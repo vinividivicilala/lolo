@@ -1099,71 +1099,48 @@ export default function BlogPage() {
       padding: isMobile ? '20px' : '40px',
     }}>
       
-      {/* ===== BANNER DEVELOPMENT ===== */}
-      <motion.div
-        initial={{ y: -100, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          zIndex: 9999,
-          backgroundColor: '#FF6B00',
-          color: 'white',
-          padding: '12px 20px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '12px',
-          borderBottom: '2px solid rgba(255,255,255,0.2)',
-          backdropFilter: 'blur(8px)',
-          flexWrap: 'wrap',
-        }}
-      >
+      {/* ===== TEKS BERJALAN ===== */}
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 9999,
+        backgroundColor: 'rgba(0,0,0,0.8)',
+        color: 'white',
+        padding: '12px 0',
+        borderBottom: '1px solid rgba(255,255,255,0.1)',
+        backdropFilter: 'blur(8px)',
+        overflow: 'hidden',
+        whiteSpace: 'nowrap',
+      }}>
         <motion.div
-          animate={{ 
-            rotate: [0, 10, -10, 10, 0],
+          animate={{
+            x: [0, -1000]
           }}
-          transition={{ 
-            duration: 2,
+          transition={{
+            duration: 20,
             repeat: Infinity,
-            repeatDelay: 3
+            ease: "linear",
+            repeatType: "loop"
           }}
           style={{
-            fontSize: isMobile ? '1.2rem' : '1.5rem',
-            display: 'flex',
-            alignItems: 'center',
+            display: 'inline-block',
+            fontSize: isMobile ? '1rem' : '1.2rem',
+            fontWeight: 'normal',
+            paddingLeft: '20px',
           }}
         >
-          🚧
+          Note adalah teman terbaik mu &nbsp;&nbsp;&nbsp; • &nbsp;&nbsp;&nbsp; 
+          Note adalah teman terbaik mu &nbsp;&nbsp;&nbsp; • &nbsp;&nbsp;&nbsp; 
+          Note adalah teman terbaik mu &nbsp;&nbsp;&nbsp; • &nbsp;&nbsp;&nbsp; 
+          Note adalah teman terbaik mu &nbsp;&nbsp;&nbsp; • &nbsp;&nbsp;&nbsp; 
+          Note adalah teman terbaik mu &nbsp;&nbsp;&nbsp; • &nbsp;&nbsp;&nbsp; 
+          Note adalah teman terbaik mu &nbsp;&nbsp;&nbsp; • &nbsp;&nbsp;&nbsp; 
+          Note adalah teman terbaik mu &nbsp;&nbsp;&nbsp; • &nbsp;&nbsp;&nbsp; 
+          Note adalah teman terbaik mu &nbsp;&nbsp;&nbsp; • &nbsp;&nbsp;&nbsp; 
         </motion.div>
-        <span style={{
-          fontSize: isMobile ? '0.9rem' : '1.1rem',
-          fontWeight: '500',
-          textAlign: 'center',
-        }}>
-          Halaman ini sedang dalam pengembangan, konten blog tidak 100% benar
-        </span>
-        <motion.div
-          animate={{ 
-            rotate: [0, 10, -10, 10, 0],
-          }}
-          transition={{ 
-            duration: 2,
-            repeat: Infinity,
-            repeatDelay: 3
-          }}
-          style={{
-            fontSize: isMobile ? '1.2rem' : '1.5rem',
-            display: 'flex',
-            alignItems: 'center',
-          }}
-        >
-          🚧
-        </motion.div>
-      </motion.div>
+      </div>
 
       {/* HEADER - HALAMAN UTAMA & USER */}
       <div style={{
@@ -2898,110 +2875,6 @@ export default function BlogPage() {
               {/* Konten dihapus */}
             </section>
           </div>
-
-          {/* ===== ADS LIKE GOJEK / YOUTUBE ===== */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            style={{
-              marginTop: '40px',
-              marginBottom: '40px',
-              padding: '24px',
-              background: 'rgba(255,255,255,0.03)',
-              borderRadius: '16px',
-              border: '1px solid rgba(255,255,255,0.1)',
-              position: 'relative',
-            }}
-          >
-            {/* Label ADS */}
-            <div style={{
-              position: 'absolute',
-              top: '-10px',
-              left: '20px',
-              background: '#FF6B00',
-              color: 'white',
-              padding: '4px 12px',
-              borderRadius: '20px',
-              fontSize: '0.75rem',
-              fontWeight: 'bold',
-              textTransform: 'uppercase',
-              letterSpacing: '1px',
-              border: '1px solid rgba(255,255,255,0.2)',
-            }}>
-              ADS
-            </div>
-
-            <div style={{
-              display: 'flex',
-              flexDirection: isMobile ? 'column' : 'row',
-              alignItems: 'center',
-              gap: '24px',
-            }}>
-              {/* Icon Section */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px',
-              }}>
-                <span style={{ fontSize: '2rem' }}>📝</span>
-                <span style={{ fontSize: '2rem' }}>➡️</span>
-                <span style={{ fontSize: '2rem' }}>📋</span>
-              </div>
-
-              {/* Text Section */}
-              <div style={{
-                flex: 1,
-                textAlign: isMobile ? 'center' : 'left',
-              }}>
-                <h3 style={{
-                  fontSize: isMobile ? '1.3rem' : '1.5rem',
-                  fontWeight: '500',
-                  color: 'white',
-                  margin: '0 0 8px 0',
-                }}>
-                  jangan lupa kunjungin ke note
-                </h3>
-                
-                <p style={{
-                  fontSize: isMobile ? '0.9rem' : '1rem',
-                  color: '#999999',
-                  margin: '0 0 16px 0',
-                }}>
-                  Catat semua hal penting, ide kreatif, dan pengalaman seru kamu di note pribadi.
-                </p>
-
-                <Link 
-                  href="/note"
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    padding: '10px 24px',
-                    background: 'rgba(255,255,255,0.1)',
-                    border: '1px solid rgba(255,255,255,0.2)',
-                    borderRadius: '30px',
-                    color: 'white',
-                    fontSize: '0.95rem',
-                    textDecoration: 'none',
-                    transition: 'all 0.2s ease',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = 'rgba(255,255,255,0.15)';
-                    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
-                    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)';
-                  }}
-                >
-                  <span>Buka Note</span>
-                  <NorthEastArrow width={16} height={16} />
-                </Link>
-              </div>
-            </div>
-          </motion.div>
 
           {/* ===== TAG SECTION (2 TAG SAJA) ===== */}
           <motion.div
