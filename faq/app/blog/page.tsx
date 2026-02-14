@@ -54,6 +54,31 @@ const EMOTICONS = [
   { id: 'angry', emoji: '😠', label: 'Marah' }
 ];
 
+// Konten Blog untuk Ringkasan
+const BLOG_CONTENT = {
+  pendahuluan: "Masuk ke Universitas Gunadarma adalah salah satu keputusan terbesar dalam hidup saya. Banyak orang bertanya, 'Bagaimana rasanya?' Pertanyaan sederhana namun jawabannya sangat kompleks. Ini bukan sekadar tentang perkuliahan, tapi tentang perjalanan menemukan jati diri, bertemu dengan berbagai karakter manusia, dan belajar bahwa kehidupan tidak selalu hitam dan putih. Gunadarma mengajarkan saya bahwa pendidikan bukan hanya tentang nilai di atas kertas, tapi tentang bagaimana kita berpikir kritis, menyelesaikan masalah, dan beradaptasi dengan perubahan.",
+  
+  sejarah: "Universitas Gunadarma berdiri pada tahun 1981, berawal dari sebuah kursus komputer kecil yang kemudian berkembang menjadi salah satu perguruan tinggi swasta terkemuka di Indonesia. Reputasi Gunadarma di bidang teknologi informasi dan komputer sudah tidak diragukan lagi. Banyak alumni Gunadarma yang kini bekerja di perusahaan-perusahaan besar, baik di dalam maupun luar negeri.",
+  
+  suasana: "Suasana kampus Gunadarma selalu hidup. Dari pagi hingga malam, mahasiswa lalu-lalang dengan berbagai aktivitas. Ada yang buru-buru masuk kelas, ada yang nongkrong di kantin, ada juga yang asyik mengerjakan tugas di perpustakaan. Kampus ini tidak pernah tidur. Yang paling berkesan adalah ketika jam istirahat tiba. Kantin penuh sesak, antrian panjang di depan gerobak bakso, dan tawa riang mahasiswa yang melepas penat.",
+  
+  akademik: "Sistem akademik di Gunadarma terkenal dengan disiplinnya. Absensi sidik jari, tugas yang menumpuk, praktikum yang melelahkan, namun semua itu membentuk karakter kami menjadi pribadi yang tangguh dan bertanggung jawab. Tugas besar atau yang sering disebut 'tubesar' adalah momok yang menakutkan sekaligus momen yang mendewasakan.",
+  
+  dosen: "Dosen-dosen di Gunadarma memiliki latar belakang yang beragam. Ada yang galak dan disiplin, ada juga yang santai dan humoris. Tapi satu hal yang pasti, mereka semua berdedikasi untuk mentransfer ilmu kepada mahasiswanya. Mereka tidak hanya mengajar, tapi juga menginspirasi.",
+  
+  teman: "Harta paling berharga selama kuliah adalah teman-teman. Mereka yang menemani begadang saat deadline, yang meminjamkan catatan ketika kita absen, yang menghibur ketika nilai jelek, dan yang merayakan setiap pencapaian kecil. Dari sekadar teman sekelas, menjadi sahabat, bahkan keluarga.",
+  
+  fasilitas: "Gunadarma memiliki fasilitas yang lengkap. Laboratorium komputer dengan spesifikasi tinggi, perpustakaan dengan koleksi buku yang up-to-date, ruang kelas ber-AC, akses WiFi cepat, dan area parkir yang luas. Semua mendukung proses belajar mengajar.",
+  
+  organisasi: "Selain akademik, Gunadarma juga aktif dalam berbagai organisasi dan kegiatan ekstrakurikuler. Ada BEM, himpunan mahasiswa, UKM olahraga, seni, robotik, dan masih banyak lagi. Mahasiswa diberi kebebasan untuk mengembangkan minat dan bakat.",
+  
+  tantangan: "Tidak selalu mulus. Ada kalanya saya merasa lelah, stres, bahkan ingin menyerah. Tugas yang menumpuk, praktikum yang gagal, nilai yang tidak memuaskan, semua itu adalah bagian dari proses pendewasaan. Tantangan terbesar adalah membagi waktu antara kuliah, organisasi, dan kehidupan pribadi.",
+  
+  kesan: "Universitas Gunadarma bukan sekadar tempat saya mengejar gelar sarjana. Ini adalah rumah kedua yang membentuk saya menjadi pribadi yang lebih baik. Di sini saya belajar bahwa kesuksesan bukan tentang seberapa cepat kita lulus, tapi seberapa banyak ilmu dan pengalaman yang kita dapatkan.",
+  
+  penutup: "Kuliah di Gunadarma adalah perjalanan yang penuh warna. Setiap suka dan duka, setiap tawa dan tangis, setiap keberhasilan dan kegagalan, semuanya membentuk saya menjadi pribadi yang lebih kuat dan siap menghadapi dunia. Terima kasih Gunadarma, terima kasih para dosen, dan terima kasih teman-teman."
+};
+
 export default function BlogPage() {
   const router = useRouter();
   const [isMounted, setIsMounted] = useState(false);
@@ -92,6 +117,13 @@ export default function BlogPage() {
   const [isSaved, setIsSaved] = useState(false);
   const [showSaveHistory, setShowSaveHistory] = useState(false);
   const [saveHistory, setSaveHistory] = useState<any[]>([]);
+
+  // State untuk Chatbot
+  const [showChatbot, setShowChatbot] = useState(false);
+  const [chatMessages, setChatMessages] = useState<Array<{text: string, isUser: boolean}>>([]);
+  const [chatInput, setChatInput] = useState("");
+  const [selectedSection, setSelectedSection] = useState<string | null>(null);
+  const [summaryLevel, setSummaryLevel] = useState<"singkat" | "sedang" | "detail">("sedang");
 
   // Format tanggal
   const today = new Date();
@@ -702,7 +734,143 @@ export default function BlogPage() {
   };
 
   // ============================================
-  // 21. SCROLL HANDLER
+  // 21. CHATBOT FUNCTIONS
+  // ============================================
+  const generateSummary = (sectionId: string, level: "singkat" | "sedang" | "detail"): string => {
+    const content = BLOG_CONTENT[sectionId as keyof typeof BLOG_CONTENT] || "";
+    
+    if (!content) return "Maaf, bagian ini tidak ditemukan.";
+    
+    const sentences = content.split('. ').filter(s => s.trim().length > 0);
+    
+    switch(level) {
+      case "singkat":
+        // Ambil 1-2 kalimat pertama
+        return sentences.slice(0, 2).join('. ') + '.';
+      
+      case "sedang":
+        // Ambil 3-4 kalimat atau setengah dari konten
+        const midCount = Math.min(4, Math.ceil(sentences.length / 2));
+        return sentences.slice(0, midCount).join('. ') + '.';
+      
+      case "detail":
+        // Ambil 6-7 kalimat atau 3/4 dari konten
+        const detailCount = Math.min(7, Math.ceil(sentences.length * 0.75));
+        return sentences.slice(0, detailCount).join('. ') + '.';
+      
+      default:
+        return sentences.slice(0, 3).join('. ') + '.';
+    }
+  };
+
+  const handleChatSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!chatInput.trim()) return;
+
+    // Tambahkan pesan user
+    const userMessage = { text: chatInput, isUser: true };
+    setChatMessages(prev => [...prev, userMessage]);
+
+    // Proses input user
+    const input = chatInput.toLowerCase();
+    let response = "";
+
+    if (input.includes("halo") || input.includes("hai") || input.includes("hi")) {
+      response = "Halo! Ada yang bisa saya bantu? Saya bisa merangkum bagian-bagian blog ini untuk Anda.";
+    }
+    else if (input.includes("rangkum semua") || input.includes("semua bagian")) {
+      const summaries = Object.keys(BLOG_CONTENT).map(key => {
+        const title = key.charAt(0).toUpperCase() + key.slice(1);
+        const summary = generateSummary(key, summaryLevel);
+        return `${title}: ${summary}`;
+      }).join('\n\n');
+      response = `Berikut ringkasan semua bagian blog (level ${summaryLevel}):\n\n${summaries}`;
+    }
+    else if (input.includes("pendahuluan") || input.includes("pengantar")) {
+      setSelectedSection("pendahuluan");
+      response = `Ringkasan bagian Pendahuluan (level ${summaryLevel}):\n${generateSummary("pendahuluan", summaryLevel)}`;
+    }
+    else if (input.includes("sejarah") || input.includes("reputasi")) {
+      setSelectedSection("sejarah");
+      response = `Ringkasan bagian Sejarah & Reputasi (level ${summaryLevel}):\n${generateSummary("sejarah", summaryLevel)}`;
+    }
+    else if (input.includes("suasana")) {
+      setSelectedSection("suasana");
+      response = `Ringkasan bagian Suasana Kampus (level ${summaryLevel}):\n${generateSummary("suasana", summaryLevel)}`;
+    }
+    else if (input.includes("akademik")) {
+      setSelectedSection("akademik");
+      response = `Ringkasan bagian Kehidupan Akademik (level ${summaryLevel}):\n${generateSummary("akademik", summaryLevel)}`;
+    }
+    else if (input.includes("dosen")) {
+      setSelectedSection("dosen");
+      response = `Ringkasan bagian Para Dosen (level ${summaryLevel}):\n${generateSummary("dosen", summaryLevel)}`;
+    }
+    else if (input.includes("teman") || input.includes("pertemanan")) {
+      setSelectedSection("teman");
+      response = `Ringkasan bagian Pertemanan & Relasi (level ${summaryLevel}):\n${generateSummary("teman", summaryLevel)}`;
+    }
+    else if (input.includes("fasilitas")) {
+      setSelectedSection("fasilitas");
+      response = `Ringkasan bagian Fasilitas Kampus (level ${summaryLevel}):\n${generateSummary("fasilitas", summaryLevel)}`;
+    }
+    else if (input.includes("organisasi") || input.includes("kegiatan")) {
+      setSelectedSection("organisasi");
+      response = `Ringkasan bagian Organisasi & Kegiatan (level ${summaryLevel}):\n${generateSummary("organisasi", summaryLevel)}`;
+    }
+    else if (input.includes("tantangan") || input.includes("hambatan")) {
+      setSelectedSection("tantangan");
+      response = `Ringkasan bagian Tantangan & Hambatan (level ${summaryLevel}):\n${generateSummary("tantangan", summaryLevel)}`;
+    }
+    else if (input.includes("kesan") || input.includes("pesan")) {
+      setSelectedSection("kesan");
+      response = `Ringkasan bagian Kesan & Pesan (level ${summaryLevel}):\n${generateSummary("kesan", summaryLevel)}`;
+    }
+    else if (input.includes("penutup")) {
+      setSelectedSection("penutup");
+      response = `Ringkasan bagian Penutup (level ${summaryLevel}):\n${generateSummary("penutup", summaryLevel)}`;
+    }
+    else if (input.includes("level") || input.includes("tingkat")) {
+      if (input.includes("singkat")) {
+        setSummaryLevel("singkat");
+        response = "Level ringkasan diubah menjadi 'Singkat' (1-2 kalimat)";
+      } else if (input.includes("sedang")) {
+        setSummaryLevel("sedang");
+        response = "Level ringkasan diubah menjadi 'Sedang' (3-4 kalimat)";
+      } else if (input.includes("detail")) {
+        setSummaryLevel("detail");
+        response = "Level ringkasan diubah menjadi 'Detail' (6-7 kalimat)";
+      } else {
+        response = `Level ringkasan saat ini: ${summaryLevel}. Anda bisa mengubahnya dengan mengetik 'level singkat', 'level sedang', atau 'level detail'`;
+      }
+    }
+    else if (input.includes("bantuan") || input.includes("help")) {
+      response = `Berikut perintah yang bisa Anda gunakan:
+- Halo / Hai : Menyapa chatbot
+- Rangkum semua : Merangkum semua bagian blog
+- [Nama bagian] : Merangkum bagian tertentu (contoh: pendahuluan, sejarah, suasana, akademik, dosen, teman, fasilitas, organisasi, tantangan, kesan, penutup)
+- Level [singkat/sedang/detail] : Mengubah tingkat detail ringkasan
+- Bantuan : Menampilkan menu bantuan ini`;
+    }
+    else {
+      response = `Maaf, saya tidak memahami pertanyaan Anda. Ketik "bantuan" untuk melihat perintah yang tersedia.`;
+    }
+
+    // Tambahkan respons chatbot dengan delay untuk efek natural
+    setTimeout(() => {
+      setChatMessages(prev => [...prev, { text: response, isUser: false }]);
+    }, 500);
+
+    setChatInput("");
+  };
+
+  const clearChat = () => {
+    setChatMessages([]);
+    setSelectedSection(null);
+  };
+
+  // ============================================
+  // 22. SCROLL HANDLER
   // ============================================
   useEffect(() => {
     const handleScroll = () => {
@@ -729,7 +897,7 @@ export default function BlogPage() {
   }, []);
 
   // ============================================
-  // 22. SVG COMPONENTS
+  // 23. SVG COMPONENTS
   // ============================================
   const SouthWestArrow = ({ width, height, style }: { width: number | string, height: number | string, style?: React.CSSProperties }) => (
     <svg 
@@ -813,6 +981,27 @@ export default function BlogPage() {
     </svg>
   );
 
+  const ChatIcon = ({ width, height }: { width: number, height: number }) => (
+    <svg width={width} height={height} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+    </svg>
+  );
+
+  const SendIcon = ({ width, height }: { width: number, height: number }) => (
+    <svg width={width} height={height} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <line x1="22" y1="2" x2="11" y2="13"/>
+      <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+    </svg>
+  );
+
+  const ClearIcon = ({ width, height }: { width: number, height: number }) => (
+    <svg width={width} height={height} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <circle cx="12" cy="12" r="10"/>
+      <line x1="18" y1="6" x2="6" y2="18"/>
+      <line x1="6" y1="6" x2="18" y2="18"/>
+    </svg>
+  );
+
   // Twitter Icon
   const TwitterIcon = ({ size = 24 }: { size?: number }) => (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
@@ -821,7 +1010,7 @@ export default function BlogPage() {
   );
 
   // ============================================
-  // 23. RANGKUMAN SECTIONS
+  // 24. RANGKUMAN SECTIONS
   // ============================================
   const rangkumanSections = [
     { id: "pendahuluan", title: "Pendahuluan" },
@@ -852,7 +1041,7 @@ export default function BlogPage() {
   };
 
   // ============================================
-  // 24. LOADING STATE
+  // 25. LOADING STATE
   // ============================================
   if (!isMounted || loading) {
     return (
@@ -968,6 +1157,28 @@ export default function BlogPage() {
         alignItems: 'center',
         gap: '20px',
       }}>
+        {/* Chatbot Button */}
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => setShowChatbot(!showChatbot)}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            background: showChatbot ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.05)',
+            border: showChatbot ? '1px solid white' : '1px solid rgba(255,255,255,0.2)',
+            borderRadius: '40px',
+            padding: '10px 24px',
+            color: 'white',
+            fontSize: '0.95rem',
+            cursor: 'pointer',
+          }}
+        >
+          <ChatIcon width={20} height={20} />
+          <span>Ringkas Blog</span>
+        </motion.button>
+
         {/* Save Button with Count */}
         <motion.button
           whileHover={{ scale: 1.05 }}
@@ -1165,6 +1376,194 @@ export default function BlogPage() {
           />
         </Link>
       </div>
+
+      {/* CHATBOT MODAL */}
+      <AnimatePresence>
+        {showChatbot && (
+          <motion.div
+            initial={{ opacity: 0, x: 300 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 300 }}
+            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            style={{
+              position: 'fixed',
+              top: isMobile ? '70px' : '80px',
+              right: isMobile ? '20px' : '40px',
+              width: isMobile ? 'calc(100% - 40px)' : '350px',
+              height: '500px',
+              backgroundColor: '#1a1a1a',
+              border: '1px solid #333333',
+              borderRadius: '24px',
+              zIndex: 1000,
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'hidden',
+              boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
+            }}
+          >
+            {/* Chatbot Header */}
+            <div style={{
+              padding: '20px',
+              borderBottom: '1px solid #333333',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              background: 'rgba(255,255,255,0.02)',
+            }}>
+              <div>
+                <h3 style={{
+                  fontSize: '1.2rem',
+                  fontWeight: '500',
+                  color: 'white',
+                  margin: '0 0 4px 0',
+                }}>
+                  Asisten Ringkasan Blog
+                </h3>
+                <p style={{
+                  fontSize: '0.85rem',
+                  color: '#999999',
+                  margin: 0,
+                }}>
+                  Level: {summaryLevel} • {selectedSection ? `Bagian: ${selectedSection}` : 'Pilih bagian'}
+                </p>
+              </div>
+              <div style={{
+                display: 'flex',
+                gap: '10px',
+              }}>
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={clearChat}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#999999',
+                    cursor: 'pointer',
+                    padding: '5px',
+                  }}
+                >
+                  <ClearIcon width={18} height={18} />
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => setShowChatbot(false)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#999999',
+                    fontSize: '1.5rem',
+                    cursor: 'pointer',
+                    lineHeight: 1,
+                  }}
+                >
+                  ×
+                </motion.button>
+              </div>
+            </div>
+
+            {/* Chat Messages */}
+            <div style={{
+              flex: 1,
+              overflowY: 'auto',
+              padding: '20px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '15px',
+            }}>
+              {chatMessages.length === 0 ? (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  style={{
+                    textAlign: 'center',
+                    color: '#666666',
+                    padding: '30px 20px',
+                  }}
+                >
+                  <ChatIcon width={40} height={40} />
+                  <p style={{ marginTop: '15px', fontSize: '0.95rem' }}>
+                    Halo! Saya bisa membantu merangkum blog ini. 
+                    Ketik "bantuan" untuk melihat perintah yang tersedia.
+                  </p>
+                </motion.div>
+              ) : (
+                chatMessages.map((msg, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    style={{
+                      alignSelf: msg.isUser ? 'flex-end' : 'flex-start',
+                      maxWidth: '80%',
+                    }}
+                  >
+                    <div style={{
+                      padding: '12px 16px',
+                      background: msg.isUser ? '#FF6B00' : '#2a2a2a',
+                      borderRadius: msg.isUser ? '20px 20px 5px 20px' : '20px 20px 20px 5px',
+                      color: msg.isUser ? 'white' : '#e0e0e0',
+                      fontSize: '0.95rem',
+                      lineHeight: '1.5',
+                      whiteSpace: 'pre-wrap',
+                    }}>
+                      {msg.text}
+                    </div>
+                  </motion.div>
+                ))
+              )}
+            </div>
+
+            {/* Chat Input */}
+            <form onSubmit={handleChatSubmit} style={{
+              padding: '20px',
+              borderTop: '1px solid #333333',
+              display: 'flex',
+              gap: '10px',
+              background: 'rgba(255,255,255,0.02)',
+            }}>
+              <input
+                type="text"
+                value={chatInput}
+                onChange={(e) => setChatInput(e.target.value)}
+                placeholder="Tulis pertanyaan Anda..."
+                style={{
+                  flex: 1,
+                  padding: '12px 16px',
+                  background: '#2a2a2a',
+                  border: '1px solid #444444',
+                  borderRadius: '30px',
+                  color: 'white',
+                  fontSize: '0.95rem',
+                  outline: 'none',
+                }}
+              />
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                type="submit"
+                disabled={!chatInput.trim()}
+                style={{
+                  padding: '12px',
+                  background: chatInput.trim() ? '#FF6B00' : '#333333',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '45px',
+                  height: '45px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: chatInput.trim() ? 'pointer' : 'not-allowed',
+                }}
+              >
+                <SendIcon width={20} height={20} />
+              </motion.button>
+            </form>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* SAVE HISTORY MODAL */}
       <AnimatePresence>
