@@ -54,31 +54,6 @@ const EMOTICONS = [
   { id: 'angry', emoji: '😠', label: 'Marah' }
 ];
 
-// Konten Blog untuk Ringkasan
-const BLOG_CONTENT = {
-  pendahuluan: "Masuk ke Universitas Gunadarma adalah salah satu keputusan terbesar dalam hidup saya. Banyak orang bertanya, 'Bagaimana rasanya?' Pertanyaan sederhana namun jawabannya sangat kompleks. Ini bukan sekadar tentang perkuliahan, tapi tentang perjalanan menemukan jati diri, bertemu dengan berbagai karakter manusia, dan belajar bahwa kehidupan tidak selalu hitam dan putih. Gunadarma mengajarkan saya bahwa pendidikan bukan hanya tentang nilai di atas kertas, tapi tentang bagaimana kita berpikir kritis, menyelesaikan masalah, dan beradaptasi dengan perubahan.",
-  
-  sejarah: "Universitas Gunadarma berdiri pada tahun 1981, berawal dari sebuah kursus komputer kecil yang kemudian berkembang menjadi salah satu perguruan tinggi swasta terkemuka di Indonesia. Reputasi Gunadarma di bidang teknologi informasi dan komputer sudah tidak diragukan lagi. Banyak alumni Gunadarma yang kini bekerja di perusahaan-perusahaan besar, baik di dalam maupun luar negeri.",
-  
-  suasana: "Suasana kampus Gunadarma selalu hidup. Dari pagi hingga malam, mahasiswa lalu-lalang dengan berbagai aktivitas. Ada yang buru-buru masuk kelas, ada yang nongkrong di kantin, ada juga yang asyik mengerjakan tugas di perpustakaan. Kampus ini tidak pernah tidur. Yang paling berkesan adalah ketika jam istirahat tiba. Kantin penuh sesak, antrian panjang di depan gerobak bakso, dan tawa riang mahasiswa yang melepas penat.",
-  
-  akademik: "Sistem akademik di Gunadarma terkenal dengan disiplinnya. Absensi sidik jari, tugas yang menumpuk, praktikum yang melelahkan, namun semua itu membentuk karakter kami menjadi pribadi yang tangguh dan bertanggung jawab. Tugas besar atau yang sering disebut 'tubesar' adalah momok yang menakutkan sekaligus momen yang mendewasakan.",
-  
-  dosen: "Dosen-dosen di Gunadarma memiliki latar belakang yang beragam. Ada yang galak dan disiplin, ada juga yang santai dan humoris. Tapi satu hal yang pasti, mereka semua berdedikasi untuk mentransfer ilmu kepada mahasiswanya. Mereka tidak hanya mengajar, tapi juga menginspirasi.",
-  
-  teman: "Harta paling berharga selama kuliah adalah teman-teman. Mereka yang menemani begadang saat deadline, yang meminjamkan catatan ketika kita absen, yang menghibur ketika nilai jelek, dan yang merayakan setiap pencapaian kecil. Dari sekadar teman sekelas, menjadi sahabat, bahkan keluarga.",
-  
-  fasilitas: "Gunadarma memiliki fasilitas yang lengkap. Laboratorium komputer dengan spesifikasi tinggi, perpustakaan dengan koleksi buku yang up-to-date, ruang kelas ber-AC, akses WiFi cepat, dan area parkir yang luas. Semua mendukung proses belajar mengajar.",
-  
-  organisasi: "Selain akademik, Gunadarma juga aktif dalam berbagai organisasi dan kegiatan ekstrakurikuler. Ada BEM, himpunan mahasiswa, UKM olahraga, seni, robotik, dan masih banyak lagi. Mahasiswa diberi kebebasan untuk mengembangkan minat dan bakat.",
-  
-  tantangan: "Tidak selalu mulus. Ada kalanya saya merasa lelah, stres, bahkan ingin menyerah. Tugas yang menumpuk, praktikum yang gagal, nilai yang tidak memuaskan, semua itu adalah bagian dari proses pendewasaan. Tantangan terbesar adalah membagi waktu antara kuliah, organisasi, dan kehidupan pribadi.",
-  
-  kesan: "Universitas Gunadarma bukan sekadar tempat saya mengejar gelar sarjana. Ini adalah rumah kedua yang membentuk saya menjadi pribadi yang lebih baik. Di sini saya belajar bahwa kesuksesan bukan tentang seberapa cepat kita lulus, tapi seberapa banyak ilmu dan pengalaman yang kita dapatkan.",
-  
-  penutup: "Kuliah di Gunadarma adalah perjalanan yang penuh warna. Setiap suka dan duka, setiap tawa dan tangis, setiap keberhasilan dan kegagalan, semuanya membentuk saya menjadi pribadi yang lebih kuat dan siap menghadapi dunia. Terima kasih Gunadarma, terima kasih para dosen, dan terima kasih teman-teman."
-};
-
 export default function BlogPage() {
   const router = useRouter();
   const [isMounted, setIsMounted] = useState(false);
@@ -118,12 +93,14 @@ export default function BlogPage() {
   const [showSaveHistory, setShowSaveHistory] = useState(false);
   const [saveHistory, setSaveHistory] = useState<any[]>([]);
 
-  // State untuk Chatbot
-  const [showChatbot, setShowChatbot] = useState(false);
-  const [chatMessages, setChatMessages] = useState<Array<{text: string, isUser: boolean}>>([]);
-  const [chatInput, setChatInput] = useState("");
-  const [selectedSection, setSelectedSection] = useState<string | null>(null);
-  const [summaryLevel, setSummaryLevel] = useState<"singkat" | "sedang" | "detail">("sedang");
+  // State untuk Pesan ke Penulis
+  const [showMessageModal, setShowMessageModal] = useState(false);
+  const [messages, setMessages] = useState<any[]>([]);
+  const [newMessage, setNewMessage] = useState("");
+  const [messageLoading, setMessageLoading] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [selectedMessage, setSelectedMessage] = useState<any>(null);
+  const [replyMessage, setReplyMessage] = useState("");
 
   // Format tanggal
   const today = new Date();
@@ -426,7 +403,39 @@ export default function BlogPage() {
   }, [firebaseDb, firebaseInitialized]);
 
   // ============================================
-  // 13. HANDLE REACTION (EMOTICON)
+  // 13. LOAD MESSAGES TO AUTHOR (REAL-TIME)
+  // ============================================
+  useEffect(() => {
+    if (!firebaseDb || !firebaseInitialized) return;
+
+    const messagesRef = collection(firebaseDb, "authorMessages");
+    const q = query(
+      messagesRef,
+      orderBy("createdAt", "desc")
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const messagesData = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        createdAt: doc.data().createdAt?.toDate?.() || new Date()
+      }));
+      setMessages(messagesData);
+      
+      // Hitung pesan yang belum dibaca (jika user adalah penulis)
+      if (user && user.email === "farid.ardiansyah@gunadarma.ac.id") {
+        const unread = messagesData.filter((msg: any) => !msg.isRead).length;
+        setUnreadCount(unread);
+      }
+    }, (error) => {
+      console.error("Error loading messages:", error);
+    });
+
+    return () => unsubscribe();
+  }, [firebaseDb, firebaseInitialized, user]);
+
+  // ============================================
+  // 14. HANDLE REACTION (EMOTICON)
   // ============================================
   const handleReaction = async (emoticonId: string) => {
     if (!user) {
@@ -486,7 +495,7 @@ export default function BlogPage() {
   };
 
   // ============================================
-  // 14. HANDLE GOOGLE LOGIN
+  // 15. HANDLE GOOGLE LOGIN
   // ============================================
   const handleGoogleLogin = async () => {
     if (!firebaseAuth) return;
@@ -500,7 +509,7 @@ export default function BlogPage() {
   };
 
   // ============================================
-  // 15. HANDLE LOGOUT
+  // 16. HANDLE LOGOUT
   // ============================================
   const handleLogout = async () => {
     if (!firebaseAuth) return;
@@ -513,7 +522,7 @@ export default function BlogPage() {
   };
 
   // ============================================
-  // 16. HANDLE ADD COMMENT
+  // 17. HANDLE ADD COMMENT
   // ============================================
   const handleAddComment = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -552,7 +561,7 @@ export default function BlogPage() {
   };
 
   // ============================================
-  // 17. HANDLE ADD REPLY
+  // 18. HANDLE ADD REPLY
   // ============================================
   const handleAddReply = async (commentId: string) => {
     if (!user) {
@@ -590,7 +599,7 @@ export default function BlogPage() {
   };
 
   // ============================================
-  // 18. HANDLE LIKE COMMENT
+  // 19. HANDLE LIKE COMMENT
   // ============================================
   const handleLikeComment = async (commentId: string, isReply: boolean = false, replyId?: string) => {
     if (!user) {
@@ -650,7 +659,7 @@ export default function BlogPage() {
   };
 
   // ============================================
-  // 19. HANDLE SAVE
+  // 20. HANDLE SAVE
   // ============================================
   const handleSave = async () => {
     if (!user) {
@@ -690,7 +699,7 @@ export default function BlogPage() {
   };
 
   // ============================================
-  // 20. HANDLE SHARE
+  // 21. HANDLE SHARE
   // ============================================
   const handleShare = () => {
     setShowShareModal(true);
@@ -734,143 +743,131 @@ export default function BlogPage() {
   };
 
   // ============================================
-  // 21. CHATBOT FUNCTIONS
+  // 22. HANDLE SEND MESSAGE TO AUTHOR
   // ============================================
-  const generateSummary = (sectionId: string, level: "singkat" | "sedang" | "detail"): string => {
-    const content = BLOG_CONTENT[sectionId as keyof typeof BLOG_CONTENT] || "";
-    
-    if (!content) return "Maaf, bagian ini tidak ditemukan.";
-    
-    const sentences = content.split('. ').filter(s => s.trim().length > 0);
-    
-    switch(level) {
-      case "singkat":
-        // Ambil 1-2 kalimat pertama
-        return sentences.slice(0, 2).join('. ') + '.';
-      
-      case "sedang":
-        // Ambil 3-4 kalimat atau setengah dari konten
-        const midCount = Math.min(4, Math.ceil(sentences.length / 2));
-        return sentences.slice(0, midCount).join('. ') + '.';
-      
-      case "detail":
-        // Ambil 6-7 kalimat atau 3/4 dari konten
-        const detailCount = Math.min(7, Math.ceil(sentences.length * 0.75));
-        return sentences.slice(0, detailCount).join('. ') + '.';
-      
-      default:
-        return sentences.slice(0, 3).join('. ') + '.';
-    }
-  };
-
-  const handleChatSubmit = (e: React.FormEvent) => {
+  const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!chatInput.trim()) return;
+    if (!user) {
+      handleGoogleLogin();
+      return;
+    }
+    if (!firebaseDb || !newMessage.trim()) return;
 
-    // Tambahkan pesan user
-    const userMessage = { text: chatInput, isUser: true };
-    setChatMessages(prev => [...prev, userMessage]);
+    setMessageLoading(true);
+    
+    try {
+      const messagesRef = collection(firebaseDb, "authorMessages");
+      
+      await addDoc(messagesRef, {
+        userId: user.uid,
+        userName: user.displayName || user.email?.split('@')[0] || 'Anonymous',
+        userEmail: user.email,
+        userPhoto: user.photoURL || `https://ui-avatars.com/api/?name=${user.email}&background=random`,
+        message: newMessage,
+        isRead: false,
+        replies: [],
+        createdAt: Timestamp.now()
+      });
 
-    // Proses input user
-    const input = chatInput.toLowerCase();
-    let response = "";
-
-    if (input.includes("halo") || input.includes("hai") || input.includes("hi")) {
-      response = "Halo! Ada yang bisa saya bantu? Saya bisa merangkum bagian-bagian blog ini untuk Anda.";
+      setNewMessage("");
+      
+      // Tampilkan notifikasi
+      showNotification("Pesan berhasil dikirim ke penulis");
+    } catch (error) {
+      console.error("Error sending message:", error);
+      showNotification("Gagal mengirim pesan", "error");
+    } finally {
+      setMessageLoading(false);
     }
-    else if (input.includes("rangkum semua") || input.includes("semua bagian")) {
-      const summaries = Object.keys(BLOG_CONTENT).map(key => {
-        const title = key.charAt(0).toUpperCase() + key.slice(1);
-        const summary = generateSummary(key, summaryLevel);
-        return `${title}: ${summary}`;
-      }).join('\n\n');
-      response = `Berikut ringkasan semua bagian blog (level ${summaryLevel}):\n\n${summaries}`;
-    }
-    else if (input.includes("pendahuluan") || input.includes("pengantar")) {
-      setSelectedSection("pendahuluan");
-      response = `Ringkasan bagian Pendahuluan (level ${summaryLevel}):\n${generateSummary("pendahuluan", summaryLevel)}`;
-    }
-    else if (input.includes("sejarah") || input.includes("reputasi")) {
-      setSelectedSection("sejarah");
-      response = `Ringkasan bagian Sejarah & Reputasi (level ${summaryLevel}):\n${generateSummary("sejarah", summaryLevel)}`;
-    }
-    else if (input.includes("suasana")) {
-      setSelectedSection("suasana");
-      response = `Ringkasan bagian Suasana Kampus (level ${summaryLevel}):\n${generateSummary("suasana", summaryLevel)}`;
-    }
-    else if (input.includes("akademik")) {
-      setSelectedSection("akademik");
-      response = `Ringkasan bagian Kehidupan Akademik (level ${summaryLevel}):\n${generateSummary("akademik", summaryLevel)}`;
-    }
-    else if (input.includes("dosen")) {
-      setSelectedSection("dosen");
-      response = `Ringkasan bagian Para Dosen (level ${summaryLevel}):\n${generateSummary("dosen", summaryLevel)}`;
-    }
-    else if (input.includes("teman") || input.includes("pertemanan")) {
-      setSelectedSection("teman");
-      response = `Ringkasan bagian Pertemanan & Relasi (level ${summaryLevel}):\n${generateSummary("teman", summaryLevel)}`;
-    }
-    else if (input.includes("fasilitas")) {
-      setSelectedSection("fasilitas");
-      response = `Ringkasan bagian Fasilitas Kampus (level ${summaryLevel}):\n${generateSummary("fasilitas", summaryLevel)}`;
-    }
-    else if (input.includes("organisasi") || input.includes("kegiatan")) {
-      setSelectedSection("organisasi");
-      response = `Ringkasan bagian Organisasi & Kegiatan (level ${summaryLevel}):\n${generateSummary("organisasi", summaryLevel)}`;
-    }
-    else if (input.includes("tantangan") || input.includes("hambatan")) {
-      setSelectedSection("tantangan");
-      response = `Ringkasan bagian Tantangan & Hambatan (level ${summaryLevel}):\n${generateSummary("tantangan", summaryLevel)}`;
-    }
-    else if (input.includes("kesan") || input.includes("pesan")) {
-      setSelectedSection("kesan");
-      response = `Ringkasan bagian Kesan & Pesan (level ${summaryLevel}):\n${generateSummary("kesan", summaryLevel)}`;
-    }
-    else if (input.includes("penutup")) {
-      setSelectedSection("penutup");
-      response = `Ringkasan bagian Penutup (level ${summaryLevel}):\n${generateSummary("penutup", summaryLevel)}`;
-    }
-    else if (input.includes("level") || input.includes("tingkat")) {
-      if (input.includes("singkat")) {
-        setSummaryLevel("singkat");
-        response = "Level ringkasan diubah menjadi 'Singkat' (1-2 kalimat)";
-      } else if (input.includes("sedang")) {
-        setSummaryLevel("sedang");
-        response = "Level ringkasan diubah menjadi 'Sedang' (3-4 kalimat)";
-      } else if (input.includes("detail")) {
-        setSummaryLevel("detail");
-        response = "Level ringkasan diubah menjadi 'Detail' (6-7 kalimat)";
-      } else {
-        response = `Level ringkasan saat ini: ${summaryLevel}. Anda bisa mengubahnya dengan mengetik 'level singkat', 'level sedang', atau 'level detail'`;
-      }
-    }
-    else if (input.includes("bantuan") || input.includes("help")) {
-      response = `Berikut perintah yang bisa Anda gunakan:
-- Halo / Hai : Menyapa chatbot
-- Rangkum semua : Merangkum semua bagian blog
-- [Nama bagian] : Merangkum bagian tertentu (contoh: pendahuluan, sejarah, suasana, akademik, dosen, teman, fasilitas, organisasi, tantangan, kesan, penutup)
-- Level [singkat/sedang/detail] : Mengubah tingkat detail ringkasan
-- Bantuan : Menampilkan menu bantuan ini`;
-    }
-    else {
-      response = `Maaf, saya tidak memahami pertanyaan Anda. Ketik "bantuan" untuk melihat perintah yang tersedia.`;
-    }
-
-    // Tambahkan respons chatbot dengan delay untuk efek natural
-    setTimeout(() => {
-      setChatMessages(prev => [...prev, { text: response, isUser: false }]);
-    }, 500);
-
-    setChatInput("");
-  };
-
-  const clearChat = () => {
-    setChatMessages([]);
-    setSelectedSection(null);
   };
 
   // ============================================
-  // 22. SCROLL HANDLER
+  // 23. HANDLE REPLY TO MESSAGE (UNTUK PENULIS)
+  // ============================================
+  const handleReplyToMessage = async (messageId: string) => {
+    if (!user || user.email !== "farid.ardiansyah@gunadarma.ac.id") return;
+    if (!firebaseDb || !replyMessage.trim()) return;
+
+    try {
+      const messageRef = doc(firebaseDb, "authorMessages", messageId);
+      const messageDoc = await getDoc(messageRef);
+      
+      if (!messageDoc.exists()) return;
+      
+      const replyData = {
+        id: `${Date.now()}_${user.uid}`,
+        userId: user.uid,
+        userName: user.displayName || "Farid Ardiansyah",
+        userPhoto: user.photoURL || `https://ui-avatars.com/api/?name=Farid+Ardiansyah&background=FF6B00&color=fff`,
+        text: replyMessage,
+        createdAt: Timestamp.now()
+      };
+
+      await updateDoc(messageRef, {
+        replies: arrayUnion(replyData),
+        isRead: true
+      });
+
+      setReplyMessage("");
+      setSelectedMessage(null);
+      
+      // Tampilkan notifikasi
+      showNotification("Balasan berhasil dikirim");
+    } catch (error) {
+      console.error("Error replying to message:", error);
+      showNotification("Gagal mengirim balasan", "error");
+    }
+  };
+
+  // ============================================
+  // 24. HANDLE MARK AS READ (UNTUK PENULIS)
+  // ============================================
+  const handleMarkAsRead = async (messageId: string) => {
+    if (!user || user.email !== "farid.ardiansyah@gunadarma.ac.id") return;
+    if (!firebaseDb) return;
+
+    try {
+      const messageRef = doc(firebaseDb, "authorMessages", messageId);
+      await updateDoc(messageRef, {
+        isRead: true
+      });
+    } catch (error) {
+      console.error("Error marking message as read:", error);
+    }
+  };
+
+  // ============================================
+  // 25. NOTIFICATION FUNCTION
+  // ============================================
+  const showNotification = (message: string, type: "success" | "error" = "success") => {
+    // Buat elemen notifikasi
+    const notification = document.createElement("div");
+    notification.style.position = "fixed";
+    notification.style.bottom = "20px";
+    notification.style.left = "20px";
+    notification.style.backgroundColor = type === "success" ? "#00CC88" : "#FF4444";
+    notification.style.color = "white";
+    notification.style.padding = "12px 24px";
+    notification.style.borderRadius = "30px";
+    notification.style.fontSize = "0.95rem";
+    notification.style.zIndex = "10001";
+    notification.style.boxShadow = "0 4px 12px rgba(0,0,0,0.3)";
+    notification.style.animation = "slideIn 0.3s ease";
+    notification.innerText = message;
+
+    document.body.appendChild(notification);
+
+    // Hapus setelah 3 detik
+    setTimeout(() => {
+      notification.style.animation = "slideOut 0.3s ease";
+      setTimeout(() => {
+        document.body.removeChild(notification);
+      }, 300);
+    }, 3000);
+  };
+
+  // ============================================
+  // 26. SCROLL HANDLER
   // ============================================
   useEffect(() => {
     const handleScroll = () => {
@@ -897,7 +894,7 @@ export default function BlogPage() {
   }, []);
 
   // ============================================
-  // 23. SVG COMPONENTS
+  // 27. SVG COMPONENTS
   // ============================================
   const SouthWestArrow = ({ width, height, style }: { width: number | string, height: number | string, style?: React.CSSProperties }) => (
     <svg 
@@ -981,7 +978,7 @@ export default function BlogPage() {
     </svg>
   );
 
-  const ChatIcon = ({ width, height }: { width: number, height: number }) => (
+  const MessageIcon = ({ width, height }: { width: number, height: number }) => (
     <svg width={width} height={height} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
       <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
     </svg>
@@ -994,11 +991,16 @@ export default function BlogPage() {
     </svg>
   );
 
-  const ClearIcon = ({ width, height }: { width: number, height: number }) => (
+  const ReplyIcon = ({ width, height }: { width: number, height: number }) => (
     <svg width={width} height={height} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-      <circle cx="12" cy="12" r="10"/>
-      <line x1="18" y1="6" x2="6" y2="18"/>
-      <line x1="6" y1="6" x2="18" y2="18"/>
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+      <polyline points="10 11 13 14 10 17"/>
+    </svg>
+  );
+
+  const CheckIcon = ({ width, height }: { width: number, height: number }) => (
+    <svg width={width} height={height} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <polyline points="20 6 9 17 4 12"/>
     </svg>
   );
 
@@ -1010,7 +1012,7 @@ export default function BlogPage() {
   );
 
   // ============================================
-  // 24. RANGKUMAN SECTIONS
+  // 28. RANGKUMAN SECTIONS
   // ============================================
   const rangkumanSections = [
     { id: "pendahuluan", title: "Pendahuluan" },
@@ -1037,11 +1039,12 @@ export default function BlogPage() {
   const authorBio = {
     name: "Farid Ardiansyah",
     role: "Penulis",
-    bio: "Manusia Biasa"
+    bio: "Manusia Biasa",
+    email: "farid.ardiansyah@gunadarma.ac.id"
   };
 
   // ============================================
-  // 25. LOADING STATE
+  // 29. LOADING STATE
   // ============================================
   if (!isMounted || loading) {
     return (
@@ -1157,17 +1160,18 @@ export default function BlogPage() {
         alignItems: 'center',
         gap: '20px',
       }}>
-        {/* Chatbot Button */}
+        {/* Message to Author Button */}
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          onClick={() => setShowChatbot(!showChatbot)}
+          onClick={() => setShowMessageModal(!showMessageModal)}
           style={{
+            position: 'relative',
             display: 'flex',
             alignItems: 'center',
             gap: '10px',
-            background: showChatbot ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.05)',
-            border: showChatbot ? '1px solid white' : '1px solid rgba(255,255,255,0.2)',
+            background: showMessageModal ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.05)',
+            border: showMessageModal ? '1px solid white' : '1px solid rgba(255,255,255,0.2)',
             borderRadius: '40px',
             padding: '10px 24px',
             color: 'white',
@@ -1175,8 +1179,32 @@ export default function BlogPage() {
             cursor: 'pointer',
           }}
         >
-          <ChatIcon width={20} height={20} />
-          <span>Ringkas Blog</span>
+          <MessageIcon width={20} height={20} />
+          <span>Pesan ke Penulis</span>
+          {user && user.email === authorBio.email && unreadCount > 0 && (
+            <motion.span
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              style={{
+                position: 'absolute',
+                top: '-5px',
+                right: '-5px',
+                background: '#FF6B00',
+                color: 'white',
+                fontSize: '0.75rem',
+                fontWeight: 'bold',
+                minWidth: '20px',
+                height: '20px',
+                borderRadius: '10px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                border: '2px solid #000000',
+              }}
+            >
+              {unreadCount}
+            </motion.span>
+          )}
         </motion.button>
 
         {/* Save Button with Count */}
@@ -1377,83 +1405,90 @@ export default function BlogPage() {
         </Link>
       </div>
 
-      {/* CHATBOT MODAL */}
+      {/* MESSAGE MODAL - UNTUK KIRIM PESAN KE PENULIS */}
       <AnimatePresence>
-        {showChatbot && (
+        {showMessageModal && (
           <motion.div
-            initial={{ opacity: 0, x: 300 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 300 }}
-            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             style={{
               position: 'fixed',
-              top: isMobile ? '70px' : '80px',
-              right: isMobile ? '20px' : '40px',
-              width: isMobile ? 'calc(100% - 40px)' : '350px',
-              height: '500px',
-              backgroundColor: '#1a1a1a',
-              border: '1px solid #333333',
-              borderRadius: '24px',
-              zIndex: 1000,
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0,0,0,0.8)',
+              backdropFilter: 'blur(8px)',
+              zIndex: 10000,
               display: 'flex',
-              flexDirection: 'column',
-              overflow: 'hidden',
-              boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
-            }}
-          >
-            {/* Chatbot Header */}
-            <div style={{
-              padding: '20px',
-              borderBottom: '1px solid #333333',
-              display: 'flex',
-              justifyContent: 'space-between',
               alignItems: 'center',
-              background: 'rgba(255,255,255,0.02)',
-            }}>
-              <div>
-                <h3 style={{
-                  fontSize: '1.2rem',
-                  fontWeight: '500',
-                  color: 'white',
-                  margin: '0 0 4px 0',
-                }}>
-                  Asisten Ringkasan Blog
-                </h3>
-                <p style={{
-                  fontSize: '0.85rem',
-                  color: '#999999',
-                  margin: 0,
-                }}>
-                  Level: {summaryLevel} • {selectedSection ? `Bagian: ${selectedSection}` : 'Pilih bagian'}
-                </p>
-              </div>
+              justifyContent: 'center',
+              padding: '20px',
+            }}
+            onClick={() => setShowMessageModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              style={{
+                background: '#1a1a1a',
+                borderRadius: '32px',
+                padding: '40px',
+                maxWidth: '600px',
+                width: '100%',
+                maxHeight: '80vh',
+                overflowY: 'auto',
+                border: '1px solid #333333',
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
               <div style={{
                 display: 'flex',
-                gap: '10px',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '30px',
               }}>
+                <div>
+                  <motion.h3 
+                    initial={{ x: -20, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 0.1 }}
+                    style={{
+                      fontSize: '2rem',
+                      fontWeight: 'normal',
+                      color: 'white',
+                      margin: '0 0 8px 0',
+                    }}
+                  >
+                    {user && user.email === authorBio.email ? 'Pesan dari Pembaca' : 'Kirim Pesan ke Penulis'}
+                  </motion.h3>
+                  <motion.p
+                    initial={{ x: -20, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 0.2 }}
+                    style={{
+                      fontSize: '0.95rem',
+                      color: '#999999',
+                      margin: 0,
+                    }}
+                  >
+                    {user && user.email === authorBio.email 
+                      ? `${messages.length} pesan • ${unreadCount} belum dibaca`
+                      : 'Tanyakan sesuatu atau berikan masukan untuk penulis'}
+                  </motion.p>
+                </div>
                 <motion.button
-                  whileHover={{ scale: 1.1 }}
+                  whileHover={{ scale: 1.1, rotate: 90 }}
                   whileTap={{ scale: 0.9 }}
-                  onClick={clearChat}
+                  onClick={() => setShowMessageModal(false)}
                   style={{
                     background: 'none',
                     border: 'none',
                     color: '#999999',
-                    cursor: 'pointer',
-                    padding: '5px',
-                  }}
-                >
-                  <ClearIcon width={18} height={18} />
-                </motion.button>
-                <motion.button
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  onClick={() => setShowChatbot(false)}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: '#999999',
-                    fontSize: '1.5rem',
+                    fontSize: '2rem',
                     cursor: 'pointer',
                     lineHeight: 1,
                   }}
@@ -1461,106 +1496,347 @@ export default function BlogPage() {
                   ×
                 </motion.button>
               </div>
-            </div>
 
-            {/* Chat Messages */}
-            <div style={{
-              flex: 1,
-              overflowY: 'auto',
-              padding: '20px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '15px',
-            }}>
-              {chatMessages.length === 0 ? (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
+              {/* Form Kirim Pesan (untuk pembaca) */}
+              {(!user || user.email !== authorBio.email) && (
+                <motion.form
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.3 }}
+                  onSubmit={handleSendMessage}
                   style={{
-                    textAlign: 'center',
-                    color: '#666666',
-                    padding: '30px 20px',
+                    marginBottom: '30px',
                   }}
                 >
-                  <ChatIcon width={40} height={40} />
-                  <p style={{ marginTop: '15px', fontSize: '0.95rem' }}>
-                    Halo! Saya bisa membantu merangkum blog ini. 
-                    Ketik "bantuan" untuk melihat perintah yang tersedia.
-                  </p>
-                </motion.div>
-              ) : (
-                chatMessages.map((msg, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
+                  <textarea
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    placeholder="Tulis pesan Anda untuk Farid Ardiansyah..."
+                    rows={4}
+                    required
                     style={{
-                      alignSelf: msg.isUser ? 'flex-end' : 'flex-start',
-                      maxWidth: '80%',
+                      width: '100%',
+                      padding: '20px',
+                      background: '#2a2a2a',
+                      border: '1px solid #444444',
+                      borderRadius: '20px',
+                      color: 'white',
+                      fontSize: '1rem',
+                      outline: 'none',
+                      resize: 'vertical',
+                      marginBottom: '15px',
                     }}
-                  >
-                    <div style={{
-                      padding: '12px 16px',
-                      background: msg.isUser ? '#FF6B00' : '#2a2a2a',
-                      borderRadius: msg.isUser ? '20px 20px 5px 20px' : '20px 20px 20px 5px',
-                      color: msg.isUser ? 'white' : '#e0e0e0',
-                      fontSize: '0.95rem',
-                      lineHeight: '1.5',
-                      whiteSpace: 'pre-wrap',
-                    }}>
-                      {msg.text}
-                    </div>
-                  </motion.div>
-                ))
+                  />
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'flex-end',
+                  }}>
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      type="submit"
+                      disabled={messageLoading || !newMessage.trim()}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        padding: '12px 32px',
+                        background: messageLoading || !newMessage.trim() ? '#333333' : '#FF6B00',
+                        border: 'none',
+                        borderRadius: '30px',
+                        color: messageLoading || !newMessage.trim() ? '#999999' : 'white',
+                        fontSize: '1rem',
+                        fontWeight: '500',
+                        cursor: messageLoading || !newMessage.trim() ? 'not-allowed' : 'pointer',
+                      }}
+                    >
+                      <SendIcon width={18} height={18} />
+                      <span>{messageLoading ? 'Mengirim...' : 'Kirim Pesan'}</span>
+                    </motion.button>
+                  </div>
+                </motion.form>
               )}
-            </div>
 
-            {/* Chat Input */}
-            <form onSubmit={handleChatSubmit} style={{
-              padding: '20px',
-              borderTop: '1px solid #333333',
-              display: 'flex',
-              gap: '10px',
-              background: 'rgba(255,255,255,0.02)',
-            }}>
-              <input
-                type="text"
-                value={chatInput}
-                onChange={(e) => setChatInput(e.target.value)}
-                placeholder="Tulis pertanyaan Anda..."
-                style={{
-                  flex: 1,
-                  padding: '12px 16px',
-                  background: '#2a2a2a',
-                  border: '1px solid #444444',
-                  borderRadius: '30px',
-                  color: 'white',
-                  fontSize: '0.95rem',
-                  outline: 'none',
-                }}
-              />
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                type="submit"
-                disabled={!chatInput.trim()}
-                style={{
-                  padding: '12px',
-                  background: chatInput.trim() ? '#FF6B00' : '#333333',
-                  border: 'none',
-                  borderRadius: '50%',
-                  width: '45px',
-                  height: '45px',
+              {/* Daftar Pesan (untuk penulis) */}
+              {user && user.email === authorBio.email && (
+                <div style={{
                   display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: chatInput.trim() ? 'pointer' : 'not-allowed',
-                }}
-              >
-                <SendIcon width={20} height={20} />
-              </motion.button>
-            </form>
+                  flexDirection: 'column',
+                  gap: '20px',
+                }}>
+                  {messages.length === 0 ? (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      style={{
+                        padding: '40px',
+                        textAlign: 'center',
+                        color: '#666666',
+                        border: '1px dashed #333333',
+                        borderRadius: '24px',
+                      }}
+                    >
+                      <MessageIcon width={40} height={40} />
+                      <p style={{ fontSize: '1.1rem', margin: '15px 0 0 0' }}>
+                        Belum ada pesan dari pembaca.
+                      </p>
+                    </motion.div>
+                  ) : (
+                    messages.map((msg, index) => (
+                      <motion.div
+                        key={msg.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.1 }}
+                        style={{
+                          padding: '24px',
+                          background: msg.isRead ? 'rgba(255,255,255,0.02)' : 'rgba(255,107,0,0.05)',
+                          borderRadius: '24px',
+                          border: msg.isRead ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(255,107,0,0.3)',
+                        }}
+                      >
+                        {/* Header Pesan */}
+                        <div style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          marginBottom: '15px',
+                        }}>
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '12px',
+                          }}>
+                            <img 
+                              src={msg.userPhoto}
+                              alt={msg.userName}
+                              style={{
+                                width: '40px',
+                                height: '40px',
+                                borderRadius: '50%',
+                                objectFit: 'cover',
+                              }}
+                            />
+                            <div>
+                              <span style={{
+                                fontSize: '1.1rem',
+                                fontWeight: '500',
+                                color: 'white',
+                                display: 'block',
+                                marginBottom: '4px',
+                              }}>
+                                {msg.userName}
+                              </span>
+                              <span style={{
+                                fontSize: '0.85rem',
+                                color: '#999999',
+                              }}>
+                                {msg.createdAt.toLocaleDateString('id-ID', {
+                                  day: 'numeric',
+                                  month: 'long',
+                                  year: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </span>
+                            </div>
+                          </div>
+                          
+                          {!msg.isRead && (
+                            <motion.button
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.9 }}
+                              onClick={() => handleMarkAsRead(msg.id)}
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '5px',
+                                padding: '6px 12px',
+                                background: 'rgba(255,255,255,0.05)',
+                                border: '1px solid #444444',
+                                borderRadius: '20px',
+                                color: '#999999',
+                                fontSize: '0.85rem',
+                                cursor: 'pointer',
+                              }}
+                            >
+                              <CheckIcon width={14} height={14} />
+                              <span>Tandai Dibaca</span>
+                            </motion.button>
+                          )}
+                        </div>
+
+                        {/* Isi Pesan */}
+                        <p style={{
+                          fontSize: '1rem',
+                          lineHeight: '1.6',
+                          color: '#e0e0e0',
+                          margin: '0 0 20px 0',
+                          padding: '15px',
+                          background: 'rgba(0,0,0,0.2)',
+                          borderRadius: '16px',
+                          borderLeft: '3px solid #FF6B00',
+                        }}>
+                          {msg.message}
+                        </p>
+
+                        {/* Balasan */}
+                        {msg.replies && msg.replies.length > 0 && (
+                          <div style={{
+                            marginTop: '15px',
+                            paddingLeft: '20px',
+                            borderLeft: '2px solid #FF6B00',
+                          }}>
+                            {msg.replies.map((reply: any) => (
+                              <div key={reply.id} style={{
+                                marginBottom: '10px',
+                                padding: '10px',
+                                background: 'rgba(255,255,255,0.02)',
+                                borderRadius: '12px',
+                              }}>
+                                <div style={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '8px',
+                                  marginBottom: '5px',
+                                }}>
+                                  <img 
+                                    src={reply.userPhoto}
+                                    alt={reply.userName}
+                                    style={{
+                                      width: '24px',
+                                      height: '24px',
+                                      borderRadius: '50%',
+                                    }}
+                                  />
+                                  <span style={{
+                                    fontSize: '0.9rem',
+                                    fontWeight: '500',
+                                    color: '#FF6B00',
+                                  }}>
+                                    {reply.userName}
+                                  </span>
+                                  <span style={{
+                                    fontSize: '0.75rem',
+                                    color: '#666666',
+                                  }}>
+                                    {reply.createdAt?.toDate?.()?.toLocaleDateString?.('id-ID', {
+                                      hour: '2-digit',
+                                      minute: '2-digit'
+                                    })}
+                                  </span>
+                                </div>
+                                <p style={{
+                                  fontSize: '0.95rem',
+                                  color: '#cccccc',
+                                  margin: 0,
+                                }}>
+                                  {reply.text}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Form Balasan */}
+                        {selectedMessage === msg.id ? (
+                          <div style={{
+                            marginTop: '20px',
+                          }}>
+                            <textarea
+                              value={replyMessage}
+                              onChange={(e) => setReplyMessage(e.target.value)}
+                              placeholder="Tulis balasan Anda..."
+                              rows={2}
+                              style={{
+                                width: '100%',
+                                padding: '12px',
+                                background: '#2a2a2a',
+                                border: '1px solid #444444',
+                                borderRadius: '12px',
+                                color: 'white',
+                                fontSize: '0.95rem',
+                                outline: 'none',
+                                resize: 'vertical',
+                                marginBottom: '10px',
+                              }}
+                            />
+                            <div style={{
+                              display: 'flex',
+                              gap: '10px',
+                              justifyContent: 'flex-end',
+                            }}>
+                              <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={() => {
+                                  setSelectedMessage(null);
+                                  setReplyMessage("");
+                                }}
+                                style={{
+                                  padding: '8px 16px',
+                                  background: 'none',
+                                  border: '1px solid #444444',
+                                  borderRadius: '20px',
+                                  color: '#999999',
+                                  fontSize: '0.9rem',
+                                  cursor: 'pointer',
+                                }}
+                              >
+                                Batal
+                              </motion.button>
+                              <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={() => handleReplyToMessage(msg.id)}
+                                disabled={!replyMessage.trim()}
+                                style={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '8px',
+                                  padding: '8px 24px',
+                                  background: replyMessage.trim() ? '#FF6B00' : '#333333',
+                                  border: 'none',
+                                  borderRadius: '20px',
+                                  color: replyMessage.trim() ? 'white' : '#999999',
+                                  fontSize: '0.9rem',
+                                  fontWeight: '500',
+                                  cursor: replyMessage.trim() ? 'pointer' : 'not-allowed',
+                                }}
+                              >
+                                <ReplyIcon width={16} height={16} />
+                                <span>Kirim Balasan</span>
+                              </motion.button>
+                            </div>
+                          </div>
+                        ) : (
+                          <motion.button
+                            whileHover={{ x: 5 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => setSelectedMessage(msg.id)}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '8px',
+                              background: 'none',
+                              border: 'none',
+                              color: '#FF6B00',
+                              fontSize: '0.9rem',
+                              cursor: 'pointer',
+                              padding: '8px 0',
+                              marginTop: '10px',
+                            }}
+                          >
+                            <ReplyIcon width={16} height={16} />
+                            <span>Balas Pesan</span>
+                          </motion.button>
+                        )}
+                      </motion.div>
+                    ))
+                  )}
+                </div>
+              )}
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -2014,7 +2290,7 @@ export default function BlogPage() {
                         border: '1px solid #333333',
                         borderRadius: '16px',
                         padding: '20px',
-                        width: '200px',
+                        width: '250px',
                         zIndex: 1000,
                         boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
                       }}
@@ -2066,12 +2342,27 @@ export default function BlogPage() {
                           color: '#cccccc',
                           fontSize: '0.9rem',
                           lineHeight: '1.5',
-                          margin: 0,
+                          margin: '0 0 10px 0',
                           fontStyle: 'italic',
                         }}
                       >
                         "{authorBio.bio}"
                       </motion.p>
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.3 }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          color: '#666666',
+                          fontSize: '0.85rem',
+                        }}
+                      >
+                        <MessageIcon width={14} height={14} />
+                        <span>Kirim pesan melalui tombol di atas</span>
+                      </motion.div>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -3303,6 +3594,31 @@ export default function BlogPage() {
           
         </div>
       </div>
+
+      {/* Tambahkan CSS untuk animasi notifikasi */}
+      <style jsx>{`
+        @keyframes slideIn {
+          from {
+            transform: translateX(-100%);
+            opacity: 0;
+          }
+          to {
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+        
+        @keyframes slideOut {
+          from {
+            transform: translateX(0);
+            opacity: 1;
+          }
+          to {
+            transform: translateX(-100%);
+            opacity: 0;
+          }
+        }
+      `}</style>
     </div>
   );
 }
