@@ -96,11 +96,13 @@ export default function BlogPage() {
   // State untuk Pesan ke Penulis
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [messages, setMessages] = useState<any[]>([]);
+  const [userMessages, setUserMessages] = useState<any[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [messageLoading, setMessageLoading] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [selectedMessage, setSelectedMessage] = useState<any>(null);
   const [replyMessage, setReplyMessage] = useState("");
+  const [showUserMessageHistory, setShowUserMessageHistory] = useState(false);
 
   // Format tanggal
   const today = new Date();
@@ -430,6 +432,12 @@ export default function BlogPage() {
         const unread = messagesData.filter((msg: any) => !msg.isRead).length;
         setUnreadCount(unread);
       }
+
+      // Filter pesan untuk user yang sedang login (bukan penulis)
+      if (user && user.email !== authorEmail) {
+        const userMsgs = messagesData.filter((msg: any) => msg.userId === user.uid);
+        setUserMessages(userMsgs);
+      }
     }, (error) => {
       console.error("Error loading messages:", error);
     });
@@ -545,7 +553,7 @@ export default function BlogPage() {
         userId: user.uid,
         userName: user.displayName || user.email?.split('@')[0] || 'Anonymous',
         userEmail: user.email,
-        userPhoto: user.photoURL || `https://ui-avatars.com/api/?name=${user.email}&background=random`,
+        userPhoto: user.photoURL || `https://ui-avatars.com/api/?name=${user.email}&background=random&color=fff`,
         comment: newComment,
         likes: 0,
         likedBy: [],
@@ -583,7 +591,7 @@ export default function BlogPage() {
         id: `${Date.now()}_${user.uid}`,
         userId: user.uid,
         userName: user.displayName || user.email?.split('@')[0] || 'Anonymous',
-        userPhoto: user.photoURL || `https://ui-avatars.com/api/?name=${user.email}&background=random`,
+        userPhoto: user.photoURL || `https://ui-avatars.com/api/?name=${user.email}&background=random&color=fff`,
         text: replyText,
         createdAt: Timestamp.now(),
         likes: 0,
@@ -765,7 +773,7 @@ export default function BlogPage() {
         userId: user.uid,
         userName: user.displayName || user.email?.split('@')[0] || 'Anonymous',
         userEmail: user.email,
-        userPhoto: user.photoURL || `https://ui-avatars.com/api/?name=${user.email}&background=random`,
+        userPhoto: user.photoURL || `https://ui-avatars.com/api/?name=${user.email}&background=random&color=fff`,
         message: newMessage,
         isRead: false,
         replies: [],
@@ -1401,7 +1409,7 @@ export default function BlogPage() {
         </Link>
       </div>
 
-      {/* MESSAGE MODAL - UNTUK KIRIM PESAN KE PENULIS */}
+      {/* MESSAGE MODAL - UNTUK KIRIM PESAN KE PENULIS DAN LIHAT RIWAYAT */}
       <AnimatePresence>
         {showMessageModal && (
           <motion.div
@@ -1459,7 +1467,7 @@ export default function BlogPage() {
                       margin: '0 0 8px 0',
                     }}
                   >
-                    {user && user.email === authorEmail ? 'Pesan dari Pembaca' : 'Kirim Pesan ke Penulis'}
+                    {user && user.email === authorEmail ? 'Pesan dari Pembaca' : 'Pesan ke Penulis'}
                   </motion.h3>
                   <motion.p
                     initial={{ x: -20, opacity: 0 }}
@@ -1473,7 +1481,9 @@ export default function BlogPage() {
                   >
                     {user && user.email === authorEmail 
                       ? `${messages.length} pesan • ${unreadCount} belum dibaca`
-                      : 'Tanyakan sesuatu atau berikan masukan untuk penulis'}
+                      : user 
+                        ? `${userMessages.length} pesan • Kirim pesan baru atau lihat riwayat`
+                        : 'Login untuk mengirim pesan'}
                   </motion.p>
                 </div>
                 <motion.button
@@ -1493,8 +1503,62 @@ export default function BlogPage() {
                 </motion.button>
               </div>
 
-              {/* Form Kirim Pesan (untuk pembaca) */}
-              {(!user || user.email !== authorEmail) && (
+              {/* Tabs untuk pengirim pesan (bukan penulis) */}
+              {user && user.email !== authorEmail && (
+                <div style={{
+                  display: 'flex',
+                  gap: '10px',
+                  marginBottom: '30px',
+                  borderBottom: '1px solid #333333',
+                  paddingBottom: '20px',
+                }}>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => {
+                      setShowUserMessageHistory(false);
+                      setNewMessage("");
+                    }}
+                    style={{
+                      flex: 1,
+                      padding: '12px',
+                      background: !showUserMessageHistory ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.02)',
+                      border: '1px solid rgba(255,255,255,0.2)',
+                      borderRadius: '30px',
+                      color: 'white',
+                      fontSize: '0.95rem',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Kirim Pesan Baru
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setShowUserMessageHistory(true)}
+                    style={{
+                      flex: 1,
+                      padding: '12px',
+                      background: showUserMessageHistory ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.02)',
+                      border: '1px solid rgba(255,255,255,0.2)',
+                      borderRadius: '30px',
+                      color: 'white',
+                      fontSize: '0.95rem',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px',
+                    }}
+                  >
+                    <HistoryIcon width={16} height={16} />
+                    <span>Riwayat Pesan ({userMessages.length})</span>
+                  </motion.button>
+                </div>
+              )}
+
+              {/* Form Kirim Pesan Baru (untuk pembaca) */}
+              {user && user.email !== authorEmail && !showUserMessageHistory && (
                 <motion.form
                   initial={{ y: 20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
@@ -1553,7 +1617,223 @@ export default function BlogPage() {
                 </motion.form>
               )}
 
-              {/* Daftar Pesan (untuk penulis) */}
+              {/* Riwayat Pesan untuk Pengirim (pembaca) */}
+              {user && user.email !== authorEmail && showUserMessageHistory && (
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '20px',
+                }}>
+                  {userMessages.length === 0 ? (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      style={{
+                        padding: '40px',
+                        textAlign: 'center',
+                        color: '#666666',
+                        border: '1px dashed #333333',
+                        borderRadius: '24px',
+                      }}
+                    >
+                      <MessageIcon width={40} height={40} />
+                      <p style={{ fontSize: '1.1rem', margin: '15px 0 0 0' }}>
+                        Belum ada pesan yang dikirim.
+                      </p>
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => setShowUserMessageHistory(false)}
+                        style={{
+                          marginTop: '20px',
+                          padding: '10px 24px',
+                          background: 'rgba(255,255,255,0.1)',
+                          border: '1px solid rgba(255,255,255,0.2)',
+                          borderRadius: '30px',
+                          color: 'white',
+                          fontSize: '0.95rem',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        Kirim Pesan Baru
+                      </motion.button>
+                    </motion.div>
+                  ) : (
+                    userMessages.map((msg, index) => (
+                      <motion.div
+                        key={msg.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.1 }}
+                        style={{
+                          padding: '24px',
+                          background: 'rgba(255,255,255,0.02)',
+                          borderRadius: '24px',
+                          border: '1px solid rgba(255,255,255,0.05)',
+                        }}
+                      >
+                        {/* Header Pesan */}
+                        <div style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          marginBottom: '15px',
+                        }}>
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '12px',
+                          }}>
+                            <img 
+                              src={msg.userPhoto}
+                              alt={msg.userName}
+                              style={{
+                                width: '40px',
+                                height: '40px',
+                                borderRadius: '50%',
+                                objectFit: 'cover',
+                              }}
+                            />
+                            <div>
+                              <span style={{
+                                fontSize: '1.1rem',
+                                fontWeight: '500',
+                                color: 'white',
+                                display: 'block',
+                                marginBottom: '4px',
+                              }}>
+                                {msg.userName} (Anda)
+                              </span>
+                              <span style={{
+                                fontSize: '0.85rem',
+                                color: '#999999',
+                              }}>
+                                {msg.createdAt.toLocaleDateString('id-ID', {
+                                  day: 'numeric',
+                                  month: 'long',
+                                  year: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </span>
+                            </div>
+                          </div>
+                          
+                          {msg.isRead ? (
+                            <span style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '5px',
+                              padding: '4px 10px',
+                              background: 'rgba(255,255,255,0.05)',
+                              border: '1px solid rgba(255,255,255,0.1)',
+                              borderRadius: '20px',
+                              color: '#999999',
+                              fontSize: '0.8rem',
+                            }}>
+                              <CheckIcon width={12} height={12} />
+                              <span>Telah dibaca</span>
+                            </span>
+                          ) : (
+                            <span style={{
+                              padding: '4px 10px',
+                              background: 'rgba(255,255,255,0.1)',
+                              border: '1px solid rgba(255,255,255,0.2)',
+                              borderRadius: '20px',
+                              color: 'white',
+                              fontSize: '0.8rem',
+                            }}>
+                              Belum dibaca
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Isi Pesan */}
+                        <p style={{
+                          fontSize: '1rem',
+                          lineHeight: '1.6',
+                          color: '#e0e0e0',
+                          margin: '0 0 20px 0',
+                          padding: '15px',
+                          background: 'rgba(0,0,0,0.2)',
+                          borderRadius: '16px',
+                          borderLeft: '2px solid rgba(255,255,255,0.2)',
+                        }}>
+                          {msg.message}
+                        </p>
+
+                        {/* Balasan dari Penulis */}
+                        {msg.replies && msg.replies.length > 0 && (
+                          <div style={{
+                            marginTop: '15px',
+                            paddingLeft: '20px',
+                            borderLeft: '2px solid rgba(255,255,255,0.2)',
+                          }}>
+                            <span style={{
+                              fontSize: '0.9rem',
+                              color: '#999999',
+                              display: 'block',
+                              marginBottom: '10px',
+                            }}>
+                              Balasan dari Penulis:
+                            </span>
+                            {msg.replies.map((reply: any) => (
+                              <div key={reply.id} style={{
+                                marginBottom: '10px',
+                                padding: '10px',
+                                background: 'rgba(255,255,255,0.02)',
+                                borderRadius: '12px',
+                              }}>
+                                <div style={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '8px',
+                                  marginBottom: '5px',
+                                }}>
+                                  <img 
+                                    src={reply.userPhoto}
+                                    alt={reply.userName}
+                                    style={{
+                                      width: '24px',
+                                      height: '24px',
+                                      borderRadius: '50%',
+                                    }}
+                                  />
+                                  <span style={{
+                                    fontSize: '0.9rem',
+                                    fontWeight: '500',
+                                    color: 'white',
+                                  }}>
+                                    {reply.userName}
+                                  </span>
+                                  <span style={{
+                                    fontSize: '0.75rem',
+                                    color: '#666666',
+                                  }}>
+                                    {reply.createdAt?.toDate?.()?.toLocaleDateString?.('id-ID', {
+                                      hour: '2-digit',
+                                      minute: '2-digit'
+                                    })}
+                                  </span>
+                                </div>
+                                <p style={{
+                                  fontSize: '0.95rem',
+                                  color: '#cccccc',
+                                  margin: 0,
+                                }}>
+                                  {reply.text}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </motion.div>
+                    ))
+                  )}
+                </div>
+              )}
+
+              {/* Daftar Pesan untuk Penulis */}
               {user && user.email === authorEmail && (
                 <div style={{
                   display: 'flex',
@@ -1683,6 +1963,14 @@ export default function BlogPage() {
                             paddingLeft: '20px',
                             borderLeft: '2px solid rgba(255,255,255,0.2)',
                           }}>
+                            <span style={{
+                              fontSize: '0.9rem',
+                              color: '#999999',
+                              display: 'block',
+                              marginBottom: '10px',
+                            }}>
+                              Balasan Anda:
+                            </span>
                             {msg.replies.map((reply: any) => (
                               <div key={reply.id} style={{
                                 marginBottom: '10px',
