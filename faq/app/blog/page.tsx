@@ -1114,9 +1114,11 @@ export default function BlogPage() {
       fontFamily: 'Helvetica, Arial, sans-serif',
       color: 'white',
       position: 'relative',
-      overflow: 'hidden', // Mencegah scrollbar pada container utama
-      width: '100vw', // Lebar penuh viewport
-      maxWidth: '100%', // Mencegah overflow horizontal
+      padding: isMobile ? '20px' : '40px',
+      overflowX: 'hidden', // Hanya sembunyikan scroll horizontal
+      width: '100%',
+      maxWidth: '100vw',
+      boxSizing: 'border-box',
     }}>
       
       {/* ===== TEKS BERJALAN DENGAN ARROW NORTH WEST ===== */}
@@ -1133,8 +1135,7 @@ export default function BlogPage() {
         backdropFilter: 'blur(8px)',
         overflow: 'hidden',
         whiteSpace: 'nowrap',
-        width: '100%', // Pastikan lebar penuh
-        maxWidth: '100vw', // Mencegah overflow
+        width: '100%',
       }}>
         <motion.div
           animate={{
@@ -1171,146 +1172,214 @@ export default function BlogPage() {
         </motion.div>
       </div>
 
-      {/* Konten utama dengan scroll internal */}
+      {/* HEADER - HALAMAN UTAMA & USER */}
       <div style={{
-        height: '100vh', // Tinggi penuh viewport
-        overflowY: 'auto', // Scroll hanya di konten utama
-        overflowX: 'hidden', // Mencegah scroll horizontal
-        paddingTop: isMobile ? '90px' : '110px', // Padding untuk teks berjalan
-        paddingLeft: isMobile ? '20px' : '40px',
-        paddingRight: isMobile ? '20px' : '40px',
-        paddingBottom: '20px',
-        width: '100%',
-        maxWidth: '100vw',
-        boxSizing: 'border-box',
+        position: 'fixed',
+        top: isMobile ? '90px' : '110px',
+        right: isMobile ? '20px' : '40px',
+        zIndex: 100,
+        display: 'flex',
+        alignItems: 'center',
+        gap: '20px',
+        maxWidth: 'calc(100% - 80px)',
+        flexWrap: isMobile ? 'wrap' : 'nowrap',
+        justifyContent: 'flex-end',
       }}>
-        
-        {/* HEADER - HALAMAN UTAMA & USER */}
-        <div style={{
-          position: 'fixed',
-          top: isMobile ? '90px' : '110px',
-          right: isMobile ? '20px' : '40px',
-          zIndex: 100,
-          display: 'flex',
-          alignItems: 'center',
-          gap: '20px',
-          maxWidth: 'calc(100vw - 80px)', // Mencegah overflow
-          flexWrap: isMobile ? 'wrap' : 'nowrap',
-          justifyContent: 'flex-end',
-        }}>
-          {/* Message to Author Button */}
+        {/* Message to Author Button */}
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => setShowMessageModal(!showMessageModal)}
+          style={{
+            position: 'relative',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            background: showMessageModal ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.05)',
+            border: '1px solid rgba(255,255,255,0.2)',
+            borderRadius: '40px',
+            padding: '10px 24px',
+            color: 'white',
+            fontSize: '0.95rem',
+            cursor: 'pointer',
+          }}
+        >
+          <MessageIcon width={20} height={20} />
+          <span>Pesan ke Penulis</span>
+          {user && user.email === authorEmail && unreadCount > 0 && (
+            <span
+              style={{
+                position: 'absolute',
+                top: '-5px',
+                right: '-5px',
+                background: 'rgba(255,255,255,0.2)',
+                color: 'white',
+                fontSize: '0.75rem',
+                minWidth: '20px',
+                height: '20px',
+                borderRadius: '10px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                border: '1px solid rgba(255,255,255,0.3)',
+              }}
+            >
+              {unreadCount}
+            </span>
+          )}
+        </motion.button>
+
+        {/* Save Button with Count */}
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={handleSave}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            background: isSaved ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.05)',
+            border: '1px solid rgba(255,255,255,0.2)',
+            borderRadius: '40px',
+            padding: '10px 24px',
+            color: 'white',
+            fontSize: '0.95rem',
+            cursor: user ? 'pointer' : 'pointer',
+          }}
+        >
+          <SaveIcon width={20} height={20} filled={isSaved} />
+          <span>{isSaved ? 'Tersimpan' : 'Simpan'}</span>
+          <span
+            style={{
+              background: 'rgba(255,255,255,0.1)',
+              padding: '2px 8px',
+              borderRadius: '20px',
+              fontSize: '0.85rem',
+              color: 'white',
+            }}
+          >
+            {saveCount}
+          </span>
+        </motion.button>
+
+        {/* History Button */}
+        {user && (
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => setShowMessageModal(!showMessageModal)}
+            onClick={() => setShowSaveHistory(!showSaveHistory)}
             style={{
-              position: 'relative',
               display: 'flex',
               alignItems: 'center',
-              gap: '10px',
-              background: showMessageModal ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.05)',
+              gap: '8px',
+              background: 'rgba(255,255,255,0.05)',
               border: '1px solid rgba(255,255,255,0.2)',
               borderRadius: '40px',
-              padding: '10px 24px',
+              padding: '10px 20px',
               color: 'white',
               fontSize: '0.95rem',
               cursor: 'pointer',
-              whiteSpace: 'nowrap',
             }}
           >
-            <MessageIcon width={20} height={20} />
-            <span>Pesan ke Penulis</span>
-            {user && user.email === authorEmail && unreadCount > 0 && (
-              <span
-                style={{
-                  position: 'absolute',
-                  top: '-5px',
-                  right: '-5px',
-                  background: 'rgba(255,255,255,0.2)',
-                  color: 'white',
-                  fontSize: '0.75rem',
-                  minWidth: '20px',
-                  height: '20px',
-                  borderRadius: '10px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  border: '1px solid rgba(255,255,255,0.3)',
-                }}
-              >
-                {unreadCount}
-              </span>
-            )}
+            <HistoryIcon width={18} height={18} />
+            <span>Riwayat</span>
           </motion.button>
+        )}
 
-          {/* Save Button with Count */}
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={handleSave}
+        {/* Share Button with Count */}
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={handleShare}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            background: 'rgba(255,255,255,0.05)',
+            border: '1px solid rgba(255,255,255,0.2)',
+            borderRadius: '40px',
+            padding: '10px 24px',
+            color: 'white',
+            fontSize: '0.95rem',
+            cursor: 'pointer',
+          }}
+        >
+          <ShareIcon width={20} height={20} />
+          <span>Bagikan</span>
+          <span
+            style={{
+              background: 'rgba(255,255,255,0.1)',
+              padding: '2px 8px',
+              borderRadius: '20px',
+              fontSize: '0.85rem',
+              color: 'white',
+            }}
+          >
+            {shareCount}
+          </span>
+        </motion.button>
+
+        {/* User Info / Login Button */}
+        {user ? (
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '12px',
-              background: isSaved ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.05)',
-              border: '1px solid rgba(255,255,255,0.2)',
+              gap: '15px',
+              backgroundColor: 'rgba(255,255,255,0.05)',
+              padding: '8px 20px',
               borderRadius: '40px',
-              padding: '10px 24px',
-              color: 'white',
-              fontSize: '0.95rem',
-              cursor: user ? 'pointer' : 'pointer',
-              whiteSpace: 'nowrap',
+              border: '1px solid rgba(255,255,255,0.1)',
             }}
           >
-            <SaveIcon width={20} height={20} filled={isSaved} />
-            <span>{isSaved ? 'Tersimpan' : 'Simpan'}</span>
-            <span
+            <motion.img 
+              whileHover={{ scale: 1.1 }}
+              src={user.photoURL || `https://ui-avatars.com/api/?name=${user.email}&background=random&color=fff`} 
+              alt={user.displayName}
               style={{
-                background: 'rgba(255,255,255,0.1)',
-                padding: '2px 8px',
-                borderRadius: '20px',
-                fontSize: '0.85rem',
-                color: 'white',
+                width: '36px',
+                height: '36px',
+                borderRadius: '50%',
+                objectFit: 'cover',
               }}
-            >
-              {saveCount}
+            />
+            <span style={{
+              fontSize: '1rem',
+              color: 'white',
+              fontWeight: '500',
+            }}>
+              {user.displayName || user.email?.split('@')[0]}
             </span>
-          </motion.button>
-
-          {/* History Button */}
-          {user && (
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => setShowSaveHistory(!showSaveHistory)}
+              onClick={handleLogout}
               style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                background: 'rgba(255,255,255,0.05)',
+                background: 'rgba(255,255,255,0.1)',
                 border: '1px solid rgba(255,255,255,0.2)',
-                borderRadius: '40px',
-                padding: '10px 20px',
+                borderRadius: '30px',
+                padding: '6px 16px',
                 color: 'white',
-                fontSize: '0.95rem',
+                fontSize: '0.85rem',
                 cursor: 'pointer',
-                whiteSpace: 'nowrap',
               }}
             >
-              <HistoryIcon width={18} height={18} />
-              <span>Riwayat</span>
+              Logout
             </motion.button>
-          )}
-
-          {/* Share Button with Count */}
+          </motion.div>
+        ) : (
           <motion.button
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={handleShare}
+            onClick={handleGoogleLogin}
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '12px',
+              gap: '10px',
               background: 'rgba(255,255,255,0.05)',
               border: '1px solid rgba(255,255,255,0.2)',
               borderRadius: '40px',
@@ -1318,1503 +1387,36 @@ export default function BlogPage() {
               color: 'white',
               fontSize: '0.95rem',
               cursor: 'pointer',
-              whiteSpace: 'nowrap',
             }}
           >
-            <ShareIcon width={20} height={20} />
-            <span>Bagikan</span>
-            <span
-              style={{
-                background: 'rgba(255,255,255,0.1)',
-                padding: '2px 8px',
-                borderRadius: '20px',
-                fontSize: '0.85rem',
-                color: 'white',
-              }}
-            >
-              {shareCount}
-            </span>
+            <svg width="20" height="20" viewBox="0 0 24 24">
+              <path fill="#ffffff" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+              <path fill="#ffffff" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+              <path fill="#ffffff" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+              <path fill="#ffffff" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+            </svg>
+            <span>Login dengan Google</span>
           </motion.button>
-
-          {/* User Info / Login Button */}
-          {user ? (
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '15px',
-                backgroundColor: 'rgba(255,255,255,0.05)',
-                padding: '8px 20px',
-                borderRadius: '40px',
-                border: '1px solid rgba(255,255,255,0.1)',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              <motion.img 
-                whileHover={{ scale: 1.1 }}
-                src={user.photoURL || `https://ui-avatars.com/api/?name=${user.email}&background=random&color=fff`} 
-                alt={user.displayName}
-                style={{
-                  width: '36px',
-                  height: '36px',
-                  borderRadius: '50%',
-                  objectFit: 'cover',
-                }}
-              />
-              <span style={{
-                fontSize: '1rem',
-                color: 'white',
-                fontWeight: '500',
-              }}>
-                {user.displayName || user.email?.split('@')[0]}
-              </span>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={handleLogout}
-                style={{
-                  background: 'rgba(255,255,255,0.1)',
-                  border: '1px solid rgba(255,255,255,0.2)',
-                  borderRadius: '30px',
-                  padding: '6px 16px',
-                  color: 'white',
-                  fontSize: '0.85rem',
-                  cursor: 'pointer',
-                }}
-              >
-                Logout
-              </motion.button>
-            </motion.div>
-          ) : (
-            <motion.button
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={handleGoogleLogin}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px',
-                background: 'rgba(255,255,255,0.05)',
-                border: '1px solid rgba(255,255,255,0.2)',
-                borderRadius: '40px',
-                padding: '10px 24px',
-                color: 'white',
-                fontSize: '0.95rem',
-                cursor: 'pointer',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24">
-                <path fill="#ffffff" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                <path fill="#ffffff" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                <path fill="#ffffff" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                <path fill="#ffffff" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-              </svg>
-              <span>Login dengan Google</span>
-            </motion.button>
-          )}
-          
-          <Link href="/" style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '15px',
-            textDecoration: 'none',
-            color: 'white',
-            whiteSpace: 'nowrap',
-          }}>
-            <span style={{
-              fontSize: isMobile ? '1.2rem' : '1.5rem',
-              fontWeight: 'normal',
-            }}>
-              Halaman Utama
-            </span>
-            <SouthWestArrow 
-              width={isMobile ? 30 : 40} 
-              height={isMobile ? 30 : 40} 
-            />
-          </Link>
-        </div>
-
-        {/* LAYOUT 2 KOLOM */}
-        <div style={{
+        )}
+        
+        <Link href="/" style={{
           display: 'flex',
-          flexDirection: isMobile ? 'column' : 'row',
-          gap: '60px',
-          maxWidth: '1200px',
-          margin: '0 auto',
-          width: '100%',
+          alignItems: 'center',
+          gap: '15px',
+          textDecoration: 'none',
+          color: 'white',
         }}>
-          
-          {/* SIDEBAR KIRI - RANGKUMAN */}
-          <div style={{
-            flex: isMobile ? '1' : '0 0 280px',
-            position: isMobile ? 'relative' : 'sticky',
-            top: isMobile ? 'auto' : '40px',
-            alignSelf: 'flex-start',
-            height: isMobile ? 'auto' : 'calc(100vh - 180px)',
-            overflowY: isMobile ? 'visible' : 'auto',
-            paddingRight: '20px',
+          <span style={{
+            fontSize: isMobile ? '1.2rem' : '1.5rem',
+            fontWeight: 'normal',
           }}>
-            
-            {/* Blog Title */}
-            <div style={{
-              marginBottom: '50px',
-            }}>
-              <h1 style={{
-                fontSize: isMobile ? '4rem' : '6rem',
-                fontWeight: 'normal',
-                color: 'white',
-                margin: '0 0 20px 0',
-                lineHeight: '0.9',
-                letterSpacing: '-2px',
-              }}>
-                Blog
-              </h1>
-              
-              <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '12px',
-                marginTop: '20px',
-                color: '#999999',
-                fontSize: isMobile ? '0.9rem' : '1rem',
-              }}>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                }}>
-                  <CalendarIcon width={18} height={18} />
-                  <span>{formattedDate}</span>
-                </div>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                }}>
-                  <ClockIcon width={18} height={18} />
-                  <span>8 menit membaca</span>
-                </div>
-                {/* Author Info with Tooltip */}
-                <div 
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '10px',
-                    marginTop: '10px',
-                    paddingTop: '10px',
-                    borderTop: '1px solid #333333',
-                    position: 'relative',
-                  }}
-                  onMouseEnter={() => setShowAuthorTooltip(true)}
-                  onMouseLeave={() => setShowAuthorTooltip(false)}
-                >
-                  <motion.img 
-                    whileHover={{ scale: 1.1, rotate: 5 }}
-                    transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                    src={`https://ui-avatars.com/api/?name=Farid+Ardiansyah&background=random&color=fff&size=32`}
-                    alt="Farid Ardiansyah"
-                    style={{
-                      width: '32px',
-                      height: '32px',
-                      borderRadius: '50%',
-                      objectFit: 'cover',
-                      cursor: 'pointer',
-                    }}
-                  />
-                  <div>
-                    <motion.span
-                      whileHover={{ x: 5 }}
-                      style={{
-                        color: 'white',
-                        fontSize: '1rem',
-                        fontWeight: '500',
-                        display: 'block',
-                        cursor: 'pointer',
-                      }}
-                    >
-                      Farid Ardiansyah
-                    </motion.span>
-                    <span style={{
-                      color: '#999999',
-                      fontSize: '0.85rem',
-                    }}>
-                      Penulis
-                    </span>
-                  </div>
-
-                  {/* Author Tooltip */}
-                  <AnimatePresence>
-                    {showAuthorTooltip && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 10, scale: 0.9 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 10, scale: 0.9 }}
-                        transition={{ type: "spring", damping: 20, stiffness: 300 }}
-                        style={{
-                          position: 'absolute',
-                          top: '100%',
-                          left: 0,
-                          marginTop: '15px',
-                          background: '#1a1a1a',
-                          border: '1px solid #333333',
-                          borderRadius: '16px',
-                          padding: '20px',
-                          width: '250px',
-                          zIndex: 1000,
-                          boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
-                        }}
-                      >
-                        <motion.div
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          transition={{ delay: 0.1, type: "spring", stiffness: 400, damping: 10 }}
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '15px',
-                            marginBottom: '15px',
-                          }}
-                        >
-                          <img 
-                            src={`https://ui-avatars.com/api/?name=Farid+Ardiansyah&background=random&color=fff&size=48`}
-                            alt="Farid Ardiansyah"
-                            style={{
-                              width: '48px',
-                              height: '48px',
-                              borderRadius: '50%',
-                              objectFit: 'cover',
-                            }}
-                          />
-                          <div>
-                            <span style={{
-                              color: 'white',
-                              fontSize: '1.1rem',
-                              fontWeight: '500',
-                              display: 'block',
-                              marginBottom: '4px',
-                            }}>
-                              Farid Ardiansyah
-                            </span>
-                            <span style={{
-                              color: '#999999',
-                              fontSize: '0.85rem',
-                            }}>
-                              {authorBio.role}
-                            </span>
-                          </div>
-                        </motion.div>
-                        <motion.p
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ delay: 0.2 }}
-                          style={{
-                            color: '#cccccc',
-                            fontSize: '0.9rem',
-                            lineHeight: '1.5',
-                            margin: '0 0 10px 0',
-                            fontStyle: 'italic',
-                          }}
-                        >
-                          "{authorBio.bio}"
-                        </motion.p>
-                        <motion.div
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ delay: 0.3 }}
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px',
-                            color: '#666666',
-                            fontSize: '0.85rem',
-                          }}
-                        >
-                          <MessageIcon width={14} height={14} />
-                          <span>Kirim pesan melalui tombol di atas</span>
-                        </motion.div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              </div>
-            </div>
-            
-            <div style={{
-              marginBottom: '25px',
-            }}>
-              <h3 style={{
-                fontSize: isMobile ? '1.3rem' : '1.5rem',
-                fontWeight: 'normal',
-                color: 'white',
-                margin: '0',
-              }}>
-                Rangkuman
-              </h3>
-            </div>
-            
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '12px',
-            }}>
-              {rangkumanSections.map((section) => (
-                <motion.button
-                  key={section.id}
-                  onClick={() => scrollToSection(section.id)}
-                  whileHover={{ x: 10 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    padding: '5px 0',
-                    color: activeSection === section.id ? 'white' : '#999999',
-                    fontSize: isMobile ? '0.95rem' : '1rem',
-                    textAlign: 'left',
-                    cursor: 'pointer',
-                    fontWeight: 'normal',
-                  }}
-                >
-                  {section.title}
-                </motion.button>
-              ))}
-            </div>
-          </div>
-
-          {/* KONTEN KANAN - ARTIKEL */}
-          <div style={{
-            flex: '1',
-            maxWidth: isMobile ? '100%' : '700px',
-            overflowX: 'hidden', // Mencegah scroll horizontal
-          }}>
-            
-            <motion.h2 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              style={{
-                fontSize: isMobile ? '2rem' : '2.8rem',
-                fontWeight: 'normal',
-                color: 'white',
-                marginBottom: '40px',
-                lineHeight: '1.2',
-                wordWrap: 'break-word', // Memastikan teks panjang tidak overflow
-              }}
-            >
-              Bagaimana Rasa nya Masuk Kuliah Di Universitas Gunadarma
-            </motion.h2>
-
-            {/* KONTEN ARTIKEL - HANYA SUB JUDUL, ISI DIHAPUS */}
-            <div style={{
-              fontSize: isMobile ? '1.1rem' : '1.2rem',
-              lineHeight: '1.8',
-              color: '#e0e0e0',
-              width: '100%',
-              overflowX: 'hidden',
-            }}>
-              <section 
-                id="pendahuluan"
-                ref={el => sectionRefs.current.pendahuluan = el}
-                style={{ scrollMarginTop: '150px', marginBottom: '3em', width: '100%' }}
-              >
-                <h3 style={{
-                  fontSize: isMobile ? '1.3rem' : '1.5rem',
-                  fontWeight: 'normal',
-                  color: 'white',
-                  marginBottom: '20px',
-                }}>
-                  Pendahuluan
-                </h3>
-                {/* Konten dihapus */}
-              </section>
-              
-              <section 
-                id="sejarah"
-                ref={el => sectionRefs.current.sejarah = el}
-                style={{ scrollMarginTop: '150px', marginBottom: '3em', width: '100%' }}
-              >
-                <h3 style={{
-                  fontSize: isMobile ? '1.3rem' : '1.5rem',
-                  fontWeight: 'normal',
-                  color: 'white',
-                  marginBottom: '20px',
-                }}>
-                  Sejarah & Reputasi
-                </h3>
-                {/* Konten dihapus */}
-              </section>
-              
-              <section 
-                id="suasana"
-                ref={el => sectionRefs.current.suasana = el}
-                style={{ scrollMarginTop: '150px', marginBottom: '3em', width: '100%' }}
-              >
-                <h3 style={{
-                  fontSize: isMobile ? '1.3rem' : '1.5rem',
-                  fontWeight: 'normal',
-                  color: 'white',
-                  marginBottom: '20px',
-                }}>
-                  Suasana Kampus
-                </h3>
-                {/* Konten dihapus */}
-              </section>
-              
-              <section 
-                id="akademik"
-                ref={el => sectionRefs.current.akademik = el}
-                style={{ scrollMarginTop: '150px', marginBottom: '3em', width: '100%' }}
-              >
-                <h3 style={{
-                  fontSize: isMobile ? '1.3rem' : '1.5rem',
-                  fontWeight: 'normal',
-                  color: 'white',
-                  marginBottom: '20px',
-                }}>
-                  Kehidupan Akademik
-                </h3>
-                {/* Konten dihapus */}
-              </section>
-              
-              <section 
-                id="dosen"
-                ref={el => sectionRefs.current.dosen = el}
-                style={{ scrollMarginTop: '150px', marginBottom: '3em', width: '100%' }}
-              >
-                <h3 style={{
-                  fontSize: isMobile ? '1.3rem' : '1.5rem',
-                  fontWeight: 'normal',
-                  color: 'white',
-                  marginBottom: '20px',
-                }}>
-                  Para Dosen
-                </h3>
-                {/* Konten dihapus */}
-              </section>
-              
-              <section 
-                id="teman"
-                ref={el => sectionRefs.current.teman = el}
-                style={{ scrollMarginTop: '150px', marginBottom: '3em', width: '100%' }}
-              >
-                <h3 style={{
-                  fontSize: isMobile ? '1.3rem' : '1.5rem',
-                  fontWeight: 'normal',
-                  color: 'white',
-                  marginBottom: '20px',
-                }}>
-                  Pertemanan & Relasi
-                </h3>
-                {/* Konten dihapus */}
-              </section>
-              
-              <section 
-                id="fasilitas"
-                ref={el => sectionRefs.current.fasilitas = el}
-                style={{ scrollMarginTop: '150px', marginBottom: '3em', width: '100%' }}
-              >
-                <h3 style={{
-                  fontSize: isMobile ? '1.3rem' : '1.5rem',
-                  fontWeight: 'normal',
-                  color: 'white',
-                  marginBottom: '20px',
-                }}>
-                  Fasilitas Kampus
-                </h3>
-                {/* Konten dihapus */}
-              </section>
-              
-              <section 
-                id="organisasi"
-                ref={el => sectionRefs.current.organisasi = el}
-                style={{ scrollMarginTop: '150px', marginBottom: '3em', width: '100%' }}
-              >
-                <h3 style={{
-                  fontSize: isMobile ? '1.3rem' : '1.5rem',
-                  fontWeight: 'normal',
-                  color: 'white',
-                  marginBottom: '20px',
-                }}>
-                  Organisasi & Kegiatan
-                </h3>
-                {/* Konten dihapus */}
-              </section>
-              
-              <section 
-                id="tantangan"
-                ref={el => sectionRefs.current.tantangan = el}
-                style={{ scrollMarginTop: '150px', marginBottom: '3em', width: '100%' }}
-              >
-                <h3 style={{
-                  fontSize: isMobile ? '1.3rem' : '1.5rem',
-                  fontWeight: 'normal',
-                  color: 'white',
-                  marginBottom: '20px',
-                }}>
-                  Tantangan & Hambatan
-                </h3>
-                {/* Konten dihapus */}
-              </section>
-              
-              <section 
-                id="kesan"
-                ref={el => sectionRefs.current.kesan = el}
-                style={{ scrollMarginTop: '150px', marginBottom: '3em', width: '100%' }}
-              >
-                <h3 style={{
-                  fontSize: isMobile ? '1.3rem' : '1.5rem',
-                  fontWeight: 'normal',
-                  color: 'white',
-                  marginBottom: '20px',
-                }}>
-                  Kesan & Pesan
-                </h3>
-                {/* Konten dihapus */}
-              </section>
-              
-              <section 
-                id="penutup"
-                ref={el => sectionRefs.current.penutup = el}
-                style={{ scrollMarginTop: '150px', marginBottom: '3em', width: '100%' }}
-              >
-                <h3 style={{
-                  fontSize: isMobile ? '1.3rem' : '1.5rem',
-                  fontWeight: 'normal',
-                  color: 'white',
-                  marginBottom: '20px',
-                }}>
-                  Penutup
-                </h3>
-                {/* Konten dihapus */}
-              </section>
-            </div>
-
-            {/* ===== TAG SECTION (2 TAG SAJA) ===== */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              style={{
-                marginTop: '40px',
-                marginBottom: '40px',
-                paddingTop: '20px',
-                borderTop: '1px solid #333333',
-                width: '100%',
-              }}
-            >
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px',
-                marginBottom: '15px',
-              }}>
-                <TagIcon width={20} height={20} />
-                <span style={{
-                  fontSize: '1rem',
-                  color: '#999999',
-                  textTransform: 'uppercase',
-                  letterSpacing: '1px',
-                }}>
-                  Tags
-                </span>
-              </div>
-              
-              <div style={{
-                display: 'flex',
-                gap: '15px',
-                flexWrap: 'wrap', // Mencegah overflow pada mobile
-              }}>
-                <Link 
-                  href="/tag/kuliah"
-                  style={{ textDecoration: 'none' }}
-                >
-                  <motion.span
-                    whileHover={{ x: 5 }}
-                    style={{
-                      display: 'inline-block',
-                      padding: '6px 18px',
-                      backgroundColor: '#222222',
-                      border: '1px solid #444444',
-                      borderRadius: '30px',
-                      color: '#cccccc',
-                      fontSize: '0.95rem',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    #kuliah
-                  </motion.span>
-                </Link>
-                
-                <Link 
-                  href="/tag/gunadarma"
-                  style={{ textDecoration: 'none' }}
-                >
-                  <motion.span
-                    whileHover={{ x: 5 }}
-                    style={{
-                      display: 'inline-block',
-                      padding: '6px 18px',
-                      backgroundColor: '#222222',
-                      border: '1px solid #444444',
-                      borderRadius: '30px',
-                      color: '#cccccc',
-                      fontSize: '0.95rem',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    #gunadarma
-                  </motion.span>
-                </Link>
-              </div>
-            </motion.div>
-
-            {/* ===== BLOG SELANJUTNYA - PREVIOUS PAGE ===== */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-              style={{
-                marginTop: '40px',
-                marginBottom: '60px',
-                paddingTop: '40px',
-                borderTop: '1px solid #333333',
-                width: '100%',
-              }}
-            >
-              <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '20px',
-              }}>
-                <span style={{
-                  fontSize: '0.9rem',
-                  color: '#666666',
-                  textTransform: 'uppercase',
-                  letterSpacing: '2px',
-                }}>
-                  Blog Selanjutnya
-                </span>
-                
-                <Link 
-                  href="/blog/memilih-jurusan" 
-                  style={{
-                    textDecoration: 'none',
-                    color: 'white',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '24px',
-                    backgroundColor: 'rgba(255,255,255,0.02)',
-                    borderRadius: '24px',
-                    border: '1px solid rgba(255,255,255,0.05)',
-                    transition: 'all 0.3s ease',
-                    width: '100%',
-                    boxSizing: 'border-box',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)';
-                    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)';
-                    e.currentTarget.style.transform = 'translateY(-2px)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.02)';
-                    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)';
-                    e.currentTarget.style.transform = 'translateY(0)';
-                  }}
-                >
-                  <div style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '8px',
-                    flex: 1,
-                  }}>
-                    <span style={{
-                      fontSize: '0.85rem',
-                      color: '#999999',
-                    }}>
-                      Previous Page
-                    </span>
-                    <span style={{
-                      fontSize: isMobile ? '1.3rem' : '1.8rem',
-                      fontWeight: 'normal',
-                      color: 'white',
-                      wordWrap: 'break-word',
-                    }}>
-                      Mengapa saya memilih jurusan tersebut
-                    </span>
-                    <span style={{
-                      fontSize: '0.95rem',
-                      color: '#666666',
-                      marginTop: '4px',
-                    }}>
-                      Alasan di balik keputusan memilih program studi
-                    </span>
-                  </div>
-                  
-                  <motion.div
-                    whileHover={{ x: 5, y: -5 }}
-                    transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      marginLeft: '20px',
-                      flexShrink: 0, // Mencegah arrow mengecil
-                    }}
-                  >
-                    <NorthEastArrow 
-                      width={isMobile ? 40 : 50} 
-                      height={isMobile ? 40 : 50} 
-                    />
-                  </motion.div>
-                </Link>
-              </div>
-            </motion.div>
-
-            {/* ===== EMOTICON REACTIONS ===== */}
-            <div style={{
-              marginTop: '40px',
-              marginBottom: '40px',
-              borderTop: '1px solid #333333',
-              paddingTop: '40px',
-              width: '100%',
-            }}>
-              
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  marginBottom: '30px',
-                  flexWrap: 'wrap', // Mencegah overflow pada mobile
-                  gap: '15px',
-                }}
-              >
-                <h3 style={{
-                  fontSize: '1.8rem',
-                  fontWeight: 'normal',
-                  color: 'white',
-                  margin: 0,
-                }}>
-                  Reaksi
-                </h3>
-                
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => setShowEmoticonPicker(!showEmoticonPicker)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '10px',
-                    background: 'rgba(255,255,255,0.05)',
-                    border: '1px solid rgba(255,255,255,0.2)',
-                    borderRadius: '30px',
-                    padding: '12px 24px',
-                    color: 'white',
-                    fontSize: '1rem',
-                    cursor: 'pointer',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  <span style={{ fontSize: '1.5rem' }}>😊</span>
-                  <span>Tambahkan Reaksi</span>
-                </motion.button>
-              </motion.div>
-
-              {/* Emoticon Picker */}
-              <AnimatePresence>
-                {showEmoticonPicker && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -20, height: 0 }}
-                    animate={{ opacity: 1, y: 0, height: 'auto' }}
-                    exit={{ opacity: 0, y: -20, height: 0 }}
-                    transition={{ duration: 0.3 }}
-                    style={{
-                      overflow: 'hidden',
-                      marginBottom: '30px',
-                      width: '100%',
-                    }}
-                  >
-                    <div style={{
-                      display: 'grid',
-                      gridTemplateColumns: 'repeat(6, 1fr)',
-                      gap: '12px',
-                      padding: '24px',
-                      background: 'rgba(255,255,255,0.03)',
-                      borderRadius: '20px',
-                      border: '1px solid rgba(255,255,255,0.1)',
-                      width: '100%',
-                      boxSizing: 'border-box',
-                    }}>
-                      {EMOTICONS.map((emoticon) => (
-                        <motion.button
-                          key={emoticon.id}
-                          whileHover={{ scale: 1.2, y: -5 }}
-                          whileTap={{ scale: 0.9 }}
-                          onClick={() => {
-                            handleReaction(emoticon.id);
-                            setShowEmoticonPicker(false);
-                          }}
-                          style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            gap: '8px',
-                            background: userReactions.includes(emoticon.id) ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.05)',
-                            border: userReactions.includes(emoticon.id) ? '1px solid white' : '1px solid rgba(255,255,255,0.1)',
-                            borderRadius: '16px',
-                            padding: '16px 8px',
-                            cursor: 'pointer',
-                            width: '100%',
-                          }}
-                        >
-                          <span style={{ fontSize: '2.5rem' }}>{emoticon.emoji}</span>
-                          <span style={{ 
-                            fontSize: '0.8rem', 
-                            color: userReactions.includes(emoticon.id) ? 'white' : '#999999' 
-                          }}>
-                            {emoticon.label}
-                          </span>
-                          <span style={{ 
-                            fontSize: '0.9rem', 
-                            color: 'white',
-                            fontWeight: 'bold' 
-                          }}>
-                            {reactions[emoticon.id] || 0}
-                          </span>
-                        </motion.button>
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              {/* Active Reactions Summary */}
-              <div style={{
-                display: 'flex',
-                flexWrap: 'wrap',
-                gap: '12px',
-                alignItems: 'center',
-              }}>
-                {Object.entries(reactions)
-                  .filter(([_, count]) => count > 0)
-                  .sort(([_, a], [__, b]) => b - a)
-                  .map(([id, count]) => {
-                    const emoticon = EMOTICONS.find(e => e.id === id);
-                    if (!emoticon) return null;
-                    return (
-                      <motion.button
-                        key={id}
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={() => handleReaction(id)}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '8px',
-                          background: userReactions.includes(id) ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.05)',
-                          border: userReactions.includes(id) ? '1px solid white' : '1px solid rgba(255,255,255,0.1)',
-                          borderRadius: '30px',
-                          padding: '8px 16px',
-                          cursor: 'pointer',
-                        }}
-                      >
-                        <span style={{ fontSize: '1.3rem' }}>{emoticon.emoji}</span>
-                        <span style={{ 
-                          fontSize: '0.95rem', 
-                          color: 'white' 
-                        }}>
-                          {count}
-                        </span>
-                      </motion.button>
-                    );
-                  })}
-              </div>
-            </div>
-
-            {/* ===== COMMENT SECTION ===== */}
-
-            {/* Add Comment Button */}
-            <motion.button
-              whileHover={{ scale: 1.01 }}
-              whileTap={{ scale: 0.99 }}
-              onClick={() => {
-                if (!user) {
-                  handleGoogleLogin();
-                } else {
-                  setShowCommentForm(!showCommentForm);
-                }
-              }}
-              style={{
-                width: '100%',
-                padding: '20px',
-                background: 'rgba(255,255,255,0.02)',
-                border: '1px dashed #444444',
-                borderRadius: '16px',
-                color: user ? '#999999' : 'white',
-                fontSize: '1.1rem',
-                cursor: 'pointer',
-                marginBottom: '40px',
-                textAlign: 'left',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                boxSizing: 'border-box',
-              }}
-            >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-              </svg>
-              {user ? 'Tulis komentar Anda di sini...' : 'Login untuk menulis komentar'}
-            </motion.button>
-
-            {/* Comment Form */}
-            <AnimatePresence>
-              {showCommentForm && user && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 20 }}
-                  transition={{ duration: 0.3 }}
-                  style={{ marginBottom: '40px', width: '100%' }}
-                >
-                  <form onSubmit={handleAddComment} style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '20px',
-                    width: '100%',
-                  }}>
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '15px',
-                      flexWrap: 'wrap', // Mencegah overflow pada mobile
-                    }}>
-                      <motion.img 
-                        whileHover={{ scale: 1.1 }}
-                        src={user?.photoURL || `https://ui-avatars.com/api/?name=${user?.email}&background=random&color=fff`}
-                        alt={user?.displayName}
-                        style={{
-                          width: '56px',
-                          height: '56px',
-                          borderRadius: '50%',
-                          objectFit: 'cover',
-                          border: '2px solid rgba(255,255,255,0.1)',
-                        }}
-                      />
-                      <div>
-                        <span style={{ 
-                          color: 'white', 
-                          fontSize: '1.2rem',
-                          fontWeight: '500',
-                          display: 'block',
-                          marginBottom: '4px'
-                        }}>
-                          {user?.displayName || user?.email?.split('@')[0]}
-                        </span>
-                        <span style={{ color: '#666666', fontSize: '0.9rem' }}>
-                          Berkomentar sebagai pengguna
-                        </span>
-                      </div>
-                    </div>
-                    <textarea
-                      value={newComment}
-                      onChange={(e) => setNewComment(e.target.value)}
-                      placeholder="Apa pendapat Anda tentang artikel ini?"
-                      rows={5}
-                      required
-                      style={{
-                        padding: '20px',
-                        background: 'rgba(255,255,255,0.03)',
-                        border: '1px solid #333333',
-                        borderRadius: '20px',
-                        color: 'white',
-                        fontSize: '1.1rem',
-                        outline: 'none',
-                        resize: 'vertical',
-                        width: '100%',
-                        boxSizing: 'border-box',
-                      }}
-                    />
-                    <div style={{
-                      display: 'flex',
-                      justifyContent: 'flex-end',
-                      gap: '15px',
-                      flexWrap: 'wrap',
-                    }}>
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        type="button"
-                        onClick={() => setShowCommentForm(false)}
-                        style={{
-                          padding: '12px 24px',
-                          background: 'none',
-                          border: '1px solid #333333',
-                          borderRadius: '30px',
-                          color: '#999999',
-                          fontSize: '1rem',
-                          cursor: 'pointer',
-                        }}
-                      >
-                        Batal
-                      </motion.button>
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        type="submit"
-                        disabled={commentLoading || !newComment.trim()}
-                        style={{
-                          padding: '12px 32px',
-                          background: commentLoading || !newComment.trim() ? '#333333' : 'rgba(255,255,255,0.1)',
-                          border: '1px solid rgba(255,255,255,0.2)',
-                          borderRadius: '30px',
-                          color: commentLoading || !newComment.trim() ? '#999999' : 'white',
-                          fontSize: '1rem',
-                          fontWeight: '500',
-                          cursor: commentLoading || !newComment.trim() ? 'not-allowed' : 'pointer',
-                        }}
-                      >
-                        {commentLoading ? 'Mengirim...' : 'Kirim Komentar'}
-                      </motion.button>
-                    </div>
-                  </form>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {/* Comments List */}
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '30px',
-              width: '100%',
-            }}>
-              <div style={{
-                display: 'flex',
-                alignItems: 'baseline',
-                justifyContent: 'space-between',
-                marginBottom: '10px',
-                flexWrap: 'wrap',
-                gap: '10px',
-              }}>
-                <h3 style={{
-                  fontSize: '1.8rem',
-                  fontWeight: 'normal',
-                  color: 'white',
-                  margin: 0,
-                }}>
-                  Komentar
-                </h3>
-                <span style={{
-                  fontSize: '1.2rem',
-                  color: '#666666',
-                }}>
-                  {comments.length} komentar
-                </span>
-              </div>
-
-              <AnimatePresence>
-                {comments.map((comment, index) => (
-                  <motion.div
-                    key={comment.id}
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -30 }}
-                    transition={{ duration: 0.4, delay: index * 0.1 }}
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '15px',
-                      padding: '24px',
-                      backgroundColor: 'rgba(255,255,255,0.02)',
-                      borderRadius: '24px',
-                      border: '1px solid rgba(255,255,255,0.05)',
-                      width: '100%',
-                      boxSizing: 'border-box',
-                    }}
-                  >
-                    {/* Comment Header */}
-                    <div style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      flexWrap: 'wrap',
-                      gap: '15px',
-                    }}>
-                      <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '15px',
-                        flexWrap: 'wrap',
-                      }}>
-                        <motion.img 
-                          whileHover={{ scale: 1.1 }}
-                          src={comment.userPhoto || `https://ui-avatars.com/api/?name=${comment.userEmail}&background=random&color=fff`}
-                          alt={comment.userName}
-                          style={{
-                            width: '48px',
-                            height: '48px',
-                            borderRadius: '50%',
-                            objectFit: 'cover',
-                            border: '2px solid rgba(255,255,255,0.1)',
-                          }}
-                        />
-                        <div>
-                          <span style={{
-                            fontSize: '1.2rem',
-                            fontWeight: '500',
-                            color: 'white',
-                            display: 'block',
-                            marginBottom: '4px',
-                          }}>
-                            {comment.userName}
-                          </span>
-                          <span style={{
-                            fontSize: '0.9rem',
-                            color: '#666666',
-                          }}>
-                            {comment.createdAt?.toLocaleDateString?.('id-ID', {
-                              day: 'numeric',
-                              month: 'long',
-                              year: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            }) || 'Baru saja'}
-                          </span>
-                        </div>
-                      </div>
-                      
-                      {/* Comment Like Button */}
-                      <motion.button
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
-                        onClick={() => handleLikeComment(comment.id, false)}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '8px',
-                          background: comment.likedBy?.includes(user?.uid) ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.05)',
-                          border: comment.likedBy?.includes(user?.uid) ? '1px solid white' : '1px solid rgba(255,255,255,0.1)',
-                          borderRadius: '30px',
-                          padding: '8px 16px',
-                          cursor: user ? 'pointer' : 'not-allowed',
-                        }}
-                      >
-                        <svg 
-                          width="20" 
-                          height="20" 
-                          viewBox="0 0 24 24" 
-                          fill={comment.likedBy?.includes(user?.uid) ? "white" : "none"} 
-                          stroke="white" 
-                          strokeWidth="1"
-                        >
-                          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-                        </svg>
-                        <span style={{ 
-                          color: 'white',
-                          fontSize: '1rem'
-                        }}>
-                          {comment.likes || 0}
-                        </span>
-                      </motion.button>
-                    </div>
-
-                    {/* Comment Content */}
-                    <p style={{
-                      fontSize: '1.1rem',
-                      lineHeight: '1.7',
-                      color: '#e0e0e0',
-                      margin: '10px 0 5px 0',
-                      paddingLeft: '15px',
-                      borderLeft: '2px solid rgba(255,255,255,0.1)',
-                      wordWrap: 'break-word',
-                    }}>
-                      {comment.comment}
-                    </p>
-
-                    {/* Reply Button */}
-                    <motion.button
-                      whileHover={{ x: 5 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => {
-                        if (!user) {
-                          handleGoogleLogin();
-                        } else {
-                          setSelectedCommentForReply(
-                            selectedCommentForReply === comment.id ? null : comment.id
-                          );
-                        }
-                      }}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        background: 'none',
-                        border: 'none',
-                        color: '#666666',
-                        fontSize: '0.95rem',
-                        cursor: 'pointer',
-                        padding: '8px 0',
-                        marginTop: '5px',
-                      }}
-                    >
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
-                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                      </svg>
-                      <span>Balas komentar</span>
-                    </motion.button>
-
-                    {/* Reply Form */}
-                    <AnimatePresence>
-                      {selectedCommentForReply === comment.id && (
-                        <motion.div
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: 'auto' }}
-                          exit={{ opacity: 0, height: 0 }}
-                          transition={{ duration: 0.3 }}
-                          style={{
-                            marginTop: '15px',
-                            marginLeft: isMobile ? '0' : '30px',
-                            overflow: 'hidden',
-                            width: '100%',
-                          }}
-                        >
-                          <div style={{
-                            display: 'flex',
-                            alignItems: 'flex-start',
-                            gap: '15px',
-                            flexWrap: 'wrap',
-                          }}>
-                            <img 
-                              src={user?.photoURL || `https://ui-avatars.com/api/?name=${user?.email}&background=random&color=fff`}
-                              alt={user?.displayName}
-                              style={{
-                                width: '40px',
-                                height: '40px',
-                                borderRadius: '50%',
-                                objectFit: 'cover',
-                              }}
-                            />
-                            <div style={{
-                              flex: 1,
-                              display: 'flex',
-                              flexDirection: 'column',
-                              gap: '10px',
-                              minWidth: '200px',
-                            }}>
-                              <textarea
-                                value={replyText}
-                                onChange={(e) => setReplyText(e.target.value)}
-                                placeholder="Tulis balasan Anda..."
-                                rows={3}
-                                style={{
-                                  padding: '15px',
-                                  background: 'rgba(255,255,255,0.03)',
-                                  border: '1px solid #333333',
-                                  borderRadius: '16px',
-                                  color: 'white',
-                                  fontSize: '0.95rem',
-                                  outline: 'none',
-                                  resize: 'vertical',
-                                  width: '100%',
-                                  boxSizing: 'border-box',
-                                }}
-                              />
-                              <div style={{
-                                display: 'flex',
-                                gap: '10px',
-                                justifyContent: 'flex-end',
-                                flexWrap: 'wrap',
-                              }}>
-                                <motion.button
-                                  whileHover={{ scale: 1.05 }}
-                                  whileTap={{ scale: 0.95 }}
-                                  onClick={() => setSelectedCommentForReply(null)}
-                                  style={{
-                                    padding: '8px 16px',
-                                    background: 'none',
-                                    border: '1px solid #333333',
-                                    borderRadius: '20px',
-                                    color: '#999999',
-                                    fontSize: '0.9rem',
-                                    cursor: 'pointer',
-                                  }}
-                                >
-                                  Batal
-                                </motion.button>
-                                <motion.button
-                                  whileHover={{ scale: 1.05 }}
-                                  whileTap={{ scale: 0.95 }}
-                                  onClick={() => handleAddReply(comment.id)}
-                                  disabled={!replyText.trim()}
-                                  style={{
-                                    padding: '8px 24px',
-                                    background: replyText.trim() ? 'rgba(255,255,255,0.1)' : '#333333',
-                                    border: '1px solid rgba(255,255,255,0.2)',
-                                    borderRadius: '20px',
-                                    color: replyText.trim() ? 'white' : '#999999',
-                                    fontSize: '0.9rem',
-                                    fontWeight: '500',
-                                    cursor: replyText.trim() ? 'pointer' : 'not-allowed',
-                                  }}
-                                >
-                                  Kirim Balasan
-                                </motion.button>
-                              </div>
-                            </div>
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-
-                    {/* Replies List */}
-                    {comment.replies && comment.replies.length > 0 && (
-                      <div style={{
-                        marginTop: '20px',
-                        marginLeft: isMobile ? '0' : '30px',
-                        paddingLeft: isMobile ? '10px' : '20px',
-                        borderLeft: '2px solid rgba(255,255,255,0.05)',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '20px',
-                        width: '100%',
-                        boxSizing: 'border-box',
-                      }}>
-                        {comment.replies.map((reply: any) => (
-                          <motion.div
-                            key={reply.id}
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            style={{
-                              display: 'flex',
-                              justifyContent: 'space-between',
-                              alignItems: 'flex-start',
-                              width: '100%',
-                            }}
-                          >
-                            <div style={{
-                              display: 'flex',
-                              gap: '12px',
-                              flex: 1,
-                              flexWrap: 'wrap',
-                            }}>
-                              <img 
-                                src={reply.userPhoto || `https://ui-avatars.com/api/?name=${reply.userName}&background=random&color=fff`}
-                                alt={reply.userName}
-                                style={{
-                                  width: '32px',
-                                  height: '32px',
-                                  borderRadius: '50%',
-                                  objectFit: 'cover',
-                                }}
-                              />
-                              <div style={{ flex: 1, minWidth: '200px' }}>
-                                <div style={{
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  gap: '10px',
-                                  marginBottom: '5px',
-                                  flexWrap: 'wrap',
-                                }}>
-                                  <span style={{
-                                    fontSize: '1rem',
-                                    fontWeight: '500',
-                                    color: 'white',
-                                  }}>
-                                    {reply.userName}
-                                  </span>
-                                  <span style={{
-                                    fontSize: '0.8rem',
-                                    color: '#666666',
-                                  }}>
-                                    {reply.createdAt?.toDate?.()?.toLocaleDateString?.('id-ID', {
-                                      hour: '2-digit',
-                                      minute: '2-digit'
-                                    }) || 'Baru saja'}
-                                  </span>
-                                </div>
-                                <p style={{
-                                  fontSize: '0.95rem',
-                                  lineHeight: '1.6',
-                                  color: '#e0e0e0',
-                                  margin: '0 0 8px 0',
-                                  wordWrap: 'break-word',
-                                }}>
-                                  {reply.text}
-                                </p>
-                                <motion.button
-                                  whileHover={{ scale: 1.1 }}
-                                  whileTap={{ scale: 0.9 }}
-                                  onClick={() => handleLikeComment(comment.id, true, reply.id)}
-                                  style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '5px',
-                                    background: 'none',
-                                    border: 'none',
-                                    color: reply.likedBy?.includes(user?.uid) ? 'white' : '#666666',
-                                    fontSize: '0.85rem',
-                                    cursor: user ? 'pointer' : 'not-allowed',
-                                    padding: '4px 8px',
-                                    borderRadius: '20px',
-                                    backgroundColor: reply.likedBy?.includes(user?.uid) ? 'rgba(255,255,255,0.1)' : 'transparent',
-                                  }}
-                                >
-                                  <svg 
-                                    width="14" 
-                                    height="14" 
-                                    viewBox="0 0 24 24" 
-                                    fill={reply.likedBy?.includes(user?.uid) ? "white" : "none"} 
-                                    stroke="currentColor" 
-                                    strokeWidth="1"
-                                  >
-                                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-                                  </svg>
-                                  <span>{reply.likes || 0}</span>
-                                </motion.button>
-                              </div>
-                            </div>
-                          </motion.div>
-                        ))}
-                      </div>
-                    )}
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-
-              {comments.length === 0 && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  style={{
-                    padding: '60px',
-                    textAlign: 'center',
-                    color: '#666666',
-                    border: '1px dashed #333333',
-                    borderRadius: '24px',
-                    width: '100%',
-                    boxSizing: 'border-box',
-                  }}
-                >
-                  <span style={{ fontSize: '3rem', display: 'block', marginBottom: '20px' }}>💬</span>
-                  <p style={{ fontSize: '1.2rem', margin: 0 }}>Belum ada komentar.</p>
-                  <p style={{ fontSize: '1rem', color: '#999999', marginTop: '10px' }}>
-                    Jadilah yang pertama untuk berdiskusi!
-                  </p>
-                </motion.div>
-              )}
-            </div>
-            
-          </div>
-        </div>
+            Halaman Utama
+          </span>
+          <SouthWestArrow 
+            width={isMobile ? 30 : 40} 
+            height={isMobile ? 30 : 40} 
+          />
+        </Link>
       </div>
 
       {/* MESSAGE MODAL - UNTUK KIRIM PESAN KE PENULIS DAN LIHAT RIWAYAT */}
@@ -2919,7 +1521,6 @@ export default function BlogPage() {
                   marginBottom: '30px',
                   borderBottom: '1px solid #333333',
                   paddingBottom: '20px',
-                  flexWrap: 'wrap',
                 }}>
                   <motion.button
                     whileHover={{ scale: 1.05 }}
@@ -2937,7 +1538,6 @@ export default function BlogPage() {
                       color: 'white',
                       fontSize: '0.95rem',
                       cursor: 'pointer',
-                      minWidth: '150px',
                     }}
                   >
                     Kirim Pesan Baru
@@ -2959,7 +1559,6 @@ export default function BlogPage() {
                       alignItems: 'center',
                       justifyContent: 'center',
                       gap: '8px',
-                      minWidth: '150px',
                     }}
                   >
                     <HistoryIcon width={16} height={16} />
@@ -3090,8 +1689,6 @@ export default function BlogPage() {
                           justifyContent: 'space-between',
                           alignItems: 'center',
                           marginBottom: '15px',
-                          flexWrap: 'wrap',
-                          gap: '10px',
                         }}>
                           <div style={{
                             display: 'flex',
@@ -3204,7 +1801,6 @@ export default function BlogPage() {
                                   alignItems: 'center',
                                   gap: '8px',
                                   marginBottom: '5px',
-                                  flexWrap: 'wrap',
                                 }}>
                                   <img 
                                     src={reply.userPhoto}
@@ -3294,8 +1890,6 @@ export default function BlogPage() {
                           justifyContent: 'space-between',
                           alignItems: 'center',
                           marginBottom: '15px',
-                          flexWrap: 'wrap',
-                          gap: '10px',
                         }}>
                           <div style={{
                             display: 'flex',
@@ -3403,7 +1997,6 @@ export default function BlogPage() {
                                   alignItems: 'center',
                                   gap: '8px',
                                   marginBottom: '5px',
-                                  flexWrap: 'wrap',
                                 }}>
                                   <img 
                                     src={reply.userPhoto}
@@ -3472,7 +2065,6 @@ export default function BlogPage() {
                               display: 'flex',
                               gap: '10px',
                               justifyContent: 'flex-end',
-                              flexWrap: 'wrap',
                             }}>
                               <motion.button
                                 whileHover={{ scale: 1.05 }}
@@ -3669,7 +2261,6 @@ export default function BlogPage() {
                           fontWeight: '500',
                           color: 'white',
                           margin: '0 0 8px 0',
-                          wordWrap: 'break-word',
                         }}>
                           {item.articleTitle}
                         </h4>
@@ -3677,7 +2268,6 @@ export default function BlogPage() {
                           fontSize: '0.9rem',
                           color: '#999999',
                           margin: 0,
-                          wordWrap: 'break-word',
                         }}>
                           Disimpan pada: {item.savedAt?.toLocaleDateString?.('id-ID', {
                             day: 'numeric',
@@ -3797,7 +2387,6 @@ export default function BlogPage() {
                   display: 'flex',
                   gap: '10px',
                   marginBottom: '10px',
-                  flexWrap: 'wrap',
                 }}>
                   <input
                     type="text"
@@ -3812,7 +2401,6 @@ export default function BlogPage() {
                       color: 'white',
                       fontSize: '0.9rem',
                       outline: 'none',
-                      minWidth: '200px',
                     }}
                   />
                   <motion.button
@@ -3829,7 +2417,6 @@ export default function BlogPage() {
                       fontWeight: '500',
                       cursor: 'pointer',
                       transition: 'all 0.3s ease',
-                      whiteSpace: 'nowrap',
                     }}
                   >
                     {copySuccess ? 'Tersalin!' : 'Salin Link'}
@@ -3877,6 +2464,1348 @@ export default function BlogPage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* LAYOUT 2 KOLOM */}
+      <div style={{
+        display: 'flex',
+        flexDirection: isMobile ? 'column' : 'row',
+        gap: '60px',
+        maxWidth: '1200px',
+        margin: '0 auto',
+        padding: isMobile ? '140px 0 40px' : '180px 0 60px',
+        width: '100%',
+      }}>
+        
+        {/* SIDEBAR KIRI - RANGKUMAN */}
+        <div style={{
+          flex: isMobile ? '1' : '0 0 280px',
+          position: isMobile ? 'relative' : 'sticky',
+          top: isMobile ? 'auto' : '150px',
+          alignSelf: 'flex-start',
+          height: isMobile ? 'auto' : 'calc(100vh - 200px)',
+          overflowY: isMobile ? 'visible' : 'auto',
+          paddingRight: '20px',
+        }}>
+          
+          {/* Blog Title */}
+          <div style={{
+            marginBottom: '50px',
+          }}>
+            <h1 style={{
+              fontSize: isMobile ? '4rem' : '6rem',
+              fontWeight: 'normal',
+              color: 'white',
+              margin: '0 0 20px 0',
+              lineHeight: '0.9',
+              letterSpacing: '-2px',
+            }}>
+              Blog
+            </h1>
+            
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '12px',
+              marginTop: '20px',
+              color: '#999999',
+              fontSize: isMobile ? '0.9rem' : '1rem',
+            }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+              }}>
+                <CalendarIcon width={18} height={18} />
+                <span>{formattedDate}</span>
+              </div>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+              }}>
+                <ClockIcon width={18} height={18} />
+                <span>8 menit membaca</span>
+              </div>
+              {/* Author Info with Tooltip */}
+              <div 
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  marginTop: '10px',
+                  paddingTop: '10px',
+                  borderTop: '1px solid #333333',
+                  position: 'relative',
+                }}
+                onMouseEnter={() => setShowAuthorTooltip(true)}
+                onMouseLeave={() => setShowAuthorTooltip(false)}
+              >
+                <motion.img 
+                  whileHover={{ scale: 1.1, rotate: 5 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                  src={`https://ui-avatars.com/api/?name=Farid+Ardiansyah&background=random&color=fff&size=32`}
+                  alt="Farid Ardiansyah"
+                  style={{
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '50%',
+                    objectFit: 'cover',
+                    cursor: 'pointer',
+                  }}
+                />
+                <div>
+                  <motion.span
+                    whileHover={{ x: 5 }}
+                    style={{
+                      color: 'white',
+                      fontSize: '1rem',
+                      fontWeight: '500',
+                      display: 'block',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Farid Ardiansyah
+                  </motion.span>
+                  <span style={{
+                    color: '#999999',
+                    fontSize: '0.85rem',
+                  }}>
+                    Penulis
+                  </span>
+                </div>
+
+                {/* Author Tooltip */}
+                <AnimatePresence>
+                  {showAuthorTooltip && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10, scale: 0.9 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.9 }}
+                      transition={{ type: "spring", damping: 20, stiffness: 300 }}
+                      style={{
+                        position: 'absolute',
+                        top: '100%',
+                        left: 0,
+                        marginTop: '15px',
+                        background: '#1a1a1a',
+                        border: '1px solid #333333',
+                        borderRadius: '16px',
+                        padding: '20px',
+                        width: '250px',
+                        zIndex: 1000,
+                        boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
+                      }}
+                    >
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ delay: 0.1, type: "spring", stiffness: 400, damping: 10 }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '15px',
+                          marginBottom: '15px',
+                        }}
+                      >
+                        <img 
+                          src={`https://ui-avatars.com/api/?name=Farid+Ardiansyah&background=random&color=fff&size=48`}
+                          alt="Farid Ardiansyah"
+                          style={{
+                            width: '48px',
+                            height: '48px',
+                            borderRadius: '50%',
+                            objectFit: 'cover',
+                          }}
+                        />
+                        <div>
+                          <span style={{
+                            color: 'white',
+                            fontSize: '1.1rem',
+                            fontWeight: '500',
+                            display: 'block',
+                            marginBottom: '4px',
+                          }}>
+                            Farid Ardiansyah
+                          </span>
+                          <span style={{
+                            color: '#999999',
+                            fontSize: '0.85rem',
+                          }}>
+                            {authorBio.role}
+                          </span>
+                        </div>
+                      </motion.div>
+                      <motion.p
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.2 }}
+                        style={{
+                          color: '#cccccc',
+                          fontSize: '0.9rem',
+                          lineHeight: '1.5',
+                          margin: '0 0 10px 0',
+                          fontStyle: 'italic',
+                        }}
+                      >
+                        "{authorBio.bio}"
+                      </motion.p>
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.3 }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          color: '#666666',
+                          fontSize: '0.85rem',
+                        }}
+                      >
+                        <MessageIcon width={14} height={14} />
+                        <span>Kirim pesan melalui tombol di atas</span>
+                      </motion.div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </div>
+          </div>
+          
+          <div style={{
+            marginBottom: '25px',
+          }}>
+            <h3 style={{
+              fontSize: isMobile ? '1.3rem' : '1.5rem',
+              fontWeight: 'normal',
+              color: 'white',
+              margin: '0',
+            }}>
+              Rangkuman
+            </h3>
+          </div>
+          
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '12px',
+          }}>
+            {rangkumanSections.map((section) => (
+              <motion.button
+                key={section.id}
+                onClick={() => scrollToSection(section.id)}
+                whileHover={{ x: 10 }}
+                transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  padding: '5px 0',
+                  color: activeSection === section.id ? 'white' : '#999999',
+                  fontSize: isMobile ? '0.95rem' : '1rem',
+                  textAlign: 'left',
+                  cursor: 'pointer',
+                  fontWeight: 'normal',
+                }}
+              >
+                {section.title}
+              </motion.button>
+            ))}
+          </div>
+        </div>
+
+        {/* KONTEN KANAN - ARTIKEL */}
+        <div style={{
+          flex: '1',
+          maxWidth: isMobile ? '100%' : '700px',
+          overflowX: 'hidden', // Mencegah scroll horizontal pada konten
+        }}>
+          
+          <motion.h2 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            style={{
+              fontSize: isMobile ? '2rem' : '2.8rem',
+              fontWeight: 'normal',
+              color: 'white',
+              marginBottom: '40px',
+              lineHeight: '1.2',
+              wordWrap: 'break-word', // Memastikan teks panjang tidak overflow
+            }}
+          >
+            Bagaimana Rasa nya Masuk Kuliah Di Universitas Gunadarma
+          </motion.h2>
+
+          {/* KONTEN ARTIKEL - HANYA SUB JUDUL, ISI DIHAPUS */}
+          <div style={{
+            fontSize: isMobile ? '1.1rem' : '1.2rem',
+            lineHeight: '1.8',
+            color: '#e0e0e0',
+          }}>
+            <section 
+              id="pendahuluan"
+              ref={el => sectionRefs.current.pendahuluan = el}
+              style={{ scrollMarginTop: '150px', marginBottom: '3em' }}
+            >
+              <h3 style={{
+                fontSize: isMobile ? '1.3rem' : '1.5rem',
+                fontWeight: 'normal',
+                color: 'white',
+                marginBottom: '20px',
+              }}>
+                Pendahuluan
+              </h3>
+              {/* Konten dihapus */}
+            </section>
+            
+            <section 
+              id="sejarah"
+              ref={el => sectionRefs.current.sejarah = el}
+              style={{ scrollMarginTop: '150px', marginBottom: '3em' }}
+            >
+              <h3 style={{
+                fontSize: isMobile ? '1.3rem' : '1.5rem',
+                fontWeight: 'normal',
+                color: 'white',
+                marginBottom: '20px',
+              }}>
+                Sejarah & Reputasi
+              </h3>
+              {/* Konten dihapus */}
+            </section>
+            
+            <section 
+              id="suasana"
+              ref={el => sectionRefs.current.suasana = el}
+              style={{ scrollMarginTop: '150px', marginBottom: '3em' }}
+            >
+              <h3 style={{
+                fontSize: isMobile ? '1.3rem' : '1.5rem',
+                fontWeight: 'normal',
+                color: 'white',
+                marginBottom: '20px',
+              }}>
+                Suasana Kampus
+              </h3>
+              {/* Konten dihapus */}
+            </section>
+            
+            <section 
+              id="akademik"
+              ref={el => sectionRefs.current.akademik = el}
+              style={{ scrollMarginTop: '150px', marginBottom: '3em' }}
+            >
+              <h3 style={{
+                fontSize: isMobile ? '1.3rem' : '1.5rem',
+                fontWeight: 'normal',
+                color: 'white',
+                marginBottom: '20px',
+              }}>
+                Kehidupan Akademik
+              </h3>
+              {/* Konten dihapus */}
+            </section>
+            
+            <section 
+              id="dosen"
+              ref={el => sectionRefs.current.dosen = el}
+              style={{ scrollMarginTop: '150px', marginBottom: '3em' }}
+            >
+              <h3 style={{
+                fontSize: isMobile ? '1.3rem' : '1.5rem',
+                fontWeight: 'normal',
+                color: 'white',
+                marginBottom: '20px',
+              }}>
+                Para Dosen
+              </h3>
+              {/* Konten dihapus */}
+            </section>
+            
+            <section 
+              id="teman"
+              ref={el => sectionRefs.current.teman = el}
+              style={{ scrollMarginTop: '150px', marginBottom: '3em' }}
+            >
+              <h3 style={{
+                fontSize: isMobile ? '1.3rem' : '1.5rem',
+                fontWeight: 'normal',
+                color: 'white',
+                marginBottom: '20px',
+              }}>
+                Pertemanan & Relasi
+              </h3>
+              {/* Konten dihapus */}
+            </section>
+            
+            <section 
+              id="fasilitas"
+              ref={el => sectionRefs.current.fasilitas = el}
+              style={{ scrollMarginTop: '150px', marginBottom: '3em' }}
+            >
+              <h3 style={{
+                fontSize: isMobile ? '1.3rem' : '1.5rem',
+                fontWeight: 'normal',
+                color: 'white',
+                marginBottom: '20px',
+              }}>
+                Fasilitas Kampus
+              </h3>
+              {/* Konten dihapus */}
+            </section>
+            
+            <section 
+              id="organisasi"
+              ref={el => sectionRefs.current.organisasi = el}
+              style={{ scrollMarginTop: '150px', marginBottom: '3em' }}
+            >
+              <h3 style={{
+                fontSize: isMobile ? '1.3rem' : '1.5rem',
+                fontWeight: 'normal',
+                color: 'white',
+                marginBottom: '20px',
+              }}>
+                Organisasi & Kegiatan
+              </h3>
+              {/* Konten dihapus */}
+            </section>
+            
+            <section 
+              id="tantangan"
+              ref={el => sectionRefs.current.tantangan = el}
+              style={{ scrollMarginTop: '150px', marginBottom: '3em' }}
+            >
+              <h3 style={{
+                fontSize: isMobile ? '1.3rem' : '1.5rem',
+                fontWeight: 'normal',
+                color: 'white',
+                marginBottom: '20px',
+              }}>
+                Tantangan & Hambatan
+              </h3>
+              {/* Konten dihapus */}
+            </section>
+            
+            <section 
+              id="kesan"
+              ref={el => sectionRefs.current.kesan = el}
+              style={{ scrollMarginTop: '150px', marginBottom: '3em' }}
+            >
+              <h3 style={{
+                fontSize: isMobile ? '1.3rem' : '1.5rem',
+                fontWeight: 'normal',
+                color: 'white',
+                marginBottom: '20px',
+              }}>
+                Kesan & Pesan
+              </h3>
+              {/* Konten dihapus */}
+            </section>
+            
+            <section 
+              id="penutup"
+              ref={el => sectionRefs.current.penutup = el}
+              style={{ scrollMarginTop: '150px', marginBottom: '3em' }}
+            >
+              <h3 style={{
+                fontSize: isMobile ? '1.3rem' : '1.5rem',
+                fontWeight: 'normal',
+                color: 'white',
+                marginBottom: '20px',
+              }}>
+                Penutup
+              </h3>
+              {/* Konten dihapus */}
+            </section>
+          </div>
+
+          {/* ===== TAG SECTION (2 TAG SAJA) ===== */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            style={{
+              marginTop: '40px',
+              marginBottom: '40px',
+              paddingTop: '20px',
+              borderTop: '1px solid #333333',
+            }}
+          >
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              marginBottom: '15px',
+            }}>
+              <TagIcon width={20} height={20} />
+              <span style={{
+                fontSize: '1rem',
+                color: '#999999',
+                textTransform: 'uppercase',
+                letterSpacing: '1px',
+              }}>
+                Tags
+              </span>
+            </div>
+            
+            <div style={{
+              display: 'flex',
+              gap: '15px',
+              flexWrap: 'wrap', // Mencegah overflow pada mobile
+            }}>
+              <Link 
+                href="/tag/kuliah"
+                style={{ textDecoration: 'none' }}
+              >
+                <motion.span
+                  whileHover={{ x: 5 }}
+                  style={{
+                    display: 'inline-block',
+                    padding: '6px 18px',
+                    backgroundColor: '#222222',
+                    border: '1px solid #444444',
+                    borderRadius: '30px',
+                    color: '#cccccc',
+                    fontSize: '0.95rem',
+                    cursor: 'pointer',
+                  }}
+                >
+                  #kuliah
+                </motion.span>
+              </Link>
+              
+              <Link 
+                href="/tag/gunadarma"
+                style={{ textDecoration: 'none' }}
+              >
+                <motion.span
+                  whileHover={{ x: 5 }}
+                  style={{
+                    display: 'inline-block',
+                    padding: '6px 18px',
+                    backgroundColor: '#222222',
+                    border: '1px solid #444444',
+                    borderRadius: '30px',
+                    color: '#cccccc',
+                    fontSize: '0.95rem',
+                    cursor: 'pointer',
+                  }}
+                >
+                  #gunadarma
+                </motion.span>
+              </Link>
+            </div>
+          </motion.div>
+
+          {/* ===== BLOG SELANJUTNYA - PREVIOUS PAGE ===== */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            style={{
+              marginTop: '40px',
+              marginBottom: '60px',
+              paddingTop: '40px',
+              borderTop: '1px solid #333333',
+            }}
+          >
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '20px',
+            }}>
+              <span style={{
+                fontSize: '0.9rem',
+                color: '#666666',
+                textTransform: 'uppercase',
+                letterSpacing: '2px',
+              }}>
+                Blog Selanjutnya
+              </span>
+              
+              <Link 
+                href="/blog/memilih-jurusan" 
+                style={{
+                  textDecoration: 'none',
+                  color: 'white',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '24px',
+                  backgroundColor: 'rgba(255,255,255,0.02)',
+                  borderRadius: '24px',
+                  border: '1px solid rgba(255,255,255,0.05)',
+                  transition: 'all 0.3s ease',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)';
+                  e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)';
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.02)';
+                  e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                }}
+              >
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '8px',
+                }}>
+                  <span style={{
+                    fontSize: '0.85rem',
+                    color: '#999999',
+                  }}>
+                    Previous Page
+                  </span>
+                  <span style={{
+                    fontSize: isMobile ? '1.3rem' : '1.8rem',
+                    fontWeight: 'normal',
+                    color: 'white',
+                  }}>
+                    Mengapa saya memilih jurusan tersebut
+                  </span>
+                  <span style={{
+                    fontSize: '0.95rem',
+                    color: '#666666',
+                    marginTop: '4px',
+                  }}>
+                    Alasan di balik keputusan memilih program studi
+                  </span>
+                </div>
+                
+                <motion.div
+                  whileHover={{ x: 5, y: -5 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginLeft: '20px',
+                  }}
+                >
+                  <NorthEastArrow 
+                    width={isMobile ? 40 : 50} 
+                    height={isMobile ? 40 : 50} 
+                  />
+                </motion.div>
+              </Link>
+            </div>
+          </motion.div>
+
+          {/* ===== EMOTICON REACTIONS ===== */}
+          <div style={{
+            marginTop: '40px',
+            marginBottom: '40px',
+            borderTop: '1px solid #333333',
+            paddingTop: '40px',
+          }}>
+            
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginBottom: '30px',
+                flexWrap: 'wrap', // Mencegah overflow pada mobile
+                gap: '15px',
+              }}
+            >
+              <h3 style={{
+                fontSize: '1.8rem',
+                fontWeight: 'normal',
+                color: 'white',
+                margin: 0,
+              }}>
+                Reaksi
+              </h3>
+              
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setShowEmoticonPicker(!showEmoticonPicker)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  borderRadius: '30px',
+                  padding: '12px 24px',
+                  color: 'white',
+                  fontSize: '1rem',
+                  cursor: 'pointer',
+                }}
+              >
+                <span style={{ fontSize: '1.5rem' }}>😊</span>
+                <span>Tambahkan Reaksi</span>
+              </motion.button>
+            </motion.div>
+
+            {/* Emoticon Picker */}
+            <AnimatePresence>
+              {showEmoticonPicker && (
+                <motion.div
+                  initial={{ opacity: 0, y: -20, height: 0 }}
+                  animate={{ opacity: 1, y: 0, height: 'auto' }}
+                  exit={{ opacity: 0, y: -20, height: 0 }}
+                  transition={{ duration: 0.3 }}
+                  style={{
+                    overflow: 'hidden',
+                    marginBottom: '30px',
+                  }}
+                >
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(6, 1fr)',
+                    gap: '12px',
+                    padding: '24px',
+                    background: 'rgba(255,255,255,0.03)',
+                    borderRadius: '20px',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                  }}>
+                    {EMOTICONS.map((emoticon) => (
+                      <motion.button
+                        key={emoticon.id}
+                        whileHover={{ scale: 1.2, y: -5 }}
+                        whileTap={{ scale: 0.9 }}
+                        onClick={() => {
+                          handleReaction(emoticon.id);
+                          setShowEmoticonPicker(false);
+                        }}
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          gap: '8px',
+                          background: userReactions.includes(emoticon.id) ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.05)',
+                          border: userReactions.includes(emoticon.id) ? '1px solid white' : '1px solid rgba(255,255,255,0.1)',
+                          borderRadius: '16px',
+                          padding: '16px 8px',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        <span style={{ fontSize: '2.5rem' }}>{emoticon.emoji}</span>
+                        <span style={{ 
+                          fontSize: '0.8rem', 
+                          color: userReactions.includes(emoticon.id) ? 'white' : '#999999' 
+                        }}>
+                          {emoticon.label}
+                        </span>
+                        <span style={{ 
+                          fontSize: '0.9rem', 
+                          color: 'white',
+                          fontWeight: 'bold' 
+                        }}>
+                          {reactions[emoticon.id] || 0}
+                        </span>
+                      </motion.button>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Active Reactions Summary */}
+            <div style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '12px',
+              alignItems: 'center',
+            }}>
+              {Object.entries(reactions)
+                .filter(([_, count]) => count > 0)
+                .sort(([_, a], [__, b]) => b - a)
+                .map(([id, count]) => {
+                  const emoticon = EMOTICONS.find(e => e.id === id);
+                  if (!emoticon) return null;
+                  return (
+                    <motion.button
+                      key={id}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => handleReaction(id)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        background: userReactions.includes(id) ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.05)',
+                        border: userReactions.includes(id) ? '1px solid white' : '1px solid rgba(255,255,255,0.1)',
+                        borderRadius: '30px',
+                        padding: '8px 16px',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      <span style={{ fontSize: '1.3rem' }}>{emoticon.emoji}</span>
+                      <span style={{ 
+                        fontSize: '0.95rem', 
+                        color: 'white' 
+                      }}>
+                        {count}
+                      </span>
+                    </motion.button>
+                  );
+                })}
+            </div>
+          </div>
+
+          {/* ===== COMMENT SECTION ===== */}
+
+          {/* Add Comment Button */}
+          <motion.button
+            whileHover={{ scale: 1.01 }}
+            whileTap={{ scale: 0.99 }}
+            onClick={() => {
+              if (!user) {
+                handleGoogleLogin();
+              } else {
+                setShowCommentForm(!showCommentForm);
+              }
+            }}
+            style={{
+              width: '100%',
+              padding: '20px',
+              background: 'rgba(255,255,255,0.02)',
+              border: '1px dashed #444444',
+              borderRadius: '16px',
+              color: user ? '#999999' : 'white',
+              fontSize: '1.1rem',
+              cursor: 'pointer',
+              marginBottom: '40px',
+              textAlign: 'left',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+            }}
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+            {user ? 'Tulis komentar Anda di sini...' : 'Login untuk menulis komentar'}
+          </motion.button>
+
+          {/* Comment Form */}
+          <AnimatePresence>
+            {showCommentForm && user && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                transition={{ duration: 0.3 }}
+                style={{ marginBottom: '40px' }}
+              >
+                <form onSubmit={handleAddComment} style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '20px',
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '15px',
+                  }}>
+                    <motion.img 
+                      whileHover={{ scale: 1.1 }}
+                      src={user?.photoURL || `https://ui-avatars.com/api/?name=${user?.email}&background=random&color=fff`}
+                      alt={user?.displayName}
+                      style={{
+                        width: '56px',
+                        height: '56px',
+                        borderRadius: '50%',
+                        objectFit: 'cover',
+                        border: '2px solid rgba(255,255,255,0.1)',
+                      }}
+                    />
+                    <div>
+                      <span style={{ 
+                        color: 'white', 
+                        fontSize: '1.2rem',
+                        fontWeight: '500',
+                        display: 'block',
+                        marginBottom: '4px'
+                      }}>
+                        {user?.displayName || user?.email?.split('@')[0]}
+                      </span>
+                      <span style={{ color: '#666666', fontSize: '0.9rem' }}>
+                        Berkomentar sebagai pengguna
+                      </span>
+                    </div>
+                  </div>
+                  <textarea
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    placeholder="Apa pendapat Anda tentang artikel ini?"
+                    rows={5}
+                    required
+                    style={{
+                      padding: '20px',
+                      background: 'rgba(255,255,255,0.03)',
+                      border: '1px solid #333333',
+                      borderRadius: '20px',
+                      color: 'white',
+                      fontSize: '1.1rem',
+                      outline: 'none',
+                      resize: 'vertical',
+                      width: '100%',
+                      boxSizing: 'border-box',
+                    }}
+                  />
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'flex-end',
+                    gap: '15px',
+                  }}>
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      type="button"
+                      onClick={() => setShowCommentForm(false)}
+                      style={{
+                        padding: '12px 24px',
+                        background: 'none',
+                        border: '1px solid #333333',
+                        borderRadius: '30px',
+                        color: '#999999',
+                        fontSize: '1rem',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      Batal
+                    </motion.button>
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      type="submit"
+                      disabled={commentLoading || !newComment.trim()}
+                      style={{
+                        padding: '12px 32px',
+                        background: commentLoading || !newComment.trim() ? '#333333' : 'rgba(255,255,255,0.1)',
+                        border: '1px solid rgba(255,255,255,0.2)',
+                        borderRadius: '30px',
+                        color: commentLoading || !newComment.trim() ? '#999999' : 'white',
+                        fontSize: '1rem',
+                        fontWeight: '500',
+                        cursor: commentLoading || !newComment.trim() ? 'not-allowed' : 'pointer',
+                      }}
+                    >
+                      {commentLoading ? 'Mengirim...' : 'Kirim Komentar'}
+                    </motion.button>
+                  </div>
+                </form>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Comments List */}
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '30px',
+          }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'baseline',
+              justifyContent: 'space-between',
+              marginBottom: '10px',
+            }}>
+              <h3 style={{
+                fontSize: '1.8rem',
+                fontWeight: 'normal',
+                color: 'white',
+                margin: 0,
+              }}>
+                Komentar
+              </h3>
+              <span style={{
+                fontSize: '1.2rem',
+                color: '#666666',
+              }}>
+                {comments.length} komentar
+              </span>
+            </div>
+
+            <AnimatePresence>
+              {comments.map((comment, index) => (
+                <motion.div
+                  key={comment.id}
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -30 }}
+                  transition={{ duration: 0.4, delay: index * 0.1 }}
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '15px',
+                    padding: '24px',
+                    backgroundColor: 'rgba(255,255,255,0.02)',
+                    borderRadius: '24px',
+                    border: '1px solid rgba(255,255,255,0.05)',
+                    width: '100%',
+                    boxSizing: 'border-box',
+                  }}
+                >
+                  {/* Comment Header */}
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                  }}>
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '15px',
+                    }}>
+                      <motion.img 
+                        whileHover={{ scale: 1.1 }}
+                        src={comment.userPhoto || `https://ui-avatars.com/api/?name=${comment.userEmail}&background=random&color=fff`}
+                        alt={comment.userName}
+                        style={{
+                          width: '48px',
+                          height: '48px',
+                          borderRadius: '50%',
+                          objectFit: 'cover',
+                          border: '2px solid rgba(255,255,255,0.1)',
+                        }}
+                      />
+                      <div>
+                        <span style={{
+                          fontSize: '1.2rem',
+                          fontWeight: '500',
+                          color: 'white',
+                          display: 'block',
+                          marginBottom: '4px',
+                        }}>
+                          {comment.userName}
+                        </span>
+                        <span style={{
+                          fontSize: '0.9rem',
+                          color: '#666666',
+                        }}>
+                          {comment.createdAt?.toLocaleDateString?.('id-ID', {
+                            day: 'numeric',
+                            month: 'long',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          }) || 'Baru saja'}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    {/* Comment Like Button */}
+                    <motion.button
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => handleLikeComment(comment.id, false)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        background: comment.likedBy?.includes(user?.uid) ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.05)',
+                        border: comment.likedBy?.includes(user?.uid) ? '1px solid white' : '1px solid rgba(255,255,255,0.1)',
+                        borderRadius: '30px',
+                        padding: '8px 16px',
+                        cursor: user ? 'pointer' : 'not-allowed',
+                      }}
+                    >
+                      <svg 
+                        width="20" 
+                        height="20" 
+                        viewBox="0 0 24 24" 
+                        fill={comment.likedBy?.includes(user?.uid) ? "white" : "none"} 
+                        stroke="white" 
+                        strokeWidth="1"
+                      >
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                      </svg>
+                      <span style={{ 
+                        color: 'white',
+                        fontSize: '1rem'
+                      }}>
+                        {comment.likes || 0}
+                      </span>
+                    </motion.button>
+                  </div>
+
+                  {/* Comment Content */}
+                  <p style={{
+                    fontSize: '1.1rem',
+                    lineHeight: '1.7',
+                    color: '#e0e0e0',
+                    margin: '10px 0 5px 0',
+                    paddingLeft: '15px',
+                    borderLeft: '2px solid rgba(255,255,255,0.1)',
+                    wordWrap: 'break-word',
+                  }}>
+                    {comment.comment}
+                  </p>
+
+                  {/* Reply Button */}
+                  <motion.button
+                    whileHover={{ x: 5 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => {
+                      if (!user) {
+                        handleGoogleLogin();
+                      } else {
+                        setSelectedCommentForReply(
+                          selectedCommentForReply === comment.id ? null : comment.id
+                        );
+                      }
+                    }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      background: 'none',
+                      border: 'none',
+                      color: '#666666',
+                      fontSize: '0.95rem',
+                      cursor: 'pointer',
+                      padding: '8px 0',
+                      marginTop: '5px',
+                    }}
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
+                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
+                    <span>Balas komentar</span>
+                  </motion.button>
+
+                  {/* Reply Form */}
+                  <AnimatePresence>
+                    {selectedCommentForReply === comment.id && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.3 }}
+                        style={{
+                          marginTop: '15px',
+                          marginLeft: isMobile ? '0' : '30px',
+                          overflow: 'hidden',
+                        }}
+                      >
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'flex-start',
+                          gap: '15px',
+                        }}>
+                          <img 
+                            src={user?.photoURL || `https://ui-avatars.com/api/?name=${user?.email}&background=random&color=fff`}
+                            alt={user?.displayName}
+                            style={{
+                              width: '40px',
+                              height: '40px',
+                              borderRadius: '50%',
+                              objectFit: 'cover',
+                            }}
+                          />
+                          <div style={{
+                            flex: 1,
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '10px',
+                          }}>
+                            <textarea
+                              value={replyText}
+                              onChange={(e) => setReplyText(e.target.value)}
+                              placeholder="Tulis balasan Anda..."
+                              rows={3}
+                              style={{
+                                padding: '15px',
+                                background: 'rgba(255,255,255,0.03)',
+                                border: '1px solid #333333',
+                                borderRadius: '16px',
+                                color: 'white',
+                                fontSize: '0.95rem',
+                                outline: 'none',
+                                resize: 'vertical',
+                                width: '100%',
+                                boxSizing: 'border-box',
+                              }}
+                            />
+                            <div style={{
+                              display: 'flex',
+                              gap: '10px',
+                              justifyContent: 'flex-end',
+                            }}>
+                              <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={() => setSelectedCommentForReply(null)}
+                                style={{
+                                  padding: '8px 16px',
+                                  background: 'none',
+                                  border: '1px solid #333333',
+                                  borderRadius: '20px',
+                                  color: '#999999',
+                                  fontSize: '0.9rem',
+                                  cursor: 'pointer',
+                                }}
+                              >
+                                Batal
+                              </motion.button>
+                              <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={() => handleAddReply(comment.id)}
+                                disabled={!replyText.trim()}
+                                style={{
+                                  padding: '8px 24px',
+                                  background: replyText.trim() ? 'rgba(255,255,255,0.1)' : '#333333',
+                                  border: '1px solid rgba(255,255,255,0.2)',
+                                  borderRadius: '20px',
+                                  color: replyText.trim() ? 'white' : '#999999',
+                                  fontSize: '0.9rem',
+                                  fontWeight: '500',
+                                  cursor: replyText.trim() ? 'pointer' : 'not-allowed',
+                                }}
+                              >
+                                Kirim Balasan
+                              </motion.button>
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
+                  {/* Replies List */}
+                  {comment.replies && comment.replies.length > 0 && (
+                    <div style={{
+                      marginTop: '20px',
+                      marginLeft: isMobile ? '0' : '30px',
+                      paddingLeft: isMobile ? '10px' : '20px',
+                      borderLeft: '2px solid rgba(255,255,255,0.05)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '20px',
+                    }}>
+                      {comment.replies.map((reply: any) => (
+                        <motion.div
+                          key={reply.id}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'flex-start',
+                          }}
+                        >
+                          <div style={{
+                            display: 'flex',
+                            gap: '12px',
+                            flex: 1,
+                          }}>
+                            <img 
+                              src={reply.userPhoto || `https://ui-avatars.com/api/?name=${reply.userName}&background=random&color=fff`}
+                              alt={reply.userName}
+                              style={{
+                                width: '32px',
+                                height: '32px',
+                                borderRadius: '50%',
+                                objectFit: 'cover',
+                              }}
+                            />
+                            <div style={{ flex: 1 }}>
+                              <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '10px',
+                                marginBottom: '5px',
+                              }}>
+                                <span style={{
+                                  fontSize: '1rem',
+                                  fontWeight: '500',
+                                  color: 'white',
+                                }}>
+                                  {reply.userName}
+                                </span>
+                                <span style={{
+                                  fontSize: '0.8rem',
+                                  color: '#666666',
+                                }}>
+                                  {reply.createdAt?.toDate?.()?.toLocaleDateString?.('id-ID', {
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                  }) || 'Baru saja'}
+                                </span>
+                              </div>
+                              <p style={{
+                                fontSize: '0.95rem',
+                                lineHeight: '1.6',
+                                color: '#e0e0e0',
+                                margin: '0 0 8px 0',
+                                wordWrap: 'break-word',
+                              }}>
+                                {reply.text}
+                              </p>
+                              <motion.button
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.9 }}
+                                onClick={() => handleLikeComment(comment.id, true, reply.id)}
+                                style={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '5px',
+                                  background: 'none',
+                                  border: 'none',
+                                  color: reply.likedBy?.includes(user?.uid) ? 'white' : '#666666',
+                                  fontSize: '0.85rem',
+                                  cursor: user ? 'pointer' : 'not-allowed',
+                                  padding: '4px 8px',
+                                  borderRadius: '20px',
+                                  backgroundColor: reply.likedBy?.includes(user?.uid) ? 'rgba(255,255,255,0.1)' : 'transparent',
+                                }}
+                              >
+                                <svg 
+                                  width="14" 
+                                  height="14" 
+                                  viewBox="0 0 24 24" 
+                                  fill={reply.likedBy?.includes(user?.uid) ? "white" : "none"} 
+                                  stroke="currentColor" 
+                                  strokeWidth="1"
+                                >
+                                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                                </svg>
+                                <span>{reply.likes || 0}</span>
+                              </motion.button>
+                            </div>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+                  )}
+                </motion.div>
+              ))}
+            </AnimatePresence>
+
+            {comments.length === 0 && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                style={{
+                  padding: '60px',
+                  textAlign: 'center',
+                  color: '#666666',
+                  border: '1px dashed #333333',
+                  borderRadius: '24px',
+                }}
+              >
+                <span style={{ fontSize: '3rem', display: 'block', marginBottom: '20px' }}>💬</span>
+                <p style={{ fontSize: '1.2rem', margin: 0 }}>Belum ada komentar.</p>
+                <p style={{ fontSize: '1rem', color: '#999999', marginTop: '10px' }}>
+                  Jadilah yang pertama untuk berdiskusi!
+                </p>
+              </motion.div>
+            )}
+          </div>
+          
+        </div>
+      </div>
 
       {/* Tambahkan CSS untuk animasi notifikasi */}
       <style jsx>{`
