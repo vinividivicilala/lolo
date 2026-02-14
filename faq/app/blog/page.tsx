@@ -955,7 +955,7 @@ export default function BlogPage() {
       viewBox="0 0 24 24" 
       fill="none"
       stroke="white"
-      strokeWidth="1"
+      strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
       style={style}
@@ -1116,30 +1116,32 @@ export default function BlogPage() {
       color: 'white',
       position: 'relative',
       padding: isMobile ? '20px' : '40px',
+      paddingTop: isMobile ? '120px' : '180px', // Tambah padding top untuk memberi ruang teks berjalan
     }}>
       
-      {/* ===== TEKS BERJALAN - SEMUA KAPITAL DENGAN NORTH WEST ARROW ===== */}
+      {/* ===== TEKS BERJALAN - LEBIH BESAR DENGAN PANAH ===== */}
       <div style={{
         position: 'fixed',
         top: 0,
         left: 0,
         right: 0,
         zIndex: 9999,
-        backgroundColor: 'rgba(0,0,0,0.8)',
+        backgroundColor: 'rgba(0,0,0,0.95)',
         color: 'white',
-        padding: '12px 0',
-        borderBottom: '1px solid rgba(255,255,255,0.1)',
-        backdropFilter: 'blur(8px)',
+        padding: '20px 0', // Padding lebih besar
+        borderBottom: '2px solid rgba(255,255,255,0.2)',
+        backdropFilter: 'blur(12px)',
         overflow: 'hidden',
         whiteSpace: 'nowrap',
-        width: '100vw', // Pastikan lebar penuh
+        width: '100vw',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
       }}>
         <motion.div
           animate={{
-            x: [0, -2000] // Geser lebih jauh untuk animasi tanpa putus
+            x: [0, -2500] // Geser lebih jauh
           }}
           transition={{
-            duration: 25, // Durasi lebih lama agar lebih halus
+            duration: 30,
             repeat: Infinity,
             ease: "linear",
             repeatType: "loop"
@@ -1147,42 +1149,39 @@ export default function BlogPage() {
           style={{
             display: 'inline-flex',
             alignItems: 'center',
-            gap: '40px', // Jarak antar elemen
-            fontSize: isMobile ? '1rem' : '1.2rem',
+            gap: '60px', // Jarak antar elemen lebih besar
+            fontSize: isMobile ? '1.8rem' : '2.5rem', // Ukuran font lebih besar
             fontWeight: 'bold',
-            letterSpacing: '1px',
-            paddingLeft: '20px',
+            letterSpacing: '2px',
+            paddingLeft: '30px',
           }}
         >
-          {/* Elemen teks berjalan dengan arrow di awal dan akhir */}
-          <NorthWestArrow width={24} height={24} />
-          <span>NOTE ADALAH TEMAN TERBAIK MU</span>
-          <NorthWestArrow width={24} height={24} />
-          <span>NOTE ADALAH TEMAN TERBAIK MU</span>
-          <NorthWestArrow width={24} height={24} />
-          <span>NOTE ADALAH TEMAN TERBAIK MU</span>
-          <NorthWestArrow width={24} height={24} />
-          <span>NOTE ADALAH TEMAN TERBAIK MU</span>
-          <NorthWestArrow width={24} height={24} />
-          <span>NOTE ADALAH TEMAN TERBAIK MU</span>
-          <NorthWestArrow width={24} height={24} />
-          <span>NOTE ADALAH TEMAN TERBAIK MU</span>
-          <NorthWestArrow width={24} height={24} />
-          <span>NOTE ADALAH TEMAN TERBAIK MU</span>
-          <NorthWestArrow width={24} height={24} />
-          <span>NOTE ADALAH TEMAN TERBAIK MU</span>
+          {/* Elemen teks berjalan dengan arrow besar */}
+          <NorthWestArrow width={isMobile ? 40 : 60} height={isMobile ? 40 : 60} style={{ strokeWidth: 2 }} />
+          <span style={{ background: 'linear-gradient(45deg, #fff, #aaa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>NOTE ADALAH TEMAN TERBAIK MU</span>
+          <NorthWestArrow width={isMobile ? 40 : 60} height={isMobile ? 40 : 60} style={{ strokeWidth: 2 }} />
+          <span style={{ background: 'linear-gradient(45deg, #fff, #aaa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>NOTE ADALAH TEMAN TERBAIK MU</span>
+          <NorthWestArrow width={isMobile ? 40 : 60} height={isMobile ? 40 : 60} style={{ strokeWidth: 2 }} />
+          <span style={{ background: 'linear-gradient(45deg, #fff, #aaa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>NOTE ADALAH TEMAN TERBAIK MU</span>
+          <NorthWestArrow width={isMobile ? 40 : 60} height={isMobile ? 40 : 60} style={{ strokeWidth: 2 }} />
+          <span style={{ background: 'linear-gradient(45deg, #fff, #aaa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>NOTE ADALAH TEMAN TERBAIK MU</span>
+          <NorthWestArrow width={isMobile ? 40 : 60} height={isMobile ? 40 : 60} style={{ strokeWidth: 2 }} />
+          <span style={{ background: 'linear-gradient(45deg, #fff, #aaa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>NOTE ADALAH TEMAN TERBAIK MU</span>
         </motion.div>
       </div>
 
-      {/* HEADER - HALAMAN UTAMA & USER */}
+      {/* HEADER - HALAMAN UTAMA & USER - DIBERI JARAK DARI TEKS BERJALAN */}
       <div style={{
         position: 'fixed',
-        top: isMobile ? '70px' : '80px',
+        top: isMobile ? '100px' : '120px', // Turunkan posisi (dari 80px jadi 120px)
         right: isMobile ? '20px' : '40px',
         zIndex: 100,
         display: 'flex',
         alignItems: 'center',
         gap: '20px',
+        flexWrap: 'wrap',
+        justifyContent: 'flex-end',
+        maxWidth: 'calc(100% - 80px)',
       }}>
         {/* Message to Author Button */}
         <motion.button
@@ -2465,16 +2464,16 @@ export default function BlogPage() {
         gap: '60px',
         maxWidth: '1200px',
         margin: '0 auto',
-        padding: isMobile ? '120px 0 40px' : '150px 0 60px',
+        padding: isMobile ? '20px 0 40px' : '40px 0 60px', // Kurangi padding top karena sudah di container utama
       }}>
         
         {/* SIDEBAR KIRI - RANGKUMAN */}
         <div style={{
           flex: isMobile ? '1' : '0 0 280px',
           position: isMobile ? 'relative' : 'sticky',
-          top: isMobile ? 'auto' : '130px',
+          top: isMobile ? 'auto' : '160px', // Sesuaikan posisi sticky (dari 130px jadi 160px)
           alignSelf: 'flex-start',
-          height: isMobile ? 'auto' : 'calc(100vh - 180px)',
+          height: isMobile ? 'auto' : 'calc(100vh - 210px)',
           overflowY: isMobile ? 'visible' : 'auto',
           paddingRight: '20px',
         }}>
@@ -2725,7 +2724,7 @@ export default function BlogPage() {
             Bagaimana Rasa nya Masuk Kuliah Di Universitas Gunadarma
           </motion.h2>
 
-          {/* KONTEN ARTIKEL - HANYA SUB JUDUL, ISI DIHAPUS */}
+          {/* KONTEN ARTIKEL - LENGKAP */}
           <div style={{
             fontSize: isMobile ? '1.1rem' : '1.2rem',
             lineHeight: '1.8',
@@ -2734,7 +2733,7 @@ export default function BlogPage() {
             <section 
               id="pendahuluan"
               ref={el => sectionRefs.current.pendahuluan = el}
-              style={{ scrollMarginTop: '130px', marginBottom: '3em' }}
+              style={{ scrollMarginTop: '160px', marginBottom: '3em' }}
             >
               <h3 style={{
                 fontSize: isMobile ? '1.3rem' : '1.5rem',
@@ -2744,13 +2743,18 @@ export default function BlogPage() {
               }}>
                 Pendahuluan
               </h3>
-              {/* Konten dihapus */}
+              <p style={{ marginBottom: '1.5em' }}>
+                Saat pertama kali mendengar nama Universitas Gunadarma, yang terbayang di benakku adalah kampus dengan reputasi kuat di bidang teknologi dan komputer. Sebagai salah satu perguruan tinggi swasta terkemuka di Indonesia, Gunadarma telah melahirkan ribuan lulusan yang sukses di berbagai bidang, terutama di industri teknologi. Namun, seperti apa sebenarnya rasanya menjadi mahasiswa di universitas ini? Apakah sesuai dengan ekspektasi? Ataukah ada cerita-cerita tak terduga di balik gedung-gedung kampusnya yang ikonik?
+              </p>
+              <p style={{ marginBottom: '1.5em' }}>
+                Dalam artikel ini, aku akan berbagi pengalaman pribadi selama menjalani perkuliahan di Universitas Gunadarma. Dari hari pertama masuk hingga saat-saat menjelang kelulusan, ada banyak hal yang membentuk cara pandangku tentang dunia perkuliahan, tentang teknologi, dan tentang kehidupan itu sendiri. Tulisan ini bukan hanya sekadar catatan perjalanan, tetapi juga refleksi atas apa yang kudapatkan dari kampus yang telah menjadi rumah kedua selama beberapa tahun terakhir.
+              </p>
             </section>
             
             <section 
               id="sejarah"
               ref={el => sectionRefs.current.sejarah = el}
-              style={{ scrollMarginTop: '130px', marginBottom: '3em' }}
+              style={{ scrollMarginTop: '160px', marginBottom: '3em' }}
             >
               <h3 style={{
                 fontSize: isMobile ? '1.3rem' : '1.5rem',
@@ -2760,13 +2764,18 @@ export default function BlogPage() {
               }}>
                 Sejarah & Reputasi
               </h3>
-              {/* Konten dihapus */}
+              <p style={{ marginBottom: '1.5em' }}>
+                Universitas Gunadarma didirikan pada tahun 1981 dengan nama Sekolah Tinggi Manajemen Informatika dan Komputer (STMIK) Gunadarma. Seiring perkembangannya, pada tahun 1993, Gunadarma resmi menjadi universitas dan terus berkembang hingga kini memiliki beberapa kampus yang tersebar di berbagai lokasi strategis di Jakarta, Depok, dan sekitarnya. Reputasi Gunadarma sebagai kampus teknologi bukanlah isapan jempol belaka. Banyak perusahaan teknologi, baik nasional maupun multinasional, yang secara aktif merekrut lulusan Gunadarma.
+              </p>
+              <p style={{ marginBottom: '1.5em' }}>
+              Yang membuatku memilih Gunadarma adalah reputasinya yang kuat di bidang IT. Saat masih duduk di bangku SMA, aku sering mendengar bahwa lulusan Gunadarma "tidak diragukan lagi" kemampuannya dalam programming dan pengembangan sistem. Banyak senior yang kuliah di sini dan kini bekerja di perusahaan-perusahaan ternama. Reputasi ini menjadi salah satu alasan utama mengapa aku memantapkan pilihan untuk berkuliah di Gunadarma, meskipun sebenarnya ada beberapa pilihan lain yang juga menarik.
+              </p>
             </section>
             
             <section 
               id="suasana"
               ref={el => sectionRefs.current.suasana = el}
-              style={{ scrollMarginTop: '130px', marginBottom: '3em' }}
+              style={{ scrollMarginTop: '160px', marginBottom: '3em' }}
             >
               <h3 style={{
                 fontSize: isMobile ? '1.3rem' : '1.5rem',
@@ -2776,13 +2785,18 @@ export default function BlogPage() {
               }}>
                 Suasana Kampus
               </h3>
-              {/* Konten dihapus */}
+              <p style={{ marginBottom: '1.5em' }}>
+                Suasana kampus Gunadarma... bagaimana ya mendeskripsikannya? Mungkin kata yang paling tepat adalah "dinamis". Setiap sudut kampus selalu dipenuhi dengan aktivitas mahasiswa. Di kantin, terdengar obrolan tentang tugas kuliah, rencana liburan, atau sekadar gosip terkini. Di taman-taman kampus, terlihat mahasiswa yang nongkrong sambil mengerjakan tugas kelompok. Di perpustakaan, suasana hening namun terasa produktif.
+              </p>
+              <p style={{ marginBottom: '1.5em' }}>
+                Salah satu hal yang paling kuingat adalah suasana saat ujian tiba. Kampus yang biasanya ramai dan penuh tawa, tiba-tiba berubah menjadi "lautan wajah tegang". Semua orang sibuk belajar, baik di dalam ruangan maupun di sudut-sudut kampus. Suasana kompetitif yang sehat ini justru membuatku semakin termotivasi untuk belajar lebih giat. Aku ingat betul bagaimana kami saling berbagi catatan, bertukar pikiran, dan membantu teman yang kesulitan memahami materi. Ada rasa kebersamaan yang kuat meskipun kami semua bersaing untuk mendapatkan nilai terbaik.
+              </p>
             </section>
             
             <section 
               id="akademik"
               ref={el => sectionRefs.current.akademik = el}
-              style={{ scrollMarginTop: '130px', marginBottom: '3em' }}
+              style={{ scrollMarginTop: '160px', marginBottom: '3em' }}
             >
               <h3 style={{
                 fontSize: isMobile ? '1.3rem' : '1.5rem',
@@ -2792,13 +2806,21 @@ export default function BlogPage() {
               }}>
                 Kehidupan Akademik
               </h3>
-              {/* Konten dihapus */}
+              <p style={{ marginBottom: '1.5em' }}>
+                Kehidupan akademik di Gunadarma menurutku cukup menantang namun tetap menyenangkan. Sistem kredit semester (SKS) yang diterapkan memberikan fleksibilitas bagi mahasiswa untuk mengatur beban studi mereka. Aku pribadi menyukai sistem ini karena bisa menyesuaikan dengan kemampuan dan kebutuhan. Ada semester di mana aku mengambil banyak SKS, ada pula semester di mana aku sengaja mengambil sedikit agar bisa fokus pada kegiatan lain seperti organisasi atau magang.
+              </p>
+              <p style={{ marginBottom: '1.5em' }}>
+                Metode pengajaran di Gunadarma cukup bervariasi. Ada dosen yang lebih suka dengan metode ceramah, ada juga yang aktif menggunakan diskusi dan studi kasus. Beberapa mata kuliah bahkan mewajibkan mahasiswa untuk membuat proyek nyata, seperti membuat aplikasi sederhana atau menganalisis sistem informasi di perusahaan. Tugas-tugas seperti ini sangat membantuku untuk memahami aplikasi praktis dari teori yang dipelajari di kelas.
+              </p>
+              <p style={{ marginBottom: '1.5em' }}>
+                Laboratorium komputer di Gunadarma juga menjadi salah satu fasilitas pendukung utama dalam kehidupan akademik. Dengan peralatan yang memadai dan akses yang cukup luas, mahasiswa dapat bereksperimen dan mengembangkan keterampilan teknis mereka. Aku sering menghabiskan waktu di lab, baik untuk mengerjakan tugas maupun sekadar mengeksplorasi teknologi baru yang sedang tren.
+              </p>
             </section>
             
             <section 
               id="dosen"
               ref={el => sectionRefs.current.dosen = el}
-              style={{ scrollMarginTop: '130px', marginBottom: '3em' }}
+              style={{ scrollMarginTop: '160px', marginBottom: '3em' }}
             >
               <h3 style={{
                 fontSize: isMobile ? '1.3rem' : '1.5rem',
@@ -2808,13 +2830,21 @@ export default function BlogPage() {
               }}>
                 Para Dosen
               </h3>
-              {/* Konten dihapus */}
+              <p style={{ marginBottom: '1.5em' }}>
+                Berbicara tentang dosen di Gunadarma, aku merasa sangat beruntung karena banyak dari mereka yang tidak hanya pintar secara akademis, tetapi juga memiliki pengalaman praktis di industri. Ada dosen yang sebelumnya bekerja sebagai software engineer di perusahaan multinasional, ada juga yang masih aktif sebagai konsultan di bidang teknologi. Pengalaman mereka ini menjadi nilai tambah yang sangat berharga dalam proses belajar-mengajar.
+              </p>
+              <p style={{ marginBottom: '1.5em' }}>
+                Aku ingat betul bagaimana seorang dosen pemrograman yang sangat bersemangat mengajarkan kami tentang algoritma. Beliau tidak hanya memberikan teori, tetapi juga menunjukkan bagaimana algoritma tersebut diterapkan dalam aplikasi-aplikasi nyata yang kita gunakan sehari-hari. Pendekatan seperti ini membuat materi yang tadinya terasa abstrak menjadi lebih konkret dan mudah dipahami.
+              </p>
+              <p style={{ marginBottom: '1.5em' }}>
+                Ada juga dosen yang terkenal killer, yang suka memberi tugas berat dan menuntut mahasiswa untuk berpikir kritis. Saat itu mungkin kita merasa terbebani, tapi setelah lulus baru sadar bahwa "kekerasan" beliau justru mempersiapkan kita menghadapi dunia kerja yang sesungguhnya. Tugas-tugas berat itu mengajarkan kami tentang manajemen waktu, kerja keras, dan ketahanan menghadapi tekanan.
+              </p>
             </section>
             
             <section 
               id="teman"
               ref={el => sectionRefs.current.teman = el}
-              style={{ scrollMarginTop: '130px', marginBottom: '3em' }}
+              style={{ scrollMarginTop: '160px', marginBottom: '3em' }}
             >
               <h3 style={{
                 fontSize: isMobile ? '1.3rem' : '1.5rem',
@@ -2824,13 +2854,21 @@ export default function BlogPage() {
               }}>
                 Pertemanan & Relasi
               </h3>
-              {/* Konten dihapus */}
+              <p style={{ marginBottom: '1.5em' }}>
+                Salah satu hal paling berharga yang kudapatkan selama kuliah di Gunadarma adalah teman-teman. Mereka berasal dari berbagai latar belakang, dengan berbagai keunikan dan kelebihan masing-masing. Ada yang jago coding, ada yang mahir desain, ada yang pandai berorganisasi, dan ada juga yang sekadar jago bikin suasana cair. Perpaduan ini menciptakan dinamika yang seru dalam setiap interaksi.
+              </p>
+              <p style={{ marginBottom: '1.5em' }}>
+                Tugas kelompok menjadi ajang untuk belajar bekerja sama dengan orang lain. Tidak selalu mulus, pasti ada gesekan dan perbedaan pendapat. Tapi justru dari situ kami belajar bagaimana berkompromi, menghargai pendapat orang lain, dan mencapai tujuan bersama. Beberapa teman kelompok bahkan menjadi teman dekat hingga sekarang, dan masih sering berkomunikasi meskipun sudah sibuk dengan urusan masing-masing.
+              </p>
+              <p style={{ marginBottom: '1.5em' }}>
+                Relasi yang dibangun selama kuliah juga menjadi aset berharga di masa depan. Banyak dari kami yang sekarang bekerja di berbagai perusahaan, dan koneksi ini sering kali bermanfaat, baik untuk sekadar bertukar informasi lowongan kerja maupun untuk kolaborasi profesional. Bahkan ada beberapa teman yang akhirnya menjadi rekan bisnis setelah lulus. Benar-benar tak ternilai harganya.
+              </p>
             </section>
             
             <section 
               id="fasilitas"
               ref={el => sectionRefs.current.fasilitas = el}
-              style={{ scrollMarginTop: '130px', marginBottom: '3em' }}
+              style={{ scrollMarginTop: '160px', marginBottom: '3em' }}
             >
               <h3 style={{
                 fontSize: isMobile ? '1.3rem' : '1.5rem',
@@ -2840,13 +2878,21 @@ export default function BlogPage() {
               }}>
                 Fasilitas Kampus
               </h3>
-              {/* Konten dihapus */}
+              <p style={{ marginBottom: '1.5em' }}>
+                Fasilitas kampus menjadi salah satu faktor penting dalam menunjang kegiatan perkuliahan. Di Gunadarma, fasilitas yang disediakan cukup lengkap. Mulai dari ruang kuliah yang nyaman dengan pendingin udara dan proyektor di setiap kelas, perpustakaan dengan koleksi buku dan jurnal yang memadai, laboratorium komputer dengan spesifikasi tinggi, hingga akses internet yang cepat di seluruh area kampus.
+              </p>
+              <p style={{ marginBottom: '1.5em' }}>
+                Aku pribadi paling sering menghabiskan waktu di perpustakaan. Selain untuk membaca buku, perpustakaan juga menjadi tempat favorit untuk belajar karena suasananya yang tenang dan kondusif. Koleksi bukunya juga lengkap, mulai dari buku teks kuliah, buku-buku populer tentang teknologi, hingga jurnal-jurnal ilmiah terkini. Sistem peminjaman yang terkomputerisasi juga memudahkan mahasiswa untuk mencari dan meminjam buku yang dibutuhkan.
+              </p>
+              <p style={{ marginBottom: '1.5em' }}>
+                Untuk menunjang kreativitas mahasiswa, Gunadarma juga menyediakan fasilitas seperti ruang diskusi, studio multimedia, dan area komunal yang nyaman. Ruang diskusi sangat membantu saat kami mengerjakan tugas kelompok, sementara studio multimedia menjadi tempat favorit bagi mahasiswa yang tertarik dengan produksi video dan audio. Area komunal di beberapa titik kampus juga menjadi tempat nongkrong favorit untuk melepas penat di sela-sela kuliah.
+              </p>
             </section>
             
             <section 
               id="organisasi"
               ref={el => sectionRefs.current.organisasi = el}
-              style={{ scrollMarginTop: '130px', marginBottom: '3em' }}
+              style={{ scrollMarginTop: '160px', marginBottom: '3em' }}
             >
               <h3 style={{
                 fontSize: isMobile ? '1.3rem' : '1.5rem',
@@ -2856,13 +2902,21 @@ export default function BlogPage() {
               }}>
                 Organisasi & Kegiatan
               </h3>
-              {/* Konten dihapus */}
+              <p style={{ marginBottom: '1.5em' }}>
+                Selain kegiatan akademik, Gunadarma juga memiliki berbagai organisasi dan kegiatan kemahasiswaan yang menarik. Ada himpunan mahasiswa jurusan (HMJ), unit kegiatan mahasiswa (UKM) di berbagai bidang seperti olahraga, seni, keagamaan, dan masih banyak lagi. Aku sendiri cukup aktif di organisasi mahasiswa jurusan, dan pengalaman itu menjadi salah satu yang paling berkesan selama kuliah.
+              </p>
+              <p style={{ marginBottom: '1.5em' }}>
+                Melalui organisasi, aku belajar banyak hal yang tidak diajarkan di kelas: kepemimpinan, manajemen proyek, komunikasi publik, dan kemampuan bekerja dalam tim. Kami sering mengadakan acara-acara seperti seminar, workshop, atau kompetisi yang melibatkan mahasiswa dari berbagai jurusan. Mengkoordinasikan acara-acara ini tidak mudah, tapi hasilnya sangat memuaskan dan memberikan banyak pelajaran berharga.
+              </p>
+              <p style={{ marginBottom: '1.5em' }}>
+                Selain itu, Gunadarma juga rutin mengadakan kegiatan tingkat universitas seperti pekan olahraga, pekan seni, dan seminar nasional. Kegiatan-kegiatan ini menjadi ajang untuk berinteraksi dengan mahasiswa dari jurusan lain dan memperluas pergaulan. Ada juga program magang dan kerjasama dengan berbagai perusahaan yang memungkinkan mahasiswa mendapatkan pengalaman kerja nyata sebelum lulus. Program-program seperti ini sangat membantu dalam mempersiapkan diri memasuki dunia kerja.
+              </p>
             </section>
             
             <section 
               id="tantangan"
               ref={el => sectionRefs.current.tantangan = el}
-              style={{ scrollMarginTop: '130px', marginBottom: '3em' }}
+              style={{ scrollMarginTop: '160px', marginBottom: '3em' }}
             >
               <h3 style={{
                 fontSize: isMobile ? '1.3rem' : '1.5rem',
@@ -2872,13 +2926,21 @@ export default function BlogPage() {
               }}>
                 Tantangan & Hambatan
               </h3>
-              {/* Konten dihapus */}
+              <p style={{ marginBottom: '1.5em' }}>
+                Tentu saja, perjalanan kuliah di Gunadarma tidak selalu mulus. Ada banyak tantangan dan hambatan yang harus dihadapi. Salah satu yang paling berat adalah masalah transportasi. Dengan kampus yang tersebar di beberapa lokasi, kadang aku harus berpindah-pindah tempat dalam satu hari. Belum lagi kemacetan Jakarta yang legendaris, membuat perjalanan antar kampus bisa memakan waktu berjam-jam. Ini menjadi tantangan tersendiri dalam manajemen waktu.
+              </p>
+              <p style={{ marginBottom: '1.5em' }}>
+                Tantangan lainnya adalah beban akademik yang kadang terasa berat. Ada kalanya dalam satu minggu, aku harus menyelesaikan beberapa tugas besar sekaligus, plus persiapan ujian. Masa-masa seperti ini benar-benar menguji mental dan fisik. Tapi justru dari situ aku belajar bagaimana mengelola stres, memprioritaskan tugas, dan tetap menjaga kesehatan meskipun dikejar deadline.
+              </p>
+              <p style={{ marginBottom: '1.5em' }}>
+                Adaptasi dengan sistem pembelajaran juga menjadi tantangan tersendiri, terutama di awal-awal kuliah. Metode pembelajaran di kampus sangat berbeda dengan di SMA. Di sini, mahasiswa dituntut untuk lebih mandiri dan proaktif dalam mencari sumber belajar. Tidak semua materi diberikan secara detail oleh dosen, ada kalanya kami harus mencari sendiri referensi tambahan. Butuh waktu untuk bisa beradaptasi dengan sistem ini, tapi setelah terbiasa, justru menjadi kebiasaan baik yang berguna hingga sekarang.
+              </p>
             </section>
             
             <section 
               id="kesan"
               ref={el => sectionRefs.current.kesan = el}
-              style={{ scrollMarginTop: '130px', marginBottom: '3em' }}
+              style={{ scrollMarginTop: '160px', marginBottom: '3em' }}
             >
               <h3 style={{
                 fontSize: isMobile ? '1.3rem' : '1.5rem',
@@ -2888,13 +2950,21 @@ export default function BlogPage() {
               }}>
                 Kesan & Pesan
               </h3>
-              {/* Konten dihapus */}
+              <p style={{ marginBottom: '1.5em' }}>
+                Secara keseluruhan, aku merasa sangat bersyukur bisa kuliah di Universitas Gunadarma. Pengalaman yang kudapatkan, baik dari sisi akademik maupun non-akademik, telah membentuk diriku menjadi pribadi yang lebih baik. Aku tidak hanya mendapatkan ilmu pengetahuan, tetapi juga keterampilan hidup, relasi yang berharga, dan kenangan indah yang akan selalu kukenang.
+              </p>
+              <p style={{ marginBottom: '1.5em' }}>
+                Bagi adik-adik yang saat ini sedang mempertimbangkan untuk kuliah di Gunadarma, pesanku: persiapkan diri dengan baik. Kuliah di sini akan menantang, tapi juga akan sangat rewarding. Jangan hanya fokus pada nilai akademik, tapi juga aktiflah dalam organisasi dan kegiatan kemahasiswaan. Bangun relasi seluas mungkin, karena mereka akan menjadi teman seperjuangan sekaligus jaringan profesional di masa depan.
+              </p>
+              <p style={{ marginBottom: '1.5em' }}>
+                Jangan takut untuk bertanya dan meminta bantuan jika mengalami kesulitan. Dosen dan teman-teman di sini umumnya sangat supportive dan siap membantu. Manfaatkan juga fasilitas kampus sebaik mungkin. Laboratorium, perpustakaan, dan berbagai sumber daya lainnya ada untuk menunjang pembelajaranmu. Dan yang terpenting, nikmati setiap prosesnya. Masa kuliah adalah masa-masa yang tidak akan terulang, jadi isilah dengan hal-hal positif dan berkesan.
+              </p>
             </section>
             
             <section 
               id="penutup"
               ref={el => sectionRefs.current.penutup = el}
-              style={{ scrollMarginTop: '130px', marginBottom: '3em' }}
+              style={{ scrollMarginTop: '160px', marginBottom: '3em' }}
             >
               <h3 style={{
                 fontSize: isMobile ? '1.3rem' : '1.5rem',
@@ -2904,7 +2974,12 @@ export default function BlogPage() {
               }}>
                 Penutup
               </h3>
-              {/* Konten dihapus */}
+              <p style={{ marginBottom: '1.5em' }}>
+                Demikianlah cerita tentang pengalamanku kuliah di Universitas Gunadarma. Tentu setiap orang akan memiliki pengalaman yang berbeda, tapi setidaknya tulisan ini bisa memberikan gambaran tentang bagaimana rasanya menjadi mahasiswa di kampus yang terkenal dengan julukan "Kampus Biru" ini. Terima kasih sudah membaca, semoga bermanfaat.
+              </p>
+              <p style={{ marginBottom: '1.5em' }}>
+                Bagi teman-teman yang juga alumni atau mahasiswa Gunadarma, jangan ragu untuk berbagi cerita di kolom komentar. Aku sangat tertarik untuk mendengar perspektif kalian. Siapa tahu dari diskusi ini, kita bisa mendapatkan wawasan baru tentang kampus tercinta ini. Sampai jumpa di artikel selanjutnya!
+              </p>
             </section>
           </div>
 
