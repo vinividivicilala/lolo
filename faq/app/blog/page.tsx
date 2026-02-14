@@ -87,6 +87,12 @@ export default function BlogPage() {
   const [shareCount, setShareCount] = useState(0);
   const [showAuthorTooltip, setShowAuthorTooltip] = useState(false);
 
+  // State untuk Save
+  const [saveCount, setSaveCount] = useState(0);
+  const [isSaved, setIsSaved] = useState(false);
+  const [showSaveHistory, setShowSaveHistory] = useState(false);
+  const [saveHistory, setSaveHistory] = useState<any[]>([]);
+
   // Format tanggal
   const today = new Date();
   const formattedDate = today.toLocaleDateString('id-ID', {
@@ -124,6 +130,8 @@ export default function BlogPage() {
       initializeBlogReactions(db);
       // Initialize share count
       initializeShareCount(db);
+      // Initialize save count
+      initializeSaveCount(db);
     } catch (error) {
       console.error("Firebase initialization error:", error);
     }
@@ -180,7 +188,30 @@ export default function BlogPage() {
   };
 
   // ============================================
-  // 4. LOAD SHARE COUNT (REAL-TIME)
+  // 4. INITIALIZE SAVE COUNT
+  // ============================================
+  const initializeSaveCount = async (db: any) => {
+    try {
+      const saveRef = doc(db, "blogSaves", "gunadarma-article");
+      const docSnap = await getDoc(saveRef);
+      
+      if (!docSnap.exists()) {
+        await setDoc(saveRef, {
+          articleId: "gunadarma-article",
+          count: 0,
+          createdAt: Timestamp.now()
+        });
+        setSaveCount(0);
+      } else {
+        setSaveCount(docSnap.data().count || 0);
+      }
+    } catch (error) {
+      console.error("Error initializing save count:", error);
+    }
+  };
+
+  // ============================================
+  // 5. LOAD SHARE COUNT (REAL-TIME)
   // ============================================
   useEffect(() => {
     if (!firebaseDb || !firebaseInitialized) return;
@@ -199,7 +230,81 @@ export default function BlogPage() {
   }, [firebaseDb, firebaseInitialized]);
 
   // ============================================
-  // 5. AUTH STATE LISTENER
+  // 6. LOAD SAVE COUNT (REAL-TIME)
+  // ============================================
+  useEffect(() => {
+    if (!firebaseDb || !firebaseInitialized) return;
+
+    const saveRef = doc(firebaseDb, "blogSaves", "gunadarma-article");
+    
+    const unsubscribe = onSnapshot(saveRef, (doc) => {
+      if (doc.exists()) {
+        setSaveCount(doc.data().count || 0);
+      }
+    }, (error) => {
+      console.error("Error loading save count:", error);
+    });
+
+    return () => unsubscribe();
+  }, [firebaseDb, firebaseInitialized]);
+
+  // ============================================
+  // 7. LOAD USER SAVE STATUS
+  // ============================================
+  useEffect(() => {
+    if (!firebaseDb || !firebaseInitialized || !user) return;
+
+    const loadUserSaveStatus = async () => {
+      try {
+        const userSaveRef = doc(firebaseDb, "userSaves", `${user.uid}_gunadarma-article`);
+        const docSnap = await getDoc(userSaveRef);
+        if (docSnap.exists()) {
+          setIsSaved(true);
+        } else {
+          setIsSaved(false);
+        }
+      } catch (error) {
+        console.error("Error loading user save status:", error);
+      }
+    };
+
+    loadUserSaveStatus();
+  }, [firebaseDb, firebaseInitialized, user]);
+
+  // ============================================
+  // 8. LOAD SAVE HISTORY
+  // ============================================
+  useEffect(() => {
+    if (!firebaseDb || !firebaseInitialized || !user) return;
+
+    const loadSaveHistory = async () => {
+      try {
+        const savesRef = collection(firebaseDb, "userSaves");
+        const q = query(
+          savesRef,
+          where("userId", "==", user.uid),
+          orderBy("savedAt", "desc")
+        );
+        
+        const querySnapshot = await getDocs(q);
+        const history = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+          savedAt: doc.data().savedAt?.toDate?.() || new Date()
+        }));
+        setSaveHistory(history);
+      } catch (error) {
+        console.error("Error loading save history:", error);
+      }
+    };
+
+    if (showSaveHistory) {
+      loadSaveHistory();
+    }
+  }, [firebaseDb, firebaseInitialized, user, showSaveHistory]);
+
+  // ============================================
+  // 9. AUTH STATE LISTENER
   // ============================================
   useEffect(() => {
     if (!firebaseAuth || !firebaseInitialized) return;
@@ -213,7 +318,7 @@ export default function BlogPage() {
   }, [firebaseAuth, firebaseInitialized]);
 
   // ============================================
-  // 6. LOAD REACTIONS FROM FIREBASE (REAL-TIME)
+  // 10. LOAD REACTIONS FROM FIREBASE (REAL-TIME)
   // ============================================
   useEffect(() => {
     if (!firebaseDb || !firebaseInitialized) return;
@@ -232,7 +337,7 @@ export default function BlogPage() {
   }, [firebaseDb, firebaseInitialized]);
 
   // ============================================
-  // 7. LOAD USER REACTIONS
+  // 11. LOAD USER REACTIONS
   // ============================================
   useEffect(() => {
     if (!firebaseDb || !firebaseInitialized || !user) return;
@@ -261,7 +366,7 @@ export default function BlogPage() {
   }, [firebaseDb, firebaseInitialized, user]);
 
   // ============================================
-  // 8. LOAD COMMENTS FROM FIREBASE (REAL-TIME)
+  // 12. LOAD COMMENTS FROM FIREBASE (REAL-TIME)
   // ============================================
   useEffect(() => {
     if (!firebaseDb || !firebaseInitialized) return;
@@ -289,7 +394,7 @@ export default function BlogPage() {
   }, [firebaseDb, firebaseInitialized]);
 
   // ============================================
-  // 9. HANDLE REACTION (EMOTICON)
+  // 13. HANDLE REACTION (EMOTICON)
   // ============================================
   const handleReaction = async (emoticonId: string) => {
     if (!user) {
@@ -349,7 +454,7 @@ export default function BlogPage() {
   };
 
   // ============================================
-  // 10. HANDLE GOOGLE LOGIN
+  // 14. HANDLE GOOGLE LOGIN
   // ============================================
   const handleGoogleLogin = async () => {
     if (!firebaseAuth) return;
@@ -363,7 +468,7 @@ export default function BlogPage() {
   };
 
   // ============================================
-  // 11. HANDLE LOGOUT
+  // 15. HANDLE LOGOUT
   // ============================================
   const handleLogout = async () => {
     if (!firebaseAuth) return;
@@ -376,7 +481,7 @@ export default function BlogPage() {
   };
 
   // ============================================
-  // 12. HANDLE ADD COMMENT
+  // 16. HANDLE ADD COMMENT
   // ============================================
   const handleAddComment = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -415,7 +520,7 @@ export default function BlogPage() {
   };
 
   // ============================================
-  // 13. HANDLE ADD REPLY
+  // 17. HANDLE ADD REPLY
   // ============================================
   const handleAddReply = async (commentId: string) => {
     if (!user) {
@@ -453,7 +558,7 @@ export default function BlogPage() {
   };
 
   // ============================================
-  // 14. HANDLE LIKE COMMENT
+  // 18. HANDLE LIKE COMMENT
   // ============================================
   const handleLikeComment = async (commentId: string, isReply: boolean = false, replyId?: string) => {
     if (!user) {
@@ -513,7 +618,47 @@ export default function BlogPage() {
   };
 
   // ============================================
-  // 15. HANDLE SHARE
+  // 19. HANDLE SAVE
+  // ============================================
+  const handleSave = async () => {
+    if (!user) {
+      handleGoogleLogin();
+      return;
+    }
+    if (!firebaseDb) return;
+
+    try {
+      const saveRef = doc(firebaseDb, "blogSaves", "gunadarma-article");
+      const userSaveRef = doc(firebaseDb, "userSaves", `${user.uid}_gunadarma-article`);
+
+      if (isSaved) {
+        // Unsave
+        await updateDoc(saveRef, {
+          count: increment(-1)
+        });
+        await deleteDoc(userSaveRef);
+        setIsSaved(false);
+      } else {
+        // Save
+        await updateDoc(saveRef, {
+          count: increment(1)
+        });
+        await setDoc(userSaveRef, {
+          userId: user.uid,
+          articleId: "gunadarma-article",
+          articleTitle: "Bagaimana Rasa nya Masuk Kuliah Di Universitas Gunadarma",
+          articleUrl: typeof window !== 'undefined' ? window.location.href : '',
+          savedAt: Timestamp.now()
+        });
+        setIsSaved(true);
+      }
+    } catch (error) {
+      console.error("Error handling save:", error);
+    }
+  };
+
+  // ============================================
+  // 20. HANDLE SHARE
   // ============================================
   const handleShare = () => {
     setShowShareModal(true);
@@ -557,7 +702,7 @@ export default function BlogPage() {
   };
 
   // ============================================
-  // 16. SCROLL HANDLER
+  // 21. SCROLL HANDLER
   // ============================================
   useEffect(() => {
     const handleScroll = () => {
@@ -584,7 +729,7 @@ export default function BlogPage() {
   }, []);
 
   // ============================================
-  // 17. SVG COMPONENTS
+  // 22. SVG COMPONENTS
   // ============================================
   const SouthWestArrow = ({ width, height, style }: { width: number | string, height: number | string, style?: React.CSSProperties }) => (
     <svg 
@@ -655,6 +800,19 @@ export default function BlogPage() {
     </svg>
   );
 
+  const SaveIcon = ({ width, height, filled }: { width: number, height: number, filled?: boolean }) => (
+    <svg width={width} height={height} viewBox="0 0 24 24" fill={filled ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.5">
+      <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+    </svg>
+  );
+
+  const HistoryIcon = ({ width, height }: { width: number, height: number }) => (
+    <svg width={width} height={height} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <circle cx="12" cy="12" r="10"/>
+      <polyline points="12 6 12 12 16 14"/>
+    </svg>
+  );
+
   // Twitter Icon
   const TwitterIcon = ({ size = 24 }: { size?: number }) => (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
@@ -663,7 +821,7 @@ export default function BlogPage() {
   );
 
   // ============================================
-  // 18. RANGKUMAN SECTIONS
+  // 23. RANGKUMAN SECTIONS
   // ============================================
   const rangkumanSections = [
     { id: "pendahuluan", title: "Pendahuluan" },
@@ -694,7 +852,7 @@ export default function BlogPage() {
   };
 
   // ============================================
-  // 19. LOADING STATE
+  // 24. LOADING STATE
   // ============================================
   if (!isMounted || loading) {
     return (
@@ -810,6 +968,67 @@ export default function BlogPage() {
         alignItems: 'center',
         gap: '20px',
       }}>
+        {/* Save Button with Count */}
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={handleSave}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            background: isSaved ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.05)',
+            border: isSaved ? '1px solid white' : '1px solid rgba(255,255,255,0.2)',
+            borderRadius: '40px',
+            padding: '10px 24px',
+            color: 'white',
+            fontSize: '0.95rem',
+            cursor: user ? 'pointer' : 'pointer',
+          }}
+        >
+          <SaveIcon width={20} height={20} filled={isSaved} />
+          <span>{isSaved ? 'Tersimpan' : 'Simpan'}</span>
+          <motion.span
+            key={saveCount}
+            initial={{ scale: 0.5, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ type: "spring", stiffness: 500, damping: 30 }}
+            style={{
+              background: 'rgba(255,255,255,0.1)',
+              padding: '2px 8px',
+              borderRadius: '20px',
+              fontSize: '0.85rem',
+              color: 'white',
+            }}
+          >
+            {saveCount}
+          </motion.span>
+        </motion.button>
+
+        {/* History Button */}
+        {user && (
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setShowSaveHistory(!showSaveHistory)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              background: 'rgba(255,255,255,0.05)',
+              border: '1px solid rgba(255,255,255,0.2)',
+              borderRadius: '40px',
+              padding: '10px 20px',
+              color: 'white',
+              fontSize: '0.95rem',
+              cursor: 'pointer',
+            }}
+          >
+            <HistoryIcon width={18} height={18} />
+            <span>Riwayat</span>
+          </motion.button>
+        )}
+
         {/* Share Button with Count */}
         <motion.button
           whileHover={{ scale: 1.05 }}
@@ -946,6 +1165,152 @@ export default function BlogPage() {
           />
         </Link>
       </div>
+
+      {/* SAVE HISTORY MODAL */}
+      <AnimatePresence>
+        {showSaveHistory && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0,0,0,0.8)',
+              backdropFilter: 'blur(8px)',
+              zIndex: 10000,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '20px',
+            }}
+            onClick={() => setShowSaveHistory(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              style={{
+                background: '#1a1a1a',
+                borderRadius: '32px',
+                padding: '40px',
+                maxWidth: '500px',
+                width: '100%',
+                maxHeight: '80vh',
+                overflowY: 'auto',
+                border: '1px solid #333333',
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '30px',
+              }}>
+                <motion.h3 
+                  initial={{ x: -20, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  transition={{ delay: 0.1 }}
+                  style={{
+                    fontSize: '2rem',
+                    fontWeight: 'normal',
+                    color: 'white',
+                    margin: 0,
+                  }}
+                >
+                  Riwayat Simpanan
+                </motion.h3>
+                <motion.button
+                  whileHover={{ scale: 1.1, rotate: 90 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => setShowSaveHistory(false)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#999999',
+                    fontSize: '2rem',
+                    cursor: 'pointer',
+                    lineHeight: 1,
+                  }}
+                >
+                  ×
+                </motion.button>
+              </div>
+
+              {saveHistory.length === 0 ? (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.2 }}
+                  style={{
+                    padding: '40px',
+                    textAlign: 'center',
+                    color: '#666666',
+                    border: '1px dashed #333333',
+                    borderRadius: '24px',
+                  }}
+                >
+                  <span style={{ fontSize: '3rem', display: 'block', marginBottom: '20px' }}>📌</span>
+                  <p style={{ fontSize: '1.2rem', margin: 0 }}>Belum ada artikel yang disimpan.</p>
+                </motion.div>
+              ) : (
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '15px',
+                }}>
+                  {saveHistory.map((item, index) => (
+                    <motion.div
+                      key={item.id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                      style={{
+                        padding: '20px',
+                        background: 'rgba(255,255,255,0.02)',
+                        borderRadius: '16px',
+                        border: '1px solid rgba(255,255,255,0.05)',
+                      }}
+                    >
+                      <Link 
+                        href={item.articleUrl || '#'}
+                        style={{ textDecoration: 'none' }}
+                      >
+                        <h4 style={{
+                          fontSize: '1.2rem',
+                          fontWeight: '500',
+                          color: 'white',
+                          margin: '0 0 8px 0',
+                        }}>
+                          {item.articleTitle}
+                        </h4>
+                        <p style={{
+                          fontSize: '0.9rem',
+                          color: '#999999',
+                          margin: 0,
+                        }}>
+                          Disimpan pada: {item.savedAt?.toLocaleDateString?.('id-ID', {
+                            day: 'numeric',
+                            month: 'long',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </p>
+                      </Link>
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* SHARE MODAL */}
       <AnimatePresence>
