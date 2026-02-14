@@ -929,24 +929,6 @@ export default function BlogPage() {
     </svg>
   );
 
-  const NorthWestArrow = ({ width, height, style }: { width: number | string, height: number | string, style?: React.CSSProperties }) => (
-    <svg 
-      width={width} 
-      height={height} 
-      viewBox="0 0 24 24" 
-      fill="none"
-      stroke="white"
-      strokeWidth="1"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      style={style}
-    >
-      <path d="M7 7L17 17" stroke="white"/>
-      <path d="M7 7H17" stroke="white"/>
-      <path d="M7 17V7" stroke="white"/>
-    </svg>
-  );
-
   const NorthEastArrow = ({ width, height, style }: { width: number | string, height: number | string, style?: React.CSSProperties }) => (
     <svg 
       width={width} 
@@ -1115,13 +1097,9 @@ export default function BlogPage() {
       color: 'white',
       position: 'relative',
       padding: isMobile ? '20px' : '40px',
-      overflowX: 'hidden', // Hanya sembunyikan scroll horizontal
-      width: '100%',
-      maxWidth: '100vw',
-      boxSizing: 'border-box',
     }}>
       
-      {/* ===== TEKS BERJALAN DENGAN ARROW NORTH WEST ===== */}
+      {/* ===== TEKS BERJALAN ===== */}
       <div style={{
         position: 'fixed',
         top: 0,
@@ -1130,60 +1108,49 @@ export default function BlogPage() {
         zIndex: 9999,
         backgroundColor: 'rgba(0,0,0,0.8)',
         color: 'white',
-        padding: '16px 0',
+        padding: '12px 0',
         borderBottom: '1px solid rgba(255,255,255,0.1)',
         backdropFilter: 'blur(8px)',
         overflow: 'hidden',
         whiteSpace: 'nowrap',
-        width: '100%',
       }}>
         <motion.div
           animate={{
-            x: [0, -2000]
+            x: [0, -1000]
           }}
           transition={{
-            duration: 30,
+            duration: 20,
             repeat: Infinity,
             ease: "linear",
             repeatType: "loop"
           }}
           style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '40px',
-            fontSize: isMobile ? '1.5rem' : '2.5rem',
-            fontWeight: 'bold',
-            letterSpacing: '2px',
+            display: 'inline-block',
+            fontSize: isMobile ? '1rem' : '1.2rem',
+            fontWeight: 'normal',
             paddingLeft: '20px',
           }}
         >
-          <span>NOTE ADALAH TEMAN TERBAIK MU</span>
-          <NorthWestArrow width={isMobile ? 40 : 60} height={isMobile ? 40 : 60} />
-          <span>NOTE ADALAH TEMAN TERBAIK MU</span>
-          <NorthWestArrow width={isMobile ? 40 : 60} height={isMobile ? 40 : 60} />
-          <span>NOTE ADALAH TEMAN TERBAIK MU</span>
-          <NorthWestArrow width={isMobile ? 40 : 60} height={isMobile ? 40 : 60} />
-          <span>NOTE ADALAH TEMAN TERBAIK MU</span>
-          <NorthWestArrow width={isMobile ? 40 : 60} height={isMobile ? 40 : 60} />
-          <span>NOTE ADALAH TEMAN TERBAIK MU</span>
-          <NorthWestArrow width={isMobile ? 40 : 60} height={isMobile ? 40 : 60} />
-          <span>NOTE ADALAH TEMAN TERBAIK MU</span>
-          <NorthWestArrow width={isMobile ? 40 : 60} height={isMobile ? 40 : 60} />
+          Note adalah teman terbaik mu &nbsp;&nbsp;&nbsp; • &nbsp;&nbsp;&nbsp; 
+          Note adalah teman terbaik mu &nbsp;&nbsp;&nbsp; • &nbsp;&nbsp;&nbsp; 
+          Note adalah teman terbaik mu &nbsp;&nbsp;&nbsp; • &nbsp;&nbsp;&nbsp; 
+          Note adalah teman terbaik mu &nbsp;&nbsp;&nbsp; • &nbsp;&nbsp;&nbsp; 
+          Note adalah teman terbaik mu &nbsp;&nbsp;&nbsp; • &nbsp;&nbsp;&nbsp; 
+          Note adalah teman terbaik mu &nbsp;&nbsp;&nbsp; • &nbsp;&nbsp;&nbsp; 
+          Note adalah teman terbaik mu &nbsp;&nbsp;&nbsp; • &nbsp;&nbsp;&nbsp; 
+          Note adalah teman terbaik mu &nbsp;&nbsp;&nbsp; • &nbsp;&nbsp;&nbsp; 
         </motion.div>
       </div>
 
       {/* HEADER - HALAMAN UTAMA & USER */}
       <div style={{
         position: 'fixed',
-        top: isMobile ? '90px' : '110px',
+        top: isMobile ? '70px' : '80px',
         right: isMobile ? '20px' : '40px',
         zIndex: 100,
         display: 'flex',
         alignItems: 'center',
         gap: '20px',
-        maxWidth: 'calc(100% - 80px)',
-        flexWrap: isMobile ? 'wrap' : 'nowrap',
-        justifyContent: 'flex-end',
       }}>
         {/* Message to Author Button */}
         <motion.button
@@ -1595,7 +1562,6 @@ export default function BlogPage() {
                       outline: 'none',
                       resize: 'vertical',
                       marginBottom: '15px',
-                      boxSizing: 'border-box',
                     }}
                   />
                   <div style={{
@@ -1769,7 +1735,6 @@ export default function BlogPage() {
                           background: 'rgba(0,0,0,0.2)',
                           borderRadius: '16px',
                           borderLeft: '2px solid rgba(255,255,255,0.2)',
-                          wordWrap: 'break-word',
                         }}>
                           {msg.message}
                         </p>
@@ -1832,7 +1797,6 @@ export default function BlogPage() {
                                   fontSize: '0.95rem',
                                   color: '#cccccc',
                                   margin: 0,
-                                  wordWrap: 'break-word',
                                 }}>
                                   {reply.text}
                                 </p>
@@ -1965,7 +1929,6 @@ export default function BlogPage() {
                           background: 'rgba(0,0,0,0.2)',
                           borderRadius: '16px',
                           borderLeft: '2px solid rgba(255,255,255,0.2)',
-                          wordWrap: 'break-word',
                         }}>
                           {msg.message}
                         </p>
@@ -2028,7 +1991,6 @@ export default function BlogPage() {
                                   fontSize: '0.95rem',
                                   color: '#cccccc',
                                   margin: 0,
-                                  wordWrap: 'break-word',
                                 }}>
                                   {reply.text}
                                 </p>
@@ -2058,7 +2020,6 @@ export default function BlogPage() {
                                 outline: 'none',
                                 resize: 'vertical',
                                 marginBottom: '10px',
-                                boxSizing: 'border-box',
                               }}
                             />
                             <div style={{
@@ -2472,17 +2433,16 @@ export default function BlogPage() {
         gap: '60px',
         maxWidth: '1200px',
         margin: '0 auto',
-        padding: isMobile ? '140px 0 40px' : '180px 0 60px',
-        width: '100%',
+        padding: isMobile ? '120px 0 40px' : '150px 0 60px',
       }}>
         
         {/* SIDEBAR KIRI - RANGKUMAN */}
         <div style={{
           flex: isMobile ? '1' : '0 0 280px',
           position: isMobile ? 'relative' : 'sticky',
-          top: isMobile ? 'auto' : '150px',
+          top: isMobile ? 'auto' : '130px',
           alignSelf: 'flex-start',
-          height: isMobile ? 'auto' : 'calc(100vh - 200px)',
+          height: isMobile ? 'auto' : 'calc(100vh - 180px)',
           overflowY: isMobile ? 'visible' : 'auto',
           paddingRight: '20px',
         }}>
@@ -2716,7 +2676,6 @@ export default function BlogPage() {
         <div style={{
           flex: '1',
           maxWidth: isMobile ? '100%' : '700px',
-          overflowX: 'hidden', // Mencegah scroll horizontal pada konten
         }}>
           
           <motion.h2 
@@ -2729,7 +2688,6 @@ export default function BlogPage() {
               color: 'white',
               marginBottom: '40px',
               lineHeight: '1.2',
-              wordWrap: 'break-word', // Memastikan teks panjang tidak overflow
             }}
           >
             Bagaimana Rasa nya Masuk Kuliah Di Universitas Gunadarma
@@ -2744,7 +2702,7 @@ export default function BlogPage() {
             <section 
               id="pendahuluan"
               ref={el => sectionRefs.current.pendahuluan = el}
-              style={{ scrollMarginTop: '150px', marginBottom: '3em' }}
+              style={{ scrollMarginTop: '130px', marginBottom: '3em' }}
             >
               <h3 style={{
                 fontSize: isMobile ? '1.3rem' : '1.5rem',
@@ -2760,7 +2718,7 @@ export default function BlogPage() {
             <section 
               id="sejarah"
               ref={el => sectionRefs.current.sejarah = el}
-              style={{ scrollMarginTop: '150px', marginBottom: '3em' }}
+              style={{ scrollMarginTop: '130px', marginBottom: '3em' }}
             >
               <h3 style={{
                 fontSize: isMobile ? '1.3rem' : '1.5rem',
@@ -2776,7 +2734,7 @@ export default function BlogPage() {
             <section 
               id="suasana"
               ref={el => sectionRefs.current.suasana = el}
-              style={{ scrollMarginTop: '150px', marginBottom: '3em' }}
+              style={{ scrollMarginTop: '130px', marginBottom: '3em' }}
             >
               <h3 style={{
                 fontSize: isMobile ? '1.3rem' : '1.5rem',
@@ -2792,7 +2750,7 @@ export default function BlogPage() {
             <section 
               id="akademik"
               ref={el => sectionRefs.current.akademik = el}
-              style={{ scrollMarginTop: '150px', marginBottom: '3em' }}
+              style={{ scrollMarginTop: '130px', marginBottom: '3em' }}
             >
               <h3 style={{
                 fontSize: isMobile ? '1.3rem' : '1.5rem',
@@ -2808,7 +2766,7 @@ export default function BlogPage() {
             <section 
               id="dosen"
               ref={el => sectionRefs.current.dosen = el}
-              style={{ scrollMarginTop: '150px', marginBottom: '3em' }}
+              style={{ scrollMarginTop: '130px', marginBottom: '3em' }}
             >
               <h3 style={{
                 fontSize: isMobile ? '1.3rem' : '1.5rem',
@@ -2824,7 +2782,7 @@ export default function BlogPage() {
             <section 
               id="teman"
               ref={el => sectionRefs.current.teman = el}
-              style={{ scrollMarginTop: '150px', marginBottom: '3em' }}
+              style={{ scrollMarginTop: '130px', marginBottom: '3em' }}
             >
               <h3 style={{
                 fontSize: isMobile ? '1.3rem' : '1.5rem',
@@ -2840,7 +2798,7 @@ export default function BlogPage() {
             <section 
               id="fasilitas"
               ref={el => sectionRefs.current.fasilitas = el}
-              style={{ scrollMarginTop: '150px', marginBottom: '3em' }}
+              style={{ scrollMarginTop: '130px', marginBottom: '3em' }}
             >
               <h3 style={{
                 fontSize: isMobile ? '1.3rem' : '1.5rem',
@@ -2856,7 +2814,7 @@ export default function BlogPage() {
             <section 
               id="organisasi"
               ref={el => sectionRefs.current.organisasi = el}
-              style={{ scrollMarginTop: '150px', marginBottom: '3em' }}
+              style={{ scrollMarginTop: '130px', marginBottom: '3em' }}
             >
               <h3 style={{
                 fontSize: isMobile ? '1.3rem' : '1.5rem',
@@ -2872,7 +2830,7 @@ export default function BlogPage() {
             <section 
               id="tantangan"
               ref={el => sectionRefs.current.tantangan = el}
-              style={{ scrollMarginTop: '150px', marginBottom: '3em' }}
+              style={{ scrollMarginTop: '130px', marginBottom: '3em' }}
             >
               <h3 style={{
                 fontSize: isMobile ? '1.3rem' : '1.5rem',
@@ -2888,7 +2846,7 @@ export default function BlogPage() {
             <section 
               id="kesan"
               ref={el => sectionRefs.current.kesan = el}
-              style={{ scrollMarginTop: '150px', marginBottom: '3em' }}
+              style={{ scrollMarginTop: '130px', marginBottom: '3em' }}
             >
               <h3 style={{
                 fontSize: isMobile ? '1.3rem' : '1.5rem',
@@ -2904,7 +2862,7 @@ export default function BlogPage() {
             <section 
               id="penutup"
               ref={el => sectionRefs.current.penutup = el}
-              style={{ scrollMarginTop: '150px', marginBottom: '3em' }}
+              style={{ scrollMarginTop: '130px', marginBottom: '3em' }}
             >
               <h3 style={{
                 fontSize: isMobile ? '1.3rem' : '1.5rem',
@@ -2950,7 +2908,6 @@ export default function BlogPage() {
             <div style={{
               display: 'flex',
               gap: '15px',
-              flexWrap: 'wrap', // Mencegah overflow pada mobile
             }}>
               <Link 
                 href="/tag/kuliah"
@@ -3109,8 +3066,6 @@ export default function BlogPage() {
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 marginBottom: '30px',
-                flexWrap: 'wrap', // Mencegah overflow pada mobile
-                gap: '15px',
               }}
             >
               <h3 style={{
@@ -3348,8 +3303,6 @@ export default function BlogPage() {
                       fontSize: '1.1rem',
                       outline: 'none',
                       resize: 'vertical',
-                      width: '100%',
-                      boxSizing: 'border-box',
                     }}
                   />
                   <div style={{
@@ -3442,8 +3395,6 @@ export default function BlogPage() {
                     backgroundColor: 'rgba(255,255,255,0.02)',
                     borderRadius: '24px',
                     border: '1px solid rgba(255,255,255,0.05)',
-                    width: '100%',
-                    boxSizing: 'border-box',
                   }}
                 >
                   {/* Comment Header */}
@@ -3537,7 +3488,6 @@ export default function BlogPage() {
                     margin: '10px 0 5px 0',
                     paddingLeft: '15px',
                     borderLeft: '2px solid rgba(255,255,255,0.1)',
-                    wordWrap: 'break-word',
                   }}>
                     {comment.comment}
                   </p>
@@ -3584,7 +3534,7 @@ export default function BlogPage() {
                         transition={{ duration: 0.3 }}
                         style={{
                           marginTop: '15px',
-                          marginLeft: isMobile ? '0' : '30px',
+                          marginLeft: '30px',
                           overflow: 'hidden',
                         }}
                       >
@@ -3623,8 +3573,6 @@ export default function BlogPage() {
                                 fontSize: '0.95rem',
                                 outline: 'none',
                                 resize: 'vertical',
-                                width: '100%',
-                                boxSizing: 'border-box',
                               }}
                             />
                             <div style={{
@@ -3677,8 +3625,8 @@ export default function BlogPage() {
                   {comment.replies && comment.replies.length > 0 && (
                     <div style={{
                       marginTop: '20px',
-                      marginLeft: isMobile ? '0' : '30px',
-                      paddingLeft: isMobile ? '10px' : '20px',
+                      marginLeft: '30px',
+                      paddingLeft: '20px',
                       borderLeft: '2px solid rgba(255,255,255,0.05)',
                       display: 'flex',
                       flexDirection: 'column',
@@ -3739,7 +3687,6 @@ export default function BlogPage() {
                                 lineHeight: '1.6',
                                 color: '#e0e0e0',
                                 margin: '0 0 8px 0',
-                                wordWrap: 'break-word',
                               }}>
                                 {reply.text}
                               </p>
