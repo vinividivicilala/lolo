@@ -81,9 +81,11 @@ export default function BlogPage() {
   const [showCommentForm, setShowCommentForm] = useState(false);
   const [commentLoading, setCommentLoading] = useState(false);
 
-  // State untuk Share Modal
+  // State untuk Share
   const [showShareModal, setShowShareModal] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
+  const [shareCount, setShareCount] = useState(0);
+  const [showAuthorTooltip, setShowAuthorTooltip] = useState(false);
 
   // Format tanggal
   const today = new Date();
@@ -120,6 +122,8 @@ export default function BlogPage() {
       
       // Initialize blog reactions document
       initializeBlogReactions(db);
+      // Initialize share count
+      initializeShareCount(db);
     } catch (error) {
       console.error("Firebase initialization error:", error);
     }
@@ -136,7 +140,6 @@ export default function BlogPage() {
       const docSnap = await getDoc(reactionsRef);
       
       if (!docSnap.exists()) {
-        // Initialize with zero counts for all emoticons
         const initialCounts: { [key: string]: number } = {};
         EMOTICONS.forEach(emoticon => {
           initialCounts[emoticon.id] = 0;
@@ -147,7 +150,6 @@ export default function BlogPage() {
           counts: initialCounts,
           createdAt: Timestamp.now()
         });
-        console.log("Blog reactions document created");
       }
     } catch (error) {
       console.error("Error initializing blog reactions:", error);
@@ -155,7 +157,49 @@ export default function BlogPage() {
   };
 
   // ============================================
-  // 3. AUTH STATE LISTENER
+  // 3. INITIALIZE SHARE COUNT
+  // ============================================
+  const initializeShareCount = async (db: any) => {
+    try {
+      const shareRef = doc(db, "blogShares", "gunadarma-article");
+      const docSnap = await getDoc(shareRef);
+      
+      if (!docSnap.exists()) {
+        await setDoc(shareRef, {
+          articleId: "gunadarma-article",
+          count: 0,
+          createdAt: Timestamp.now()
+        });
+        setShareCount(0);
+      } else {
+        setShareCount(docSnap.data().count || 0);
+      }
+    } catch (error) {
+      console.error("Error initializing share count:", error);
+    }
+  };
+
+  // ============================================
+  // 4. LOAD SHARE COUNT (REAL-TIME)
+  // ============================================
+  useEffect(() => {
+    if (!firebaseDb || !firebaseInitialized) return;
+
+    const shareRef = doc(firebaseDb, "blogShares", "gunadarma-article");
+    
+    const unsubscribe = onSnapshot(shareRef, (doc) => {
+      if (doc.exists()) {
+        setShareCount(doc.data().count || 0);
+      }
+    }, (error) => {
+      console.error("Error loading share count:", error);
+    });
+
+    return () => unsubscribe();
+  }, [firebaseDb, firebaseInitialized]);
+
+  // ============================================
+  // 5. AUTH STATE LISTENER
   // ============================================
   useEffect(() => {
     if (!firebaseAuth || !firebaseInitialized) return;
@@ -169,7 +213,7 @@ export default function BlogPage() {
   }, [firebaseAuth, firebaseInitialized]);
 
   // ============================================
-  // 4. LOAD REACTIONS FROM FIREBASE (REAL-TIME)
+  // 6. LOAD REACTIONS FROM FIREBASE (REAL-TIME)
   // ============================================
   useEffect(() => {
     if (!firebaseDb || !firebaseInitialized) return;
@@ -188,7 +232,7 @@ export default function BlogPage() {
   }, [firebaseDb, firebaseInitialized]);
 
   // ============================================
-  // 5. LOAD USER REACTIONS
+  // 7. LOAD USER REACTIONS
   // ============================================
   useEffect(() => {
     if (!firebaseDb || !firebaseInitialized || !user) return;
@@ -200,7 +244,6 @@ export default function BlogPage() {
         if (docSnap.exists()) {
           setUserReactions(docSnap.data().reactions || []);
         } else {
-          // Create user reactions document
           await setDoc(userReactionsRef, {
             userId: user.uid,
             articleId: "gunadarma-article",
@@ -218,7 +261,7 @@ export default function BlogPage() {
   }, [firebaseDb, firebaseInitialized, user]);
 
   // ============================================
-  // 6. LOAD COMMENTS FROM FIREBASE (REAL-TIME)
+  // 8. LOAD COMMENTS FROM FIREBASE (REAL-TIME)
   // ============================================
   useEffect(() => {
     if (!firebaseDb || !firebaseInitialized) return;
@@ -246,7 +289,7 @@ export default function BlogPage() {
   }, [firebaseDb, firebaseInitialized]);
 
   // ============================================
-  // 7. HANDLE REACTION (EMOTICON)
+  // 9. HANDLE REACTION (EMOTICON)
   // ============================================
   const handleReaction = async (emoticonId: string) => {
     if (!user) {
@@ -259,7 +302,6 @@ export default function BlogPage() {
       const reactionsRef = doc(firebaseDb, "blogReactions", "gunadarma-article");
       const userReactionsRef = doc(firebaseDb, "userReactions", `${user.uid}_gunadarma-article`);
 
-      // Ensure reactions document exists
       const reactionsDoc = await getDoc(reactionsRef);
       if (!reactionsDoc.exists()) {
         const initialCounts: { [key: string]: number } = {};
@@ -274,7 +316,6 @@ export default function BlogPage() {
       }
 
       if (userReactions.includes(emoticonId)) {
-        // Remove reaction
         await updateDoc(reactionsRef, {
           [`counts.${emoticonId}`]: increment(-1)
         });
@@ -283,7 +324,6 @@ export default function BlogPage() {
         });
         setUserReactions(prev => prev.filter(id => id !== emoticonId));
       } else {
-        // Add reaction
         await updateDoc(reactionsRef, {
           [`counts.${emoticonId}`]: increment(1)
         });
@@ -309,7 +349,7 @@ export default function BlogPage() {
   };
 
   // ============================================
-  // 8. HANDLE GOOGLE LOGIN
+  // 10. HANDLE GOOGLE LOGIN
   // ============================================
   const handleGoogleLogin = async () => {
     if (!firebaseAuth) return;
@@ -323,7 +363,7 @@ export default function BlogPage() {
   };
 
   // ============================================
-  // 9. HANDLE LOGOUT
+  // 11. HANDLE LOGOUT
   // ============================================
   const handleLogout = async () => {
     if (!firebaseAuth) return;
@@ -336,7 +376,7 @@ export default function BlogPage() {
   };
 
   // ============================================
-  // 10. HANDLE ADD COMMENT
+  // 12. HANDLE ADD COMMENT
   // ============================================
   const handleAddComment = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -375,7 +415,7 @@ export default function BlogPage() {
   };
 
   // ============================================
-  // 11. HANDLE ADD REPLY
+  // 13. HANDLE ADD REPLY
   // ============================================
   const handleAddReply = async (commentId: string) => {
     if (!user) {
@@ -413,7 +453,7 @@ export default function BlogPage() {
   };
 
   // ============================================
-  // 12. HANDLE LIKE COMMENT
+  // 14. HANDLE LIKE COMMENT
   // ============================================
   const handleLikeComment = async (commentId: string, isReply: boolean = false, replyId?: string) => {
     if (!user) {
@@ -431,7 +471,6 @@ export default function BlogPage() {
       const commentData = commentDoc.data();
       
       if (isReply && replyId) {
-        // Like reply
         const replies = commentData.replies || [];
         const updatedReplies = replies.map((reply: any) => {
           if (reply.id === replyId) {
@@ -455,7 +494,6 @@ export default function BlogPage() {
         
         await updateDoc(commentRef, { replies: updatedReplies });
       } else {
-        // Like comment
         const likedBy = commentData.likedBy || [];
         if (likedBy.includes(user.uid)) {
           await updateDoc(commentRef, {
@@ -475,16 +513,30 @@ export default function BlogPage() {
   };
 
   // ============================================
-  // 13. HANDLE SHARE
+  // 15. HANDLE SHARE
   // ============================================
   const handleShare = () => {
     setShowShareModal(true);
+  };
+
+  const incrementShareCount = async () => {
+    if (!firebaseDb) return;
+    
+    try {
+      const shareRef = doc(firebaseDb, "blogShares", "gunadarma-article");
+      await updateDoc(shareRef, {
+        count: increment(1)
+      });
+    } catch (error) {
+      console.error("Error incrementing share count:", error);
+    }
   };
 
   const copyToClipboard = async () => {
     try {
       await navigator.clipboard.writeText(window.location.href);
       setCopySuccess(true);
+      await incrementShareCount();
       setTimeout(() => {
         setCopySuccess(false);
         setShowShareModal(false);
@@ -494,7 +546,7 @@ export default function BlogPage() {
     }
   };
 
-  const shareToSocialMedia = (platform: string) => {
+  const shareToSocialMedia = async (platform: string) => {
     const url = encodeURIComponent(window.location.href);
     const title = encodeURIComponent('Bagaimana Rasa nya Masuk Kuliah Di Universitas Gunadarma');
     let shareUrl = '';
@@ -515,16 +567,20 @@ export default function BlogPage() {
       case 'telegram':
         shareUrl = `https://t.me/share/url?url=${url}&text=${title}`;
         break;
+      case 'quora':
+        shareUrl = `https://www.quora.com/share?url=${url}&title=${title}`;
+        break;
       default:
         return;
     }
 
+    await incrementShareCount();
     window.open(shareUrl, '_blank', 'noopener,noreferrer');
     setShowShareModal(false);
   };
 
   // ============================================
-  // 14. SCROLL HANDLER
+  // 16. SCROLL HANDLER
   // ============================================
   useEffect(() => {
     const handleScroll = () => {
@@ -551,7 +607,7 @@ export default function BlogPage() {
   }, []);
 
   // ============================================
-  // 15. SVG COMPONENTS
+  // 17. SVG COMPONENTS
   // ============================================
   const SouthWestArrow = ({ width, height, style }: { width: number | string, height: number | string, style?: React.CSSProperties }) => (
     <svg 
@@ -622,8 +678,46 @@ export default function BlogPage() {
     </svg>
   );
 
+  // Social Media Icons
+  const TwitterIcon = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+    </svg>
+  );
+
+  const FacebookIcon = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+    </svg>
+  );
+
+  const LinkedInIcon = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+    </svg>
+  );
+
+  const WhatsAppIcon = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+      <path d="M12 0C5.373 0 0 5.373 0 12c0 2.124.553 4.12 1.522 5.851L.51 23.49l5.639-1.012A11.947 11.947 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.86 0-3.633-.5-5.155-1.373l-.37-.221-3.344.6.6-3.344-.221-.37A9.937 9.937 0 0 1 2 12C2 6.486 6.486 2 12 2s10 4.486 10 10-4.486 10-10 10z"/>
+    </svg>
+  );
+
+  const TelegramIcon = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.161c-.18.772-2.898 6.534-3.566 8.356-.366 1-.792 1.001-1.147 1.001-.317 0-.453-.146-.689-.343-.25-.21-1.583-1.521-1.583-1.521l-1.732-1.172 1.088-1.029c.12-.111 2.264-2.063 4.379-3.98.089-.083.173-.158.25-.231.262-.249.088-.403-.173-.275-.413.203-5.023 3.235-5.61 3.61-.069.044-.14.086-.211.127-1.112.644-1.939.944-2.493 1.018-.552.074-.899-.117-1.094-.305-.176-.169-.535-.523-.825-.875-.376-.455-.669-.939.041-1.466.292-.216 3.572-2.346 7.119-4.654.853-.554 1.654-1.044 2.318-1.382.705-.359 1.265-.502 1.672-.502.373 0 .806.115.976.434.188.352.13.803.005 1.184z"/>
+    </svg>
+  );
+
+  const QuoraIcon = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12.555 17.025c-.668-1.216-1.27-2.548-1.778-3.942-.508-1.394-.916-2.829-1.222-4.306-.306-1.477-.457-2.978-.457-4.503h2.591c0 1.397.114 2.766.343 4.108.229 1.342.582 2.647 1.058 3.914.476 1.267 1.079 2.486 1.807 3.658.728-1.172 1.331-2.391 1.807-3.658.476-1.267.829-2.572 1.058-3.914.229-1.342.343-2.711.343-4.108h2.591c0 1.525-.152 3.026-.457 4.503-.305 1.477-.713 2.912-1.222 4.306-.508 1.394-1.11 2.726-1.778 3.942 1.016 1.588 2.287 2.919 3.815 3.994-1.092.051-2.147.255-3.162.611-1.016.356-1.968.855-2.857 1.498-.89-.643-1.842-1.142-2.857-1.498-1.016-.356-2.07-.56-3.162-.611 1.528-1.075 2.799-2.406 3.815-3.994z"/>
+    </svg>
+  );
+
   // ============================================
-  // 16. RANGKUMAN SECTIONS
+  // 18. RANGKUMAN SECTIONS
   // ============================================
   const rangkumanSections = [
     { id: "pendahuluan", title: "Pendahuluan" },
@@ -646,8 +740,21 @@ export default function BlogPage() {
     }
   };
 
+  // Author Bio
+  const authorBio = {
+    name: "Farid Ardiansyah",
+    role: "Penulis & Content Creator",
+    bio: "Mahasiswa aktif Universitas Gunadarma yang gemar menulis tentang pengalaman kuliah, teknologi, dan pengembangan diri. Aktif di berbagai organisasi kampus dan UKM Robotik.",
+    email: "farid.ardiansyah@gunadarma.ac.id",
+    social: {
+      twitter: "https://twitter.com/faridard",
+      linkedin: "https://linkedin.com/in/faridardiansyah",
+      instagram: "https://instagram.com/faridard"
+    }
+  };
+
   // ============================================
-  // 17. LOADING STATE
+  // 19. LOADING STATE
   // ============================================
   if (!isMounted || loading) {
     return (
@@ -750,7 +857,7 @@ export default function BlogPage() {
         alignItems: 'center',
         gap: '20px',
       }}>
-        {/* Share Button */}
+        {/* Share Button with Count */}
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
@@ -758,7 +865,7 @@ export default function BlogPage() {
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '10px',
+            gap: '12px',
             background: 'rgba(255,255,255,0.05)',
             border: '1px solid rgba(255,255,255,0.2)',
             borderRadius: '40px',
@@ -770,6 +877,15 @@ export default function BlogPage() {
         >
           <ShareIcon width={20} height={20} />
           <span>Bagikan</span>
+          <span style={{
+            background: 'rgba(255,255,255,0.1)',
+            padding: '2px 8px',
+            borderRadius: '20px',
+            fontSize: '0.85rem',
+            color: '#FF6B00',
+          }}>
+            {shareCount}
+          </span>
         </motion.button>
 
         {/* User Info / Login Button */}
@@ -915,14 +1031,22 @@ export default function BlogPage() {
                 alignItems: 'center',
                 marginBottom: '30px',
               }}>
-                <h3 style={{
-                  fontSize: '2rem',
-                  fontWeight: 'normal',
-                  color: 'white',
-                  margin: 0,
-                }}>
-                  Bagikan Artikel
-                </h3>
+                <div>
+                  <h3 style={{
+                    fontSize: '2rem',
+                    fontWeight: 'normal',
+                    color: 'white',
+                    margin: '0 0 8px 0',
+                  }}>
+                    Bagikan Artikel
+                  </h3>
+                  <span style={{
+                    fontSize: '0.95rem',
+                    color: '#999999',
+                  }}>
+                    {shareCount} orang telah membagikan artikel ini
+                  </span>
+                </div>
                 <motion.button
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
@@ -996,40 +1120,146 @@ export default function BlogPage() {
                 </p>
                 <div style={{
                   display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))',
+                  gridTemplateColumns: 'repeat(3, 1fr)',
                   gap: '12px',
                 }}>
-                  {[
-                    { id: 'twitter', name: 'Twitter', icon: '𝕏', color: '#1DA1F2' },
-                    { id: 'facebook', name: 'Facebook', icon: 'f', color: '#4267B2' },
-                    { id: 'linkedin', name: 'LinkedIn', icon: 'in', color: '#0077B5' },
-                    { id: 'whatsapp', name: 'WhatsApp', icon: '📱', color: '#25D366' },
-                    { id: 'telegram', name: 'Telegram', icon: '📨', color: '#0088cc' },
-                  ].map((platform) => (
-                    <motion.button
-                      key={platform.id}
-                      whileHover={{ scale: 1.05, y: -2 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => shareToSocialMedia(platform.id)}
-                      style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        gap: '8px',
-                        padding: '15px',
-                        background: '#2a2a2a',
-                        border: '1px solid #444444',
-                        borderRadius: '16px',
-                        color: 'white',
-                        fontSize: '1.5rem',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s ease',
-                      }}
-                    >
-                      <span style={{ fontSize: '1.8rem' }}>{platform.icon}</span>
-                      <span style={{ fontSize: '0.8rem', color: '#cccccc' }}>{platform.name}</span>
-                    </motion.button>
-                  ))}
+                  <motion.button
+                    whileHover={{ scale: 1.05, y: -2 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => shareToSocialMedia('twitter')}
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '15px',
+                      background: '#2a2a2a',
+                      border: '1px solid #444444',
+                      borderRadius: '16px',
+                      color: '#1DA1F2',
+                      fontSize: '1.5rem',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                    }}
+                  >
+                    <TwitterIcon />
+                    <span style={{ fontSize: '0.8rem', color: '#cccccc' }}>Twitter</span>
+                  </motion.button>
+
+                  <motion.button
+                    whileHover={{ scale: 1.05, y: -2 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => shareToSocialMedia('facebook')}
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '15px',
+                      background: '#2a2a2a',
+                      border: '1px solid #444444',
+                      borderRadius: '16px',
+                      color: '#4267B2',
+                      fontSize: '1.5rem',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                    }}
+                  >
+                    <FacebookIcon />
+                    <span style={{ fontSize: '0.8rem', color: '#cccccc' }}>Facebook</span>
+                  </motion.button>
+
+                  <motion.button
+                    whileHover={{ scale: 1.05, y: -2 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => shareToSocialMedia('linkedin')}
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '15px',
+                      background: '#2a2a2a',
+                      border: '1px solid #444444',
+                      borderRadius: '16px',
+                      color: '#0077B5',
+                      fontSize: '1.5rem',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                    }}
+                  >
+                    <LinkedInIcon />
+                    <span style={{ fontSize: '0.8rem', color: '#cccccc' }}>LinkedIn</span>
+                  </motion.button>
+
+                  <motion.button
+                    whileHover={{ scale: 1.05, y: -2 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => shareToSocialMedia('whatsapp')}
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '15px',
+                      background: '#2a2a2a',
+                      border: '1px solid #444444',
+                      borderRadius: '16px',
+                      color: '#25D366',
+                      fontSize: '1.5rem',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                    }}
+                  >
+                    <WhatsAppIcon />
+                    <span style={{ fontSize: '0.8rem', color: '#cccccc' }}>WhatsApp</span>
+                  </motion.button>
+
+                  <motion.button
+                    whileHover={{ scale: 1.05, y: -2 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => shareToSocialMedia('telegram')}
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '15px',
+                      background: '#2a2a2a',
+                      border: '1px solid #444444',
+                      borderRadius: '16px',
+                      color: '#0088cc',
+                      fontSize: '1.5rem',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                    }}
+                  >
+                    <TelegramIcon />
+                    <span style={{ fontSize: '0.8rem', color: '#cccccc' }}>Telegram</span>
+                  </motion.button>
+
+                  <motion.button
+                    whileHover={{ scale: 1.05, y: -2 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => shareToSocialMedia('quora')}
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '15px',
+                      background: '#2a2a2a',
+                      border: '1px solid #444444',
+                      borderRadius: '16px',
+                      color: '#B92B27',
+                      fontSize: '1.5rem',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                    }}
+                  >
+                    <QuoraIcon />
+                    <span style={{ fontSize: '0.8rem', color: '#cccccc' }}>Quora</span>
+                  </motion.button>
                 </div>
               </div>
             </motion.div>
@@ -1097,15 +1327,20 @@ export default function BlogPage() {
                 <ClockIcon width={18} height={18} />
                 <span>8 menit membaca</span>
               </div>
-              {/* Author Info - Farid Ardiansyah */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px',
-                marginTop: '10px',
-                paddingTop: '10px',
-                borderTop: '1px solid #333333',
-              }}>
+              {/* Author Info with Tooltip */}
+              <div 
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  marginTop: '10px',
+                  paddingTop: '10px',
+                  borderTop: '1px solid #333333',
+                  position: 'relative',
+                }}
+                onMouseEnter={() => setShowAuthorTooltip(true)}
+                onMouseLeave={() => setShowAuthorTooltip(false)}
+              >
                 <img 
                   src="https://ui-avatars.com/api/?name=Farid+Ardiansyah&background=FF6B00&color=fff&size=32" 
                   alt="Farid Ardiansyah"
@@ -1114,6 +1349,7 @@ export default function BlogPage() {
                     height: '32px',
                     borderRadius: '50%',
                     objectFit: 'cover',
+                    cursor: 'pointer',
                   }}
                 />
                 <div>
@@ -1122,6 +1358,7 @@ export default function BlogPage() {
                     fontSize: '1rem',
                     fontWeight: '500',
                     display: 'block',
+                    cursor: 'pointer',
                   }}>
                     Farid Ardiansyah
                   </span>
@@ -1132,6 +1369,93 @@ export default function BlogPage() {
                     Penulis
                   </span>
                 </div>
+
+                {/* Author Tooltip */}
+                <AnimatePresence>
+                  {showAuthorTooltip && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 10 }}
+                      style={{
+                        position: 'absolute',
+                        top: '100%',
+                        left: 0,
+                        marginTop: '15px',
+                        background: '#1a1a1a',
+                        border: '1px solid #333333',
+                        borderRadius: '16px',
+                        padding: '20px',
+                        width: '280px',
+                        zIndex: 1000,
+                        boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
+                      }}
+                    >
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '15px',
+                        marginBottom: '15px',
+                      }}>
+                        <img 
+                          src="https://ui-avatars.com/api/?name=Farid+Ardiansyah&background=FF6B00&color=fff&size=48" 
+                          alt="Farid Ardiansyah"
+                          style={{
+                            width: '48px',
+                            height: '48px',
+                            borderRadius: '50%',
+                            objectFit: 'cover',
+                          }}
+                        />
+                        <div>
+                          <span style={{
+                            color: 'white',
+                            fontSize: '1.2rem',
+                            fontWeight: '500',
+                            display: 'block',
+                            marginBottom: '4px',
+                          }}>
+                            Farid Ardiansyah
+                          </span>
+                          <span style={{
+                            color: '#FF6B00',
+                            fontSize: '0.9rem',
+                          }}>
+                            {authorBio.role}
+                          </span>
+                        </div>
+                      </div>
+                      <p style={{
+                        color: '#cccccc',
+                        fontSize: '0.95rem',
+                        lineHeight: '1.6',
+                        marginBottom: '15px',
+                      }}>
+                        {authorBio.bio}
+                      </p>
+                      <div style={{
+                        display: 'flex',
+                        gap: '15px',
+                      }}>
+                        <a href={authorBio.social.twitter} target="_blank" rel="noopener noreferrer" style={{ color: '#1DA1F2' }}>
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                          </svg>
+                        </a>
+                        <a href={authorBio.social.linkedin} target="_blank" rel="noopener noreferrer" style={{ color: '#0077B5' }}>
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                          </svg>
+                        </a>
+                        <a href={authorBio.social.instagram} target="_blank" rel="noopener noreferrer" style={{ color: '#E4405F' }}>
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zM5.838 12a6.162 6.162 0 1112.324 0 6.162 6.162 0 01-12.324 0zM12 16a4 4 0 110-8 4 4 0 010 8zm4.965-10.405a1.44 1.44 0 112.881.001 1.44 1.44 0 01-2.881-.001z"/>
+                          </svg>
+                        </a>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             </div>
           </div>
