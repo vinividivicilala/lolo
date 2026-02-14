@@ -2899,134 +2899,55 @@ export default function BlogPage() {
             </section>
           </div>
 
-          {/* ===== ADS LIKE GOJEK ===== */}
+          {/* ===== ADS LIKE GOJEK / YOUTUBE ===== */}
           <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
             style={{
               marginTop: '40px',
               marginBottom: '40px',
-              padding: '30px',
-              background: 'linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)',
-              borderRadius: '32px',
+              padding: '24px',
+              background: 'rgba(255,255,255,0.03)',
+              borderRadius: '16px',
               border: '1px solid rgba(255,255,255,0.1)',
-              backdropFilter: 'blur(10px)',
               position: 'relative',
-              overflow: 'hidden',
             }}
           >
-            {/* Background Pattern */}
+            {/* Label ADS */}
             <div style={{
               position: 'absolute',
-              top: -20,
-              right: -20,
-              width: 150,
-              height: 150,
-              background: 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)',
-              borderRadius: '50%',
-              pointerEvents: 'none',
-            }} />
-            
-            <div style={{
-              position: 'absolute',
-              bottom: -20,
-              left: -20,
-              width: 120,
-              height: 120,
-              background: 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)',
-              borderRadius: '50%',
-              pointerEvents: 'none',
-            }} />
+              top: '-10px',
+              left: '20px',
+              background: '#FF6B00',
+              color: 'white',
+              padding: '4px 12px',
+              borderRadius: '20px',
+              fontSize: '0.75rem',
+              fontWeight: 'bold',
+              textTransform: 'uppercase',
+              letterSpacing: '1px',
+              border: '1px solid rgba(255,255,255,0.2)',
+            }}>
+              ADS
+            </div>
 
             <div style={{
               display: 'flex',
               flexDirection: isMobile ? 'column' : 'row',
               alignItems: 'center',
-              gap: '30px',
-              position: 'relative',
-              zIndex: 1,
+              gap: '24px',
             }}>
               {/* Icon Section */}
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: '15px',
+                gap: '8px',
               }}>
-                <motion.div
-                  animate={{ 
-                    rotate: [0, 10, -10, 10, 0],
-                    scale: [1, 1.1, 1, 1.1, 1]
-                  }}
-                  transition={{ 
-                    duration: 3,
-                    repeat: Infinity,
-                    repeatDelay: 1
-                  }}
-                  style={{
-                    width: 70,
-                    height: 70,
-                    background: 'rgba(255,255,255,0.1)',
-                    borderRadius: '25px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    border: '1px solid rgba(255,255,255,0.2)',
-                  }}
-                >
-                  <span style={{ fontSize: '2.5rem' }}>📝</span>
-                </motion.div>
-                
-                <motion.div
-                  animate={{ 
-                    rotate: [0, -10, 10, -10, 0],
-                    scale: [1, 1.1, 1, 1.1, 1]
-                  }}
-                  transition={{ 
-                    duration: 3,
-                    repeat: Infinity,
-                    repeatDelay: 1,
-                    delay: 0.5
-                  }}
-                  style={{
-                    width: 70,
-                    height: 70,
-                    background: 'rgba(255,255,255,0.1)',
-                    borderRadius: '25px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    border: '1px solid rgba(255,255,255,0.2)',
-                  }}
-                >
-                  <span style={{ fontSize: '2.5rem' }}>📋</span>
-                </motion.div>
-                
-                <motion.div
-                  animate={{ 
-                    rotate: [0, 10, -10, 10, 0],
-                    scale: [1, 1.1, 1, 1.1, 1]
-                  }}
-                  transition={{ 
-                    duration: 3,
-                    repeat: Infinity,
-                    repeatDelay: 1,
-                    delay: 1
-                  }}
-                  style={{
-                    width: 70,
-                    height: 70,
-                    background: 'rgba(255,255,255,0.1)',
-                    borderRadius: '25px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    border: '1px solid rgba(255,255,255,0.2)',
-                  }}
-                >
-                  <span style={{ fontSize: '2.5rem' }}>✏️</span>
-                </motion.div>
+                <span style={{ fontSize: '2rem' }}>📝</span>
+                <span style={{ fontSize: '2rem' }}>➡️</span>
+                <span style={{ fontSize: '2rem' }}>📋</span>
               </div>
 
               {/* Text Section */}
@@ -3034,119 +2955,52 @@ export default function BlogPage() {
                 flex: 1,
                 textAlign: isMobile ? 'center' : 'left',
               }}>
-                <motion.h3
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.3 }}
-                  style={{
-                    fontSize: isMobile ? '1.5rem' : '2rem',
-                    fontWeight: 'normal',
-                    color: 'white',
-                    margin: '0 0 10px 0',
-                    letterSpacing: '-0.5px',
-                  }}
-                >
+                <h3 style={{
+                  fontSize: isMobile ? '1.3rem' : '1.5rem',
+                  fontWeight: '500',
+                  color: 'white',
+                  margin: '0 0 8px 0',
+                }}>
                   jangan lupa kunjungin ke note
-                </motion.h3>
+                </h3>
                 
-                <motion.p
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.4 }}
+                <p style={{
+                  fontSize: isMobile ? '0.9rem' : '1rem',
+                  color: '#999999',
+                  margin: '0 0 16px 0',
+                }}>
+                  Catat semua hal penting, ide kreatif, dan pengalaman seru kamu di note pribadi.
+                </p>
+
+                <Link 
+                  href="/note"
                   style={{
-                    fontSize: isMobile ? '0.95rem' : '1.1rem',
-                    color: '#999999',
-                    margin: '0 0 20px 0',
-                    lineHeight: '1.6',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '10px 24px',
+                    background: 'rgba(255,255,255,0.1)',
+                    border: '1px solid rgba(255,255,255,0.2)',
+                    borderRadius: '30px',
+                    color: 'white',
+                    fontSize: '0.95rem',
+                    textDecoration: 'none',
+                    transition: 'all 0.2s ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'rgba(255,255,255,0.15)';
+                    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
+                    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)';
                   }}
                 >
-                  Catat semua hal penting, ide kreatif, dan pengalaman seru kamu di note pribadi.
-                </motion.p>
-
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.5 }}
-                >
-                  <Link 
-                    href="/note"
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '12px',
-                      padding: '16px 32px',
-                      background: 'rgba(255,255,255,0.1)',
-                      border: '1px solid rgba(255,255,255,0.2)',
-                      borderRadius: '40px',
-                      color: 'white',
-                      fontSize: isMobile ? '1rem' : '1.1rem',
-                      textDecoration: 'none',
-                      transition: 'all 0.3s ease',
-                      cursor: 'pointer',
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = 'rgba(255,255,255,0.15)';
-                      e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)';
-                      e.currentTarget.style.transform = 'translateY(-2px)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
-                      e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)';
-                      e.currentTarget.style.transform = 'translateY(0)';
-                    }}
-                  >
-                    <span>Buka Note</span>
-                    <NorthEastArrow width={20} height={20} />
-                  </Link>
-                </motion.div>
+                  <span>Buka Note</span>
+                  <NorthEastArrow width={16} height={16} />
+                </Link>
               </div>
             </div>
-
-            {/* Floating Elements */}
-            <motion.div
-              animate={{ 
-                y: [0, -10, 0],
-                rotate: [0, 5, 0]
-              }}
-              transition={{ 
-                duration: 4,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
-              style={{
-                position: 'absolute',
-                top: '20%',
-                right: '10%',
-                fontSize: '2rem',
-                opacity: 0.3,
-                pointerEvents: 'none',
-              }}
-            >
-              ✨
-            </motion.div>
-            
-            <motion.div
-              animate={{ 
-                y: [0, 10, 0],
-                rotate: [0, -5, 0]
-              }}
-              transition={{ 
-                duration: 5,
-                repeat: Infinity,
-                ease: "easeInOut",
-                delay: 1
-              }}
-              style={{
-                position: 'absolute',
-                bottom: '20%',
-                left: '5%',
-                fontSize: '2rem',
-                opacity: 0.3,
-                pointerEvents: 'none',
-              }}
-            >
-              💫
-            </motion.div>
           </motion.div>
 
           {/* ===== TAG SECTION (2 TAG SAJA) ===== */}
