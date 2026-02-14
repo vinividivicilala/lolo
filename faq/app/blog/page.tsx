@@ -2716,7 +2716,7 @@ export default function BlogPage() {
             Bagaimana Rasa nya Masuk Kuliah Di Universitas Gunadarma
           </motion.h2>
 
-          {/* KONTEN ARTIKEL - LENGKAP */}
+          {/* KONTEN ARTIKEL - HANYA SUB JUDUL, ISI DIHAPUS */}
           <div style={{
             fontSize: isMobile ? '1.1rem' : '1.2rem',
             lineHeight: '1.8',
@@ -2735,17 +2735,7 @@ export default function BlogPage() {
               }}>
                 Pendahuluan
               </h3>
-              <p style={{ marginBottom: '1.5em' }}>
-                Masuk ke Universitas Gunadarma adalah salah satu keputusan terbesar dalam hidup saya. 
-                Banyak orang bertanya, "Bagaimana rasanya?" Pertanyaan sederhana namun jawabannya sangat kompleks. 
-                Ini bukan sekadar tentang perkuliahan, tapi tentang perjalanan menemukan jati diri, 
-                bertemu dengan berbagai karakter manusia, dan belajar bahwa kehidupan tidak selalu hitam dan putih.
-              </p>
-              <p style={{ marginBottom: '1.5em' }}>
-                Gunadarma mengajarkan saya bahwa pendidikan bukan hanya tentang nilai di atas kertas, 
-                tapi tentang bagaimana kita berpikir kritis, menyelesaikan masalah, dan beradaptasi dengan perubahan. 
-                Di sini, saya belajar bahwa kegagalan adalah bagian dari proses, dan kesuksesan adalah akumulasi dari ribuan percobaan.
-              </p>
+              {/* Konten dihapus */}
             </section>
             
             <section 
@@ -2761,16 +2751,7 @@ export default function BlogPage() {
               }}>
                 Sejarah & Reputasi
               </h3>
-              <p style={{ marginBottom: '1.5em' }}>
-                Universitas Gunadarma berdiri pada tahun 1981, berawal dari sebuah kursus komputer kecil 
-                yang kemudian berkembang menjadi salah satu perguruan tinggi swasta terkemuka di Indonesia. 
-                Reputasi Gunadarma di bidang teknologi informasi dan komputer sudah tidak diragukan lagi.
-              </p>
-              <p style={{ marginBottom: '1.5em' }}>
-                Banyak alumni Gunadarma yang kini bekerja di perusahaan-perusahaan besar, 
-                baik di dalam maupun luar negeri. Ini membuktikan bahwa kualitas pendidikan di sini 
-                diakui secara nasional dan internasional.
-              </p>
+              {/* Konten dihapus */}
             </section>
             
             <section 
@@ -2786,16 +2767,7 @@ export default function BlogPage() {
               }}>
                 Suasana Kampus
               </h3>
-              <p style={{ marginBottom: '1.5em' }}>
-                Suasana kampus Gunadarma selalu hidup. Dari pagi hingga malam, mahasiswa lalu-lalang 
-                dengan berbagai aktivitas. Ada yang buru-buru masuk kelas, ada yang nongkrong di kantin, 
-                ada juga yang asyik mengerjakan tugas di perpustakaan. Kampus ini tidak pernah tidur.
-              </p>
-              <p style={{ marginBottom: '1.5em' }}>
-                Yang paling berkesan adalah ketika jam istirahat tiba. Kantin penuh sesak, 
-                antrian panjang di depan gerobak bakso, dan tawa riang mahasiswa yang melepas penat. 
-                Momen-momen sederhana inilah yang akan selalu saya ingat.
-              </p>
+              {/* Konten dihapus */}
             </section>
             
             <section 
@@ -2811,17 +2783,7 @@ export default function BlogPage() {
               }}>
                 Kehidupan Akademik
               </h3>
-              <p style={{ marginBottom: '1.5em' }}>
-                Sistem akademik di Gunadarma terkenal dengan disiplinnya. Absensi sidik jari, 
-                tugas yang menumpuk, praktikum yang melelahkan, namun semua itu membentuk karakter 
-                kami menjadi pribadi yang tangguh dan bertanggung jawab.
-              </p>
-              <p style={{ marginBottom: '1.5em' }}>
-                Tugas besar atau yang sering disebut "tubesar" adalah momok yang menakutkan sekaligus 
-                momen yang mendewasakan. Begadang berhari-hari, debugging kode sampai mata merah, 
-                dan akhirnya presentasi di depan dosen yang kritis. Rasanya campur aduk, tapi kepuasan 
-                saat aplikasi buatan sendiri berjalan dengan sempurna tidak ternilai harganya.
-              </p>
+              {/* Konten dihapus */}
             </section>
             
             <section 
@@ -2837,17 +2799,7 @@ export default function BlogPage() {
               }}>
                 Para Dosen
               </h3>
-              <p style={{ marginBottom: '1.5em' }}>
-                Dosen-dosen di Gunadarma memiliki latar belakang yang beragam. Ada yang galak dan disiplin, 
-                ada juga yang santai dan humoris. Tapi satu hal yang pasti, mereka semua berdedikasi 
-                untuk mentransfer ilmu kepada mahasiswanya.
-              </p>
-              <p style={{ marginBottom: '1.5em' }}>
-                Saya ingat dosen pemrograman yang selalu berkata, "Coding itu seperti seni, 
-                butuh feeling dan latihan." Atau dosen basis data yang dengan sabar menjelaskan 
-                normalisasi sampai kami benar-benar paham. Mereka tidak hanya mengajar, tapi juga 
-                menginspirasi.
-              </p>
+              {/* Konten dihapus */}
             </section>
             
             <section 
@@ -2863,16 +2815,7 @@ export default function BlogPage() {
               }}>
                 Pertemanan & Relasi
               </h3>
-              <p style={{ marginBottom: '1.5em' }}>
-                Harta paling berharga selama kuliah adalah teman-teman. Mereka yang menemani begadang 
-                saat deadline, yang meminjamkan catatan ketika kita absen, yang menghibur ketika nilai 
-                jelek, dan yang merayakan setiap pencapaian kecil.
-              </p>
-              <p style={{ marginBottom: '1.5em' }}>
-                Dari sekadar teman sekelas, menjadi sahabat, bahkan keluarga. Kami saling mengenal 
-                karakter masing-masing, tahu siapa yang jago coding, siapa yang jago desain, siapa 
-                yang jago presentasi. Kerja sama tim yang solid terbentuk secara alami.
-              </p>
+              {/* Konten dihapus */}
             </section>
             
             <section 
@@ -2888,16 +2831,7 @@ export default function BlogPage() {
               }}>
                 Fasilitas Kampus
               </h3>
-              <p style={{ marginBottom: '1.5em' }}>
-                Gunadarma memiliki fasilitas yang lengkap. Laboratorium komputer dengan spesifikasi tinggi, 
-                perpustakaan dengan koleksi buku yang up-to-date, ruang kelas ber-AC, akses WiFi cepat, 
-                dan area parkir yang luas. Semua mendukung proses belajar mengajar.
-              </p>
-              <p style={{ marginBottom: '1.5em' }}>
-                Yang paling saya sukai adalah perpustakaannya. Selain koleksi bukunya yang lengkap, 
-                suasananya nyaman untuk belajar. Banyak mahasiswa menghabiskan waktu berjam-jam di sini, 
-                membaca buku, mengerjakan tugas, atau sekadar mencari inspirasi.
-              </p>
+              {/* Konten dihapus */}
             </section>
             
             <section 
@@ -2913,16 +2847,7 @@ export default function BlogPage() {
               }}>
                 Organisasi & Kegiatan
               </h3>
-              <p style={{ marginBottom: '1.5em' }}>
-                Selain akademik, Gunadarma juga aktif dalam berbagai organisasi dan kegiatan 
-                ekstrakurikuler. Ada BEM, himpunan mahasiswa, UKM olahraga, seni, robotik, 
-                dan masih banyak lagi. Mahasiswa diberi kebebasan untuk mengembangkan minat dan bakat.
-              </p>
-              <p style={{ marginBottom: '1.5em' }}>
-                Saya sendiri aktif di UKM Robotik. Di sana saya belajar banyak hal yang tidak diajarkan 
-                di kelas: kerja tim di bawah tekanan, manajemen proyek, dan problem-solving. Pengalaman 
-                mengikuti kontes robotika nasional adalah salah satu pencapaian terbesar saya selama kuliah.
-              </p>
+              {/* Konten dihapus */}
             </section>
             
             <section 
@@ -2938,16 +2863,7 @@ export default function BlogPage() {
               }}>
                 Tantangan & Hambatan
               </h3>
-              <p style={{ marginBottom: '1.5em' }}>
-                Tidak selalu mulus. Ada kalanya saya merasa lelah, stres, bahkan ingin menyerah. 
-                Tugas yang menumpuk, praktikum yang gagal, nilai yang tidak memuaskan, semua itu 
-                adalah bagian dari proses pendewasaan.
-              </p>
-              <p style={{ marginBottom: '1.5em' }}>
-                Tantangan terbesar adalah membagi waktu antara kuliah, organisasi, dan kehidupan pribadi. 
-                Seringkali saya harus begadang demi menyelesaikan semua tanggungan. Tapi justru dari 
-                situ saya belajar tentang prioritas dan manajemen waktu.
-              </p>
+              {/* Konten dihapus */}
             </section>
             
             <section 
@@ -2963,17 +2879,7 @@ export default function BlogPage() {
               }}>
                 Kesan & Pesan
               </h3>
-              <p style={{ marginBottom: '1.5em' }}>
-                Universitas Gunadarma bukan sekadar tempat saya mengejar gelar sarjana. 
-                Ini adalah rumah kedua yang membentuk saya menjadi pribadi yang lebih baik. 
-                Di sini saya belajar bahwa kesuksesan bukan tentang seberapa cepat kita lulus, 
-                tapi seberapa banyak ilmu dan pengalaman yang kita dapatkan.
-              </p>
-              <p style={{ marginBottom: '1.5em' }}>
-                Pesan saya untuk adik-adik yang akan berkuliah di Gunadarma: nikmati setiap prosesnya. 
-                Jangan terlalu fokus pada nilai, tapi kejarlah ilmu dan pengalaman. Aktiflah di organisasi, 
-                perbanyak relasi, dan jangan takut gagal.
-              </p>
+              {/* Konten dihapus */}
             </section>
             
             <section 
@@ -2989,17 +2895,259 @@ export default function BlogPage() {
               }}>
                 Penutup
               </h3>
-              <p style={{ marginBottom: '1.5em' }}>
-                Kuliah di Gunadarma adalah perjalanan yang penuh warna. Setiap suka dan duka, 
-                setiap tawa dan tangis, setiap keberhasilan dan kegagalan, semuanya membentuk 
-                saya menjadi pribadi yang lebih kuat dan siap menghadapi dunia.
-              </p>
-              <p style={{ marginBottom: '1.5em' }}>
-                Terima kasih Gunadarma, terima kasih para dosen, dan terima kasih teman-teman. 
-                Kalian adalah bagian terindah dalam perjalanan hidup saya.
-              </p>
+              {/* Konten dihapus */}
             </section>
           </div>
+
+          {/* ===== ADS LIKE GOJEK ===== */}
+          <motion.div
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            style={{
+              marginTop: '40px',
+              marginBottom: '40px',
+              padding: '30px',
+              background: 'linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)',
+              borderRadius: '32px',
+              border: '1px solid rgba(255,255,255,0.1)',
+              backdropFilter: 'blur(10px)',
+              position: 'relative',
+              overflow: 'hidden',
+            }}
+          >
+            {/* Background Pattern */}
+            <div style={{
+              position: 'absolute',
+              top: -20,
+              right: -20,
+              width: 150,
+              height: 150,
+              background: 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)',
+              borderRadius: '50%',
+              pointerEvents: 'none',
+            }} />
+            
+            <div style={{
+              position: 'absolute',
+              bottom: -20,
+              left: -20,
+              width: 120,
+              height: 120,
+              background: 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)',
+              borderRadius: '50%',
+              pointerEvents: 'none',
+            }} />
+
+            <div style={{
+              display: 'flex',
+              flexDirection: isMobile ? 'column' : 'row',
+              alignItems: 'center',
+              gap: '30px',
+              position: 'relative',
+              zIndex: 1,
+            }}>
+              {/* Icon Section */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '15px',
+              }}>
+                <motion.div
+                  animate={{ 
+                    rotate: [0, 10, -10, 10, 0],
+                    scale: [1, 1.1, 1, 1.1, 1]
+                  }}
+                  transition={{ 
+                    duration: 3,
+                    repeat: Infinity,
+                    repeatDelay: 1
+                  }}
+                  style={{
+                    width: 70,
+                    height: 70,
+                    background: 'rgba(255,255,255,0.1)',
+                    borderRadius: '25px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    border: '1px solid rgba(255,255,255,0.2)',
+                  }}
+                >
+                  <span style={{ fontSize: '2.5rem' }}>📝</span>
+                </motion.div>
+                
+                <motion.div
+                  animate={{ 
+                    rotate: [0, -10, 10, -10, 0],
+                    scale: [1, 1.1, 1, 1.1, 1]
+                  }}
+                  transition={{ 
+                    duration: 3,
+                    repeat: Infinity,
+                    repeatDelay: 1,
+                    delay: 0.5
+                  }}
+                  style={{
+                    width: 70,
+                    height: 70,
+                    background: 'rgba(255,255,255,0.1)',
+                    borderRadius: '25px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    border: '1px solid rgba(255,255,255,0.2)',
+                  }}
+                >
+                  <span style={{ fontSize: '2.5rem' }}>📋</span>
+                </motion.div>
+                
+                <motion.div
+                  animate={{ 
+                    rotate: [0, 10, -10, 10, 0],
+                    scale: [1, 1.1, 1, 1.1, 1]
+                  }}
+                  transition={{ 
+                    duration: 3,
+                    repeat: Infinity,
+                    repeatDelay: 1,
+                    delay: 1
+                  }}
+                  style={{
+                    width: 70,
+                    height: 70,
+                    background: 'rgba(255,255,255,0.1)',
+                    borderRadius: '25px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    border: '1px solid rgba(255,255,255,0.2)',
+                  }}
+                >
+                  <span style={{ fontSize: '2.5rem' }}>✏️</span>
+                </motion.div>
+              </div>
+
+              {/* Text Section */}
+              <div style={{
+                flex: 1,
+                textAlign: isMobile ? 'center' : 'left',
+              }}>
+                <motion.h3
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.3 }}
+                  style={{
+                    fontSize: isMobile ? '1.5rem' : '2rem',
+                    fontWeight: 'normal',
+                    color: 'white',
+                    margin: '0 0 10px 0',
+                    letterSpacing: '-0.5px',
+                  }}
+                >
+                  jangan lupa kunjungin ke note
+                </motion.h3>
+                
+                <motion.p
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.4 }}
+                  style={{
+                    fontSize: isMobile ? '0.95rem' : '1.1rem',
+                    color: '#999999',
+                    margin: '0 0 20px 0',
+                    lineHeight: '1.6',
+                  }}
+                >
+                  Catat semua hal penting, ide kreatif, dan pengalaman seru kamu di note pribadi.
+                </motion.p>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 }}
+                >
+                  <Link 
+                    href="/note"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '12px',
+                      padding: '16px 32px',
+                      background: 'rgba(255,255,255,0.1)',
+                      border: '1px solid rgba(255,255,255,0.2)',
+                      borderRadius: '40px',
+                      color: 'white',
+                      fontSize: isMobile ? '1rem' : '1.1rem',
+                      textDecoration: 'none',
+                      transition: 'all 0.3s ease',
+                      cursor: 'pointer',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = 'rgba(255,255,255,0.15)';
+                      e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)';
+                      e.currentTarget.style.transform = 'translateY(-2px)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
+                      e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)';
+                      e.currentTarget.style.transform = 'translateY(0)';
+                    }}
+                  >
+                    <span>Buka Note</span>
+                    <NorthEastArrow width={20} height={20} />
+                  </Link>
+                </motion.div>
+              </div>
+            </div>
+
+            {/* Floating Elements */}
+            <motion.div
+              animate={{ 
+                y: [0, -10, 0],
+                rotate: [0, 5, 0]
+              }}
+              transition={{ 
+                duration: 4,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+              style={{
+                position: 'absolute',
+                top: '20%',
+                right: '10%',
+                fontSize: '2rem',
+                opacity: 0.3,
+                pointerEvents: 'none',
+              }}
+            >
+              ✨
+            </motion.div>
+            
+            <motion.div
+              animate={{ 
+                y: [0, 10, 0],
+                rotate: [0, -5, 0]
+              }}
+              transition={{ 
+                duration: 5,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 1
+              }}
+              style={{
+                position: 'absolute',
+                bottom: '20%',
+                left: '5%',
+                fontSize: '2rem',
+                opacity: 0.3,
+                pointerEvents: 'none',
+              }}
+            >
+              💫
+            </motion.div>
+          </motion.div>
 
           {/* ===== TAG SECTION (2 TAG SAJA) ===== */}
           <motion.div
