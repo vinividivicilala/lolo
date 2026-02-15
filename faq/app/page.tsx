@@ -1767,7 +1767,7 @@ setIsLoadingEvents(false);
     };
   }, [isMobile, showMenuruFullPage, showPhotoFullPage, showUserDropdown, showLogoutModal, showMenuOverlay, showNotification, showSearch, showUserProfileModal, showDeleteAccountModal, showCalendarModal]);
 
-  // Animasi GSAP untuk tanda + di tombol MENURU (sebelumnya)
+  // Animasi GSAP untuk tanda + di tombol Menuru
   useEffect(() => {
     if (plusSignRef.current && !showMenuruFullPage) {
       gsap.killTweensOf(plusSignRef.current);
@@ -1781,58 +1781,6 @@ setIsLoadingEvents(false);
       });
     }
   }, [showMenuruFullPage]);
-
-  // Animasi GSAP baru untuk tombol MENU dengan gaya modern
-  useEffect(() => {
-    const menuElement = document.querySelector('[data-menu-button]');
-    if (menuElement) {
-      // Animasi modern: efek pulse dengan transformasi dan opacity
-      gsap.killTweensOf(menuElement);
-      
-      // Animasi modern dengan timeline
-      const tl = gsap.timeline({ repeat: -1, yoyo: true });
-      
-      tl.to(menuElement, {
-        scale: 1.05,
-        duration: 1.2,
-        ease: "power2.inOut",
-        boxShadow: '0 0 15px rgba(0, 255, 0, 0.3)'
-      })
-      .to(menuElement, {
-        scale: 1,
-        duration: 1.2,
-        ease: "power2.inOut",
-        boxShadow: '0 0 5px rgba(0, 255, 0, 0.1)'
-      });
-    }
-  }, []);
-
-  // Animasi GSAP untuk tombol NOTE
-  useEffect(() => {
-    const noteElement = document.querySelector('[data-note-button]');
-    if (noteElement) {
-      gsap.killTweensOf(noteElement);
-      
-      // Animasi modern untuk NOTE
-      const tl = gsap.timeline({ repeat: -1, yoyo: true, repeatDelay: 0.5 });
-      
-      tl.to(noteElement, {
-        x: 5,
-        duration: 0.8,
-        ease: "power2.inOut"
-      })
-      .to(noteElement, {
-        x: -5,
-        duration: 0.8,
-        ease: "power2.inOut"
-      }, 0.4)
-      .to(noteElement, {
-        x: 0,
-        duration: 0.8,
-        ease: "power2.inOut"
-      }, 0.8);
-    }
-  }, []);
 
   // Animasi GSAP untuk tanda \ di halaman full page
   useEffect(() => {
@@ -4321,8 +4269,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Menu Overlay dengan GSAP Animation */}
+      {/* Menu Overlay dengan GSAP Animation - Modern Awwwards Style */}
       <AnimatePresence>
         {showMenuOverlay && (
           <motion.div
@@ -4348,6 +4295,377 @@ fontFamily: 'Helvetica, Arial, sans-serif'
               transform: 'translateY(-100%)'
             }}
           >
+            {/* Background dengan efek grain dan pattern */}
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              backgroundImage: `radial-gradient(circle at 30% 40%, rgba(255,255,255,0.03) 0%, transparent 30%),
+                                radial-gradient(circle at 70% 60%, rgba(255,255,255,0.03) 0%, transparent 30%),
+                                repeating-linear-gradient(45deg, rgba(255,255,255,0.01) 0px, rgba(255,255,255,0.01) 2px, transparent 2px, transparent 8px)`,
+              pointerEvents: 'none',
+              zIndex: 1
+            }} />
+
+            {/* Konten Utama */}
+            <div style={{
+              position: 'relative',
+              zIndex: 2,
+              width: '100%',
+              maxWidth: '1400px',
+              padding: isMobile ? '2rem' : '4rem',
+              display: 'flex',
+              flexDirection: isMobile ? 'column' : 'row',
+              gap: isMobile ? '3rem' : '6rem'
+            }}>
+              
+              {/* Left Section - Menu Items */}
+              <motion.div
+                initial={{ opacity: 0, x: -50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                style={{
+                  flex: 1,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '1.5rem'
+                }}
+              >
+                <div style={{
+                  color: 'rgba(255, 255, 255, 0.4)',
+                  fontSize: '0.9rem',
+                  fontWeight: '500',
+                  textTransform: 'uppercase',
+                  letterSpacing: '2px',
+                  marginBottom: '1rem'
+                }}>
+                  Navigation
+                </div>
+
+                {[
+                  { label: 'Home', url: '/' },
+                  { label: 'Projects', url: '/projects' },
+                  { label: 'About', url: '/about' },
+                  { label: 'Contact', url: '/contact' }
+                ].map((item, index) => (
+                  <motion.a
+                    key={item.label}
+                    href={item.url}
+                    initial={{ opacity: 0, x: -30 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.5, delay: 0.3 + (index * 0.1) }}
+                    style={{
+                      color: 'white',
+                      fontSize: isMobile ? '2.5rem' : '4rem',
+                      fontWeight: '500',
+                      textDecoration: 'none',
+                      fontFamily: 'Helvetica, Arial, sans-serif',
+                      lineHeight: 1.1,
+                      position: 'relative',
+                      display: 'inline-block',
+                      width: 'fit-content',
+                      cursor: 'pointer',
+                      transition: 'all 0.3s ease'
+                    }}
+                    whileHover={{
+                      x: 20,
+                      color: '#999'
+                    }}
+                  >
+                    {item.label}
+                    <motion.div
+                      initial={{ scaleX: 0 }}
+                      whileHover={{ scaleX: 1 }}
+                      transition={{ duration: 0.3 }}
+                      style={{
+                        position: 'absolute',
+                        bottom: 0,
+                        left: 0,
+                        width: '100%',
+                        height: '2px',
+                        backgroundColor: 'white',
+                        transformOrigin: 'left'
+                      }}
+                    />
+                  </motion.a>
+                ))}
+              </motion.div>
+
+              {/* Right Section - Notes dan Info */}
+              <motion.div
+                initial={{ opacity: 0, x: 50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: 0.4 }}
+                style={{
+                  flex: 1,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '2.5rem'
+                }}
+              >
+                {/* Featured Note dengan panah */}
+                <div>
+                  <div style={{
+                    color: 'rgba(255, 255, 255, 0.4)',
+                    fontSize: '0.9rem',
+                    fontWeight: '500',
+                    textTransform: 'uppercase',
+                    letterSpacing: '2px',
+                    marginBottom: '1.5rem'
+                  }}>
+                    Featured Note
+                  </div>
+
+                  <motion.div
+                    whileHover={{ x: 10 }}
+                    transition={{ duration: 0.3 }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '1rem',
+                      cursor: 'pointer',
+                      padding: '1rem',
+                      backgroundColor: 'rgba(255, 255, 255, 0.02)',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      borderRadius: '8px'
+                    }}
+                    onClick={() => router.push('/notes')}
+                  >
+                    <div style={{
+                      width: '40px',
+                      height: '40px',
+                      borderRadius: '50%',
+                      backgroundColor: 'transparent',
+                      border: '1px solid rgba(255, 255, 255, 0.3)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '1.2rem'
+                    }}>
+                      📝
+                    </div>
+                    
+                    <div style={{ flex: 1 }}>
+                      <div style={{
+                        color: 'white',
+                        fontSize: '1.2rem',
+                        fontWeight: '600',
+                        marginBottom: '0.3rem'
+                      }}>
+                        Note #01: Creative Process
+                      </div>
+                      <div style={{
+                        color: 'rgba(255, 255, 255, 0.6)',
+                        fontSize: '0.9rem'
+                      }}>
+                        Exploring the intersection of design and technology
+                      </div>
+                    </div>
+
+                    {/* Panah SVG */}
+                    <motion.svg
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="white"
+                      strokeWidth="2"
+                      animate={{ x: [0, 5, 0] }}
+                      transition={{ 
+                        duration: 1.5, 
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                      }}
+                    >
+                      <path d="M5 12h14"/>
+                      <path d="M12 5l7 7-7 7"/>
+                    </motion.svg>
+                  </motion.div>
+                </div>
+
+                {/* Recent Notes List */}
+                <div>
+                  <div style={{
+                    color: 'rgba(255, 255, 255, 0.4)',
+                    fontSize: '0.9rem',
+                    fontWeight: '500',
+                    textTransform: 'uppercase',
+                    letterSpacing: '2px',
+                    marginBottom: '1rem'
+                  }}>
+                    Recent Notes
+                  </div>
+
+                  {[1, 2, 3].map((note, index) => (
+                    <motion.div
+                      key={note}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.4, delay: 0.5 + (index * 0.1) }}
+                      style={{
+                        padding: '1rem 0',
+                        borderBottom: index < 2 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between'
+                      }}
+                      onClick={() => router.push('/notes')}
+                    >
+                      <div>
+                        <div style={{
+                          color: 'white',
+                          fontSize: '1rem',
+                          fontWeight: '500',
+                          marginBottom: '0.2rem'
+                        }}>
+                          Note #{note}: Project Documentation
+                        </div>
+                        <div style={{
+                          color: 'rgba(255, 255, 255, 0.5)',
+                          fontSize: '0.85rem'
+                        }}>
+                          Updated {note} day{note > 1 ? 's' : ''} ago
+                        </div>
+                      </div>
+                      
+                      {/* Panah kecil */}
+                      <motion.svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="rgba(255, 255, 255, 0.5)"
+                        strokeWidth="2"
+                        whileHover={{ x: 3 }}
+                      >
+                        <path d="M5 12h14"/>
+                        <path d="M12 5l7 7-7 7"/>
+                      </motion.svg>
+                    </motion.div>
+                  ))}
+                </div>
+
+                {/* Call to Action dengan panah besar */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.8 }}
+                  style={{
+                    marginTop: '2rem'
+                  }}
+                >
+                  <motion.button
+                    onClick={() => router.push('/notes/new')}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    style={{
+                      backgroundColor: 'transparent',
+                      border: '2px solid white',
+                      color: 'white',
+                      padding: '1.5rem 2.5rem',
+                      fontSize: '1.2rem',
+                      fontWeight: '600',
+                      cursor: 'pointer',
+                      fontFamily: 'Helvetica, Arial, sans-serif',
+                      letterSpacing: '1px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      width: '100%',
+                      maxWidth: '400px',
+                      borderRadius: '50px',
+                      position: 'relative',
+                      overflow: 'hidden'
+                    }}
+                  >
+                    <span>Create New Note</span>
+                    <motion.div
+                      animate={{ x: [0, 5, 0] }}
+                      transition={{ 
+                        duration: 1.5, 
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                      }}
+                    >
+                      <svg
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="white"
+                        strokeWidth="2"
+                      >
+                        <path d="M5 12h14"/>
+                        <path d="M12 5l7 7-7 7"/>
+                      </svg>
+                    </motion.div>
+
+                    {/* Hover effect background */}
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      whileHover={{ scale: 1 }}
+                      transition={{ duration: 0.3 }}
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: '100%',
+                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                        zIndex: -1,
+                        borderRadius: '50px'
+                      }}
+                    />
+                  </motion.button>
+                </motion.div>
+              </motion.div>
+            </div>
+
+            {/* Footer Menu */}
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 1 }}
+              style={{
+                position: 'absolute',
+                bottom: isMobile ? '2rem' : '3rem',
+                left: 0,
+                width: '100%',
+                display: 'flex',
+                justifyContent: 'space-between',
+                padding: isMobile ? '0 2rem' : '0 4rem',
+                boxSizing: 'border-box',
+                color: 'rgba(255, 255, 255, 0.5)',
+                fontSize: '0.85rem',
+                zIndex: 2
+              }}
+            >
+              <div style={{ display: 'flex', gap: '2rem' }}>
+                <span>© 2024 MENURU</span>
+                <span>All rights reserved</span>
+              </div>
+              <div style={{ display: 'flex', gap: '2rem' }}>
+                <motion.a 
+                  href="/privacy"
+                  whileHover={{ color: 'white' }}
+                  style={{ color: 'inherit', textDecoration: 'none' }}
+                >
+                  Privacy
+                </motion.a>
+                <motion.a 
+                  href="/terms"
+                  whileHover={{ color: 'white' }}
+                  style={{ color: 'inherit', textDecoration: 'none' }}
+                >
+                  Terms
+                </motion.a>
+              </div>
+            </motion.div>
+
+            {/* Close Button */}
             <motion.div
               onClick={handleCloseMenu}
               style={{
@@ -4364,8 +4682,18 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                opacity: 0.7
+                opacity: 0.7,
+                width: '60px',
+                height: '60px',
+                borderRadius: '50%',
+                border: '1px solid rgba(255, 255, 255, 0.2)'
               }}
+              whileHover={{ 
+                opacity: 1,
+                rotate: 90,
+                borderColor: 'white'
+              }}
+              transition={{ duration: 0.3 }}
             >
               ×
             </motion.div>
@@ -6320,100 +6648,26 @@ fontFamily: 'Helvetica, Arial, sans-serif'
             )}
           </motion.div>
 
-          {/* Tombol MENU dengan gaya baru */}
+          {/* Tombol MENU */}
           <motion.div
-            data-menu-button
             onClick={handleOpenMenu}
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.3rem',
-              color: '#00FF00',
+              color: 'white',
               fontSize: isMobile ? '1rem' : '1.5rem',
-              fontWeight: '600',
+              fontWeight: '400',
               fontFamily: 'Helvetica, Arial, sans-serif',
               cursor: 'pointer',
               padding: isMobile ? '0.3rem 0.8rem' : '0.5rem 1rem',
               whiteSpace: 'nowrap',
               letterSpacing: '1px',
               position: 'relative',
-              transition: 'all 0.3s ease',
-              backgroundColor: 'transparent',
-              border: '1px solid rgba(0, 255, 0, 0.3)',
-              borderRadius: '30px',
-              textShadow: '0 0 5px rgba(0, 255, 0, 0.3)'
+              transition: 'all 0.3s ease'
             }}
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 1.1, duration: 0.6 }}
-            whileHover={{ 
-              scale: 1.05,
-              borderColor: '#00FF00',
-              boxShadow: '0 0 15px #00FF00',
-              transition: { duration: 0.2 }
-            }}
           >
-            <svg 
-              width={isMobile ? "14" : "16"} 
-              height={isMobile ? "14" : "16"} 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="#00FF00" 
-              strokeWidth="2"
-            >
-              <line x1="12" y1="5" x2="12" y2="19"/>
-              <line x1="5" y1="12" x2="19" y2="12"/>
-            </svg>
             MENU
-          </motion.div>
-
-          {/* Tombol NOTE dengan angka (01) dan South East Arrow */}
-          <motion.div
-            data-note-button
-            onClick={() => router.push('/notes')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.3rem',
-              color: '#00FF00',
-              fontSize: isMobile ? '1rem' : '1.5rem',
-              fontWeight: '600',
-              fontFamily: 'Helvetica, Arial, sans-serif',
-              cursor: 'pointer',
-              padding: isMobile ? '0.3rem 0.8rem' : '0.5rem 1rem',
-              whiteSpace: 'nowrap',
-              letterSpacing: '1px',
-              position: 'relative',
-              transition: 'all 0.3s ease',
-              backgroundColor: 'transparent',
-              border: '1px solid rgba(0, 255, 0, 0.3)',
-              borderRadius: '30px',
-              textShadow: '0 0 5px rgba(0, 255, 0, 0.3)'
-            }}
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 1.1, duration: 0.6 }}
-            whileHover={{ 
-              scale: 1.05,
-              borderColor: '#00FF00',
-              boxShadow: '0 0 15px #00FF00',
-              transition: { duration: 0.2 }
-            }}
-          >
-            <span style={{ fontSize: isMobile ? '0.8rem' : '1rem', opacity: 0.7 }}>01</span>
-            NOTE
-            <svg 
-              width={isMobile ? "14" : "16"} 
-              height={isMobile ? "14" : "16"} 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="#00FF00" 
-              strokeWidth="2"
-              style={{ transform: 'rotate(45deg)' }}
-            >
-              <path d="M7 7h10v10"/>
-              <path d="M7 17L17 7"/>
-            </svg>
           </motion.div>
 
           {/* Calendar Button di Header */}
@@ -6895,3 +7149,5 @@ fontFamily: 'Helvetica, Arial, sans-serif'
     </div>
   );
 }
+
+
