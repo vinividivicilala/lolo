@@ -216,27 +216,17 @@ export default function HomePage(): React.JSX.Element {
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [showSearchResults, setShowSearchResults] = useState(false);
 
-  // State untuk GSAP Loading
+  // State untuk GSAP Loading - DIPERBAIKI
   const [showGsapLoading, setShowGsapLoading] = useState(true);
   const [currentRandomNumber, setCurrentRandomNumber] = useState(0);
 
   // State untuk kalender
   const [showCalendarModal, setShowCalendarModal] = useState(false);
   const [currentYear, setCurrentYear] = useState(2026);
-  const [currentMonth, setCurrentMonth] = useState(0);
+  const [currentMonth, setCurrentMonth] = useState(0); // 0 = Januari
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [isLoadingEvents, setIsLoadingEvents] = useState(false);
-
-  // State untuk drag foto
-  const [photoPositions, setPhotoPositions] = useState([
-    { x: 0, y: 0 },
-    { x: 0, y: 0 },
-    { x: 0, y: 0 },
-    { x: 0, y: 0 }
-  ]);
-  const [isDragging, setIsDragging] = useState<number | null>(null);
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
   const headerRef = useRef<HTMLDivElement>(null);
   const topNavRef = useRef<HTMLDivElement>(null);
@@ -251,7 +241,6 @@ export default function HomePage(): React.JSX.Element {
   const messageInputRef = useRef<HTMLInputElement>(null);
   const userDropdownRef = useRef<HTMLDivElement>(null);
   const menuOverlayRef = useRef<HTMLDivElement>(null);
-  const menuButtonRef = useRef<HTMLDivElement>(null);
   
   // Ref untuk notifikasi dan search
   const notificationRef = useRef<HTMLDivElement>(null);
@@ -260,7 +249,7 @@ export default function HomePage(): React.JSX.Element {
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const userProfileModalRef = useRef<HTMLDivElement>(null);
 
-  // Ref untuk GSAP Loading
+  // Ref untuk GSAP Loading - DIPERBAIKI
   const gsapLoadingRef = useRef<HTMLDivElement>(null);
   const loadingNumberRef = useRef<HTMLDivElement>(null);
 
@@ -380,6 +369,9 @@ export default function HomePage(): React.JSX.Element {
     { title: "Features", description: "Functionality & Integration" }
   ];
 
+
+ 
+
   // Data untuk halaman Index
   const indexTopics = [
     {
@@ -430,9 +422,9 @@ export default function HomePage(): React.JSX.Element {
   const getColorByType = (type: string): string => {
     switch (type) {
       case 'system': return '#6366F1';
-      case 'announcement': return '#FF3366';
+      case 'announcement': return '#0050B7';
       case 'alert': return '#FF4757';
-      case 'update': return '#00FF88';
+      case 'update': return '#00FF00';
       case 'comment': return '#8B5CF6';
       case 'personal': return '#F59E0B';
       default: return '#6B7280';
@@ -518,7 +510,7 @@ export default function HomePage(): React.JSX.Element {
     return new Date(year, month + 1, 0).getDate();
   };
 
-  // Fungsi untuk mendapatkan hari pertama dalam bulan
+  // Fungsi untuk mendapatkan hari pertama dalam bulan (0 = Minggu, 1 = Senin, dst)
   const getFirstDayOfMonth = (year: number, month: number): number => {
     return new Date(year, month, 1).getDay();
   };
@@ -527,9 +519,11 @@ export default function HomePage(): React.JSX.Element {
 const daysInMonth = getDaysInMonth(currentYear, currentMonth);
 const firstDayOfMonth = getFirstDayOfMonth(currentYear, currentMonth);
 const days = [];
+// Tambahkan hari kosong untuk hari-hari sebelum bulan dimulai
 for (let i = 0; i < firstDayOfMonth; i++) {
 days.push(null);
 }
+// Tambahkan hari-hari dalam bulan
 for (let i = 1; i <= daysInMonth; i++) {
 const currentDate = new Date(currentYear, currentMonth, i);
 const dayEvents = calendarEvents.filter(event => {
@@ -960,7 +954,7 @@ return days;
     loadTotalLoggedInUsers();
   }, []);
 
-  // Fungsi untuk load user notes dari Firebase
+  // Fungsi untuk load user notes dari Firebase - DIPERBAIKI
   const loadUserNotes = async (userId: string) => {
     if (!db || !userId) return;
     
@@ -968,6 +962,7 @@ return days;
       setIsLoadingNotes(true);
       console.log(`📝 Loading notes for user: ${userId} from userNotes collection`);
       
+      // Gunakan collection 'userNotes' yang sama dengan halaman notes
       const notesRef = collection(db, 'userNotes');
       const q = query(
         notesRef, 
@@ -981,6 +976,7 @@ return days;
       querySnapshot.forEach((doc) => {
         const data = doc.data();
         
+        // DEBUG: Tampilkan data yang diterima
         console.log("Firestore note data:", {
           id: doc.id,
           data: data,
@@ -990,6 +986,7 @@ return days;
           hasContent: !!data.content
         });
         
+        // Ambil field sesuai dengan struktur di halaman notes
         const noteTitle = data.title?.trim() || 'Untitled Note';
         const noteDescription = data.description?.trim() || data.content?.trim() || '';
         const noteCategory = data.category?.trim() || '';
@@ -998,22 +995,22 @@ return days;
         notesData.push({
           id: doc.id,
           title: noteTitle,
-          content: noteDescription,
+          content: noteDescription, // Gunakan description sebagai content
           userId: data.userId || userId,
           userName: data.userName || userDisplayName || 'User',
           userEmail: data.userEmail || user?.email || '',
           createdAt: data.createdAt || new Date(),
           updatedAt: data.updatedAt || new Date(),
           isPinned: data.isPinned || false,
-          category: noteCategory,
-          link: noteLink,
+          category: noteCategory, // Tambahkan category
+          link: noteLink, // Tambahkan link
           color: data.color || '#3B82F6',
           tags: data.tags || []
         });
       });
       
       console.log(`✅ Loaded ${notesData.length} notes for user ${userId}`);
-      console.log("Sample note data:", notesData[0]);
+      console.log("Sample note data:", notesData[0]); // Debug: tampilkan contoh data
       
       setUserNotes(notesData);
       setTotalNotesCount(notesData.length);
@@ -1024,11 +1021,12 @@ return days;
     }
   };
 
-  // Fungsi untuk load user notes secara real-time
+  // Fungsi untuk load user notes secara real-time - DIPERBAIKI
   const loadUserNotesRealtime = (userId: string) => {
     if (!db || !userId) return () => {};
     
     try {
+      // Gunakan collection 'userNotes' yang sama
       const notesRef = collection(db, 'userNotes');
       const q = query(
         notesRef, 
@@ -1042,6 +1040,7 @@ return days;
         querySnapshot.forEach((doc) => {
           const data = doc.data();
           
+          // Ambil field sesuai dengan struktur di halaman notes
           const noteTitle = data.title?.trim() || 'Untitled Note';
           const noteDescription = data.description?.trim() || data.content?.trim() || '';
           const noteCategory = data.category?.trim() || '';
@@ -1050,15 +1049,15 @@ return days;
           notesData.push({
             id: doc.id,
             title: noteTitle,
-            content: noteDescription,
+            content: noteDescription, // Gunakan description sebagai content
             userId: data.userId || userId,
             userName: data.userName || userDisplayName || 'User',
             userEmail: data.userEmail || user?.email || '',
             createdAt: data.createdAt || new Date(),
             updatedAt: data.updatedAt || new Date(),
             isPinned: data.isPinned || false,
-            category: noteCategory,
-            link: noteLink,
+            category: noteCategory, // Tambahkan category
+            link: noteLink, // Tambahkan link
             color: data.color || '#3B82F6',
             tags: data.tags || []
           });
@@ -1291,7 +1290,7 @@ return days;
                   createdAt: timestamp || new Date(),
                   actionUrl: data.actionUrl,
                   icon: data.icon || getIconByType(data.type || 'announcement'),
-                  color: data.color || '#FF3366',
+                  color: data.color || '#0050B7',
                   userReads: data.userReads || {},
                   views: data.views || 0,
                   clicks: data.clicks || 0,
@@ -1342,7 +1341,7 @@ return days;
     }
   }, [db, auth?.currentUser]);
 
- // Load events kalender dari Firebase
+ // Load events kalender dari Firebase - DIPERBAIKI
 useEffect(() => {
 if (showCalendarModal && db) {
 setIsLoadingEvents(true);
@@ -1355,6 +1354,7 @@ const eventsData: CalendarEvent[] = [];
 querySnapshot.forEach((doc) => {
 const data = doc.data();
 let eventDate = data.date;
+// Convert Firestore Timestamp to Date if needed
 if (eventDate && typeof eventDate.toDate === 'function') {
 eventDate = eventDate.toDate();
 } else if (typeof eventDate === 'string') {
@@ -1425,9 +1425,9 @@ setIsLoadingEvents(false);
     if (searchContainerRef.current) {
       if (showSearch) {
         gsap.to(searchContainerRef.current, {
-          width: 350,
-          duration: 0.4,
-          ease: "power3.out"
+          width: 250,
+          duration: 0.3,
+          ease: "power2.out"
         });
         setTimeout(() => {
           if (searchInputRef.current) {
@@ -1437,8 +1437,8 @@ setIsLoadingEvents(false);
       } else {
         gsap.to(searchContainerRef.current, {
           width: 40,
-          duration: 0.4,
-          ease: "power3.in",
+          duration: 0.3,
+          ease: "power2.in",
           onComplete: () => {
             setSearchQuery("");
           }
@@ -1447,41 +1447,20 @@ setIsLoadingEvents(false);
     }
   }, [showSearch]);
 
-  // Animasi GSAP untuk tombol MENU dengan tanda +
-  useEffect(() => {
-    if (menuButtonRef.current && plusSignRef.current) {
-      // Animasi untuk tanda +
-      gsap.to(plusSignRef.current, {
-        rotation: 180,
-        scale: 1.2,
-        duration: 1.5,
-        repeat: -1,
-        yoyo: true,
-        ease: "power2.inOut"
-      });
-
-      // Animasi untuk tombol menu
-      gsap.to(menuButtonRef.current, {
-        scale: 1.05,
-        duration: 1,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut"
-      });
-    }
-  }, []);
-
   // Mouse wheel scroll handler
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
+      // Biarkan scroll normal jika tidak dalam modal
       if (!showUserProfileModal && !showMenuruFullPage && !showPhotoFullPage && !showCalendarModal) {
         return;
       }
       
+      // Jika dalam modal, izinkan scroll dengan mouse wheel
       e.stopPropagation();
     };
 
     const handleMouseDown = (e: MouseEvent) => {
+      // Middle click (scroll wheel click) untuk scroll
       if (e.button === 1) {
         e.preventDefault();
       }
@@ -1570,7 +1549,7 @@ setIsLoadingEvents(false);
     }
   }, [hoveredTopic]);
 
-  // Handler untuk membuka menu overlay dengan animasi modern
+  // Handler untuk membuka menu overlay
   const handleOpenMenu = () => {
     setShowMenuOverlay(true);
   };
@@ -1582,8 +1561,8 @@ setIsLoadingEvents(false);
       
       tl.to(menuOverlayRef.current, {
         y: '-100%',
-        duration: 0.6,
-        ease: "power4.inOut",
+        duration: 0.5,
+        ease: "power2.inOut",
         onComplete: () => {
           setShowMenuOverlay(false);
         }
@@ -1593,7 +1572,7 @@ setIsLoadingEvents(false);
     }
   };
 
-  // Animasi GSAP saat menu dibuka - Modern Awwards style
+  // Animasi GSAP saat menu dibuka
   useEffect(() => {
     if (showMenuOverlay && menuOverlayRef.current) {
       gsap.set(menuOverlayRef.current, { y: '-100%' });
@@ -1601,36 +1580,36 @@ setIsLoadingEvents(false);
       const tl = gsap.timeline();
       tl.to(menuOverlayRef.current, {
         y: '0%',
-        duration: 0.8,
-        ease: "power4.out"
-      })
-      .fromTo(".menu-item",
-        { opacity: 0, y: 30 },
-        { opacity: 1, y: 0, duration: 0.5, stagger: 0.1, ease: "power3.out" },
-        "-=0.4"
-      );
+        duration: 0.5,
+        ease: "power2.out"
+      });
     }
   }, [showMenuOverlay]);
 
   // Fungsi untuk generate angka acak
   const generateRandomNumber = (): number => {
+    // 70% kemungkinan satuan (1-9)
+    // 20% kemungkinan puluhan (10-99)
+    // 10% kemungkinan ratusan (100-999)
     const random = Math.random();
     
     if (random < 0.7) {
-      return Math.floor(Math.random() * 9) + 1;
+      return Math.floor(Math.random() * 9) + 1; // 1-9
     } else if (random < 0.9) {
-      return Math.floor(Math.random() * 90) + 10;
+      return Math.floor(Math.random() * 90) + 10; // 10-99
     } else {
-      return Math.floor(Math.random() * 900) + 100;
+      return Math.floor(Math.random() * 900) + 100; // 100-999
     }
   };
 
-  // Animasi GSAP Loading dengan angka acak
+  // Animasi GSAP Loading dengan angka acak - DIPERBAIKI
   useEffect(() => {
     if (!loadingNumberRef.current) return;
 
+    // Timeline untuk animasi angka acak
     const loadingTimeline = gsap.timeline({
       onComplete: () => {
+        // Setelah selesai, tunggu sebentar lalu fade out
         setTimeout(() => {
           gsap.to(gsapLoadingRef.current, {
             opacity: 0,
@@ -1644,18 +1623,22 @@ setIsLoadingEvents(false);
       }
     });
 
+    // Total durasi animasi: 3 detik
     const totalDuration = 3;
-    const numChanges = 15;
+    const numChanges = 15; // Jumlah perubahan angka
     const changeInterval = totalDuration / numChanges;
 
+    // Animasikan perubahan angka acak
     for (let i = 0; i < numChanges; i++) {
       loadingTimeline.to({}, {
         duration: changeInterval,
         onStart: () => {
+          // Generate angka acak baru
           const newNumber = generateRandomNumber();
           setCurrentRandomNumber(newNumber);
         },
         onUpdate: function() {
+          // Efek visual halus saat angka berubah
           if (loadingNumberRef.current) {
             const progress = this.progress();
             const scale = 1 + (Math.sin(progress * Math.PI * 2) * 0.05);
@@ -1669,6 +1652,7 @@ setIsLoadingEvents(false);
       }, i * changeInterval);
     }
 
+    // Animasi awal untuk angka pertama
     loadingTimeline.fromTo(loadingNumberRef.current,
       {
         scale: 0.8,
@@ -1683,6 +1667,7 @@ setIsLoadingEvents(false);
       0
     );
 
+    // Animasi akhir sebelum fade out
     loadingTimeline.to(loadingNumberRef.current, {
       scale: 1.1,
       duration: 0.3,
@@ -1782,7 +1767,7 @@ setIsLoadingEvents(false);
     };
   }, [isMobile, showMenuruFullPage, showPhotoFullPage, showUserDropdown, showLogoutModal, showMenuOverlay, showNotification, showSearch, showUserProfileModal, showDeleteAccountModal, showCalendarModal]);
 
-  // Animasi GSAP untuk tanda + di tombol Menuru
+  // Animasi GSAP untuk tanda + di tombol MENURU (sebelumnya)
   useEffect(() => {
     if (plusSignRef.current && !showMenuruFullPage) {
       gsap.killTweensOf(plusSignRef.current);
@@ -1796,6 +1781,58 @@ setIsLoadingEvents(false);
       });
     }
   }, [showMenuruFullPage]);
+
+  // Animasi GSAP baru untuk tombol MENU dengan gaya modern
+  useEffect(() => {
+    const menuElement = document.querySelector('[data-menu-button]');
+    if (menuElement) {
+      // Animasi modern: efek pulse dengan transformasi dan opacity
+      gsap.killTweensOf(menuElement);
+      
+      // Animasi modern dengan timeline
+      const tl = gsap.timeline({ repeat: -1, yoyo: true });
+      
+      tl.to(menuElement, {
+        scale: 1.05,
+        duration: 1.2,
+        ease: "power2.inOut",
+        boxShadow: '0 0 15px rgba(0, 255, 0, 0.3)'
+      })
+      .to(menuElement, {
+        scale: 1,
+        duration: 1.2,
+        ease: "power2.inOut",
+        boxShadow: '0 0 5px rgba(0, 255, 0, 0.1)'
+      });
+    }
+  }, []);
+
+  // Animasi GSAP untuk tombol NOTE
+  useEffect(() => {
+    const noteElement = document.querySelector('[data-note-button]');
+    if (noteElement) {
+      gsap.killTweensOf(noteElement);
+      
+      // Animasi modern untuk NOTE
+      const tl = gsap.timeline({ repeat: -1, yoyo: true, repeatDelay: 0.5 });
+      
+      tl.to(noteElement, {
+        x: 5,
+        duration: 0.8,
+        ease: "power2.inOut"
+      })
+      .to(noteElement, {
+        x: -5,
+        duration: 0.8,
+        ease: "power2.inOut"
+      }, 0.4)
+      .to(noteElement, {
+        x: 0,
+        duration: 0.8,
+        ease: "power2.inOut"
+      }, 0.8);
+    }
+  }, []);
 
   // Animasi GSAP untuk tanda \ di halaman full page
   useEffect(() => {
@@ -1923,10 +1960,11 @@ setIsLoadingEvents(false);
     handleOpenPhotoFullPage();
   };
 
-  // Handler untuk Sign In / User Button
+  // Handler untuk Sign In / User Button - DIPERBAIKI
   const handleSignInClick = () => {
     if (user) {
       setShowUserProfileModal(true);
+      // Load notes ketika modal dibuka
       if (user) {
         loadUserNotes(user.uid);
       }
@@ -2101,6 +2139,7 @@ setIsLoadingEvents(false);
     if (!user || !auth.currentUser) return;
     
     try {
+      // Hapus semua notes user
       const notesRef = collection(db, 'notes');
       const q = query(notesRef, where('userId', '==', user.uid));
       const querySnapshot = await getDocs(q);
@@ -2110,11 +2149,13 @@ setIsLoadingEvents(false);
         batch.delete(doc.ref);
       });
       
+      // Hapus user stats
       const userStatsRef = doc(db, 'userStats', user.uid);
       batch.delete(userStatsRef);
       
       await batch.commit();
       
+      // Hapus user dari authentication
       await deleteUser(auth.currentUser);
       
       alert("Akun berhasil dihapus!");
@@ -2133,43 +2174,6 @@ setIsLoadingEvents(false);
       alert("Terima kasih atas feedback Anda!");
     }
   };
-
-  // Handler untuk drag foto
-  const handlePhotoDragStart = (index: number, e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsDragging(index);
-    setDragStart({
-      x: e.clientX - photoPositions[index].x,
-      y: e.clientY - photoPositions[index].y
-    });
-  };
-
-  const handlePhotoDragMove = (e: React.MouseEvent) => {
-    if (isDragging !== null) {
-      const newX = e.clientX - dragStart.x;
-      const newY = e.clientY - dragStart.y;
-      
-      setPhotoPositions(prev => prev.map((pos, i) => 
-        i === isDragging ? { x: newX, y: newY } : pos
-      ));
-    }
-  };
-
-  const handlePhotoDragEnd = () => {
-    setIsDragging(null);
-  };
-
-  useEffect(() => {
-    if (isDragging !== null) {
-      window.addEventListener('mousemove', handlePhotoDragMove as any);
-      window.addEventListener('mouseup', handlePhotoDragEnd);
-      
-      return () => {
-        window.removeEventListener('mousemove', handlePhotoDragMove as any);
-        window.removeEventListener('mouseup', handlePhotoDragEnd);
-      };
-    }
-  }, [isDragging, dragStart]);
 
   // Komentar untuk foto saat ini
   const currentPhotoComments = comments.filter(comment => comment.photoIndex === currentPhotoIndex);
@@ -2192,7 +2196,7 @@ setIsLoadingEvents(false);
       MozOsxFontSmoothing: 'grayscale'
     }}>
 
-      {/* GSAP Modern Loading Animation */}
+      {/* GSAP Modern Loading Animation - DIPERBAIKI DENGAN ANGKA ACAK */}
       <AnimatePresence>
         {showGsapLoading && (
           <motion.div
@@ -2224,11 +2228,12 @@ setIsLoadingEvents(false);
                 msUserSelect: 'none'
               }}
             >
+              {/* Angka loading acak dengan animasi GSAP */}
               <div 
                 ref={loadingNumberRef}
                 style={{
                   fontSize: isMobile ? '5rem' : '7rem',
-                  fontWeight: 400,
+                  fontWeight: 400, // Normal, tidak bold
                   fontFamily: 'Helvetica, Arial, sans-serif',
                   color: 'white',
                   opacity: 0,
@@ -2242,26 +2247,28 @@ setIsLoadingEvents(false);
         )}
       </AnimatePresence>
 
-      {/* Loading Events */}
-      {isLoadingEvents && (
-        <div style={{
-          padding: '3rem 0',
-          textAlign: 'center',
-          color: 'rgba(255, 255, 255, 0.7)',
-          fontFamily: 'Helvetica, Arial, sans-serif'
-        }}>
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-            style={{ marginBottom: '1rem' }}
-          >
-            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
-            </svg>
-          </motion.div>
-          Loading events...
-        </div>
-      )}
+
+
+      {/* Loading State */}
+{isLoadingEvents && (
+<div style={{
+padding: '3rem 0',
+textAlign: 'center',
+color: 'rgba(255, 255, 255, 0.7)',
+fontFamily: 'Helvetica, Arial, sans-serif'
+}}>
+<motion.div
+animate={{ rotate: 360 }}
+transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+style={{ marginBottom: '1rem' }}
+>
+<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+<path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+</svg>
+</motion.div>
+Loading events...
+</div>
+)}
 
       {/* Modal Kalender Tahun Baru */}
       <AnimatePresence>
@@ -2305,7 +2312,7 @@ setIsLoadingEvents(false);
                 border: '1px solid rgba(255, 255, 255, 0.2)'
               }}
             >
-              {/* Header Modal Kalender */}
+              {/* Header Modal */}
               <div style={{
                 padding: isMobile ? '1.5rem' : '2rem',
                 borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
@@ -2326,15 +2333,15 @@ setIsLoadingEvents(false);
                     Kalender MENURU {currentYear}
                   </h2>
                   <div style={{
-                    backgroundColor: 'transparent',
-                    color: 'white',
-                    fontSize: '0.9rem',
-                    padding: '0.3rem 0.8rem',
-                    borderRadius: '20px',
-                    border: '1px solid rgba(255, 255, 255, 0.3)'
-                  }}>
-                    {calendarEvents.length} Events
-                  </div>
+backgroundColor: 'transparent',
+color: 'white',
+fontSize: '0.9rem',
+padding: '0.3rem 0.8rem',
+borderRadius: '20px',
+border: '1px solid rgba(255, 255, 255, 0.3)'
+}}>
+{calendarEvents.length} Events
+</div>
                 </div>
                 
                 <motion.button
@@ -2379,6 +2386,7 @@ setIsLoadingEvents(false);
                   flexWrap: 'wrap',
                   gap: '1rem'
                 }}>
+                  {/* Navigasi Bulan */}
                   <div style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -2438,6 +2446,7 @@ setIsLoadingEvents(false);
                     </motion.button>
                   </div>
 
+                  {/* Pilih Tahun */}
                   <div style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -2449,9 +2458,9 @@ setIsLoadingEvents(false);
                         key={year}
                         onClick={() => handleYearSelect(year)}
                         style={{
-                          backgroundColor: currentYear === year ? 'rgba(255, 51, 102, 0.2)' : 'transparent',
-                          border: currentYear === year ? '1px solid #FF3366' : '1px solid rgba(255, 255, 255, 0.3)',
-                          color: currentYear === year ? '#FF3366' : 'white',
+                          backgroundColor: currentYear === year ? 'rgba(255, 255, 255, 0.2)' : 'transparent',
+                          border: '1px solid rgba(255, 255, 255, 0.3)',
+                          color: 'white',
                           padding: '0.5rem 1rem',
                           borderRadius: '20px',
                           cursor: 'pointer',
@@ -2459,13 +2468,14 @@ setIsLoadingEvents(false);
                           fontFamily: 'Helvetica, Arial, sans-serif',
                           whiteSpace: 'nowrap'
                         }}
-                        whileHover={{ backgroundColor: 'rgba(255, 51, 102, 0.1)', borderColor: '#FF3366' }}
+                        whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
                       >
                         {year}
                       </motion.button>
                     ))}
                   </div>
 
+                  {/* Pilih Bulan */}
                   <div style={{
                     display: 'flex',
                     gap: '0.5rem',
@@ -2479,9 +2489,9 @@ setIsLoadingEvents(false);
                         key={month}
                         onClick={() => handleMonthSelect(index)}
                         style={{
-                          backgroundColor: currentMonth === index ? 'rgba(255, 51, 102, 0.2)' : 'transparent',
-                          border: currentMonth === index ? '1px solid #FF3366' : '1px solid rgba(255, 255, 255, 0.3)',
-                          color: currentMonth === index ? '#FF3366' : 'white',
+                          backgroundColor: currentMonth === index ? 'rgba(255, 255, 255, 0.2)' : 'transparent',
+                          border: '1px solid rgba(255, 255, 255, 0.3)',
+                          color: 'white',
                           padding: '0.4rem 0.8rem',
                           borderRadius: '15px',
                           cursor: 'pointer',
@@ -2489,7 +2499,7 @@ setIsLoadingEvents(false);
                           fontFamily: 'Helvetica, Arial, sans-serif',
                           minWidth: '40px'
                         }}
-                        whileHover={{ backgroundColor: 'rgba(255, 51, 102, 0.1)', borderColor: '#FF3366' }}
+                        whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
                       >
                         {month}
                       </motion.button>
@@ -2503,6 +2513,7 @@ setIsLoadingEvents(false);
                   flexDirection: 'column',
                   gap: '1rem'
                 }}>
+                  {/* Header Hari */}
                   <div style={{
                     display: 'grid',
                     gridTemplateColumns: 'repeat(7, 1fr)',
@@ -2525,6 +2536,7 @@ setIsLoadingEvents(false);
                     ))}
                   </div>
 
+                  {/* Grid Tanggal */}
                   <div style={{
                     display: 'grid',
                     gridTemplateColumns: 'repeat(7, 1fr)',
@@ -2555,12 +2567,13 @@ setIsLoadingEvents(false);
                             transition: 'all 0.3s ease'
                           }}
                           whileHover={{ 
-                            backgroundColor: 'rgba(255, 51, 102, 0.05)',
-                            borderColor: '#FF3366'
+                            backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                            borderColor: 'rgba(255, 255, 255, 0.4)'
                           }}
                         >
+                          {/* Tanggal */}
                           <div style={{
-                            color: day.isToday ? '#FF3366' : 'white',
+                            color: day.isToday ? '#3B82F6' : 'white',
                             fontSize: isMobile ? '0.9rem' : '1rem',
                             fontWeight: day.isToday ? '700' : '400',
                             marginBottom: '0.5rem',
@@ -2573,12 +2586,13 @@ setIsLoadingEvents(false);
                               <div style={{
                                 width: '6px',
                                 height: '6px',
-                                backgroundColor: '#FF3366',
+                                backgroundColor: '#3B82F6',
                                 borderRadius: '50%'
                               }} />
                             )}
                           </div>
 
+                          {/* Event Indicators */}
                           {hasEvents && (
                             <div style={{
                               display: 'flex',
@@ -2652,8 +2666,8 @@ setIsLoadingEvents(false);
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     style={{
-                      backgroundColor: 'rgba(255, 51, 102, 0.05)',
-                      border: '1px solid #FF3366',
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      border: '1px solid rgba(255, 255, 255, 0.2)',
                       borderRadius: '15px',
                       padding: '1.5rem',
                       marginTop: '1rem'
@@ -2678,8 +2692,8 @@ setIsLoadingEvents(false);
                         onClick={() => setSelectedDate(null)}
                         style={{
                           backgroundColor: 'transparent',
-                          border: '1px solid #FF3366',
-                          color: '#FF3366',
+                          border: '1px solid rgba(255, 255, 255, 0.3)',
+                          color: 'white',
                           width: '30px',
                           height: '30px',
                           borderRadius: '50%',
@@ -2689,7 +2703,7 @@ setIsLoadingEvents(false);
                           justifyContent: 'center',
                           fontSize: '1rem'
                         }}
-                        whileHover={{ backgroundColor: 'rgba(255, 51, 102, 0.1)' }}
+                        whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
                       >
                         ×
                       </motion.button>
@@ -2697,7 +2711,7 @@ setIsLoadingEvents(false);
 
                    {(() => {
 if (isLoadingEvents) {
-return null;
+return null; // Loading sudah ditampilkan di atas
 }
 const eventsForSelectedDate = calendarEvents.filter(event =>
 event.date.getDate() === selectedDate.getDate() &&
@@ -2740,6 +2754,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                                 alignItems: 'flex-start'
                               }}
                             >
+                              {/* Warna Label */}
                               <div style={{
                                 width: '4px',
                                 height: '100%',
@@ -2748,6 +2763,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                                 flexShrink: 0
                               }} />
 
+                              {/* Konten Event */}
                               <div style={{ flex: 1 }}>
                                 <div style={{
                                   display: 'flex',
@@ -2827,14 +2843,13 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                                       width: '24px',
                                       height: '24px',
                                       borderRadius: '50%',
-                                      backgroundColor: 'rgba(255, 51, 102, 0.1)',
+                                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
                                       display: 'flex',
                                       alignItems: 'center',
                                       justifyContent: 'center',
                                       fontSize: '0.8rem',
                                       fontWeight: '600',
-                                      color: '#FF3366',
-                                      border: '1px solid #FF3366'
+                                      color: 'white'
                                     }}>
                                       {event.createdBy.charAt(0)}
                                     </div>
@@ -2848,10 +2863,10 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                                           marginLeft: '0.3rem',
                                           fontSize: '0.7rem',
                                           backgroundColor: 'transparent',
-                                          color: '#FF3366',
+                                          color: 'white',
                                           padding: '0.1rem 0.4rem',
                                           borderRadius: '4px',
-                                          border: '1px solid #FF3366'
+                                          border: '1px solid rgba(255, 255, 255, 0.3)'
                                         }}>
                                           ADMIN
                                         </span>
@@ -2868,17 +2883,18 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                   </motion.div>
                 )}
 
+                {/* Footer Modal */}
                 <div style={{
                   paddingTop: '1.5rem',
-                  borderTop: '1px solid rgba(255, 51, 102, 0.3)',
+                  borderTop: '1px solid rgba(255, 255, 255, 0.2)',
                   color: 'rgba(255, 255, 255, 0.6)',
                   fontSize: '0.85rem',
                   fontFamily: 'Helvetica, Arial, sans-serif',
                   textAlign: 'center'
                 }}>
                   Kalender kegiatan admin MENURU • Waktu dalam WIB (UTC+7) • 
-                  <span style={{ color: '#FF3366', marginLeft: '0.3rem' }}>
-                    Titik merah menunjukkan hari ini
+                  <span style={{ color: '#3B82F6', marginLeft: '0.3rem' }}>
+                    Titik biru menunjukkan hari ini
                   </span>
                 </div>
               </div>
@@ -2887,7 +2903,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
         )}
       </AnimatePresence>
 
-      {/* Modal Profil User */}
+      {/* Modal Profil User - DIPERBAIKI */}
       <AnimatePresence>
         {showUserProfileModal && user && (
           <motion.div
@@ -2930,7 +2946,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
               }}
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Sidebar Tabs di Kiri */}
+              {/* Sidebar Tabs di Kiri - TRANSPARAN */}
               <div style={{
                 width: '300px',
                 backgroundColor: 'transparent',
@@ -2983,7 +2999,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                         padding: '1.5rem 2rem',
                         backgroundColor: 'transparent',
                         border: 'none',
-                        color: activeTab === tab ? '#FF3366' : 'rgba(255, 255, 255, 0.7)',
+                        color: activeTab === tab ? 'white' : 'rgba(255, 255, 255, 0.7)',
                         fontSize: '1.3rem',
                         fontWeight: '300',
                         fontFamily: 'Helvetica, Arial, sans-serif',
@@ -2996,7 +3012,6 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                         transition: 'all 0.3s ease',
                         position: 'relative'
                       }}
-                      whileHover={{ color: '#FF3366', x: 10 }}
                     >
                       <span>
                         {tab === 'notes' ? 'Notes' :
@@ -3013,8 +3028,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                             height: '24px',
                             display: 'flex',
                             alignItems: 'center',
-                            justifyContent: 'center',
-                            color: '#FF3366'
+                            justifyContent: 'center'
                           }}
                         >
                           <svg
@@ -3022,7 +3036,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                             height="20"
                             viewBox="0 0 24 24"
                             fill="none"
-                            stroke="#FF3366"
+                            stroke="white"
                             strokeWidth="2"
                           >
                             <path d="M6 18L18 6"/>
@@ -3044,9 +3058,9 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                       width: '100%',
                       padding: '1.2rem',
                       backgroundColor: 'transparent',
-                      border: '1px solid #FF3366',
+                      border: '1px solid rgba(255, 255, 255, 0.3)',
                       borderRadius: '0',
-                      color: '#FF3366',
+                      color: 'white',
                       fontSize: '1.1rem',
                       fontWeight: '300',
                       fontFamily: 'Helvetica, Arial, sans-serif',
@@ -3057,10 +3071,9 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                       justifyContent: 'center',
                       gap: '0.8rem'
                     }}
-                    whileHover={{ backgroundColor: 'rgba(255, 51, 102, 0.1)' }}
                   >
                     Logout
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF3366" strokeWidth="2">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
                       <path d="M16 17l5-5-5-5"/>
                       <path d="M21 12H9"/>
@@ -3069,7 +3082,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                 </div>
               </div>
 
-              {/* Content Area di Kanan */}
+              {/* Content Area di Kanan - TRANSPARAN */}
               <div style={{
                 flex: 1,
                 padding: '3rem',
@@ -3098,7 +3111,6 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                       fontFamily: 'Helvetica, Arial, sans-serif',
                       opacity: 0.7
                     }}
-                    whileHover={{ opacity: 1, color: '#FF3366' }}
                   >
                     ×
                   </motion.button>
@@ -3133,9 +3145,9 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                           style={{
                             padding: '0.8rem 1.5rem',
                             backgroundColor: 'transparent',
-                            border: '1px solid #FF3366',
+                            border: '1px solid rgba(255, 255, 255, 0.3)',
                             borderRadius: '0',
-                            color: '#FF3366',
+                            color: 'white',
                             fontSize: '1rem',
                             fontWeight: '300',
                             cursor: 'pointer',
@@ -3145,10 +3157,9 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                             alignItems: 'center',
                             gap: '0.5rem'
                           }}
-                          whileHover={{ backgroundColor: 'rgba(255, 51, 102, 0.1)' }}
                         >
                           Go to Notes
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF3366" strokeWidth="2">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M7 17l9.2-9.2M17 17V7H7"/>
                           </svg>
                         </motion.button>
@@ -3173,7 +3184,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                           transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                           style={{ marginBottom: '1rem' }}
                         >
-                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FF3366" strokeWidth="1.5">
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5">
                             <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
                           </svg>
                         </motion.div>
@@ -3187,7 +3198,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                         fontFamily: 'Helvetica, Arial, sans-serif'
                       }}>
                         <div style={{ fontSize: '3rem', marginBottom: '1.5rem', opacity: 0.5 }}>
-                          <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#FF3366" strokeWidth="1.5">
+                          <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                             <polyline points="14 2 14 8 20 8"/>
                             <line x1="16" y1="13" x2="8" y2="13"/>
@@ -3199,8 +3210,8 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                           onClick={() => router.push('/notes')}
                           style={{
                             backgroundColor: 'transparent',
-                            color: '#FF3366',
-                            border: '1px solid #FF3366',
+                            color: 'white',
+                            border: '1px solid rgba(255, 255, 255, 0.3)',
                             padding: '1.2rem 2.5rem',
                             borderRadius: '0',
                             cursor: 'pointer',
@@ -3213,10 +3224,9 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                             gap: '1rem',
                             margin: '0 auto'
                           }}
-                          whileHover={{ backgroundColor: 'rgba(255, 51, 102, 0.1)' }}
                         >
                           Create first note
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF3366" strokeWidth="2">
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M7 17l9.2-9.2M17 17V7H7"/>
                           </svg>
                         </motion.button>
@@ -3302,7 +3312,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                                 <div style={{
                                   fontSize: '1.2rem',
                                   fontFamily: 'Helvetica, Arial, sans-serif',
-                                  color: '#FF3366',
+                                  color: 'rgba(255, 255, 255, 0.6)',
                                   marginBottom: '0.5rem',
                                   textTransform: 'uppercase',
                                   letterSpacing: '0.5px'
@@ -3346,8 +3356,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                                       height: 0,
                                       overflow: 'hidden',
                                       backgroundColor: '#000',
-                                      borderRadius: '4px',
-                                      border: '1px solid #FF3366'
+                                      borderRadius: '4px'
                                     }}>
                                       <iframe
                                         src={videoEmbedUrl}
@@ -3370,8 +3379,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                                       backgroundColor: '#000',
                                       borderRadius: '4px',
                                       overflow: 'hidden',
-                                      maxWidth: '560px',
-                                      border: '1px solid #FF3366'
+                                      maxWidth: '560px'
                                     }}>
                                       <video
                                         src={videoEmbedUrl}
@@ -3388,9 +3396,9 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                                   ) : (
                                     <div style={{
                                       padding: '1rem',
-                                      backgroundColor: 'rgba(255, 51, 102, 0.1)',
+                                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
                                       borderRadius: '4px',
-                                      border: '1px solid #FF3366'
+                                      border: '1px solid rgba(255, 255, 255, 0.2)'
                                     }}>
                                       <a
                                         href={note.link}
@@ -3398,7 +3406,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                                         rel="noopener noreferrer"
                                         onClick={(e) => e.stopPropagation()}
                                         style={{
-                                          color: '#FF3366',
+                                          color: 'white',
                                           textDecoration: 'none',
                                           display: 'flex',
                                           alignItems: 'center',
@@ -3408,7 +3416,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                                           wordBreak: 'break-all'
                                         }}
                                       >
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF3366" strokeWidth="2">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                           <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2 2V8a2 2 0 0 1 2-2h6"/>
                                           <polyline points="15 3 21 3 21 9"/>
                                           <line x1="10" y1="14" x2="21" y2="3"/>
@@ -3429,7 +3437,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                                 <span style={{
                                   fontSize: '1rem',
                                   fontFamily: 'Helvetica, Arial, sans-serif',
-                                  color: 'rgba(255, 51, 102, 0.7)'
+                                  color: 'rgba(255, 255, 255, 0.5)'
                                 }}>
                                   {note.updatedAt ? calculateTimeAgo(note.updatedAt) : 'Recently'}
                                 </span>
@@ -3441,7 +3449,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                                     rel="noopener noreferrer"
                                     onClick={(e) => e.stopPropagation()}
                                     style={{
-                                      color: '#FF3366',
+                                      color: 'white',
                                       textDecoration: 'none',
                                       display: 'flex',
                                       alignItems: 'center',
@@ -3451,7 +3459,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                                     }}
                                   >
                                     Buka Link
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF3366" strokeWidth="2">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                       <path d="M7 17l9.2-9.2M17 17V7H7"/>
                                     </svg>
                                   </a>
@@ -3473,12 +3481,12 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                               alignItems: 'center',
                               justifyContent: 'center',
                               gap: '0.5rem',
-                              borderTop: '1px solid #FF3366',
+                              borderTop: '1px solid rgba(255, 255, 255, 0.1)',
                               marginTop: '1rem'
                             }}
                           >
                             <div style={{
-                              color: '#FF3366',
+                              color: 'white',
                               fontSize: '1.2rem',
                               fontWeight: '300',
                               fontFamily: 'Helvetica, Arial, sans-serif'
@@ -3497,7 +3505,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                               height="20"
                               viewBox="0 0 24 24"
                               fill="none"
-                              stroke="#FF3366"
+                              stroke="white"
                               strokeWidth="2"
                               animate={{ x: [0, 5, 0] }}
                               transition={{ repeat: Infinity, duration: 1.5 }}
@@ -3552,7 +3560,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                               width: '100%',
                               padding: '1.2rem',
                               backgroundColor: 'transparent',
-                              border: '1px solid #FF3366',
+                              border: '1px solid rgba(255, 255, 255, 0.3)',
                               borderRadius: '0',
                               color: 'white',
                               fontSize: '1.2rem',
@@ -3581,7 +3589,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                               width: '100%',
                               padding: '1.2rem',
                               backgroundColor: 'transparent',
-                              border: '1px solid #FF3366',
+                              border: '1px solid rgba(255, 255, 255, 0.3)',
                               borderRadius: '0',
                               color: 'white',
                               fontSize: '1.2rem',
@@ -3612,7 +3620,6 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                               letterSpacing: '0.5px'
                             }}
                             disabled={isUpdating}
-                            whileHover={{ borderColor: '#FF3366' }}
                           >
                             Cancel
                           </motion.button>
@@ -3621,9 +3628,9 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                             style={{
                               padding: '1.2rem 2.5rem',
                               backgroundColor: 'transparent',
-                              border: '1px solid #FF3366',
+                              border: '1px solid white',
                               borderRadius: '0',
-                              color: '#FF3366',
+                              color: 'white',
                               fontSize: '1.1rem',
                               fontWeight: '300',
                               cursor: 'pointer',
@@ -3631,7 +3638,6 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                               letterSpacing: '0.5px'
                             }}
                             disabled={isUpdating}
-                            whileHover={{ backgroundColor: 'rgba(255, 51, 102, 0.1)' }}
                           >
                             {isUpdating ? 'Updating...' : 'Save'}
                           </motion.button>
@@ -3653,7 +3659,6 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                             cursor: 'pointer'
                           }}
                           onClick={() => setIsEditingProfile(true)}
-                          whileHover={{ borderLeft: '2px solid #FF3366' }}
                         >
                           <div style={{
                             color: 'rgba(255, 255, 255, 0.8)',
@@ -3675,7 +3680,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                             alignItems: 'center'
                           }}>
                             {userDisplayName}
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF3366" strokeWidth="2">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                               <path d="M18 6L6 18"/>
                               <path d="M8 6h10v10"/>
                             </svg>
@@ -3691,7 +3696,6 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                             cursor: 'pointer'
                           }}
                           onClick={() => setIsEditingProfile(true)}
-                          whileHover={{ borderLeft: '2px solid #FF3366' }}
                         >
                           <div style={{
                             color: 'rgba(255, 255, 255, 0.8)',
@@ -3713,7 +3717,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                             alignItems: 'center'
                           }}>
                             {user.email}
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF3366" strokeWidth="2">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                               <path d="M18 6L6 18"/>
                               <path d="M8 6h10v10"/>
                             </svg>
@@ -3781,9 +3785,9 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                               width: '100%',
                               padding: '1.5rem',
                               backgroundColor: 'transparent',
-                              border: '1px solid #FF3366',
+                              border: '1px solid rgba(255, 255, 255, 0.3)',
                               borderRadius: '0',
-                              color: '#FF3366',
+                              color: 'white',
                               fontSize: '1.2rem',
                               fontWeight: '300',
                               cursor: 'pointer',
@@ -3794,10 +3798,9 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                               justifyContent: 'center',
                               gap: '1rem'
                             }}
-                            whileHover={{ backgroundColor: 'rgba(255, 51, 102, 0.1)' }}
                           >
                             Delete account
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF3366" strokeWidth="2">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                               <path d="M3 6h18"/>
                               <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
                             </svg>
@@ -3837,7 +3840,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                         }}
                       >
                         <h5 style={{
-                          color: '#FF3366',
+                          color: 'white',
                           fontSize: '1.5rem',
                           fontWeight: '300',
                           margin: '0 0 1.5rem 0',
@@ -3865,7 +3868,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                         }}
                       >
                         <h5 style={{
-                          color: '#FF3366',
+                          color: 'white',
                           fontSize: '1.5rem',
                           fontWeight: '300',
                           margin: '0 0 1.5rem 0',
@@ -3893,9 +3896,9 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                         style={{
                           padding: '1.5rem 3rem',
                           backgroundColor: 'transparent',
-                          border: '1px solid #FF3366',
+                          border: '1px solid rgba(255, 255, 255, 0.3)',
                           borderRadius: '0',
-                          color: '#FF3366',
+                          color: 'white',
                           fontSize: '1.2rem',
                           fontWeight: '300',
                           cursor: 'pointer',
@@ -3906,10 +3909,9 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                           justifyContent: 'space-between',
                           marginTop: '1rem'
                         }}
-                        whileHover={{ backgroundColor: 'rgba(255, 51, 102, 0.1)' }}
                       >
                         <span>View full documentation</span>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF3366" strokeWidth="2">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                           <path d="M18 6L6 18"/>
                           <path d="M8 6h10v10"/>
                         </svg>
@@ -3947,7 +3949,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                         }}
                       >
                         <h5 style={{
-                          color: '#FF3366',
+                          color: 'white',
                           fontSize: '1.5rem',
                           fontWeight: '300',
                           margin: '0 0 1.5rem 0',
@@ -3971,9 +3973,9 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                         style={{
                           padding: '1.5rem 3rem',
                           backgroundColor: 'transparent',
-                          border: '1px solid #FF3366',
+                          border: '1px solid rgba(255, 255, 255, 0.3)',
                           borderRadius: '0',
-                          color: '#FF3366',
+                          color: 'white',
                           fontSize: '1.2rem',
                           fontWeight: '300',
                           cursor: 'pointer',
@@ -3983,10 +3985,9 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                           alignItems: 'center',
                           justifyContent: 'space-between'
                         }}
-                        whileHover={{ backgroundColor: 'rgba(255, 51, 102, 0.1)' }}
                       >
                         <span>Send feedback</span>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF3366" strokeWidth="2">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                           <path d="M18 6L6 18"/>
                           <path d="M8 6h10v10"/>
                         </svg>
@@ -4002,7 +4003,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                         }}
                       >
                         <h5 style={{
-                          color: '#FF3366',
+                          color: 'white',
                           fontSize: '1.5rem',
                           fontWeight: '300',
                           margin: '0 0 1.5rem 0',
@@ -4024,9 +4025,9 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                           style={{
                             padding: '1.2rem 2rem',
                             backgroundColor: 'transparent',
-                            border: '1px solid #FF3366',
+                            border: '1px solid rgba(255, 255, 255, 0.3)',
                             borderRadius: '0',
-                            color: '#FF3366',
+                            color: 'white',
                             fontSize: '1rem',
                             fontWeight: '300',
                             cursor: 'pointer',
@@ -4037,10 +4038,9 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                             justifyContent: 'space-between',
                             marginTop: '1.5rem'
                           }}
-                          whileHover={{ backgroundColor: 'rgba(255, 51, 102, 0.1)' }}
                         >
                           <span>Contact support</span>
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF3366" strokeWidth="2">
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M18 6L6 18"/>
                             <path d="M8 6h10v10"/>
                           </svg>
@@ -4089,12 +4089,12 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                 padding: '2.5rem',
                 width: isMobile ? '90%' : '500px',
                 maxWidth: '600px',
-                border: '1px solid #FF3366'
+                border: '1px solid rgba(255, 255, 255, 0.2)'
               }}
               onClick={(e) => e.stopPropagation()}
             >
               <h4 style={{
-                color: '#FF3366',
+                color: 'white',
                 fontSize: '1.3rem',
                 fontWeight: '300',
                 margin: '0 0 1.5rem 0',
@@ -4133,7 +4133,6 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                     cursor: 'pointer',
                     fontFamily: 'Helvetica, Arial, sans-serif'
                   }}
-                  whileHover={{ borderColor: '#FF3366' }}
                 >
                   Cancel
                 </motion.button>
@@ -4142,15 +4141,14 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                   style={{
                     padding: '1rem 2rem',
                     backgroundColor: 'transparent',
-                    border: '1px solid #FF3366',
+                    border: '1px solid rgba(255, 255, 255, 0.3)',
                     borderRadius: '0',
-                    color: '#FF3366',
+                    color: 'white',
                     fontSize: '1rem',
                     fontWeight: '300',
                     cursor: 'pointer',
                     fontFamily: 'Helvetica, Arial, sans-serif'
                   }}
-                  whileHover={{ backgroundColor: 'rgba(255, 51, 102, 0.1)' }}
                 >
                   Delete
                 </motion.button>
@@ -4207,7 +4205,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                 gap: '1rem'
               }}>
                 <h3 style={{
-                  color: '#FF3366',
+                  color: 'white',
                   fontSize: isMobile ? '2rem' : '2.5rem',
                   fontWeight: '400',
                   margin: 0,
@@ -4251,7 +4249,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                     gap: '0.8rem',
                     opacity: 0.9
                   }}
-                  whileHover={{ opacity: 1, color: '#FF3366' }}
+                  whileHover={{ opacity: 1 }}
                 >
                   <span>No</span>
                   <svg 
@@ -4279,7 +4277,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                     padding: '1rem 2rem',
                     backgroundColor: 'transparent',
                     border: 'none',
-                    color: '#FF3366',
+                    color: 'white',
                     fontSize: '1.1rem',
                     fontWeight: '300',
                     cursor: 'pointer',
@@ -4298,7 +4296,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                     height="18" 
                     viewBox="0 0 24 24" 
                     fill="none" 
-                    stroke="#FF3366" 
+                    stroke="currentColor" 
                     strokeWidth="2"
                   >
                     <path d="M7 17l9.2-9.2M17 17V7H7"/>
@@ -4324,7 +4322,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
         )}
       </AnimatePresence>
 
-      {/* Menu Overlay dengan GSAP Animation - Modern Awwards Style */}
+      {/* Menu Overlay dengan GSAP Animation */}
       <AnimatePresence>
         {showMenuOverlay && (
           <motion.div
@@ -4350,257 +4348,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
               transform: 'translateY(-100%)'
             }}
           >
-            {/* Navigation Bar di dalam Menu */}
-            <div style={{
-              position: 'fixed',
-              top: isMobile ? '5rem' : '6rem',
-              left: 0,
-              width: '100%',
-              padding: isMobile ? '1rem' : '2rem',
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              zIndex: 9996,
-              boxSizing: 'border-box'
-            }}>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: isMobile ? '1rem' : '2rem',
-                backgroundColor: 'transparent',
-                borderRadius: '50px',
-                padding: isMobile ? '0.6rem 1rem' : '0.8rem 1.5rem',
-                border: '1px solid #FF3366'
-              }}>
-                <motion.div
-                  className="menu-item"
-                  onClick={() => router.push('/docs')}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    cursor: 'pointer',
-                    padding: '0.4rem 1rem 0.4rem 0.8rem',
-                    borderRadius: '25px',
-                    backgroundColor: 'transparent',
-                    border: '1px solid #FF3366',
-                    transition: 'all 0.3s ease'
-                  }}
-                  whileHover={{ backgroundColor: 'rgba(255, 51, 102, 0.1)' }}
-                >
-                  <svg width={isMobile ? "18" : "20"} height={isMobile ? "18" : "20"} viewBox="0 0 24 24" fill="none" stroke="#FF3366" strokeWidth="2">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                    <polyline points="14,2 14,8 20,8"/>
-                    <line x1="16" y1="13" x2="8" y2="13"/>
-                    <line x1="16" y1="17" x2="8" y2="17"/>
-                    <polyline points="10,9 9,9 8,9"/>
-                  </svg>
-                  <span style={{
-                    color: '#FF3366',
-                    fontSize: isMobile ? '0.8rem' : '0.9rem',
-                    fontWeight: '600',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.3rem'
-                  }}>
-                    Docs
-                    <svg width={isMobile ? "12" : "14"} height={isMobile ? "12" : "14"} viewBox="0 0 24 24" fill="none" stroke="#FF3366" strokeWidth="2">
-                      <path d="M5 12h14"/>
-                      <path d="M12 5l7 7-7 7"/>
-                    </svg>
-                  </span>
-                </motion.div>
-
-                <motion.div
-                  className="menu-item"
-                  onClick={() => router.push('/chatbot')}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    cursor: 'pointer',
-                    padding: '0.4rem 1rem 0.4rem 0.8rem',
-                    borderRadius: '25px',
-                    backgroundColor: 'transparent',
-                    border: '1px solid #FF3366',
-                    transition: 'all 0.3s ease'
-                  }}
-                  whileHover={{ backgroundColor: 'rgba(255, 51, 102, 0.1)' }}
-                >
-                  <svg width={isMobile ? "18" : "20"} height={isMobile ? "18" : "20"} viewBox="0 0 24 24" fill="none" stroke="#FF3366" strokeWidth="2">
-                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                    <line x1="8" y1="7" x2="16" y2="7"/>
-                    <line x1="8" y1="11" x2="12" y2="11"/>
-                  </svg>
-                  <span style={{
-                    color: '#FF3366',
-                    fontSize: isMobile ? '0.8rem' : '0.9rem',
-                    fontWeight: '600',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.3rem'
-                  }}>
-                    Chatbot
-                    <svg width={isMobile ? "12" : "14"} height={isMobile ? "12" : "14"} viewBox="0 0 24 24" fill="none" stroke="#FF3366" strokeWidth="2">
-                      <path d="M5 12h14"/>
-                      <path d="M12 5l7 7-7 7"/>
-                    </svg>
-                  </span>
-                </motion.div>
-
-                <motion.div
-                  className="menu-item"
-                  onClick={() => router.push('/update')}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    cursor: 'pointer',
-                    padding: '0.4rem 1rem 0.4rem 0.8rem',
-                    borderRadius: '25px',
-                    backgroundColor: 'transparent',
-                    border: '1px solid #FF3366',
-                    transition: 'all 0.3s ease'
-                  }}
-                  whileHover={{ backgroundColor: 'rgba(255, 51, 102, 0.1)' }}
-                >
-                  <svg width={isMobile ? "18" : "20"} height={isMobile ? "18" : "20"} viewBox="0 0 24 24" fill="none" stroke="#FF3366" strokeWidth="2">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                    <polyline points="14,2 14,8 20,8"/>
-                    <line x1="16" y1="13" x2="8" y2="13"/>
-                    <line x1="16" y1="17" x2="8" y2="17"/>
-                    <polyline points="10,9 9,9 8,9"/>
-                  </svg>
-                  <span style={{
-                    color: '#FF3366',
-                    fontSize: isMobile ? '0.8rem' : '0.9rem',
-                    fontWeight: '600',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.3rem'
-                  }}>
-                    Update
-                    <svg width={isMobile ? "12" : "14"} height={isMobile ? "12" : "14"} viewBox="0 0 24 24" fill="none" stroke="#FF3366" strokeWidth="2">
-                      <path d="M5 12h14"/>
-                      <path d="M12 5l7 7-7 7"/>
-                    </svg>
-                  </span>
-                </motion.div>
-
-                <motion.div
-                  className="menu-item"
-                  onClick={() => router.push('/timeline')}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    cursor: 'pointer',
-                    padding: '0.4rem 1rem 0.4rem 0.8rem',
-                    borderRadius: '25px',
-                    backgroundColor: 'transparent',
-                    border: '1px solid #FF3366',
-                    transition: 'all 0.3s ease'
-                  }}
-                  whileHover={{ backgroundColor: 'rgba(255, 51, 102, 0.1)' }}
-                >
-                  <svg width={isMobile ? "18" : "20"} height={isMobile ? "18" : "20"} viewBox="0 0 24 24" fill="none" stroke="#FF3366" strokeWidth="2">
-                    <polyline points="1 4 1 10 7 10"/>
-                    <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
-                    <line x1="12" y1="7" x2="12" y2="13"/>
-                    <line x1="16" y1="11" x2="12" y2="7"/>
-                  </svg>
-                  <span style={{
-                    color: '#FF3366',
-                    fontSize: isMobile ? '0.8rem' : '0.9rem',
-                    fontWeight: '600',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.3rem'
-                  }}>
-                    Timeline
-                    <svg width={isMobile ? "12" : "14"} height={isMobile ? "12" : "14"} viewBox="0 0 24 24" fill="none" stroke="#FF3366" strokeWidth="2">
-                      <path d="M5 12h14"/>
-                      <path d="M12 5l7 7-7 7"/>
-                    </svg>
-                  </span>
-                </motion.div>
-              </div>
-            </div>
-
-            {/* Menu Items */}
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '2rem',
-              padding: '2rem'
-            }}>
-              <motion.div
-                className="menu-item"
-                style={{
-                  fontSize: isMobile ? '3rem' : '5rem',
-                  color: 'white',
-                  cursor: 'pointer',
-                  fontFamily: 'Helvetica, Arial, sans-serif',
-                  fontWeight: '300',
-                  textTransform: 'uppercase',
-                  letterSpacing: '2px'
-                }}
-                onClick={() => {
-                  router.push('/');
-                  handleCloseMenu();
-                }}
-                whileHover={{ color: '#FF3366', x: 20 }}
-              >
-                Home
-              </motion.div>
-              <motion.div
-                className="menu-item"
-                style={{
-                  fontSize: isMobile ? '3rem' : '5rem',
-                  color: 'white',
-                  cursor: 'pointer',
-                  fontFamily: 'Helvetica, Arial, sans-serif',
-                  fontWeight: '300',
-                  textTransform: 'uppercase',
-                  letterSpacing: '2px'
-                }}
-                onClick={() => {
-                  router.push('/notes');
-                  handleCloseMenu();
-                }}
-                whileHover={{ color: '#FF3366', x: 20 }}
-              >
-                Notes
-              </motion.div>
-              <motion.div
-                className="menu-item"
-                style={{
-                  fontSize: isMobile ? '3rem' : '5rem',
-                  color: 'white',
-                  cursor: 'pointer',
-                  fontFamily: 'Helvetica, Arial, sans-serif',
-                  fontWeight: '300',
-                  textTransform: 'uppercase',
-                  letterSpacing: '2px'
-                }}
-                onClick={() => {
-                  router.push('/docs');
-                  handleCloseMenu();
-                }}
-                whileHover={{ color: '#FF3366', x: 20 }}
-              >
-                Docs
-              </motion.div>
-            </div>
-
             <motion.div
-              className="menu-item"
               onClick={handleCloseMenu}
               style={{
                 position: 'absolute',
@@ -4618,7 +4366,6 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                 justifyContent: 'center',
                 opacity: 0.7
               }}
-              whileHover={{ opacity: 1, color: '#FF3366', rotate: 90 }}
             >
               ×
             </motion.div>
@@ -4651,183 +4398,6 @@ fontFamily: 'Helvetica, Arial, sans-serif'
               paddingBottom: '4rem'
             }}
           >
-            {/* Navigation Bar di dalam Full Page Menu */}
-            <div style={{
-              position: 'fixed',
-              top: isMobile ? '5rem' : '6rem',
-              left: 0,
-              width: '100%',
-              padding: isMobile ? '1rem' : '2rem',
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              zIndex: 9999,
-              boxSizing: 'border-box'
-            }}>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: isMobile ? '1rem' : '2rem',
-                backgroundColor: 'transparent',
-                borderRadius: '50px',
-                padding: isMobile ? '0.6rem 1rem' : '0.8rem 1.5rem',
-                border: '1px solid #FF3366'
-              }}>
-                <motion.div
-                  onClick={() => router.push('/docs')}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    cursor: 'pointer',
-                    padding: '0.4rem 1rem 0.4rem 0.8rem',
-                    borderRadius: '25px',
-                    backgroundColor: 'transparent',
-                    border: '1px solid #FF3366',
-                    transition: 'all 0.3s ease'
-                  }}
-                  whileHover={{ backgroundColor: 'rgba(255, 51, 102, 0.1)' }}
-                >
-                  <svg width={isMobile ? "18" : "20"} height={isMobile ? "18" : "20"} viewBox="0 0 24 24" fill="none" stroke="#FF3366" strokeWidth="2">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                    <polyline points="14,2 14,8 20,8"/>
-                    <line x1="16" y1="13" x2="8" y2="13"/>
-                    <line x1="16" y1="17" x2="8" y2="17"/>
-                    <polyline points="10,9 9,9 8,9"/>
-                  </svg>
-                  <span style={{
-                    color: '#FF3366',
-                    fontSize: isMobile ? '0.8rem' : '0.9rem',
-                    fontWeight: '600',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.3rem'
-                  }}>
-                    Docs
-                    <svg width={isMobile ? "12" : "14"} height={isMobile ? "12" : "14"} viewBox="0 0 24 24" fill="none" stroke="#FF3366" strokeWidth="2">
-                      <path d="M5 12h14"/>
-                      <path d="M12 5l7 7-7 7"/>
-                    </svg>
-                  </span>
-                </motion.div>
-
-                <motion.div
-                  onClick={() => router.push('/chatbot')}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    cursor: 'pointer',
-                    padding: '0.4rem 1rem 0.4rem 0.8rem',
-                    borderRadius: '25px',
-                    backgroundColor: 'transparent',
-                    border: '1px solid #FF3366',
-                    transition: 'all 0.3s ease'
-                  }}
-                  whileHover={{ backgroundColor: 'rgba(255, 51, 102, 0.1)' }}
-                >
-                  <svg width={isMobile ? "18" : "20"} height={isMobile ? "18" : "20"} viewBox="0 0 24 24" fill="none" stroke="#FF3366" strokeWidth="2">
-                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                    <line x1="8" y1="7" x2="16" y2="7"/>
-                    <line x1="8" y1="11" x2="12" y2="11"/>
-                  </svg>
-                  <span style={{
-                    color: '#FF3366',
-                    fontSize: isMobile ? '0.8rem' : '0.9rem',
-                    fontWeight: '600',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.3rem'
-                  }}>
-                    Chatbot
-                    <svg width={isMobile ? "12" : "14"} height={isMobile ? "12" : "14"} viewBox="0 0 24 24" fill="none" stroke="#FF3366" strokeWidth="2">
-                      <path d="M5 12h14"/>
-                      <path d="M12 5l7 7-7 7"/>
-                    </svg>
-                  </span>
-                </motion.div>
-
-                <motion.div
-                  onClick={() => router.push('/update')}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    cursor: 'pointer',
-                    padding: '0.4rem 1rem 0.4rem 0.8rem',
-                    borderRadius: '25px',
-                    backgroundColor: 'transparent',
-                    border: '1px solid #FF3366',
-                    transition: 'all 0.3s ease'
-                  }}
-                  whileHover={{ backgroundColor: 'rgba(255, 51, 102, 0.1)' }}
-                >
-                  <svg width={isMobile ? "18" : "20"} height={isMobile ? "18" : "20"} viewBox="0 0 24 24" fill="none" stroke="#FF3366" strokeWidth="2">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                    <polyline points="14,2 14,8 20,8"/>
-                    <line x1="16" y1="13" x2="8" y2="13"/>
-                    <line x1="16" y1="17" x2="8" y2="17"/>
-                    <polyline points="10,9 9,9 8,9"/>
-                  </svg>
-                  <span style={{
-                    color: '#FF3366',
-                    fontSize: isMobile ? '0.8rem' : '0.9rem',
-                    fontWeight: '600',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.3rem'
-                  }}>
-                    Update
-                    <svg width={isMobile ? "12" : "14"} height={isMobile ? "12" : "14"} viewBox="0 0 24 24" fill="none" stroke="#FF3366" strokeWidth="2">
-                      <path d="M5 12h14"/>
-                      <path d="M12 5l7 7-7 7"/>
-                    </svg>
-                  </span>
-                </motion.div>
-
-                <motion.div
-                  onClick={() => router.push('/timeline')}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    cursor: 'pointer',
-                    padding: '0.4rem 1rem 0.4rem 0.8rem',
-                    borderRadius: '25px',
-                    backgroundColor: 'transparent',
-                    border: '1px solid #FF3366',
-                    transition: 'all 0.3s ease'
-                  }}
-                  whileHover={{ backgroundColor: 'rgba(255, 51, 102, 0.1)' }}
-                >
-                  <svg width={isMobile ? "18" : "20"} height={isMobile ? "18" : "20"} viewBox="0 0 24 24" fill="none" stroke="#FF3366" strokeWidth="2">
-                    <polyline points="1 4 1 10 7 10"/>
-                    <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
-                    <line x1="12" y1="7" x2="12" y2="13"/>
-                    <line x1="16" y1="11" x2="12" y2="7"/>
-                  </svg>
-                  <span style={{
-                    color: '#FF3366',
-                    fontSize: isMobile ? '0.8rem' : '0.9rem',
-                    fontWeight: '600',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.3rem'
-                  }}>
-                    Timeline
-                    <svg width={isMobile ? "12" : "14"} height={isMobile ? "12" : "14"} viewBox="0 0 24 24" fill="none" stroke="#FF3366" strokeWidth="2">
-                      <path d="M5 12h14"/>
-                      <path d="M12 5l7 7-7 7"/>
-                    </svg>
-                  </span>
-                </motion.div>
-              </div>
-            </div>
-
             <div style={{
               position: 'sticky',
               top: 0,
@@ -4855,7 +4425,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                     color: 'white',
                     fontSize: isMobile ? '2.5rem' : '4rem',
                     fontWeight: '300',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
                     textTransform: 'uppercase',
                     letterSpacing: '4px',
                     lineHeight: 1,
@@ -4873,7 +4443,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                     color: 'white',
                     fontSize: isMobile ? '2rem' : '3rem',
                     fontWeight: '400',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
                     letterSpacing: '3px',
                     marginBottom: isMobile ? '3rem' : '4rem'
                   }}
@@ -4903,10 +4473,10 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                       }}
                     >
                       <div style={{
-                        color: '#FF3366',
+                        color: 'white',
                         fontSize: isMobile ? '1.2rem' : '1.8rem',
                         fontWeight: '500',
-                        fontFamily: 'Helvetica, Arial, sans-serif',
+                        fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
                         letterSpacing: '1px',
                         marginBottom: '0.8rem'
                       }}>
@@ -4917,7 +4487,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                         color: 'white',
                         fontSize: isMobile ? '1rem' : '1.3rem',
                         fontWeight: '400',
-                        fontFamily: 'Helvetica, Arial, sans-serif',
+                        fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
                         opacity: 0.9,
                         lineHeight: 1.5
                       }}>
@@ -4946,7 +4516,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                     color: 'white',
                     fontSize: isMobile ? '1.5rem' : '2.2rem',
                     fontWeight: '700',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    fontFamily: '"Formula Condensed", sans-serif',
                     lineHeight: 1.7,
                     textAlign: 'left',
                     maxWidth: isMobile ? '90%' : '75%',
@@ -4966,7 +4536,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                     height: isMobile ? '350px' : '600px',
                     overflow: 'hidden',
                     borderRadius: '20px',
-                    border: '1px solid #FF3366',
+                    border: '1px solid rgba(255,255,255,0.2)',
                     marginBottom: isMobile ? '3rem' : '4rem',
                     alignSelf: 'flex-start'
                   }}
@@ -4985,7 +4555,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                       e.currentTarget.style.display = 'flex';
                       e.currentTarget.style.alignItems = 'center';
                       e.currentTarget.style.justifyContent = 'center';
-                      e.currentTarget.style.color = '#FF3366';
+                      e.currentTarget.style.color = 'white';
                       e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">Menuru Image</div>';
                     }}
                   />
@@ -4996,10 +4566,10 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ duration: 0.6, delay: 0.5 }}
                   style={{
-                    color: '#FF3366',
+                    color: 'white',
                     fontSize: isMobile ? '1rem' : '1.2rem',
                     fontWeight: '500',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
                     letterSpacing: '1px',
                     textTransform: 'uppercase',
                     opacity: 0.8,
@@ -5023,10 +4593,10 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                   <motion.a
                     href="/explore"
                     style={{
-                      color: '#FF3366',
+                      color: 'white',
                       fontSize: isMobile ? '1.8rem' : '2.5rem',
                       fontWeight: '600',
-                      fontFamily: 'Helvetica, Arial, sans-serif',
+                      fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
                       textDecoration: 'none',
                       letterSpacing: '1px',
                       display: 'inline-flex',
@@ -5035,7 +4605,6 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                       position: 'relative',
                       padding: '1rem 0'
                     }}
-                    whileHover={{ x: 20 }}
                   >
                     EXPLORE FULL COLLECTION
                     <motion.svg
@@ -5043,7 +4612,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                       height={isMobile ? "24" : "32"}
                       viewBox="0 0 24 24"
                       fill="none"
-                      stroke="#FF3366"
+                      stroke="currentColor"
                       strokeWidth="2"
                     >
                       <path d="M5 12h14" />
@@ -5066,7 +4635,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                     color: 'white',
                     fontSize: isMobile ? '1.1rem' : '1.4rem',
                     fontWeight: '300',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
                     lineHeight: 1.8,
                     opacity: 0.9
                   }}>
@@ -5093,7 +4662,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                   backgroundColor: 'transparent',
                   borderRadius: '50%',
                   zIndex: 9999,
-                  border: '1px solid #FF3366'
+                  border: '1px solid rgba(255, 255, 255, 0.3)'
                 }}
               >
                 <div 
@@ -5102,7 +4671,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                     position: 'absolute',
                     width: isMobile ? '30px' : '35px',
                     height: '4px',
-                    backgroundColor: '#FF3366',
+                    backgroundColor: 'white',
                     borderRadius: '2px',
                     transform: 'rotate(45deg)',
                     transformOrigin: 'center'
@@ -5123,10 +4692,10 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                 animate={{ opacity: 0.5 }}
                 transition={{ delay: 1, duration: 1 }}
                 style={{
-                  color: '#FF3366',
+                  color: 'white',
                   fontSize: isMobile ? '1rem' : '1.2rem',
                   fontWeight: '300',
-                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
                   textTransform: 'uppercase',
                   letterSpacing: '2px'
                 }}
@@ -5171,7 +4740,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
               alignItems: 'center',
               zIndex: 100,
               backgroundColor: 'black',
-              borderBottom: '1px solid #FF3366'
+              borderBottom: '1px solid rgba(255,255,255,0.1)'
             }}>
               <motion.button
                 onClick={handleClosePhotoFullPage}
@@ -5190,7 +4759,6 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                   order: 1,
                   opacity: 0.7
                 }}
-                whileHover={{ opacity: 1, color: '#FF3366' }}
               >
                 ×
               </motion.button>
@@ -5246,7 +4814,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                         position: 'relative',
                         borderRadius: '15px',
                         overflow: 'hidden',
-                        border: '1px solid #FF3366',
+                        border: '1px solid rgba(255,255,255,0.2)',
                         cursor: 'pointer'
                       }}
                       onClick={(e) => {
@@ -5276,7 +4844,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                           e.currentTarget.style.display = 'flex';
                           e.currentTarget.style.alignItems = 'center';
                           e.currentTarget.style.justifyContent = 'center';
-                          e.currentTarget.style.color = '#FF3366';
+                          e.currentTarget.style.color = '#fff';
                           e.currentTarget.innerHTML = `<div style="padding: 2rem; text-align: center;">Photo ${currentPhotoIndex + 1}</div>`;
                         }}
                       />
@@ -5300,7 +4868,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                     style={{
                       flex: 1,
                       height: '4px',
-                      backgroundColor: index === currentPhotoIndex ? '#FF3366' : 'rgba(255,51,102,0.2)',
+                      backgroundColor: index === currentPhotoIndex ? 'white' : 'rgba(255,255,255,0.2)',
                       borderRadius: '2px',
                       transition: 'background-color 0.3s ease'
                     }}
@@ -5316,10 +4884,10 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.5rem',
-                color: '#FF3366',
+                color: 'rgba(255,255,255,0.7)',
                 fontSize: '0.9rem'
               }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FF3366" strokeWidth="2">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <circle cx="12" cy="12" r="10"/>
                   <polyline points="12 6 12 12 16 14"/>
                 </svg>
@@ -5339,7 +4907,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                   borderRadius: '12px',
                   padding: '1.5rem',
                   marginBottom: '2rem',
-                  border: '1px solid #FF3366'
+                  border: '1px solid rgba(255,255,255,0.2)'
                 }}>
                   <div style={{
                     display: 'flex',
@@ -5363,7 +4931,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                           padding: '0.8rem 1rem',
                           paddingRight: '3rem',
                           backgroundColor: 'transparent',
-                          border: '1px solid #FF3366',
+                          border: '1px solid rgba(255,255,255,0.2)',
                           borderRadius: '20px',
                           color: 'white',
                           fontSize: '0.9rem',
@@ -5377,7 +4945,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                         right: '1rem',
                         top: '50%',
                         transform: 'translateY(-50%)',
-                        color: '#FF3366',
+                        color: 'rgba(255,255,255,0.3)',
                         fontSize: '0.75rem'
                       }}>
                         Enter
@@ -5391,7 +4959,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                         width: '40px',
                         height: '40px',
                         backgroundColor: 'transparent',
-                        border: '1px solid #FF3366',
+                        border: '1px solid rgba(255, 255, 255, 0.3)',
                         borderRadius: '50%',
                         cursor: message.trim() === "" ? 'not-allowed' : 'pointer',
                         display: 'flex',
@@ -5400,14 +4968,13 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                         transition: 'all 0.3s ease',
                         flexShrink: 0
                       }}
-                      whileHover={{ backgroundColor: 'rgba(255, 51, 102, 0.1)' }}
                     >
                       <svg 
                         width="18" 
                         height="18" 
                         viewBox="0 0 24 24" 
                         fill="none" 
-                        stroke="#FF3366" 
+                        stroke="white" 
                         strokeWidth="2"
                       >
                         <line x1="22" y1="2" x2="11" y2="13"/>
@@ -5420,7 +4987,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                     textAlign: 'center'
                   }}>
                     <span style={{
-                      color: '#FF3366',
+                      color: 'rgba(255,255,255,0.5)',
                       fontSize: '0.75rem'
                     }}>
                       {user ? `Login sebagai: ${userDisplayName}` : 'Komentar sebagai: Anonymous'}
@@ -5453,7 +5020,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                 }}>
                   {isLoadingComments ? (
                     <div style={{
-                      color: '#FF3366',
+                      color: 'rgba(255,255,255,0.5)',
                       textAlign: 'center',
                       padding: '2rem',
                       fontSize: '0.9rem'
@@ -5462,7 +5029,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                     </div>
                   ) : currentPhotoComments.length === 0 ? (
                     <div style={{
-                      color: '#FF3366',
+                      color: 'rgba(255,255,255,0.5)',
                       textAlign: 'center',
                       padding: '2rem',
                       fontSize: '0.9rem'
@@ -5483,7 +5050,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                           backgroundColor: 'transparent',
                           padding: '1rem',
                           borderRadius: '8px',
-                          border: '1px solid #FF3366'
+                          border: '1px solid rgba(255, 255, 255, 0.2)'
                         }}
                       >
                         <div style={{
@@ -5498,13 +5065,13 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                             minWidth: '32px',
                             borderRadius: '50%',
                             backgroundColor: 'transparent',
-                            border: '1px solid #FF3366',
+                            border: '1px solid rgba(255, 255, 255, 0.3)',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
                             fontSize: '0.9rem',
                             fontWeight: '600',
-                            color: '#FF3366'
+                            color: 'white'
                           }}>
                             {comment.userAvatar || comment.user.charAt(0).toUpperCase()}
                           </div>
@@ -5516,7 +5083,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                               marginBottom: '0.3rem'
                             }}>
                               <span style={{
-                                color: '#FF3366',
+                                color: 'rgba(255,255,255,0.9)',
                                 fontSize: '0.9rem',
                                 fontWeight: '600'
                               }}>
@@ -5526,17 +5093,17 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                                     marginLeft: '0.5rem',
                                     fontSize: '0.7rem',
                                     backgroundColor: 'transparent',
-                                    color: '#FF3366',
+                                    color: 'white',
                                     padding: '0.1rem 0.4rem',
                                     borderRadius: '4px',
-                                    border: '1px solid #FF3366'
+                                    border: '1px solid rgba(255, 255, 255, 0.3)'
                                   }}>
                                     Anda
                                   </span>
                                 )}
                               </span>
                               <span style={{
-                                color: '#FF3366',
+                                color: 'rgba(255,255,255,0.5)',
                                 fontSize: '0.75rem',
                                 whiteSpace: 'nowrap'
                               }}>
@@ -5584,7 +5151,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
               maxWidth: '90vw',
               maxHeight: '80vh',
               zIndex: 1001,
-              border: '1px solid #FF3366',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
               display: 'flex',
               flexDirection: 'column',
               overflow: 'hidden'
@@ -5592,7 +5159,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
           >
             <div style={{
               padding: '0 1.5rem 1rem 1.5rem',
-              borderBottom: '1px solid #FF3366',
+              borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
@@ -5608,7 +5175,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                 alignItems: 'center',
                 gap: '0.5rem'
               }}>
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF3366" strokeWidth="2">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
                   <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
                   <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
                 </svg>
@@ -5616,13 +5183,13 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                 {notificationCount > 0 && (
                   <span style={{
                     backgroundColor: 'transparent',
-                    color: '#FF3366',
+                    color: 'white',
                     fontSize: '0.8rem',
                     fontWeight: '700',
                     padding: '0.1rem 0.6rem',
                     borderRadius: '10px',
                     marginLeft: '0.5rem',
-                    border: '1px solid #FF3366'
+                    border: '1px solid rgba(255, 255, 255, 0.3)'
                   }}>
                     {notificationCount > 9 ? '9+' : notificationCount}
                   </span>
@@ -5635,8 +5202,8 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                     onClick={handleClearNotification}
                     style={{
                       backgroundColor: 'transparent',
-                      border: '1px solid #FF3366',
-                      color: '#FF3366',
+                      border: '1px solid rgba(255, 255, 255, 0.3)',
+                      color: 'white',
                       fontSize: '0.8rem',
                       fontWeight: '600',
                       padding: '0.3rem 0.8rem',
@@ -5644,7 +5211,6 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                       cursor: 'pointer',
                       fontFamily: 'Helvetica, Arial, sans-serif'
                     }}
-                    whileHover={{ backgroundColor: 'rgba(255, 51, 102, 0.1)' }}
                   >
                     Clear All
                 </motion.button>
@@ -5657,8 +5223,8 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                   }}
                   style={{
                     backgroundColor: 'transparent',
-                    border: '1px solid #FF3366',
-                    color: '#FF3366',
+                    border: '1px solid rgba(255, 255, 255, 0.3)',
+                    color: 'white',
                     fontSize: '0.8rem',
                     fontWeight: '600',
                     padding: '0.3rem 0.8rem',
@@ -5666,7 +5232,6 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                     cursor: 'pointer',
                     fontFamily: 'Helvetica, Arial, sans-serif'
                   }}
-                  whileHover={{ backgroundColor: 'rgba(255, 51, 102, 0.1)' }}
                 >
                   Refresh
                 </motion.button>
@@ -5683,7 +5248,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                 <div style={{
                   padding: '3rem 1rem',
                   textAlign: 'center',
-                  color: '#FF3366',
+                  color: 'rgba(255, 255, 255, 0.7)',
                   fontFamily: 'Helvetica, Arial, sans-serif'
                 }}>
                   <motion.div
@@ -5691,7 +5256,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                     transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                     style={{ marginBottom: '1rem' }}
                   >
-                    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#FF3366" strokeWidth="2">
+                    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
                     </svg>
                   </motion.div>
@@ -5701,7 +5266,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                 <div style={{
                   padding: '3rem 1.5rem',
                   textAlign: 'center',
-                  color: '#FF3366',
+                  color: 'rgba(255, 255, 255, 0.7)',
                   fontFamily: 'Helvetica, Arial, sans-serif'
                 }}>
                   <div style={{ 
@@ -5712,7 +5277,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                     🔔
                   </div>
                   <h4 style={{
-                    color: '#FF3366',
+                    color: 'rgba(255, 255, 255, 0.9)',
                     fontSize: '1.2rem',
                     margin: '0 0 0.5rem 0'
                   }}>
@@ -5721,7 +5286,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                   <p style={{
                     fontSize: '0.9rem',
                     margin: '0 0 1.5rem 0',
-                    color: '#FF3366'
+                    color: 'rgba(255, 255, 255, 0.6)'
                   }}>
                     Check back later for updates
                   </p>
@@ -5736,7 +5301,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                       transition={{ delay: index * 0.05 }}
                       style={{
                         padding: '1rem 1.5rem',
-                        borderBottom: '1px solid #FF3366',
+                        borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
                         cursor: 'pointer',
                         transition: 'all 0.2s ease',
                         backgroundColor: notification.isRead ? 'transparent' : 'transparent',
@@ -5752,7 +5317,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                           transform: 'translateY(-50%)',
                           width: '8px',
                           height: '8px',
-                          backgroundColor: '#FF3366',
+                          backgroundColor: 'white',
                           borderRadius: '50%'
                         }} />
                       )}
@@ -5768,12 +5333,12 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                           minWidth: '40px',
                           borderRadius: '10px',
                           backgroundColor: 'transparent',
-                          border: '1px solid #FF3366',
+                          border: '1px solid rgba(255, 255, 255, 0.3)',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
                           fontSize: '1.2rem',
-                          color: '#FF3366'
+                          color: 'white'
                         }}>
                           {notification.icon}
                         </div>
@@ -5805,13 +5370,13 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                               
                               <span style={{
                                 backgroundColor: 'transparent',
-                                color: '#FF3366',
+                                color: 'white',
                                 fontSize: '0.7rem',
                                 fontWeight: '600',
                                 padding: '0.1rem 0.5rem',
                                 borderRadius: '4px',
                                 textTransform: 'uppercase',
-                                border: '1px solid #FF3366'
+                                border: '1px solid rgba(255, 255, 255, 0.3)'
                               }}>
                                 {notification.type}
                               </span>
@@ -5819,12 +5384,12 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                               {notification.isAdminPost && (
                                 <span style={{
                                   backgroundColor: 'transparent',
-                                  color: '#FF3366',
+                                  color: 'white',
                                   fontSize: '0.7rem',
                                   fontWeight: '600',
                                   padding: '0.1rem 0.5rem',
                                   borderRadius: '4px',
-                                  border: '1px solid #FF3366'
+                                  border: '1px solid rgba(255, 255, 255, 0.3)'
                                 }}>
                                   ADMIN
                                 </span>
@@ -5832,7 +5397,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                             </div>
                             
                             <span style={{
-                              color: '#FF3366',
+                              color: 'rgba(255, 255, 255, 0.6)',
                               fontSize: '0.75rem',
                               whiteSpace: 'nowrap'
                             }}>
@@ -5841,7 +5406,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                           </div>
                           
                           <p style={{
-                            color: notification.read ? '#FF3366' : 'white',
+                            color: notification.read ? 'rgba(255, 255, 255, 0.8)' : 'white',
                             fontSize: '0.9rem',
                             margin: '0 0 0.5rem 0',
                             lineHeight: 1.4,
@@ -5859,7 +5424,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                               marginTop: '0.3rem'
                             }}>
                               <span style={{
-                                color: '#FF3366',
+                                color: 'rgba(255, 255, 255, 0.6)',
                                 fontSize: '0.75rem'
                               }}>
                                 From:
@@ -5883,7 +5448,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
             
             <div style={{
               padding: '1rem 1.5rem',
-              borderTop: '1px solid #FF3366',
+              borderTop: '1px solid rgba(255, 255, 255, 0.1)',
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
@@ -5891,7 +5456,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
               backgroundColor: 'transparent'
             }}>
               <div style={{
-                color: '#FF3366',
+                color: 'rgba(255, 255, 255, 0.6)',
                 fontSize: '0.8rem',
                 fontFamily: 'Helvetica, Arial, sans-serif'
               }}>
@@ -5901,7 +5466,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
               <motion.a
                 href="/notifications"
                 style={{
-                  color: '#FF3366',
+                  color: 'white',
                   fontSize: '0.9rem',
                   fontWeight: '600',
                   textDecoration: 'none',
@@ -5910,10 +5475,9 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                   alignItems: 'center',
                   gap: '0.5rem'
                 }}
-                whileHover={{ x: 5 }}
               >
                 View All
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF3366" strokeWidth="2">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M5 12h14"/>
                   <path d="M12 5l7 7-7 7"/>
                 </svg>
@@ -5923,7 +5487,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
         )}
       </AnimatePresence>
 
-      {/* Teks "Selamat Tahun Baru 2026" di pojok kiri atas */}
+      {/* Teks "Selamat Tahun Baru 2026" di pojok kiri atas - DIPERBAIKI dengan onClick */}
       <motion.div
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
@@ -5948,7 +5512,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
         }}
         whileHover={{ 
           opacity: 0.8,
-          color: '#FF3366'
+          backgroundColor: 'rgba(255, 255, 255, 0.1)'
         }}
       >
         Selamat Tahun Baru 2026
@@ -5973,14 +5537,14 @@ fontFamily: 'Helvetica, Arial, sans-serif'
               padding: '0.8rem 0',
               minWidth: '200px',
               zIndex: 1001,
-              border: '1px solid #FF3366',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
               display: 'flex',
               flexDirection: 'column'
             }}
           >
             <div style={{
               padding: '0.8rem 1rem',
-              borderBottom: '1px solid #FF3366',
+              borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
               display: 'flex',
               alignItems: 'center',
               gap: '0.8rem'
@@ -5990,13 +5554,13 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                 height: '40px',
                 borderRadius: '50%',
                 backgroundColor: 'transparent',
-                border: '1px solid #FF3366',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontSize: '1rem',
                 fontWeight: '600',
-                color: '#FF3366',
+                color: 'white',
                 flexShrink: 0
               }}>
                 {userDisplayName.charAt(0).toUpperCase()}
@@ -6013,7 +5577,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                   {userDisplayName}
                 </div>
                 <div style={{
-                  color: '#FF3366',
+                  color: 'rgba(255, 255, 255, 0.7)',
                   fontSize: '0.75rem',
                   marginTop: '0.2rem'
                 }}>
@@ -6044,9 +5608,8 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                   transition: 'all 0.2s ease',
                   fontFamily: 'Helvetica, Arial, sans-serif'
                 }}
-                whileHover={{ color: '#FF3366', x: 5 }}
               >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF3366" strokeWidth="2">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                   <polyline points="14 2 14 8 20 8"/>
                   <line x1="16" y1="13" x2="8" y2="13"/>
@@ -6073,9 +5636,8 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                   transition: 'all 0.2s ease',
                   fontFamily: 'Helvetica, Arial, sans-serif'
                 }}
-                whileHover={{ color: '#FF3366', x: 5 }}
               >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF3366" strokeWidth="2">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
                   <path d="M16 17l5-5-5-5"/>
                   <path d="M21 12H9"/>
@@ -6112,7 +5674,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
           backgroundColor: 'transparent',
           borderRadius: '50px',
           padding: isMobile ? '0.6rem 1rem' : '0.8rem 1.5rem',
-          border: '1px solid #FF3366'
+          border: '1px solid rgba(255,255,255,0.2)'
         }}>
           
           {/* Docs */}
@@ -6126,18 +5688,17 @@ fontFamily: 'Helvetica, Arial, sans-serif'
               padding: '0.4rem 1rem 0.4rem 0.8rem',
               borderRadius: '25px',
               backgroundColor: 'transparent',
-              border: '1px solid #FF3366',
+              border: '1px solid rgba(255,255,255,0.2)',
               transition: 'all 0.3s ease',
               position: 'relative'
             }}
-            whileHover={{ backgroundColor: 'rgba(255, 51, 102, 0.1)' }}
           >
             <svg 
               width={isMobile ? "18" : "20"} 
               height={isMobile ? "18" : "20"} 
               viewBox="0 0 24 24" 
               fill="none" 
-              stroke="#FF3366"
+              stroke="white"
               strokeWidth="2"
             >
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
@@ -6147,7 +5708,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
               <polyline points="10,9 9,9 8,9"/>
             </svg>
             <span style={{
-              color: '#FF3366',
+              color: 'white',
               fontSize: isMobile ? '0.8rem' : '0.9rem',
               fontWeight: '600',
               fontFamily: 'Helvetica, Arial, sans-serif',
@@ -6161,7 +5722,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                 height={isMobile ? "12" : "14"} 
                 viewBox="0 0 24 24" 
                 fill="none" 
-                stroke="#FF3366"
+                stroke="white"
                 strokeWidth="2"
               >
                 <path d="M5 12h14"/>
@@ -6182,18 +5743,17 @@ fontFamily: 'Helvetica, Arial, sans-serif'
               padding: '0.4rem 1rem 0.4rem 0.8rem',
               borderRadius: '25px',
               backgroundColor: 'transparent',
-              border: '1px solid #FF3366',
+              border: '1px solid rgba(255,255,255,0.2)',
               transition: 'all 0.3s ease',
               position: 'relative'
             }}
-            whileHover={{ backgroundColor: 'rgba(255, 51, 102, 0.1)' }}
           >
             <svg 
               width={isMobile ? "18" : "20"} 
               height={isMobile ? "18" : "20"} 
               viewBox="0 0 24 24" 
               fill="none" 
-              stroke="#FF3366"
+              stroke="white"
               strokeWidth="2"
             >
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
@@ -6201,7 +5761,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
               <line x1="8" y1="11" x2="12" y2="11"/>
             </svg>
             <span style={{
-              color: '#FF3366',
+              color: 'white',
               fontSize: isMobile ? '0.8rem' : '0.9rem',
               fontWeight: '600',
               fontFamily: 'Helvetica, Arial, sans-serif',
@@ -6215,7 +5775,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                 height={isMobile ? "12" : "14"} 
                 viewBox="0 0 24 24" 
                 fill="none" 
-                stroke="#FF3366"
+                stroke="white"
                 strokeWidth="2"
               >
                 <path d="M5 12h14"/>
@@ -6235,18 +5795,17 @@ fontFamily: 'Helvetica, Arial, sans-serif'
               padding: '0.4rem 1rem 0.4rem 0.8rem',
               borderRadius: '25px',
               backgroundColor: 'transparent',
-              border: '1px solid #FF3366',
+              border: '1px solid rgba(255,255,255,0.2)',
               transition: 'all 0.3s ease',
               position: 'relative'
             }}
-            whileHover={{ backgroundColor: 'rgba(255, 51, 102, 0.1)' }}
           >
             <svg 
               width={isMobile ? "18" : "20"} 
               height={isMobile ? "18" : "20"} 
               viewBox="0 0 24 24" 
               fill="none" 
-              stroke="#FF3366"
+              stroke="white"
               strokeWidth="2"
             >
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
@@ -6256,7 +5815,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
               <polyline points="10,9 9,9 8,9"/>
             </svg>
             <span style={{
-              color: '#FF3366',
+              color: 'white',
               fontSize: isMobile ? '0.8rem' : '0.9rem',
               fontWeight: '600',
               fontFamily: 'Helvetica, Arial, sans-serif',
@@ -6270,7 +5829,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                 height={isMobile ? "12" : "14"} 
                 viewBox="0 0 24 24" 
                 fill="none" 
-                stroke="#FF3366"
+                stroke="white"
                 strokeWidth="2"
               >
                 <path d="M5 12h14"/>
@@ -6290,18 +5849,17 @@ fontFamily: 'Helvetica, Arial, sans-serif'
               padding: '0.4rem 1rem 0.4rem 0.8rem',
               borderRadius: '25px',
               backgroundColor: 'transparent',
-              border: '1px solid #FF3366',
+              border: '1px solid rgba(255,255,255,0.2)',
               transition: 'all 0.3s ease',
               position: 'relative'
             }}
-            whileHover={{ backgroundColor: 'rgba(255, 51, 102, 0.1)' }}
           >
             <svg 
               width={isMobile ? "18" : "20"} 
               height={isMobile ? "18" : "20"} 
               viewBox="0 0 24 24" 
               fill="none" 
-              stroke="#FF3366"
+              stroke="white"
               strokeWidth="2"
             >
               <polyline points="1 4 1 10 7 10"/>
@@ -6310,7 +5868,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
               <line x1="16" y1="11" x2="12" y2="7"/>
             </svg>
             <span style={{
-              color: '#FF3366',
+              color: 'white',
               fontSize: isMobile ? '0.8rem' : '0.9rem',
               fontWeight: '600',
               fontFamily: 'Helvetica, Arial, sans-serif',
@@ -6324,7 +5882,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                 height={isMobile ? "12" : "14"} 
                 viewBox="0 0 24 24" 
                 fill="none" 
-                stroke="#FF3366"
+                stroke="white"
                 strokeWidth="2"
               >
                 <path d="M5 12h14"/>
@@ -6426,7 +5984,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
               height: showSearch ? 'auto' : '40px',
               borderRadius: '20px',
               backgroundColor: 'transparent',
-              border: '1px solid #FF3366',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
               overflow: 'hidden',
               cursor: 'pointer',
               transition: 'all 0.3s ease',
@@ -6459,7 +6017,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                   height="18" 
                   viewBox="0 0 24 24" 
                   fill="none" 
-                  stroke={showSearch ? "#FF3366" : "#FF3366"} 
+                  stroke={showSearch ? "white" : "white"} 
                   strokeWidth="2"
                 >
                   <circle cx="11" cy="11" r="8"/>
@@ -6507,7 +6065,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                     height: '20px',
                     cursor: 'pointer',
                     backgroundColor: 'transparent',
-                    border: '1px solid #FF3366',
+                    border: '1px solid rgba(255, 255, 255, 0.3)',
                     borderRadius: '50%',
                     flexShrink: 0,
                     marginLeft: '8px'
@@ -6518,7 +6076,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                     height="12" 
                     viewBox="0 0 24 24" 
                     fill="none" 
-                    stroke="#FF3366" 
+                    stroke="white" 
                     strokeWidth="2"
                   >
                     <line x1="18" y1="6" x2="6" y2="18"/>
@@ -6540,17 +6098,17 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                     maxHeight: '400px',
                     overflowY: 'auto',
                     backgroundColor: 'rgba(15, 15, 15, 0.98)',
-                    borderTop: '1px solid #FF3366',
+                    borderTop: '1px solid rgba(255, 255, 255, 0.2)',
                     padding: '10px 0'
                   }}
                 >
                   <div style={{
                     padding: '0 15px 10px 15px',
-                    borderBottom: '1px solid #FF3366',
+                    borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
                     marginBottom: '5px'
                   }}>
                     <div style={{
-                      color: '#FF3366',
+                      color: 'rgba(255, 255, 255, 0.8)',
                       fontSize: '0.8rem',
                       fontWeight: '600',
                       textTransform: 'uppercase',
@@ -6575,7 +6133,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                         alignItems: 'center',
                         gap: '12px',
                         transition: 'all 0.2s ease',
-                        borderBottom: '1px solid #FF3366'
+                        borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
                       }}
                     >
                       <div style={{
@@ -6583,13 +6141,12 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                         height: '36px',
                         borderRadius: '8px',
                         backgroundColor: 'transparent',
-                        border: '1px solid #FF3366',
+                        border: '1px solid rgba(255, 255, 255, 0.3)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         fontSize: '1.2rem',
-                        flexShrink: 0,
-                        color: '#FF3366'
+                        flexShrink: 0
                       }}>
                         {result.icon}
                       </div>
@@ -6614,21 +6171,21 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                           </div>
                           <div style={{
                             backgroundColor: 'transparent',
-                            color: '#FF3366',
+                            color: 'white',
                             fontSize: '0.7rem',
                             fontWeight: '600',
                             padding: '2px 6px',
                             borderRadius: '10px',
                             marginLeft: '8px',
                             flexShrink: 0,
-                            border: '1px solid #FF3366'
+                            border: '1px solid rgba(255, 255, 255, 0.3)'
                           }}>
                             {result.category}
                           </div>
                         </div>
                         
                         <div style={{
-                          color: '#FF3366',
+                          color: 'rgba(255, 255, 255, 0.7)',
                           fontSize: '0.8rem',
                           whiteSpace: 'nowrap',
                           overflow: 'hidden',
@@ -6639,13 +6196,13 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                         </div>
                         
                         <div style={{
-                          color: '#FF3366',
+                          color: 'white',
                           fontSize: '0.75rem',
                           display: 'flex',
                           alignItems: 'center',
                           gap: '4px'
                         }}>
-                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#FF3366" strokeWidth="2">
+                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2 2V8a2 2 0 0 1 2-2h6"/>
                             <polyline points="15 3 21 3 21 9"/>
                             <line x1="10" y1="14" x2="21" y2="3"/>
@@ -6663,7 +6220,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                           transition: 'all 0.2s ease'
                         }}
                       >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF3366" strokeWidth="2">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                           <path d="M5 12h14"/>
                           <path d="M12 5l7 7-7 7"/>
                         </svg>
@@ -6683,14 +6240,14 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                   style={{
                     padding: '20px 15px',
                     textAlign: 'center',
-                    color: '#FF3366',
+                    color: 'rgba(255, 255, 255, 0.6)',
                     fontSize: '0.9rem',
                     backgroundColor: 'rgba(15, 15, 15, 0.98)',
-                    borderTop: '1px solid #FF3366'
+                    borderTop: '1px solid rgba(255, 255, 255, 0.2)'
                   }}
                 >
                   Tidak ditemukan hasil untuk "{searchQuery}"
-                  <div style={{ fontSize: '0.8rem', marginTop: '5px', color: '#FF3366' }}>
+                  <div style={{ fontSize: '0.8rem', marginTop: '5px' }}>
                     Coba kata kunci lain seperti: chatbot, sign in, notifikasi
                   </div>
                 </motion.div>
@@ -6710,7 +6267,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
               height: '40px',
               borderRadius: '50%',
               backgroundColor: 'transparent',
-              border: '1px solid #FF3366',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -6718,14 +6275,13 @@ fontFamily: 'Helvetica, Arial, sans-serif'
               transition: 'all 0.3s ease'
             }}
             onClick={() => setShowNotification(!showNotification)}
-            whileHover={{ backgroundColor: 'rgba(255, 51, 102, 0.1)' }}
           >
             <svg 
               width="20" 
               height="20" 
               viewBox="0 0 24 24" 
               fill="none" 
-              stroke="#FF3366" 
+              stroke="white" 
               strokeWidth="2"
             >
               <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
@@ -6748,11 +6304,11 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  border: '1px solid #FF3366'
+                  border: '1px solid rgba(255, 255, 255, 0.3)'
                 }}
               >
                 <span style={{
-                  color: '#FF3366',
+                  color: 'white',
                   fontSize: '0.65rem',
                   fontWeight: '700',
                   fontFamily: 'Helvetica, Arial, sans-serif',
@@ -6764,14 +6320,17 @@ fontFamily: 'Helvetica, Arial, sans-serif'
             )}
           </motion.div>
 
-          {/* Tombol MENU dengan tanda + */}
+          {/* Tombol MENU dengan gaya baru */}
           <motion.div
-            ref={menuButtonRef}
+            data-menu-button
             onClick={handleOpenMenu}
             style={{
-              color: 'white',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.3rem',
+              color: '#00FF00',
               fontSize: isMobile ? '1rem' : '1.5rem',
-              fontWeight: '400',
+              fontWeight: '600',
               fontFamily: 'Helvetica, Arial, sans-serif',
               cursor: 'pointer',
               padding: isMobile ? '0.3rem 0.8rem' : '0.5rem 1rem',
@@ -6779,35 +6338,46 @@ fontFamily: 'Helvetica, Arial, sans-serif'
               letterSpacing: '1px',
               position: 'relative',
               transition: 'all 0.3s ease',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem'
+              backgroundColor: 'transparent',
+              border: '1px solid rgba(0, 255, 0, 0.3)',
+              borderRadius: '30px',
+              textShadow: '0 0 5px rgba(0, 255, 0, 0.3)'
             }}
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 1.1, duration: 0.6 }}
+            whileHover={{ 
+              scale: 1.05,
+              borderColor: '#00FF00',
+              boxShadow: '0 0 15px #00FF00',
+              transition: { duration: 0.2 }
+            }}
           >
-            MENU
-            <motion.div
-              ref={plusSignRef}
-              style={{
-                color: '#FF3366',
-                fontSize: isMobile ? '1.2rem' : '1.8rem',
-                fontWeight: '400',
-                lineHeight: 1
-              }}
+            <svg 
+              width={isMobile ? "14" : "16"} 
+              height={isMobile ? "14" : "16"} 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="#00FF00" 
+              strokeWidth="2"
             >
-              +
-            </motion.div>
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            MENU
           </motion.div>
 
-          {/* Calendar Button di Header */}
+          {/* Tombol NOTE dengan angka (01) dan South East Arrow */}
           <motion.div
-            onClick={() => router.push('/calendar')}
+            data-note-button
+            onClick={() => router.push('/notes')}
             style={{
-              color: 'white',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.3rem',
+              color: '#00FF00',
               fontSize: isMobile ? '1rem' : '1.5rem',
-              fontWeight: '300',
+              fontWeight: '600',
               fontFamily: 'Helvetica, Arial, sans-serif',
               cursor: 'pointer',
               padding: isMobile ? '0.3rem 0.8rem' : '0.5rem 1rem',
@@ -6815,45 +6385,89 @@ fontFamily: 'Helvetica, Arial, sans-serif'
               letterSpacing: '1px',
               position: 'relative',
               transition: 'all 0.3s ease',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem'
+              backgroundColor: 'transparent',
+              border: '1px solid rgba(0, 255, 0, 0.3)',
+              borderRadius: '30px',
+              textShadow: '0 0 5px rgba(0, 255, 0, 0.3)'
             }}
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 1.0, duration: 0.6 }}
-            whileHover={{ color: '#FF3366' }}
+            transition={{ delay: 1.1, duration: 0.6 }}
+            whileHover={{ 
+              scale: 1.05,
+              borderColor: '#00FF00',
+              boxShadow: '0 0 15px #00FF00',
+              transition: { duration: 0.2 }
+            }}
           >
-            <svg
-              width={isMobile ? "14" : "16"}
-              height={isMobile ? "14" : "16"}
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
+            <span style={{ fontSize: isMobile ? '0.8rem' : '1rem', opacity: 0.7 }}>01</span>
+            NOTE
+            <svg 
+              width={isMobile ? "14" : "16"} 
+              height={isMobile ? "14" : "16"} 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="#00FF00" 
               strokeWidth="2"
-              style={{ flexShrink: 0 }}
+              style={{ transform: 'rotate(45deg)' }}
             >
-              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-              <line x1="16" y1="2" x2="16" y2="6"/>
-              <line x1="8" y1="2" x2="8" y2="6"/>
-              <line x1="3" y1="10" x2="21" y2="10"/>
-            </svg>
-            Calendar
-            <svg
-              width={isMobile ? "14" : "16"}
-              height={isMobile ? "14" : "16"}
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              style={{ flexShrink: 0 }}
-            >
-              <path d="M7 17L17 7"/>
               <path d="M7 7h10v10"/>
+              <path d="M7 17L17 7"/>
             </svg>
           </motion.div>
 
-          {/* Sign In / User Button */}
+          {/* Calendar Button di Header */}
+<motion.div
+  onClick={() => router.push('/calendar')}
+  style={{
+    color: 'white',
+    fontSize: isMobile ? '1rem' : '1.5rem',
+    fontWeight: '300',
+    fontFamily: 'Helvetica, Arial, sans-serif',
+    cursor: 'pointer',
+    padding: isMobile ? '0.3rem 0.8rem' : '0.5rem 1rem',
+    whiteSpace: 'nowrap',
+    letterSpacing: '1px',
+    position: 'relative',
+    transition: 'all 0.3s ease',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem'
+  }}
+  initial={{ opacity: 0, x: -10 }}
+  animate={{ opacity: 1, x: 0 }}
+  transition={{ delay: 1.0, duration: 0.6 }}
+>
+  <svg
+    width={isMobile ? "14" : "16"}
+    height={isMobile ? "14" : "16"}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="white"
+    strokeWidth="2"
+    style={{ flexShrink: 0 }}
+  >
+    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+    <line x1="16" y1="2" x2="16" y2="6"/>
+    <line x1="8" y1="2" x2="8" y2="6"/>
+    <line x1="3" y1="10" x2="21" y2="10"/>
+  </svg>
+  Calendar
+  <svg
+    width={isMobile ? "14" : "16"}
+    height={isMobile ? "14" : "16"}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="white"
+    strokeWidth="2"
+    style={{ flexShrink: 0 }}
+  >
+    <path d="M7 17L17 7"/>
+    <path d="M7 7h10v10"/>
+  </svg>
+</motion.div>
+
+          {/* Sign In / User Button - DIPERBAIKI dengan North East Arrow ketika sudah login */}
           <motion.div
             onClick={handleSignInClick}
             style={{
@@ -6875,7 +6489,6 @@ fontFamily: 'Helvetica, Arial, sans-serif'
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 1.2, duration: 0.6 }}
-            whileHover={{ color: '#FF3366' }}
           >
             {user ? (
               <>
@@ -6885,7 +6498,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                   height={isMobile ? "14" : "16"}
                   viewBox="0 0 24 24"
                   fill="none"
-                  stroke="currentColor"
+                  stroke="white"
                   strokeWidth="2"
                   style={{
                     flexShrink: 0
@@ -6903,7 +6516,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                   height={isMobile ? "14" : "16"}
                   viewBox="0 0 24 24"
                   fill="none"
-                  stroke="currentColor"
+                  stroke="white"
                   strokeWidth="2"
                   style={{
                     flexShrink: 0
@@ -6927,7 +6540,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
         position: 'relative'
       }}>
 
-        {/* PRODUCT AND Image Section - DIUBAH MENJADI "CATATAN ADALAH TEMAN TERBAIK MU" */}
+        {/* PRODUCT AND Image Section */}
         <div style={{
           width: '100%',
           padding: isMobile ? '1.5rem' : '3rem',
@@ -6938,7 +6551,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
           gap: isMobile ? '0.1rem' : '0.2rem'
         }}>
           
-          {/* Baris 1: CATATAN + Foto + ADALAH */}
+          {/* Baris 1: PRODUCT + AND + Foto + 01 */}
           <div style={{
             display: 'flex',
             alignItems: 'center',
@@ -6953,7 +6566,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
             }}>
               <h2 style={{
                 color: 'white',
-                fontSize: isMobile ? '4rem' : '6rem',
+                fontSize: isMobile ? '5rem' : '7rem',
                 fontWeight: '900',
                 textTransform: 'uppercase',
                 fontFamily: 'Helvetica, Arial, sans-serif',
@@ -6962,7 +6575,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                 lineHeight: 0.8,
                 padding: 0
               }}>
-                CATATAN
+                PRODUCT
               </h2>
             </div>
 
@@ -6979,7 +6592,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
               }}>
                 <h2 style={{
                   color: 'white',
-                  fontSize: isMobile ? '4rem' : '6rem',
+                  fontSize: isMobile ? '5rem' : '7rem',
                   fontWeight: '900',
                   textTransform: 'uppercase',
                   fontFamily: 'Helvetica, Arial, sans-serif',
@@ -6988,7 +6601,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                   lineHeight: 0.8,
                   padding: 0
                 }}>
-                  ADALAH
+                  AND
                 </h2>
               </div>
 
@@ -6997,44 +6610,31 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                 display: 'flex',
                 alignItems: 'flex-end'
               }}>
-                <motion.div
-                  drag
-                  dragMomentum={false}
-                  onDragStart={(e) => handlePhotoDragStart(0, e as any)}
-                  style={{
-                    width: isMobile ? '140px' : '180px',
-                    height: isMobile ? '5rem' : '7rem',
-                    borderRadius: '10px',
-                    overflow: 'hidden',
-                    border: '2px solid #FF3366',
-                    backgroundColor: '#222',
-                    cursor: 'grab',
-                    position: 'relative',
-                    zIndex: 100,
-                    boxShadow: '0 0 20px rgba(255, 51, 102, 0.3)',
-                    transform: `translate(${photoPositions[0].x}px, ${photoPositions[0].y}px)`,
-                    transition: isDragging === 0 ? 'none' : 'transform 0.1s ease'
-                  }}
-                  whileHover={{ boxShadow: '0 0 30px rgba(255, 51, 102, 0.5)' }}
-                >
+                <div style={{
+                  width: isMobile ? '140px' : '180px',
+                  height: isMobile ? '5rem' : '7rem',
+                  borderRadius: '10px',
+                  overflow: 'hidden',
+                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                  backgroundColor: '#222'
+                }}>
                   <img 
                     src="images/5.jpg" 
-                    alt="Catatan Image 1"
+                    alt="Product Image"
                     style={{
                       width: '100%',
                       height: '100%',
                       objectFit: 'cover',
-                      display: 'block',
-                      pointerEvents: 'none'
+                      display: 'block'
                     }}
                   />
-                </motion.div>
+                </div>
                 
                 <div style={{
                   position: 'absolute',
                   bottom: '-0.8rem',
                   right: '-1.5rem',
-                  color: '#FF3366',
+                  color: 'rgba(255, 255, 255, 0.7)',
                   fontSize: isMobile ? '1rem' : '1.2rem',
                   fontWeight: '400',
                   fontFamily: 'Helvetica, Arial, sans-serif',
@@ -7046,7 +6646,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
             </div>
           </div>
 
-          {/* Baris 2: Foto + TEMAN */}
+          {/* Baris 2: Foto + VISUAL DESIGNER */}
           <div style={{
             display: 'flex',
             alignItems: 'center',
@@ -7059,44 +6659,31 @@ fontFamily: 'Helvetica, Arial, sans-serif'
               display: 'flex',
               alignItems: 'flex-end'
             }}>
-              <motion.div
-                drag
-                dragMomentum={false}
-                onDragStart={(e) => handlePhotoDragStart(1, e as any)}
-                style={{
-                  width: isMobile ? '140px' : '180px',
-                  height: isMobile ? '5rem' : '7rem',
-                  borderRadius: '10px',
-                  overflow: 'hidden',
-                  border: '2px solid #FF3366',
-                  backgroundColor: '#222',
-                  cursor: 'grab',
-                  position: 'relative',
-                  zIndex: 100,
-                  boxShadow: '0 0 20px rgba(255, 51, 102, 0.3)',
-                  transform: `translate(${photoPositions[1].x}px, ${photoPositions[1].y}px)`,
-                  transition: isDragging === 1 ? 'none' : 'transform 0.1s ease'
-                }}
-                whileHover={{ boxShadow: '0 0 30px rgba(255, 51, 102, 0.5)' }}
-              >
+              <div style={{
+                width: isMobile ? '140px' : '180px',
+                height: isMobile ? '5rem' : '7rem',
+                borderRadius: '10px',
+                overflow: 'hidden',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
+                backgroundColor: '#222'
+              }}>
                 <img 
                   src="images/5.jpg" 
-                  alt="Teman Image"
+                  alt="Visual Designer"
                   style={{
                     width: '100%',
                     height: '100%',
                     objectFit: 'cover',
-                    display: 'block',
-                    pointerEvents: 'none'
+                    display: 'block'
                   }}
                 />
-              </motion.div>
+              </div>
               
               <div style={{
                 position: 'absolute',
                 bottom: '-0.8rem',
                 right: '-1.5rem',
-                color: '#FF3366',
+                color: 'rgba(255, 255, 255, 0.7)',
                 fontSize: isMobile ? '1rem' : '1.2rem',
                 fontWeight: '400',
                 fontFamily: 'Helvetica, Arial, sans-serif',
@@ -7114,7 +6701,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
             }}>
               <h2 style={{
                 color: 'white',
-                fontSize: isMobile ? '4rem' : '6rem',
+                fontSize: isMobile ? '5rem' : '7rem',
                 fontWeight: '900',
                 textTransform: 'uppercase',
                 fontFamily: 'Helvetica, Arial, sans-serif',
@@ -7123,12 +6710,12 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                 lineHeight: 0.8,
                 whiteSpace: 'nowrap'
               }}>
-                TEMAN
+                VISUAL DESIGNER
               </h2>
             </div>
           </div>
 
-          {/* Baris 3: TERBAIK + Foto + MU */}
+          {/* Baris 3: BASED + Foto + IN */}
           <div style={{
             display: 'flex',
             alignItems: 'center',
@@ -7143,7 +6730,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
             }}>
               <h2 style={{
                 color: 'white',
-                fontSize: isMobile ? '4rem' : '6rem',
+                fontSize: isMobile ? '5rem' : '7rem',
                 fontWeight: '900',
                 textTransform: 'uppercase',
                 fontFamily: 'Helvetica, Arial, sans-serif',
@@ -7151,7 +6738,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                 margin: 0,
                 lineHeight: 0.8
               }}>
-                TERBAIK
+                BASED
               </h2>
             </div>
 
@@ -7160,44 +6747,31 @@ fontFamily: 'Helvetica, Arial, sans-serif'
               display: 'flex',
               alignItems: 'flex-end'
             }}>
-              <motion.div
-                drag
-                dragMomentum={false}
-                onDragStart={(e) => handlePhotoDragStart(2, e as any)}
-                style={{
-                  width: isMobile ? '140px' : '180px',
-                  height: isMobile ? '5rem' : '7rem',
-                  borderRadius: '10px',
-                  overflow: 'hidden',
-                  border: '2px solid #FF3366',
-                  backgroundColor: '#222',
-                  cursor: 'grab',
-                  position: 'relative',
-                  zIndex: 100,
-                  boxShadow: '0 0 20px rgba(255, 51, 102, 0.3)',
-                  transform: `translate(${photoPositions[2].x}px, ${photoPositions[2].y}px)`,
-                  transition: isDragging === 2 ? 'none' : 'transform 0.1s ease'
-                }}
-                whileHover={{ boxShadow: '0 0 30px rgba(255, 51, 102, 0.5)' }}
-              >
+              <div style={{
+                width: isMobile ? '140px' : '180px',
+                height: isMobile ? '5rem' : '7rem',
+                borderRadius: '10px',
+                overflow: 'hidden',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
+                backgroundColor: '#222'
+              }}>
                 <img 
                   src="images/5.jpg" 
-                  alt="Terbaik Image"
+                  alt="Based"
                   style={{
                     width: '100%',
                     height: '100%',
                     objectFit: 'cover',
-                    display: 'block',
-                    pointerEvents: 'none'
+                    display: 'block'
                   }}
                 />
-              </motion.div>
+              </div>
               
               <div style={{
                 position: 'absolute',
                 bottom: '-0.8rem',
                 right: '-1.5rem',
-                color: '#FF3366',
+                color: 'rgba(255, 255, 255, 0.7)',
                 fontSize: isMobile ? '1rem' : '1.2rem',
                 fontWeight: '400',
                 fontFamily: 'Helvetica, Arial, sans-serif',
@@ -7216,7 +6790,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
             }}>
               <h2 style={{
                 color: 'white',
-                fontSize: isMobile ? '4rem' : '6rem',
+                fontSize: isMobile ? '5rem' : '7rem',
                 fontWeight: '900',
                 textTransform: 'uppercase',
                 fontFamily: 'Helvetica, Arial, sans-serif',
@@ -7224,7 +6798,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                 margin: 0,
                 lineHeight: 0.8
               }}>
-                MU
+                IN
               </h2>
             </div>
           </div>
@@ -7242,26 +6816,14 @@ fontFamily: 'Helvetica, Arial, sans-serif'
               display: 'flex',
               alignItems: 'flex-end'
             }}>
-              <motion.div
-                drag
-                dragMomentum={false}
-                onDragStart={(e) => handlePhotoDragStart(3, e as any)}
-                style={{
-                  width: isMobile ? '140px' : '180px',
-                  height: isMobile ? '5rem' : '7rem',
-                  borderRadius: '10px',
-                  overflow: 'hidden',
-                  border: '2px solid #FF3366',
-                  backgroundColor: '#222',
-                  cursor: 'grab',
-                  position: 'relative',
-                  zIndex: 100,
-                  boxShadow: '0 0 20px rgba(255, 51, 102, 0.3)',
-                  transform: `translate(${photoPositions[3].x}px, ${photoPositions[3].y}px)`,
-                  transition: isDragging === 3 ? 'none' : 'transform 0.1s ease'
-                }}
-                whileHover={{ boxShadow: '0 0 30px rgba(255, 51, 102, 0.5)' }}
-              >
+              <div style={{
+                width: isMobile ? '140px' : '180px',
+                height: isMobile ? '5rem' : '7rem',
+                borderRadius: '10px',
+                overflow: 'hidden',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
+                backgroundColor: '#222'
+              }}>
                 <img 
                   src="images/5.jpg" 
                   alt="Footer Image"
@@ -7269,17 +6831,16 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                     width: '100%',
                     height: '100%',
                     objectFit: 'cover',
-                    display: 'block',
-                    pointerEvents: 'none'
+                    display: 'block'
                   }}
                 />
-              </motion.div>
+              </div>
               
               <div style={{
                 position: 'absolute',
                 bottom: '-0.8rem',
                 right: '-1.5rem',
-                color: '#FF3366',
+                color: 'rgba(255, 255, 255, 0.7)',
                 fontSize: isMobile ? '1rem' : '1.2rem',
                 fontWeight: '400',
                 fontFamily: 'Helvetica, Arial, sans-serif',
@@ -7297,7 +6858,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
             }}>
               <h2 style={{
                 color: 'white',
-                fontSize: isMobile ? '4rem' : '6rem',
+                fontSize: isMobile ? '5rem' : '7rem',
                 fontWeight: '900',
                 textTransform: 'uppercase',
                 fontFamily: 'Helvetica, Arial, sans-serif',
