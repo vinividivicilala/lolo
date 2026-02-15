@@ -2482,68 +2482,70 @@ export default function BlogPage() {
           boxSizing: 'border-box', // Pastikan padding tidak menambah lebar
         }}>
           
-          {/* Blog Title */}
-          <div style={{
-            marginBottom: '50px',
-            width: '100%', // Pastikan lebar penuh
-            overflow: 'hidden', // Hindari overflow
-          }}>
-            <h1 style={{
-              fontSize: isMobile ? '4rem' : '6rem',
-              fontWeight: 'normal',
-              color: 'white',
-              margin: '0 0 20px 0',
-              lineHeight: '0.9',
-              letterSpacing: '-2px',
-              wordWrap: 'break-word', // Pastikan teks panjang tidak overflow
-            }}>
-              Blog
-            </h1>
-            
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '12px',
-              marginTop: '20px',
-              color: '#999999',
-              fontSize: isMobile ? '0.9rem' : '1rem',
-              width: '100%',
-              overflow: 'hidden',
-            }}>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px',
-                flexWrap: 'wrap', // Wrap jika perlu
-              }}>
-                <CalendarIcon width={18} height={18} />
-                <span style={{ wordBreak: 'break-word' }}>{formattedDate}</span>
-              </div>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px',
-                flexWrap: 'wrap',
-              }}>
-                <ClockIcon width={18} height={18} />
-                <span>8 menit membaca</span>
-              </div>
-              {/* Author Info with Tooltip */}
-              <div 
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                  marginTop: '10px',
-                  paddingTop: '10px',
-                  borderTop: '1px solid #333333',
-                  position: 'relative',
-                  width: '100%',
-                  overflow: 'visible', // Tooltip perlu visible
-                }}
-                onMouseEnter={() => setShowAuthorTooltip(true)}
-                onMouseLeave={() => setShowAuthorTooltip(false)}
-              >
+        {/* Blog Title - PERBAIKAN */}
+<div style={{
+  marginBottom: '50px',
+  width: '100%',
+  boxSizing: 'border-box',
+}}>
+  <h1 style={{
+    fontSize: isMobile ? 'clamp(2.5rem, 12vw, 4rem)' : 'clamp(3rem, 5vw, 6rem)',
+    fontWeight: 'normal',
+    color: 'white',
+    margin: '0 0 20px 0',
+    lineHeight: '0.9',
+    letterSpacing: '-2px',
+    wordBreak: 'break-word',
+    overflowWrap: 'break-word',
+    maxWidth: '100%',
+  }}>
+    Blog
+  </h1>
+  
+  <div style={{
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '12px',
+    marginTop: '20px',
+    color: '#999999',
+    fontSize: isMobile ? '0.9rem' : '1rem',
+    width: '100%',
+    boxSizing: 'border-box',
+  }}>
+    <div style={{
+      display: 'flex',
+      alignItems: 'center',
+      gap: '10px',
+      flexWrap: 'wrap',
+    }}>
+      <CalendarIcon width={18} height={18} />
+      <span style={{ wordBreak: 'break-word' }}>{formattedDate}</span>
+    </div>
+    <div style={{
+      display: 'flex',
+      alignItems: 'center',
+      gap: '10px',
+      flexWrap: 'wrap',
+    }}>
+      <ClockIcon width={18} height={18} />
+      <span>8 menit membaca</span>
+    </div>
+    {/* Author Info with Tooltip - KODE ASLI TIDAK BERUBAH */}
+    <div 
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '10px',
+        marginTop: '10px',
+        paddingTop: '10px',
+        borderTop: '1px solid #333333',
+        position: 'relative',
+        width: '100%',
+        overflow: 'visible',
+      }}
+      onMouseEnter={() => setShowAuthorTooltip(true)}
+      onMouseLeave={() => setShowAuthorTooltip(false)}
+    >
                 <motion.img 
                   whileHover={{ scale: 1.1, rotate: 5 }}
                   transition={{ type: "spring", stiffness: 400, damping: 10 }}
@@ -2701,36 +2703,40 @@ export default function BlogPage() {
             </h3>
           </div>
           
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '12px',
-            width: '100%',
-            overflow: 'hidden',
-          }}>
-            {rangkumanSections.map((section) => (
-              <motion.button
-                key={section.id}
-                onClick={() => scrollToSection(section.id)}
-                whileHover={{ x: 10 }}
-                transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  padding: '5px 0',
-                  color: activeSection === section.id ? 'white' : '#999999',
-                  fontSize: isMobile ? '0.95rem' : '1rem',
-                  textAlign: 'left',
-                  cursor: 'pointer',
-                  fontWeight: 'normal',
-                  width: '100%',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap', // Mencegah teks wrap ke bawah
-                }}
-              >
-                {section.title}
-              </motion.button>
+         <div style={{
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '12px',
+  width: '100%',
+  boxSizing: 'border-box',
+}}>
+  {rangkumanSections.map((section) => (
+    <motion.button
+      key={section.id}
+      onClick={() => scrollToSection(section.id)}
+      whileHover={{ x: 10 }}
+      transition={{ type: "spring", stiffness: 400, damping: 25 }}
+      style={{
+        background: 'none',
+        border: 'none',
+        padding: '5px 0',
+        color: activeSection === section.id ? 'white' : '#999999',
+        fontSize: isMobile ? '0.95rem' : '1rem',
+        textAlign: 'left',
+        cursor: 'pointer',
+        fontWeight: 'normal',
+        width: '100%',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap',
+        maxWidth: '100%',
+        display: 'block',
+      }}
+      title={section.title}
+    >
+      {section.title}
+    </motion.button>
+
             ))}
           </div>
         </div>
@@ -3920,3 +3926,4 @@ export default function BlogPage() {
     </div>
   );
 }
+
