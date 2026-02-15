@@ -3,8 +3,49 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
-import { motion } from "framer-motion";
-import gsap from "gsap";
+import { motion, AnimatePresence } from "framer-motion";
+import gsap from "gsat";
+
+// Firebase
+import { initializeApp, getApps } from "firebase/app";
+import { 
+  getAuth, 
+  onAuthStateChanged,
+  signInWithPopup,
+  GoogleAuthProvider,
+  signOut 
+} from "firebase/auth";
+import { 
+  getFirestore, 
+  collection, 
+  doc, 
+  setDoc, 
+  getDocs, 
+  query, 
+  orderBy, 
+  Timestamp,
+  deleteDoc,
+  updateDoc,
+  arrayUnion,
+  arrayRemove,
+  getDoc,
+  where,
+  addDoc,
+  onSnapshot,
+  increment
+} from "firebase/firestore";
+
+// Konfigurasi Firebase
+const firebaseConfig = {
+  apiKey: "AIzaSyD_htQZ1TClnXKZGRJ4izbMQ02y6V3aNAQ",
+  authDomain: "wawa44-58d1e.firebaseapp.com",
+  databaseURL: "https://wawa44-58d1e-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "wawa44-58d1e",
+  storageBucket: "wawa44-58d1e.firebasestorage.app",
+  messagingSenderId: "836899520599",
+  appId: "1:836899520599:web:b346e4370ecfa9bb89e312",
+  measurementId: "G-8LMP7F4BE9"
+};
 
 // Data blog posts dengan tags
 const BLOG_POSTS = [
@@ -96,6 +137,9 @@ const TAG_INFO: { [key: string]: { name: string, description: string } } = {
   }
 };
 
+// Email penulis
+const authorEmail = "faridardiansyah061@gmail.com";
+
 // Icons
 const CalendarIcon = ({ width, height }: { width: number, height: number }) => (
   <svg width={width} height={height} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
@@ -139,7 +183,7 @@ const NorthWestArrow = ({ width, height, style }: { width: number | string, heig
   </svg>
 );
 
-// North East Arrow SVG (untuk setiap blog)
+// North East Arrow SVG
 const NorthEastArrow = ({ width, height, style }: { width: number | string, height: number | string, style?: React.CSSProperties }) => (
   <svg 
     width={width} 
@@ -177,6 +221,44 @@ const SouthWestArrow = ({ width, height, style }: { width: number | string, heig
   </svg>
 );
 
+// Message Icon
+const MessageIcon = ({ width, height }: { width: number, height: number }) => (
+  <svg width={width} height={height} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+  </svg>
+);
+
+// Send Icon
+const SendIcon = ({ width, height }: { width: number, height: number }) => (
+  <svg width={width} height={height} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+    <line x1="22" y1="2" x2="11" y2="13"/>
+    <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+  </svg>
+);
+
+// Reply Icon
+const ReplyIcon = ({ width, height }: { width: number, height: number }) => (
+  <svg width={width} height={height} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+    <polyline points="10 11 13 14 10 17"/>
+  </svg>
+);
+
+// Check Icon
+const CheckIcon = ({ width, height }: { width: number, height: number }) => (
+  <svg width={width} height={height} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+    <polyline points="20 6 9 17 4 12"/>
+  </svg>
+);
+
+// History Icon
+const HistoryIcon = ({ width, height }: { width: number, height: number }) => (
+  <svg width={width} height={height} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+    <circle cx="12" cy="12" r="10"/>
+    <polyline points="12 6 12 12 16 14"/>
+  </svg>
+);
+
 export default function TagPage() {
   const router = useRouter();
   const params = useParams();
@@ -184,6 +266,26 @@ export default function TagPage() {
   
   const [isMounted, setIsMounted] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  
+  // Firebase State
+  const [firebaseInitialized, setFirebaseInitialized] = useState(false);
+  const [firebaseAuth, setFirebaseAuth] = useState<any>(null);
+  const [firebaseDb, setFirebaseDb] = useState<any>(null);
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  // State untuk Chat/Message
+  const [showMessageModal, setShowMessageModal] = useState(false);
+  const [messages, setMessages] = useState<any[]>([]);
+  const [userMessages, setUserMessages] = useState<any[]>([]);
+  const [newMessage, setNewMessage] = useState("");
+  const [messageLoading, setMessageLoading] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [selectedMessage, setSelectedMessage] = useState<any>(null);
+  const [replyMessage, setReplyMessage] = useState("");
+  const [showUserMessageHistory, setShowUserMessageHistory] = useState(false);
+  const [showUserMessageModal, setShowUserMessageModal] = useState(false);
+  const [selectedUserMessage, setSelectedUserMessage] = useState<any>(null);
   
   // Refs untuk GSAP animations
   const bannerRef = useRef<HTMLDivElement>(null);
@@ -198,23 +300,17 @@ export default function TagPage() {
 
   // ===== FUNGSI UNTUK MENDAPATKAN POST TERBARU =====
   const getNewestPosts = () => {
-    // Urutkan berdasarkan tanggal (asumsi semua tanggal sama, jadi gunakan urutan array)
-    // Jika ada tanggal yang berbeda, bisa menggunakan sort berdasarkan date
-    return [...BLOG_POSTS].slice(0, 2); // Ambil 2 post pertama sebagai contoh terbaru
+    return [...BLOG_POSTS].slice(0, 2);
   };
 
   // ===== FUNGSI UNTUK MENDAPATKAN POST TERAKHIR =====
   const getLastPosts = () => {
-    // Ambil 2 post terakhir dari array
-    return [...BLOG_POSTS].slice(-2); // Ambil 2 post terakhir
+    return [...BLOG_POSTS].slice(-2);
   };
 
-  // Get recommended posts (acak 3 post yang tidak memiliki tag yang sama dengan current tag)
+  // Get recommended posts
   const getRecommendedPosts = () => {
-    // Filter post yang tidak memiliki tag yang sama dengan current tag
     const otherPosts = BLOG_POSTS.filter(post => !post.tags.includes(tagId));
-    
-    // Acak dan ambil 3 post
     const shuffled = [...otherPosts].sort(() => 0.5 - Math.random());
     return shuffled.slice(0, 3);
   };
@@ -223,11 +319,247 @@ export default function TagPage() {
   const lastPosts = getLastPosts();
   const recommendedPosts = getRecommendedPosts();
 
+  // ============================================
+  // FIREBASE INITIALIZATION
+  // ============================================
+  useEffect(() => {
+    setIsMounted(true);
+    
+    const checkScreenSize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+    
+    try {
+      const app = getApps().length === 0
+        ? initializeApp(firebaseConfig)
+        : getApps()[0];
+      
+      const auth = getAuth(app);
+      const db = getFirestore(app);
+      
+      setFirebaseAuth(auth);
+      setFirebaseDb(db);
+      setFirebaseInitialized(true);
+      
+    } catch (error) {
+      console.error("Firebase initialization error:", error);
+    }
+    
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
+
+  // ============================================
+  // AUTH STATE LISTENER
+  // ============================================
+  useEffect(() => {
+    if (!firebaseAuth || !firebaseInitialized) return;
+    
+    const unsubscribe = onAuthStateChanged(firebaseAuth, (currentUser: any) => {
+      setUser(currentUser);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, [firebaseAuth, firebaseInitialized]);
+
+  // ============================================
+  // LOAD MESSAGES (REAL-TIME)
+  // ============================================
+  useEffect(() => {
+    if (!firebaseDb || !firebaseInitialized) return;
+
+    const messagesRef = collection(firebaseDb, "authorMessages");
+    const q = query(
+      messagesRef,
+      orderBy("createdAt", "desc")
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const messagesData = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        createdAt: doc.data().createdAt?.toDate?.() || new Date()
+      }));
+      setMessages(messagesData);
+      
+      // Hitung pesan yang belum dibaca (jika user adalah penulis)
+      if (user && user.email === authorEmail) {
+        const unread = messagesData.filter((msg: any) => !msg.isRead).length;
+        setUnreadCount(unread);
+      }
+
+      // Filter pesan untuk user yang sedang login (bukan penulis)
+      if (user && user.email !== authorEmail) {
+        const userMsgs = messagesData.filter((msg: any) => msg.userId === user.uid);
+        setUserMessages(userMsgs);
+      }
+    }, (error) => {
+      console.error("Error loading messages:", error);
+    });
+
+    return () => unsubscribe();
+  }, [firebaseDb, firebaseInitialized, user]);
+
+  // ============================================
+  // HANDLE GOOGLE LOGIN
+  // ============================================
+  const handleGoogleLogin = async () => {
+    if (!firebaseAuth) return;
+    
+    try {
+      const provider = new GoogleAuthProvider();
+      await signInWithPopup(firebaseAuth, provider);
+    } catch (error) {
+      console.error("Google login error:", error);
+    }
+  };
+
+  // ============================================
+  // HANDLE LOGOUT
+  // ============================================
+  const handleLogout = async () => {
+    if (!firebaseAuth) return;
+    
+    try {
+      await signOut(firebaseAuth);
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
+
+  // ============================================
+  // HANDLE SEND MESSAGE TO AUTHOR
+  // ============================================
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) {
+      handleGoogleLogin();
+      return;
+    }
+    if (!firebaseDb || !newMessage.trim()) return;
+
+    setMessageLoading(true);
+    
+    try {
+      const messagesRef = collection(firebaseDb, "authorMessages");
+      
+      await addDoc(messagesRef, {
+        userId: user.uid,
+        userName: user.displayName || user.email?.split('@')[0] || 'Anonymous',
+        userEmail: user.email,
+        userPhoto: user.photoURL || `https://ui-avatars.com/api/?name=${user.email}&background=random&color=fff`,
+        message: newMessage,
+        isRead: false,
+        replies: [],
+        createdAt: Timestamp.now(),
+        type: 'saran' // Tipe pesan: saran untuk blog
+      });
+
+      setNewMessage("");
+      setShowMessageModal(false);
+      showNotification("Saran berhasil dikirim ke penulis");
+      
+    } catch (error) {
+      console.error("Error sending message:", error);
+      showNotification("Gagal mengirim saran", "error");
+    } finally {
+      setMessageLoading(false);
+    }
+  };
+
+  // ============================================
+  // HANDLE REPLY TO MESSAGE (UNTUK PENULIS)
+  // ============================================
+  const handleReplyToMessage = async (messageId: string) => {
+    if (!user || user.email !== authorEmail) return;
+    if (!firebaseDb || !replyMessage.trim()) return;
+
+    try {
+      const messageRef = doc(firebaseDb, "authorMessages", messageId);
+      const messageDoc = await getDoc(messageRef);
+      
+      if (!messageDoc.exists()) return;
+      
+      const replyData = {
+        id: `${Date.now()}_${user.uid}`,
+        userId: user.uid,
+        userName: user.displayName || "Farid Ardiansyah",
+        userPhoto: user.photoURL || `https://ui-avatars.com/api/?name=Farid+Ardiansyah&background=random&color=fff`,
+        text: replyMessage,
+        createdAt: Timestamp.now()
+      };
+
+      await updateDoc(messageRef, {
+        replies: arrayUnion(replyData),
+        isRead: true
+      });
+
+      setReplyMessage("");
+      setSelectedMessage(null);
+      showNotification("Balasan berhasil dikirim ke user");
+      
+    } catch (error) {
+      console.error("Error replying to message:", error);
+      showNotification("Gagal mengirim balasan", "error");
+    }
+  };
+
+  // ============================================
+  // HANDLE MARK AS READ (UNTUK PENULIS)
+  // ============================================
+  const handleMarkAsRead = async (messageId: string) => {
+    if (!user || user.email !== authorEmail) return;
+    if (!firebaseDb) return;
+
+    try {
+      const messageRef = doc(firebaseDb, "authorMessages", messageId);
+      await updateDoc(messageRef, {
+        isRead: true
+      });
+      
+      showNotification("Pesan ditandai telah dibaca");
+    } catch (error) {
+      console.error("Error marking message as read:", error);
+    }
+  };
+
+  // ============================================
+  // NOTIFICATION FUNCTION
+  // ============================================
+  const showNotification = (message: string, type: "success" | "error" = "success") => {
+    const notification = document.createElement("div");
+    notification.style.position = "fixed";
+    notification.style.bottom = "20px";
+    notification.style.left = "20px";
+    notification.style.backgroundColor = "rgba(255,255,255,0.1)";
+    notification.style.color = "white";
+    notification.style.padding = "12px 24px";
+    notification.style.borderRadius = "30px";
+    notification.style.fontSize = "0.95rem";
+    notification.style.zIndex = "10001";
+    notification.style.border = "1px solid rgba(255,255,255,0.2)";
+    notification.style.backdropFilter = "blur(10px)";
+    notification.style.boxShadow = "0 4px 12px rgba(0,0,0,0.3)";
+    notification.style.animation = "slideIn 0.3s ease";
+    notification.innerText = message;
+
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+      notification.style.animation = "slideOut 0.3s ease";
+      setTimeout(() => {
+        document.body.removeChild(notification);
+      }, 300);
+    }, 3000);
+  };
+
   // GSAP Animations
   useEffect(() => {
     if (!isMounted) return;
 
-    // Banner animation
     if (bannerRef.current) {
       gsap.fromTo(bannerRef.current,
         { y: -100, opacity: 0 },
@@ -235,9 +567,7 @@ export default function TagPage() {
       );
     }
 
-    // Emoji animations
     if (emoji1Ref.current && emoji2Ref.current) {
-      // Create timeline for emojis
       const tl = gsap.timeline({ repeat: -1, repeatDelay: 3 });
       
       tl.to([emoji1Ref.current, emoji2Ref.current], {
@@ -262,7 +592,6 @@ export default function TagPage() {
       });
     }
 
-    // Header animation
     if (headerRef.current) {
       gsap.fromTo(headerRef.current,
         { x: 20, opacity: 0 },
@@ -272,20 +601,7 @@ export default function TagPage() {
 
   }, [isMounted]);
 
-  useEffect(() => {
-    setIsMounted(true);
-    
-    const checkScreenSize = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    
-    checkScreenSize();
-    window.addEventListener('resize', checkScreenSize);
-    
-    return () => window.removeEventListener('resize', checkScreenSize);
-  }, []);
-
-  if (!isMounted) {
+  if (!isMounted || loading) {
     return (
       <div style={{
         minHeight: '100vh',
@@ -295,7 +611,20 @@ export default function TagPage() {
         alignItems: 'center',
         fontFamily: 'Helvetica, Arial, sans-serif',
       }}>
-        <div style={{ color: 'white', fontSize: '1rem' }}>Loading...</div>
+        <motion.div 
+          animate={{ 
+            scale: [1, 1.2, 1],
+            opacity: [0.5, 1, 0.5]
+          }}
+          transition={{ 
+            duration: 1.5,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+          style={{ color: 'white', fontSize: '1rem' }}
+        >
+          Loading...
+        </motion.div>
       </div>
     );
   }
@@ -399,7 +728,7 @@ export default function TagPage() {
         </motion.div>
       </div>
 
-      {/* Header dengan North West Arrow + Halaman Utama */}
+      {/* HEADER - NAMA USER + PANAH BESAR + TOMBOL SARAN */}
       <div
         ref={headerRef}
         style={{
@@ -407,45 +736,648 @@ export default function TagPage() {
           top: isMobile ? '90px' : '110px',
           right: isMobile ? '20px' : '40px',
           zIndex: 100,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '15px',
+          flexWrap: 'wrap',
+          justifyContent: 'flex-end',
+          maxWidth: 'calc(100% - 80px)',
         }}
       >
-        <Link 
-          href="/" 
+        {/* Tombol Saran ke Penulis */}
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => {
+            if (!user) {
+              handleGoogleLogin();
+            } else {
+              setShowMessageModal(true);
+            }
+          }}
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '15px',
-            textDecoration: 'none',
-            color: 'white',
-            padding: '10px 20px',
-            backgroundColor: 'rgba(255,255,255,0.05)',
+            gap: '10px',
+            background: showMessageModal ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.05)',
+            border: '1px solid rgba(255,255,255,0.2)',
             borderRadius: '40px',
-            border: '1px solid rgba(255,255,255,0.1)',
-            transition: 'all 0.3s ease',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)';
-            e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)';
-            e.currentTarget.style.transform = 'translateY(-2px)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)';
-            e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)';
-            e.currentTarget.style.transform = 'translateY(0)';
+            padding: '12px 24px',
+            color: 'white',
+            fontSize: '0.95rem',
+            cursor: 'pointer',
+            position: 'relative',
           }}
         >
-          <NorthWestArrow 
-            width={isMobile ? 24 : 28} 
-            height={isMobile ? 24 : 28} 
-          />
-          <span style={{
-            fontSize: isMobile ? '1rem' : '1.1rem',
-            fontWeight: '500',
-          }}>
-            Halaman Utama
-          </span>
-        </Link>
+          <MessageIcon width={20} height={20} />
+          <span>💡 Beri Saran</span>
+          {user && user.email !== authorEmail && userMessages.length > 0 && (
+            <span
+              style={{
+                position: 'absolute',
+                top: '-5px',
+                right: '-5px',
+                background: '#FF6B00',
+                color: 'white',
+                fontSize: '0.7rem',
+                minWidth: '18px',
+                height: '18px',
+                borderRadius: '9px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                border: '2px solid black',
+              }}
+            >
+              {userMessages.filter(m => m.replies?.length > 0 && !m.isReadByUser).length}
+            </span>
+          )}
+        </motion.button>
+
+        {/* Tombol Riwayat Pesan (untuk user biasa) */}
+        {user && user.email !== authorEmail && userMessages.length > 0 && (
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setShowUserMessageModal(true)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              background: 'rgba(255,255,255,0.05)',
+              border: '1px solid rgba(255,255,255,0.2)',
+              borderRadius: '40px',
+              padding: '12px 20px',
+              color: 'white',
+              fontSize: '0.95rem',
+              cursor: 'pointer',
+            }}
+          >
+            <HistoryIcon width={18} height={18} />
+            <span>Pesan Saya ({userMessages.length})</span>
+          </motion.button>
+        )}
+
+        {/* User Info / Login Button + PANAH BESAR */}
+        {user ? (
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '15px',
+              backgroundColor: 'rgba(255,255,255,0.05)',
+              padding: '8px 20px',
+              borderRadius: '40px',
+              border: '1px solid rgba(255,255,255,0.1)',
+            }}
+          >
+            <motion.img 
+              whileHover={{ scale: 1.1 }}
+              src={user.photoURL || `https://ui-avatars.com/api/?name=${user.email}&background=random&color=fff`} 
+              alt={user.displayName}
+              style={{
+                width: '36px',
+                height: '36px',
+                borderRadius: '50%',
+                objectFit: 'cover',
+              }}
+            />
+            <span style={{
+              fontSize: '1rem',
+              color: 'white',
+              fontWeight: '500',
+            }}>
+              {user.displayName || user.email?.split('@')[0]}
+            </span>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleLogout}
+              style={{
+                background: 'rgba(255,255,255,0.1)',
+                border: '1px solid rgba(255,255,255,0.2)',
+                borderRadius: '30px',
+                padding: '6px 16px',
+                color: 'white',
+                fontSize: '0.85rem',
+                cursor: 'pointer',
+              }}
+            >
+              Logout
+            </motion.button>
+            {/* PANAH BESAR DI SAMPING USER */}
+            <SouthWestArrow width={40} height={40} />
+          </motion.div>
+        ) : (
+          <motion.button
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={handleGoogleLogin}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              background: 'rgba(255,255,255,0.05)',
+              border: '1px solid rgba(255,255,255,0.2)',
+              borderRadius: '40px',
+              padding: '12px 24px',
+              color: 'white',
+              fontSize: '0.95rem',
+              cursor: 'pointer',
+            }}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24">
+              <path fill="#ffffff" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+              <path fill="#ffffff" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+              <path fill="#ffffff" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+              <path fill="#ffffff" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+            </svg>
+            <span>Login dengan Google</span>
+          </motion.button>
+        )}
       </div>
+
+      {/* ===== MODAL KIRIM SARAN ===== */}
+      <AnimatePresence>
+        {showMessageModal && user && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0,0,0,0.8)',
+              backdropFilter: 'blur(8px)',
+              zIndex: 10000,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '20px',
+            }}
+            onClick={() => setShowMessageModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              style={{
+                background: '#1a1a1a',
+                borderRadius: '32px',
+                padding: '40px',
+                maxWidth: '500px',
+                width: '100%',
+                border: '1px solid #333333',
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '30px',
+              }}>
+                <div>
+                  <motion.h3 
+                    initial={{ x: -20, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 0.1 }}
+                    style={{
+                      fontSize: '2rem',
+                      fontWeight: 'normal',
+                      color: 'white',
+                      margin: '0 0 8px 0',
+                    }}
+                  >
+                    💡 Beri Saran
+                  </motion.h3>
+                  <motion.p
+                    initial={{ x: -20, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 0.2 }}
+                    style={{
+                      fontSize: '0.95rem',
+                      color: '#999999',
+                      margin: 0,
+                    }}
+                  >
+                    Kirim saran, kritik, atau ide untuk blog ini
+                  </motion.p>
+                </div>
+                <motion.button
+                  whileHover={{ scale: 1.1, rotate: 90 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => setShowMessageModal(false)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#999999',
+                    fontSize: '2rem',
+                    cursor: 'pointer',
+                    lineHeight: 1,
+                  }}
+                >
+                  ×
+                </motion.button>
+              </div>
+
+              <motion.form
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.3 }}
+                onSubmit={handleSendMessage}
+              >
+                <textarea
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  placeholder="Tulis saran Anda di sini..."
+                  rows={6}
+                  required
+                  style={{
+                    width: '100%',
+                    padding: '20px',
+                    background: '#2a2a2a',
+                    border: '1px solid #444444',
+                    borderRadius: '20px',
+                    color: 'white',
+                    fontSize: '1rem',
+                    outline: 'none',
+                    resize: 'vertical',
+                    marginBottom: '20px',
+                  }}
+                />
+                
+                <div style={{
+                  display: 'flex',
+                  gap: '15px',
+                  justifyContent: 'flex-end',
+                }}>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    type="button"
+                    onClick={() => setShowMessageModal(false)}
+                    style={{
+                      padding: '12px 24px',
+                      background: 'none',
+                      border: '1px solid #333333',
+                      borderRadius: '30px',
+                      color: '#999999',
+                      fontSize: '1rem',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Batal
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    type="submit"
+                    disabled={messageLoading || !newMessage.trim()}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '10px',
+                      padding: '12px 32px',
+                      background: messageLoading || !newMessage.trim() ? '#333333' : 'rgba(255,255,255,0.1)',
+                      border: '1px solid rgba(255,255,255,0.2)',
+                      borderRadius: '30px',
+                      color: messageLoading || !newMessage.trim() ? '#999999' : 'white',
+                      fontSize: '1rem',
+                      fontWeight: '500',
+                      cursor: messageLoading || !newMessage.trim() ? 'not-allowed' : 'pointer',
+                    }}
+                  >
+                    <SendIcon width={18} height={18} />
+                    <span>{messageLoading ? 'Mengirim...' : 'Kirim Saran'}</span>
+                  </motion.button>
+                </div>
+              </motion.form>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ===== MODAL PESAN DARI PENULIS (UNTUK USER) ===== */}
+      <AnimatePresence>
+        {showUserMessageModal && user && user.email !== authorEmail && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0,0,0,0.8)',
+              backdropFilter: 'blur(8px)',
+              zIndex: 10000,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '20px',
+            }}
+            onClick={() => setShowUserMessageModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              style={{
+                background: '#1a1a1a',
+                borderRadius: '32px',
+                padding: '40px',
+                maxWidth: '600px',
+                width: '100%',
+                maxHeight: '80vh',
+                overflowY: 'auto',
+                border: '1px solid #333333',
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '30px',
+              }}>
+                <div>
+                  <motion.h3 
+                    initial={{ x: -20, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 0.1 }}
+                    style={{
+                      fontSize: '2rem',
+                      fontWeight: 'normal',
+                      color: 'white',
+                      margin: '0 0 8px 0',
+                    }}
+                  >
+                    💬 Pesan dari Penulis
+                  </motion.h3>
+                  <motion.p
+                    initial={{ x: -20, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 0.2 }}
+                    style={{
+                      fontSize: '0.95rem',
+                      color: '#999999',
+                      margin: 0,
+                    }}
+                  >
+                    {userMessages.length} pesan • Balasan dari Farid Ardiansyah
+                  </motion.p>
+                </div>
+                <motion.button
+                  whileHover={{ scale: 1.1, rotate: 90 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => setShowUserMessageModal(false)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#999999',
+                    fontSize: '2rem',
+                    cursor: 'pointer',
+                    lineHeight: 1,
+                  }}
+                >
+                  ×
+                </motion.button>
+              </div>
+
+              {userMessages.length === 0 ? (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  style={{
+                    padding: '40px',
+                    textAlign: 'center',
+                    color: '#666666',
+                    border: '1px dashed #333333',
+                    borderRadius: '24px',
+                  }}
+                >
+                  <MessageIcon width={40} height={40} />
+                  <p style={{ fontSize: '1.1rem', margin: '15px 0 0 0' }}>
+                    Belum ada pesan dari penulis.
+                  </p>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => {
+                      setShowUserMessageModal(false);
+                      setShowMessageModal(true);
+                    }}
+                    style={{
+                      marginTop: '20px',
+                      padding: '10px 24px',
+                      background: 'rgba(255,255,255,0.1)',
+                      border: '1px solid rgba(255,255,255,0.2)',
+                      borderRadius: '30px',
+                      color: 'white',
+                      fontSize: '0.95rem',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Kirim Saran Baru
+                  </motion.button>
+                </motion.div>
+              ) : (
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '20px',
+                }}>
+                  {userMessages.map((msg, index) => (
+                    <motion.div
+                      key={msg.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                      style={{
+                        padding: '24px',
+                        background: msg.replies?.length > 0 ? 'rgba(0,204,136,0.05)' : 'rgba(255,255,255,0.02)',
+                        borderRadius: '24px',
+                        border: msg.replies?.length > 0 ? '1px solid rgba(0,204,136,0.2)' : '1px solid rgba(255,255,255,0.05)',
+                        cursor: 'pointer',
+                      }}
+                      onClick={() => setSelectedUserMessage(selectedUserMessage === msg.id ? null : msg.id)}
+                    >
+                      {/* Header Pesan */}
+                      <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        marginBottom: '15px',
+                      }}>
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '12px',
+                        }}>
+                          <img 
+                            src={msg.userPhoto}
+                            alt={msg.userName}
+                            style={{
+                              width: '40px',
+                              height: '40px',
+                              borderRadius: '50%',
+                              objectFit: 'cover',
+                            }}
+                          />
+                          <div>
+                            <span style={{
+                              fontSize: '1.1rem',
+                              fontWeight: '500',
+                              color: 'white',
+                              display: 'block',
+                              marginBottom: '4px',
+                            }}>
+                              {msg.userName} (Anda)
+                            </span>
+                            <span style={{
+                              fontSize: '0.85rem',
+                              color: '#999999',
+                            }}>
+                              {msg.createdAt.toLocaleDateString('id-ID', {
+                                day: 'numeric',
+                                month: 'long',
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </span>
+                          </div>
+                        </div>
+                        
+                        {msg.replies?.length > 0 && (
+                          <span style={{
+                            padding: '4px 12px',
+                            background: 'rgba(0,204,136,0.1)',
+                            border: '1px solid rgba(0,204,136,0.3)',
+                            borderRadius: '20px',
+                            color: '#00cc88',
+                            fontSize: '0.8rem',
+                          }}>
+                            Ada balasan
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Isi Pesan */}
+                      <p style={{
+                        fontSize: '1rem',
+                        lineHeight: '1.6',
+                        color: '#e0e0e0',
+                        margin: '0 0 15px 0',
+                        padding: '15px',
+                        background: 'rgba(0,0,0,0.2)',
+                        borderRadius: '16px',
+                        borderLeft: '2px solid rgba(255,255,255,0.2)',
+                      }}>
+                        {msg.message}
+                      </p>
+
+                      {/* Balasan dari Penulis */}
+                      {selectedUserMessage === msg.id && msg.replies && msg.replies.length > 0 && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          transition={{ duration: 0.3 }}
+                          style={{
+                            marginTop: '15px',
+                            paddingLeft: '20px',
+                            borderLeft: '2px solid rgba(0,204,136,0.3)',
+                          }}
+                        >
+                          <span style={{
+                            fontSize: '0.9rem',
+                            color: '#00cc88',
+                            display: 'block',
+                            marginBottom: '10px',
+                          }}>
+                            Balasan dari Penulis:
+                          </span>
+                          {msg.replies.map((reply: any) => (
+                            <div key={reply.id} style={{
+                              marginBottom: '15px',
+                              padding: '15px',
+                              background: 'rgba(0,204,136,0.02)',
+                              borderRadius: '12px',
+                            }}>
+                              <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                marginBottom: '8px',
+                              }}>
+                                <img 
+                                  src={reply.userPhoto}
+                                  alt={reply.userName}
+                                  style={{
+                                    width: '24px',
+                                    height: '24px',
+                                    borderRadius: '50%',
+                                  }}
+                                />
+                                <span style={{
+                                  fontSize: '0.9rem',
+                                  fontWeight: '500',
+                                  color: '#00cc88',
+                                }}>
+                                  {reply.userName}
+                                </span>
+                                <span style={{
+                                  fontSize: '0.75rem',
+                                  color: '#666666',
+                                }}>
+                                  {reply.createdAt?.toDate?.()?.toLocaleDateString?.('id-ID', {
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                  })}
+                                </span>
+                              </div>
+                              <p style={{
+                                fontSize: '0.95rem',
+                                color: '#cccccc',
+                                margin: 0,
+                                lineHeight: '1.6',
+                              }}>
+                                {reply.text}
+                              </p>
+                            </div>
+                          ))}
+                        </motion.div>
+                      )}
+
+                      {msg.replies?.length > 0 && selectedUserMessage !== msg.id && (
+                        <div style={{
+                          textAlign: 'right',
+                          color: '#666666',
+                          fontSize: '0.85rem',
+                        }}>
+                          Klik untuk lihat balasan
+                        </div>
+                      )}
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Main Content */}
       <div style={{
@@ -1173,6 +2105,31 @@ export default function TagPage() {
           </motion.div>
         )}
       </div>
+
+      {/* Tambahkan CSS untuk animasi notifikasi */}
+      <style jsx>{`
+        @keyframes slideIn {
+          from {
+            transform: translateX(-100%);
+            opacity: 0;
+          }
+          to {
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+        
+        @keyframes slideOut {
+          from {
+            transform: translateX(0);
+            opacity: 1;
+          }
+          to {
+            transform: translateX(-100%);
+            opacity: 0;
+          }
+        }
+      `}</style>
     </div>
   );
 }
