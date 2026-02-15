@@ -1119,27 +1119,22 @@ export default function BlogPage() {
       paddingTop: isMobile ? '120px' : '180px', // Tambah padding top untuk memberi ruang teks berjalan
     }}>
       
-    {/* ===== TEKS BERJALAN - LEBIH BESAR DENGAN PANAH ===== */}
-<div
-  style={{
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 9999,
-    backgroundColor: 'rgba(0,0,0,0.95)',
-    color: 'white',
-    padding: '20px 0',
-    borderBottom: '2px solid rgba(255,255,255,0.2)',
-    backdropFilter: 'blur(12px)',
-    overflow: 'hidden',
-    whiteSpace: 'nowrap',
-    /* 🔥 FIX SCROLL HORIZONTAL */
-    width: '100%',          // ganti dari 100vw
-    maxWidth: '100%',
-    boxSizing: 'border-box',
-    boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
-
+      {/* ===== TEKS BERJALAN - LEBIH BESAR DENGAN PANAH ===== */}
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 9999,
+        backgroundColor: 'rgba(0,0,0,0.95)',
+        color: 'white',
+        padding: '20px 0', // Padding lebih besar
+        borderBottom: '2px solid rgba(255,255,255,0.2)',
+        backdropFilter: 'blur(12px)',
+        overflow: 'hidden',
+        whiteSpace: 'nowrap',
+        width: '100vw',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
       }}>
         <motion.div
           animate={{
@@ -2474,35 +2469,39 @@ export default function BlogPage() {
         
         {/* SIDEBAR KIRI - RANGKUMAN (DIPERBAIKI: OVERFLOW-X HIDDEN) */}
         <div style={{
-          flex: isMobile ? '1' : '0 0 280px',
-          position: isMobile ? 'relative' : 'sticky',
-          top: isMobile ? 'auto' : '160px',
-          alignSelf: 'flex-start',
-          height: isMobile ? 'auto' : 'calc(100vh - 210px)',
-          overflowY: isMobile ? 'visible' : 'auto',
-          overflowX: 'hidden', // PENTING: Hilangkan scrollbar horizontal
-          paddingRight: '20px',
-          maxWidth: '100%', // Pastikan tidak melebihi lebar container
-          boxSizing: 'border-box', // Pastikan padding tidak menambah lebar
+           flex: isMobile ? '1' : '0 0 280px',
+  position: isMobile ? 'relative' : 'sticky',
+  top: isMobile ? 'auto' : '160px',
+  alignSelf: 'flex-start',
+  height: isMobile ? 'auto' : 'calc(100vh - 210px)',
+  overflowY: isMobile ? 'visible' : 'auto',
+  overflowX: 'hidden', // KRUSIAL: sembunyikan scroll horizontal
+  paddingRight: '20px',
+  width: '280px', // TETAPKAN LEBAR FIX
+  maxWidth: '280px', // PASTIKAN TIDAK MELEBAR
+  minWidth: '280px', // PASTIKAN TIDAK MENYEMPIT
+  boxSizing: 'border-box',
         }}>
           
-          {/* Blog Title */}
-          <div style={{
-            marginBottom: '50px',
-            width: '100%', // Pastikan lebar penuh
-            overflow: 'hidden', // Hindari overflow
-          }}>
-            <h1 style={{
-              fontSize: isMobile ? '4rem' : '6rem',
-              fontWeight: 'normal',
-              color: 'white',
-              margin: '0 0 20px 0',
-              lineHeight: '0.9',
-              letterSpacing: '-2px',
-              wordWrap: 'break-word', // Pastikan teks panjang tidak overflow
-            }}>
-              Blog
-            </h1>
+         {/* Blog Title */}
+  <div style={{
+    marginBottom: '50px',
+    width: '100%',
+  }}>
+    <h1 style={{
+      fontSize: isMobile ? '4rem' : '6rem',
+      fontWeight: 'normal',
+      color: 'white',
+      margin: '0 0 20px 0',
+      lineHeight: '0.9',
+      letterSpacing: '-2px',
+      width: '100%',
+      overflow: 'hidden',
+      textOverflow: 'clip', // POTONG TEKS JIKA TERLALU PANJANG
+      whiteSpace: 'nowrap', // CEGAH WRAP
+    }}>
+      Blog
+    </h1>
             
             <div style={{
               display: 'flex',
@@ -3924,4 +3923,3 @@ export default function BlogPage() {
     </div>
   );
 }
-
