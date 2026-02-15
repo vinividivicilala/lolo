@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import gsap from "gsat";
+import gsap from "gsap"; // Perbaikan: dari 'gsat' menjadi 'gsap'
 
 // Firebase
 import { initializeApp, getApps } from "firebase/app";
@@ -455,7 +455,7 @@ export default function TagPage() {
         isRead: false,
         replies: [],
         createdAt: Timestamp.now(),
-        type: 'saran' // Tipe pesan: saran untuk blog
+        type: 'saran'
       });
 
       setNewMessage("");
@@ -771,7 +771,7 @@ export default function TagPage() {
         >
           <MessageIcon width={20} height={20} />
           <span>💡 Beri Saran</span>
-          {user && user.email !== authorEmail && userMessages.length > 0 && (
+          {user && user.email !== authorEmail && userMessages.filter(m => m.replies?.length > 0).length > 0 && (
             <span
               style={{
                 position: 'absolute',
@@ -789,7 +789,7 @@ export default function TagPage() {
                 border: '2px solid black',
               }}
             >
-              {userMessages.filter(m => m.replies?.length > 0 && !m.isReadByUser).length}
+              {userMessages.filter(m => m.replies?.length > 0).length}
             </span>
           )}
         </motion.button>
@@ -835,13 +835,16 @@ export default function TagPage() {
           >
             <motion.img 
               whileHover={{ scale: 1.1 }}
-              src={user.photoURL || `https://ui-avatars.com/api/?name=${user.email}&background=random&color=fff`} 
-              alt={user.displayName}
+              src={user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.email || 'User')}&background=random&color=fff`} 
+              alt={user.displayName || 'User'}
               style={{
                 width: '36px',
                 height: '36px',
                 borderRadius: '50%',
                 objectFit: 'cover',
+              }}
+              onError={(e) => {
+                e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.email || 'User')}&background=random&color=fff`;
               }}
             />
             <span style={{
@@ -849,7 +852,7 @@ export default function TagPage() {
               color: 'white',
               fontWeight: '500',
             }}>
-              {user.displayName || user.email?.split('@')[0]}
+              {user.displayName || user.email?.split('@')[0] || 'User'}
             </span>
             <motion.button
               whileHover={{ scale: 1.05 }}
@@ -1235,6 +1238,9 @@ export default function TagPage() {
                               borderRadius: '50%',
                               objectFit: 'cover',
                             }}
+                            onError={(e) => {
+                              e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(msg.userName || 'User')}&background=random&color=fff`;
+                            }}
                           />
                           <div>
                             <span style={{
@@ -1250,13 +1256,13 @@ export default function TagPage() {
                               fontSize: '0.85rem',
                               color: '#999999',
                             }}>
-                              {msg.createdAt.toLocaleDateString('id-ID', {
+                              {msg.createdAt?.toLocaleDateString?.('id-ID', {
                                 day: 'numeric',
                                 month: 'long',
                                 year: 'numeric',
                                 hour: '2-digit',
                                 minute: '2-digit'
-                              })}
+                              }) || new Date().toLocaleDateString('id-ID')}
                             </span>
                           </div>
                         </div>
@@ -1330,6 +1336,9 @@ export default function TagPage() {
                                     height: '24px',
                                     borderRadius: '50%',
                                   }}
+                                  onError={(e) => {
+                                    e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(reply.userName || 'Penulis')}&background=random&color=fff`;
+                                  }}
                                 />
                                 <span style={{
                                   fontSize: '0.9rem',
@@ -1345,7 +1354,7 @@ export default function TagPage() {
                                   {reply.createdAt?.toDate?.()?.toLocaleDateString?.('id-ID', {
                                     hour: '2-digit',
                                     minute: '2-digit'
-                                  })}
+                                  }) || ''}
                                 </span>
                               </div>
                               <p style={{
