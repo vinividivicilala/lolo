@@ -1111,37 +1111,30 @@ export default function BlogPage() {
 
   return (
     <div style={{
-       minHeight: '100vh',
+      minHeight: '100vh',
       backgroundColor: '#000000',
       fontFamily: 'Helvetica, Arial, sans-serif',
       color: 'white',
       position: 'relative',
       padding: isMobile ? '20px' : '40px',
-      paddingTop: isMobile ? '120px' : '180px',
-      width: '100%',
-      maxWidth: '100vw',
-      overflowX: 'hidden', // TAMBAHKAN INI
-      margin: 0,
-      boxSizing: 'border-box',
-      
+      paddingTop: isMobile ? '120px' : '180px', // Tambah padding top untuk memberi ruang teks berjalan
     }}>
       
       {/* ===== TEKS BERJALAN - LEBIH BESAR DENGAN PANAH ===== */}
       <div style={{
-       position: 'fixed',
+        position: 'fixed',
         top: 0,
         left: 0,
         right: 0,
         zIndex: 9999,
         backgroundColor: 'rgba(0,0,0,0.95)',
         color: 'white',
-        padding: '20px 0',
+        padding: '20px 0', // Padding lebih besar
         borderBottom: '2px solid rgba(255,255,255,0.2)',
         backdropFilter: 'blur(12px)',
         overflow: 'hidden',
         whiteSpace: 'nowrap',
-        width: '100%',
-        maxWidth: '100vw', // TAMBAHKAN INI
+        width: '100vw',
         boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
       }}>
         <motion.div
@@ -2486,9 +2479,7 @@ export default function BlogPage() {
           overflowX: 'hidden', // PENTING: Hilangkan scrollbar horizontal
           paddingRight: '20px',
           maxWidth: '100%', // Pastikan tidak melebihi lebar container
-      width: isMobile ? '100%' : '280px', // TAMBAHKAN WIDTH FIX
           boxSizing: 'border-box', // Pastikan padding tidak menambah lebar
-       minWidth: 0,
         }}>
           
           {/* Blog Title */}
@@ -2505,9 +2496,6 @@ export default function BlogPage() {
               lineHeight: '0.9',
               letterSpacing: '-2px',
               wordWrap: 'break-word', // Pastikan teks panjang tidak overflow
-  whiteSpace: 'nowrap', // atau 'normal' — hindari 'nowrap' jika tidak diperlukan
-  overflow: 'hidden',
-      
             }}>
               Blog
             </h1>
@@ -2751,8 +2739,6 @@ export default function BlogPage() {
         <div style={{
           flex: '1',
           maxWidth: isMobile ? '100%' : '700px',
-       minWidth: 0, // PENTING UNTUK RESPONSIVE
-          width: '100%',
         }}>
           
           <motion.h2 
@@ -3934,4 +3920,3 @@ export default function BlogPage() {
     </div>
   );
 }
-
