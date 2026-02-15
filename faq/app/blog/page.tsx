@@ -1119,22 +1119,27 @@ export default function BlogPage() {
       paddingTop: isMobile ? '120px' : '180px', // Tambah padding top untuk memberi ruang teks berjalan
     }}>
       
-      {/* ===== TEKS BERJALAN - LEBIH BESAR DENGAN PANAH ===== */}
-      <div style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        zIndex: 9999,
-        backgroundColor: 'rgba(0,0,0,0.95)',
-        color: 'white',
-        padding: '20px 0', // Padding lebih besar
-        borderBottom: '2px solid rgba(255,255,255,0.2)',
-        backdropFilter: 'blur(12px)',
-        overflow: 'hidden',
-        whiteSpace: 'nowrap',
-        width: '100vw',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
+    {/* ===== TEKS BERJALAN - LEBIH BESAR DENGAN PANAH ===== */}
+<div
+  style={{
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 9999,
+    backgroundColor: 'rgba(0,0,0,0.95)',
+    color: 'white',
+    padding: '20px 0',
+    borderBottom: '2px solid rgba(255,255,255,0.2)',
+    backdropFilter: 'blur(12px)',
+    overflow: 'hidden',
+    whiteSpace: 'nowrap',
+    /* 🔥 FIX SCROLL HORIZONTAL */
+    width: '100%',          // ganti dari 100vw
+    maxWidth: '100%',
+    boxSizing: 'border-box',
+    boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
+
       }}>
         <motion.div
           animate={{
@@ -3919,3 +3924,4 @@ export default function BlogPage() {
     </div>
   );
 }
+
