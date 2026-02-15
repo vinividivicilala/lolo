@@ -3900,40 +3900,6 @@ export default function BlogPage() {
       </div>
 
 
-      <style jsx>{`
-  @keyframes slideIn {
-    from {
-      transform: translateX(-100%);
-      opacity: 0;
-    }
-    to {
-      transform: translateX(0);
-      opacity: 1;
-    }
-  }
-  
-  @keyframes slideOut {
-    from {
-      transform: translateX(0);
-      opacity: 1;
-    }
-    to {
-      transform: translateX(-100%);
-      opacity: 0;
-    }
-  }
-
-  /* Global style untuk memastikan tidak ada scroll horizontal */
-  body {
-    overflow-x: hidden !important;
-    max-width: 100vw !important;
-  }
-  
-  * {
-    box-sizing: border-box;
-  }
-`}</style>
-
       {/* Tambahkan CSS untuk animasi notifikasi */}
       <style jsx>{`
         @keyframes slideIn {
@@ -3961,5 +3927,6 @@ export default function BlogPage() {
     </div>
   );
 }
+
 
 
