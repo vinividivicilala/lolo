@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import gsap from "gsap"; // Perbaikan: dari 'gsat' menjadi 'gsap'
+import gsap from "gsap";
 
 // Firebase
 import { initializeApp, getApps } from "firebase/app";
@@ -286,6 +286,8 @@ export default function TagPage() {
   const [showUserMessageHistory, setShowUserMessageHistory] = useState(false);
   const [showUserMessageModal, setShowUserMessageModal] = useState(false);
   const [selectedUserMessage, setSelectedUserMessage] = useState<any>(null);
+  const [showAuthorMessageModal, setShowAuthorMessageModal] = useState(false);
+  const [selectedAuthorMessage, setSelectedAuthorMessage] = useState<any>(null);
   
   // Refs untuk GSAP animations
   const bannerRef = useRef<HTMLDivElement>(null);
@@ -450,7 +452,7 @@ export default function TagPage() {
         userId: user.uid,
         userName: user.displayName || user.email?.split('@')[0] || 'Anonymous',
         userEmail: user.email,
-        userPhoto: user.photoURL || `https://ui-avatars.com/api/?name=${user.email}&background=random&color=fff`,
+        userPhoto: user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.email || 'User')}&background=random&color=fff`,
         message: newMessage,
         isRead: false,
         replies: [],
@@ -499,6 +501,7 @@ export default function TagPage() {
 
       setReplyMessage("");
       setSelectedMessage(null);
+      setSelectedAuthorMessage(null);
       showNotification("Balasan berhasil dikirim ke user");
       
     } catch (error) {
@@ -744,57 +747,59 @@ export default function TagPage() {
           maxWidth: 'calc(100% - 80px)',
         }}
       >
-        {/* Tombol Saran ke Penulis */}
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => {
-            if (!user) {
-              handleGoogleLogin();
-            } else {
-              setShowMessageModal(true);
-            }
-          }}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px',
-            background: showMessageModal ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.05)',
-            border: '1px solid rgba(255,255,255,0.2)',
-            borderRadius: '40px',
-            padding: '12px 24px',
-            color: 'white',
-            fontSize: '0.95rem',
-            cursor: 'pointer',
-            position: 'relative',
-          }}
-        >
-          <MessageIcon width={20} height={20} />
-          <span>💡 Beri Saran</span>
-          {user && user.email !== authorEmail && userMessages.filter(m => m.replies?.length > 0).length > 0 && (
-            <span
-              style={{
-                position: 'absolute',
-                top: '-5px',
-                right: '-5px',
-                background: '#FF6B00',
-                color: 'white',
-                fontSize: '0.7rem',
-                minWidth: '18px',
-                height: '18px',
-                borderRadius: '9px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                border: '2px solid black',
-              }}
-            >
-              {userMessages.filter(m => m.replies?.length > 0).length}
-            </span>
-          )}
-        </motion.button>
+        {/* Tombol Saran ke Penulis - Untuk User Biasa */}
+        {user && user.email !== authorEmail && (
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => {
+              if (!user) {
+                handleGoogleLogin();
+              } else {
+                setShowMessageModal(true);
+              }
+            }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              background: showMessageModal ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.05)',
+              border: '1px solid rgba(255,255,255,0.2)',
+              borderRadius: '40px',
+              padding: '12px 24px',
+              color: 'white',
+              fontSize: '0.95rem',
+              cursor: 'pointer',
+              position: 'relative',
+            }}
+          >
+            <MessageIcon width={20} height={20} />
+            <span>💡 Beri Saran</span>
+            {userMessages.filter(m => m.replies?.length > 0).length > 0 && (
+              <span
+                style={{
+                  position: 'absolute',
+                  top: '-5px',
+                  right: '-5px',
+                  background: '#FF6B00',
+                  color: 'white',
+                  fontSize: '0.7rem',
+                  minWidth: '18px',
+                  height: '18px',
+                  borderRadius: '9px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  border: '2px solid black',
+                }}
+              >
+                {userMessages.filter(m => m.replies?.length > 0).length}
+              </span>
+            )}
+          </motion.button>
+        )}
 
-        {/* Tombol Riwayat Pesan (untuk user biasa) */}
+        {/* Tombol Pesan Saya (untuk user biasa) */}
         {user && user.email !== authorEmail && userMessages.length > 0 && (
           <motion.button
             whileHover={{ scale: 1.05 }}
@@ -815,6 +820,52 @@ export default function TagPage() {
           >
             <HistoryIcon width={18} height={18} />
             <span>Pesan Saya ({userMessages.length})</span>
+          </motion.button>
+        )}
+
+        {/* Tombol Pesan dari User (untuk penulis) */}
+        {user && user.email === authorEmail && messages.length > 0 && (
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setShowAuthorMessageModal(true)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              background: 'rgba(255,255,255,0.05)',
+              border: '1px solid rgba(255,255,255,0.2)',
+              borderRadius: '40px',
+              padding: '12px 24px',
+              color: 'white',
+              fontSize: '0.95rem',
+              cursor: 'pointer',
+              position: 'relative',
+            }}
+          >
+            <MessageIcon width={20} height={20} />
+            <span>Pesan dari User ({messages.length})</span>
+            {unreadCount > 0 && (
+              <span
+                style={{
+                  position: 'absolute',
+                  top: '-5px',
+                  right: '-5px',
+                  background: '#FF6B00',
+                  color: 'white',
+                  fontSize: '0.7rem',
+                  minWidth: '18px',
+                  height: '18px',
+                  borderRadius: '9px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  border: '2px solid black',
+                }}
+              >
+                {unreadCount}
+              </span>
+            )}
           </motion.button>
         )}
 
@@ -904,9 +955,9 @@ export default function TagPage() {
         )}
       </div>
 
-      {/* ===== MODAL KIRIM SARAN ===== */}
+      {/* ===== MODAL KIRIM SARAN (UNTUK USER) ===== */}
       <AnimatePresence>
-        {showMessageModal && user && (
+        {showMessageModal && user && user.email !== authorEmail && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -1069,6 +1120,388 @@ export default function TagPage() {
         )}
       </AnimatePresence>
 
+      {/* ===== MODAL PESAN DARI USER (UNTUK PENULIS) ===== */}
+      <AnimatePresence>
+        {showAuthorMessageModal && user && user.email === authorEmail && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0,0,0,0.8)',
+              backdropFilter: 'blur(8px)',
+              zIndex: 10000,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '20px',
+            }}
+            onClick={() => setShowAuthorMessageModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              style={{
+                background: '#1a1a1a',
+                borderRadius: '32px',
+                padding: '40px',
+                maxWidth: '700px',
+                width: '100%',
+                maxHeight: '80vh',
+                overflowY: 'auto',
+                border: '1px solid #333333',
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '30px',
+              }}>
+                <div>
+                  <motion.h3 
+                    initial={{ x: -20, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 0.1 }}
+                    style={{
+                      fontSize: '2rem',
+                      fontWeight: 'normal',
+                      color: 'white',
+                      margin: '0 0 8px 0',
+                    }}
+                  >
+                    💬 Pesan dari User
+                  </motion.h3>
+                  <motion.p
+                    initial={{ x: -20, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 0.2 }}
+                    style={{
+                      fontSize: '0.95rem',
+                      color: '#999999',
+                      margin: 0,
+                    }}
+                  >
+                    {messages.length} pesan • {unreadCount} belum dibaca
+                  </motion.p>
+                </div>
+                <motion.button
+                  whileHover={{ scale: 1.1, rotate: 90 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => setShowAuthorMessageModal(false)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#999999',
+                    fontSize: '2rem',
+                    cursor: 'pointer',
+                    lineHeight: 1,
+                  }}
+                >
+                  ×
+                </motion.button>
+              </div>
+
+              {messages.length === 0 ? (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  style={{
+                    padding: '40px',
+                    textAlign: 'center',
+                    color: '#666666',
+                    border: '1px dashed #333333',
+                    borderRadius: '24px',
+                  }}
+                >
+                  <MessageIcon width={40} height={40} />
+                  <p style={{ fontSize: '1.1rem', margin: '15px 0 0 0' }}>
+                    Belum ada pesan dari user.
+                  </p>
+                </motion.div>
+              ) : (
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '20px',
+                }}>
+                  {messages.map((msg, index) => (
+                    <motion.div
+                      key={msg.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                      style={{
+                        padding: '24px',
+                        background: msg.isRead ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.05)',
+                        borderRadius: '24px',
+                        border: '1px solid rgba(255,255,255,0.05)',
+                      }}
+                    >
+                      {/* Header Pesan */}
+                      <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        marginBottom: '15px',
+                      }}>
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '12px',
+                        }}>
+                          <img 
+                            src={msg.userPhoto}
+                            alt={msg.userName}
+                            style={{
+                              width: '40px',
+                              height: '40px',
+                              borderRadius: '50%',
+                              objectFit: 'cover',
+                            }}
+                            onError={(e) => {
+                              e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(msg.userName || 'User')}&background=random&color=fff`;
+                            }}
+                          />
+                          <div>
+                            <span style={{
+                              fontSize: '1.1rem',
+                              fontWeight: '500',
+                              color: 'white',
+                              display: 'block',
+                              marginBottom: '4px',
+                            }}>
+                              {msg.userName}
+                            </span>
+                            <span style={{
+                              fontSize: '0.85rem',
+                              color: '#999999',
+                            }}>
+                              {msg.createdAt?.toLocaleDateString?.('id-ID', {
+                                day: 'numeric',
+                                month: 'long',
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              }) || new Date().toLocaleDateString('id-ID')}
+                            </span>
+                          </div>
+                        </div>
+                        
+                        {!msg.isRead && (
+                          <motion.button
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                            onClick={() => handleMarkAsRead(msg.id)}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '5px',
+                              padding: '6px 12px',
+                              background: 'rgba(255,255,255,0.05)',
+                              border: '1px solid rgba(255,255,255,0.2)',
+                              borderRadius: '20px',
+                              color: 'white',
+                              fontSize: '0.85rem',
+                              cursor: 'pointer',
+                            }}
+                          >
+                            <CheckIcon width={14} height={14} />
+                            <span>Tandai Dibaca</span>
+                          </motion.button>
+                        )}
+                      </div>
+
+                      {/* Isi Pesan */}
+                      <p style={{
+                        fontSize: '1rem',
+                        lineHeight: '1.6',
+                        color: '#e0e0e0',
+                        margin: '0 0 20px 0',
+                        padding: '15px',
+                        background: 'rgba(0,0,0,0.2)',
+                        borderRadius: '16px',
+                        borderLeft: '2px solid rgba(255,255,255,0.2)',
+                      }}>
+                        {msg.message}
+                      </p>
+
+                      {/* Balasan dari Penulis */}
+                      {msg.replies && msg.replies.length > 0 && (
+                        <div style={{
+                          marginTop: '15px',
+                          paddingLeft: '20px',
+                          borderLeft: '2px solid rgba(0,204,136,0.3)',
+                          marginBottom: '15px',
+                        }}>
+                          <span style={{
+                            fontSize: '0.9rem',
+                            color: '#00cc88',
+                            display: 'block',
+                            marginBottom: '10px',
+                          }}>
+                            Balasan Anda:
+                          </span>
+                          {msg.replies.map((reply: any) => (
+                            <div key={reply.id} style={{
+                              marginBottom: '10px',
+                              padding: '12px',
+                              background: 'rgba(0,204,136,0.02)',
+                              borderRadius: '12px',
+                            }}>
+                              <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                marginBottom: '5px',
+                              }}>
+                                <img 
+                                  src={reply.userPhoto}
+                                  alt={reply.userName}
+                                  style={{
+                                    width: '24px',
+                                    height: '24px',
+                                    borderRadius: '50%',
+                                  }}
+                                />
+                                <span style={{
+                                  fontSize: '0.9rem',
+                                  fontWeight: '500',
+                                  color: '#00cc88',
+                                }}>
+                                  {reply.userName}
+                                </span>
+                                <span style={{
+                                  fontSize: '0.75rem',
+                                  color: '#666666',
+                                }}>
+                                  {reply.createdAt?.toDate?.()?.toLocaleDateString?.('id-ID', {
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                  }) || ''}
+                                </span>
+                              </div>
+                              <p style={{
+                                fontSize: '0.95rem',
+                                color: '#cccccc',
+                                margin: 0,
+                              }}>
+                                {reply.text}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Form Balasan */}
+                      {selectedAuthorMessage === msg.id ? (
+                        <div style={{
+                          marginTop: '20px',
+                        }}>
+                          <textarea
+                            value={replyMessage}
+                            onChange={(e) => setReplyMessage(e.target.value)}
+                            placeholder="Tulis balasan Anda..."
+                            rows={3}
+                            style={{
+                              width: '100%',
+                              padding: '12px',
+                              background: '#2a2a2a',
+                              border: '1px solid #444444',
+                              borderRadius: '12px',
+                              color: 'white',
+                              fontSize: '0.95rem',
+                              outline: 'none',
+                              resize: 'vertical',
+                              marginBottom: '10px',
+                            }}
+                          />
+                          <div style={{
+                            display: 'flex',
+                            gap: '10px',
+                            justifyContent: 'flex-end',
+                          }}>
+                            <motion.button
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              onClick={() => {
+                                setSelectedAuthorMessage(null);
+                                setReplyMessage("");
+                              }}
+                              style={{
+                                padding: '8px 16px',
+                                background: 'none',
+                                border: '1px solid #333333',
+                                borderRadius: '20px',
+                                color: '#999999',
+                                fontSize: '0.9rem',
+                                cursor: 'pointer',
+                              }}
+                            >
+                              Batal
+                            </motion.button>
+                            <motion.button
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              onClick={() => handleReplyToMessage(msg.id)}
+                              disabled={!replyMessage.trim()}
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                padding: '8px 24px',
+                                background: replyMessage.trim() ? 'rgba(255,255,255,0.1)' : '#333333',
+                                border: '1px solid rgba(255,255,255,0.2)',
+                                borderRadius: '20px',
+                                color: replyMessage.trim() ? 'white' : '#999999',
+                                fontSize: '0.9rem',
+                                fontWeight: '500',
+                                cursor: replyMessage.trim() ? 'pointer' : 'not-allowed',
+                              }}
+                            >
+                              <ReplyIcon width={16} height={16} />
+                              <span>Kirim Balasan</span>
+                            </motion.button>
+                          </div>
+                        </div>
+                      ) : (
+                        <motion.button
+                          whileHover={{ x: 5 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() => setSelectedAuthorMessage(msg.id)}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            background: 'none',
+                            border: 'none',
+                            color: 'white',
+                            fontSize: '0.9rem',
+                            cursor: 'pointer',
+                            padding: '8px 0',
+                          }}
+                        >
+                          <ReplyIcon width={16} height={16} />
+                          <span>Balas Pesan</span>
+                        </motion.button>
+                      )}
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* ===== MODAL PESAN DARI PENULIS (UNTUK USER) ===== */}
       <AnimatePresence>
         {showUserMessageModal && user && user.email !== authorEmail && (
@@ -1127,7 +1560,7 @@ export default function TagPage() {
                       margin: '0 0 8px 0',
                     }}
                   >
-                    💬 Pesan dari Penulis
+                    💬 Riwayat Saran Saya
                   </motion.h3>
                   <motion.p
                     initial={{ x: -20, opacity: 0 }}
@@ -1173,7 +1606,7 @@ export default function TagPage() {
                 >
                   <MessageIcon width={40} height={40} />
                   <p style={{ fontSize: '1.1rem', margin: '15px 0 0 0' }}>
-                    Belum ada pesan dari penulis.
+                    Belum ada saran yang Anda kirim.
                   </p>
                   <motion.button
                     whileHover={{ scale: 1.05 }}
