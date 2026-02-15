@@ -87,6 +87,29 @@ export default function MemilihJurusanPage() {
   const [showCommentForm, setShowCommentForm] = useState(false);
   const [commentLoading, setCommentLoading] = useState(false);
 
+  // State untuk Share
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [copySuccess, setCopySuccess] = useState(false);
+  const [shareCount, setShareCount] = useState(0);
+  const [showAuthorTooltip, setShowAuthorTooltip] = useState(false);
+
+  // State untuk Save
+  const [saveCount, setSaveCount] = useState(0);
+  const [isSaved, setIsSaved] = useState(false);
+  const [showSaveHistory, setShowSaveHistory] = useState(false);
+  const [saveHistory, setSaveHistory] = useState<any[]>([]);
+
+  // State untuk Pesan ke Penulis
+  const [showMessageModal, setShowMessageModal] = useState(false);
+  const [messages, setMessages] = useState<any[]>([]);
+  const [userMessages, setUserMessages] = useState<any[]>([]);
+  const [newMessage, setNewMessage] = useState("");
+  const [messageLoading, setMessageLoading] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [selectedMessage, setSelectedMessage] = useState<any>(null);
+  const [replyMessage, setReplyMessage] = useState("");
+  const [showUserMessageHistory, setShowUserMessageHistory] = useState(false);
+
   // Format tanggal
   const today = new Date();
   const formattedDate = today.toLocaleDateString('id-ID', {
@@ -94,6 +117,9 @@ export default function MemilihJurusanPage() {
     month: 'long',
     year: 'numeric'
   });
+
+  // Email penulis
+  const authorEmail = "faridardiansyah061@gmail.com";
 
   // ============================================
   // DATA TAGS
@@ -133,6 +159,10 @@ export default function MemilihJurusanPage() {
       
       // Initialize blog reactions document
       initializeBlogReactions(db);
+      // Initialize share count
+      initializeShareCount(db);
+      // Initialize save count
+      initializeSaveCount(db);
     } catch (error) {
       console.error("Firebase initialization error:", error);
     }
@@ -149,7 +179,6 @@ export default function MemilihJurusanPage() {
       const docSnap = await getDoc(reactionsRef);
       
       if (!docSnap.exists()) {
-        // Initialize with zero counts for all emoticons
         const initialCounts: { [key: string]: number } = {};
         EMOTICONS.forEach(emoticon => {
           initialCounts[emoticon.id] = 0;
@@ -160,7 +189,6 @@ export default function MemilihJurusanPage() {
           counts: initialCounts,
           createdAt: Timestamp.now()
         });
-        console.log("Blog reactions document created");
       }
     } catch (error) {
       console.error("Error initializing blog reactions:", error);
@@ -168,7 +196,146 @@ export default function MemilihJurusanPage() {
   };
 
   // ============================================
-  // 3. AUTH STATE LISTENER
+  // 3. INITIALIZE SHARE COUNT
+  // ============================================
+  const initializeShareCount = async (db: any) => {
+    try {
+      const shareRef = doc(db, "blogShares", "memilih-jurusan-article");
+      const docSnap = await getDoc(shareRef);
+      
+      if (!docSnap.exists()) {
+        await setDoc(shareRef, {
+          articleId: "memilih-jurusan-article",
+          count: 0,
+          createdAt: Timestamp.now()
+        });
+        setShareCount(0);
+      } else {
+        setShareCount(docSnap.data().count || 0);
+      }
+    } catch (error) {
+      console.error("Error initializing share count:", error);
+    }
+  };
+
+  // ============================================
+  // 4. INITIALIZE SAVE COUNT
+  // ============================================
+  const initializeSaveCount = async (db: any) => {
+    try {
+      const saveRef = doc(db, "blogSaves", "memilih-jurusan-article");
+      const docSnap = await getDoc(saveRef);
+      
+      if (!docSnap.exists()) {
+        await setDoc(saveRef, {
+          articleId: "memilih-jurusan-article",
+          count: 0,
+          createdAt: Timestamp.now()
+        });
+        setSaveCount(0);
+      } else {
+        setSaveCount(docSnap.data().count || 0);
+      }
+    } catch (error) {
+      console.error("Error initializing save count:", error);
+    }
+  };
+
+  // ============================================
+  // 5. LOAD SHARE COUNT (REAL-TIME)
+  // ============================================
+  useEffect(() => {
+    if (!firebaseDb || !firebaseInitialized) return;
+
+    const shareRef = doc(firebaseDb, "blogShares", "memilih-jurusan-article");
+    
+    const unsubscribe = onSnapshot(shareRef, (doc) => {
+      if (doc.exists()) {
+        setShareCount(doc.data().count || 0);
+      }
+    }, (error) => {
+      console.error("Error loading share count:", error);
+    });
+
+    return () => unsubscribe();
+  }, [firebaseDb, firebaseInitialized]);
+
+  // ============================================
+  // 6. LOAD SAVE COUNT (REAL-TIME)
+  // ============================================
+  useEffect(() => {
+    if (!firebaseDb || !firebaseInitialized) return;
+
+    const saveRef = doc(firebaseDb, "blogSaves", "memilih-jurusan-article");
+    
+    const unsubscribe = onSnapshot(saveRef, (doc) => {
+      if (doc.exists()) {
+        setSaveCount(doc.data().count || 0);
+      }
+    }, (error) => {
+      console.error("Error loading save count:", error);
+    });
+
+    return () => unsubscribe();
+  }, [firebaseDb, firebaseInitialized]);
+
+  // ============================================
+  // 7. LOAD USER SAVE STATUS
+  // ============================================
+  useEffect(() => {
+    if (!firebaseDb || !firebaseInitialized || !user) return;
+
+    const loadUserSaveStatus = async () => {
+      try {
+        const userSaveRef = doc(firebaseDb, "userSaves", `${user.uid}_memilih-jurusan-article`);
+        const docSnap = await getDoc(userSaveRef);
+        if (docSnap.exists()) {
+          setIsSaved(true);
+        } else {
+          setIsSaved(false);
+        }
+      } catch (error) {
+        console.error("Error loading user save status:", error);
+      }
+    };
+
+    loadUserSaveStatus();
+  }, [firebaseDb, firebaseInitialized, user]);
+
+  // ============================================
+  // 8. LOAD SAVE HISTORY
+  // ============================================
+  useEffect(() => {
+    if (!firebaseDb || !firebaseInitialized || !user) return;
+
+    const loadSaveHistory = async () => {
+      try {
+        const savesRef = collection(firebaseDb, "userSaves");
+        const q = query(
+          savesRef,
+          where("userId", "==", user.uid),
+          orderBy("savedAt", "desc")
+        );
+        
+        const querySnapshot = await getDocs(q);
+        const history = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+          savedAt: doc.data().savedAt?.toDate?.() || new Date()
+        }));
+        setSaveHistory(history);
+      } catch (error) {
+        console.error("Error loading save history:", error);
+      }
+    };
+
+    if (showSaveHistory) {
+      loadSaveHistory();
+    }
+  }, [firebaseDb, firebaseInitialized, user, showSaveHistory]);
+
+  // ============================================
+  // 9. AUTH STATE LISTENER
   // ============================================
   useEffect(() => {
     if (!firebaseAuth || !firebaseInitialized) return;
@@ -182,7 +349,7 @@ export default function MemilihJurusanPage() {
   }, [firebaseAuth, firebaseInitialized]);
 
   // ============================================
-  // 4. LOAD REACTIONS FROM FIREBASE (REAL-TIME)
+  // 10. LOAD REACTIONS FROM FIREBASE (REAL-TIME)
   // ============================================
   useEffect(() => {
     if (!firebaseDb || !firebaseInitialized) return;
@@ -201,7 +368,7 @@ export default function MemilihJurusanPage() {
   }, [firebaseDb, firebaseInitialized]);
 
   // ============================================
-  // 5. LOAD USER REACTIONS
+  // 11. LOAD USER REACTIONS
   // ============================================
   useEffect(() => {
     if (!firebaseDb || !firebaseInitialized || !user) return;
@@ -213,7 +380,6 @@ export default function MemilihJurusanPage() {
         if (docSnap.exists()) {
           setUserReactions(docSnap.data().reactions || []);
         } else {
-          // Create user reactions document
           await setDoc(userReactionsRef, {
             userId: user.uid,
             articleId: "memilih-jurusan-article",
@@ -231,7 +397,7 @@ export default function MemilihJurusanPage() {
   }, [firebaseDb, firebaseInitialized, user]);
 
   // ============================================
-  // 6. LOAD COMMENTS FROM FIREBASE (REAL-TIME)
+  // 12. LOAD COMMENTS FROM FIREBASE (REAL-TIME)
   // ============================================
   useEffect(() => {
     if (!firebaseDb || !firebaseInitialized) return;
@@ -259,7 +425,45 @@ export default function MemilihJurusanPage() {
   }, [firebaseDb, firebaseInitialized]);
 
   // ============================================
-  // 7. HANDLE REACTION (EMOTICON)
+  // 13. LOAD MESSAGES TO AUTHOR (REAL-TIME)
+  // ============================================
+  useEffect(() => {
+    if (!firebaseDb || !firebaseInitialized) return;
+
+    const messagesRef = collection(firebaseDb, "authorMessages");
+    const q = query(
+      messagesRef,
+      orderBy("createdAt", "desc")
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const messagesData = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        createdAt: doc.data().createdAt?.toDate?.() || new Date()
+      }));
+      setMessages(messagesData);
+      
+      // Hitung pesan yang belum dibaca (jika user adalah penulis)
+      if (user && user.email === authorEmail) {
+        const unread = messagesData.filter((msg: any) => !msg.isRead).length;
+        setUnreadCount(unread);
+      }
+
+      // Filter pesan untuk user yang sedang login (bukan penulis)
+      if (user && user.email !== authorEmail) {
+        const userMsgs = messagesData.filter((msg: any) => msg.userId === user.uid);
+        setUserMessages(userMsgs);
+      }
+    }, (error) => {
+      console.error("Error loading messages:", error);
+    });
+
+    return () => unsubscribe();
+  }, [firebaseDb, firebaseInitialized, user]);
+
+  // ============================================
+  // 14. HANDLE REACTION (EMOTICON)
   // ============================================
   const handleReaction = async (emoticonId: string) => {
     if (!user) {
@@ -272,7 +476,6 @@ export default function MemilihJurusanPage() {
       const reactionsRef = doc(firebaseDb, "blogReactions", "memilih-jurusan-article");
       const userReactionsRef = doc(firebaseDb, "userReactions", `${user.uid}_memilih-jurusan-article`);
 
-      // Ensure reactions document exists
       const reactionsDoc = await getDoc(reactionsRef);
       if (!reactionsDoc.exists()) {
         const initialCounts: { [key: string]: number } = {};
@@ -287,7 +490,6 @@ export default function MemilihJurusanPage() {
       }
 
       if (userReactions.includes(emoticonId)) {
-        // Remove reaction
         await updateDoc(reactionsRef, {
           [`counts.${emoticonId}`]: increment(-1)
         });
@@ -296,7 +498,6 @@ export default function MemilihJurusanPage() {
         });
         setUserReactions(prev => prev.filter(id => id !== emoticonId));
       } else {
-        // Add reaction
         await updateDoc(reactionsRef, {
           [`counts.${emoticonId}`]: increment(1)
         });
@@ -322,7 +523,7 @@ export default function MemilihJurusanPage() {
   };
 
   // ============================================
-  // 8. HANDLE GOOGLE LOGIN
+  // 15. HANDLE GOOGLE LOGIN
   // ============================================
   const handleGoogleLogin = async () => {
     if (!firebaseAuth) return;
@@ -336,7 +537,7 @@ export default function MemilihJurusanPage() {
   };
 
   // ============================================
-  // 9. HANDLE LOGOUT
+  // 16. HANDLE LOGOUT
   // ============================================
   const handleLogout = async () => {
     if (!firebaseAuth) return;
@@ -349,7 +550,7 @@ export default function MemilihJurusanPage() {
   };
 
   // ============================================
-  // 10. HANDLE ADD COMMENT
+  // 17. HANDLE ADD COMMENT
   // ============================================
   const handleAddComment = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -369,7 +570,7 @@ export default function MemilihJurusanPage() {
         userId: user.uid,
         userName: user.displayName || user.email?.split('@')[0] || 'Anonymous',
         userEmail: user.email,
-        userPhoto: user.photoURL || `https://ui-avatars.com/api/?name=${user.email}&background=random`,
+        userPhoto: user.photoURL || `https://ui-avatars.com/api/?name=${user.email}&background=random&color=fff`,
         comment: newComment,
         likes: 0,
         likedBy: [],
@@ -388,7 +589,7 @@ export default function MemilihJurusanPage() {
   };
 
   // ============================================
-  // 11. HANDLE ADD REPLY
+  // 18. HANDLE ADD REPLY
   // ============================================
   const handleAddReply = async (commentId: string) => {
     if (!user) {
@@ -407,7 +608,7 @@ export default function MemilihJurusanPage() {
         id: `${Date.now()}_${user.uid}`,
         userId: user.uid,
         userName: user.displayName || user.email?.split('@')[0] || 'Anonymous',
-        userPhoto: user.photoURL || `https://ui-avatars.com/api/?name=${user.email}&background=random`,
+        userPhoto: user.photoURL || `https://ui-avatars.com/api/?name=${user.email}&background=random&color=fff`,
         text: replyText,
         createdAt: Timestamp.now(),
         likes: 0,
@@ -426,7 +627,7 @@ export default function MemilihJurusanPage() {
   };
 
   // ============================================
-  // 12. HANDLE LIKE COMMENT
+  // 19. HANDLE LIKE COMMENT
   // ============================================
   const handleLikeComment = async (commentId: string, isReply: boolean = false, replyId?: string) => {
     if (!user) {
@@ -444,7 +645,6 @@ export default function MemilihJurusanPage() {
       const commentData = commentDoc.data();
       
       if (isReply && replyId) {
-        // Like reply
         const replies = commentData.replies || [];
         const updatedReplies = replies.map((reply: any) => {
           if (reply.id === replyId) {
@@ -468,7 +668,6 @@ export default function MemilihJurusanPage() {
         
         await updateDoc(commentRef, { replies: updatedReplies });
       } else {
-        // Like comment
         const likedBy = commentData.likedBy || [];
         if (likedBy.includes(user.uid)) {
           await updateDoc(commentRef, {
@@ -488,7 +687,217 @@ export default function MemilihJurusanPage() {
   };
 
   // ============================================
-  // 13. SCROLL HANDLER
+  // 20. HANDLE SAVE
+  // ============================================
+  const handleSave = async () => {
+    if (!user) {
+      handleGoogleLogin();
+      return;
+    }
+    if (!firebaseDb) return;
+
+    try {
+      const saveRef = doc(firebaseDb, "blogSaves", "memilih-jurusan-article");
+      const userSaveRef = doc(firebaseDb, "userSaves", `${user.uid}_memilih-jurusan-article`);
+
+      if (isSaved) {
+        // Unsave
+        await updateDoc(saveRef, {
+          count: increment(-1)
+        });
+        await deleteDoc(userSaveRef);
+        setIsSaved(false);
+      } else {
+        // Save
+        await updateDoc(saveRef, {
+          count: increment(1)
+        });
+        await setDoc(userSaveRef, {
+          userId: user.uid,
+          articleId: "memilih-jurusan-article",
+          articleTitle: "Mengapa saya memilih jurusan tersebut",
+          articleUrl: typeof window !== 'undefined' ? window.location.href : '',
+          savedAt: Timestamp.now()
+        });
+        setIsSaved(true);
+      }
+    } catch (error) {
+      console.error("Error handling save:", error);
+    }
+  };
+
+  // ============================================
+  // 21. HANDLE SHARE
+  // ============================================
+  const handleShare = () => {
+    setShowShareModal(true);
+  };
+
+  const incrementShareCount = async () => {
+    if (!firebaseDb) return;
+    
+    try {
+      const shareRef = doc(firebaseDb, "blogShares", "memilih-jurusan-article");
+      await updateDoc(shareRef, {
+        count: increment(1)
+      });
+    } catch (error) {
+      console.error("Error incrementing share count:", error);
+    }
+  };
+
+  const copyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setCopySuccess(true);
+      await incrementShareCount();
+      setTimeout(() => {
+        setCopySuccess(false);
+        setShowShareModal(false);
+      }, 2000);
+    } catch (err) {
+      console.error('Failed to copy: ', err);
+    }
+  };
+
+  const shareToTwitter = async () => {
+    const url = encodeURIComponent(window.location.href);
+    const title = encodeURIComponent('Mengapa saya memilih jurusan tersebut');
+    const shareUrl = `https://twitter.com/intent/tweet?url=${url}&text=${title}`;
+    
+    await incrementShareCount();
+    window.open(shareUrl, '_blank', 'noopener,noreferrer');
+    setShowShareModal(false);
+  };
+
+  // ============================================
+  // 22. HANDLE SEND MESSAGE TO AUTHOR
+  // ============================================
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) {
+      handleGoogleLogin();
+      return;
+    }
+    if (!firebaseDb || !newMessage.trim()) return;
+
+    setMessageLoading(true);
+    
+    try {
+      const messagesRef = collection(firebaseDb, "authorMessages");
+      
+      await addDoc(messagesRef, {
+        userId: user.uid,
+        userName: user.displayName || user.email?.split('@')[0] || 'Anonymous',
+        userEmail: user.email,
+        userPhoto: user.photoURL || `https://ui-avatars.com/api/?name=${user.email}&background=random&color=fff`,
+        message: newMessage,
+        isRead: false,
+        replies: [],
+        createdAt: Timestamp.now()
+      });
+
+      setNewMessage("");
+      
+      // Tampilkan notifikasi
+      showNotification("Pesan berhasil dikirim ke penulis");
+    } catch (error) {
+      console.error("Error sending message:", error);
+      showNotification("Gagal mengirim pesan", "error");
+    } finally {
+      setMessageLoading(false);
+    }
+  };
+
+  // ============================================
+  // 23. HANDLE REPLY TO MESSAGE (UNTUK PENULIS)
+  // ============================================
+  const handleReplyToMessage = async (messageId: string) => {
+    if (!user || user.email !== authorEmail) return;
+    if (!firebaseDb || !replyMessage.trim()) return;
+
+    try {
+      const messageRef = doc(firebaseDb, "authorMessages", messageId);
+      const messageDoc = await getDoc(messageRef);
+      
+      if (!messageDoc.exists()) return;
+      
+      const replyData = {
+        id: `${Date.now()}_${user.uid}`,
+        userId: user.uid,
+        userName: user.displayName || "Farid Ardiansyah",
+        userPhoto: user.photoURL || `https://ui-avatars.com/api/?name=Farid+Ardiansyah&background=random&color=fff`,
+        text: replyMessage,
+        createdAt: Timestamp.now()
+      };
+
+      await updateDoc(messageRef, {
+        replies: arrayUnion(replyData),
+        isRead: true
+      });
+
+      setReplyMessage("");
+      setSelectedMessage(null);
+      
+      // Tampilkan notifikasi
+      showNotification("Balasan berhasil dikirim");
+    } catch (error) {
+      console.error("Error replying to message:", error);
+      showNotification("Gagal mengirim balasan", "error");
+    }
+  };
+
+  // ============================================
+  // 24. HANDLE MARK AS READ (UNTUK PENULIS)
+  // ============================================
+  const handleMarkAsRead = async (messageId: string) => {
+    if (!user || user.email !== authorEmail) return;
+    if (!firebaseDb) return;
+
+    try {
+      const messageRef = doc(firebaseDb, "authorMessages", messageId);
+      await updateDoc(messageRef, {
+        isRead: true
+      });
+      
+      showNotification("Pesan ditandai telah dibaca");
+    } catch (error) {
+      console.error("Error marking message as read:", error);
+    }
+  };
+
+  // ============================================
+  // 25. NOTIFICATION FUNCTION
+  // ============================================
+  const showNotification = (message: string, type: "success" | "error" = "success") => {
+    const notification = document.createElement("div");
+    notification.style.position = "fixed";
+    notification.style.bottom = "20px";
+    notification.style.left = "20px";
+    notification.style.backgroundColor = "rgba(255,255,255,0.1)";
+    notification.style.color = "white";
+    notification.style.padding = "12px 24px";
+    notification.style.borderRadius = "30px";
+    notification.style.fontSize = "0.95rem";
+    notification.style.zIndex = "10001";
+    notification.style.border = "1px solid rgba(255,255,255,0.2)";
+    notification.style.backdropFilter = "blur(10px)";
+    notification.style.boxShadow = "0 4px 12px rgba(0,0,0,0.3)";
+    notification.style.animation = "slideIn 0.3s ease";
+    notification.innerText = message;
+
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+      notification.style.animation = "slideOut 0.3s ease";
+      setTimeout(() => {
+        document.body.removeChild(notification);
+      }, 300);
+    }, 3000);
+  };
+
+  // ============================================
+  // 26. SCROLL HANDLER
   // ============================================
   useEffect(() => {
     const handleScroll = () => {
@@ -515,7 +924,7 @@ export default function MemilihJurusanPage() {
   }, []);
 
   // ============================================
-  // 14. SVG COMPONENTS
+  // 27. SVG COMPONENTS
   // ============================================
   const SouthWestArrow = ({ width, height, style }: { width: number | string, height: number | string, style?: React.CSSProperties }) => (
     <svg 
@@ -553,6 +962,24 @@ export default function MemilihJurusanPage() {
     </svg>
   );
 
+  const NorthWestArrow = ({ width, height, style }: { width: number | string, height: number | string, style?: React.CSSProperties }) => (
+    <svg 
+      width={width} 
+      height={height} 
+      viewBox="0 0 24 24" 
+      fill="none"
+      stroke="white"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      style={style}
+    >
+      <path d="M17 17L7 7" stroke="white"/>
+      <path d="M17 7H7" stroke="white"/>
+      <path d="M7 17V7" stroke="white"/>
+    </svg>
+  );
+
   const CalendarIcon = ({ width, height }: { width: number, height: number }) => (
     <svg width={width} height={height} viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1">
       <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke="white"/>
@@ -576,8 +1003,63 @@ export default function MemilihJurusanPage() {
     </svg>
   );
 
+  const ShareIcon = ({ width, height }: { width: number, height: number }) => (
+    <svg width={width} height={height} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <circle cx="18" cy="5" r="3" stroke="currentColor"/>
+      <circle cx="6" cy="12" r="3" stroke="currentColor"/>
+      <circle cx="18" cy="19" r="3" stroke="currentColor"/>
+      <line x1="15.59" y1="6.59" x2="8.42" y2="10.41" stroke="currentColor"/>
+      <line x1="15.59" y1="17.41" x2="8.42" y2="13.59" stroke="currentColor"/>
+    </svg>
+  );
+
+  const SaveIcon = ({ width, height, filled }: { width: number, height: number, filled?: boolean }) => (
+    <svg width={width} height={height} viewBox="0 0 24 24" fill={filled ? "white" : "none"} stroke="white" strokeWidth="1.5">
+      <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+    </svg>
+  );
+
+  const HistoryIcon = ({ width, height }: { width: number, height: number }) => (
+    <svg width={width} height={height} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <circle cx="12" cy="12" r="10"/>
+      <polyline points="12 6 12 12 16 14"/>
+    </svg>
+  );
+
+  const MessageIcon = ({ width, height }: { width: number, height: number }) => (
+    <svg width={width} height={height} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+    </svg>
+  );
+
+  const SendIcon = ({ width, height }: { width: number, height: number }) => (
+    <svg width={width} height={height} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <line x1="22" y1="2" x2="11" y2="13"/>
+      <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+    </svg>
+  );
+
+  const ReplyIcon = ({ width, height }: { width: number, height: number }) => (
+    <svg width={width} height={height} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+      <polyline points="10 11 13 14 10 17"/>
+    </svg>
+  );
+
+  const CheckIcon = ({ width, height }: { width: number, height: number }) => (
+    <svg width={width} height={height} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <polyline points="20 6 9 17 4 12"/>
+    </svg>
+  );
+
+  const TwitterIcon = ({ size = 24 }: { size?: number }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+    </svg>
+  );
+
   // ============================================
-  // 15. RANGKUMAN SECTIONS
+  // 28. RANGKUMAN SECTIONS
   // ============================================
   const rangkumanSections = [
     { id: "pendahuluan", title: "Pendahuluan" },
@@ -600,8 +1082,16 @@ export default function MemilihJurusanPage() {
     }
   };
 
+  // Author Bio
+  const authorBio = {
+    name: "Farid Ardiansyah",
+    role: "Penulis",
+    bio: "Manusia Biasa",
+    email: authorEmail
+  };
+
   // ============================================
-  // 16. LOADING STATE
+  // 29. LOADING STATE
   // ============================================
   if (!isMounted || loading) {
     return (
@@ -613,7 +1103,20 @@ export default function MemilihJurusanPage() {
         alignItems: 'center',
         fontFamily: 'Helvetica, Arial, sans-serif',
       }}>
-        <div style={{ color: 'white', fontSize: '1rem' }}>Loading...</div>
+        <motion.div 
+          animate={{ 
+            scale: [1, 1.2, 1],
+            opacity: [0.5, 1, 0.5]
+          }}
+          transition={{ 
+            duration: 1.5,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+          style={{ color: 'white', fontSize: '1rem' }}
+        >
+          Loading...
+        </motion.div>
       </div>
     );
   }
@@ -626,84 +1129,206 @@ export default function MemilihJurusanPage() {
       color: 'white',
       position: 'relative',
       padding: isMobile ? '20px' : '40px',
+      paddingTop: isMobile ? '120px' : '180px',
     }}>
       
-      {/* ===== BANNER DEVELOPMENT ===== */}
-      <motion.div
-        initial={{ y: -100, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          zIndex: 9999,
-          backgroundColor: '#FF6B00',
-          color: 'white',
-          padding: '12px 20px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '12px',
-          borderBottom: '2px solid rgba(255,255,255,0.2)',
-          backdropFilter: 'blur(8px)',
-          flexWrap: 'wrap',
-        }}
-      >
+      {/* ===== TEKS BERJALAN ===== */}
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 9999,
+        backgroundColor: 'rgba(0,0,0,0.95)',
+        color: 'white',
+        padding: '20px 0',
+        borderBottom: '2px solid rgba(255,255,255,0.2)',
+        backdropFilter: 'blur(12px)',
+        overflow: 'hidden',
+        whiteSpace: 'nowrap',
+        width: '100vw',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
+      }}>
         <motion.div
-          animate={{ 
-            rotate: [0, 10, -10, 10, 0],
+          animate={{
+            x: [0, -2500]
           }}
-          transition={{ 
-            duration: 2,
+          transition={{
+            duration: 30,
             repeat: Infinity,
-            repeatDelay: 3
+            ease: "linear",
+            repeatType: "loop"
           }}
           style={{
-            fontSize: isMobile ? '1.2rem' : '1.5rem',
-            display: 'flex',
+            display: 'inline-flex',
             alignItems: 'center',
+            gap: '60px',
+            fontSize: isMobile ? '1.8rem' : '2.5rem',
+            fontWeight: 'bold',
+            letterSpacing: '2px',
+            paddingLeft: '30px',
           }}
         >
-          🚧
+          <NorthWestArrow width={isMobile ? 40 : 60} height={isMobile ? 40 : 60} style={{ strokeWidth: 2 }} />
+          <span style={{ background: 'linear-gradient(45deg, #fff, #aaa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>NOTE ADALAH TEMAN TERBAIK MU</span>
+          <NorthWestArrow width={isMobile ? 40 : 60} height={isMobile ? 40 : 60} style={{ strokeWidth: 2 }} />
+          <span style={{ background: 'linear-gradient(45deg, #fff, #aaa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>NOTE ADALAH TEMAN TERBAIK MU</span>
+          <NorthWestArrow width={isMobile ? 40 : 60} height={isMobile ? 40 : 60} style={{ strokeWidth: 2 }} />
+          <span style={{ background: 'linear-gradient(45deg, #fff, #aaa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>NOTE ADALAH TEMAN TERBAIK MU</span>
+          <NorthWestArrow width={isMobile ? 40 : 60} height={isMobile ? 40 : 60} style={{ strokeWidth: 2 }} />
+          <span style={{ background: 'linear-gradient(45deg, #fff, #aaa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>NOTE ADALAH TEMAN TERBAIK MU</span>
+          <NorthWestArrow width={isMobile ? 40 : 60} height={isMobile ? 40 : 60} style={{ strokeWidth: 2 }} />
+          <span style={{ background: 'linear-gradient(45deg, #fff, #aaa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>NOTE ADALAH TEMAN TERBAIK MU</span>
         </motion.div>
-        <span style={{
-          fontSize: isMobile ? '0.9rem' : '1.1rem',
-          fontWeight: '500',
-          textAlign: 'center',
-        }}>
-          Halaman ini sedang dalam pengembangan, konten blog tidak 100% benar
-        </span>
-        <motion.div
-          animate={{ 
-            rotate: [0, 10, -10, 10, 0],
-          }}
-          transition={{ 
-            duration: 2,
-            repeat: Infinity,
-            repeatDelay: 3
-          }}
-          style={{
-            fontSize: isMobile ? '1.2rem' : '1.5rem',
-            display: 'flex',
-            alignItems: 'center',
-          }}
-        >
-          🚧
-        </motion.div>
-      </motion.div>
+      </div>
 
       {/* HEADER - HALAMAN UTAMA & USER */}
       <div style={{
         position: 'fixed',
-        top: isMobile ? '70px' : '80px',
+        top: isMobile ? '100px' : '120px',
         right: isMobile ? '20px' : '40px',
         zIndex: 100,
         display: 'flex',
         alignItems: 'center',
         gap: '20px',
+        flexWrap: 'wrap',
+        justifyContent: 'flex-end',
+        maxWidth: 'calc(100% - 80px)',
       }}>
+        {/* Message to Author Button */}
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => setShowMessageModal(!showMessageModal)}
+          style={{
+            position: 'relative',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            background: showMessageModal ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.05)',
+            border: '1px solid rgba(255,255,255,0.2)',
+            borderRadius: '40px',
+            padding: '10px 24px',
+            color: 'white',
+            fontSize: '0.95rem',
+            cursor: 'pointer',
+          }}
+        >
+          <MessageIcon width={20} height={20} />
+          <span>Pesan ke Penulis</span>
+          {user && user.email === authorEmail && unreadCount > 0 && (
+            <span
+              style={{
+                position: 'absolute',
+                top: '-5px',
+                right: '-5px',
+                background: 'rgba(255,255,255,0.2)',
+                color: 'white',
+                fontSize: '0.75rem',
+                minWidth: '20px',
+                height: '20px',
+                borderRadius: '10px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                border: '1px solid rgba(255,255,255,0.3)',
+              }}
+            >
+              {unreadCount}
+            </span>
+          )}
+        </motion.button>
+
+        {/* Save Button with Count */}
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={handleSave}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            background: isSaved ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.05)',
+            border: '1px solid rgba(255,255,255,0.2)',
+            borderRadius: '40px',
+            padding: '10px 24px',
+            color: 'white',
+            fontSize: '0.95rem',
+            cursor: user ? 'pointer' : 'pointer',
+          }}
+        >
+          <SaveIcon width={20} height={20} filled={isSaved} />
+          <span>{isSaved ? 'Tersimpan' : 'Simpan'}</span>
+          <span
+            style={{
+              background: 'rgba(255,255,255,0.1)',
+              padding: '2px 8px',
+              borderRadius: '20px',
+              fontSize: '0.85rem',
+              color: 'white',
+            }}
+          >
+            {saveCount}
+          </span>
+        </motion.button>
+
+        {/* History Button */}
+        {user && (
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setShowSaveHistory(!showSaveHistory)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              background: 'rgba(255,255,255,0.05)',
+              border: '1px solid rgba(255,255,255,0.2)',
+              borderRadius: '40px',
+              padding: '10px 20px',
+              color: 'white',
+              fontSize: '0.95rem',
+              cursor: 'pointer',
+            }}
+          >
+            <HistoryIcon width={18} height={18} />
+            <span>Riwayat</span>
+          </motion.button>
+        )}
+
+        {/* Share Button with Count */}
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={handleShare}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            background: 'rgba(255,255,255,0.05)',
+            border: '1px solid rgba(255,255,255,0.2)',
+            borderRadius: '40px',
+            padding: '10px 24px',
+            color: 'white',
+            fontSize: '0.95rem',
+            cursor: 'pointer',
+          }}
+        >
+          <ShareIcon width={20} height={20} />
+          <span>Bagikan</span>
+          <span
+            style={{
+              background: 'rgba(255,255,255,0.1)',
+              padding: '2px 8px',
+              borderRadius: '20px',
+              fontSize: '0.85rem',
+              color: 'white',
+            }}
+          >
+            {shareCount}
+          </span>
+        </motion.button>
+
         {/* User Info / Login Button */}
         {user ? (
           <motion.div
@@ -721,7 +1346,7 @@ export default function MemilihJurusanPage() {
           >
             <motion.img 
               whileHover={{ scale: 1.1 }}
-              src={user.photoURL || `https://ui-avatars.com/api/?name=${user.email}&background=random`} 
+              src={user.photoURL || `https://ui-avatars.com/api/?name=${user.email}&background=random&color=fff`} 
               alt={user.displayName}
               style={{
                 width: '36px',
@@ -743,7 +1368,7 @@ export default function MemilihJurusanPage() {
               onClick={handleLogout}
               style={{
                 background: 'rgba(255,255,255,0.1)',
-                border: 'none',
+                border: '1px solid rgba(255,255,255,0.2)',
                 borderRadius: '30px',
                 padding: '6px 16px',
                 color: 'white',
@@ -804,6 +1429,1046 @@ export default function MemilihJurusanPage() {
         </Link>
       </div>
 
+      {/* MESSAGE MODAL */}
+      <AnimatePresence>
+        {showMessageModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0,0,0,0.8)',
+              backdropFilter: 'blur(8px)',
+              zIndex: 10000,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '20px',
+            }}
+            onClick={() => setShowMessageModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              style={{
+                background: '#1a1a1a',
+                borderRadius: '32px',
+                padding: '40px',
+                maxWidth: '600px',
+                width: '100%',
+                maxHeight: '80vh',
+                overflowY: 'auto',
+                border: '1px solid #333333',
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '30px',
+              }}>
+                <div>
+                  <motion.h3 
+                    initial={{ x: -20, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 0.1 }}
+                    style={{
+                      fontSize: '2rem',
+                      fontWeight: 'normal',
+                      color: 'white',
+                      margin: '0 0 8px 0',
+                    }}
+                  >
+                    {user && user.email === authorEmail ? 'Pesan dari Pembaca' : 'Pesan ke Penulis'}
+                  </motion.h3>
+                  <motion.p
+                    initial={{ x: -20, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 0.2 }}
+                    style={{
+                      fontSize: '0.95rem',
+                      color: '#999999',
+                      margin: 0,
+                    }}
+                  >
+                    {user && user.email === authorEmail 
+                      ? `${messages.length} pesan • ${unreadCount} belum dibaca`
+                      : user 
+                        ? `${userMessages.length} pesan • Kirim pesan baru atau lihat riwayat`
+                        : 'Login untuk mengirim pesan'}
+                  </motion.p>
+                </div>
+                <motion.button
+                  whileHover={{ scale: 1.1, rotate: 90 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => setShowMessageModal(false)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#999999',
+                    fontSize: '2rem',
+                    cursor: 'pointer',
+                    lineHeight: 1,
+                  }}
+                >
+                  ×
+                </motion.button>
+              </div>
+
+              {/* Tabs untuk pengirim pesan (bukan penulis) */}
+              {user && user.email !== authorEmail && (
+                <div style={{
+                  display: 'flex',
+                  gap: '10px',
+                  marginBottom: '30px',
+                  borderBottom: '1px solid #333333',
+                  paddingBottom: '20px',
+                }}>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => {
+                      setShowUserMessageHistory(false);
+                      setNewMessage("");
+                    }}
+                    style={{
+                      flex: 1,
+                      padding: '12px',
+                      background: !showUserMessageHistory ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.02)',
+                      border: '1px solid rgba(255,255,255,0.2)',
+                      borderRadius: '30px',
+                      color: 'white',
+                      fontSize: '0.95rem',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Kirim Pesan Baru
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setShowUserMessageHistory(true)}
+                    style={{
+                      flex: 1,
+                      padding: '12px',
+                      background: showUserMessageHistory ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.02)',
+                      border: '1px solid rgba(255,255,255,0.2)',
+                      borderRadius: '30px',
+                      color: 'white',
+                      fontSize: '0.95rem',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px',
+                    }}
+                  >
+                    <HistoryIcon width={16} height={16} />
+                    <span>Riwayat Pesan ({userMessages.length})</span>
+                  </motion.button>
+                </div>
+              )}
+
+              {/* Form Kirim Pesan Baru (untuk pembaca) */}
+              {user && user.email !== authorEmail && !showUserMessageHistory && (
+                <motion.form
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.3 }}
+                  onSubmit={handleSendMessage}
+                  style={{
+                    marginBottom: '30px',
+                  }}
+                >
+                  <textarea
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    placeholder="Tulis pesan Anda untuk Farid Ardiansyah..."
+                    rows={4}
+                    required
+                    style={{
+                      width: '100%',
+                      padding: '20px',
+                      background: '#2a2a2a',
+                      border: '1px solid #444444',
+                      borderRadius: '20px',
+                      color: 'white',
+                      fontSize: '1rem',
+                      outline: 'none',
+                      resize: 'vertical',
+                      marginBottom: '15px',
+                    }}
+                  />
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'flex-end',
+                  }}>
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      type="submit"
+                      disabled={messageLoading || !newMessage.trim()}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        padding: '12px 32px',
+                        background: messageLoading || !newMessage.trim() ? '#333333' : 'rgba(255,255,255,0.1)',
+                        border: '1px solid rgba(255,255,255,0.2)',
+                        borderRadius: '30px',
+                        color: messageLoading || !newMessage.trim() ? '#999999' : 'white',
+                        fontSize: '1rem',
+                        fontWeight: '500',
+                        cursor: messageLoading || !newMessage.trim() ? 'not-allowed' : 'pointer',
+                      }}
+                    >
+                      <SendIcon width={18} height={18} />
+                      <span>{messageLoading ? 'Mengirim...' : 'Kirim Pesan'}</span>
+                    </motion.button>
+                  </div>
+                </motion.form>
+              )}
+
+              {/* Riwayat Pesan untuk Pengirim (pembaca) */}
+              {user && user.email !== authorEmail && showUserMessageHistory && (
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '20px',
+                }}>
+                  {userMessages.length === 0 ? (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      style={{
+                        padding: '40px',
+                        textAlign: 'center',
+                        color: '#666666',
+                        border: '1px dashed #333333',
+                        borderRadius: '24px',
+                      }}
+                    >
+                      <MessageIcon width={40} height={40} />
+                      <p style={{ fontSize: '1.1rem', margin: '15px 0 0 0' }}>
+                        Belum ada pesan yang dikirim.
+                      </p>
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => setShowUserMessageHistory(false)}
+                        style={{
+                          marginTop: '20px',
+                          padding: '10px 24px',
+                          background: 'rgba(255,255,255,0.1)',
+                          border: '1px solid rgba(255,255,255,0.2)',
+                          borderRadius: '30px',
+                          color: 'white',
+                          fontSize: '0.95rem',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        Kirim Pesan Baru
+                      </motion.button>
+                    </motion.div>
+                  ) : (
+                    userMessages.map((msg, index) => (
+                      <motion.div
+                        key={msg.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.1 }}
+                        style={{
+                          padding: '24px',
+                          background: 'rgba(255,255,255,0.02)',
+                          borderRadius: '24px',
+                          border: '1px solid rgba(255,255,255,0.05)',
+                        }}
+                      >
+                        {/* Header Pesan */}
+                        <div style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          marginBottom: '15px',
+                        }}>
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '12px',
+                          }}>
+                            <img 
+                              src={msg.userPhoto}
+                              alt={msg.userName}
+                              style={{
+                                width: '40px',
+                                height: '40px',
+                                borderRadius: '50%',
+                                objectFit: 'cover',
+                              }}
+                            />
+                            <div>
+                              <span style={{
+                                fontSize: '1.1rem',
+                                fontWeight: '500',
+                                color: 'white',
+                                display: 'block',
+                                marginBottom: '4px',
+                              }}>
+                                {msg.userName} (Anda)
+                              </span>
+                              <span style={{
+                                fontSize: '0.85rem',
+                                color: '#999999',
+                              }}>
+                                {msg.createdAt.toLocaleDateString('id-ID', {
+                                  day: 'numeric',
+                                  month: 'long',
+                                  year: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </span>
+                            </div>
+                          </div>
+                          
+                          {msg.isRead ? (
+                            <span style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '5px',
+                              padding: '4px 10px',
+                              background: 'rgba(255,255,255,0.05)',
+                              border: '1px solid rgba(255,255,255,0.1)',
+                              borderRadius: '20px',
+                              color: '#999999',
+                              fontSize: '0.8rem',
+                            }}>
+                              <CheckIcon width={12} height={12} />
+                              <span>Telah dibaca</span>
+                            </span>
+                          ) : (
+                            <span style={{
+                              padding: '4px 10px',
+                              background: 'rgba(255,255,255,0.1)',
+                              border: '1px solid rgba(255,255,255,0.2)',
+                              borderRadius: '20px',
+                              color: 'white',
+                              fontSize: '0.8rem',
+                            }}>
+                              Belum dibaca
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Isi Pesan */}
+                        <p style={{
+                          fontSize: '1rem',
+                          lineHeight: '1.6',
+                          color: '#e0e0e0',
+                          margin: '0 0 20px 0',
+                          padding: '15px',
+                          background: 'rgba(0,0,0,0.2)',
+                          borderRadius: '16px',
+                          borderLeft: '2px solid rgba(255,255,255,0.2)',
+                        }}>
+                          {msg.message}
+                        </p>
+
+                        {/* Balasan dari Penulis */}
+                        {msg.replies && msg.replies.length > 0 && (
+                          <div style={{
+                            marginTop: '15px',
+                            paddingLeft: '20px',
+                            borderLeft: '2px solid rgba(255,255,255,0.2)',
+                          }}>
+                            <span style={{
+                              fontSize: '0.9rem',
+                              color: '#999999',
+                              display: 'block',
+                              marginBottom: '10px',
+                            }}>
+                              Balasan dari Penulis:
+                            </span>
+                            {msg.replies.map((reply: any) => (
+                              <div key={reply.id} style={{
+                                marginBottom: '10px',
+                                padding: '10px',
+                                background: 'rgba(255,255,255,0.02)',
+                                borderRadius: '12px',
+                              }}>
+                                <div style={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '8px',
+                                  marginBottom: '5px',
+                                }}>
+                                  <img 
+                                    src={reply.userPhoto}
+                                    alt={reply.userName}
+                                    style={{
+                                      width: '24px',
+                                      height: '24px',
+                                      borderRadius: '50%',
+                                    }}
+                                  />
+                                  <span style={{
+                                    fontSize: '0.9rem',
+                                    fontWeight: '500',
+                                    color: 'white',
+                                  }}>
+                                    {reply.userName}
+                                  </span>
+                                  <span style={{
+                                    fontSize: '0.75rem',
+                                    color: '#666666',
+                                  }}>
+                                    {reply.createdAt?.toDate?.()?.toLocaleDateString?.('id-ID', {
+                                      hour: '2-digit',
+                                      minute: '2-digit'
+                                    })}
+                                  </span>
+                                </div>
+                                <p style={{
+                                  fontSize: '0.95rem',
+                                  color: '#cccccc',
+                                  margin: 0,
+                                }}>
+                                  {reply.text}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </motion.div>
+                    ))
+                  )}
+                </div>
+              )}
+
+              {/* Daftar Pesan untuk Penulis */}
+              {user && user.email === authorEmail && (
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '20px',
+                }}>
+                  {messages.length === 0 ? (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      style={{
+                        padding: '40px',
+                        textAlign: 'center',
+                        color: '#666666',
+                        border: '1px dashed #333333',
+                        borderRadius: '24px',
+                      }}
+                    >
+                      <MessageIcon width={40} height={40} />
+                      <p style={{ fontSize: '1.1rem', margin: '15px 0 0 0' }}>
+                        Belum ada pesan dari pembaca.
+                      </p>
+                    </motion.div>
+                  ) : (
+                    messages.map((msg, index) => (
+                      <motion.div
+                        key={msg.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.1 }}
+                        style={{
+                          padding: '24px',
+                          background: msg.isRead ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.05)',
+                          borderRadius: '24px',
+                          border: '1px solid rgba(255,255,255,0.05)',
+                        }}
+                      >
+                        {/* Header Pesan */}
+                        <div style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          marginBottom: '15px',
+                        }}>
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '12px',
+                          }}>
+                            <img 
+                              src={msg.userPhoto}
+                              alt={msg.userName}
+                              style={{
+                                width: '40px',
+                                height: '40px',
+                                borderRadius: '50%',
+                                objectFit: 'cover',
+                              }}
+                            />
+                            <div>
+                              <span style={{
+                                fontSize: '1.1rem',
+                                fontWeight: '500',
+                                color: 'white',
+                                display: 'block',
+                                marginBottom: '4px',
+                              }}>
+                                {msg.userName}
+                              </span>
+                              <span style={{
+                                fontSize: '0.85rem',
+                                color: '#999999',
+                              }}>
+                                {msg.createdAt.toLocaleDateString('id-ID', {
+                                  day: 'numeric',
+                                  month: 'long',
+                                  year: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </span>
+                            </div>
+                          </div>
+                          
+                          {!msg.isRead && (
+                            <motion.button
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.9 }}
+                              onClick={() => handleMarkAsRead(msg.id)}
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '5px',
+                                padding: '6px 12px',
+                                background: 'rgba(255,255,255,0.05)',
+                                border: '1px solid rgba(255,255,255,0.2)',
+                                borderRadius: '20px',
+                                color: 'white',
+                                fontSize: '0.85rem',
+                                cursor: 'pointer',
+                              }}
+                            >
+                              <CheckIcon width={14} height={14} />
+                              <span>Tandai Dibaca</span>
+                            </motion.button>
+                          )}
+                        </div>
+
+                        {/* Isi Pesan */}
+                        <p style={{
+                          fontSize: '1rem',
+                          lineHeight: '1.6',
+                          color: '#e0e0e0',
+                          margin: '0 0 20px 0',
+                          padding: '15px',
+                          background: 'rgba(0,0,0,0.2)',
+                          borderRadius: '16px',
+                          borderLeft: '2px solid rgba(255,255,255,0.2)',
+                        }}>
+                          {msg.message}
+                        </p>
+
+                        {/* Balasan */}
+                        {msg.replies && msg.replies.length > 0 && (
+                          <div style={{
+                            marginTop: '15px',
+                            paddingLeft: '20px',
+                            borderLeft: '2px solid rgba(255,255,255,0.2)',
+                          }}>
+                            <span style={{
+                              fontSize: '0.9rem',
+                              color: '#999999',
+                              display: 'block',
+                              marginBottom: '10px',
+                            }}>
+                              Balasan Anda:
+                            </span>
+                            {msg.replies.map((reply: any) => (
+                              <div key={reply.id} style={{
+                                marginBottom: '10px',
+                                padding: '10px',
+                                background: 'rgba(255,255,255,0.02)',
+                                borderRadius: '12px',
+                              }}>
+                                <div style={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '8px',
+                                  marginBottom: '5px',
+                                }}>
+                                  <img 
+                                    src={reply.userPhoto}
+                                    alt={reply.userName}
+                                    style={{
+                                      width: '24px',
+                                      height: '24px',
+                                      borderRadius: '50%',
+                                    }}
+                                  />
+                                  <span style={{
+                                    fontSize: '0.9rem',
+                                    fontWeight: '500',
+                                    color: 'white',
+                                  }}>
+                                    {reply.userName}
+                                  </span>
+                                  <span style={{
+                                    fontSize: '0.75rem',
+                                    color: '#666666',
+                                  }}>
+                                    {reply.createdAt?.toDate?.()?.toLocaleDateString?.('id-ID', {
+                                      hour: '2-digit',
+                                      minute: '2-digit'
+                                    })}
+                                  </span>
+                                </div>
+                                <p style={{
+                                  fontSize: '0.95rem',
+                                  color: '#cccccc',
+                                  margin: 0,
+                                }}>
+                                  {reply.text}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Form Balasan */}
+                        {selectedMessage === msg.id ? (
+                          <div style={{
+                            marginTop: '20px',
+                          }}>
+                            <textarea
+                              value={replyMessage}
+                              onChange={(e) => setReplyMessage(e.target.value)}
+                              placeholder="Tulis balasan Anda..."
+                              rows={2}
+                              style={{
+                                width: '100%',
+                                padding: '12px',
+                                background: '#2a2a2a',
+                                border: '1px solid #444444',
+                                borderRadius: '12px',
+                                color: 'white',
+                                fontSize: '0.95rem',
+                                outline: 'none',
+                                resize: 'vertical',
+                                marginBottom: '10px',
+                              }}
+                            />
+                            <div style={{
+                              display: 'flex',
+                              gap: '10px',
+                              justifyContent: 'flex-end',
+                            }}>
+                              <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={() => {
+                                  setSelectedMessage(null);
+                                  setReplyMessage("");
+                                }}
+                                style={{
+                                  padding: '8px 16px',
+                                  background: 'none',
+                                  border: '1px solid rgba(255,255,255,0.2)',
+                                  borderRadius: '20px',
+                                  color: '#999999',
+                                  fontSize: '0.9rem',
+                                  cursor: 'pointer',
+                                }}
+                              >
+                                Batal
+                              </motion.button>
+                              <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={() => handleReplyToMessage(msg.id)}
+                                disabled={!replyMessage.trim()}
+                                style={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '8px',
+                                  padding: '8px 24px',
+                                  background: replyMessage.trim() ? 'rgba(255,255,255,0.1)' : '#333333',
+                                  border: '1px solid rgba(255,255,255,0.2)',
+                                  borderRadius: '20px',
+                                  color: replyMessage.trim() ? 'white' : '#999999',
+                                  fontSize: '0.9rem',
+                                  fontWeight: '500',
+                                  cursor: replyMessage.trim() ? 'pointer' : 'not-allowed',
+                                }}
+                              >
+                                <ReplyIcon width={16} height={16} />
+                                <span>Kirim Balasan</span>
+                              </motion.button>
+                            </div>
+                          </div>
+                        ) : (
+                          <motion.button
+                            whileHover={{ x: 5 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => setSelectedMessage(msg.id)}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '8px',
+                              background: 'none',
+                              border: 'none',
+                              color: 'white',
+                              fontSize: '0.9rem',
+                              cursor: 'pointer',
+                              padding: '8px 0',
+                              marginTop: '10px',
+                            }}
+                          >
+                            <ReplyIcon width={16} height={16} />
+                            <span>Balas Pesan</span>
+                          </motion.button>
+                        )}
+                      </motion.div>
+                    ))
+                  )}
+                </div>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* SAVE HISTORY MODAL */}
+      <AnimatePresence>
+        {showSaveHistory && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0,0,0,0.8)',
+              backdropFilter: 'blur(8px)',
+              zIndex: 10000,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '20px',
+            }}
+            onClick={() => setShowSaveHistory(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              style={{
+                background: '#1a1a1a',
+                borderRadius: '32px',
+                padding: '40px',
+                maxWidth: '500px',
+                width: '100%',
+                maxHeight: '80vh',
+                overflowY: 'auto',
+                border: '1px solid #333333',
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '30px',
+              }}>
+                <motion.h3 
+                  initial={{ x: -20, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  transition={{ delay: 0.1 }}
+                  style={{
+                    fontSize: '2rem',
+                    fontWeight: 'normal',
+                    color: 'white',
+                    margin: 0,
+                  }}
+                >
+                  Riwayat Simpanan
+                </motion.h3>
+                <motion.button
+                  whileHover={{ scale: 1.1, rotate: 90 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => setShowSaveHistory(false)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#999999',
+                    fontSize: '2rem',
+                    cursor: 'pointer',
+                    lineHeight: 1,
+                  }}
+                >
+                  ×
+                </motion.button>
+              </div>
+
+              {saveHistory.length === 0 ? (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.2 }}
+                  style={{
+                    padding: '40px',
+                    textAlign: 'center',
+                    color: '#666666',
+                    border: '1px dashed #333333',
+                    borderRadius: '24px',
+                  }}
+                >
+                  <span style={{ fontSize: '3rem', display: 'block', marginBottom: '20px' }}>📌</span>
+                  <p style={{ fontSize: '1.2rem', margin: 0 }}>Belum ada artikel yang disimpan.</p>
+                </motion.div>
+              ) : (
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '15px',
+                }}>
+                  {saveHistory.map((item, index) => (
+                    <motion.div
+                      key={item.id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                      style={{
+                        padding: '20px',
+                        background: 'rgba(255,255,255,0.02)',
+                        borderRadius: '16px',
+                        border: '1px solid rgba(255,255,255,0.05)',
+                      }}
+                    >
+                      <Link 
+                        href={item.articleUrl || '#'}
+                        style={{ textDecoration: 'none' }}
+                      >
+                        <h4 style={{
+                          fontSize: '1.2rem',
+                          fontWeight: '500',
+                          color: 'white',
+                          margin: '0 0 8px 0',
+                        }}>
+                          {item.articleTitle}
+                        </h4>
+                        <p style={{
+                          fontSize: '0.9rem',
+                          color: '#999999',
+                          margin: 0,
+                        }}>
+                          Disimpan pada: {item.savedAt?.toLocaleDateString?.('id-ID', {
+                            day: 'numeric',
+                            month: 'long',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </p>
+                      </Link>
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* SHARE MODAL */}
+      <AnimatePresence>
+        {showShareModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0,0,0,0.8)',
+              backdropFilter: 'blur(8px)',
+              zIndex: 10000,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '20px',
+            }}
+            onClick={() => setShowShareModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              style={{
+                background: '#1a1a1a',
+                borderRadius: '32px',
+                padding: '40px',
+                maxWidth: '400px',
+                width: '100%',
+                border: '1px solid #333333',
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '30px',
+              }}>
+                <div>
+                  <motion.h3 
+                    initial={{ x: -20, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 0.1 }}
+                    style={{
+                      fontSize: '2rem',
+                      fontWeight: 'normal',
+                      color: 'white',
+                      margin: '0 0 8px 0',
+                    }}
+                  >
+                    Bagikan Artikel
+                  </motion.h3>
+                  <motion.span
+                    initial={{ x: -20, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 0.2 }}
+                    style={{
+                      fontSize: '0.95rem',
+                      color: '#999999',
+                    }}
+                  >
+                    {shareCount} orang telah membagikan artikel ini
+                  </motion.span>
+                </div>
+                <motion.button
+                  whileHover={{ scale: 1.1, rotate: 90 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => setShowShareModal(false)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#999999',
+                    fontSize: '2rem',
+                    cursor: 'pointer',
+                    lineHeight: 1,
+                  }}
+                >
+                  ×
+                </motion.button>
+              </div>
+
+              {/* Copy Link */}
+              <motion.div
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.3 }}
+                style={{
+                  marginBottom: '30px',
+                }}
+              >
+                <div style={{
+                  display: 'flex',
+                  gap: '10px',
+                  marginBottom: '10px',
+                }}>
+                  <input
+                    type="text"
+                    value={typeof window !== 'undefined' ? window.location.href : ''}
+                    readOnly
+                    style={{
+                      flex: 1,
+                      padding: '15px 20px',
+                      background: '#2a2a2a',
+                      border: '1px solid #444444',
+                      borderRadius: '16px',
+                      color: 'white',
+                      fontSize: '0.9rem',
+                      outline: 'none',
+                    }}
+                  />
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={copyToClipboard}
+                    style={{
+                      padding: '15px 25px',
+                      background: copySuccess ? 'rgba(0,204,136,0.2)' : 'rgba(255,255,255,0.1)',
+                      border: '1px solid rgba(255,255,255,0.2)',
+                      borderRadius: '16px',
+                      color: 'white',
+                      fontSize: '0.95rem',
+                      fontWeight: '500',
+                      cursor: 'pointer',
+                      transition: 'all 0.3s ease',
+                    }}
+                  >
+                    {copySuccess ? 'Tersalin!' : 'Salin Link'}
+                  </motion.button>
+                </div>
+              </motion.div>
+
+              {/* Twitter Share */}
+              <motion.div
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.4 }}
+              >
+                <p style={{
+                  color: '#999999',
+                  marginBottom: '20px',
+                  fontSize: '0.95rem',
+                }}>
+                  Bagikan ke Twitter:
+                </p>
+                <motion.button
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={shareToTwitter}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    padding: '15px 25px',
+                    width: '100%',
+                    background: 'rgba(29,161,242,0.2)',
+                    border: '1px solid rgba(29,161,242,0.3)',
+                    borderRadius: '16px',
+                    color: 'white',
+                    fontSize: '1rem',
+                    fontWeight: '500',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <TwitterIcon size={24} />
+                  <span>Bagikan ke Twitter</span>
+                </motion.button>
+              </motion.div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* LAYOUT 2 KOLOM */}
       <div style={{
         display: 'flex',
@@ -811,31 +2476,39 @@ export default function MemilihJurusanPage() {
         gap: '60px',
         maxWidth: '1200px',
         margin: '0 auto',
-        padding: isMobile ? '120px 0 40px' : '150px 0 60px',
+        padding: isMobile ? '20px 0 40px' : '40px 0 60px',
       }}>
         
         {/* SIDEBAR KIRI - RANGKUMAN */}
         <div style={{
           flex: isMobile ? '1' : '0 0 280px',
           position: isMobile ? 'relative' : 'sticky',
-          top: isMobile ? 'auto' : '130px',
+          top: isMobile ? 'auto' : '160px',
           alignSelf: 'flex-start',
-          height: isMobile ? 'auto' : 'calc(100vh - 180px)',
+          height: isMobile ? 'auto' : 'calc(100vh - 210px)',
           overflowY: isMobile ? 'visible' : 'auto',
+          overflowX: 'hidden',
           paddingRight: '20px',
+          maxWidth: '100%',
+          boxSizing: 'border-box',
         }}>
           
           {/* Blog Title */}
           <div style={{
             marginBottom: '50px',
+            width: '100%',
+            boxSizing: 'border-box',
           }}>
             <h1 style={{
-              fontSize: isMobile ? '4rem' : '6rem',
+              fontSize: isMobile ? 'clamp(2.5rem, 12vw, 4rem)' : 'clamp(3rem, 5vw, 6rem)',
               fontWeight: 'normal',
               color: 'white',
               margin: '0 0 20px 0',
               lineHeight: '0.9',
               letterSpacing: '-2px',
+              wordBreak: 'break-word',
+              overflowWrap: 'break-word',
+              maxWidth: '100%',
             }}>
               Blog
             </h1>
@@ -847,28 +2520,189 @@ export default function MemilihJurusanPage() {
               marginTop: '20px',
               color: '#999999',
               fontSize: isMobile ? '0.9rem' : '1rem',
+              width: '100%',
+              boxSizing: 'border-box',
             }}>
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
                 gap: '10px',
+                flexWrap: 'wrap',
               }}>
                 <CalendarIcon width={18} height={18} />
-                <span>{formattedDate}</span>
+                <span style={{ wordBreak: 'break-word' }}>{formattedDate}</span>
               </div>
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
                 gap: '10px',
+                flexWrap: 'wrap',
               }}>
                 <ClockIcon width={18} height={18} />
                 <span>10 menit membaca</span>
+              </div>
+              {/* Author Info with Tooltip */}
+              <div 
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  marginTop: '10px',
+                  paddingTop: '10px',
+                  borderTop: '1px solid #333333',
+                  position: 'relative',
+                  width: '100%',
+                  overflow: 'visible',
+                }}
+                onMouseEnter={() => setShowAuthorTooltip(true)}
+                onMouseLeave={() => setShowAuthorTooltip(false)}
+              >
+                <motion.img 
+                  whileHover={{ scale: 1.1, rotate: 5 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                  src={`https://ui-avatars.com/api/?name=Farid+Ardiansyah&background=random&color=fff&size=32`}
+                  alt="Farid Ardiansyah"
+                  style={{
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '50%',
+                    objectFit: 'cover',
+                    cursor: 'pointer',
+                    flexShrink: 0,
+                  }}
+                />
+                <div style={{ 
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}>
+                  <motion.span
+                    whileHover={{ x: 5 }}
+                    style={{
+                      color: 'white',
+                      fontSize: '1rem',
+                      fontWeight: '500',
+                      display: 'block',
+                      cursor: 'pointer',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    Farid Ardiansyah
+                  </motion.span>
+                  <span style={{
+                    color: '#999999',
+                    fontSize: '0.85rem',
+                    display: 'block',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}>
+                    Penulis
+                  </span>
+                </div>
+
+                {/* Author Tooltip */}
+                <AnimatePresence>
+                  {showAuthorTooltip && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10, scale: 0.9 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.9 }}
+                      transition={{ type: "spring", damping: 20, stiffness: 300 }}
+                      style={{
+                        position: 'absolute',
+                        top: '100%',
+                        left: 0,
+                        marginTop: '15px',
+                        background: '#1a1a1a',
+                        border: '1px solid #333333',
+                        borderRadius: '16px',
+                        padding: '20px',
+                        width: '250px',
+                        zIndex: 1000,
+                        boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
+                      }}
+                    >
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ delay: 0.1, type: "spring", stiffness: 400, damping: 10 }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '15px',
+                          marginBottom: '15px',
+                        }}
+                      >
+                        <img 
+                          src={`https://ui-avatars.com/api/?name=Farid+Ardiansyah&background=random&color=fff&size=48`}
+                          alt="Farid Ardiansyah"
+                          style={{
+                            width: '48px',
+                            height: '48px',
+                            borderRadius: '50%',
+                            objectFit: 'cover',
+                          }}
+                        />
+                        <div>
+                          <span style={{
+                            color: 'white',
+                            fontSize: '1.1rem',
+                            fontWeight: '500',
+                            display: 'block',
+                            marginBottom: '4px',
+                          }}>
+                            Farid Ardiansyah
+                          </span>
+                          <span style={{
+                            color: '#999999',
+                            fontSize: '0.85rem',
+                          }}>
+                            {authorBio.role}
+                          </span>
+                        </div>
+                      </motion.div>
+                      <motion.p
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.2 }}
+                        style={{
+                          color: '#cccccc',
+                          fontSize: '0.9rem',
+                          lineHeight: '1.5',
+                          margin: '0 0 10px 0',
+                          fontStyle: 'italic',
+                        }}
+                      >
+                        "{authorBio.bio}"
+                      </motion.p>
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.3 }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          color: '#666666',
+                          fontSize: '0.85rem',
+                        }}
+                      >
+                        <MessageIcon width={14} height={14} />
+                        <span>Kirim pesan melalui tombol di atas</span>
+                      </motion.div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             </div>
           </div>
           
           <div style={{
             marginBottom: '25px',
+            width: '100%',
           }}>
             <h3 style={{
               fontSize: isMobile ? '1.3rem' : '1.5rem',
@@ -884,19 +2718,15 @@ export default function MemilihJurusanPage() {
             display: 'flex',
             flexDirection: 'column',
             gap: '12px',
+            width: '100%',
+            boxSizing: 'border-box',
           }}>
             {rangkumanSections.map((section) => (
-              <button
+              <motion.button
                 key={section.id}
                 onClick={() => scrollToSection(section.id)}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.color = 'white';
-                  e.currentTarget.style.paddingLeft = '10px';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.color = activeSection === section.id ? 'white' : '#999999';
-                  e.currentTarget.style.paddingLeft = '0';
-                }}
+                whileHover={{ x: 10 }}
+                transition={{ type: "spring", stiffness: 400, damping: 25 }}
                 style={{
                   background: 'none',
                   border: 'none',
@@ -906,12 +2736,17 @@ export default function MemilihJurusanPage() {
                   textAlign: 'left',
                   cursor: 'pointer',
                   fontWeight: 'normal',
-                  transition: 'all 0.2s ease',
-                  paddingLeft: '0',
+                  width: '100%',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  maxWidth: '100%',
+                  display: 'block',
                 }}
+                title={section.title}
               >
                 {section.title}
-              </button>
+              </motion.button>
             ))}
           </div>
         </div>
@@ -922,15 +2757,20 @@ export default function MemilihJurusanPage() {
           maxWidth: isMobile ? '100%' : '700px',
         }}>
           
-          <h2 style={{
-            fontSize: isMobile ? '2rem' : '2.8rem',
-            fontWeight: 'normal',
-            color: 'white',
-            marginBottom: '40px',
-            lineHeight: '1.2',
-          }}>
+          <motion.h2 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            style={{
+              fontSize: isMobile ? '2rem' : '2.8rem',
+              fontWeight: 'normal',
+              color: 'white',
+              marginBottom: '40px',
+              lineHeight: '1.2',
+            }}
+          >
             Mengapa saya memilih jurusan tersebut
-          </h2>
+          </motion.h2>
 
           {/* ===== BLOG SEBELUMNYA - PREVIOUS PAGE ===== */}
           <motion.div
@@ -1037,7 +2877,7 @@ export default function MemilihJurusanPage() {
             <section 
               id="pendahuluan"
               ref={el => sectionRefs.current.pendahuluan = el}
-              style={{ scrollMarginTop: '130px', marginBottom: '3em' }}
+              style={{ scrollMarginTop: '160px', marginBottom: '3em' }}
             >
               <h3 style={{
                 fontSize: isMobile ? '1.3rem' : '1.5rem',
@@ -1064,7 +2904,7 @@ export default function MemilihJurusanPage() {
             <section 
               id="minat"
               ref={el => sectionRefs.current.minat = el}
-              style={{ scrollMarginTop: '130px', marginBottom: '3em' }}
+              style={{ scrollMarginTop: '160px', marginBottom: '3em' }}
             >
               <h3 style={{
                 fontSize: isMobile ? '1.3rem' : '1.5rem',
@@ -1097,7 +2937,7 @@ export default function MemilihJurusanPage() {
             <section 
               id="prospek"
               ref={el => sectionRefs.current.prospek = el}
-              style={{ scrollMarginTop: '130px', marginBottom: '3em' }}
+              style={{ scrollMarginTop: '160px', marginBottom: '3em' }}
             >
               <h3 style={{
                 fontSize: isMobile ? '1.3rem' : '1.5rem',
@@ -1131,7 +2971,7 @@ export default function MemilihJurusanPage() {
             <section 
               id="riset"
               ref={el => sectionRefs.current.riset = el}
-              style={{ scrollMarginTop: '130px', marginBottom: '3em' }}
+              style={{ scrollMarginTop: '160px', marginBottom: '3em' }}
             >
               <h3 style={{
                 fontSize: isMobile ? '1.3rem' : '1.5rem',
@@ -1164,7 +3004,7 @@ export default function MemilihJurusanPage() {
             <section 
               id="keluarga"
               ref={el => sectionRefs.current.keluarga = el}
-              style={{ scrollMarginTop: '130px', marginBottom: '3em' }}
+              style={{ scrollMarginTop: '160px', marginBottom: '3em' }}
             >
               <h3 style={{
                 fontSize: isMobile ? '1.3rem' : '1.5rem',
@@ -1195,7 +3035,7 @@ export default function MemilihJurusanPage() {
             <section 
               id="keraguan"
               ref={el => sectionRefs.current.keraguan = el}
-              style={{ scrollMarginTop: '130px', marginBottom: '3em' }}
+              style={{ scrollMarginTop: '160px', marginBottom: '3em' }}
             >
               <h3 style={{
                 fontSize: isMobile ? '1.3rem' : '1.5rem',
@@ -1227,7 +3067,7 @@ export default function MemilihJurusanPage() {
             <section 
               id="keputusan"
               ref={el => sectionRefs.current.keputusan = el}
-              style={{ scrollMarginTop: '130px', marginBottom: '3em' }}
+              style={{ scrollMarginTop: '160px', marginBottom: '3em' }}
             >
               <h3 style={{
                 fontSize: isMobile ? '1.3rem' : '1.5rem',
@@ -1260,7 +3100,7 @@ export default function MemilihJurusanPage() {
             <section 
               id="adaptasi"
               ref={el => sectionRefs.current.adaptasi = el}
-              style={{ scrollMarginTop: '130px', marginBottom: '3em' }}
+              style={{ scrollMarginTop: '160px', marginBottom: '3em' }}
             >
               <h3 style={{
                 fontSize: isMobile ? '1.3rem' : '1.5rem',
@@ -1294,7 +3134,7 @@ export default function MemilihJurusanPage() {
             <section 
               id="pelajaran"
               ref={el => sectionRefs.current.pelajaran = el}
-              style={{ scrollMarginTop: '130px', marginBottom: '3em' }}
+              style={{ scrollMarginTop: '160px', marginBottom: '3em' }}
             >
               <h3 style={{
                 fontSize: isMobile ? '1.3rem' : '1.5rem',
@@ -1326,7 +3166,7 @@ export default function MemilihJurusanPage() {
             <section 
               id="tips"
               ref={el => sectionRefs.current.tips = el}
-              style={{ scrollMarginTop: '130px', marginBottom: '3em' }}
+              style={{ scrollMarginTop: '160px', marginBottom: '3em' }}
             >
               <h3 style={{
                 fontSize: isMobile ? '1.3rem' : '1.5rem',
@@ -1371,7 +3211,7 @@ export default function MemilihJurusanPage() {
             <section 
               id="penutup"
               ref={el => sectionRefs.current.penutup = el}
-              style={{ scrollMarginTop: '130px', marginBottom: '3em' }}
+              style={{ scrollMarginTop: '160px', marginBottom: '3em' }}
             >
               <h3 style={{
                 fontSize: isMobile ? '1.3rem' : '1.5rem',
@@ -1773,7 +3613,7 @@ export default function MemilihJurusanPage() {
                   }}>
                     <motion.img 
                       whileHover={{ scale: 1.1 }}
-                      src={user?.photoURL || `https://ui-avatars.com/api/?name=${user?.email}&background=random`}
+                      src={user?.photoURL || `https://ui-avatars.com/api/?name=${user?.email}&background=random&color=fff`}
                       alt={user?.displayName}
                       style={{
                         width: '56px',
@@ -1844,10 +3684,10 @@ export default function MemilihJurusanPage() {
                       disabled={commentLoading || !newComment.trim()}
                       style={{
                         padding: '12px 32px',
-                        background: commentLoading || !newComment.trim() ? '#333333' : 'white',
-                        border: 'none',
+                        background: commentLoading || !newComment.trim() ? '#333333' : 'rgba(255,255,255,0.1)',
+                        border: '1px solid rgba(255,255,255,0.2)',
                         borderRadius: '30px',
-                        color: commentLoading || !newComment.trim() ? '#999999' : 'black',
+                        color: commentLoading || !newComment.trim() ? '#999999' : 'white',
                         fontSize: '1rem',
                         fontWeight: '500',
                         cursor: commentLoading || !newComment.trim() ? 'not-allowed' : 'pointer',
@@ -1920,7 +3760,7 @@ export default function MemilihJurusanPage() {
                     }}>
                       <motion.img 
                         whileHover={{ scale: 1.1 }}
-                        src={comment.userPhoto || `https://ui-avatars.com/api/?name=${comment.userEmail}&background=random`}
+                        src={comment.userPhoto || `https://ui-avatars.com/api/?name=${comment.userEmail}&background=random&color=fff`}
                         alt={comment.userName}
                         style={{
                           width: '48px',
@@ -1964,8 +3804,8 @@ export default function MemilihJurusanPage() {
                         display: 'flex',
                         alignItems: 'center',
                         gap: '8px',
-                        background: comment.likedBy?.includes(user?.uid) ? 'rgba(239,68,68,0.1)' : 'rgba(255,255,255,0.05)',
-                        border: comment.likedBy?.includes(user?.uid) ? '1px solid #ef4444' : '1px solid rgba(255,255,255,0.1)',
+                        background: comment.likedBy?.includes(user?.uid) ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.05)',
+                        border: comment.likedBy?.includes(user?.uid) ? '1px solid white' : '1px solid rgba(255,255,255,0.1)',
                         borderRadius: '30px',
                         padding: '8px 16px',
                         cursor: user ? 'pointer' : 'not-allowed',
@@ -1975,14 +3815,14 @@ export default function MemilihJurusanPage() {
                         width="20" 
                         height="20" 
                         viewBox="0 0 24 24" 
-                        fill={comment.likedBy?.includes(user?.uid) ? "#ef4444" : "none"} 
-                        stroke={comment.likedBy?.includes(user?.uid) ? "#ef4444" : "white"} 
+                        fill={comment.likedBy?.includes(user?.uid) ? "white" : "none"} 
+                        stroke="white" 
                         strokeWidth="1"
                       >
                         <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
                       </svg>
                       <span style={{ 
-                        color: comment.likedBy?.includes(user?.uid) ? '#ef4444' : 'white',
+                        color: 'white',
                         fontSize: '1rem'
                       }}>
                         {comment.likes || 0}
@@ -2054,7 +3894,7 @@ export default function MemilihJurusanPage() {
                           gap: '15px',
                         }}>
                           <img 
-                            src={user?.photoURL || `https://ui-avatars.com/api/?name=${user?.email}&background=random`}
+                            src={user?.photoURL || `https://ui-avatars.com/api/?name=${user?.email}&background=random&color=fff`}
                             alt={user?.displayName}
                             style={{
                               width: '40px',
@@ -2113,10 +3953,10 @@ export default function MemilihJurusanPage() {
                                 disabled={!replyText.trim()}
                                 style={{
                                   padding: '8px 24px',
-                                  background: replyText.trim() ? 'white' : '#333333',
-                                  border: 'none',
+                                  background: replyText.trim() ? 'rgba(255,255,255,0.1)' : '#333333',
+                                  border: '1px solid rgba(255,255,255,0.2)',
                                   borderRadius: '20px',
-                                  color: replyText.trim() ? 'black' : '#999999',
+                                  color: replyText.trim() ? 'white' : '#999999',
                                   fontSize: '0.9rem',
                                   fontWeight: '500',
                                   cursor: replyText.trim() ? 'pointer' : 'not-allowed',
@@ -2159,7 +3999,7 @@ export default function MemilihJurusanPage() {
                             flex: 1,
                           }}>
                             <img 
-                              src={reply.userPhoto || `https://ui-avatars.com/api/?name=${reply.userName}&background=random`}
+                              src={reply.userPhoto || `https://ui-avatars.com/api/?name=${reply.userName}&background=random&color=fff`}
                               alt={reply.userName}
                               style={{
                                 width: '32px',
@@ -2210,19 +4050,19 @@ export default function MemilihJurusanPage() {
                                   gap: '5px',
                                   background: 'none',
                                   border: 'none',
-                                  color: reply.likedBy?.includes(user?.uid) ? '#ef4444' : '#666666',
+                                  color: reply.likedBy?.includes(user?.uid) ? 'white' : '#666666',
                                   fontSize: '0.85rem',
                                   cursor: user ? 'pointer' : 'not-allowed',
                                   padding: '4px 8px',
                                   borderRadius: '20px',
-                                  backgroundColor: reply.likedBy?.includes(user?.uid) ? 'rgba(239,68,68,0.1)' : 'transparent',
+                                  backgroundColor: reply.likedBy?.includes(user?.uid) ? 'rgba(255,255,255,0.1)' : 'transparent',
                                 }}
                               >
                                 <svg 
                                   width="14" 
                                   height="14" 
                                   viewBox="0 0 24 24" 
-                                  fill={reply.likedBy?.includes(user?.uid) ? "#ef4444" : "none"} 
+                                  fill={reply.likedBy?.includes(user?.uid) ? "white" : "none"} 
                                   stroke="currentColor" 
                                   strokeWidth="1"
                                 >
@@ -2263,6 +4103,31 @@ export default function MemilihJurusanPage() {
           
         </div>
       </div>
+
+      {/* Tambahkan CSS untuk animasi notifikasi */}
+      <style jsx>{`
+        @keyframes slideIn {
+          from {
+            transform: translateX(-100%);
+            opacity: 0;
+          }
+          to {
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+        
+        @keyframes slideOut {
+          from {
+            transform: translateX(0);
+            opacity: 1;
+          }
+          to {
+            transform: translateX(-100%);
+            opacity: 0;
+          }
+        }
+      `}</style>
     </div>
   );
 }
