@@ -34,7 +34,6 @@ const BLOG_POSTS = [
     tags: ['it', 'kuliah', 'karir'],
     date: '2026-02-13',
     readTime: 6,
-    isNew: false
   },
   {
     id: 'Coming Soon',
@@ -44,7 +43,6 @@ const BLOG_POSTS = [
     tags: ['it', 'karir'],
     date: '2026-02-13',
     readTime: 7,
-    isNew: false
   },
   {
     id: 'tips-memilih-jurusan',
@@ -54,7 +52,6 @@ const BLOG_POSTS = [
     tags: ['jurusan', 'kuliah'],
     date: '2026-02-13',
     readTime: 6,
-    isNew: false
   },
   {
     id: 'pengalaman-magang',
@@ -64,7 +61,6 @@ const BLOG_POSTS = [
     tags: ['sekolah','karir', 'kuliah'],
     date: '2026-02-13',
     readTime: 5,
-    isNew: false
   },
   {
     id: 'tips-belajar-coding-2',
@@ -74,7 +70,6 @@ const BLOG_POSTS = [
     tags: ['it', 'kuliah', 'karir'],
     date: '2026-02-13',
     readTime: 7,
-    isNew: false
   },
   {
     id: 'tips-belajar-coding-3',
@@ -84,7 +79,6 @@ const BLOG_POSTS = [
     tags: ['it', 'kuliah', 'karir'],
     date: '2026-02-13',
     readTime: 6,
-    isNew: false
   },
   {
     id: 'tips-belajar-coding-4',
@@ -94,7 +88,6 @@ const BLOG_POSTS = [
     tags: ['it', 'kuliah', 'karir'],
     date: '2026-02-13',
     readTime: 8,
-    isNew: false
   },
   {
     id: 'tips-belajar-coding-5',
@@ -104,7 +97,6 @@ const BLOG_POSTS = [
     tags: ['it', 'kuliah', 'karir'],
     date: '2026-02-13',
     readTime: 6,
-    isNew: false
   }
 ];
 
@@ -246,7 +238,7 @@ export default function TagPage() {
   const POSTS_PER_PAGE = 5;
   
   // Refs untuk GSAP animations
-  const bannerRef = useRef<HTMLDivElement>(null);
+  const runningTextRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
   const emoji1Ref = useRef<HTMLDivElement>(null);
   const emoji2Ref = useRef<HTMLDivElement>(null);
@@ -275,19 +267,24 @@ export default function TagPage() {
     }
   }, [filteredPosts, currentPage]);
 
-  // GSAP Animations
+  // GSAP Animations untuk teks berjalan
   useEffect(() => {
     if (!isMounted) return;
 
-    // Banner animation - Teks Berjalan
-    if (bannerRef.current) {
-      gsap.fromTo(bannerRef.current,
-        { y: -100, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.8, ease: "power3.out" }
-      );
+    // Animasi teks berjalan
+    if (runningTextRef.current) {
+      gsap.to(runningTextRef.current, {
+        x: -1500,
+        duration: 30,
+        repeat: -1,
+        ease: "linear",
+        modifiers: {
+          x: gsap.utils.unitize(x => parseFloat(x) % 1500)
+        }
+      });
     }
 
-    // Emoji animations
+    // Animasi emoji
     if (emoji1Ref.current && emoji2Ref.current) {
       const tl = gsap.timeline({ repeat: -1, repeatDelay: 3 });
       
@@ -405,38 +402,28 @@ export default function TagPage() {
       position: 'relative',
       padding: isMobile ? '20px' : '40px',
       paddingTop: isMobile ? '120px' : '180px',
+      overflowX: 'hidden',
     }}>
       
-      {/* ===== TEKS BERJALAN - MENGGANTIKAN BANNER ===== */}
-      <div
-        ref={bannerRef}
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          zIndex: 9999,
-          backgroundColor: 'rgba(0,0,0,0.95)',
-          color: 'white',
-          padding: '20px 0',
-          borderBottom: '2px solid rgba(255,107,0,0.5)',
-          backdropFilter: 'blur(12px)',
-          overflow: 'hidden',
-          whiteSpace: 'nowrap',
-          width: '100vw',
-          boxShadow: '0 4px 20px rgba(255,107,0,0.3)',
-        }}
-      >
-        <motion.div
-          animate={{
-            x: [0, -2500]
-          }}
-          transition={{
-            duration: 30,
-            repeat: Infinity,
-            ease: "linear",
-            repeatType: "loop"
-          }}
+      {/* ===== TEKS BERJALAN SEPERTI HALAMAN SEBELUMNYA ===== */}
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 9999,
+        backgroundColor: 'rgba(0,0,0,0.95)',
+        color: 'white',
+        padding: '20px 0',
+        borderBottom: '2px solid rgba(255,255,255,0.2)',
+        backdropFilter: 'blur(12px)',
+        overflow: 'hidden',
+        whiteSpace: 'nowrap',
+        width: '100vw',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
+      }}>
+        <div
+          ref={runningTextRef}
           style={{
             display: 'inline-flex',
             alignItems: 'center',
@@ -445,6 +432,7 @@ export default function TagPage() {
             fontWeight: 'bold',
             letterSpacing: '2px',
             paddingLeft: '30px',
+            whiteSpace: 'nowrap',
           }}
         >
           <div
@@ -457,7 +445,7 @@ export default function TagPage() {
           >
             <span style={{ fontSize: 'inherit' }}>🚧</span>
           </div>
-          <span style={{ background: 'linear-gradient(45deg, #FF6B00, #FFA500)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+          <span style={{ background: 'linear-gradient(45deg, #fff, #aaa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
             HALAMAN INI SEDANG DALAM PENGEMBANGAN • JUDUL BLOG TIDAK 100% BENAR
           </span>
           <div
@@ -470,7 +458,7 @@ export default function TagPage() {
           >
             <span style={{ fontSize: 'inherit' }}>🚧</span>
           </div>
-          <span style={{ background: 'linear-gradient(45deg, #FF6B00, #FFA500)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+          <span style={{ background: 'linear-gradient(45deg, #fff, #aaa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
             HALAMAN INI SEDANG DALAM PENGEMBANGAN • JUDUL BLOG TIDAK 100% BENAR
           </span>
           <div
@@ -483,10 +471,23 @@ export default function TagPage() {
           >
             <span style={{ fontSize: 'inherit' }}>🚧</span>
           </div>
-          <span style={{ background: 'linear-gradient(45deg, #FF6B00, #FFA500)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+          <span style={{ background: 'linear-gradient(45deg, #fff, #aaa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
             HALAMAN INI SEDANG DALAM PENGEMBANGAN • JUDUL BLOG TIDAK 100% BENAR
           </span>
-        </motion.div>
+          <div
+            ref={emoji2Ref}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              transform: 'rotate(0deg)',
+            }}
+          >
+            <span style={{ fontSize: 'inherit' }}>🚧</span>
+          </div>
+          <span style={{ background: 'linear-gradient(45deg, #fff, #aaa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+            HALAMAN INI SEDANG DALAM PENGEMBANGAN • JUDUL BLOG TIDAK 100% BENAR
+          </span>
+        </div>
       </div>
 
       {/* Header dengan North West Arrow + Halaman Utama */}
@@ -629,33 +630,12 @@ export default function TagPage() {
                       e.currentTarget.style.transform = 'translateY(0)';
                     }}
                     >
-                      {/* Nomor Artikel */}
-                      <div style={{
-                        position: 'absolute',
-                        top: '20px',
-                        left: '20px',
-                        width: '40px',
-                        height: '40px',
-                        backgroundColor: 'rgba(255,255,255,0.1)',
-                        borderRadius: '50%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '1.2rem',
-                        fontWeight: 'bold',
-                        color: 'white',
-                        border: '1px solid rgba(255,255,255,0.2)',
-                      }}>
-                        {startIndex + index + 1}
-                      </div>
-
-                      {/* Konten Artikel */}
+                      {/* Konten Artikel - TANPA NOMOR */}
                       <div style={{
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'flex-start',
                         gap: '20px',
-                        marginLeft: '50px', // Beri ruang untuk nomor
                       }}>
                         <div style={{
                           flex: 1,
@@ -664,7 +644,7 @@ export default function TagPage() {
                             fontSize: isMobile ? '1.6rem' : '2rem',
                             fontWeight: 'normal',
                             color: 'white',
-                            margin: index < 2 ? '10px 0 15px 0' : '0 0 15px 0',
+                            margin: '0 0 15px 0',
                           }}>
                             {post.title}
                           </h2>
@@ -768,7 +748,7 @@ export default function TagPage() {
               ))}
             </div>
 
-            {/* Pagination */}
+            {/* Pagination - HANYA PANAH, TANPA ANGKA */}
             {totalPages > 1 && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -792,45 +772,25 @@ export default function TagPage() {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    width: '50px',
-                    height: '50px',
-                    backgroundColor: currentPage === 1 ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.1)',
-                    border: currentPage === 1 ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(255,255,255,0.2)',
+                    width: '60px',
+                    height: '60px',
+                    backgroundColor: currentPage === 1 ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.05)',
+                    border: currentPage === 1 ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(255,255,255,0.1)',
                     borderRadius: '50%',
                     cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
-                    opacity: currentPage === 1 ? 0.5 : 1,
+                    opacity: currentPage === 1 ? 0.3 : 1,
                   }}
                 >
-                  <SouthWestArrow width={24} height={24} />
+                  <SouthWestArrow width={30} height={30} />
                 </motion.button>
 
-                {/* Page Numbers */}
-                <div style={{
-                  display: 'flex',
-                  gap: '10px',
+                {/* Page Info - Text Saja */}
+                <span style={{
+                  color: '#999999',
+                  fontSize: '1rem',
                 }}>
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                    <motion.button
-                      key={page}
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                      onClick={() => goToPage(page)}
-                      style={{
-                        width: '40px',
-                        height: '40px',
-                        backgroundColor: currentPage === page ? 'white' : 'rgba(255,255,255,0.05)',
-                        border: currentPage === page ? 'none' : '1px solid rgba(255,255,255,0.1)',
-                        borderRadius: '50%',
-                        color: currentPage === page ? 'black' : 'white',
-                        fontSize: '1rem',
-                        fontWeight: currentPage === page ? 'bold' : 'normal',
-                        cursor: 'pointer',
-                      }}
-                    >
-                      {page}
-                    </motion.button>
-                  ))}
-                </div>
+                  Halaman {currentPage} dari {totalPages}
+                </span>
 
                 {/* Next Button */}
                 <motion.button
@@ -842,21 +802,21 @@ export default function TagPage() {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    width: '50px',
-                    height: '50px',
-                    backgroundColor: currentPage === totalPages ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.1)',
-                    border: currentPage === totalPages ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(255,255,255,0.2)',
+                    width: '60px',
+                    height: '60px',
+                    backgroundColor: currentPage === totalPages ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.05)',
+                    border: currentPage === totalPages ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(255,255,255,0.1)',
                     borderRadius: '50%',
                     cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
-                    opacity: currentPage === totalPages ? 0.5 : 1,
+                    opacity: currentPage === totalPages ? 0.3 : 1,
                   }}
                 >
-                  <SouthEastArrow width={24} height={24} />
+                  <SouthEastArrow width={30} height={30} />
                 </motion.button>
               </motion.div>
             )}
 
-            {/* Rekomendasi Artikel */}
+            {/* Rekomendasi Artikel - DESIGN SAMA SEPERTI CARD ARTIKEL */}
             {recommendations.length > 0 && (
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
@@ -878,8 +838,8 @@ export default function TagPage() {
                 </h3>
                 
                 <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)',
+                  display: 'flex',
+                  flexDirection: 'column',
                   gap: '20px',
                 }}>
                   {recommendations.map((post, index) => (
@@ -894,12 +854,15 @@ export default function TagPage() {
                         style={{ textDecoration: 'none' }}
                       >
                         <div style={{
-                          padding: '20px',
+                          padding: '24px',
                           backgroundColor: 'rgba(255,255,255,0.02)',
                           borderRadius: '20px',
                           border: '1px solid rgba(255,255,255,0.05)',
                           transition: 'all 0.3s ease',
-                          height: '100%',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          gap: '20px',
                         }}
                         onMouseEnter={(e) => {
                           e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)';
@@ -912,36 +875,67 @@ export default function TagPage() {
                           e.currentTarget.style.transform = 'translateY(0)';
                         }}
                         >
-                          <h4 style={{
-                            fontSize: '1.2rem',
-                            fontWeight: '500',
-                            color: 'white',
-                            margin: '0 0 10px 0',
-                          }}>
-                            {post.title}
-                          </h4>
-                          <p style={{
-                            fontSize: '0.9rem',
-                            color: '#999999',
-                            marginBottom: '15px',
-                            lineHeight: '1.5',
-                          }}>
-                            {post.excerpt}
-                          </p>
-                          <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '10px',
-                            color: '#666666',
-                            fontSize: '0.8rem',
-                          }}>
-                            <CalendarIcon width={14} height={14} />
-                            <span>{new Date(post.date).toLocaleDateString('id-ID', {
-                              day: 'numeric',
-                              month: 'short',
-                              year: 'numeric'
-                            })}</span>
+                          <div style={{ flex: 1 }}>
+                            <h4 style={{
+                              fontSize: '1.3rem',
+                              fontWeight: '500',
+                              color: 'white',
+                              margin: '0 0 8px 0',
+                            }}>
+                              {post.title}
+                            </h4>
+                            <p style={{
+                              fontSize: '0.95rem',
+                              color: '#999999',
+                              marginBottom: '12px',
+                              lineHeight: '1.5',
+                            }}>
+                              {post.excerpt}
+                            </p>
+                            <div style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '15px',
+                              color: '#666666',
+                              fontSize: '0.85rem',
+                            }}>
+                              <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '5px',
+                              }}>
+                                <CalendarIcon width={14} height={14} />
+                                <span>{new Date(post.date).toLocaleDateString('id-ID', {
+                                  day: 'numeric',
+                                  month: 'short',
+                                  year: 'numeric'
+                                })}</span>
+                              </div>
+                              <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '5px',
+                              }}>
+                                <ClockIcon width={14} height={14} />
+                                <span>{post.readTime} menit</span>
+                              </div>
+                            </div>
                           </div>
+                          <motion.div
+                            whileHover={{ x: 5, y: -5 }}
+                            transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              minWidth: isMobile ? 30 : 40,
+                            }}
+                          >
+                            <NorthEastArrow 
+                              width={isMobile ? 30 : 40} 
+                              height={isMobile ? 30 : 40} 
+                            />
+                          </motion.div>
                         </div>
                       </Link>
                     </motion.div>
