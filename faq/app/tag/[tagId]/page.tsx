@@ -121,7 +121,7 @@ const TagIcon = ({ width, height }: { width: number, height: number }) => (
 );
 
 // North West Arrow SVG
-const NorthWestArrow = ({ width, height }: { width: number | string, height: number | string }) => (
+const NorthWestArrow = ({ width, height, style }: { width: number | string, height: number | string, style?: React.CSSProperties }) => (
   <svg 
     width={width} 
     height={height} 
@@ -131,6 +131,7 @@ const NorthWestArrow = ({ width, height }: { width: number | string, height: num
     strokeWidth="1.5"
     strokeLinecap="round"
     strokeLinejoin="round"
+    style={style}
   >
     <path d="M17 17L7 7" stroke="white"/>
     <path d="M17 7H7" stroke="white"/>
@@ -139,7 +140,7 @@ const NorthWestArrow = ({ width, height }: { width: number | string, height: num
 );
 
 // North East Arrow SVG (untuk setiap blog)
-const NorthEastArrow = ({ width, height }: { width: number | string, height: number | string }) => (
+const NorthEastArrow = ({ width, height, style }: { width: number | string, height: number | string, style?: React.CSSProperties }) => (
   <svg 
     width={width} 
     height={height} 
@@ -149,10 +150,30 @@ const NorthEastArrow = ({ width, height }: { width: number | string, height: num
     strokeWidth="1.5"
     strokeLinecap="round"
     strokeLinejoin="round"
+    style={style}
   >
     <path d="M7 7L17 17" stroke="white"/>
     <path d="M7 7H17" stroke="white"/>
     <path d="M7 17V7" stroke="white"/>
+  </svg>
+);
+
+// South West Arrow SVG
+const SouthWestArrow = ({ width, height, style }: { width: number | string, height: number | string, style?: React.CSSProperties }) => (
+  <svg 
+    width={width} 
+    height={height} 
+    viewBox="0 0 24 24" 
+    fill="none"
+    stroke="white"
+    strokeWidth="1.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    style={style}
+  >
+    <path d="M17 7L7 17" stroke="white"/>
+    <path d="M17 7H7" stroke="white"/>
+    <path d="M17 7V17" stroke="white"/>
   </svg>
 );
 
@@ -175,6 +196,19 @@ export default function TagPage() {
   const currentTag = TAG_INFO[tagId] || { name: tagId, description: '' };
   const otherTags = Object.keys(TAG_INFO).filter(t => t !== tagId);
 
+  // ===== FUNGSI UNTUK MENDAPATKAN POST TERBARU =====
+  const getNewestPosts = () => {
+    // Urutkan berdasarkan tanggal (asumsi semua tanggal sama, jadi gunakan urutan array)
+    // Jika ada tanggal yang berbeda, bisa menggunakan sort berdasarkan date
+    return [...BLOG_POSTS].slice(0, 2); // Ambil 2 post pertama sebagai contoh terbaru
+  };
+
+  // ===== FUNGSI UNTUK MENDAPATKAN POST TERAKHIR =====
+  const getLastPosts = () => {
+    // Ambil 2 post terakhir dari array
+    return [...BLOG_POSTS].slice(-2); // Ambil 2 post terakhir
+  };
+
   // Get recommended posts (acak 3 post yang tidak memiliki tag yang sama dengan current tag)
   const getRecommendedPosts = () => {
     // Filter post yang tidak memiliki tag yang sama dengan current tag
@@ -185,6 +219,8 @@ export default function TagPage() {
     return shuffled.slice(0, 3);
   };
 
+  const newestPosts = getNewestPosts();
+  const lastPosts = getLastPosts();
   const recommendedPosts = getRecommendedPosts();
 
   // GSAP Animations
@@ -307,10 +343,10 @@ export default function TagPage() {
       color: 'white',
       position: 'relative',
       padding: isMobile ? '20px' : '40px',
-      paddingTop: isMobile ? '100px' : '120px', // Tambah padding top untuk memberi ruang teks berjalan
+      paddingTop: isMobile ? '100px' : '120px',
     }}>
       
-      {/* ===== TEKS BERJALAN - SAMA PERSIS DENGAN sssssf.txt ===== */}
+      {/* ===== TEKS BERJALAN ===== */}
       <div
         ref={bannerRef}
         style={{
@@ -350,7 +386,6 @@ export default function TagPage() {
             paddingLeft: '30px',
           }}
         >
-          {/* Elemen teks berjalan dengan arrow besar - SAMA PERSIS DENGAN sssssf.txt */}
           <NorthWestArrow width={isMobile ? 40 : 60} height={isMobile ? 40 : 60} style={{ strokeWidth: 2 }} />
           <span style={{ background: 'linear-gradient(45deg, #fff, #aaa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>NOTE ADALAH TEMAN TERBAIK MU</span>
           <NorthWestArrow width={isMobile ? 40 : 60} height={isMobile ? 40 : 60} style={{ strokeWidth: 2 }} />
@@ -369,7 +404,7 @@ export default function TagPage() {
         ref={headerRef}
         style={{
           position: 'fixed',
-          top: isMobile ? '90px' : '110px', // Sesuaikan posisi karena teks berjalan lebih besar
+          top: isMobile ? '90px' : '110px',
           right: isMobile ? '20px' : '40px',
           zIndex: 100,
         }}
@@ -638,12 +673,282 @@ export default function TagPage() {
           </motion.div>
         )}
 
-        {/* ===== REKOMENDASI POST BLOG - DESIGN SAMA PERSIS DENGAN BLOG POST ===== */}
-        {recommendedPosts.length > 0 && (
+        {/* ===== POST BLOG TERBARU (NEWEST) ===== */}
+        {newestPosts.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            style={{
+              marginTop: '80px',
+              paddingTop: '40px',
+              borderTop: '1px solid #333333',
+            }}
+          >
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '15px',
+              marginBottom: '30px',
+            }}>
+              <h3 style={{
+                fontSize: '1.5rem',
+                fontWeight: 'normal',
+                color: 'white',
+                margin: 0,
+              }}>
+                📌 Postingan Terbaru
+              </h3>
+              <span style={{
+                fontSize: '0.9rem',
+                color: '#666666',
+                background: 'rgba(255,255,255,0.05)',
+                padding: '4px 12px',
+                borderRadius: '20px',
+                border: '1px solid rgba(255,255,255,0.1)',
+              }}>
+                Newest
+              </span>
+            </div>
+
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '20px',
+            }}>
+              {newestPosts.map((post, index) => (
+                <motion.div
+                  key={post.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.4, delay: 0.4 + (index * 0.1) }}
+                >
+                  <Link 
+                    href={`/blog/${post.slug}`}
+                    style={{ textDecoration: 'none' }}
+                  >
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '20px',
+                      backgroundColor: 'rgba(255,255,255,0.02)',
+                      borderRadius: '16px',
+                      border: '1px solid rgba(255,255,255,0.05)',
+                      transition: 'all 0.3s ease',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)';
+                      e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)';
+                      e.currentTarget.style.transform = 'translateX(5px)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.02)';
+                      e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)';
+                      e.currentTarget.style.transform = 'translateX(0)';
+                    }}
+                    >
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '15px',
+                        flex: 1,
+                      }}>
+                        <span style={{
+                          fontSize: '1.5rem',
+                          color: '#666666',
+                        }}>
+                          {index + 1}.
+                        </span>
+                        <div>
+                          <h4 style={{
+                            fontSize: '1.2rem',
+                            fontWeight: '500',
+                            color: 'white',
+                            margin: '0 0 5px 0',
+                          }}>
+                            {post.title}
+                          </h4>
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '15px',
+                            color: '#666666',
+                            fontSize: '0.85rem',
+                          }}>
+                            <div style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '5px',
+                            }}>
+                              <CalendarIcon width={14} height={14} />
+                              <span>{new Date(post.date).toLocaleDateString('id-ID')}</span>
+                            </div>
+                            <div style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '5px',
+                            }}>
+                              <ClockIcon width={14} height={14} />
+                              <span>{post.readTime} menit</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <motion.div
+                        whileHover={{ x: 3 }}
+                      >
+                        <SouthWestArrow width={20} height={20} />
+                      </motion.div>
+                    </div>
+                  </Link>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+
+        {/* ===== POST BLOG TERAKHIR (LAST) ===== */}
+        {lastPosts.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.4 }}
+            style={{
+              marginTop: '60px',
+              paddingTop: '40px',
+              borderTop: '1px solid #333333',
+            }}
+          >
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '15px',
+              marginBottom: '30px',
+            }}>
+              <h3 style={{
+                fontSize: '1.5rem',
+                fontWeight: 'normal',
+                color: 'white',
+                margin: 0,
+              }}>
+                📚 Postingan Terakhir
+              </h3>
+              <span style={{
+                fontSize: '0.9rem',
+                color: '#666666',
+                background: 'rgba(255,255,255,0.05)',
+                padding: '4px 12px',
+                borderRadius: '20px',
+                border: '1px solid rgba(255,255,255,0.1)',
+              }}>
+                Last Posts
+              </span>
+            </div>
+
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '20px',
+            }}>
+              {lastPosts.map((post, index) => (
+                <motion.div
+                  key={post.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.4, delay: 0.5 + (index * 0.1) }}
+                >
+                  <Link 
+                    href={`/blog/${post.slug}`}
+                    style={{ textDecoration: 'none' }}
+                  >
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '20px',
+                      backgroundColor: 'rgba(255,255,255,0.02)',
+                      borderRadius: '16px',
+                      border: '1px solid rgba(255,255,255,0.05)',
+                      transition: 'all 0.3s ease',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)';
+                      e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)';
+                      e.currentTarget.style.transform = 'translateX(5px)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.02)';
+                      e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)';
+                      e.currentTarget.style.transform = 'translateX(0)';
+                    }}
+                    >
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '15px',
+                        flex: 1,
+                      }}>
+                        <span style={{
+                          fontSize: '1.5rem',
+                          color: '#666666',
+                        }}>
+                          {index + 1}.
+                        </span>
+                        <div>
+                          <h4 style={{
+                            fontSize: '1.2rem',
+                            fontWeight: '500',
+                            color: 'white',
+                            margin: '0 0 5px 0',
+                          }}>
+                            {post.title}
+                          </h4>
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '15px',
+                            color: '#666666',
+                            fontSize: '0.85rem',
+                          }}>
+                            <div style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '5px',
+                            }}>
+                              <CalendarIcon width={14} height={14} />
+                              <span>{new Date(post.date).toLocaleDateString('id-ID')}</span>
+                            </div>
+                            <div style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '5px',
+                            }}>
+                              <ClockIcon width={14} height={14} />
+                              <span>{post.readTime} menit</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <motion.div
+                        whileHover={{ x: 3 }}
+                      >
+                        <SouthWestArrow width={20} height={20} />
+                      </motion.div>
+                    </div>
+                  </Link>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+
+        {/* ===== REKOMENDASI POST BLOG ===== */}
+        {recommendedPosts.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.5 }}
             style={{
               marginTop: '80px',
               paddingTop: '40px',
@@ -669,7 +974,7 @@ export default function TagPage() {
                   key={post.id}
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.5 + (index * 0.1) }}
+                  transition={{ duration: 0.5, delay: 0.6 + (index * 0.1) }}
                 >
                   <Link 
                     href={`/blog/${post.slug}`}
@@ -695,7 +1000,7 @@ export default function TagPage() {
                       e.currentTarget.style.transform = 'translateY(0)';
                     }}
                     >
-                      {/* Konten Artikel - SAMA PERSIS DENGAN DESIGN BLOG POST */}
+                      {/* Konten Artikel */}
                       <div style={{
                         display: 'flex',
                         justifyContent: 'space-between',
@@ -790,7 +1095,7 @@ export default function TagPage() {
                           </div>
                         </div>
 
-                        {/* Tanda Panah SVG untuk setiap blog - SAMA PERSIS */}
+                        {/* Tanda Panah SVG */}
                         <motion.div
                           whileHover={{ x: 5, y: -5 }}
                           transition={{ type: "spring", stiffness: 400, damping: 10 }}
@@ -820,7 +1125,7 @@ export default function TagPage() {
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.6 }}
+            transition={{ duration: 0.5, delay: 0.7 }}
             style={{
               marginTop: '60px',
               paddingTop: '40px',
