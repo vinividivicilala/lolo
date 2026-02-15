@@ -44,20 +44,14 @@ const firebaseConfig = {
   measurementId: "G-8LMP7F4BE9"
 };
 
-// Emoticon List untuk Reactions
+// Emoticon List untuk Reactions (DISEDERHANAKAN MENJADI 6 EMOTICON)
 const EMOTICONS = [
-  { id: 'like', emoji: '👍', label: 'Suka', color: '#3b82f6' },
-  { id: 'heart', emoji: '❤️', label: 'Cinta', color: '#ef4444' },
-  { id: 'laugh', emoji: '😂', label: 'Lucu', color: '#f59e0b' },
-  { id: 'wow', emoji: '😮', label: 'Kagum', color: '#8b5cf6' },
-  { id: 'sad', emoji: '😢', label: 'Sedih', color: '#6b7280' },
-  { id: 'angry', emoji: '😠', label: 'Marah', color: '#dc2626' },
-  { id: 'fire', emoji: '🔥', label: 'Hebat', color: '#f97316' },
-  { id: 'clap', emoji: '👏', label: 'Apresiasi', color: '#10b981' },
-  { id: 'rocket', emoji: '🚀', label: 'Keren', color: '#a855f7' },
-  { id: 'bulb', emoji: '💡', label: 'Inspiratif', color: '#eab308' },
-  { id: 'coffee', emoji: '☕', label: 'Semangat', color: '#92400e' },
-  { id: 'muscle', emoji: '💪', label: 'Kuat', color: '#b45309' }
+  { id: 'like', emoji: '👍', label: 'Suka' },
+  { id: 'heart', emoji: '❤️', label: 'Cinta' },
+  { id: 'laugh', emoji: '😂', label: 'Lucu' },
+  { id: 'wow', emoji: '😮', label: 'Kagum' },
+  { id: 'sad', emoji: '😢', label: 'Sedih' },
+  { id: 'angry', emoji: '😠', label: 'Marah' }
 ];
 
 export default function MemilihJurusanPage() {
@@ -3400,7 +3394,7 @@ export default function MemilihJurusanPage() {
             </div>
           </motion.div>
 
-          {/* ===== EMOTICON REACTIONS ===== */}
+          {/* ===== EMOTICON REACTIONS (DISEDERHANAKAN) ===== */}
           <div style={{
             marginTop: '40px',
             marginBottom: '40px',
@@ -3449,7 +3443,7 @@ export default function MemilihJurusanPage() {
               </motion.button>
             </motion.div>
 
-            {/* Emoticon Picker */}
+            {/* Emoticon Picker - DISEDERHANAKAN */}
             <AnimatePresence>
               {showEmoticonPicker && (
                 <motion.div
@@ -3485,8 +3479,8 @@ export default function MemilihJurusanPage() {
                           flexDirection: 'column',
                           alignItems: 'center',
                           gap: '8px',
-                          background: userReactions.includes(emoticon.id) ? `${emoticon.color}20` : 'rgba(255,255,255,0.05)',
-                          border: userReactions.includes(emoticon.id) ? `1px solid ${emoticon.color}` : '1px solid rgba(255,255,255,0.1)',
+                          background: userReactions.includes(emoticon.id) ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.05)',
+                          border: userReactions.includes(emoticon.id) ? '1px solid white' : '1px solid rgba(255,255,255,0.1)',
                           borderRadius: '16px',
                           padding: '16px 8px',
                           cursor: 'pointer',
@@ -3495,7 +3489,7 @@ export default function MemilihJurusanPage() {
                         <span style={{ fontSize: '2.5rem' }}>{emoticon.emoji}</span>
                         <span style={{ 
                           fontSize: '0.8rem', 
-                          color: userReactions.includes(emoticon.id) ? emoticon.color : '#999999' 
+                          color: userReactions.includes(emoticon.id) ? 'white' : '#999999' 
                         }}>
                           {emoticon.label}
                         </span>
@@ -3513,7 +3507,7 @@ export default function MemilihJurusanPage() {
               )}
             </AnimatePresence>
 
-            {/* Active Reactions Summary */}
+            {/* Active Reactions Summary - DISEDERHANAKAN */}
             <div style={{
               display: 'flex',
               flexWrap: 'wrap',
@@ -3536,8 +3530,8 @@ export default function MemilihJurusanPage() {
                         display: 'flex',
                         alignItems: 'center',
                         gap: '8px',
-                        background: userReactions.includes(id) ? `${emoticon.color}20` : 'rgba(255,255,255,0.05)',
-                        border: userReactions.includes(id) ? `1px solid ${emoticon.color}` : '1px solid rgba(255,255,255,0.1)',
+                        background: userReactions.includes(id) ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.05)',
+                        border: userReactions.includes(id) ? '1px solid white' : '1px solid rgba(255,255,255,0.1)',
                         borderRadius: '30px',
                         padding: '8px 16px',
                         cursor: 'pointer',
@@ -3546,7 +3540,7 @@ export default function MemilihJurusanPage() {
                       <span style={{ fontSize: '1.3rem' }}>{emoticon.emoji}</span>
                       <span style={{ 
                         fontSize: '0.95rem', 
-                        color: userReactions.includes(id) ? emoticon.color : 'white' 
+                        color: 'white' 
                       }}>
                         {count}
                       </span>
