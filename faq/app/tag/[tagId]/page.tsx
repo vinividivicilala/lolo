@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import gsap from "gsap";
 
 // Data blog posts dengan tags
@@ -34,6 +34,7 @@ const BLOG_POSTS = [
     tags: ['it', 'kuliah', 'karir'],
     date: '2026-02-13',
     readTime: 6,
+    isNew: false
   },
   {
     id: 'Coming Soon',
@@ -43,6 +44,7 @@ const BLOG_POSTS = [
     tags: ['it', 'karir'],
     date: '2026-02-13',
     readTime: 7,
+    isNew: false
   },
   {
     id: 'tips-memilih-jurusan',
@@ -52,6 +54,7 @@ const BLOG_POSTS = [
     tags: ['jurusan', 'kuliah'],
     date: '2026-02-13',
     readTime: 6,
+    isNew: false
   },
   {
     id: 'pengalaman-magang',
@@ -61,42 +64,7 @@ const BLOG_POSTS = [
     tags: ['sekolah','karir', 'kuliah'],
     date: '2026-02-13',
     readTime: 5,
-  },
-  {
-    id: 'tips-belajar-coding-2',
-    title: 'Tips Belajar Coding untuk Pemula Part 2',
-    slug: 'tips-belajar-coding-2',
-    excerpt: 'Lanjutan panduan praktis memulai perjalanan sebagai programmer.',
-    tags: ['it', 'kuliah', 'karir'],
-    date: '2026-02-13',
-    readTime: 7,
-  },
-  {
-    id: 'tips-belajar-coding-3',
-    title: 'Tips Belajar Coding untuk Pemula Part 3',
-    slug: 'tips-belajar-coding-3',
-    excerpt: 'Tips dan trik lanjutan untuk programmer pemula.',
-    tags: ['it', 'kuliah', 'karir'],
-    date: '2026-02-13',
-    readTime: 6,
-  },
-  {
-    id: 'tips-belajar-coding-4',
-    title: 'Tips Belajar Coding untuk Pemula Part 4',
-    slug: 'tips-belajar-coding-4',
-    excerpt: 'Membangun proyek pertama sebagai programmer.',
-    tags: ['it', 'kuliah', 'karir'],
-    date: '2026-02-13',
-    readTime: 8,
-  },
-  {
-    id: 'tips-belajar-coding-5',
-    title: 'Tips Belajar Coding untuk Pemula Part 5',
-    slug: 'tips-belajar-coding-5',
-    excerpt: 'Persiapan mencari kerja sebagai programmer junior.',
-    tags: ['it', 'kuliah', 'karir'],
-    date: '2026-02-13',
-    readTime: 6,
+    isNew: false
   }
 ];
 
@@ -122,8 +90,8 @@ const TAG_INFO: { [key: string]: { name: string, description: string } } = {
     name: 'Karir',
     description: 'Tips dan informasi seputar persiapan karir dan dunia kerja.'
   },
-  sekolah: {
-    name: 'Sekolah',
+   sekolah: {
+    name: 'sekolah',
     description: 'Tips dan informasi seputar persiapan sekolah dan dunia kerja.'
   }
 };
@@ -170,7 +138,7 @@ const NorthWestArrow = ({ width, height }: { width: number | string, height: num
   </svg>
 );
 
-// North East Arrow SVG
+// North East Arrow SVG (untuk setiap blog)
 const NorthEastArrow = ({ width, height }: { width: number | string, height: number | string }) => (
   <svg 
     width={width} 
@@ -188,7 +156,7 @@ const NorthEastArrow = ({ width, height }: { width: number | string, height: num
   </svg>
 );
 
-// South West Arrow SVG (untuk pagination prev)
+// South West Arrow SVG
 const SouthWestArrow = ({ width, height }: { width: number | string, height: number | string }) => (
   <svg 
     width={width} 
@@ -206,24 +174,6 @@ const SouthWestArrow = ({ width, height }: { width: number | string, height: num
   </svg>
 );
 
-// South East Arrow SVG (untuk pagination next)
-const SouthEastArrow = ({ width, height }: { width: number | string, height: number | string }) => (
-  <svg 
-    width={width} 
-    height={height} 
-    viewBox="0 0 24 24" 
-    fill="none"
-    stroke="white"
-    strokeWidth="1.5"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M7 7L17 17" stroke="white"/>
-    <path d="M7 7H17" stroke="white"/>
-    <path d="M7 17V7" stroke="white"/>
-  </svg>
-);
-
 export default function TagPage() {
   const router = useRouter();
   const params = useParams();
@@ -231,14 +181,9 @@ export default function TagPage() {
   
   const [isMounted, setIsMounted] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [recommendations, setRecommendations] = useState<any[]>([]);
-  
-  // Constants for pagination
-  const POSTS_PER_PAGE = 5;
   
   // Refs untuk GSAP animations
-  const runningTextRef = useRef<HTMLDivElement>(null);
+  const bannerRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
   const emoji1Ref = useRef<HTMLDivElement>(null);
   const emoji2Ref = useRef<HTMLDivElement>(null);
@@ -247,45 +192,34 @@ export default function TagPage() {
   const filteredPosts = BLOG_POSTS.filter(post => post.tags.includes(tagId));
   const currentTag = TAG_INFO[tagId] || { name: tagId, description: '' };
   const otherTags = Object.keys(TAG_INFO).filter(t => t !== tagId);
-  
-  // Pagination calculations
-  const totalPages = Math.ceil(filteredPosts.length / POSTS_PER_PAGE);
-  const startIndex = (currentPage - 1) * POSTS_PER_PAGE;
-  const endIndex = startIndex + POSTS_PER_PAGE;
-  const currentPosts = filteredPosts.slice(startIndex, endIndex);
 
-  // Generate recommendations berdasarkan tag yang sama
-  useEffect(() => {
-    if (filteredPosts.length > 0) {
-      // Ambil 3 artikel acak dari tag yang sama (selain yang sudah ditampilkan di halaman ini)
-      const otherPosts = filteredPosts.filter(post => 
-        !currentPosts.some(p => p.id === post.id)
-      );
-      
-      const shuffled = [...otherPosts].sort(() => 0.5 - Math.random());
-      setRecommendations(shuffled.slice(0, 3));
-    }
-  }, [filteredPosts, currentPage]);
+  // Get recommended posts (acak 3 post yang tidak memiliki tag yang sama dengan current tag)
+  const getRecommendedPosts = () => {
+    // Filter post yang tidak memiliki tag yang sama dengan current tag
+    const otherPosts = BLOG_POSTS.filter(post => !post.tags.includes(tagId));
+    
+    // Acak dan ambil 3 post
+    const shuffled = [...otherPosts].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, 3);
+  };
 
-  // GSAP Animations untuk teks berjalan
+  const recommendedPosts = getRecommendedPosts();
+
+  // GSAP Animations
   useEffect(() => {
     if (!isMounted) return;
 
-    // Animasi teks berjalan
-    if (runningTextRef.current) {
-      gsap.to(runningTextRef.current, {
-        x: -1500,
-        duration: 30,
-        repeat: -1,
-        ease: "linear",
-        modifiers: {
-          x: gsap.utils.unitize(x => parseFloat(x) % 1500)
-        }
-      });
+    // Banner animation
+    if (bannerRef.current) {
+      gsap.fromTo(bannerRef.current,
+        { y: -100, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.8, ease: "power3.out" }
+      );
     }
 
-    // Animasi emoji
+    // Emoji animations
     if (emoji1Ref.current && emoji2Ref.current) {
+      // Create timeline for emojis
       const tl = gsap.timeline({ repeat: -1, repeatDelay: 3 });
       
       tl.to([emoji1Ref.current, emoji2Ref.current], {
@@ -332,16 +266,6 @@ export default function TagPage() {
     
     return () => window.removeEventListener('resize', checkScreenSize);
   }, []);
-
-  // Reset page when tag changes
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [tagId]);
-
-  const goToPage = (page: number) => {
-    setCurrentPage(page);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
 
   if (!isMounted) {
     return (
@@ -401,29 +325,39 @@ export default function TagPage() {
       color: 'white',
       position: 'relative',
       padding: isMobile ? '20px' : '40px',
-      paddingTop: isMobile ? '120px' : '180px',
-      overflowX: 'hidden',
+      paddingTop: isMobile ? '100px' : '120px', // Tambah padding top untuk memberi ruang teks berjalan
     }}>
       
-      {/* ===== TEKS BERJALAN SEPERTI HALAMAN SEBELUMNYA ===== */}
-      <div style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        zIndex: 9999,
-        backgroundColor: 'rgba(0,0,0,0.95)',
-        color: 'white',
-        padding: '20px 0',
-        borderBottom: '2px solid rgba(255,255,255,0.2)',
-        backdropFilter: 'blur(12px)',
-        overflow: 'hidden',
-        whiteSpace: 'nowrap',
-        width: '100vw',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
-      }}>
-        <div
-          ref={runningTextRef}
+      {/* ===== TEKS BERJALAN - LEBIH BESAR DENGAN PANAH (SEPERTI sssssf.txt) ===== */}
+      <div
+        ref={bannerRef}
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 9999,
+          backgroundColor: 'rgba(0,0,0,0.95)',
+          color: 'white',
+          padding: '20px 0',
+          borderBottom: '2px solid rgba(255,255,255,0.2)',
+          backdropFilter: 'blur(12px)',
+          overflow: 'hidden',
+          whiteSpace: 'nowrap',
+          width: '100vw',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
+        }}
+      >
+        <motion.div
+          animate={{
+            x: [0, -2500]
+          }}
+          transition={{
+            duration: 30,
+            repeat: Infinity,
+            ease: "linear",
+            repeatType: "loop"
+          }}
           style={{
             display: 'inline-flex',
             alignItems: 'center',
@@ -432,62 +366,20 @@ export default function TagPage() {
             fontWeight: 'bold',
             letterSpacing: '2px',
             paddingLeft: '30px',
-            whiteSpace: 'nowrap',
           }}
         >
-          <div
-            ref={emoji1Ref}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              transform: 'rotate(0deg)',
-            }}
-          >
-            <span style={{ fontSize: 'inherit' }}>🚧</span>
-          </div>
-          <span style={{ background: 'linear-gradient(45deg, #fff, #aaa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-            HALAMAN INI SEDANG DALAM PENGEMBANGAN • JUDUL BLOG TIDAK 100% BENAR
-          </span>
-          <div
-            ref={emoji2Ref}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              transform: 'rotate(0deg)',
-            }}
-          >
-            <span style={{ fontSize: 'inherit' }}>🚧</span>
-          </div>
-          <span style={{ background: 'linear-gradient(45deg, #fff, #aaa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-            HALAMAN INI SEDANG DALAM PENGEMBANGAN • JUDUL BLOG TIDAK 100% BENAR
-          </span>
-          <div
-            ref={emoji1Ref}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              transform: 'rotate(0deg)',
-            }}
-          >
-            <span style={{ fontSize: 'inherit' }}>🚧</span>
-          </div>
-          <span style={{ background: 'linear-gradient(45deg, #fff, #aaa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-            HALAMAN INI SEDANG DALAM PENGEMBANGAN • JUDUL BLOG TIDAK 100% BENAR
-          </span>
-          <div
-            ref={emoji2Ref}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              transform: 'rotate(0deg)',
-            }}
-          >
-            <span style={{ fontSize: 'inherit' }}>🚧</span>
-          </div>
-          <span style={{ background: 'linear-gradient(45deg, #fff, #aaa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-            HALAMAN INI SEDANG DALAM PENGEMBANGAN • JUDUL BLOG TIDAK 100% BENAR
-          </span>
-        </div>
+          {/* Elemen teks berjalan dengan arrow besar */}
+          <NorthWestArrow width={isMobile ? 40 : 60} height={isMobile ? 40 : 60} />
+          <span style={{ background: 'linear-gradient(45deg, #fff, #aaa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>HALAMAN TAG BLOG</span>
+          <NorthWestArrow width={isMobile ? 40 : 60} height={isMobile ? 40 : 60} />
+          <span style={{ background: 'linear-gradient(45deg, #fff, #aaa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>HALAMAN TAG BLOG</span>
+          <NorthWestArrow width={isMobile ? 40 : 60} height={isMobile ? 40 : 60} />
+          <span style={{ background: 'linear-gradient(45deg, #fff, #aaa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>HALAMAN TAG BLOG</span>
+          <NorthWestArrow width={isMobile ? 40 : 60} height={isMobile ? 40 : 60} />
+          <span style={{ background: 'linear-gradient(45deg, #fff, #aaa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>HALAMAN TAG BLOG</span>
+          <NorthWestArrow width={isMobile ? 40 : 60} height={isMobile ? 40 : 60} />
+          <span style={{ background: 'linear-gradient(45deg, #fff, #aaa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>HALAMAN TAG BLOG</span>
+        </motion.div>
       </div>
 
       {/* Header dengan North West Arrow + Halaman Utama */}
@@ -495,7 +387,7 @@ export default function TagPage() {
         ref={headerRef}
         style={{
           position: 'fixed',
-          top: isMobile ? '100px' : '120px',
+          top: isMobile ? '90px' : '110px', // Sesuaikan posisi karena teks berjalan lebih besar
           right: isMobile ? '20px' : '40px',
           zIndex: 100,
         }}
@@ -542,7 +434,7 @@ export default function TagPage() {
       <div style={{
         maxWidth: '900px',
         margin: '0 auto',
-        padding: isMobile ? '20px 0 40px' : '40px 0 60px',
+        padding: isMobile ? '60px 0 40px' : '80px 0 60px',
       }}>
         
         {/* Tag Header */}
@@ -593,357 +485,160 @@ export default function TagPage() {
 
         {/* Articles List */}
         {filteredPosts.length > 0 ? (
-          <>
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '30px',
-            }}>
-              {currentPosts.map((post, index) => (
-                <motion.div
-                  key={post.id}
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                >
-                  <Link 
-                    href={`/blog/${post.slug}`}
-                    style={{ textDecoration: 'none' }}
-                  >
-                    <div style={{
-                      padding: '30px',
-                      backgroundColor: 'rgba(255,255,255,0.02)',
-                      borderRadius: '24px',
-                      border: '1px solid rgba(255,255,255,0.05)',
-                      transition: 'all 0.3s ease',
-                      cursor: 'pointer',
-                      position: 'relative',
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)';
-                      e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)';
-                      e.currentTarget.style.transform = 'translateY(-4px)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.02)';
-                      e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)';
-                      e.currentTarget.style.transform = 'translateY(0)';
-                    }}
-                    >
-                      {/* Konten Artikel - TANPA NOMOR */}
-                      <div style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'flex-start',
-                        gap: '20px',
-                      }}>
-                        <div style={{
-                          flex: 1,
-                        }}>
-                          <h2 style={{
-                            fontSize: isMobile ? '1.6rem' : '2rem',
-                            fontWeight: 'normal',
-                            color: 'white',
-                            margin: '0 0 15px 0',
-                          }}>
-                            {post.title}
-                          </h2>
-                          
-                          <p style={{
-                            fontSize: isMobile ? '1rem' : '1.1rem',
-                            color: '#999999',
-                            marginBottom: '20px',
-                            lineHeight: '1.6',
-                          }}>
-                            {post.excerpt}
-                          </p>
-                          
-                          <div style={{
-                            display: 'flex',
-                            flexWrap: 'wrap',
-                            gap: '10px',
-                            marginBottom: '20px',
-                          }}>
-                            {post.tags.map(tag => (
-                              <span
-                                key={tag}
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  router.push(`/tag/${tag}`);
-                                }}
-                                style={{
-                                  padding: '4px 12px',
-                                  backgroundColor: '#222222',
-                                  border: '1px solid #444444',
-                                  borderRadius: '20px',
-                                  color: '#cccccc',
-                                  fontSize: '0.85rem',
-                                  cursor: 'pointer',
-                                  transition: 'all 0.2s ease',
-                                }}
-                                onMouseEnter={(e) => {
-                                  e.currentTarget.style.backgroundColor = '#333333';
-                                  e.currentTarget.style.borderColor = '#666666';
-                                }}
-                                onMouseLeave={(e) => {
-                                  e.currentTarget.style.backgroundColor = '#222222';
-                                  e.currentTarget.style.borderColor = '#444444';
-                                }}
-                              >
-                                #{tag}
-                              </span>
-                            ))}
-                          </div>
-                          
-                          <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '20px',
-                            color: '#666666',
-                            fontSize: '0.9rem',
-                          }}>
-                            <div style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '6px',
-                            }}>
-                              <CalendarIcon width={16} height={16} />
-                              <span>{new Date(post.date).toLocaleDateString('id-ID', {
-                                day: 'numeric',
-                                month: 'long',
-                                year: 'numeric'
-                              })}</span>
-                            </div>
-                            <div style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '6px',
-                            }}>
-                              <ClockIcon width={16} height={16} />
-                              <span>{post.readTime} menit membaca</span>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Tanda Panah SVG untuk setiap blog */}
-                        <motion.div
-                          whileHover={{ x: 5, y: -5 }}
-                          transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            minWidth: isMobile ? 40 : 50,
-                          }}
-                        >
-                          <NorthEastArrow 
-                            width={isMobile ? 40 : 50} 
-                            height={isMobile ? 40 : 50} 
-                          />
-                        </motion.div>
-                      </div>
-                    </div>
-                  </Link>
-                </motion.div>
-              ))}
-            </div>
-
-            {/* Pagination - HANYA PANAH, TANPA ANGKA */}
-            {totalPages > 1 && (
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '30px',
+          }}>
+            {filteredPosts.map((post, index) => (
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.3 }}
-                style={{
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  gap: '20px',
-                  marginTop: '60px',
-                }}
-              >
-                {/* Previous Button */}
-                <motion.button
-                  whileHover={{ scale: 1.1, x: -5 }}
-                  whileTap={{ scale: 0.9 }}
-                  onClick={() => goToPage(currentPage - 1)}
-                  disabled={currentPage === 1}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: '60px',
-                    height: '60px',
-                    backgroundColor: currentPage === 1 ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.05)',
-                    border: currentPage === 1 ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(255,255,255,0.1)',
-                    borderRadius: '50%',
-                    cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
-                    opacity: currentPage === 1 ? 0.3 : 1,
-                  }}
-                >
-                  <SouthWestArrow width={30} height={30} />
-                </motion.button>
-
-                {/* Page Info - Text Saja */}
-                <span style={{
-                  color: '#999999',
-                  fontSize: '1rem',
-                }}>
-                  Halaman {currentPage} dari {totalPages}
-                </span>
-
-                {/* Next Button */}
-                <motion.button
-                  whileHover={{ scale: 1.1, x: 5 }}
-                  whileTap={{ scale: 0.9 }}
-                  onClick={() => goToPage(currentPage + 1)}
-                  disabled={currentPage === totalPages}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: '60px',
-                    height: '60px',
-                    backgroundColor: currentPage === totalPages ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.05)',
-                    border: currentPage === totalPages ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(255,255,255,0.1)',
-                    borderRadius: '50%',
-                    cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
-                    opacity: currentPage === totalPages ? 0.3 : 1,
-                  }}
-                >
-                  <SouthEastArrow width={30} height={30} />
-                </motion.button>
-              </motion.div>
-            )}
-
-            {/* Rekomendasi Artikel - DESIGN SAMA SEPERTI CARD ARTIKEL */}
-            {recommendations.length > 0 && (
-              <motion.div
+                key={post.id}
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.4 }}
-                style={{
-                  marginTop: '80px',
-                  paddingTop: '40px',
-                  borderTop: '1px solid #333333',
-                }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
               >
-                <h3 style={{
-                  fontSize: '1.8rem',
-                  fontWeight: 'normal',
-                  color: 'white',
-                  marginBottom: '30px',
-                }}>
-                  Rekomendasi Artikel Lainnya
-                </h3>
-                
-                <div style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '20px',
-                }}>
-                  {recommendations.map((post, index) => (
-                    <motion.div
-                      key={post.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5, delay: 0.5 + index * 0.1 }}
-                    >
-                      <Link 
-                        href={`/blog/${post.slug}`}
-                        style={{ textDecoration: 'none' }}
-                      >
+                <Link 
+                  href={`/blog/${post.slug}`}
+                  style={{ textDecoration: 'none' }}
+                >
+                  <div style={{
+                    padding: '30px',
+                    backgroundColor: 'rgba(255,255,255,0.02)',
+                    borderRadius: '24px',
+                    border: '1px solid rgba(255,255,255,0.05)',
+                    transition: 'all 0.3s ease',
+                    cursor: 'pointer',
+                    position: 'relative',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)';
+                    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)';
+                    e.currentTarget.style.transform = 'translateY(-4px)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.02)';
+                    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)';
+                    e.currentTarget.style.transform = 'translateY(0)';
+                  }}
+                  >
+
+                    {/* Konten Artikel */}
+                    <div style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'flex-start',
+                      gap: '20px',
+                    }}>
+                      <div style={{
+                        flex: 1,
+                      }}>
+                        <h2 style={{
+                          fontSize: isMobile ? '1.6rem' : '2rem',
+                          fontWeight: 'normal',
+                          color: 'white',
+                          margin: index < 2 ? '30px 0 15px 0' : '0 0 15px 0',
+                        }}>
+                          {post.title}
+                        </h2>
+                        
+                        <p style={{
+                          fontSize: isMobile ? '1rem' : '1.1rem',
+                          color: '#999999',
+                          marginBottom: '20px',
+                          lineHeight: '1.6',
+                        }}>
+                          {post.excerpt}
+                        </p>
+                        
                         <div style={{
-                          padding: '24px',
-                          backgroundColor: 'rgba(255,255,255,0.02)',
-                          borderRadius: '20px',
-                          border: '1px solid rgba(255,255,255,0.05)',
-                          transition: 'all 0.3s ease',
                           display: 'flex',
-                          justifyContent: 'space-between',
+                          flexWrap: 'wrap',
+                          gap: '10px',
+                          marginBottom: '20px',
+                        }}>
+                          {post.tags.map(tag => (
+                            <span
+                              key={tag}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                router.push(`/tag/${tag}`);
+                              }}
+                              style={{
+                                padding: '4px 12px',
+                                backgroundColor: '#222222',
+                                border: '1px solid #444444',
+                                borderRadius: '20px',
+                                color: '#cccccc',
+                                fontSize: '0.85rem',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s ease',
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.backgroundColor = '#333333';
+                                e.currentTarget.style.borderColor = '#666666';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.backgroundColor = '#222222';
+                                e.currentTarget.style.borderColor = '#444444';
+                              }}
+                            >
+                              #{tag}
+                            </span>
+                          ))}
+                        </div>
+                        
+                        <div style={{
+                          display: 'flex',
                           alignItems: 'center',
                           gap: '20px',
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)';
-                          e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)';
-                          e.currentTarget.style.transform = 'translateY(-4px)';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.02)';
-                          e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)';
-                          e.currentTarget.style.transform = 'translateY(0)';
-                        }}
-                        >
-                          <div style={{ flex: 1 }}>
-                            <h4 style={{
-                              fontSize: '1.3rem',
-                              fontWeight: '500',
-                              color: 'white',
-                              margin: '0 0 8px 0',
-                            }}>
-                              {post.title}
-                            </h4>
-                            <p style={{
-                              fontSize: '0.95rem',
-                              color: '#999999',
-                              marginBottom: '12px',
-                              lineHeight: '1.5',
-                            }}>
-                              {post.excerpt}
-                            </p>
-                            <div style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '15px',
-                              color: '#666666',
-                              fontSize: '0.85rem',
-                            }}>
-                              <div style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '5px',
-                              }}>
-                                <CalendarIcon width={14} height={14} />
-                                <span>{new Date(post.date).toLocaleDateString('id-ID', {
-                                  day: 'numeric',
-                                  month: 'short',
-                                  year: 'numeric'
-                                })}</span>
-                              </div>
-                              <div style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '5px',
-                              }}>
-                                <ClockIcon width={14} height={14} />
-                                <span>{post.readTime} menit</span>
-                              </div>
-                            </div>
+                          color: '#666666',
+                          fontSize: '0.9rem',
+                        }}>
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                          }}>
+                            <CalendarIcon width={16} height={16} />
+                            <span>{new Date(post.date).toLocaleDateString('id-ID', {
+                              day: 'numeric',
+                              month: 'long',
+                              year: 'numeric'
+                            })}</span>
                           </div>
-                          <motion.div
-                            whileHover={{ x: 5, y: -5 }}
-                            transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                            style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              minWidth: isMobile ? 30 : 40,
-                            }}
-                          >
-                            <NorthEastArrow 
-                              width={isMobile ? 30 : 40} 
-                              height={isMobile ? 30 : 40} 
-                            />
-                          </motion.div>
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                          }}>
+                            <ClockIcon width={16} height={16} />
+                            <span>{post.readTime} menit membaca</span>
+                          </div>
                         </div>
-                      </Link>
-                    </motion.div>
-                  ))}
-                </div>
+                      </div>
+
+                      {/* Tanda Panah SVG untuk setiap blog */}
+                      <motion.div
+                        whileHover={{ x: 5, y: -5 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          minWidth: isMobile ? 40 : 50,
+                        }}
+                      >
+                        <NorthEastArrow 
+                          width={isMobile ? 40 : 50} 
+                          height={isMobile ? 40 : 50} 
+                        />
+                      </motion.div>
+                    </div>
+                  </div>
+                </Link>
               </motion.div>
-            )}
-          </>
+            ))}
+          </div>
         ) : (
           <motion.div
             initial={{ opacity: 0 }}
@@ -961,6 +656,157 @@ export default function TagPage() {
           </motion.div>
         )}
 
+        {/* ===== REKOMENDASI POST BLOG OTOMATIS ===== */}
+        {recommendedPosts.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            style={{
+              marginTop: '80px',
+              paddingTop: '40px',
+              borderTop: '1px solid #333333',
+            }}
+          >
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '15px',
+              marginBottom: '30px',
+            }}>
+              <h3 style={{
+                fontSize: '1.8rem',
+                fontWeight: 'normal',
+                color: 'white',
+                margin: 0,
+              }}>
+                Rekomendasi Untukmu
+              </h3>
+              <span style={{
+                fontSize: '1rem',
+                color: '#666666',
+                background: 'rgba(255,255,255,0.05)',
+                padding: '4px 12px',
+                borderRadius: '20px',
+                border: '1px solid rgba(255,255,255,0.1)',
+              }}>
+                Artikel Lainnya
+              </span>
+            </div>
+
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)',
+              gap: '20px',
+            }}>
+              {recommendedPosts.map((post, index) => (
+                <motion.div
+                  key={post.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: 0.5 + (index * 0.1) }}
+                  whileHover={{ y: -5 }}
+                >
+                  <Link 
+                    href={`/blog/${post.slug}`}
+                    style={{ textDecoration: 'none' }}
+                  >
+                    <div style={{
+                      padding: '24px',
+                      background: 'rgba(255,255,255,0.02)',
+                      borderRadius: '20px',
+                      border: '1px solid rgba(255,255,255,0.05)',
+                      height: '100%',
+                      transition: 'all 0.3s ease',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)';
+                      e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.02)';
+                      e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)';
+                    }}
+                    >
+                      {/* Tag kecil di atas */}
+                      <div style={{
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        gap: '5px',
+                        marginBottom: '15px',
+                      }}>
+                        {post.tags.slice(0, 2).map(tag => (
+                          <span
+                            key={tag}
+                            style={{
+                              padding: '2px 8px',
+                              background: '#222222',
+                              border: '1px solid #444444',
+                              borderRadius: '12px',
+                              color: '#cccccc',
+                              fontSize: '0.7rem',
+                            }}
+                          >
+                            #{tag}
+                          </span>
+                        ))}
+                      </div>
+
+                      <h4 style={{
+                        fontSize: '1.2rem',
+                        fontWeight: '500',
+                        color: 'white',
+                        margin: '0 0 10px 0',
+                        lineHeight: '1.4',
+                      }}>
+                        {post.title}
+                      </h4>
+
+                      <p style={{
+                        fontSize: '0.9rem',
+                        color: '#999999',
+                        margin: '0 0 20px 0',
+                        lineHeight: '1.5',
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden',
+                      }}>
+                        {post.excerpt}
+                      </p>
+
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        marginTop: 'auto',
+                      }}>
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          color: '#666666',
+                          fontSize: '0.8rem',
+                        }}>
+                          <ClockIcon width={14} height={14} />
+                          <span>{post.readTime} menit</span>
+                        </div>
+                        
+                        <motion.div
+                          whileHover={{ x: 3, y: -3 }}
+                          transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                        >
+                          <SouthWestArrow width={20} height={20} />
+                        </motion.div>
+                      </div>
+                    </div>
+                  </Link>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+
         {/* Other Tags */}
         {otherTags.length > 0 && (
           <motion.div
@@ -968,7 +814,7 @@ export default function TagPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.6 }}
             style={{
-              marginTop: '80px',
+              marginTop: '60px',
               paddingTop: '40px',
               borderTop: '1px solid #333333',
             }}
