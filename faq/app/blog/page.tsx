@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useRef } from "react";
@@ -2469,39 +2470,39 @@ export default function BlogPage() {
         
         {/* SIDEBAR KIRI - RANGKUMAN (DIPERBAIKI: OVERFLOW-X HIDDEN) */}
         <div style={{
-           flex: isMobile ? '1' : '0 0 280px',
-  position: isMobile ? 'relative' : 'sticky',
-  top: isMobile ? 'auto' : '160px',
-  alignSelf: 'flex-start',
-  height: isMobile ? 'auto' : 'calc(100vh - 210px)',
-  overflowY: isMobile ? 'visible' : 'auto',
-  overflowX: 'hidden', // KRUSIAL: sembunyikan scroll horizontal
-  paddingRight: '20px',
-  width: '280px', // TETAPKAN LEBAR FIX
-  maxWidth: '280px', // PASTIKAN TIDAK MELEBAR
-  minWidth: '280px', // PASTIKAN TIDAK MENYEMPIT
-  boxSizing: 'border-box',
+          flex: isMobile ? '1' : '0 0 280px',
+          position: isMobile ? 'relative' : 'sticky',
+          top: isMobile ? 'auto' : '160px',
+          alignSelf: 'flex-start',
+          height: isMobile ? 'auto' : 'calc(100vh - 210px)',
+          overflowY: isMobile ? 'visible' : 'auto',
+          overflowX: 'hidden', // PENTING: Hilangkan scrollbar horizontal
+          paddingRight: '20px',
+          maxWidth: '100%', // Pastikan tidak melebihi lebar container
+          boxSizing: 'border-box', // Pastikan padding tidak menambah lebar
+       minWidth: 0,
         }}>
           
-         {/* Blog Title */}
-  <div style={{
-    marginBottom: '50px',
-    width: '100%',
-  }}>
-    <h1 style={{
-      fontSize: isMobile ? '4rem' : '6rem',
-      fontWeight: 'normal',
-      color: 'white',
-      margin: '0 0 20px 0',
-      lineHeight: '0.9',
-      letterSpacing: '-2px',
-      width: '100%',
-      overflow: 'hidden',
-      textOverflow: 'clip', // POTONG TEKS JIKA TERLALU PANJANG
-      whiteSpace: 'nowrap', // CEGAH WRAP
-    }}>
-      Blog
-    </h1>
+          {/* Blog Title */}
+          <div style={{
+            marginBottom: '50px',
+            width: '100%', // Pastikan lebar penuh
+            overflow: 'hidden', // Hindari overflow
+          }}>
+            <h1 style={{
+              fontSize: isMobile ? '4rem' : '6rem',
+              fontWeight: 'normal',
+              color: 'white',
+              margin: '0 0 20px 0',
+              lineHeight: '0.9',
+              letterSpacing: '-2px',
+              wordWrap: 'break-word', // Pastikan teks panjang tidak overflow
+  whiteSpace: 'pre-wrap', // atau 'normal' — hindari 'nowrap' jika tidak diperlukan
+  overflow: 'hidden',
+      
+            }}>
+              Blog
+            </h1>
             
             <div style={{
               display: 'flex',
