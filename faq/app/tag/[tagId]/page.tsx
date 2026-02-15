@@ -156,24 +156,6 @@ const NorthEastArrow = ({ width, height }: { width: number | string, height: num
   </svg>
 );
 
-// South West Arrow SVG
-const SouthWestArrow = ({ width, height }: { width: number | string, height: number | string }) => (
-  <svg 
-    width={width} 
-    height={height} 
-    viewBox="0 0 24 24" 
-    fill="none"
-    stroke="white"
-    strokeWidth="1.5"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M17 7L7 17" stroke="white"/>
-    <path d="M17 7H7" stroke="white"/>
-    <path d="M17 7V17" stroke="white"/>
-  </svg>
-);
-
 export default function TagPage() {
   const router = useRouter();
   const params = useParams();
@@ -328,7 +310,7 @@ export default function TagPage() {
       paddingTop: isMobile ? '100px' : '120px', // Tambah padding top untuk memberi ruang teks berjalan
     }}>
       
-      {/* ===== TEKS BERJALAN - LEBIH BESAR DENGAN PANAH (SEPERTI sssssf.txt) ===== */}
+      {/* ===== TEKS BERJALAN - SAMA PERSIS DENGAN sssssf.txt ===== */}
       <div
         ref={bannerRef}
         style={{
@@ -368,17 +350,17 @@ export default function TagPage() {
             paddingLeft: '30px',
           }}
         >
-          {/* Elemen teks berjalan dengan arrow besar */}
-          <NorthWestArrow width={isMobile ? 40 : 60} height={isMobile ? 40 : 60} />
-          <span style={{ background: 'linear-gradient(45deg, #fff, #aaa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>HALAMAN TAG BLOG</span>
-          <NorthWestArrow width={isMobile ? 40 : 60} height={isMobile ? 40 : 60} />
-          <span style={{ background: 'linear-gradient(45deg, #fff, #aaa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>HALAMAN TAG BLOG</span>
-          <NorthWestArrow width={isMobile ? 40 : 60} height={isMobile ? 40 : 60} />
-          <span style={{ background: 'linear-gradient(45deg, #fff, #aaa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>HALAMAN TAG BLOG</span>
-          <NorthWestArrow width={isMobile ? 40 : 60} height={isMobile ? 40 : 60} />
-          <span style={{ background: 'linear-gradient(45deg, #fff, #aaa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>HALAMAN TAG BLOG</span>
-          <NorthWestArrow width={isMobile ? 40 : 60} height={isMobile ? 40 : 60} />
-          <span style={{ background: 'linear-gradient(45deg, #fff, #aaa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>HALAMAN TAG BLOG</span>
+          {/* Elemen teks berjalan dengan arrow besar - SAMA PERSIS DENGAN sssssf.txt */}
+          <NorthWestArrow width={isMobile ? 40 : 60} height={isMobile ? 40 : 60} style={{ strokeWidth: 2 }} />
+          <span style={{ background: 'linear-gradient(45deg, #fff, #aaa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>NOTE ADALAH TEMAN TERBAIK MU</span>
+          <NorthWestArrow width={isMobile ? 40 : 60} height={isMobile ? 40 : 60} style={{ strokeWidth: 2 }} />
+          <span style={{ background: 'linear-gradient(45deg, #fff, #aaa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>NOTE ADALAH TEMAN TERBAIK MU</span>
+          <NorthWestArrow width={isMobile ? 40 : 60} height={isMobile ? 40 : 60} style={{ strokeWidth: 2 }} />
+          <span style={{ background: 'linear-gradient(45deg, #fff, #aaa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>NOTE ADALAH TEMAN TERBAIK MU</span>
+          <NorthWestArrow width={isMobile ? 40 : 60} height={isMobile ? 40 : 60} style={{ strokeWidth: 2 }} />
+          <span style={{ background: 'linear-gradient(45deg, #fff, #aaa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>NOTE ADALAH TEMAN TERBAIK MU</span>
+          <NorthWestArrow width={isMobile ? 40 : 60} height={isMobile ? 40 : 60} style={{ strokeWidth: 2 }} />
+          <span style={{ background: 'linear-gradient(45deg, #fff, #aaa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>NOTE ADALAH TEMAN TERBAIK MU</span>
         </motion.div>
       </div>
 
@@ -656,7 +638,7 @@ export default function TagPage() {
           </motion.div>
         )}
 
-        {/* ===== REKOMENDASI POST BLOG OTOMATIS ===== */}
+        {/* ===== REKOMENDASI POST BLOG - DESIGN SAMA PERSIS DENGAN BLOG POST ===== */}
         {recommendedPosts.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -668,135 +650,161 @@ export default function TagPage() {
               borderTop: '1px solid #333333',
             }}
           >
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '15px',
+            <h3 style={{
+              fontSize: '1.5rem',
+              fontWeight: 'normal',
+              color: 'white',
               marginBottom: '30px',
             }}>
-              <h3 style={{
-                fontSize: '1.8rem',
-                fontWeight: 'normal',
-                color: 'white',
-                margin: 0,
-              }}>
-                Rekomendasi Untukmu
-              </h3>
-              <span style={{
-                fontSize: '1rem',
-                color: '#666666',
-                background: 'rgba(255,255,255,0.05)',
-                padding: '4px 12px',
-                borderRadius: '20px',
-                border: '1px solid rgba(255,255,255,0.1)',
-              }}>
-                Artikel Lainnya
-              </span>
-            </div>
+              Rekomendasi Untukmu
+            </h3>
 
             <div style={{
-              display: 'grid',
-              gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)',
-              gap: '20px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '30px',
             }}>
               {recommendedPosts.map((post, index) => (
                 <motion.div
                   key={post.id}
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, delay: 0.5 + (index * 0.1) }}
-                  whileHover={{ y: -5 }}
+                  transition={{ duration: 0.5, delay: 0.5 + (index * 0.1) }}
                 >
                   <Link 
                     href={`/blog/${post.slug}`}
                     style={{ textDecoration: 'none' }}
                   >
                     <div style={{
-                      padding: '24px',
-                      background: 'rgba(255,255,255,0.02)',
-                      borderRadius: '20px',
+                      padding: '30px',
+                      backgroundColor: 'rgba(255,255,255,0.02)',
+                      borderRadius: '24px',
                       border: '1px solid rgba(255,255,255,0.05)',
-                      height: '100%',
                       transition: 'all 0.3s ease',
+                      cursor: 'pointer',
+                      position: 'relative',
                     }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)';
                       e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)';
+                      e.currentTarget.style.transform = 'translateY(-4px)';
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.02)';
                       e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)';
+                      e.currentTarget.style.transform = 'translateY(0)';
                     }}
                     >
-                      {/* Tag kecil di atas */}
+                      {/* Konten Artikel - SAMA PERSIS DENGAN DESIGN BLOG POST */}
                       <div style={{
                         display: 'flex',
-                        flexWrap: 'wrap',
-                        gap: '5px',
-                        marginBottom: '15px',
-                      }}>
-                        {post.tags.slice(0, 2).map(tag => (
-                          <span
-                            key={tag}
-                            style={{
-                              padding: '2px 8px',
-                              background: '#222222',
-                              border: '1px solid #444444',
-                              borderRadius: '12px',
-                              color: '#cccccc',
-                              fontSize: '0.7rem',
-                            }}
-                          >
-                            #{tag}
-                          </span>
-                        ))}
-                      </div>
-
-                      <h4 style={{
-                        fontSize: '1.2rem',
-                        fontWeight: '500',
-                        color: 'white',
-                        margin: '0 0 10px 0',
-                        lineHeight: '1.4',
-                      }}>
-                        {post.title}
-                      </h4>
-
-                      <p style={{
-                        fontSize: '0.9rem',
-                        color: '#999999',
-                        margin: '0 0 20px 0',
-                        lineHeight: '1.5',
-                        display: '-webkit-box',
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: 'vertical',
-                        overflow: 'hidden',
-                      }}>
-                        {post.excerpt}
-                      </p>
-
-                      <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
                         justifyContent: 'space-between',
-                        marginTop: 'auto',
+                        alignItems: 'flex-start',
+                        gap: '20px',
                       }}>
                         <div style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '8px',
-                          color: '#666666',
-                          fontSize: '0.8rem',
+                          flex: 1,
                         }}>
-                          <ClockIcon width={14} height={14} />
-                          <span>{post.readTime} menit</span>
+                          <h2 style={{
+                            fontSize: isMobile ? '1.6rem' : '2rem',
+                            fontWeight: 'normal',
+                            color: 'white',
+                            margin: '0 0 15px 0',
+                          }}>
+                            {post.title}
+                          </h2>
+                          
+                          <p style={{
+                            fontSize: isMobile ? '1rem' : '1.1rem',
+                            color: '#999999',
+                            marginBottom: '20px',
+                            lineHeight: '1.6',
+                          }}>
+                            {post.excerpt}
+                          </p>
+                          
+                          <div style={{
+                            display: 'flex',
+                            flexWrap: 'wrap',
+                            gap: '10px',
+                            marginBottom: '20px',
+                          }}>
+                            {post.tags.map(tag => (
+                              <span
+                                key={tag}
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  router.push(`/tag/${tag}`);
+                                }}
+                                style={{
+                                  padding: '4px 12px',
+                                  backgroundColor: '#222222',
+                                  border: '1px solid #444444',
+                                  borderRadius: '20px',
+                                  color: '#cccccc',
+                                  fontSize: '0.85rem',
+                                  cursor: 'pointer',
+                                  transition: 'all 0.2s ease',
+                                }}
+                                onMouseEnter={(e) => {
+                                  e.currentTarget.style.backgroundColor = '#333333';
+                                  e.currentTarget.style.borderColor = '#666666';
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.backgroundColor = '#222222';
+                                  e.currentTarget.style.borderColor = '#444444';
+                                }}
+                              >
+                                #{tag}
+                              </span>
+                            ))}
+                          </div>
+                          
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '20px',
+                            color: '#666666',
+                            fontSize: '0.9rem',
+                          }}>
+                            <div style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                            }}>
+                              <CalendarIcon width={16} height={16} />
+                              <span>{new Date(post.date).toLocaleDateString('id-ID', {
+                                day: 'numeric',
+                                month: 'long',
+                                year: 'numeric'
+                              })}</span>
+                            </div>
+                            <div style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                            }}>
+                              <ClockIcon width={16} height={16} />
+                              <span>{post.readTime} menit membaca</span>
+                            </div>
+                          </div>
                         </div>
-                        
+
+                        {/* Tanda Panah SVG untuk setiap blog - SAMA PERSIS */}
                         <motion.div
-                          whileHover={{ x: 3, y: -3 }}
+                          whileHover={{ x: 5, y: -5 }}
                           transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            minWidth: isMobile ? 40 : 50,
+                          }}
                         >
-                          <SouthWestArrow width={20} height={20} />
+                          <NorthEastArrow 
+                            width={isMobile ? 40 : 50} 
+                            height={isMobile ? 40 : 50} 
+                          />
                         </motion.div>
                       </div>
                     </div>
