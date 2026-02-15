@@ -2467,20 +2467,25 @@ export default function BlogPage() {
         padding: isMobile ? '20px 0 40px' : '40px 0 60px', // Kurangi padding top karena sudah di container utama
       }}>
         
-        {/* SIDEBAR KIRI - RANGKUMAN */}
+        {/* SIDEBAR KIRI - RANGKUMAN (DIPERBAIKI: OVERFLOW-X HIDDEN) */}
         <div style={{
           flex: isMobile ? '1' : '0 0 280px',
           position: isMobile ? 'relative' : 'sticky',
-          top: isMobile ? 'auto' : '160px', // Sesuaikan posisi sticky (dari 130px jadi 160px)
+          top: isMobile ? 'auto' : '160px',
           alignSelf: 'flex-start',
           height: isMobile ? 'auto' : 'calc(100vh - 210px)',
           overflowY: isMobile ? 'visible' : 'auto',
+          overflowX: 'hidden', // PENTING: Hilangkan scrollbar horizontal
           paddingRight: '20px',
+          maxWidth: '100%', // Pastikan tidak melebihi lebar container
+          boxSizing: 'border-box', // Pastikan padding tidak menambah lebar
         }}>
           
           {/* Blog Title */}
           <div style={{
             marginBottom: '50px',
+            width: '100%', // Pastikan lebar penuh
+            overflow: 'hidden', // Hindari overflow
           }}>
             <h1 style={{
               fontSize: isMobile ? '4rem' : '6rem',
@@ -2489,6 +2494,7 @@ export default function BlogPage() {
               margin: '0 0 20px 0',
               lineHeight: '0.9',
               letterSpacing: '-2px',
+              wordWrap: 'break-word', // Pastikan teks panjang tidak overflow
             }}>
               Blog
             </h1>
@@ -2500,19 +2506,23 @@ export default function BlogPage() {
               marginTop: '20px',
               color: '#999999',
               fontSize: isMobile ? '0.9rem' : '1rem',
+              width: '100%',
+              overflow: 'hidden',
             }}>
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
                 gap: '10px',
+                flexWrap: 'wrap', // Wrap jika perlu
               }}>
                 <CalendarIcon width={18} height={18} />
-                <span>{formattedDate}</span>
+                <span style={{ wordBreak: 'break-word' }}>{formattedDate}</span>
               </div>
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
                 gap: '10px',
+                flexWrap: 'wrap',
               }}>
                 <ClockIcon width={18} height={18} />
                 <span>8 menit membaca</span>
@@ -2527,6 +2537,8 @@ export default function BlogPage() {
                   paddingTop: '10px',
                   borderTop: '1px solid #333333',
                   position: 'relative',
+                  width: '100%',
+                  overflow: 'visible', // Tooltip perlu visible
                 }}
                 onMouseEnter={() => setShowAuthorTooltip(true)}
                 onMouseLeave={() => setShowAuthorTooltip(false)}
@@ -2542,9 +2554,14 @@ export default function BlogPage() {
                     borderRadius: '50%',
                     objectFit: 'cover',
                     cursor: 'pointer',
+                    flexShrink: 0, // Jangan mengecil
                   }}
                 />
-                <div>
+                <div style={{ 
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}>
                   <motion.span
                     whileHover={{ x: 5 }}
                     style={{
@@ -2553,6 +2570,9 @@ export default function BlogPage() {
                       fontWeight: '500',
                       display: 'block',
                       cursor: 'pointer',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
                     }}
                   >
                     Farid Ardiansyah
@@ -2560,12 +2580,16 @@ export default function BlogPage() {
                   <span style={{
                     color: '#999999',
                     fontSize: '0.85rem',
+                    display: 'block',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
                   }}>
                     Penulis
                   </span>
                 </div>
 
-                {/* Author Tooltip */}
+                {/* Author Tooltip - tetap sama */}
                 <AnimatePresence>
                   {showAuthorTooltip && (
                     <motion.div
@@ -2664,6 +2688,7 @@ export default function BlogPage() {
           
           <div style={{
             marginBottom: '25px',
+            width: '100%',
           }}>
             <h3 style={{
               fontSize: isMobile ? '1.3rem' : '1.5rem',
@@ -2679,6 +2704,8 @@ export default function BlogPage() {
             display: 'flex',
             flexDirection: 'column',
             gap: '12px',
+            width: '100%',
+            overflow: 'hidden',
           }}>
             {rangkumanSections.map((section) => (
               <motion.button
@@ -2695,6 +2722,10 @@ export default function BlogPage() {
                   textAlign: 'left',
                   cursor: 'pointer',
                   fontWeight: 'normal',
+                  width: '100%',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap', // Mencegah teks wrap ke bawah
                 }}
               >
                 {section.title}
