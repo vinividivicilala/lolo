@@ -4270,7 +4270,10 @@ fontFamily: 'Helvetica, Arial, sans-serif'
         )}
       </AnimatePresence>
 
-{/* Menu Overlay dengan GSAP Animation - Modern Awwwards Style */}
+
+
+
+      {/* Menu Overlay dengan GSAP Animation - Modern Awwwards Style */}
 <AnimatePresence>
   {showMenuOverlay && (
     <motion.div
@@ -4296,7 +4299,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
         transform: 'translateY(-100%)'
       }}
     >
-      {/* Background dengan efek grain dan pattern - DIPERBAIKI: kurangi opacity pattern */}
+      {/* Background dengan efek grain dan pattern - Lebih subtle */}
       <div style={{
         position: 'absolute',
         top: 0,
@@ -4310,7 +4313,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
         zIndex: 1
       }} />
 
-      {/* Teks Berjalan dengan North East Arrow - DIPERBAIKI: warna putih solid dan lebih terang */}
+      {/* Teks Berjalan dengan North East Arrow - PUTIH CERAH DENGAN GLOW */}
       <div style={{
         position: 'absolute',
         bottom: '15%',
@@ -4333,312 +4336,446 @@ fontFamily: 'Helvetica, Arial, sans-serif'
             display: 'inline-block',
             whiteSpace: 'nowrap',
             fontSize: isMobile ? '6rem' : '12rem',
-            fontWeight: '500',
-            color: '#FFFFFF', // Pure white
+            fontWeight: '600',
+            color: '#FFFFFF',
             fontFamily: 'Helvetica, Arial, sans-serif',
             textTransform: 'uppercase',
             letterSpacing: '8px',
             lineHeight: 1,
-            opacity: 0.5, // Ditingkatkan dari 0.3 ke 0.5
-            textShadow: '0 0 10px rgba(255,255,255,0.2)', // Tambah glow tipis
-            filter: 'brightness(1.2)' // Tambah brightness
+            opacity: 0.7,
+            textShadow: '0 0 20px rgba(255,255,255,0.5), 0 0 40px rgba(255,255,255,0.3)',
+            filter: 'brightness(1.3)'
           }}
         >
-          {/* DIPERBAIKI: SVG dengan stroke putih lebih tebal dan solid */}
-          HOME <svg width="180" height="180" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 2rem', filter: 'drop-shadow(0 0 5px rgba(255,255,255,0.3))' }}>
+          {/* MENU dengan SVG yang sangat cerah */}
+          MENU <svg width="180" height="180" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="3" strokeLinecap="round" style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 2rem', filter: 'drop-shadow(0 0 10px rgba(255,255,255,0.8)) drop-shadow(0 0 20px rgba(255,255,255,0.5))' }}>
             <path d="M7 7h10v10" />
             <path d="M17 7L7 17" />
-          </svg> HOME <svg width="180" height="180" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 2rem', filter: 'drop-shadow(0 0 5px rgba(255,255,255,0.3))' }}>
+          </svg> MENU <svg width="180" height="180" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="3" strokeLinecap="round" style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 2rem', filter: 'drop-shadow(0 0 10px rgba(255,255,255,0.8)) drop-shadow(0 0 20px rgba(255,255,255,0.5))' }}>
             <path d="M7 7h10v10" />
             <path d="M17 7L7 17" />
-          </svg> HOME <svg width="180" height="180" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 2rem', filter: 'drop-shadow(0 0 5px rgba(255,255,255,0.3))' }}>
+          </svg> MENU <svg width="180" height="180" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="3" strokeLinecap="round" style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 2rem', filter: 'drop-shadow(0 0 10px rgba(255,255,255,0.8)) drop-shadow(0 0 20px rgba(255,255,255,0.5))' }}>
             <path d="M7 7h10v10" />
             <path d="M17 7L7 17" />
           </svg>
         </motion.div>
       </div>
 
-      {/* Konten Utama */}
+      {/* Konten Utama - MENU UTAMA YANG BARU */}
       <div style={{
         position: 'relative',
         zIndex: 3,
         width: '100%',
-        maxWidth: '1400px',
+        maxWidth: '1200px',
         padding: isMobile ? '2rem' : '4rem',
-        paddingTop: isMobile ? '3rem' : '5rem',
         display: 'flex',
-        flexDirection: isMobile ? 'column' : 'row',
-        gap: isMobile ? '3rem' : '6rem',
-        height: '100%',
-        alignItems: 'flex-start',
-        marginTop: '-10%'
+        flexDirection: 'column',
+        gap: '2rem',
+        marginTop: '-5%'
       }}>
         
-        {/* Left Section - Menu Items dengan North East Arrow Besar - DIPERBAIKI: SVG lebih terang */}
+        {/* CATATAN SECTION - dengan angka otomatis */}
         <motion.div
-          initial={{ opacity: 0, x: -50 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.1 }}
           style={{
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '1.5rem',
-            marginTop: isMobile ? '2rem' : '3rem'
+            borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+            paddingBottom: '1.5rem'
           }}
         >
           <div style={{
-            color: 'rgba(255, 255, 255, 0.5)', // Ditingkatkan dari 0.4 ke 0.5
-            fontSize: '0.9rem',
-            fontWeight: '400',
-            textTransform: 'uppercase',
-            letterSpacing: '2px',
-            marginBottom: '1rem'
-          }}>
-            Navigation
-          </div>
-
-          {[
-            { label: 'Home', url: '/' },
-            { label: 'Projects', url: '/projects' },
-            { label: 'About', url: '/about' },
-            { label: 'Contact', url: '/contact' }
-          ].map((item, index) => (
-            <motion.a
-              key={item.label}
-              href={item.url}
-              initial={{ opacity: 0, x: -30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.3 + (index * 0.1) }}
-              style={{
-                color: '#FFFFFF', // Pure white
-                fontSize: isMobile ? '2.5rem' : '4rem',
-                fontWeight: '400',
-                textDecoration: 'none',
-                fontFamily: 'Helvetica, Arial, sans-serif',
-                lineHeight: 1.1,
-                position: 'relative',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '1.5rem',
-                width: 'fit-content',
-                cursor: 'pointer',
-                transition: 'all 0.3s ease',
-                textShadow: '0 0 10px rgba(255,255,255,0.2)' // Tambah glow tipis
-              }}
-              whileHover={{
-                x: 20,
-                color: '#FFFFFF',
-                textShadow: '0 0 20px rgba(255,255,255,0.4)'
-              }}
-            >
-              {item.label}
-              
-              {/* North East Arrow besar untuk setiap menu item - DIPERBAIKI: stroke lebih tebal dan putih solid */}
-              <svg
-                width="60"
-                height="60"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#FFFFFF"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                style={{
-                  transition: 'all 0.3s ease',
-                  filter: 'drop-shadow(0 0 5px rgba(255,255,255,0.3))'
-                }}
-              >
-                <path d="M7 7h10v10" />
-                <path d="M17 7L7 17" />
-              </svg>
-
-              <motion.div
-                initial={{ scaleX: 0 }}
-                whileHover={{ scaleX: 1 }}
-                transition={{ duration: 0.3 }}
-                style={{
-                  position: 'absolute',
-                  bottom: 0,
-                  left: 0,
-                  width: '100%',
-                  height: '2px', // Ditingkatkan dari 1px ke 2px
-                  backgroundColor: '#FFFFFF',
-                  transformOrigin: 'left',
-                  boxShadow: '0 0 10px rgba(255,255,255,0.5)' // Tambah glow
-                }}
-              />
-            </motion.a>
-          ))}
-        </motion.div>
-
-        {/* Right Section - Notes dan Info dengan North East Arrow Besar - DIPERBAIKI: semua SVG lebih terang */}
-        <motion.div
-          initial={{ opacity: 0, x: 50 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
-          style={{
-            flex: 1,
             display: 'flex',
-            flexDirection: 'column',
-            gap: '2.5rem',
-            marginTop: isMobile ? '2rem' : '3rem'
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            cursor: 'pointer',
+            padding: '1rem 0'
           }}
-        >
-          {/* Featured Note dengan north east arrow besar */}
-          <div>
-            <div style={{
-              color: 'rgba(255, 255, 255, 0.5)',
-              fontSize: '0.9rem',
-              fontWeight: '400',
-              textTransform: 'uppercase',
-              letterSpacing: '2px',
-              marginBottom: '1.5rem'
-            }}>
-              Featured Note
-            </div>
-
-            <motion.div
-              whileHover={{ x: 10 }}
-              transition={{ duration: 0.3 }}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '2rem',
-                cursor: 'pointer',
-                padding: '2rem',
-                backgroundColor: 'rgba(255, 255, 255, 0.03)', // Ditingkatkan dari 0.02 ke 0.03
-                border: '1px solid rgba(255, 255, 255, 0.15)', // Ditingkatkan dari 0.1 ke 0.15
-                borderRadius: '12px'
-              }}
-              onClick={() => router.push('/notes')}
-            >
-              <div style={{
-                width: '60px',
-                height: '60px',
-                borderRadius: '50%',
-                backgroundColor: 'rgba(255, 255, 255, 0.05)', // Tambah background tipis
-                border: '1px solid rgba(255, 255, 255, 0.3)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '2rem'
+          onClick={() => router.push('/catatan')}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+              <span style={{
+                color: 'rgba(255, 255, 255, 0.5)',
+                fontSize: '2rem',
+                fontWeight: '300',
+                fontFamily: 'monospace'
+              }}>01</span>
+              <span style={{
+                color: '#FFFFFF',
+                fontSize: isMobile ? '3rem' : '4.5rem',
+                fontWeight: '500',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                textShadow: '0 0 10px rgba(255,255,255,0.3)'
               }}>
-                📝
-              </div>
-              
-              <div style={{ flex: 1 }}>
-                <div style={{
-                  color: '#FFFFFF',
-                  fontSize: '1.5rem',
-                  fontWeight: '400',
-                  marginBottom: '0.5rem',
-                  textShadow: '0 0 8px rgba(255,255,255,0.2)'
-                }}>
-                  Note #01: Creative Process
-                </div>
-                <div style={{
-                  color: 'rgba(255, 255, 255, 0.7)', // Ditingkatkan dari 0.6 ke 0.7
-                  fontSize: '1.1rem',
-                  fontWeight: '400'
-                }}>
-                  Exploring the intersection of design and technology
-                </div>
-              </div>
-
-              {/* North East Arrow besar untuk featured note - DIPERBAIKI */}
-              <svg
-                width="60"
-                height="60"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#FFFFFF"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                style={{
-                  filter: 'drop-shadow(0 0 5px rgba(255,255,255,0.3))'
-                }}
-              >
-                <path d="M7 7h10v10" />
-                <path d="M17 7L7 17" />
-              </svg>
-            </motion.div>
+                CATATAN
+              </span>
+            </div>
+            <svg
+              width="50"
+              height="50"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#FFFFFF"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              style={{
+                filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.5))'
+              }}
+            >
+              <path d="M7 7h10v10" />
+              <path d="M17 7L7 17" />
+            </svg>
           </div>
 
-          {/* Recent Notes List dengan north east arrow besar */}
-          <div>
-            <div style={{
-              color: 'rgba(255, 255, 255, 0.5)',
-              fontSize: '0.9rem',
-              fontWeight: '400',
-              textTransform: 'uppercase',
-              letterSpacing: '2px',
-              marginBottom: '1rem'
-            }}>
-              Recent Notes
-            </div>
-
-            {[1, 2, 3].map((note, index) => (
+          {/* Sub-menu Catatan - muncul ketika di hover/click */}
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            transition={{ duration: 0.3 }}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.8rem',
+              marginLeft: '6rem',
+              marginTop: '0.5rem'
+            }}
+          >
+            {[
+              { number: '01', title: 'Creative Process', url: '/catatan/creative' },
+              { number: '02', title: 'Design Thinking', url: '/catatan/design' },
+              { number: '03', title: 'UX Research', url: '/catatan/ux' },
+              { number: '04', title: 'Development', url: '/catatan/dev' }
+            ].map((item, idx) => (
               <motion.div
-                key={note}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.5 + (index * 0.1) }}
+                key={idx}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.2 + (idx * 0.1) }}
                 style={{
-                  padding: '1.5rem 0',
-                  borderBottom: index < 2 ? '1px solid rgba(255, 255, 255, 0.15)' : 'none', // Ditingkatkan dari 0.1 ke 0.15
-                  cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'space-between'
+                  gap: '1.5rem',
+                  padding: '0.5rem 0',
+                  cursor: 'pointer',
+                  borderBottom: idx < 3 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none'
                 }}
-                onClick={() => router.push('/notes')}
+                onClick={() => router.push(item.url)}
+                whileHover={{ x: 10 }}
               >
-                <div>
-                  <div style={{
-                    color: '#FFFFFF',
-                    fontSize: '1.3rem',
-                    fontWeight: '400',
-                    marginBottom: '0.5rem',
-                    textShadow: '0 0 8px rgba(255,255,255,0.2)'
-                  }}>
-                    Note #{note}: Project Documentation
-                  </div>
-                  <div style={{
-                    color: 'rgba(255, 255, 255, 0.6)', // Ditingkatkan dari 0.5 ke 0.6
-                    fontSize: '1rem',
-                    fontWeight: '400'
-                  }}>
-                    Updated {note} day{note > 1 ? 's' : ''} ago
-                  </div>
-                </div>
-                
-                {/* North East Arrow besar untuk recent notes - DIPERBAIKI */}
-                <svg
-                  width="40"
-                  height="40"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="#FFFFFF"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  style={{
-                    filter: 'drop-shadow(0 0 5px rgba(255,255,255,0.3))'
-                  }}
-                >
+                <span style={{ color: 'rgba(255, 255, 255, 0.3)', fontSize: '0.9rem', fontFamily: 'monospace', width: '30px' }}>{item.number}</span>
+                <span style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '1.2rem' }}>{item.title}</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2">
                   <path d="M7 7h10v10" />
                   <path d="M17 7L7 17" />
                 </svg>
               </motion.div>
             ))}
+          </motion.div>
+        </motion.div>
+
+        {/* COMMUNITY SECTION - dengan angka otomatis */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          style={{
+            borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+            paddingBottom: '1.5rem'
+          }}
+        >
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            cursor: 'pointer',
+            padding: '1rem 0'
+          }}
+          onClick={() => router.push('/community')}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+              <span style={{
+                color: 'rgba(255, 255, 255, 0.5)',
+                fontSize: '2rem',
+                fontWeight: '300',
+                fontFamily: 'monospace'
+              }}>02</span>
+              <span style={{
+                color: '#FFFFFF',
+                fontSize: isMobile ? '3rem' : '4.5rem',
+                fontWeight: '500',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                textShadow: '0 0 10px rgba(255,255,255,0.3)'
+              }}>
+                COMMUNITY
+              </span>
+            </div>
+            <svg
+              width="50"
+              height="50"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#FFFFFF"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              style={{
+                filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.5))'
+              }}
+            >
+              <path d="M7 7h10v10" />
+              <path d="M17 7L7 17" />
+            </svg>
           </div>
+
+          {/* Sub-menu Community */}
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            transition={{ duration: 0.3 }}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.8rem',
+              marginLeft: '6rem',
+              marginTop: '0.5rem'
+            }}
+          >
+            {[
+              { number: '01', title: 'Forum Diskusi', url: '/community/forum' },
+              { number: '02', title: 'Events', url: '/community/events' },
+              { number: '03', title: 'Members', url: '/community/members' },
+              { number: '04', title: 'Gallery', url: '/community/gallery' }
+            ].map((item, idx) => (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.3 + (idx * 0.1) }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '1.5rem',
+                  padding: '0.5rem 0',
+                  cursor: 'pointer',
+                  borderBottom: idx < 3 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none'
+                }}
+                onClick={() => router.push(item.url)}
+                whileHover={{ x: 10 }}
+              >
+                <span style={{ color: 'rgba(255, 255, 255, 0.3)', fontSize: '0.9rem', fontFamily: 'monospace', width: '30px' }}>{item.number}</span>
+                <span style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '1.2rem' }}>{item.title}</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2">
+                  <path d="M7 7h10v10" />
+                  <path d="M17 7L7 17" />
+                </svg>
+              </motion.div>
+            ))}
+          </motion.div>
+        </motion.div>
+
+        {/* CALENDAR SECTION - dengan angka otomatis */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+          style={{
+            borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+            paddingBottom: '1.5rem'
+          }}
+        >
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            cursor: 'pointer',
+            padding: '1rem 0'
+          }}
+          onClick={() => router.push('/calendar')}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+              <span style={{
+                color: 'rgba(255, 255, 255, 0.5)',
+                fontSize: '2rem',
+                fontWeight: '300',
+                fontFamily: 'monospace'
+              }}>03</span>
+              <span style={{
+                color: '#FFFFFF',
+                fontSize: isMobile ? '3rem' : '4.5rem',
+                fontWeight: '500',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                textShadow: '0 0 10px rgba(255,255,255,0.3)'
+              }}>
+                CALENDAR
+              </span>
+            </div>
+            <svg
+              width="50"
+              height="50"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#FFFFFF"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              style={{
+                filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.5))'
+              }}
+            >
+              <path d="M7 7h10v10" />
+              <path d="M17 7L7 17" />
+            </svg>
+          </div>
+
+          {/* Sub-menu Calendar */}
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            transition={{ duration: 0.3 }}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.8rem',
+              marginLeft: '6rem',
+              marginTop: '0.5rem'
+            }}
+          >
+            {[
+              { number: '01', title: 'Upcoming Events', url: '/calendar/upcoming' },
+              { number: '02', title: 'Workshops', url: '/calendar/workshops' },
+              { number: '03', title: 'Deadlines', url: '/calendar/deadlines' },
+              { number: '04', title: 'Schedule', url: '/calendar/schedule' }
+            ].map((item, idx) => (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.4 + (idx * 0.1) }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '1.5rem',
+                  padding: '0.5rem 0',
+                  cursor: 'pointer',
+                  borderBottom: idx < 3 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none'
+                }}
+                onClick={() => router.push(item.url)}
+                whileHover={{ x: 10 }}
+              >
+                <span style={{ color: 'rgba(255, 255, 255, 0.3)', fontSize: '0.9rem', fontFamily: 'monospace', width: '30px' }}>{item.number}</span>
+                <span style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '1.2rem' }}>{item.title}</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2">
+                  <path d="M7 7h10v10" />
+                  <path d="M17 7L7 17" />
+                </svg>
+              </motion.div>
+            ))}
+          </motion.div>
+        </motion.div>
+
+        {/* BLOG SECTION - dengan angka otomatis */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+          style={{
+            borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+            paddingBottom: '1.5rem'
+          }}
+        >
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            cursor: 'pointer',
+            padding: '1rem 0'
+          }}
+          onClick={() => router.push('/blog')}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+              <span style={{
+                color: 'rgba(255, 255, 255, 0.5)',
+                fontSize: '2rem',
+                fontWeight: '300',
+                fontFamily: 'monospace'
+              }}>04</span>
+              <span style={{
+                color: '#FFFFFF',
+                fontSize: isMobile ? '3rem' : '4.5rem',
+                fontWeight: '500',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                textShadow: '0 0 10px rgba(255,255,255,0.3)'
+              }}>
+                BLOG
+              </span>
+            </div>
+            <svg
+              width="50"
+              height="50"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#FFFFFF"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              style={{
+                filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.5))'
+              }}
+            >
+              <path d="M7 7h10v10" />
+              <path d="M17 7L7 17" />
+            </svg>
+          </div>
+
+          {/* Sub-menu Blog */}
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            transition={{ duration: 0.3 }}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.8rem',
+              marginLeft: '6rem',
+              marginTop: '0.5rem'
+            }}
+          >
+            {[
+              { number: '01', title: 'Latest Posts', url: '/blog/latest' },
+              { number: '02', title: 'Tutorials', url: '/blog/tutorials' },
+              { number: '03', title: 'News', url: '/blog/news' },
+              { number: '04', title: 'Insights', url: '/blog/insights' }
+            ].map((item, idx) => (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.5 + (idx * 0.1) }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '1.5rem',
+                  padding: '0.5rem 0',
+                  cursor: 'pointer',
+                  borderBottom: idx < 3 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none'
+                }}
+                onClick={() => router.push(item.url)}
+                whileHover={{ x: 10 }}
+              >
+                <span style={{ color: 'rgba(255, 255, 255, 0.3)', fontSize: '0.9rem', fontFamily: 'monospace', width: '30px' }}>{item.number}</span>
+                <span style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '1.2rem' }}>{item.title}</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2">
+                  <path d="M7 7h10v10" />
+                  <path d="M17 7L7 17" />
+                </svg>
+              </motion.div>
+            ))}
+          </motion.div>
         </motion.div>
       </div>
 
-      {/* Footer Normal */}
+      {/* Footer dengan social links */}
       <motion.div
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 1 }}
+        transition={{ duration: 0.6, delay: 0.8 }}
         style={{
           position: 'absolute',
           bottom: isMobile ? '2rem' : '3rem',
@@ -4648,7 +4785,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
           justifyContent: 'space-between',
           padding: isMobile ? '0 2rem' : '0 4rem',
           boxSizing: 'border-box',
-          color: 'rgba(255, 255, 255, 0.9)', // Ditingkatkan dari 0.8 ke 0.9
+          color: 'rgba(255, 255, 255, 0.9)',
           fontSize: isMobile ? '0.9rem' : '1rem',
           fontWeight: '400',
           zIndex: 2
@@ -4660,23 +4797,30 @@ fontFamily: 'Helvetica, Arial, sans-serif'
         </div>
         <div style={{ display: 'flex', gap: '2rem' }}>
           <motion.a 
-            href="/privacy"
-            whileHover={{ color: '#FFFFFF' }}
+            href="#"
+            whileHover={{ color: '#FFFFFF', textShadow: '0 0 10px white' }}
             style={{ color: 'inherit', textDecoration: 'none' }}
           >
-            Privacy
+            IG
           </motion.a>
           <motion.a 
-            href="/terms"
-            whileHover={{ color: '#FFFFFF' }}
+            href="#"
+            whileHover={{ color: '#FFFFFF', textShadow: '0 0 10px white' }}
             style={{ color: 'inherit', textDecoration: 'none' }}
           >
-            Terms
+            TW
+          </motion.a>
+          <motion.a 
+            href="#"
+            whileHover={{ color: '#FFFFFF', textShadow: '0 0 10px white' }}
+            style={{ color: 'inherit', textDecoration: 'none' }}
+          >
+            GH
           </motion.a>
         </div>
       </motion.div>
 
-      {/* Close Button - DIPERBAIKI: border lebih terang */}
+      {/* Close Button dengan glow */}
       <motion.div
         onClick={handleCloseMenu}
         style={{
@@ -4693,19 +4837,21 @@ fontFamily: 'Helvetica, Arial, sans-serif'
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          opacity: 0.8, // Ditingkatkan dari 0.7 ke 0.8
+          opacity: 0.9,
           width: '60px',
           height: '60px',
           borderRadius: '50%',
-          border: '1px solid rgba(255, 255, 255, 0.3)', // Ditingkatkan dari 0.2 ke 0.3
-          backgroundColor: 'rgba(255, 255, 255, 0.02)', // Tambah background tipis
-          textShadow: '0 0 10px rgba(255,255,255,0.3)' // Tambah glow
+          border: '1px solid rgba(255, 255, 255, 0.4)',
+          backgroundColor: 'rgba(255, 255, 255, 0.03)',
+          textShadow: '0 0 15px rgba(255,255,255,0.5)',
+          boxShadow: '0 0 20px rgba(255,255,255,0.1)'
         }}
         whileHover={{ 
           opacity: 1,
           rotate: 90,
           borderColor: '#FFFFFF',
-          backgroundColor: 'rgba(255, 255, 255, 0.05)'
+          backgroundColor: 'rgba(255, 255, 255, 0.1)',
+          boxShadow: '0 0 30px rgba(255,255,255,0.3)'
         }}
         transition={{ duration: 0.3 }}
       >
@@ -4714,10 +4860,6 @@ fontFamily: 'Helvetica, Arial, sans-serif'
     </motion.div>
   )}
 </AnimatePresence>
-
-
-
-
       
       
 
@@ -7171,6 +7313,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
     </div>
   );
 }
+
 
 
 
