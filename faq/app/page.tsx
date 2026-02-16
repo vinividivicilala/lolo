@@ -4270,9 +4270,6 @@ fontFamily: 'Helvetica, Arial, sans-serif'
         )}
       </AnimatePresence>
 
-
-
-
       {/* Menu Overlay dengan GSAP Animation - Modern Awwwards Style */}
       <AnimatePresence>
         {showMenuOverlay && (
@@ -4313,7 +4310,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
               zIndex: 1
             }} />
 
-            {/* Teks Berjalan "HOME" dengan Panah North East - Diperbesar dan Tanpa Terputus */}
+            {/* Teks Berjalan dengan North East Arrow - Tanpa Hover */}
             <div style={{
               position: 'absolute',
               top: '15%',
@@ -4328,7 +4325,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                   x: ['0%', '-50%']
                 }}
                 transition={{ 
-                  duration: 20,
+                  duration: 25,
                   repeat: Infinity,
                   ease: "linear"
                 }}
@@ -4345,7 +4342,28 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                   lineHeight: 1
                 }}
               >
-                HOME • HOME • HOME • HOME • HOME • HOME • HOME • HOME • HOME • HOME • HOME • HOME • HOME • HOME • HOME • HOME • HOME • HOME • HOME • HOME • 
+                HOME <svg width="150" height="150" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 2rem' }}>
+                  <path d="M7 7h10v10" />
+                  <path d="M17 7L7 17" />
+                </svg> HOME <svg width="150" height="150" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 2rem' }}>
+                  <path d="M7 7h10v10" />
+                  <path d="M17 7L7 17" />
+                </svg> HOME <svg width="150" height="150" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 2rem' }}>
+                  <path d="M7 7h10v10" />
+                  <path d="M17 7L7 17" />
+                </svg> HOME <svg width="150" height="150" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 2rem' }}>
+                  <path d="M7 7h10v10" />
+                  <path d="M17 7L7 17" />
+                </svg> HOME <svg width="150" height="150" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 2rem' }}>
+                  <path d="M7 7h10v10" />
+                  <path d="M17 7L7 17" />
+                </svg> HOME <svg width="150" height="150" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 2rem' }}>
+                  <path d="M7 7h10v10" />
+                  <path d="M17 7L7 17" />
+                </svg> HOME <svg width="150" height="150" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 2rem' }}>
+                  <path d="M7 7h10v10" />
+                  <path d="M17 7L7 17" />
+                </svg> 
               </motion.div>
             </div>
 
@@ -4361,7 +4379,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
               gap: isMobile ? '3rem' : '6rem'
             }}>
               
-              {/* Left Section - Menu Items dengan Panah North East */}
+              {/* Left Section - Menu Items dengan North East Arrow */}
               <motion.div
                 initial={{ opacity: 0, x: -50 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -4419,26 +4437,20 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                     {item.label}
                     
                     {/* North East Arrow untuk setiap menu item */}
-                    <motion.svg
-                      width="32"
-                      height="32"
+                    <svg
+                      width="40"
+                      height="40"
                       viewBox="0 0 24 24"
                       fill="none"
                       stroke="white"
                       strokeWidth="2"
-                      initial={{ opacity: 0, scale: 0 }}
-                      whileHover={{ 
-                        opacity: 1, 
-                        scale: 1.2,
-                        rotate: 45,
-                        x: 5,
-                        y: -5
+                      style={{
+                        transition: 'all 0.3s ease'
                       }}
-                      transition={{ duration: 0.3 }}
                     >
                       <path d="M7 7h10v10" />
                       <path d="M17 7L7 17" />
-                    </motion.svg>
+                    </svg>
 
                     <motion.div
                       initial={{ scaleX: 0 }}
@@ -4470,7 +4482,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                   gap: '2.5rem'
                 }}
               >
-                {/* Featured Note dengan panah north east besar */}
+                {/* Featured Note dengan north east arrow */}
                 <div>
                   <div style={{
                     color: 'rgba(255, 255, 255, 0.4)',
@@ -4529,29 +4541,22 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                       </div>
                     </div>
 
-                    {/* North East Arrow untuk featured note - diperbesar */}
-                    <motion.svg
+                    {/* North East Arrow untuk featured note */}
+                    <svg
                       width="40"
                       height="40"
                       viewBox="0 0 24 24"
                       fill="none"
                       stroke="white"
                       strokeWidth="2"
-                      whileHover={{ 
-                        rotate: 45,
-                        x: 5,
-                        y: -5,
-                        scale: 1.2
-                      }}
-                      transition={{ duration: 0.3 }}
                     >
                       <path d="M7 7h10v10" />
                       <path d="M17 7L7 17" />
-                    </motion.svg>
+                    </svg>
                   </motion.div>
                 </div>
 
-                {/* Recent Notes List dengan panah north east */}
+                {/* Recent Notes List dengan north east arrow */}
                 <div>
                   <div style={{
                     color: 'rgba(255, 255, 255, 0.4)',
@@ -4598,28 +4603,22 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                       </div>
                       
                       {/* North East Arrow kecil */}
-                      <motion.svg
+                      <svg
                         width="24"
                         height="24"
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="rgba(255, 255, 255, 0.5)"
                         strokeWidth="2"
-                        whileHover={{ 
-                          rotate: 45,
-                          x: 3,
-                          y: -3,
-                          stroke: 'white'
-                        }}
                       >
                         <path d="M7 7h10v10" />
                         <path d="M17 7L7 17" />
-                      </motion.svg>
+                      </svg>
                     </motion.div>
                   ))}
                 </div>
 
-                {/* Call to Action dengan north east arrow besar */}
+                {/* Call to Action dengan north east arrow */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -4654,28 +4653,18 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                   >
                     <span>Create New Note</span>
                     
-                    {/* North East Arrow besar dengan animasi */}
-                    <motion.svg
+                    {/* North East Arrow besar */}
+                    <svg
                       width="36"
                       height="36"
                       viewBox="0 0 24 24"
                       fill="none"
                       stroke="white"
                       strokeWidth="2"
-                      animate={{ 
-                        rotate: [0, 45, 0],
-                        x: [0, 5, 0],
-                        y: [0, -5, 0]
-                      }}
-                      transition={{ 
-                        duration: 2,
-                        repeat: Infinity,
-                        ease: "easeInOut"
-                      }}
                     >
                       <path d="M7 7h10v10" />
                       <path d="M17 7L7 17" />
-                    </motion.svg>
+                    </svg>
 
                     {/* Hover effect background */}
                     <motion.div
@@ -4698,78 +4687,54 @@ fontFamily: 'Helvetica, Arial, sans-serif'
               </motion.div>
             </div>
 
-            {/* Footer Besar dengan Teks Putih */}
+            {/* Footer Besar dengan Teks Putih - Sesuai Design Awal tapi Diperbesar */}
             <motion.div
-              initial={{ opacity: 0, y: 100 }}
+              initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 1 }}
+              transition={{ duration: 0.6, delay: 1 }}
               style={{
                 position: 'absolute',
-                bottom: isMobile ? '3rem' : '4rem',
+                bottom: isMobile ? '2rem' : '3rem',
                 left: 0,
                 width: '100%',
                 display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
+                justifyContent: 'space-between',
                 padding: isMobile ? '0 2rem' : '0 4rem',
                 boxSizing: 'border-box',
+                color: 'white',
+                fontSize: isMobile ? '1.5rem' : '2.5rem',
+                fontWeight: '700',
                 zIndex: 2,
-                textAlign: 'center'
+                textTransform: 'uppercase',
+                letterSpacing: '2px'
               }}
             >
-              {/* Teks Footer Besar */}
-              <motion.div
-                animate={{ 
-                  scale: [1, 1.02, 1],
-                }}
-                transition={{ 
-                  duration: 3,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-                style={{
-                  fontSize: isMobile ? '3rem' : '6rem',
-                  fontWeight: '900',
-                  color: 'white',
-                  fontFamily: 'Helvetica, Arial, sans-serif',
-                  textTransform: 'uppercase',
-                  letterSpacing: '5px',
-                  lineHeight: 1.2,
-                  marginBottom: '2rem',
-                  textShadow: '0 0 20px rgba(255,255,255,0.3)'
-                }}
-              >
-                MENURU
-              </motion.div>
-
-              {/* Footer Subtext */}
-              <div style={{
-                display: 'flex',
-                gap: '4rem',
-                color: 'white',
-                fontSize: '1.2rem',
-                fontWeight: '400',
-                letterSpacing: '2px',
-                opacity: 0.9
-              }}>
+              <div style={{ display: 'flex', gap: '3rem' }}>
                 <motion.span
-                  animate={{ opacity: [0.7, 1, 0.7] }}
+                  animate={{ opacity: [0.8, 1, 0.8] }}
                   transition={{ duration: 2, repeat: Infinity }}
                 >
                   © 2024
                 </motion.span>
                 <motion.span
-                  animate={{ opacity: [0.7, 1, 0.7] }}
+                  animate={{ opacity: [0.8, 1, 0.8] }}
                   transition={{ duration: 2, repeat: Infinity, delay: 0.3 }}
                 >
-                  ALL RIGHTS RESERVED
+                  MENURU
                 </motion.span>
+              </div>
+              <div style={{ display: 'flex', gap: '3rem' }}>
                 <motion.span
-                  animate={{ opacity: [0.7, 1, 0.7] }}
+                  animate={{ opacity: [0.8, 1, 0.8] }}
                   transition={{ duration: 2, repeat: Infinity, delay: 0.6 }}
                 >
-                  VERSION 2.0
+                  ALL RIGHTS
+                </motion.span>
+                <motion.span
+                  animate={{ opacity: [0.8, 1, 0.8] }}
+                  transition={{ duration: 2, repeat: Infinity, delay: 0.9 }}
+                >
+                  RESERVED
                 </motion.span>
               </div>
             </motion.div>
@@ -4809,8 +4774,6 @@ fontFamily: 'Helvetica, Arial, sans-serif'
           </motion.div>
         )}
       </AnimatePresence>
-
-
 
 
 
@@ -7269,6 +7232,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
     </div>
   );
 }
+
 
 
 
