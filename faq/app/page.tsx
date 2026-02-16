@@ -4520,7 +4520,6 @@ fontFamily: 'Helvetica, Arial, sans-serif'
         )}
       </AnimatePresence>
 
-
 {/* Menu Overlay dengan GSAP Animation - Modern Awwwards Style */}
 <AnimatePresence>
   {showMenuOverlay && (
@@ -4542,7 +4541,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'center',
+        justifyContent: 'flex-start', // Ganti dari center ke flex-start
         overflow: 'hidden',
         transform: 'translateY(-100%)'
       }}
@@ -4561,9 +4560,9 @@ fontFamily: 'Helvetica, Arial, sans-serif'
         zIndex: 1
       }} />
 
-      {/* Header Menu - JAKARTA & Jam di Kiri, MENURU di Tengah, Close di Kanan */}
+      {/* Header Menu - Tetap di atas */}
       <div style={{
-        position: 'absolute',
+        position: 'fixed',
         top: isMobile ? '1.5rem' : '2rem',
         left: 0,
         right: 0,
@@ -4573,7 +4572,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
         alignItems: 'center',
         padding: isMobile ? '0 2rem' : '0 4rem',
         boxSizing: 'border-box',
-        zIndex: 10,
+        zIndex: 20,
         pointerEvents: 'none'
       }}>
         {/* Kiri - JAKARTA dan Jam */}
@@ -4609,19 +4608,50 @@ fontFamily: 'Helvetica, Arial, sans-serif'
           MENURU
         </div>
 
-        {/* Kanan - Kosong untuk menyeimbangkan grid, close button absolute terpisah */}
+        {/* Kanan - Kosong */}
         <div style={{ justifySelf: 'end' }}></div>
       </div>
 
-      {/* Teks Berjalan dengan North East Arrow - PUTIH CERAH (TETAP BERJALAN) */}
+      {/* Close Button - Posisi Fixed di Kanan */}
+      <div
+        onClick={handleCloseMenu}
+        style={{
+          position: 'fixed',
+          top: isMobile ? '1.5rem' : '2rem',
+          right: isMobile ? '1.5rem' : '2rem',
+          color: '#FFFFFF',
+          fontSize: isMobile ? '2.5rem' : '3rem',
+          fontWeight: '300',
+          cursor: 'pointer',
+          fontFamily: 'Helvetica, Arial, sans-serif',
+          zIndex: 21,
+          padding: '1rem',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          opacity: 0.9,
+          width: '60px',
+          height: '60px',
+          borderRadius: '50%',
+          border: '1px solid rgba(255, 255, 255, 0.4)',
+          backgroundColor: 'rgba(255, 255, 255, 0.03)',
+          textShadow: '0 0 15px rgba(255,255,255,0.5)',
+          boxShadow: '0 0 20px rgba(255,255,255,0.1)'
+        }}
+      >
+        ×
+      </div>
+
+      {/* Teks Berjalan - Posisi Fixed di Bawah */}
       <div style={{
-        position: 'absolute',
-        bottom: '15%',
+        position: 'fixed',
+        bottom: '10%',
         left: 0,
         width: '100%',
         overflow: 'hidden',
         whiteSpace: 'nowrap',
-        zIndex: 2
+        zIndex: 2,
+        pointerEvents: 'none'
       }}>
         <motion.div
           animate={{ 
@@ -4660,827 +4690,804 @@ fontFamily: 'Helvetica, Arial, sans-serif'
         </motion.div>
       </div>
 
-      {/* Konten Utama - TANPA ANIMASI SAMA SEKALI */}
-      <div style={{
-        position: 'relative',
-        zIndex: 3,
-        width: '100%',
-        maxWidth: '1200px',
-        padding: isMobile ? '2rem' : '4rem',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '1rem',
-        marginTop: '-5%'
-      }}>
-        
-        {/* CATATAN SECTION */}
-        <div style={{
-          borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
-        }}>
-          {/* Header */}
-          <div
-            onClick={() => handleToggleSection('catatan')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              cursor: 'pointer',
-              padding: '1rem 0',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
-              <span style={{
-                color: 'rgba(255, 255, 255, 0.5)',
-                fontSize: '2rem',
-                fontWeight: '300',
-                fontFamily: 'monospace'
-              }}>01</span>
-              
-              <span
-                onClick={(e) => {
-                  e.stopPropagation();
-                  router.push('/catatan');
-                }}
-                style={{
-                  color: '#FFFFFF',
-                  fontSize: isMobile ? '3rem' : '4.5rem',
-                  fontWeight: '300',
-                  fontFamily: 'Helvetica, Arial, sans-serif',
-                  textShadow: '0 0 10px rgba(255,255,255,0.3)',
-                  cursor: 'pointer',
-                }}
-              >
-                CATATAN
-              </span>
-            </div>
-            
-            {/* Arrow dengan animasi rotate (TETAP ADA) */}
-            <div style={{
-              transform: openSection === 'catatan' ? 'rotate(90deg)' : 'rotate(0deg)',
-              transition: 'transform 0.3s ease'
-            }}>
-              <svg
-                width="50"
-                height="50"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#FFFFFF"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                style={{
-                  filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.5))'
-                }}
-              >
-                <path d="M7 7h10v10" />
-                <path d="M17 7L7 17" />
-              </svg>
-            </div>
-          </div>
-
-          {/* Sub-menu */}
-          {openSection === 'catatan' && (
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '0.8rem',
-              marginLeft: '6rem',
-              marginTop: '0.5rem',
-              marginBottom: '1rem',
-            }}>
-              {[
-                { number: '01', title: 'Creative Process', url: '/catatan/creative' },
-                { number: '02', title: 'Design Thinking', url: '/catatan/design' },
-                { number: '03', title: 'UX Research', url: '/catatan/ux' },
-                { number: '04', title: 'Development', url: '/catatan/dev' }
-              ].map((item, idx) => (
-                <div
-                  key={idx}
-                  onClick={() => router.push(item.url)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '1.5rem',
-                    padding: '0.5rem 0',
-                    cursor: 'pointer',
-                    borderBottom: idx < 3 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none'
-                  }}
-                >
-                  <span style={{ 
-                    color: 'rgba(255, 255, 255, 0.3)', 
-                    fontSize: '0.9rem', 
-                    fontFamily: 'monospace', 
-                    width: '30px' 
-                  }}>
-                    {item.number}
-                  </span>
-                  <span style={{ 
-                    color: 'rgba(255, 255, 255, 0.8)', 
-                    fontSize: '1.2rem',
-                    flex: 1,
-                    fontWeight: '300',
-                    fontFamily: 'Helvetica, Arial, sans-serif'
-                  }}>
-                    {item.title}
-                  </span>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2">
-                    <path d="M7 7h10v10" />
-                    <path d="M17 7L7 17" />
-                  </svg>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* COMMUNITY SECTION */}
-        <div style={{
-          borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
-        }}>
-          <div
-            onClick={() => handleToggleSection('community')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              cursor: 'pointer',
-              padding: '1rem 0',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
-              <span style={{
-                color: 'rgba(255, 255, 255, 0.5)',
-                fontSize: '2rem',
-                fontWeight: '300',
-                fontFamily: 'monospace'
-              }}>02</span>
-              <span
-                onClick={(e) => {
-                  e.stopPropagation();
-                  router.push('/community');
-                }}
-                style={{
-                  color: '#FFFFFF',
-                  fontSize: isMobile ? '3rem' : '4.5rem',
-                  fontWeight: '300',
-                  fontFamily: 'Helvetica, Arial, sans-serif',
-                  textShadow: '0 0 10px rgba(255,255,255,0.3)',
-                  cursor: 'pointer',
-                }}
-              >
-                COMMUNITY
-              </span>
-            </div>
-            
-            <div style={{
-              transform: openSection === 'community' ? 'rotate(90deg)' : 'rotate(0deg)',
-              transition: 'transform 0.3s ease'
-            }}>
-              <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" style={{ filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.5))' }}>
-                <path d="M7 7h10v10" />
-                <path d="M17 7L7 17" />
-              </svg>
-            </div>
-          </div>
-
-          {openSection === 'community' && (
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '0.8rem',
-              marginLeft: '6rem',
-              marginTop: '0.5rem',
-              marginBottom: '1rem',
-            }}>
-              {[
-                { number: '01', title: 'Forum Diskusi', url: '/community/forum' },
-                { number: '02', title: 'Events', url: '/community/events' },
-                { number: '03', title: 'Members', url: '/community/members' },
-                { number: '04', title: 'Gallery', url: '/community/gallery' }
-              ].map((item, idx) => (
-                <div
-                  key={idx}
-                  onClick={() => router.push(item.url)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '1.5rem',
-                    padding: '0.5rem 0',
-                    cursor: 'pointer',
-                    borderBottom: idx < 3 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none'
-                  }}
-                >
-                  <span style={{ color: 'rgba(255, 255, 255, 0.3)', fontSize: '0.9rem', fontFamily: 'monospace', width: '30px' }}>{item.number}</span>
-                  <span style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '1.2rem', flex: 1, fontWeight: '300', fontFamily: 'Helvetica, Arial, sans-serif' }}>{item.title}</span>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2">
-                    <path d="M7 7h10v10" />
-                    <path d="M17 7L7 17" />
-                  </svg>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* CALENDAR SECTION */}
-        <div style={{
-          borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
-        }}>
-          <div
-            onClick={() => handleToggleSection('calendar')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              cursor: 'pointer',
-              padding: '1rem 0',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
-              <span style={{
-                color: 'rgba(255, 255, 255, 0.5)',
-                fontSize: '2rem',
-                fontWeight: '300',
-                fontFamily: 'monospace'
-              }}>03</span>
-              <span
-                onClick={(e) => {
-                  e.stopPropagation();
-                  router.push('/calendar');
-                }}
-                style={{
-                  color: '#FFFFFF',
-                  fontSize: isMobile ? '3rem' : '4.5rem',
-                  fontWeight: '300',
-                  fontFamily: 'Helvetica, Arial, sans-serif',
-                  textShadow: '0 0 10px rgba(255,255,255,0.3)',
-                  cursor: 'pointer',
-                }}
-              >
-                CALENDAR
-              </span>
-            </div>
-            
-            <div style={{
-              transform: openSection === 'calendar' ? 'rotate(90deg)' : 'rotate(0deg)',
-              transition: 'transform 0.3s ease'
-            }}>
-              <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" style={{ filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.5))' }}>
-                <path d="M7 7h10v10" />
-                <path d="M17 7L7 17" />
-              </svg>
-            </div>
-          </div>
-
-          {openSection === 'calendar' && (
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '0.8rem',
-              marginLeft: '6rem',
-              marginTop: '0.5rem',
-              marginBottom: '1rem',
-            }}>
-              {[
-                { number: '01', title: 'Upcoming Events', url: '/calendar/upcoming' },
-                { number: '02', title: 'Workshops', url: '/calendar/workshops' },
-                { number: '03', title: 'Deadlines', url: '/calendar/deadlines' },
-                { number: '04', title: 'Schedule', url: '/calendar/schedule' }
-              ].map((item, idx) => (
-                <div
-                  key={idx}
-                  onClick={() => router.push(item.url)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '1.5rem',
-                    padding: '0.5rem 0',
-                    cursor: 'pointer',
-                    borderBottom: idx < 3 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none'
-                  }}
-                >
-                  <span style={{ color: 'rgba(255, 255, 255, 0.3)', fontSize: '0.9rem', fontFamily: 'monospace', width: '30px' }}>{item.number}</span>
-                  <span style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '1.2rem', flex: 1, fontWeight: '300', fontFamily: 'Helvetica, Arial, sans-serif' }}>{item.title}</span>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2">
-                    <path d="M7 7h10v10" />
-                    <path d="M17 7L7 17" />
-                  </svg>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* BLOG SECTION */}
-        <div style={{
-          borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
-        }}>
-          <div
-            onClick={() => handleToggleSection('blog')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              cursor: 'pointer',
-              padding: '1rem 0',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
-              <span style={{
-                color: 'rgba(255, 255, 255, 0.5)',
-                fontSize: '2rem',
-                fontWeight: '300',
-                fontFamily: 'monospace'
-              }}>04</span>
-              <span
-                onClick={(e) => {
-                  e.stopPropagation();
-                  router.push('/blog');
-                }}
-                style={{
-                  color: '#FFFFFF',
-                  fontSize: isMobile ? '3rem' : '4.5rem',
-                  fontWeight: '300',
-                  fontFamily: 'Helvetica, Arial, sans-serif',
-                  textShadow: '0 0 10px rgba(255,255,255,0.3)',
-                  cursor: 'pointer',
-                }}
-              >
-                BLOG
-              </span>
-            </div>
-            
-            <div style={{
-              transform: openSection === 'blog' ? 'rotate(90deg)' : 'rotate(0deg)',
-              transition: 'transform 0.3s ease'
-            }}>
-              <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" style={{ filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.5))' }}>
-                <path d="M7 7h10v10" />
-                <path d="M17 7L7 17" />
-              </svg>
-            </div>
-          </div>
-
-          {openSection === 'blog' && (
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '0.8rem',
-              marginLeft: '6rem',
-              marginTop: '0.5rem',
-              marginBottom: '1rem',
-            }}>
-              {[
-                { number: '01', title: 'Latest Posts', url: '/blog/latest' },
-                { number: '02', title: 'Tutorials', url: '/blog/tutorials' },
-                { number: '03', title: 'News', url: '/blog/news' },
-                { number: '04', title: 'Insights', url: '/blog/insights' }
-              ].map((item, idx) => (
-                <div
-                  key={idx}
-                  onClick={() => router.push(item.url)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '1.5rem',
-                    padding: '0.5rem 0',
-                    cursor: 'pointer',
-                    borderBottom: idx < 3 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none'
-                  }}
-                >
-                  <span style={{ color: 'rgba(255, 255, 255, 0.3)', fontSize: '0.9rem', fontFamily: 'monospace', width: '30px' }}>{item.number}</span>
-                  <span style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '1.2rem', flex: 1, fontWeight: '300', fontFamily: 'Helvetica, Arial, sans-serif' }}>{item.title}</span>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2">
-                    <path d="M7 7h10v10" />
-                    <path d="M17 7L7 17" />
-                  </svg>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-              
-
-        
-
-        {/* SPOTIFY PLAYLIST SECTION - DENGAN PLAYER LANGSUNG */}
-        <div style={{
-          borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
-          marginTop: '2rem',
-          paddingBottom: '1rem'
-        }}>
-          <div
-            onClick={() => handleToggleSection('spotify')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              cursor: 'pointer',
-              padding: '1rem 0',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
-              <span style={{
-                color: 'rgba(255, 255, 255, 0.5)',
-                fontSize: '2rem',
-                fontWeight: '300',
-                fontFamily: 'monospace'
-              }}>05</span>
-              
-              <span
-                onClick={(e) => {
-                  e.stopPropagation();
-                }}
-                style={{
-                  color: '#FFFFFF',
-                  fontSize: isMobile ? '3rem' : '4.5rem',
-                  fontWeight: '300',
-                  fontFamily: 'Helvetica, Arial, sans-serif',
-                  textShadow: '0 0 10px rgba(255,255,255,0.3)',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '1rem'
-                }}
-              >
-                SPOTIFY PLAYLIST
-              </span>
-            </div>
-            
-            <div style={{
-              transform: openSection === 'spotify' ? 'rotate(90deg)' : 'rotate(0deg)',
-              transition: 'transform 0.3s ease'
-            }}>
-              <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" style={{ filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.5))' }}>
-                <path d="M7 7h10v10" />
-                <path d="M17 7L7 17" />
-              </svg>
-            </div>
-          </div>
-
-          {openSection === 'spotify' && (
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '2rem',
-              marginLeft: isMobile ? '2rem' : '6rem',
-              marginTop: '2rem',
-              marginBottom: '2rem',
-            }}>
-              
-              {/* Spotify Player - Muncul jika ada lagu yang dipilih */}
-              {currentEmbedUrl && (
-                <div style={{
-                  width: '100%',
-                  marginBottom: '2rem'
-                }}>
-                  <iframe
-                    style={{ borderRadius: '12px', width: '100%', height: '152px' }}
-                    src={currentEmbedUrl}
-                    frameBorder="0"
-                    allowFullScreen
-                    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                    loading="lazy"
-                  />
-                </div>
-              )}
-
-              {/* Header Playlist */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '2rem',
-                marginBottom: '1rem'
-              }}>
-                <div style={{
-                  width: isMobile ? '80px' : '100px',
-                  height: isMobile ? '80px' : '100px',
-                  borderRadius: '8px',
-                  backgroundColor: 'rgba(255,255,255,0.1)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  border: '1px solid rgba(255,255,255,0.2)'
-                }}>
-                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5">
-                    <circle cx="12" cy="12" r="10"/>
-                    <path d="M8 11L12 8L16 11" strokeLinecap="round"/>
-                    <path d="M8 15L12 12L16 15" strokeLinecap="round"/>
-                  </svg>
-                </div>
-                <div>
-                  <div style={{
-                    color: 'rgba(255,255,255,0.6)',
-                    fontSize: '0.9rem',
-                    marginBottom: '0.3rem',
-                    letterSpacing: '1px'
-                  }}>
-                    PLAYLIST • 5 LAGU
-                  </div>
-                  <div style={{
-                    color: '#FFFFFF',
-                    fontSize: isMobile ? '2rem' : '2.5rem',
-                    fontWeight: '300',
-                    fontFamily: 'Helvetica, Arial, sans-serif'
-                  }}>
-                    Lagu Kesukaan
-                  </div>
-                  <div style={{
-                    color: 'rgba(255,255,255,0.6)',
-                    fontSize: '0.9rem',
-                    marginTop: '0.3rem'
-                  }}>
-                    Hanin Dhiya • Stand Here Alone
-                  </div>
-                </div>
-              </div>
-
-              {/* Daftar Lagu - Bisa Dipilih */}
-              <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '1rem'
-              }}>
-                {/* Hanin Dhiya Section */}
-                <div style={{
-                  marginBottom: '1rem'
-                }}>
-                  <div style={{
-                    color: 'rgba(255,255,255,0.8)',
-                    fontSize: '1.2rem',
-                    fontWeight: '300',
-                    marginBottom: '1rem',
-                    paddingBottom: '0.5rem',
-                    borderBottom: '1px solid rgba(255,255,255,0.1)'
-                  }}>
-                    Hanin Dhiya
-                  </div>
-                  
-                  {favoriteTracks.filter(t => t.artist === 'Hanin Dhiya').map((track, idx) => (
-                    <div
-                      key={track.id}
-                      onClick={() => playTrack(track)}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '1.5rem',
-                        padding: '1rem 0',
-                        cursor: 'pointer',
-                        borderBottom: idx < 1 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none',
-                        backgroundColor: currentTrack === track.id ? 'rgba(255,255,255,0.05)' : 'transparent',
-                        transition: 'all 0.2s ease'
-                      }}
-                    >
-                      {/* Nomor */}
-                      <span style={{
-                        color: 'rgba(255, 255, 255, 0.3)',
-                        fontSize: '1.2rem',
-                        fontWeight: '300',
-                        fontFamily: 'monospace',
-                        width: '30px'
-                      }}>
-                        {idx + 1}
-                      </span>
-
-                      {/* Cover Album kecil */}
-                      <div style={{
-                        width: '50px',
-                        height: '50px',
-                        borderRadius: '4px',
-                        overflow: 'hidden',
-                        backgroundColor: 'rgba(255,255,255,0.1)',
-                        flexShrink: 0
-                      }}>
-                        <div style={{
-                          width: '100%',
-                          height: '100%',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          color: 'rgba(255,255,255,0.5)',
-                          fontSize: '1.5rem'
-                        }}>
-                          ♪
-                        </div>
-                      </div>
-
-                      {/* Info Lagu */}
-                      <div style={{ flex: 1 }}>
-                        <div style={{
-                          color: '#FFFFFF',
-                          fontSize: '1.5rem',
-                          fontWeight: '300',
-                          fontFamily: 'Helvetica, Arial, sans-serif',
-                          marginBottom: '0.2rem'
-                        }}>
-                          {track.title}
-                        </div>
-                        <div style={{
-                          color: 'rgba(255, 255, 255, 0.6)',
-                          fontSize: '1rem',
-                          fontWeight: '300'
-                        }}>
-                          {track.artist}
-                        </div>
-                      </div>
-
-                      {/* Indikator Sedang Diputar */}
-                      {currentTrack === track.id && (
-                        <div style={{
-                          width: '8px',
-                          height: '8px',
-                          borderRadius: '50%',
-                          backgroundColor: 'white',
-                          marginRight: '0.5rem'
-                        }} />
-                      )}
-
-                      {/* Tombol Play */}
-                      <div style={{
-                        width: '40px',
-                        height: '40px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        flexShrink: 0
-                      }}>
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
-                          <polygon points="5 3 19 12 5 21 5 3" />
-                        </svg>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Stand Here Alone Section */}
-                <div>
-                  <div style={{
-                    color: 'rgba(255,255,255,0.8)',
-                    fontSize: '1.2rem',
-                    fontWeight: '300',
-                    marginBottom: '1rem',
-                    paddingBottom: '0.5rem',
-                    borderBottom: '1px solid rgba(255,255,255,0.1)'
-                  }}>
-                    Stand Here Alone
-                  </div>
-                  
-                  {favoriteTracks.filter(t => t.artist === 'Stand Here Alone').map((track, idx) => (
-                    <div
-                      key={track.id}
-                      onClick={() => playTrack(track)}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '1.5rem',
-                        padding: '1rem 0',
-                        cursor: 'pointer',
-                        borderBottom: idx < 2 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none',
-                        backgroundColor: currentTrack === track.id ? 'rgba(255,255,255,0.05)' : 'transparent',
-                        transition: 'all 0.2s ease'
-                      }}
-                    >
-                      {/* Nomor */}
-                      <span style={{
-                        color: 'rgba(255, 255, 255, 0.3)',
-                        fontSize: '1.2rem',
-                        fontWeight: '300',
-                        fontFamily: 'monospace',
-                        width: '30px'
-                      }}>
-                        {idx + 1}
-                      </span>
-
-                      {/* Cover Album kecil */}
-                      <div style={{
-                        width: '50px',
-                        height: '50px',
-                        borderRadius: '4px',
-                        overflow: 'hidden',
-                        backgroundColor: 'rgba(255,255,255,0.1)',
-                        flexShrink: 0
-                      }}>
-                        <div style={{
-                          width: '100%',
-                          height: '100%',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          color: 'rgba(255,255,255,0.5)',
-                          fontSize: '1.5rem'
-                        }}>
-                          ♪
-                        </div>
-                      </div>
-
-                      {/* Info Lagu */}
-                      <div style={{ flex: 1 }}>
-                        <div style={{
-                          color: '#FFFFFF',
-                          fontSize: '1.5rem',
-                          fontWeight: '300',
-                          fontFamily: 'Helvetica, Arial, sans-serif',
-                          marginBottom: '0.2rem'
-                        }}>
-                          {track.title}
-                        </div>
-                        <div style={{
-                          color: 'rgba(255, 255, 255, 0.6)',
-                          fontSize: '1rem',
-                          fontWeight: '300'
-                        }}>
-                          {track.artist}
-                        </div>
-                      </div>
-
-                      {/* Indikator Sedang Diputar */}
-                      {currentTrack === track.id && (
-                        <div style={{
-                          width: '8px',
-                          height: '8px',
-                          borderRadius: '50%',
-                          backgroundColor: 'white',
-                          marginRight: '0.5rem'
-                        }} />
-                      )}
-
-                      {/* Tombol Play */}
-                      <div style={{
-                        width: '40px',
-                        height: '40px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        flexShrink: 0
-                      }}>
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
-                          <polygon points="5 3 19 12 5 21 5 3" />
-                        </svg>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Jika belum ada lagu yang dipilih */}
-              {!currentEmbedUrl && (
-                <div style={{
-                  textAlign: 'center',
-                  padding: '2rem',
-                  color: 'rgba(255,255,255,0.5)',
-                  fontSize: '1rem',
-                  border: '1px dashed rgba(255,255,255,0.2)',
-                  borderRadius: '8px'
-                }}>
-                  Pilih lagu di atas untuk memutar
-                </div>
-              )}
-
-              {/* Link ke Spotify */}
-              <div style={{
-                display: 'flex',
-                justifyContent: 'flex-end',
-                marginTop: '2rem',
-                paddingTop: '1rem',
-                borderTop: '1px solid rgba(255,255,255,0.1)'
-              }}>
-                <a
-                  href="https://open.spotify.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    color: 'rgba(255,255,255,0.8)',
-                    textDecoration: 'none',
-                    fontSize: '0.9rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    padding: '0.5rem 0',
-                    transition: 'all 0.2s ease'
-                  }}
-                >
-                  Buka di Spotify
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-                    <polyline points="15 3 21 3 21 9" />
-                    <line x1="10" y1="14" x2="21" y2="3" />
-                  </svg>
-                </a>
-              </div>
-            </div>
-          )}
-        </div>
-
-
-
-
-
-        
-      </div>
-
-      {/* Footer */}
+      {/* Scrollable Content Area - Dengan padding top dan bottom tetap */}
       <div style={{
         position: 'absolute',
-        bottom: isMobile ? '2rem' : '3rem',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        overflowY: 'auto',
+        zIndex: 3,
+        paddingTop: isMobile ? '8rem' : '10rem', // Ruang untuk header
+        paddingBottom: isMobile ? '8rem' : '10rem', // Ruang untuk teks berjalan
+        paddingLeft: isMobile ? '1rem' : '2rem',
+        paddingRight: isMobile ? '1rem' : '2rem',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center'
+      }}>
+        
+        {/* Konten Menu - Container dengan lebar tetap */}
+        <div style={{
+          width: '100%',
+          maxWidth: '1200px',
+          margin: '0 auto',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '0.5rem'
+        }}>
+          
+          {/* CATATAN SECTION */}
+          <div style={{
+            borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+          }}>
+            {/* Header */}
+            <div
+              onClick={() => handleToggleSection('catatan')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                cursor: 'pointer',
+                padding: '1rem 0',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+                <span style={{
+                  color: 'rgba(255, 255, 255, 0.5)',
+                  fontSize: '2rem',
+                  fontWeight: '300',
+                  fontFamily: 'monospace'
+                }}>01</span>
+                
+                <span
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    router.push('/catatan');
+                  }}
+                  style={{
+                    color: '#FFFFFF',
+                    fontSize: isMobile ? '2.5rem' : '4rem',
+                    fontWeight: '300',
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    textShadow: '0 0 10px rgba(255,255,255,0.3)',
+                    cursor: 'pointer',
+                  }}
+                >
+                  CATATAN
+                </span>
+              </div>
+              
+              {/* Arrow */}
+              <div style={{
+                transform: openSection === 'catatan' ? 'rotate(90deg)' : 'rotate(0deg)',
+                transition: 'transform 0.3s ease'
+              }}>
+                <svg
+                  width="40"
+                  height="40"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#FFFFFF"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  style={{
+                    filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.5))'
+                  }}
+                >
+                  <path d="M7 7h10v10" />
+                  <path d="M17 7L7 17" />
+                </svg>
+              </div>
+            </div>
+
+            {/* Sub-menu - Dengan animasi height */}
+            <AnimatePresence>
+              {openSection === 'catatan' && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.3 }}
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.8rem',
+                    marginLeft: '6rem',
+                    marginTop: '0.5rem',
+                    marginBottom: '1rem',
+                    overflow: 'hidden'
+                  }}
+                >
+                  {[
+                    { number: '01', title: 'Creative Process', url: '/catatan/creative' },
+                    { number: '02', title: 'Design Thinking', url: '/catatan/design' },
+                    { number: '03', title: 'UX Research', url: '/catatan/ux' },
+                    { number: '04', title: 'Development', url: '/catatan/dev' }
+                  ].map((item, idx) => (
+                    <div
+                      key={idx}
+                      onClick={() => router.push(item.url)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '1.5rem',
+                        padding: '0.5rem 0',
+                        cursor: 'pointer',
+                        borderBottom: idx < 3 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none'
+                      }}
+                    >
+                      <span style={{ 
+                        color: 'rgba(255, 255, 255, 0.3)', 
+                        fontSize: '0.9rem', 
+                        fontFamily: 'monospace', 
+                        width: '30px' 
+                      }}>
+                        {item.number}
+                      </span>
+                      <span style={{ 
+                        color: 'rgba(255, 255, 255, 0.8)', 
+                        fontSize: '1.2rem',
+                        flex: 1,
+                        fontWeight: '300',
+                        fontFamily: 'Helvetica, Arial, sans-serif'
+                      }}>
+                        {item.title}
+                      </span>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2">
+                        <path d="M7 7h10v10" />
+                        <path d="M17 7L7 17" />
+                      </svg>
+                    </div>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* COMMUNITY SECTION */}
+          <div style={{
+            borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+          }}>
+            <div
+              onClick={() => handleToggleSection('community')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                cursor: 'pointer',
+                padding: '1rem 0',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+                <span style={{
+                  color: 'rgba(255, 255, 255, 0.5)',
+                  fontSize: '2rem',
+                  fontWeight: '300',
+                  fontFamily: 'monospace'
+                }}>02</span>
+                <span
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    router.push('/community');
+                  }}
+                  style={{
+                    color: '#FFFFFF',
+                    fontSize: isMobile ? '2.5rem' : '4rem',
+                    fontWeight: '300',
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    textShadow: '0 0 10px rgba(255,255,255,0.3)',
+                    cursor: 'pointer',
+                  }}
+                >
+                  COMMUNITY
+                </span>
+              </div>
+              
+              <div style={{
+                transform: openSection === 'community' ? 'rotate(90deg)' : 'rotate(0deg)',
+                transition: 'transform 0.3s ease'
+              }}>
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" style={{ filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.5))' }}>
+                  <path d="M7 7h10v10" />
+                  <path d="M17 7L7 17" />
+                </svg>
+              </div>
+            </div>
+
+            <AnimatePresence>
+              {openSection === 'community' && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.3 }}
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.8rem',
+                    marginLeft: '6rem',
+                    marginTop: '0.5rem',
+                    marginBottom: '1rem',
+                    overflow: 'hidden'
+                  }}
+                >
+                  {[
+                    { number: '01', title: 'Forum Diskusi', url: '/community/forum' },
+                    { number: '02', title: 'Events', url: '/community/events' },
+                    { number: '03', title: 'Members', url: '/community/members' },
+                    { number: '04', title: 'Gallery', url: '/community/gallery' }
+                  ].map((item, idx) => (
+                    <div
+                      key={idx}
+                      onClick={() => router.push(item.url)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '1.5rem',
+                        padding: '0.5rem 0',
+                        cursor: 'pointer',
+                        borderBottom: idx < 3 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none'
+                      }}
+                    >
+                      <span style={{ color: 'rgba(255, 255, 255, 0.3)', fontSize: '0.9rem', fontFamily: 'monospace', width: '30px' }}>{item.number}</span>
+                      <span style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '1.2rem', flex: 1, fontWeight: '300', fontFamily: 'Helvetica, Arial, sans-serif' }}>{item.title}</span>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2">
+                        <path d="M7 7h10v10" />
+                        <path d="M17 7L7 17" />
+                      </svg>
+                    </div>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* CALENDAR SECTION */}
+          <div style={{
+            borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+          }}>
+            <div
+              onClick={() => handleToggleSection('calendar')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                cursor: 'pointer',
+                padding: '1rem 0',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+                <span style={{
+                  color: 'rgba(255, 255, 255, 0.5)',
+                  fontSize: '2rem',
+                  fontWeight: '300',
+                  fontFamily: 'monospace'
+                }}>03</span>
+                <span
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    router.push('/calendar');
+                  }}
+                  style={{
+                    color: '#FFFFFF',
+                    fontSize: isMobile ? '2.5rem' : '4rem',
+                    fontWeight: '300',
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    textShadow: '0 0 10px rgba(255,255,255,0.3)',
+                    cursor: 'pointer',
+                  }}
+                >
+                  CALENDAR
+                </span>
+              </div>
+              
+              <div style={{
+                transform: openSection === 'calendar' ? 'rotate(90deg)' : 'rotate(0deg)',
+                transition: 'transform 0.3s ease'
+              }}>
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" style={{ filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.5))' }}>
+                  <path d="M7 7h10v10" />
+                  <path d="M17 7L7 17" />
+                </svg>
+              </div>
+            </div>
+
+            <AnimatePresence>
+              {openSection === 'calendar' && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.3 }}
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.8rem',
+                    marginLeft: '6rem',
+                    marginTop: '0.5rem',
+                    marginBottom: '1rem',
+                    overflow: 'hidden'
+                  }}
+                >
+                  {[
+                    { number: '01', title: 'Upcoming Events', url: '/calendar/upcoming' },
+                    { number: '02', title: 'Workshops', url: '/calendar/workshops' },
+                    { number: '03', title: 'Deadlines', url: '/calendar/deadlines' },
+                    { number: '04', title: 'Schedule', url: '/calendar/schedule' }
+                  ].map((item, idx) => (
+                    <div
+                      key={idx}
+                      onClick={() => router.push(item.url)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '1.5rem',
+                        padding: '0.5rem 0',
+                        cursor: 'pointer',
+                        borderBottom: idx < 3 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none'
+                      }}
+                    >
+                      <span style={{ color: 'rgba(255, 255, 255, 0.3)', fontSize: '0.9rem', fontFamily: 'monospace', width: '30px' }}>{item.number}</span>
+                      <span style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '1.2rem', flex: 1, fontWeight: '300', fontFamily: 'Helvetica, Arial, sans-serif' }}>{item.title}</span>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2">
+                        <path d="M7 7h10v10" />
+                        <path d="M17 7L7 17" />
+                      </svg>
+                    </div>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* BLOG SECTION */}
+          <div style={{
+            borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+          }}>
+            <div
+              onClick={() => handleToggleSection('blog')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                cursor: 'pointer',
+                padding: '1rem 0',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+                <span style={{
+                  color: 'rgba(255, 255, 255, 0.5)',
+                  fontSize: '2rem',
+                  fontWeight: '300',
+                  fontFamily: 'monospace'
+                }}>04</span>
+                <span
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    router.push('/blog');
+                  }}
+                  style={{
+                    color: '#FFFFFF',
+                    fontSize: isMobile ? '2.5rem' : '4rem',
+                    fontWeight: '300',
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    textShadow: '0 0 10px rgba(255,255,255,0.3)',
+                    cursor: 'pointer',
+                  }}
+                >
+                  BLOG
+                </span>
+              </div>
+              
+              <div style={{
+                transform: openSection === 'blog' ? 'rotate(90deg)' : 'rotate(0deg)',
+                transition: 'transform 0.3s ease'
+              }}>
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" style={{ filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.5))' }}>
+                  <path d="M7 7h10v10" />
+                  <path d="M17 7L7 17" />
+                </svg>
+              </div>
+            </div>
+
+            <AnimatePresence>
+              {openSection === 'blog' && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.3 }}
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.8rem',
+                    marginLeft: '6rem',
+                    marginTop: '0.5rem',
+                    marginBottom: '1rem',
+                    overflow: 'hidden'
+                  }}
+                >
+                  {[
+                    { number: '01', title: 'Latest Posts', url: '/blog/latest' },
+                    { number: '02', title: 'Tutorials', url: '/blog/tutorials' },
+                    { number: '03', title: 'News', url: '/blog/news' },
+                    { number: '04', title: 'Insights', url: '/blog/insights' }
+                  ].map((item, idx) => (
+                    <div
+                      key={idx}
+                      onClick={() => router.push(item.url)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '1.5rem',
+                        padding: '0.5rem 0',
+                        cursor: 'pointer',
+                        borderBottom: idx < 3 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none'
+                      }}
+                    >
+                      <span style={{ color: 'rgba(255, 255, 255, 0.3)', fontSize: '0.9rem', fontFamily: 'monospace', width: '30px' }}>{item.number}</span>
+                      <span style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '1.2rem', flex: 1, fontWeight: '300', fontFamily: 'Helvetica, Arial, sans-serif' }}>{item.title}</span>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2">
+                        <path d="M7 7h10v10" />
+                        <path d="M17 7L7 17" />
+                      </svg>
+                    </div>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* SPOTIFY PLAYLIST SECTION */}
+          <div style={{
+            borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+            marginTop: '1rem',
+            paddingBottom: '1rem'
+          }}>
+            <div
+              onClick={() => handleToggleSection('spotify')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                cursor: 'pointer',
+                padding: '1rem 0',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+                <span style={{
+                  color: 'rgba(255, 255, 255, 0.5)',
+                  fontSize: '2rem',
+                  fontWeight: '300',
+                  fontFamily: 'monospace'
+                }}>05</span>
+                
+                <span
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
+                  style={{
+                    color: '#FFFFFF',
+                    fontSize: isMobile ? '2.5rem' : '4rem',
+                    fontWeight: '300',
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    textShadow: '0 0 10px rgba(255,255,255,0.3)',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '1rem'
+                  }}
+                >
+                  SPOTIFY PLAYLIST
+                </span>
+              </div>
+              
+              <div style={{
+                transform: openSection === 'spotify' ? 'rotate(90deg)' : 'rotate(0deg)',
+                transition: 'transform 0.3s ease'
+              }}>
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" style={{ filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.5))' }}>
+                  <path d="M7 7h10v10" />
+                  <path d="M17 7L7 17" />
+                </svg>
+              </div>
+            </div>
+
+            <AnimatePresence>
+              {openSection === 'spotify' && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.3 }}
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '2rem',
+                    marginLeft: '6rem',
+                    marginTop: '1.5rem',
+                    marginBottom: '1.5rem',
+                    overflow: 'hidden'
+                  }}
+                >
+                  {/* Spotify Player */}
+                  {currentEmbedUrl && (
+                    <div style={{
+                      width: '100%',
+                      marginBottom: '1rem'
+                    }}>
+                      <iframe
+                        style={{ borderRadius: '12px', width: '100%', height: '152px' }}
+                        src={currentEmbedUrl}
+                        frameBorder="0"
+                        allowFullScreen
+                        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                        loading="lazy"
+                      />
+                    </div>
+                  )}
+
+                  {/* Header Playlist */}
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '2rem',
+                    marginBottom: '0.5rem'
+                  }}>
+                    <div style={{
+                      width: isMobile ? '80px' : '100px',
+                      height: isMobile ? '80px' : '100px',
+                      borderRadius: '8px',
+                      backgroundColor: 'rgba(255,255,255,0.1)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      border: '1px solid rgba(255,255,255,0.2)'
+                    }}>
+                      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M8 11L12 8L16 11" strokeLinecap="round"/>
+                        <path d="M8 15L12 12L16 15" strokeLinecap="round"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <div style={{
+                        color: 'rgba(255,255,255,0.6)',
+                        fontSize: '0.9rem',
+                        marginBottom: '0.3rem',
+                        letterSpacing: '1px'
+                      }}>
+                        PLAYLIST • 5 LAGU
+                      </div>
+                      <div style={{
+                        color: '#FFFFFF',
+                        fontSize: isMobile ? '1.8rem' : '2.2rem',
+                        fontWeight: '300',
+                        fontFamily: 'Helvetica, Arial, sans-serif'
+                      }}>
+                        Lagu Kesukaan
+                      </div>
+                      <div style={{
+                        color: 'rgba(255,255,255,0.6)',
+                        fontSize: '0.9rem',
+                        marginTop: '0.3rem'
+                      }}>
+                        Hanin Dhiya • Stand Here Alone
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Daftar Lagu */}
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '1rem'
+                  }}>
+                    {/* Hanin Dhiya Section */}
+                    <div>
+                      <div style={{
+                        color: 'rgba(255,255,255,0.8)',
+                        fontSize: '1.1rem',
+                        fontWeight: '300',
+                        marginBottom: '0.8rem',
+                        paddingBottom: '0.3rem',
+                        borderBottom: '1px solid rgba(255,255,255,0.1)'
+                      }}>
+                        Hanin Dhiya
+                      </div>
+                      
+                      {favoriteTracks.filter(t => t.artist === 'Hanin Dhiya').map((track, idx) => (
+                        <div
+                          key={track.id}
+                          onClick={() => playTrack(track)}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '1.5rem',
+                            padding: '0.8rem 0',
+                            cursor: 'pointer',
+                            borderBottom: idx < 1 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none',
+                            backgroundColor: currentTrack === track.id ? 'rgba(255,255,255,0.05)' : 'transparent',
+                            transition: 'all 0.2s ease'
+                          }}
+                        >
+                          <span style={{
+                            color: 'rgba(255, 255, 255, 0.3)',
+                            fontSize: '1rem',
+                            fontWeight: '300',
+                            fontFamily: 'monospace',
+                            width: '30px'
+                          }}>
+                            {idx + 1}
+                          </span>
+
+                          <div style={{
+                            width: '40px',
+                            height: '40px',
+                            borderRadius: '4px',
+                            backgroundColor: 'rgba(255,255,255,0.1)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: 'rgba(255,255,255,0.5)',
+                            fontSize: '1.2rem'
+                          }}>
+                            ♪
+                          </div>
+
+                          <div style={{ flex: 1 }}>
+                            <div style={{
+                              color: '#FFFFFF',
+                              fontSize: '1.2rem',
+                              fontWeight: '300',
+                              fontFamily: 'Helvetica, Arial, sans-serif'
+                            }}>
+                              {track.title}
+                            </div>
+                          </div>
+
+                          {currentTrack === track.id && (
+                            <div style={{
+                              width: '6px',
+                              height: '6px',
+                              borderRadius: '50%',
+                              backgroundColor: 'white'
+                            }} />
+                          )}
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Stand Here Alone Section */}
+                    <div>
+                      <div style={{
+                        color: 'rgba(255,255,255,0.8)',
+                        fontSize: '1.1rem',
+                        fontWeight: '300',
+                        marginBottom: '0.8rem',
+                        paddingBottom: '0.3rem',
+                        borderBottom: '1px solid rgba(255,255,255,0.1)'
+                      }}>
+                        Stand Here Alone
+                      </div>
+                      
+                      {favoriteTracks.filter(t => t.artist === 'Stand Here Alone').map((track, idx) => (
+                        <div
+                          key={track.id}
+                          onClick={() => playTrack(track)}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '1.5rem',
+                            padding: '0.8rem 0',
+                            cursor: 'pointer',
+                            borderBottom: idx < 2 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none',
+                            backgroundColor: currentTrack === track.id ? 'rgba(255,255,255,0.05)' : 'transparent',
+                            transition: 'all 0.2s ease'
+                          }}
+                        >
+                          <span style={{
+                            color: 'rgba(255, 255, 255, 0.3)',
+                            fontSize: '1rem',
+                            fontWeight: '300',
+                            fontFamily: 'monospace',
+                            width: '30px'
+                          }}>
+                            {idx + 1}
+                          </span>
+
+                          <div style={{
+                            width: '40px',
+                            height: '40px',
+                            borderRadius: '4px',
+                            backgroundColor: 'rgba(255,255,255,0.1)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: 'rgba(255,255,255,0.5)',
+                            fontSize: '1.2rem'
+                          }}>
+                            ♪
+                          </div>
+
+                          <div style={{ flex: 1 }}>
+                            <div style={{
+                              color: '#FFFFFF',
+                              fontSize: '1.2rem',
+                              fontWeight: '300',
+                              fontFamily: 'Helvetica, Arial, sans-serif'
+                            }}>
+                              {track.title}
+                            </div>
+                          </div>
+
+                          {currentTrack === track.id && (
+                            <div style={{
+                              width: '6px',
+                              height: '6px',
+                              borderRadius: '50%',
+                              backgroundColor: 'white'
+                            }} />
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {!currentEmbedUrl && (
+                    <div style={{
+                      textAlign: 'center',
+                      padding: '1.5rem',
+                      color: 'rgba(255,255,255,0.5)',
+                      fontSize: '0.9rem',
+                      border: '1px dashed rgba(255,255,255,0.2)',
+                      borderRadius: '8px'
+                    }}>
+                      Pilih lagu di atas untuk memutar
+                    </div>
+                  )}
+
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'flex-end',
+                    marginTop: '1rem',
+                    paddingTop: '0.8rem',
+                    borderTop: '1px solid rgba(255,255,255,0.1)'
+                  }}>
+                    <a
+                      href="https://open.spotify.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        color: 'rgba(255,255,255,0.8)',
+                        textDecoration: 'none',
+                        fontSize: '0.9rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem'
+                      }}
+                    >
+                      Buka di Spotify
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                        <polyline points="15 3 21 3 21 9" />
+                        <line x1="10" y1="14" x2="21" y2="3" />
+                      </svg>
+                    </a>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer - Fixed di bawah */}
+      <div style={{
+        position: 'fixed',
+        bottom: isMobile ? '1.5rem' : '2rem',
         left: 0,
         width: '100%',
         display: 'flex',
@@ -5491,52 +5498,22 @@ fontFamily: 'Helvetica, Arial, sans-serif'
         fontSize: isMobile ? '0.9rem' : '1rem',
         fontWeight: '300',
         fontFamily: 'Helvetica, Arial, sans-serif',
-        zIndex: 2
+        zIndex: 20,
+        pointerEvents: 'none'
       }}>
         <div style={{ display: 'flex', gap: '2rem' }}>
           <span>© 2024 MENURU</span>
           <span>All rights reserved</span>
         </div>
         <div style={{ display: 'flex', gap: '2rem' }}>
-          <a href="#" style={{ color: 'inherit', textDecoration: 'none' }}>IG</a>
-          <a href="#" style={{ color: 'inherit', textDecoration: 'none' }}>TW</a>
-          <a href="#" style={{ color: 'inherit', textDecoration: 'none' }}>GH</a>
+          <a href="#" style={{ color: 'inherit', textDecoration: 'none', pointerEvents: 'auto' }}>IG</a>
+          <a href="#" style={{ color: 'inherit', textDecoration: 'none', pointerEvents: 'auto' }}>TW</a>
+          <a href="#" style={{ color: 'inherit', textDecoration: 'none', pointerEvents: 'auto' }}>GH</a>
         </div>
-      </div>
-
-      {/* Close Button - Posisi Absolute di Kanan */}
-      <div
-        onClick={handleCloseMenu}
-        style={{
-          position: 'absolute',
-          top: isMobile ? '1.5rem' : '2rem',
-          right: isMobile ? '1.5rem' : '2rem',
-          color: '#FFFFFF',
-          fontSize: isMobile ? '2.5rem' : '3rem',
-          fontWeight: '300',
-          cursor: 'pointer',
-          fontFamily: 'Helvetica, Arial, sans-serif',
-          zIndex: 20,
-          padding: '1rem',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          opacity: 0.9,
-          width: '60px',
-          height: '60px',
-          borderRadius: '50%',
-          border: '1px solid rgba(255, 255, 255, 0.4)',
-          backgroundColor: 'rgba(255, 255, 255, 0.03)',
-          textShadow: '0 0 15px rgba(255,255,255,0.5)',
-          boxShadow: '0 0 20px rgba(255,255,255,0.1)'
-        }}
-      >
-        ×
       </div>
     </motion.div>
   )}
 </AnimatePresence>
-
 
 
 
@@ -7993,6 +7970,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
     </div>
   );
 }
+
 
 
 
