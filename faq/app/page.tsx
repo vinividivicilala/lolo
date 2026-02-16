@@ -4269,6 +4269,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
           </motion.div>
         )}
       </AnimatePresence>
+
       {/* Menu Overlay dengan GSAP Animation - Modern Awwwards Style */}
       <AnimatePresence>
         {showMenuOverlay && (
@@ -4309,7 +4310,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
               zIndex: 1
             }} />
 
-            {/* Teks Berjalan dengan North East Arrow - Huruf Normal (Tanpa Bold) */}
+            {/* Teks Berjalan dengan North East Arrow - Warna Putih Solid */}
             <div style={{
               position: 'absolute',
               top: '15%',
@@ -4337,23 +4338,22 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                   fontFamily: 'Helvetica, Arial, sans-serif',
                   textTransform: 'uppercase',
                   letterSpacing: '8px',
-                  opacity: 0.15,
                   lineHeight: 1
                 }}
               >
-                HOME <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 2rem' }}>
+                HOME <svg width="180" height="180" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 2rem' }}>
                   <path d="M7 7h10v10" />
                   <path d="M17 7L7 17" />
-                </svg> HOME <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 2rem' }}>
+                </svg> HOME <svg width="180" height="180" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 2rem' }}>
                   <path d="M7 7h10v10" />
                   <path d="M17 7L7 17" />
-                </svg> HOME <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 2rem' }}>
+                </svg> HOME <svg width="180" height="180" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 2rem' }}>
                   <path d="M7 7h10v10" />
                   <path d="M17 7L7 17" />
-                </svg> HOME <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 2rem' }}>
+                </svg> HOME <svg width="180" height="180" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 2rem' }}>
                   <path d="M7 7h10v10" />
                   <path d="M17 7L7 17" />
-                </svg> HOME <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 2rem' }}>
+                </svg> HOME <svg width="180" height="180" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 2rem' }}>
                   <path d="M7 7h10v10" />
                   <path d="M17 7L7 17" />
                 </svg> 
@@ -4372,7 +4372,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
               gap: isMobile ? '3rem' : '6rem'
             }}>
               
-              {/* Left Section - Menu Items dengan North East Arrow */}
+              {/* Left Section - Menu Items dengan North East Arrow Besar */}
               <motion.div
                 initial={{ opacity: 0, x: -50 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -4417,7 +4417,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                       position: 'relative',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '1rem',
+                      gap: '1.5rem',
                       width: 'fit-content',
                       cursor: 'pointer',
                       transition: 'all 0.3s ease'
@@ -4429,14 +4429,14 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                   >
                     {item.label}
                     
-                    {/* North East Arrow untuk setiap menu item */}
+                    {/* North East Arrow besar untuk setiap menu item */}
                     <svg
-                      width="40"
-                      height="40"
+                      width="60"
+                      height="60"
                       viewBox="0 0 24 24"
                       fill="none"
                       stroke="white"
-                      strokeWidth="1.5"
+                      strokeWidth="2"
                       style={{
                         transition: 'all 0.3s ease'
                       }}
@@ -4463,7 +4463,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                 ))}
               </motion.div>
 
-              {/* Right Section - Notes dan Info */}
+              {/* Right Section - Notes dan Info dengan North East Arrow Besar */}
               <motion.div
                 initial={{ opacity: 0, x: 50 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -4475,7 +4475,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                   gap: '2.5rem'
                 }}
               >
-                {/* Featured Note dengan north east arrow */}
+                {/* Featured Note dengan north east arrow besar */}
                 <div>
                   <div style={{
                     color: 'rgba(255, 255, 255, 0.4)',
@@ -4494,9 +4494,9 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                     style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '1.5rem',
+                      gap: '2rem',
                       cursor: 'pointer',
-                      padding: '1.5rem',
+                      padding: '2rem',
                       backgroundColor: 'rgba(255, 255, 255, 0.02)',
                       border: '1px solid rgba(255, 255, 255, 0.1)',
                       borderRadius: '12px'
@@ -4504,15 +4504,15 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                     onClick={() => router.push('/notes')}
                   >
                     <div style={{
-                      width: '50px',
-                      height: '50px',
+                      width: '60px',
+                      height: '60px',
                       borderRadius: '50%',
                       backgroundColor: 'transparent',
                       border: '1px solid rgba(255, 255, 255, 0.3)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      fontSize: '1.5rem'
+                      fontSize: '2rem'
                     }}>
                       📝
                     </div>
@@ -4520,7 +4520,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                     <div style={{ flex: 1 }}>
                       <div style={{
                         color: 'white',
-                        fontSize: '1.3rem',
+                        fontSize: '1.5rem',
                         fontWeight: '400',
                         marginBottom: '0.5rem'
                       }}>
@@ -4528,21 +4528,21 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                       </div>
                       <div style={{
                         color: 'rgba(255, 255, 255, 0.6)',
-                        fontSize: '1rem',
+                        fontSize: '1.1rem',
                         fontWeight: '400'
                       }}>
                         Exploring the intersection of design and technology
                       </div>
                     </div>
 
-                    {/* North East Arrow untuk featured note */}
+                    {/* North East Arrow besar untuk featured note */}
                     <svg
-                      width="40"
-                      height="40"
+                      width="60"
+                      height="60"
                       viewBox="0 0 24 24"
                       fill="none"
                       stroke="white"
-                      strokeWidth="1.5"
+                      strokeWidth="2"
                     >
                       <path d="M7 7h10v10" />
                       <path d="M17 7L7 17" />
@@ -4550,7 +4550,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                   </motion.div>
                 </div>
 
-                {/* Recent Notes List dengan north east arrow */}
+                {/* Recent Notes List dengan north east arrow besar */}
                 <div>
                   <div style={{
                     color: 'rgba(255, 255, 255, 0.4)',
@@ -4570,7 +4570,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.4, delay: 0.5 + (index * 0.1) }}
                       style={{
-                        padding: '1.2rem 0',
+                        padding: '1.5rem 0',
                         borderBottom: index < 2 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none',
                         cursor: 'pointer',
                         display: 'flex',
@@ -4582,29 +4582,29 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                       <div>
                         <div style={{
                           color: 'white',
-                          fontSize: '1.1rem',
+                          fontSize: '1.3rem',
                           fontWeight: '400',
-                          marginBottom: '0.3rem'
+                          marginBottom: '0.5rem'
                         }}>
                           Note #{note}: Project Documentation
                         </div>
                         <div style={{
                           color: 'rgba(255, 255, 255, 0.5)',
-                          fontSize: '0.9rem',
+                          fontSize: '1rem',
                           fontWeight: '400'
                         }}>
                           Updated {note} day{note > 1 ? 's' : ''} ago
                         </div>
                       </div>
                       
-                      {/* North East Arrow kecil */}
+                      {/* North East Arrow besar untuk recent notes */}
                       <svg
-                        width="24"
-                        height="24"
+                        width="40"
+                        height="40"
                         viewBox="0 0 24 24"
                         fill="none"
-                        stroke="rgba(255, 255, 255, 0.5)"
-                        strokeWidth="1.5"
+                        stroke="white"
+                        strokeWidth="2"
                       >
                         <path d="M7 7h10v10" />
                         <path d="M17 7L7 17" />
@@ -7145,6 +7145,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
     </div>
   );
 }
+
 
 
 
