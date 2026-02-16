@@ -4270,10 +4270,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
         )}
       </AnimatePresence>
 
-
-
-
-      {/* Menu Overlay dengan GSAP Animation - Modern Awwwards Style */}
+{/* Menu Overlay dengan GSAP Animation - Modern Awwwards Style */}
 <AnimatePresence>
   {showMenuOverlay && (
     <motion.div
@@ -4299,7 +4296,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
         transform: 'translateY(-100%)'
       }}
     >
-      {/* Background dengan efek grain dan pattern - Lebih subtle */}
+      {/* Background dengan efek grain dan pattern */}
       <div style={{
         position: 'absolute',
         top: 0,
@@ -4313,7 +4310,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
         zIndex: 1
       }} />
 
-      {/* Teks Berjalan dengan North East Arrow - PUTIH CERAH DENGAN GLOW */}
+      {/* Teks Berjalan dengan North East Arrow - PUTIH CERAH */}
       <div style={{
         position: 'absolute',
         bottom: '15%',
@@ -4347,7 +4344,6 @@ fontFamily: 'Helvetica, Arial, sans-serif'
             filter: 'brightness(1.3)'
           }}
         >
-          {/* MENU dengan SVG yang sangat cerah */}
           MENU <svg width="180" height="180" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="3" strokeLinecap="round" style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 2rem', filter: 'drop-shadow(0 0 10px rgba(255,255,255,0.8)) drop-shadow(0 0 20px rgba(255,255,255,0.5))' }}>
             <path d="M7 7h10v10" />
             <path d="M17 7L7 17" />
@@ -4361,7 +4357,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
         </motion.div>
       </div>
 
-      {/* Konten Utama - MENU UTAMA YANG BARU */}
+      {/* Konten Utama */}
       <div style={{
         position: 'relative',
         zIndex: 3,
@@ -4370,408 +4366,68 @@ fontFamily: 'Helvetica, Arial, sans-serif'
         padding: isMobile ? '2rem' : '4rem',
         display: 'flex',
         flexDirection: 'column',
-        gap: '2rem',
+        gap: '1rem',
         marginTop: '-5%'
       }}>
         
-        {/* CATATAN SECTION - dengan angka otomatis */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          style={{
-            borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
-            paddingBottom: '1.5rem'
-          }}
+        {/* CATATAN SECTION */}
+        <MenuItem 
+          number="01" 
+          title="CATATAN" 
+          mainUrl="/catatan"
+          isOpen={openSection === 'catatan'}
+          onToggle={() => handleToggleSection('catatan')}
         >
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            cursor: 'pointer',
-            padding: '1rem 0'
-          }}
-          onClick={() => router.push('/catatan')}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
-              <span style={{
-                color: 'rgba(255, 255, 255, 0.5)',
-                fontSize: '2rem',
-                fontWeight: '300',
-                fontFamily: 'monospace'
-              }}>01</span>
-              <span style={{
-                color: '#FFFFFF',
-                fontSize: isMobile ? '3rem' : '4.5rem',
-                fontWeight: '500',
-                fontFamily: 'Helvetica, Arial, sans-serif',
-                textShadow: '0 0 10px rgba(255,255,255,0.3)'
-              }}>
-                CATATAN
-              </span>
-            </div>
-            <svg
-              width="50"
-              height="50"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#FFFFFF"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              style={{
-                filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.5))'
-              }}
-            >
-              <path d="M7 7h10v10" />
-              <path d="M17 7L7 17" />
-            </svg>
-          </div>
+          <SubMenuItem number="01" title="Creative Process" url="/catatan/creative" />
+          <SubMenuItem number="02" title="Design Thinking" url="/catatan/design" />
+          <SubMenuItem number="03" title="UX Research" url="/catatan/ux" />
+          <SubMenuItem number="04" title="Development" url="/catatan/dev" />
+        </MenuItem>
 
-          {/* Sub-menu Catatan - muncul ketika di hover/click */}
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            transition={{ duration: 0.3 }}
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '0.8rem',
-              marginLeft: '6rem',
-              marginTop: '0.5rem'
-            }}
-          >
-            {[
-              { number: '01', title: 'Creative Process', url: '/catatan/creative' },
-              { number: '02', title: 'Design Thinking', url: '/catatan/design' },
-              { number: '03', title: 'UX Research', url: '/catatan/ux' },
-              { number: '04', title: 'Development', url: '/catatan/dev' }
-            ].map((item, idx) => (
-              <motion.div
-                key={idx}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.2 + (idx * 0.1) }}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '1.5rem',
-                  padding: '0.5rem 0',
-                  cursor: 'pointer',
-                  borderBottom: idx < 3 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none'
-                }}
-                onClick={() => router.push(item.url)}
-                whileHover={{ x: 10 }}
-              >
-                <span style={{ color: 'rgba(255, 255, 255, 0.3)', fontSize: '0.9rem', fontFamily: 'monospace', width: '30px' }}>{item.number}</span>
-                <span style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '1.2rem' }}>{item.title}</span>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2">
-                  <path d="M7 7h10v10" />
-                  <path d="M17 7L7 17" />
-                </svg>
-              </motion.div>
-            ))}
-          </motion.div>
-        </motion.div>
-
-        {/* COMMUNITY SECTION - dengan angka otomatis */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          style={{
-            borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
-            paddingBottom: '1.5rem'
-          }}
+        {/* COMMUNITY SECTION */}
+        <MenuItem 
+          number="02" 
+          title="COMMUNITY" 
+          mainUrl="/community"
+          isOpen={openSection === 'community'}
+          onToggle={() => handleToggleSection('community')}
         >
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            cursor: 'pointer',
-            padding: '1rem 0'
-          }}
-          onClick={() => router.push('/community')}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
-              <span style={{
-                color: 'rgba(255, 255, 255, 0.5)',
-                fontSize: '2rem',
-                fontWeight: '300',
-                fontFamily: 'monospace'
-              }}>02</span>
-              <span style={{
-                color: '#FFFFFF',
-                fontSize: isMobile ? '3rem' : '4.5rem',
-                fontWeight: '500',
-                fontFamily: 'Helvetica, Arial, sans-serif',
-                textShadow: '0 0 10px rgba(255,255,255,0.3)'
-              }}>
-                COMMUNITY
-              </span>
-            </div>
-            <svg
-              width="50"
-              height="50"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#FFFFFF"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              style={{
-                filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.5))'
-              }}
-            >
-              <path d="M7 7h10v10" />
-              <path d="M17 7L7 17" />
-            </svg>
-          </div>
+          <SubMenuItem number="01" title="Forum Diskusi" url="/community/forum" />
+          <SubMenuItem number="02" title="Events" url="/community/events" />
+          <SubMenuItem number="03" title="Members" url="/community/members" />
+          <SubMenuItem number="04" title="Gallery" url="/community/gallery" />
+        </MenuItem>
 
-          {/* Sub-menu Community */}
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            transition={{ duration: 0.3 }}
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '0.8rem',
-              marginLeft: '6rem',
-              marginTop: '0.5rem'
-            }}
-          >
-            {[
-              { number: '01', title: 'Forum Diskusi', url: '/community/forum' },
-              { number: '02', title: 'Events', url: '/community/events' },
-              { number: '03', title: 'Members', url: '/community/members' },
-              { number: '04', title: 'Gallery', url: '/community/gallery' }
-            ].map((item, idx) => (
-              <motion.div
-                key={idx}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.3 + (idx * 0.1) }}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '1.5rem',
-                  padding: '0.5rem 0',
-                  cursor: 'pointer',
-                  borderBottom: idx < 3 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none'
-                }}
-                onClick={() => router.push(item.url)}
-                whileHover={{ x: 10 }}
-              >
-                <span style={{ color: 'rgba(255, 255, 255, 0.3)', fontSize: '0.9rem', fontFamily: 'monospace', width: '30px' }}>{item.number}</span>
-                <span style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '1.2rem' }}>{item.title}</span>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2">
-                  <path d="M7 7h10v10" />
-                  <path d="M17 7L7 17" />
-                </svg>
-              </motion.div>
-            ))}
-          </motion.div>
-        </motion.div>
-
-        {/* CALENDAR SECTION - dengan angka otomatis */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          style={{
-            borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
-            paddingBottom: '1.5rem'
-          }}
+        {/* CALENDAR SECTION */}
+        <MenuItem 
+          number="03" 
+          title="CALENDAR" 
+          mainUrl="/calendar"
+          isOpen={openSection === 'calendar'}
+          onToggle={() => handleToggleSection('calendar')}
         >
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            cursor: 'pointer',
-            padding: '1rem 0'
-          }}
-          onClick={() => router.push('/calendar')}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
-              <span style={{
-                color: 'rgba(255, 255, 255, 0.5)',
-                fontSize: '2rem',
-                fontWeight: '300',
-                fontFamily: 'monospace'
-              }}>03</span>
-              <span style={{
-                color: '#FFFFFF',
-                fontSize: isMobile ? '3rem' : '4.5rem',
-                fontWeight: '500',
-                fontFamily: 'Helvetica, Arial, sans-serif',
-                textShadow: '0 0 10px rgba(255,255,255,0.3)'
-              }}>
-                CALENDAR
-              </span>
-            </div>
-            <svg
-              width="50"
-              height="50"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#FFFFFF"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              style={{
-                filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.5))'
-              }}
-            >
-              <path d="M7 7h10v10" />
-              <path d="M17 7L7 17" />
-            </svg>
-          </div>
+          <SubMenuItem number="01" title="Upcoming Events" url="/calendar/upcoming" />
+          <SubMenuItem number="02" title="Workshops" url="/calendar/workshops" />
+          <SubMenuItem number="03" title="Deadlines" url="/calendar/deadlines" />
+          <SubMenuItem number="04" title="Schedule" url="/calendar/schedule" />
+        </MenuItem>
 
-          {/* Sub-menu Calendar */}
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            transition={{ duration: 0.3 }}
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '0.8rem',
-              marginLeft: '6rem',
-              marginTop: '0.5rem'
-            }}
-          >
-            {[
-              { number: '01', title: 'Upcoming Events', url: '/calendar/upcoming' },
-              { number: '02', title: 'Workshops', url: '/calendar/workshops' },
-              { number: '03', title: 'Deadlines', url: '/calendar/deadlines' },
-              { number: '04', title: 'Schedule', url: '/calendar/schedule' }
-            ].map((item, idx) => (
-              <motion.div
-                key={idx}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.4 + (idx * 0.1) }}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '1.5rem',
-                  padding: '0.5rem 0',
-                  cursor: 'pointer',
-                  borderBottom: idx < 3 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none'
-                }}
-                onClick={() => router.push(item.url)}
-                whileHover={{ x: 10 }}
-              >
-                <span style={{ color: 'rgba(255, 255, 255, 0.3)', fontSize: '0.9rem', fontFamily: 'monospace', width: '30px' }}>{item.number}</span>
-                <span style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '1.2rem' }}>{item.title}</span>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2">
-                  <path d="M7 7h10v10" />
-                  <path d="M17 7L7 17" />
-                </svg>
-              </motion.div>
-            ))}
-          </motion.div>
-        </motion.div>
-
-        {/* BLOG SECTION - dengan angka otomatis */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
-          style={{
-            borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
-            paddingBottom: '1.5rem'
-          }}
+        {/* BLOG SECTION */}
+        <MenuItem 
+          number="04" 
+          title="BLOG" 
+          mainUrl="/blog"
+          isOpen={openSection === 'blog'}
+          onToggle={() => handleToggleSection('blog')}
         >
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            cursor: 'pointer',
-            padding: '1rem 0'
-          }}
-          onClick={() => router.push('/blog')}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
-              <span style={{
-                color: 'rgba(255, 255, 255, 0.5)',
-                fontSize: '2rem',
-                fontWeight: '300',
-                fontFamily: 'monospace'
-              }}>04</span>
-              <span style={{
-                color: '#FFFFFF',
-                fontSize: isMobile ? '3rem' : '4.5rem',
-                fontWeight: '500',
-                fontFamily: 'Helvetica, Arial, sans-serif',
-                textShadow: '0 0 10px rgba(255,255,255,0.3)'
-              }}>
-                BLOG
-              </span>
-            </div>
-            <svg
-              width="50"
-              height="50"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#FFFFFF"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              style={{
-                filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.5))'
-              }}
-            >
-              <path d="M7 7h10v10" />
-              <path d="M17 7L7 17" />
-            </svg>
-          </div>
-
-          {/* Sub-menu Blog */}
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            transition={{ duration: 0.3 }}
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '0.8rem',
-              marginLeft: '6rem',
-              marginTop: '0.5rem'
-            }}
-          >
-            {[
-              { number: '01', title: 'Latest Posts', url: '/blog/latest' },
-              { number: '02', title: 'Tutorials', url: '/blog/tutorials' },
-              { number: '03', title: 'News', url: '/blog/news' },
-              { number: '04', title: 'Insights', url: '/blog/insights' }
-            ].map((item, idx) => (
-              <motion.div
-                key={idx}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.5 + (idx * 0.1) }}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '1.5rem',
-                  padding: '0.5rem 0',
-                  cursor: 'pointer',
-                  borderBottom: idx < 3 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none'
-                }}
-                onClick={() => router.push(item.url)}
-                whileHover={{ x: 10 }}
-              >
-                <span style={{ color: 'rgba(255, 255, 255, 0.3)', fontSize: '0.9rem', fontFamily: 'monospace', width: '30px' }}>{item.number}</span>
-                <span style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '1.2rem' }}>{item.title}</span>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2">
-                  <path d="M7 7h10v10" />
-                  <path d="M17 7L7 17" />
-                </svg>
-              </motion.div>
-            ))}
-          </motion.div>
-        </motion.div>
+          <SubMenuItem number="01" title="Latest Posts" url="/blog/latest" />
+          <SubMenuItem number="02" title="Tutorials" url="/blog/tutorials" />
+          <SubMenuItem number="03" title="News" url="/blog/news" />
+          <SubMenuItem number="04" title="Insights" url="/blog/insights" />
+        </MenuItem>
       </div>
 
-      {/* Footer dengan social links */}
+      {/* Footer */}
       <motion.div
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
@@ -4820,7 +4476,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
         </div>
       </motion.div>
 
-      {/* Close Button dengan glow */}
+      {/* Close Button */}
       <motion.div
         onClick={handleCloseMenu}
         style={{
@@ -4860,8 +4516,6 @@ fontFamily: 'Helvetica, Arial, sans-serif'
     </motion.div>
   )}
 </AnimatePresence>
-      
-      
 
       
 
@@ -7313,6 +6967,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
     </div>
   );
 }
+
 
 
 
