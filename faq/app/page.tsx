@@ -410,7 +410,31 @@ const SubMenuItem = ({ number, title, url }: {
 );
 
 
-  
+  // State untuk jam Jakarta
+const [jakartaTime, setJakartaTime] = useState<string>('');
+
+// useEffect untuk update jam Jakarta setiap detik
+useEffect(() => {
+  const updateJakartaTime = () => {
+    const now = new Date();
+    const timeString = now.toLocaleTimeString('id-ID', { 
+      timeZone: 'Asia/Jakarta', 
+      hour12: false,
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+    setJakartaTime(timeString);
+  };
+
+  // Update immediately
+  updateJakartaTime();
+
+  // Update every second
+  const interval = setInterval(updateJakartaTime, 1000);
+
+  return () => clearInterval(interval);
+}, []);
   
 
   // Data untuk pencarian
@@ -4426,8 +4450,6 @@ fontFamily: 'Helvetica, Arial, sans-serif'
           </motion.div>
         )}
       </AnimatePresence>
-
-
 {/* Menu Overlay dengan GSAP Animation - Modern Awwwards Style */}
 <AnimatePresence>
   {showMenuOverlay && (
@@ -4467,6 +4489,56 @@ fontFamily: 'Helvetica, Arial, sans-serif'
         pointerEvents: 'none',
         zIndex: 1
       }} />
+
+      {/* Header Menu - Judul Website dan Jam Jakarta */}
+      <div style={{
+        position: 'absolute',
+        top: isMobile ? '1.5rem' : '2rem',
+        left: 0,
+        right: 0,
+        width: '100%',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: isMobile ? '0 2rem' : '0 4rem',
+        boxSizing: 'border-box',
+        zIndex: 10,
+        pointerEvents: 'none'
+      }}>
+        {/* Judul Website */}
+        <div style={{
+          color: '#FFFFFF',
+          fontSize: isMobile ? '1.2rem' : '1.5rem',
+          fontWeight: '300',
+          fontFamily: 'Helvetica, Arial, sans-serif',
+          letterSpacing: '2px',
+          textTransform: 'uppercase',
+          opacity: 0.9,
+          textShadow: '0 0 10px rgba(255,255,255,0.3)'
+        }}>
+          Menuru
+        </div>
+
+        {/* Jam Jakarta Realtime */}
+        <div style={{
+          color: '#FFFFFF',
+          fontSize: isMobile ? '1.2rem' : '1.5rem',
+          fontWeight: '300',
+          fontFamily: 'Helvetica, Arial, sans-serif',
+          letterSpacing: '1px',
+          opacity: 0.9,
+          textShadow: '0 0 10px rgba(255,255,255,0.3)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.5rem'
+        }}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ opacity: 0.7 }}>
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+          <span id="jakarta-clock">{new Date().toLocaleTimeString('id-ID', { timeZone: 'Asia/Jakarta', hour12: false })}</span>
+        </div>
+      </div>
 
       {/* Teks Berjalan dengan North East Arrow - PUTIH CERAH (TETAP BERJALAN) */}
       <div style={{
@@ -4939,7 +5011,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
         </div>
       </div>
 
-      {/* Close Button - tanpa hover effect */}
+      {/* Close Button */}
       <div
         onClick={handleCloseMenu}
         style={{
@@ -4971,11 +5043,6 @@ fontFamily: 'Helvetica, Arial, sans-serif'
     </motion.div>
   )}
 </AnimatePresence>
-
-
-
-
-
 
 
 
@@ -7432,6 +7499,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
     </div>
   );
 }
+
 
 
 
