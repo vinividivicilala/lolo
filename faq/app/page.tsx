@@ -265,23 +265,30 @@ const handleToggleSection = (section: string) => {
 };
 
 
-// Data playlist lagu kesukaan - Hanin Dhiya & Stand Here Alone
+
+
+
+
+  // State untuk Spotify
+const [currentTrack, setCurrentTrack] = useState<string | null>(null);
+const [isPlaying, setIsPlaying] = useState(false);
+const [currentEmbedUrl, setCurrentEmbedUrl] = useState<string>('');
+
+// Data playlist lagu kesukaan dengan Spotify embed URL
 const favoriteTracks = [
   // Hanin Dhiya
   {
     id: 'hanin1',
     title: 'Pupus',
     artist: 'Hanin Dhiya',
-    album: 'Pupus - Single',
-    coverUrl: 'https://i.scdn.co/image/ab67616d0000b2738c9b6d9b6d9b6d9b6d9b6d9b6',
+    embedUrl: 'https://open.spotify.com/embed/track/3z8h0TU7ReDPLIbEnYhWZb?utm_source=generator',
     spotifyUrl: 'https://open.spotify.com/track/3z8h0TU7ReDPLIbEnYhWZb'
   },
   {
     id: 'hanin2',
     title: 'Suatu Saat Nanti',
     artist: 'Hanin Dhiya',
-    album: 'Suatu Saat Nanti - Single',
-    coverUrl: 'https://i.scdn.co/image/ab67616d0000b2739c9b6d9b6d9b6d9b6d9b6d9b6',
+    embedUrl: 'https://open.spotify.com/embed/track/4z8h0TU7ReDPLIbEnYhWZb?utm_source=generator',
     spotifyUrl: 'https://open.spotify.com/track/4z8h0TU7ReDPLIbEnYhWZb'
   },
   // Stand Here Alone
@@ -289,49 +296,31 @@ const favoriteTracks = [
     id: 'sha1',
     title: 'Kita Lawan Mereka',
     artist: 'Stand Here Alone',
-    album: 'Kita Lawan Mereka - Single',
-    coverUrl: 'https://i.scdn.co/image/ab67616d0000b273ac9b6d9b6d9b6d9b6d9b6d9b6',
+    embedUrl: 'https://open.spotify.com/embed/track/5z8h0TU7ReDPLIbEnYhWZb?utm_source=generator',
     spotifyUrl: 'https://open.spotify.com/track/5z8h0TU7ReDPLIbEnYhWZb'
   },
   {
     id: 'sha2',
     title: 'Korban Lelaki',
     artist: 'Stand Here Alone',
-    album: 'Korban Lelaki - Single',
-    coverUrl: 'https://i.scdn.co/image/ab67616d0000b273bc9b6d9b6d9b6d9b6d9b6d9b6',
+    embedUrl: 'https://open.spotify.com/embed/track/6z8h0TU7ReDPLIbEnYhWZb?utm_source=generator',
     spotifyUrl: 'https://open.spotify.com/track/6z8h0TU7ReDPLIbEnYhWZb'
   },
   {
     id: 'sha3',
     title: 'Wanita Masih Banyak',
     artist: 'Stand Here Alone',
-    album: 'Wanita Masih Banyak - Single',
-    coverUrl: 'https://i.scdn.co/image/ab67616d0000b273cc9b6d9b6d9b6d9b6d9b6d9b6',
+    embedUrl: 'https://open.spotify.com/embed/track/7z8h0TU7ReDPLIbEnYhWZb?utm_source=generator',
     spotifyUrl: 'https://open.spotify.com/track/7z8h0TU7ReDPLIbEnYhWZb'
   }
 ];
 
-// State untuk lagu yang sedang diputar
-const [currentTrack, setCurrentTrack] = useState<string | null>(null);
-const [isPlaying, setIsPlaying] = useState(false);
-const audioRef = useRef<HTMLAudioElement | null>(null);
-
-// Fungsi untuk memutar lagu (buka di Spotify)
+// Fungsi untuk memutar lagu
 const playTrack = (track: typeof favoriteTracks[0]) => {
   setCurrentTrack(track.id);
+  setCurrentEmbedUrl(track.embedUrl);
   setIsPlaying(true);
-  window.open(track.spotifyUrl, '_blank');
 };
-
-// Fungsi untuk toggle play/pause
-const togglePlay = (track: typeof favoriteTracks[0]) => {
-  if (currentTrack === track.id) {
-    setIsPlaying(!isPlaying);
-  } else {
-    playTrack(track);
-  }
-};
-
 
 
 
@@ -5071,8 +5060,9 @@ fontFamily: 'Helvetica, Arial, sans-serif'
         </div>
               
 
+        
 
-        {/* SPOTIFY PLAYLIST SECTION - DESAIN MINIMALIS BESAR */}
+        {/* SPOTIFY PLAYLIST SECTION - DENGAN PLAYER LANGSUNG */}
         <div style={{
           borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
           marginTop: '2rem',
@@ -5137,6 +5127,23 @@ fontFamily: 'Helvetica, Arial, sans-serif'
               marginBottom: '2rem',
             }}>
               
+              {/* Spotify Player - Muncul jika ada lagu yang dipilih */}
+              {currentEmbedUrl && (
+                <div style={{
+                  width: '100%',
+                  marginBottom: '2rem'
+                }}>
+                  <iframe
+                    style={{ borderRadius: '12px', width: '100%', height: '152px' }}
+                    src={currentEmbedUrl}
+                    frameBorder="0"
+                    allowFullScreen
+                    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                    loading="lazy"
+                  />
+                </div>
+              )}
+
               {/* Header Playlist */}
               <div style={{
                 display: 'flex',
@@ -5187,7 +5194,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                 </div>
               </div>
 
-              {/* Daftar Lagu - Desain Minimalis Besar */}
+              {/* Daftar Lagu - Bisa Dipilih */}
               <div style={{
                 display: 'flex',
                 flexDirection: 'column',
@@ -5211,7 +5218,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                   {favoriteTracks.filter(t => t.artist === 'Hanin Dhiya').map((track, idx) => (
                     <div
                       key={track.id}
-                      onClick={() => togglePlay(track)}
+                      onClick={() => playTrack(track)}
                       style={{
                         display: 'flex',
                         alignItems: 'center',
@@ -5219,7 +5226,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                         padding: '1rem 0',
                         cursor: 'pointer',
                         borderBottom: idx < 1 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none',
-                        backgroundColor: 'transparent',
+                        backgroundColor: currentTrack === track.id ? 'rgba(255,255,255,0.05)' : 'transparent',
                         transition: 'all 0.2s ease'
                       }}
                     >
@@ -5272,9 +5279,20 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                           fontSize: '1rem',
                           fontWeight: '300'
                         }}>
-                          {track.album}
+                          {track.artist}
                         </div>
                       </div>
+
+                      {/* Indikator Sedang Diputar */}
+                      {currentTrack === track.id && (
+                        <div style={{
+                          width: '8px',
+                          height: '8px',
+                          borderRadius: '50%',
+                          backgroundColor: 'white',
+                          marginRight: '0.5rem'
+                        }} />
+                      )}
 
                       {/* Tombol Play */}
                       <div style={{
@@ -5285,16 +5303,9 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                         justifyContent: 'center',
                         flexShrink: 0
                       }}>
-                        {currentTrack === track.id && isPlaying ? (
-                          <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
-                            <rect x="6" y="4" width="4" height="16" />
-                            <rect x="14" y="4" width="4" height="16" />
-                          </svg>
-                        ) : (
-                          <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
-                            <polygon points="5 3 19 12 5 21 5 3" />
-                          </svg>
-                        )}
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                          <polygon points="5 3 19 12 5 21 5 3" />
+                        </svg>
                       </div>
                     </div>
                   ))}
@@ -5316,7 +5327,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                   {favoriteTracks.filter(t => t.artist === 'Stand Here Alone').map((track, idx) => (
                     <div
                       key={track.id}
-                      onClick={() => togglePlay(track)}
+                      onClick={() => playTrack(track)}
                       style={{
                         display: 'flex',
                         alignItems: 'center',
@@ -5324,7 +5335,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                         padding: '1rem 0',
                         cursor: 'pointer',
                         borderBottom: idx < 2 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none',
-                        backgroundColor: 'transparent',
+                        backgroundColor: currentTrack === track.id ? 'rgba(255,255,255,0.05)' : 'transparent',
                         transition: 'all 0.2s ease'
                       }}
                     >
@@ -5377,9 +5388,20 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                           fontSize: '1rem',
                           fontWeight: '300'
                         }}>
-                          {track.album}
+                          {track.artist}
                         </div>
                       </div>
+
+                      {/* Indikator Sedang Diputar */}
+                      {currentTrack === track.id && (
+                        <div style={{
+                          width: '8px',
+                          height: '8px',
+                          borderRadius: '50%',
+                          backgroundColor: 'white',
+                          marginRight: '0.5rem'
+                        }} />
+                      )}
 
                       {/* Tombol Play */}
                       <div style={{
@@ -5390,23 +5412,30 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                         justifyContent: 'center',
                         flexShrink: 0
                       }}>
-                        {currentTrack === track.id && isPlaying ? (
-                          <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
-                            <rect x="6" y="4" width="4" height="16" />
-                            <rect x="14" y="4" width="4" height="16" />
-                          </svg>
-                        ) : (
-                          <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
-                            <polygon points="5 3 19 12 5 21 5 3" />
-                          </svg>
-                        )}
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                          <polygon points="5 3 19 12 5 21 5 3" />
+                        </svg>
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
 
-              {/* Link ke Spotify - Minimalis */}
+              {/* Jika belum ada lagu yang dipilih */}
+              {!currentEmbedUrl && (
+                <div style={{
+                  textAlign: 'center',
+                  padding: '2rem',
+                  color: 'rgba(255,255,255,0.5)',
+                  fontSize: '1rem',
+                  border: '1px dashed rgba(255,255,255,0.2)',
+                  borderRadius: '8px'
+                }}>
+                  Pilih lagu di atas untuk memutar
+                </div>
+              )}
+
+              {/* Link ke Spotify */}
               <div style={{
                 display: 'flex',
                 justifyContent: 'flex-end',
@@ -5440,12 +5469,6 @@ fontFamily: 'Helvetica, Arial, sans-serif'
             </div>
           )}
         </div>
-
-
-
-        
-
-
 
 
 
@@ -7970,6 +7993,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
     </div>
   );
 }
+
 
 
 
