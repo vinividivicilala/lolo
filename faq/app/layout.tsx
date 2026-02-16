@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Your App',
-  description: 'Your app description',
+  title: 'Menuru Brand',
+  description: 'Menuru Brand from Love yourself',
 }
 
 export default function RootLayout({
@@ -18,3 +18,4 @@ export default function RootLayout({
     </html>
   )
 }
+
