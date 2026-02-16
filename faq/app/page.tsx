@@ -264,7 +264,8 @@ const handleToggleSection = (section: string) => {
   setOpenSection(openSection === section ? null : section);
 };
 
-// Component Menu Item - definisikan di dalam HomePage component (sebelum return)
+
+// Component Menu Item - tanpa animasi gerak
 const MenuItem = ({ number, title, mainUrl, isOpen, onToggle, children }: {
   number: string;
   title: string;
@@ -281,8 +282,8 @@ const MenuItem = ({ number, title, mainUrl, isOpen, onToggle, children }: {
       borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
     }}
   >
-    {/* Header yang bisa diklik untuk toggle */}
-    <motion.div
+    {/* Header yang bisa diklik untuk toggle - tanpa hover effect */}
+    <div
       onClick={onToggle}
       style={{
         display: 'flex',
@@ -290,9 +291,8 @@ const MenuItem = ({ number, title, mainUrl, isOpen, onToggle, children }: {
         justifyContent: 'space-between',
         cursor: 'pointer',
         padding: '1rem 0',
-        transition: 'all 0.3s ease'
+        transition: 'none' // Hapus transition
       }}
-      whileHover={{ x: 10 }}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
         <span style={{
@@ -302,7 +302,7 @@ const MenuItem = ({ number, title, mainUrl, isOpen, onToggle, children }: {
           fontFamily: 'monospace'
         }}>{number}</span>
         
-        {/* Title bisa diklik langsung ke halaman utama */}
+        {/* Title - tanpa hover effect */}
         <span
           onClick={(e) => {
             e.stopPropagation();
@@ -315,20 +315,18 @@ const MenuItem = ({ number, title, mainUrl, isOpen, onToggle, children }: {
             fontFamily: 'Helvetica, Arial, sans-serif',
             textShadow: '0 0 10px rgba(255,255,255,0.3)',
             cursor: 'pointer',
-            transition: 'all 0.3s ease'
+            transition: 'none' // Hapus transition
           }}
-          onMouseEnter={(e) => e.currentTarget.style.color = 'rgba(255,255,255,0.8)'}
-          onMouseLeave={(e) => e.currentTarget.style.color = '#FFFFFF'}
         >
           {title}
         </span>
       </div>
       
-      {/* Arrow yang berubah sesuai state */}
-      <motion.div
-        animate={{ rotate: isOpen ? 90 : 0 }}
-        transition={{ duration: 0.3 }}
-      >
+      {/* Arrow yang berubah sesuai state - tanpa animasi rotate */}
+      <div style={{
+        transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)',
+        transition: 'transform 0.3s ease' // Hanya arrow yang tetap punya animasi
+      }}>
         <svg
           width="50"
           height="50"
@@ -344,10 +342,10 @@ const MenuItem = ({ number, title, mainUrl, isOpen, onToggle, children }: {
           <path d="M7 7h10v10" />
           <path d="M17 7L7 17" />
         </svg>
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
 
-    {/* Sub-menu dengan animasi muncul/hilang */}
+    {/* Sub-menu dengan animasi muncul/hilang - tetap ada animasi */}
     <AnimatePresence>
       {isOpen && (
         <motion.div
@@ -372,16 +370,13 @@ const MenuItem = ({ number, title, mainUrl, isOpen, onToggle, children }: {
   </motion.div>
 );
 
-// Component Sub Menu Item - definisikan di dalam HomePage component (sebelum return)
+// Component Sub Menu Item - tanpa animasi hover
 const SubMenuItem = ({ number, title, url }: {
   number: string;
   title: string;
   url: string;
 }) => (
-  <motion.div
-    initial={{ opacity: 0, x: -20 }}
-    animate={{ opacity: 1, x: 0 }}
-    exit={{ opacity: 0, x: -20 }}
+  <div // Ganti dari motion.div ke div biasa
     style={{
       display: 'flex',
       alignItems: 'center',
@@ -391,7 +386,6 @@ const SubMenuItem = ({ number, title, url }: {
       borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
     }}
     onClick={() => router.push(url)}
-    whileHover={{ x: 10 }}
   >
     <span style={{ 
       color: 'rgba(255, 255, 255, 0.3)', 
@@ -412,9 +406,11 @@ const SubMenuItem = ({ number, title, url }: {
       <path d="M7 7h10v10" />
       <path d="M17 7L7 17" />
     </svg>
-  </motion.div>
+  </div>
 );
 
+
+  
   
 
   // Data untuk pencarian
@@ -7142,6 +7138,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
     </div>
   );
 }
+
 
 
 
