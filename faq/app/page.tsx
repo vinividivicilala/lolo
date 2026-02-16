@@ -4269,6 +4269,8 @@ fontFamily: 'Helvetica, Arial, sans-serif'
           </motion.div>
         )}
       </AnimatePresence>
+
+
       {/* Menu Overlay dengan GSAP Animation - Modern Awwwards Style */}
       <AnimatePresence>
         {showMenuOverlay && (
@@ -4278,14 +4280,14 @@ fontFamily: 'Helvetica, Arial, sans-serif'
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.5, ease: [0.76, 0, 0.24, 1] }}
             style={{
               position: 'fixed',
               top: 0,
               left: 0,
               width: '100%',
               height: '100%',
-              backgroundColor: 'black',
+              backgroundColor: '#0a0a0a',
               zIndex: 9995,
               display: 'flex',
               flexDirection: 'column',
@@ -4295,110 +4297,159 @@ fontFamily: 'Helvetica, Arial, sans-serif'
               transform: 'translateY(-100%)'
             }}
           >
-            {/* Background dengan efek grain dan pattern */}
-            <div style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              backgroundImage: `radial-gradient(circle at 30% 40%, rgba(255,255,255,0.03) 0%, transparent 30%),
-                                radial-gradient(circle at 70% 60%, rgba(255,255,255,0.03) 0%, transparent 30%),
-                                repeating-linear-gradient(45deg, rgba(255,255,255,0.01) 0px, rgba(255,255,255,0.01) 2px, transparent 2px, transparent 8px)`,
-              pointerEvents: 'none',
-              zIndex: 1
-            }} />
+            {/* Animated Background dengan efek noise dan gradient */}
+            <motion.div
+              initial={{ scale: 1.2, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 1.2, ease: [0.76, 0, 0.24, 1] }}
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                background: `
+                  radial-gradient(circle at 20% 30%, rgba(255,255,255,0.03) 0%, transparent 40%),
+                  radial-gradient(circle at 80% 70%, rgba(255,255,255,0.03) 0%, transparent 40%),
+                  repeating-linear-gradient(45deg, rgba(255,255,255,0.01) 0px, rgba(255,255,255,0.01) 2px, transparent 2px, transparent 8px)
+                `,
+                pointerEvents: 'none',
+                zIndex: 1
+              }}
+            />
 
-            {/* Teks Berjalan dengan North East Arrow - Dipindah ke bawah supaya tidak bentrok */}
+            {/* Animated Lines - Efek garis dinamis ala awwwards */}
+            <motion.div
+              initial={{ x: '-100%' }}
+              animate={{ x: '100%' }}
+              transition={{ duration: 1.5, delay: 0.3, ease: [0.76, 0, 0.24, 1] }}
+              style={{
+                position: 'absolute',
+                top: '20%',
+                left: 0,
+                width: '100%',
+                height: '1px',
+                background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)',
+                zIndex: 1
+              }}
+            />
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: '-100%' }}
+              transition={{ duration: 1.5, delay: 0.5, ease: [0.76, 0, 0.24, 1] }}
+              style={{
+                position: 'absolute',
+                top: '80%',
+                left: 0,
+                width: '100%',
+                height: '1px',
+                background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)',
+                zIndex: 1
+              }}
+            />
+
+            {/* Teks Berjalan dengan North East Arrow - Warna Putih Solid, Ditempatkan Strategis */}
             <div style={{
               position: 'absolute',
-              bottom: '15%',
+              top: '50%',
               left: 0,
               width: '100%',
               overflow: 'hidden',
               whiteSpace: 'nowrap',
-              zIndex: 2
+              zIndex: 2,
+              transform: 'translateY(-50%) rotate(-5deg)',
+              opacity: 0.15
             }}>
               <motion.div
                 animate={{ 
                   x: ['0%', '-50%']
                 }}
                 transition={{ 
-                  duration: 25,
+                  duration: 30,
                   repeat: Infinity,
                   ease: "linear"
                 }}
                 style={{
                   display: 'inline-block',
                   whiteSpace: 'nowrap',
-                  fontSize: isMobile ? '6rem' : '12rem',
-                  fontWeight: '400',
+                  fontSize: isMobile ? '7rem' : '14rem',
+                  fontWeight: '200',
                   color: 'white',
                   fontFamily: 'Helvetica, Arial, sans-serif',
                   textTransform: 'uppercase',
-                  letterSpacing: '8px',
+                  letterSpacing: '12px',
                   lineHeight: 1,
-                  opacity: 0.3
+                  textShadow: '0 0 30px rgba(255,255,255,0.2)'
                 }}
               >
-                HOME <svg width="180" height="180" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 2rem' }}>
+                HOME • <svg width="200" height="200" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 2rem' }}>
                   <path d="M7 7h10v10" />
                   <path d="M17 7L7 17" />
-                </svg> HOME <svg width="180" height="180" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 2rem' }}>
+                </svg> • HOME • <svg width="200" height="200" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 2rem' }}>
                   <path d="M7 7h10v10" />
                   <path d="M17 7L7 17" />
-                </svg> HOME <svg width="180" height="180" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 2rem' }}>
+                </svg> • HOME • <svg width="200" height="200" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 2rem' }}>
                   <path d="M7 7h10v10" />
                   <path d="M17 7L7 17" />
-                </svg> HOME <svg width="180" height="180" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 2rem' }}>
+                </svg> • HOME • <svg width="200" height="200" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 2rem' }}>
                   <path d="M7 7h10v10" />
                   <path d="M17 7L7 17" />
-                </svg> HOME <svg width="180" height="180" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 2rem' }}>
-                  <path d="M7 7h10v10" />
-                  <path d="M17 7L7 17" />
-                </svg> 
+                </svg> • 
               </motion.div>
             </div>
 
-            {/* Konten Utama - Dinaikkan ke atas dan diberi jarak dari teks berjalan */}
+            {/* Konten Utama - Dengan Spacing yang Tepat */}
             <div style={{
               position: 'relative',
-              zIndex: 3,
+              zIndex: 10,
               width: '100%',
               maxWidth: '1400px',
               padding: isMobile ? '2rem' : '4rem',
-              paddingTop: isMobile ? '3rem' : '5rem',
               display: 'flex',
               flexDirection: isMobile ? 'column' : 'row',
-              gap: isMobile ? '3rem' : '6rem',
+              gap: isMobile ? '3rem' : '8rem',
               height: '100%',
-              alignItems: 'flex-start',
-              marginTop: '-10%'
+              alignItems: 'center',
+              justifyContent: 'center'
             }}>
               
-              {/* Left Section - Menu Items dengan North East Arrow Besar */}
+              {/* Left Section - Menu Items dengan Animasi Stagger */}
               <motion.div
-                initial={{ opacity: 0, x: -50 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
+                initial="hidden"
+                animate="visible"
+                variants={{
+                  hidden: { opacity: 0 },
+                  visible: {
+                    opacity: 1,
+                    transition: {
+                      staggerChildren: 0.1,
+                      delayChildren: 0.3
+                    }
+                  }
+                }}
                 style={{
                   flex: 1,
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '1.5rem',
-                  marginTop: isMobile ? '2rem' : '3rem'
+                  gap: '2rem'
                 }}
               >
-                <div style={{
-                  color: 'rgba(255, 255, 255, 0.4)',
-                  fontSize: '0.9rem',
-                  fontWeight: '400',
-                  textTransform: 'uppercase',
-                  letterSpacing: '2px',
-                  marginBottom: '1rem'
-                }}>
+                <motion.div
+                  variants={{
+                    hidden: { opacity: 0, y: 20 },
+                    visible: { opacity: 1, y: 0 }
+                  }}
+                  style={{
+                    color: 'rgba(255, 255, 255, 0.4)',
+                    fontSize: '0.9rem',
+                    fontWeight: '400',
+                    textTransform: 'uppercase',
+                    letterSpacing: '4px',
+                    marginBottom: '1rem'
+                  }}
+                >
                   Navigation
-                </div>
+                </motion.div>
 
                 {[
                   { label: 'Home', url: '/' },
@@ -4409,86 +4460,103 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                   <motion.a
                     key={item.label}
                     href={item.url}
-                    initial={{ opacity: 0, x: -30 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.5, delay: 0.3 + (index * 0.1) }}
+                    variants={{
+                      hidden: { opacity: 0, x: -30 },
+                      visible: { opacity: 1, x: 0 }
+                    }}
+                    whileHover={{ x: 20 }}
+                    transition={{ duration: 0.3, ease: [0.76, 0, 0.24, 1] }}
                     style={{
                       color: 'white',
-                      fontSize: isMobile ? '2.5rem' : '4rem',
-                      fontWeight: '400',
+                      fontSize: isMobile ? '3rem' : '5rem',
+                      fontWeight: '300',
                       textDecoration: 'none',
                       fontFamily: 'Helvetica, Arial, sans-serif',
                       lineHeight: 1.1,
                       position: 'relative',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '1.5rem',
+                      gap: '2rem',
                       width: 'fit-content',
                       cursor: 'pointer',
-                      transition: 'all 0.3s ease'
-                    }}
-                    whileHover={{
-                      x: 20,
-                      color: '#999'
+                      letterSpacing: '-1px'
                     }}
                   >
-                    {item.label}
+                    <span style={{ position: 'relative' }}>
+                      {item.label}
+                      <motion.div
+                        initial={{ scaleX: 0 }}
+                        whileHover={{ scaleX: 1 }}
+                        transition={{ duration: 0.4, ease: [0.76, 0, 0.24, 1] }}
+                        style={{
+                          position: 'absolute',
+                          bottom: -5,
+                          left: 0,
+                          width: '100%',
+                          height: '2px',
+                          backgroundColor: 'white',
+                          transformOrigin: 'left'
+                        }}
+                      />
+                    </span>
                     
-                    {/* North East Arrow besar untuk setiap menu item */}
-                    <svg
-                      width="60"
-                      height="60"
+                    {/* North East Arrow untuk setiap menu item */}
+                    <motion.svg
+                      width="70"
+                      height="70"
                       viewBox="0 0 24 24"
                       fill="none"
                       stroke="white"
-                      strokeWidth="2"
-                      style={{
-                        transition: 'all 0.3s ease'
+                      strokeWidth="1.5"
+                      initial={{ opacity: 0, scale: 0.8, rotate: 0 }}
+                      whileHover={{ 
+                        opacity: 1, 
+                        scale: 1.2,
+                        rotate: 45,
+                        transition: { duration: 0.3 }
                       }}
                     >
                       <path d="M7 7h10v10" />
                       <path d="M17 7L7 17" />
-                    </svg>
-
-                    <motion.div
-                      initial={{ scaleX: 0 }}
-                      whileHover={{ scaleX: 1 }}
-                      transition={{ duration: 0.3 }}
-                      style={{
-                        position: 'absolute',
-                        bottom: 0,
-                        left: 0,
-                        width: '100%',
-                        height: '1px',
-                        backgroundColor: 'white',
-                        transformOrigin: 'left'
-                      }}
-                    />
+                    </motion.svg>
                   </motion.a>
                 ))}
               </motion.div>
 
-              {/* Right Section - Notes dan Info dengan North East Arrow Besar */}
+              {/* Right Section - Notes dan Info dengan Animasi Stagger */}
               <motion.div
-                initial={{ opacity: 0, x: 50 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 0.4 }}
+                initial="hidden"
+                animate="visible"
+                variants={{
+                  hidden: { opacity: 0 },
+                  visible: {
+                    opacity: 1,
+                    transition: {
+                      staggerChildren: 0.15,
+                      delayChildren: 0.5
+                    }
+                  }
+                }}
                 style={{
                   flex: 1,
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '2.5rem',
-                  marginTop: isMobile ? '2rem' : '3rem'
+                  gap: '3rem'
                 }}
               >
-                {/* Featured Note dengan north east arrow besar */}
-                <div>
+                {/* Featured Note */}
+                <motion.div
+                  variants={{
+                    hidden: { opacity: 0, y: 30 },
+                    visible: { opacity: 1, y: 0 }
+                  }}
+                >
                   <div style={{
                     color: 'rgba(255, 255, 255, 0.4)',
                     fontSize: '0.9rem',
                     fontWeight: '400',
                     textTransform: 'uppercase',
-                    letterSpacing: '2px',
+                    letterSpacing: '4px',
                     marginBottom: '1.5rem'
                   }}>
                     Featured Note
@@ -4496,7 +4564,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
 
                   <motion.div
                     whileHover={{ x: 10 }}
-                    transition={{ duration: 0.3 }}
+                    transition={{ duration: 0.3, ease: [0.76, 0, 0.24, 1] }}
                     style={{
                       display: 'flex',
                       alignItems: 'center',
@@ -4505,20 +4573,21 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                       padding: '2rem',
                       backgroundColor: 'rgba(255, 255, 255, 0.02)',
                       border: '1px solid rgba(255, 255, 255, 0.1)',
-                      borderRadius: '12px'
+                      borderRadius: '16px',
+                      backdropFilter: 'blur(10px)'
                     }}
                     onClick={() => router.push('/notes')}
                   >
                     <div style={{
-                      width: '60px',
-                      height: '60px',
+                      width: '70px',
+                      height: '70px',
                       borderRadius: '50%',
                       backgroundColor: 'transparent',
                       border: '1px solid rgba(255, 255, 255, 0.3)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      fontSize: '2rem'
+                      fontSize: '2.2rem'
                     }}>
                       📝
                     </div>
@@ -4526,45 +4595,52 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                     <div style={{ flex: 1 }}>
                       <div style={{
                         color: 'white',
-                        fontSize: '1.5rem',
-                        fontWeight: '400',
-                        marginBottom: '0.5rem'
+                        fontSize: '1.8rem',
+                        fontWeight: '300',
+                        marginBottom: '0.5rem',
+                        letterSpacing: '-0.5px'
                       }}>
-                        Note #01: Creative Process
+                        Note #01
                       </div>
                       <div style={{
                         color: 'rgba(255, 255, 255, 0.6)',
-                        fontSize: '1.1rem',
-                        fontWeight: '400'
+                        fontSize: '1.2rem',
+                        fontWeight: '300',
+                        lineHeight: 1.4
                       }}>
-                        Exploring the intersection of design and technology
+                        Creative Process & Design Philosophy
                       </div>
                     </div>
 
-                    {/* North East Arrow besar untuk featured note */}
+                    {/* North East Arrow untuk featured note */}
                     <svg
-                      width="60"
-                      height="60"
+                      width="70"
+                      height="70"
                       viewBox="0 0 24 24"
                       fill="none"
                       stroke="white"
-                      strokeWidth="2"
+                      strokeWidth="1.5"
                     >
                       <path d="M7 7h10v10" />
                       <path d="M17 7L7 17" />
                     </svg>
                   </motion.div>
-                </div>
+                </motion.div>
 
-                {/* Recent Notes List dengan north east arrow besar */}
-                <div>
+                {/* Recent Notes List */}
+                <motion.div
+                  variants={{
+                    hidden: { opacity: 0, y: 30 },
+                    visible: { opacity: 1, y: 0 }
+                  }}
+                >
                   <div style={{
                     color: 'rgba(255, 255, 255, 0.4)',
                     fontSize: '0.9rem',
                     fontWeight: '400',
                     textTransform: 'uppercase',
-                    letterSpacing: '2px',
-                    marginBottom: '1rem'
+                    letterSpacing: '4px',
+                    marginBottom: '1.5rem'
                   }}>
                     Recent Notes
                   </div>
@@ -4572,9 +4648,12 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                   {[1, 2, 3].map((note, index) => (
                     <motion.div
                       key={note}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.4, delay: 0.5 + (index * 0.1) }}
+                      variants={{
+                        hidden: { opacity: 0, x: -20 },
+                        visible: { opacity: 1, x: 0 }
+                      }}
+                      transition={{ delay: 0.1 * index }}
+                      whileHover={{ x: 10 }}
                       style={{
                         padding: '1.5rem 0',
                         borderBottom: index < 2 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none',
@@ -4588,44 +4667,49 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                       <div>
                         <div style={{
                           color: 'white',
-                          fontSize: '1.3rem',
-                          fontWeight: '400',
-                          marginBottom: '0.5rem'
+                          fontSize: '1.4rem',
+                          fontWeight: '300',
+                          marginBottom: '0.5rem',
+                          letterSpacing: '-0.5px'
                         }}>
-                          Note #{note}: Project Documentation
+                          Note #{note}
                         </div>
                         <div style={{
                           color: 'rgba(255, 255, 255, 0.5)',
                           fontSize: '1rem',
-                          fontWeight: '400'
+                          fontWeight: '300'
                         }}>
-                          Updated {note} day{note > 1 ? 's' : ''} ago
+                          Project Documentation • Updated {note}d ago
                         </div>
                       </div>
                       
-                      {/* North East Arrow besar untuk recent notes */}
-                      <svg
-                        width="40"
-                        height="40"
+                      {/* North East Arrow untuk recent notes */}
+                      <motion.svg
+                        width="45"
+                        height="45"
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="white"
-                        strokeWidth="2"
+                        strokeWidth="1.5"
+                        whileHover={{ 
+                          rotate: 45,
+                          scale: 1.2
+                        }}
                       >
                         <path d="M7 7h10v10" />
                         <path d="M17 7L7 17" />
-                      </svg>
+                      </motion.svg>
                     </motion.div>
                   ))}
-                </div>
+                </motion.div>
               </motion.div>
             </div>
 
-            {/* Footer Normal - Sesuai Design Awal */}
+            {/* Footer dengan Animasi */}
             <motion.div
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 1 }}
+              transition={{ duration: 0.8, delay: 1.2, ease: [0.76, 0, 0.24, 1] }}
               style={{
                 position: 'absolute',
                 bottom: isMobile ? '2rem' : '3rem',
@@ -4635,17 +4719,28 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                 justifyContent: 'space-between',
                 padding: isMobile ? '0 2rem' : '0 4rem',
                 boxSizing: 'border-box',
-                color: 'rgba(255, 255, 255, 0.8)',
+                color: 'rgba(255, 255, 255, 0.7)',
                 fontSize: isMobile ? '0.9rem' : '1rem',
-                fontWeight: '400',
-                zIndex: 2
+                fontWeight: '300',
+                zIndex: 10,
+                letterSpacing: '1px'
               }}
             >
-              <div style={{ display: 'flex', gap: '2rem' }}>
-                <span>© 2024 MENURU</span>
-                <span>All rights reserved</span>
+              <div style={{ display: 'flex', gap: '3rem' }}>
+                <motion.span
+                  whileHover={{ color: 'white' }}
+                  transition={{ duration: 0.2 }}
+                >
+                  © 2024 MENURU
+                </motion.span>
+                <motion.span
+                  whileHover={{ color: 'white' }}
+                  transition={{ duration: 0.2 }}
+                >
+                  All rights reserved
+                </motion.span>
               </div>
-              <div style={{ display: 'flex', gap: '2rem' }}>
+              <div style={{ display: 'flex', gap: '3rem' }}>
                 <motion.a 
                   href="/privacy"
                   whileHover={{ color: 'white' }}
@@ -4663,41 +4758,51 @@ fontFamily: 'Helvetica, Arial, sans-serif'
               </div>
             </motion.div>
 
-            {/* Close Button */}
+            {/* Close Button dengan Animasi Modern */}
             <motion.div
               onClick={handleCloseMenu}
-              style={{
-                position: 'absolute',
-                top: isMobile ? '1.5rem' : '2rem',
-                right: isMobile ? '1.5rem' : '2rem',
-                color: 'white',
-                fontSize: isMobile ? '2.5rem' : '3rem',
-                fontWeight: '300',
-                cursor: 'pointer',
-                fontFamily: 'Helvetica, Arial, sans-serif',
-                zIndex: 10,
-                padding: '1rem',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                opacity: 0.7,
-                width: '60px',
-                height: '60px',
-                borderRadius: '50%',
-                border: '1px solid rgba(255, 255, 255, 0.2)'
-              }}
+              initial={{ opacity: 0, rotate: -90 }}
+              animate={{ opacity: 1, rotate: 0 }}
+              transition={{ duration: 0.6, delay: 1.4 }}
               whileHover={{ 
-                opacity: 1,
+                scale: 1.2,
                 rotate: 90,
                 borderColor: 'white'
               }}
-              transition={{ duration: 0.3 }}
+              style={{
+                position: 'absolute',
+                top: isMobile ? '2rem' : '2.5rem',
+                right: isMobile ? '2rem' : '2.5rem',
+                color: 'white',
+                fontSize: isMobile ? '2rem' : '2.5rem',
+                fontWeight: '200',
+                cursor: 'pointer',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                zIndex: 10,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '70px',
+                height: '70px',
+                borderRadius: '50%',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                backdropFilter: 'blur(10px)'
+              }}
             >
-              ×
+              <motion.span
+                animate={{ rotate: [0, 180, 360] }}
+                transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+              >
+                ×
+              </motion.span>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
+
+
+
+      
 
 
       
@@ -7150,6 +7255,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
     </div>
   );
 }
+
 
 
 
