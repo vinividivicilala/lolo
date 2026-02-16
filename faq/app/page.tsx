@@ -4270,9 +4270,6 @@ fontFamily: 'Helvetica, Arial, sans-serif'
         )}
       </AnimatePresence>
 
-
-
-
 {/* Menu Overlay dengan GSAP Animation - Modern Awwwards Style */}
 <AnimatePresence>
   {showMenuOverlay && (
@@ -4717,8 +4714,6 @@ fontFamily: 'Helvetica, Arial, sans-serif'
     </motion.div>
   )}
 </AnimatePresence>
-
-
 
 
 
@@ -7176,6 +7171,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
     </div>
   );
 }
+
 
 
 
