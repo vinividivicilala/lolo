@@ -282,14 +282,14 @@ const favoriteTracks = [
     title: 'Pupus',
     artist: 'Hanin Dhiya',
     embedUrl: 'https://open.spotify.com/embed/track/3z8h0TU7ReDPLIbEnYhWZb?utm_source=generator',
-    spotifyUrl: 'https://open.spotify.com/track/3z8h0TU7ReDPLIbEnYhWZb'
+    spotifyUrl: 'https://open.spotify.com/track/4za8UJq7JI99ilRYQXVrkm?si=e767fcf3e9ae4a6c'
   },
   {
     id: 'hanin2',
     title: 'Suatu Saat Nanti',
     artist: 'Hanin Dhiya',
     embedUrl: 'https://open.spotify.com/embed/track/4z8h0TU7ReDPLIbEnYhWZb?utm_source=generator',
-    spotifyUrl: 'https://open.spotify.com/track/4z8h0TU7ReDPLIbEnYhWZb'
+    spotifyUrl: 'https://open.spotify.com/track/11nApQrr7tfBNYzBOmHWCc?si=a141c85a054d41b0'
   },
   // Stand Here Alone
   {
@@ -297,21 +297,21 @@ const favoriteTracks = [
     title: 'Kita Lawan Mereka',
     artist: 'Stand Here Alone',
     embedUrl: 'https://open.spotify.com/embed/track/5z8h0TU7ReDPLIbEnYhWZb?utm_source=generator',
-    spotifyUrl: 'https://open.spotify.com/track/5z8h0TU7ReDPLIbEnYhWZb'
+    spotifyUrl: 'https://open.spotify.com/track/2rj9nnNMZQNs2pZAPWuvze?si=34b6e33a87454394'
   },
   {
     id: 'sha2',
     title: 'Korban Lelaki',
     artist: 'Stand Here Alone',
     embedUrl: 'https://open.spotify.com/embed/track/6z8h0TU7ReDPLIbEnYhWZb?utm_source=generator',
-    spotifyUrl: 'https://open.spotify.com/track/6z8h0TU7ReDPLIbEnYhWZb'
+    spotifyUrl: 'https://open.spotify.com/track/3u53sM4xrdWl0uDLzcFm6x?si=ba3bbf39522a475e'
   },
   {
     id: 'sha3',
     title: 'Wanita Masih Banyak',
     artist: 'Stand Here Alone',
     embedUrl: 'https://open.spotify.com/embed/track/7z8h0TU7ReDPLIbEnYhWZb?utm_source=generator',
-    spotifyUrl: 'https://open.spotify.com/track/7z8h0TU7ReDPLIbEnYhWZb'
+    spotifyUrl: 'https://open.spotify.com/track/5H60BCrbWBocSIAoZwjxwD?si=2ac532c98a9b483e'
   }
 ];
 
@@ -7993,6 +7993,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
     </div>
   );
 }
+
 
 
 
