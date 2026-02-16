@@ -4540,10 +4540,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
         zIndex: 9995,
         display: 'flex',
         flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'flex-start', // Ganti dari center ke flex-start
-        overflow: 'hidden',
-        transform: 'translateY(-100%)'
+        overflow: 'hidden'
       }}
     >
       {/* Background dengan efek grain dan pattern */}
@@ -4560,25 +4557,24 @@ fontFamily: 'Helvetica, Arial, sans-serif'
         zIndex: 1
       }} />
 
-      {/* Header Menu - Tetap di atas */}
+      {/* Header - Fixed di atas */}
       <div style={{
         position: 'fixed',
-        top: isMobile ? '1.5rem' : '2rem',
+        top: 0,
         left: 0,
         right: 0,
-        width: '100%',
-        display: 'grid',
-        gridTemplateColumns: '1fr auto 1fr',
+        height: isMobile ? '80px' : '100px',
+        display: 'flex',
         alignItems: 'center',
-        padding: isMobile ? '0 2rem' : '0 4rem',
-        boxSizing: 'border-box',
+        justifyContent: 'space-between',
+        padding: isMobile ? '0 1.5rem' : '0 3rem',
         zIndex: 20,
-        pointerEvents: 'none'
+        backgroundColor: 'transparent'
       }}>
         {/* Kiri - JAKARTA dan Jam */}
         <div style={{
           color: '#FFFFFF',
-          fontSize: isMobile ? '1.2rem' : '1.8rem',
+          fontSize: isMobile ? '1rem' : '1.4rem',
           fontWeight: '300',
           fontFamily: 'Helvetica, Arial, sans-serif',
           letterSpacing: '1px',
@@ -4586,132 +4582,71 @@ fontFamily: 'Helvetica, Arial, sans-serif'
           textShadow: '0 0 10px rgba(255,255,255,0.3)',
           display: 'flex',
           flexDirection: 'column',
-          alignItems: 'flex-start',
-          justifySelf: 'start'
+          alignItems: 'flex-start'
         }}>
-          <span style={{ fontSize: isMobile ? '1.2rem' : '1.8rem', fontWeight: '300' }}>JAKARTA</span>
-          <span style={{ fontSize: isMobile ? '1.2rem' : '1.8rem', fontWeight: '300', marginTop: '0.2rem' }}>{jakartaTime}</span>
+          <span>JAKARTA</span>
+          <span style={{ marginTop: '0.2rem' }}>{jakartaTime}</span>
         </div>
 
         {/* Tengah - MENURU */}
         <div style={{
           color: '#FFFFFF',
-          fontSize: isMobile ? '2rem' : '3rem',
+          fontSize: isMobile ? '1.6rem' : '2.2rem',
           fontWeight: '300',
           fontFamily: 'Helvetica, Arial, sans-serif',
           letterSpacing: '4px',
           textTransform: 'uppercase',
           opacity: 0.9,
           textShadow: '0 0 20px rgba(255,255,255,0.5)',
-          justifySelf: 'center'
+          position: 'absolute',
+          left: '50%',
+          transform: 'translateX(-50%)'
         }}>
           MENURU
         </div>
 
-        {/* Kanan - Kosong */}
-        <div style={{ justifySelf: 'end' }}></div>
-      </div>
-
-      {/* Close Button - Posisi Fixed di Kanan */}
-      <div
-        onClick={handleCloseMenu}
-        style={{
-          position: 'fixed',
-          top: isMobile ? '1.5rem' : '2rem',
-          right: isMobile ? '1.5rem' : '2rem',
-          color: '#FFFFFF',
-          fontSize: isMobile ? '2.5rem' : '3rem',
-          fontWeight: '300',
-          cursor: 'pointer',
-          fontFamily: 'Helvetica, Arial, sans-serif',
-          zIndex: 21,
-          padding: '1rem',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          opacity: 0.9,
-          width: '60px',
-          height: '60px',
-          borderRadius: '50%',
-          border: '1px solid rgba(255, 255, 255, 0.4)',
-          backgroundColor: 'rgba(255, 255, 255, 0.03)',
-          textShadow: '0 0 15px rgba(255,255,255,0.5)',
-          boxShadow: '0 0 20px rgba(255,255,255,0.1)'
-        }}
-      >
-        ×
-      </div>
-
-      {/* Teks Berjalan - Posisi Fixed di Bawah */}
-      <div style={{
-        position: 'fixed',
-        bottom: '10%',
-        left: 0,
-        width: '100%',
-        overflow: 'hidden',
-        whiteSpace: 'nowrap',
-        zIndex: 2,
-        pointerEvents: 'none'
-      }}>
-        <motion.div
-          animate={{ 
-            x: ['0%', '-50%']
-          }}
-          transition={{ 
-            duration: 25,
-            repeat: Infinity,
-            ease: "linear"
-          }}
+        {/* Kanan - Close Button */}
+        <div
+          onClick={handleCloseMenu}
           style={{
-            display: 'inline-block',
-            whiteSpace: 'nowrap',
-            fontSize: isMobile ? '6rem' : '12rem',
-            fontWeight: '300',
             color: '#FFFFFF',
+            fontSize: isMobile ? '2rem' : '2.5rem',
+            fontWeight: '300',
+            cursor: 'pointer',
             fontFamily: 'Helvetica, Arial, sans-serif',
-            textTransform: 'uppercase',
-            letterSpacing: '8px',
-            lineHeight: 1,
-            opacity: 0.7,
-            textShadow: '0 0 20px rgba(255,255,255,0.5), 0 0 40px rgba(255,255,255,0.3)',
-            filter: 'brightness(1.3)'
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            opacity: 0.9,
+            width: isMobile ? '40px' : '50px',
+            height: isMobile ? '40px' : '50px',
+            borderRadius: '50%',
+            border: '1px solid rgba(255, 255, 255, 0.4)',
+            backgroundColor: 'rgba(255, 255, 255, 0.03)',
+            textShadow: '0 0 15px rgba(255,255,255,0.5)',
+            boxShadow: '0 0 20px rgba(255,255,255,0.1)'
           }}
         >
-          MENU <svg width="180" height="180" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="3" strokeLinecap="round" style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 2rem', filter: 'drop-shadow(0 0 10px rgba(255,255,255,0.8)) drop-shadow(0 0 20px rgba(255,255,255,0.5))' }}>
-            <path d="M7 7h10v10" />
-            <path d="M17 7L7 17" />
-          </svg> MENU <svg width="180" height="180" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="3" strokeLinecap="round" style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 2rem', filter: 'drop-shadow(0 0 10px rgba(255,255,255,0.8)) drop-shadow(0 0 20px rgba(255,255,255,0.5))' }}>
-            <path d="M7 7h10v10" />
-            <path d="M17 7L7 17" />
-          </svg> MENU <svg width="180" height="180" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="3" strokeLinecap="round" style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 2rem', filter: 'drop-shadow(0 0 10px rgba(255,255,255,0.8)) drop-shadow(0 0 20px rgba(255,255,255,0.5))' }}>
-            <path d="M7 7h10v10" />
-            <path d="M17 7L7 17" />
-          </svg>
-        </motion.div>
+          ×
+        </div>
       </div>
 
-      {/* Scrollable Content Area - Dengan padding top dan bottom tetap */}
+      {/* Scrollable Content - Dengan margin top dan bottom tetap */}
       <div style={{
         position: 'absolute',
-        top: 0,
+        top: isMobile ? '80px' : '100px',
+        bottom: isMobile ? '100px' : '120px',
         left: 0,
         right: 0,
-        bottom: 0,
         overflowY: 'auto',
         zIndex: 3,
-        paddingTop: isMobile ? '8rem' : '10rem', // Ruang untuk header
-        paddingBottom: isMobile ? '8rem' : '10rem', // Ruang untuk teks berjalan
-        paddingLeft: isMobile ? '1rem' : '2rem',
-        paddingRight: isMobile ? '1rem' : '2rem',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center'
+        padding: isMobile ? '1rem 1.5rem' : '2rem 3rem'
       }}>
         
-        {/* Konten Menu - Container dengan lebar tetap */}
+        {/* Konten Menu */}
         <div style={{
           width: '100%',
-          maxWidth: '1200px',
+          maxWidth: '1000px',
           margin: '0 auto',
           display: 'flex',
           flexDirection: 'column',
@@ -4722,7 +4657,6 @@ fontFamily: 'Helvetica, Arial, sans-serif'
           <div style={{
             borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
           }}>
-            {/* Header */}
             <div
               onClick={() => handleToggleSection('catatan')}
               style={{
@@ -4730,13 +4664,13 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 cursor: 'pointer',
-                padding: '1rem 0',
+                padding: '0.8rem 0',
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
                 <span style={{
                   color: 'rgba(255, 255, 255, 0.5)',
-                  fontSize: '2rem',
+                  fontSize: '1.5rem',
                   fontWeight: '300',
                   fontFamily: 'monospace'
                 }}>01</span>
@@ -4748,7 +4682,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                   }}
                   style={{
                     color: '#FFFFFF',
-                    fontSize: isMobile ? '2.5rem' : '4rem',
+                    fontSize: isMobile ? '2rem' : '3rem',
                     fontWeight: '300',
                     fontFamily: 'Helvetica, Arial, sans-serif',
                     textShadow: '0 0 10px rgba(255,255,255,0.3)',
@@ -4759,14 +4693,13 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                 </span>
               </div>
               
-              {/* Arrow */}
               <div style={{
                 transform: openSection === 'catatan' ? 'rotate(90deg)' : 'rotate(0deg)',
                 transition: 'transform 0.3s ease'
               }}>
                 <svg
-                  width="40"
-                  height="40"
+                  width="30"
+                  height="30"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="#FFFFFF"
@@ -4782,7 +4715,6 @@ fontFamily: 'Helvetica, Arial, sans-serif'
               </div>
             </div>
 
-            {/* Sub-menu - Dengan animasi height */}
             <AnimatePresence>
               {openSection === 'catatan' && (
                 <motion.div
@@ -4793,9 +4725,8 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                   style={{
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: '0.8rem',
-                    marginLeft: '6rem',
-                    marginTop: '0.5rem',
+                    gap: '0.5rem',
+                    marginLeft: '4rem',
                     marginBottom: '1rem',
                     overflow: 'hidden'
                   }}
@@ -4812,30 +4743,30 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                       style={{
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '1.5rem',
-                        padding: '0.5rem 0',
+                        gap: '1rem',
+                        padding: '0.4rem 0',
                         cursor: 'pointer',
                         borderBottom: idx < 3 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none'
                       }}
                     >
                       <span style={{ 
                         color: 'rgba(255, 255, 255, 0.3)', 
-                        fontSize: '0.9rem', 
+                        fontSize: '0.8rem', 
                         fontFamily: 'monospace', 
-                        width: '30px' 
+                        width: '25px' 
                       }}>
                         {item.number}
                       </span>
                       <span style={{ 
                         color: 'rgba(255, 255, 255, 0.8)', 
-                        fontSize: '1.2rem',
+                        fontSize: '1rem',
                         flex: 1,
                         fontWeight: '300',
                         fontFamily: 'Helvetica, Arial, sans-serif'
                       }}>
                         {item.title}
                       </span>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2">
                         <path d="M7 7h10v10" />
                         <path d="M17 7L7 17" />
                       </svg>
@@ -4857,13 +4788,13 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 cursor: 'pointer',
-                padding: '1rem 0',
+                padding: '0.8rem 0',
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
                 <span style={{
                   color: 'rgba(255, 255, 255, 0.5)',
-                  fontSize: '2rem',
+                  fontSize: '1.5rem',
                   fontWeight: '300',
                   fontFamily: 'monospace'
                 }}>02</span>
@@ -4874,7 +4805,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                   }}
                   style={{
                     color: '#FFFFFF',
-                    fontSize: isMobile ? '2.5rem' : '4rem',
+                    fontSize: isMobile ? '2rem' : '3rem',
                     fontWeight: '300',
                     fontFamily: 'Helvetica, Arial, sans-serif',
                     textShadow: '0 0 10px rgba(255,255,255,0.3)',
@@ -4889,7 +4820,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                 transform: openSection === 'community' ? 'rotate(90deg)' : 'rotate(0deg)',
                 transition: 'transform 0.3s ease'
               }}>
-                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" style={{ filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.5))' }}>
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" style={{ filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.5))' }}>
                   <path d="M7 7h10v10" />
                   <path d="M17 7L7 17" />
                 </svg>
@@ -4906,9 +4837,8 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                   style={{
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: '0.8rem',
-                    marginLeft: '6rem',
-                    marginTop: '0.5rem',
+                    gap: '0.5rem',
+                    marginLeft: '4rem',
                     marginBottom: '1rem',
                     overflow: 'hidden'
                   }}
@@ -4925,15 +4855,15 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                       style={{
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '1.5rem',
-                        padding: '0.5rem 0',
+                        gap: '1rem',
+                        padding: '0.4rem 0',
                         cursor: 'pointer',
                         borderBottom: idx < 3 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none'
                       }}
                     >
-                      <span style={{ color: 'rgba(255, 255, 255, 0.3)', fontSize: '0.9rem', fontFamily: 'monospace', width: '30px' }}>{item.number}</span>
-                      <span style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '1.2rem', flex: 1, fontWeight: '300', fontFamily: 'Helvetica, Arial, sans-serif' }}>{item.title}</span>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2">
+                      <span style={{ color: 'rgba(255, 255, 255, 0.3)', fontSize: '0.8rem', fontFamily: 'monospace', width: '25px' }}>{item.number}</span>
+                      <span style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '1rem', flex: 1, fontWeight: '300', fontFamily: 'Helvetica, Arial, sans-serif' }}>{item.title}</span>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2">
                         <path d="M7 7h10v10" />
                         <path d="M17 7L7 17" />
                       </svg>
@@ -4955,13 +4885,13 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 cursor: 'pointer',
-                padding: '1rem 0',
+                padding: '0.8rem 0',
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
                 <span style={{
                   color: 'rgba(255, 255, 255, 0.5)',
-                  fontSize: '2rem',
+                  fontSize: '1.5rem',
                   fontWeight: '300',
                   fontFamily: 'monospace'
                 }}>03</span>
@@ -4972,7 +4902,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                   }}
                   style={{
                     color: '#FFFFFF',
-                    fontSize: isMobile ? '2.5rem' : '4rem',
+                    fontSize: isMobile ? '2rem' : '3rem',
                     fontWeight: '300',
                     fontFamily: 'Helvetica, Arial, sans-serif',
                     textShadow: '0 0 10px rgba(255,255,255,0.3)',
@@ -4987,7 +4917,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                 transform: openSection === 'calendar' ? 'rotate(90deg)' : 'rotate(0deg)',
                 transition: 'transform 0.3s ease'
               }}>
-                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" style={{ filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.5))' }}>
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" style={{ filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.5))' }}>
                   <path d="M7 7h10v10" />
                   <path d="M17 7L7 17" />
                 </svg>
@@ -5004,9 +4934,8 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                   style={{
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: '0.8rem',
-                    marginLeft: '6rem',
-                    marginTop: '0.5rem',
+                    gap: '0.5rem',
+                    marginLeft: '4rem',
                     marginBottom: '1rem',
                     overflow: 'hidden'
                   }}
@@ -5023,15 +4952,15 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                       style={{
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '1.5rem',
-                        padding: '0.5rem 0',
+                        gap: '1rem',
+                        padding: '0.4rem 0',
                         cursor: 'pointer',
                         borderBottom: idx < 3 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none'
                       }}
                     >
-                      <span style={{ color: 'rgba(255, 255, 255, 0.3)', fontSize: '0.9rem', fontFamily: 'monospace', width: '30px' }}>{item.number}</span>
-                      <span style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '1.2rem', flex: 1, fontWeight: '300', fontFamily: 'Helvetica, Arial, sans-serif' }}>{item.title}</span>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2">
+                      <span style={{ color: 'rgba(255, 255, 255, 0.3)', fontSize: '0.8rem', fontFamily: 'monospace', width: '25px' }}>{item.number}</span>
+                      <span style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '1rem', flex: 1, fontWeight: '300', fontFamily: 'Helvetica, Arial, sans-serif' }}>{item.title}</span>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2">
                         <path d="M7 7h10v10" />
                         <path d="M17 7L7 17" />
                       </svg>
@@ -5053,13 +4982,13 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 cursor: 'pointer',
-                padding: '1rem 0',
+                padding: '0.8rem 0',
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
                 <span style={{
                   color: 'rgba(255, 255, 255, 0.5)',
-                  fontSize: '2rem',
+                  fontSize: '1.5rem',
                   fontWeight: '300',
                   fontFamily: 'monospace'
                 }}>04</span>
@@ -5070,7 +4999,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                   }}
                   style={{
                     color: '#FFFFFF',
-                    fontSize: isMobile ? '2.5rem' : '4rem',
+                    fontSize: isMobile ? '2rem' : '3rem',
                     fontWeight: '300',
                     fontFamily: 'Helvetica, Arial, sans-serif',
                     textShadow: '0 0 10px rgba(255,255,255,0.3)',
@@ -5085,7 +5014,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                 transform: openSection === 'blog' ? 'rotate(90deg)' : 'rotate(0deg)',
                 transition: 'transform 0.3s ease'
               }}>
-                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" style={{ filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.5))' }}>
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" style={{ filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.5))' }}>
                   <path d="M7 7h10v10" />
                   <path d="M17 7L7 17" />
                 </svg>
@@ -5102,9 +5031,8 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                   style={{
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: '0.8rem',
-                    marginLeft: '6rem',
-                    marginTop: '0.5rem',
+                    gap: '0.5rem',
+                    marginLeft: '4rem',
                     marginBottom: '1rem',
                     overflow: 'hidden'
                   }}
@@ -5121,15 +5049,15 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                       style={{
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '1.5rem',
-                        padding: '0.5rem 0',
+                        gap: '1rem',
+                        padding: '0.4rem 0',
                         cursor: 'pointer',
                         borderBottom: idx < 3 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none'
                       }}
                     >
-                      <span style={{ color: 'rgba(255, 255, 255, 0.3)', fontSize: '0.9rem', fontFamily: 'monospace', width: '30px' }}>{item.number}</span>
-                      <span style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '1.2rem', flex: 1, fontWeight: '300', fontFamily: 'Helvetica, Arial, sans-serif' }}>{item.title}</span>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2">
+                      <span style={{ color: 'rgba(255, 255, 255, 0.3)', fontSize: '0.8rem', fontFamily: 'monospace', width: '25px' }}>{item.number}</span>
+                      <span style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '1rem', flex: 1, fontWeight: '300', fontFamily: 'Helvetica, Arial, sans-serif' }}>{item.title}</span>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2">
                         <path d="M7 7h10v10" />
                         <path d="M17 7L7 17" />
                       </svg>
@@ -5143,8 +5071,8 @@ fontFamily: 'Helvetica, Arial, sans-serif'
           {/* SPOTIFY PLAYLIST SECTION */}
           <div style={{
             borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
-            marginTop: '1rem',
-            paddingBottom: '1rem'
+            marginTop: '0.5rem',
+            paddingBottom: '0.5rem'
           }}>
             <div
               onClick={() => handleToggleSection('spotify')}
@@ -5153,31 +5081,28 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 cursor: 'pointer',
-                padding: '1rem 0',
+                padding: '0.8rem 0',
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
                 <span style={{
                   color: 'rgba(255, 255, 255, 0.5)',
-                  fontSize: '2rem',
+                  fontSize: '1.5rem',
                   fontWeight: '300',
                   fontFamily: 'monospace'
                 }}>05</span>
                 
                 <span
-                  onClick={(e) => {
-                    e.stopPropagation();
-                  }}
                   style={{
                     color: '#FFFFFF',
-                    fontSize: isMobile ? '2.5rem' : '4rem',
+                    fontSize: isMobile ? '2rem' : '3rem',
                     fontWeight: '300',
                     fontFamily: 'Helvetica, Arial, sans-serif',
                     textShadow: '0 0 10px rgba(255,255,255,0.3)',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '1rem'
+                    gap: '0.8rem'
                   }}
                 >
                   SPOTIFY PLAYLIST
@@ -5188,7 +5113,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                 transform: openSection === 'spotify' ? 'rotate(90deg)' : 'rotate(0deg)',
                 transition: 'transform 0.3s ease'
               }}>
-                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" style={{ filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.5))' }}>
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" style={{ filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.5))' }}>
                   <path d="M7 7h10v10" />
                   <path d="M17 7L7 17" />
                 </svg>
@@ -5205,21 +5130,18 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                   style={{
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: '2rem',
-                    marginLeft: '6rem',
-                    marginTop: '1.5rem',
-                    marginBottom: '1.5rem',
+                    gap: '1.5rem',
+                    marginLeft: '4rem',
+                    marginTop: '1rem',
+                    marginBottom: '1rem',
                     overflow: 'hidden'
                   }}
                 >
                   {/* Spotify Player */}
                   {currentEmbedUrl && (
-                    <div style={{
-                      width: '100%',
-                      marginBottom: '1rem'
-                    }}>
+                    <div style={{ width: '100%' }}>
                       <iframe
-                        style={{ borderRadius: '12px', width: '100%', height: '152px' }}
+                        style={{ borderRadius: '8px', width: '100%', height: '80px' }}
                         src={currentEmbedUrl}
                         frameBorder="0"
                         allowFullScreen
@@ -5229,71 +5151,17 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                     </div>
                   )}
 
-                  {/* Header Playlist */}
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '2rem',
-                    marginBottom: '0.5rem'
-                  }}>
-                    <div style={{
-                      width: isMobile ? '80px' : '100px',
-                      height: isMobile ? '80px' : '100px',
-                      borderRadius: '8px',
-                      backgroundColor: 'rgba(255,255,255,0.1)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      border: '1px solid rgba(255,255,255,0.2)'
-                    }}>
-                      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5">
-                        <circle cx="12" cy="12" r="10"/>
-                        <path d="M8 11L12 8L16 11" strokeLinecap="round"/>
-                        <path d="M8 15L12 12L16 15" strokeLinecap="round"/>
-                      </svg>
-                    </div>
-                    <div>
-                      <div style={{
-                        color: 'rgba(255,255,255,0.6)',
-                        fontSize: '0.9rem',
-                        marginBottom: '0.3rem',
-                        letterSpacing: '1px'
-                      }}>
-                        PLAYLIST • 5 LAGU
-                      </div>
-                      <div style={{
-                        color: '#FFFFFF',
-                        fontSize: isMobile ? '1.8rem' : '2.2rem',
-                        fontWeight: '300',
-                        fontFamily: 'Helvetica, Arial, sans-serif'
-                      }}>
-                        Lagu Kesukaan
-                      </div>
-                      <div style={{
-                        color: 'rgba(255,255,255,0.6)',
-                        fontSize: '0.9rem',
-                        marginTop: '0.3rem'
-                      }}>
-                        Hanin Dhiya • Stand Here Alone
-                      </div>
-                    </div>
-                  </div>
-
                   {/* Daftar Lagu */}
-                  <div style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '1rem'
-                  }}>
-                    {/* Hanin Dhiya Section */}
-                    <div>
+                  <div>
+                    {/* Hanin Dhiya */}
+                    <div style={{ marginBottom: '1rem' }}>
                       <div style={{
                         color: 'rgba(255,255,255,0.8)',
-                        fontSize: '1.1rem',
+                        fontSize: '0.9rem',
                         fontWeight: '300',
-                        marginBottom: '0.8rem',
-                        paddingBottom: '0.3rem',
-                        borderBottom: '1px solid rgba(255,255,255,0.1)'
+                        marginBottom: '0.5rem',
+                        borderBottom: '1px solid rgba(255,255,255,0.1)',
+                        paddingBottom: '0.3rem'
                       }}>
                         Hanin Dhiya
                       </div>
@@ -5305,70 +5173,28 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                           style={{
                             display: 'flex',
                             alignItems: 'center',
-                            gap: '1.5rem',
-                            padding: '0.8rem 0',
+                            gap: '1rem',
+                            padding: '0.5rem 0',
                             cursor: 'pointer',
-                            borderBottom: idx < 1 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none',
-                            backgroundColor: currentTrack === track.id ? 'rgba(255,255,255,0.05)' : 'transparent',
-                            transition: 'all 0.2s ease'
+                            backgroundColor: currentTrack === track.id ? 'rgba(255,255,255,0.05)' : 'transparent'
                           }}
                         >
-                          <span style={{
-                            color: 'rgba(255, 255, 255, 0.3)',
-                            fontSize: '1rem',
-                            fontWeight: '300',
-                            fontFamily: 'monospace',
-                            width: '30px'
-                          }}>
-                            {idx + 1}
-                          </span>
-
-                          <div style={{
-                            width: '40px',
-                            height: '40px',
-                            borderRadius: '4px',
-                            backgroundColor: 'rgba(255,255,255,0.1)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            color: 'rgba(255,255,255,0.5)',
-                            fontSize: '1.2rem'
-                          }}>
-                            ♪
-                          </div>
-
-                          <div style={{ flex: 1 }}>
-                            <div style={{
-                              color: '#FFFFFF',
-                              fontSize: '1.2rem',
-                              fontWeight: '300',
-                              fontFamily: 'Helvetica, Arial, sans-serif'
-                            }}>
-                              {track.title}
-                            </div>
-                          </div>
-
-                          {currentTrack === track.id && (
-                            <div style={{
-                              width: '6px',
-                              height: '6px',
-                              borderRadius: '50%',
-                              backgroundColor: 'white'
-                            }} />
-                          )}
+                          <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.8rem', width: '20px' }}>{idx + 1}</span>
+                          <span style={{ color: '#FFFFFF', fontSize: '0.9rem', flex: 1 }}>{track.title}</span>
+                          {currentTrack === track.id && <span style={{ color: 'white', fontSize: '0.8rem' }}>▶</span>}
                         </div>
                       ))}
                     </div>
 
-                    {/* Stand Here Alone Section */}
+                    {/* Stand Here Alone */}
                     <div>
                       <div style={{
                         color: 'rgba(255,255,255,0.8)',
-                        fontSize: '1.1rem',
+                        fontSize: '0.9rem',
                         fontWeight: '300',
-                        marginBottom: '0.8rem',
-                        paddingBottom: '0.3rem',
-                        borderBottom: '1px solid rgba(255,255,255,0.1)'
+                        marginBottom: '0.5rem',
+                        borderBottom: '1px solid rgba(255,255,255,0.1)',
+                        paddingBottom: '0.3rem'
                       }}>
                         Stand Here Alone
                       </div>
@@ -5380,57 +5206,15 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                           style={{
                             display: 'flex',
                             alignItems: 'center',
-                            gap: '1.5rem',
-                            padding: '0.8rem 0',
+                            gap: '1rem',
+                            padding: '0.5rem 0',
                             cursor: 'pointer',
-                            borderBottom: idx < 2 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none',
-                            backgroundColor: currentTrack === track.id ? 'rgba(255,255,255,0.05)' : 'transparent',
-                            transition: 'all 0.2s ease'
+                            backgroundColor: currentTrack === track.id ? 'rgba(255,255,255,0.05)' : 'transparent'
                           }}
                         >
-                          <span style={{
-                            color: 'rgba(255, 255, 255, 0.3)',
-                            fontSize: '1rem',
-                            fontWeight: '300',
-                            fontFamily: 'monospace',
-                            width: '30px'
-                          }}>
-                            {idx + 1}
-                          </span>
-
-                          <div style={{
-                            width: '40px',
-                            height: '40px',
-                            borderRadius: '4px',
-                            backgroundColor: 'rgba(255,255,255,0.1)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            color: 'rgba(255,255,255,0.5)',
-                            fontSize: '1.2rem'
-                          }}>
-                            ♪
-                          </div>
-
-                          <div style={{ flex: 1 }}>
-                            <div style={{
-                              color: '#FFFFFF',
-                              fontSize: '1.2rem',
-                              fontWeight: '300',
-                              fontFamily: 'Helvetica, Arial, sans-serif'
-                            }}>
-                              {track.title}
-                            </div>
-                          </div>
-
-                          {currentTrack === track.id && (
-                            <div style={{
-                              width: '6px',
-                              height: '6px',
-                              borderRadius: '50%',
-                              backgroundColor: 'white'
-                            }} />
-                          )}
+                          <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.8rem', width: '20px' }}>{idx + 1}</span>
+                          <span style={{ color: '#FFFFFF', fontSize: '0.9rem', flex: 1 }}>{track.title}</span>
+                          {currentTrack === track.id && <span style={{ color: 'white', fontSize: '0.8rem' }}>▶</span>}
                         </div>
                       ))}
                     </div>
@@ -5439,44 +5223,15 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                   {!currentEmbedUrl && (
                     <div style={{
                       textAlign: 'center',
-                      padding: '1.5rem',
+                      padding: '1rem',
                       color: 'rgba(255,255,255,0.5)',
-                      fontSize: '0.9rem',
+                      fontSize: '0.8rem',
                       border: '1px dashed rgba(255,255,255,0.2)',
-                      borderRadius: '8px'
+                      borderRadius: '4px'
                     }}>
-                      Pilih lagu di atas untuk memutar
+                      Pilih lagu untuk memutar
                     </div>
                   )}
-
-                  <div style={{
-                    display: 'flex',
-                    justifyContent: 'flex-end',
-                    marginTop: '1rem',
-                    paddingTop: '0.8rem',
-                    borderTop: '1px solid rgba(255,255,255,0.1)'
-                  }}>
-                    <a
-                      href="https://open.spotify.com"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{
-                        color: 'rgba(255,255,255,0.8)',
-                        textDecoration: 'none',
-                        fontSize: '0.9rem',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.5rem'
-                      }}
-                    >
-                      Buka di Spotify
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-                        <polyline points="15 3 21 3 21 9" />
-                        <line x1="10" y1="14" x2="21" y2="3" />
-                      </svg>
-                    </a>
-                  </div>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -5484,38 +5239,71 @@ fontFamily: 'Helvetica, Arial, sans-serif'
         </div>
       </div>
 
+      {/* Teks Berjalan - Fixed di bawah */}
+      <div style={{
+        position: 'fixed',
+        bottom: isMobile ? '50px' : '60px',
+        left: 0,
+        width: '100%',
+        overflow: 'hidden',
+        whiteSpace: 'nowrap',
+        zIndex: 2,
+        pointerEvents: 'none'
+      }}>
+        <motion.div
+          animate={{ x: ['0%', '-50%'] }}
+          transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+          style={{
+            display: 'inline-block',
+            whiteSpace: 'nowrap',
+            fontSize: isMobile ? '4rem' : '8rem',
+            fontWeight: '300',
+            color: '#FFFFFF',
+            fontFamily: 'Helvetica, Arial, sans-serif',
+            textTransform: 'uppercase',
+            letterSpacing: '6px',
+            lineHeight: 1,
+            opacity: 0.5,
+            textShadow: '0 0 20px rgba(255,255,255,0.3)'
+          }}
+        >
+          MENU • MENU • MENU • MENU • MENU • MENU • MENU • MENU • 
+        </motion.div>
+      </div>
+
       {/* Footer - Fixed di bawah */}
       <div style={{
         position: 'fixed',
-        bottom: isMobile ? '1.5rem' : '2rem',
+        bottom: 0,
         left: 0,
         width: '100%',
+        height: isMobile ? '40px' : '50px',
         display: 'flex',
+        alignItems: 'center',
         justifyContent: 'space-between',
-        padding: isMobile ? '0 2rem' : '0 4rem',
+        padding: isMobile ? '0 1.5rem' : '0 3rem',
         boxSizing: 'border-box',
-        color: 'rgba(255, 255, 255, 0.9)',
-        fontSize: isMobile ? '0.9rem' : '1rem',
+        color: 'rgba(255, 255, 255, 0.7)',
+        fontSize: isMobile ? '0.7rem' : '0.8rem',
         fontWeight: '300',
         fontFamily: 'Helvetica, Arial, sans-serif',
         zIndex: 20,
-        pointerEvents: 'none'
+        backgroundColor: 'transparent',
+        borderTop: '1px solid rgba(255,255,255,0.1)'
       }}>
-        <div style={{ display: 'flex', gap: '2rem' }}>
+        <div style={{ display: 'flex', gap: '1.5rem' }}>
           <span>© 2024 MENURU</span>
           <span>All rights reserved</span>
         </div>
-        <div style={{ display: 'flex', gap: '2rem' }}>
-          <a href="#" style={{ color: 'inherit', textDecoration: 'none', pointerEvents: 'auto' }}>IG</a>
-          <a href="#" style={{ color: 'inherit', textDecoration: 'none', pointerEvents: 'auto' }}>TW</a>
-          <a href="#" style={{ color: 'inherit', textDecoration: 'none', pointerEvents: 'auto' }}>GH</a>
+        <div style={{ display: 'flex', gap: '1.5rem' }}>
+          <a href="#" style={{ color: 'inherit', textDecoration: 'none' }}>IG</a>
+          <a href="#" style={{ color: 'inherit', textDecoration: 'none' }}>TW</a>
+          <a href="#" style={{ color: 'inherit', textDecoration: 'none' }}>GH</a>
         </div>
       </div>
     </motion.div>
   )}
 </AnimatePresence>
-
-
 
 
       
@@ -7970,6 +7758,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
     </div>
   );
 }
+
 
 
 
