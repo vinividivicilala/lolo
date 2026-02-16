@@ -409,8 +409,7 @@ const SubMenuItem = ({ number, title, url }: {
   </div>
 );
 
-
-  // State untuk jam Jakarta
+// Tambahkan state ini di dalam component HomePage (setelah state lainnya)
 const [jakartaTime, setJakartaTime] = useState<string>('');
 
 // useEffect untuk update jam Jakarta setiap detik
@@ -435,6 +434,12 @@ useEffect(() => {
 
   return () => clearInterval(interval);
 }, []);
+
+
+
+
+
+
   
 
   // Data untuk pencarian
@@ -4450,6 +4455,8 @@ fontFamily: 'Helvetica, Arial, sans-serif'
           </motion.div>
         )}
       </AnimatePresence>
+
+
 {/* Menu Overlay dengan GSAP Animation - Modern Awwwards Style */}
 <AnimatePresence>
   {showMenuOverlay && (
@@ -4490,7 +4497,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
         zIndex: 1
       }} />
 
-      {/* Header Menu - Judul Website dan Jam Jakarta */}
+      {/* Header Menu - Judul Website Besar dan Jam Jakarta */}
       <div style={{
         position: 'absolute',
         top: isMobile ? '1.5rem' : '2rem',
@@ -4505,38 +4512,35 @@ fontFamily: 'Helvetica, Arial, sans-serif'
         zIndex: 10,
         pointerEvents: 'none'
       }}>
-        {/* Judul Website */}
+        {/* Judul Website Besar */}
         <div style={{
           color: '#FFFFFF',
-          fontSize: isMobile ? '1.2rem' : '1.5rem',
+          fontSize: isMobile ? '2.5rem' : '4rem',
+          fontWeight: '700',
+          fontFamily: 'Helvetica, Arial, sans-serif',
+          letterSpacing: '4px',
+          textTransform: 'uppercase',
+          opacity: 0.9,
+          textShadow: '0 0 20px rgba(255,255,255,0.5)'
+        }}>
+          MENURU
+        </div>
+
+        {/* Jam Jakarta - Tanpa Icon */}
+        <div style={{
+          color: '#FFFFFF',
+          fontSize: isMobile ? '1.2rem' : '1.8rem',
           fontWeight: '300',
           fontFamily: 'Helvetica, Arial, sans-serif',
           letterSpacing: '2px',
-          textTransform: 'uppercase',
-          opacity: 0.9,
-          textShadow: '0 0 10px rgba(255,255,255,0.3)'
-        }}>
-          Menuru
-        </div>
-
-        {/* Jam Jakarta Realtime */}
-        <div style={{
-          color: '#FFFFFF',
-          fontSize: isMobile ? '1.2rem' : '1.5rem',
-          fontWeight: '300',
-          fontFamily: 'Helvetica, Arial, sans-serif',
-          letterSpacing: '1px',
-          opacity: 0.9,
+          opacity: 0.8,
           textShadow: '0 0 10px rgba(255,255,255,0.3)',
           display: 'flex',
-          alignItems: 'center',
-          gap: '0.5rem'
+          flexDirection: 'column',
+          alignItems: 'flex-end'
         }}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ opacity: 0.7 }}>
-            <circle cx="12" cy="12" r="10"/>
-            <polyline points="12 6 12 12 16 14"/>
-          </svg>
-          <span id="jakarta-clock">{new Date().toLocaleTimeString('id-ID', { timeZone: 'Asia/Jakarta', hour12: false })}</span>
+          <span style={{ fontSize: isMobile ? '0.8rem' : '1rem', opacity: 0.6, marginBottom: '0.2rem' }}>JAKARTA</span>
+          <span>{jakartaTime}</span>
         </div>
       </div>
 
@@ -5043,9 +5047,6 @@ fontFamily: 'Helvetica, Arial, sans-serif'
     </motion.div>
   )}
 </AnimatePresence>
-
-
-
 
       
 
@@ -7499,6 +7500,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
     </div>
   );
 }
+
 
 
 
