@@ -256,6 +256,167 @@ export default function HomePage(): React.JSX.Element {
   // Ref untuk modal kalender
   const calendarModalRef = useRef<HTMLDivElement>(null);
 
+// Tambahkan state ini di dalam component HomePage (setelah state lainnya)
+const [openSection, setOpenSection] = useState<string | null>(null);
+
+// Fungsi untuk toggle section
+const handleToggleSection = (section: string) => {
+  setOpenSection(openSection === section ? null : section);
+};
+
+// Component Menu Item - definisikan di dalam HomePage component (sebelum return)
+const MenuItem = ({ number, title, mainUrl, isOpen, onToggle, children }: {
+  number: string;
+  title: string;
+  mainUrl: string;
+  isOpen: boolean;
+  onToggle: () => void;
+  children: React.ReactNode;
+}) => (
+  <motion.div
+    initial={{ opacity: 0, y: 30 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.6 }}
+    style={{
+      borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+    }}
+  >
+    {/* Header yang bisa diklik untuk toggle */}
+    <motion.div
+      onClick={onToggle}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        cursor: 'pointer',
+        padding: '1rem 0',
+        transition: 'all 0.3s ease'
+      }}
+      whileHover={{ x: 10 }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+        <span style={{
+          color: 'rgba(255, 255, 255, 0.5)',
+          fontSize: '2rem',
+          fontWeight: '300',
+          fontFamily: 'monospace'
+        }}>{number}</span>
+        
+        {/* Title bisa diklik langsung ke halaman utama */}
+        <span
+          onClick={(e) => {
+            e.stopPropagation();
+            router.push(mainUrl);
+          }}
+          style={{
+            color: '#FFFFFF',
+            fontSize: isMobile ? '3rem' : '4.5rem',
+            fontWeight: '500',
+            fontFamily: 'Helvetica, Arial, sans-serif',
+            textShadow: '0 0 10px rgba(255,255,255,0.3)',
+            cursor: 'pointer',
+            transition: 'all 0.3s ease'
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.color = 'rgba(255,255,255,0.8)'}
+          onMouseLeave={(e) => e.currentTarget.style.color = '#FFFFFF'}
+        >
+          {title}
+        </span>
+      </div>
+      
+      {/* Arrow yang berubah sesuai state */}
+      <motion.div
+        animate={{ rotate: isOpen ? 90 : 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        <svg
+          width="50"
+          height="50"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#FFFFFF"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          style={{
+            filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.5))'
+          }}
+        >
+          <path d="M7 7h10v10" />
+          <path d="M17 7L7 17" />
+        </svg>
+      </motion.div>
+    </motion.div>
+
+    {/* Sub-menu dengan animasi muncul/hilang */}
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          exit={{ opacity: 0, height: 0 }}
+          transition={{ duration: 0.3 }}
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0.8rem',
+            marginLeft: '6rem',
+            marginTop: '0.5rem',
+            marginBottom: '1rem',
+            overflow: 'hidden'
+          }}
+        >
+          {children}
+        </motion.div>
+      )}
+    </AnimatePresence>
+  </motion.div>
+);
+
+// Component Sub Menu Item - definisikan di dalam HomePage component (sebelum return)
+const SubMenuItem = ({ number, title, url }: {
+  number: string;
+  title: string;
+  url: string;
+}) => (
+  <motion.div
+    initial={{ opacity: 0, x: -20 }}
+    animate={{ opacity: 1, x: 0 }}
+    exit={{ opacity: 0, x: -20 }}
+    style={{
+      display: 'flex',
+      alignItems: 'center',
+      gap: '1.5rem',
+      padding: '0.5rem 0',
+      cursor: 'pointer',
+      borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
+    }}
+    onClick={() => router.push(url)}
+    whileHover={{ x: 10 }}
+  >
+    <span style={{ 
+      color: 'rgba(255, 255, 255, 0.3)', 
+      fontSize: '0.9rem', 
+      fontFamily: 'monospace', 
+      width: '30px' 
+    }}>
+      {number}
+    </span>
+    <span style={{ 
+      color: 'rgba(255, 255, 255, 0.8)', 
+      fontSize: '1.2rem',
+      flex: 1
+    }}>
+      {title}
+    </span>
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2">
+      <path d="M7 7h10v10" />
+      <path d="M17 7L7 17" />
+    </svg>
+  </motion.div>
+);
+
+  
+
   // Data untuk pencarian
   const searchablePages = [
     {
@@ -4270,6 +4431,9 @@ fontFamily: 'Helvetica, Arial, sans-serif'
         )}
       </AnimatePresence>
 
+
+
+
 {/* Menu Overlay dengan GSAP Animation - Modern Awwwards Style */}
 <AnimatePresence>
   {showMenuOverlay && (
@@ -4516,6 +4680,17 @@ fontFamily: 'Helvetica, Arial, sans-serif'
     </motion.div>
   )}
 </AnimatePresence>
+
+
+
+
+
+
+
+
+
+
+      
 
       
 
@@ -6967,6 +7142,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
     </div>
   );
 }
+
 
 
 
