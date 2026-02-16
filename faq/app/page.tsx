@@ -4269,16 +4269,20 @@ fontFamily: 'Helvetica, Arial, sans-serif'
           </motion.div>
         )}
       </AnimatePresence>
+
+
+
+
 {/* Menu Overlay dengan GSAP Animation - Modern Awwwards Style */}
 <AnimatePresence>
   {showMenuOverlay && (
     <motion.div
       ref={menuOverlayRef}
       key="menu-overlay"
-      initial={{ opacity: 0, y: '-100%' }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: '-100%' }}
-      transition={{ duration: 0.5, ease: "easeInOut" }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.3 }}
       style={{
         position: 'fixed',
         top: 0,
@@ -4292,23 +4296,24 @@ fontFamily: 'Helvetica, Arial, sans-serif'
         alignItems: 'center',
         justifyContent: 'center',
         overflow: 'hidden',
+        transform: 'translateY(-100%)'
       }}
     >
-      {/* Background dengan efek grain dan pattern */}
+      {/* Background dengan efek grain dan pattern - DIPERBAIKI: kurangi opacity pattern */}
       <div style={{
         position: 'absolute',
         top: 0,
         left: 0,
         width: '100%',
         height: '100%',
-        backgroundImage: `radial-gradient(circle at 30% 40%, rgba(255,255,255,0.03) 0%, transparent 30%),
-                          radial-gradient(circle at 70% 60%, rgba(255,255,255,0.03) 0%, transparent 30%),
-                          repeating-linear-gradient(45deg, rgba(255,255,255,0.01) 0px, rgba(255,255,255,0.01) 2px, transparent 2px, transparent 8px)`,
+        backgroundImage: `radial-gradient(circle at 30% 40%, rgba(255,255,255,0.02) 0%, transparent 40%),
+                          radial-gradient(circle at 70% 60%, rgba(255,255,255,0.02) 0%, transparent 40%),
+                          repeating-linear-gradient(45deg, rgba(255,255,255,0.005) 0px, rgba(255,255,255,0.005) 2px, transparent 2px, transparent 12px)`,
         pointerEvents: 'none',
         zIndex: 1
       }} />
 
-      {/* Teks Berjalan dengan North East Arrow - DIPERBAIKI */}
+      {/* Teks Berjalan dengan North East Arrow - DIPERBAIKI: warna putih solid dan lebih terang */}
       <div style={{
         position: 'absolute',
         bottom: '15%',
@@ -4316,8 +4321,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
         width: '100%',
         overflow: 'hidden',
         whiteSpace: 'nowrap',
-        zIndex: 2,
-        pointerEvents: 'none'
+        zIndex: 2
       }}>
         <motion.div
           animate={{ 
@@ -4332,37 +4336,28 @@ fontFamily: 'Helvetica, Arial, sans-serif'
             display: 'inline-block',
             whiteSpace: 'nowrap',
             fontSize: isMobile ? '6rem' : '12rem',
-            fontWeight: '400',
-            color: 'white',
+            fontWeight: '500',
+            color: '#FFFFFF', // Pure white
             fontFamily: 'Helvetica, Arial, sans-serif',
             textTransform: 'uppercase',
             letterSpacing: '8px',
             lineHeight: 1,
-            opacity: 0.3
+            opacity: 0.5, // Ditingkatkan dari 0.3 ke 0.5
+            textShadow: '0 0 10px rgba(255,255,255,0.2)', // Tambah glow tipis
+            filter: 'brightness(1.2)' // Tambah brightness
           }}
         >
-          {/* Konten di-duplicate untuk infinite scroll */}
-          {Array(5).fill(null).map((_, i) => (
-            <span key={i} style={{ display: 'inline-block', whiteSpace: 'nowrap' }}>
-              HOME
-              <svg 
-                width={isMobile ? "60" : "100"} 
-                height={isMobile ? "60" : "100"} 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="white" 
-                strokeWidth="1.5"
-                style={{ 
-                  display: 'inline-block', 
-                  verticalAlign: 'middle', 
-                  margin: isMobile ? '0 1rem' : '0 2rem'
-                }}
-              >
-                <path d="M7 7h10v10" />
-                <path d="M17 7L7 17" />
-              </svg>
-            </span>
-          ))}
+          {/* DIPERBAIKI: SVG dengan stroke putih lebih tebal dan solid */}
+          HOME <svg width="180" height="180" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 2rem', filter: 'drop-shadow(0 0 5px rgba(255,255,255,0.3))' }}>
+            <path d="M7 7h10v10" />
+            <path d="M17 7L7 17" />
+          </svg> HOME <svg width="180" height="180" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 2rem', filter: 'drop-shadow(0 0 5px rgba(255,255,255,0.3))' }}>
+            <path d="M7 7h10v10" />
+            <path d="M17 7L7 17" />
+          </svg> HOME <svg width="180" height="180" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 2rem', filter: 'drop-shadow(0 0 5px rgba(255,255,255,0.3))' }}>
+            <path d="M7 7h10v10" />
+            <path d="M17 7L7 17" />
+          </svg>
         </motion.div>
       </div>
 
@@ -4379,11 +4374,10 @@ fontFamily: 'Helvetica, Arial, sans-serif'
         gap: isMobile ? '3rem' : '6rem',
         height: '100%',
         alignItems: 'flex-start',
-        justifyContent: 'center',
-        marginTop: '-5%'
+        marginTop: '-10%'
       }}>
         
-        {/* Left Section - Menu Items */}
+        {/* Left Section - Menu Items dengan North East Arrow Besar - DIPERBAIKI: SVG lebih terang */}
         <motion.div
           initial={{ opacity: 0, x: -50 }}
           animate={{ opacity: 1, x: 0 }}
@@ -4397,7 +4391,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
           }}
         >
           <div style={{
-            color: 'rgba(255, 255, 255, 0.4)',
+            color: 'rgba(255, 255, 255, 0.5)', // Ditingkatkan dari 0.4 ke 0.5
             fontSize: '0.9rem',
             fontWeight: '400',
             textTransform: 'uppercase',
@@ -4420,7 +4414,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5, delay: 0.3 + (index * 0.1) }}
               style={{
-                color: 'white',
+                color: '#FFFFFF', // Pure white
                 fontSize: isMobile ? '2.5rem' : '4rem',
                 fontWeight: '400',
                 textDecoration: 'none',
@@ -4432,25 +4426,29 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                 gap: '1.5rem',
                 width: 'fit-content',
                 cursor: 'pointer',
-                transition: 'all 0.3s ease'
+                transition: 'all 0.3s ease',
+                textShadow: '0 0 10px rgba(255,255,255,0.2)' // Tambah glow tipis
               }}
               whileHover={{
                 x: 20,
-                color: '#999'
+                color: '#FFFFFF',
+                textShadow: '0 0 20px rgba(255,255,255,0.4)'
               }}
             >
               {item.label}
               
-              {/* Arrow untuk menu items - diperkecil ukurannya */}
+              {/* North East Arrow besar untuk setiap menu item - DIPERBAIKI: stroke lebih tebal dan putih solid */}
               <svg
-                width={isMobile ? "40" : "50"}
-                height={isMobile ? "40" : "50"}
+                width="60"
+                height="60"
                 viewBox="0 0 24 24"
                 fill="none"
-                stroke="white"
-                strokeWidth="1.5"
+                stroke="#FFFFFF"
+                strokeWidth="2.5"
+                strokeLinecap="round"
                 style={{
-                  transition: 'all 0.3s ease'
+                  transition: 'all 0.3s ease',
+                  filter: 'drop-shadow(0 0 5px rgba(255,255,255,0.3))'
                 }}
               >
                 <path d="M7 7h10v10" />
@@ -4466,16 +4464,17 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                   bottom: 0,
                   left: 0,
                   width: '100%',
-                  height: '1px',
-                  backgroundColor: 'white',
-                  transformOrigin: 'left'
+                  height: '2px', // Ditingkatkan dari 1px ke 2px
+                  backgroundColor: '#FFFFFF',
+                  transformOrigin: 'left',
+                  boxShadow: '0 0 10px rgba(255,255,255,0.5)' // Tambah glow
                 }}
               />
             </motion.a>
           ))}
         </motion.div>
 
-        {/* Right Section - Notes dan Info */}
+        {/* Right Section - Notes dan Info dengan North East Arrow Besar - DIPERBAIKI: semua SVG lebih terang */}
         <motion.div
           initial={{ opacity: 0, x: 50 }}
           animate={{ opacity: 1, x: 0 }}
@@ -4488,10 +4487,10 @@ fontFamily: 'Helvetica, Arial, sans-serif'
             marginTop: isMobile ? '2rem' : '3rem'
           }}
         >
-          {/* Featured Note */}
+          {/* Featured Note dengan north east arrow besar */}
           <div>
             <div style={{
-              color: 'rgba(255, 255, 255, 0.4)',
+              color: 'rgba(255, 255, 255, 0.5)',
               fontSize: '0.9rem',
               fontWeight: '400',
               textTransform: 'uppercase',
@@ -4510,8 +4509,8 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                 gap: '2rem',
                 cursor: 'pointer',
                 padding: '2rem',
-                backgroundColor: 'rgba(255, 255, 255, 0.02)',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
+                backgroundColor: 'rgba(255, 255, 255, 0.03)', // Ditingkatkan dari 0.02 ke 0.03
+                border: '1px solid rgba(255, 255, 255, 0.15)', // Ditingkatkan dari 0.1 ke 0.15
                 borderRadius: '12px'
               }}
               onClick={() => router.push('/notes')}
@@ -4520,7 +4519,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                 width: '60px',
                 height: '60px',
                 borderRadius: '50%',
-                backgroundColor: 'transparent',
+                backgroundColor: 'rgba(255, 255, 255, 0.05)', // Tambah background tipis
                 border: '1px solid rgba(255, 255, 255, 0.3)',
                 display: 'flex',
                 alignItems: 'center',
@@ -4532,15 +4531,16 @@ fontFamily: 'Helvetica, Arial, sans-serif'
               
               <div style={{ flex: 1 }}>
                 <div style={{
-                  color: 'white',
+                  color: '#FFFFFF',
                   fontSize: '1.5rem',
                   fontWeight: '400',
-                  marginBottom: '0.5rem'
+                  marginBottom: '0.5rem',
+                  textShadow: '0 0 8px rgba(255,255,255,0.2)'
                 }}>
                   Note #01: Creative Process
                 </div>
                 <div style={{
-                  color: 'rgba(255, 255, 255, 0.6)',
+                  color: 'rgba(255, 255, 255, 0.7)', // Ditingkatkan dari 0.6 ke 0.7
                   fontSize: '1.1rem',
                   fontWeight: '400'
                 }}>
@@ -4548,14 +4548,18 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                 </div>
               </div>
 
-              {/* Arrow untuk featured note */}
+              {/* North East Arrow besar untuk featured note - DIPERBAIKI */}
               <svg
-                width="40"
-                height="40"
+                width="60"
+                height="60"
                 viewBox="0 0 24 24"
                 fill="none"
-                stroke="white"
-                strokeWidth="1.5"
+                stroke="#FFFFFF"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                style={{
+                  filter: 'drop-shadow(0 0 5px rgba(255,255,255,0.3))'
+                }}
               >
                 <path d="M7 7h10v10" />
                 <path d="M17 7L7 17" />
@@ -4563,10 +4567,10 @@ fontFamily: 'Helvetica, Arial, sans-serif'
             </motion.div>
           </div>
 
-          {/* Recent Notes List */}
+          {/* Recent Notes List dengan north east arrow besar */}
           <div>
             <div style={{
-              color: 'rgba(255, 255, 255, 0.4)',
+              color: 'rgba(255, 255, 255, 0.5)',
               fontSize: '0.9rem',
               fontWeight: '400',
               textTransform: 'uppercase',
@@ -4584,7 +4588,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                 transition={{ duration: 0.4, delay: 0.5 + (index * 0.1) }}
                 style={{
                   padding: '1.5rem 0',
-                  borderBottom: index < 2 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none',
+                  borderBottom: index < 2 ? '1px solid rgba(255, 255, 255, 0.15)' : 'none', // Ditingkatkan dari 0.1 ke 0.15
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
@@ -4594,15 +4598,16 @@ fontFamily: 'Helvetica, Arial, sans-serif'
               >
                 <div>
                   <div style={{
-                    color: 'white',
+                    color: '#FFFFFF',
                     fontSize: '1.3rem',
                     fontWeight: '400',
-                    marginBottom: '0.5rem'
+                    marginBottom: '0.5rem',
+                    textShadow: '0 0 8px rgba(255,255,255,0.2)'
                   }}>
                     Note #{note}: Project Documentation
                   </div>
                   <div style={{
-                    color: 'rgba(255, 255, 255, 0.5)',
+                    color: 'rgba(255, 255, 255, 0.6)', // Ditingkatkan dari 0.5 ke 0.6
                     fontSize: '1rem',
                     fontWeight: '400'
                   }}>
@@ -4610,14 +4615,18 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                   </div>
                 </div>
                 
-                {/* Arrow untuk recent notes */}
+                {/* North East Arrow besar untuk recent notes - DIPERBAIKI */}
                 <svg
-                  width="30"
-                  height="30"
+                  width="40"
+                  height="40"
                   viewBox="0 0 24 24"
                   fill="none"
-                  stroke="white"
-                  strokeWidth="1.5"
+                  stroke="#FFFFFF"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  style={{
+                    filter: 'drop-shadow(0 0 5px rgba(255,255,255,0.3))'
+                  }}
                 >
                   <path d="M7 7h10v10" />
                   <path d="M17 7L7 17" />
@@ -4628,7 +4637,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
         </motion.div>
       </div>
 
-      {/* Footer */}
+      {/* Footer Normal */}
       <motion.div
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
@@ -4642,7 +4651,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
           justifyContent: 'space-between',
           padding: isMobile ? '0 2rem' : '0 4rem',
           boxSizing: 'border-box',
-          color: 'rgba(255, 255, 255, 0.8)',
+          color: 'rgba(255, 255, 255, 0.9)', // Ditingkatkan dari 0.8 ke 0.9
           fontSize: isMobile ? '0.9rem' : '1rem',
           fontWeight: '400',
           zIndex: 2
@@ -4655,14 +4664,14 @@ fontFamily: 'Helvetica, Arial, sans-serif'
         <div style={{ display: 'flex', gap: '2rem' }}>
           <motion.a 
             href="/privacy"
-            whileHover={{ color: 'white' }}
+            whileHover={{ color: '#FFFFFF' }}
             style={{ color: 'inherit', textDecoration: 'none' }}
           >
             Privacy
           </motion.a>
           <motion.a 
             href="/terms"
-            whileHover={{ color: 'white' }}
+            whileHover={{ color: '#FFFFFF' }}
             style={{ color: 'inherit', textDecoration: 'none' }}
           >
             Terms
@@ -4670,14 +4679,14 @@ fontFamily: 'Helvetica, Arial, sans-serif'
         </div>
       </motion.div>
 
-      {/* Close Button */}
+      {/* Close Button - DIPERBAIKI: border lebih terang */}
       <motion.div
         onClick={handleCloseMenu}
         style={{
           position: 'absolute',
           top: isMobile ? '1.5rem' : '2rem',
           right: isMobile ? '1.5rem' : '2rem',
-          color: 'white',
+          color: '#FFFFFF',
           fontSize: isMobile ? '2.5rem' : '3rem',
           fontWeight: '300',
           cursor: 'pointer',
@@ -4687,16 +4696,19 @@ fontFamily: 'Helvetica, Arial, sans-serif'
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          opacity: 0.7,
+          opacity: 0.8, // Ditingkatkan dari 0.7 ke 0.8
           width: '60px',
           height: '60px',
           borderRadius: '50%',
-          border: '1px solid rgba(255, 255, 255, 0.2)'
+          border: '1px solid rgba(255, 255, 255, 0.3)', // Ditingkatkan dari 0.2 ke 0.3
+          backgroundColor: 'rgba(255, 255, 255, 0.02)', // Tambah background tipis
+          textShadow: '0 0 10px rgba(255,255,255,0.3)' // Tambah glow
         }}
         whileHover={{ 
           opacity: 1,
           rotate: 90,
-          borderColor: 'white'
+          borderColor: '#FFFFFF',
+          backgroundColor: 'rgba(255, 255, 255, 0.05)'
         }}
         transition={{ duration: 0.3 }}
       >
@@ -4706,6 +4718,12 @@ fontFamily: 'Helvetica, Arial, sans-serif'
   )}
 </AnimatePresence>
 
+
+
+
+
+
+      
       
 
       
@@ -7158,6 +7176,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
     </div>
   );
 }
+
 
 
 
