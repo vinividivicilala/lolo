@@ -4428,8 +4428,6 @@ fontFamily: 'Helvetica, Arial, sans-serif'
       </AnimatePresence>
 
 
-
-
 {/* Menu Overlay dengan GSAP Animation - Modern Awwwards Style */}
 <AnimatePresence>
   {showMenuOverlay && (
@@ -4470,7 +4468,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
         zIndex: 1
       }} />
 
-      {/* Teks Berjalan dengan North East Arrow - PUTIH CERAH */}
+      {/* Teks Berjalan dengan North East Arrow - PUTIH CERAH (TETAP BERJALAN) */}
       <div style={{
         position: 'absolute',
         bottom: '15%',
@@ -4517,7 +4515,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
         </motion.div>
       </div>
 
-      {/* Konten Utama */}
+      {/* Konten Utama - TANPA ANIMASI SAMA SEKALI */}
       <div style={{
         position: 'relative',
         zIndex: 3,
@@ -4531,113 +4529,418 @@ fontFamily: 'Helvetica, Arial, sans-serif'
       }}>
         
         {/* CATATAN SECTION */}
-        <MenuItem 
-          number="01" 
-          title="CATATAN" 
-          mainUrl="/catatan"
-          isOpen={openSection === 'catatan'}
-          onToggle={() => handleToggleSection('catatan')}
-        >
-          <SubMenuItem number="01" title="Creative Process" url="/catatan/creative" />
-          <SubMenuItem number="02" title="Design Thinking" url="/catatan/design" />
-          <SubMenuItem number="03" title="UX Research" url="/catatan/ux" />
-          <SubMenuItem number="04" title="Development" url="/catatan/dev" />
-        </MenuItem>
+        <div style={{
+          borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+        }}>
+          {/* Header */}
+          <div
+            onClick={() => handleToggleSection('catatan')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              cursor: 'pointer',
+              padding: '1rem 0',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+              <span style={{
+                color: 'rgba(255, 255, 255, 0.5)',
+                fontSize: '2rem',
+                fontWeight: '300',
+                fontFamily: 'monospace'
+              }}>01</span>
+              
+              <span
+                onClick={(e) => {
+                  e.stopPropagation();
+                  router.push('/catatan');
+                }}
+                style={{
+                  color: '#FFFFFF',
+                  fontSize: isMobile ? '3rem' : '4.5rem',
+                  fontWeight: '500',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  textShadow: '0 0 10px rgba(255,255,255,0.3)',
+                  cursor: 'pointer',
+                }}
+              >
+                CATATAN
+              </span>
+            </div>
+            
+            {/* Arrow dengan animasi rotate (TETAP ADA) */}
+            <div style={{
+              transform: openSection === 'catatan' ? 'rotate(90deg)' : 'rotate(0deg)',
+              transition: 'transform 0.3s ease'
+            }}>
+              <svg
+                width="50"
+                height="50"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#FFFFFF"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                style={{
+                  filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.5))'
+                }}
+              >
+                <path d="M7 7h10v10" />
+                <path d="M17 7L7 17" />
+              </svg>
+            </div>
+          </div>
+
+          {/* Sub-menu */}
+          {openSection === 'catatan' && (
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.8rem',
+              marginLeft: '6rem',
+              marginTop: '0.5rem',
+              marginBottom: '1rem',
+            }}>
+              {[
+                { number: '01', title: 'Creative Process', url: '/catatan/creative' },
+                { number: '02', title: 'Design Thinking', url: '/catatan/design' },
+                { number: '03', title: 'UX Research', url: '/catatan/ux' },
+                { number: '04', title: 'Development', url: '/catatan/dev' }
+              ].map((item, idx) => (
+                <div
+                  key={idx}
+                  onClick={() => router.push(item.url)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '1.5rem',
+                    padding: '0.5rem 0',
+                    cursor: 'pointer',
+                    borderBottom: idx < 3 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none'
+                  }}
+                >
+                  <span style={{ 
+                    color: 'rgba(255, 255, 255, 0.3)', 
+                    fontSize: '0.9rem', 
+                    fontFamily: 'monospace', 
+                    width: '30px' 
+                  }}>
+                    {item.number}
+                  </span>
+                  <span style={{ 
+                    color: 'rgba(255, 255, 255, 0.8)', 
+                    fontSize: '1.2rem',
+                    flex: 1
+                  }}>
+                    {item.title}
+                  </span>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2">
+                    <path d="M7 7h10v10" />
+                    <path d="M17 7L7 17" />
+                  </svg>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
         {/* COMMUNITY SECTION */}
-        <MenuItem 
-          number="02" 
-          title="COMMUNITY" 
-          mainUrl="/community"
-          isOpen={openSection === 'community'}
-          onToggle={() => handleToggleSection('community')}
-        >
-          <SubMenuItem number="01" title="Forum Diskusi" url="/community/forum" />
-          <SubMenuItem number="02" title="Events" url="/community/events" />
-          <SubMenuItem number="03" title="Members" url="/community/members" />
-          <SubMenuItem number="04" title="Gallery" url="/community/gallery" />
-        </MenuItem>
+        <div style={{
+          borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+        }}>
+          <div
+            onClick={() => handleToggleSection('community')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              cursor: 'pointer',
+              padding: '1rem 0',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+              <span style={{
+                color: 'rgba(255, 255, 255, 0.5)',
+                fontSize: '2rem',
+                fontWeight: '300',
+                fontFamily: 'monospace'
+              }}>02</span>
+              <span
+                onClick={(e) => {
+                  e.stopPropagation();
+                  router.push('/community');
+                }}
+                style={{
+                  color: '#FFFFFF',
+                  fontSize: isMobile ? '3rem' : '4.5rem',
+                  fontWeight: '500',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  textShadow: '0 0 10px rgba(255,255,255,0.3)',
+                  cursor: 'pointer',
+                }}
+              >
+                COMMUNITY
+              </span>
+            </div>
+            
+            <div style={{
+              transform: openSection === 'community' ? 'rotate(90deg)' : 'rotate(0deg)',
+              transition: 'transform 0.3s ease'
+            }}>
+              <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" style={{ filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.5))' }}>
+                <path d="M7 7h10v10" />
+                <path d="M17 7L7 17" />
+              </svg>
+            </div>
+          </div>
+
+          {openSection === 'community' && (
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.8rem',
+              marginLeft: '6rem',
+              marginTop: '0.5rem',
+              marginBottom: '1rem',
+            }}>
+              {[
+                { number: '01', title: 'Forum Diskusi', url: '/community/forum' },
+                { number: '02', title: 'Events', url: '/community/events' },
+                { number: '03', title: 'Members', url: '/community/members' },
+                { number: '04', title: 'Gallery', url: '/community/gallery' }
+              ].map((item, idx) => (
+                <div
+                  key={idx}
+                  onClick={() => router.push(item.url)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '1.5rem',
+                    padding: '0.5rem 0',
+                    cursor: 'pointer',
+                    borderBottom: idx < 3 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none'
+                  }}
+                >
+                  <span style={{ color: 'rgba(255, 255, 255, 0.3)', fontSize: '0.9rem', fontFamily: 'monospace', width: '30px' }}>{item.number}</span>
+                  <span style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '1.2rem', flex: 1 }}>{item.title}</span>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2">
+                    <path d="M7 7h10v10" />
+                    <path d="M17 7L7 17" />
+                  </svg>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
         {/* CALENDAR SECTION */}
-        <MenuItem 
-          number="03" 
-          title="CALENDAR" 
-          mainUrl="/calendar"
-          isOpen={openSection === 'calendar'}
-          onToggle={() => handleToggleSection('calendar')}
-        >
-          <SubMenuItem number="01" title="Upcoming Events" url="/calendar/upcoming" />
-          <SubMenuItem number="02" title="Workshops" url="/calendar/workshops" />
-          <SubMenuItem number="03" title="Deadlines" url="/calendar/deadlines" />
-          <SubMenuItem number="04" title="Schedule" url="/calendar/schedule" />
-        </MenuItem>
+        <div style={{
+          borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+        }}>
+          <div
+            onClick={() => handleToggleSection('calendar')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              cursor: 'pointer',
+              padding: '1rem 0',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+              <span style={{
+                color: 'rgba(255, 255, 255, 0.5)',
+                fontSize: '2rem',
+                fontWeight: '300',
+                fontFamily: 'monospace'
+              }}>03</span>
+              <span
+                onClick={(e) => {
+                  e.stopPropagation();
+                  router.push('/calendar');
+                }}
+                style={{
+                  color: '#FFFFFF',
+                  fontSize: isMobile ? '3rem' : '4.5rem',
+                  fontWeight: '500',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  textShadow: '0 0 10px rgba(255,255,255,0.3)',
+                  cursor: 'pointer',
+                }}
+              >
+                CALENDAR
+              </span>
+            </div>
+            
+            <div style={{
+              transform: openSection === 'calendar' ? 'rotate(90deg)' : 'rotate(0deg)',
+              transition: 'transform 0.3s ease'
+            }}>
+              <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" style={{ filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.5))' }}>
+                <path d="M7 7h10v10" />
+                <path d="M17 7L7 17" />
+              </svg>
+            </div>
+          </div>
+
+          {openSection === 'calendar' && (
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.8rem',
+              marginLeft: '6rem',
+              marginTop: '0.5rem',
+              marginBottom: '1rem',
+            }}>
+              {[
+                { number: '01', title: 'Upcoming Events', url: '/calendar/upcoming' },
+                { number: '02', title: 'Workshops', url: '/calendar/workshops' },
+                { number: '03', title: 'Deadlines', url: '/calendar/deadlines' },
+                { number: '04', title: 'Schedule', url: '/calendar/schedule' }
+              ].map((item, idx) => (
+                <div
+                  key={idx}
+                  onClick={() => router.push(item.url)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '1.5rem',
+                    padding: '0.5rem 0',
+                    cursor: 'pointer',
+                    borderBottom: idx < 3 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none'
+                  }}
+                >
+                  <span style={{ color: 'rgba(255, 255, 255, 0.3)', fontSize: '0.9rem', fontFamily: 'monospace', width: '30px' }}>{item.number}</span>
+                  <span style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '1.2rem', flex: 1 }}>{item.title}</span>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2">
+                    <path d="M7 7h10v10" />
+                    <path d="M17 7L7 17" />
+                  </svg>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
         {/* BLOG SECTION */}
-        <MenuItem 
-          number="04" 
-          title="BLOG" 
-          mainUrl="/blog"
-          isOpen={openSection === 'blog'}
-          onToggle={() => handleToggleSection('blog')}
-        >
-          <SubMenuItem number="01" title="Latest Posts" url="/blog/latest" />
-          <SubMenuItem number="02" title="Tutorials" url="/blog/tutorials" />
-          <SubMenuItem number="03" title="News" url="/blog/news" />
-          <SubMenuItem number="04" title="Insights" url="/blog/insights" />
-        </MenuItem>
+        <div style={{
+          borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+        }}>
+          <div
+            onClick={() => handleToggleSection('blog')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              cursor: 'pointer',
+              padding: '1rem 0',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+              <span style={{
+                color: 'rgba(255, 255, 255, 0.5)',
+                fontSize: '2rem',
+                fontWeight: '300',
+                fontFamily: 'monospace'
+              }}>04</span>
+              <span
+                onClick={(e) => {
+                  e.stopPropagation();
+                  router.push('/blog');
+                }}
+                style={{
+                  color: '#FFFFFF',
+                  fontSize: isMobile ? '3rem' : '4.5rem',
+                  fontWeight: '500',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  textShadow: '0 0 10px rgba(255,255,255,0.3)',
+                  cursor: 'pointer',
+                }}
+              >
+                BLOG
+              </span>
+            </div>
+            
+            <div style={{
+              transform: openSection === 'blog' ? 'rotate(90deg)' : 'rotate(0deg)',
+              transition: 'transform 0.3s ease'
+            }}>
+              <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" style={{ filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.5))' }}>
+                <path d="M7 7h10v10" />
+                <path d="M17 7L7 17" />
+              </svg>
+            </div>
+          </div>
+
+          {openSection === 'blog' && (
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.8rem',
+              marginLeft: '6rem',
+              marginTop: '0.5rem',
+              marginBottom: '1rem',
+            }}>
+              {[
+                { number: '01', title: 'Latest Posts', url: '/blog/latest' },
+                { number: '02', title: 'Tutorials', url: '/blog/tutorials' },
+                { number: '03', title: 'News', url: '/blog/news' },
+                { number: '04', title: 'Insights', url: '/blog/insights' }
+              ].map((item, idx) => (
+                <div
+                  key={idx}
+                  onClick={() => router.push(item.url)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '1.5rem',
+                    padding: '0.5rem 0',
+                    cursor: 'pointer',
+                    borderBottom: idx < 3 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none'
+                  }}
+                >
+                  <span style={{ color: 'rgba(255, 255, 255, 0.3)', fontSize: '0.9rem', fontFamily: 'monospace', width: '30px' }}>{item.number}</span>
+                  <span style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '1.2rem', flex: 1 }}>{item.title}</span>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2">
+                    <path d="M7 7h10v10" />
+                    <path d="M17 7L7 17" />
+                  </svg>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Footer */}
-      <motion.div
-        initial={{ opacity: 0, y: 50 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.8 }}
-        style={{
-          position: 'absolute',
-          bottom: isMobile ? '2rem' : '3rem',
-          left: 0,
-          width: '100%',
-          display: 'flex',
-          justifyContent: 'space-between',
-          padding: isMobile ? '0 2rem' : '0 4rem',
-          boxSizing: 'border-box',
-          color: 'rgba(255, 255, 255, 0.9)',
-          fontSize: isMobile ? '0.9rem' : '1rem',
-          fontWeight: '400',
-          zIndex: 2
-        }}
-      >
+      <div style={{
+        position: 'absolute',
+        bottom: isMobile ? '2rem' : '3rem',
+        left: 0,
+        width: '100%',
+        display: 'flex',
+        justifyContent: 'space-between',
+        padding: isMobile ? '0 2rem' : '0 4rem',
+        boxSizing: 'border-box',
+        color: 'rgba(255, 255, 255, 0.9)',
+        fontSize: isMobile ? '0.9rem' : '1rem',
+        fontWeight: '400',
+        zIndex: 2
+      }}>
         <div style={{ display: 'flex', gap: '2rem' }}>
           <span>© 2024 MENURU</span>
           <span>All rights reserved</span>
         </div>
         <div style={{ display: 'flex', gap: '2rem' }}>
-          <motion.a 
-            href="#"
-            whileHover={{ color: '#FFFFFF', textShadow: '0 0 10px white' }}
-            style={{ color: 'inherit', textDecoration: 'none' }}
-          >
-            IG
-          </motion.a>
-          <motion.a 
-            href="#"
-            whileHover={{ color: '#FFFFFF', textShadow: '0 0 10px white' }}
-            style={{ color: 'inherit', textDecoration: 'none' }}
-          >
-            TW
-          </motion.a>
-          <motion.a 
-            href="#"
-            whileHover={{ color: '#FFFFFF', textShadow: '0 0 10px white' }}
-            style={{ color: 'inherit', textDecoration: 'none' }}
-          >
-            GH
-          </motion.a>
+          <a href="#" style={{ color: 'inherit', textDecoration: 'none' }}>IG</a>
+          <a href="#" style={{ color: 'inherit', textDecoration: 'none' }}>TW</a>
+          <a href="#" style={{ color: 'inherit', textDecoration: 'none' }}>GH</a>
         </div>
-      </motion.div>
+      </div>
 
-      {/* Close Button */}
-      <motion.div
+      {/* Close Button - tanpa hover effect */}
+      <div
         onClick={handleCloseMenu}
         style={{
           position: 'absolute',
@@ -4662,21 +4965,12 @@ fontFamily: 'Helvetica, Arial, sans-serif'
           textShadow: '0 0 15px rgba(255,255,255,0.5)',
           boxShadow: '0 0 20px rgba(255,255,255,0.1)'
         }}
-        whileHover={{ 
-          opacity: 1,
-          rotate: 90,
-          borderColor: '#FFFFFF',
-          backgroundColor: 'rgba(255, 255, 255, 0.1)',
-          boxShadow: '0 0 30px rgba(255,255,255,0.3)'
-        }}
-        transition={{ duration: 0.3 }}
       >
         ×
-      </motion.div>
+      </div>
     </motion.div>
   )}
 </AnimatePresence>
-
 
 
 
@@ -7138,6 +7432,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
     </div>
   );
 }
+
 
 
 
