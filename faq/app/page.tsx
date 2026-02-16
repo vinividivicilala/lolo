@@ -4269,7 +4269,6 @@ fontFamily: 'Helvetica, Arial, sans-serif'
           </motion.div>
         )}
       </AnimatePresence>
-
       {/* Menu Overlay dengan GSAP Animation - Modern Awwwards Style */}
       <AnimatePresence>
         {showMenuOverlay && (
@@ -4310,10 +4309,10 @@ fontFamily: 'Helvetica, Arial, sans-serif'
               zIndex: 1
             }} />
 
-            {/* Teks Berjalan dengan North East Arrow - Warna Putih Solid */}
+            {/* Teks Berjalan dengan North East Arrow - Dipindah ke bawah supaya tidak bentrok */}
             <div style={{
               position: 'absolute',
-              top: '15%',
+              bottom: '15%',
               left: 0,
               width: '100%',
               overflow: 'hidden',
@@ -4338,7 +4337,8 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                   fontFamily: 'Helvetica, Arial, sans-serif',
                   textTransform: 'uppercase',
                   letterSpacing: '8px',
-                  lineHeight: 1
+                  lineHeight: 1,
+                  opacity: 0.3
                 }}
               >
                 HOME <svg width="180" height="180" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 2rem' }}>
@@ -4360,16 +4360,20 @@ fontFamily: 'Helvetica, Arial, sans-serif'
               </motion.div>
             </div>
 
-            {/* Konten Utama */}
+            {/* Konten Utama - Dinaikkan ke atas dan diberi jarak dari teks berjalan */}
             <div style={{
               position: 'relative',
               zIndex: 3,
               width: '100%',
               maxWidth: '1400px',
               padding: isMobile ? '2rem' : '4rem',
+              paddingTop: isMobile ? '3rem' : '5rem',
               display: 'flex',
               flexDirection: isMobile ? 'column' : 'row',
-              gap: isMobile ? '3rem' : '6rem'
+              gap: isMobile ? '3rem' : '6rem',
+              height: '100%',
+              alignItems: 'flex-start',
+              marginTop: '-10%'
             }}>
               
               {/* Left Section - Menu Items dengan North East Arrow Besar */}
@@ -4381,7 +4385,8 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                   flex: 1,
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '1.5rem'
+                  gap: '1.5rem',
+                  marginTop: isMobile ? '2rem' : '3rem'
                 }}
               >
                 <div style={{
@@ -4472,7 +4477,8 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                   flex: 1,
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '2.5rem'
+                  gap: '2.5rem',
+                  marginTop: isMobile ? '2rem' : '3rem'
                 }}
               >
                 {/* Featured Note dengan north east arrow besar */}
@@ -4692,7 +4698,6 @@ fontFamily: 'Helvetica, Arial, sans-serif'
           </motion.div>
         )}
       </AnimatePresence>
-
 
 
       
@@ -7145,6 +7150,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
     </div>
   );
 }
+
 
 
 
