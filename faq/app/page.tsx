@@ -4269,7 +4269,6 @@ fontFamily: 'Helvetica, Arial, sans-serif'
           </motion.div>
         )}
       </AnimatePresence>
-
       {/* Menu Overlay dengan GSAP Animation - Modern Awwwards Style */}
       <AnimatePresence>
         {showMenuOverlay && (
@@ -4310,7 +4309,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
               zIndex: 1
             }} />
 
-            {/* Teks Berjalan dengan North East Arrow - Tanpa Hover */}
+            {/* Teks Berjalan dengan North East Arrow - Huruf Normal (Tanpa Bold) */}
             <div style={{
               position: 'absolute',
               top: '15%',
@@ -4332,35 +4331,29 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                 style={{
                   display: 'inline-block',
                   whiteSpace: 'nowrap',
-                  fontSize: isMobile ? '8rem' : '15rem',
-                  fontWeight: '900',
+                  fontSize: isMobile ? '6rem' : '12rem',
+                  fontWeight: '400',
                   color: 'white',
                   fontFamily: 'Helvetica, Arial, sans-serif',
                   textTransform: 'uppercase',
-                  letterSpacing: '10px',
+                  letterSpacing: '8px',
                   opacity: 0.15,
                   lineHeight: 1
                 }}
               >
-                HOME <svg width="150" height="150" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 2rem' }}>
+                HOME <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 2rem' }}>
                   <path d="M7 7h10v10" />
                   <path d="M17 7L7 17" />
-                </svg> HOME <svg width="150" height="150" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 2rem' }}>
+                </svg> HOME <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 2rem' }}>
                   <path d="M7 7h10v10" />
                   <path d="M17 7L7 17" />
-                </svg> HOME <svg width="150" height="150" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 2rem' }}>
+                </svg> HOME <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 2rem' }}>
                   <path d="M7 7h10v10" />
                   <path d="M17 7L7 17" />
-                </svg> HOME <svg width="150" height="150" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 2rem' }}>
+                </svg> HOME <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 2rem' }}>
                   <path d="M7 7h10v10" />
                   <path d="M17 7L7 17" />
-                </svg> HOME <svg width="150" height="150" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 2rem' }}>
-                  <path d="M7 7h10v10" />
-                  <path d="M17 7L7 17" />
-                </svg> HOME <svg width="150" height="150" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 2rem' }}>
-                  <path d="M7 7h10v10" />
-                  <path d="M17 7L7 17" />
-                </svg> HOME <svg width="150" height="150" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 2rem' }}>
+                </svg> HOME <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 2rem' }}>
                   <path d="M7 7h10v10" />
                   <path d="M17 7L7 17" />
                 </svg> 
@@ -4394,7 +4387,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                 <div style={{
                   color: 'rgba(255, 255, 255, 0.4)',
                   fontSize: '0.9rem',
-                  fontWeight: '500',
+                  fontWeight: '400',
                   textTransform: 'uppercase',
                   letterSpacing: '2px',
                   marginBottom: '1rem'
@@ -4417,7 +4410,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                     style={{
                       color: 'white',
                       fontSize: isMobile ? '2.5rem' : '4rem',
-                      fontWeight: '500',
+                      fontWeight: '400',
                       textDecoration: 'none',
                       fontFamily: 'Helvetica, Arial, sans-serif',
                       lineHeight: 1.1,
@@ -4443,7 +4436,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                       viewBox="0 0 24 24"
                       fill="none"
                       stroke="white"
-                      strokeWidth="2"
+                      strokeWidth="1.5"
                       style={{
                         transition: 'all 0.3s ease'
                       }}
@@ -4461,7 +4454,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                         bottom: 0,
                         left: 0,
                         width: '100%',
-                        height: '2px',
+                        height: '1px',
                         backgroundColor: 'white',
                         transformOrigin: 'left'
                       }}
@@ -4487,7 +4480,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                   <div style={{
                     color: 'rgba(255, 255, 255, 0.4)',
                     fontSize: '0.9rem',
-                    fontWeight: '500',
+                    fontWeight: '400',
                     textTransform: 'uppercase',
                     letterSpacing: '2px',
                     marginBottom: '1.5rem'
@@ -4528,14 +4521,15 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                       <div style={{
                         color: 'white',
                         fontSize: '1.3rem',
-                        fontWeight: '600',
+                        fontWeight: '400',
                         marginBottom: '0.5rem'
                       }}>
                         Note #01: Creative Process
                       </div>
                       <div style={{
                         color: 'rgba(255, 255, 255, 0.6)',
-                        fontSize: '1rem'
+                        fontSize: '1rem',
+                        fontWeight: '400'
                       }}>
                         Exploring the intersection of design and technology
                       </div>
@@ -4548,7 +4542,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                       viewBox="0 0 24 24"
                       fill="none"
                       stroke="white"
-                      strokeWidth="2"
+                      strokeWidth="1.5"
                     >
                       <path d="M7 7h10v10" />
                       <path d="M17 7L7 17" />
@@ -4561,7 +4555,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                   <div style={{
                     color: 'rgba(255, 255, 255, 0.4)',
                     fontSize: '0.9rem',
-                    fontWeight: '500',
+                    fontWeight: '400',
                     textTransform: 'uppercase',
                     letterSpacing: '2px',
                     marginBottom: '1rem'
@@ -4589,14 +4583,15 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                         <div style={{
                           color: 'white',
                           fontSize: '1.1rem',
-                          fontWeight: '500',
+                          fontWeight: '400',
                           marginBottom: '0.3rem'
                         }}>
                           Note #{note}: Project Documentation
                         </div>
                         <div style={{
                           color: 'rgba(255, 255, 255, 0.5)',
-                          fontSize: '0.9rem'
+                          fontSize: '0.9rem',
+                          fontWeight: '400'
                         }}>
                           Updated {note} day{note > 1 ? 's' : ''} ago
                         </div>
@@ -4609,7 +4604,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="rgba(255, 255, 255, 0.5)"
-                        strokeWidth="2"
+                        strokeWidth="1.5"
                       >
                         <path d="M7 7h10v10" />
                         <path d="M17 7L7 17" />
@@ -4617,77 +4612,10 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                     </motion.div>
                   ))}
                 </div>
-
-                {/* Call to Action dengan north east arrow */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.8 }}
-                  style={{
-                    marginTop: '2rem'
-                  }}
-                >
-                  <motion.button
-                    onClick={() => router.push('/notes/new')}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    style={{
-                      backgroundColor: 'transparent',
-                      border: '2px solid white',
-                      color: 'white',
-                      padding: '1.8rem 3rem',
-                      fontSize: '1.5rem',
-                      fontWeight: '600',
-                      cursor: 'pointer',
-                      fontFamily: 'Helvetica, Arial, sans-serif',
-                      letterSpacing: '1px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      width: '100%',
-                      maxWidth: '500px',
-                      borderRadius: '60px',
-                      position: 'relative',
-                      overflow: 'hidden'
-                    }}
-                  >
-                    <span>Create New Note</span>
-                    
-                    {/* North East Arrow besar */}
-                    <svg
-                      width="36"
-                      height="36"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="white"
-                      strokeWidth="2"
-                    >
-                      <path d="M7 7h10v10" />
-                      <path d="M17 7L7 17" />
-                    </svg>
-
-                    {/* Hover effect background */}
-                    <motion.div
-                      initial={{ scale: 0 }}
-                      whileHover={{ scale: 1 }}
-                      transition={{ duration: 0.3 }}
-                      style={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        width: '100%',
-                        height: '100%',
-                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                        zIndex: -1,
-                        borderRadius: '60px'
-                      }}
-                    />
-                  </motion.button>
-                </motion.div>
               </motion.div>
             </div>
 
-            {/* Footer Besar dengan Teks Putih - Sesuai Design Awal tapi Diperbesar */}
+            {/* Footer Normal - Sesuai Design Awal */}
             <motion.div
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
@@ -4701,41 +4629,31 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                 justifyContent: 'space-between',
                 padding: isMobile ? '0 2rem' : '0 4rem',
                 boxSizing: 'border-box',
-                color: 'white',
-                fontSize: isMobile ? '1.5rem' : '2.5rem',
-                fontWeight: '700',
-                zIndex: 2,
-                textTransform: 'uppercase',
-                letterSpacing: '2px'
+                color: 'rgba(255, 255, 255, 0.8)',
+                fontSize: isMobile ? '0.9rem' : '1rem',
+                fontWeight: '400',
+                zIndex: 2
               }}
             >
-              <div style={{ display: 'flex', gap: '3rem' }}>
-                <motion.span
-                  animate={{ opacity: [0.8, 1, 0.8] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                >
-                  © 2024
-                </motion.span>
-                <motion.span
-                  animate={{ opacity: [0.8, 1, 0.8] }}
-                  transition={{ duration: 2, repeat: Infinity, delay: 0.3 }}
-                >
-                  MENURU
-                </motion.span>
+              <div style={{ display: 'flex', gap: '2rem' }}>
+                <span>© 2024 MENURU</span>
+                <span>All rights reserved</span>
               </div>
-              <div style={{ display: 'flex', gap: '3rem' }}>
-                <motion.span
-                  animate={{ opacity: [0.8, 1, 0.8] }}
-                  transition={{ duration: 2, repeat: Infinity, delay: 0.6 }}
+              <div style={{ display: 'flex', gap: '2rem' }}>
+                <motion.a 
+                  href="/privacy"
+                  whileHover={{ color: 'white' }}
+                  style={{ color: 'inherit', textDecoration: 'none' }}
                 >
-                  ALL RIGHTS
-                </motion.span>
-                <motion.span
-                  animate={{ opacity: [0.8, 1, 0.8] }}
-                  transition={{ duration: 2, repeat: Infinity, delay: 0.9 }}
+                  Privacy
+                </motion.a>
+                <motion.a 
+                  href="/terms"
+                  whileHover={{ color: 'white' }}
+                  style={{ color: 'inherit', textDecoration: 'none' }}
                 >
-                  RESERVED
-                </motion.span>
+                  Terms
+                </motion.a>
               </div>
             </motion.div>
 
@@ -4774,11 +4692,6 @@ fontFamily: 'Helvetica, Arial, sans-serif'
           </motion.div>
         )}
       </AnimatePresence>
-
-
-
-
-
 
 
 
@@ -7232,6 +7145,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
     </div>
   );
 }
+
 
 
 
