@@ -409,6 +409,7 @@ const SubMenuItem = ({ number, title, url }: {
   </div>
 );
 
+
 // Tambahkan state ini di dalam component HomePage (setelah state lainnya)
 const [jakartaTime, setJakartaTime] = useState<string>('');
 
@@ -434,9 +435,6 @@ useEffect(() => {
 
   return () => clearInterval(interval);
 }, []);
-
-
-
 
 
 
@@ -4497,51 +4495,56 @@ fontFamily: 'Helvetica, Arial, sans-serif'
         zIndex: 1
       }} />
 
-      {/* Header Menu - Judul Website Besar dan Jam Jakarta */}
+      {/* Header Menu - JAKARTA & Jam di Kiri, MENURU di Tengah, Close di Kanan */}
       <div style={{
         position: 'absolute',
         top: isMobile ? '1.5rem' : '2rem',
         left: 0,
         right: 0,
         width: '100%',
-        display: 'flex',
-        justifyContent: 'space-between',
+        display: 'grid',
+        gridTemplateColumns: '1fr auto 1fr',
         alignItems: 'center',
         padding: isMobile ? '0 2rem' : '0 4rem',
         boxSizing: 'border-box',
         zIndex: 10,
         pointerEvents: 'none'
       }}>
-        {/* Judul Website Besar */}
-        <div style={{
-          color: '#FFFFFF',
-          fontSize: isMobile ? '2.5rem' : '4rem',
-          fontWeight: '700',
-          fontFamily: 'Helvetica, Arial, sans-serif',
-          letterSpacing: '4px',
-          textTransform: 'uppercase',
-          opacity: 0.9,
-          textShadow: '0 0 20px rgba(255,255,255,0.5)'
-        }}>
-          MENURU
-        </div>
-
-        {/* Jam Jakarta - Tanpa Icon */}
+        {/* Kiri - JAKARTA dan Jam */}
         <div style={{
           color: '#FFFFFF',
           fontSize: isMobile ? '1.2rem' : '1.8rem',
           fontWeight: '300',
           fontFamily: 'Helvetica, Arial, sans-serif',
-          letterSpacing: '2px',
-          opacity: 0.8,
+          letterSpacing: '1px',
+          opacity: 0.9,
           textShadow: '0 0 10px rgba(255,255,255,0.3)',
           display: 'flex',
           flexDirection: 'column',
-          alignItems: 'flex-end'
+          alignItems: 'flex-start',
+          justifySelf: 'start'
         }}>
-          <span style={{ fontSize: isMobile ? '0.8rem' : '1rem', opacity: 0.6, marginBottom: '0.2rem' }}>JAKARTA</span>
-          <span>{jakartaTime}</span>
+          <span style={{ fontSize: isMobile ? '1.2rem' : '1.8rem', fontWeight: '300' }}>JAKARTA</span>
+          <span style={{ fontSize: isMobile ? '1.2rem' : '1.8rem', fontWeight: '300', marginTop: '0.2rem' }}>{jakartaTime}</span>
         </div>
+
+        {/* Tengah - MENURU */}
+        <div style={{
+          color: '#FFFFFF',
+          fontSize: isMobile ? '2rem' : '3rem',
+          fontWeight: '300',
+          fontFamily: 'Helvetica, Arial, sans-serif',
+          letterSpacing: '4px',
+          textTransform: 'uppercase',
+          opacity: 0.9,
+          textShadow: '0 0 20px rgba(255,255,255,0.5)',
+          justifySelf: 'center'
+        }}>
+          MENURU
+        </div>
+
+        {/* Kanan - Kosong untuk menyeimbangkan grid, close button absolute terpisah */}
+        <div style={{ justifySelf: 'end' }}></div>
       </div>
 
       {/* Teks Berjalan dengan North East Arrow - PUTIH CERAH (TETAP BERJALAN) */}
@@ -4567,7 +4570,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
             display: 'inline-block',
             whiteSpace: 'nowrap',
             fontSize: isMobile ? '6rem' : '12rem',
-            fontWeight: '600',
+            fontWeight: '300',
             color: '#FFFFFF',
             fontFamily: 'Helvetica, Arial, sans-serif',
             textTransform: 'uppercase',
@@ -4635,7 +4638,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                 style={{
                   color: '#FFFFFF',
                   fontSize: isMobile ? '3rem' : '4.5rem',
-                  fontWeight: '500',
+                  fontWeight: '300',
                   fontFamily: 'Helvetica, Arial, sans-serif',
                   textShadow: '0 0 10px rgba(255,255,255,0.3)',
                   cursor: 'pointer',
@@ -4707,7 +4710,9 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                   <span style={{ 
                     color: 'rgba(255, 255, 255, 0.8)', 
                     fontSize: '1.2rem',
-                    flex: 1
+                    flex: 1,
+                    fontWeight: '300',
+                    fontFamily: 'Helvetica, Arial, sans-serif'
                   }}>
                     {item.title}
                   </span>
@@ -4750,7 +4755,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                 style={{
                   color: '#FFFFFF',
                   fontSize: isMobile ? '3rem' : '4.5rem',
-                  fontWeight: '500',
+                  fontWeight: '300',
                   fontFamily: 'Helvetica, Arial, sans-serif',
                   textShadow: '0 0 10px rgba(255,255,255,0.3)',
                   cursor: 'pointer',
@@ -4799,7 +4804,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                   }}
                 >
                   <span style={{ color: 'rgba(255, 255, 255, 0.3)', fontSize: '0.9rem', fontFamily: 'monospace', width: '30px' }}>{item.number}</span>
-                  <span style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '1.2rem', flex: 1 }}>{item.title}</span>
+                  <span style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '1.2rem', flex: 1, fontWeight: '300', fontFamily: 'Helvetica, Arial, sans-serif' }}>{item.title}</span>
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2">
                     <path d="M7 7h10v10" />
                     <path d="M17 7L7 17" />
@@ -4839,7 +4844,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                 style={{
                   color: '#FFFFFF',
                   fontSize: isMobile ? '3rem' : '4.5rem',
-                  fontWeight: '500',
+                  fontWeight: '300',
                   fontFamily: 'Helvetica, Arial, sans-serif',
                   textShadow: '0 0 10px rgba(255,255,255,0.3)',
                   cursor: 'pointer',
@@ -4888,7 +4893,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                   }}
                 >
                   <span style={{ color: 'rgba(255, 255, 255, 0.3)', fontSize: '0.9rem', fontFamily: 'monospace', width: '30px' }}>{item.number}</span>
-                  <span style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '1.2rem', flex: 1 }}>{item.title}</span>
+                  <span style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '1.2rem', flex: 1, fontWeight: '300', fontFamily: 'Helvetica, Arial, sans-serif' }}>{item.title}</span>
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2">
                     <path d="M7 7h10v10" />
                     <path d="M17 7L7 17" />
@@ -4928,7 +4933,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                 style={{
                   color: '#FFFFFF',
                   fontSize: isMobile ? '3rem' : '4.5rem',
-                  fontWeight: '500',
+                  fontWeight: '300',
                   fontFamily: 'Helvetica, Arial, sans-serif',
                   textShadow: '0 0 10px rgba(255,255,255,0.3)',
                   cursor: 'pointer',
@@ -4977,7 +4982,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                   }}
                 >
                   <span style={{ color: 'rgba(255, 255, 255, 0.3)', fontSize: '0.9rem', fontFamily: 'monospace', width: '30px' }}>{item.number}</span>
-                  <span style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '1.2rem', flex: 1 }}>{item.title}</span>
+                  <span style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '1.2rem', flex: 1, fontWeight: '300', fontFamily: 'Helvetica, Arial, sans-serif' }}>{item.title}</span>
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2">
                     <path d="M7 7h10v10" />
                     <path d="M17 7L7 17" />
@@ -5001,7 +5006,8 @@ fontFamily: 'Helvetica, Arial, sans-serif'
         boxSizing: 'border-box',
         color: 'rgba(255, 255, 255, 0.9)',
         fontSize: isMobile ? '0.9rem' : '1rem',
-        fontWeight: '400',
+        fontWeight: '300',
+        fontFamily: 'Helvetica, Arial, sans-serif',
         zIndex: 2
       }}>
         <div style={{ display: 'flex', gap: '2rem' }}>
@@ -5015,7 +5021,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
         </div>
       </div>
 
-      {/* Close Button */}
+      {/* Close Button - Posisi Absolute di Kanan */}
       <div
         onClick={handleCloseMenu}
         style={{
@@ -5027,7 +5033,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
           fontWeight: '300',
           cursor: 'pointer',
           fontFamily: 'Helvetica, Arial, sans-serif',
-          zIndex: 10,
+          zIndex: 20,
           padding: '1rem',
           display: 'flex',
           alignItems: 'center',
@@ -5047,6 +5053,10 @@ fontFamily: 'Helvetica, Arial, sans-serif'
     </motion.div>
   )}
 </AnimatePresence>
+
+
+
+
 
       
 
@@ -7500,6 +7510,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
     </div>
   );
 }
+
 
 
 
