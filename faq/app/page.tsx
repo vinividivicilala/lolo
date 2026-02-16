@@ -4269,90 +4269,46 @@ fontFamily: 'Helvetica, Arial, sans-serif'
           </motion.div>
         )}
       </AnimatePresence>
-
-
 {/* Menu Overlay dengan GSAP Animation - Modern Awwwards Style */}
-<AnimatePresence mode="wait">
+<AnimatePresence>
   {showMenuOverlay && (
     <motion.div
+      ref={menuOverlayRef}
       key="menu-overlay"
-      initial={{ 
-        y: '-100%',
-        opacity: 0.8
-      }}
-      animate={{ 
-        y: 0,
-        opacity: 1,
-        transition: {
-          duration: 0.8,
-          ease: [0.76, 0, 0.24, 1] // Custom easing untuk efek smooth
-        }
-      }}
-      exit={{ 
-        y: '-100%',
-        opacity: 0,
-        transition: {
-          duration: 0.6,
-          ease: [0.76, 0, 0.24, 1]
-        }
-      }}
+      initial={{ opacity: 0, y: '-100%' }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: '-100%' }}
+      transition={{ duration: 0.5, ease: "easeInOut" }}
       style={{
         position: 'fixed',
         top: 0,
         left: 0,
         width: '100%',
         height: '100%',
-        backgroundColor: '#0a0a0a', // Warna hitam lebih soft
+        backgroundColor: 'black',
         zIndex: 9995,
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
         overflow: 'hidden',
-        willChange: 'transform'
       }}
     >
-      {/* Background dengan efek grain dan pattern yang lebih dinamis */}
+      {/* Background dengan efek grain dan pattern */}
       <div style={{
         position: 'absolute',
         top: 0,
         left: 0,
         width: '100%',
         height: '100%',
-        backgroundImage: `
-          radial-gradient(circle at 20% 30%, rgba(255,255,255,0.05) 0%, transparent 40%),
-          radial-gradient(circle at 80% 70%, rgba(255,255,255,0.05) 0%, transparent 40%),
-          repeating-linear-gradient(45deg, rgba(255,255,255,0.02) 0px, rgba(255,255,255,0.02) 2px, transparent 2px, transparent 12px)
-        `,
+        backgroundImage: `radial-gradient(circle at 30% 40%, rgba(255,255,255,0.03) 0%, transparent 30%),
+                          radial-gradient(circle at 70% 60%, rgba(255,255,255,0.03) 0%, transparent 30%),
+                          repeating-linear-gradient(45deg, rgba(255,255,255,0.01) 0px, rgba(255,255,255,0.01) 2px, transparent 2px, transparent 8px)`,
         pointerEvents: 'none',
         zIndex: 1
       }} />
 
-      {/* Animated gradient overlay */}
-      <motion.div
-        animate={{
-          background: [
-            'radial-gradient(circle at 30% 40%, rgba(255,255,255,0.1) 0%, transparent 50%)',
-            'radial-gradient(circle at 70% 60%, rgba(255,255,255,0.1) 0%, transparent 50%)',
-            'radial-gradient(circle at 30% 40%, rgba(255,255,255,0.1) 0%, transparent 50%)'
-          ]
-        }}
-        transition={{
-          duration: 8,
-          repeat: Infinity,
-          ease: "linear"
-        }}
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          zIndex: 1
-        }}
-      />
-
-      {/* Teks Berjalan dengan efek parallax */}
+      {/* Teks Berjalan dengan North East Arrow - DIPERBAIKI */}
       <div style={{
         position: 'absolute',
         bottom: '15%',
@@ -4360,38 +4316,38 @@ fontFamily: 'Helvetica, Arial, sans-serif'
         width: '100%',
         overflow: 'hidden',
         whiteSpace: 'nowrap',
-        zIndex: 2
+        zIndex: 2,
+        pointerEvents: 'none'
       }}>
         <motion.div
           animate={{ 
             x: ['0%', '-50%']
           }}
           transition={{ 
-            duration: 30,
+            duration: 25,
             repeat: Infinity,
             ease: "linear"
           }}
           style={{
             display: 'inline-block',
             whiteSpace: 'nowrap',
-            fontSize: isMobile ? '6rem' : '14rem',
-            fontWeight: '300',
+            fontSize: isMobile ? '6rem' : '12rem',
+            fontWeight: '400',
             color: 'white',
             fontFamily: 'Helvetica, Arial, sans-serif',
             textTransform: 'uppercase',
-            letterSpacing: '12px',
+            letterSpacing: '8px',
             lineHeight: 1,
-            opacity: 0.15,
-            filter: 'blur(1px)'
+            opacity: 0.3
           }}
         >
-          {/* Konten teks berjalan dengan SVG putih */}
-          {Array(10).fill(null).map((_, i) => (
-            <span key={i}>
-              HOME 
+          {/* Konten di-duplicate untuk infinite scroll */}
+          {Array(5).fill(null).map((_, i) => (
+            <span key={i} style={{ display: 'inline-block', whiteSpace: 'nowrap' }}>
+              HOME
               <svg 
-                width={isMobile ? "120" : "200"} 
-                height={isMobile ? "120" : "200"} 
+                width={isMobile ? "60" : "100"} 
+                height={isMobile ? "60" : "100"} 
                 viewBox="0 0 24 24" 
                 fill="none" 
                 stroke="white" 
@@ -4399,8 +4355,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                 style={{ 
                   display: 'inline-block', 
                   verticalAlign: 'middle', 
-                  margin: '0 3rem',
-                  opacity: 0.5
+                  margin: isMobile ? '0 1rem' : '0 2rem'
                 }}
               >
                 <path d="M7 7h10v10" />
@@ -4411,58 +4366,46 @@ fontFamily: 'Helvetica, Arial, sans-serif'
         </motion.div>
       </div>
 
-      {/* Konten Utama dengan stagger animation */}
+      {/* Konten Utama */}
       <div style={{
         position: 'relative',
         zIndex: 3,
         width: '100%',
         maxWidth: '1400px',
         padding: isMobile ? '2rem' : '4rem',
+        paddingTop: isMobile ? '3rem' : '5rem',
         display: 'flex',
         flexDirection: isMobile ? 'column' : 'row',
-        gap: isMobile ? '3rem' : '8rem',
+        gap: isMobile ? '3rem' : '6rem',
         height: '100%',
-        alignItems: 'center',
-        justifyContent: 'center'
+        alignItems: 'flex-start',
+        justifyContent: 'center',
+        marginTop: '-5%'
       }}>
         
         {/* Left Section - Menu Items */}
         <motion.div
-          initial="hidden"
-          animate="visible"
-          variants={{
-            hidden: { opacity: 0 },
-            visible: {
-              opacity: 1,
-              transition: {
-                staggerChildren: 0.1,
-                delayChildren: 0.3
-              }
-            }
-          }}
+          initial={{ opacity: 0, x: -50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
           style={{
             flex: 1,
             display: 'flex',
             flexDirection: 'column',
-            gap: '1.5rem'
+            gap: '1.5rem',
+            marginTop: isMobile ? '2rem' : '3rem'
           }}
         >
-          <motion.div
-            variants={{
-              hidden: { opacity: 0, y: 20 },
-              visible: { opacity: 0.4, y: 0 }
-            }}
-            style={{
-              color: 'rgba(255, 255, 255, 0.4)',
-              fontSize: '0.9rem',
-              fontWeight: '400',
-              textTransform: 'uppercase',
-              letterSpacing: '2px',
-              marginBottom: '1rem'
-            }}
-          >
+          <div style={{
+            color: 'rgba(255, 255, 255, 0.4)',
+            fontSize: '0.9rem',
+            fontWeight: '400',
+            textTransform: 'uppercase',
+            letterSpacing: '2px',
+            marginBottom: '1rem'
+          }}>
             Navigation
-          </motion.div>
+          </div>
 
           {[
             { label: 'Home', url: '/' },
@@ -4473,79 +4416,59 @@ fontFamily: 'Helvetica, Arial, sans-serif'
             <motion.a
               key={item.label}
               href={item.url}
-              variants={{
-                hidden: { opacity: 0, x: -50, filter: 'blur(10px)' },
-                visible: { 
-                  opacity: 1, 
-                  x: 0, 
-                  filter: 'blur(0px)',
-                  transition: {
-                    duration: 0.8,
-                    ease: [0.22, 1, 0.36, 1]
-                  }
-                }
-              }}
-              whileHover={{
-                x: 30,
-                transition: { duration: 0.3, ease: "easeOut" }
-              }}
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 + (index * 0.1) }}
               style={{
                 color: 'white',
-                fontSize: isMobile ? '2.5rem' : '4.5rem',
-                fontWeight: '300',
+                fontSize: isMobile ? '2.5rem' : '4rem',
+                fontWeight: '400',
                 textDecoration: 'none',
                 fontFamily: 'Helvetica, Arial, sans-serif',
                 lineHeight: 1.1,
                 position: 'relative',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '2rem',
+                gap: '1.5rem',
                 width: 'fit-content',
-                cursor: 'pointer'
+                cursor: 'pointer',
+                transition: 'all 0.3s ease'
+              }}
+              whileHover={{
+                x: 20,
+                color: '#999'
               }}
             >
-              <span style={{ position: 'relative', zIndex: 2 }}>{item.label}</span>
+              {item.label}
               
-              {/* Arrow SVG putih */}
-              <motion.svg
-                width="70"
-                height="70"
+              {/* Arrow untuk menu items - diperkecil ukurannya */}
+              <svg
+                width={isMobile ? "40" : "50"}
+                height={isMobile ? "40" : "50"}
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="white"
                 strokeWidth="1.5"
-                initial={{ opacity: 0, x: -20, rotate: -45 }}
-                animate={{ opacity: 1, x: 0, rotate: 0 }}
-                transition={{ delay: 0.5 + (index * 0.1), duration: 0.6 }}
-                whileHover={{
-                  x: 10,
-                  y: -10,
-                  rotate: 45,
-                  transition: { duration: 0.3 }
-                }}
                 style={{
-                  position: 'relative',
-                  zIndex: 2
+                  transition: 'all 0.3s ease'
                 }}
               >
                 <path d="M7 7h10v10" />
                 <path d="M17 7L7 17" />
-              </motion.svg>
+              </svg>
 
-              {/* Hover line effect */}
               <motion.div
                 initial={{ scaleX: 0 }}
                 whileHover={{ scaleX: 1 }}
-                transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                transition={{ duration: 0.3 }}
                 style={{
                   position: 'absolute',
                   bottom: 0,
                   left: 0,
                   width: '100%',
-                  height: '2px',
+                  height: '1px',
                   backgroundColor: 'white',
-                  transformOrigin: 'left',
-                  zIndex: 1
+                  transformOrigin: 'left'
                 }}
               />
             </motion.a>
@@ -4554,37 +4477,19 @@ fontFamily: 'Helvetica, Arial, sans-serif'
 
         {/* Right Section - Notes dan Info */}
         <motion.div
-          initial="hidden"
-          animate="visible"
-          variants={{
-            hidden: { opacity: 0 },
-            visible: {
-              opacity: 1,
-              transition: {
-                staggerChildren: 0.15,
-                delayChildren: 0.5
-              }
-            }
-          }}
+          initial={{ opacity: 0, x: 50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
           style={{
             flex: 1,
             display: 'flex',
             flexDirection: 'column',
-            gap: '3rem'
+            gap: '2.5rem',
+            marginTop: isMobile ? '2rem' : '3rem'
           }}
         >
           {/* Featured Note */}
-          <motion.div
-            variants={{
-              hidden: { opacity: 0, y: 30, filter: 'blur(10px)' },
-              visible: { 
-                opacity: 1, 
-                y: 0, 
-                filter: 'blur(0px)',
-                transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] }
-              }
-            }}
-          >
+          <div>
             <div style={{
               color: 'rgba(255, 255, 255, 0.4)',
               fontSize: '0.9rem',
@@ -4597,11 +4502,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
             </div>
 
             <motion.div
-              whileHover={{ 
-                x: 15,
-                backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                borderColor: 'rgba(255, 255, 255, 0.3)'
-              }}
+              whileHover={{ x: 10 }}
               transition={{ duration: 0.3 }}
               style={{
                 display: 'flex',
@@ -4611,21 +4512,20 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                 padding: '2rem',
                 backgroundColor: 'rgba(255, 255, 255, 0.02)',
                 border: '1px solid rgba(255, 255, 255, 0.1)',
-                borderRadius: '12px',
-                transition: 'all 0.3s ease'
+                borderRadius: '12px'
               }}
               onClick={() => router.push('/notes')}
             >
               <div style={{
-                width: '70px',
-                height: '70px',
+                width: '60px',
+                height: '60px',
                 borderRadius: '50%',
-                backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
+                backgroundColor: 'transparent',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: '2.2rem'
+                fontSize: '2rem'
               }}>
                 📝
               </div>
@@ -4633,148 +4533,106 @@ fontFamily: 'Helvetica, Arial, sans-serif'
               <div style={{ flex: 1 }}>
                 <div style={{
                   color: 'white',
-                  fontSize: '1.8rem',
-                  fontWeight: '300',
+                  fontSize: '1.5rem',
+                  fontWeight: '400',
                   marginBottom: '0.5rem'
                 }}>
-                  Note #01
+                  Note #01: Creative Process
                 </div>
                 <div style={{
                   color: 'rgba(255, 255, 255, 0.6)',
                   fontSize: '1.1rem',
-                  fontWeight: '300'
+                  fontWeight: '400'
                 }}>
-                  Creative Process & Design Philosophy
+                  Exploring the intersection of design and technology
                 </div>
               </div>
 
-              {/* Arrow SVG putih untuk featured note */}
-              <motion.svg
-                width="60"
-                height="60"
+              {/* Arrow untuk featured note */}
+              <svg
+                width="40"
+                height="40"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="white"
                 strokeWidth="1.5"
-                whileHover={{
-                  x: 5,
-                  y: -5,
-                  rotate: 45,
-                  transition: { duration: 0.3 }
-                }}
               >
                 <path d="M7 7h10v10" />
                 <path d="M17 7L7 17" />
-              </motion.svg>
+              </svg>
             </motion.div>
-          </motion.div>
+          </div>
 
           {/* Recent Notes List */}
-          <motion.div
-            variants={{
-              hidden: { opacity: 0 },
-              visible: {
-                opacity: 1,
-                transition: {
-                  staggerChildren: 0.1,
-                  delayChildren: 0.7
-                }
-              }
-            }}
-          >
-            <motion.div
-              variants={{
-                hidden: { opacity: 0, y: 20 },
-                visible: { opacity: 0.4, y: 0 }
-              }}
-              style={{
-                color: 'rgba(255, 255, 255, 0.4)',
-                fontSize: '0.9rem',
-                fontWeight: '400',
-                textTransform: 'uppercase',
-                letterSpacing: '2px',
-                marginBottom: '1rem'
-              }}
-            >
+          <div>
+            <div style={{
+              color: 'rgba(255, 255, 255, 0.4)',
+              fontSize: '0.9rem',
+              fontWeight: '400',
+              textTransform: 'uppercase',
+              letterSpacing: '2px',
+              marginBottom: '1rem'
+            }}>
               Recent Notes
-            </motion.div>
+            </div>
 
             {[1, 2, 3].map((note, index) => (
               <motion.div
                 key={note}
-                variants={{
-                  hidden: { opacity: 0, y: 20, filter: 'blur(5px)' },
-                  visible: { 
-                    opacity: 1, 
-                    y: 0, 
-                    filter: 'blur(0px)',
-                    transition: { duration: 0.6, delay: 0.8 + (index * 0.1) }
-                  }
-                }}
-                whileHover={{
-                  x: 15,
-                  backgroundColor: 'rgba(255, 255, 255, 0.02)',
-                  transition: { duration: 0.3 }
-                }}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.5 + (index * 0.1) }}
                 style={{
-                  padding: '1.5rem 1rem',
+                  padding: '1.5rem 0',
                   borderBottom: index < 2 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'space-between',
-                  borderRadius: '8px',
-                  transition: 'all 0.3s ease'
+                  justifyContent: 'space-between'
                 }}
                 onClick={() => router.push('/notes')}
               >
                 <div>
                   <div style={{
                     color: 'white',
-                    fontSize: '1.4rem',
-                    fontWeight: '300',
-                    marginBottom: '0.3rem'
+                    fontSize: '1.3rem',
+                    fontWeight: '400',
+                    marginBottom: '0.5rem'
                   }}>
-                    Note #{note}
+                    Note #{note}: Project Documentation
                   </div>
                   <div style={{
                     color: 'rgba(255, 255, 255, 0.5)',
                     fontSize: '1rem',
-                    fontWeight: '300'
+                    fontWeight: '400'
                   }}>
-                    Project Documentation & Insights
+                    Updated {note} day{note > 1 ? 's' : ''} ago
                   </div>
                 </div>
                 
-                {/* Arrow SVG putih untuk recent notes */}
-                <motion.svg
-                  width="45"
-                  height="45"
+                {/* Arrow untuk recent notes */}
+                <svg
+                  width="30"
+                  height="30"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="white"
                   strokeWidth="1.5"
-                  whileHover={{
-                    x: 5,
-                    y: -5,
-                    rotate: 45,
-                    transition: { duration: 0.3 }
-                  }}
                 >
                   <path d="M7 7h10v10" />
                   <path d="M17 7L7 17" />
-                </motion.svg>
+                </svg>
               </motion.div>
             ))}
-          </motion.div>
+          </div>
         </motion.div>
       </div>
 
-      {/* Footer dengan efek hover */}
+      {/* Footer */}
       <motion.div
-        initial={{ opacity: 0, y: 30 }}
+        initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, delay: 1.2, ease: [0.22, 1, 0.36, 1] }}
+        transition={{ duration: 0.6, delay: 1 }}
         style={{
           position: 'absolute',
           bottom: isMobile ? '2rem' : '3rem',
@@ -4786,37 +4644,25 @@ fontFamily: 'Helvetica, Arial, sans-serif'
           boxSizing: 'border-box',
           color: 'rgba(255, 255, 255, 0.8)',
           fontSize: isMobile ? '0.9rem' : '1rem',
-          fontWeight: '300',
+          fontWeight: '400',
           zIndex: 2
         }}
       >
         <div style={{ display: 'flex', gap: '2rem' }}>
-          <motion.span
-            whileHover={{ color: 'white', x: 2 }}
-            transition={{ duration: 0.2 }}
-          >
-            © 2024 MENURU
-          </motion.span>
-          <motion.span
-            whileHover={{ color: 'white', x: 2 }}
-            transition={{ duration: 0.2 }}
-          >
-            All rights reserved
-          </motion.span>
+          <span>© 2024 MENURU</span>
+          <span>All rights reserved</span>
         </div>
         <div style={{ display: 'flex', gap: '2rem' }}>
           <motion.a 
             href="/privacy"
-            whileHover={{ color: 'white', x: -2 }}
-            transition={{ duration: 0.2 }}
+            whileHover={{ color: 'white' }}
             style={{ color: 'inherit', textDecoration: 'none' }}
           >
             Privacy
           </motion.a>
           <motion.a 
             href="/terms"
-            whileHover={{ color: 'white', x: -2 }}
-            transition={{ duration: 0.2 }}
+            whileHover={{ color: 'white' }}
             style={{ color: 'inherit', textDecoration: 'none' }}
           >
             Terms
@@ -4824,20 +4670,9 @@ fontFamily: 'Helvetica, Arial, sans-serif'
         </div>
       </motion.div>
 
-      {/* Close Button dengan efek lebih modern */}
+      {/* Close Button */}
       <motion.div
         onClick={handleCloseMenu}
-        initial={{ opacity: 0, rotate: -90 }}
-        animate={{ opacity: 0.7, rotate: 0 }}
-        exit={{ opacity: 0, rotate: 90 }}
-        transition={{ duration: 0.6, delay: 0.2 }}
-        whileHover={{ 
-          opacity: 1,
-          rotate: 90,
-          scale: 1.1,
-          borderColor: 'white',
-          backgroundColor: 'rgba(255, 255, 255, 0.1)'
-        }}
         style={{
           position: 'absolute',
           top: isMobile ? '1.5rem' : '2rem',
@@ -4852,28 +4687,24 @@ fontFamily: 'Helvetica, Arial, sans-serif'
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          width: '70px',
-          height: '70px',
+          opacity: 0.7,
+          width: '60px',
+          height: '60px',
           borderRadius: '50%',
-          border: '1px solid rgba(255, 255, 255, 0.2)',
-          backdropFilter: 'blur(5px)',
-          transition: 'all 0.3s ease'
+          border: '1px solid rgba(255, 255, 255, 0.2)'
         }}
+        whileHover={{ 
+          opacity: 1,
+          rotate: 90,
+          borderColor: 'white'
+        }}
+        transition={{ duration: 0.3 }}
       >
-        <motion.span
-          animate={{ rotate: 0 }}
-          whileHover={{ rotate: 90 }}
-          transition={{ duration: 0.3 }}
-        >
-          ×
-        </motion.span>
+        ×
       </motion.div>
     </motion.div>
   )}
 </AnimatePresence>
-
-
-
 
       
 
@@ -7327,6 +7158,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
     </div>
   );
 }
+
 
 
 
