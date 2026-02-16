@@ -265,84 +265,81 @@ const handleToggleSection = (section: string) => {
 };
 
 
-  // Tambahkan state untuk Spotify player di dalam component HomePage
-const [isSpotifyReady, setIsSpotifyReady] = useState(false);
-const [currentTrack, setCurrentTrack] = useState<string | null>(null);
-const spotifyPlayerRef = useRef<HTMLIFrameElement>(null);
-
-// Data playlist lagu kesukaan
+// Data playlist lagu kesukaan - Hanin Dhiya & Stand Here Alone
 const favoriteTracks = [
+  // Hanin Dhiya
   {
-    id: 'track1',
-    title: 'Bohemian Rhapsody',
-    artist: 'Queen',
-    album: 'A Night at the Opera',
-    coverUrl: 'https://i.scdn.co/image/ab67616d0000b273e8b066f70c206551210d902b',
-    previewUrl: 'https://p.scdn.co/mp3-preview/7f9b6e7a7f7b7f7b7f7b7f7b7f7b7f7b7f7b7f7b',
+    id: 'hanin1',
+    title: 'Pupus',
+    artist: 'Hanin Dhiya',
+    album: 'Pupus - Single',
+    coverUrl: 'https://i.scdn.co/image/ab67616d0000b2738c9b6d9b6d9b6d9b6d9b6d9b6',
     spotifyUrl: 'https://open.spotify.com/track/3z8h0TU7ReDPLIbEnYhWZb'
   },
   {
-    id: 'track2',
-    title: 'Hotel California',
-    artist: 'Eagles',
-    album: 'Hotel California',
-    coverUrl: 'https://i.scdn.co/image/ab67616d0000b273c8b9d6b9f6b9c8b9d6b9f6b9',
-    previewUrl: 'https://p.scdn.co/mp3-preview/8f9b6e7a7f7b7f7b7f7b7f7b7f7b7f7b7f7b7f7b',
+    id: 'hanin2',
+    title: 'Suatu Saat Nanti',
+    artist: 'Hanin Dhiya',
+    album: 'Suatu Saat Nanti - Single',
+    coverUrl: 'https://i.scdn.co/image/ab67616d0000b2739c9b6d9b6d9b6d9b6d9b6d9b6',
     spotifyUrl: 'https://open.spotify.com/track/4z8h0TU7ReDPLIbEnYhWZb'
   },
+  // Stand Here Alone
   {
-    id: 'track3',
-    title: 'Stairway to Heaven',
-    artist: 'Led Zeppelin',
-    album: 'Led Zeppelin IV',
-    coverUrl: 'https://i.scdn.co/image/ab67616d0000b273d9b6d9b6d9b6d9b6d9b6d9b6',
-    previewUrl: 'https://p.scdn.co/mp3-preview/9f9b6e7a7f7b7f7b7f7b7f7b7f7b7f7b7f7b7f7b',
+    id: 'sha1',
+    title: 'Kita Lawan Mereka',
+    artist: 'Stand Here Alone',
+    album: 'Kita Lawan Mereka - Single',
+    coverUrl: 'https://i.scdn.co/image/ab67616d0000b273ac9b6d9b6d9b6d9b6d9b6d9b6',
     spotifyUrl: 'https://open.spotify.com/track/5z8h0TU7ReDPLIbEnYhWZb'
   },
   {
-    id: 'track4',
-    title: 'Imagine',
-    artist: 'John Lennon',
-    album: 'Imagine',
-    coverUrl: 'https://i.scdn.co/image/ab67616d0000b273e9b6d9b6d9b6d9b6d9b6d9b6',
-    previewUrl: 'https://p.scdn.co/mp3-preview/0f9b6e7a7f7b7f7b7f7b7f7b7f7b7f7b7f7b7f7b',
+    id: 'sha2',
+    title: 'Korban Lelaki',
+    artist: 'Stand Here Alone',
+    album: 'Korban Lelaki - Single',
+    coverUrl: 'https://i.scdn.co/image/ab67616d0000b273bc9b6d9b6d9b6d9b6d9b6d9b6',
     spotifyUrl: 'https://open.spotify.com/track/6z8h0TU7ReDPLIbEnYhWZb'
   },
   {
-    id: 'track5',
-    title: 'Hey Jude',
-    artist: 'The Beatles',
-    album: 'The Beatles (White Album)',
-    coverUrl: 'https://i.scdn.co/image/ab67616d0000b273f9b6d9b6d9b6d9b6d9b6d9b6',
-    previewUrl: 'https://p.scdn.co/mp3-preview/1f9b6e7a7f7b7f7b7f7b7f7b7f7b7f7b7f7b7f7b',
+    id: 'sha3',
+    title: 'Wanita Masih Banyak',
+    artist: 'Stand Here Alone',
+    album: 'Wanita Masih Banyak - Single',
+    coverUrl: 'https://i.scdn.co/image/ab67616d0000b273cc9b6d9b6d9b6d9b6d9b6d9b6',
     spotifyUrl: 'https://open.spotify.com/track/7z8h0TU7ReDPLIbEnYhWZb'
-  },
-  {
-    id: 'track6',
-    title: 'Smells Like Teen Spirit',
-    artist: 'Nirvana',
-    album: 'Nevermind',
-    coverUrl: 'https://i.scdn.co/image/ab67616d0000b2732f9b6d9b6d9b6d9b6d9b6d9b6',
-    previewUrl: 'https://p.scdn.co/mp3-preview/2f9b6e7a7f7b7f7b7f7b7f7b7f7b7f7b7f7b7f7b',
-    spotifyUrl: 'https://open.spotify.com/track/8z8h0TU7ReDPLIbEnYhWZb'
   }
 ];
 
-// Fungsi untuk memutar lagu
+// State untuk lagu yang sedang diputar
+const [currentTrack, setCurrentTrack] = useState<string | null>(null);
+const [isPlaying, setIsPlaying] = useState(false);
+const audioRef = useRef<HTMLAudioElement | null>(null);
+
+// Fungsi untuk memutar lagu (buka di Spotify)
 const playTrack = (track: typeof favoriteTracks[0]) => {
   setCurrentTrack(track.id);
-  // Buka Spotify URL di tab baru (karena preview URL mungkin tidak selalu tersedia)
+  setIsPlaying(true);
   window.open(track.spotifyUrl, '_blank');
 };
 
-// Fungsi untuk memutar preview (jika ada)
-const playPreview = (track: typeof favoriteTracks[0]) => {
-  if (track.previewUrl) {
-    const audio = new Audio(track.previewUrl);
-    audio.play();
-    setCurrentTrack(track.id);
+// Fungsi untuk toggle play/pause
+const togglePlay = (track: typeof favoriteTracks[0]) => {
+  if (currentTrack === track.id) {
+    setIsPlaying(!isPlaying);
+  } else {
+    playTrack(track);
   }
 };
+
+
+
+
+
+
+
+
+  
 
 
 // Component Menu Item - tanpa animasi gerak
@@ -5072,7 +5069,10 @@ fontFamily: 'Helvetica, Arial, sans-serif'
             </div>
           )}
         </div>
-                {/* SPOTIFY PLAYLIST SECTION */}
+              
+
+
+        {/* SPOTIFY PLAYLIST SECTION - DESAIN MINIMALIS BESAR */}
         <div style={{
           borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
           marginTop: '2rem',
@@ -5113,11 +5113,6 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                 }}
               >
                 SPOTIFY PLAYLIST
-                <svg width="30" height="30" viewBox="0 0 24 24" fill="#1DB954" stroke="none">
-                  <circle cx="12" cy="12" r="10"/>
-                  <path d="M8 11.5L12 8L16 11.5" stroke="white" strokeWidth="2" fill="none"/>
-                  <path d="M8 14.5L12 11L16 14.5" stroke="white" strokeWidth="2" fill="none"/>
-                </svg>
               </span>
             </div>
             
@@ -5136,166 +5131,327 @@ fontFamily: 'Helvetica, Arial, sans-serif'
             <div style={{
               display: 'flex',
               flexDirection: 'column',
-              gap: '1.5rem',
+              gap: '2rem',
               marginLeft: isMobile ? '2rem' : '6rem',
-              marginTop: '1.5rem',
+              marginTop: '2rem',
               marginBottom: '2rem',
             }}>
               
-              {/* Spotify Embed Player */}
-              <div style={{
-                width: '100%',
-                borderRadius: '12px',
-                overflow: 'hidden',
-                backgroundColor: 'rgba(29, 185, 84, 0.1)',
-                border: '1px solid rgba(29, 185, 84, 0.3)',
-                padding: '1rem'
-              }}>
-                <iframe 
-                  ref={spotifyPlayerRef}
-                  style={{ borderRadius: '12px', width: '100%', height: '80px' }} 
-                  src="https://open.spotify.com/embed/playlist/37i9dQZF1DXcBWIGoYBM5M?utm_source=generator" 
-                  frameBorder="0" 
-                  allowFullScreen 
-                  allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
-                  loading="lazy"
-                />
-              </div>
-
-              {/* Daftar Lagu Kesukaan */}
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)',
-                gap: '1rem',
-                marginTop: '0.5rem'
-              }}>
-                {favoriteTracks.map((track, idx) => (
-                  <div
-                    key={track.id}
-                    onClick={() => playTrack(track)}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '1rem',
-                      padding: '0.8rem',
-                      cursor: 'pointer',
-                      backgroundColor: currentTrack === track.id ? 'rgba(29, 185, 84, 0.2)' : 'rgba(255, 255, 255, 0.05)',
-                      border: '1px solid rgba(255, 255, 255, 0.1)',
-                      borderRadius: '8px',
-                      transition: 'all 0.2s ease'
-                    }}
-                  >
-                    {/* Cover Album */}
-                    <div style={{
-                      width: '50px',
-                      height: '50px',
-                      borderRadius: '4px',
-                      overflow: 'hidden',
-                      flexShrink: 0,
-                      backgroundColor: '#333'
-                    }}>
-                      <img 
-                        src={track.coverUrl} 
-                        alt={track.album}
-                        style={{
-                          width: '100%',
-                          height: '100%',
-                          objectFit: 'cover'
-                        }}
-                        onError={(e) => {
-                          e.currentTarget.style.backgroundColor = '#1DB954';
-                          e.currentTarget.style.display = 'flex';
-                          e.currentTarget.style.alignItems = 'center';
-                          e.currentTarget.style.justifyContent = 'center';
-                          e.currentTarget.innerHTML = '<span style="color: white; font-size: 20px;">♪</span>';
-                        }}
-                      />
-                    </div>
-
-                    {/* Info Lagu */}
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{
-                        color: '#FFFFFF',
-                        fontSize: '1rem',
-                        fontWeight: '500',
-                        marginBottom: '0.2rem',
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis'
-                      }}>
-                        {track.title}
-                      </div>
-                      <div style={{
-                        color: 'rgba(255, 255, 255, 0.6)',
-                        fontSize: '0.85rem',
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis'
-                      }}>
-                        {track.artist}
-                      </div>
-                    </div>
-
-                    {/* Tombol Play */}
-                    <div style={{
-                      width: '36px',
-                      height: '36px',
-                      borderRadius: '50%',
-                      backgroundColor: currentTrack === track.id ? '#1DB954' : 'rgba(255, 255, 255, 0.1)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      flexShrink: 0,
-                      transition: 'all 0.2s ease'
-                    }}>
-                      {currentTrack === track.id ? (
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="white">
-                          <rect x="6" y="4" width="4" height="16" />
-                          <rect x="14" y="4" width="4" height="16" />
-                        </svg>
-                      ) : (
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="white">
-                          <polygon points="5 3 19 12 5 21 5 3" />
-                        </svg>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Link ke Spotify */}
+              {/* Header Playlist */}
               <div style={{
                 display: 'flex',
-                justifyContent: 'center',
-                marginTop: '1rem'
+                alignItems: 'center',
+                gap: '2rem',
+                marginBottom: '1rem'
+              }}>
+                <div style={{
+                  width: isMobile ? '80px' : '100px',
+                  height: isMobile ? '80px' : '100px',
+                  borderRadius: '8px',
+                  backgroundColor: 'rgba(255,255,255,0.1)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  border: '1px solid rgba(255,255,255,0.2)'
+                }}>
+                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M8 11L12 8L16 11" strokeLinecap="round"/>
+                    <path d="M8 15L12 12L16 15" strokeLinecap="round"/>
+                  </svg>
+                </div>
+                <div>
+                  <div style={{
+                    color: 'rgba(255,255,255,0.6)',
+                    fontSize: '0.9rem',
+                    marginBottom: '0.3rem',
+                    letterSpacing: '1px'
+                  }}>
+                    PLAYLIST • 5 LAGU
+                  </div>
+                  <div style={{
+                    color: '#FFFFFF',
+                    fontSize: isMobile ? '2rem' : '2.5rem',
+                    fontWeight: '300',
+                    fontFamily: 'Helvetica, Arial, sans-serif'
+                  }}>
+                    Lagu Kesukaan
+                  </div>
+                  <div style={{
+                    color: 'rgba(255,255,255,0.6)',
+                    fontSize: '0.9rem',
+                    marginTop: '0.3rem'
+                  }}>
+                    Hanin Dhiya • Stand Here Alone
+                  </div>
+                </div>
+              </div>
+
+              {/* Daftar Lagu - Desain Minimalis Besar */}
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '1rem'
+              }}>
+                {/* Hanin Dhiya Section */}
+                <div style={{
+                  marginBottom: '1rem'
+                }}>
+                  <div style={{
+                    color: 'rgba(255,255,255,0.8)',
+                    fontSize: '1.2rem',
+                    fontWeight: '300',
+                    marginBottom: '1rem',
+                    paddingBottom: '0.5rem',
+                    borderBottom: '1px solid rgba(255,255,255,0.1)'
+                  }}>
+                    Hanin Dhiya
+                  </div>
+                  
+                  {favoriteTracks.filter(t => t.artist === 'Hanin Dhiya').map((track, idx) => (
+                    <div
+                      key={track.id}
+                      onClick={() => togglePlay(track)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '1.5rem',
+                        padding: '1rem 0',
+                        cursor: 'pointer',
+                        borderBottom: idx < 1 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none',
+                        backgroundColor: 'transparent',
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
+                      {/* Nomor */}
+                      <span style={{
+                        color: 'rgba(255, 255, 255, 0.3)',
+                        fontSize: '1.2rem',
+                        fontWeight: '300',
+                        fontFamily: 'monospace',
+                        width: '30px'
+                      }}>
+                        {idx + 1}
+                      </span>
+
+                      {/* Cover Album kecil */}
+                      <div style={{
+                        width: '50px',
+                        height: '50px',
+                        borderRadius: '4px',
+                        overflow: 'hidden',
+                        backgroundColor: 'rgba(255,255,255,0.1)',
+                        flexShrink: 0
+                      }}>
+                        <div style={{
+                          width: '100%',
+                          height: '100%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          color: 'rgba(255,255,255,0.5)',
+                          fontSize: '1.5rem'
+                        }}>
+                          ♪
+                        </div>
+                      </div>
+
+                      {/* Info Lagu */}
+                      <div style={{ flex: 1 }}>
+                        <div style={{
+                          color: '#FFFFFF',
+                          fontSize: '1.5rem',
+                          fontWeight: '300',
+                          fontFamily: 'Helvetica, Arial, sans-serif',
+                          marginBottom: '0.2rem'
+                        }}>
+                          {track.title}
+                        </div>
+                        <div style={{
+                          color: 'rgba(255, 255, 255, 0.6)',
+                          fontSize: '1rem',
+                          fontWeight: '300'
+                        }}>
+                          {track.album}
+                        </div>
+                      </div>
+
+                      {/* Tombol Play */}
+                      <div style={{
+                        width: '40px',
+                        height: '40px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0
+                      }}>
+                        {currentTrack === track.id && isPlaying ? (
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                            <rect x="6" y="4" width="4" height="16" />
+                            <rect x="14" y="4" width="4" height="16" />
+                          </svg>
+                        ) : (
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                            <polygon points="5 3 19 12 5 21 5 3" />
+                          </svg>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Stand Here Alone Section */}
+                <div>
+                  <div style={{
+                    color: 'rgba(255,255,255,0.8)',
+                    fontSize: '1.2rem',
+                    fontWeight: '300',
+                    marginBottom: '1rem',
+                    paddingBottom: '0.5rem',
+                    borderBottom: '1px solid rgba(255,255,255,0.1)'
+                  }}>
+                    Stand Here Alone
+                  </div>
+                  
+                  {favoriteTracks.filter(t => t.artist === 'Stand Here Alone').map((track, idx) => (
+                    <div
+                      key={track.id}
+                      onClick={() => togglePlay(track)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '1.5rem',
+                        padding: '1rem 0',
+                        cursor: 'pointer',
+                        borderBottom: idx < 2 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none',
+                        backgroundColor: 'transparent',
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
+                      {/* Nomor */}
+                      <span style={{
+                        color: 'rgba(255, 255, 255, 0.3)',
+                        fontSize: '1.2rem',
+                        fontWeight: '300',
+                        fontFamily: 'monospace',
+                        width: '30px'
+                      }}>
+                        {idx + 1}
+                      </span>
+
+                      {/* Cover Album kecil */}
+                      <div style={{
+                        width: '50px',
+                        height: '50px',
+                        borderRadius: '4px',
+                        overflow: 'hidden',
+                        backgroundColor: 'rgba(255,255,255,0.1)',
+                        flexShrink: 0
+                      }}>
+                        <div style={{
+                          width: '100%',
+                          height: '100%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          color: 'rgba(255,255,255,0.5)',
+                          fontSize: '1.5rem'
+                        }}>
+                          ♪
+                        </div>
+                      </div>
+
+                      {/* Info Lagu */}
+                      <div style={{ flex: 1 }}>
+                        <div style={{
+                          color: '#FFFFFF',
+                          fontSize: '1.5rem',
+                          fontWeight: '300',
+                          fontFamily: 'Helvetica, Arial, sans-serif',
+                          marginBottom: '0.2rem'
+                        }}>
+                          {track.title}
+                        </div>
+                        <div style={{
+                          color: 'rgba(255, 255, 255, 0.6)',
+                          fontSize: '1rem',
+                          fontWeight: '300'
+                        }}>
+                          {track.album}
+                        </div>
+                      </div>
+
+                      {/* Tombol Play */}
+                      <div style={{
+                        width: '40px',
+                        height: '40px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0
+                      }}>
+                        {currentTrack === track.id && isPlaying ? (
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                            <rect x="6" y="4" width="4" height="16" />
+                            <rect x="14" y="4" width="4" height="16" />
+                          </svg>
+                        ) : (
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                            <polygon points="5 3 19 12 5 21 5 3" />
+                          </svg>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Link ke Spotify - Minimalis */}
+              <div style={{
+                display: 'flex',
+                justifyContent: 'flex-end',
+                marginTop: '2rem',
+                paddingTop: '1rem',
+                borderTop: '1px solid rgba(255,255,255,0.1)'
               }}>
                 <a
                   href="https://open.spotify.com"
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{
-                    color: '#1DB954',
+                    color: 'rgba(255,255,255,0.8)',
                     textDecoration: 'none',
                     fontSize: '0.9rem',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '0.5rem',
-                    padding: '0.5rem 1rem',
-                    border: '1px solid rgba(29, 185, 84, 0.3)',
-                    borderRadius: '20px'
+                    padding: '0.5rem 0',
+                    transition: 'all 0.2s ease'
                   }}
                 >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="#1DB954">
-                    <circle cx="12" cy="12" r="10"/>
-                    <path d="M8 11.5L12 8L16 11.5" stroke="white" strokeWidth="2" fill="none"/>
-                    <path d="M8 14.5L12 11L16 14.5" stroke="white" strokeWidth="2" fill="none"/>
-                  </svg>
                   Buka di Spotify
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                    <polyline points="15 3 21 3 21 9" />
+                    <line x1="10" y1="14" x2="21" y2="3" />
+                  </svg>
                 </a>
               </div>
             </div>
           )}
         </div>
+
+
+
+        
+
+
+
+
+
+
+
+        
       </div>
 
       {/* Footer */}
@@ -7814,6 +7970,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
     </div>
   );
 }
+
 
 
 
