@@ -95,6 +95,13 @@ interface Notification {
   comments: Comment[];
   status?: string;
   reactions?: Record<string, number>;
+  links?: {
+    youtube?: string[];
+    pdf?: string[];
+    images?: string[];
+    videos?: string[];
+    websites?: string[];
+  };
 }
 
 export default function NotificationsPage(): React.JSX.Element {
@@ -117,6 +124,9 @@ export default function NotificationsPage(): React.JSX.Element {
   const [showEmoticonPicker, setShowEmoticonPicker] = useState(false);
   const [notificationReactions, setNotificationReactions] = useState<Record<string, number>>({});
   const [userReactions, setUserReactions] = useState<string[]>([]);
+
+  // Link preview states
+  const [showLinks, setShowLinks] = useState(false);
 
   // Update current time
   useEffect(() => {
@@ -235,7 +245,8 @@ export default function NotificationsPage(): React.JSX.Element {
             likes: data.likes || [],
             comments: data.comments || [],
             status: data.status || 'sent',
-            reactions: data.reactions || {}
+            reactions: data.reactions || {},
+            links: data.links || {}
           };
           
           if (!notification.userReads[currentUserId]) {
@@ -304,10 +315,9 @@ export default function NotificationsPage(): React.JSX.Element {
   };
 
   // Toggle like on notification
-  const toggleNotificationLike = async (notificationId: string, e?: React.MouseEvent) => {
-    if (e) {
-      e.stopPropagation();
-    }
+  const toggleNotificationLike = async (notificationId: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     
     if (!db) return;
     if (!user) {
@@ -484,12 +494,11 @@ export default function NotificationsPage(): React.JSX.Element {
   const toggleLike = async (
     notificationId: string, 
     commentId: string, 
-    replyId?: string,
-    e?: React.MouseEvent
+    e: React.MouseEvent,
+    replyId?: string
   ) => {
-    if (e) {
-      e.stopPropagation();
-    }
+    e.preventDefault();
+    e.stopPropagation();
     
     if (!db) return;
     if (!user) {
@@ -584,6 +593,42 @@ export default function NotificationsPage(): React.JSX.Element {
     });
   };
 
+  // Extract links from message
+  const extractLinks = (message: string) => {
+    const youtubeRegex = /(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/[^\s]+/g;
+    const pdfRegex = /(https?:\/\/[^\s]+\.pdf)/g;
+    const imageRegex = /(https?:\/\/[^\s]+\.(jpg|jpeg|png|gif|webp))/g;
+    const videoRegex = /(https?:\/\/[^\s]+\.(mp4|webm|ogg))/g;
+    const websiteRegex = /(https?:\/\/[^\s]+)/g;
+    
+    const youtubeLinks = message.match(youtubeRegex) || [];
+    const pdfLinks = message.match(pdfRegex) || [];
+    const imageLinks = message.match(imageRegex) || [];
+    const videoLinks = message.match(videoRegex) || [];
+    
+    // Remove already matched links
+    let remainingMessage = message;
+    [...youtubeLinks, ...pdfLinks, ...imageLinks, ...videoLinks].forEach(link => {
+      remainingMessage = remainingMessage.replace(link, '');
+    });
+    
+    const websiteLinks = remainingMessage.match(websiteRegex) || [];
+    
+    return {
+      youtube: youtubeLinks,
+      pdf: pdfLinks,
+      images: imageLinks,
+      videos: videoLinks,
+      websites: websiteLinks
+    };
+  };
+
+  // Render YouTube embed
+  const getYouTubeEmbedUrl = (url: string) => {
+    const videoId = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
+    return videoId ? `https://www.youtube.com/embed/${videoId[1]}` : null;
+  };
+
   // SVG Components
   const NorthEastArrow = () => (
     <svg 
@@ -673,6 +718,46 @@ export default function NotificationsPage(): React.JSX.Element {
     >
       <line x1="22" y1="2" x2="11" y2="13"/>
       <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+    </svg>
+  );
+
+  // Link Icons
+  const YoutubeIcon = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+    </svg>
+  );
+
+  const PdfIcon = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+      <polyline points="14 2 14 8 20 8"/>
+      <path d="M9 15h6"/>
+      <path d="M9 18h6"/>
+      <path d="M9 12h6"/>
+    </svg>
+  );
+
+  const ImageIcon = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <rect x="2" y="2" width="20" height="20" rx="2" ry="2"/>
+      <circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"/>
+      <polyline points="21 15 16 10 5 21"/>
+    </svg>
+  );
+
+  const VideoIcon = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <rect x="2" y="4" width="20" height="16" rx="2"/>
+      <path d="M9 8l6 4-6 4V8z"/>
+    </svg>
+  );
+
+  const WebsiteIcon = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <circle cx="12" cy="12" r="10"/>
+      <line x1="2" y1="12" x2="22" y2="12"/>
+      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
     </svg>
   );
 
@@ -818,7 +903,20 @@ export default function NotificationsPage(): React.JSX.Element {
                   }}>
                     <span>From {notification.senderName}</span>
                     <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <div 
+                        onClick={(e) => toggleNotificationLike(notification.id, e)}
+                        style={{ 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          gap: '0.5rem',
+                          cursor: user ? 'pointer' : 'default',
+                          padding: '8px 12px',
+                          borderRadius: '30px',
+                          background: isLiked ? 'rgba(59, 130, 246, 0.1)' : 'transparent',
+                          border: isLiked ? '1px solid #3b82f6' : 'none',
+                          transition: 'all 0.2s'
+                        }}
+                      >
                         <LikeIcon filled={isLiked} />
                         <span>{notification.likes?.length || 0}</span>
                       </div>
@@ -849,8 +947,15 @@ export default function NotificationsPage(): React.JSX.Element {
             overflowY: 'auto',
             zIndex: 1000
           }}
+          onClick={() => {
+            setSelectedNotification(null);
+            setReplyingTo(null);
+            setShowCommentForm(false);
+            setShowEmoticonPicker(false);
+            setShowLinks(false);
+          }}
         >
-          <div style={{ maxWidth: '900px', margin: '0 auto' }}>
+          <div style={{ maxWidth: '900px', margin: '0 auto' }} onClick={(e) => e.stopPropagation()}>
             {/* Modal Header */}
             <div style={{
               display: 'flex',
@@ -864,6 +969,7 @@ export default function NotificationsPage(): React.JSX.Element {
                   setReplyingTo(null);
                   setShowCommentForm(false);
                   setShowEmoticonPicker(false);
+                  setShowLinks(false);
                 }}
                 style={{
                   background: 'none',
@@ -907,6 +1013,251 @@ export default function NotificationsPage(): React.JSX.Element {
                 {selectedNotification.message}
               </div>
               
+              {/* Links Section */}
+              {(() => {
+                const links = extractLinks(selectedNotification.message);
+                const hasLinks = Object.values(links).some(arr => arr.length > 0);
+                
+                if (hasLinks) {
+                  return (
+                    <div style={{ marginBottom: '3rem' }}>
+                      <button
+                        onClick={() => setShowLinks(!showLinks)}
+                        style={{
+                          background: 'rgba(255,255,255,0.05)',
+                          border: '1px solid rgba(255,255,255,0.2)',
+                          borderRadius: '30px',
+                          padding: '12px 24px',
+                          color: 'white',
+                          fontSize: '1rem',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '10px',
+                          marginBottom: '20px'
+                        }}
+                      >
+                        <WebsiteIcon />
+                        <span>{showLinks ? 'Sembunyikan Link' : 'Tampilkan Link'}</span>
+                      </button>
+
+                      {showLinks && (
+                        <div style={{
+                          background: 'rgba(255,255,255,0.02)',
+                          borderRadius: '20px',
+                          padding: '24px',
+                          border: '1px solid rgba(255,255,255,0.1)'
+                        }}>
+                          {/* YouTube Links */}
+                          {links.youtube.length > 0 && (
+                            <div style={{ marginBottom: '30px' }}>
+                              <h4 style={{ 
+                                fontSize: '1.5rem', 
+                                marginBottom: '15px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '10px'
+                              }}>
+                                <YoutubeIcon /> YouTube Videos
+                              </h4>
+                              <div style={{ display: 'grid', gap: '20px' }}>
+                                {links.youtube.map((url, index) => {
+                                  const embedUrl = getYouTubeEmbedUrl(url);
+                                  return embedUrl ? (
+                                    <div key={index}>
+                                      <iframe
+                                        width="100%"
+                                        height="400"
+                                        src={embedUrl}
+                                        title={`YouTube video ${index + 1}`}
+                                        frameBorder="0"
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                        allowFullScreen
+                                        style={{ borderRadius: '12px' }}
+                                      />
+                                    </div>
+                                  ) : (
+                                    <a
+                                      key={index}
+                                      href={url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      style={{
+                                        color: '#3b82f6',
+                                        textDecoration: 'none',
+                                        display: 'block',
+                                        padding: '10px',
+                                        background: 'rgba(59,130,246,0.1)',
+                                        borderRadius: '8px',
+                                        wordBreak: 'break-all'
+                                      }}
+                                    >
+                                      {url}
+                                    </a>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* PDF Links */}
+                          {links.pdf.length > 0 && (
+                            <div style={{ marginBottom: '30px' }}>
+                              <h4 style={{ 
+                                fontSize: '1.5rem', 
+                                marginBottom: '15px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '10px'
+                              }}>
+                                <PdfIcon /> PDF Documents
+                              </h4>
+                              <div style={{ display: 'grid', gap: '10px' }}>
+                                {links.pdf.map((url, index) => (
+                                  <a
+                                    key={index}
+                                    href={url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    style={{
+                                      color: '#3b82f6',
+                                      textDecoration: 'none',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      gap: '10px',
+                                      padding: '12px',
+                                      background: 'rgba(59,130,246,0.1)',
+                                      borderRadius: '8px',
+                                      wordBreak: 'break-all'
+                                    }}
+                                  >
+                                    <PdfIcon />
+                                    <span>{url.split('/').pop() || url}</span>
+                                  </a>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Image Links */}
+                          {links.images.length > 0 && (
+                            <div style={{ marginBottom: '30px' }}>
+                              <h4 style={{ 
+                                fontSize: '1.5rem', 
+                                marginBottom: '15px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '10px'
+                              }}>
+                                <ImageIcon /> Images
+                              </h4>
+                              <div style={{ 
+                                display: 'grid', 
+                                gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+                                gap: '15px'
+                              }}>
+                                {links.images.map((url, index) => (
+                                  <a
+                                    key={index}
+                                    href={url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    style={{ textDecoration: 'none' }}
+                                  >
+                                    <img
+                                      src={url}
+                                      alt={`Image ${index + 1}`}
+                                      style={{
+                                        width: '100%',
+                                        height: '150px',
+                                        objectFit: 'cover',
+                                        borderRadius: '8px',
+                                        border: '1px solid rgba(255,255,255,0.1)'
+                                      }}
+                                    />
+                                  </a>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Video Links */}
+                          {links.videos.length > 0 && (
+                            <div style={{ marginBottom: '30px' }}>
+                              <h4 style={{ 
+                                fontSize: '1.5rem', 
+                                marginBottom: '15px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '10px'
+                              }}>
+                                <VideoIcon /> Videos
+                              </h4>
+                              <div style={{ display: 'grid', gap: '20px' }}>
+                                {links.videos.map((url, index) => (
+                                  <video
+                                    key={index}
+                                    controls
+                                    style={{
+                                      width: '100%',
+                                      borderRadius: '12px',
+                                      border: '1px solid rgba(255,255,255,0.1)'
+                                    }}
+                                  >
+                                    <source src={url} />
+                                    Your browser does not support the video tag.
+                                  </video>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Website Links */}
+                          {links.websites.length > 0 && (
+                            <div>
+                              <h4 style={{ 
+                                fontSize: '1.5rem', 
+                                marginBottom: '15px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '10px'
+                              }}>
+                                <WebsiteIcon /> Websites
+                              </h4>
+                              <div style={{ display: 'grid', gap: '10px' }}>
+                                {links.websites.map((url, index) => (
+                                  <a
+                                    key={index}
+                                    href={url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    style={{
+                                      color: '#3b82f6',
+                                      textDecoration: 'none',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      gap: '10px',
+                                      padding: '12px',
+                                      background: 'rgba(59,130,246,0.1)',
+                                      borderRadius: '8px',
+                                      wordBreak: 'break-all'
+                                    }}
+                                  >
+                                    <WebsiteIcon />
+                                    <span>{url}</span>
+                                  </a>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                }
+                return null;
+              })()}
+              
               <div style={{ 
                 display: 'flex',
                 justifyContent: 'space-between',
@@ -914,11 +1265,8 @@ export default function NotificationsPage(): React.JSX.Element {
                 fontSize: '2rem'
               }}>
                 <span>— {selectedNotification.senderName}</span>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toggleNotificationLike(selectedNotification.id);
-                  }}
+                <div 
+                  onClick={(e) => toggleNotificationLike(selectedNotification.id, e)}
                   style={{
                     background: 'none',
                     border: 'none',
@@ -927,12 +1275,16 @@ export default function NotificationsPage(): React.JSX.Element {
                     cursor: user ? 'pointer' : 'default',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '0.5rem'
+                    gap: '0.5rem',
+                    padding: '8px 16px',
+                    borderRadius: '30px',
+                    background: selectedNotification.likes.includes(getCurrentUserId()) ? 'rgba(59, 130, 246, 0.1)' : 'transparent',
+                    border: selectedNotification.likes.includes(getCurrentUserId()) ? '1px solid #3b82f6' : 'none'
                   }}
                 >
                   <LikeIcon filled={selectedNotification.likes.includes(getCurrentUserId())} />
                   <span>{selectedNotification.likes?.length || 0}</span>
-                </button>
+                </div>
               </div>
             </div>
 
@@ -1294,8 +1646,8 @@ export default function NotificationsPage(): React.JSX.Element {
                         </div>
                         
                         {/* Comment Like Button */}
-                        <button
-                          onClick={(e) => toggleLike(selectedNotification.id, comment.id, undefined, e)}
+                        <div 
+                          onClick={(e) => toggleLike(selectedNotification.id, comment.id, e)}
                           style={{
                             display: 'flex',
                             alignItems: 'center',
@@ -1312,7 +1664,7 @@ export default function NotificationsPage(): React.JSX.Element {
                           <span style={{ fontSize: '1rem' }}>
                             {comment.likes || 0}
                           </span>
-                        </button>
+                        </div>
                       </div>
 
                       {/* Comment Content */}
@@ -1507,8 +1859,8 @@ export default function NotificationsPage(): React.JSX.Element {
                                   }}>
                                     {reply.text}
                                   </p>
-                                  <button
-                                    onClick={(e) => toggleLike(selectedNotification.id, comment.id, reply.id, e)}
+                                  <div
+                                    onClick={(e) => toggleLike(selectedNotification.id, comment.id, e, reply.id)}
                                     style={{
                                       display: 'flex',
                                       alignItems: 'center',
@@ -1521,11 +1873,12 @@ export default function NotificationsPage(): React.JSX.Element {
                                       padding: '4px 8px',
                                       borderRadius: '20px',
                                       backgroundColor: (reply.likedBy || []).includes(getCurrentUserId()) ? 'rgba(59, 130, 246, 0.1)' : 'transparent',
+                                      width: 'fit-content'
                                     }}
                                   >
                                     <LikeIcon filled={(reply.likedBy || []).includes(getCurrentUserId())} />
                                     <span>{reply.likes || 0}</span>
-                                  </button>
+                                  </div>
                                 </div>
                               </div>
                             </div>
