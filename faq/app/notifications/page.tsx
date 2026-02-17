@@ -48,7 +48,7 @@ interface Notification {
   id: string;
   title: string;
   message: string;
-  type: 'announcement' | 'maintenance' | 'system' | 'update' | 'alert' | 'info';
+  type?: 'announcement' | 'maintenance' | 'system' | 'update' | 'alert' | 'info';
   senderId: string;
   senderName: string;
   senderEmail?: string;
@@ -192,7 +192,26 @@ export default function NotificationsPage(): React.JSX.Element {
         if (shouldShow) {
           const notification = {
             id: doc.id,
-            ...data
+            title: data.title || 'No Title',
+            message: data.message || 'No Message',
+            type: data.type || 'info',
+            senderId: data.senderId || '',
+            senderName: data.senderName || 'Unknown',
+            senderEmail: data.senderEmail,
+            recipientType: data.recipientType || 'all',
+            recipientIds: data.recipientIds || [],
+            recipientEmails: data.recipientEmails || [],
+            isRead: data.isRead || false,
+            isDeleted: data.isDeleted || false,
+            createdAt: data.createdAt || Timestamp.now(),
+            scheduledTime: data.scheduledTime,
+            actionUrl: data.actionUrl,
+            userReads: data.userReads || {},
+            views: data.views || 0,
+            clicks: data.clicks || 0,
+            likes: data.likes || [],
+            comments: data.comments || [],
+            status: data.status || 'sent'
           } as Notification;
           
           const isReadByUser = notification.userReads?.[currentUserId] || 
@@ -421,7 +440,9 @@ export default function NotificationsPage(): React.JSX.Element {
   });
 
   // Get notification type label
-  const getTypeLabel = (type: string) => {
+  const getTypeLabel = (type: string | undefined) => {
+    if (!type) return 'INFO';
+    
     const labels: Record<string, string> = {
       announcement: 'ANNOUNCEMENT',
       maintenance: 'MAINTENANCE',
@@ -435,6 +456,8 @@ export default function NotificationsPage(): React.JSX.Element {
 
   // Format date
   const formatDate = (timestamp: Timestamp) => {
+    if (!timestamp) return 'Unknown date';
+    
     const date = timestamp.toDate();
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
@@ -456,6 +479,8 @@ export default function NotificationsPage(): React.JSX.Element {
 
   // Format date time
   const formatDateTime = (timestamp: Timestamp) => {
+    if (!timestamp) return 'Unknown date';
+    
     const date = timestamp.toDate();
     return date.toLocaleDateString('id-ID', {
       day: 'numeric',
@@ -487,7 +512,7 @@ export default function NotificationsPage(): React.JSX.Element {
   };
 
   // Get status color
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: string | undefined) => {
     switch (status) {
       case 'draft': return '#666666';
       case 'scheduled': return '#ffaa00';
@@ -498,13 +523,13 @@ export default function NotificationsPage(): React.JSX.Element {
   };
 
   // Get status label
-  const getStatusLabel = (status: string) => {
+  const getStatusLabel = (status: string | undefined) => {
     switch (status) {
       case 'draft': return 'DRAFT';
       case 'scheduled': return 'SCHEDULED';
       case 'sent': return 'SENT';
       case 'failed': return 'FAILED';
-      default: return status.toUpperCase();
+      default: return 'SENT';
     }
   };
 
@@ -999,7 +1024,8 @@ export default function NotificationsPage(): React.JSX.Element {
                 gap: '2rem',
                 marginBottom: '2rem',
                 padding: '1rem',
-                backgroundColor: '#1a1a1a'
+                backgroundColor: '#1a1a1a',
+                flexWrap: 'wrap'
               }}>
                 <div>
                   <div style={{ fontSize: '1rem', color: '#888888', marginBottom: '0.3rem' }}>STATUS</div>
