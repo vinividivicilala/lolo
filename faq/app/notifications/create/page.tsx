@@ -68,22 +68,6 @@ export default function CreateNotificationPage(): React.JSX.Element {
   const [showSuccess, setShowSuccess] = useState(false);
   const [notificationId, setNotificationId] = useState<string>('');
   
-  // Generate years for dropdown (2024-2030)
-  const years = Array.from({ length: 7 }, (_, i) => (2024 + i).toString());
-  const months = [
-    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
-  ];
-  const days = Array.from({ length: 31 }, (_, i) => (i + 1).toString().padStart(2, '0'));
-  const hours = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0'));
-  const minutes = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0'));
-
-  const [selectedYear, setSelectedYear] = useState<string>('');
-  const [selectedMonth, setSelectedMonth] = useState<string>('');
-  const [selectedDay, setSelectedDay] = useState<string>('');
-  const [selectedHour, setSelectedHour] = useState<string>('');
-  const [selectedMinute, setSelectedMinute] = useState<string>('');
-  
   const [formData, setFormData] = useState<NotificationForm>({
     title: '',
     message: '',
@@ -100,21 +84,15 @@ export default function CreateNotificationPage(): React.JSX.Element {
   const [newRecipientEmail, setNewRecipientEmail] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Update current time every second
+  // Update current time
   useEffect(() => {
     const timer = setInterval(() => {
       const now = new Date();
       setCurrentTime(now.toLocaleString('id-ID', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
         hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit'
+        minute: '2-digit'
       }));
-    }, 1000);
-
+    }, 60000);
     return () => clearInterval(timer);
   }, []);
 
@@ -160,22 +138,6 @@ export default function CreateNotificationPage(): React.JSX.Element {
 
     loadUsers();
   }, [db]);
-
-  // Update scheduled date/time when dropdowns change
-  useEffect(() => {
-    if (selectedYear && selectedMonth && selectedDay && selectedHour && selectedMinute) {
-      const monthIndex = (months.indexOf(selectedMonth) + 1).toString().padStart(2, '0');
-      const dateString = `${selectedYear}-${monthIndex}-${selectedDay}`;
-      const timeString = `${selectedHour}:${selectedMinute}`;
-      
-      setFormData(prev => ({
-        ...prev,
-        scheduledDate: dateString,
-        scheduledTime: timeString,
-        status: 'scheduled'
-      }));
-    }
-  }, [selectedYear, selectedMonth, selectedDay, selectedHour, selectedMinute]);
 
   const handleInputChange = (field: keyof NotificationForm, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -338,32 +300,45 @@ export default function CreateNotificationPage(): React.JSX.Element {
     }
   };
 
-  // SVG North West Arrow component - Large
-  const NorthWestArrow = () => (
+  // Get type color
+  const getTypeColor = (type: string) => {
+    switch (type) {
+      case 'announcement': return '#4a90e2';
+      case 'maintenance': return '#f5a623';
+      case 'system': return '#9013fe';
+      case 'update': return '#7ed321';
+      case 'alert': return '#d0021b';
+      case 'info': return '#4a90e2';
+      default: return '#4a90e2';
+    }
+  };
+
+  // SVG North East Arrow
+  const NorthEastArrow = () => (
     <svg 
-      width="64" 
-      height="64" 
+      width="48" 
+      height="48" 
       viewBox="0 0 24 24" 
       fill="none" 
       stroke="currentColor" 
-      strokeWidth="2"
+      strokeWidth="1"
       strokeLinecap="round" 
       strokeLinejoin="round"
     >
-      <path d="M17 17L7 7" />
+      <path d="M7 7L17 17" />
       <path d="M7 17V7H17" />
     </svg>
   );
 
-  // SVG South East Arrow component - Large
+  // SVG South East Arrow
   const SouthEastArrow = () => (
     <svg 
-      width="64" 
-      height="64" 
+      width="48" 
+      height="48" 
       viewBox="0 0 24 24" 
       fill="none" 
       stroke="currentColor" 
-      strokeWidth="2"
+      strokeWidth="1"
       strokeLinecap="round" 
       strokeLinejoin="round"
     >
@@ -376,80 +351,39 @@ export default function CreateNotificationPage(): React.JSX.Element {
     <div style={{
       minHeight: '100vh',
       backgroundColor: '#000000',
-      margin: 0,
-      padding: 0,
-      width: '100%',
       fontFamily: 'Helvetica, Arial, sans-serif',
-      color: '#ffffff'
+      color: '#ffffff',
+      padding: '2rem'
     }}>
       {/* Header */}
       <div style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100%',
-        padding: '2rem 3rem',
-        backgroundColor: '#000000',
-        zIndex: 100,
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        borderBottom: '1px solid #222222'
+        marginBottom: '3rem'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
-          <motion.button
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+          <button
             onClick={() => router.push('/notifications')}
             style={{
-              backgroundColor: 'transparent',
+              background: 'none',
               border: 'none',
-              color: '#ffffff',
               cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
+              color: '#ffffff',
               padding: 0
             }}
-            whileHover={{ opacity: 0.8 }}
-            whileTap={{ scale: 0.95 }}
           >
-            <NorthWestArrow />
-          </motion.button>
-          <h1 style={{
-            fontSize: '4rem',
-            fontWeight: '700',
-            margin: 0,
-            color: '#ffffff',
-            letterSpacing: '-0.02em'
-          }}>
-            Halaman Notifikasi
-          </h1>
+            <NorthEastArrow />
+          </button>
+          <span style={{ fontSize: '2.5rem' }}>create notification</span>
         </div>
         
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '2rem'
-        }}>
-          <span style={{
-            fontSize: '2rem',
-            fontWeight: '600',
-            color: '#ffffff'
-          }}>
-            {user?.displayName || user?.email || 'USER'}
-          </span>
-          <svg 
-            width="48" 
-            height="48" 
-            viewBox="0 0 24 24" 
-            fill="none" 
-            stroke="currentColor" 
-            strokeWidth="2"
-            strokeLinecap="round" 
-            strokeLinejoin="round"
-          >
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-            <circle cx="12" cy="7" r="4" />
-          </svg>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+          <span style={{ fontSize: '1.2rem', color: '#888888' }}>{currentTime}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <span style={{ fontSize: '1.2rem' }}>{user?.displayName || user?.email || 'visitor'}</span>
+            <NorthEastArrow />
+          </div>
         </div>
       </div>
 
@@ -457,610 +391,332 @@ export default function CreateNotificationPage(): React.JSX.Element {
       {showSuccess && (
         <div style={{
           position: 'fixed',
-          top: '120px',
-          right: '3rem',
-          backgroundColor: '#00ff00',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          backgroundColor: '#7ed321',
           color: '#000000',
-          padding: '2rem 3rem',
+          padding: '2rem 4rem',
           zIndex: 200,
-          fontSize: '1.5rem',
-          fontWeight: '700',
-          boxShadow: '0 0 20px rgba(0,255,0,0.3)'
+          fontSize: '1.5rem'
         }}>
-          ✓ NOTIFICATION CREATED SUCCESSFULLY - ID: {notificationId}
+          notification created
         </div>
       )}
 
-      {/* Main Content */}
-      <div style={{
-        paddingTop: '180px',
-        paddingBottom: '3rem',
-        maxWidth: '1200px',
-        margin: '0 auto',
-        width: '100%',
-        boxSizing: 'border-box',
-        padding: '12rem 3rem 3rem 3rem'
-      }}>
-        {/* User Info Bar */}
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '4rem',
-          padding: '1.5rem 0',
-          borderBottom: '1px solid #222222'
-        }}>
-          <div style={{
-            fontSize: '1.5rem',
-            color: '#888888',
-            fontWeight: '500'
-          }}>
-            {currentTime}
-          </div>
-        </div>
-
-        {/* Info Status */}
-        <div style={{
-          marginBottom: '4rem',
-          padding: '2rem',
-          backgroundColor: '#111111',
-          borderRadius: '0'
-        }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '2rem',
-            fontSize: '1.8rem',
-            color: '#ffffff',
-            fontWeight: '500'
-          }}>
-            <span>📋 SENDING NOTIFICATION AS:</span>
-            <span style={{ fontWeight: '700', color: '#ffffff' }}>{user?.displayName || user?.email || 'USER'}</span>
-            <span style={{ 
-              marginLeft: 'auto',
-              backgroundColor: formData.status === 'draft' ? '#666666' : 
-                             formData.status === 'scheduled' ? '#ffaa00' : 
-                             formData.status === 'sent' ? '#00ff00' : '#ff0000',
-              color: '#000000',
-              padding: '0.5rem 2rem',
-              fontSize: '1.5rem',
-              fontWeight: '700'
-            }}>
-              {formData.status === 'draft' ? 'DRAFT' : 
-               formData.status === 'scheduled' ? 'SCHEDULED' : 
-               formData.status === 'sent' ? 'SENT' : 'FAILED'}
-            </span>
-          </div>
-        </div>
-
-        <motion.form
-          onSubmit={handleSubmit}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          style={{
-            width: '100%'
-          }}
-        >
-          {/* Title */}
-          <div style={{ marginBottom: '3rem' }}>
-            <input
-              type="text"
-              value={formData.title}
-              onChange={(e) => handleInputChange('title', e.target.value)}
-              placeholder="TITLE"
-              required
-              style={{
-                width: '100%',
-                padding: '1rem 0',
-                backgroundColor: 'transparent',
-                border: 'none',
-                borderBottom: '2px solid #333333',
-                color: '#ffffff',
-                fontSize: '2.5rem',
-                fontWeight: '600',
-                outline: 'none',
-                fontFamily: 'Helvetica, Arial, sans-serif'
-              }}
-            />
-          </div>
-
-          {/* Message */}
-          <div style={{ marginBottom: '3rem' }}>
-            <textarea
-              value={formData.message}
-              onChange={(e) => handleInputChange('message', e.target.value)}
-              placeholder="MESSAGE"
-              required
-              rows={4}
-              style={{
-                width: '100%',
-                padding: '1rem 0',
-                backgroundColor: 'transparent',
-                border: 'none',
-                borderBottom: '2px solid #333333',
-                color: '#ffffff',
-                fontSize: '2rem',
-                fontWeight: '400',
-                outline: 'none',
-                resize: 'vertical',
-                minHeight: '150px',
-                fontFamily: 'Helvetica, Arial, sans-serif'
-              }}
-            />
-          </div>
-
-          {/* Notification Type */}
-          <div style={{ marginBottom: '3rem' }}>
-            <div style={{
-              display: 'flex',
-              gap: '2.5rem',
-              flexWrap: 'wrap',
-              borderBottom: '2px solid #333333',
-              paddingBottom: '1rem'
-            }}>
-              {[
-                { value: 'announcement', label: 'ANNOUNCEMENT' },
-                { value: 'maintenance', label: 'MAINTENANCE' },
-                { value: 'system', label: 'SYSTEM' },
-                { value: 'update', label: 'UPDATE' },
-                { value: 'alert', label: 'ALERT' },
-                { value: 'info', label: 'INFO' }
-              ].map((option) => (
-                <button
-                  key={option.value}
-                  type="button"
-                  onClick={() => {
-                    handleInputChange('type', option.value);
-                    handleInputChange('status', 'draft');
-                  }}
-                  style={{
-                    padding: '0.5rem 0',
-                    backgroundColor: 'transparent',
-                    border: 'none',
-                    borderBottom: formData.type === option.value ? '3px solid #ffffff' : 'none',
-                    color: formData.type === option.value ? '#ffffff' : '#666666',
-                    fontSize: '1.5rem',
-                    fontWeight: formData.type === option.value ? '700' : '500',
-                    cursor: 'pointer',
-                    fontFamily: 'Helvetica, Arial, sans-serif'
-                  }}
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Schedule Time - Dropdowns */}
-          <div style={{ 
-            marginBottom: '3rem',
-            display: 'flex',
-            gap: '1rem',
-            flexWrap: 'wrap',
-            borderBottom: '2px solid #333333',
-            paddingBottom: '2rem'
-          }}>
-            <select 
-              value={selectedYear} 
-              onChange={(e) => setSelectedYear(e.target.value)}
-              style={{
-                padding: '1rem 2rem',
-                backgroundColor: '#111111',
-                border: '1px solid #333333',
-                color: '#ffffff',
-                fontSize: '1.5rem',
-                fontFamily: 'Helvetica, Arial, sans-serif',
-                cursor: 'pointer',
-                minWidth: '120px'
-              }}
-            >
-              <option value="">YEAR</option>
-              {years.map(year => <option key={year} value={year}>{year}</option>)}
-            </select>
-
-            <select 
-              value={selectedMonth} 
-              onChange={(e) => setSelectedMonth(e.target.value)}
-              style={{
-                padding: '1rem 2rem',
-                backgroundColor: '#111111',
-                border: '1px solid #333333',
-                color: '#ffffff',
-                fontSize: '1.5rem',
-                fontFamily: 'Helvetica, Arial, sans-serif',
-                cursor: 'pointer',
-                minWidth: '140px'
-              }}
-            >
-              <option value="">MONTH</option>
-              {months.map(month => <option key={month} value={month}>{month}</option>)}
-            </select>
-
-            <select 
-              value={selectedDay} 
-              onChange={(e) => setSelectedDay(e.target.value)}
-              style={{
-                padding: '1rem 2rem',
-                backgroundColor: '#111111',
-                border: '1px solid #333333',
-                color: '#ffffff',
-                fontSize: '1.5rem',
-                fontFamily: 'Helvetica, Arial, sans-serif',
-                cursor: 'pointer',
-                minWidth: '100px'
-              }}
-            >
-              <option value="">DAY</option>
-              {days.map(day => <option key={day} value={day}>{day}</option>)}
-            </select>
-
-            <select 
-              value={selectedHour} 
-              onChange={(e) => setSelectedHour(e.target.value)}
-              style={{
-                padding: '1rem 2rem',
-                backgroundColor: '#111111',
-                border: '1px solid #333333',
-                color: '#ffffff',
-                fontSize: '1.5rem',
-                fontFamily: 'Helvetica, Arial, sans-serif',
-                cursor: 'pointer',
-                minWidth: '100px'
-              }}
-            >
-              <option value="">HOUR</option>
-              {hours.map(hour => <option key={hour} value={hour}>{hour}</option>)}
-            </select>
-
-            <select 
-              value={selectedMinute} 
-              onChange={(e) => setSelectedMinute(e.target.value)}
-              style={{
-                padding: '1rem 2rem',
-                backgroundColor: '#111111',
-                border: '1px solid #333333',
-                color: '#ffffff',
-                fontSize: '1.5rem',
-                fontFamily: 'Helvetica, Arial, sans-serif',
-                cursor: 'pointer',
-                minWidth: '100px'
-              }}
-            >
-              <option value="">MINUTE</option>
-              {minutes.map(minute => <option key={minute} value={minute}>{minute}</option>)}
-            </select>
-          </div>
-
-          {/* Recipient Type */}
-          <div style={{ marginBottom: '3rem' }}>
-            <div style={{
-              display: 'flex',
-              gap: '2.5rem',
-              borderBottom: '2px solid #333333',
-              paddingBottom: '1rem'
-            }}>
-              {[
-                { value: 'all', label: 'ALL USERS' },
-                { value: 'specific', label: 'SPECIFIC USERS' },
-                { value: 'email', label: 'EMAIL ADDRESSES' }
-              ].map((option) => (
-                <button
-                  key={option.value}
-                  type="button"
-                  onClick={() => {
-                    handleInputChange('recipientType', option.value);
-                    handleInputChange('status', 'draft');
-                  }}
-                  style={{
-                    padding: '0.5rem 0',
-                    backgroundColor: 'transparent',
-                    border: 'none',
-                    borderBottom: formData.recipientType === option.value ? '3px solid #ffffff' : 'none',
-                    color: formData.recipientType === option.value ? '#ffffff' : '#666666',
-                    fontSize: '1.5rem',
-                    fontWeight: formData.recipientType === option.value ? '700' : '500',
-                    cursor: 'pointer',
-                    fontFamily: 'Helvetica, Arial, sans-serif'
-                  }}
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Specific Users Selection */}
-          {formData.recipientType === 'specific' && (
-            <div style={{ marginBottom: '3rem' }}>
-              <div style={{ marginBottom: '2rem' }}>
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="SEARCH USERS..."
-                  style={{
-                    width: '100%',
-                    padding: '1rem 0',
-                    backgroundColor: 'transparent',
-                    border: 'none',
-                    borderBottom: '2px solid #333333',
-                    color: '#ffffff',
-                    fontSize: '1.8rem',
-                    fontWeight: '500',
-                    outline: 'none',
-                    fontFamily: 'Helvetica, Arial, sans-serif'
-                  }}
-                />
-              </div>
-
-              <div style={{
-                maxHeight: '400px',
-                overflowY: 'auto'
-              }}>
-                {isLoadingUsers ? (
-                  <div style={{ padding: '2rem 0', color: '#888888', fontSize: '1.8rem' }}>
-                    LOADING...
-                  </div>
-                ) : filteredUsers.length === 0 ? (
-                  <div style={{ padding: '2rem 0', color: '#888888', fontSize: '1.8rem' }}>
-                    NO USERS FOUND
-                  </div>
-                ) : (
-                  filteredUsers.map((userItem) => {
-                    const isSelected = formData.recipientIds.includes(userItem.uid);
-                    return (
-                      <div
-                        key={userItem.uid}
-                        onClick={() => {
-                          toggleUserSelection(userItem.uid);
-                          handleInputChange('status', 'draft');
-                        }}
-                        style={{
-                          padding: '1.5rem 0',
-                          cursor: 'pointer',
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                          borderBottom: '1px solid #333333'
-                        }}
-                      >
-                        <div>
-                          <div style={{ fontSize: '1.8rem', fontWeight: '600', color: '#ffffff' }}>
-                            {userItem.displayName || 'NO NAME'}
-                          </div>
-                          <div style={{ fontSize: '1.4rem', color: '#888888' }}>
-                            {userItem.email}
-                          </div>
-                        </div>
-                        {isSelected && (
-                          <span style={{ fontSize: '2.5rem', color: '#ffffff', fontWeight: 'bold' }}>✓</span>
-                        )}
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-
-              {formData.recipientIds.length > 0 && (
-                <div style={{ marginTop: '2rem', fontSize: '1.8rem', color: '#ffffff', fontWeight: '600' }}>
-                  SELECTED: {formData.recipientIds.length} USERS
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Email Recipients */}
-          {formData.recipientType === 'email' && (
-            <div style={{ marginBottom: '3rem' }}>
-              <div style={{
-                display: 'flex',
-                gap: '1rem',
-                marginBottom: '1.5rem'
-              }}>
-                <input
-                  type="email"
-                  value={newRecipientEmail}
-                  onChange={(e) => setNewRecipientEmail(e.target.value)}
-                  placeholder="ENTER EMAIL ADDRESS"
-                  style={{
-                    flex: 1,
-                    padding: '1rem 0',
-                    backgroundColor: 'transparent',
-                    border: 'none',
-                    borderBottom: '2px solid #333333',
-                    color: '#ffffff',
-                    fontSize: '1.8rem',
-                    fontWeight: '500',
-                    outline: 'none',
-                    fontFamily: 'Helvetica, Arial, sans-serif'
-                  }}
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      addRecipientEmail();
-                      handleInputChange('status', 'draft');
-                    }
-                  }}
-                />
-                <button
-                  type="button"
-                  onClick={() => {
-                    addRecipientEmail();
-                    handleInputChange('status', 'draft');
-                  }}
-                  style={{
-                    padding: '1rem 3rem',
-                    backgroundColor: '#ffffff',
-                    border: 'none',
-                    color: '#000000',
-                    fontSize: '1.5rem',
-                    fontWeight: '700',
-                    cursor: 'pointer',
-                    fontFamily: 'Helvetica, Arial, sans-serif'
-                  }}
-                >
-                  ADD
-                </button>
-              </div>
-              
-              {formData.recipientEmails.length > 0 && (
-                <div style={{ marginTop: '2rem' }}>
-                  <div style={{ fontSize: '1.8rem', color: '#ffffff', fontWeight: '700', marginBottom: '1.5rem' }}>
-                    EMAIL LIST:
-                  </div>
-                  <div>
-                    {formData.recipientEmails.map((email, index) => (
-                      <div key={index} style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '1rem',
-                        padding: '1rem 0',
-                        fontSize: '1.8rem',
-                        borderBottom: '1px solid #333333'
-                      }}>
-                        <span style={{ flex: 1, color: '#ffffff', fontWeight: '500' }}>{email}</span>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            removeRecipientEmail(email);
-                            handleInputChange('status', 'draft');
-                          }}
-                          style={{
-                            backgroundColor: 'transparent',
-                            border: 'none',
-                            color: '#ff4444',
-                            cursor: 'pointer',
-                            fontSize: '2.5rem',
-                            fontWeight: 'bold',
-                            padding: '0',
-                            lineHeight: 1
-                          }}
-                        >
-                          ×
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Action URL */}
-          <div style={{ marginBottom: '3rem' }}>
-            <input
-              type="url"
-              value={formData.actionUrl}
-              onChange={(e) => {
-                handleInputChange('actionUrl', e.target.value);
+      {/* Form */}
+      <form onSubmit={handleSubmit} style={{ maxWidth: '800px', margin: '0 auto' }}>
+        {/* Type Selection */}
+        <div style={{ marginBottom: '3rem', display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+          {[
+            { value: 'announcement', label: 'announcement' },
+            { value: 'maintenance', label: 'maintenance' },
+            { value: 'system', label: 'system' },
+            { value: 'update', label: 'update' },
+            { value: 'alert', label: 'alert' },
+            { value: 'info', label: 'info' }
+          ].map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              onClick={() => {
+                handleInputChange('type', option.value);
                 handleInputChange('status', 'draft');
               }}
-              placeholder="ACTION URL (OPTIONAL)"
+              style={{
+                padding: '0.8rem 2rem',
+                backgroundColor: formData.type === option.value ? getTypeColor(option.value) : 'transparent',
+                border: '1px solid #333333',
+                color: formData.type === option.value ? '#000000' : '#ffffff',
+                fontSize: '1.2rem',
+                cursor: 'pointer'
+              }}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Title */}
+        <div style={{ marginBottom: '2rem' }}>
+          <input
+            type="text"
+            value={formData.title}
+            onChange={(e) => handleInputChange('title', e.target.value)}
+            placeholder="title"
+            required
+            style={{
+              width: '100%',
+              padding: '1rem 0',
+              backgroundColor: 'transparent',
+              border: 'none',
+              borderBottom: '1px solid #333333',
+              color: '#ffffff',
+              fontSize: '2rem',
+              outline: 'none'
+            }}
+          />
+        </div>
+
+        {/* Message */}
+        <div style={{ marginBottom: '2rem' }}>
+          <textarea
+            value={formData.message}
+            onChange={(e) => handleInputChange('message', e.target.value)}
+            placeholder="message"
+            required
+            rows={6}
+            style={{
+              width: '100%',
+              padding: '1rem 0',
+              backgroundColor: 'transparent',
+              border: 'none',
+              borderBottom: '1px solid #333333',
+              color: '#ffffff',
+              fontSize: '1.2rem',
+              outline: 'none',
+              resize: 'vertical'
+            }}
+          />
+        </div>
+
+        {/* Schedule */}
+        <div style={{ marginBottom: '2rem', display: 'flex', gap: '1rem' }}>
+          <input
+            type="date"
+            value={formData.scheduledDate}
+            onChange={(e) => {
+              handleInputChange('scheduledDate', e.target.value);
+              if (e.target.value) handleInputChange('status', 'scheduled');
+            }}
+            style={{
+              flex: 1,
+              padding: '0.8rem',
+              backgroundColor: '#111111',
+              border: '1px solid #333333',
+              color: '#ffffff',
+              fontSize: '1rem'
+            }}
+          />
+          <input
+            type="time"
+            value={formData.scheduledTime}
+            onChange={(e) => {
+              handleInputChange('scheduledTime', e.target.value);
+              if (e.target.value) handleInputChange('status', 'scheduled');
+            }}
+            style={{
+              flex: 1,
+              padding: '0.8rem',
+              backgroundColor: '#111111',
+              border: '1px solid #333333',
+              color: '#ffffff',
+              fontSize: '1rem'
+            }}
+          />
+        </div>
+
+        {/* Recipient Type */}
+        <div style={{ marginBottom: '2rem', display: 'flex', gap: '1rem' }}>
+          {[
+            { value: 'all', label: 'all users' },
+            { value: 'specific', label: 'specific users' },
+            { value: 'email', label: 'email addresses' }
+          ].map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              onClick={() => handleInputChange('recipientType', option.value)}
+              style={{
+                padding: '0.5rem 1.5rem',
+                backgroundColor: 'transparent',
+                border: formData.recipientType === option.value ? '1px solid #ffffff' : '1px solid #333333',
+                color: '#ffffff',
+                fontSize: '1rem',
+                cursor: 'pointer'
+              }}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Specific Users */}
+        {formData.recipientType === 'specific' && (
+          <div style={{ marginBottom: '2rem' }}>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="search users"
               style={{
                 width: '100%',
-                padding: '1rem 0',
-                backgroundColor: 'transparent',
-                border: 'none',
-                borderBottom: '2px solid #333333',
+                padding: '0.8rem',
+                backgroundColor: '#111111',
+                border: '1px solid #333333',
                 color: '#ffffff',
-                fontSize: '1.8rem',
-                fontWeight: '500',
-                outline: 'none',
-                fontFamily: 'Helvetica, Arial, sans-serif'
+                fontSize: '1rem',
+                marginBottom: '1rem'
               }}
             />
+            <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+              {filteredUsers.map((userItem) => (
+                <div
+                  key={userItem.uid}
+                  onClick={() => toggleUserSelection(userItem.uid)}
+                  style={{
+                    padding: '1rem',
+                    marginBottom: '0.5rem',
+                    backgroundColor: formData.recipientIds.includes(userItem.uid) ? '#7ed321' : '#111111',
+                    color: formData.recipientIds.includes(userItem.uid) ? '#000000' : '#ffffff',
+                    cursor: 'pointer'
+                  }}
+                >
+                  {userItem.displayName || userItem.email || 'unknown'}
+                </div>
+              ))}
+            </div>
           </div>
+        )}
 
-          {/* Submit Buttons */}
-          <div style={{
-            display: 'flex',
-            justifyContent: 'flex-end',
-            gap: '3rem',
-            marginTop: '5rem'
-          }}>
-            <button
-              type="button"
-              onClick={saveAsDraft}
-              disabled={isLoading}
-              style={{
-                padding: '1rem 3rem',
-                backgroundColor: 'transparent',
-                border: '2px solid #666666',
-                color: '#ffffff',
-                fontSize: '1.8rem',
-                fontWeight: '600',
-                cursor: isLoading ? 'not-allowed' : 'pointer',
-                fontFamily: 'Helvetica, Arial, sans-serif'
-              }}
-            >
-              SAVE AS DRAFT
-            </button>
-
-            <button
-              type="button"
-              onClick={() => router.push('/notifications')}
-              style={{
-                padding: '1rem 0',
-                backgroundColor: 'transparent',
-                border: 'none',
-                color: '#888888',
-                fontSize: '2rem',
-                fontWeight: '600',
-                cursor: 'pointer',
-                fontFamily: 'Helvetica, Arial, sans-serif'
-              }}
-            >
-              CANCEL
-            </button>
-            
-            <motion.button
-              type="submit"
-              disabled={isLoading}
-              style={{
-                padding: '1rem 0',
-                backgroundColor: 'transparent',
-                border: 'none',
-                color: isLoading ? '#444444' : '#ffffff',
-                fontSize: '2rem',
-                fontWeight: '700',
-                cursor: isLoading ? 'not-allowed' : 'pointer',
-                fontFamily: 'Helvetica, Arial, sans-serif',
+        {/* Email Recipients */}
+        {formData.recipientType === 'email' && (
+          <div style={{ marginBottom: '2rem' }}>
+            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+              <input
+                type="email"
+                value={newRecipientEmail}
+                onChange={(e) => setNewRecipientEmail(e.target.value)}
+                placeholder="email address"
+                style={{
+                  flex: 1,
+                  padding: '0.8rem',
+                  backgroundColor: '#111111',
+                  border: '1px solid #333333',
+                  color: '#ffffff',
+                  fontSize: '1rem'
+                }}
+                onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addRecipientEmail())}
+              />
+              <button
+                type="button"
+                onClick={addRecipientEmail}
+                style={{
+                  padding: '0.8rem 2rem',
+                  backgroundColor: '#ffffff',
+                  border: 'none',
+                  color: '#000000',
+                  fontSize: '1rem',
+                  cursor: 'pointer'
+                }}
+              >
+                add
+              </button>
+            </div>
+            {formData.recipientEmails.map((email, i) => (
+              <div key={i} style={{
                 display: 'flex',
+                justifyContent: 'space-between',
                 alignItems: 'center',
-                gap: '1rem'
-              }}
-              whileHover={{ scale: isLoading ? 1 : 1.05 }}
-              whileTap={{ scale: isLoading ? 1 : 0.95 }}
-            >
-              {isLoading ? 'SENDING...' : 'SEND NOTIFICATION'}
-              <SouthEastArrow />
-            </motion.button>
+                padding: '0.8rem',
+                backgroundColor: '#111111',
+                marginBottom: '0.5rem'
+              }}>
+                <span>{email}</span>
+                <button
+                  type="button"
+                  onClick={() => removeRecipientEmail(email)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#d0021b',
+                    fontSize: '1.5rem',
+                    cursor: 'pointer'
+                  }}
+                >
+                  ×
+                </button>
+              </div>
+            ))}
           </div>
+        )}
 
-          {/* Status Info */}
-          <div style={{
-            marginTop: '3rem',
-            padding: '2rem',
-            backgroundColor: '#111111',
-            display: 'flex',
-            gap: '3rem',
-            justifyContent: 'center'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              <div style={{ width: '20px', height: '20px', backgroundColor: '#666666' }}></div>
-              <span style={{ fontSize: '1.4rem' }}>DRAFT - Saved but not sent</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              <div style={{ width: '20px', height: '20px', backgroundColor: '#ffaa00' }}></div>
-              <span style={{ fontSize: '1.4rem' }}>SCHEDULED - Will be sent at selected time</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              <div style={{ width: '20px', height: '20px', backgroundColor: '#00ff00' }}></div>
-              <span style={{ fontSize: '1.4rem' }}>SENT - Notification has been sent</span>
-            </div>
-          </div>
-        </motion.form>
-      </div>
+        {/* Action URL */}
+        <div style={{ marginBottom: '2rem' }}>
+          <input
+            type="url"
+            value={formData.actionUrl}
+            onChange={(e) => handleInputChange('actionUrl', e.target.value)}
+            placeholder="action url (optional)"
+            style={{
+              width: '100%',
+              padding: '0.8rem',
+              backgroundColor: '#111111',
+              border: '1px solid #333333',
+              color: '#ffffff',
+              fontSize: '1rem'
+            }}
+          />
+        </div>
+
+        {/* Buttons */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'flex-end',
+          gap: '2rem',
+          marginTop: '3rem'
+        }}>
+          <button
+            type="button"
+            onClick={saveAsDraft}
+            disabled={isLoading}
+            style={{
+              padding: '0.8rem 2rem',
+              background: 'none',
+              border: '1px solid #666666',
+              color: '#ffffff',
+              fontSize: '1.2rem',
+              cursor: isLoading ? 'not-allowed' : 'pointer'
+            }}
+          >
+            save draft
+          </button>
+          
+          <button
+            type="button"
+            onClick={() => router.push('/notifications')}
+            style={{
+              padding: '0.8rem 2rem',
+              background: 'none',
+              border: 'none',
+              color: '#888888',
+              fontSize: '1.2rem',
+              cursor: 'pointer'
+            }}
+          >
+            cancel
+          </button>
+          
+          <button
+            type="submit"
+            disabled={isLoading}
+            style={{
+              padding: '0.8rem 2rem',
+              background: 'none',
+              border: 'none',
+              color: isLoading ? '#444444' : '#ffffff',
+              fontSize: '1.2rem',
+              cursor: isLoading ? 'not-allowed' : 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem'
+            }}
+          >
+            {isLoading ? 'sending' : 'send'}
+            <SouthEastArrow />
+          </button>
+        </div>
+      </form>
     </div>
   );
 }
