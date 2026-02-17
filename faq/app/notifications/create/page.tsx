@@ -10,9 +10,7 @@ import {
   serverTimestamp,
   getDocs,
   query,
-  orderBy,
-  doc,
-  updateDoc
+  orderBy
 } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { initializeApp, getApps } from "firebase/app";
@@ -69,6 +67,22 @@ export default function CreateNotificationPage(): React.JSX.Element {
   const [currentTime, setCurrentTime] = useState<string>('');
   const [showSuccess, setShowSuccess] = useState(false);
   const [notificationId, setNotificationId] = useState<string>('');
+  
+  // Generate years for dropdown (2024-2030)
+  const years = Array.from({ length: 7 }, (_, i) => (2024 + i).toString());
+  const months = [
+    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+  ];
+  const days = Array.from({ length: 31 }, (_, i) => (i + 1).toString().padStart(2, '0'));
+  const hours = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0'));
+  const minutes = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0'));
+
+  const [selectedYear, setSelectedYear] = useState<string>('');
+  const [selectedMonth, setSelectedMonth] = useState<string>('');
+  const [selectedDay, setSelectedDay] = useState<string>('');
+  const [selectedHour, setSelectedHour] = useState<string>('');
+  const [selectedMinute, setSelectedMinute] = useState<string>('');
   
   const [formData, setFormData] = useState<NotificationForm>({
     title: '',
@@ -146,6 +160,22 @@ export default function CreateNotificationPage(): React.JSX.Element {
 
     loadUsers();
   }, [db]);
+
+  // Update scheduled date/time when dropdowns change
+  useEffect(() => {
+    if (selectedYear && selectedMonth && selectedDay && selectedHour && selectedMinute) {
+      const monthIndex = (months.indexOf(selectedMonth) + 1).toString().padStart(2, '0');
+      const dateString = `${selectedYear}-${monthIndex}-${selectedDay}`;
+      const timeString = `${selectedHour}:${selectedMinute}`;
+      
+      setFormData(prev => ({
+        ...prev,
+        scheduledDate: dateString,
+        scheduledTime: timeString,
+        status: 'scheduled'
+      }));
+    }
+  }, [selectedYear, selectedMonth, selectedDay, selectedHour, selectedMinute]);
 
   const handleInputChange = (field: keyof NotificationForm, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -308,8 +338,8 @@ export default function CreateNotificationPage(): React.JSX.Element {
     }
   };
 
-  // SVG South West Arrow component - Large
-  const SouthWestArrow = () => (
+  // SVG North West Arrow component - Large
+  const NorthWestArrow = () => (
     <svg 
       width="64" 
       height="64" 
@@ -320,8 +350,8 @@ export default function CreateNotificationPage(): React.JSX.Element {
       strokeLinecap="round" 
       strokeLinejoin="round"
     >
-      <path d="M19 5L5 19" />
-      <path d="M19 19H5V5" />
+      <path d="M17 17L7 7" />
+      <path d="M7 17V7H17" />
     </svg>
   );
 
@@ -382,26 +412,44 @@ export default function CreateNotificationPage(): React.JSX.Element {
             whileHover={{ opacity: 0.8 }}
             whileTap={{ scale: 0.95 }}
           >
-            <SouthWestArrow />
+            <NorthWestArrow />
           </motion.button>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '1rem' }}>
-            <h1 style={{
-              fontSize: '4rem',
-              fontWeight: '700',
-              margin: 0,
-              color: '#ffffff',
-              letterSpacing: '-0.02em'
-            }}>
-              CREATE NOTIFICATION
-            </h1>
-            <span style={{
-              fontSize: '2rem',
-              fontWeight: '400',
-              color: '#666666'
-            }}>
-              Halaman Notification
-            </span>
-          </div>
+          <h1 style={{
+            fontSize: '4rem',
+            fontWeight: '700',
+            margin: 0,
+            color: '#ffffff',
+            letterSpacing: '-0.02em'
+          }}>
+            Halaman Notifikasi
+          </h1>
+        </div>
+        
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '2rem'
+        }}>
+          <span style={{
+            fontSize: '2rem',
+            fontWeight: '600',
+            color: '#ffffff'
+          }}>
+            {user?.displayName || user?.email || 'USER'}
+          </span>
+          <svg 
+            width="48" 
+            height="48" 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            stroke="currentColor" 
+            strokeWidth="2"
+            strokeLinecap="round" 
+            strokeLinejoin="round"
+          >
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
+          </svg>
         </div>
       </div>
 
@@ -442,32 +490,6 @@ export default function CreateNotificationPage(): React.JSX.Element {
           padding: '1.5rem 0',
           borderBottom: '1px solid #222222'
         }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '2rem'
-          }}>
-            <svg 
-              width="48" 
-              height="48" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeWidth="2"
-              strokeLinecap="round" 
-              strokeLinejoin="round"
-            >
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-              <circle cx="12" cy="7" r="4" />
-            </svg>
-            <span style={{
-              fontSize: '2rem',
-              fontWeight: '600',
-              color: '#ffffff'
-            }}>
-              {user?.displayName || user?.email || 'USER'}
-            </span>
-          </div>
           <div style={{
             fontSize: '1.5rem',
             color: '#888888',
@@ -609,62 +631,104 @@ export default function CreateNotificationPage(): React.JSX.Element {
             </div>
           </div>
 
-          {/* Schedule Time - With dropdown selectors */}
+          {/* Schedule Time - Dropdowns */}
           <div style={{ 
             marginBottom: '3rem',
             display: 'flex',
-            gap: '2rem',
+            gap: '1rem',
+            flexWrap: 'wrap',
             borderBottom: '2px solid #333333',
-            paddingBottom: '1rem'
+            paddingBottom: '2rem'
           }}>
-            <div style={{ flex: 1 }}>
-              <input
-                type="date"
-                value={formData.scheduledDate}
-                onChange={(e) => {
-                  handleInputChange('scheduledDate', e.target.value);
-                  if (e.target.value || formData.scheduledTime) {
-                    handleInputChange('status', 'scheduled');
-                  }
-                }}
-                style={{
-                  width: '100%',
-                  padding: '1rem 0',
-                  backgroundColor: 'transparent',
-                  border: 'none',
-                  color: '#ffffff',
-                  fontSize: '1.8rem',
-                  fontWeight: '500',
-                  outline: 'none',
-                  fontFamily: 'Helvetica, Arial, sans-serif',
-                  cursor: 'pointer'
-                }}
-              />
-            </div>
-            <div style={{ flex: 1 }}>
-              <input
-                type="time"
-                value={formData.scheduledTime}
-                onChange={(e) => {
-                  handleInputChange('scheduledTime', e.target.value);
-                  if (formData.scheduledDate || e.target.value) {
-                    handleInputChange('status', 'scheduled');
-                  }
-                }}
-                style={{
-                  width: '100%',
-                  padding: '1rem 0',
-                  backgroundColor: 'transparent',
-                  border: 'none',
-                  color: '#ffffff',
-                  fontSize: '1.8rem',
-                  fontWeight: '500',
-                  outline: 'none',
-                  fontFamily: 'Helvetica, Arial, sans-serif',
-                  cursor: 'pointer'
-                }}
-              />
-            </div>
+            <select 
+              value={selectedYear} 
+              onChange={(e) => setSelectedYear(e.target.value)}
+              style={{
+                padding: '1rem 2rem',
+                backgroundColor: '#111111',
+                border: '1px solid #333333',
+                color: '#ffffff',
+                fontSize: '1.5rem',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                cursor: 'pointer',
+                minWidth: '120px'
+              }}
+            >
+              <option value="">YEAR</option>
+              {years.map(year => <option key={year} value={year}>{year}</option>)}
+            </select>
+
+            <select 
+              value={selectedMonth} 
+              onChange={(e) => setSelectedMonth(e.target.value)}
+              style={{
+                padding: '1rem 2rem',
+                backgroundColor: '#111111',
+                border: '1px solid #333333',
+                color: '#ffffff',
+                fontSize: '1.5rem',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                cursor: 'pointer',
+                minWidth: '140px'
+              }}
+            >
+              <option value="">MONTH</option>
+              {months.map(month => <option key={month} value={month}>{month}</option>)}
+            </select>
+
+            <select 
+              value={selectedDay} 
+              onChange={(e) => setSelectedDay(e.target.value)}
+              style={{
+                padding: '1rem 2rem',
+                backgroundColor: '#111111',
+                border: '1px solid #333333',
+                color: '#ffffff',
+                fontSize: '1.5rem',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                cursor: 'pointer',
+                minWidth: '100px'
+              }}
+            >
+              <option value="">DAY</option>
+              {days.map(day => <option key={day} value={day}>{day}</option>)}
+            </select>
+
+            <select 
+              value={selectedHour} 
+              onChange={(e) => setSelectedHour(e.target.value)}
+              style={{
+                padding: '1rem 2rem',
+                backgroundColor: '#111111',
+                border: '1px solid #333333',
+                color: '#ffffff',
+                fontSize: '1.5rem',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                cursor: 'pointer',
+                minWidth: '100px'
+              }}
+            >
+              <option value="">HOUR</option>
+              {hours.map(hour => <option key={hour} value={hour}>{hour}</option>)}
+            </select>
+
+            <select 
+              value={selectedMinute} 
+              onChange={(e) => setSelectedMinute(e.target.value)}
+              style={{
+                padding: '1rem 2rem',
+                backgroundColor: '#111111',
+                border: '1px solid #333333',
+                color: '#ffffff',
+                fontSize: '1.5rem',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                cursor: 'pointer',
+                minWidth: '100px'
+              }}
+            >
+              <option value="">MINUTE</option>
+              {minutes.map(minute => <option key={minute} value={minute}>{minute}</option>)}
+            </select>
           </div>
 
           {/* Recipient Type */}
