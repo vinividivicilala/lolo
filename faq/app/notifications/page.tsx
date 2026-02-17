@@ -18,8 +18,6 @@ import {
 } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { initializeApp, getApps } from "firebase/app";
-import Picker from '@emoji-mart/react';
-import data from '@emoji-mart/data';
 
 // Konfigurasi Firebase
 const firebaseConfig = {
@@ -53,7 +51,6 @@ interface Reply {
   text: string;
   createdAt: Timestamp;
   likes: string[];
-  emoji?: string;
 }
 
 interface Comment {
@@ -65,7 +62,6 @@ interface Comment {
   createdAt: Timestamp;
   likes: string[];
   replies: Reply[];
-  emoji?: string;
 }
 
 interface Notification {
@@ -99,7 +95,6 @@ export default function NotificationsPage(): React.JSX.Element {
   const [replyText, setReplyText] = useState('');
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showEmojiPicker, setShowEmojiPicker] = useState<string | null>(null);
 
   // Update current time
   useEffect(() => {
@@ -299,7 +294,6 @@ export default function NotificationsPage(): React.JSX.Element {
       });
       
       setCommentText('');
-      setShowEmojiPicker(null);
     } catch (error) {
       console.error("Error adding comment:", error);
       alert('Failed to add comment');
@@ -347,7 +341,6 @@ export default function NotificationsPage(): React.JSX.Element {
       
       setReplyText('');
       setReplyingTo(null);
-      setShowEmojiPicker(null);
     } catch (error) {
       console.error("Error adding reply:", error);
       alert('Failed to add reply');
@@ -402,16 +395,6 @@ export default function NotificationsPage(): React.JSX.Element {
     } catch (error) {
       console.error("Error toggling like:", error);
     }
-  };
-
-  // Add emoji to comment/reply
-  const addEmoji = (emoji: any, target: string) => {
-    if (target === 'comment') {
-      setCommentText(prev => prev + emoji.native);
-    } else {
-      setReplyText(prev => prev + emoji.native);
-    }
-    setShowEmojiPicker(null);
   };
 
   // Format time ago
@@ -637,7 +620,6 @@ export default function NotificationsPage(): React.JSX.Element {
                 onClick={() => {
                   setSelectedNotification(null);
                   setReplyingTo(null);
-                  setShowEmojiPicker(null);
                 }}
                 style={{
                   background: 'none',
@@ -743,21 +725,8 @@ export default function NotificationsPage(): React.JSX.Element {
                 />
                 <div style={{ 
                   display: 'flex', 
-                  justifyContent: 'space-between',
-                  alignItems: 'center'
+                  justifyContent: 'flex-end'
                 }}>
-                  <button
-                    onClick={() => setShowEmojiPicker('comment')}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      color: '#ffffff',
-                      fontSize: '2rem',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    😊
-                  </button>
                   <button
                     onClick={() => addComment(selectedNotification.id)}
                     disabled={!commentText.trim() || isSubmitting}
@@ -773,15 +742,6 @@ export default function NotificationsPage(): React.JSX.Element {
                     {isSubmitting ? 'Posting...' : 'Post Comment'}
                   </button>
                 </div>
-                {showEmojiPicker === 'comment' && (
-                  <div style={{ marginTop: '1rem' }}>
-                    <Picker 
-                      data={data} 
-                      onEmojiSelect={(emoji: any) => addEmoji(emoji, 'comment')}
-                      theme="dark"
-                    />
-                  </div>
-                )}
               </div>
 
               {/* Comments List */}
@@ -916,60 +876,37 @@ export default function NotificationsPage(): React.JSX.Element {
                           />
                           <div style={{ 
                             display: 'flex', 
-                            justifyContent: 'space-between',
-                            alignItems: 'center'
+                            justifyContent: 'flex-end',
+                            gap: '1rem'
                           }}>
                             <button
-                              onClick={() => setShowEmojiPicker(`reply-${comment.id}`)}
+                              onClick={() => setReplyingTo(null)}
                               style={{
                                 background: 'none',
-                                border: 'none',
-                                color: '#ffffff',
-                                fontSize: '2rem',
+                                border: '1px solid #666666',
+                                color: '#888888',
+                                fontSize: '1.2rem',
+                                padding: '0.5rem 1.5rem',
                                 cursor: 'pointer'
                               }}
                             >
-                              😊
+                              Cancel
                             </button>
-                            <div style={{ display: 'flex', gap: '1rem' }}>
-                              <button
-                                onClick={() => setReplyingTo(null)}
-                                style={{
-                                  background: 'none',
-                                  border: '1px solid #666666',
-                                  color: '#888888',
-                                  fontSize: '1.2rem',
-                                  padding: '0.5rem 1.5rem',
-                                  cursor: 'pointer'
-                                }}
-                              >
-                                Cancel
-                              </button>
-                              <button
-                                onClick={() => addReply(selectedNotification.id, comment.id)}
-                                disabled={!replyText.trim() || isSubmitting}
-                                style={{
-                                  background: 'none',
-                                  border: '1px solid #ffffff',
-                                  color: replyText.trim() && !isSubmitting ? '#ffffff' : '#666666',
-                                  fontSize: '1.2rem',
-                                  padding: '0.5rem 1.5rem',
-                                  cursor: replyText.trim() && !isSubmitting ? 'pointer' : 'default'
-                                }}
-                              >
-                                {isSubmitting ? 'Posting...' : 'Reply'}
-                              </button>
-                            </div>
+                            <button
+                              onClick={() => addReply(selectedNotification.id, comment.id)}
+                              disabled={!replyText.trim() || isSubmitting}
+                              style={{
+                                background: 'none',
+                                border: '1px solid #ffffff',
+                                color: replyText.trim() && !isSubmitting ? '#ffffff' : '#666666',
+                                fontSize: '1.2rem',
+                                padding: '0.5rem 1.5rem',
+                                cursor: replyText.trim() && !isSubmitting ? 'pointer' : 'default'
+                              }}
+                            >
+                              {isSubmitting ? 'Posting...' : 'Reply'}
+                            </button>
                           </div>
-                          {showEmojiPicker === `reply-${comment.id}` && (
-                            <div style={{ marginTop: '1rem' }}>
-                              <Picker 
-                                data={data} 
-                                onEmojiSelect={(emoji: any) => addEmoji(emoji, 'reply')}
-                                theme="dark"
-                              />
-                            </div>
-                          )}
                         </div>
                       )}
                     </div>
