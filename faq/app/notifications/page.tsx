@@ -304,7 +304,11 @@ export default function NotificationsPage(): React.JSX.Element {
   };
 
   // Toggle like on notification
-  const toggleNotificationLike = async (notificationId: string) => {
+  const toggleNotificationLike = async (notificationId: string, e?: React.MouseEvent) => {
+    if (e) {
+      e.stopPropagation();
+    }
+    
     if (!db) return;
     if (!user) {
       alert('Silakan login untuk menyukai notifikasi');
@@ -316,11 +320,15 @@ export default function NotificationsPage(): React.JSX.Element {
       const notificationRef = doc(db, 'notifications', notificationId);
       const notification = notifications.find(n => n.id === notificationId);
       
-      if (notification?.likes.includes(currentUserId)) {
+      if (!notification) return;
+      
+      if (notification.likes.includes(currentUserId)) {
+        // Unlike
         await updateDoc(notificationRef, {
           likes: arrayRemove(currentUserId)
         });
       } else {
+        // Like
         await updateDoc(notificationRef, {
           likes: arrayUnion(currentUserId)
         });
@@ -476,8 +484,13 @@ export default function NotificationsPage(): React.JSX.Element {
   const toggleLike = async (
     notificationId: string, 
     commentId: string, 
-    replyId?: string
+    replyId?: string,
+    e?: React.MouseEvent
   ) => {
+    if (e) {
+      e.stopPropagation();
+    }
+    
     if (!db) return;
     if (!user) {
       alert('Silakan login untuk menyukai');
@@ -489,60 +502,60 @@ export default function NotificationsPage(): React.JSX.Element {
       const notificationRef = doc(db, 'notifications', notificationId);
       const notification = notifications.find(n => n.id === notificationId);
       
-      if (notification) {
-        const updatedComments = notification.comments.map(comment => {
-          if (comment.id === commentId) {
-            if (replyId) {
-              // Toggle like on reply
-              const updatedReplies = comment.replies.map(reply => {
-                if (reply.id === replyId) {
-                  const likedBy = reply.likedBy || [];
-                  const likes = reply.likes || 0;
-                  
-                  if (likedBy.includes(currentUserId)) {
-                    return { 
-                      ...reply, 
-                      likes: likes - 1,
-                      likedBy: likedBy.filter(id => id !== currentUserId)
-                    };
-                  } else {
-                    return { 
-                      ...reply, 
-                      likes: likes + 1,
-                      likedBy: [...likedBy, currentUserId]
-                    };
-                  }
+      if (!notification) return;
+      
+      const updatedComments = notification.comments.map(comment => {
+        if (comment.id === commentId) {
+          if (replyId) {
+            // Toggle like on reply
+            const updatedReplies = comment.replies.map(reply => {
+              if (reply.id === replyId) {
+                const likedBy = reply.likedBy || [];
+                const likes = reply.likes || 0;
+                
+                if (likedBy.includes(currentUserId)) {
+                  return { 
+                    ...reply, 
+                    likes: likes - 1,
+                    likedBy: likedBy.filter(id => id !== currentUserId)
+                  };
+                } else {
+                  return { 
+                    ...reply, 
+                    likes: likes + 1,
+                    likedBy: [...likedBy, currentUserId]
+                  };
                 }
-                return reply;
-              });
-              return { ...comment, replies: updatedReplies };
-            } else {
-              // Toggle like on comment
-              const likedBy = comment.likedBy || [];
-              const likes = comment.likes || 0;
-              
-              if (likedBy.includes(currentUserId)) {
-                return { 
-                  ...comment, 
-                  likes: likes - 1,
-                  likedBy: likedBy.filter(id => id !== currentUserId)
-                };
-              } else {
-                return { 
-                  ...comment, 
-                  likes: likes + 1,
-                  likedBy: [...likedBy, currentUserId]
-                };
               }
+              return reply;
+            });
+            return { ...comment, replies: updatedReplies };
+          } else {
+            // Toggle like on comment
+            const likedBy = comment.likedBy || [];
+            const likes = comment.likes || 0;
+            
+            if (likedBy.includes(currentUserId)) {
+              return { 
+                ...comment, 
+                likes: likes - 1,
+                likedBy: likedBy.filter(id => id !== currentUserId)
+              };
+            } else {
+              return { 
+                ...comment, 
+                likes: likes + 1,
+                likedBy: [...likedBy, currentUserId]
+              };
             }
           }
-          return comment;
-        });
-        
-        await updateDoc(notificationRef, {
-          comments: updatedComments
-        });
-      }
+        }
+        return comment;
+      });
+      
+      await updateDoc(notificationRef, {
+        comments: updatedComments
+      });
     } catch (error) {
       console.error("Error toggling like:", error);
     }
@@ -600,7 +613,7 @@ export default function NotificationsPage(): React.JSX.Element {
     </svg>
   );
 
-  // Modern Minimalist Icons
+  // Like Icon seperti YouTube (Thumbs Up)
   const LikeIcon = ({ filled = false }: { filled?: boolean }) => (
     <svg 
       width="20" 
@@ -612,7 +625,7 @@ export default function NotificationsPage(): React.JSX.Element {
       strokeLinecap="round"
       strokeLinejoin="round"
     >
-      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+      <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>
     </svg>
   );
 
@@ -909,7 +922,7 @@ export default function NotificationsPage(): React.JSX.Element {
                   style={{
                     background: 'none',
                     border: 'none',
-                    color: selectedNotification.likes.includes(getCurrentUserId()) ? '#ff4444' : '#ffffff',
+                    color: selectedNotification.likes.includes(getCurrentUserId()) ? '#3b82f6' : '#ffffff',
                     fontSize: '2rem',
                     cursor: user ? 'pointer' : 'default',
                     display: 'flex',
@@ -1282,20 +1295,21 @@ export default function NotificationsPage(): React.JSX.Element {
                         
                         {/* Comment Like Button */}
                         <button
-                          onClick={() => toggleLike(selectedNotification.id, comment.id)}
+                          onClick={(e) => toggleLike(selectedNotification.id, comment.id, undefined, e)}
                           style={{
                             display: 'flex',
                             alignItems: 'center',
                             gap: '8px',
-                            background: (comment.likedBy || []).includes(getCurrentUserId()) ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.05)',
-                            border: (comment.likedBy || []).includes(getCurrentUserId()) ? '1px solid white' : '1px solid rgba(255,255,255,0.1)',
+                            background: (comment.likedBy || []).includes(getCurrentUserId()) ? 'rgba(59, 130, 246, 0.1)' : 'rgba(255,255,255,0.05)',
+                            border: (comment.likedBy || []).includes(getCurrentUserId()) ? '1px solid #3b82f6' : '1px solid rgba(255,255,255,0.1)',
                             borderRadius: '30px',
                             padding: '8px 16px',
                             cursor: user ? 'pointer' : 'not-allowed',
+                            color: (comment.likedBy || []).includes(getCurrentUserId()) ? '#3b82f6' : 'white',
                           }}
                         >
                           <LikeIcon filled={(comment.likedBy || []).includes(getCurrentUserId())} />
-                          <span style={{ color: 'white', fontSize: '1rem' }}>
+                          <span style={{ fontSize: '1rem' }}>
                             {comment.likes || 0}
                           </span>
                         </button>
@@ -1494,19 +1508,19 @@ export default function NotificationsPage(): React.JSX.Element {
                                     {reply.text}
                                   </p>
                                   <button
-                                    onClick={() => toggleLike(selectedNotification.id, comment.id, reply.id)}
+                                    onClick={(e) => toggleLike(selectedNotification.id, comment.id, reply.id, e)}
                                     style={{
                                       display: 'flex',
                                       alignItems: 'center',
                                       gap: '5px',
                                       background: 'none',
                                       border: 'none',
-                                      color: (reply.likedBy || []).includes(getCurrentUserId()) ? 'white' : '#666666',
+                                      color: (reply.likedBy || []).includes(getCurrentUserId()) ? '#3b82f6' : '#666666',
                                       fontSize: '0.85rem',
                                       cursor: user ? 'pointer' : 'not-allowed',
                                       padding: '4px 8px',
                                       borderRadius: '20px',
-                                      backgroundColor: (reply.likedBy || []).includes(getCurrentUserId()) ? 'rgba(255,255,255,0.1)' : 'transparent',
+                                      backgroundColor: (reply.likedBy || []).includes(getCurrentUserId()) ? 'rgba(59, 130, 246, 0.1)' : 'transparent',
                                     }}
                                   >
                                     <LikeIcon filled={(reply.likedBy || []).includes(getCurrentUserId())} />
