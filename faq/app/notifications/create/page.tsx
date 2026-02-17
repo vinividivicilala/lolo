@@ -63,6 +63,7 @@ export default function CreateNotificationPage(): React.JSX.Element {
   const [isLoading, setIsLoading] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
+  const [currentTime, setCurrentTime] = useState<string>('');
   
   const [formData, setFormData] = useState<NotificationForm>({
     title: '',
@@ -78,6 +79,24 @@ export default function CreateNotificationPage(): React.JSX.Element {
 
   const [newRecipientEmail, setNewRecipientEmail] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Update current time every second
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const now = new Date();
+      setCurrentTime(now.toLocaleString('id-ID', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      }));
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
 
   // Check authentication
   useEffect(() => {
@@ -221,11 +240,11 @@ export default function CreateNotificationPage(): React.JSX.Element {
     }
   };
 
-  // SVG North West Arrow component - Large
-  const NorthWestArrow = () => (
+  // SVG South West Arrow component - Large
+  const SouthWestArrow = () => (
     <svg 
-      width="48" 
-      height="48" 
+      width="64" 
+      height="64" 
       viewBox="0 0 24 24" 
       fill="none" 
       stroke="currentColor" 
@@ -233,8 +252,25 @@ export default function CreateNotificationPage(): React.JSX.Element {
       strokeLinecap="round" 
       strokeLinejoin="round"
     >
-      <path d="M17 17L7 7" />
-      <path d="M7 17V7H17" />
+      <path d="M19 5L5 19" />
+      <path d="M19 19H5V5" />
+    </svg>
+  );
+
+  // SVG South East Arrow component - Large
+  const SouthEastArrow = () => (
+    <svg 
+      width="64" 
+      height="64" 
+      viewBox="0 0 24 24" 
+      fill="none" 
+      stroke="currentColor" 
+      strokeWidth="2"
+      strokeLinecap="round" 
+      strokeLinejoin="round"
+    >
+      <path d="M5 5L19 19" />
+      <path d="M5 19H19V5" />
     </svg>
   );
 
@@ -254,14 +290,15 @@ export default function CreateNotificationPage(): React.JSX.Element {
         top: 0,
         left: 0,
         width: '100%',
-        padding: '2rem',
+        padding: '2rem 3rem',
         backgroundColor: '#000000',
         zIndex: 100,
         display: 'flex',
         justifyContent: 'space-between',
-        alignItems: 'center'
+        alignItems: 'center',
+        borderBottom: '1px solid #222222'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
           <motion.button
             onClick={() => router.push('/notifications')}
             style={{
@@ -277,56 +314,94 @@ export default function CreateNotificationPage(): React.JSX.Element {
             whileHover={{ opacity: 0.8 }}
             whileTap={{ scale: 0.95 }}
           >
-            <NorthWestArrow />
+            <SouthWestArrow />
           </motion.button>
           <h1 style={{
-            fontSize: '2.5rem',
-            fontWeight: '600',
+            fontSize: '4rem',
+            fontWeight: '700',
             margin: 0,
-            color: '#ffffff'
+            color: '#ffffff',
+            letterSpacing: '-0.02em'
           }}>
-            Notifikasi
+            CREATE NOTIFICATION
           </h1>
-        </div>
-        
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '1rem'
-        }}>
-          <span style={{
-            fontSize: '1.5rem',
-            fontWeight: '500',
-            color: '#ffffff'
-          }}>
-            {user?.displayName || user?.email || 'User'}
-          </span>
-          <svg 
-            width="48" 
-            height="48" 
-            viewBox="0 0 24 24" 
-            fill="none" 
-            stroke="currentColor" 
-            strokeWidth="2"
-            strokeLinecap="round" 
-            strokeLinejoin="round"
-          >
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-            <circle cx="12" cy="7" r="4" />
-          </svg>
         </div>
       </div>
 
-      {/* Main Form */}
+      {/* Main Content */}
       <div style={{
-        paddingTop: '140px',
+        paddingTop: '180px',
         paddingBottom: '3rem',
-        maxWidth: '800px',
+        maxWidth: '1200px',
         margin: '0 auto',
         width: '100%',
         boxSizing: 'border-box',
-        padding: '8rem 2rem 3rem 2rem'
+        padding: '12rem 3rem 3rem 3rem'
       }}>
+        {/* User Info Bar */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '4rem',
+          padding: '1.5rem 0',
+          borderBottom: '1px solid #222222'
+        }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '2rem'
+          }}>
+            <svg 
+              width="48" 
+              height="48" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2"
+              strokeLinecap="round" 
+              strokeLinejoin="round"
+            >
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+              <circle cx="12" cy="7" r="4" />
+            </svg>
+            <span style={{
+              fontSize: '2rem',
+              fontWeight: '600',
+              color: '#ffffff'
+            }}>
+              {user?.displayName || user?.email || 'USER'}
+            </span>
+          </div>
+          <div style={{
+            fontSize: '1.5rem',
+            color: '#888888',
+            fontWeight: '500'
+          }}>
+            {currentTime}
+          </div>
+        </div>
+
+        {/* Info Status */}
+        <div style={{
+          marginBottom: '4rem',
+          padding: '2rem',
+          backgroundColor: '#111111',
+          borderRadius: '0'
+        }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '2rem',
+            fontSize: '1.8rem',
+            color: '#ffffff',
+            fontWeight: '500'
+          }}>
+            <span>📋 SENDING NOTIFICATION AS:</span>
+            <span style={{ fontWeight: '700', color: '#ffffff' }}>{user?.displayName || user?.email || 'USER'}</span>
+          </div>
+        </div>
+
         <motion.form
           onSubmit={handleSubmit}
           initial={{ opacity: 0 }}
@@ -336,21 +411,22 @@ export default function CreateNotificationPage(): React.JSX.Element {
           }}
         >
           {/* Title */}
-          <div style={{ marginBottom: '2.5rem' }}>
+          <div style={{ marginBottom: '3rem' }}>
             <input
               type="text"
               value={formData.title}
               onChange={(e) => handleInputChange('title', e.target.value)}
-              placeholder="Judul"
+              placeholder="TITLE"
               required
               style={{
                 width: '100%',
-                padding: '0.75rem 0',
+                padding: '1rem 0',
                 backgroundColor: 'transparent',
                 border: 'none',
+                borderBottom: '2px solid #333333',
                 color: '#ffffff',
-                fontSize: '1.5rem',
-                fontWeight: '500',
+                fontSize: '2.5rem',
+                fontWeight: '600',
                 outline: 'none',
                 fontFamily: 'Helvetica, Arial, sans-serif'
               }}
@@ -358,55 +434,59 @@ export default function CreateNotificationPage(): React.JSX.Element {
           </div>
 
           {/* Message */}
-          <div style={{ marginBottom: '2.5rem' }}>
+          <div style={{ marginBottom: '3rem' }}>
             <textarea
               value={formData.message}
               onChange={(e) => handleInputChange('message', e.target.value)}
-              placeholder="Pesan"
+              placeholder="MESSAGE"
               required
               rows={4}
               style={{
                 width: '100%',
-                padding: '0.75rem 0',
+                padding: '1rem 0',
                 backgroundColor: 'transparent',
                 border: 'none',
+                borderBottom: '2px solid #333333',
                 color: '#ffffff',
-                fontSize: '1.2rem',
+                fontSize: '2rem',
                 fontWeight: '400',
                 outline: 'none',
                 resize: 'vertical',
-                minHeight: '120px',
+                minHeight: '150px',
                 fontFamily: 'Helvetica, Arial, sans-serif'
               }}
             />
           </div>
 
           {/* Notification Type */}
-          <div style={{ marginBottom: '2.5rem' }}>
+          <div style={{ marginBottom: '3rem' }}>
             <div style={{
               display: 'flex',
-              gap: '2rem',
-              flexWrap: 'wrap'
+              gap: '2.5rem',
+              flexWrap: 'wrap',
+              borderBottom: '2px solid #333333',
+              paddingBottom: '1rem'
             }}>
               {[
-                { value: 'announcement', label: 'Pengumuman' },
-                { value: 'maintenance', label: 'Pemeliharaan' },
-                { value: 'system', label: 'Sistem' },
-                { value: 'update', label: 'Pembaruan' },
-                { value: 'alert', label: 'Peringatan' },
-                { value: 'info', label: 'Informasi' }
+                { value: 'announcement', label: 'ANNOUNCEMENT' },
+                { value: 'maintenance', label: 'MAINTENANCE' },
+                { value: 'system', label: 'SYSTEM' },
+                { value: 'update', label: 'UPDATE' },
+                { value: 'alert', label: 'ALERT' },
+                { value: 'info', label: 'INFO' }
               ].map((option) => (
                 <button
                   key={option.value}
                   type="button"
                   onClick={() => handleInputChange('type', option.value)}
                   style={{
-                    padding: '0.75rem 0',
+                    padding: '0.5rem 0',
                     backgroundColor: 'transparent',
                     border: 'none',
+                    borderBottom: formData.type === option.value ? '3px solid #ffffff' : 'none',
                     color: formData.type === option.value ? '#ffffff' : '#666666',
-                    fontSize: '1.2rem',
-                    fontWeight: formData.type === option.value ? '600' : '400',
+                    fontSize: '1.5rem',
+                    fontWeight: formData.type === option.value ? '700' : '500',
                     cursor: 'pointer',
                     fontFamily: 'Helvetica, Arial, sans-serif'
                   }}
@@ -419,9 +499,11 @@ export default function CreateNotificationPage(): React.JSX.Element {
 
           {/* Schedule Time */}
           <div style={{ 
-            marginBottom: '2.5rem',
+            marginBottom: '3rem',
             display: 'flex',
-            gap: '2rem'
+            gap: '2rem',
+            borderBottom: '2px solid #333333',
+            paddingBottom: '1rem'
           }}>
             <div style={{ flex: 1 }}>
               <input
@@ -430,12 +512,12 @@ export default function CreateNotificationPage(): React.JSX.Element {
                 onChange={(e) => handleInputChange('scheduledDate', e.target.value)}
                 style={{
                   width: '100%',
-                  padding: '0.75rem 0',
+                  padding: '1rem 0',
                   backgroundColor: 'transparent',
                   border: 'none',
                   color: '#ffffff',
-                  fontSize: '1.2rem',
-                  fontWeight: '400',
+                  fontSize: '1.8rem',
+                  fontWeight: '500',
                   outline: 'none',
                   fontFamily: 'Helvetica, Arial, sans-serif'
                 }}
@@ -448,12 +530,12 @@ export default function CreateNotificationPage(): React.JSX.Element {
                 onChange={(e) => handleInputChange('scheduledTime', e.target.value)}
                 style={{
                   width: '100%',
-                  padding: '0.75rem 0',
+                  padding: '1rem 0',
                   backgroundColor: 'transparent',
                   border: 'none',
                   color: '#ffffff',
-                  fontSize: '1.2rem',
-                  fontWeight: '400',
+                  fontSize: '1.8rem',
+                  fontWeight: '500',
                   outline: 'none',
                   fontFamily: 'Helvetica, Arial, sans-serif'
                 }}
@@ -462,27 +544,30 @@ export default function CreateNotificationPage(): React.JSX.Element {
           </div>
 
           {/* Recipient Type */}
-          <div style={{ marginBottom: '2.5rem' }}>
+          <div style={{ marginBottom: '3rem' }}>
             <div style={{
               display: 'flex',
-              gap: '2rem'
+              gap: '2.5rem',
+              borderBottom: '2px solid #333333',
+              paddingBottom: '1rem'
             }}>
               {[
-                { value: 'all', label: 'Semua Pengguna' },
-                { value: 'specific', label: 'Pengguna Tertentu' },
-                { value: 'email', label: 'Alamat Email' }
+                { value: 'all', label: 'ALL USERS' },
+                { value: 'specific', label: 'SPECIFIC USERS' },
+                { value: 'email', label: 'EMAIL ADDRESSES' }
               ].map((option) => (
                 <button
                   key={option.value}
                   type="button"
                   onClick={() => handleInputChange('recipientType', option.value)}
                   style={{
-                    padding: '0.75rem 0',
+                    padding: '0.5rem 0',
                     backgroundColor: 'transparent',
                     border: 'none',
+                    borderBottom: formData.recipientType === option.value ? '3px solid #ffffff' : 'none',
                     color: formData.recipientType === option.value ? '#ffffff' : '#666666',
-                    fontSize: '1.2rem',
-                    fontWeight: formData.recipientType === option.value ? '600' : '400',
+                    fontSize: '1.5rem',
+                    fontWeight: formData.recipientType === option.value ? '700' : '500',
                     cursor: 'pointer',
                     fontFamily: 'Helvetica, Arial, sans-serif'
                   }}
@@ -495,21 +580,22 @@ export default function CreateNotificationPage(): React.JSX.Element {
 
           {/* Specific Users Selection */}
           {formData.recipientType === 'specific' && (
-            <div style={{ marginBottom: '2.5rem' }}>
-              <div style={{ marginBottom: '1.5rem' }}>
+            <div style={{ marginBottom: '3rem' }}>
+              <div style={{ marginBottom: '2rem' }}>
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Cari Pengguna..."
+                  placeholder="SEARCH USERS..."
                   style={{
                     width: '100%',
-                    padding: '0.75rem 0',
+                    padding: '1rem 0',
                     backgroundColor: 'transparent',
                     border: 'none',
+                    borderBottom: '2px solid #333333',
                     color: '#ffffff',
-                    fontSize: '1.2rem',
-                    fontWeight: '400',
+                    fontSize: '1.8rem',
+                    fontWeight: '500',
                     outline: 'none',
                     fontFamily: 'Helvetica, Arial, sans-serif'
                   }}
@@ -517,16 +603,16 @@ export default function CreateNotificationPage(): React.JSX.Element {
               </div>
 
               <div style={{
-                maxHeight: '300px',
+                maxHeight: '400px',
                 overflowY: 'auto'
               }}>
                 {isLoadingUsers ? (
-                  <div style={{ padding: '1rem 0', color: '#999999', fontSize: '1.2rem' }}>
-                    Memuat...
+                  <div style={{ padding: '2rem 0', color: '#888888', fontSize: '1.8rem' }}>
+                    LOADING...
                   </div>
                 ) : filteredUsers.length === 0 ? (
-                  <div style={{ padding: '1rem 0', color: '#999999', fontSize: '1.2rem' }}>
-                    Tidak Ada Pengguna
+                  <div style={{ padding: '2rem 0', color: '#888888', fontSize: '1.8rem' }}>
+                    NO USERS FOUND
                   </div>
                 ) : (
                   filteredUsers.map((userItem) => {
@@ -536,25 +622,24 @@ export default function CreateNotificationPage(): React.JSX.Element {
                         key={userItem.uid}
                         onClick={() => toggleUserSelection(userItem.uid)}
                         style={{
-                          padding: '1rem 0',
+                          padding: '1.5rem 0',
                           cursor: 'pointer',
                           display: 'flex',
                           justifyContent: 'space-between',
                           alignItems: 'center',
-                          opacity: 1,
-                          borderBottom: '1px solid #222222'
+                          borderBottom: '1px solid #333333'
                         }}
                       >
                         <div>
-                          <div style={{ fontSize: '1.2rem', fontWeight: '500', color: '#ffffff' }}>
-                            {userItem.displayName || 'Tanpa Nama'}
+                          <div style={{ fontSize: '1.8rem', fontWeight: '600', color: '#ffffff' }}>
+                            {userItem.displayName || 'NO NAME'}
                           </div>
-                          <div style={{ fontSize: '1rem', color: '#999999' }}>
+                          <div style={{ fontSize: '1.4rem', color: '#888888' }}>
                             {userItem.email}
                           </div>
                         </div>
                         {isSelected && (
-                          <span style={{ fontSize: '1.5rem', color: '#ffffff', fontWeight: 'bold' }}>✓</span>
+                          <span style={{ fontSize: '2.5rem', color: '#ffffff', fontWeight: 'bold' }}>✓</span>
                         )}
                       </div>
                     );
@@ -563,8 +648,8 @@ export default function CreateNotificationPage(): React.JSX.Element {
               </div>
 
               {formData.recipientIds.length > 0 && (
-                <div style={{ marginTop: '1rem', fontSize: '1.2rem', color: '#ffffff', fontWeight: '500' }}>
-                  Dipilih: {formData.recipientIds.length} Pengguna
+                <div style={{ marginTop: '2rem', fontSize: '1.8rem', color: '#ffffff', fontWeight: '600' }}>
+                  SELECTED: {formData.recipientIds.length} USERS
                 </div>
               )}
             </div>
@@ -572,25 +657,26 @@ export default function CreateNotificationPage(): React.JSX.Element {
 
           {/* Email Recipients */}
           {formData.recipientType === 'email' && (
-            <div style={{ marginBottom: '2.5rem' }}>
+            <div style={{ marginBottom: '3rem' }}>
               <div style={{
                 display: 'flex',
                 gap: '1rem',
-                marginBottom: '1rem'
+                marginBottom: '1.5rem'
               }}>
                 <input
                   type="email"
                   value={newRecipientEmail}
                   onChange={(e) => setNewRecipientEmail(e.target.value)}
-                  placeholder="Masukkan Alamat Email"
+                  placeholder="ENTER EMAIL ADDRESS"
                   style={{
                     flex: 1,
-                    padding: '0.75rem 0',
+                    padding: '1rem 0',
                     backgroundColor: 'transparent',
                     border: 'none',
+                    borderBottom: '2px solid #333333',
                     color: '#ffffff',
-                    fontSize: '1.2rem',
-                    fontWeight: '400',
+                    fontSize: '1.8rem',
+                    fontWeight: '500',
                     outline: 'none',
                     fontFamily: 'Helvetica, Arial, sans-serif'
                   }}
@@ -605,24 +691,24 @@ export default function CreateNotificationPage(): React.JSX.Element {
                   type="button"
                   onClick={addRecipientEmail}
                   style={{
-                    padding: '0.75rem 2rem',
-                    backgroundColor: 'transparent',
+                    padding: '1rem 3rem',
+                    backgroundColor: '#ffffff',
                     border: 'none',
-                    color: '#ffffff',
-                    fontSize: '1.2rem',
-                    fontWeight: '600',
+                    color: '#000000',
+                    fontSize: '1.5rem',
+                    fontWeight: '700',
                     cursor: 'pointer',
                     fontFamily: 'Helvetica, Arial, sans-serif'
                   }}
                 >
-                  Tambah
+                  ADD
                 </button>
               </div>
               
               {formData.recipientEmails.length > 0 && (
-                <div style={{ marginTop: '1.5rem' }}>
-                  <div style={{ fontSize: '1.2rem', color: '#ffffff', fontWeight: '600', marginBottom: '1rem' }}>
-                    Daftar Email:
+                <div style={{ marginTop: '2rem' }}>
+                  <div style={{ fontSize: '1.8rem', color: '#ffffff', fontWeight: '700', marginBottom: '1.5rem' }}>
+                    EMAIL LIST:
                   </div>
                   <div>
                     {formData.recipientEmails.map((email, index) => (
@@ -630,11 +716,11 @@ export default function CreateNotificationPage(): React.JSX.Element {
                         display: 'flex',
                         alignItems: 'center',
                         gap: '1rem',
-                        padding: '0.75rem 0',
-                        fontSize: '1.2rem',
-                        borderBottom: '1px solid #222222'
+                        padding: '1rem 0',
+                        fontSize: '1.8rem',
+                        borderBottom: '1px solid #333333'
                       }}>
-                        <span style={{ flex: 1, color: '#ffffff', fontWeight: '400' }}>{email}</span>
+                        <span style={{ flex: 1, color: '#ffffff', fontWeight: '500' }}>{email}</span>
                         <button
                           type="button"
                           onClick={() => removeRecipientEmail(email)}
@@ -643,7 +729,7 @@ export default function CreateNotificationPage(): React.JSX.Element {
                             border: 'none',
                             color: '#ff4444',
                             cursor: 'pointer',
-                            fontSize: '2rem',
+                            fontSize: '2.5rem',
                             fontWeight: 'bold',
                             padding: '0',
                             lineHeight: 1
@@ -660,20 +746,21 @@ export default function CreateNotificationPage(): React.JSX.Element {
           )}
 
           {/* Action URL */}
-          <div style={{ marginBottom: '2.5rem' }}>
+          <div style={{ marginBottom: '3rem' }}>
             <input
               type="url"
               value={formData.actionUrl}
               onChange={(e) => handleInputChange('actionUrl', e.target.value)}
-              placeholder="URL Tindakan (Opsional)"
+              placeholder="ACTION URL (OPTIONAL)"
               style={{
                 width: '100%',
-                padding: '0.75rem 0',
+                padding: '1rem 0',
                 backgroundColor: 'transparent',
                 border: 'none',
+                borderBottom: '2px solid #333333',
                 color: '#ffffff',
-                fontSize: '1.2rem',
-                fontWeight: '400',
+                fontSize: '1.8rem',
+                fontWeight: '500',
                 outline: 'none',
                 fontFamily: 'Helvetica, Arial, sans-serif'
               }}
@@ -684,42 +771,48 @@ export default function CreateNotificationPage(): React.JSX.Element {
           <div style={{
             display: 'flex',
             justifyContent: 'flex-end',
-            gap: '2rem',
-            marginTop: '4rem'
+            gap: '3rem',
+            marginTop: '5rem'
           }}>
             <button
               type="button"
               onClick={() => router.push('/notifications')}
               style={{
-                padding: '0.75rem 0',
+                padding: '1rem 0',
                 backgroundColor: 'transparent',
                 border: 'none',
-                color: '#999999',
-                fontSize: '1.5rem',
-                fontWeight: '500',
+                color: '#888888',
+                fontSize: '2rem',
+                fontWeight: '600',
                 cursor: 'pointer',
                 fontFamily: 'Helvetica, Arial, sans-serif'
               }}
             >
-              Batal
+              CANCEL
             </button>
             
-            <button
+            <motion.button
               type="submit"
               disabled={isLoading}
               style={{
-                padding: '0.75rem 0',
+                padding: '1rem 0',
                 backgroundColor: 'transparent',
                 border: 'none',
-                color: isLoading ? '#666666' : '#ffffff',
-                fontSize: '1.5rem',
-                fontWeight: '600',
+                color: isLoading ? '#444444' : '#ffffff',
+                fontSize: '2rem',
+                fontWeight: '700',
                 cursor: isLoading ? 'not-allowed' : 'pointer',
-                fontFamily: 'Helvetica, Arial, sans-serif'
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '1rem'
               }}
+              whileHover={{ scale: isLoading ? 1 : 1.05 }}
+              whileTap={{ scale: isLoading ? 1 : 0.95 }}
             >
-              {isLoading ? 'Mengirim...' : 'Kirim'}
-            </button>
+              {isLoading ? 'SENDING...' : 'SEND NOTIFICATION'}
+              <SouthEastArrow />
+            </motion.button>
           </div>
         </motion.form>
       </div>
