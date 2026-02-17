@@ -42,30 +42,20 @@ if (typeof window !== "undefined") {
   auth = getAuth(app);
 }
 
-interface Reaction {
-  type: 'like' | 'love' | 'laugh' | 'sad' | 'angry';
-  count: number;
-  users: string[];
-}
-
 interface Reply {
   id: string;
   userId: string;
   userName: string;
-  userEmail?: string;
   text: string;
   createdAt: Timestamp;
-  reactions: Reaction[];
 }
 
 interface Comment {
   id: string;
   userId: string;
   userName: string;
-  userEmail?: string;
   text: string;
   createdAt: Timestamp;
-  reactions: Reaction[];
   replies: Reply[];
 }
 
@@ -74,18 +64,11 @@ interface Notification {
   title: string;
   message: string;
   type: string;
-  senderId: string;
   senderName: string;
-  senderEmail?: string;
-  recipientType: 'all' | 'specific' | 'email';
-  recipientIds?: string[];
-  recipientEmails?: string[];
   createdAt: Timestamp;
   userReads: Record<string, boolean>;
   views: number;
-  reactions: Reaction[];
   comments: Comment[];
-  status?: string;
 }
 
 export default function NotificationsPage(): React.JSX.Element {
@@ -95,36 +78,10 @@ export default function NotificationsPage(): React.JSX.Element {
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
-  const [currentTime, setCurrentTime] = useState<string>('');
   const [commentText, setCommentText] = useState('');
   const [replyText, setReplyText] = useState('');
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showReactions, setShowReactions] = useState<string | null>(null);
-
-  // Reaction types
-  const reactionTypes = [
-    { type: 'like', icon: '👍' },
-    { type: 'love', icon: '❤️' },
-    { type: 'laugh', icon: '😂' },
-    { type: 'sad', icon: '😢' },
-    { type: 'angry', icon: '😠' }
-  ];
-
-  // Update current time
-  useEffect(() => {
-    const updateTime = () => {
-      const now = new Date();
-      setCurrentTime(now.toLocaleString('id-ID', {
-        hour: '2-digit',
-        minute: '2-digit'
-      }));
-    };
-    
-    updateTime();
-    const timer = setInterval(updateTime, 60000);
-    return () => clearInterval(timer);
-  }, []);
 
   // Check authentication
   useEffect(() => {
@@ -152,7 +109,7 @@ export default function NotificationsPage(): React.JSX.Element {
     }
     let anonymousName = localStorage.getItem('anonymous_name');
     if (!anonymousName) {
-      anonymousName = 'Anonymous ' + Math.floor(Math.random() * 1000);
+      anonymousName = 'Anonymous';
       localStorage.setItem('anonymous_name', anonymousName);
     }
     return anonymousName;
@@ -170,58 +127,28 @@ export default function NotificationsPage(): React.JSX.Element {
       const notificationsData: Notification[] = [];
       let unread = 0;
       const currentUserId = getCurrentUserId();
-      const currentUserEmail = user?.email;
       
       querySnapshot.docs.forEach((doc) => {
         const data = doc.data();
         if (data.isDeleted) return;
         
-        let shouldShow = false;
+        const notification = {
+          id: doc.id,
+          title: data.title || '',
+          message: data.message || '',
+          type: data.type || 'info',
+          senderName: data.senderName || 'System',
+          createdAt: data.createdAt || Timestamp.now(),
+          userReads: data.userReads || {},
+          views: data.views || 0,
+          comments: data.comments || []
+        };
         
-        switch (data.recipientType) {
-          case 'all':
-            shouldShow = true;
-            break;
-          case 'specific':
-            const recipientIds = data.recipientIds || [];
-            if (recipientIds.includes(currentUserId) || (user && recipientIds.includes(user.uid))) {
-              shouldShow = true;
-            }
-            break;
-          case 'email':
-            const recipientEmails = data.recipientEmails || [];
-            if (currentUserEmail && recipientEmails.includes(currentUserEmail)) {
-              shouldShow = true;
-            }
-            break;
+        if (!notification.userReads[currentUserId]) {
+          unread++;
         }
         
-        if (shouldShow) {
-          const notification = {
-            id: doc.id,
-            title: data.title || '',
-            message: data.message || '',
-            type: data.type || 'info',
-            senderId: data.senderId || '',
-            senderName: data.senderName || 'System',
-            senderEmail: data.senderEmail,
-            recipientType: data.recipientType || 'all',
-            recipientIds: data.recipientIds || [],
-            recipientEmails: data.recipientEmails || [],
-            createdAt: data.createdAt || Timestamp.now(),
-            userReads: data.userReads || {},
-            views: data.views || 0,
-            reactions: data.reactions || reactionTypes.map(r => ({ type: r.type, count: 0, users: [] })),
-            comments: data.comments || [],
-            status: data.status || 'sent'
-          };
-          
-          if (!notification.userReads[currentUserId]) {
-            unread++;
-          }
-          
-          notificationsData.push(notification);
-        }
+        notificationsData.push(notification);
       });
       
       setNotifications(notificationsData);
@@ -239,100 +166,12 @@ export default function NotificationsPage(): React.JSX.Element {
     try {
       const currentUserId = getCurrentUserId();
       const notificationRef = doc(db, 'notifications', notificationId);
-      
       await updateDoc(notificationRef, {
         [`userReads.${currentUserId}`]: true,
         views: firestoreIncrement(1)
       });
-      
-      setUnreadCount(prev => Math.max(0, prev - 1));
     } catch (error) {
       console.error("Error marking as read:", error);
-    }
-  };
-
-  // Add reaction
-  const addReaction = async (targetType: 'notification' | 'comment' | 'reply', targetId: string, reactionType: string, commentId?: string, replyId?: string) => {
-    if (!db) return;
-    
-    try {
-      const currentUserId = getCurrentUserId();
-      let docRef;
-      let updateData = {};
-
-      if (targetType === 'notification') {
-        docRef = doc(db, 'notifications', targetId);
-        const notification = notifications.find(n => n.id === targetId);
-        if (notification) {
-          const updatedReactions = notification.reactions.map(r => {
-            if (r.type === reactionType) {
-              if (r.users.includes(currentUserId)) {
-                return { ...r, count: r.count - 1, users: r.users.filter(id => id !== currentUserId) };
-              } else {
-                return { ...r, count: r.count + 1, users: [...r.users, currentUserId] };
-              }
-            }
-            return r;
-          });
-          updateData = { reactions: updatedReactions };
-        }
-      } else if (targetType === 'comment' && commentId) {
-        docRef = doc(db, 'notifications', targetId);
-        const notification = notifications.find(n => n.id === targetId);
-        if (notification) {
-          const updatedComments = notification.comments.map(c => {
-            if (c.id === commentId) {
-              const updatedReactions = c.reactions.map(r => {
-                if (r.type === reactionType) {
-                  if (r.users.includes(currentUserId)) {
-                    return { ...r, count: r.count - 1, users: r.users.filter(id => id !== currentUserId) };
-                  } else {
-                    return { ...r, count: r.count + 1, users: [...r.users, currentUserId] };
-                  }
-                }
-                return r;
-              });
-              return { ...c, reactions: updatedReactions };
-            }
-            return c;
-          });
-          updateData = { comments: updatedComments };
-        }
-      } else if (targetType === 'reply' && commentId && replyId) {
-        docRef = doc(db, 'notifications', targetId);
-        const notification = notifications.find(n => n.id === targetId);
-        if (notification) {
-          const updatedComments = notification.comments.map(c => {
-            if (c.id === commentId) {
-              const updatedReplies = c.replies.map(r => {
-                if (r.id === replyId) {
-                  const updatedReactions = r.reactions.map(react => {
-                    if (react.type === reactionType) {
-                      if (react.users.includes(currentUserId)) {
-                        return { ...react, count: react.count - 1, users: react.users.filter(id => id !== currentUserId) };
-                      } else {
-                        return { ...react, count: react.count + 1, users: [...react.users, currentUserId] };
-                      }
-                    }
-                    return react;
-                  });
-                  return { ...r, reactions: updatedReactions };
-                }
-                return r;
-              });
-              return { ...c, replies: updatedReplies };
-            }
-            return c;
-          });
-          updateData = { comments: updatedComments };
-        }
-      }
-
-      if (docRef) {
-        await updateDoc(docRef, updateData);
-      }
-    } catch (error) {
-      console.error("Error adding reaction:", error);
     }
   };
 
@@ -351,10 +190,8 @@ export default function NotificationsPage(): React.JSX.Element {
         id: Date.now().toString(),
         userId: currentUserId,
         userName: currentUserName,
-        userEmail: user?.email,
         text: commentText.trim(),
         createdAt: Timestamp.now(),
-        reactions: reactionTypes.map(r => ({ type: r.type, count: 0, users: [] })),
         replies: []
       };
       
@@ -389,10 +226,8 @@ export default function NotificationsPage(): React.JSX.Element {
               id: Date.now().toString(),
               userId: currentUserId,
               userName: currentUserName,
-              userEmail: user?.email,
               text: replyText.trim(),
-              createdAt: Timestamp.now(),
-              reactions: reactionTypes.map(r => ({ type: r.type, count: 0, users: [] }))
+              createdAt: Timestamp.now()
             };
             return {
               ...comment,
@@ -419,21 +254,19 @@ export default function NotificationsPage(): React.JSX.Element {
   // Format time ago
   const timeAgo = (timestamp: Timestamp) => {
     if (!timestamp) return '';
-    
     const date = timestamp.toDate();
     const now = new Date();
     const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-    
-    if (seconds < 60) return `${seconds}s`;
+    if (seconds < 60) return `${seconds}s ago`;
     const minutes = Math.floor(seconds / 60);
-    if (minutes < 60) return `${minutes}m`;
+    if (minutes < 60) return `${minutes}m ago`;
     const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `${hours}h`;
+    if (hours < 24) return `${hours}h ago`;
     const days = Math.floor(hours / 24);
-    return `${days}d`;
+    return `${days}d ago`;
   };
 
-  // SVG Icons
+  // SVG Arrows
   const NorthEastArrow = () => (
     <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
       <path d="M7 7L17 17" />
@@ -448,9 +281,10 @@ export default function NotificationsPage(): React.JSX.Element {
     </svg>
   );
 
-  const ReplyIcon = () => (
+  const ReplyArrow = () => (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
-      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+      <path d="M7 7L3 11L7 15" />
+      <path d="M3 11H15C17.7614 11 20 13.2386 20 16V17" />
     </svg>
   );
 
@@ -473,34 +307,31 @@ export default function NotificationsPage(): React.JSX.Element {
           <button onClick={() => router.push('/')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ffffff', padding: 0 }}>
             <NorthEastArrow />
           </button>
-          <span style={{ fontSize: '3rem' }}>Notifications</span>
+          <span style={{ fontSize: '3rem' }}>notifications</span>
           {unreadCount > 0 && <span style={{ fontSize: '1.5rem' }}>({unreadCount})</span>}
         </div>
         
-        <div style={{ display: 'flex', alignItems: 'center', gap: '3rem' }}>
-          <span style={{ fontSize: '1.8rem' }}>{currentTime}</span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <span style={{ fontSize: '2rem' }}>{user?.displayName || user?.email || 'Visitor'}</span>
-            <NorthEastArrow />
-          </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <span style={{ fontSize: '1.5rem' }}>{user?.displayName || user?.email || 'visitor'}</span>
+          <NorthEastArrow />
         </div>
       </div>
 
       {/* Create Button */}
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '3rem' }}>
-        <button onClick={() => router.push('/notifications/create')} style={{ background: 'none', border: 'none', color: '#ffffff', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '1rem', fontSize: '2rem', padding: 0 }}>
-          Create Notification
+        <button onClick={() => router.push('/notifications/create')} style={{ background: 'none', border: 'none', color: '#ffffff', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '1rem', fontSize: '1.5rem', padding: 0 }}>
+          create notification
           <SouthEastArrow />
         </button>
       </div>
 
       {/* Content */}
       {isLoading ? (
-        <div style={{ textAlign: 'center', padding: '6rem', fontSize: '2rem' }}>Loading...</div>
+        <div style={{ textAlign: 'center', padding: '6rem', fontSize: '2rem' }}>loading...</div>
       ) : notifications.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '6rem', fontSize: '2rem' }}>No Notifications</div>
+        <div style={{ textAlign: 'center', padding: '6rem', fontSize: '2rem' }}>no notifications</div>
       ) : (
-        <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
           {notifications.map((notification) => {
             const isRead = notification.userReads[getCurrentUserId()];
             
@@ -512,29 +343,24 @@ export default function NotificationsPage(): React.JSX.Element {
                   if (!isRead) markAsRead(notification.id);
                 }}
                 style={{
-                  padding: '2.5rem 0',
-                  borderBottom: '1px solid #222222',
+                  padding: '2rem 0',
                   cursor: 'pointer',
-                  opacity: isRead ? 0.7 : 1
+                  opacity: isRead ? 0.5 : 1
                 }}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem', fontSize: '1.5rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '1.2rem', color: '#888888' }}>
                   <span>{notification.type}</span>
                   <span>{timeAgo(notification.createdAt)}</span>
                 </div>
-                <div style={{ fontSize: '2.2rem', marginBottom: '1rem' }}>{notification.title}</div>
-                <div style={{ fontSize: '1.8rem', lineHeight: '1.6' }}>
-                  {notification.message.length > 150 ? notification.message.substring(0, 150) + '...' : notification.message}
+                <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>{notification.title}</div>
+                <div style={{ fontSize: '1.2rem', color: '#cccccc', marginBottom: '1rem' }}>
+                  {notification.message.length > 100 ? notification.message.substring(0, 100) + '...' : notification.message}
                 </div>
-                <div style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '1.5rem' }}>
-                  <span>From {notification.senderName}</span>
-                  <div style={{ display: 'flex', gap: '2rem' }}>
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                      {notification.reactions?.map(r => r.count > 0 && (
-                        <span key={r.type}>{reactionTypes.find(rt => rt.type === r.type)?.icon} {r.count}</span>
-                      ))}
-                    </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '1.2rem', color: '#888888' }}>
+                  <span>{notification.senderName}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     <span>💬 {notification.comments?.length || 0}</span>
+                    <span>👁️ {notification.views || 0}</span>
                   </div>
                 </div>
               </div>
@@ -556,75 +382,41 @@ export default function NotificationsPage(): React.JSX.Element {
           overflowY: 'auto',
           zIndex: 1000
         }}>
-          <div style={{ maxWidth: '900px', margin: '0 auto' }}>
+          <div style={{ maxWidth: '800px', margin: '0 auto' }}>
             {/* Modal Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4rem' }}>
-              <button onClick={() => { setSelectedNotification(null); setReplyingTo(null); setShowReactions(null); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ffffff', padding: 0 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
+              <button onClick={() => { setSelectedNotification(null); setReplyingTo(null); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ffffff', padding: 0 }}>
                 <NorthEastArrow />
               </button>
-              <span style={{ fontSize: '1.8rem' }}>Notification</span>
-              <span style={{ fontSize: '1.8rem' }}>{timeAgo(selectedNotification.createdAt)}</span>
+              <span style={{ fontSize: '1.2rem', color: '#888888' }}>{timeAgo(selectedNotification.createdAt)}</span>
             </div>
 
             {/* Content */}
             <div style={{ marginBottom: '3rem' }}>
-              <div style={{ fontSize: '2rem', marginBottom: '2rem' }}>{selectedNotification.type}</div>
-              <div style={{ fontSize: '4rem', marginBottom: '3rem', lineHeight: '1.3' }}>{selectedNotification.title}</div>
-              <div style={{ lineHeight: '2', marginBottom: '3rem', fontSize: '2.2rem', whiteSpace: 'pre-line' }}>{selectedNotification.message}</div>
-              
-              {/* Reactions */}
-              <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem' }}>
-                {reactionTypes.map(reaction => {
-                  const reactionData = selectedNotification.reactions?.find(r => r.type === reaction.type);
-                  const count = reactionData?.count || 0;
-                  const userReacted = reactionData?.users.includes(getCurrentUserId());
-                  
-                  return (
-                    <button
-                      key={reaction.type}
-                      onClick={(e) => { e.stopPropagation(); addReaction('notification', selectedNotification.id, reaction.type); }}
-                      style={{
-                        background: 'none',
-                        border: 'none',
-                        color: userReacted ? '#ff4444' : '#888888',
-                        fontSize: '1.5rem',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.3rem'
-                      }}
-                    >
-                      {reaction.icon} {count > 0 && count}
-                    </button>
-                  );
-                })}
-              </div>
-              
-              <div style={{ fontSize: '2rem' }}>— {selectedNotification.senderName}</div>
+              <div style={{ fontSize: '1.2rem', color: '#888888', marginBottom: '1rem' }}>{selectedNotification.type}</div>
+              <div style={{ fontSize: '3rem', marginBottom: '2rem', lineHeight: '1.3' }}>{selectedNotification.title}</div>
+              <div style={{ fontSize: '1.5rem', lineHeight: '1.8', marginBottom: '2rem', color: '#cccccc' }}>{selectedNotification.message}</div>
+              <div style={{ fontSize: '1.2rem', color: '#888888' }}>— {selectedNotification.senderName}</div>
             </div>
 
             {/* Comments Section */}
-            <div style={{ marginBottom: '3rem' }}>
-              <div style={{ fontSize: '2rem', marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                <span>Comments</span>
-                <span>({selectedNotification.comments?.length || 0})</span>
-              </div>
+            <div>
+              <div style={{ fontSize: '1.5rem', marginBottom: '2rem' }}>comments ({selectedNotification.comments?.length || 0})</div>
 
               {/* Add Comment */}
               <div style={{ marginBottom: '3rem' }}>
                 <textarea
                   value={commentText}
                   onChange={(e) => setCommentText(e.target.value)}
-                  placeholder="Write a comment..."
+                  placeholder="write a comment..."
                   rows={3}
                   style={{
                     width: '100%',
-                    padding: '1rem',
-                    background: '#111111',
+                    padding: '1rem 0',
+                    background: 'none',
                     border: 'none',
                     color: '#ffffff',
-                    fontSize: '1.5rem',
-                    marginBottom: '1rem',
+                    fontSize: '1.2rem',
                     resize: 'vertical'
                   }}
                 />
@@ -634,14 +426,17 @@ export default function NotificationsPage(): React.JSX.Element {
                     disabled={!commentText.trim() || isSubmitting}
                     style={{
                       background: 'none',
-                      border: '1px solid #ffffff',
-                      color: commentText.trim() && !isSubmitting ? '#ffffff' : '#666666',
-                      fontSize: '1.5rem',
-                      padding: '1rem 3rem',
-                      cursor: commentText.trim() && !isSubmitting ? 'pointer' : 'default'
+                      border: 'none',
+                      color: commentText.trim() && !isSubmitting ? '#ffffff' : '#444444',
+                      fontSize: '1.2rem',
+                      cursor: commentText.trim() && !isSubmitting ? 'pointer' : 'default',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem'
                     }}
                   >
-                    {isSubmitting ? 'Posting...' : 'Post Comment'}
+                    post
+                    <SouthEastArrow />
                   </button>
                 </div>
               </div>
@@ -649,43 +444,15 @@ export default function NotificationsPage(): React.JSX.Element {
               {/* Comments List */}
               {selectedNotification.comments && selectedNotification.comments.length > 0 ? (
                 [...selectedNotification.comments].sort((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis()).map((comment) => (
-                  <div key={comment.id} style={{ marginBottom: '3rem' }}>
+                  <div key={comment.id} style={{ marginBottom: '2.5rem' }}>
                     {/* Comment */}
-                    <div style={{ marginBottom: '1.5rem' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '1.2rem' }}>
+                    <div style={{ marginBottom: '1rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '1rem', color: '#888888' }}>
                         <span>{comment.userName}</span>
                         <span>{timeAgo(comment.createdAt)}</span>
                       </div>
-                      <div style={{ fontSize: '1.8rem', marginBottom: '1rem' }}>{comment.text}</div>
+                      <div style={{ fontSize: '1.2rem', marginBottom: '1rem' }}>{comment.text}</div>
                       
-                      {/* Comment Reactions */}
-                      <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
-                        {reactionTypes.map(reaction => {
-                          const reactionData = comment.reactions?.find(r => r.type === reaction.type);
-                          const count = reactionData?.count || 0;
-                          const userReacted = reactionData?.users.includes(getCurrentUserId());
-                          
-                          return (
-                            <button
-                              key={reaction.type}
-                              onClick={(e) => { e.stopPropagation(); addReaction('comment', selectedNotification.id, reaction.type, comment.id); }}
-                              style={{
-                                background: 'none',
-                                border: 'none',
-                                color: userReacted ? '#ff4444' : '#888888',
-                                fontSize: '1.2rem',
-                                cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.3rem'
-                              }}
-                            >
-                              {reaction.icon} {count > 0 && count}
-                            </button>
-                          );
-                        })}
-                      </div>
-
                       {/* Reply Button */}
                       <button
                         onClick={(e) => { e.stopPropagation(); setReplyingTo(comment.id); }}
@@ -697,51 +464,23 @@ export default function NotificationsPage(): React.JSX.Element {
                           display: 'flex',
                           alignItems: 'center',
                           gap: '0.5rem',
-                          fontSize: '1.2rem'
+                          fontSize: '1rem'
                         }}
                       >
-                        <ReplyIcon /> Reply
+                        <ReplyArrow /> reply
                       </button>
                     </div>
 
                     {/* Replies */}
                     {comment.replies && comment.replies.length > 0 && (
-                      <div style={{ marginLeft: '3rem' }}>
+                      <div style={{ marginLeft: '2rem' }}>
                         {comment.replies.map((reply) => (
-                          <div key={reply.id} style={{ marginBottom: '1.5rem' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '1.2rem' }}>
+                          <div key={reply.id} style={{ marginBottom: '1rem' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.9rem', color: '#888888' }}>
                               <span>{reply.userName}</span>
                               <span>{timeAgo(reply.createdAt)}</span>
                             </div>
-                            <div style={{ fontSize: '1.6rem', marginBottom: '1rem' }}>{reply.text}</div>
-                            
-                            {/* Reply Reactions */}
-                            <div style={{ display: 'flex', gap: '1rem' }}>
-                              {reactionTypes.map(reaction => {
-                                const reactionData = reply.reactions?.find(r => r.type === reaction.type);
-                                const count = reactionData?.count || 0;
-                                const userReacted = reactionData?.users.includes(getCurrentUserId());
-                                
-                                return (
-                                  <button
-                                    key={reaction.type}
-                                    onClick={(e) => { e.stopPropagation(); addReaction('reply', selectedNotification.id, reaction.type, comment.id, reply.id); }}
-                                    style={{
-                                      background: 'none',
-                                      border: 'none',
-                                      color: userReacted ? '#ff4444' : '#888888',
-                                      fontSize: '1.2rem',
-                                      cursor: 'pointer',
-                                      display: 'flex',
-                                      alignItems: 'center',
-                                      gap: '0.3rem'
-                                    }}
-                                  >
-                                    {reaction.icon} {count > 0 && count}
-                                  </button>
-                                );
-                              })}
-                            </div>
+                            <div style={{ fontSize: '1.1rem' }}>{reply.text}</div>
                           </div>
                         ))}
                       </div>
@@ -749,40 +488,42 @@ export default function NotificationsPage(): React.JSX.Element {
 
                     {/* Reply Form */}
                     {replyingTo === comment.id && (
-                      <div style={{ marginTop: '1rem', marginLeft: '3rem' }}>
+                      <div style={{ marginTop: '1rem', marginLeft: '2rem' }}>
                         <textarea
                           value={replyText}
                           onChange={(e) => setReplyText(e.target.value)}
-                          placeholder="Write a reply..."
+                          placeholder="write a reply..."
                           rows={2}
                           style={{
                             width: '100%',
-                            padding: '1rem',
-                            background: '#111111',
+                            padding: '0.5rem 0',
+                            background: 'none',
                             border: 'none',
                             color: '#ffffff',
-                            fontSize: '1.5rem',
-                            marginBottom: '1rem',
+                            fontSize: '1.1rem',
                             resize: 'vertical'
                           }}
                         />
                         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
-                          <button onClick={() => setReplyingTo(null)} style={{ background: 'none', border: '1px solid #666666', color: '#888888', fontSize: '1.2rem', padding: '0.5rem 1.5rem', cursor: 'pointer' }}>
-                            Cancel
+                          <button onClick={() => setReplyingTo(null)} style={{ background: 'none', border: 'none', color: '#888888', fontSize: '1rem', cursor: 'pointer' }}>
+                            cancel
                           </button>
                           <button
                             onClick={() => addReply(selectedNotification.id, comment.id)}
                             disabled={!replyText.trim() || isSubmitting}
                             style={{
                               background: 'none',
-                              border: '1px solid #ffffff',
-                              color: replyText.trim() && !isSubmitting ? '#ffffff' : '#666666',
-                              fontSize: '1.2rem',
-                              padding: '0.5rem 1.5rem',
-                              cursor: replyText.trim() && !isSubmitting ? 'pointer' : 'default'
+                              border: 'none',
+                              color: replyText.trim() && !isSubmitting ? '#ffffff' : '#444444',
+                              fontSize: '1rem',
+                              cursor: replyText.trim() && !isSubmitting ? 'pointer' : 'default',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.5rem'
                             }}
                           >
-                            {isSubmitting ? 'Posting...' : 'Reply'}
+                            post
+                            <SouthEastArrow />
                           </button>
                         </div>
                       </div>
@@ -790,12 +531,12 @@ export default function NotificationsPage(): React.JSX.Element {
                   </div>
                 ))
               ) : (
-                <div style={{ textAlign: 'center', padding: '3rem', fontSize: '1.5rem' }}>No comments yet</div>
+                <div style={{ textAlign: 'center', padding: '3rem', fontSize: '1.2rem', color: '#888888' }}>no comments yet</div>
               )}
             </div>
 
             {/* Views */}
-            <div style={{ paddingTop: '2rem', fontSize: '1.5rem' }}>Viewed {selectedNotification.views} times</div>
+            <div style={{ marginTop: '3rem', fontSize: '1rem', color: '#888888' }}>viewed {selectedNotification.views} times</div>
           </div>
         </div>
       )}
