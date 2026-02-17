@@ -130,6 +130,9 @@ export default function NotificationsPage(): React.JSX.Element {
   // Link preview states
   const [showLinks, setShowLinks] = useState(false);
   const [expandedLinks, setExpandedLinks] = useState<Record<string, boolean>>({});
+  
+  // YouTube player states
+  const [playingVideo, setPlayingVideo] = useState<string | null>(null);
 
   // Update current time
   useEffect(() => {
@@ -604,10 +607,23 @@ export default function NotificationsPage(): React.JSX.Element {
     });
   };
 
+  // Get YouTube video ID from URL
+  const getYouTubeVideoId = (url: string): string | null => {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
+  };
+
+  // Get YouTube thumbnail URL
+  const getYouTubeThumbnail = (url: string): string | null => {
+    const videoId = getYouTubeVideoId(url);
+    return videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : null;
+  };
+
   // Get YouTube embed URL
-  const getYouTubeEmbedUrl = (url: string) => {
-    const videoId = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
-    return videoId ? `https://www.youtube.com/embed/${videoId[1]}` : null;
+  const getYouTubeEmbedUrl = (url: string): string | null => {
+    const videoId = getYouTubeVideoId(url);
+    return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
   };
 
   // Toggle link section
@@ -616,6 +632,16 @@ export default function NotificationsPage(): React.JSX.Element {
       ...prev,
       [notificationId]: !prev[notificationId]
     }));
+  };
+
+  // Play YouTube video
+  const playYouTubeVideo = (videoUrl: string) => {
+    setPlayingVideo(videoUrl);
+  };
+
+  // Close video player
+  const closeVideoPlayer = () => {
+    setPlayingVideo(null);
   };
 
   // SVG Components
@@ -756,6 +782,84 @@ export default function NotificationsPage(): React.JSX.Element {
     </svg>
   );
 
+  const PlayIcon = () => (
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
+      <circle cx="12" cy="12" r="10" fill="rgba(0,0,0,0.5)" stroke="none"/>
+      <polygon points="10,8 16,12 10,16" fill="white"/>
+    </svg>
+  );
+
+  // YouTube Thumbnail Component
+  const YouTubeThumbnail = ({ url, onClick }: { url: string; onClick: () => void }) => {
+    const thumbnailUrl = getYouTubeThumbnail(url);
+    const videoId = getYouTubeVideoId(url);
+    
+    if (!thumbnailUrl || !videoId) {
+      return (
+        <a 
+          href={url} 
+          target="_blank" 
+          rel="noopener noreferrer"
+          style={{
+            display: 'block',
+            padding: '15px',
+            background: 'rgba(255,0,0,0.1)',
+            borderRadius: '8px',
+            color: '#ff0000',
+            textDecoration: 'none',
+            border: '1px solid rgba(255,0,0,0.3)'
+          }}
+        >
+          <YoutubeIcon />
+          <span style={{ marginLeft: '10px' }}>Watch on YouTube</span>
+        </a>
+      );
+    }
+
+    return (
+      <div 
+        onClick={onClick}
+        style={{
+          position: 'relative',
+          width: '100%',
+          cursor: 'pointer',
+          borderRadius: '12px',
+          overflow: 'hidden',
+          aspectRatio: '16/9',
+          background: '#000'
+        }}
+      >
+        <img 
+          src={thumbnailUrl}
+          alt="YouTube thumbnail"
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover'
+          }}
+          onError={(e) => {
+            // Fallback to default thumbnail if maxresdefault doesn't exist
+            e.currentTarget.src = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+          }}
+        />
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: 'rgba(0,0,0,0.3)',
+          transition: 'background 0.3s'
+        }}>
+          <PlayIcon />
+        </div>
+      </div>
+    );
+  };
+
   // Link Preview Component
   const LinkPreview = ({ notification }: { notification: Notification }) => {
     const links = notification.links || {
@@ -805,53 +909,33 @@ export default function NotificationsPage(): React.JSX.Element {
           }}>
             {/* YouTube Links */}
             {links.youtube && links.youtube.length > 0 && (
-              <div style={{ marginBottom: '20px' }}>
+              <div style={{ marginBottom: '30px' }}>
                 <h4 style={{ 
                   fontSize: '1.2rem', 
-                  marginBottom: '10px',
+                  marginBottom: '15px',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '8px',
                   color: '#ff0000'
                 }}>
-                  <YoutubeIcon /> YouTube ({links.youtube.length})
+                  <YoutubeIcon /> YouTube Videos ({links.youtube.length})
                 </h4>
-                <div style={{ display: 'grid', gap: '15px' }}>
-                  {links.youtube.map((url, index) => {
-                    const embedUrl = getYouTubeEmbedUrl(url);
-                    return embedUrl ? (
-                      <div key={index}>
-                        <iframe
-                          width="100%"
-                          height="315"
-                          src={embedUrl}
-                          title={`YouTube video ${index + 1}`}
-                          frameBorder="0"
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                          allowFullScreen
-                          style={{ borderRadius: '12px' }}
-                        />
-                      </div>
-                    ) : (
-                      <a
-                        key={index}
-                        href={url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{
-                          color: '#3b82f6',
-                          textDecoration: 'none',
-                          display: 'block',
-                          padding: '10px',
-                          background: 'rgba(59,130,246,0.1)',
-                          borderRadius: '8px',
-                          wordBreak: 'break-all'
-                        }}
-                      >
-                        {url}
-                      </a>
-                    );
-                  })}
+                <div style={{ 
+                  display: 'grid', 
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+                  gap: '15px'
+                }}>
+                  {links.youtube.map((url, index) => (
+                    <YouTubeThumbnail 
+                      key={index} 
+                      url={url} 
+                      onClick={() => {
+                        if (selectedNotification) {
+                          setPlayingVideo(url);
+                        }
+                      }}
+                    />
+                  ))}
                 </div>
               </div>
             )}
@@ -1214,6 +1298,7 @@ export default function NotificationsPage(): React.JSX.Element {
             setShowCommentForm(false);
             setShowEmoticonPicker(false);
             setShowLinks(false);
+            setPlayingVideo(null);
           }}
         >
           <div style={{ maxWidth: '900px', margin: '0 auto' }} onClick={(e) => e.stopPropagation()}>
@@ -1231,6 +1316,7 @@ export default function NotificationsPage(): React.JSX.Element {
                   setShowCommentForm(false);
                   setShowEmoticonPicker(false);
                   setShowLinks(false);
+                  setPlayingVideo(null);
                 }}
                 style={{
                   background: 'none',
@@ -1273,6 +1359,57 @@ export default function NotificationsPage(): React.JSX.Element {
               }}>
                 {selectedNotification.message}
               </div>
+              
+              {/* YouTube Player Modal */}
+              {playingVideo && (
+                <div style={{
+                  position: 'fixed',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  backgroundColor: 'rgba(0,0,0,0.95)',
+                  zIndex: 2000,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '3rem'
+                }} onClick={closeVideoPlayer}>
+                  <div style={{
+                    position: 'relative',
+                    width: '100%',
+                    maxWidth: '1000px',
+                    aspectRatio: '16/9'
+                  }} onClick={(e) => e.stopPropagation()}>
+                    <button
+                      onClick={closeVideoPlayer}
+                      style={{
+                        position: 'absolute',
+                        top: '-40px',
+                        right: '-40px',
+                        background: 'none',
+                        border: 'none',
+                        color: 'white',
+                        fontSize: '2rem',
+                        cursor: 'pointer',
+                        zIndex: 2001
+                      }}
+                    >
+                      ×
+                    </button>
+                    <iframe
+                      width="100%"
+                      height="100%"
+                      src={getYouTubeEmbedUrl(playingVideo) + '?autoplay=1'}
+                      title="YouTube video player"
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      style={{ borderRadius: '12px' }}
+                    />
+                  </div>
+                </div>
+              )}
               
               {/* Links Section di Modal */}
               {selectedNotification.links && Object.values(selectedNotification.links).some(arr => arr.length > 0) && (
@@ -1320,42 +1457,18 @@ export default function NotificationsPage(): React.JSX.Element {
                           }}>
                             <YoutubeIcon /> YouTube Videos ({selectedNotification.links.youtube.length})
                           </h4>
-                          <div style={{ display: 'grid', gap: '20px' }}>
-                            {selectedNotification.links.youtube.map((url, index) => {
-                              const embedUrl = getYouTubeEmbedUrl(url);
-                              return embedUrl ? (
-                                <div key={index}>
-                                  <iframe
-                                    width="100%"
-                                    height="400"
-                                    src={embedUrl}
-                                    title={`YouTube video ${index + 1}`}
-                                    frameBorder="0"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                    allowFullScreen
-                                    style={{ borderRadius: '12px' }}
-                                  />
-                                </div>
-                              ) : (
-                                <a
-                                  key={index}
-                                  href={url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  style={{
-                                    color: '#3b82f6',
-                                    textDecoration: 'none',
-                                    display: 'block',
-                                    padding: '10px',
-                                    background: 'rgba(59,130,246,0.1)',
-                                    borderRadius: '8px',
-                                    wordBreak: 'break-all'
-                                  }}
-                                >
-                                  {url}
-                                </a>
-                              );
-                            })}
+                          <div style={{ 
+                            display: 'grid', 
+                            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+                            gap: '15px'
+                          }}>
+                            {selectedNotification.links.youtube.map((url, index) => (
+                              <YouTubeThumbnail 
+                                key={index} 
+                                url={url} 
+                                onClick={() => setPlayingVideo(url)}
+                              />
+                            ))}
                           </div>
                         </div>
                       )}
