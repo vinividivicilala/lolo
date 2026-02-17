@@ -333,7 +333,7 @@ export default function CreateNotificationPage(): React.JSX.Element {
         actionUrl: formData.actionUrl?.trim() || '',
         userReads: {},
         status: scheduledTime ? 'scheduled' : 'sent',
-        // Simpan links yang sudah diekstrak - PASTIKAN STRUKTURNYA BENAR
+        // Simpan links yang sudah diekstrak
         links: {
           youtube: extractedLinks.youtube || [],
           pdf: extractedLinks.pdf || [],
