@@ -238,23 +238,6 @@ export default function CreateNotificationPage(): React.JSX.Element {
     </svg>
   );
 
-  // SVG User Icon
-  const UserIcon = () => (
-    <svg 
-      width="48" 
-      height="48" 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      stroke="currentColor" 
-      strokeWidth="1.5"
-      strokeLinecap="round" 
-      strokeLinejoin="round"
-    >
-      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-      <circle cx="12" cy="7" r="4" />
-    </svg>
-  );
-
   return (
     <div style={{
       minHeight: '100vh',
@@ -291,18 +274,18 @@ export default function CreateNotificationPage(): React.JSX.Element {
               justifyContent: 'center',
               padding: 0
             }}
-            whileHover={{ opacity: 0.7 }}
+            whileHover={{ opacity: 0.8 }}
             whileTap={{ scale: 0.95 }}
           >
             <NorthWestArrow />
           </motion.button>
           <h1 style={{
             fontSize: '2.5rem',
-            fontWeight: '400',
+            fontWeight: '600',
             margin: 0,
-            letterSpacing: '-0.02em'
+            color: '#ffffff'
           }}>
-            Create Notification
+            Notifikasi
           </h1>
         </div>
         
@@ -311,13 +294,26 @@ export default function CreateNotificationPage(): React.JSX.Element {
           alignItems: 'center',
           gap: '1rem'
         }}>
-          <UserIcon />
           <span style={{
-            fontSize: '1.2rem',
+            fontSize: '1.5rem',
+            fontWeight: '500',
             color: '#ffffff'
           }}>
             {user?.displayName || user?.email || 'User'}
           </span>
+          <svg 
+            width="48" 
+            height="48" 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            stroke="currentColor" 
+            strokeWidth="2"
+            strokeLinecap="round" 
+            strokeLinejoin="round"
+          >
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
+          </svg>
         </div>
       </div>
 
@@ -345,7 +341,7 @@ export default function CreateNotificationPage(): React.JSX.Element {
               type="text"
               value={formData.title}
               onChange={(e) => handleInputChange('title', e.target.value)}
-              placeholder="Title"
+              placeholder="Judul"
               required
               style={{
                 width: '100%',
@@ -354,6 +350,7 @@ export default function CreateNotificationPage(): React.JSX.Element {
                 border: 'none',
                 color: '#ffffff',
                 fontSize: '1.5rem',
+                fontWeight: '500',
                 outline: 'none',
                 fontFamily: 'Helvetica, Arial, sans-serif'
               }}
@@ -365,7 +362,7 @@ export default function CreateNotificationPage(): React.JSX.Element {
             <textarea
               value={formData.message}
               onChange={(e) => handleInputChange('message', e.target.value)}
-              placeholder="Message"
+              placeholder="Pesan"
               required
               rows={4}
               style={{
@@ -375,6 +372,7 @@ export default function CreateNotificationPage(): React.JSX.Element {
                 border: 'none',
                 color: '#ffffff',
                 fontSize: '1.2rem',
+                fontWeight: '400',
                 outline: 'none',
                 resize: 'vertical',
                 minHeight: '120px',
@@ -391,12 +389,12 @@ export default function CreateNotificationPage(): React.JSX.Element {
               flexWrap: 'wrap'
             }}>
               {[
-                { value: 'announcement', label: 'Announcement' },
-                { value: 'maintenance', label: 'Maintenance' },
-                { value: 'system', label: 'System' },
-                { value: 'update', label: 'Update' },
-                { value: 'alert', label: 'Alert' },
-                { value: 'info', label: 'Info' }
+                { value: 'announcement', label: 'Pengumuman' },
+                { value: 'maintenance', label: 'Pemeliharaan' },
+                { value: 'system', label: 'Sistem' },
+                { value: 'update', label: 'Pembaruan' },
+                { value: 'alert', label: 'Peringatan' },
+                { value: 'info', label: 'Informasi' }
               ].map((option) => (
                 <button
                   key={option.value}
@@ -406,8 +404,9 @@ export default function CreateNotificationPage(): React.JSX.Element {
                     padding: '0.75rem 0',
                     backgroundColor: 'transparent',
                     border: 'none',
-                    color: formData.type === option.value ? '#ffffff' : '#333333',
+                    color: formData.type === option.value ? '#ffffff' : '#666666',
                     fontSize: '1.2rem',
+                    fontWeight: formData.type === option.value ? '600' : '400',
                     cursor: 'pointer',
                     fontFamily: 'Helvetica, Arial, sans-serif'
                   }}
@@ -436,6 +435,7 @@ export default function CreateNotificationPage(): React.JSX.Element {
                   border: 'none',
                   color: '#ffffff',
                   fontSize: '1.2rem',
+                  fontWeight: '400',
                   outline: 'none',
                   fontFamily: 'Helvetica, Arial, sans-serif'
                 }}
@@ -453,6 +453,7 @@ export default function CreateNotificationPage(): React.JSX.Element {
                   border: 'none',
                   color: '#ffffff',
                   fontSize: '1.2rem',
+                  fontWeight: '400',
                   outline: 'none',
                   fontFamily: 'Helvetica, Arial, sans-serif'
                 }}
@@ -467,9 +468,9 @@ export default function CreateNotificationPage(): React.JSX.Element {
               gap: '2rem'
             }}>
               {[
-                { value: 'all', label: 'All Users' },
-                { value: 'specific', label: 'Specific Users' },
-                { value: 'email', label: 'Email Addresses' }
+                { value: 'all', label: 'Semua Pengguna' },
+                { value: 'specific', label: 'Pengguna Tertentu' },
+                { value: 'email', label: 'Alamat Email' }
               ].map((option) => (
                 <button
                   key={option.value}
@@ -479,8 +480,9 @@ export default function CreateNotificationPage(): React.JSX.Element {
                     padding: '0.75rem 0',
                     backgroundColor: 'transparent',
                     border: 'none',
-                    color: formData.recipientType === option.value ? '#ffffff' : '#333333',
+                    color: formData.recipientType === option.value ? '#ffffff' : '#666666',
                     fontSize: '1.2rem',
+                    fontWeight: formData.recipientType === option.value ? '600' : '400',
                     cursor: 'pointer',
                     fontFamily: 'Helvetica, Arial, sans-serif'
                   }}
@@ -499,7 +501,7 @@ export default function CreateNotificationPage(): React.JSX.Element {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search Users..."
+                  placeholder="Cari Pengguna..."
                   style={{
                     width: '100%',
                     padding: '0.75rem 0',
@@ -507,6 +509,7 @@ export default function CreateNotificationPage(): React.JSX.Element {
                     border: 'none',
                     color: '#ffffff',
                     fontSize: '1.2rem',
+                    fontWeight: '400',
                     outline: 'none',
                     fontFamily: 'Helvetica, Arial, sans-serif'
                   }}
@@ -518,12 +521,12 @@ export default function CreateNotificationPage(): React.JSX.Element {
                 overflowY: 'auto'
               }}>
                 {isLoadingUsers ? (
-                  <div style={{ padding: '1rem 0', color: '#666666', fontSize: '1.2rem' }}>
-                    Loading...
+                  <div style={{ padding: '1rem 0', color: '#999999', fontSize: '1.2rem' }}>
+                    Memuat...
                   </div>
                 ) : filteredUsers.length === 0 ? (
-                  <div style={{ padding: '1rem 0', color: '#666666', fontSize: '1.2rem' }}>
-                    No Users Found
+                  <div style={{ padding: '1rem 0', color: '#999999', fontSize: '1.2rem' }}>
+                    Tidak Ada Pengguna
                   </div>
                 ) : (
                   filteredUsers.map((userItem) => {
@@ -538,19 +541,20 @@ export default function CreateNotificationPage(): React.JSX.Element {
                           display: 'flex',
                           justifyContent: 'space-between',
                           alignItems: 'center',
-                          opacity: isSelected ? 1 : 0.7
+                          opacity: 1,
+                          borderBottom: '1px solid #222222'
                         }}
                       >
                         <div>
-                          <div style={{ fontSize: '1.2rem' }}>
-                            {userItem.displayName || 'No Name'}
+                          <div style={{ fontSize: '1.2rem', fontWeight: '500', color: '#ffffff' }}>
+                            {userItem.displayName || 'Tanpa Nama'}
                           </div>
-                          <div style={{ fontSize: '1rem', color: '#666666' }}>
+                          <div style={{ fontSize: '1rem', color: '#999999' }}>
                             {userItem.email}
                           </div>
                         </div>
                         {isSelected && (
-                          <span style={{ fontSize: '1.5rem', color: '#ffffff' }}>✓</span>
+                          <span style={{ fontSize: '1.5rem', color: '#ffffff', fontWeight: 'bold' }}>✓</span>
                         )}
                       </div>
                     );
@@ -559,8 +563,8 @@ export default function CreateNotificationPage(): React.JSX.Element {
               </div>
 
               {formData.recipientIds.length > 0 && (
-                <div style={{ marginTop: '1rem', fontSize: '1.2rem', color: '#666666' }}>
-                  Selected: {formData.recipientIds.length} Users
+                <div style={{ marginTop: '1rem', fontSize: '1.2rem', color: '#ffffff', fontWeight: '500' }}>
+                  Dipilih: {formData.recipientIds.length} Pengguna
                 </div>
               )}
             </div>
@@ -578,7 +582,7 @@ export default function CreateNotificationPage(): React.JSX.Element {
                   type="email"
                   value={newRecipientEmail}
                   onChange={(e) => setNewRecipientEmail(e.target.value)}
-                  placeholder="Enter Email Address"
+                  placeholder="Masukkan Alamat Email"
                   style={{
                     flex: 1,
                     padding: '0.75rem 0',
@@ -586,6 +590,7 @@ export default function CreateNotificationPage(): React.JSX.Element {
                     border: 'none',
                     color: '#ffffff',
                     fontSize: '1.2rem',
+                    fontWeight: '400',
                     outline: 'none',
                     fontFamily: 'Helvetica, Arial, sans-serif'
                   }}
@@ -603,20 +608,21 @@ export default function CreateNotificationPage(): React.JSX.Element {
                     padding: '0.75rem 2rem',
                     backgroundColor: 'transparent',
                     border: 'none',
-                    color: '#666666',
+                    color: '#ffffff',
                     fontSize: '1.2rem',
+                    fontWeight: '600',
                     cursor: 'pointer',
                     fontFamily: 'Helvetica, Arial, sans-serif'
                   }}
                 >
-                  Add
+                  Tambah
                 </button>
               </div>
               
               {formData.recipientEmails.length > 0 && (
                 <div style={{ marginTop: '1.5rem' }}>
-                  <div style={{ fontSize: '1.2rem', color: '#666666', marginBottom: '1rem' }}>
-                    Email List:
+                  <div style={{ fontSize: '1.2rem', color: '#ffffff', fontWeight: '600', marginBottom: '1rem' }}>
+                    Daftar Email:
                   </div>
                   <div>
                     {formData.recipientEmails.map((email, index) => (
@@ -625,18 +631,20 @@ export default function CreateNotificationPage(): React.JSX.Element {
                         alignItems: 'center',
                         gap: '1rem',
                         padding: '0.75rem 0',
-                        fontSize: '1.2rem'
+                        fontSize: '1.2rem',
+                        borderBottom: '1px solid #222222'
                       }}>
-                        <span style={{ flex: 1, color: '#ffffff' }}>{email}</span>
+                        <span style={{ flex: 1, color: '#ffffff', fontWeight: '400' }}>{email}</span>
                         <button
                           type="button"
                           onClick={() => removeRecipientEmail(email)}
                           style={{
                             backgroundColor: 'transparent',
                             border: 'none',
-                            color: '#666666',
+                            color: '#ff4444',
                             cursor: 'pointer',
                             fontSize: '2rem',
+                            fontWeight: 'bold',
                             padding: '0',
                             lineHeight: 1
                           }}
@@ -657,7 +665,7 @@ export default function CreateNotificationPage(): React.JSX.Element {
               type="url"
               value={formData.actionUrl}
               onChange={(e) => handleInputChange('actionUrl', e.target.value)}
-              placeholder="Action URL (Optional)"
+              placeholder="URL Tindakan (Opsional)"
               style={{
                 width: '100%',
                 padding: '0.75rem 0',
@@ -665,6 +673,7 @@ export default function CreateNotificationPage(): React.JSX.Element {
                 border: 'none',
                 color: '#ffffff',
                 fontSize: '1.2rem',
+                fontWeight: '400',
                 outline: 'none',
                 fontFamily: 'Helvetica, Arial, sans-serif'
               }}
@@ -685,13 +694,14 @@ export default function CreateNotificationPage(): React.JSX.Element {
                 padding: '0.75rem 0',
                 backgroundColor: 'transparent',
                 border: 'none',
-                color: '#666666',
+                color: '#999999',
                 fontSize: '1.5rem',
+                fontWeight: '500',
                 cursor: 'pointer',
                 fontFamily: 'Helvetica, Arial, sans-serif'
               }}
             >
-              Cancel
+              Batal
             </button>
             
             <button
@@ -701,13 +711,14 @@ export default function CreateNotificationPage(): React.JSX.Element {
                 padding: '0.75rem 0',
                 backgroundColor: 'transparent',
                 border: 'none',
-                color: isLoading ? '#333333' : '#ffffff',
+                color: isLoading ? '#666666' : '#ffffff',
                 fontSize: '1.5rem',
+                fontWeight: '600',
                 cursor: isLoading ? 'not-allowed' : 'pointer',
                 fontFamily: 'Helvetica, Arial, sans-serif'
               }}
             >
-              {isLoading ? 'Sending...' : 'Send'}
+              {isLoading ? 'Mengirim...' : 'Kirim'}
             </button>
           </div>
         </motion.form>
