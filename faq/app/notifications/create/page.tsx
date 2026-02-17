@@ -102,6 +102,21 @@ export default function CreateNotificationPage(): React.JSX.Element {
 
   const [newRecipientEmail, setNewRecipientEmail] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  
+  // State untuk preview link seperti di halaman notes
+  const [linkPreview, setLinkPreview] = useState<{
+    youtube: string[];
+    pdf: string[];
+    images: string[];
+    videos: string[];
+    websites: string[];
+  }>({
+    youtube: [],
+    pdf: [],
+    images: [],
+    videos: [],
+    websites: []
+  });
 
   // Update current date and time
   useEffect(() => {
@@ -181,6 +196,151 @@ export default function CreateNotificationPage(): React.JSX.Element {
     loadUsers();
   }, [db]);
 
+  // Fungsi untuk generate thumbnail (sama seperti di halaman notes)
+  const generateThumbnail = (link: string): string => {
+    if (!link) return "";
+    
+    try {
+      const url = new URL(link);
+      
+      // YouTube
+      if (url.hostname.includes('youtube.com') || url.hostname.includes('youtu.be')) {
+        const videoId = url.searchParams.get('v') || url.pathname.split('/').pop();
+        if (videoId && videoId.length === 11) {
+          return `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+        }
+      }
+      
+      // Vimeo
+      if (url.hostname.includes('vimeo.com')) {
+        const videoId = url.pathname.split('/').pop();
+        if (videoId) {
+          return `https://i.vimeocdn.com/video/${videoId}_640.jpg`;
+        }
+      }
+      
+      return "";
+    } catch {
+      return "";
+    }
+  };
+
+  // Fungsi untuk mendapatkan embed URL (sama seperti di halaman notes)
+  const getVideoEmbedUrl = (link: string): string | null => {
+    if (!link) return null;
+    
+    try {
+      const url = new URL(link);
+      
+      // YouTube
+      if (url.hostname.includes('youtube.com') || url.hostname.includes('youtu.be')) {
+        const videoId = url.searchParams.get('v') || url.pathname.split('/').pop();
+        if (videoId && videoId.length === 11) {
+          return `https://www.youtube.com/embed/${videoId}?autoplay=0&rel=0&showinfo=0`;
+        }
+      }
+      
+      // Vimeo
+      if (url.hostname.includes('vimeo.com')) {
+        const videoId = url.pathname.split('/').pop();
+        if (videoId) {
+          return `https://player.vimeo.com/video/${videoId}?autoplay=0&title=0&byline=0&portrait=0`;
+        }
+      }
+      
+      // Video file langsung
+      if (link.match(/\.(mp4|webm|ogg|mov|avi|wmv|flv|mkv)$/i)) {
+        return link;
+      }
+      
+      return null;
+    } catch {
+      return null;
+    }
+  };
+
+  // Fungsi untuk mengekstrak links dari message (versi seperti di halaman notes)
+  const extractLinksFromMessage = (message: string) => {
+    console.log('Original message:', message);
+    
+    // URL regex yang lebih komprehensif
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    
+    // YouTube regex
+    const youtubeRegex = /(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/v\/)([a-zA-Z0-9_-]{11})/g;
+    
+    // PDF regex
+    const pdfRegex = /(https?:\/\/[^\s]+\.pdf)/gi;
+    
+    // Image regex
+    const imageRegex = /(https?:\/\/[^\s]+\.(jpg|jpeg|png|gif|webp|svg|bmp|ico|avif))/gi;
+    
+    // Video regex
+    const videoRegex = /(https?:\/\/[^\s]+\.(mp4|webm|ogg|mov|avi|mkv|flv|wmv|m4v))/gi;
+    
+    // Ekstrak semua URL dulu
+    const allUrls = message.match(urlRegex) || [];
+    console.log('All URLs found:', allUrls);
+    
+    // Kategorikan URLs
+    const youtubeLinks: string[] = [];
+    const pdfLinks: string[] = [];
+    const imageLinks: string[] = [];
+    const videoLinks: string[] = [];
+    const websiteLinks: string[] = [];
+    
+    allUrls.forEach(url => {
+      // Cek YouTube
+      if (url.match(youtubeRegex)) {
+        youtubeLinks.push(url);
+      }
+      // Cek PDF
+      else if (url.match(pdfRegex)) {
+        pdfLinks.push(url);
+      }
+      // Cek Image
+      else if (url.match(imageRegex)) {
+        imageLinks.push(url);
+      }
+      // Cek Video
+      else if (url.match(videoRegex)) {
+        videoLinks.push(url);
+      }
+      // Sisanya sebagai website
+      else {
+        websiteLinks.push(url);
+      }
+    });
+    
+    const result = {
+      youtube: [...new Set(youtubeLinks)],
+      pdf: [...new Set(pdfLinks)],
+      images: [...new Set(imageLinks)],
+      videos: [...new Set(videoLinks)],
+      websites: [...new Set(websiteLinks)]
+    };
+    
+    console.log('Extracted links result:', result);
+    
+    return result;
+  };
+
+  // Update preview setiap kali message berubah
+  useEffect(() => {
+    if (formData.message) {
+      const links = extractLinksFromMessage(formData.message);
+      setLinkPreview(links);
+    } else {
+      setLinkPreview({
+        youtube: [],
+        pdf: [],
+        images: [],
+        videos: [],
+        websites: []
+      });
+    }
+  }, [formData.message]);
+
   const handleInputChange = (field: keyof NotificationForm, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
@@ -220,60 +380,6 @@ export default function CreateNotificationPage(): React.JSX.Element {
     );
   });
 
-  // Fungsi untuk mengekstrak links dari message
-  const extractLinksFromMessage = (message: string) => {
-    // YouTube regex
-    const youtubeRegex = /(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/[^\s]+/g;
-    
-    // PDF regex - case insensitive untuk .pdf
-    const pdfRegex = /(https?:\/\/[^\s]+\.pdf)/gi;
-    
-    // Image regex - berbagai format gambar
-    const imageRegex = /(https?:\/\/[^\s]+\.(jpg|jpeg|png|gif|webp|svg|bmp|ico))/gi;
-    
-    // Video regex - berbagai format video
-    const videoRegex = /(https?:\/\/[^\s]+\.(mp4|webm|ogg|mov|avi|mkv|flv|wmv))/gi;
-    
-    // Website regex - URL umum
-    const websiteRegex = /(https?:\/\/[^\s]+)/g;
-    
-    // Ekstrak semua link
-    const youtubeLinks = message.match(youtubeRegex) || [];
-    const pdfLinks = message.match(pdfRegex) || [];
-    const imageLinks = message.match(imageRegex) || [];
-    const videoLinks = message.match(videoRegex) || [];
-    
-    // Buat salinan message untuk mencari website links
-    let remainingMessage = message;
-    
-    // Hapus link yang sudah terdeteksi
-    [...youtubeLinks, ...pdfLinks, ...imageLinks, ...videoLinks].forEach(link => {
-      remainingMessage = remainingMessage.replace(link, '');
-    });
-    
-    // Cari website links dari sisa message
-    const websiteLinks = remainingMessage.match(websiteRegex) || [];
-    
-    // Filter website links yang sudah termasuk kategori lain
-    const filteredWebsiteLinks = websiteLinks.filter(url => 
-      !youtubeLinks.includes(url) && 
-      !pdfLinks.includes(url) && 
-      !imageLinks.includes(url) && 
-      !videoLinks.includes(url)
-    );
-    
-    // Hapus duplikat dengan Set
-    const result = {
-      youtube: [...new Set(youtubeLinks)],
-      pdf: [...new Set(pdfLinks)],
-      images: [...new Set(imageLinks)],
-      videos: [...new Set(videoLinks)],
-      websites: [...new Set(filteredWebsiteLinks)]
-    };
-    
-    return result;
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -311,7 +417,6 @@ export default function CreateNotificationPage(): React.JSX.Element {
       const linkCount = Object.values(extractedLinks).reduce((acc, arr) => acc + arr.length, 0);
       const hasLinks = linkCount > 0;
 
-      // Log untuk debugging
       console.log('Extracted Links:', extractedLinks);
       console.log('Link Count:', linkCount);
       console.log('Has Links:', hasLinks);
@@ -363,6 +468,299 @@ export default function CreateNotificationPage(): React.JSX.Element {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Komponen untuk preview link ala halaman notes
+  const LinkPreviewSection = () => {
+    const hasLinks = Object.values(linkPreview).some(arr => arr.length > 0);
+    
+    if (!hasLinks) return null;
+    
+    return (
+      <div style={{
+        marginTop: '30px',
+        marginBottom: '30px',
+        padding: '20px',
+        background: 'rgba(255,255,255,0.02)',
+        borderRadius: '16px',
+        border: '1px solid rgba(255,255,255,0.1)'
+      }}>
+        <h3 style={{
+          fontSize: '1.5rem',
+          marginBottom: '20px',
+          color: '#fff'
+        }}>
+          Preview Link
+        </h3>
+        
+        {/* YouTube Links */}
+        {linkPreview.youtube.length > 0 && (
+          <div style={{ marginBottom: '30px' }}>
+            <h4 style={{
+              fontSize: '1.2rem',
+              marginBottom: '15px',
+              color: '#ff0000'
+            }}>
+              YouTube ({linkPreview.youtube.length})
+            </h4>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+              gap: '15px'
+            }}>
+              {linkPreview.youtube.map((url, index) => {
+                const thumbnail = generateThumbnail(url);
+                const embedUrl = getVideoEmbedUrl(url);
+                
+                return (
+                  <div
+                    key={index}
+                    style={{
+                      background: '#111',
+                      borderRadius: '12px',
+                      overflow: 'hidden',
+                      border: '1px solid #333'
+                    }}
+                  >
+                    {thumbnail && (
+                      <img
+                        src={thumbnail}
+                        alt="YouTube thumbnail"
+                        style={{
+                          width: '100%',
+                          height: '180px',
+                          objectFit: 'cover'
+                        }}
+                        onError={(e) => {
+                          e.currentTarget.src = 'https://via.placeholder.com/300x180?text=Video';
+                        }}
+                      />
+                    )}
+                    <div style={{ padding: '15px' }}>
+                      <a
+                        href={url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          color: '#3b82f6',
+                          textDecoration: 'none',
+                          fontSize: '0.9rem',
+                          wordBreak: 'break-all'
+                        }}
+                      >
+                        {url}
+                      </a>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+        
+        {/* Image Links */}
+        {linkPreview.images.length > 0 && (
+          <div style={{ marginBottom: '30px' }}>
+            <h4 style={{
+              fontSize: '1.2rem',
+              marginBottom: '15px',
+              color: '#4ecdc4'
+            }}>
+              Images ({linkPreview.images.length})
+            </h4>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+              gap: '15px'
+            }}>
+              {linkPreview.images.map((url, index) => (
+                <div
+                  key={index}
+                  style={{
+                    background: '#111',
+                    borderRadius: '12px',
+                    overflow: 'hidden',
+                    border: '1px solid #333'
+                  }}
+                >
+                  <img
+                    src={url}
+                    alt={`Preview ${index + 1}`}
+                    style={{
+                      width: '100%',
+                      height: '150px',
+                      objectFit: 'cover'
+                    }}
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                  <div style={{ padding: '10px' }}>
+                    <a
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        color: '#3b82f6',
+                        textDecoration: 'none',
+                        fontSize: '0.8rem',
+                        wordBreak: 'break-all'
+                      }}
+                    >
+                      {url.split('/').pop() || url}
+                    </a>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {/* PDF Links */}
+        {linkPreview.pdf.length > 0 && (
+          <div style={{ marginBottom: '20px' }}>
+            <h4 style={{
+              fontSize: '1.2rem',
+              marginBottom: '15px',
+              color: '#ff6b6b'
+            }}>
+              PDF Documents ({linkPreview.pdf.length})
+            </h4>
+            <div style={{ display: 'grid', gap: '10px' }}>
+              {linkPreview.pdf.map((url, index) => (
+                <a
+                  key={index}
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    padding: '15px',
+                    background: 'rgba(255,107,107,0.1)',
+                    borderRadius: '8px',
+                    color: '#3b82f6',
+                    textDecoration: 'none',
+                    wordBreak: 'break-all'
+                  }}
+                >
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                  </svg>
+                  <span>{url.split('/').pop() || url}</span>
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {/* Video Links */}
+        {linkPreview.videos.length > 0 && (
+          <div style={{ marginBottom: '20px' }}>
+            <h4 style={{
+              fontSize: '1.2rem',
+              marginBottom: '15px',
+              color: '#45b7d1'
+            }}>
+              Videos ({linkPreview.videos.length})
+            </h4>
+            <div style={{ display: 'grid', gap: '15px' }}>
+              {linkPreview.videos.map((url, index) => (
+                <div
+                  key={index}
+                  style={{
+                    background: '#111',
+                    borderRadius: '12px',
+                    overflow: 'hidden',
+                    border: '1px solid #333'
+                  }}
+                >
+                  <video
+                    controls
+                    style={{
+                      width: '100%',
+                      maxHeight: '300px',
+                      background: '#000'
+                    }}
+                  >
+                    <source src={url} />
+                  </video>
+                  <div style={{ padding: '15px' }}>
+                    <a
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        color: '#3b82f6',
+                        textDecoration: 'none',
+                        wordBreak: 'break-all'
+                      }}
+                    >
+                      {url.split('/').pop() || url}
+                    </a>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {/* Website Links */}
+        {linkPreview.websites.length > 0 && (
+          <div>
+            <h4 style={{
+              fontSize: '1.2rem',
+              marginBottom: '15px',
+              color: '#96ceb4'
+            }}>
+              Websites ({linkPreview.websites.length})
+            </h4>
+            <div style={{ display: 'grid', gap: '10px' }}>
+              {linkPreview.websites.map((url, index) => (
+                <a
+                  key={index}
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    padding: '15px',
+                    background: 'rgba(150,206,180,0.1)',
+                    borderRadius: '8px',
+                    color: '#3b82f6',
+                    textDecoration: 'none',
+                    wordBreak: 'break-all'
+                  }}
+                >
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="2" y1="12" x2="22" y2="12"/>
+                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                  </svg>
+                  <span>{url}</span>
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {/* Total Links */}
+        <div style={{
+          marginTop: '20px',
+          padding: '10px',
+          background: 'rgba(255,255,255,0.05)',
+          borderRadius: '8px',
+          fontSize: '1rem',
+          color: '#888'
+        }}>
+          Total Links: {Object.values(linkPreview).reduce((acc, arr) => acc + arr.length, 0)}
+        </div>
+      </div>
+    );
   };
 
   // SVG North East Arrow - Large
@@ -492,7 +890,7 @@ export default function CreateNotificationPage(): React.JSX.Element {
             onChange={(e) => handleInputChange('message', e.target.value)}
             placeholder="Message - Masukkan link YouTube, PDF, gambar, video, atau website"
             required
-            rows={8}
+            rows={6}
             style={{
               width: '100%',
               padding: '0.5rem 0',
@@ -522,6 +920,9 @@ export default function CreateNotificationPage(): React.JSX.Element {
             </ul>
           </div>
         </div>
+
+        {/* Link Preview Section - SEPERTI DI HALAMAN NOTES */}
+        <LinkPreviewSection />
 
         {/* Calendar - Dropdown Style */}
         <div style={{ marginBottom: '3rem' }}>
@@ -762,77 +1163,6 @@ export default function CreateNotificationPage(): React.JSX.Element {
             }}
           />
         </div>
-
-        {/* Preview Links */}
-        {formData.message && (
-          <div style={{ 
-            marginBottom: '2rem',
-            padding: '1rem',
-            background: 'rgba(255,255,255,0.02)',
-            borderRadius: '8px',
-            border: '1px solid #333333'
-          }}>
-            <h3 style={{ fontSize: '1.2rem', marginBottom: '1rem', color: '#888888' }}>
-              Preview Links yang Akan Disimpan:
-            </h3>
-            {(() => {
-              const links = extractLinksFromMessage(formData.message);
-              const hasLinks = Object.values(links).some(arr => arr.length > 0);
-              
-              if (!hasLinks) {
-                return <div style={{ color: '#666666' }}>Tidak ada link yang terdeteksi</div>;
-              }
-
-              return (
-                <div>
-                  {links.youtube.length > 0 && (
-                    <div style={{ marginBottom: '0.5rem' }}>
-                      <strong style={{ color: '#ff0000' }}>YouTube ({links.youtube.length}):</strong>
-                      <ul style={{ margin: '0.5rem 0', color: '#3b82f6' }}>
-                        {links.youtube.map((url, i) => <li key={i}>{url}</li>)}
-                      </ul>
-                    </div>
-                  )}
-                  {links.pdf.length > 0 && (
-                    <div style={{ marginBottom: '0.5rem' }}>
-                      <strong style={{ color: '#ff6b6b' }}>PDF ({links.pdf.length}):</strong>
-                      <ul style={{ margin: '0.5rem 0', color: '#3b82f6' }}>
-                        {links.pdf.map((url, i) => <li key={i}>{url}</li>)}
-                      </ul>
-                    </div>
-                  )}
-                  {links.images.length > 0 && (
-                    <div style={{ marginBottom: '0.5rem' }}>
-                      <strong style={{ color: '#4ecdc4' }}>Images ({links.images.length}):</strong>
-                      <ul style={{ margin: '0.5rem 0', color: '#3b82f6' }}>
-                        {links.images.map((url, i) => <li key={i}>{url}</li>)}
-                      </ul>
-                    </div>
-                  )}
-                  {links.videos.length > 0 && (
-                    <div style={{ marginBottom: '0.5rem' }}>
-                      <strong style={{ color: '#45b7d1' }}>Videos ({links.videos.length}):</strong>
-                      <ul style={{ margin: '0.5rem 0', color: '#3b82f6' }}>
-                        {links.videos.map((url, i) => <li key={i}>{url}</li>)}
-                      </ul>
-                    </div>
-                  )}
-                  {links.websites.length > 0 && (
-                    <div style={{ marginBottom: '0.5rem' }}>
-                      <strong style={{ color: '#96ceb4' }}>Websites ({links.websites.length}):</strong>
-                      <ul style={{ margin: '0.5rem 0', color: '#3b82f6' }}>
-                        {links.websites.map((url, i) => <li key={i}>{url}</li>)}
-                      </ul>
-                    </div>
-                  )}
-                  <div style={{ marginTop: '1rem', color: '#888888' }}>
-                    Total Links: {Object.values(links).reduce((acc, arr) => acc + arr.length, 0)}
-                  </div>
-                </div>
-              );
-            })()}
-          </div>
-        )}
 
         {/* Buttons */}
         <div style={{
