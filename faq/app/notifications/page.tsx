@@ -191,12 +191,14 @@ export default function NotificationsPage(): React.JSX.Element {
         const data = doc.data();
         if (data.isDeleted) return;
         
+        // Determine if this notification should be shown to current user
         let shouldShow = false;
         
         switch (data.recipientType) {
           case 'all':
             shouldShow = true;
             break;
+            
           case 'specific':
             const recipientIds = data.recipientIds || [];
             if (recipientIds.includes(currentUserId) || 
@@ -204,12 +206,14 @@ export default function NotificationsPage(): React.JSX.Element {
               shouldShow = true;
             }
             break;
+            
           case 'email':
             const recipientEmails = data.recipientEmails || [];
             if (currentUserEmail && recipientEmails.includes(currentUserEmail)) {
               shouldShow = true;
             }
             break;
+            
           default:
             shouldShow = false;
         }
@@ -341,6 +345,7 @@ export default function NotificationsPage(): React.JSX.Element {
       const currentCount = notificationReactions[emoticonId] || 0;
       
       if (userReactions.includes(emoticonId)) {
+        // Remove reaction
         await updateDoc(notificationRef, {
           [reactionKey]: currentCount - 1
         });
@@ -354,6 +359,7 @@ export default function NotificationsPage(): React.JSX.Element {
           [emoticonId]: currentCount - 1
         }));
       } else {
+        // Add reaction
         await updateDoc(notificationRef, {
           [reactionKey]: currentCount + 1
         });
@@ -488,6 +494,7 @@ export default function NotificationsPage(): React.JSX.Element {
         const updatedComments = notification.comments.map(comment => {
           if (comment.id === commentId) {
             if (replyId) {
+              // Toggle like on reply
               const updatedReplies = comment.replies.map(reply => {
                 if (reply.id === replyId) {
                   const likedBy = reply.likedBy || [];
@@ -511,6 +518,7 @@ export default function NotificationsPage(): React.JSX.Element {
               });
               return { ...comment, replies: updatedReplies };
             } else {
+              // Toggle like on comment
               const likedBy = comment.likedBy || [];
               const likes = comment.likes || 0;
               
@@ -549,13 +557,13 @@ export default function NotificationsPage(): React.JSX.Element {
     const now = new Date();
     const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
     
-    if (seconds < 60) return `${seconds} detik yang lalu`;
+    if (seconds < 60) return `${seconds} seconds ago`;
     const minutes = Math.floor(seconds / 60);
-    if (minutes < 60) return `${minutes} menit yang lalu`;
+    if (minutes < 60) return `${minutes} minutes ago`;
     const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `${hours} jam yang lalu`;
+    if (hours < 24) return `${hours} hours ago`;
     const days = Math.floor(hours / 24);
-    if (days < 7) return `${days} hari yang lalu`;
+    if (days < 7) return `${days} days ago`;
     
     return date.toLocaleDateString('id-ID', { 
       day: 'numeric', 
@@ -564,133 +572,77 @@ export default function NotificationsPage(): React.JSX.Element {
     });
   };
 
-  // SVG Components Modern
-  const NorthEastArrow = ({ width = 64, height = 64 }: { width?: number, height?: number }) => (
+  // SVG North East Arrow
+  const NorthEastArrow = () => (
     <svg 
-      width={width} 
-      height={height} 
+      width="64" 
+      height="64" 
       viewBox="0 0 24 24" 
       fill="none" 
       stroke="currentColor" 
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
+      strokeWidth="1"
     >
       <path d="M7 7L17 17" />
-      <path d="M17 7H7" />
-      <path d="M17 7V17" />
+      <path d="M7 17V7H17" />
     </svg>
   );
 
-  const SouthEastArrow = ({ width = 64, height = 64 }: { width?: number, height?: number }) => (
+  // SVG South East Arrow
+  const SouthEastArrow = () => (
     <svg 
-      width={width} 
-      height={height} 
+      width="64" 
+      height="64" 
       viewBox="0 0 24 24" 
       fill="none" 
       stroke="currentColor" 
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
+      strokeWidth="1"
     >
       <path d="M5 5L19 19" />
-      <path d="M19 5H5" />
-      <path d="M5 19V5" />
+      <path d="M5 19H19V5" />
     </svg>
   );
 
-  const NorthWestArrow = ({ width = 40, height = 40 }: { width?: number, height?: number }) => (
+  // Heart Icon for likes
+  const HeartIcon = ({ filled = false }: { filled?: boolean }) => (
     <svg 
-      width={width} 
-      height={height} 
-      viewBox="0 0 24 24" 
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M17 17L7 7"/>
-      <path d="M17 7H7"/>
-      <path d="M7 17V7"/>
-    </svg>
-  );
-
-  // Modern Icons
-  const HeartIcon = ({ filled = false, width = 24, height = 24 }: { filled?: boolean, width?: number, height?: number }) => (
-    <svg 
-      width={width} 
-      height={height} 
+      width="20" 
+      height="20" 
       viewBox="0 0 24 24" 
       fill={filled ? "currentColor" : "none"} 
       stroke="currentColor" 
       strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
     >
       <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
     </svg>
   );
 
-  const CommentIcon = ({ width = 24, height = 24 }: { width?: number, height?: number }) => (
+  // Reply Icon
+  const ReplyIcon = () => (
     <svg 
-      width={width} 
-      height={height} 
+      width="18" 
+      height="18" 
       viewBox="0 0 24 24" 
       fill="none" 
       stroke="currentColor" 
       strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-    </svg>
-  );
-
-  const SendIcon = ({ width = 20, height = 20 }: { width?: number, height?: number }) => (
-    <svg 
-      width={width} 
-      height={height} 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      stroke="currentColor" 
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <line x1="22" y1="2" x2="11" y2="13"/>
-      <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-    </svg>
-  );
-
-  const ReplyIcon = ({ width = 18, height = 18 }: { width?: number, height?: number }) => (
-    <svg 
-      width={width} 
-      height={height} 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      stroke="currentColor" 
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
     >
       <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
       <polyline points="10 11 13 14 10 17"/>
     </svg>
   );
 
-  const MessageIcon = ({ width = 24, height = 24 }: { width?: number, height?: number }) => (
+  // Send Icon
+  const SendIcon = () => (
     <svg 
-      width={width} 
-      height={height} 
+      width="18" 
+      height="18" 
       viewBox="0 0 24 24" 
       fill="none" 
       stroke="currentColor" 
       strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
     >
-      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+      <line x1="22" y1="2" x2="11" y2="13"/>
+      <polygon points="22 2 15 22 11 13 2 9 22 2"/>
     </svg>
   );
 
@@ -702,64 +654,12 @@ export default function NotificationsPage(): React.JSX.Element {
       color: '#ffffff',
       padding: '3rem'
     }}>
-      {/* Running Text */}
-      <div style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        zIndex: 9999,
-        backgroundColor: 'rgba(0,0,0,0.95)',
-        color: 'white',
-        padding: '20px 0',
-        borderBottom: '2px solid rgba(255,255,255,0.2)',
-        backdropFilter: 'blur(12px)',
-        overflow: 'hidden',
-        whiteSpace: 'nowrap',
-        width: '100vw',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
-      }}>
-        <motion.div
-          animate={{
-            x: [0, -2500]
-          }}
-          transition={{
-            duration: 30,
-            repeat: Infinity,
-            ease: "linear",
-            repeatType: "loop"
-          }}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '60px',
-            fontSize: '2.5rem',
-            fontWeight: 'bold',
-            letterSpacing: '2px',
-            paddingLeft: '30px',
-          }}
-        >
-          <NorthWestArrow width={60} height={60} />
-          <span style={{ background: 'linear-gradient(45deg, #fff, #aaa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>NOTE ADALAH TEMAN TERBAIK MU</span>
-          <NorthWestArrow width={60} height={60} />
-          <span style={{ background: 'linear-gradient(45deg, #fff, #aaa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>NOTE ADALAH TEMAN TERBAIK MU</span>
-          <NorthWestArrow width={60} height={60} />
-          <span style={{ background: 'linear-gradient(45deg, #fff, #aaa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>NOTE ADALAH TEMAN TERBAIK MU</span>
-        </motion.div>
-      </div>
-
       {/* Header */}
       <div style={{
-        position: 'fixed',
-        top: '120px',
-        right: '40px',
-        zIndex: 100,
         display: 'flex',
+        justifyContent: 'space-between',
         alignItems: 'center',
-        gap: '20px',
-        flexWrap: 'wrap',
-        justifyContent: 'flex-end',
-        maxWidth: 'calc(100% - 80px)',
+        marginBottom: '4rem'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
           <button
@@ -772,7 +672,7 @@ export default function NotificationsPage(): React.JSX.Element {
               padding: 0
             }}
           >
-            <NorthEastArrow width={40} height={40} />
+            <NorthEastArrow />
           </button>
           <span style={{ fontSize: '3rem' }}>Notifications</span>
           {unreadCount > 0 && (
@@ -786,7 +686,7 @@ export default function NotificationsPage(): React.JSX.Element {
             <span style={{ fontSize: '2rem' }}>
               {user?.displayName || user?.email || 'Visitor'}
             </span>
-            <NorthEastArrow width={40} height={40} />
+            <NorthEastArrow />
           </div>
         </div>
       </div>
@@ -795,8 +695,7 @@ export default function NotificationsPage(): React.JSX.Element {
       <div style={{
         display: 'flex',
         justifyContent: 'flex-end',
-        marginBottom: '3rem',
-        marginTop: '200px'
+        marginBottom: '3rem'
       }}>
         <button
           onClick={() => router.push('/notifications/create')}
@@ -813,7 +712,7 @@ export default function NotificationsPage(): React.JSX.Element {
           }}
         >
           Create Notification
-          <SouthEastArrow width={50} height={50} />
+          <SouthEastArrow />
         </button>
       </div>
 
@@ -857,7 +756,7 @@ export default function NotificationsPage(): React.JSX.Element {
                 }}
               >
                 {/* North East Arrow untuk setiap post */}
-                <NorthEastArrow width={50} height={50} />
+                <NorthEastArrow />
                 
                 <div style={{ flex: 1 }}>
                   <div style={{ 
@@ -891,15 +790,9 @@ export default function NotificationsPage(): React.JSX.Element {
                     fontSize: '1.5rem'
                   }}>
                     <span>From {notification.senderName}</span>
-                    <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <HeartIcon filled={isLiked} width={24} height={24} />
-                        <span>{notification.likes?.length || 0}</span>
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <CommentIcon width={24} height={24} />
-                        <span>{notification.comments?.length || 0}</span>
-                      </div>
+                    <div style={{ display: 'flex', gap: '2rem' }}>
+                      <span>❤️ {notification.likes?.length || 0}</span>
+                      <span>💬 {notification.comments?.length || 0}</span>
                     </div>
                   </div>
                 </div>
@@ -951,7 +844,7 @@ export default function NotificationsPage(): React.JSX.Element {
                     padding: 0
                   }}
                 >
-                  <NorthEastArrow width={40} height={40} />
+                  <NorthEastArrow />
                 </button>
                 <span style={{ fontSize: '1.8rem' }}>Notification</span>
                 <span style={{ fontSize: '1.8rem' }}>
@@ -1008,7 +901,7 @@ export default function NotificationsPage(): React.JSX.Element {
                       gap: '0.5rem'
                     }}
                   >
-                    <HeartIcon filled={selectedNotification.likes.includes(getCurrentUserId())} width={32} height={32} />
+                    {selectedNotification.likes.includes(getCurrentUserId()) ? '❤️' : '🤍'}
                     <span>{selectedNotification.likes?.length || 0}</span>
                   </button>
                 </div>
@@ -1199,7 +1092,9 @@ export default function NotificationsPage(): React.JSX.Element {
                   gap: '12px',
                 }}
               >
-                <MessageIcon width={24} height={24} />
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
                 {user ? 'Tulis komentar Anda di sini...' : 'Login untuk menulis komentar'}
               </motion.button>
 
@@ -1307,7 +1202,7 @@ export default function NotificationsPage(): React.JSX.Element {
                             gap: '8px',
                           }}
                         >
-                          <SendIcon width={18} height={18} />
+                          <SendIcon />
                           <span>{isSubmitting ? 'Mengirim...' : 'Kirim Komentar'}</span>
                         </motion.button>
                       </div>
@@ -1423,11 +1318,7 @@ export default function NotificationsPage(): React.JSX.Element {
                                 cursor: user ? 'pointer' : 'not-allowed',
                               }}
                             >
-                              <HeartIcon 
-                                filled={(comment.likedBy || []).includes(getCurrentUserId())} 
-                                width={20} 
-                                height={20} 
-                              />
+                              <HeartIcon filled={(comment.likedBy || []).includes(getCurrentUserId())} />
                               <span style={{ color: 'white', fontSize: '1rem' }}>
                                 {comment.likes || 0}
                               </span>
@@ -1470,7 +1361,7 @@ export default function NotificationsPage(): React.JSX.Element {
                               marginTop: '5px',
                             }}
                           >
-                            <ReplyIcon width={18} height={18} />
+                            <ReplyIcon />
                             <span>Balas komentar</span>
                           </motion.button>
 
@@ -1565,7 +1456,7 @@ export default function NotificationsPage(): React.JSX.Element {
                                           cursor: replyText.trim() && !isSubmitting ? 'pointer' : 'not-allowed',
                                         }}
                                       >
-                                        <ReplyIcon width={16} height={16} />
+                                        <ReplyIcon />
                                         <span>{isSubmitting ? 'Mengirim...' : 'Kirim Balasan'}</span>
                                       </motion.button>
                                     </div>
@@ -1659,11 +1550,7 @@ export default function NotificationsPage(): React.JSX.Element {
                                           backgroundColor: (reply.likedBy || []).includes(getCurrentUserId()) ? 'rgba(255,255,255,0.1)' : 'transparent',
                                         }}
                                       >
-                                        <HeartIcon 
-                                          filled={(reply.likedBy || []).includes(getCurrentUserId())} 
-                                          width={14} 
-                                          height={14} 
-                                        />
+                                        <HeartIcon filled={(reply.likedBy || []).includes(getCurrentUserId())} />
                                         <span>{reply.likes || 0}</span>
                                       </motion.button>
                                     </div>
@@ -1707,31 +1594,6 @@ export default function NotificationsPage(): React.JSX.Element {
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* CSS for animations */}
-      <style jsx>{`
-        @keyframes slideIn {
-          from {
-            transform: translateX(-100%);
-            opacity: 0;
-          }
-          to {
-            transform: translateX(0);
-            opacity: 1;
-          }
-        }
-        
-        @keyframes slideOut {
-          from {
-            transform: translateX(0);
-            opacity: 1;
-          }
-          to {
-            transform: translateX(-100%);
-            opacity: 0;
-          }
-        }
-      `}</style>
     </div>
   );
 }
