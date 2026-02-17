@@ -48,6 +48,13 @@ interface NotificationForm {
   recipientIds: string[];
   recipientEmails: string[];
   actionUrl?: string;
+  links?: {
+    youtube: string[];
+    pdf: string[];
+    images: string[];
+    videos: string[];
+    websites: string[];
+  };
 }
 
 interface User {
@@ -213,6 +220,44 @@ export default function CreateNotificationPage(): React.JSX.Element {
     );
   });
 
+  // Fungsi untuk mengekstrak links dari message
+  const extractLinksFromMessage = (message: string) => {
+    const youtubeRegex = /(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/[^\s]+/g;
+    const pdfRegex = /(https?:\/\/[^\s]+\.pdf)/gi;
+    const imageRegex = /(https?:\/\/[^\s]+\.(jpg|jpeg|png|gif|webp|svg))/gi;
+    const videoRegex = /(https?:\/\/[^\s]+\.(mp4|webm|ogg|mov))/gi;
+    const websiteRegex = /(https?:\/\/[^\s]+)/g;
+    
+    const youtubeLinks = message.match(youtubeRegex) || [];
+    const pdfLinks = message.match(pdfRegex) || [];
+    const imageLinks = message.match(imageRegex) || [];
+    const videoLinks = message.match(videoRegex) || [];
+    
+    // Remove already matched links
+    let remainingMessage = message;
+    [...youtubeLinks, ...pdfLinks, ...imageLinks, ...videoLinks].forEach(link => {
+      remainingMessage = remainingMessage.replace(link, '');
+    });
+    
+    const websiteLinks = remainingMessage.match(websiteRegex) || [];
+    
+    // Filter out duplicates
+    const allLinks = {
+      youtube: [...new Set(youtubeLinks)],
+      pdf: [...new Set(pdfLinks)],
+      images: [...new Set(imageLinks)],
+      videos: [...new Set(videoLinks)],
+      websites: [...new Set(websiteLinks.filter(url => 
+        !youtubeLinks.includes(url) && 
+        !pdfLinks.includes(url) && 
+        !imageLinks.includes(url) && 
+        !videoLinks.includes(url)
+      ))]
+    };
+    
+    return allLinks;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -243,6 +288,9 @@ export default function CreateNotificationPage(): React.JSX.Element {
         ? new Date(`${formData.scheduledDate}T${formData.scheduledTime}`).toISOString()
         : null;
 
+      // Ekstrak links dari message
+      const extractedLinks = extractLinksFromMessage(formData.message.trim());
+
       const notificationData = {
         title: formData.title.trim(),
         message: formData.message.trim(),
@@ -260,9 +308,17 @@ export default function CreateNotificationPage(): React.JSX.Element {
         actionUrl: formData.actionUrl?.trim() || '',
         userReads: {},
         status: scheduledTime ? 'scheduled' : 'sent',
+        // Simpan links yang sudah diekstrak
+        links: extractedLinks,
+        // Metadata untuk memudahkan query
+        hasLinks: Object.values(extractedLinks).some(arr => arr.length > 0),
+        linkCount: Object.values(extractedLinks).reduce((acc, arr) => acc + arr.length, 0)
       };
 
+      console.log('Sending notification with links:', notificationData.links);
       await addDoc(collection(db, 'notifications'), notificationData);
+      
+      alert('Notification created successfully!');
       router.push('/notifications');
 
     } catch (error) {
@@ -398,9 +454,9 @@ export default function CreateNotificationPage(): React.JSX.Element {
           <textarea
             value={formData.message}
             onChange={(e) => handleInputChange('message', e.target.value)}
-            placeholder="Message"
+            placeholder="Message - Masukkan link YouTube, PDF, gambar, video, atau website"
             required
-            rows={6}
+            rows={8}
             style={{
               width: '100%',
               padding: '0.5rem 0',
@@ -412,6 +468,23 @@ export default function CreateNotificationPage(): React.JSX.Element {
               resize: 'vertical'
             }}
           />
+          <div style={{ 
+            marginTop: '0.5rem', 
+            fontSize: '1rem', 
+            color: '#888888',
+            background: 'rgba(255,255,255,0.05)',
+            padding: '1rem',
+            borderRadius: '8px'
+          }}>
+            <strong>Supported Links:</strong>
+            <ul style={{ margin: '0.5rem 0 0 0', paddingLeft: '1.5rem' }}>
+              <li>YouTube: https://youtube.com/watch?v=... atau https://youtu.be/...</li>
+              <li>PDF: https://example.com/file.pdf</li>
+              <li>Images: .jpg, .jpeg, .png, .gif, .webp</li>
+              <li>Videos: .mp4, .webm, .ogg</li>
+              <li>Websites: https://example.com</li>
+            </ul>
+          </div>
         </div>
 
         {/* Calendar - Dropdown Style */}
@@ -653,6 +726,74 @@ export default function CreateNotificationPage(): React.JSX.Element {
             }}
           />
         </div>
+
+        {/* Preview Links */}
+        {formData.message && (
+          <div style={{ 
+            marginBottom: '2rem',
+            padding: '1rem',
+            background: 'rgba(255,255,255,0.02)',
+            borderRadius: '8px',
+            border: '1px solid #333333'
+          }}>
+            <h3 style={{ fontSize: '1.2rem', marginBottom: '1rem', color: '#888888' }}>
+              Preview Links yang Akan Disimpan:
+            </h3>
+            {(() => {
+              const links = extractLinksFromMessage(formData.message);
+              const hasLinks = Object.values(links).some(arr => arr.length > 0);
+              
+              if (!hasLinks) {
+                return <div style={{ color: '#666666' }}>Tidak ada link yang terdeteksi</div>;
+              }
+
+              return (
+                <div>
+                  {links.youtube.length > 0 && (
+                    <div style={{ marginBottom: '0.5rem' }}>
+                      <strong style={{ color: '#ff0000' }}>YouTube:</strong>
+                      <ul style={{ margin: '0.5rem 0', color: '#3b82f6' }}>
+                        {links.youtube.map((url, i) => <li key={i}>{url}</li>)}
+                      </ul>
+                    </div>
+                  )}
+                  {links.pdf.length > 0 && (
+                    <div style={{ marginBottom: '0.5rem' }}>
+                      <strong style={{ color: '#ff6b6b' }}>PDF:</strong>
+                      <ul style={{ margin: '0.5rem 0', color: '#3b82f6' }}>
+                        {links.pdf.map((url, i) => <li key={i}>{url}</li>)}
+                      </ul>
+                    </div>
+                  )}
+                  {links.images.length > 0 && (
+                    <div style={{ marginBottom: '0.5rem' }}>
+                      <strong style={{ color: '#4ecdc4' }}>Images:</strong>
+                      <ul style={{ margin: '0.5rem 0', color: '#3b82f6' }}>
+                        {links.images.map((url, i) => <li key={i}>{url}</li>)}
+                      </ul>
+                    </div>
+                  )}
+                  {links.videos.length > 0 && (
+                    <div style={{ marginBottom: '0.5rem' }}>
+                      <strong style={{ color: '#45b7d1' }}>Videos:</strong>
+                      <ul style={{ margin: '0.5rem 0', color: '#3b82f6' }}>
+                        {links.videos.map((url, i) => <li key={i}>{url}</li>)}
+                      </ul>
+                    </div>
+                  )}
+                  {links.websites.length > 0 && (
+                    <div style={{ marginBottom: '0.5rem' }}>
+                      <strong style={{ color: '#96ceb4' }}>Websites:</strong>
+                      <ul style={{ margin: '0.5rem 0', color: '#3b82f6' }}>
+                        {links.websites.map((url, i) => <li key={i}>{url}</li>)}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+          </div>
+        )}
 
         {/* Buttons */}
         <div style={{
