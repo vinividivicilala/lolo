@@ -64,6 +64,23 @@ export default function CreateNotificationPage(): React.JSX.Element {
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
   const [currentDateTime, setCurrentDateTime] = useState<string>('');
   
+  // Calendar state
+  const [selectedYear, setSelectedYear] = useState<string>('');
+  const [selectedMonth, setSelectedMonth] = useState<string>('');
+  const [selectedDay, setSelectedDay] = useState<string>('');
+  const [selectedHour, setSelectedHour] = useState<string>('');
+  const [selectedMinute, setSelectedMinute] = useState<string>('');
+  
+  // Calendar options
+  const years = Array.from({ length: 10 }, (_, i) => (new Date().getFullYear() + i).toString());
+  const months = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+  const days = Array.from({ length: 31 }, (_, i) => (i + 1).toString().padStart(2, '0'));
+  const hours = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0'));
+  const minutes = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0'));
+
   const [formData, setFormData] = useState<NotificationForm>({
     title: '',
     message: '',
@@ -98,6 +115,21 @@ export default function CreateNotificationPage(): React.JSX.Element {
     const timer = setInterval(updateDateTime, 60000);
     return () => clearInterval(timer);
   }, []);
+
+  // Update scheduled date when calendar changes
+  useEffect(() => {
+    if (selectedYear && selectedMonth && selectedDay && selectedHour && selectedMinute) {
+      const monthIndex = (months.indexOf(selectedMonth) + 1).toString().padStart(2, '0');
+      const dateString = `${selectedYear}-${monthIndex}-${selectedDay}`;
+      const timeString = `${selectedHour}:${selectedMinute}`;
+      
+      setFormData(prev => ({
+        ...prev,
+        scheduledDate: dateString,
+        scheduledTime: timeString
+      }));
+    }
+  }, [selectedYear, selectedMonth, selectedDay, selectedHour, selectedMinute]);
 
   // Check authentication
   useEffect(() => {
@@ -241,11 +273,11 @@ export default function CreateNotificationPage(): React.JSX.Element {
     }
   };
 
-  // SVG North East Arrow
+  // SVG North East Arrow - Large
   const NorthEastArrow = () => (
     <svg 
-      width="48" 
-      height="48" 
+      width="64" 
+      height="64" 
       viewBox="0 0 24 24" 
       fill="none" 
       stroke="currentColor" 
@@ -256,11 +288,11 @@ export default function CreateNotificationPage(): React.JSX.Element {
     </svg>
   );
 
-  // SVG South East Arrow
+  // SVG South East Arrow - Large
   const SouthEastArrow = () => (
     <svg 
-      width="48" 
-      height="48" 
+      width="64" 
+      height="64" 
       viewBox="0 0 24 24" 
       fill="none" 
       stroke="currentColor" 
@@ -286,7 +318,7 @@ export default function CreateNotificationPage(): React.JSX.Element {
         alignItems: 'center',
         marginBottom: '3rem'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
           <button
             onClick={() => router.push('/notifications')}
             style={{
@@ -299,13 +331,13 @@ export default function CreateNotificationPage(): React.JSX.Element {
           >
             <NorthEastArrow />
           </button>
-          <span style={{ fontSize: '1.5rem' }}>Create Notification</span>
+          <span style={{ fontSize: '2.5rem' }}>Create Notification</span>
         </div>
         
-        <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
-          <span style={{ fontSize: '1.2rem', color: '#888888' }}>{currentDateTime}</span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <span style={{ fontSize: '1.2rem' }}>{user?.displayName || user?.email || 'Visitor'}</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '3rem' }}>
+          <span style={{ fontSize: '1.5rem', color: '#ffffff' }}>{currentDateTime}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <span style={{ fontSize: '1.5rem' }}>{user?.displayName || user?.email || 'Visitor'}</span>
             <NorthEastArrow />
           </div>
         </div>
@@ -314,7 +346,7 @@ export default function CreateNotificationPage(): React.JSX.Element {
       {/* Form */}
       <form onSubmit={handleSubmit} style={{ maxWidth: '800px', margin: '0 auto' }}>
         {/* Type Selection */}
-        <div style={{ marginBottom: '2rem', display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+        <div style={{ marginBottom: '2rem', display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
           {[
             'Announcement',
             'Maintenance',
@@ -332,7 +364,7 @@ export default function CreateNotificationPage(): React.JSX.Element {
                 background: 'none',
                 border: 'none',
                 color: formData.type === label.toLowerCase() ? '#ffffff' : '#666666',
-                fontSize: '1.2rem',
+                fontSize: '1.5rem',
                 cursor: 'pointer'
               }}
             >
@@ -355,7 +387,7 @@ export default function CreateNotificationPage(): React.JSX.Element {
               background: 'none',
               border: 'none',
               color: '#ffffff',
-              fontSize: '1.5rem',
+              fontSize: '2rem',
               outline: 'none'
             }}
           />
@@ -375,53 +407,106 @@ export default function CreateNotificationPage(): React.JSX.Element {
               background: 'none',
               border: 'none',
               color: '#ffffff',
-              fontSize: '1.2rem',
+              fontSize: '1.5rem',
               outline: 'none',
               resize: 'vertical'
             }}
           />
         </div>
 
-        {/* Calendar - Modern Style */}
-        <div style={{ marginBottom: '2rem', display: 'flex', gap: '2rem' }}>
-          <div style={{ flex: 1 }}>
-            <div style={{ marginBottom: '0.5rem', color: '#888888', fontSize: '1rem' }}>Date</div>
-            <input
-              type="date"
-              value={formData.scheduledDate}
-              onChange={(e) => handleInputChange('scheduledDate', e.target.value)}
+        {/* Calendar - Dropdown Style */}
+        <div style={{ marginBottom: '3rem' }}>
+          <div style={{ marginBottom: '1rem', fontSize: '1.2rem', color: '#888888' }}>Schedule</div>
+          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+            <select 
+              value={selectedYear} 
+              onChange={(e) => setSelectedYear(e.target.value)}
               style={{
-                width: '100%',
-                padding: '0.5rem 0',
-                background: 'none',
+                padding: '1rem 2rem',
+                background: '#111111',
                 border: 'none',
                 color: '#ffffff',
                 fontSize: '1.2rem',
-                fontFamily: 'Helvetica, Arial, sans-serif'
+                cursor: 'pointer',
+                minWidth: '120px'
               }}
-            />
-          </div>
-          <div style={{ flex: 1 }}>
-            <div style={{ marginBottom: '0.5rem', color: '#888888', fontSize: '1rem' }}>Time</div>
-            <input
-              type="time"
-              value={formData.scheduledTime}
-              onChange={(e) => handleInputChange('scheduledTime', e.target.value)}
+            >
+              <option value="">Year</option>
+              {years.map(year => <option key={year} value={year}>{year}</option>)}
+            </select>
+
+            <select 
+              value={selectedMonth} 
+              onChange={(e) => setSelectedMonth(e.target.value)}
               style={{
-                width: '100%',
-                padding: '0.5rem 0',
-                background: 'none',
+                padding: '1rem 2rem',
+                background: '#111111',
                 border: 'none',
                 color: '#ffffff',
                 fontSize: '1.2rem',
-                fontFamily: 'Helvetica, Arial, sans-serif'
+                cursor: 'pointer',
+                minWidth: '140px'
               }}
-            />
+            >
+              <option value="">Month</option>
+              {months.map(month => <option key={month} value={month}>{month}</option>)}
+            </select>
+
+            <select 
+              value={selectedDay} 
+              onChange={(e) => setSelectedDay(e.target.value)}
+              style={{
+                padding: '1rem 2rem',
+                background: '#111111',
+                border: 'none',
+                color: '#ffffff',
+                fontSize: '1.2rem',
+                cursor: 'pointer',
+                minWidth: '100px'
+              }}
+            >
+              <option value="">Day</option>
+              {days.map(day => <option key={day} value={day}>{day}</option>)}
+            </select>
+
+            <select 
+              value={selectedHour} 
+              onChange={(e) => setSelectedHour(e.target.value)}
+              style={{
+                padding: '1rem 2rem',
+                background: '#111111',
+                border: 'none',
+                color: '#ffffff',
+                fontSize: '1.2rem',
+                cursor: 'pointer',
+                minWidth: '100px'
+              }}
+            >
+              <option value="">Hour</option>
+              {hours.map(hour => <option key={hour} value={hour}>{hour}</option>)}
+            </select>
+
+            <select 
+              value={selectedMinute} 
+              onChange={(e) => setSelectedMinute(e.target.value)}
+              style={{
+                padding: '1rem 2rem',
+                background: '#111111',
+                border: 'none',
+                color: '#ffffff',
+                fontSize: '1.2rem',
+                cursor: 'pointer',
+                minWidth: '100px'
+              }}
+            >
+              <option value="">Minute</option>
+              {minutes.map(minute => <option key={minute} value={minute}>{minute}</option>)}
+            </select>
           </div>
         </div>
 
         {/* Recipient Type */}
-        <div style={{ marginBottom: '2rem', display: 'flex', gap: '1rem' }}>
+        <div style={{ marginBottom: '2rem', display: 'flex', gap: '2rem' }}>
           {[
             { value: 'all', label: 'All Users' },
             { value: 'specific', label: 'Specific Users' },
@@ -436,7 +521,7 @@ export default function CreateNotificationPage(): React.JSX.Element {
                 background: 'none',
                 border: 'none',
                 color: formData.recipientType === option.value ? '#ffffff' : '#666666',
-                fontSize: '1.2rem',
+                fontSize: '1.5rem',
                 cursor: 'pointer'
               }}
             >
@@ -459,15 +544,15 @@ export default function CreateNotificationPage(): React.JSX.Element {
                 background: 'none',
                 border: 'none',
                 color: '#ffffff',
-                fontSize: '1.2rem',
+                fontSize: '1.5rem',
                 marginBottom: '1rem'
               }}
             />
             <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
               {isLoadingUsers ? (
-                <div style={{ padding: '0.5rem 0', color: '#888888', fontSize: '1.2rem' }}>Loading...</div>
+                <div style={{ padding: '0.5rem 0', color: '#888888', fontSize: '1.5rem' }}>Loading...</div>
               ) : filteredUsers.length === 0 ? (
-                <div style={{ padding: '0.5rem 0', color: '#888888', fontSize: '1.2rem' }}>No Users Found</div>
+                <div style={{ padding: '0.5rem 0', color: '#888888', fontSize: '1.5rem' }}>No Users Found</div>
               ) : (
                 filteredUsers.map((userItem) => (
                   <div
@@ -477,7 +562,7 @@ export default function CreateNotificationPage(): React.JSX.Element {
                       padding: '0.5rem 0',
                       color: formData.recipientIds.includes(userItem.uid) ? '#ffffff' : '#888888',
                       cursor: 'pointer',
-                      fontSize: '1.2rem',
+                      fontSize: '1.5rem',
                       marginBottom: '0.5rem'
                     }}
                   >
@@ -492,7 +577,7 @@ export default function CreateNotificationPage(): React.JSX.Element {
         {/* Email Recipients */}
         {formData.recipientType === 'email' && (
           <div style={{ marginBottom: '2rem' }}>
-            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+            <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
               <input
                 type="email"
                 value={newRecipientEmail}
@@ -504,7 +589,7 @@ export default function CreateNotificationPage(): React.JSX.Element {
                   background: 'none',
                   border: 'none',
                   color: '#ffffff',
-                  fontSize: '1.2rem'
+                  fontSize: '1.5rem'
                 }}
                 onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addRecipientEmail())}
               />
@@ -512,11 +597,11 @@ export default function CreateNotificationPage(): React.JSX.Element {
                 type="button"
                 onClick={addRecipientEmail}
                 style={{
-                  padding: '0.5rem 1rem',
+                  padding: '0.5rem 2rem',
                   background: 'none',
                   border: 'none',
                   color: '#ffffff',
-                  fontSize: '1.2rem',
+                  fontSize: '1.5rem',
                   cursor: 'pointer'
                 }}
               >
@@ -529,7 +614,7 @@ export default function CreateNotificationPage(): React.JSX.Element {
                 justifyContent: 'space-between',
                 alignItems: 'center',
                 padding: '0.5rem 0',
-                fontSize: '1.2rem'
+                fontSize: '1.5rem'
               }}>
                 <span style={{ color: '#ffffff' }}>{email}</span>
                 <button
@@ -539,7 +624,7 @@ export default function CreateNotificationPage(): React.JSX.Element {
                     background: 'none',
                     border: 'none',
                     color: '#888888',
-                    fontSize: '1.5rem',
+                    fontSize: '2rem',
                     cursor: 'pointer',
                     padding: '0'
                   }}
@@ -564,7 +649,7 @@ export default function CreateNotificationPage(): React.JSX.Element {
               background: 'none',
               border: 'none',
               color: '#ffffff',
-              fontSize: '1.2rem'
+              fontSize: '1.5rem'
             }}
           />
         </div>
@@ -573,7 +658,7 @@ export default function CreateNotificationPage(): React.JSX.Element {
         <div style={{
           display: 'flex',
           justifyContent: 'flex-end',
-          gap: '2rem',
+          gap: '3rem',
           marginTop: '3rem'
         }}>
           <button
@@ -584,7 +669,7 @@ export default function CreateNotificationPage(): React.JSX.Element {
               background: 'none',
               border: 'none',
               color: '#888888',
-              fontSize: '1.2rem',
+              fontSize: '1.5rem',
               cursor: 'pointer'
             }}
           >
@@ -599,11 +684,11 @@ export default function CreateNotificationPage(): React.JSX.Element {
               background: 'none',
               border: 'none',
               color: isLoading ? '#888888' : '#ffffff',
-              fontSize: '1.2rem',
+              fontSize: '1.5rem',
               cursor: isLoading ? 'default' : 'pointer',
               display: 'flex',
               alignItems: 'center',
-              gap: '0.5rem'
+              gap: '1rem'
             }}
           >
             {isLoading ? 'Sending...' : 'Send'}
