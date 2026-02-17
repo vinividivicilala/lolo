@@ -365,32 +365,32 @@ export default function CreateNotificationPage(): React.JSX.Element {
           />
         </div>
 
-        {/* Schedule */}
-        <div style={{ marginBottom: '2rem', display: 'flex', gap: '1rem' }}>
+        {/* Schedule - Using native datetime-local */}
+        <div style={{ marginBottom: '2rem' }}>
           <input
-            type="date"
-            value={formData.scheduledDate}
-            onChange={(e) => handleInputChange('scheduledDate', e.target.value)}
-            style={{
-              flex: 1,
-              padding: '0.8rem',
-              backgroundColor: '#111111',
-              border: '1px solid #333333',
-              color: '#ffffff',
-              fontSize: '1rem'
+            type="datetime-local"
+            value={formData.scheduledDate && formData.scheduledTime 
+              ? `${formData.scheduledDate}T${formData.scheduledTime}` 
+              : ''}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value) {
+                const [date, time] = value.split('T');
+                handleInputChange('scheduledDate', date);
+                handleInputChange('scheduledTime', time);
+              } else {
+                handleInputChange('scheduledDate', '');
+                handleInputChange('scheduledTime', '');
+              }
             }}
-          />
-          <input
-            type="time"
-            value={formData.scheduledTime}
-            onChange={(e) => handleInputChange('scheduledTime', e.target.value)}
             style={{
-              flex: 1,
+              width: '100%',
               padding: '0.8rem',
               backgroundColor: '#111111',
               border: '1px solid #333333',
               color: '#ffffff',
-              fontSize: '1rem'
+              fontSize: '1.2rem',
+              fontFamily: 'Helvetica, Arial, sans-serif'
             }}
           />
         </div>
@@ -434,15 +434,15 @@ export default function CreateNotificationPage(): React.JSX.Element {
                 backgroundColor: '#111111',
                 border: '1px solid #333333',
                 color: '#ffffff',
-                fontSize: '1rem',
+                fontSize: '1.2rem',
                 marginBottom: '1rem'
               }}
             />
             <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
               {isLoadingUsers ? (
-                <div style={{ padding: '1rem', color: '#888888' }}>Loading...</div>
+                <div style={{ padding: '1rem', color: '#888888', fontSize: '1.2rem' }}>Loading...</div>
               ) : filteredUsers.length === 0 ? (
-                <div style={{ padding: '1rem', color: '#888888' }}>No Users Found</div>
+                <div style={{ padding: '1rem', color: '#888888', fontSize: '1.2rem' }}>No Users Found</div>
               ) : (
                 filteredUsers.map((userItem) => (
                   <div
@@ -453,7 +453,8 @@ export default function CreateNotificationPage(): React.JSX.Element {
                       marginBottom: '0.5rem',
                       backgroundColor: formData.recipientIds.includes(userItem.uid) ? '#333333' : '#111111',
                       color: '#ffffff',
-                      cursor: 'pointer'
+                      cursor: 'pointer',
+                      fontSize: '1.2rem'
                     }}
                   >
                     {userItem.displayName || userItem.email || 'No Name'}
@@ -479,7 +480,7 @@ export default function CreateNotificationPage(): React.JSX.Element {
                   backgroundColor: '#111111',
                   border: '1px solid #333333',
                   color: '#ffffff',
-                  fontSize: '1rem'
+                  fontSize: '1.2rem'
                 }}
                 onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addRecipientEmail())}
               />
@@ -491,7 +492,7 @@ export default function CreateNotificationPage(): React.JSX.Element {
                   backgroundColor: '#333333',
                   border: '1px solid #ffffff',
                   color: '#ffffff',
-                  fontSize: '1rem',
+                  fontSize: '1.2rem',
                   cursor: 'pointer'
                 }}
               >
@@ -505,7 +506,8 @@ export default function CreateNotificationPage(): React.JSX.Element {
                 alignItems: 'center',
                 padding: '0.8rem',
                 backgroundColor: '#111111',
-                marginBottom: '0.5rem'
+                marginBottom: '0.5rem',
+                fontSize: '1.2rem'
               }}>
                 <span>{email}</span>
                 <button
@@ -539,7 +541,7 @@ export default function CreateNotificationPage(): React.JSX.Element {
               backgroundColor: '#111111',
               border: '1px solid #333333',
               color: '#ffffff',
-              fontSize: '1rem'
+              fontSize: '1.2rem'
             }}
           />
         </div>
