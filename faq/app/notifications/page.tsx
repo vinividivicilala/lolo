@@ -95,15 +95,15 @@ interface Notification {
   comments: Comment[];
   status?: string;
   reactions?: Record<string, number>;
-  links?: {
+  links: {
     youtube: string[];
     pdf: string[];
     images: string[];
     videos: string[];
     websites: string[];
   };
-  hasLinks?: boolean;
-  linkCount?: number;
+  hasLinks: boolean;
+  linkCount: number;
 }
 
 export default function NotificationsPage(): React.JSX.Element {
@@ -234,7 +234,10 @@ export default function NotificationsPage(): React.JSX.Element {
         }
         
         if (shouldShow) {
-          const notification = {
+          // PERBAIKAN: Pastikan links diambil dengan benar dari Firestore
+          const linksData = data.links || {};
+          
+          const notification: Notification = {
             id: doc.id,
             title: data.title || '',
             message: data.message || '',
@@ -252,16 +255,24 @@ export default function NotificationsPage(): React.JSX.Element {
             comments: data.comments || [],
             status: data.status || 'sent',
             reactions: data.reactions || {},
-            links: data.links || {
-              youtube: [],
-              pdf: [],
-              images: [],
-              videos: [],
-              websites: []
+            // PERBAIKAN: Pastikan links diambil dengan struktur yang benar
+            links: {
+              youtube: Array.isArray(linksData.youtube) ? linksData.youtube : [],
+              pdf: Array.isArray(linksData.pdf) ? linksData.pdf : [],
+              images: Array.isArray(linksData.images) ? linksData.images : [],
+              videos: Array.isArray(linksData.videos) ? linksData.videos : [],
+              websites: Array.isArray(linksData.websites) ? linksData.websites : []
             },
-            hasLinks: data.hasLinks || false,
+            // PERBAIKAN: Gunakan hasLinks dan linkCount dari Firestore jika ada
+            hasLinks: data.hasLinks === true || 
+                      (linksData && Object.values(linksData).some(arr => arr && arr.length > 0)),
             linkCount: data.linkCount || 0
           };
+          
+          // Log untuk debugging
+          console.log('Notification loaded:', notification.id);
+          console.log('Links:', notification.links);
+          console.log('Has Links:', notification.hasLinks);
           
           if (!notification.userReads[currentUserId]) {
             unread++;
@@ -862,6 +873,11 @@ export default function NotificationsPage(): React.JSX.Element {
 
   // Link Preview Component
   const LinkPreview = ({ notification }: { notification: Notification }) => {
+    // Log untuk debugging
+    console.log('Rendering LinkPreview for:', notification.id);
+    console.log('Links data:', notification.links);
+    console.log('Has Links:', notification.hasLinks);
+    
     const links = notification.links || {
       youtube: [],
       pdf: [],
@@ -870,7 +886,12 @@ export default function NotificationsPage(): React.JSX.Element {
       websites: []
     };
     
-    const hasLinks = notification.hasLinks || Object.values(links).some(arr => arr.length > 0);
+    const hasLinks = notification.hasLinks || 
+                     links.youtube.length > 0 ||
+                     links.pdf.length > 0 ||
+                     links.images.length > 0 ||
+                     links.videos.length > 0 ||
+                     links.websites.length > 0;
     
     if (!hasLinks) return null;
     
@@ -2292,4 +2313,3 @@ export default function NotificationsPage(): React.JSX.Element {
     </div>
   );
 }
-
