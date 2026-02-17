@@ -13,10 +13,13 @@ import {
   updateDoc,
   Timestamp,
   arrayUnion,
+  arrayRemove,
   increment as firestoreIncrement
 } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { initializeApp, getApps } from "firebase/app";
+import Picker from '@emoji-mart/react';
+import data from '@emoji-mart/data';
 
 // Konfigurasi Firebase
 const firebaseConfig = {
@@ -42,6 +45,17 @@ if (typeof window !== "undefined") {
   auth = getAuth(app);
 }
 
+interface Reply {
+  id: string;
+  userId: string;
+  userName: string;
+  userEmail?: string;
+  text: string;
+  createdAt: Timestamp;
+  likes: string[];
+  emoji?: string;
+}
+
 interface Comment {
   id: string;
   userId: string;
@@ -49,6 +63,9 @@ interface Comment {
   userEmail?: string;
   text: string;
   createdAt: Timestamp;
+  likes: string[];
+  replies: Reply[];
+  emoji?: string;
 }
 
 interface Notification {
@@ -65,6 +82,7 @@ interface Notification {
   createdAt: Timestamp;
   userReads: Record<string, boolean>;
   views: number;
+  likes: string[];
   comments: Comment[];
   status?: string;
 }
@@ -78,8 +96,10 @@ export default function NotificationsPage(): React.JSX.Element {
   const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
   const [currentTime, setCurrentTime] = useState<string>('');
   const [commentText, setCommentText] = useState('');
-  const [isSubmittingComment, setIsSubmittingComment] = useState(false);
-  const [showComments, setShowComments] = useState(false);
+  const [replyText, setReplyText] = useState('');
+  const [replyingTo, setReplyingTo] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState<string | null>(null);
 
   // Update current time
   useEffect(() => {
@@ -87,12 +107,13 @@ export default function NotificationsPage(): React.JSX.Element {
       const now = new Date();
       setCurrentTime(now.toLocaleString('id-ID', {
         hour: '2-digit',
-        minute: '2-digit'
+        minute: '2-digit',
+        second: '2-digit'
       }));
     };
     
     updateTime();
-    const timer = setInterval(updateTime, 60000);
+    const timer = setInterval(updateTime, 1000);
     return () => clearInterval(timer);
   }, []);
 
@@ -188,6 +209,7 @@ export default function NotificationsPage(): React.JSX.Element {
             createdAt: data.createdAt || Timestamp.now(),
             userReads: data.userReads || {},
             views: data.views || 0,
+            likes: data.likes || [],
             comments: data.comments || [],
             status: data.status || 'sent'
           };
@@ -227,11 +249,34 @@ export default function NotificationsPage(): React.JSX.Element {
     }
   };
 
+  // Toggle like on notification
+  const toggleNotificationLike = async (notificationId: string) => {
+    if (!db) return;
+    
+    try {
+      const currentUserId = getCurrentUserId();
+      const notificationRef = doc(db, 'notifications', notificationId);
+      const notification = notifications.find(n => n.id === notificationId);
+      
+      if (notification?.likes.includes(currentUserId)) {
+        await updateDoc(notificationRef, {
+          likes: arrayRemove(currentUserId)
+        });
+      } else {
+        await updateDoc(notificationRef, {
+          likes: arrayUnion(currentUserId)
+        });
+      }
+    } catch (error) {
+      console.error("Error toggling like:", error);
+    }
+  };
+
   // Add comment
   const addComment = async (notificationId: string) => {
     if (!db || !commentText.trim()) return;
     
-    setIsSubmittingComment(true);
+    setIsSubmitting(true);
     
     try {
       const currentUserId = getCurrentUserId();
@@ -244,70 +289,151 @@ export default function NotificationsPage(): React.JSX.Element {
         userName: currentUserName,
         userEmail: user?.email,
         text: commentText.trim(),
-        createdAt: Timestamp.now()
+        createdAt: Timestamp.now(),
+        likes: [],
+        replies: []
       };
       
       await updateDoc(notificationRef, {
         comments: arrayUnion(newComment)
       });
       
-      // Update local state
-      setNotifications(prev => prev.map(notif => {
-        if (notif.id === notificationId) {
-          return {
-            ...notif,
-            comments: [...(notif.comments || []), newComment]
-          };
-        }
-        return notif;
-      }));
-      
-      if (selectedNotification?.id === notificationId) {
-        setSelectedNotification(prev => prev ? {
-          ...prev,
-          comments: [...(prev.comments || []), newComment]
-        } : null);
-      }
-      
       setCommentText('');
+      setShowEmojiPicker(null);
     } catch (error) {
       console.error("Error adding comment:", error);
       alert('Failed to add comment');
     } finally {
-      setIsSubmittingComment(false);
+      setIsSubmitting(false);
     }
   };
 
-  // Format date
-  const formatDate = (timestamp: Timestamp) => {
+  // Add reply
+  const addReply = async (notificationId: string, commentId: string) => {
+    if (!db || !replyText.trim()) return;
+    
+    setIsSubmitting(true);
+    
+    try {
+      const currentUserId = getCurrentUserId();
+      const currentUserName = getCurrentUserName();
+      const notificationRef = doc(db, 'notifications', notificationId);
+      const notification = notifications.find(n => n.id === notificationId);
+      
+      if (notification) {
+        const updatedComments = notification.comments.map(comment => {
+          if (comment.id === commentId) {
+            const newReply = {
+              id: Date.now().toString(),
+              userId: currentUserId,
+              userName: currentUserName,
+              userEmail: user?.email,
+              text: replyText.trim(),
+              createdAt: Timestamp.now(),
+              likes: []
+            };
+            return {
+              ...comment,
+              replies: [...(comment.replies || []), newReply]
+            };
+          }
+          return comment;
+        });
+        
+        await updateDoc(notificationRef, {
+          comments: updatedComments
+        });
+      }
+      
+      setReplyText('');
+      setReplyingTo(null);
+      setShowEmojiPicker(null);
+    } catch (error) {
+      console.error("Error adding reply:", error);
+      alert('Failed to add reply');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Toggle like on comment or reply
+  const toggleLike = async (
+    notificationId: string, 
+    commentId: string, 
+    replyId?: string
+  ) => {
+    if (!db) return;
+    
+    try {
+      const currentUserId = getCurrentUserId();
+      const notificationRef = doc(db, 'notifications', notificationId);
+      const notification = notifications.find(n => n.id === notificationId);
+      
+      if (notification) {
+        const updatedComments = notification.comments.map(comment => {
+          if (comment.id === commentId) {
+            if (replyId) {
+              // Toggle like on reply
+              const updatedReplies = comment.replies.map(reply => {
+                if (reply.id === replyId) {
+                  const likes = reply.likes.includes(currentUserId)
+                    ? reply.likes.filter(id => id !== currentUserId)
+                    : [...reply.likes, currentUserId];
+                  return { ...reply, likes };
+                }
+                return reply;
+              });
+              return { ...comment, replies: updatedReplies };
+            } else {
+              // Toggle like on comment
+              const likes = comment.likes.includes(currentUserId)
+                ? comment.likes.filter(id => id !== currentUserId)
+                : [...comment.likes, currentUserId];
+              return { ...comment, likes };
+            }
+          }
+          return comment;
+        });
+        
+        await updateDoc(notificationRef, {
+          comments: updatedComments
+        });
+      }
+    } catch (error) {
+      console.error("Error toggling like:", error);
+    }
+  };
+
+  // Add emoji to comment/reply
+  const addEmoji = (emoji: any, target: string) => {
+    if (target === 'comment') {
+      setCommentText(prev => prev + emoji.native);
+    } else {
+      setReplyText(prev => prev + emoji.native);
+    }
+    setShowEmojiPicker(null);
+  };
+
+  // Format time ago
+  const timeAgo = (timestamp: Timestamp) => {
     if (!timestamp) return '';
+    
     const date = timestamp.toDate();
     const now = new Date();
-    const diff = now.getTime() - date.getTime();
-    const hours = Math.floor(diff / 3600000);
-    const days = Math.floor(diff / 86400000);
+    const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
     
-    if (hours < 1) return 'just now';
-    if (hours < 24) return `${hours}h ago`;
-    if (days < 7) return `${days}d ago`;
+    if (seconds < 60) return `${seconds} seconds ago`;
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes} minutes ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours} hours ago`;
+    const days = Math.floor(hours / 24);
+    if (days < 7) return `${days} days ago`;
     
     return date.toLocaleDateString('id-ID', { 
       day: 'numeric', 
       month: 'short',
       year: 'numeric'
-    });
-  };
-
-  // Format date time
-  const formatDateTime = (timestamp: Timestamp) => {
-    if (!timestamp) return '';
-    const date = timestamp.toDate();
-    return date.toLocaleDateString('id-ID', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
     });
   };
 
@@ -428,6 +554,7 @@ export default function NotificationsPage(): React.JSX.Element {
         <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
           {notifications.map((notification) => {
             const isRead = notification.userReads[getCurrentUserId()];
+            const isLiked = notification.likes.includes(getCurrentUserId());
             
             return (
               <div
@@ -450,7 +577,7 @@ export default function NotificationsPage(): React.JSX.Element {
                   fontSize: '1.5rem'
                 }}>
                   <span>{notification.type}</span>
-                  <span>{formatDate(notification.createdAt)}</span>
+                  <span>{timeAgo(notification.createdAt)}</span>
                 </div>
                 <div style={{ 
                   fontSize: '2.2rem', 
@@ -474,7 +601,10 @@ export default function NotificationsPage(): React.JSX.Element {
                   fontSize: '1.5rem'
                 }}>
                   <span>From {notification.senderName}</span>
-                  <span>💬 {notification.comments?.length || 0}</span>
+                  <div style={{ display: 'flex', gap: '2rem' }}>
+                    <span>❤️ {notification.likes?.length || 0}</span>
+                    <span>💬 {notification.comments?.length || 0}</span>
+                  </div>
                 </div>
               </div>
             );
@@ -504,7 +634,11 @@ export default function NotificationsPage(): React.JSX.Element {
               marginBottom: '4rem'
             }}>
               <button
-                onClick={() => setSelectedNotification(null)}
+                onClick={() => {
+                  setSelectedNotification(null);
+                  setReplyingTo(null);
+                  setShowEmojiPicker(null);
+                }}
                 style={{
                   background: 'none',
                   border: 'none',
@@ -517,7 +651,7 @@ export default function NotificationsPage(): React.JSX.Element {
               </button>
               <span style={{ fontSize: '1.8rem' }}>Notification</span>
               <span style={{ fontSize: '1.8rem' }}>
-                {formatDate(selectedNotification.createdAt)}
+                {timeAgo(selectedNotification.createdAt)}
               </span>
             </div>
 
@@ -548,114 +682,308 @@ export default function NotificationsPage(): React.JSX.Element {
               </div>
               
               <div style={{ 
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
                 fontSize: '2rem'
               }}>
-                — {selectedNotification.senderName}
-                {selectedNotification.senderEmail && (
-                  <span style={{ marginLeft: '1rem' }}>
-                    ({selectedNotification.senderEmail})
-                  </span>
-                )}
+                <span>— {selectedNotification.senderName}</span>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleNotificationLike(selectedNotification.id);
+                  }}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: selectedNotification.likes.includes(getCurrentUserId()) ? '#ff4444' : '#ffffff',
+                    fontSize: '2rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem'
+                  }}
+                >
+                  {selectedNotification.likes.includes(getCurrentUserId()) ? '❤️' : '🤍'}
+                  <span>{selectedNotification.likes?.length || 0}</span>
+                </button>
               </div>
             </div>
 
             {/* Comments Section */}
             <div style={{ marginBottom: '3rem' }}>
-              <button
-                onClick={() => setShowComments(!showComments)}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: '#ffffff',
-                  fontSize: '2rem',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '1rem',
-                  padding: 0,
-                  marginBottom: '2rem'
-                }}
-              >
-                <span>Comments ({selectedNotification.comments?.length || 0})</span>
-                <span style={{ fontSize: '2rem' }}>{showComments ? '▼' : '▶'}</span>
-              </button>
+              <div style={{ 
+                fontSize: '2rem', 
+                marginBottom: '2rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '1rem'
+              }}>
+                <span>Comments</span>
+                <span>({selectedNotification.comments?.length || 0})</span>
+              </div>
 
-              {showComments && (
-                <>
-                  {/* Add Comment */}
-                  <div style={{ marginBottom: '2rem' }}>
-                    <textarea
-                      value={commentText}
-                      onChange={(e) => setCommentText(e.target.value)}
-                      placeholder="Write a comment..."
-                      rows={3}
-                      style={{
-                        width: '100%',
-                        padding: '1rem',
-                        background: '#111111',
-                        border: 'none',
-                        color: '#ffffff',
-                        fontSize: '1.5rem',
-                        marginBottom: '1rem',
-                        resize: 'vertical'
-                      }}
+              {/* Add Comment */}
+              <div style={{ marginBottom: '3rem' }}>
+                <textarea
+                  value={commentText}
+                  onChange={(e) => setCommentText(e.target.value)}
+                  placeholder="Write a comment..."
+                  rows={3}
+                  style={{
+                    width: '100%',
+                    padding: '1rem',
+                    background: '#111111',
+                    border: 'none',
+                    color: '#ffffff',
+                    fontSize: '1.5rem',
+                    marginBottom: '1rem',
+                    resize: 'vertical'
+                  }}
+                />
+                <div style={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between',
+                  alignItems: 'center'
+                }}>
+                  <button
+                    onClick={() => setShowEmojiPicker('comment')}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: '#ffffff',
+                      fontSize: '2rem',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    😊
+                  </button>
+                  <button
+                    onClick={() => addComment(selectedNotification.id)}
+                    disabled={!commentText.trim() || isSubmitting}
+                    style={{
+                      background: 'none',
+                      border: '1px solid #ffffff',
+                      color: commentText.trim() && !isSubmitting ? '#ffffff' : '#666666',
+                      fontSize: '1.5rem',
+                      padding: '1rem 3rem',
+                      cursor: commentText.trim() && !isSubmitting ? 'pointer' : 'default'
+                    }}
+                  >
+                    {isSubmitting ? 'Posting...' : 'Post Comment'}
+                  </button>
+                </div>
+                {showEmojiPicker === 'comment' && (
+                  <div style={{ marginTop: '1rem' }}>
+                    <Picker 
+                      data={data} 
+                      onEmojiSelect={(emoji: any) => addEmoji(emoji, 'comment')}
+                      theme="dark"
                     />
-                    <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                      <button
-                        onClick={() => addComment(selectedNotification.id)}
-                        disabled={!commentText.trim() || isSubmittingComment}
-                        style={{
-                          background: 'none',
-                          border: '1px solid #ffffff',
-                          color: commentText.trim() && !isSubmittingComment ? '#ffffff' : '#666666',
-                          fontSize: '1.5rem',
-                          padding: '1rem 3rem',
-                          cursor: commentText.trim() && !isSubmittingComment ? 'pointer' : 'default'
-                        }}
-                      >
-                        {isSubmittingComment ? 'Posting...' : 'Post Comment'}
-                      </button>
-                    </div>
                   </div>
+                )}
+              </div>
 
-                  {/* Comments List */}
-                  <div>
-                    {selectedNotification.comments && selectedNotification.comments.length > 0 ? (
-                      [...selectedNotification.comments]
-                        .sort((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis())
-                        .map((comment) => (
-                          <div key={comment.id} style={{
-                            padding: '1.5rem 0',
-                            borderBottom: '1px solid #333333'
-                          }}>
-                            <div style={{
+              {/* Comments List */}
+              {selectedNotification.comments && selectedNotification.comments.length > 0 ? (
+                [...selectedNotification.comments]
+                  .sort((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis())
+                  .map((comment) => (
+                    <div key={comment.id} style={{
+                      marginBottom: '2rem'
+                    }}>
+                      {/* Comment */}
+                      <div style={{ marginBottom: '1rem' }}>
+                        <div style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          marginBottom: '0.5rem',
+                          fontSize: '1.2rem'
+                        }}>
+                          <span>{comment.userName}</span>
+                          <span>{timeAgo(comment.createdAt)}</span>
+                        </div>
+                        <div style={{ 
+                          fontSize: '1.5rem',
+                          marginBottom: '0.5rem'
+                        }}>
+                          {comment.text}
+                        </div>
+                        <div style={{
+                          display: 'flex',
+                          gap: '2rem',
+                          fontSize: '1.2rem'
+                        }}>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleLike(selectedNotification.id, comment.id);
+                            }}
+                            style={{
+                              background: 'none',
+                              border: 'none',
+                              color: comment.likes.includes(getCurrentUserId()) ? '#ff4444' : '#888888',
+                              cursor: 'pointer',
                               display: 'flex',
-                              justifyContent: 'space-between',
-                              marginBottom: '0.5rem',
-                              fontSize: '1.2rem'
+                              alignItems: 'center',
+                              gap: '0.3rem'
+                            }}
+                          >
+                            {comment.likes.includes(getCurrentUserId()) ? '❤️' : '🤍'}
+                            {comment.likes?.length || 0}
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setReplyingTo(comment.id);
+                            }}
+                            style={{
+                              background: 'none',
+                              border: 'none',
+                              color: '#888888',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            Reply
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Replies */}
+                      {comment.replies && comment.replies.length > 0 && (
+                        <div style={{ marginLeft: '3rem' }}>
+                          {comment.replies.map((reply) => (
+                            <div key={reply.id} style={{
+                              marginBottom: '1rem'
                             }}>
-                              <span>{comment.userName}</span>
-                              <span>{formatDateTime(comment.createdAt)}</span>
+                              <div style={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                marginBottom: '0.5rem',
+                                fontSize: '1.2rem'
+                              }}>
+                                <span>{reply.userName}</span>
+                                <span>{timeAgo(reply.createdAt)}</span>
+                              </div>
+                              <div style={{ 
+                                fontSize: '1.5rem',
+                                marginBottom: '0.5rem'
+                              }}>
+                                {reply.text}
+                              </div>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toggleLike(selectedNotification.id, comment.id, reply.id);
+                                }}
+                                style={{
+                                  background: 'none',
+                                  border: 'none',
+                                  color: reply.likes.includes(getCurrentUserId()) ? '#ff4444' : '#888888',
+                                  cursor: 'pointer',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '0.3rem',
+                                  fontSize: '1.2rem'
+                                }}
+                              >
+                                {reply.likes.includes(getCurrentUserId()) ? '❤️' : '🤍'}
+                                {reply.likes?.length || 0}
+                              </button>
                             </div>
-                            <div style={{ fontSize: '1.5rem' }}>
-                              {comment.text}
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Reply Form */}
+                      {replyingTo === comment.id && (
+                        <div style={{ marginTop: '1rem', marginLeft: '3rem' }}>
+                          <textarea
+                            value={replyText}
+                            onChange={(e) => setReplyText(e.target.value)}
+                            placeholder="Write a reply..."
+                            rows={2}
+                            style={{
+                              width: '100%',
+                              padding: '1rem',
+                              background: '#111111',
+                              border: 'none',
+                              color: '#ffffff',
+                              fontSize: '1.2rem',
+                              marginBottom: '1rem',
+                              resize: 'vertical'
+                            }}
+                          />
+                          <div style={{ 
+                            display: 'flex', 
+                            justifyContent: 'space-between',
+                            alignItems: 'center'
+                          }}>
+                            <button
+                              onClick={() => setShowEmojiPicker(`reply-${comment.id}`)}
+                              style={{
+                                background: 'none',
+                                border: 'none',
+                                color: '#ffffff',
+                                fontSize: '2rem',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              😊
+                            </button>
+                            <div style={{ display: 'flex', gap: '1rem' }}>
+                              <button
+                                onClick={() => setReplyingTo(null)}
+                                style={{
+                                  background: 'none',
+                                  border: '1px solid #666666',
+                                  color: '#888888',
+                                  fontSize: '1.2rem',
+                                  padding: '0.5rem 1.5rem',
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                Cancel
+                              </button>
+                              <button
+                                onClick={() => addReply(selectedNotification.id, comment.id)}
+                                disabled={!replyText.trim() || isSubmitting}
+                                style={{
+                                  background: 'none',
+                                  border: '1px solid #ffffff',
+                                  color: replyText.trim() && !isSubmitting ? '#ffffff' : '#666666',
+                                  fontSize: '1.2rem',
+                                  padding: '0.5rem 1.5rem',
+                                  cursor: replyText.trim() && !isSubmitting ? 'pointer' : 'default'
+                                }}
+                              >
+                                {isSubmitting ? 'Posting...' : 'Reply'}
+                              </button>
                             </div>
                           </div>
-                        ))
-                    ) : (
-                      <div style={{ textAlign: 'center', padding: '3rem', fontSize: '1.5rem' }}>
-                        No comments yet
-                      </div>
-                    )}
-                  </div>
-                </>
+                          {showEmojiPicker === `reply-${comment.id}` && (
+                            <div style={{ marginTop: '1rem' }}>
+                              <Picker 
+                                data={data} 
+                                onEmojiSelect={(emoji: any) => addEmoji(emoji, 'reply')}
+                                theme="dark"
+                              />
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ))
+              ) : (
+                <div style={{ textAlign: 'center', padding: '3rem', fontSize: '1.5rem' }}>
+                  No comments yet
+                </div>
               )}
             </div>
 
             {/* Views */}
             <div style={{ 
               paddingTop: '2rem',
-              borderTop: '1px solid #333333',
               fontSize: '1.5rem'
             }}>
               Viewed {selectedNotification.views} times
