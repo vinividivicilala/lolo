@@ -1,4 +1,4 @@
-'use client';
+\'use client';
 
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
@@ -51,6 +51,7 @@ interface Notification {
   createdAt: Timestamp;
   userReads: Record<string, boolean>;
   views: number;
+  status?: string;
 }
 
 export default function NotificationsPage(): React.JSX.Element {
@@ -73,7 +74,7 @@ export default function NotificationsPage(): React.JSX.Element {
     };
     
     updateTime();
-    const timer = setInterval(updateTime, 60000); // Update every minute
+    const timer = setInterval(updateTime, 60000);
     
     return () => clearInterval(timer);
   }, []);
@@ -123,7 +124,8 @@ export default function NotificationsPage(): React.JSX.Element {
           senderEmail: data.senderEmail,
           createdAt: data.createdAt || Timestamp.now(),
           userReads: data.userReads || {},
-          views: data.views || 0
+          views: data.views || 0,
+          status: data.status || 'sent'
         };
         
         if (!notification.userReads[currentUserId]) {
@@ -180,25 +182,46 @@ export default function NotificationsPage(): React.JSX.Element {
     });
   };
 
-  // SVG Arrows
-  const ArrowLeft = () => (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-      <path d="M19 12H5M12 19L5 12L12 5"/>
+  // SVG North East Arrow - Large
+  const NorthEastArrow = () => (
+    <svg 
+      width="48" 
+      height="48" 
+      viewBox="0 0 24 24" 
+      fill="none" 
+      stroke="currentColor" 
+      strokeWidth="1.5"
+      strokeLinecap="round" 
+      strokeLinejoin="round"
+    >
+      <path d="M7 7L17 17" />
+      <path d="M7 17V7H17" />
     </svg>
   );
 
-  const ArrowRight = () => (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-      <path d="M5 12H19M12 5L19 12L12 19"/>
+  // SVG South East Arrow - Large
+  const SouthEastArrow = () => (
+    <svg 
+      width="48" 
+      height="48" 
+      viewBox="0 0 24 24" 
+      fill="none" 
+      stroke="currentColor" 
+      strokeWidth="1.5"
+      strokeLinecap="round" 
+      strokeLinejoin="round"
+    >
+      <path d="M5 5L19 19" />
+      <path d="M5 19H19V5" />
     </svg>
   );
 
   return (
     <div style={{
       minHeight: '100vh',
-      backgroundColor: '#ffffff',
+      backgroundColor: '#000000',
       fontFamily: 'Helvetica, Arial, sans-serif',
-      color: '#000000',
+      color: '#ffffff',
       padding: '2rem'
     }}>
       {/* Header */}
@@ -208,52 +231,80 @@ export default function NotificationsPage(): React.JSX.Element {
         alignItems: 'center',
         marginBottom: '3rem',
         paddingBottom: '1rem',
-        borderBottom: '1px solid #f0f0f0'
+        borderBottom: '1px solid #222222'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
           <button
             onClick={() => router.push('/')}
             style={{
               background: 'none',
               border: 'none',
               cursor: 'pointer',
-              color: '#000000',
+              color: '#ffffff',
               padding: 0,
               display: 'flex',
               alignItems: 'center'
             }}
           >
-            <ArrowLeft />
+            <NorthEastArrow />
           </button>
-          <span style={{ fontSize: '1.1rem' }}>notifications</span>
+          <span style={{ fontSize: '1.8rem' }}>notifikasi</span>
           {unreadCount > 0 && (
-            <span style={{ color: '#999999', fontSize: '0.9rem' }}>({unreadCount})</span>
+            <span style={{ color: '#666666', fontSize: '1rem' }}>({unreadCount})</span>
           )}
         </div>
         
         <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
-          <span style={{ color: '#666666', fontSize: '0.9rem' }}>{currentTime}</span>
-          <span style={{ fontSize: '0.9rem' }}>
-            {user?.displayName || user?.email || 'visitor'}
-          </span>
+          <span style={{ color: '#666666', fontSize: '1rem' }}>{currentTime}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <span style={{ fontSize: '1rem' }}>
+              {user?.displayName || user?.email || 'visitor'}
+            </span>
+            <NorthEastArrow />
+          </div>
         </div>
+      </div>
+
+      {/* Create Notification Button */}
+      <div style={{
+        display: 'flex',
+        justifyContent: 'flex-end',
+        marginBottom: '2rem'
+      }}>
+        <button
+          onClick={() => router.push('/notifications/create')}
+          style={{
+            background: 'none',
+            border: 'none',
+            color: '#ffffff',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            fontSize: '1rem',
+            padding: 0
+          }}
+        >
+          create notification
+          <SouthEastArrow />
+        </button>
       </div>
 
       {/* Content */}
       {isLoading ? (
-        <div style={{ textAlign: 'center', padding: '4rem', color: '#999999' }}>
+        <div style={{ textAlign: 'center', padding: '4rem', color: '#666666' }}>
           loading...
         </div>
       ) : notifications.length === 0 ? (
         <div style={{ 
           textAlign: 'center', 
           padding: '4rem', 
-          color: '#999999'
+          color: '#666666'
         }}>
           no notifications
         </div>
       ) : (
-        <div style={{ maxWidth: '700px', margin: '0 auto' }}>
+        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
           {notifications.map((notification) => {
             const isRead = notification.userReads[getCurrentUserId()];
             
@@ -266,7 +317,7 @@ export default function NotificationsPage(): React.JSX.Element {
                 }}
                 style={{
                   padding: '1.5rem 0',
-                  borderBottom: '1px solid #f0f0f0',
+                  borderBottom: '1px solid #222222',
                   cursor: 'pointer',
                   opacity: isRead ? 0.6 : 1
                 }}
@@ -275,22 +326,22 @@ export default function NotificationsPage(): React.JSX.Element {
                   display: 'flex', 
                   justifyContent: 'space-between', 
                   marginBottom: '0.5rem',
-                  fontSize: '0.85rem',
-                  color: '#999999'
+                  fontSize: '0.9rem',
+                  color: '#666666'
                 }}>
                   <span>{notification.type}</span>
                   <span>{formatDate(notification.createdAt)}</span>
                 </div>
                 <div style={{ 
-                  fontSize: '1rem', 
+                  fontSize: '1.2rem', 
                   marginBottom: '0.5rem',
                   fontWeight: 'normal'
                 }}>
                   {notification.title}
                 </div>
                 <div style={{ 
-                  color: '#666666', 
-                  fontSize: '0.9rem',
+                  color: '#888888', 
+                  fontSize: '1rem',
                   lineHeight: '1.5'
                 }}>
                   {notification.message.length > 120 
@@ -299,8 +350,8 @@ export default function NotificationsPage(): React.JSX.Element {
                 </div>
                 <div style={{ 
                   marginTop: '0.75rem', 
-                  color: '#999999',
-                  fontSize: '0.8rem'
+                  color: '#666666',
+                  fontSize: '0.9rem'
                 }}>
                   from {notification.senderName}
                 </div>
@@ -318,12 +369,12 @@ export default function NotificationsPage(): React.JSX.Element {
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundColor: '#ffffff',
+          backgroundColor: '#000000',
           padding: '2rem',
           overflowY: 'auto',
           zIndex: 1000
         }}>
-          <div style={{ maxWidth: '600px', margin: '0 auto' }}>
+          <div style={{ maxWidth: '700px', margin: '0 auto' }}>
             {/* Modal Header */}
             <div style={{
               display: 'flex',
@@ -331,7 +382,7 @@ export default function NotificationsPage(): React.JSX.Element {
               alignItems: 'center',
               marginBottom: '2.5rem',
               paddingBottom: '1rem',
-              borderBottom: '1px solid #f0f0f0'
+              borderBottom: '1px solid #222222'
             }}>
               <button
                 onClick={() => setSelectedNotification(null)}
@@ -339,16 +390,16 @@ export default function NotificationsPage(): React.JSX.Element {
                   background: 'none',
                   border: 'none',
                   cursor: 'pointer',
-                  color: '#000000',
+                  color: '#ffffff',
                   padding: 0,
                   display: 'flex',
                   alignItems: 'center'
                 }}
               >
-                <ArrowLeft />
+                <NorthEastArrow />
               </button>
-              <span style={{ color: '#999999', fontSize: '0.9rem' }}>notification</span>
-              <span style={{ color: '#999999', fontSize: '0.9rem' }}>
+              <span style={{ color: '#666666', fontSize: '0.9rem' }}>notification</span>
+              <span style={{ color: '#666666', fontSize: '0.9rem' }}>
                 {formatDate(selectedNotification.createdAt)}
               </span>
             </div>
@@ -356,15 +407,15 @@ export default function NotificationsPage(): React.JSX.Element {
             {/* Content */}
             <div>
               <div style={{ 
-                color: '#999999', 
+                color: '#666666', 
                 marginBottom: '1rem',
-                fontSize: '0.9rem'
+                fontSize: '1rem'
               }}>
                 {selectedNotification.type}
               </div>
               
               <div style={{ 
-                fontSize: '1.5rem', 
+                fontSize: '2rem', 
                 marginBottom: '2rem',
                 fontWeight: 'normal',
                 lineHeight: '1.3'
@@ -375,20 +426,20 @@ export default function NotificationsPage(): React.JSX.Element {
               <div style={{ 
                 lineHeight: '1.8', 
                 marginBottom: '2.5rem',
-                color: '#333333',
-                fontSize: '1rem',
+                color: '#cccccc',
+                fontSize: '1.1rem',
                 whiteSpace: 'pre-line'
               }}>
                 {selectedNotification.message}
               </div>
               
               <div style={{ 
-                color: '#666666',
-                fontSize: '0.9rem'
+                color: '#888888',
+                fontSize: '1rem'
               }}>
                 — {selectedNotification.senderName}
                 {selectedNotification.senderEmail && (
-                  <span style={{ color: '#999999', marginLeft: '0.5rem' }}>
+                  <span style={{ color: '#666666', marginLeft: '0.5rem' }}>
                     ({selectedNotification.senderEmail})
                   </span>
                 )}
@@ -399,9 +450,9 @@ export default function NotificationsPage(): React.JSX.Element {
             <div style={{ 
               marginTop: '3rem',
               paddingTop: '1rem',
-              borderTop: '1px solid #f0f0f0',
-              color: '#999999',
-              fontSize: '0.8rem'
+              borderTop: '1px solid #222222',
+              color: '#666666',
+              fontSize: '0.9rem'
             }}>
               viewed {selectedNotification.views} times
             </div>
