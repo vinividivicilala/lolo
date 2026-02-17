@@ -2292,3 +2292,4 @@ export default function NotificationsPage(): React.JSX.Element {
     </div>
   );
 }
+
