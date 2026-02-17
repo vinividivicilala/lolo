@@ -222,40 +222,56 @@ export default function CreateNotificationPage(): React.JSX.Element {
 
   // Fungsi untuk mengekstrak links dari message
   const extractLinksFromMessage = (message: string) => {
+    // YouTube regex
     const youtubeRegex = /(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/[^\s]+/g;
+    
+    // PDF regex - case insensitive untuk .pdf
     const pdfRegex = /(https?:\/\/[^\s]+\.pdf)/gi;
-    const imageRegex = /(https?:\/\/[^\s]+\.(jpg|jpeg|png|gif|webp|svg))/gi;
-    const videoRegex = /(https?:\/\/[^\s]+\.(mp4|webm|ogg|mov))/gi;
+    
+    // Image regex - berbagai format gambar
+    const imageRegex = /(https?:\/\/[^\s]+\.(jpg|jpeg|png|gif|webp|svg|bmp|ico))/gi;
+    
+    // Video regex - berbagai format video
+    const videoRegex = /(https?:\/\/[^\s]+\.(mp4|webm|ogg|mov|avi|mkv|flv|wmv))/gi;
+    
+    // Website regex - URL umum
     const websiteRegex = /(https?:\/\/[^\s]+)/g;
     
+    // Ekstrak semua link
     const youtubeLinks = message.match(youtubeRegex) || [];
     const pdfLinks = message.match(pdfRegex) || [];
     const imageLinks = message.match(imageRegex) || [];
     const videoLinks = message.match(videoRegex) || [];
     
-    // Remove already matched links
+    // Buat salinan message untuk mencari website links
     let remainingMessage = message;
+    
+    // Hapus link yang sudah terdeteksi
     [...youtubeLinks, ...pdfLinks, ...imageLinks, ...videoLinks].forEach(link => {
       remainingMessage = remainingMessage.replace(link, '');
     });
     
+    // Cari website links dari sisa message
     const websiteLinks = remainingMessage.match(websiteRegex) || [];
     
-    // Filter out duplicates
-    const allLinks = {
+    // Filter website links yang sudah termasuk kategori lain
+    const filteredWebsiteLinks = websiteLinks.filter(url => 
+      !youtubeLinks.includes(url) && 
+      !pdfLinks.includes(url) && 
+      !imageLinks.includes(url) && 
+      !videoLinks.includes(url)
+    );
+    
+    // Hapus duplikat dengan Set
+    const result = {
       youtube: [...new Set(youtubeLinks)],
       pdf: [...new Set(pdfLinks)],
       images: [...new Set(imageLinks)],
       videos: [...new Set(videoLinks)],
-      websites: [...new Set(websiteLinks.filter(url => 
-        !youtubeLinks.includes(url) && 
-        !pdfLinks.includes(url) && 
-        !imageLinks.includes(url) && 
-        !videoLinks.includes(url)
-      ))]
+      websites: [...new Set(filteredWebsiteLinks)]
     };
     
-    return allLinks;
+    return result;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -290,6 +306,15 @@ export default function CreateNotificationPage(): React.JSX.Element {
 
       // Ekstrak links dari message
       const extractedLinks = extractLinksFromMessage(formData.message.trim());
+      
+      // Hitung total links
+      const linkCount = Object.values(extractedLinks).reduce((acc, arr) => acc + arr.length, 0);
+      const hasLinks = linkCount > 0;
+
+      // Log untuk debugging
+      console.log('Extracted Links:', extractedLinks);
+      console.log('Link Count:', linkCount);
+      console.log('Has Links:', hasLinks);
 
       const notificationData = {
         title: formData.title.trim(),
@@ -308,22 +333,33 @@ export default function CreateNotificationPage(): React.JSX.Element {
         actionUrl: formData.actionUrl?.trim() || '',
         userReads: {},
         status: scheduledTime ? 'scheduled' : 'sent',
-        // Simpan links yang sudah diekstrak
-        links: extractedLinks,
+        // Simpan links yang sudah diekstrak - PASTIKAN STRUKTURNYA BENAR
+        links: {
+          youtube: extractedLinks.youtube || [],
+          pdf: extractedLinks.pdf || [],
+          images: extractedLinks.images || [],
+          videos: extractedLinks.videos || [],
+          websites: extractedLinks.websites || []
+        },
         // Metadata untuk memudahkan query
-        hasLinks: Object.values(extractedLinks).some(arr => arr.length > 0),
-        linkCount: Object.values(extractedLinks).reduce((acc, arr) => acc + arr.length, 0)
+        hasLinks: hasLinks,
+        linkCount: linkCount,
+        // Tambahkan timestamp untuk debugging
+        createdAt_server: new Date().toISOString()
       };
 
-      console.log('Sending notification with links:', notificationData.links);
-      await addDoc(collection(db, 'notifications'), notificationData);
+      console.log('Final notification data:', JSON.stringify(notificationData, null, 2));
+      
+      // Simpan ke Firestore
+      const docRef = await addDoc(collection(db, 'notifications'), notificationData);
+      console.log('Notification created with ID:', docRef.id);
       
       alert('Notification created successfully!');
       router.push('/notifications');
 
     } catch (error) {
       console.error('Error creating notification:', error);
-      alert('Failed to create notification');
+      alert('Failed to create notification: ' + (error instanceof Error ? error.message : 'Unknown error'));
     } finally {
       setIsLoading(false);
     }
@@ -480,8 +516,8 @@ export default function CreateNotificationPage(): React.JSX.Element {
             <ul style={{ margin: '0.5rem 0 0 0', paddingLeft: '1.5rem' }}>
               <li>YouTube: https://youtube.com/watch?v=... atau https://youtu.be/...</li>
               <li>PDF: https://example.com/file.pdf</li>
-              <li>Images: .jpg, .jpeg, .png, .gif, .webp</li>
-              <li>Videos: .mp4, .webm, .ogg</li>
+              <li>Images: .jpg, .jpeg, .png, .gif, .webp, .svg</li>
+              <li>Videos: .mp4, .webm, .ogg, .mov</li>
               <li>Websites: https://example.com</li>
             </ul>
           </div>
@@ -751,7 +787,7 @@ export default function CreateNotificationPage(): React.JSX.Element {
                 <div>
                   {links.youtube.length > 0 && (
                     <div style={{ marginBottom: '0.5rem' }}>
-                      <strong style={{ color: '#ff0000' }}>YouTube:</strong>
+                      <strong style={{ color: '#ff0000' }}>YouTube ({links.youtube.length}):</strong>
                       <ul style={{ margin: '0.5rem 0', color: '#3b82f6' }}>
                         {links.youtube.map((url, i) => <li key={i}>{url}</li>)}
                       </ul>
@@ -759,7 +795,7 @@ export default function CreateNotificationPage(): React.JSX.Element {
                   )}
                   {links.pdf.length > 0 && (
                     <div style={{ marginBottom: '0.5rem' }}>
-                      <strong style={{ color: '#ff6b6b' }}>PDF:</strong>
+                      <strong style={{ color: '#ff6b6b' }}>PDF ({links.pdf.length}):</strong>
                       <ul style={{ margin: '0.5rem 0', color: '#3b82f6' }}>
                         {links.pdf.map((url, i) => <li key={i}>{url}</li>)}
                       </ul>
@@ -767,7 +803,7 @@ export default function CreateNotificationPage(): React.JSX.Element {
                   )}
                   {links.images.length > 0 && (
                     <div style={{ marginBottom: '0.5rem' }}>
-                      <strong style={{ color: '#4ecdc4' }}>Images:</strong>
+                      <strong style={{ color: '#4ecdc4' }}>Images ({links.images.length}):</strong>
                       <ul style={{ margin: '0.5rem 0', color: '#3b82f6' }}>
                         {links.images.map((url, i) => <li key={i}>{url}</li>)}
                       </ul>
@@ -775,7 +811,7 @@ export default function CreateNotificationPage(): React.JSX.Element {
                   )}
                   {links.videos.length > 0 && (
                     <div style={{ marginBottom: '0.5rem' }}>
-                      <strong style={{ color: '#45b7d1' }}>Videos:</strong>
+                      <strong style={{ color: '#45b7d1' }}>Videos ({links.videos.length}):</strong>
                       <ul style={{ margin: '0.5rem 0', color: '#3b82f6' }}>
                         {links.videos.map((url, i) => <li key={i}>{url}</li>)}
                       </ul>
@@ -783,12 +819,15 @@ export default function CreateNotificationPage(): React.JSX.Element {
                   )}
                   {links.websites.length > 0 && (
                     <div style={{ marginBottom: '0.5rem' }}>
-                      <strong style={{ color: '#96ceb4' }}>Websites:</strong>
+                      <strong style={{ color: '#96ceb4' }}>Websites ({links.websites.length}):</strong>
                       <ul style={{ margin: '0.5rem 0', color: '#3b82f6' }}>
                         {links.websites.map((url, i) => <li key={i}>{url}</li>)}
                       </ul>
                     </div>
                   )}
+                  <div style={{ marginTop: '1rem', color: '#888888' }}>
+                    Total Links: {Object.values(links).reduce((acc, arr) => acc + arr.length, 0)}
+                  </div>
                 </div>
               );
             })()}
