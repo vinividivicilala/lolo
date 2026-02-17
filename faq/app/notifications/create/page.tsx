@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from "react";
-import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { 
   getFirestore, 
@@ -49,7 +48,6 @@ interface NotificationForm {
   recipientIds: string[];
   recipientEmails: string[];
   actionUrl?: string;
-  status: 'draft' | 'scheduled' | 'sent' | 'failed';
 }
 
 interface User {
@@ -64,9 +62,6 @@ export default function CreateNotificationPage(): React.JSX.Element {
   const [isLoading, setIsLoading] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
-  const [currentTime, setCurrentTime] = useState<string>('');
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [notificationId, setNotificationId] = useState<string>('');
   
   const [formData, setFormData] = useState<NotificationForm>({
     title: '',
@@ -78,23 +73,10 @@ export default function CreateNotificationPage(): React.JSX.Element {
     recipientIds: [],
     recipientEmails: [],
     actionUrl: '',
-    status: 'draft'
   });
 
   const [newRecipientEmail, setNewRecipientEmail] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
-
-  // Update current time
-  useEffect(() => {
-    const timer = setInterval(() => {
-      const now = new Date();
-      setCurrentTime(now.toLocaleString('id-ID', {
-        hour: '2-digit',
-        minute: '2-digit'
-      }));
-    }, 60000);
-    return () => clearInterval(timer);
-  }, []);
 
   // Check authentication
   useEffect(() => {
@@ -178,60 +160,6 @@ export default function CreateNotificationPage(): React.JSX.Element {
     );
   });
 
-  const saveAsDraft = async () => {
-    if (!user || !db) {
-      alert('Please sign in to create notifications');
-      return;
-    }
-
-    if (!formData.title.trim() || !formData.message.trim()) {
-      alert('Title and message are required');
-      return;
-    }
-
-    setIsLoading(true);
-
-    try {
-      const scheduledTime = formData.scheduledDate && formData.scheduledTime 
-        ? new Date(`${formData.scheduledDate}T${formData.scheduledTime}`).toISOString()
-        : null;
-
-      const notificationData = {
-        title: formData.title.trim(),
-        message: formData.message.trim(),
-        type: formData.type,
-        scheduledTime: scheduledTime,
-        senderId: user.uid,
-        senderName: user.displayName || user.email || 'User',
-        senderEmail: user.email,
-        recipientType: formData.recipientType,
-        recipientIds: formData.recipientType === 'specific' ? formData.recipientIds : [],
-        recipientEmails: formData.recipientType === 'email' ? formData.recipientEmails : [],
-        isRead: false,
-        isDeleted: false,
-        createdAt: serverTimestamp(),
-        actionUrl: formData.actionUrl?.trim() || '',
-        userReads: {},
-        status: 'draft',
-        updatedAt: serverTimestamp()
-      };
-
-      const docRef = await addDoc(collection(db, 'notifications'), notificationData);
-      setNotificationId(docRef.id);
-      setShowSuccess(true);
-      
-      setTimeout(() => {
-        setShowSuccess(false);
-      }, 5000);
-
-    } catch (error) {
-      console.error('Error saving draft:', error);
-      alert('Failed to save draft');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -279,37 +207,16 @@ export default function CreateNotificationPage(): React.JSX.Element {
         actionUrl: formData.actionUrl?.trim() || '',
         userReads: {},
         status: scheduledTime ? 'scheduled' : 'sent',
-        sentAt: scheduledTime ? null : serverTimestamp(),
-        updatedAt: serverTimestamp()
       };
 
-      const docRef = await addDoc(collection(db, 'notifications'), notificationData);
-      setNotificationId(docRef.id);
-      setShowSuccess(true);
-      
-      setTimeout(() => {
-        setShowSuccess(false);
-        router.push('/notifications');
-      }, 3000);
+      await addDoc(collection(db, 'notifications'), notificationData);
+      router.push('/notifications');
 
     } catch (error) {
       console.error('Error creating notification:', error);
       alert('Failed to create notification');
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  // Get type color
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case 'announcement': return '#4a90e2';
-      case 'maintenance': return '#f5a623';
-      case 'system': return '#9013fe';
-      case 'update': return '#7ed321';
-      case 'alert': return '#d0021b';
-      case 'info': return '#4a90e2';
-      default: return '#4a90e2';
     }
   };
 
@@ -322,8 +229,6 @@ export default function CreateNotificationPage(): React.JSX.Element {
       fill="none" 
       stroke="currentColor" 
       strokeWidth="1"
-      strokeLinecap="round" 
-      strokeLinejoin="round"
     >
       <path d="M7 7L17 17" />
       <path d="M7 17V7H17" />
@@ -339,8 +244,6 @@ export default function CreateNotificationPage(): React.JSX.Element {
       fill="none" 
       stroke="currentColor" 
       strokeWidth="1"
-      strokeLinecap="round" 
-      strokeLinejoin="round"
     >
       <path d="M5 5L19 19" />
       <path d="M5 19H19V5" />
@@ -375,64 +278,46 @@ export default function CreateNotificationPage(): React.JSX.Element {
           >
             <NorthEastArrow />
           </button>
-          <span style={{ fontSize: '2.5rem' }}>create notification</span>
+          <span style={{ fontSize: '2rem' }}>Create Notification</span>
         </div>
         
         <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
-          <span style={{ fontSize: '1.2rem', color: '#888888' }}>{currentTime}</span>
+          <span style={{ fontSize: '1.2rem', color: '#888888' }}>
+            {new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
+          </span>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <span style={{ fontSize: '1.2rem' }}>{user?.displayName || user?.email || 'visitor'}</span>
+            <span style={{ fontSize: '1.2rem' }}>{user?.displayName || user?.email || 'Visitor'}</span>
             <NorthEastArrow />
           </div>
         </div>
       </div>
 
-      {/* Success Message */}
-      {showSuccess && (
-        <div style={{
-          position: 'fixed',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          backgroundColor: '#7ed321',
-          color: '#000000',
-          padding: '2rem 4rem',
-          zIndex: 200,
-          fontSize: '1.5rem'
-        }}>
-          notification created
-        </div>
-      )}
-
       {/* Form */}
       <form onSubmit={handleSubmit} style={{ maxWidth: '800px', margin: '0 auto' }}>
         {/* Type Selection */}
-        <div style={{ marginBottom: '3rem', display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+        <div style={{ marginBottom: '2rem', display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
           {[
-            { value: 'announcement', label: 'announcement' },
-            { value: 'maintenance', label: 'maintenance' },
-            { value: 'system', label: 'system' },
-            { value: 'update', label: 'update' },
-            { value: 'alert', label: 'alert' },
-            { value: 'info', label: 'info' }
-          ].map((option) => (
+            'Announcement',
+            'Maintenance',
+            'System',
+            'Update',
+            'Alert',
+            'Info'
+          ].map((label) => (
             <button
-              key={option.value}
+              key={label}
               type="button"
-              onClick={() => {
-                handleInputChange('type', option.value);
-                handleInputChange('status', 'draft');
-              }}
+              onClick={() => handleInputChange('type', label.toLowerCase())}
               style={{
-                padding: '0.8rem 2rem',
-                backgroundColor: formData.type === option.value ? getTypeColor(option.value) : 'transparent',
-                border: '1px solid #333333',
-                color: formData.type === option.value ? '#000000' : '#ffffff',
-                fontSize: '1.2rem',
+                padding: '0.5rem 1.5rem',
+                backgroundColor: 'transparent',
+                border: formData.type === label.toLowerCase() ? '1px solid #ffffff' : '1px solid #333333',
+                color: '#ffffff',
+                fontSize: '1rem',
                 cursor: 'pointer'
               }}
             >
-              {option.label}
+              {label}
             </button>
           ))}
         </div>
@@ -443,16 +328,16 @@ export default function CreateNotificationPage(): React.JSX.Element {
             type="text"
             value={formData.title}
             onChange={(e) => handleInputChange('title', e.target.value)}
-            placeholder="title"
+            placeholder="Title"
             required
             style={{
               width: '100%',
-              padding: '1rem 0',
+              padding: '0.8rem 0',
               backgroundColor: 'transparent',
               border: 'none',
               borderBottom: '1px solid #333333',
               color: '#ffffff',
-              fontSize: '2rem',
+              fontSize: '1.5rem',
               outline: 'none'
             }}
           />
@@ -463,12 +348,12 @@ export default function CreateNotificationPage(): React.JSX.Element {
           <textarea
             value={formData.message}
             onChange={(e) => handleInputChange('message', e.target.value)}
-            placeholder="message"
+            placeholder="Message"
             required
             rows={6}
             style={{
               width: '100%',
-              padding: '1rem 0',
+              padding: '0.8rem 0',
               backgroundColor: 'transparent',
               border: 'none',
               borderBottom: '1px solid #333333',
@@ -485,10 +370,7 @@ export default function CreateNotificationPage(): React.JSX.Element {
           <input
             type="date"
             value={formData.scheduledDate}
-            onChange={(e) => {
-              handleInputChange('scheduledDate', e.target.value);
-              if (e.target.value) handleInputChange('status', 'scheduled');
-            }}
+            onChange={(e) => handleInputChange('scheduledDate', e.target.value)}
             style={{
               flex: 1,
               padding: '0.8rem',
@@ -501,10 +383,7 @@ export default function CreateNotificationPage(): React.JSX.Element {
           <input
             type="time"
             value={formData.scheduledTime}
-            onChange={(e) => {
-              handleInputChange('scheduledTime', e.target.value);
-              if (e.target.value) handleInputChange('status', 'scheduled');
-            }}
+            onChange={(e) => handleInputChange('scheduledTime', e.target.value)}
             style={{
               flex: 1,
               padding: '0.8rem',
@@ -519,9 +398,9 @@ export default function CreateNotificationPage(): React.JSX.Element {
         {/* Recipient Type */}
         <div style={{ marginBottom: '2rem', display: 'flex', gap: '1rem' }}>
           {[
-            { value: 'all', label: 'all users' },
-            { value: 'specific', label: 'specific users' },
-            { value: 'email', label: 'email addresses' }
+            { value: 'all', label: 'All Users' },
+            { value: 'specific', label: 'Specific Users' },
+            { value: 'email', label: 'Email Addresses' }
           ].map((option) => (
             <button
               key={option.value}
@@ -548,7 +427,7 @@ export default function CreateNotificationPage(): React.JSX.Element {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="search users"
+              placeholder="Search Users"
               style={{
                 width: '100%',
                 padding: '0.8rem',
@@ -560,21 +439,27 @@ export default function CreateNotificationPage(): React.JSX.Element {
               }}
             />
             <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
-              {filteredUsers.map((userItem) => (
-                <div
-                  key={userItem.uid}
-                  onClick={() => toggleUserSelection(userItem.uid)}
-                  style={{
-                    padding: '1rem',
-                    marginBottom: '0.5rem',
-                    backgroundColor: formData.recipientIds.includes(userItem.uid) ? '#7ed321' : '#111111',
-                    color: formData.recipientIds.includes(userItem.uid) ? '#000000' : '#ffffff',
-                    cursor: 'pointer'
-                  }}
-                >
-                  {userItem.displayName || userItem.email || 'unknown'}
-                </div>
-              ))}
+              {isLoadingUsers ? (
+                <div style={{ padding: '1rem', color: '#888888' }}>Loading...</div>
+              ) : filteredUsers.length === 0 ? (
+                <div style={{ padding: '1rem', color: '#888888' }}>No Users Found</div>
+              ) : (
+                filteredUsers.map((userItem) => (
+                  <div
+                    key={userItem.uid}
+                    onClick={() => toggleUserSelection(userItem.uid)}
+                    style={{
+                      padding: '1rem',
+                      marginBottom: '0.5rem',
+                      backgroundColor: formData.recipientIds.includes(userItem.uid) ? '#333333' : '#111111',
+                      color: '#ffffff',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {userItem.displayName || userItem.email || 'No Name'}
+                  </div>
+                ))
+              )}
             </div>
           </div>
         )}
@@ -587,7 +472,7 @@ export default function CreateNotificationPage(): React.JSX.Element {
                 type="email"
                 value={newRecipientEmail}
                 onChange={(e) => setNewRecipientEmail(e.target.value)}
-                placeholder="email address"
+                placeholder="Email Address"
                 style={{
                   flex: 1,
                   padding: '0.8rem',
@@ -603,14 +488,14 @@ export default function CreateNotificationPage(): React.JSX.Element {
                 onClick={addRecipientEmail}
                 style={{
                   padding: '0.8rem 2rem',
-                  backgroundColor: '#ffffff',
-                  border: 'none',
-                  color: '#000000',
+                  backgroundColor: '#333333',
+                  border: '1px solid #ffffff',
+                  color: '#ffffff',
                   fontSize: '1rem',
                   cursor: 'pointer'
                 }}
               >
-                add
+                Add
               </button>
             </div>
             {formData.recipientEmails.map((email, i) => (
@@ -629,7 +514,7 @@ export default function CreateNotificationPage(): React.JSX.Element {
                   style={{
                     background: 'none',
                     border: 'none',
-                    color: '#d0021b',
+                    color: '#888888',
                     fontSize: '1.5rem',
                     cursor: 'pointer'
                   }}
@@ -647,7 +532,7 @@ export default function CreateNotificationPage(): React.JSX.Element {
             type="url"
             value={formData.actionUrl}
             onChange={(e) => handleInputChange('actionUrl', e.target.value)}
-            placeholder="action url (optional)"
+            placeholder="Action Url (Optional)"
             style={{
               width: '100%',
               padding: '0.8rem',
@@ -668,33 +553,17 @@ export default function CreateNotificationPage(): React.JSX.Element {
         }}>
           <button
             type="button"
-            onClick={saveAsDraft}
-            disabled={isLoading}
-            style={{
-              padding: '0.8rem 2rem',
-              background: 'none',
-              border: '1px solid #666666',
-              color: '#ffffff',
-              fontSize: '1.2rem',
-              cursor: isLoading ? 'not-allowed' : 'pointer'
-            }}
-          >
-            save draft
-          </button>
-          
-          <button
-            type="button"
             onClick={() => router.push('/notifications')}
             style={{
               padding: '0.8rem 2rem',
               background: 'none',
-              border: 'none',
+              border: '1px solid #333333',
               color: '#888888',
               fontSize: '1.2rem',
               cursor: 'pointer'
             }}
           >
-            cancel
+            Cancel
           </button>
           
           <button
@@ -703,16 +572,16 @@ export default function CreateNotificationPage(): React.JSX.Element {
             style={{
               padding: '0.8rem 2rem',
               background: 'none',
-              border: 'none',
-              color: isLoading ? '#444444' : '#ffffff',
+              border: '1px solid #ffffff',
+              color: isLoading ? '#888888' : '#ffffff',
               fontSize: '1.2rem',
-              cursor: isLoading ? 'not-allowed' : 'pointer',
+              cursor: isLoading ? 'default' : 'pointer',
               display: 'flex',
               alignItems: 'center',
               gap: '0.5rem'
             }}
           >
-            {isLoading ? 'sending' : 'send'}
+            {isLoading ? 'Sending...' : 'Send'}
             <SouthEastArrow />
           </button>
         </div>
