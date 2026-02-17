@@ -578,13 +578,13 @@ export default function NotificationsPage(): React.JSX.Element {
     const now = new Date();
     const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
     
-    if (seconds < 60) return `${seconds} seconds ago`;
+    if (seconds < 60) return `${seconds} detik yang lalu`;
     const minutes = Math.floor(seconds / 60);
-    if (minutes < 60) return `${minutes} minutes ago`;
+    if (minutes < 60) return `${minutes} menit yang lalu`;
     const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `${hours} hours ago`;
+    if (hours < 24) return `${hours} jam yang lalu`;
     const days = Math.floor(hours / 24);
-    if (days < 7) return `${days} days ago`;
+    if (days < 7) return `${days} hari yang lalu`;
     
     return date.toLocaleDateString('id-ID', { 
       day: 'numeric', 
@@ -596,9 +596,9 @@ export default function NotificationsPage(): React.JSX.Element {
   // Extract links from message
   const extractLinks = (message: string) => {
     const youtubeRegex = /(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/[^\s]+/g;
-    const pdfRegex = /(https?:\/\/[^\s]+\.pdf)/g;
-    const imageRegex = /(https?:\/\/[^\s]+\.(jpg|jpeg|png|gif|webp))/g;
-    const videoRegex = /(https?:\/\/[^\s]+\.(mp4|webm|ogg))/g;
+    const pdfRegex = /(https?:\/\/[^\s]+\.pdf)/gi;
+    const imageRegex = /(https?:\/\/[^\s]+\.(jpg|jpeg|png|gif|webp|svg))/gi;
+    const videoRegex = /(https?:\/\/[^\s]+\.(mp4|webm|ogg|mov))/gi;
     const websiteRegex = /(https?:\/\/[^\s]+)/g;
     
     const youtubeLinks = message.match(youtubeRegex) || [];
@@ -623,7 +623,7 @@ export default function NotificationsPage(): React.JSX.Element {
     };
   };
 
-  // Render YouTube embed
+  // Get YouTube embed URL
   const getYouTubeEmbedUrl = (url: string) => {
     const videoId = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
     return videoId ? `https://www.youtube.com/embed/${videoId[1]}` : null;
@@ -638,9 +638,12 @@ export default function NotificationsPage(): React.JSX.Element {
       fill="none" 
       stroke="currentColor" 
       strokeWidth="1"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     >
       <path d="M7 7L17 17" />
-      <path d="M7 17V7H17" />
+      <path d="M17 7H7" />
+      <path d="M7 17V7" />
     </svg>
   );
 
@@ -652,9 +655,12 @@ export default function NotificationsPage(): React.JSX.Element {
       fill="none" 
       stroke="currentColor" 
       strokeWidth="1"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     >
       <path d="M5 5L19 19" />
-      <path d="M5 19H19V5" />
+      <path d="M19 5H5" />
+      <path d="M5 19V5" />
     </svg>
   );
 
@@ -831,7 +837,7 @@ export default function NotificationsPage(): React.JSX.Element {
         </button>
       </div>
 
-      {/* Content - Tanpa Animasi */}
+      {/* Content */}
       {isLoading ? (
         <div style={{ textAlign: 'center', padding: '6rem', fontSize: '2rem' }}>
           Loading...
@@ -913,8 +919,7 @@ export default function NotificationsPage(): React.JSX.Element {
                           padding: '8px 12px',
                           borderRadius: '30px',
                           background: isLiked ? 'rgba(59, 130, 246, 0.1)' : 'transparent',
-                          border: isLiked ? '1px solid #3b82f6' : 'none',
-                          transition: 'all 0.2s'
+                          border: isLiked ? '1px solid #3b82f6' : 'none'
                         }}
                       >
                         <LikeIcon filled={isLiked} />
@@ -933,7 +938,7 @@ export default function NotificationsPage(): React.JSX.Element {
         </div>
       )}
 
-      {/* Detail Modal - Tanpa Animasi */}
+      {/* Detail Modal */}
       {selectedNotification && (
         <div
           style={{
@@ -1015,14 +1020,21 @@ export default function NotificationsPage(): React.JSX.Element {
               
               {/* Links Section */}
               {(() => {
-                const links = extractLinks(selectedNotification.message);
-                const hasLinks = Object.values(links).some(arr => arr.length > 0);
+                // Gunakan links dari database jika ada, jika tidak extract dari message
+                const links = selectedNotification.links && Object.values(selectedNotification.links).some(arr => arr && arr.length > 0)
+                  ? selectedNotification.links
+                  : extractLinks(selectedNotification.message);
+                
+                const hasLinks = links && Object.values(links).some(arr => arr && arr.length > 0);
                 
                 if (hasLinks) {
                   return (
                     <div style={{ marginBottom: '3rem' }}>
                       <button
-                        onClick={() => setShowLinks(!showLinks)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setShowLinks(!showLinks);
+                        }}
                         style={{
                           background: 'rgba(255,255,255,0.05)',
                           border: '1px solid rgba(255,255,255,0.2)',
@@ -1049,14 +1061,15 @@ export default function NotificationsPage(): React.JSX.Element {
                           border: '1px solid rgba(255,255,255,0.1)'
                         }}>
                           {/* YouTube Links */}
-                          {links.youtube.length > 0 && (
+                          {links.youtube && links.youtube.length > 0 && (
                             <div style={{ marginBottom: '30px' }}>
                               <h4 style={{ 
                                 fontSize: '1.5rem', 
                                 marginBottom: '15px',
                                 display: 'flex',
                                 alignItems: 'center',
-                                gap: '10px'
+                                gap: '10px',
+                                color: '#ff0000'
                               }}>
                                 <YoutubeIcon /> YouTube Videos
                               </h4>
@@ -1101,14 +1114,15 @@ export default function NotificationsPage(): React.JSX.Element {
                           )}
 
                           {/* PDF Links */}
-                          {links.pdf.length > 0 && (
+                          {links.pdf && links.pdf.length > 0 && (
                             <div style={{ marginBottom: '30px' }}>
                               <h4 style={{ 
                                 fontSize: '1.5rem', 
                                 marginBottom: '15px',
                                 display: 'flex',
                                 alignItems: 'center',
-                                gap: '10px'
+                                gap: '10px',
+                                color: '#ff6b6b'
                               }}>
                                 <PdfIcon /> PDF Documents
                               </h4>
@@ -1140,14 +1154,15 @@ export default function NotificationsPage(): React.JSX.Element {
                           )}
 
                           {/* Image Links */}
-                          {links.images.length > 0 && (
+                          {links.images && links.images.length > 0 && (
                             <div style={{ marginBottom: '30px' }}>
                               <h4 style={{ 
                                 fontSize: '1.5rem', 
                                 marginBottom: '15px',
                                 display: 'flex',
                                 alignItems: 'center',
-                                gap: '10px'
+                                gap: '10px',
+                                color: '#4ecdc4'
                               }}>
                                 <ImageIcon /> Images
                               </h4>
@@ -1174,6 +1189,9 @@ export default function NotificationsPage(): React.JSX.Element {
                                         borderRadius: '8px',
                                         border: '1px solid rgba(255,255,255,0.1)'
                                       }}
+                                      onError={(e) => {
+                                        e.currentTarget.style.display = 'none';
+                                      }}
                                     />
                                   </a>
                                 ))}
@@ -1182,14 +1200,15 @@ export default function NotificationsPage(): React.JSX.Element {
                           )}
 
                           {/* Video Links */}
-                          {links.videos.length > 0 && (
+                          {links.videos && links.videos.length > 0 && (
                             <div style={{ marginBottom: '30px' }}>
                               <h4 style={{ 
                                 fontSize: '1.5rem', 
                                 marginBottom: '15px',
                                 display: 'flex',
                                 alignItems: 'center',
-                                gap: '10px'
+                                gap: '10px',
+                                color: '#45b7d1'
                               }}>
                                 <VideoIcon /> Videos
                               </h4>
@@ -1213,14 +1232,15 @@ export default function NotificationsPage(): React.JSX.Element {
                           )}
 
                           {/* Website Links */}
-                          {links.websites.length > 0 && (
+                          {links.websites && links.websites.length > 0 && (
                             <div>
                               <h4 style={{ 
                                 fontSize: '1.5rem', 
                                 marginBottom: '15px',
                                 display: 'flex',
                                 alignItems: 'center',
-                                gap: '10px'
+                                gap: '10px',
+                                color: '#96ceb4'
                               }}>
                                 <WebsiteIcon /> Websites
                               </h4>
@@ -1262,22 +1282,20 @@ export default function NotificationsPage(): React.JSX.Element {
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                fontSize: '2rem'
+                fontSize: '2rem',
+                marginTop: '2rem'
               }}>
                 <span>— {selectedNotification.senderName}</span>
                 <div 
                   onClick={(e) => toggleNotificationLike(selectedNotification.id, e)}
                   style={{
-                    background: 'none',
-                    border: 'none',
-                    color: selectedNotification.likes.includes(getCurrentUserId()) ? '#3b82f6' : '#ffffff',
-                    fontSize: '2rem',
-                    cursor: user ? 'pointer' : 'default',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '0.5rem',
                     padding: '8px 16px',
                     borderRadius: '30px',
+                    cursor: user ? 'pointer' : 'default',
+                    color: selectedNotification.likes.includes(getCurrentUserId()) ? '#3b82f6' : '#ffffff',
                     background: selectedNotification.likes.includes(getCurrentUserId()) ? 'rgba(59, 130, 246, 0.1)' : 'transparent',
                     border: selectedNotification.likes.includes(getCurrentUserId()) ? '1px solid #3b82f6' : 'none'
                   }}
@@ -1865,15 +1883,12 @@ export default function NotificationsPage(): React.JSX.Element {
                                       display: 'flex',
                                       alignItems: 'center',
                                       gap: '5px',
-                                      background: 'none',
-                                      border: 'none',
-                                      color: (reply.likedBy || []).includes(getCurrentUserId()) ? '#3b82f6' : '#666666',
-                                      fontSize: '0.85rem',
-                                      cursor: user ? 'pointer' : 'not-allowed',
+                                      width: 'fit-content',
                                       padding: '4px 8px',
                                       borderRadius: '20px',
+                                      cursor: user ? 'pointer' : 'not-allowed',
+                                      color: (reply.likedBy || []).includes(getCurrentUserId()) ? '#3b82f6' : '#666666',
                                       backgroundColor: (reply.likedBy || []).includes(getCurrentUserId()) ? 'rgba(59, 130, 246, 0.1)' : 'transparent',
-                                      width: 'fit-content'
                                     }}
                                   >
                                     <LikeIcon filled={(reply.likedBy || []).includes(getCurrentUserId())} />
@@ -1909,9 +1924,10 @@ export default function NotificationsPage(): React.JSX.Element {
             {/* Views */}
             <div style={{ 
               paddingTop: '2rem',
-              fontSize: '1.5rem'
+              fontSize: '1.5rem',
+              color: '#666666'
             }}>
-              Viewed {selectedNotification.views} times
+              Dilihat {selectedNotification.views} kali
             </div>
           </div>
         </div>
