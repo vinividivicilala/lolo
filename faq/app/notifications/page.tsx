@@ -127,10 +127,6 @@ export default function NotificationsPage(): React.JSX.Element {
   const [notificationReactions, setNotificationReactions] = useState<Record<string, number>>({});
   const [userReactions, setUserReactions] = useState<string[]>([]);
 
-  // Link preview states
-  const [showLinks, setShowLinks] = useState(false);
-  const [expandedLinks, setExpandedLinks] = useState<Record<string, boolean>>({});
-  
   // YouTube player states
   const [playingVideo, setPlayingVideo] = useState<string | null>(null);
 
@@ -234,7 +230,6 @@ export default function NotificationsPage(): React.JSX.Element {
         }
         
         if (shouldShow) {
-          // PERBAIKAN: Pastikan links diambil dengan benar dari Firestore
           const linksData = data.links || {};
           
           const notification: Notification = {
@@ -255,7 +250,6 @@ export default function NotificationsPage(): React.JSX.Element {
             comments: data.comments || [],
             status: data.status || 'sent',
             reactions: data.reactions || {},
-            // PERBAIKAN: Pastikan links diambil dengan struktur yang benar
             links: {
               youtube: Array.isArray(linksData.youtube) ? linksData.youtube : [],
               pdf: Array.isArray(linksData.pdf) ? linksData.pdf : [],
@@ -263,16 +257,10 @@ export default function NotificationsPage(): React.JSX.Element {
               videos: Array.isArray(linksData.videos) ? linksData.videos : [],
               websites: Array.isArray(linksData.websites) ? linksData.websites : []
             },
-            // PERBAIKAN: Gunakan hasLinks dan linkCount dari Firestore jika ada
             hasLinks: data.hasLinks === true || 
                       (linksData && Object.values(linksData).some(arr => arr && arr.length > 0)),
             linkCount: data.linkCount || 0
           };
-          
-          // Log untuk debugging
-          console.log('Notification loaded:', notification.id);
-          console.log('Links:', notification.links);
-          console.log('Has Links:', notification.hasLinks);
           
           if (!notification.userReads[currentUserId]) {
             unread++;
@@ -637,14 +625,6 @@ export default function NotificationsPage(): React.JSX.Element {
     return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
   };
 
-  // Toggle link section
-  const toggleLinkSection = (notificationId: string) => {
-    setExpandedLinks(prev => ({
-      ...prev,
-      [notificationId]: !prev[notificationId]
-    }));
-  };
-
   // Play YouTube video
   const playYouTubeVideo = (videoUrl: string) => {
     setPlayingVideo(videoUrl);
@@ -690,7 +670,7 @@ export default function NotificationsPage(): React.JSX.Element {
     </svg>
   );
 
-  // Like Icon seperti YouTube (Thumbs Up)
+  // Like Icon
   const LikeIcon = ({ filled = false }: { filled?: boolean }) => (
     <svg 
       width="20" 
@@ -849,7 +829,6 @@ export default function NotificationsPage(): React.JSX.Element {
             objectFit: 'cover'
           }}
           onError={(e) => {
-            // Fallback to default thumbnail if maxresdefault doesn't exist
             e.currentTarget.src = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
           }}
         />
@@ -871,13 +850,8 @@ export default function NotificationsPage(): React.JSX.Element {
     );
   };
 
-  // Link Preview Component
+  // Link Preview Component - LANGSUNG DITAMPILKAN TANPA TOMBOL
   const LinkPreview = ({ notification }: { notification: Notification }) => {
-    // Log untuk debugging
-    console.log('Rendering LinkPreview for:', notification.id);
-    console.log('Links data:', notification.links);
-    console.log('Has Links:', notification.hasLinks);
-    
     const links = notification.links || {
       youtube: [],
       pdf: [],
@@ -896,230 +870,206 @@ export default function NotificationsPage(): React.JSX.Element {
     if (!hasLinks) return null;
     
     return (
-      <div style={{ marginTop: '20px' }}>
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            toggleLinkSection(notification.id);
-          }}
-          style={{
-            background: 'rgba(255,255,255,0.05)',
-            border: '1px solid rgba(255,255,255,0.2)',
-            borderRadius: '20px',
-            padding: '8px 16px',
-            color: 'white',
-            fontSize: '0.9rem',
-            cursor: 'pointer',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
-            marginBottom: '10px'
-          }}
-        >
-          <WebsiteIcon />
-          <span>{expandedLinks[notification.id] ? 'Sembunyikan Link' : `Tampilkan Link (${notification.linkCount || 0})`}</span>
-        </button>
-
-        {expandedLinks[notification.id] && (
-          <div style={{
-            background: 'rgba(255,255,255,0.02)',
-            borderRadius: '16px',
-            padding: '20px',
-            border: '1px solid rgba(255,255,255,0.1)',
-            marginTop: '10px'
-          }}>
-            {/* YouTube Links */}
-            {links.youtube && links.youtube.length > 0 && (
-              <div style={{ marginBottom: '30px' }}>
-                <h4 style={{ 
-                  fontSize: '1.2rem', 
-                  marginBottom: '15px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  color: '#ff0000'
-                }}>
-                  <YoutubeIcon /> YouTube Videos ({links.youtube.length})
-                </h4>
-                <div style={{ 
-                  display: 'grid', 
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-                  gap: '15px'
-                }}>
-                  {links.youtube.map((url, index) => (
-                    <YouTubeThumbnail 
-                      key={index} 
-                      url={url} 
-                      onClick={() => {
-                        if (selectedNotification) {
-                          setPlayingVideo(url);
-                        }
-                      }}
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* PDF Links */}
-            {links.pdf && links.pdf.length > 0 && (
-              <div style={{ marginBottom: '20px' }}>
-                <h4 style={{ 
-                  fontSize: '1.2rem', 
-                  marginBottom: '10px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  color: '#ff6b6b'
-                }}>
-                  <PdfIcon /> PDF Documents ({links.pdf.length})
-                </h4>
-                <div style={{ display: 'grid', gap: '10px' }}>
-                  {links.pdf.map((url, index) => (
-                    <a
-                      key={index}
-                      href={url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{
-                        color: '#3b82f6',
-                        textDecoration: 'none',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '10px',
-                        padding: '12px',
-                        background: 'rgba(59,130,246,0.1)',
-                        borderRadius: '8px',
-                        wordBreak: 'break-all'
-                      }}
-                    >
-                      <PdfIcon />
-                      <span>{url.split('/').pop() || url}</span>
-                    </a>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Image Links */}
-            {links.images && links.images.length > 0 && (
-              <div style={{ marginBottom: '20px' }}>
-                <h4 style={{ 
-                  fontSize: '1.2rem', 
-                  marginBottom: '10px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  color: '#4ecdc4'
-                }}>
-                  <ImageIcon /> Images ({links.images.length})
-                </h4>
-                <div style={{ 
-                  display: 'grid', 
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))',
-                  gap: '10px'
-                }}>
-                  {links.images.map((url, index) => (
-                    <a
-                      key={index}
-                      href={url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{ textDecoration: 'none' }}
-                    >
-                      <img
-                        src={url}
-                        alt={`Image ${index + 1}`}
-                        style={{
-                          width: '100%',
-                          height: '120px',
-                          objectFit: 'cover',
-                          borderRadius: '8px',
-                          border: '1px solid rgba(255,255,255,0.1)'
-                        }}
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none';
-                        }}
-                      />
-                    </a>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Video Links */}
-            {links.videos && links.videos.length > 0 && (
-              <div style={{ marginBottom: '20px' }}>
-                <h4 style={{ 
-                  fontSize: '1.2rem', 
-                  marginBottom: '10px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  color: '#45b7d1'
-                }}>
-                  <VideoIcon /> Videos ({links.videos.length})
-                </h4>
-                <div style={{ display: 'grid', gap: '15px' }}>
-                  {links.videos.map((url, index) => (
-                    <video
-                      key={index}
-                      controls
-                      style={{
-                        width: '100%',
-                        borderRadius: '12px',
-                        border: '1px solid rgba(255,255,255,0.1)'
-                      }}
-                    >
-                      <source src={url} />
-                      Your browser does not support the video tag.
-                    </video>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Website Links */}
-            {links.websites && links.websites.length > 0 && (
-              <div>
-                <h4 style={{ 
-                  fontSize: '1.2rem', 
-                  marginBottom: '10px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  color: '#96ceb4'
-                }}>
-                  <WebsiteIcon /> Websites ({links.websites.length})
-                </h4>
-                <div style={{ display: 'grid', gap: '10px' }}>
-                  {links.websites.map((url, index) => (
-                    <a
-                      key={index}
-                      href={url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{
-                        color: '#3b82f6',
-                        textDecoration: 'none',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '10px',
-                        padding: '12px',
-                        background: 'rgba(59,130,246,0.1)',
-                        borderRadius: '8px',
-                        wordBreak: 'break-all'
-                      }}
-                    >
-                      <WebsiteIcon />
-                      <span>{url}</span>
-                    </a>
-                  ))}
-                </div>
-              </div>
-            )}
+      <div style={{ marginTop: '30px', marginBottom: '20px' }}>
+        {/* YouTube Links */}
+        {links.youtube && links.youtube.length > 0 && (
+          <div style={{ marginBottom: '30px' }}>
+            <h4 style={{ 
+              fontSize: '1.2rem', 
+              marginBottom: '15px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              color: '#ff0000'
+            }}>
+              <YoutubeIcon /> YouTube Videos ({links.youtube.length})
+            </h4>
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+              gap: '15px'
+            }}>
+              {links.youtube.map((url, index) => (
+                <YouTubeThumbnail 
+                  key={index} 
+                  url={url} 
+                  onClick={() => {
+                    if (selectedNotification) {
+                      setPlayingVideo(url);
+                    }
+                  }}
+                />
+              ))}
+            </div>
           </div>
         )}
+
+        {/* Image Links */}
+        {links.images && links.images.length > 0 && (
+          <div style={{ marginBottom: '30px' }}>
+            <h4 style={{ 
+              fontSize: '1.2rem', 
+              marginBottom: '15px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              color: '#4ecdc4'
+            }}>
+              <ImageIcon /> Images ({links.images.length})
+            </h4>
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+              gap: '15px'
+            }}>
+              {links.images.map((url, index) => (
+                <a
+                  key={index}
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ textDecoration: 'none' }}
+                >
+                  <img
+                    src={url}
+                    alt={`Image ${index + 1}`}
+                    style={{
+                      width: '100%',
+                      height: '150px',
+                      objectFit: 'cover',
+                      borderRadius: '12px',
+                      border: '1px solid rgba(255,255,255,0.1)'
+                    }}
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* PDF Links */}
+        {links.pdf && links.pdf.length > 0 && (
+          <div style={{ marginBottom: '20px' }}>
+            <h4 style={{ 
+              fontSize: '1.2rem', 
+              marginBottom: '15px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              color: '#ff6b6b'
+            }}>
+              <PdfIcon /> PDF Documents ({links.pdf.length})
+            </h4>
+            <div style={{ display: 'grid', gap: '10px' }}>
+              {links.pdf.map((url, index) => (
+                <a
+                  key={index}
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    color: '#3b82f6',
+                    textDecoration: 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    padding: '15px',
+                    background: 'rgba(59,130,246,0.1)',
+                    borderRadius: '8px',
+                    wordBreak: 'break-all'
+                  }}
+                >
+                  <PdfIcon />
+                  <span>{url.split('/').pop() || url}</span>
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Video Links */}
+        {links.videos && links.videos.length > 0 && (
+          <div style={{ marginBottom: '20px' }}>
+            <h4 style={{ 
+              fontSize: '1.2rem', 
+              marginBottom: '15px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              color: '#45b7d1'
+            }}>
+              <VideoIcon /> Videos ({links.videos.length})
+            </h4>
+            <div style={{ display: 'grid', gap: '15px' }}>
+              {links.videos.map((url, index) => (
+                <video
+                  key={index}
+                  controls
+                  style={{
+                    width: '100%',
+                    borderRadius: '12px',
+                    border: '1px solid rgba(255,255,255,0.1)'
+                  }}
+                >
+                  <source src={url} />
+                  Your browser does not support the video tag.
+                </video>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Website Links */}
+        {links.websites && links.websites.length > 0 && (
+          <div style={{ marginBottom: '20px' }}>
+            <h4 style={{ 
+              fontSize: '1.2rem', 
+              marginBottom: '15px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              color: '#96ceb4'
+            }}>
+              <WebsiteIcon /> Websites ({links.websites.length})
+            </h4>
+            <div style={{ display: 'grid', gap: '10px' }}>
+              {links.websites.map((url, index) => (
+                <a
+                  key={index}
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    color: '#3b82f6',
+                    textDecoration: 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    padding: '15px',
+                    background: 'rgba(59,130,246,0.1)',
+                    borderRadius: '8px',
+                    wordBreak: 'break-all'
+                  }}
+                >
+                  <WebsiteIcon />
+                  <span>{url}</span>
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Total Links */}
+        <div style={{
+          marginTop: '10px',
+          fontSize: '0.9rem',
+          color: '#888'
+        }}>
+          Total Links: {notification.linkCount || 0}
+        </div>
       </div>
     );
   };
@@ -1251,14 +1201,13 @@ export default function NotificationsPage(): React.JSX.Element {
                   </div>
                   <div style={{ 
                     fontSize: '1.8rem',
-                    lineHeight: '1.6'
+                    lineHeight: '1.6',
+                    whiteSpace: 'pre-wrap'
                   }}>
-                    {notification.message.length > 150 
-                      ? notification.message.substring(0, 150) + '...' 
-                      : notification.message}
+                    {notification.message}
                   </div>
                   
-                  {/* Link Preview di List */}
+                  {/* Link Preview - LANGSUNG DITAMPILKAN TANPA TOMBOL */}
                   <LinkPreview notification={notification} />
                   
                   <div style={{ 
@@ -1318,7 +1267,6 @@ export default function NotificationsPage(): React.JSX.Element {
             setReplyingTo(null);
             setShowCommentForm(false);
             setShowEmoticonPicker(false);
-            setShowLinks(false);
             setPlayingVideo(null);
           }}
         >
@@ -1336,7 +1284,6 @@ export default function NotificationsPage(): React.JSX.Element {
                   setReplyingTo(null);
                   setShowCommentForm(false);
                   setShowEmoticonPicker(false);
-                  setShowLinks(false);
                   setPlayingVideo(null);
                 }}
                 style={{
@@ -1432,227 +1379,10 @@ export default function NotificationsPage(): React.JSX.Element {
                 </div>
               )}
               
-              {/* Links Section di Modal */}
+              {/* Links Section di Modal - LANGSUNG DITAMPILKAN TANPA TOMBOL */}
               {selectedNotification.links && Object.values(selectedNotification.links).some(arr => arr.length > 0) && (
                 <div style={{ marginBottom: '3rem' }}>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setShowLinks(!showLinks);
-                    }}
-                    style={{
-                      background: 'rgba(255,255,255,0.05)',
-                      border: '1px solid rgba(255,255,255,0.2)',
-                      borderRadius: '30px',
-                      padding: '12px 24px',
-                      color: 'white',
-                      fontSize: '1rem',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '10px',
-                      marginBottom: '20px'
-                    }}
-                  >
-                    <WebsiteIcon />
-                    <span>{showLinks ? 'Sembunyikan Link' : `Tampilkan Link (${selectedNotification.linkCount || 0})`}</span>
-                  </button>
-
-                  {showLinks && (
-                    <div style={{
-                      background: 'rgba(255,255,255,0.02)',
-                      borderRadius: '20px',
-                      padding: '24px',
-                      border: '1px solid rgba(255,255,255,0.1)'
-                    }}>
-                      {/* YouTube Links */}
-                      {selectedNotification.links.youtube && selectedNotification.links.youtube.length > 0 && (
-                        <div style={{ marginBottom: '30px' }}>
-                          <h4 style={{ 
-                            fontSize: '1.5rem', 
-                            marginBottom: '15px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '10px',
-                            color: '#ff0000'
-                          }}>
-                            <YoutubeIcon /> YouTube Videos ({selectedNotification.links.youtube.length})
-                          </h4>
-                          <div style={{ 
-                            display: 'grid', 
-                            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-                            gap: '15px'
-                          }}>
-                            {selectedNotification.links.youtube.map((url, index) => (
-                              <YouTubeThumbnail 
-                                key={index} 
-                                url={url} 
-                                onClick={() => setPlayingVideo(url)}
-                              />
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* PDF Links */}
-                      {selectedNotification.links.pdf && selectedNotification.links.pdf.length > 0 && (
-                        <div style={{ marginBottom: '30px' }}>
-                          <h4 style={{ 
-                            fontSize: '1.5rem', 
-                            marginBottom: '15px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '10px',
-                            color: '#ff6b6b'
-                          }}>
-                            <PdfIcon /> PDF Documents ({selectedNotification.links.pdf.length})
-                          </h4>
-                          <div style={{ display: 'grid', gap: '10px' }}>
-                            {selectedNotification.links.pdf.map((url, index) => (
-                              <a
-                                key={index}
-                                href={url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                style={{
-                                  color: '#3b82f6',
-                                  textDecoration: 'none',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  gap: '10px',
-                                  padding: '12px',
-                                  background: 'rgba(59,130,246,0.1)',
-                                  borderRadius: '8px',
-                                  wordBreak: 'break-all'
-                                }}
-                              >
-                                <PdfIcon />
-                                <span>{url.split('/').pop() || url}</span>
-                              </a>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Image Links */}
-                      {selectedNotification.links.images && selectedNotification.links.images.length > 0 && (
-                        <div style={{ marginBottom: '30px' }}>
-                          <h4 style={{ 
-                            fontSize: '1.5rem', 
-                            marginBottom: '15px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '10px',
-                            color: '#4ecdc4'
-                          }}>
-                            <ImageIcon /> Images ({selectedNotification.links.images.length})
-                          </h4>
-                          <div style={{ 
-                            display: 'grid', 
-                            gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-                            gap: '15px'
-                          }}>
-                            {selectedNotification.links.images.map((url, index) => (
-                              <a
-                                key={index}
-                                href={url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                style={{ textDecoration: 'none' }}
-                              >
-                                <img
-                                  src={url}
-                                  alt={`Image ${index + 1}`}
-                                  style={{
-                                    width: '100%',
-                                    height: '150px',
-                                    objectFit: 'cover',
-                                    borderRadius: '8px',
-                                    border: '1px solid rgba(255,255,255,0.1)'
-                                  }}
-                                  onError={(e) => {
-                                    e.currentTarget.style.display = 'none';
-                                  }}
-                                />
-                              </a>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Video Links */}
-                      {selectedNotification.links.videos && selectedNotification.links.videos.length > 0 && (
-                        <div style={{ marginBottom: '30px' }}>
-                          <h4 style={{ 
-                            fontSize: '1.5rem', 
-                            marginBottom: '15px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '10px',
-                            color: '#45b7d1'
-                          }}>
-                            <VideoIcon /> Videos ({selectedNotification.links.videos.length})
-                          </h4>
-                          <div style={{ display: 'grid', gap: '20px' }}>
-                            {selectedNotification.links.videos.map((url, index) => (
-                              <video
-                                key={index}
-                                controls
-                                style={{
-                                  width: '100%',
-                                  borderRadius: '12px',
-                                  border: '1px solid rgba(255,255,255,0.1)'
-                                }}
-                              >
-                                <source src={url} />
-                                Your browser does not support the video tag.
-                              </video>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Website Links */}
-                      {selectedNotification.links.websites && selectedNotification.links.websites.length > 0 && (
-                        <div>
-                          <h4 style={{ 
-                            fontSize: '1.5rem', 
-                            marginBottom: '15px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '10px',
-                            color: '#96ceb4'
-                          }}>
-                            <WebsiteIcon /> Websites ({selectedNotification.links.websites.length})
-                          </h4>
-                          <div style={{ display: 'grid', gap: '10px' }}>
-                            {selectedNotification.links.websites.map((url, index) => (
-                              <a
-                                key={index}
-                                href={url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                style={{
-                                  color: '#3b82f6',
-                                  textDecoration: 'none',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  gap: '10px',
-                                  padding: '12px',
-                                  background: 'rgba(59,130,246,0.1)',
-                                  borderRadius: '8px',
-                                  wordBreak: 'break-all'
-                                }}
-                              >
-                                <WebsiteIcon />
-                                <span>{url}</span>
-                              </a>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  )}
+                  <LinkPreview notification={selectedNotification} />
                 </div>
               )}
               
