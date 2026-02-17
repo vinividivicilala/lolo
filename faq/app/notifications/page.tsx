@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { 
   getFirestore, 
@@ -572,7 +571,7 @@ export default function NotificationsPage(): React.JSX.Element {
     });
   };
 
-  // SVG North East Arrow
+  // SVG Components
   const NorthEastArrow = () => (
     <svg 
       width="64" 
@@ -587,7 +586,6 @@ export default function NotificationsPage(): React.JSX.Element {
     </svg>
   );
 
-  // SVG South East Arrow
   const SouthEastArrow = () => (
     <svg 
       width="64" 
@@ -602,44 +600,63 @@ export default function NotificationsPage(): React.JSX.Element {
     </svg>
   );
 
-  // Heart Icon for likes
-  const HeartIcon = ({ filled = false }: { filled?: boolean }) => (
+  // Modern Minimalist Icons
+  const LikeIcon = ({ filled = false }: { filled?: boolean }) => (
     <svg 
       width="20" 
       height="20" 
       viewBox="0 0 24 24" 
       fill={filled ? "currentColor" : "none"} 
       stroke="currentColor" 
-      strokeWidth="2"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     >
       <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
     </svg>
   );
 
-  // Reply Icon
-  const ReplyIcon = () => (
+  const CommentIcon = () => (
     <svg 
-      width="18" 
-      height="18" 
+      width="20" 
+      height="20" 
       viewBox="0 0 24 24" 
       fill="none" 
       stroke="currentColor" 
-      strokeWidth="2"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+    </svg>
+  );
+
+  const ReplyIcon = () => (
+    <svg 
+      width="16" 
+      height="16" 
+      viewBox="0 0 24 24" 
+      fill="none" 
+      stroke="currentColor" 
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     >
       <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
       <polyline points="10 11 13 14 10 17"/>
     </svg>
   );
 
-  // Send Icon
   const SendIcon = () => (
     <svg 
-      width="18" 
-      height="18" 
+      width="16" 
+      height="16" 
       viewBox="0 0 24 24" 
       fill="none" 
       stroke="currentColor" 
-      strokeWidth="2"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     >
       <line x1="22" y1="2" x2="11" y2="13"/>
       <polygon points="22 2 15 22 11 13 2 9 22 2"/>
@@ -716,7 +733,7 @@ export default function NotificationsPage(): React.JSX.Element {
         </button>
       </div>
 
-      {/* Content */}
+      {/* Content - Tanpa Animasi */}
       {isLoading ? (
         <div style={{ textAlign: 'center', padding: '6rem', fontSize: '2rem' }}>
           Loading...
@@ -736,11 +753,8 @@ export default function NotificationsPage(): React.JSX.Element {
             const isLiked = notification.likes.includes(getCurrentUserId());
             
             return (
-              <motion.div
+              <div
                 key={notification.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                whileHover={{ x: 10 }}
                 onClick={() => {
                   setSelectedNotification(notification);
                   if (!isRead) markAsRead(notification.id);
@@ -790,810 +804,751 @@ export default function NotificationsPage(): React.JSX.Element {
                     fontSize: '1.5rem'
                   }}>
                     <span>From {notification.senderName}</span>
-                    <div style={{ display: 'flex', gap: '2rem' }}>
-                      <span>❤️ {notification.likes?.length || 0}</span>
-                      <span>💬 {notification.comments?.length || 0}</span>
+                    <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <LikeIcon filled={isLiked} />
+                        <span>{notification.likes?.length || 0}</span>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <CommentIcon />
+                        <span>{notification.comments?.length || 0}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </motion.div>
+              </div>
             );
           })}
         </div>
       )}
 
-      {/* Detail Modal dengan Design Komentar seperti Blog */}
-      <AnimatePresence>
-        {selectedNotification && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              backgroundColor: '#000000',
-              padding: '3rem',
-              overflowY: 'auto',
-              zIndex: 1000
-            }}
-          >
-            <div style={{ maxWidth: '900px', margin: '0 auto' }}>
-              {/* Modal Header */}
-              <div style={{
+      {/* Detail Modal - Tanpa Animasi */}
+      {selectedNotification && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: '#000000',
+            padding: '3rem',
+            overflowY: 'auto',
+            zIndex: 1000
+          }}
+        >
+          <div style={{ maxWidth: '900px', margin: '0 auto' }}>
+            {/* Modal Header */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '4rem'
+            }}>
+              <button
+                onClick={() => {
+                  setSelectedNotification(null);
+                  setReplyingTo(null);
+                  setShowCommentForm(false);
+                  setShowEmoticonPicker(false);
+                }}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: '#ffffff',
+                  padding: 0
+                }}
+              >
+                <NorthEastArrow />
+              </button>
+              <span style={{ fontSize: '1.8rem' }}>Notification</span>
+              <span style={{ fontSize: '1.8rem' }}>
+                {timeAgo(selectedNotification.createdAt)}
+              </span>
+            </div>
+
+            {/* Content */}
+            <div style={{ marginBottom: '3rem' }}>
+              <div style={{ 
+                fontSize: '2rem', 
+                marginBottom: '2rem'
+              }}>
+                {selectedNotification.type}
+              </div>
+              
+              <div style={{ 
+                fontSize: '4rem', 
+                marginBottom: '3rem',
+                lineHeight: '1.3'
+              }}>
+                {selectedNotification.title}
+              </div>
+              
+              <div style={{ 
+                lineHeight: '2', 
+                marginBottom: '3rem',
+                fontSize: '2.2rem',
+                whiteSpace: 'pre-line'
+              }}>
+                {selectedNotification.message}
+              </div>
+              
+              <div style={{ 
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                marginBottom: '4rem'
+                fontSize: '2rem'
               }}>
+                <span>— {selectedNotification.senderName}</span>
                 <button
-                  onClick={() => {
-                    setSelectedNotification(null);
-                    setReplyingTo(null);
-                    setShowCommentForm(false);
-                    setShowEmoticonPicker(false);
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleNotificationLike(selectedNotification.id);
                   }}
                   style={{
                     background: 'none',
                     border: 'none',
-                    cursor: 'pointer',
-                    color: '#ffffff',
-                    padding: 0
+                    color: selectedNotification.likes.includes(getCurrentUserId()) ? '#ff4444' : '#ffffff',
+                    fontSize: '2rem',
+                    cursor: user ? 'pointer' : 'default',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem'
                   }}
                 >
-                  <NorthEastArrow />
+                  <LikeIcon filled={selectedNotification.likes.includes(getCurrentUserId())} />
+                  <span>{selectedNotification.likes?.length || 0}</span>
                 </button>
-                <span style={{ fontSize: '1.8rem' }}>Notification</span>
-                <span style={{ fontSize: '1.8rem' }}>
-                  {timeAgo(selectedNotification.createdAt)}
-                </span>
               </div>
+            </div>
 
-              {/* Content */}
-              <div style={{ marginBottom: '3rem' }}>
-                <div style={{ 
-                  fontSize: '2rem', 
-                  marginBottom: '2rem'
-                }}>
-                  {selectedNotification.type}
-                </div>
-                
-                <div style={{ 
-                  fontSize: '4rem', 
-                  marginBottom: '3rem',
-                  lineHeight: '1.3'
-                }}>
-                  {selectedNotification.title}
-                </div>
-                
-                <div style={{ 
-                  lineHeight: '2', 
-                  marginBottom: '3rem',
-                  fontSize: '2.2rem',
-                  whiteSpace: 'pre-line'
-                }}>
-                  {selectedNotification.message}
-                </div>
-                
-                <div style={{ 
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  fontSize: '2rem'
-                }}>
-                  <span>— {selectedNotification.senderName}</span>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleNotificationLike(selectedNotification.id);
-                    }}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      color: selectedNotification.likes.includes(getCurrentUserId()) ? '#ff4444' : '#ffffff',
-                      fontSize: '2rem',
-                      cursor: user ? 'pointer' : 'default',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.5rem'
-                    }}
-                  >
-                    {selectedNotification.likes.includes(getCurrentUserId()) ? '❤️' : '🤍'}
-                    <span>{selectedNotification.likes?.length || 0}</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* EMOTICON REACTIONS SECTION (seperti blog) */}
+            {/* EMOTICON REACTIONS SECTION */}
+            <div style={{
+              marginTop: '40px',
+              marginBottom: '40px',
+              borderTop: '1px solid #333333',
+              paddingTop: '40px',
+            }}>
+              
               <div style={{
-                marginTop: '40px',
-                marginBottom: '40px',
-                borderTop: '1px solid #333333',
-                paddingTop: '40px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginBottom: '30px',
               }}>
+                <h3 style={{
+                  fontSize: '1.8rem',
+                  fontWeight: 'normal',
+                  color: 'white',
+                  margin: 0,
+                }}>
+                  Reaksi
+                </h3>
                 
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
+                <button
+                  onClick={() => setShowEmoticonPicker(!showEmoticonPicker)}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'space-between',
+                    gap: '10px',
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.2)',
+                    borderRadius: '30px',
+                    padding: '12px 24px',
+                    color: 'white',
+                    fontSize: '1rem',
+                    cursor: user ? 'pointer' : 'default',
+                  }}
+                >
+                  <span style={{ fontSize: '1.5rem' }}>😊</span>
+                  <span>Tambahkan Reaksi</span>
+                </button>
+              </div>
+
+              {/* Emoticon Picker */}
+              {showEmoticonPicker && (
+                <div
+                  style={{
                     marginBottom: '30px',
                   }}
                 >
-                  <h3 style={{
-                    fontSize: '1.8rem',
-                    fontWeight: 'normal',
-                    color: 'white',
-                    margin: 0,
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(6, 1fr)',
+                    gap: '12px',
+                    padding: '24px',
+                    background: 'rgba(255,255,255,0.03)',
+                    borderRadius: '20px',
+                    border: '1px solid rgba(255,255,255,0.1)',
                   }}>
-                    Reaksi
-                  </h3>
-                  
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => setShowEmoticonPicker(!showEmoticonPicker)}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '10px',
-                      background: 'rgba(255,255,255,0.05)',
-                      border: '1px solid rgba(255,255,255,0.2)',
-                      borderRadius: '30px',
-                      padding: '12px 24px',
-                      color: 'white',
-                      fontSize: '1rem',
-                      cursor: user ? 'pointer' : 'default',
-                    }}
-                  >
-                    <span style={{ fontSize: '1.5rem' }}>😊</span>
-                    <span>Tambahkan Reaksi</span>
-                  </motion.button>
-                </motion.div>
-
-                {/* Emoticon Picker */}
-                <AnimatePresence>
-                  {showEmoticonPicker && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -20, height: 0 }}
-                      animate={{ opacity: 1, y: 0, height: 'auto' }}
-                      exit={{ opacity: 0, y: -20, height: 0 }}
-                      transition={{ duration: 0.3 }}
-                      style={{
-                        overflow: 'hidden',
-                        marginBottom: '30px',
-                      }}
-                    >
-                      <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(6, 1fr)',
-                        gap: '12px',
-                        padding: '24px',
-                        background: 'rgba(255,255,255,0.03)',
-                        borderRadius: '20px',
-                        border: '1px solid rgba(255,255,255,0.1)',
-                      }}>
-                        {EMOTICONS.map((emoticon) => (
-                          <motion.button
-                            key={emoticon.id}
-                            whileHover={{ scale: 1.2, y: -5 }}
-                            whileTap={{ scale: 0.9 }}
-                            onClick={() => {
-                              handleReaction(emoticon.id);
-                              setShowEmoticonPicker(false);
-                            }}
-                            style={{
-                              display: 'flex',
-                              flexDirection: 'column',
-                              alignItems: 'center',
-                              gap: '8px',
-                              background: userReactions.includes(emoticon.id) ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.05)',
-                              border: userReactions.includes(emoticon.id) ? '1px solid white' : '1px solid rgba(255,255,255,0.1)',
-                              borderRadius: '16px',
-                              padding: '16px 8px',
-                              cursor: user ? 'pointer' : 'default',
-                            }}
-                          >
-                            <span style={{ fontSize: '2.5rem' }}>{emoticon.emoji}</span>
-                            <span style={{ 
-                              fontSize: '0.8rem', 
-                              color: userReactions.includes(emoticon.id) ? 'white' : '#999999' 
-                            }}>
-                              {emoticon.label}
-                            </span>
-                            <span style={{ 
-                              fontSize: '0.9rem', 
-                              color: 'white',
-                              fontWeight: 'bold' 
-                            }}>
-                              {notificationReactions[emoticon.id] || 0}
-                            </span>
-                          </motion.button>
-                        ))}
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-
-                {/* Active Reactions Summary */}
-                <div style={{
-                  display: 'flex',
-                  flexWrap: 'wrap',
-                  gap: '12px',
-                  alignItems: 'center',
-                }}>
-                  {Object.entries(notificationReactions)
-                    .filter(([_, count]) => count > 0)
-                    .sort(([_, a], [__, b]) => b - a)
-                    .map(([id, count]) => {
-                      const emoticon = EMOTICONS.find(e => e.id === id);
-                      if (!emoticon) return null;
-                      return (
-                        <motion.button
-                          key={id}
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          onClick={() => handleReaction(id)}
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px',
-                            background: userReactions.includes(id) ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.05)',
-                            border: userReactions.includes(id) ? '1px solid white' : '1px solid rgba(255,255,255,0.1)',
-                            borderRadius: '30px',
-                            padding: '8px 16px',
-                            cursor: user ? 'pointer' : 'default',
-                          }}
-                        >
-                          <span style={{ fontSize: '1.3rem' }}>{emoticon.emoji}</span>
-                          <span style={{ 
-                            fontSize: '0.95rem', 
-                            color: 'white' 
-                          }}>
-                            {count}
-                          </span>
-                        </motion.button>
-                      );
-                    })}
-                </div>
-              </div>
-
-              {/* COMMENTS SECTION (seperti blog) */}
-
-              {/* Add Comment Button */}
-              <motion.button
-                whileHover={{ scale: 1.01 }}
-                whileTap={{ scale: 0.99 }}
-                onClick={() => {
-                  if (!user) {
-                    alert('Silakan login untuk berkomentar');
-                  } else {
-                    setShowCommentForm(!showCommentForm);
-                  }
-                }}
-                style={{
-                  width: '100%',
-                  padding: '20px',
-                  background: 'rgba(255,255,255,0.02)',
-                  border: '1px dashed #444444',
-                  borderRadius: '16px',
-                  color: user ? '#999999' : 'white',
-                  fontSize: '1.1rem',
-                  cursor: 'pointer',
-                  marginBottom: '40px',
-                  textAlign: 'left',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                }}
-              >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
-                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                </svg>
-                {user ? 'Tulis komentar Anda di sini...' : 'Login untuk menulis komentar'}
-              </motion.button>
-
-              {/* Comment Form */}
-              <AnimatePresence>
-                {showCommentForm && user && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 20 }}
-                    transition={{ duration: 0.3 }}
-                    style={{ marginBottom: '40px' }}
-                  >
-                    <div style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '20px',
-                    }}>
-                      <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '15px',
-                      }}>
-                        <motion.img 
-                          whileHover={{ scale: 1.1 }}
-                          src={getCurrentUserPhoto()}
-                          alt={getCurrentUserName()}
-                          style={{
-                            width: '56px',
-                            height: '56px',
-                            borderRadius: '50%',
-                            objectFit: 'cover',
-                            border: '2px solid rgba(255,255,255,0.1)',
-                          }}
-                        />
-                        <div>
-                          <span style={{ 
-                            color: 'white', 
-                            fontSize: '1.2rem',
-                            fontWeight: '500',
-                            display: 'block',
-                            marginBottom: '4px'
-                          }}>
-                            {getCurrentUserName()}
-                          </span>
-                          <span style={{ color: '#666666', fontSize: '0.9rem' }}>
-                            Berkomentar sebagai pengguna
-                          </span>
-                        </div>
-                      </div>
-                      <textarea
-                        value={commentText}
-                        onChange={(e) => setCommentText(e.target.value)}
-                        placeholder="Apa pendapat Anda tentang notifikasi ini?"
-                        rows={5}
-                        style={{
-                          padding: '20px',
-                          background: 'rgba(255,255,255,0.03)',
-                          border: '1px solid #333333',
-                          borderRadius: '20px',
-                          color: 'white',
-                          fontSize: '1.1rem',
-                          outline: 'none',
-                          resize: 'vertical',
+                    {EMOTICONS.map((emoticon) => (
+                      <button
+                        key={emoticon.id}
+                        onClick={() => {
+                          handleReaction(emoticon.id);
+                          setShowEmoticonPicker(false);
                         }}
-                      />
-                      <div style={{
-                        display: 'flex',
-                        justifyContent: 'flex-end',
-                        gap: '15px',
-                      }}>
-                        <motion.button
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          type="button"
-                          onClick={() => setShowCommentForm(false)}
-                          style={{
-                            padding: '12px 24px',
-                            background: 'none',
-                            border: '1px solid #333333',
-                            borderRadius: '30px',
-                            color: '#999999',
-                            fontSize: '1rem',
-                            cursor: 'pointer',
-                          }}
-                        >
-                          Batal
-                        </motion.button>
-                        <motion.button
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          onClick={() => addComment(selectedNotification.id)}
-                          disabled={isSubmitting || !commentText.trim()}
-                          style={{
-                            padding: '12px 32px',
-                            background: isSubmitting || !commentText.trim() ? '#333333' : 'rgba(255,255,255,0.1)',
-                            border: '1px solid rgba(255,255,255,0.2)',
-                            borderRadius: '30px',
-                            color: isSubmitting || !commentText.trim() ? '#999999' : 'white',
-                            fontSize: '1rem',
-                            fontWeight: '500',
-                            cursor: isSubmitting || !commentText.trim() ? 'not-allowed' : 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px',
-                          }}
-                        >
-                          <SendIcon />
-                          <span>{isSubmitting ? 'Mengirim...' : 'Kirim Komentar'}</span>
-                        </motion.button>
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          gap: '8px',
+                          background: userReactions.includes(emoticon.id) ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.05)',
+                          border: userReactions.includes(emoticon.id) ? '1px solid white' : '1px solid rgba(255,255,255,0.1)',
+                          borderRadius: '16px',
+                          padding: '16px 8px',
+                          cursor: user ? 'pointer' : 'default',
+                        }}
+                      >
+                        <span style={{ fontSize: '2.5rem' }}>{emoticon.emoji}</span>
+                        <span style={{ 
+                          fontSize: '0.8rem', 
+                          color: userReactions.includes(emoticon.id) ? 'white' : '#999999' 
+                        }}>
+                          {emoticon.label}
+                        </span>
+                        <span style={{ 
+                          fontSize: '0.9rem', 
+                          color: 'white',
+                          fontWeight: 'bold' 
+                        }}>
+                          {notificationReactions[emoticon.id] || 0}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
 
-              {/* Comments List */}
+              {/* Active Reactions Summary */}
               <div style={{
                 display: 'flex',
-                flexDirection: 'column',
-                gap: '30px',
+                flexWrap: 'wrap',
+                gap: '12px',
+                alignItems: 'center',
               }}>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'baseline',
-                  justifyContent: 'space-between',
-                  marginBottom: '10px',
-                }}>
-                  <h3 style={{
-                    fontSize: '1.8rem',
-                    fontWeight: 'normal',
-                    color: 'white',
-                    margin: 0,
-                  }}>
-                    Komentar
-                  </h3>
-                  <span style={{
-                    fontSize: '1.2rem',
-                    color: '#666666',
-                  }}>
-                    {selectedNotification.comments?.length || 0} komentar
-                  </span>
-                </div>
-
-                <AnimatePresence>
-                  {selectedNotification.comments && selectedNotification.comments.length > 0 ? (
-                    [...selectedNotification.comments]
-                      .sort((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis())
-                      .map((comment, index) => (
-                        <motion.div
-                          key={comment.id}
-                          initial={{ opacity: 0, y: 30 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -30 }}
-                          transition={{ duration: 0.4, delay: index * 0.1 }}
-                          style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: '15px',
-                            padding: '24px',
-                            backgroundColor: 'rgba(255,255,255,0.02)',
-                            borderRadius: '24px',
-                            border: '1px solid rgba(255,255,255,0.05)',
-                          }}
-                        >
-                          {/* Comment Header */}
-                          <div style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                          }}>
-                            <div style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '15px',
-                            }}>
-                              <motion.img 
-                                whileHover={{ scale: 1.1 }}
-                                src={comment.userPhoto || `https://ui-avatars.com/api/?name=${comment.userName}&background=random&color=fff`}
-                                alt={comment.userName}
-                                style={{
-                                  width: '48px',
-                                  height: '48px',
-                                  borderRadius: '50%',
-                                  objectFit: 'cover',
-                                  border: '2px solid rgba(255,255,255,0.1)',
-                                }}
-                              />
-                              <div>
-                                <span style={{
-                                  fontSize: '1.2rem',
-                                  fontWeight: '500',
-                                  color: 'white',
-                                  display: 'block',
-                                  marginBottom: '4px',
-                                }}>
-                                  {comment.userName}
-                                </span>
-                                <span style={{
-                                  fontSize: '0.9rem',
-                                  color: '#666666',
-                                }}>
-                                  {timeAgo(comment.createdAt)}
-                                </span>
-                              </div>
-                            </div>
-                            
-                            {/* Comment Like Button */}
-                            <motion.button
-                              whileHover={{ scale: 1.1 }}
-                              whileTap={{ scale: 0.9 }}
-                              onClick={() => toggleLike(selectedNotification.id, comment.id)}
-                              style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '8px',
-                                background: (comment.likedBy || []).includes(getCurrentUserId()) ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.05)',
-                                border: (comment.likedBy || []).includes(getCurrentUserId()) ? '1px solid white' : '1px solid rgba(255,255,255,0.1)',
-                                borderRadius: '30px',
-                                padding: '8px 16px',
-                                cursor: user ? 'pointer' : 'not-allowed',
-                              }}
-                            >
-                              <HeartIcon filled={(comment.likedBy || []).includes(getCurrentUserId())} />
-                              <span style={{ color: 'white', fontSize: '1rem' }}>
-                                {comment.likes || 0}
-                              </span>
-                            </motion.button>
-                          </div>
-
-                          {/* Comment Content */}
-                          <p style={{
-                            fontSize: '1.1rem',
-                            lineHeight: '1.7',
-                            color: '#e0e0e0',
-                            margin: '10px 0 5px 0',
-                            paddingLeft: '15px',
-                            borderLeft: '2px solid rgba(255,255,255,0.1)',
-                          }}>
-                            {comment.text}
-                          </p>
-
-                          {/* Reply Button */}
-                          <motion.button
-                            whileHover={{ x: 5 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={() => {
-                              if (!user) {
-                                alert('Silakan login untuk membalas');
-                              } else {
-                                setReplyingTo(replyingTo === comment.id ? null : comment.id);
-                              }
-                            }}
-                            style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '8px',
-                              background: 'none',
-                              border: 'none',
-                              color: '#666666',
-                              fontSize: '0.95rem',
-                              cursor: 'pointer',
-                              padding: '8px 0',
-                              marginTop: '5px',
-                            }}
-                          >
-                            <ReplyIcon />
-                            <span>Balas komentar</span>
-                          </motion.button>
-
-                          {/* Reply Form */}
-                          <AnimatePresence>
-                            {replyingTo === comment.id && (
-                              <motion.div
-                                initial={{ opacity: 0, height: 0 }}
-                                animate={{ opacity: 1, height: 'auto' }}
-                                exit={{ opacity: 0, height: 0 }}
-                                transition={{ duration: 0.3 }}
-                                style={{
-                                  marginTop: '15px',
-                                  marginLeft: '30px',
-                                  overflow: 'hidden',
-                                }}
-                              >
-                                <div style={{
-                                  display: 'flex',
-                                  alignItems: 'flex-start',
-                                  gap: '15px',
-                                }}>
-                                  <img 
-                                    src={getCurrentUserPhoto()}
-                                    alt={getCurrentUserName()}
-                                    style={{
-                                      width: '40px',
-                                      height: '40px',
-                                      borderRadius: '50%',
-                                      objectFit: 'cover',
-                                    }}
-                                  />
-                                  <div style={{
-                                    flex: 1,
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    gap: '10px',
-                                  }}>
-                                    <textarea
-                                      value={replyText}
-                                      onChange={(e) => setReplyText(e.target.value)}
-                                      placeholder="Tulis balasan Anda..."
-                                      rows={3}
-                                      style={{
-                                        padding: '15px',
-                                        background: 'rgba(255,255,255,0.03)',
-                                        border: '1px solid #333333',
-                                        borderRadius: '16px',
-                                        color: 'white',
-                                        fontSize: '0.95rem',
-                                        outline: 'none',
-                                        resize: 'vertical',
-                                      }}
-                                    />
-                                    <div style={{
-                                      display: 'flex',
-                                      gap: '10px',
-                                      justifyContent: 'flex-end',
-                                    }}>
-                                      <motion.button
-                                        whileHover={{ scale: 1.05 }}
-                                        whileTap={{ scale: 0.95 }}
-                                        onClick={() => setReplyingTo(null)}
-                                        style={{
-                                          padding: '8px 16px',
-                                          background: 'none',
-                                          border: '1px solid #333333',
-                                          borderRadius: '20px',
-                                          color: '#999999',
-                                          fontSize: '0.9rem',
-                                          cursor: 'pointer',
-                                        }}
-                                      >
-                                        Batal
-                                      </motion.button>
-                                      <motion.button
-                                        whileHover={{ scale: 1.05 }}
-                                        whileTap={{ scale: 0.95 }}
-                                        onClick={() => addReply(selectedNotification.id, comment.id)}
-                                        disabled={!replyText.trim() || isSubmitting}
-                                        style={{
-                                          display: 'flex',
-                                          alignItems: 'center',
-                                          gap: '8px',
-                                          padding: '8px 24px',
-                                          background: replyText.trim() && !isSubmitting ? 'rgba(255,255,255,0.1)' : '#333333',
-                                          border: '1px solid rgba(255,255,255,0.2)',
-                                          borderRadius: '20px',
-                                          color: replyText.trim() && !isSubmitting ? 'white' : '#999999',
-                                          fontSize: '0.9rem',
-                                          fontWeight: '500',
-                                          cursor: replyText.trim() && !isSubmitting ? 'pointer' : 'not-allowed',
-                                        }}
-                                      >
-                                        <ReplyIcon />
-                                        <span>{isSubmitting ? 'Mengirim...' : 'Kirim Balasan'}</span>
-                                      </motion.button>
-                                    </div>
-                                  </div>
-                                </div>
-                              </motion.div>
-                            )}
-                          </AnimatePresence>
-
-                          {/* Replies List */}
-                          {comment.replies && comment.replies.length > 0 && (
-                            <div style={{
-                              marginTop: '20px',
-                              marginLeft: '30px',
-                              paddingLeft: '20px',
-                              borderLeft: '2px solid rgba(255,255,255,0.05)',
-                              display: 'flex',
-                              flexDirection: 'column',
-                              gap: '20px',
-                            }}>
-                              {comment.replies.map((reply: any) => (
-                                <motion.div
-                                  key={reply.id}
-                                  initial={{ opacity: 0, x: -20 }}
-                                  animate={{ opacity: 1, x: 0 }}
-                                  style={{
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    alignItems: 'flex-start',
-                                  }}
-                                >
-                                  <div style={{
-                                    display: 'flex',
-                                    gap: '12px',
-                                    flex: 1,
-                                  }}>
-                                    <img 
-                                      src={reply.userPhoto || `https://ui-avatars.com/api/?name=${reply.userName}&background=random&color=fff`}
-                                      alt={reply.userName}
-                                      style={{
-                                        width: '32px',
-                                        height: '32px',
-                                        borderRadius: '50%',
-                                        objectFit: 'cover',
-                                      }}
-                                    />
-                                    <div style={{ flex: 1 }}>
-                                      <div style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '10px',
-                                        marginBottom: '5px',
-                                      }}>
-                                        <span style={{
-                                          fontSize: '1rem',
-                                          fontWeight: '500',
-                                          color: 'white',
-                                        }}>
-                                          {reply.userName}
-                                        </span>
-                                        <span style={{
-                                          fontSize: '0.8rem',
-                                          color: '#666666',
-                                        }}>
-                                          {timeAgo(reply.createdAt)}
-                                        </span>
-                                      </div>
-                                      <p style={{
-                                        fontSize: '0.95rem',
-                                        lineHeight: '1.6',
-                                        color: '#e0e0e0',
-                                        margin: '0 0 8px 0',
-                                      }}>
-                                        {reply.text}
-                                      </p>
-                                      <motion.button
-                                        whileHover={{ scale: 1.1 }}
-                                        whileTap={{ scale: 0.9 }}
-                                        onClick={() => toggleLike(selectedNotification.id, comment.id, reply.id)}
-                                        style={{
-                                          display: 'flex',
-                                          alignItems: 'center',
-                                          gap: '5px',
-                                          background: 'none',
-                                          border: 'none',
-                                          color: (reply.likedBy || []).includes(getCurrentUserId()) ? 'white' : '#666666',
-                                          fontSize: '0.85rem',
-                                          cursor: user ? 'pointer' : 'not-allowed',
-                                          padding: '4px 8px',
-                                          borderRadius: '20px',
-                                          backgroundColor: (reply.likedBy || []).includes(getCurrentUserId()) ? 'rgba(255,255,255,0.1)' : 'transparent',
-                                        }}
-                                      >
-                                        <HeartIcon filled={(reply.likedBy || []).includes(getCurrentUserId())} />
-                                        <span>{reply.likes || 0}</span>
-                                      </motion.button>
-                                    </div>
-                                  </div>
-                                </motion.div>
-                              ))}
-                            </div>
-                          )}
-                        </motion.div>
-                      ))
-                  ) : (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      style={{
-                        padding: '60px',
-                        textAlign: 'center',
-                        color: '#666666',
-                        border: '1px dashed #333333',
-                        borderRadius: '24px',
-                      }}
-                    >
-                      <span style={{ fontSize: '3rem', display: 'block', marginBottom: '20px' }}>💬</span>
-                      <p style={{ fontSize: '1.2rem', margin: 0 }}>Belum ada komentar.</p>
-                      <p style={{ fontSize: '1rem', color: '#999999', marginTop: '10px' }}>
-                        Jadilah yang pertama untuk berdiskusi!
-                      </p>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-
-              {/* Views */}
-              <div style={{ 
-                paddingTop: '2rem',
-                fontSize: '1.5rem'
-              }}>
-                Viewed {selectedNotification.views} times
+                {Object.entries(notificationReactions)
+                  .filter(([_, count]) => count > 0)
+                  .sort(([_, a], [__, b]) => b - a)
+                  .map(([id, count]) => {
+                    const emoticon = EMOTICONS.find(e => e.id === id);
+                    if (!emoticon) return null;
+                    return (
+                      <button
+                        key={id}
+                        onClick={() => handleReaction(id)}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          background: userReactions.includes(id) ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.05)',
+                          border: userReactions.includes(id) ? '1px solid white' : '1px solid rgba(255,255,255,0.1)',
+                          borderRadius: '30px',
+                          padding: '8px 16px',
+                          cursor: user ? 'pointer' : 'default',
+                        }}
+                      >
+                        <span style={{ fontSize: '1.3rem' }}>{emoticon.emoji}</span>
+                        <span style={{ 
+                          fontSize: '0.95rem', 
+                          color: 'white' 
+                        }}>
+                          {count}
+                        </span>
+                      </button>
+                    );
+                  })}
               </div>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+
+            {/* COMMENTS SECTION */}
+
+            {/* Add Comment Button */}
+            <button
+              onClick={() => {
+                if (!user) {
+                  alert('Silakan login untuk berkomentar');
+                } else {
+                  setShowCommentForm(!showCommentForm);
+                }
+              }}
+              style={{
+                width: '100%',
+                padding: '20px',
+                background: 'rgba(255,255,255,0.02)',
+                border: '1px dashed #444444',
+                borderRadius: '16px',
+                color: user ? '#999999' : 'white',
+                fontSize: '1.1rem',
+                cursor: 'pointer',
+                marginBottom: '40px',
+                textAlign: 'left',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+              }}
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+              </svg>
+              {user ? 'Tulis komentar Anda di sini...' : 'Login untuk menulis komentar'}
+            </button>
+
+            {/* Comment Form */}
+            {showCommentForm && user && (
+              <div style={{ marginBottom: '40px' }}>
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '20px',
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '15px',
+                  }}>
+                    <img 
+                      src={getCurrentUserPhoto()}
+                      alt={getCurrentUserName()}
+                      style={{
+                        width: '56px',
+                        height: '56px',
+                        borderRadius: '50%',
+                        objectFit: 'cover',
+                        border: '2px solid rgba(255,255,255,0.1)',
+                      }}
+                    />
+                    <div>
+                      <span style={{ 
+                        color: 'white', 
+                        fontSize: '1.2rem',
+                        fontWeight: '500',
+                        display: 'block',
+                        marginBottom: '4px'
+                      }}>
+                        {getCurrentUserName()}
+                      </span>
+                      <span style={{ color: '#666666', fontSize: '0.9rem' }}>
+                        Berkomentar sebagai pengguna
+                      </span>
+                    </div>
+                  </div>
+                  <textarea
+                    value={commentText}
+                    onChange={(e) => setCommentText(e.target.value)}
+                    placeholder="Apa pendapat Anda tentang notifikasi ini?"
+                    rows={5}
+                    style={{
+                      padding: '20px',
+                      background: 'rgba(255,255,255,0.03)',
+                      border: '1px solid #333333',
+                      borderRadius: '20px',
+                      color: 'white',
+                      fontSize: '1.1rem',
+                      outline: 'none',
+                      resize: 'vertical',
+                    }}
+                  />
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'flex-end',
+                    gap: '15px',
+                  }}>
+                    <button
+                      type="button"
+                      onClick={() => setShowCommentForm(false)}
+                      style={{
+                        padding: '12px 24px',
+                        background: 'none',
+                        border: '1px solid #333333',
+                        borderRadius: '30px',
+                        color: '#999999',
+                        fontSize: '1rem',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      Batal
+                    </button>
+                    <button
+                      onClick={() => addComment(selectedNotification.id)}
+                      disabled={isSubmitting || !commentText.trim()}
+                      style={{
+                        padding: '12px 32px',
+                        background: isSubmitting || !commentText.trim() ? '#333333' : 'rgba(255,255,255,0.1)',
+                        border: '1px solid rgba(255,255,255,0.2)',
+                        borderRadius: '30px',
+                        color: isSubmitting || !commentText.trim() ? '#999999' : 'white',
+                        fontSize: '1rem',
+                        fontWeight: '500',
+                        cursor: isSubmitting || !commentText.trim() ? 'not-allowed' : 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                      }}
+                    >
+                      <SendIcon />
+                      <span>{isSubmitting ? 'Mengirim...' : 'Kirim Komentar'}</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Comments List */}
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '30px',
+            }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'baseline',
+                justifyContent: 'space-between',
+                marginBottom: '10px',
+              }}>
+                <h3 style={{
+                  fontSize: '1.8rem',
+                  fontWeight: 'normal',
+                  color: 'white',
+                  margin: 0,
+                }}>
+                  Komentar
+                </h3>
+                <span style={{
+                  fontSize: '1.2rem',
+                  color: '#666666',
+                }}>
+                  {selectedNotification.comments?.length || 0} komentar
+                </span>
+              </div>
+
+              {selectedNotification.comments && selectedNotification.comments.length > 0 ? (
+                [...selectedNotification.comments]
+                  .sort((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis())
+                  .map((comment) => (
+                    <div
+                      key={comment.id}
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '15px',
+                        padding: '24px',
+                        backgroundColor: 'rgba(255,255,255,0.02)',
+                        borderRadius: '24px',
+                        border: '1px solid rgba(255,255,255,0.05)',
+                      }}
+                    >
+                      {/* Comment Header */}
+                      <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                      }}>
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '15px',
+                        }}>
+                          <img 
+                            src={comment.userPhoto || `https://ui-avatars.com/api/?name=${comment.userName}&background=random&color=fff`}
+                            alt={comment.userName}
+                            style={{
+                              width: '48px',
+                              height: '48px',
+                              borderRadius: '50%',
+                              objectFit: 'cover',
+                              border: '2px solid rgba(255,255,255,0.1)',
+                            }}
+                          />
+                          <div>
+                            <span style={{
+                              fontSize: '1.2rem',
+                              fontWeight: '500',
+                              color: 'white',
+                              display: 'block',
+                              marginBottom: '4px',
+                            }}>
+                              {comment.userName}
+                            </span>
+                            <span style={{
+                              fontSize: '0.9rem',
+                              color: '#666666',
+                            }}>
+                              {timeAgo(comment.createdAt)}
+                            </span>
+                          </div>
+                        </div>
+                        
+                        {/* Comment Like Button */}
+                        <button
+                          onClick={() => toggleLike(selectedNotification.id, comment.id)}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            background: (comment.likedBy || []).includes(getCurrentUserId()) ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.05)',
+                            border: (comment.likedBy || []).includes(getCurrentUserId()) ? '1px solid white' : '1px solid rgba(255,255,255,0.1)',
+                            borderRadius: '30px',
+                            padding: '8px 16px',
+                            cursor: user ? 'pointer' : 'not-allowed',
+                          }}
+                        >
+                          <LikeIcon filled={(comment.likedBy || []).includes(getCurrentUserId())} />
+                          <span style={{ color: 'white', fontSize: '1rem' }}>
+                            {comment.likes || 0}
+                          </span>
+                        </button>
+                      </div>
+
+                      {/* Comment Content */}
+                      <p style={{
+                        fontSize: '1.1rem',
+                        lineHeight: '1.7',
+                        color: '#e0e0e0',
+                        margin: '10px 0 5px 0',
+                        paddingLeft: '15px',
+                        borderLeft: '2px solid rgba(255,255,255,0.1)',
+                      }}>
+                        {comment.text}
+                      </p>
+
+                      {/* Reply Button */}
+                      <button
+                        onClick={() => {
+                          if (!user) {
+                            alert('Silakan login untuk membalas');
+                          } else {
+                            setReplyingTo(replyingTo === comment.id ? null : comment.id);
+                          }
+                        }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          background: 'none',
+                          border: 'none',
+                          color: '#666666',
+                          fontSize: '0.95rem',
+                          cursor: 'pointer',
+                          padding: '8px 0',
+                          marginTop: '5px',
+                        }}
+                      >
+                        <ReplyIcon />
+                        <span>Balas komentar</span>
+                      </button>
+
+                      {/* Reply Form */}
+                      {replyingTo === comment.id && (
+                        <div
+                          style={{
+                            marginTop: '15px',
+                            marginLeft: '30px',
+                          }}
+                        >
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'flex-start',
+                            gap: '15px',
+                          }}>
+                            <img 
+                              src={getCurrentUserPhoto()}
+                              alt={getCurrentUserName()}
+                              style={{
+                                width: '40px',
+                                height: '40px',
+                                borderRadius: '50%',
+                                objectFit: 'cover',
+                              }}
+                            />
+                            <div style={{
+                              flex: 1,
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: '10px',
+                            }}>
+                              <textarea
+                                value={replyText}
+                                onChange={(e) => setReplyText(e.target.value)}
+                                placeholder="Tulis balasan Anda..."
+                                rows={3}
+                                style={{
+                                  padding: '15px',
+                                  background: 'rgba(255,255,255,0.03)',
+                                  border: '1px solid #333333',
+                                  borderRadius: '16px',
+                                  color: 'white',
+                                  fontSize: '0.95rem',
+                                  outline: 'none',
+                                  resize: 'vertical',
+                                }}
+                              />
+                              <div style={{
+                                display: 'flex',
+                                gap: '10px',
+                                justifyContent: 'flex-end',
+                              }}>
+                                <button
+                                  onClick={() => setReplyingTo(null)}
+                                  style={{
+                                    padding: '8px 16px',
+                                    background: 'none',
+                                    border: '1px solid #333333',
+                                    borderRadius: '20px',
+                                    color: '#999999',
+                                    fontSize: '0.9rem',
+                                    cursor: 'pointer',
+                                  }}
+                                >
+                                  Batal
+                                </button>
+                                <button
+                                  onClick={() => addReply(selectedNotification.id, comment.id)}
+                                  disabled={!replyText.trim() || isSubmitting}
+                                  style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px',
+                                    padding: '8px 24px',
+                                    background: replyText.trim() && !isSubmitting ? 'rgba(255,255,255,0.1)' : '#333333',
+                                    border: '1px solid rgba(255,255,255,0.2)',
+                                    borderRadius: '20px',
+                                    color: replyText.trim() && !isSubmitting ? 'white' : '#999999',
+                                    fontSize: '0.9rem',
+                                    fontWeight: '500',
+                                    cursor: replyText.trim() && !isSubmitting ? 'pointer' : 'not-allowed',
+                                  }}
+                                >
+                                  <ReplyIcon />
+                                  <span>{isSubmitting ? 'Mengirim...' : 'Kirim Balasan'}</span>
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Replies List */}
+                      {comment.replies && comment.replies.length > 0 && (
+                        <div style={{
+                          marginTop: '20px',
+                          marginLeft: '30px',
+                          paddingLeft: '20px',
+                          borderLeft: '2px solid rgba(255,255,255,0.05)',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '20px',
+                        }}>
+                          {comment.replies.map((reply: any) => (
+                            <div
+                              key={reply.id}
+                              style={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'flex-start',
+                              }}
+                            >
+                              <div style={{
+                                display: 'flex',
+                                gap: '12px',
+                                flex: 1,
+                              }}>
+                                <img 
+                                  src={reply.userPhoto || `https://ui-avatars.com/api/?name=${reply.userName}&background=random&color=fff`}
+                                  alt={reply.userName}
+                                  style={{
+                                    width: '32px',
+                                    height: '32px',
+                                    borderRadius: '50%',
+                                    objectFit: 'cover',
+                                  }}
+                                />
+                                <div style={{ flex: 1 }}>
+                                  <div style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '10px',
+                                    marginBottom: '5px',
+                                  }}>
+                                    <span style={{
+                                      fontSize: '1rem',
+                                      fontWeight: '500',
+                                      color: 'white',
+                                    }}>
+                                      {reply.userName}
+                                    </span>
+                                    <span style={{
+                                      fontSize: '0.8rem',
+                                      color: '#666666',
+                                    }}>
+                                      {timeAgo(reply.createdAt)}
+                                    </span>
+                                  </div>
+                                  <p style={{
+                                    fontSize: '0.95rem',
+                                    lineHeight: '1.6',
+                                    color: '#e0e0e0',
+                                    margin: '0 0 8px 0',
+                                  }}>
+                                    {reply.text}
+                                  </p>
+                                  <button
+                                    onClick={() => toggleLike(selectedNotification.id, comment.id, reply.id)}
+                                    style={{
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      gap: '5px',
+                                      background: 'none',
+                                      border: 'none',
+                                      color: (reply.likedBy || []).includes(getCurrentUserId()) ? 'white' : '#666666',
+                                      fontSize: '0.85rem',
+                                      cursor: user ? 'pointer' : 'not-allowed',
+                                      padding: '4px 8px',
+                                      borderRadius: '20px',
+                                      backgroundColor: (reply.likedBy || []).includes(getCurrentUserId()) ? 'rgba(255,255,255,0.1)' : 'transparent',
+                                    }}
+                                  >
+                                    <LikeIcon filled={(reply.likedBy || []).includes(getCurrentUserId())} />
+                                    <span>{reply.likes || 0}</span>
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))
+              ) : (
+                <div
+                  style={{
+                    padding: '60px',
+                    textAlign: 'center',
+                    color: '#666666',
+                    border: '1px dashed #333333',
+                    borderRadius: '24px',
+                  }}
+                >
+                  <span style={{ fontSize: '3rem', display: 'block', marginBottom: '20px' }}>💬</span>
+                  <p style={{ fontSize: '1.2rem', margin: 0 }}>Belum ada komentar.</p>
+                  <p style={{ fontSize: '1rem', color: '#999999', marginTop: '10px' }}>
+                    Jadilah yang pertama untuk berdiskusi!
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Views */}
+            <div style={{ 
+              paddingTop: '2rem',
+              fontSize: '1.5rem'
+            }}>
+              Viewed {selectedNotification.views} times
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
