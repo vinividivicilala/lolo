@@ -191,14 +191,12 @@ export default function NotificationsPage(): React.JSX.Element {
         const data = doc.data();
         if (data.isDeleted) return;
         
-        // Determine if this notification should be shown to current user
         let shouldShow = false;
         
         switch (data.recipientType) {
           case 'all':
             shouldShow = true;
             break;
-            
           case 'specific':
             const recipientIds = data.recipientIds || [];
             if (recipientIds.includes(currentUserId) || 
@@ -206,14 +204,12 @@ export default function NotificationsPage(): React.JSX.Element {
               shouldShow = true;
             }
             break;
-            
           case 'email':
             const recipientEmails = data.recipientEmails || [];
             if (currentUserEmail && recipientEmails.includes(currentUserEmail)) {
               shouldShow = true;
             }
             break;
-            
           default:
             shouldShow = false;
         }
@@ -345,7 +341,6 @@ export default function NotificationsPage(): React.JSX.Element {
       const currentCount = notificationReactions[emoticonId] || 0;
       
       if (userReactions.includes(emoticonId)) {
-        // Remove reaction
         await updateDoc(notificationRef, {
           [reactionKey]: currentCount - 1
         });
@@ -359,7 +354,6 @@ export default function NotificationsPage(): React.JSX.Element {
           [emoticonId]: currentCount - 1
         }));
       } else {
-        // Add reaction
         await updateDoc(notificationRef, {
           [reactionKey]: currentCount + 1
         });
@@ -494,7 +488,6 @@ export default function NotificationsPage(): React.JSX.Element {
         const updatedComments = notification.comments.map(comment => {
           if (comment.id === commentId) {
             if (replyId) {
-              // Toggle like on reply
               const updatedReplies = comment.replies.map(reply => {
                 if (reply.id === replyId) {
                   const likedBy = reply.likedBy || [];
@@ -518,7 +511,6 @@ export default function NotificationsPage(): React.JSX.Element {
               });
               return { ...comment, replies: updatedReplies };
             } else {
-              // Toggle like on comment
               const likedBy = comment.likedBy || [];
               const likes = comment.likes || 0;
               
@@ -572,7 +564,7 @@ export default function NotificationsPage(): React.JSX.Element {
     });
   };
 
-  // SVG Components
+  // SVG Components Modern
   const NorthEastArrow = ({ width = 64, height = 64 }: { width?: number, height?: number }) => (
     <svg 
       width={width} 
@@ -580,10 +572,13 @@ export default function NotificationsPage(): React.JSX.Element {
       viewBox="0 0 24 24" 
       fill="none" 
       stroke="currentColor" 
-      strokeWidth="1"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     >
       <path d="M7 7L17 17" />
-      <path d="M7 17V7H17" />
+      <path d="M17 7H7" />
+      <path d="M17 7V17" />
     </svg>
   );
 
@@ -594,10 +589,13 @@ export default function NotificationsPage(): React.JSX.Element {
       viewBox="0 0 24 24" 
       fill="none" 
       stroke="currentColor" 
-      strokeWidth="1"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     >
       <path d="M5 5L19 19" />
-      <path d="M5 19H19V5" />
+      <path d="M19 5H5" />
+      <path d="M5 19V5" />
     </svg>
   );
 
@@ -607,40 +605,92 @@ export default function NotificationsPage(): React.JSX.Element {
       height={height} 
       viewBox="0 0 24 24" 
       fill="none"
-      stroke="white"
+      stroke="currentColor"
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
     >
-      <path d="M17 17L7 7" stroke="white"/>
-      <path d="M17 7H7" stroke="white"/>
-      <path d="M7 17V7" stroke="white"/>
+      <path d="M17 17L7 7"/>
+      <path d="M17 7H7"/>
+      <path d="M7 17V7"/>
     </svg>
   );
 
-  const MessageIcon = ({ width = 20, height = 20 }: { width?: number, height?: number }) => (
-    <svg width={width} height={height} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+  // Modern Icons
+  const HeartIcon = ({ filled = false, width = 24, height = 24 }: { filled?: boolean, width?: number, height?: number }) => (
+    <svg 
+      width={width} 
+      height={height} 
+      viewBox="0 0 24 24" 
+      fill={filled ? "currentColor" : "none"} 
+      stroke="currentColor" 
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+    </svg>
+  );
+
+  const CommentIcon = ({ width = 24, height = 24 }: { width?: number, height?: number }) => (
+    <svg 
+      width={width} 
+      height={height} 
+      viewBox="0 0 24 24" 
+      fill="none" 
+      stroke="currentColor" 
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
     </svg>
   );
 
-  const SendIcon = ({ width = 18, height = 18 }: { width?: number, height?: number }) => (
-    <svg width={width} height={height} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+  const SendIcon = ({ width = 20, height = 20 }: { width?: number, height?: number }) => (
+    <svg 
+      width={width} 
+      height={height} 
+      viewBox="0 0 24 24" 
+      fill="none" 
+      stroke="currentColor" 
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <line x1="22" y1="2" x2="11" y2="13"/>
       <polygon points="22 2 15 22 11 13 2 9 22 2"/>
     </svg>
   );
 
-  const ReplyIcon = ({ width = 16, height = 16 }: { width?: number, height?: number }) => (
-    <svg width={width} height={height} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+  const ReplyIcon = ({ width = 18, height = 18 }: { width?: number, height?: number }) => (
+    <svg 
+      width={width} 
+      height={height} 
+      viewBox="0 0 24 24" 
+      fill="none" 
+      stroke="currentColor" 
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
       <polyline points="10 11 13 14 10 17"/>
     </svg>
   );
 
-  const CheckIcon = ({ width = 12, height = 12 }: { width?: number, height?: number }) => (
-    <svg width={width} height={height} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-      <polyline points="20 6 9 17 4 12"/>
+  const MessageIcon = ({ width = 24, height = 24 }: { width?: number, height?: number }) => (
+    <svg 
+      width={width} 
+      height={height} 
+      viewBox="0 0 24 24" 
+      fill="none" 
+      stroke="currentColor" 
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
     </svg>
   );
 
@@ -652,7 +702,7 @@ export default function NotificationsPage(): React.JSX.Element {
       color: '#ffffff',
       padding: '3rem'
     }}>
-      {/* Header with running text */}
+      {/* Running Text */}
       <div style={{
         position: 'fixed',
         top: 0,
@@ -841,9 +891,15 @@ export default function NotificationsPage(): React.JSX.Element {
                     fontSize: '1.5rem'
                   }}>
                     <span>From {notification.senderName}</span>
-                    <div style={{ display: 'flex', gap: '2rem' }}>
-                      <span>❤️ {notification.likes?.length || 0}</span>
-                      <span>💬 {notification.comments?.length || 0}</span>
+                    <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <HeartIcon filled={isLiked} width={24} height={24} />
+                        <span>{notification.likes?.length || 0}</span>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <CommentIcon width={24} height={24} />
+                        <span>{notification.comments?.length || 0}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -853,7 +909,7 @@ export default function NotificationsPage(): React.JSX.Element {
         </div>
       )}
 
-      {/* Detail Modal */}
+      {/* Detail Modal dengan Design Komentar seperti Blog */}
       <AnimatePresence>
         {selectedNotification && (
           <motion.div
@@ -952,13 +1008,13 @@ export default function NotificationsPage(): React.JSX.Element {
                       gap: '0.5rem'
                     }}
                   >
-                    {selectedNotification.likes.includes(getCurrentUserId()) ? '❤️' : '🤍'}
+                    <HeartIcon filled={selectedNotification.likes.includes(getCurrentUserId())} width={32} height={32} />
                     <span>{selectedNotification.likes?.length || 0}</span>
                   </button>
                 </div>
               </div>
 
-              {/* ===== EMOTICON REACTIONS SECTION (seperti blog) ===== */}
+              {/* EMOTICON REACTIONS SECTION (seperti blog) */}
               <div style={{
                 marginTop: '40px',
                 marginBottom: '40px',
@@ -1114,7 +1170,7 @@ export default function NotificationsPage(): React.JSX.Element {
                 </div>
               </div>
 
-              {/* ===== COMMENTS SECTION (seperti blog) ===== */}
+              {/* COMMENTS SECTION (seperti blog) */}
 
               {/* Add Comment Button */}
               <motion.button
@@ -1367,16 +1423,11 @@ export default function NotificationsPage(): React.JSX.Element {
                                 cursor: user ? 'pointer' : 'not-allowed',
                               }}
                             >
-                              <svg 
-                                width="20" 
-                                height="20" 
-                                viewBox="0 0 24 24" 
-                                fill={(comment.likedBy || []).includes(getCurrentUserId()) ? "white" : "none"} 
-                                stroke="white" 
-                                strokeWidth="1"
-                              >
-                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-                              </svg>
+                              <HeartIcon 
+                                filled={(comment.likedBy || []).includes(getCurrentUserId())} 
+                                width={20} 
+                                height={20} 
+                              />
                               <span style={{ color: 'white', fontSize: '1rem' }}>
                                 {comment.likes || 0}
                               </span>
@@ -1608,16 +1659,11 @@ export default function NotificationsPage(): React.JSX.Element {
                                           backgroundColor: (reply.likedBy || []).includes(getCurrentUserId()) ? 'rgba(255,255,255,0.1)' : 'transparent',
                                         }}
                                       >
-                                        <svg 
-                                          width="14" 
-                                          height="14" 
-                                          viewBox="0 0 24 24" 
-                                          fill={(reply.likedBy || []).includes(getCurrentUserId()) ? "white" : "none"} 
-                                          stroke="currentColor" 
-                                          strokeWidth="1"
-                                        >
-                                          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-                                        </svg>
+                                        <HeartIcon 
+                                          filled={(reply.likedBy || []).includes(getCurrentUserId())} 
+                                          width={14} 
+                                          height={14} 
+                                        />
                                         <span>{reply.likes || 0}</span>
                                       </motion.button>
                                     </div>
