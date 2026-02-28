@@ -9,11 +9,22 @@ export default function DocsPage() {
   const [activeSubSection, setActiveSubSection] = useState("salam");
   const [isMobile, setIsMobile] = useState(false);
   const [showPembukaDropdown, setShowPembukaDropdown] = useState(false);
+  const [currentDateTime, setCurrentDateTime] = useState(new Date());
   const contentRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const marqueeRef = useRef<HTMLDivElement>(null);
   const marqueeContentRef = useRef<HTMLDivElement>(null);
   
+  // Update waktu real-time setiap detik
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentDateTime(new Date());
+    }, 1000);
+
+    return () => {
+      clearInterval(timer);
+    };
+  }, []);
+
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
@@ -103,6 +114,25 @@ export default function DocsPage() {
     };
   }, []);
 
+  // Format tanggal dan waktu
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString('id-ID', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
+  const formatTime = (date: Date) => {
+    return date.toLocaleTimeString('id-ID', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    });
+  };
+
   // Data navigasi dengan dropdown untuk pembuka
   const navItems = [
     { 
@@ -130,32 +160,32 @@ export default function DocsPage() {
       title: "SALAM PEMBUKA",
       content: {
         intro: "Assalamu'alaikum Warahmatullahi Wabarakatuh",
-        sapaan: "Selamat datang di platform MENURU - Solusi digital masa depan untuk kebutuhan literasi dan dokumentasi Anda.",
-        filosofi: "MENURU berasal dari bahasa Sansekerta yang berarti 'cahaya pencerahan'. Sesuai dengan namanya, platform ini hadir untuk menerangi perjalanan digital Anda melalui pengalaman membaca dan menulis yang bermakna.",
-        pesan: "Kami percaya bahwa setiap kata memiliki kekuatan untuk mengubah dunia. Melalui MENURU, kami mengajak Anda untuk menuliskan cerita, berbagi pengetahuan, dan menciptakan perubahan."
+        sapaan: "Selamat datang di platform MENURU Solusi digital masa depan untuk kebutuhan literasi dan dokumentasi Anda",
+        filosofi: "MENURU berasal dari bahasa Sansekerta yang berarti cahaya pencerahan Sesuai dengan namanya platform ini hadir untuk menerangi perjalanan digital Anda melalui pengalaman membaca dan menulis yang bermakna",
+        pesan: "Kami percaya bahwa setiap kata memiliki kekuatan untuk mengubah dunia Melalui MENURU kami mengajak Anda untuk menuliskan cerita berbagi pengetahuan dan menciptakan perubahan"
       }
     },
     tentang: {
       title: "TENTANG MENURU",
       content: {
-        sejarah: "MENURU didirikan pada tahun 2023 oleh sekelompok pengembang dan penulis yang peduli akan masa depan literasi digital. Berawal dari keprihatinan terhadap minimnya platform baca-tulis yang nyaman dan berfokus pada pengalaman pengguna.",
-        misi: "Menciptakan ekosistem digital yang mendukung pertumbuhan literasi dan kreativitas melalui teknologi yang manusiawi dan mudah diakses.",
-        keunikan: "Berbeda dari platform lain, MENURU mengedepankan pengalaman membaca tanpa gangguan dengan desain minimalis, performa cepat, dan fitur kolaborasi yang intuitif.",
-        target: "Platform ini ditujukan untuk penulis, akademisi, pelajar, dan siapa saja yang mencintai dunia tulis-menulis."
+        sejarah: "MENURU didirikan pada tahun 2023 oleh sekelompok pengembang dan penulis yang peduli akan masa depan literasi digital Berawal dari keprihatinan terhadap minimnya platform baca tulis yang nyaman dan berfokus pada pengalaman pengguna",
+        misi: "Menciptakan ekosistem digital yang mendukung pertumbuhan literasi dan kreativitas melalui teknologi yang manusiawi dan mudah diakses",
+        keunikan: "Berbeda dari platform lain MENURU mengedepankan pengalaman membaca tanpa gangguan dengan desain minimalis performa cepat dan fitur kolaborasi yang intuitif",
+        target: "Platform ini ditujukan untuk penulis akademisi pelajar dan siapa saja yang mencintai dunia tulis menulis"
       }
     },
     "visi-misi": {
       title: "VISI & MISI",
       content: {
-        visi: "Menjadi platform literasi digital terdepan yang memberdayakan jutaan penulis dan pembaca di seluruh dunia untuk menciptakan dan membagikan pengetahuan.",
+        visi: "Menjadi platform literasi digital terdepan yang memberdayakan jutaan penulis dan pembaca di seluruh dunia untuk menciptakan dan membagikan pengetahuan",
         misiList: [
-          "Menyediakan platform baca-tulis yang nyaman dan bebas gangguan",
+          "Menyediakan platform baca tulis yang nyaman dan bebas gangguan",
           "Membangun komunitas penulis dan pembaca yang aktif dan suportif",
           "Mengembangkan teknologi yang memudahkan proses kreatif menulis",
           "Melestarikan dan mengembangkan literasi dalam format digital",
           "Menciptakan ruang aman bagi kebebasan berekspresi dan berpendapat"
         ],
-        nilai: "Transparansi, Inovasi, Kolaborasi, dan Keberlanjutan"
+        nilai: "Transparansi Inovasi Kolaborasi dan Keberlanjutan"
       }
     },
     "fitur-utama": {
@@ -164,11 +194,11 @@ export default function DocsPage() {
         daftar: [
           {
             nama: "Mode Membaca Tenang",
-            deskripsi: "Antarmuka bebas gangguan dengan opsi kustomisasi font, ukuran teks, dan tema yang dapat disesuaikan"
+            deskripsi: "Antarmuka bebas gangguan dengan opsi kustomisasi font ukuran teks dan tema yang dapat disesuaikan"
           },
           {
             nama: "Editor Kaya Fitur",
-            deskripsi: "Markdown editor dengan preview real-time, support gambar, tabel, dan embed konten multimedia"
+            deskripsi: "Markdown editor dengan preview real-time support gambar tabel dan embed konten multimedia"
           },
           {
             nama: "Sistem Koleksi",
@@ -180,23 +210,23 @@ export default function DocsPage() {
           },
           {
             nama: "Analitik Membaca",
-            deskripsi: "Pantau statistik pembaca, waktu baca, dan engagement untuk setiap tulisan"
+            deskripsi: "Pantau statistik pembaca waktu baca dan engagement untuk setiap tulisan"
           },
           {
             nama: "Sinkronasi Lintas Platform",
             deskripsi: "Akses tulisan Anda dari berbagai perangkat dengan sinkronasi otomatis via cloud"
           }
         ],
-        teknologi: "React, Next.js, TailwindCSS, Prisma, PostgreSQL, Redis, WebSocket"
+        teknologi: "React Next.js TailwindCSS Prisma PostgreSQL Redis WebSocket"
       }
     },
     penutup: {
       title: "PENUTUP",
       content: {
-        terimaKasih: "Terima kasih telah menggunakan platform MENURU. Kami berkomitmen untuk terus meningkatkan layanan dan memberikan pengalaman terbaik bagi Anda.",
-        kontak: "Untuk pertanyaan, saran, atau kolaborasi, hubungi kami di:",
+        terimaKasih: "Terima kasih telah menggunakan platform MENURU Kami berkomitmen untuk terus meningkatkan layanan dan memberikan pengalaman terbaik bagi Anda",
+        kontak: "Untuk pertanyaan saran atau kolaborasi hubungi kami di",
         email: "hello@menuru.com",
-        sosial: "@menuru (Twitter, Instagram, LinkedIn)",
+        sosial: "menuru Twitter Instagram LinkedIn",
         website: "www.menuru.com",
         penutup: "Wassalamu'alaikum Warahmatullahi Wabarakatuh"
       }
@@ -204,48 +234,48 @@ export default function DocsPage() {
     arsitektur: {
       title: "ARSITEKTUR",
       content: {
-        overview: "Platform MENURU dibangun dengan arsitektur microservices yang scalable dan resilient, dirancang untuk menangani jutaan pengguna aktif dengan latensi minimal.",
+        overview: "Platform MENURU dibangun dengan arsitektur microservices yang scalable dan resilient dirancang untuk menangani jutaan pengguna aktif dengan latensi minimal",
         stack: {
-          frontend: "Next.js 14 dengan App Router, TypeScript, TailwindCSS, Framer Motion untuk animasi halus, dan GSAP untuk interaksi kompleks.",
-          backend: "Node.js dengan Express, GraphQL API, WebSocket untuk real-time updates, dan Redis untuk caching.",
-          database: "PostgreSQL untuk data utama, MongoDB untuk konten tidak terstruktur, Elasticsearch untuk pencarian full-text.",
-          infrastructure: "Docker container, Kubernetes orchestration, AWS cloud, CloudFront CDN, dan multiple availability zones."
+          frontend: "Next.js 14 dengan App Router TypeScript TailwindCSS Framer Motion untuk animasi halus dan GSAP untuk interaksi kompleks",
+          backend: "Node.js dengan Express GraphQL API WebSocket untuk real-time updates dan Redis untuk caching",
+          database: "PostgreSQL untuk data utama MongoDB untuk konten tidak terstruktur Elasticsearch untuk pencarian full-text",
+          infrastructure: "Docker container Kubernetes orchestration AWS cloud CloudFront CDN dan multiple availability zones"
         },
-        scalability: "Arsitektur horizontal scaling dengan load balancing otomatis dan database sharding untuk menangani pertumbuhan data eksponensial.",
-        performance: "Optimasi dengan server-side rendering, static generation, incremental static regeneration, dan edge computing untuk response time di bawah 100ms."
+        scalability: "Arsitektur horizontal scaling dengan load balancing otomatis dan database sharding untuk menangani pertumbuhan data eksponensial",
+        performance: "Optimasi dengan server-side rendering static generation incremental static regeneration dan edge computing untuk response time di bawah 100ms"
       }
     },
     instalasi: {
       title: "INSTALASI",
       content: {
         requirements: {
-          hardware: "CPU: 2 core minimum, RAM: 4GB minimum, Storage: 20GB available",
-          software: "Node.js 18+, PostgreSQL 14+, Redis 6+, Docker 20+ (opsional)",
-          os: "Linux (Ubuntu 20.04+/Debian 11+), macOS 12+, Windows 11 dengan WSL2"
+          hardware: "CPU 2 core minimum RAM 4GB minimum Storage 20GB available",
+          software: "Node.js 18+ PostgreSQL 14+ Redis 6+ Docker 20+ opsional",
+          os: "Linux Ubuntu 20.04+ Debian 11+ macOS 12+ Windows 11 dengan WSL2"
         },
         steps: [
           {
             title: "Clone Repository",
-            code: "git clone https://github.com/menuru/platform.git\ncd platform"
+            code: "git clone https://github.com/menuru/platform.git cd platform"
           },
           {
             title: "Install Dependencies",
-            code: "npm install\n# atau\nyarn install"
+            code: "npm install atau yarn install"
           },
           {
             title: "Konfigurasi Environment",
-            code: "cp .env.example .env\n# Edit file .env sesuai konfigurasi Anda"
+            code: "cp .env.example .env Edit file .env sesuai konfigurasi Anda"
           },
           {
             title: "Setup Database",
-            code: "npx prisma migrate dev\nnpm run seed"
+            code: "npx prisma migrate dev npm run seed"
           },
           {
             title: "Build dan Jalankan",
-            code: "npm run build\nnpm start"
+            code: "npm run build npm start"
           }
         ],
-        docker: "Untuk deployment dengan Docker: docker-compose up -d",
+        docker: "Untuk deployment dengan Docker docker-compose up -d",
         verification: "Akses http://localhost:3000 untuk verifikasi instalasi berhasil"
       }
     },
@@ -256,7 +286,7 @@ export default function DocsPage() {
           {
             judul: "Memulai Menulis",
             langkah: [
-              "Klik tombol 'Tulis Baru' di dashboard",
+              "Klik tombol Tulis Baru di dashboard",
               "Pilih template atau mulai dari kosong",
               "Gunakan editor markdown untuk memformat teks",
               "Tambahkan gambar dengan drag-and-drop",
@@ -276,30 +306,30 @@ export default function DocsPage() {
             judul: "Kolaborasi Tim",
             langkah: [
               "Undang anggota tim via email",
-              "Atur role (admin/editor/viewer)",
+              "Atur role admin editor viewer",
               "Lihat perubahan real-time",
               "Gunakan komentar untuk diskusi"
             ]
           }
         ],
         shortcut: [
-          { keys: "Ctrl/Cmd + K", fungsi: "Pencarian cepat" },
-          { keys: "Ctrl/Cmd + S", fungsi: "Simpan draft" },
-          { keys: "Ctrl/Cmd + P", fungsi: "Preview mode" },
-          { keys: "Ctrl/Cmd + B", fungsi: "Bold teks" },
-          { keys: "Ctrl/Cmd + I", fungsi: "Italic teks" }
+          { keys: "Ctrl Cmd + K", fungsi: "Pencarian cepat" },
+          { keys: "Ctrl Cmd + S", fungsi: "Simpan draft" },
+          { keys: "Ctrl Cmd + P", fungsi: "Preview mode" },
+          { keys: "Ctrl Cmd + B", fungsi: "Bold teks" },
+          { keys: "Ctrl Cmd + I", fungsi: "Italic teks" }
         ]
       }
     },
     keamanan: {
       title: "KEAMANAN",
       content: {
-        enkripsi: "Semua data dienkripsi end-to-end menggunakan AES-256 untuk data at-rest dan TLS 1.3 untuk data in-transit.",
-        authentication: "Multi-factor authentication (MFA) dengan dukungan authenticator apps, SMS, dan email verification. Single Sign-On (SSO) untuk enterprise.",
-        authorization: "Role-based access control (RBAC) dengan 5 level akses: Super Admin, Admin, Editor, Contributor, Viewer.",
-        privacy: "GDPR dan CCPA compliant dengan fitur data export dan penghapusan data permanen.",
-        monitoring: "24/7 real-time monitoring dengan anomaly detection dan automated threat response.",
-        compliance: "ISO 27001 certified, SOC 2 Type II, dan HIPAA compliant untuk sektor healthcare."
+        enkripsi: "Semua data dienkripsi end-to-end menggunakan AES-256 untuk data at-rest dan TLS 1.3 untuk data in-transit",
+        authentication: "Multi-factor authentication MFA dengan dukungan authenticator apps SMS dan email verification Single Sign-On SSO untuk enterprise",
+        authorization: "Role-based access control RBAC dengan 5 level akses Super Admin Admin Editor Contributor Viewer",
+        privacy: "GDPR dan CCPA compliant dengan fitur data export dan penghapusan data permanen",
+        monitoring: "24/7 real-time monitoring dengan anomaly detection dan automated threat response",
+        compliance: "ISO 27001 certified SOC 2 Type II dan HIPAA compliant untuk sektor healthcare"
       }
     },
     troubleshoot: {
@@ -308,37 +338,58 @@ export default function DocsPage() {
         umum: [
           {
             masalah: "Halaman tidak loading",
-            solusi: "Clear cache browser, cek koneksi internet, pastikan tidak ada firewall blocking"
+            solusi: "Clear cache browser cek koneksi internet pastikan tidak ada firewall blocking"
           },
           {
             masalah: "Login gagal",
-            solusi: "Reset password, cek email verification, pastikan caps lock non-aktif"
+            solusi: "Reset password cek email verification pastikan caps lock non aktif"
           },
           {
             masalah: "Perubahan tidak tersimpan",
-            solusi: "Cek koneksi internet, refresh halaman, cek storage quota"
+            solusi: "Cek koneksi internet refresh halaman cek storage quota"
           }
         ],
         error: [
           {
-            kode: "ERR_401",
+            kode: "ERR 401",
             deskripsi: "Unauthorized access",
-            solusi: "Login ulang, refresh token, cek session expiry"
+            solusi: "Login ulang refresh token cek session expiry"
           },
           {
-            kode: "ERR_403",
+            kode: "ERR 403",
             deskripsi: "Forbidden resource",
-            solusi: "Minta akses ke admin, cek permission settings"
+            solusi: "Minta akses ke admin cek permission settings"
           },
           {
-            kode: "ERR_429",
+            kode: "ERR 429",
             deskripsi: "Rate limit exceeded",
-            solusi: "Tunggu beberapa menit, kurangi frekuensi request"
+            solusi: "Tunggu beberapa menit kurangi frekuensi request"
           }
         ],
-        kontak: "Jika masalah berlanjut, hubungi support di support@menuru.com atau melalui live chat 24/7"
+        kontak: "Jika masalah berlanjut hubungi support di support@menuru.com atau melalui live chat 24/7"
       }
     }
+  };
+
+  // Data author untuk setiap section
+  const authors = {
+    salam: { name: "Ahmad Fauzi", role: "Lead Writer" },
+    tentang: { name: "Siti Nurhaliza", role: "Content Manager" },
+    "visi-misi": { name: "Budi Santoso", role: "Product Manager" },
+    "fitur-utama": { name: "Dewi Lestari", role: "Product Designer" },
+    penutup: { name: "Ahmad Fauzi", role: "Lead Writer" },
+    arsitektur: { name: "Rizki Pratama", role: "Lead Engineer" },
+    instalasi: { name: "Rizki Pratama", role: "Lead Engineer" },
+    penggunaan: { name: "Maya Sari", role: "Technical Writer" },
+    keamanan: { name: "Rizki Pratama", role: "Lead Engineer" },
+    troubleshoot: { name: "Maya Sari", role: "Technical Writer" }
+  };
+
+  const getCurrentAuthor = () => {
+    if (activeSection === "pembuka") {
+      return authors[activeSubSection as keyof typeof authors] || authors.salam;
+    }
+    return authors[activeSection as keyof typeof authors] || authors.arsitektur;
   };
 
   const getCurrentContent = () => {
@@ -349,6 +400,7 @@ export default function DocsPage() {
   };
 
   const currentContent = getCurrentContent();
+  const currentAuthor = getCurrentAuthor();
 
   const ArrowIcon = () => (
     <svg 
@@ -359,6 +411,7 @@ export default function DocsPage() {
       xmlns="http://www.w3.org/2000/svg"
       style={{
         marginLeft: '1rem',
+        marginRight: '1rem',
         opacity: 0.8,
         color: 'white'
       }}
@@ -437,7 +490,7 @@ export default function DocsPage() {
                       <ul style={{ listStyle: 'none', padding: 0 }}>
                         {item.langkah?.map((langkah: string, lidx: number) => (
                           <li key={lidx} style={{ marginBottom: '0.5rem', display: 'flex', alignItems: 'flex-start' }}>
-                            <span style={{ marginRight: '1rem', opacity: 0.5, color: 'white' }}>{lidx + 1}.</span>
+                            <span style={{ marginRight: '1rem', opacity: 0.5, color: 'white' }}>{lidx + 1}</span>
                             <span style={{ color: 'white' }}>{langkah}</span>
                           </li>
                         ))}
@@ -471,7 +524,7 @@ export default function DocsPage() {
                   {value.map((item, idx) => (
                     <div key={idx} style={{ marginBottom: '1.5rem', padding: '1rem', backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: '8px' }}>
                       <div style={{ fontWeight: '600', color: '#ff6b6b', marginBottom: '0.5rem' }}>{item.masalah}</div>
-                      <div style={{ opacity: 0.8, color: 'white' }}>Solusi: {item.solusi}</div>
+                      <div style={{ opacity: 0.8, color: 'white' }}>Solusi {item.solusi}</div>
                     </div>
                   ))}
                 </div>
@@ -486,7 +539,7 @@ export default function DocsPage() {
                     <div key={idx} style={{ marginBottom: '1rem', padding: '1rem', backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: '8px' }}>
                       <code style={{ color: '#ffd700', fontWeight: '600' }}>{item.kode}</code>
                       <div style={{ marginTop: '0.5rem', opacity: 0.9, color: 'white' }}>{item.deskripsi}</div>
-                      <div style={{ marginTop: '0.5rem', opacity: 0.8, fontSize: '0.95rem', color: 'white' }}>Solusi: {item.solusi}</div>
+                      <div style={{ marginTop: '0.5rem', opacity: 0.8, fontSize: '0.95rem', color: 'white' }}>Solusi {item.solusi}</div>
                     </div>
                   ))}
                 </div>
@@ -502,7 +555,7 @@ export default function DocsPage() {
                 <ul style={{ listStyle: 'none', padding: 0 }}>
                   {value.map((item: string, idx: number) => (
                     <li key={idx} style={{ marginBottom: '0.75rem', display: 'flex', alignItems: 'flex-start' }}>
-                      <span style={{ marginRight: '1rem', opacity: 0.5, color: 'white' }}>•</span>
+                      <span style={{ marginRight: '1rem', opacity: 0.5, color: 'white' }}></span>
                       <span style={{ color: 'white' }}>{item}</span>
                     </li>
                   ))}
@@ -520,7 +573,7 @@ export default function DocsPage() {
                 {Object.entries(value).map(([subKey, subValue]) => (
                   <div key={subKey} style={{ marginBottom: '1rem' }}>
                     <div style={{ fontWeight: '500', opacity: 0.9, marginBottom: '0.5rem', color: 'white', textTransform: 'capitalize' }}>
-                      {subKey.replace(/([A-Z])/g, ' $1')}:
+                      {subKey.replace(/([A-Z])/g, ' $1')}
                     </div>
                     <div style={{ opacity: 0.8, marginLeft: '1rem', color: 'white' }}>{String(subValue)}</div>
                   </div>
@@ -532,7 +585,7 @@ export default function DocsPage() {
           // Simple key-value
           return (
             <div key={key} style={{ marginBottom: '1rem' }}>
-              <span style={{ fontWeight: '500', color: 'white', textTransform: 'capitalize' }}>{key.replace(/([A-Z])/g, ' $1')}: </span>
+              <span style={{ fontWeight: '500', color: 'white', textTransform: 'capitalize' }}>{key.replace(/([A-Z])/g, ' $1')} </span>
               <span style={{ color: 'white' }}>{String(value)}</span>
             </div>
           );
@@ -724,7 +777,7 @@ export default function DocsPage() {
             style={{
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '2rem',
+              gap: '0',
               color: 'white',
               fontSize: '1.2rem',
               fontWeight: '500',
@@ -733,7 +786,7 @@ export default function DocsPage() {
           >
             {/* Konten marquee diulang 4 kali untuk efek infinite */}
             {[...Array(4)].map((_, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+              <div key={i} style={{ display: 'flex', alignItems: 'center' }}>
                 <span>DOCS MENURU</span>
                 <ArrowIcon />
                 <span>DOCUMENTATION</span>
@@ -754,7 +807,7 @@ export default function DocsPage() {
 
         <div ref={contentRef} style={{ maxWidth: '900px' }}>
           
-          {/* Title */}
+          {/* Title tanpa tanda pemisah */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -764,14 +817,42 @@ export default function DocsPage() {
               fontWeight: '900',
               lineHeight: 1,
               letterSpacing: '-2px',
-              marginBottom: '2rem',
+              marginBottom: '1rem',
               paddingLeft: '1.5rem',
-              borderLeft: '4px solid rgba(255,255,255,0.3)',
               color: 'white'
             }}
           >
             {currentContent.title}
           </motion.div>
+
+          {/* Author dan Info Update Real-time */}
+          <div style={{
+            paddingLeft: '1.5rem',
+            marginBottom: '2rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '2rem',
+            borderBottom: '1px solid rgba(255,255,255,0.1)',
+            paddingBottom: '1rem'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+              <span style={{ opacity: 0.8, fontSize: '0.95rem' }}>{currentAuthor.name}</span>
+              <span style={{ opacity: 0.5, fontSize: '0.85rem' }}>({currentAuthor.role})</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
+              </svg>
+              <span style={{ opacity: 0.8, fontSize: '0.95rem' }}>Terakhir diperbarui</span>
+              <span style={{ opacity: 0.9, fontSize: '0.95rem', fontWeight: '500' }}>{formatDate(currentDateTime)}</span>
+              <span style={{ opacity: 0.7, fontSize: '0.95rem' }}>{formatTime(currentDateTime)} WIB</span>
+            </div>
+          </div>
 
           {/* Content */}
           <div style={{
@@ -781,7 +862,7 @@ export default function DocsPage() {
             {renderContent()}
           </div>
 
-          {/* Footer */}
+          {/* Footer dengan informasi lengkap */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -793,7 +874,7 @@ export default function DocsPage() {
               maxWidth: '800px',
               paddingLeft: '1.5rem',
               display: 'grid',
-              gridTemplateColumns: 'repeat(3, 1fr)',
+              gridTemplateColumns: 'repeat(4, 1fr)',
               gap: '2rem'
             }}
           >
@@ -803,7 +884,11 @@ export default function DocsPage() {
             </div>
             <div>
               <div style={{ fontSize: '0.8rem', opacity: 0.4, marginBottom: '0.5rem', color: 'white' }}>LAST UPDATE</div>
-              <div style={{ fontSize: '0.95rem', opacity: 0.8, color: 'white' }}>Februari 2025</div>
+              <div style={{ fontSize: '0.95rem', opacity: 0.8, color: 'white' }}>{formatDate(currentDateTime)}</div>
+            </div>
+            <div>
+              <div style={{ fontSize: '0.8rem', opacity: 0.4, marginBottom: '0.5rem', color: 'white' }}>AUTHOR</div>
+              <div style={{ fontSize: '0.95rem', opacity: 0.8, color: 'white' }}>{currentAuthor.name}</div>
             </div>
             <div>
               <div style={{ fontSize: '0.8rem', opacity: 0.4, marginBottom: '0.5rem', color: 'white' }}>BUILD</div>
