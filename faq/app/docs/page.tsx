@@ -68,7 +68,7 @@ export default function DocsPage() {
     }
   }, [activeSection, activeSubSection, isClient]);
 
-  // GSAP animation for marquee - simplified to avoid modifiers issue
+  // GSAP animation for marquee - hanya teks DOCS besar
   useEffect(() => {
     if (marqueeContentRef.current && isClient) {
       // Kill previous animation if exists
@@ -76,10 +76,10 @@ export default function DocsPage() {
         marqueeAnimationRef.current.kill();
       }
       
-      // Simple infinite scroll animation
+      // Simple infinite scroll animation with larger text
       marqueeAnimationRef.current = gsap.to(marqueeContentRef.current, {
         x: "-=50%",
-        duration: 20,
+        duration: 25,
         ease: "none",
         repeat: -1
       });
@@ -156,7 +156,7 @@ export default function DocsPage() {
     });
   }, []);
 
-  // Data navigasi
+  // Data navigasi dengan dropdown untuk pembuka
   const navItems = [
     { 
       id: "pembuka", 
@@ -177,7 +177,7 @@ export default function DocsPage() {
     { id: "troubleshoot", title: "TROUBLESHOOT" }
   ];
 
-  // Data konten (dipersingkat untuk kejelasan, tapi tetap lengkap di kode asli)
+  // Data konten tanpa tanda pemisah
   const contentData: Record<string, ContentItem> = {
     salam: {
       title: "SALAM PEMBUKA",
@@ -425,30 +425,7 @@ export default function DocsPage() {
   const currentContent = getCurrentContent();
   const currentAuthor = getCurrentAuthor();
 
-  const ArrowIcon = () => (
-    <svg 
-      width="24" 
-      height="24" 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      xmlns="http://www.w3.org/2000/svg"
-      style={{
-        marginLeft: '1rem',
-        marginRight: '1rem',
-        opacity: 0.8,
-        color: 'white'
-      }}
-    >
-      <path 
-        d="M7 17L17 7M17 7H8M17 7V16" 
-        stroke="white" 
-        strokeWidth="2" 
-        strokeLinecap="round" 
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-
+  // Arrow icon dihapus karena tidak digunakan
   const PlusIcon = ({ isOpen }: { isOpen: boolean }) => (
     <svg 
       width="16" 
@@ -485,7 +462,7 @@ export default function DocsPage() {
           if (key === 'title') return null;
           
           if (Array.isArray(value)) {
-            // Handle different array types
+            // Handle different array types without separators
             return (
               <div key={key} style={{ marginBottom: '2rem' }}>
                 <h3 style={{ fontSize: '1.3rem', fontWeight: '600', marginBottom: '1rem', opacity: 1, color: 'white' }}>
@@ -494,6 +471,7 @@ export default function DocsPage() {
                    key === 'shortcut' ? 'Keyboard Shortcuts' :
                    key === 'umum' ? 'Masalah Umum' :
                    key === 'error' ? 'Kode Error' :
+                   key === 'misiList' ? 'Misi' :
                    key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
                 </h3>
                 {value.map((item, idx) => {
@@ -532,7 +510,7 @@ export default function DocsPage() {
                     return (
                       <div key={idx} style={{ marginBottom: '1.5rem', padding: '1rem', backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: '8px' }}>
                         <div style={{ fontWeight: '600', color: '#ff6b6b', marginBottom: '0.5rem' }}>{item.masalah}</div>
-                        <div style={{ opacity: 0.8, color: 'white' }}>Solusi: {item.solusi}</div>
+                        <div style={{ opacity: 0.8, color: 'white' }}>Solusi {item.solusi}</div>
                       </div>
                     );
                   }
@@ -541,13 +519,13 @@ export default function DocsPage() {
                       <div key={idx} style={{ marginBottom: '1rem', padding: '1rem', backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: '8px' }}>
                         <code style={{ color: '#ffd700', fontWeight: '600' }}>{item.kode}</code>
                         <div style={{ marginTop: '0.5rem', opacity: 0.9, color: 'white' }}>{item.deskripsi}</div>
-                        <div style={{ marginTop: '0.5rem', opacity: 0.8, fontSize: '0.95rem', color: 'white' }}>Solusi: {item.solusi}</div>
+                        <div style={{ marginTop: '0.5rem', opacity: 0.8, fontSize: '0.95rem', color: 'white' }}>Solusi {item.solusi}</div>
                       </div>
                     );
                   }
                   return (
                     <div key={idx} style={{ marginBottom: '0.75rem', display: 'flex', alignItems: 'flex-start' }}>
-                      <span style={{ marginRight: '1rem', opacity: 0.5, color: 'white' }}>•</span>
+                      <span style={{ marginRight: '1rem', opacity: 0.5, color: 'white' }}></span>
                       <span style={{ color: 'white' }}>{item}</span>
                     </div>
                   );
@@ -560,7 +538,10 @@ export default function DocsPage() {
             return (
               <div key={key} style={{ marginBottom: '2rem' }}>
                 <h3 style={{ fontSize: '1.3rem', fontWeight: '600', marginBottom: '1rem', opacity: 1, color: 'white', textTransform: 'capitalize' }}>
-                  {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
+                  {key === 'stack' ? 'Technology Stack' :
+                   key === 'requirements' ? 'Requirements' :
+                   key === 'steps' ? 'Langkah Instalasi' :
+                   key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
                 </h3>
                 {Object.entries(value).map(([subKey, subValue]) => (
                   <div key={subKey} style={{ marginBottom: '1rem' }}>
@@ -574,10 +555,9 @@ export default function DocsPage() {
             );
           }
           
-          // Simple key-value
+          // Simple key-value tanpa titik dua
           return (
             <div key={key} style={{ marginBottom: '1rem' }}>
-              <span style={{ fontWeight: '500', color: 'white', textTransform: 'capitalize' }}>{key.replace(/([A-Z])/g, ' $1')}: </span>
               <span style={{ color: 'white' }}>{String(value)}</span>
             </div>
           );
@@ -751,7 +731,7 @@ export default function DocsPage() {
         width: 'calc(100% - 280px)'
       }}>
         
-        {/* Marquee Text dengan Panah */}
+        {/* Marquee Text dengan Teks Besar "DOCS" */}
         <div style={{
           position: 'fixed',
           top: 0,
@@ -771,31 +751,23 @@ export default function DocsPage() {
               alignItems: 'center',
               gap: '0',
               color: 'white',
-              fontSize: '1.2rem',
-              fontWeight: '500',
-              letterSpacing: '1px'
+              fontSize: '3.5rem',
+              fontWeight: '900',
+              letterSpacing: '4px',
+              textTransform: 'uppercase'
             }}
           >
-            {/* Konten marquee diulang 4 kali untuk efek infinite */}
-            {[...Array(4)].map((_, i) => (
+            {/* Konten marquee hanya teks DOCS besar, diulang 8 kali */}
+            {[...Array(8)].map((_, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'center' }}>
-                <span>DOCS MENURU</span>
-                <ArrowIcon />
-                <span>DOCUMENTATION</span>
-                <ArrowIcon />
-                <span>USER GUIDE</span>
-                <ArrowIcon />
-                <span>TECHNICAL REFERENCE</span>
-                <ArrowIcon />
-                <span>API DOCS</span>
-                <ArrowIcon />
+                <span style={{ margin: '0 2rem' }}>DOCS</span>
               </div>
             ))}
           </div>
         </div>
 
         {/* Spacer untuk konten agar tidak tertutup marquee */}
-        <div style={{ height: '4rem' }} />
+        <div style={{ height: '6rem' }} />
 
         <div ref={contentRef} style={{ maxWidth: '900px' }}>
           
@@ -849,7 +821,7 @@ export default function DocsPage() {
             </div>
           )}
 
-          {/* Content */}
+          {/* Content tanpa tanda pemisah */}
           <div style={{
             paddingLeft: '1.5rem',
             paddingRight: '2rem'
@@ -857,7 +829,7 @@ export default function DocsPage() {
             {renderContent()}
           </div>
 
-          {/* Footer dengan informasi lengkap - Hanya tampil di client */}
+          {/* Footer dengan informasi lengkap */}
           {isClient && currentDateTime && (
             <motion.div
               initial={{ opacity: 0 }}
