@@ -12,6 +12,7 @@ export default function DocsPage() {
   const contentRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const marqueeRef = useRef<HTMLDivElement>(null);
+  const marqueeContentRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
     const checkMobile = () => {
@@ -37,6 +38,57 @@ export default function DocsPage() {
     }
   }, [activeSection, activeSubSection]);
 
+  // GSAP animation for marquee
+  useEffect(() => {
+    if (marqueeContentRef.current) {
+      // Create infinite marquee animation
+      gsap.to(marqueeContentRef.current, {
+        x: "-50%",
+        duration: 20,
+        ease: "none",
+        repeat: -1,
+        modifiers: {
+          x: gsap.utils.unitize(x => parseFloat(x) % (marqueeContentRef.current?.offsetWidth / 2 || 0))
+        }
+      });
+    }
+
+    return () => {
+      gsap.killTweensOf(marqueeContentRef.current);
+    };
+  }, []);
+
+  // GSAP animation for dropdown
+  useEffect(() => {
+    if (dropdownRef.current) {
+      if (showPembukaDropdown) {
+        gsap.fromTo(
+          dropdownRef.current,
+          { 
+            opacity: 0, 
+            height: 0,
+            y: -10
+          },
+          { 
+            opacity: 1, 
+            height: "auto",
+            y: 0,
+            duration: 0.3, 
+            ease: "power2.out"
+          }
+        );
+      } else {
+        gsap.to(dropdownRef.current, {
+          opacity: 0,
+          height: 0,
+          y: -10,
+          duration: 0.2,
+          ease: "power2.in"
+        });
+      }
+    }
+  }, [showPembukaDropdown]);
+
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -58,11 +110,11 @@ export default function DocsPage() {
       title: "PEMBUKA",
       hasDropdown: true,
       dropdownItems: [
-        { id: "salam", title: "SALAM" },
+        { id: "salam", title: "SALAM PEMBUKA" },
         { id: "tentang", title: "TENTANG MENURU" },
         { id: "visi-misi", title: "VISI & MISI" },
         { id: "fitur-utama", title: "FITUR UTAMA" },
-        { id: "tutup", title: "TUTUP" }
+        { id: "penutup", title: "PENUTUP" }
       ]
     },
     { id: "arsitektur", title: "ARSITEKTUR" },
@@ -75,7 +127,7 @@ export default function DocsPage() {
   // Data konten yang diperkaya dan detail
   const contentData = {
     salam: {
-      title: "SALAM",
+      title: "SALAM PEMBUKA",
       content: {
         intro: "Assalamu'alaikum Warahmatullahi Wabarakatuh",
         sapaan: "Selamat datang di platform MENURU - Solusi digital masa depan untuk kebutuhan literasi dan dokumentasi Anda.",
@@ -136,6 +188,17 @@ export default function DocsPage() {
           }
         ],
         teknologi: "React, Next.js, TailwindCSS, Prisma, PostgreSQL, Redis, WebSocket"
+      }
+    },
+    penutup: {
+      title: "PENUTUP",
+      content: {
+        terimaKasih: "Terima kasih telah menggunakan platform MENURU. Kami berkomitmen untuk terus meningkatkan layanan dan memberikan pengalaman terbaik bagi Anda.",
+        kontak: "Untuk pertanyaan, saran, atau kolaborasi, hubungi kami di:",
+        email: "hello@menuru.com",
+        sosial: "@menuru (Twitter, Instagram, LinkedIn)",
+        website: "www.menuru.com",
+        penutup: "Wassalamu'alaikum Warahmatullahi Wabarakatuh"
       }
     },
     arsitektur: {
@@ -275,17 +338,6 @@ export default function DocsPage() {
         ],
         kontak: "Jika masalah berlanjut, hubungi support di support@menuru.com atau melalui live chat 24/7"
       }
-    },
-    tutup: {
-      title: "TUTUP",
-      content: {
-        terimaKasih: "Terima kasih telah menggunakan platform MENURU. Kami berkomitmen untuk terus meningkatkan layanan dan memberikan pengalaman terbaik bagi Anda.",
-        kontak: "Untuk pertanyaan, saran, atau kolaborasi, hubungi kami di:",
-        email: "hello@menuru.com",
-        sosial: "@menuru (Twitter, Instagram, LinkedIn)",
-        website: "www.menuru.com",
-        penutup: "Wassalamu'alaikum Warahmatullahi Wabarakatuh"
-      }
     }
   };
 
@@ -300,22 +352,46 @@ export default function DocsPage() {
 
   const ArrowIcon = () => (
     <svg 
-      width="48" 
-      height="48" 
+      width="24" 
+      height="24" 
       viewBox="0 0 24 24" 
       fill="none" 
       xmlns="http://www.w3.org/2000/svg"
       style={{
         marginLeft: '1rem',
-        opacity: 0.8
+        opacity: 0.8,
+        color: 'white'
       }}
     >
       <path 
         d="M7 17L17 7M17 7H8M17 7V16" 
-        stroke="currentColor" 
+        stroke="white" 
         strokeWidth="2" 
         strokeLinecap="round" 
         strokeLinejoin="round"
+      />
+    </svg>
+  );
+
+  const PlusIcon = ({ isOpen }: { isOpen: boolean }) => (
+    <svg 
+      width="16" 
+      height="16" 
+      viewBox="0 0 24 24" 
+      fill="none" 
+      xmlns="http://www.w3.org/2000/svg"
+      style={{
+        transition: 'transform 0.3s ease',
+        transform: isOpen ? 'rotate(45deg)' : 'rotate(0deg)',
+        color: 'white',
+        opacity: 0.6
+      }}
+    >
+      <path 
+        d="M12 5V19M5 12H19" 
+        stroke="white" 
+        strokeWidth="2" 
+        strokeLinecap="round"
       />
     </svg>
   );
@@ -324,11 +400,11 @@ export default function DocsPage() {
     const content = currentContent.content;
     
     if (typeof content === 'string') {
-      return <div style={{ fontSize: '1.15rem', lineHeight: 1.7, opacity: 0.9 }}>{content}</div>;
+      return <div style={{ fontSize: '1.15rem', lineHeight: 1.7, opacity: 0.9, color: 'white' }}>{content}</div>;
     }
 
     return (
-      <div style={{ fontSize: '1.15rem', lineHeight: 1.7, opacity: 0.9 }}>
+      <div style={{ fontSize: '1.15rem', lineHeight: 1.7, opacity: 0.9, color: 'white' }}>
         {Object.entries(content).map(([key, value]) => {
           if (key === 'title') return null;
           
@@ -336,13 +412,13 @@ export default function DocsPage() {
             if (value[0]?.nama) { // Fitur utama
               return (
                 <div key={key} style={{ marginBottom: '2rem' }}>
-                  <h3 style={{ fontSize: '1.3rem', fontWeight: '600', marginBottom: '1rem', opacity: 1 }}>
+                  <h3 style={{ fontSize: '1.3rem', fontWeight: '600', marginBottom: '1rem', opacity: 1, color: 'white' }}>
                     {key === 'daftar' ? 'Daftar Fitur' : key}
                   </h3>
                   {value.map((item, idx) => (
                     <div key={idx} style={{ marginBottom: '1.5rem', borderLeft: '2px solid rgba(255,255,255,0.2)', paddingLeft: '1rem' }}>
-                      <div style={{ fontWeight: '600', marginBottom: '0.5rem' }}>{item.nama}</div>
-                      <div style={{ opacity: 0.8 }}>{item.deskripsi}</div>
+                      <div style={{ fontWeight: '600', marginBottom: '0.5rem', color: 'white' }}>{item.nama}</div>
+                      <div style={{ opacity: 0.8, color: 'white' }}>{item.deskripsi}</div>
                     </div>
                   ))}
                 </div>
@@ -352,17 +428,17 @@ export default function DocsPage() {
             if (value[0]?.judul) { // Penggunaan
               return (
                 <div key={key} style={{ marginBottom: '2rem' }}>
-                  <h3 style={{ fontSize: '1.3rem', fontWeight: '600', marginBottom: '1rem', opacity: 1 }}>
+                  <h3 style={{ fontSize: '1.3rem', fontWeight: '600', marginBottom: '1rem', opacity: 1, color: 'white' }}>
                     {key === 'panduan' ? 'Panduan Penggunaan' : key}
                   </h3>
                   {value.map((item, idx) => (
                     <div key={idx} style={{ marginBottom: '2rem' }}>
-                      <div style={{ fontWeight: '600', marginBottom: '1rem' }}>{item.judul}</div>
+                      <div style={{ fontWeight: '600', marginBottom: '1rem', color: 'white' }}>{item.judul}</div>
                       <ul style={{ listStyle: 'none', padding: 0 }}>
-                        {item.langkah?.map((langkah, lidx) => (
+                        {item.langkah?.map((langkah: string, lidx: number) => (
                           <li key={lidx} style={{ marginBottom: '0.5rem', display: 'flex', alignItems: 'flex-start' }}>
-                            <span style={{ marginRight: '1rem', opacity: 0.5 }}>{lidx + 1}.</span>
-                            <span>{langkah}</span>
+                            <span style={{ marginRight: '1rem', opacity: 0.5, color: 'white' }}>{lidx + 1}.</span>
+                            <span style={{ color: 'white' }}>{langkah}</span>
                           </li>
                         ))}
                       </ul>
@@ -375,12 +451,12 @@ export default function DocsPage() {
             if (value[0]?.keys) { // Shortcut
               return (
                 <div key={key} style={{ marginBottom: '2rem' }}>
-                  <h3 style={{ fontSize: '1.3rem', fontWeight: '600', marginBottom: '1rem', opacity: 1 }}>Keyboard Shortcuts</h3>
+                  <h3 style={{ fontSize: '1.3rem', fontWeight: '600', marginBottom: '1rem', opacity: 1, color: 'white' }}>Keyboard Shortcuts</h3>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
                     {value.map((item, idx) => (
                       <div key={idx} style={{ padding: '0.75rem', backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: '4px' }}>
-                        <code style={{ color: '#fff', fontWeight: '600' }}>{item.keys}</code>
-                        <div style={{ fontSize: '0.9rem', opacity: 0.7, marginTop: '0.25rem' }}>{item.fungsi}</div>
+                        <code style={{ color: 'white', fontWeight: '600' }}>{item.keys}</code>
+                        <div style={{ fontSize: '0.9rem', opacity: 0.7, marginTop: '0.25rem', color: 'white' }}>{item.fungsi}</div>
                       </div>
                     ))}
                   </div>
@@ -391,11 +467,11 @@ export default function DocsPage() {
             if (value[0]?.masalah) { // Troubleshoot umum
               return (
                 <div key={key} style={{ marginBottom: '2rem' }}>
-                  <h3 style={{ fontSize: '1.3rem', fontWeight: '600', marginBottom: '1rem', opacity: 1 }}>Masalah Umum</h3>
+                  <h3 style={{ fontSize: '1.3rem', fontWeight: '600', marginBottom: '1rem', opacity: 1, color: 'white' }}>Masalah Umum</h3>
                   {value.map((item, idx) => (
                     <div key={idx} style={{ marginBottom: '1.5rem', padding: '1rem', backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: '8px' }}>
                       <div style={{ fontWeight: '600', color: '#ff6b6b', marginBottom: '0.5rem' }}>{item.masalah}</div>
-                      <div style={{ opacity: 0.8 }}>Solusi: {item.solusi}</div>
+                      <div style={{ opacity: 0.8, color: 'white' }}>Solusi: {item.solusi}</div>
                     </div>
                   ))}
                 </div>
@@ -405,12 +481,12 @@ export default function DocsPage() {
             if (value[0]?.kode) { // Error codes
               return (
                 <div key={key} style={{ marginBottom: '2rem' }}>
-                  <h3 style={{ fontSize: '1.3rem', fontWeight: '600', marginBottom: '1rem', opacity: 1 }}>Kode Error</h3>
+                  <h3 style={{ fontSize: '1.3rem', fontWeight: '600', marginBottom: '1rem', opacity: 1, color: 'white' }}>Kode Error</h3>
                   {value.map((item, idx) => (
                     <div key={idx} style={{ marginBottom: '1rem', padding: '1rem', backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: '8px' }}>
                       <code style={{ color: '#ffd700', fontWeight: '600' }}>{item.kode}</code>
-                      <div style={{ marginTop: '0.5rem', opacity: 0.9 }}>{item.deskripsi}</div>
-                      <div style={{ marginTop: '0.5rem', opacity: 0.8, fontSize: '0.95rem' }}>Solusi: {item.solusi}</div>
+                      <div style={{ marginTop: '0.5rem', opacity: 0.9, color: 'white' }}>{item.deskripsi}</div>
+                      <div style={{ marginTop: '0.5rem', opacity: 0.8, fontSize: '0.95rem', color: 'white' }}>Solusi: {item.solusi}</div>
                     </div>
                   ))}
                 </div>
@@ -420,14 +496,14 @@ export default function DocsPage() {
             // Default array rendering
             return (
               <div key={key} style={{ marginBottom: '2rem' }}>
-                <h3 style={{ fontSize: '1.3rem', fontWeight: '600', marginBottom: '1rem', opacity: 1 }}>
+                <h3 style={{ fontSize: '1.3rem', fontWeight: '600', marginBottom: '1rem', opacity: 1, color: 'white' }}>
                   {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
                 </h3>
                 <ul style={{ listStyle: 'none', padding: 0 }}>
-                  {value.map((item, idx) => (
+                  {value.map((item: string, idx: number) => (
                     <li key={idx} style={{ marginBottom: '0.75rem', display: 'flex', alignItems: 'flex-start' }}>
-                      <span style={{ marginRight: '1rem', opacity: 0.5 }}>•</span>
-                      <span>{item}</span>
+                      <span style={{ marginRight: '1rem', opacity: 0.5, color: 'white' }}>•</span>
+                      <span style={{ color: 'white' }}>{item}</span>
                     </li>
                   ))}
                 </ul>
@@ -438,15 +514,15 @@ export default function DocsPage() {
           if (typeof value === 'object' && value !== null) {
             return (
               <div key={key} style={{ marginBottom: '2rem' }}>
-                <h3 style={{ fontSize: '1.3rem', fontWeight: '600', marginBottom: '1rem', opacity: 1, textTransform: 'capitalize' }}>
+                <h3 style={{ fontSize: '1.3rem', fontWeight: '600', marginBottom: '1rem', opacity: 1, color: 'white', textTransform: 'capitalize' }}>
                   {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
                 </h3>
                 {Object.entries(value).map(([subKey, subValue]) => (
                   <div key={subKey} style={{ marginBottom: '1rem' }}>
-                    <div style={{ fontWeight: '500', opacity: 0.9, marginBottom: '0.5rem', textTransform: 'capitalize' }}>
+                    <div style={{ fontWeight: '500', opacity: 0.9, marginBottom: '0.5rem', color: 'white', textTransform: 'capitalize' }}>
                       {subKey.replace(/([A-Z])/g, ' $1')}:
                     </div>
-                    <div style={{ opacity: 0.8, marginLeft: '1rem' }}>{String(subValue)}</div>
+                    <div style={{ opacity: 0.8, marginLeft: '1rem', color: 'white' }}>{String(subValue)}</div>
                   </div>
                 ))}
               </div>
@@ -456,8 +532,8 @@ export default function DocsPage() {
           // Simple key-value
           return (
             <div key={key} style={{ marginBottom: '1rem' }}>
-              <span style={{ fontWeight: '500', textTransform: 'capitalize' }}>{key.replace(/([A-Z])/g, ' $1')}: </span>
-              <span>{String(value)}</span>
+              <span style={{ fontWeight: '500', color: 'white', textTransform: 'capitalize' }}>{key.replace(/([A-Z])/g, ' $1')}: </span>
+              <span style={{ color: 'white' }}>{String(value)}</span>
             </div>
           );
         })}
@@ -499,7 +575,8 @@ export default function DocsPage() {
           marginBottom: '2.5rem',
           lineHeight: 1,
           opacity: 0.9,
-          letterSpacing: '-0.5px'
+          letterSpacing: '-0.5px',
+          color: 'white'
         }}>
           MENURU
         </div>
@@ -538,7 +615,8 @@ export default function DocsPage() {
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   backgroundColor: activeSection === item.id ? 'rgba(255,255,255,0.05)' : 'transparent',
-                  borderRadius: '4px'
+                  borderRadius: '4px',
+                  color: 'white'
                 }}
                 onMouseEnter={(e) => {
                   if (activeSection !== item.id) {
@@ -555,21 +633,21 @@ export default function DocsPage() {
               >
                 <span>{item.title}</span>
                 {item.hasDropdown && (
-                  <span style={{ opacity: 0.5, fontSize: '0.8rem' }}>▼</span>
+                  <PlusIcon isOpen={showPembukaDropdown && item.id === "pembuka"} />
                 )}
               </div>
               
-              {/* Dropdown untuk Pembuka */}
-              {item.id === "pembuka" && showPembukaDropdown && (
-                <motion.div
+              {/* Dropdown untuk Pembuka dengan GSAP */}
+              {item.id === "pembuka" && (
+                <div
                   ref={dropdownRef}
-                  initial={{ opacity: 0, y: -5 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.2 }}
                   style={{
                     position: 'relative',
                     paddingLeft: '1rem',
-                    marginTop: '0.1rem'
+                    marginTop: '0.1rem',
+                    opacity: 0,
+                    height: 0,
+                    overflow: 'hidden'
                   }}
                 >
                   {item.dropdownItems?.map((dropdownItem) => (
@@ -591,7 +669,8 @@ export default function DocsPage() {
                         lineHeight: '1.2',
                         backgroundColor: activeSubSection === dropdownItem.id ? 'rgba(255,255,255,0.05)' : 'transparent',
                         borderLeft: activeSubSection === dropdownItem.id ? '2px solid white' : '2px solid transparent',
-                        borderRadius: '0 4px 4px 0'
+                        borderRadius: '0 4px 4px 0',
+                        color: 'white'
                       }}
                       onMouseEnter={(e) => {
                         if (activeSubSection !== dropdownItem.id) {
@@ -609,7 +688,7 @@ export default function DocsPage() {
                       {dropdownItem.title}
                     </div>
                   ))}
-                </motion.div>
+                </div>
               )}
             </div>
           ))}
@@ -623,47 +702,55 @@ export default function DocsPage() {
         padding: '4rem 3rem 4rem 6rem',
         minHeight: '100vh',
         marginRight: '2rem',
-        position: 'relative'
+        position: 'relative',
+        width: 'calc(100% - 280px)'
       }}>
         
-        {/* Marquee Text with Arrow */}
+        {/* Marquee Text dengan Panah */}
         <div style={{
           position: 'fixed',
-          top: '3rem',
-          right: '3rem',
+          top: 0,
+          left: '280px',
+          right: 0,
           zIndex: 20,
-          display: 'flex',
-          alignItems: 'center',
-          backgroundColor: 'rgba(0,0,0,0.8)',
-          padding: '0.5rem 1.5rem',
-          borderRadius: '50px',
-          border: '1px solid rgba(255,255,255,0.2)',
-          backdropFilter: 'blur(10px)'
+          backgroundColor: 'black',
+          borderBottom: '1px solid rgba(255,255,255,0.1)',
+          padding: '0.75rem 0',
+          overflow: 'hidden',
+          whiteSpace: 'nowrap'
         }}>
-          <motion.div
-            ref={marqueeRef}
+          <div
+            ref={marqueeContentRef}
             style={{
-              fontSize: '1.5rem',
-              fontWeight: '700',
-              whiteSpace: 'nowrap',
-              display: 'flex',
+              display: 'inline-flex',
               alignItems: 'center',
-              gap: '0.5rem'
-            }}
-            animate={{
-              x: [0, -10, 0, 10, 0]
-            }}
-            transition={{
-              duration: 4,
-              repeat: Infinity,
-              ease: "linear",
-              repeatType: "loop"
+              gap: '2rem',
+              color: 'white',
+              fontSize: '1.2rem',
+              fontWeight: '500',
+              letterSpacing: '1px'
             }}
           >
-            <span>DOCS MENURU</span>
-            <ArrowIcon />
-          </motion.div>
+            {/* Konten marquee diulang 4 kali untuk efek infinite */}
+            {[...Array(4)].map((_, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+                <span>DOCS MENURU</span>
+                <ArrowIcon />
+                <span>DOCUMENTATION</span>
+                <ArrowIcon />
+                <span>USER GUIDE</span>
+                <ArrowIcon />
+                <span>TECHNICAL REFERENCE</span>
+                <ArrowIcon />
+                <span>API DOCS</span>
+                <ArrowIcon />
+              </div>
+            ))}
+          </div>
         </div>
+
+        {/* Spacer untuk konten agar tidak tertutup marquee */}
+        <div style={{ height: '4rem' }} />
 
         <div ref={contentRef} style={{ maxWidth: '900px' }}>
           
@@ -679,7 +766,8 @@ export default function DocsPage() {
               letterSpacing: '-2px',
               marginBottom: '2rem',
               paddingLeft: '1.5rem',
-              borderLeft: '4px solid rgba(255,255,255,0.3)'
+              borderLeft: '4px solid rgba(255,255,255,0.3)',
+              color: 'white'
             }}
           >
             {currentContent.title}
@@ -710,16 +798,16 @@ export default function DocsPage() {
             }}
           >
             <div>
-              <div style={{ fontSize: '0.8rem', opacity: 0.4, marginBottom: '0.5rem' }}>VERSION</div>
-              <div style={{ fontSize: '0.95rem', opacity: 0.8 }}>2.0.0</div>
+              <div style={{ fontSize: '0.8rem', opacity: 0.4, marginBottom: '0.5rem', color: 'white' }}>VERSION</div>
+              <div style={{ fontSize: '0.95rem', opacity: 0.8, color: 'white' }}>2.0.0</div>
             </div>
             <div>
-              <div style={{ fontSize: '0.8rem', opacity: 0.4, marginBottom: '0.5rem' }}>LAST UPDATE</div>
-              <div style={{ fontSize: '0.95rem', opacity: 0.8 }}>Februari 2025</div>
+              <div style={{ fontSize: '0.8rem', opacity: 0.4, marginBottom: '0.5rem', color: 'white' }}>LAST UPDATE</div>
+              <div style={{ fontSize: '0.95rem', opacity: 0.8, color: 'white' }}>Februari 2025</div>
             </div>
             <div>
-              <div style={{ fontSize: '0.8rem', opacity: 0.4, marginBottom: '0.5rem' }}>BUILD</div>
-              <div style={{ fontSize: '0.95rem', opacity: 0.8 }}>Production</div>
+              <div style={{ fontSize: '0.8rem', opacity: 0.4, marginBottom: '0.5rem', color: 'white' }}>BUILD</div>
+              <div style={{ fontSize: '0.95rem', opacity: 0.8, color: 'white' }}>Production</div>
             </div>
           </motion.div>
         </div>
