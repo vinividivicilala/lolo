@@ -9,13 +9,17 @@ export default function DocsPage() {
   const [activeSubSection, setActiveSubSection] = useState("salam");
   const [isMobile, setIsMobile] = useState(false);
   const [showPembukaDropdown, setShowPembukaDropdown] = useState(false);
-  const [currentDateTime, setCurrentDateTime] = useState(new Date());
+  const [currentDateTime, setCurrentDateTime] = useState<Date | null>(null);
+  const [isClient, setIsClient] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const marqueeContentRef = useRef<HTMLDivElement>(null);
   
-  // Update waktu real-time setiap detik
+  // Handle client-side only rendering untuk menghindari hydration mismatch
   useEffect(() => {
+    setIsClient(true);
+    setCurrentDateTime(new Date());
+    
     const timer = setInterval(() => {
       setCurrentDateTime(new Date());
     }, 1000);
@@ -39,20 +43,19 @@ export default function DocsPage() {
   }, []);
 
   useEffect(() => {
-    // GSAP animation for content
-    if (contentRef.current) {
+    // GSAP animation for content - hanya jalan di client
+    if (contentRef.current && isClient) {
       gsap.fromTo(
         contentRef.current,
         { opacity: 0, y: 20 },
         { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }
       );
     }
-  }, [activeSection, activeSubSection]);
+  }, [activeSection, activeSubSection, isClient]);
 
-  // GSAP animation for marquee
+  // GSAP animation for marquee - hanya jalan di client
   useEffect(() => {
-    if (marqueeContentRef.current) {
-      // Create infinite marquee animation
+    if (marqueeContentRef.current && isClient) {
       gsap.to(marqueeContentRef.current, {
         x: "-50%",
         duration: 20,
@@ -65,13 +68,15 @@ export default function DocsPage() {
     }
 
     return () => {
-      gsap.killTweensOf(marqueeContentRef.current);
+      if (isClient) {
+        gsap.killTweensOf(marqueeContentRef.current);
+      }
     };
-  }, []);
+  }, [isClient]);
 
-  // GSAP animation for dropdown
+  // GSAP animation for dropdown - hanya jalan di client
   useEffect(() => {
-    if (dropdownRef.current) {
+    if (dropdownRef.current && isClient) {
       if (showPembukaDropdown) {
         gsap.fromTo(
           dropdownRef.current,
@@ -98,7 +103,7 @@ export default function DocsPage() {
         });
       }
     }
-  }, [showPembukaDropdown]);
+  }, [showPembukaDropdown, isClient]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -114,7 +119,7 @@ export default function DocsPage() {
     };
   }, []);
 
-  // Format tanggal dan waktu
+  // Format tanggal dan waktu - hanya dipanggil saat isClient true
   const formatDate = (date: Date) => {
     return date.toLocaleDateString('id-ID', {
       weekday: 'long',
@@ -371,18 +376,18 @@ export default function DocsPage() {
     }
   };
 
-  // Data author untuk setiap section
+  // Semua author adalah Farid Ardiansyah
   const authors = {
-    salam: { name: "Ahmad Fauzi", role: "Lead Writer" },
-    tentang: { name: "Siti Nurhaliza", role: "Content Manager" },
-    "visi-misi": { name: "Budi Santoso", role: "Product Manager" },
-    "fitur-utama": { name: "Dewi Lestari", role: "Product Designer" },
-    penutup: { name: "Ahmad Fauzi", role: "Lead Writer" },
-    arsitektur: { name: "Rizki Pratama", role: "Lead Engineer" },
-    instalasi: { name: "Rizki Pratama", role: "Lead Engineer" },
-    penggunaan: { name: "Maya Sari", role: "Technical Writer" },
-    keamanan: { name: "Rizki Pratama", role: "Lead Engineer" },
-    troubleshoot: { name: "Maya Sari", role: "Technical Writer" }
+    salam: { name: "Farid Ardiansyah", role: "Lead Documentation" },
+    tentang: { name: "Farid Ardiansyah", role: "Lead Documentation" },
+    "visi-misi": { name: "Farid Ardiansyah", role: "Lead Documentation" },
+    "fitur-utama": { name: "Farid Ardiansyah", role: "Lead Documentation" },
+    penutup: { name: "Farid Ardiansyah", role: "Lead Documentation" },
+    arsitektur: { name: "Farid Ardiansyah", role: "Lead Documentation" },
+    instalasi: { name: "Farid Ardiansyah", role: "Lead Documentation" },
+    penggunaan: { name: "Farid Ardiansyah", role: "Lead Documentation" },
+    keamanan: { name: "Farid Ardiansyah", role: "Lead Documentation" },
+    troubleshoot: { name: "Farid Ardiansyah", role: "Lead Documentation" }
   };
 
   const getCurrentAuthor = () => {
@@ -825,34 +830,36 @@ export default function DocsPage() {
             {currentContent.title}
           </motion.div>
 
-          {/* Author dan Info Update Real-time */}
-          <div style={{
-            paddingLeft: '1.5rem',
-            marginBottom: '2rem',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '2rem',
-            borderBottom: '1px solid rgba(255,255,255,0.1)',
-            paddingBottom: '1rem'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                <circle cx="12" cy="7" r="4" />
-              </svg>
-              <span style={{ opacity: 0.8, fontSize: '0.95rem' }}>{currentAuthor.name}</span>
-              <span style={{ opacity: 0.5, fontSize: '0.85rem' }}>({currentAuthor.role})</span>
+          {/* Author dan Info Update Real-time - Hanya tampil di client */}
+          {isClient && currentDateTime && (
+            <div style={{
+              paddingLeft: '1.5rem',
+              marginBottom: '2rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '2rem',
+              borderBottom: '1px solid rgba(255,255,255,0.1)',
+              paddingBottom: '1rem'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                  <circle cx="12" cy="7" r="4" />
+                </svg>
+                <span style={{ opacity: 0.8, fontSize: '0.95rem' }}>{currentAuthor.name}</span>
+                <span style={{ opacity: 0.5, fontSize: '0.85rem' }}>({currentAuthor.role})</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                  <circle cx="12" cy="12" r="10" />
+                  <polyline points="12 6 12 12 16 14" />
+                </svg>
+                <span style={{ opacity: 0.8, fontSize: '0.95rem' }}>Terakhir diperbarui</span>
+                <span style={{ opacity: 0.9, fontSize: '0.95rem', fontWeight: '500' }}>{formatDate(currentDateTime)}</span>
+                <span style={{ opacity: 0.7, fontSize: '0.95rem' }}>{formatTime(currentDateTime)} WIB</span>
+              </div>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-                <circle cx="12" cy="12" r="10" />
-                <polyline points="12 6 12 12 16 14" />
-              </svg>
-              <span style={{ opacity: 0.8, fontSize: '0.95rem' }}>Terakhir diperbarui</span>
-              <span style={{ opacity: 0.9, fontSize: '0.95rem', fontWeight: '500' }}>{formatDate(currentDateTime)}</span>
-              <span style={{ opacity: 0.7, fontSize: '0.95rem' }}>{formatTime(currentDateTime)} WIB</span>
-            </div>
-          </div>
+          )}
 
           {/* Content */}
           <div style={{
@@ -862,39 +869,41 @@ export default function DocsPage() {
             {renderContent()}
           </div>
 
-          {/* Footer dengan informasi lengkap */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-            style={{
-              marginTop: '4rem',
-              paddingTop: '2rem',
-              borderTop: '1px solid rgba(255,255,255,0.1)',
-              maxWidth: '800px',
-              paddingLeft: '1.5rem',
-              display: 'grid',
-              gridTemplateColumns: 'repeat(4, 1fr)',
-              gap: '2rem'
-            }}
-          >
-            <div>
-              <div style={{ fontSize: '0.8rem', opacity: 0.4, marginBottom: '0.5rem', color: 'white' }}>VERSION</div>
-              <div style={{ fontSize: '0.95rem', opacity: 0.8, color: 'white' }}>2.0.0</div>
-            </div>
-            <div>
-              <div style={{ fontSize: '0.8rem', opacity: 0.4, marginBottom: '0.5rem', color: 'white' }}>LAST UPDATE</div>
-              <div style={{ fontSize: '0.95rem', opacity: 0.8, color: 'white' }}>{formatDate(currentDateTime)}</div>
-            </div>
-            <div>
-              <div style={{ fontSize: '0.8rem', opacity: 0.4, marginBottom: '0.5rem', color: 'white' }}>AUTHOR</div>
-              <div style={{ fontSize: '0.95rem', opacity: 0.8, color: 'white' }}>{currentAuthor.name}</div>
-            </div>
-            <div>
-              <div style={{ fontSize: '0.8rem', opacity: 0.4, marginBottom: '0.5rem', color: 'white' }}>BUILD</div>
-              <div style={{ fontSize: '0.95rem', opacity: 0.8, color: 'white' }}>Production</div>
-            </div>
-          </motion.div>
+          {/* Footer dengan informasi lengkap - Hanya tampil di client */}
+          {isClient && currentDateTime && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3 }}
+              style={{
+                marginTop: '4rem',
+                paddingTop: '2rem',
+                borderTop: '1px solid rgba(255,255,255,0.1)',
+                maxWidth: '800px',
+                paddingLeft: '1.5rem',
+                display: 'grid',
+                gridTemplateColumns: 'repeat(4, 1fr)',
+                gap: '2rem'
+              }}
+            >
+              <div>
+                <div style={{ fontSize: '0.8rem', opacity: 0.4, marginBottom: '0.5rem', color: 'white' }}>VERSION</div>
+                <div style={{ fontSize: '0.95rem', opacity: 0.8, color: 'white' }}>2.0.0</div>
+              </div>
+              <div>
+                <div style={{ fontSize: '0.8rem', opacity: 0.4, marginBottom: '0.5rem', color: 'white' }}>LAST UPDATE</div>
+                <div style={{ fontSize: '0.95rem', opacity: 0.8, color: 'white' }}>{formatDate(currentDateTime)}</div>
+              </div>
+              <div>
+                <div style={{ fontSize: '0.8rem', opacity: 0.4, marginBottom: '0.5rem', color: 'white' }}>AUTHOR</div>
+                <div style={{ fontSize: '0.95rem', opacity: 0.8, color: 'white' }}>{currentAuthor.name}</div>
+              </div>
+              <div>
+                <div style={{ fontSize: '0.8rem', opacity: 0.4, marginBottom: '0.5rem', color: 'white' }}>BUILD</div>
+                <div style={{ fontSize: '0.95rem', opacity: 0.8, color: 'white' }}>Production</div>
+              </div>
+            </motion.div>
+          )}
         </div>
       </div>
     </div>
