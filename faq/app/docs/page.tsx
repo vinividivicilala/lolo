@@ -159,7 +159,7 @@ export default function DocsPage() {
     { id: "faq", title: "FAQ", icon: navIcons.faq }
   ];
 
-  // Data konten lengkap - Minimalist dengan banyak konten
+  // Data konten lengkap
   const contentData = {
     pembuka: {
       title: "PEMBUKA",
@@ -182,78 +182,54 @@ export default function DocsPage() {
         },
         sejarah: {
           title: "SEJARAH",
-          content: [
-            {
-              tahun: "2022 - IDE AWAL",
-              desc: "Konsep MENURU pertama kali dicetuskan oleh tim developer yang frustrasi dengan tools dokumentasi yang ada."
-            },
-            {
-              tahun: "2023 - PROTOTYPE",
-              desc: "Versi pertama MENURU dikembangkan sebagai proyek internal, digunakan oleh 3 tim pengembang."
-            },
-            {
-              tahun: "2023 - BETA",
-              desc: "Program beta diluncurkan dengan 50 perusahaan, mendapatkan feedback positif untuk pengembangan."
-            },
-            {
-              tahun: "2024 - LAUNCH",
-              desc: "MENURU versi 1.0 dirilis secara publik dengan fitur dasar manajemen dokumentasi."
-            },
-            {
-              tahun: "2024 - VERSI 2.0",
-              desc: "Pembaruan besar dengan fitur kolaborasi real-time, API publik, dan integrasi pihak ketiga."
-            },
-            {
-              tahun: "2025 - MASA DEPAN",
-              desc: "Rencana pengembangan AI-powered documentation, offline mode, dan mobile apps."
-            }
+          items: [
+            "2022 - Ide awal MENURU pertama kali dicetuskan oleh tim developer.",
+            "2023 - Prototype dikembangkan sebagai proyek internal.",
+            "2023 - Program beta diluncurkan dengan 50 perusahaan.",
+            "2024 - MENURU versi 1.0 dirilis secara publik.",
+            "2024 - Pembaruan versi 2.0 dengan fitur kolaborasi real-time.",
+            "2025 - Rencana pengembangan AI-powered documentation."
           ]
         },
         visi: {
           title: "VISI",
           paragraphs: [
-            "Menjadi platform dokumentasi terdepan yang memberdayakan setiap individu dan tim untuk berbagi pengetahuan secara efektif.",
-            "Menciptakan ekosistem dokumentasi yang kolaboratif, inklusif, dan berkelanjutan untuk mendukung pertumbuhan pengetahuan kolektif."
+            "Menjadi platform dokumentasi terdepan yang memberdayakan setiap individu dan tim untuk berbagi pengetahuan secara efektif."
           ]
         },
         misi: {
           title: "MISI",
           items: [
-            "Menyediakan infrastruktur dokumentasi yang intuitif dan mudah digunakan",
-            "Membangun komunitas berbagi pengetahuan yang aktif dan suportif",
+            "Menyediakan infrastruktur dokumentasi yang intuitif",
+            "Membangun komunitas berbagi pengetahuan yang aktif",
             "Terus berinovasi dalam teknologi dokumentasi digital",
             "Menjaga keamanan dan privasi data pengguna",
-            "Mendukung berbagai format dan kebutuhan dokumentasi",
-            "Memfasilitasi kolaborasi tim tanpa batasan geografis"
+            "Mendukung berbagai format dan kebutuhan dokumentasi"
           ]
         },
         filosofi: {
           title: "FILOSOFI",
           paragraphs: [
-            "Dokumentasi bukan sekadar catatan, melainkan jembatan antara ide dan realisasi, antara pengembang dan pengguna.",
-            "Kami percaya bahwa dokumentasi yang baik dapat mengubah cara orang belajar, bekerja, dan berinovasi.",
-            "Dengan desain yang sederhana namun fungsional, kami ingin membuat dokumentasi menjadi kegiatan yang menyenangkan, bukan beban."
+            "Dokumentasi bukan sekadar catatan, melainkan jembatan antara ide dan realisasi.",
+            "Dokumentasi yang baik dapat mengubah cara orang belajar, bekerja, dan berinovasi."
           ]
         },
         tim: {
           title: "TIM PENGEMBANG",
-          members: [
-            "Arya Wicaksana - Founder & Lead Developer",
+          items: [
+            "Arya Wicaksana - Lead Developer",
             "Budi Santoso - Backend Architect",
             "Citra Dewi - Frontend Engineer",
             "Dian Pratama - DevOps Specialist",
             "Eka Putri - UI/UX Designer",
-            "Farhan Hakim - Security Engineer",
-            "Gita Savitri - Documentation Lead",
-            "Hadi Wijaya - Quality Assurance"
+            "Farhan Hakim - Security Engineer"
           ]
         },
         penutup: {
           title: "PENUTUP",
           paragraphs: [
-            "Terima kasih telah menggunakan MENURU. Kami berkomitmen untuk terus meningkatkan platform ini berdasarkan masukan dari pengguna.",
-            "Dokumentasi ini akan terus diperbarui seiring dengan perkembangan fitur dan peningkatan platform.",
-            "Untuk pertanyaan, saran, atau laporan bug, silakan hubungi tim kami melalui email atau forum diskusi."
+            "Terima kasih telah menggunakan MENURU. Dokumentasi ini akan terus diperbarui.",
+            "Untuk pertanyaan dan saran, silakan hubungi tim kami."
           ]
         }
       }
@@ -268,9 +244,7 @@ export default function DocsPage() {
             "Backend: Node.js + Express.js",
             "Database: PostgreSQL untuk data utama",
             "Cache: Redis untuk session dan performa",
-            "Storage: AWS S3 untuk file media",
-            "Queue: BullMQ untuk background jobs",
-            "Search: Elasticsearch untuk pencarian"
+            "Storage: AWS S3 untuk file media"
           ]
         },
         {
@@ -280,9 +254,7 @@ export default function DocsPage() {
             "Orchestration: Kubernetes untuk scaling",
             "Load Balancer: NGINX untuk traffic management",
             "CDN: CloudFront untuk distribusi konten",
-            "Monitoring: Prometheus + Grafana",
-            "Logging: ELK Stack (Elasticsearch, Logstash, Kibana)",
-            "CI/CD: GitHub Actions untuk deployment"
+            "Monitoring: Prometheus + Grafana"
           ]
         },
         {
@@ -291,9 +263,8 @@ export default function DocsPage() {
             "Client request masuk melalui CDN",
             "Load balancer mendistribusikan ke container",
             "API Gateway mengarahkan ke service yang sesuai",
-            "Service memproses dengan data dari database/cache",
-            "Response dikirim kembali ke client",
-            "Semua aktivitas tercatat di logging system"
+            "Service memproses dengan data dari database",
+            "Response dikirim kembali ke client"
           ]
         },
         {
@@ -303,8 +274,7 @@ export default function DocsPage() {
             "Encryption in transit (TLS 1.3)",
             "Encryption at rest untuk semua data",
             "WAF untuk proteksi dari serangan web",
-            "Rate limiting untuk mencegah abuse",
-            "Regular security audit dan penetration testing"
+            "Regular security audit"
           ]
         }
       ]
@@ -313,7 +283,7 @@ export default function DocsPage() {
       title: "INSTALASI",
       methods: [
         {
-          type: "METODE 1: INSTALASI CEPAT",
+          type: "INSTALASI CEPAT",
           steps: [
             "npx create-menuru-app my-docs",
             "cd my-docs",
@@ -323,7 +293,7 @@ export default function DocsPage() {
           ]
         },
         {
-          type: "METODE 2: MANUAL",
+          type: "INSTALASI MANUAL",
           steps: [
             "git clone https://github.com/menuru/platform.git",
             "cd platform",
@@ -333,23 +303,11 @@ export default function DocsPage() {
           ]
         },
         {
-          type: "METODE 3: DOCKER",
+          type: "INSTALASI DOCKER",
           steps: [
             "docker pull menuru/platform:latest",
             "docker run -p 3000:3000 menuru/platform",
-            "# atau menggunakan docker-compose",
-            "wget https://menuru.com/docker-compose.yml",
             "docker-compose up -d"
-          ]
-        },
-        {
-          type: "METODE 4: PRODUCTION",
-          steps: [
-            "npm run build",
-            "npm run migrate:up",
-            "npm run seed:initial",
-            "pm2 start ecosystem.config.js",
-            "nginx -t && systemctl restart nginx"
           ]
         }
       ],
@@ -357,8 +315,7 @@ export default function DocsPage() {
         "Node.js 18.0 atau lebih baru",
         "PostgreSQL 14 atau lebih baru",
         "Redis 6 atau lebih baru (opsional)",
-        "4GB RAM minimum, 8GB recommended",
-        "20GB storage untuk aplikasi"
+        "4GB RAM minimum"
       ]
     },
     penggunaan: {
@@ -371,8 +328,7 @@ export default function DocsPage() {
             "Mengundang anggota tim",
             "Membuat halaman dokumentasi",
             "Mengedit konten dengan editor",
-            "Menambahkan gambar dan file",
-            "Mempublikasikan perubahan"
+            "Menambahkan gambar dan file"
           ]
         },
         {
@@ -382,7 +338,6 @@ export default function DocsPage() {
             "Menggunakan template",
             "Membuat versi dokumentasi",
             "Mengatur permission pengguna",
-            "Integrasi dengan Git",
             "Export ke PDF/Markdown"
           ]
         },
@@ -393,7 +348,6 @@ export default function DocsPage() {
             "API integration",
             "Webhook configuration",
             "Custom styling dengan CSS",
-            "Analytics dashboard",
             "Backup dan restore"
           ]
         },
@@ -404,8 +358,7 @@ export default function DocsPage() {
             "Comments dan mentions",
             "Review dan approval workflow",
             "Activity logs",
-            "Team notifications",
-            "Version comparison"
+            "Team notifications"
           ]
         }
       ],
@@ -413,11 +366,7 @@ export default function DocsPage() {
         "Cmd/Ctrl + K - Buka command palette",
         "Cmd/Ctrl + S - Simpan dokumen",
         "Cmd/Ctrl + F - Pencarian",
-        "Cmd/Ctrl + B - Toggle sidebar",
-        "Cmd/Ctrl + P - Print preview",
-        "Cmd/Ctrl + Z - Undo",
-        "Cmd/Ctrl + Shift + Z - Redo",
-        "Cmd/Ctrl + / - Keyboard shortcuts"
+        "Cmd/Ctrl + B - Toggle sidebar"
       ]
     },
     fitur: {
@@ -428,12 +377,9 @@ export default function DocsPage() {
           features: [
             "Rich text editor dengan formatting lengkap",
             "Markdown support dengan preview real-time",
-            "Code syntax highlighting untuk 100+ bahasa",
+            "Code syntax highlighting",
             "Drag-and-drop image upload",
-            "Table editor dengan styling",
-            "Link manager untuk internal references",
-            "Emoji picker dan special characters",
-            "Math equations dengan LaTeX support"
+            "Table editor dengan styling"
           ]
         },
         {
@@ -443,10 +389,7 @@ export default function DocsPage() {
             "Tagging system untuk kategorisasi",
             "Search dengan filter advanced",
             "Bulk operations untuk multiple files",
-            "Archive dan restore system",
-            "Version history dengan diff view",
-            "Template library dengan 50+ template",
-            "Import dari berbagai format (DOCX, MD, HTML)"
+            "Version history dengan diff view"
           ]
         },
         {
@@ -456,10 +399,7 @@ export default function DocsPage() {
             "Inline comments dan discussions",
             "User mentions dengan notifikasi",
             "Review workflow dengan approval",
-            "Activity timeline untuk setiap dokumen",
-            "Team spaces dengan custom permissions",
-            "Shared drafts dan publishing queue",
-            "User presence indicator"
+            "Team spaces dengan custom permissions"
           ]
         },
         {
@@ -467,12 +407,9 @@ export default function DocsPage() {
           features: [
             "Slack integration untuk notifikasi",
             "GitHub/GitLab sync",
-            "Jira integration untuk issue tracking",
-            "Confluence migration tools",
-            "Zapier connect untuk 1000+ apps",
+            "Jira integration",
             "Custom webhooks untuk events",
-            "REST API dengan rate limiting",
-            "OAuth 2.0 untuk authentication"
+            "REST API dengan rate limiting"
           ]
         },
         {
@@ -480,25 +417,9 @@ export default function DocsPage() {
           features: [
             "Page views dan unique visitors",
             "User engagement metrics",
-            "Search analytics dan popular queries",
-            "Document performance dashboard",
+            "Search analytics",
             "Team activity reports",
-            "Export analytics ke CSV/Excel",
-            "Custom date range filtering",
-            "Real-time visitor monitoring"
-          ]
-        },
-        {
-          group: "KUSTOMISASI",
-          features: [
-            "Custom themes dengan CSS",
-            "Branding dengan logo perusahaan",
-            "Custom domain dengan SSL",
-            "Landing page builder",
-            "Email templates untuk notifikasi",
-            "Custom error pages",
-            "Favicon dan meta tags",
-            "Social media preview"
+            "Export analytics ke CSV"
           ]
         }
       ]
@@ -509,37 +430,27 @@ export default function DocsPage() {
         {
           method: "GET",
           path: "/api/v1/documents",
-          desc: "Mendapatkan daftar semua dokumen",
-          params: "page, limit, search, sort, filter"
+          desc: "Mendapatkan daftar semua dokumen"
         },
         {
           method: "GET",
           path: "/api/v1/documents/:id",
-          desc: "Mendapatkan detail dokumen spesifik",
-          params: "include=versions,comments"
+          desc: "Mendapatkan detail dokumen spesifik"
         },
         {
           method: "POST",
           path: "/api/v1/documents",
-          desc: "Membuat dokumen baru",
-          body: "title, content, folder_id, tags[]"
+          desc: "Membuat dokumen baru"
         },
         {
           method: "PUT",
           path: "/api/v1/documents/:id",
-          desc: "Mengupdate dokumen existing",
-          body: "title, content, tags[]"
+          desc: "Mengupdate dokumen existing"
         },
         {
           method: "DELETE",
           path: "/api/v1/documents/:id",
-          desc: "Menghapus dokumen",
-          params: "permanent=false (soft delete)"
-        },
-        {
-          method: "POST",
-          path: "/api/v1/documents/:id/restore",
-          desc: "Mengembalikan dokumen yang dihapus"
+          desc: "Menghapus dokumen"
         },
         {
           method: "GET",
@@ -549,23 +460,15 @@ export default function DocsPage() {
         {
           method: "GET",
           path: "/api/v1/search",
-          desc: "Pencarian dokumen",
-          params: "q, type, folder_id, tags"
+          desc: "Pencarian dokumen"
         },
         {
           method: "GET",
           path: "/api/v1/users",
           desc: "Daftar pengguna dalam workspace"
-        },
-        {
-          method: "POST",
-          path: "/api/v1/invitations",
-          desc: "Mengundang pengguna baru"
         }
       ],
-      auth: "Bearer token authentication via Authorization header",
-      rateLimit: "1000 requests per hour untuk free tier, 10000 untuk pro",
-      versions: "v1 (stable), v2 (beta) available 2025"
+      auth: "Bearer token authentication via Authorization header"
     },
     keamanan: {
       title: "KEAMANAN",
@@ -576,8 +479,7 @@ export default function DocsPage() {
             "TLS 1.3 untuk semua koneksi",
             "AES-256 untuk data at rest",
             "End-to-end encryption untuk data sensitif",
-            "Secure key management dengan HSM",
-            "Perfect forward secrecy untuk session"
+            "Secure key management"
           ]
         },
         {
@@ -586,9 +488,7 @@ export default function DocsPage() {
             "Multi-factor authentication (MFA)",
             "Single Sign-On (SSO) dengan SAML",
             "OAuth 2.0 / OpenID Connect",
-            "Passwordless login options",
-            "Session management dengan timeout",
-            "Brute force protection"
+            "Session management dengan timeout"
           ]
         },
         {
@@ -597,31 +497,16 @@ export default function DocsPage() {
             "Role-based access control (RBAC)",
             "Granular permissions per dokumen",
             "IP whitelisting untuk admin",
-            "Time-based access restrictions",
-            "Audit logs untuk semua akses",
-            "Data isolation per workspace"
+            "Audit logs untuk semua akses"
           ]
         },
         {
           name: "COMPLIANCE",
           items: [
             "GDPR compliance untuk Eropa",
-            "HIPAA readiness untuk healthcare",
             "SOC 2 Type II certified",
             "ISO 27001 certified",
-            "Data residency options",
-            "Regular third-party audits"
-          ]
-        },
-        {
-          name: "MONITORING",
-          items: [
-            "Real-time security alerts",
-            "Intrusion detection system (IDS)",
-            "DDoS protection",
-            "WAF dengan OWASP rules",
-            "Vulnerability scanning",
-            "Penetration testing quarterly"
+            "Data residency options"
           ]
         }
       ]
@@ -635,8 +520,7 @@ export default function DocsPage() {
             "Password salah - reset melalui email",
             "Akun belum diverifikasi - cek email verifikasi",
             "Terlalu banyak percobaan - tunggu 15 menit",
-            "Session expired - login ulang",
-            "2FA code salah - pastikan waktu sinkron"
+            "Session expired - login ulang"
           ]
         },
         {
@@ -645,8 +529,7 @@ export default function DocsPage() {
             "Koneksi internet - cek speed test",
             "Cache browser - clear cache",
             "Terlalu banyak konten - split menjadi beberapa halaman",
-            "Gambar besar - kompres sebelum upload",
-            "Server sibuk - coba beberapa saat lagi"
+            "Gambar besar - kompres sebelum upload"
           ]
         },
         {
@@ -655,18 +538,7 @@ export default function DocsPage() {
             "File terlalu besar - max 100MB",
             "Format tidak didukung - gunakan JPG, PNG, PDF",
             "Storage quota penuh - upgrade paket",
-            "Network timeout - coba file lebih kecil",
             "Permission denied - cek role user"
-          ]
-        },
-        {
-          problem: "Notifikasi tidak masuk",
-          causes: [
-            "Email settings - cek spam folder",
-            "Browser notifications - cek permission",
-            "Do not disturb mode - matikan DND",
-            "Wrong email address - update profile",
-            "Notification settings - cek preferences"
           ]
         },
         {
@@ -674,19 +546,7 @@ export default function DocsPage() {
           causes: [
             "Index belum update - tunggu beberapa menit",
             "Search terms terlalu umum - gunakan kata spesifik",
-            "Filter terlalu ketat - perluas filter",
-            "Content tidak dipublikasikan - cek status",
-            "Permission terbatas - tidak bisa melihat semua hasil"
-          ]
-        },
-        {
-          problem: "Export error",
-          causes: [
-            "File terlalu besar - export per section",
-            "Format tidak support - gunakan format lain",
-            "Memory limit - tutup tab lain",
-            "Server timeout - coba di jam sepi",
-            "Character encoding - gunakan UTF-8"
+            "Filter terlalu ketat - perluas filter"
           ]
         }
       ]
@@ -700,11 +560,7 @@ export default function DocsPage() {
         },
         {
           q: "Berapa biaya berlangganan?",
-          a: "Tersedia free tier dengan 5 user dan 100 dokumen. Paket Pro mulai $15/user/bulan, Enterprise hubungi sales."
-        },
-        {
-          q: "Bagaimana cara migrasi dari platform lain?",
-          a: "Kami menyediakan tools migrasi untuk Confluence, Notion, GitBook, dan Markdown files. Dokumentasi tersedia di halaman migrasi."
+          a: "Tersedia free tier dengan 5 user dan 100 dokumen. Paket Pro mulai $15/user/bulan."
         },
         {
           q: "Apakah data saya aman?",
@@ -712,43 +568,19 @@ export default function DocsPage() {
         },
         {
           q: "Bisa akses offline?",
-          a: "Saat ini belum, namun fitur offline mode sedang dalam pengembangan dan direncanakan rilis Q3 2025."
-        },
-        {
-          q: "Bagaimana cara backup data?",
-          a: "Backup otomatis dilakukan setiap 6 jam dan disimpan selama 30 hari. Ekspor manual juga tersedia."
+          a: "Saat ini belum, namun fitur offline mode sedang dalam pengembangan."
         },
         {
           q: "Support bahasa apa saja?",
-          a: "UI tersedia dalam Bahasa Indonesia dan Inggris. Editor mendukung semua bahasa untuk konten."
-        },
-        {
-          q: "Ada limitasi jumlah dokumen?",
-          a: "Free tier: 100 dokumen, Pro: unlimited, Enterprise: unlimited dengan storage tambahan."
+          a: "UI tersedia dalam Bahasa Indonesia dan Inggris."
         },
         {
           q: "Bisa custom domain?",
-          a: "Ya, fitur custom domain tersedia untuk paket Pro dan Enterprise dengan konfigurasi SSL otomatis."
-        },
-        {
-          q: "Bagaimana cara menghapus akun?",
-          a: "Masuk ke Settings > Account > Delete Account. Data akan dihapus permanen dalam 30 hari."
-        },
-        {
-          q: "Support untuk tim besar?",
-          a: "Enterprise plan mendukung unlimited user dengan SSO, advanced permissions, dan dedicated support."
+          a: "Ya, fitur custom domain tersedia untuk paket Pro dan Enterprise."
         },
         {
           q: "Ada mobile app?",
-          a: "Saat ini website sudah responsive. Mobile apps untuk iOS dan Android sedang dikembangkan."
-        },
-        {
-          q: "Bisa integrasi dengan tools lain?",
-          a: "Ya, melalui REST API, webhooks, atau integrasi langsung dengan Slack, GitHub, Jira, dan lainnya."
-        },
-        {
-          q: "Bagaimana cara report bug?",
-          a: "Kirim email ke support@menuru.com atau gunakan fitur feedback di dashboard."
+          a: "Saat ini website sudah responsive. Mobile apps sedang dikembangkan."
         }
       ]
     }
@@ -775,36 +607,17 @@ export default function DocsPage() {
         ));
       }
       
-      if ('content' in section) {
-        return (section as any).content?.map((item: any, i: number) => (
-          <div key={i} style={{ marginBottom: '1.5rem' }}>
-            <div style={{ fontWeight: '600', marginBottom: '0.25rem' }}>{item.tahun}</div>
-            <div style={{ opacity: 0.8 }}>{item.desc}</div>
-          </div>
-        ));
-      }
-      
       if ('items' in section) {
         return (section as any).items?.map((item: string, i: number) => (
-          <div key={i} style={{ marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <span style={{ opacity: 0.5 }}>—</span>
-            <span>{item}</span>
-          </div>
-        ));
-      }
-      
-      if ('members' in section) {
-        return (section as any).members?.map((member: string, i: number) => (
-          <div key={i} style={{ marginBottom: '0.5rem', opacity: 0.9 }}>{member}</div>
+          <div key={i} style={{ marginBottom: '0.75rem', opacity: 0.9 }}>• {item}</div>
         ));
       }
     }
 
-    // For other sections
     if (activeSection === "arsitektur") {
       return (contentData.arsitektur as any).sections?.map((section: any, i: number) => (
         <div key={i} style={{ marginBottom: '2.5rem' }}>
-          <div style={{ fontSize: '1.2rem', fontWeight: '600', marginBottom: '1rem' }}>{section.sub}</div>
+          <div style={{ fontSize: '1.2rem', fontWeight: '500', marginBottom: '1rem' }}>{section.sub}</div>
           {section.items?.map((item: string, j: number) => (
             <div key={j} style={{ marginBottom: '0.5rem', opacity: 0.8 }}>• {item}</div>
           ))}
@@ -816,14 +629,14 @@ export default function DocsPage() {
       return (
         <>
           <div style={{ marginBottom: '2rem' }}>
-            <div style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '1rem' }}>REQUIREMENTS</div>
+            <div style={{ fontSize: '1.1rem', fontWeight: '500', marginBottom: '1rem' }}>REQUIREMENTS</div>
             {(contentData.instalasi as any).requirements?.map((req: string, i: number) => (
               <div key={i} style={{ marginBottom: '0.5rem', opacity: 0.8 }}>• {req}</div>
             ))}
           </div>
           {(contentData.instalasi as any).methods?.map((method: any, i: number) => (
             <div key={i} style={{ marginBottom: '2rem' }}>
-              <div style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '1rem' }}>{method.type}</div>
+              <div style={{ fontSize: '1.1rem', fontWeight: '500', marginBottom: '1rem' }}>{method.type}</div>
               {method.steps?.map((step: string, j: number) => (
                 <div key={j} style={{ 
                   fontFamily: 'monospace', 
@@ -846,14 +659,14 @@ export default function DocsPage() {
         <>
           {(contentData.penggunaan as any).categories?.map((cat: any, i: number) => (
             <div key={i} style={{ marginBottom: '2rem' }}>
-              <div style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '1rem' }}>{cat.name}</div>
+              <div style={{ fontSize: '1.1rem', fontWeight: '500', marginBottom: '1rem' }}>{cat.name}</div>
               {cat.items?.map((item: string, j: number) => (
                 <div key={j} style={{ marginBottom: '0.5rem', opacity: 0.8 }}>• {item}</div>
               ))}
             </div>
           ))}
           <div style={{ marginTop: '2rem' }}>
-            <div style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '1rem' }}>KEYBOARD SHORTCUTS</div>
+            <div style={{ fontSize: '1.1rem', fontWeight: '500', marginBottom: '1rem' }}>KEYBOARD SHORTCUTS</div>
             {(contentData.penggunaan as any).shortcuts?.map((shortcut: string, i: number) => (
               <div key={i} style={{ marginBottom: '0.5rem', fontFamily: 'monospace', opacity: 0.8 }}>{shortcut}</div>
             ))}
@@ -865,7 +678,7 @@ export default function DocsPage() {
     if (activeSection === "fitur") {
       return (contentData.fitur as any).list?.map((group: any, i: number) => (
         <div key={i} style={{ marginBottom: '2.5rem' }}>
-          <div style={{ fontSize: '1.2rem', fontWeight: '600', marginBottom: '1rem' }}>{group.group}</div>
+          <div style={{ fontSize: '1.2rem', fontWeight: '500', marginBottom: '1rem' }}>{group.group}</div>
           {group.features?.map((feature: string, j: number) => (
             <div key={j} style={{ marginBottom: '0.5rem', opacity: 0.8 }}>• {feature}</div>
           ))}
@@ -877,20 +690,16 @@ export default function DocsPage() {
       return (
         <>
           <div style={{ marginBottom: '2rem' }}>
-            <div style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '1rem' }}>AUTHENTICATION</div>
+            <div style={{ fontSize: '1.1rem', fontWeight: '500', marginBottom: '1rem' }}>AUTHENTICATION</div>
             <div style={{ opacity: 0.8 }}>{(contentData.api as any).auth}</div>
-            <div style={{ opacity: 0.8, marginTop: '0.5rem' }}>Rate Limit: {(contentData.api as any).rateLimit}</div>
-            <div style={{ opacity: 0.8 }}>Versions: {(contentData.api as any).versions}</div>
           </div>
           {(contentData.api as any).endpoints?.map((ep: any, i: number) => (
             <div key={i} style={{ marginBottom: '1.5rem', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '1rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem' }}>
-                <span style={{ fontWeight: '600' }}>{ep.method}</span>
+                <span style={{ fontWeight: '500' }}>{ep.method}</span>
                 <span style={{ fontFamily: 'monospace', opacity: 0.9 }}>{ep.path}</span>
               </div>
-              <div style={{ opacity: 0.7, fontSize: '0.95rem' }}>{ep.desc}</div>
-              {ep.params && <div style={{ opacity: 0.5, fontSize: '0.9rem', marginTop: '0.25rem' }}>Params: {ep.params}</div>}
-              {ep.body && <div style={{ opacity: 0.5, fontSize: '0.9rem' }}>Body: {ep.body}</div>}
+              <div style={{ opacity: 0.7 }}>{ep.desc}</div>
             </div>
           ))}
         </>
@@ -900,7 +709,7 @@ export default function DocsPage() {
     if (activeSection === "keamanan") {
       return (contentData.keamanan as any).categories?.map((cat: any, i: number) => (
         <div key={i} style={{ marginBottom: '2rem' }}>
-          <div style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '1rem' }}>{cat.name}</div>
+          <div style={{ fontSize: '1.1rem', fontWeight: '500', marginBottom: '1rem' }}>{cat.name}</div>
           {cat.items?.map((item: string, j: number) => (
             <div key={j} style={{ marginBottom: '0.5rem', opacity: 0.8 }}>• {item}</div>
           ))}
@@ -911,7 +720,7 @@ export default function DocsPage() {
     if (activeSection === "troubleshoot") {
       return (contentData.troubleshoot as any).issues?.map((issue: any, i: number) => (
         <div key={i} style={{ marginBottom: '2rem' }}>
-          <div style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '0.75rem' }}>{issue.problem}</div>
+          <div style={{ fontSize: '1.1rem', fontWeight: '500', marginBottom: '0.75rem' }}>{issue.problem}</div>
           {issue.causes?.map((cause: string, j: number) => (
             <div key={j} style={{ marginBottom: '0.5rem', opacity: 0.8, marginLeft: '1rem' }}>• {cause}</div>
           ))}
@@ -922,8 +731,8 @@ export default function DocsPage() {
     if (activeSection === "faq") {
       return (contentData.faq as any).questions?.map((faq: any, i: number) => (
         <div key={i} style={{ marginBottom: '1.5rem' }}>
-          <div style={{ fontWeight: '600', marginBottom: '0.25rem' }}>Q: {faq.q}</div>
-          <div style={{ opacity: 0.8, marginLeft: '1rem' }}>A: {faq.a}</div>
+          <div style={{ fontWeight: '500', marginBottom: '0.25rem' }}>{faq.q}</div>
+          <div style={{ opacity: 0.8 }}>{faq.a}</div>
         </div>
       ));
     }
@@ -937,12 +746,11 @@ export default function DocsPage() {
       backgroundColor: '#000000',
       color: '#ffffff',
       display: 'flex',
-      fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
-      lineHeight: 1.6,
-      letterSpacing: '0.2px'
+      fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, Helvetica, Arial, sans-serif',
+      lineHeight: 1.6
     }}>
       
-      {/* Left Navigation - Minimalist */}
+      {/* Left Navigation */}
       <div style={{
         width: '280px',
         padding: '2rem 1.5rem',
@@ -982,7 +790,7 @@ export default function DocsPage() {
                   border: 'none',
                   color: activeSection === item.id ? '#ffffff' : 'rgba(255,255,255,0.5)',
                   fontSize: '0.95rem',
-                  fontWeight: activeSection === item.id ? '400' : '300',
+                  fontWeight: activeSection === item.id ? '500' : '300',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
@@ -1032,7 +840,7 @@ export default function DocsPage() {
                         border: 'none',
                         color: activeSubSection === subItem.id ? '#ffffff' : 'rgba(255,255,255,0.4)',
                         fontSize: '0.9rem',
-                        fontWeight: activeSubSection === subItem.id ? '400' : '300',
+                        fontWeight: activeSubSection === subItem.id ? '500' : '300',
                         cursor: 'pointer',
                         transition: 'all 0.2s ease'
                       }}
@@ -1074,7 +882,7 @@ export default function DocsPage() {
           opacity: 0.6
         }}>
           <div ref={marqueeRef} style={{ display: 'inline-block' }}>
-            DOCS MENURU <ArrowIcon /> DOKUMENTASI LENGKAP <ArrowIcon /> PANDUAN RESMI <ArrowIcon /> API REFERENCE <ArrowIcon /> BEST PRACTICES <ArrowIcon /> TUTORIAL <ArrowIcon /> FAQ <ArrowIcon /> DOCS MENURU <ArrowIcon />
+            DOCS MENURU <ArrowIcon /> DOKUMENTASI LENGKAP <ArrowIcon /> PANDUAN RESMI <ArrowIcon /> API REFERENCE <ArrowIcon /> BEST PRACTICES <ArrowIcon /> TUTORIAL <ArrowIcon /> FAQ <ArrowIcon />
           </div>
         </div>
 
@@ -1113,7 +921,6 @@ export default function DocsPage() {
             justifyContent: 'space-between'
           }}>
             <span>© 2024 MENURU</span>
-            <span>Versi 2.0.0</span>
             <span>Tim Pengembang MENURU</span>
           </div>
         </div>
