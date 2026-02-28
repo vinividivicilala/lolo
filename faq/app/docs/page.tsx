@@ -1,21 +1,35 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
 import gsap from "gsap";
 
+// Definisikan tipe untuk author
+interface Author {
+  name: string;
+  role: string;
+}
+
+// Definisikan tipe untuk konten
+interface ContentItem {
+  title: string;
+  content: any;
+}
+
 export default function DocsPage() {
-  const [activeSection, setActiveSection] = useState("pembuka");
-  const [activeSubSection, setActiveSubSection] = useState("salam");
-  const [isMobile, setIsMobile] = useState(false);
-  const [showPembukaDropdown, setShowPembukaDropdown] = useState(false);
+  const [activeSection, setActiveSection] = useState<string>("pembuka");
+  const [activeSubSection, setActiveSubSection] = useState<string>("salam");
+  const [isMobile, setIsMobile] = useState<boolean>(false);
+  const [showPembukaDropdown, setShowPembukaDropdown] = useState<boolean>(false);
   const [currentDateTime, setCurrentDateTime] = useState<Date | null>(null);
-  const [isClient, setIsClient] = useState(false);
+  const [isClient, setIsClient] = useState<boolean>(false);
+  
   const contentRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const marqueeContentRef = useRef<HTMLDivElement>(null);
+  const marqueeAnimationRef = useRef<gsap.core.Tween | null>(null);
   
-  // Handle client-side only rendering untuk menghindari hydration mismatch
+  // Handle client-side only rendering
   useEffect(() => {
     setIsClient(true);
     setCurrentDateTime(new Date());
@@ -29,6 +43,7 @@ export default function DocsPage() {
     };
   }, []);
 
+  // Handle mobile detection
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
@@ -42,8 +57,8 @@ export default function DocsPage() {
     };
   }, []);
 
+  // GSAP animation for content
   useEffect(() => {
-    // GSAP animation for content - hanya jalan di client
     if (contentRef.current && isClient) {
       gsap.fromTo(
         contentRef.current,
@@ -53,28 +68,31 @@ export default function DocsPage() {
     }
   }, [activeSection, activeSubSection, isClient]);
 
-  // GSAP animation for marquee - hanya jalan di client
+  // GSAP animation for marquee - simplified to avoid modifiers issue
   useEffect(() => {
     if (marqueeContentRef.current && isClient) {
-      gsap.to(marqueeContentRef.current, {
-        x: "-50%",
+      // Kill previous animation if exists
+      if (marqueeAnimationRef.current) {
+        marqueeAnimationRef.current.kill();
+      }
+      
+      // Simple infinite scroll animation
+      marqueeAnimationRef.current = gsap.to(marqueeContentRef.current, {
+        x: "-=50%",
         duration: 20,
         ease: "none",
-        repeat: -1,
-        modifiers: {
-          x: gsap.utils.unitize(x => parseFloat(x) % (marqueeContentRef.current?.offsetWidth / 2 || 0))
-        }
+        repeat: -1
       });
     }
 
     return () => {
-      if (isClient) {
-        gsap.killTweensOf(marqueeContentRef.current);
+      if (marqueeAnimationRef.current) {
+        marqueeAnimationRef.current.kill();
       }
     };
   }, [isClient]);
 
-  // GSAP animation for dropdown - hanya jalan di client
+  // GSAP animation for dropdown
   useEffect(() => {
     if (dropdownRef.current && isClient) {
       if (showPembukaDropdown) {
@@ -119,26 +137,26 @@ export default function DocsPage() {
     };
   }, []);
 
-  // Format tanggal dan waktu - hanya dipanggil saat isClient true
-  const formatDate = (date: Date) => {
+  // Format tanggal dan waktu
+  const formatDate = useCallback((date: Date) => {
     return date.toLocaleDateString('id-ID', {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
       day: 'numeric'
     });
-  };
+  }, []);
 
-  const formatTime = (date: Date) => {
+  const formatTime = useCallback((date: Date) => {
     return date.toLocaleTimeString('id-ID', {
       hour: '2-digit',
       minute: '2-digit',
       second: '2-digit',
       hour12: false
     });
-  };
+  }, []);
 
-  // Data navigasi dengan dropdown untuk pembuka
+  // Data navigasi
   const navItems = [
     { 
       id: "pembuka", 
@@ -159,8 +177,8 @@ export default function DocsPage() {
     { id: "troubleshoot", title: "TROUBLESHOOT" }
   ];
 
-  // Data konten yang diperkaya dan detail
-  const contentData = {
+  // Data konten (dipersingkat untuk kejelasan, tapi tetap lengkap di kode asli)
+  const contentData: Record<string, ContentItem> = {
     salam: {
       title: "SALAM PEMBUKA",
       content: {
@@ -377,7 +395,7 @@ export default function DocsPage() {
   };
 
   // Semua author adalah Farid Ardiansyah
-  const authors = {
+  const authors: Record<string, Author> = {
     salam: { name: "Farid Ardiansyah", role: "Lead Documentation" },
     tentang: { name: "Farid Ardiansyah", role: "Lead Documentation" },
     "visi-misi": { name: "Farid Ardiansyah", role: "Lead Documentation" },
@@ -390,19 +408,19 @@ export default function DocsPage() {
     troubleshoot: { name: "Farid Ardiansyah", role: "Lead Documentation" }
   };
 
-  const getCurrentAuthor = () => {
+  const getCurrentAuthor = useCallback((): Author => {
     if (activeSection === "pembuka") {
       return authors[activeSubSection as keyof typeof authors] || authors.salam;
     }
     return authors[activeSection as keyof typeof authors] || authors.arsitektur;
-  };
+  }, [activeSection, activeSubSection]);
 
-  const getCurrentContent = () => {
+  const getCurrentContent = useCallback((): ContentItem => {
     if (activeSection === "pembuka") {
       return contentData[activeSubSection as keyof typeof contentData] || contentData.salam;
     }
-    return contentData[activeSection as keyof typeof contentData];
-  };
+    return contentData[activeSection as keyof typeof contentData] || contentData.arsitektur;
+  }, [activeSection, activeSubSection]);
 
   const currentContent = getCurrentContent();
   const currentAuthor = getCurrentAuthor();
@@ -467,104 +485,73 @@ export default function DocsPage() {
           if (key === 'title') return null;
           
           if (Array.isArray(value)) {
-            if (value[0]?.nama) { // Fitur utama
-              return (
-                <div key={key} style={{ marginBottom: '2rem' }}>
-                  <h3 style={{ fontSize: '1.3rem', fontWeight: '600', marginBottom: '1rem', opacity: 1, color: 'white' }}>
-                    {key === 'daftar' ? 'Daftar Fitur' : key}
-                  </h3>
-                  {value.map((item, idx) => (
-                    <div key={idx} style={{ marginBottom: '1.5rem', borderLeft: '2px solid rgba(255,255,255,0.2)', paddingLeft: '1rem' }}>
-                      <div style={{ fontWeight: '600', marginBottom: '0.5rem', color: 'white' }}>{item.nama}</div>
-                      <div style={{ opacity: 0.8, color: 'white' }}>{item.deskripsi}</div>
-                    </div>
-                  ))}
-                </div>
-              );
-            }
-            
-            if (value[0]?.judul) { // Penggunaan
-              return (
-                <div key={key} style={{ marginBottom: '2rem' }}>
-                  <h3 style={{ fontSize: '1.3rem', fontWeight: '600', marginBottom: '1rem', opacity: 1, color: 'white' }}>
-                    {key === 'panduan' ? 'Panduan Penggunaan' : key}
-                  </h3>
-                  {value.map((item, idx) => (
-                    <div key={idx} style={{ marginBottom: '2rem' }}>
-                      <div style={{ fontWeight: '600', marginBottom: '1rem', color: 'white' }}>{item.judul}</div>
-                      <ul style={{ listStyle: 'none', padding: 0 }}>
-                        {item.langkah?.map((langkah: string, lidx: number) => (
-                          <li key={lidx} style={{ marginBottom: '0.5rem', display: 'flex', alignItems: 'flex-start' }}>
-                            <span style={{ marginRight: '1rem', opacity: 0.5, color: 'white' }}>{lidx + 1}</span>
-                            <span style={{ color: 'white' }}>{langkah}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  ))}
-                </div>
-              );
-            }
-            
-            if (value[0]?.keys) { // Shortcut
-              return (
-                <div key={key} style={{ marginBottom: '2rem' }}>
-                  <h3 style={{ fontSize: '1.3rem', fontWeight: '600', marginBottom: '1rem', opacity: 1, color: 'white' }}>Keyboard Shortcuts</h3>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
-                    {value.map((item, idx) => (
+            // Handle different array types
+            return (
+              <div key={key} style={{ marginBottom: '2rem' }}>
+                <h3 style={{ fontSize: '1.3rem', fontWeight: '600', marginBottom: '1rem', opacity: 1, color: 'white' }}>
+                  {key === 'daftar' ? 'Daftar Fitur' : 
+                   key === 'panduan' ? 'Panduan Penggunaan' :
+                   key === 'shortcut' ? 'Keyboard Shortcuts' :
+                   key === 'umum' ? 'Masalah Umum' :
+                   key === 'error' ? 'Kode Error' :
+                   key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
+                </h3>
+                {value.map((item, idx) => {
+                  if (item.nama && item.deskripsi) {
+                    return (
+                      <div key={idx} style={{ marginBottom: '1.5rem', borderLeft: '2px solid rgba(255,255,255,0.2)', paddingLeft: '1rem' }}>
+                        <div style={{ fontWeight: '600', marginBottom: '0.5rem', color: 'white' }}>{item.nama}</div>
+                        <div style={{ opacity: 0.8, color: 'white' }}>{item.deskripsi}</div>
+                      </div>
+                    );
+                  }
+                  if (item.judul && item.langkah) {
+                    return (
+                      <div key={idx} style={{ marginBottom: '2rem' }}>
+                        <div style={{ fontWeight: '600', marginBottom: '1rem', color: 'white' }}>{item.judul}</div>
+                        <ul style={{ listStyle: 'none', padding: 0 }}>
+                          {item.langkah?.map((langkah: string, lidx: number) => (
+                            <li key={lidx} style={{ marginBottom: '0.5rem', display: 'flex', alignItems: 'flex-start' }}>
+                              <span style={{ marginRight: '1rem', opacity: 0.5, color: 'white' }}>{lidx + 1}</span>
+                              <span style={{ color: 'white' }}>{langkah}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    );
+                  }
+                  if (item.keys && item.fungsi) {
+                    return (
                       <div key={idx} style={{ padding: '0.75rem', backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: '4px' }}>
                         <code style={{ color: 'white', fontWeight: '600' }}>{item.keys}</code>
                         <div style={{ fontSize: '0.9rem', opacity: 0.7, marginTop: '0.25rem', color: 'white' }}>{item.fungsi}</div>
                       </div>
-                    ))}
-                  </div>
-                </div>
-              );
-            }
-            
-            if (value[0]?.masalah) { // Troubleshoot umum
-              return (
-                <div key={key} style={{ marginBottom: '2rem' }}>
-                  <h3 style={{ fontSize: '1.3rem', fontWeight: '600', marginBottom: '1rem', opacity: 1, color: 'white' }}>Masalah Umum</h3>
-                  {value.map((item, idx) => (
-                    <div key={idx} style={{ marginBottom: '1.5rem', padding: '1rem', backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: '8px' }}>
-                      <div style={{ fontWeight: '600', color: '#ff6b6b', marginBottom: '0.5rem' }}>{item.masalah}</div>
-                      <div style={{ opacity: 0.8, color: 'white' }}>Solusi {item.solusi}</div>
-                    </div>
-                  ))}
-                </div>
-              );
-            }
-            
-            if (value[0]?.kode) { // Error codes
-              return (
-                <div key={key} style={{ marginBottom: '2rem' }}>
-                  <h3 style={{ fontSize: '1.3rem', fontWeight: '600', marginBottom: '1rem', opacity: 1, color: 'white' }}>Kode Error</h3>
-                  {value.map((item, idx) => (
-                    <div key={idx} style={{ marginBottom: '1rem', padding: '1rem', backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: '8px' }}>
-                      <code style={{ color: '#ffd700', fontWeight: '600' }}>{item.kode}</code>
-                      <div style={{ marginTop: '0.5rem', opacity: 0.9, color: 'white' }}>{item.deskripsi}</div>
-                      <div style={{ marginTop: '0.5rem', opacity: 0.8, fontSize: '0.95rem', color: 'white' }}>Solusi {item.solusi}</div>
-                    </div>
-                  ))}
-                </div>
-              );
-            }
-            
-            // Default array rendering
-            return (
-              <div key={key} style={{ marginBottom: '2rem' }}>
-                <h3 style={{ fontSize: '1.3rem', fontWeight: '600', marginBottom: '1rem', opacity: 1, color: 'white' }}>
-                  {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
-                </h3>
-                <ul style={{ listStyle: 'none', padding: 0 }}>
-                  {value.map((item: string, idx: number) => (
-                    <li key={idx} style={{ marginBottom: '0.75rem', display: 'flex', alignItems: 'flex-start' }}>
-                      <span style={{ marginRight: '1rem', opacity: 0.5, color: 'white' }}></span>
+                    );
+                  }
+                  if (item.masalah && item.solusi) {
+                    return (
+                      <div key={idx} style={{ marginBottom: '1.5rem', padding: '1rem', backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: '8px' }}>
+                        <div style={{ fontWeight: '600', color: '#ff6b6b', marginBottom: '0.5rem' }}>{item.masalah}</div>
+                        <div style={{ opacity: 0.8, color: 'white' }}>Solusi: {item.solusi}</div>
+                      </div>
+                    );
+                  }
+                  if (item.kode && item.deskripsi && item.solusi) {
+                    return (
+                      <div key={idx} style={{ marginBottom: '1rem', padding: '1rem', backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: '8px' }}>
+                        <code style={{ color: '#ffd700', fontWeight: '600' }}>{item.kode}</code>
+                        <div style={{ marginTop: '0.5rem', opacity: 0.9, color: 'white' }}>{item.deskripsi}</div>
+                        <div style={{ marginTop: '0.5rem', opacity: 0.8, fontSize: '0.95rem', color: 'white' }}>Solusi: {item.solusi}</div>
+                      </div>
+                    );
+                  }
+                  return (
+                    <div key={idx} style={{ marginBottom: '0.75rem', display: 'flex', alignItems: 'flex-start' }}>
+                      <span style={{ marginRight: '1rem', opacity: 0.5, color: 'white' }}>•</span>
                       <span style={{ color: 'white' }}>{item}</span>
-                    </li>
-                  ))}
-                </ul>
+                    </div>
+                  );
+                })}
               </div>
             );
           }
@@ -590,7 +577,7 @@ export default function DocsPage() {
           // Simple key-value
           return (
             <div key={key} style={{ marginBottom: '1rem' }}>
-              <span style={{ fontWeight: '500', color: 'white', textTransform: 'capitalize' }}>{key.replace(/([A-Z])/g, ' $1')} </span>
+              <span style={{ fontWeight: '500', color: 'white', textTransform: 'capitalize' }}>{key.replace(/([A-Z])/g, ' $1')}: </span>
               <span style={{ color: 'white' }}>{String(value)}</span>
             </div>
           );
@@ -839,7 +826,8 @@ export default function DocsPage() {
               alignItems: 'center',
               gap: '2rem',
               borderBottom: '1px solid rgba(255,255,255,0.1)',
-              paddingBottom: '1rem'
+              paddingBottom: '1rem',
+              flexWrap: 'wrap'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
@@ -849,7 +837,7 @@ export default function DocsPage() {
                 <span style={{ opacity: 0.8, fontSize: '0.95rem' }}>{currentAuthor.name}</span>
                 <span style={{ opacity: 0.5, fontSize: '0.85rem' }}>({currentAuthor.role})</span>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
                   <circle cx="12" cy="12" r="10" />
                   <polyline points="12 6 12 12 16 14" />
