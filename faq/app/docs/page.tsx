@@ -68,18 +68,16 @@ export default function DocsPage() {
     }
   }, [activeSection, activeSubSection, isClient]);
 
-  // GSAP animation for marquee - hanya teks DOCS besar
+  // GSAP animation for marquee
   useEffect(() => {
     if (marqueeContentRef.current && isClient) {
-      // Kill previous animation if exists
       if (marqueeAnimationRef.current) {
         marqueeAnimationRef.current.kill();
       }
       
-      // Simple infinite scroll animation with larger text
       marqueeAnimationRef.current = gsap.to(marqueeContentRef.current, {
         x: "-=50%",
-        duration: 25,
+        duration: 20,
         ease: "none",
         repeat: -1
       });
@@ -156,7 +154,7 @@ export default function DocsPage() {
     });
   }, []);
 
-  // Data navigasi dengan dropdown untuk pembuka
+  // Data navigasi
   const navItems = [
     { 
       id: "pembuka", 
@@ -177,7 +175,7 @@ export default function DocsPage() {
     { id: "troubleshoot", title: "TROUBLESHOOT" }
   ];
 
-  // Data konten tanpa tanda pemisah
+  // Data konten
   const contentData: Record<string, ContentItem> = {
     salam: {
       title: "SALAM PEMBUKA",
@@ -425,7 +423,32 @@ export default function DocsPage() {
   const currentContent = getCurrentContent();
   const currentAuthor = getCurrentAuthor();
 
-  // Arrow icon dihapus karena tidak digunakan
+  // Ikon Panah untuk Marquee
+  const ArrowIcon = () => (
+    <svg 
+      width="20" 
+      height="20" 
+      viewBox="0 0 24 24" 
+      fill="none" 
+      xmlns="http://www.w3.org/2000/svg"
+      style={{
+        margin: '0 1.5rem',
+        opacity: 0.7,
+        color: 'white',
+        display: 'inline-block',
+        verticalAlign: 'middle'
+      }}
+    >
+      <path 
+        d="M7 17L17 7M17 7H8M17 7V16" 
+        stroke="white" 
+        strokeWidth="1.5" 
+        strokeLinecap="round" 
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+
   const PlusIcon = ({ isOpen }: { isOpen: boolean }) => (
     <svg 
       width="16" 
@@ -449,116 +472,127 @@ export default function DocsPage() {
     </svg>
   );
 
+  // Fungsi untuk merender konten dengan aman (tanpa error #31)
+  const renderContentSafely = (content: any): React.ReactNode => {
+    // Handle string
+    if (typeof content === 'string') {
+      return <div style={{ marginBottom: '1rem' }}>{content}</div>;
+    }
+    
+    // Handle array
+    if (Array.isArray(content)) {
+      return content.map((item, index) => (
+        <div key={index} style={{ marginBottom: '1rem' }}>
+          {renderContentSafely(item)}
+        </div>
+      ));
+    }
+    
+    // Handle object
+    if (content && typeof content === 'object') {
+      // Kasus khusus untuk format data tertentu
+      if (content.nama && content.deskripsi) {
+        return (
+          <div style={{ marginBottom: '1.5rem', borderLeft: '2px solid rgba(255,255,255,0.2)', paddingLeft: '1rem' }}>
+            <div style={{ fontWeight: '600', marginBottom: '0.5rem', color: 'white' }}>{content.nama}</div>
+            <div style={{ opacity: 0.8, color: 'white' }}>{content.deskripsi}</div>
+          </div>
+        );
+      }
+      
+      if (content.judul && content.langkah) {
+        return (
+          <div style={{ marginBottom: '2rem' }}>
+            <div style={{ fontWeight: '600', marginBottom: '1rem', color: 'white' }}>{content.judul}</div>
+            <ul style={{ listStyle: 'none', padding: 0 }}>
+              {content.langkah.map((langkah: string, lidx: number) => (
+                <li key={lidx} style={{ marginBottom: '0.5rem', display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '1rem', opacity: 0.5, color: 'white' }}>{lidx + 1}</span>
+                  <span style={{ color: 'white' }}>{langkah}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        );
+      }
+      
+      if (content.keys && content.fungsi) {
+        return (
+          <div style={{ padding: '0.75rem', backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: '4px' }}>
+            <code style={{ color: 'white', fontWeight: '600' }}>{content.keys}</code>
+            <div style={{ fontSize: '0.9rem', opacity: 0.7, marginTop: '0.25rem', color: 'white' }}>{content.fungsi}</div>
+          </div>
+        );
+      }
+      
+      if (content.masalah && content.solusi) {
+        return (
+          <div style={{ marginBottom: '1.5rem', padding: '1rem', backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: '8px' }}>
+            <div style={{ fontWeight: '600', color: '#ff6b6b', marginBottom: '0.5rem' }}>{content.masalah}</div>
+            <div style={{ opacity: 0.8, color: 'white' }}>Solusi {content.solusi}</div>
+          </div>
+        );
+      }
+      
+      if (content.kode && content.deskripsi && content.solusi) {
+        return (
+          <div style={{ marginBottom: '1rem', padding: '1rem', backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: '8px' }}>
+            <code style={{ color: '#ffd700', fontWeight: '600' }}>{content.kode}</code>
+            <div style={{ marginTop: '0.5rem', opacity: 0.9, color: 'white' }}>{content.deskripsi}</div>
+            <div style={{ marginTop: '0.5rem', opacity: 0.8, fontSize: '0.95rem', color: 'white' }}>Solusi {content.solusi}</div>
+          </div>
+        );
+      }
+      
+      // Untuk object umum, render key-value pair
+      return (
+        <div style={{ marginBottom: '1rem' }}>
+          {Object.entries(content).map(([key, value]) => (
+            <div key={key} style={{ marginBottom: '0.5rem' }}>
+              <span style={{ fontWeight: '500', opacity: 0.8, marginRight: '0.5rem' }}>
+                {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
+              </span>
+              <span>{renderContentSafely(value)}</span>
+            </div>
+          ))}
+        </div>
+      );
+    }
+    
+    // Fallback untuk tipe lain (number, boolean, dll)
+    return <span>{String(content)}</span>;
+  };
+
   const renderContent = () => {
     const content = currentContent.content;
     
-    if (typeof content === 'string') {
-      return <div style={{ fontSize: '1.15rem', lineHeight: 1.7, opacity: 0.9, color: 'white' }}>{content}</div>;
-    }
-
     return (
       <div style={{ fontSize: '1.15rem', lineHeight: 1.7, opacity: 0.9, color: 'white' }}>
         {Object.entries(content).map(([key, value]) => {
+          // Skip rendering jika key adalah 'title'
           if (key === 'title') return null;
           
-          if (Array.isArray(value)) {
-            // Handle different array types without separators
-            return (
-              <div key={key} style={{ marginBottom: '2rem' }}>
-                <h3 style={{ fontSize: '1.3rem', fontWeight: '600', marginBottom: '1rem', opacity: 1, color: 'white' }}>
-                  {key === 'daftar' ? 'Daftar Fitur' : 
-                   key === 'panduan' ? 'Panduan Penggunaan' :
-                   key === 'shortcut' ? 'Keyboard Shortcuts' :
-                   key === 'umum' ? 'Masalah Umum' :
-                   key === 'error' ? 'Kode Error' :
-                   key === 'misiList' ? 'Misi' :
-                   key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
-                </h3>
-                {value.map((item, idx) => {
-                  if (item.nama && item.deskripsi) {
-                    return (
-                      <div key={idx} style={{ marginBottom: '1.5rem', borderLeft: '2px solid rgba(255,255,255,0.2)', paddingLeft: '1rem' }}>
-                        <div style={{ fontWeight: '600', marginBottom: '0.5rem', color: 'white' }}>{item.nama}</div>
-                        <div style={{ opacity: 0.8, color: 'white' }}>{item.deskripsi}</div>
-                      </div>
-                    );
-                  }
-                  if (item.judul && item.langkah) {
-                    return (
-                      <div key={idx} style={{ marginBottom: '2rem' }}>
-                        <div style={{ fontWeight: '600', marginBottom: '1rem', color: 'white' }}>{item.judul}</div>
-                        <ul style={{ listStyle: 'none', padding: 0 }}>
-                          {item.langkah?.map((langkah: string, lidx: number) => (
-                            <li key={lidx} style={{ marginBottom: '0.5rem', display: 'flex', alignItems: 'flex-start' }}>
-                              <span style={{ marginRight: '1rem', opacity: 0.5, color: 'white' }}>{lidx + 1}</span>
-                              <span style={{ color: 'white' }}>{langkah}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    );
-                  }
-                  if (item.keys && item.fungsi) {
-                    return (
-                      <div key={idx} style={{ padding: '0.75rem', backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: '4px' }}>
-                        <code style={{ color: 'white', fontWeight: '600' }}>{item.keys}</code>
-                        <div style={{ fontSize: '0.9rem', opacity: 0.7, marginTop: '0.25rem', color: 'white' }}>{item.fungsi}</div>
-                      </div>
-                    );
-                  }
-                  if (item.masalah && item.solusi) {
-                    return (
-                      <div key={idx} style={{ marginBottom: '1.5rem', padding: '1rem', backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: '8px' }}>
-                        <div style={{ fontWeight: '600', color: '#ff6b6b', marginBottom: '0.5rem' }}>{item.masalah}</div>
-                        <div style={{ opacity: 0.8, color: 'white' }}>Solusi {item.solusi}</div>
-                      </div>
-                    );
-                  }
-                  if (item.kode && item.deskripsi && item.solusi) {
-                    return (
-                      <div key={idx} style={{ marginBottom: '1rem', padding: '1rem', backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: '8px' }}>
-                        <code style={{ color: '#ffd700', fontWeight: '600' }}>{item.kode}</code>
-                        <div style={{ marginTop: '0.5rem', opacity: 0.9, color: 'white' }}>{item.deskripsi}</div>
-                        <div style={{ marginTop: '0.5rem', opacity: 0.8, fontSize: '0.95rem', color: 'white' }}>Solusi {item.solusi}</div>
-                      </div>
-                    );
-                  }
-                  return (
-                    <div key={idx} style={{ marginBottom: '0.75rem', display: 'flex', alignItems: 'flex-start' }}>
-                      <span style={{ marginRight: '1rem', opacity: 0.5, color: 'white' }}></span>
-                      <span style={{ color: 'white' }}>{item}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            );
-          }
+          // Tentukan judul section
+          let sectionTitle = '';
+          if (key === 'daftar') sectionTitle = 'Daftar Fitur';
+          else if (key === 'panduan') sectionTitle = 'Panduan Penggunaan';
+          else if (key === 'shortcut') sectionTitle = 'Keyboard Shortcuts';
+          else if (key === 'umum') sectionTitle = 'Masalah Umum';
+          else if (key === 'error') sectionTitle = 'Kode Error';
+          else if (key === 'misiList') sectionTitle = 'Misi';
+          else if (key === 'stack') sectionTitle = 'Technology Stack';
+          else if (key === 'requirements') sectionTitle = 'Requirements';
+          else if (key === 'steps') sectionTitle = 'Langkah Instalasi';
+          else sectionTitle = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
           
-          if (typeof value === 'object' && value !== null) {
-            return (
-              <div key={key} style={{ marginBottom: '2rem' }}>
-                <h3 style={{ fontSize: '1.3rem', fontWeight: '600', marginBottom: '1rem', opacity: 1, color: 'white', textTransform: 'capitalize' }}>
-                  {key === 'stack' ? 'Technology Stack' :
-                   key === 'requirements' ? 'Requirements' :
-                   key === 'steps' ? 'Langkah Instalasi' :
-                   key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
-                </h3>
-                {Object.entries(value).map(([subKey, subValue]) => (
-                  <div key={subKey} style={{ marginBottom: '1rem' }}>
-                    <div style={{ fontWeight: '500', opacity: 0.9, marginBottom: '0.5rem', color: 'white', textTransform: 'capitalize' }}>
-                      {subKey.replace(/([A-Z])/g, ' $1')}
-                    </div>
-                    <div style={{ opacity: 0.8, marginLeft: '1rem', color: 'white' }}>{String(subValue)}</div>
-                  </div>
-                ))}
-              </div>
-            );
-          }
-          
-          // Simple key-value tanpa titik dua
           return (
-            <div key={key} style={{ marginBottom: '1rem' }}>
-              <span style={{ color: 'white' }}>{String(value)}</span>
+            <div key={key} style={{ marginBottom: '2rem' }}>
+              {sectionTitle && (
+                <h3 style={{ fontSize: '1.3rem', fontWeight: '600', marginBottom: '1rem', opacity: 1, color: 'white' }}>
+                  {sectionTitle}
+                </h3>
+              )}
+              {renderContentSafely(value)}
             </div>
           );
         })}
@@ -662,7 +696,7 @@ export default function DocsPage() {
                 )}
               </div>
               
-              {/* Dropdown untuk Pembuka dengan GSAP */}
+              {/* Dropdown untuk Pembuka */}
               {item.id === "pembuka" && (
                 <div
                   ref={dropdownRef}
@@ -731,7 +765,7 @@ export default function DocsPage() {
         width: 'calc(100% - 280px)'
       }}>
         
-        {/* Marquee Text dengan Teks Besar "DOCS" */}
+        {/* Marquee Text dengan Panah - Teks Normal (tidak tebal) */}
         <div style={{
           position: 'fixed',
           top: 0,
@@ -751,27 +785,27 @@ export default function DocsPage() {
               alignItems: 'center',
               gap: '0',
               color: 'white',
-              fontSize: '3.5rem',
-              fontWeight: '900',
-              letterSpacing: '4px',
-              textTransform: 'uppercase'
+              fontSize: '1.2rem',
+              fontWeight: '400', // Normal, tidak bold
+              letterSpacing: '0.5px'
             }}
           >
-            {/* Konten marquee hanya teks DOCS besar, diulang 8 kali */}
+            {/* Konten marquee dengan teks dan panah */}
             {[...Array(8)].map((_, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'center' }}>
-                <span style={{ margin: '0 2rem' }}>DOCS</span>
+                <span>DOCS MENURU</span>
+                <ArrowIcon />
               </div>
             ))}
           </div>
         </div>
 
-        {/* Spacer untuk konten agar tidak tertutup marquee */}
-        <div style={{ height: '6rem' }} />
+        {/* Spacer untuk konten */}
+        <div style={{ height: '4rem' }} />
 
         <div ref={contentRef} style={{ maxWidth: '900px' }}>
           
-          {/* Title tanpa tanda pemisah */}
+          {/* Title - Tanpa tanda pemisah */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -789,7 +823,7 @@ export default function DocsPage() {
             {currentContent.title}
           </motion.div>
 
-          {/* Author dan Info Update Real-time - Hanya tampil di client */}
+          {/* Author dan Info Update */}
           {isClient && currentDateTime && (
             <div style={{
               paddingLeft: '1.5rem',
@@ -821,7 +855,7 @@ export default function DocsPage() {
             </div>
           )}
 
-          {/* Content tanpa tanda pemisah */}
+          {/* Content - Tanpa tanda pemisah */}
           <div style={{
             paddingLeft: '1.5rem',
             paddingRight: '2rem'
@@ -829,7 +863,7 @@ export default function DocsPage() {
             {renderContent()}
           </div>
 
-          {/* Footer dengan informasi lengkap */}
+          {/* Footer */}
           {isClient && currentDateTime && (
             <motion.div
               initial={{ opacity: 0 }}
