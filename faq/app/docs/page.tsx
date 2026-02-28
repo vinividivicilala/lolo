@@ -6,22 +6,24 @@ import gsap from "gsap";
 
 export default function DocsPage() {
   const [activeSection, setActiveSection] = useState("pembuka");
-  const [activeSubSection, setActiveSubSection] = useState("pengantar");
+  const [isMobile, setIsMobile] = useState(false);
   const [showPembukaDropdown, setShowPembukaDropdown] = useState(false);
+  const [timeAgo, setTimeAgo] = useState("");
   const contentRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const marqueeRef = useRef<HTMLDivElement>(null);
   
-  // GSAP animation for marquee
   useEffect(() => {
-    if (marqueeRef.current) {
-      gsap.to(marqueeRef.current, {
-        x: "-100%",
-        duration: 25,
-        repeat: -1,
-        ease: "none"
-      });
-    }
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => {
+      window.removeEventListener('resize', checkMobile);
+    };
   }, []);
 
   useEffect(() => {
@@ -29,11 +31,45 @@ export default function DocsPage() {
     if (contentRef.current) {
       gsap.fromTo(
         contentRef.current,
-        { opacity: 0, y: 10 },
-        { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }
+        { opacity: 0, x: -20 },
+        { opacity: 1, x: 0, duration: 0.5, ease: "power2.out" }
       );
     }
-  }, [activeSection, activeSubSection]);
+  }, [activeSection]);
+
+  // Real-time timestamp
+  useEffect(() => {
+    const updateTimeAgo = () => {
+      const now = new Date();
+      const formattedTime = now.toLocaleString('id-ID', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      });
+      setTimeAgo(formattedTime);
+    };
+
+    updateTimeAgo();
+    const interval = setInterval(updateTimeAgo, 1000);
+    
+    return () => clearInterval(interval);
+  }, []);
+
+  // Marquee animation
+  useEffect(() => {
+    if (marqueeRef.current) {
+      gsap.to(marqueeRef.current, {
+        x: "-100%",
+        duration: 20,
+        ease: "none",
+        repeat: -1
+      });
+    }
+  }, []);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -49,731 +85,186 @@ export default function DocsPage() {
     };
   }, []);
 
-  // Arrow SVG Icon
-  const ArrowIcon = () => (
-    <svg 
-      width="16" 
-      height="16" 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      xmlns="http://www.w3.org/2000/svg"
-      style={{ 
-        display: 'inline-block', 
-        margin: '0 12px',
-        opacity: 0.5,
-        transform: 'rotate(-45deg)'
-      }}
-    >
-      <path 
-        d="M7 17L17 7M17 7H8M17 7V16" 
-        stroke="currentColor" 
-        strokeWidth="1.5" 
-        strokeLinecap="round" 
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-
-  // Navigation Icons
-  const navIcons = {
-    pembuka: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-        <path d="M4 4L20 4M4 12L20 12M4 20L20 20" strokeLinecap="round"/>
-      </svg>
-    ),
-    arsitektur: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-        <path d="M3 21L21 3M9 21L21 9M15 21L21 15M3 15L15 3M3 9L9 3" strokeLinecap="round"/>
-      </svg>
-    ),
-    instalasi: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-        <path d="M4 8L12 3L20 8L12 13L4 8Z M4 14L12 19L20 14" strokeLinecap="round"/>
-      </svg>
-    ),
-    penggunaan: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-        <circle cx="12" cy="12" r="3"/>
-        <path d="M20 12C20 16.4183 16.4183 20 12 20C7.58172 20 4 16.4183 4 12C4 7.58172 7.58172 4 12 4" strokeLinecap="round"/>
-      </svg>
-    ),
-    keamanan: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-        <path d="M12 3L20 7V12C20 16 16 20 12 20C8 20 4 16 4 12V7L12 3Z" strokeLinecap="round"/>
-      </svg>
-    ),
-    troubleshoot: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-        <circle cx="12" cy="12" r="8"/>
-        <path d="M12 8V12M12 16H12.01" strokeLinecap="round"/>
-      </svg>
-    ),
-    fitur: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-        <rect x="3" y="3" width="8" height="8" rx="1"/>
-        <rect x="13" y="3" width="8" height="8" rx="1"/>
-        <rect x="3" y="13" width="8" height="8" rx="1"/>
-        <rect x="13" y="13" width="8" height="8" rx="1"/>
-      </svg>
-    ),
-    api: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-        <path d="M4 4H20V20H4V4Z" strokeLinecap="round"/>
-        <path d="M8 8H16V16H8V8Z" strokeLinecap="round"/>
-        <circle cx="12" cy="12" r="1" fill="white"/>
-      </svg>
-    ),
-    faq: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-        <circle cx="12" cy="12" r="8"/>
-        <path d="M12 16V12M12 8H12.01" strokeLinecap="round"/>
-      </svg>
-    )
-  };
-
   // Data navigasi dengan dropdown untuk pembuka
   const navItems = [
     { 
       id: "pembuka", 
       title: "PEMBUKA",
-      icon: navIcons.pembuka,
       hasDropdown: true,
-      dropdownItems: [
-        { id: "pengantar", title: "PENGANTAR" },
-        { id: "tentang", title: "TENTANG" },
-        { id: "sejarah", title: "SEJARAH" },
-        { id: "visi", title: "VISI" },
-        { id: "misi", title: "MISI" },
-        { id: "filosofi", title: "FILOSOFI" },
-        { id: "tim", title: "TIM PENGEMBANG" },
-        { id: "penutup", title: "PENUTUP" }
-      ]
+      dropdownItems: ["SALAM PEMBUKA", "VISI & MISI", "TENTANG PLATFORM", "SEJARAH", "TIM PENGEMBANG"]
     },
-    { id: "arsitektur", title: "ARSITEKTUR", icon: navIcons.arsitektur },
-    { id: "instalasi", title: "INSTALASI", icon: navIcons.instalasi },
-    { id: "penggunaan", title: "PENGGUNAAN", icon: navIcons.penggunaan },
-    { id: "fitur", title: "FITUR", icon: navIcons.fitur },
-    { id: "api", title: "API", icon: navIcons.api },
-    { id: "keamanan", title: "KEAMANAN", icon: navIcons.keamanan },
-    { id: "troubleshoot", title: "TROUBLESHOOT", icon: navIcons.troubleshoot },
-    { id: "faq", title: "FAQ", icon: navIcons.faq }
+    { id: "arsitektur", title: "ARSITEKTUR" },
+    { id: "instalasi", title: "INSTALASI" },
+    { id: "penggunaan", title: "PENGGUNAAN" },
+    { id: "keamanan", title: "KEAMANAN" },
+    { id: "troubleshoot", title: "TROUBLESHOOT" },
+    { id: "fitur", title: "FITUR" },
+    { id: "api", title: "API REFERENCE" },
+    { id: "integrasi", title: "INTEGRASI" }
   ];
 
-  // Data konten lengkap
+  // Data konten lengkap dan detail
   const contentData = {
     pembuka: {
       title: "PEMBUKA",
-      sections: {
-        pengantar: {
-          title: "PENGANTAR",
-          paragraphs: [
-            "Selamat datang di dokumentasi platform MENURU. Dokumentasi ini disusun untuk memberikan pemahaman komprehensif tentang penggunaan dan pengembangan platform.",
-            "MENURU adalah platform dokumentasi modern yang dirancang untuk memudahkan tim dalam membuat, mengelola, dan mendistribusikan dokumentasi secara efisien.",
-            "Dokumentasi ini mencakup seluruh aspek platform, mulai dari konsep dasar hingga implementasi teknis lanjutan."
-          ]
-        },
-        tentang: {
-          title: "TENTANG MENURU",
-          paragraphs: [
-            "MENURU lahir dari kebutuhan akan platform dokumentasi yang sederhana namun powerful. Nama MENURU berasal dari bahasa Sansekerta yang berarti 'panduan' atau 'petunjuk'.",
-            "Platform ini dikembangkan dengan filosofi bahwa dokumentasi yang baik harus mudah diakses, mudah dipahami, dan mudah dikelola.",
-            "Dengan MENURU, tim dapat berkolaborasi dalam membuat dokumentasi, melacak perubahan, dan mempublikasikan konten dengan workflow yang terstruktur."
-          ]
-        },
-        sejarah: {
-          title: "SEJARAH",
-          items: [
-            "2022 - Ide awal MENURU pertama kali dicetuskan oleh tim developer.",
-            "2023 - Prototype dikembangkan sebagai proyek internal.",
-            "2023 - Program beta diluncurkan dengan 50 perusahaan.",
-            "2024 - MENURU versi 1.0 dirilis secara publik.",
-            "2024 - Pembaruan versi 2.0 dengan fitur kolaborasi real-time.",
-            "2025 - Rencana pengembangan AI-powered documentation."
-          ]
-        },
-        visi: {
-          title: "VISI",
-          paragraphs: [
-            "Menjadi platform dokumentasi terdepan yang memberdayakan setiap individu dan tim untuk berbagi pengetahuan secara efektif."
-          ]
-        },
-        misi: {
-          title: "MISI",
-          items: [
-            "Menyediakan infrastruktur dokumentasi yang intuitif",
-            "Membangun komunitas berbagi pengetahuan yang aktif",
-            "Terus berinovasi dalam teknologi dokumentasi digital",
-            "Menjaga keamanan dan privasi data pengguna",
-            "Mendukung berbagai format dan kebutuhan dokumentasi"
-          ]
-        },
-        filosofi: {
-          title: "FILOSOFI",
-          paragraphs: [
-            "Dokumentasi bukan sekadar catatan, melainkan jembatan antara ide dan realisasi.",
-            "Dokumentasi yang baik dapat mengubah cara orang belajar, bekerja, dan berinovasi."
-          ]
-        },
-        tim: {
-          title: "TIM PENGEMBANG",
-          items: [
-            "Arya Wicaksana - Lead Developer",
-            "Budi Santoso - Backend Architect",
-            "Citra Dewi - Frontend Engineer",
-            "Dian Pratama - DevOps Specialist",
-            "Eka Putri - UI/UX Designer",
-            "Farhan Hakim - Security Engineer"
-          ]
-        },
-        penutup: {
-          title: "PENUTUP",
-          paragraphs: [
-            "Terima kasih telah menggunakan MENURU. Dokumentasi ini akan terus diperbarui.",
-            "Untuk pertanyaan dan saran, silakan hubungi tim kami."
-          ]
-        }
+      description: "Selamat datang di dokumentasi platform MENURU. Platform ini dirancang untuk memberikan pengalaman optimal dalam membaca, menulis, dan mengeksplorasi berbagai jenis konten digital dengan antarmuka yang intuitif dan performa yang handal.",
+      fullContent: {
+        salam: "Assalamu'alaikum Warahmatullahi Wabarakatuh dan Salam Sejahtera bagi kita semua. Selamat datang di platform MENURU - solusi digital modern untuk kebutuhan dokumentasi dan konten Anda.",
+        visiMisi: "Visi: Menjadi platform dokumentasi terdepan yang memberdayakan kreativitas dan produktivitas pengguna di seluruh dunia. Misi: Menyediakan antarmuka yang intuitif, performa yang handal, dan fitur-fitur inovatif untuk memudahkan pengelolaan konten digital.",
+        tentang: "MENURU adalah platform dokumentasi digital yang dikembangkan sejak 2023 oleh tim pengembang berpengalaman. Platform ini menggabungkan kemudahan penggunaan dengan kekuatan teknologi modern untuk menciptakan pengalaman dokumentasi yang tak tertandingi.",
+        sejarah: "Berawal dari kebutuhan internal tim pengembang akan platform dokumentasi yang sederhana namun powerful, MENURU lahir pada tahun 2023. Dalam waktu singkat, platform ini berkembang menjadi solusi dokumentasi pilihan bagi ribuan pengguna di Indonesia.",
+        tim: "Dikembangkan oleh tim yang berdedikasi tinggi dengan latar belakang beragam: pengembang software, desainer UI/UX, technical writer, dan spesialis keamanan siber. Tim kami berkomitmen untuk terus mengembangkan dan meningkatkan platform MENURU."
       }
     },
     arsitektur: {
       title: "ARSITEKTUR",
-      sections: [
-        {
-          sub: "STRUKTUR DASAR",
-          items: [
-            "Frontend: Next.js 14 dengan App Router",
-            "Backend: Node.js + Express.js",
-            "Database: PostgreSQL untuk data utama",
-            "Cache: Redis untuk session dan performa",
-            "Storage: AWS S3 untuk file media"
-          ]
-        },
-        {
-          sub: "INFRASTRUKTUR",
-          items: [
-            "Container: Docker untuk isolasi aplikasi",
-            "Orchestration: Kubernetes untuk scaling",
-            "Load Balancer: NGINX untuk traffic management",
-            "CDN: CloudFront untuk distribusi konten",
-            "Monitoring: Prometheus + Grafana"
-          ]
-        },
-        {
-          sub: "DATA FLOW",
-          items: [
-            "Client request masuk melalui CDN",
-            "Load balancer mendistribusikan ke container",
-            "API Gateway mengarahkan ke service yang sesuai",
-            "Service memproses dengan data dari database",
-            "Response dikirim kembali ke client"
-          ]
-        },
-        {
-          sub: "KEAMANAN ARSITEKTUR",
-          items: [
-            "Network isolation dengan VPC",
-            "Encryption in transit (TLS 1.3)",
-            "Encryption at rest untuk semua data",
-            "WAF untuk proteksi dari serangan web",
-            "Regular security audit"
-          ]
-        }
-      ]
+      description: "Platform MENURU dibangun dengan arsitektur modern yang scalable dan reliable. Menggunakan teknologi terbaru untuk memastikan performa optimal dan keamanan data pengguna dalam berbagai skenario penggunaan.",
+      fullContent: {
+        overview: "Arsitektur MENURU menggunakan pendekatan microservices dengan containerization untuk memastikan skalabilitas dan kemudahan maintenance.",
+        frontend: "Frontend dibangun dengan React.js dan Next.js 14, memanfaatkan server-side rendering untuk performa optimal dan SEO-friendly. State management menggunakan Redux Toolkit dan Context API untuk menangani data kompleks.",
+        backend: "Backend menggunakan Node.js dengan Express.js framework, didukung oleh database PostgreSQL untuk data utama dan Redis untuk caching. API dirancang dengan RESTful principles dan GraphQL untuk fleksibilitas query.",
+        infrastructure: "Infrastruktur di-host pada cloud platform dengan auto-scaling capability. Menggunakan Docker containers dan Kubernetes untuk orchestration, serta CI/CD pipeline untuk deployment otomatis.",
+        performance: "Optimasi performa mencakup code splitting, lazy loading, image optimization, dan CDN integration untuk pengiriman konten yang cepat ke seluruh dunia."
+      }
     },
     instalasi: {
       title: "INSTALASI",
-      methods: [
-        {
-          type: "INSTALASI CEPAT",
-          steps: [
-            "npx create-menuru-app my-docs",
-            "cd my-docs",
-            "npm install",
-            "cp .env.example .env",
-            "npm run dev"
-          ]
-        },
-        {
-          type: "INSTALASI MANUAL",
-          steps: [
-            "git clone https://github.com/menuru/platform.git",
-            "cd platform",
-            "npm install",
-            "npm run build",
-            "npm start"
-          ]
-        },
-        {
-          type: "INSTALASI DOCKER",
-          steps: [
-            "docker pull menuru/platform:latest",
-            "docker run -p 3000:3000 menuru/platform",
-            "docker-compose up -d"
-          ]
-        }
-      ],
-      requirements: [
-        "Node.js 18.0 atau lebih baru",
-        "PostgreSQL 14 atau lebih baru",
-        "Redis 6 atau lebih baru (opsional)",
-        "4GB RAM minimum"
-      ]
+      description: "Proses instalasi platform dirancang sederhana dan cepat. Panduan lengkap tersedia untuk berbagai lingkungan deployment dengan opsi konfigurasi yang fleksibel sesuai kebutuhan pengguna.",
+      fullContent: {
+        prerequisites: "Persyaratan sistem: Node.js 18+, PostgreSQL 14+, Redis 6+, dan minimal 2GB RAM. Disarankan menggunakan sistem operasi Linux (Ubuntu 20.04 atau lebih baru).",
+        quickStart: "Instalasi cepat: clone repository, jalankan 'npm install', konfigurasi environment variables, dan 'npm run dev' untuk development mode.",
+        production: "Untuk production deployment, gunakan Docker: 'docker-compose up -d' atau deploy ke platform seperti Vercel, Netlify, atau cloud providers.",
+        configuration: "Konfigurasi meliputi database connection, API keys, environment variables, dan pengaturan keamanan seperti CORS dan rate limiting.",
+        troubleshooting: "Jika mengalami kendala instalasi, periksa log error, pastikan semua dependensi terinstall, dan verifikasi koneksi database."
+      }
     },
     penggunaan: {
       title: "PENGGUNAAN",
-      categories: [
-        {
-          name: "DASAR",
-          items: [
-            "Membuat workspace baru",
-            "Mengundang anggota tim",
-            "Membuat halaman dokumentasi",
-            "Mengedit konten dengan editor",
-            "Menambahkan gambar dan file"
-          ]
-        },
-        {
-          name: "MENENGAH",
-          items: [
-            "Mengatur struktur navigasi",
-            "Menggunakan template",
-            "Membuat versi dokumentasi",
-            "Mengatur permission pengguna",
-            "Export ke PDF/Markdown"
-          ]
-        },
-        {
-          name: "LANJUTAN",
-          items: [
-            "Custom domain setup",
-            "API integration",
-            "Webhook configuration",
-            "Custom styling dengan CSS",
-            "Backup dan restore"
-          ]
-        },
-        {
-          name: "KOLABORASI",
-          items: [
-            "Real-time editing",
-            "Comments dan mentions",
-            "Review dan approval workflow",
-            "Activity logs",
-            "Team notifications"
-          ]
-        }
-      ],
-      shortcuts: [
-        "Cmd/Ctrl + K - Buka command palette",
-        "Cmd/Ctrl + S - Simpan dokumen",
-        "Cmd/Ctrl + F - Pencarian",
-        "Cmd/Ctrl + B - Toggle sidebar"
-      ]
-    },
-    fitur: {
-      title: "FITUR",
-      list: [
-        {
-          group: "EDITOR",
-          features: [
-            "Rich text editor dengan formatting lengkap",
-            "Markdown support dengan preview real-time",
-            "Code syntax highlighting",
-            "Drag-and-drop image upload",
-            "Table editor dengan styling"
-          ]
-        },
-        {
-          group: "MANAJEMEN",
-          features: [
-            "Folder organization dengan nested structure",
-            "Tagging system untuk kategorisasi",
-            "Search dengan filter advanced",
-            "Bulk operations untuk multiple files",
-            "Version history dengan diff view"
-          ]
-        },
-        {
-          group: "KOLABORASI",
-          features: [
-            "Multi-user editing real-time",
-            "Inline comments dan discussions",
-            "User mentions dengan notifikasi",
-            "Review workflow dengan approval",
-            "Team spaces dengan custom permissions"
-          ]
-        },
-        {
-          group: "INTEGRASI",
-          features: [
-            "Slack integration untuk notifikasi",
-            "GitHub/GitLab sync",
-            "Jira integration",
-            "Custom webhooks untuk events",
-            "REST API dengan rate limiting"
-          ]
-        },
-        {
-          group: "ANALYTICS",
-          features: [
-            "Page views dan unique visitors",
-            "User engagement metrics",
-            "Search analytics",
-            "Team activity reports",
-            "Export analytics ke CSV"
-          ]
-        }
-      ]
-    },
-    api: {
-      title: "API",
-      endpoints: [
-        {
-          method: "GET",
-          path: "/api/v1/documents",
-          desc: "Mendapatkan daftar semua dokumen"
-        },
-        {
-          method: "GET",
-          path: "/api/v1/documents/:id",
-          desc: "Mendapatkan detail dokumen spesifik"
-        },
-        {
-          method: "POST",
-          path: "/api/v1/documents",
-          desc: "Membuat dokumen baru"
-        },
-        {
-          method: "PUT",
-          path: "/api/v1/documents/:id",
-          desc: "Mengupdate dokumen existing"
-        },
-        {
-          method: "DELETE",
-          path: "/api/v1/documents/:id",
-          desc: "Menghapus dokumen"
-        },
-        {
-          method: "GET",
-          path: "/api/v1/folders",
-          desc: "Mendapatkan struktur folder"
-        },
-        {
-          method: "GET",
-          path: "/api/v1/search",
-          desc: "Pencarian dokumen"
-        },
-        {
-          method: "GET",
-          path: "/api/v1/users",
-          desc: "Daftar pengguna dalam workspace"
-        }
-      ],
-      auth: "Bearer token authentication via Authorization header"
+      description: "Platform menyediakan berbagai fitur untuk kebutuhan digital sehari-hari. Antarmuka yang intuitif memudahkan navigasi dan penggunaan tanpa memerlukan pelatihan khusus.",
+      fullContent: {
+        dashboard: "Dashboard utama menampilkan ringkasan aktivitas, statistik penggunaan, dan akses cepat ke fitur-fitur utama. Dapat dikustomisasi sesuai preferensi pengguna.",
+        contentCreation: "Buat konten baru dengan mudah menggunakan editor WYSIWYG yang dilengkapi formatting tools, media embedding, dan template siap pakai.",
+        collaboration: "Fitur kolaborasi memungkinkan multiple users bekerja pada dokumen yang sama secara real-time dengan version control dan comment system.",
+        organization: "Organisasi konten menggunakan folder, tags, dan kategori. Pencarian full-text dengan filter untuk menemukan konten dengan cepat.",
+        export: "Ekspor konten ke berbagai format: PDF, Markdown, HTML, atau Word. Mendukung batch export dan scheduled exports."
+      }
     },
     keamanan: {
       title: "KEAMANAN",
-      categories: [
-        {
-          name: "ENKRIPSI",
-          items: [
-            "TLS 1.3 untuk semua koneksi",
-            "AES-256 untuk data at rest",
-            "End-to-end encryption untuk data sensitif",
-            "Secure key management"
-          ]
-        },
-        {
-          name: "AUTENTIKASI",
-          items: [
-            "Multi-factor authentication (MFA)",
-            "Single Sign-On (SSO) dengan SAML",
-            "OAuth 2.0 / OpenID Connect",
-            "Session management dengan timeout"
-          ]
-        },
-        {
-          name: "AUTORISASI",
-          items: [
-            "Role-based access control (RBAC)",
-            "Granular permissions per dokumen",
-            "IP whitelisting untuk admin",
-            "Audit logs untuk semua akses"
-          ]
-        },
-        {
-          name: "COMPLIANCE",
-          items: [
-            "GDPR compliance untuk Eropa",
-            "SOC 2 Type II certified",
-            "ISO 27001 certified",
-            "Data residency options"
-          ]
-        }
-      ]
+      description: "Keamanan data dan privasi pengguna adalah prioritas utama. Platform menerapkan enkripsi end-to-end dan protokol keamanan terkini untuk melindungi semua informasi yang disimpan.",
+      fullContent: {
+        encryption: "Data dienkripsi menggunakan AES-256 untuk data at-rest dan TLS 1.3 untuk data in-transit. Password di-hash dengan bcrypt dan salt unik.",
+        authentication: "Multi-factor authentication (MFA) dengan dukungan Google Authenticator, SMS, atau email. OAuth2 integration untuk login dengan Google, GitHub, atau enterprise SSO.",
+        authorization: "Role-based access control (RBAC) dengan permission granular. Mendukung team roles dan custom permissions untuk fleksibilitas akses.",
+        audit: "Audit logging mencatat semua aktivitas penting: login attempts, content changes, permission modifications. Log disimpan minimal 90 hari.",
+        compliance: "Platform mematuhi standar keamanan: GDPR, HIPAA, dan ISO 27001. Dilengkapi dengan data backup otomatis dan disaster recovery plan."
+      }
     },
     troubleshoot: {
       title: "TROUBLESHOOT",
-      issues: [
-        {
-          problem: "Tidak bisa login",
-          causes: [
-            "Password salah - reset melalui email",
-            "Akun belum diverifikasi - cek email verifikasi",
-            "Terlalu banyak percobaan - tunggu 15 menit",
-            "Session expired - login ulang"
-          ]
-        },
-        {
-          problem: "Halaman lambat",
-          causes: [
-            "Koneksi internet - cek speed test",
-            "Cache browser - clear cache",
-            "Terlalu banyak konten - split menjadi beberapa halaman",
-            "Gambar besar - kompres sebelum upload"
-          ]
-        },
-        {
-          problem: "Upload gagal",
-          causes: [
-            "File terlalu besar - max 100MB",
-            "Format tidak didukung - gunakan JPG, PNG, PDF",
-            "Storage quota penuh - upgrade paket",
-            "Permission denied - cek role user"
-          ]
-        },
-        {
-          problem: "Search tidak akurat",
-          causes: [
-            "Index belum update - tunggu beberapa menit",
-            "Search terms terlalu umum - gunakan kata spesifik",
-            "Filter terlalu ketat - perluas filter"
-          ]
-        }
-      ]
+      description: "Dokumentasi ini menyediakan solusi untuk masalah umum yang mungkin dihadapi pengguna. Setiap solusi dijelaskan dengan langkah-langkah yang jelas dan mudah diikuti.",
+      fullContent: {
+        commonIssues: "Masalah umum: Loading lambat, error 404, login gagal, data tidak tersimpan, dan rendering issues. Semua memiliki solusi terdokumentasi.",
+        performance: "Jika platform lambat, coba clear cache, kurangi penggunaan browser extensions, atau upgrade koneksi internet. Untuk server, scale resources atau optimasi database.",
+        errors: "Error codes dan penanganannya: 400 (Bad Request) - periksa input data, 401 (Unauthorized) - login ulang, 403 (Forbidden) - cek permissions, 500 (Server Error) - hubungi tim support.",
+        dataRecovery: "Kehilangan data? Cek recycle bin (penyimpanan 30 hari), restore dari backup (tersedia 90 hari), atau hubungi support dengan timestamp kejadian.",
+        contact: "Jika masalah berlanjut, hubungi support melalui: email (support@menuru.com), live chat (24/7), atau buat ticket di portal support. Sertakan screenshot dan deskripsi detail."
+      }
     },
-    faq: {
-      title: "FAQ",
-      questions: [
-        {
-          q: "Apa itu MENURU?",
-          a: "MENURU adalah platform dokumentasi modern untuk tim, memudahkan pembuatan dan pengelolaan dokumentasi secara kolaboratif."
-        },
-        {
-          q: "Berapa biaya berlangganan?",
-          a: "Tersedia free tier dengan 5 user dan 100 dokumen. Paket Pro mulai $15/user/bulan."
-        },
-        {
-          q: "Apakah data saya aman?",
-          a: "Ya, semua data dienkripsi dengan standar industri. Kami memiliki sertifikasi ISO 27001 dan SOC 2 Type II."
-        },
-        {
-          q: "Bisa akses offline?",
-          a: "Saat ini belum, namun fitur offline mode sedang dalam pengembangan."
-        },
-        {
-          q: "Support bahasa apa saja?",
-          a: "UI tersedia dalam Bahasa Indonesia dan Inggris."
-        },
-        {
-          q: "Bisa custom domain?",
-          a: "Ya, fitur custom domain tersedia untuk paket Pro dan Enterprise."
-        },
-        {
-          q: "Ada mobile app?",
-          a: "Saat ini website sudah responsive. Mobile apps sedang dikembangkan."
-        }
-      ]
-    }
-  };
-
-  // Mendapatkan konten berdasarkan section aktif
-  const getCurrentContent = () => {
-    if (activeSection === "pembuka") {
-      return contentData.pembuka.sections[activeSubSection as keyof typeof contentData.pembuka.sections];
-    }
-    return contentData[activeSection as keyof typeof contentData];
-  };
-
-  const currentContent = getCurrentContent();
-
-  // Render content based on structure
-  const renderContent = () => {
-    if (activeSection === "pembuka") {
-      const section = contentData.pembuka.sections[activeSubSection as keyof typeof contentData.pembuka.sections];
-      
-      if ('paragraphs' in section) {
-        return section.paragraphs?.map((p, i) => (
-          <p key={i} style={{ marginBottom: '1.5rem', lineHeight: '1.8' }}>{p}</p>
-        ));
+    fitur: {
+      title: "FITUR",
+      description: "MENURU dilengkapi dengan berbagai fitur canggih untuk memaksimalkan produktivitas dan kreativitas pengguna dalam mengelola konten digital.",
+      fullContent: {
+        editor: "Rich text editor dengan real-time collaboration, comment system, version history, dan AI-powered writing assistance. Mendukung markdown, code blocks, dan embed media.",
+        analytics: "Analytics dashboard menampilkan metrics: page views, user engagement, popular content, dan conversion tracking. Export data ke CSV atau integrasi dengan Google Analytics.",
+        automation: "Workflow automation dengan triggers dan actions. Contoh: auto-publish, email notifications, Slack integration, dan webhook untuk custom automations.",
+        templates: "Library templates untuk berbagai kebutuhan: blog posts, documentation, product manuals, API docs, dan company wikis. Bisa kustom dan share templates.",
+        api: "RESTful API dan GraphQL untuk integrasi dengan aplikasi eksternal. Dokumentasi interaktif dengan Swagger UI dan contoh kode dalam berbagai bahasa."
       }
-      
-      if ('items' in section) {
-        return (section as any).items?.map((item: string, i: number) => (
-          <div key={i} style={{ marginBottom: '0.75rem', opacity: 0.9 }}>• {item}</div>
-        ));
+    },
+    api: {
+      title: "API REFERENCE",
+      description: "Dokumentasi lengkap API untuk pengembang yang ingin mengintegrasikan platform MENURU dengan aplikasi atau layanan eksternal.",
+      fullContent: {
+        authentication: "API menggunakan API keys untuk authentication. Setiap request harus menyertakan header 'X-API-Key'. Dapatkan API key dari dashboard settings.",
+        endpoints: "Endpoints utama: /api/content, /api/users, /api/analytics, /api/search. Semua endpoint mendukung pagination, filtering, dan sorting.",
+        rateLimiting: "Rate limits: 1000 requests per hour untuk free tier, unlimited untuk enterprise. Response headers menunjukkan remaining quota dan reset time.",
+        webhooks: "Webhooks untuk event-driven integrations. Events: content.created, content.updated, user.registered, dan lainnya. Payload dapat dikustomisasi.",
+        sdks: "Official SDKs tersedia untuk JavaScript/TypeScript, Python, PHP, Java, dan Ruby. Library open-source dengan dokumentasi dan contoh penggunaan."
+      }
+    },
+    integrasi: {
+      title: "INTEGRASI",
+      description: "Platform MENURU dapat diintegrasikan dengan berbagai tools dan layanan populer untuk memperluas fungsionalitas dan meningkatkan produktivitas.",
+      fullContent: {
+        cloud: "Integrasi dengan cloud storage: Google Drive, Dropbox, OneDrive, dan AWS S3 untuk backup dan sync konten otomatis.",
+        communication: "Integrasi dengan Slack, Discord, Microsoft Teams untuk notifications dan updates. Dapat mengirim pesan saat konten dibuat atau diupdate.",
+        analytics: "Integrasi dengan Google Analytics, Mixpanel, dan Amplitude untuk tracking lanjutan. Data user behavior dapat dianalisis lebih dalam.",
+        cms: "Integrasi dengan CMS populer: WordPress, Contentful, Strapi untuk sync konten dua arah. Mendukung webhooks untuk real-time updates.",
+        developer: "Developer tools: Git integration untuk version control, CI/CD pipelines untuk auto-deploy, dan monitoring tools seperti Sentry dan Datadog."
       }
     }
-
-    if (activeSection === "arsitektur") {
-      return (contentData.arsitektur as any).sections?.map((section: any, i: number) => (
-        <div key={i} style={{ marginBottom: '2.5rem' }}>
-          <div style={{ fontSize: '1.2rem', fontWeight: '500', marginBottom: '1rem' }}>{section.sub}</div>
-          {section.items?.map((item: string, j: number) => (
-            <div key={j} style={{ marginBottom: '0.5rem', opacity: 0.8 }}>• {item}</div>
-          ))}
-        </div>
-      ));
-    }
-
-    if (activeSection === "instalasi") {
-      return (
-        <>
-          <div style={{ marginBottom: '2rem' }}>
-            <div style={{ fontSize: '1.1rem', fontWeight: '500', marginBottom: '1rem' }}>REQUIREMENTS</div>
-            {(contentData.instalasi as any).requirements?.map((req: string, i: number) => (
-              <div key={i} style={{ marginBottom: '0.5rem', opacity: 0.8 }}>• {req}</div>
-            ))}
-          </div>
-          {(contentData.instalasi as any).methods?.map((method: any, i: number) => (
-            <div key={i} style={{ marginBottom: '2rem' }}>
-              <div style={{ fontSize: '1.1rem', fontWeight: '500', marginBottom: '1rem' }}>{method.type}</div>
-              {method.steps?.map((step: string, j: number) => (
-                <div key={j} style={{ 
-                  fontFamily: 'monospace', 
-                  marginBottom: '0.5rem',
-                  padding: '0.5rem',
-                  backgroundColor: 'rgba(255,255,255,0.03)',
-                  borderRadius: '4px'
-                }}>
-                  $ {step}
-                </div>
-              ))}
-            </div>
-          ))}
-        </>
-      );
-    }
-
-    if (activeSection === "penggunaan") {
-      return (
-        <>
-          {(contentData.penggunaan as any).categories?.map((cat: any, i: number) => (
-            <div key={i} style={{ marginBottom: '2rem' }}>
-              <div style={{ fontSize: '1.1rem', fontWeight: '500', marginBottom: '1rem' }}>{cat.name}</div>
-              {cat.items?.map((item: string, j: number) => (
-                <div key={j} style={{ marginBottom: '0.5rem', opacity: 0.8 }}>• {item}</div>
-              ))}
-            </div>
-          ))}
-          <div style={{ marginTop: '2rem' }}>
-            <div style={{ fontSize: '1.1rem', fontWeight: '500', marginBottom: '1rem' }}>KEYBOARD SHORTCUTS</div>
-            {(contentData.penggunaan as any).shortcuts?.map((shortcut: string, i: number) => (
-              <div key={i} style={{ marginBottom: '0.5rem', fontFamily: 'monospace', opacity: 0.8 }}>{shortcut}</div>
-            ))}
-          </div>
-        </>
-      );
-    }
-
-    if (activeSection === "fitur") {
-      return (contentData.fitur as any).list?.map((group: any, i: number) => (
-        <div key={i} style={{ marginBottom: '2.5rem' }}>
-          <div style={{ fontSize: '1.2rem', fontWeight: '500', marginBottom: '1rem' }}>{group.group}</div>
-          {group.features?.map((feature: string, j: number) => (
-            <div key={j} style={{ marginBottom: '0.5rem', opacity: 0.8 }}>• {feature}</div>
-          ))}
-        </div>
-      ));
-    }
-
-    if (activeSection === "api") {
-      return (
-        <>
-          <div style={{ marginBottom: '2rem' }}>
-            <div style={{ fontSize: '1.1rem', fontWeight: '500', marginBottom: '1rem' }}>AUTHENTICATION</div>
-            <div style={{ opacity: 0.8 }}>{(contentData.api as any).auth}</div>
-          </div>
-          {(contentData.api as any).endpoints?.map((ep: any, i: number) => (
-            <div key={i} style={{ marginBottom: '1.5rem', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '1rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem' }}>
-                <span style={{ fontWeight: '500' }}>{ep.method}</span>
-                <span style={{ fontFamily: 'monospace', opacity: 0.9 }}>{ep.path}</span>
-              </div>
-              <div style={{ opacity: 0.7 }}>{ep.desc}</div>
-            </div>
-          ))}
-        </>
-      );
-    }
-
-    if (activeSection === "keamanan") {
-      return (contentData.keamanan as any).categories?.map((cat: any, i: number) => (
-        <div key={i} style={{ marginBottom: '2rem' }}>
-          <div style={{ fontSize: '1.1rem', fontWeight: '500', marginBottom: '1rem' }}>{cat.name}</div>
-          {cat.items?.map((item: string, j: number) => (
-            <div key={j} style={{ marginBottom: '0.5rem', opacity: 0.8 }}>• {item}</div>
-          ))}
-        </div>
-      ));
-    }
-
-    if (activeSection === "troubleshoot") {
-      return (contentData.troubleshoot as any).issues?.map((issue: any, i: number) => (
-        <div key={i} style={{ marginBottom: '2rem' }}>
-          <div style={{ fontSize: '1.1rem', fontWeight: '500', marginBottom: '0.75rem' }}>{issue.problem}</div>
-          {issue.causes?.map((cause: string, j: number) => (
-            <div key={j} style={{ marginBottom: '0.5rem', opacity: 0.8, marginLeft: '1rem' }}>• {cause}</div>
-          ))}
-        </div>
-      ));
-    }
-
-    if (activeSection === "faq") {
-      return (contentData.faq as any).questions?.map((faq: any, i: number) => (
-        <div key={i} style={{ marginBottom: '1.5rem' }}>
-          <div style={{ fontWeight: '500', marginBottom: '0.25rem' }}>{faq.q}</div>
-          <div style={{ opacity: 0.8 }}>{faq.a}</div>
-        </div>
-      ));
-    }
-
-    return null;
   };
+
+  // Author data
+  const authors = [
+    { name: "Ahmad Fauzi", role: "Lead Developer", avatar: "👨‍💻", contributions: "Full-stack development, system architecture" },
+    { name: "Siti Nurhaliza", role: "Technical Writer", avatar: "✍️", contributions: "Documentation, tutorials, user guides" },
+    { name: "Budi Santoso", role: "UI/UX Designer", avatar: "🎨", contributions: "Interface design, user experience" },
+    { name: "Dewi Lestari", role: "Security Specialist", avatar: "🔒", contributions: "Security protocols, penetration testing" },
+    { name: "Rizki Pratama", role: "DevOps Engineer", avatar: "⚙️", contributions: "Infrastructure, deployment, monitoring" }
+  ];
 
   return (
     <div style={{
       minHeight: '100vh',
-      backgroundColor: '#000000',
-      color: '#ffffff',
+      backgroundColor: 'black',
+      margin: 0,
+      padding: 0,
+      width: '100%',
       display: 'flex',
-      fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, Helvetica, Arial, sans-serif',
-      lineHeight: 1.6
+      fontFamily: 'Helvetica, Arial, sans-serif',
+      color: 'white',
+      cursor: 'default'
     }}>
       
       {/* Left Navigation */}
       <div style={{
         width: '280px',
-        padding: '2rem 1.5rem',
+        padding: '3rem 1.5rem',
         position: 'fixed',
         left: 0,
         top: 0,
         height: '100vh',
+        backgroundColor: 'black',
+        zIndex: 10,
         borderRight: '1px solid rgba(255,255,255,0.1)',
+        display: 'flex',
+        flexDirection: 'column',
         overflowY: 'auto'
       }}>
         <div style={{
-          fontSize: '1.5rem',
-          fontWeight: '500',
+          fontSize: '1.8rem',
+          fontWeight: '800',
           marginBottom: '2.5rem',
-          letterSpacing: '2px'
+          lineHeight: 1,
+          opacity: 0.9,
+          letterSpacing: '-0.5px'
         }}>
           MENURU
         </div>
         
-        <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '0.1rem',
+        }}>
           {navItems.map((item) => (
-            <div key={item.id}>
-              <button
+            <div 
+              key={item.id}
+              style={{ position: 'relative' }}
+            >
+              <div
                 onClick={() => {
                   if (item.hasDropdown) {
                     setShowPembukaDropdown(!showPembukaDropdown);
@@ -783,145 +274,315 @@ export default function DocsPage() {
                   }
                 }}
                 style={{
-                  width: '100%',
-                  textAlign: 'left',
-                  padding: '0.75rem 0.5rem',
-                  background: 'none',
-                  border: 'none',
-                  color: activeSection === item.id ? '#ffffff' : 'rgba(255,255,255,0.5)',
                   fontSize: '0.95rem',
-                  fontWeight: activeSection === item.id ? '500' : '300',
+                  fontWeight: activeSection === item.id ? '700' : '400',
                   cursor: 'pointer',
+                  padding: '0.5rem 0.5rem',
+                  opacity: activeSection === item.id ? 1 : 0.6,
+                  transition: 'all 0.2s ease',
+                  letterSpacing: '0.5px',
+                  lineHeight: '1.2',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '0.75rem',
-                  transition: 'all 0.2s ease'
+                  justifyContent: 'space-between',
+                  backgroundColor: activeSection === item.id ? 'rgba(255,255,255,0.05)' : 'transparent',
+                  borderLeft: activeSection === item.id ? '2px solid white' : '2px solid transparent',
+                  paddingLeft: activeSection === item.id ? '0.3rem' : '0.5rem'
                 }}
                 onMouseEnter={(e) => {
                   if (activeSection !== item.id) {
-                    e.currentTarget.style.color = 'rgba(255,255,255,0.8)';
+                    e.currentTarget.style.opacity = '0.9';
+                    e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.02)';
                   }
                 }}
                 onMouseLeave={(e) => {
                   if (activeSection !== item.id) {
-                    e.currentTarget.style.color = 'rgba(255,255,255,0.5)';
+                    e.currentTarget.style.opacity = '0.6';
+                    e.currentTarget.style.backgroundColor = 'transparent';
                   }
                 }}
               >
-                <span style={{ opacity: 0.5 }}>{item.icon}</span>
                 <span>{item.title}</span>
-                {item.hasDropdown && (
-                  <span style={{ marginLeft: 'auto', fontSize: '0.8rem', opacity: 0.3 }}>▼</span>
-                )}
-              </button>
-
-              {/* Dropdown */}
+                {item.hasDropdown && <span style={{ fontSize: '0.8rem', opacity: 0.5 }}>▼</span>}
+              </div>
+              
+              {/* Dropdown untuk Pembuka */}
               {item.id === "pembuka" && showPembukaDropdown && (
                 <motion.div
                   ref={dropdownRef}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
+                  initial={{ opacity: 0, y: -5 }}
+                  animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.2 }}
-                  style={{ marginLeft: '2.25rem' }}
+                  style={{
+                    position: 'relative',
+                    paddingLeft: '1.2rem',
+                    marginTop: '0.2rem',
+                    marginBottom: '0.2rem'
+                  }}
                 >
-                  {item.dropdownItems?.map((subItem) => (
-                    <button
-                      key={subItem.id}
+                  {item.dropdownItems?.map((dropdownItem, index) => (
+                    <div
+                      key={index}
                       onClick={() => {
+                        console.log(`${dropdownItem} clicked`);
                         setActiveSection("pembuka");
-                        setActiveSubSection(subItem.id);
                         setShowPembukaDropdown(false);
                       }}
                       style={{
-                        width: '100%',
-                        textAlign: 'left',
-                        padding: '0.5rem 0.5rem',
-                        background: 'none',
-                        border: 'none',
-                        color: activeSubSection === subItem.id ? '#ffffff' : 'rgba(255,255,255,0.4)',
                         fontSize: '0.9rem',
-                        fontWeight: activeSubSection === subItem.id ? '500' : '300',
+                        fontWeight: '400',
                         cursor: 'pointer',
-                        transition: 'all 0.2s ease'
+                        padding: '0.3rem 0.5rem',
+                        opacity: 0.6,
+                        transition: 'all 0.2s ease',
+                        letterSpacing: '0.3px',
+                        lineHeight: '1.2',
+                        backgroundColor: 'transparent',
+                        borderLeft: '1px solid rgba(255,255,255,0.1)'
                       }}
-                      onMouseEnter={(e) => e.currentTarget.style.color = 'rgba(255,255,255,0.7)'}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.opacity = '0.9';
+                        e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.02)';
+                      }}
                       onMouseLeave={(e) => {
-                        if (activeSubSection !== subItem.id) {
-                          e.currentTarget.style.color = 'rgba(255,255,255,0.4)';
-                        }
+                        e.currentTarget.style.opacity = '0.6';
+                        e.currentTarget.style.backgroundColor = 'transparent';
                       }}
                     >
-                      {subItem.title}
-                    </button>
+                      {dropdownItem}
+                    </div>
                   ))}
                 </motion.div>
               )}
             </div>
           ))}
-        </nav>
+        </div>
+
+        {/* Author info di sidebar */}
+        <div style={{
+          marginTop: 'auto',
+          paddingTop: '2rem',
+          borderTop: '1px solid rgba(255,255,255,0.1)',
+          fontSize: '0.8rem',
+          opacity: 0.5
+        }}>
+          <div>© 2024 MENURU Docs</div>
+          <div style={{ marginTop: '0.3rem' }}>v1.0.0</div>
+        </div>
       </div>
 
       {/* Main Content */}
       <div style={{
         marginLeft: '280px',
         flex: 1,
-        padding: '2rem 4rem',
-        maxWidth: '1000px'
+        padding: '2rem 3rem 4rem 6rem',
+        minHeight: '100vh',
       }}>
-        
-        {/* Marquee */}
+        {/* Marquee Text */}
         <div style={{
           overflow: 'hidden',
           whiteSpace: 'nowrap',
-          marginBottom: '3rem',
-          padding: '0.75rem 0',
+          marginBottom: '2rem',
+          padding: '0.5rem 0',
           borderTop: '1px solid rgba(255,255,255,0.1)',
           borderBottom: '1px solid rgba(255,255,255,0.1)',
-          fontSize: '0.9rem',
-          letterSpacing: '1px',
-          opacity: 0.6
+          backgroundColor: 'rgba(255,255,255,0.02)'
         }}>
-          <div ref={marqueeRef} style={{ display: 'inline-block' }}>
-            DOCS MENURU <ArrowIcon /> DOKUMENTASI LENGKAP <ArrowIcon /> PANDUAN RESMI <ArrowIcon /> API REFERENCE <ArrowIcon /> BEST PRACTICES <ArrowIcon /> TUTORIAL <ArrowIcon /> FAQ <ArrowIcon />
+          <div ref={marqueeRef} style={{
+            display: 'inline-block',
+            whiteSpace: 'nowrap',
+            paddingRight: '100%'
+          }}>
+            <span style={{ fontSize: '1.1rem', fontWeight: '500' }}>
+              DOCS MENURU • DOKUMENTASI LENGKAP • PANDUAN PENGGUNAAN • API REFERENCE • TUTORIAL • 
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ display: 'inline-block', margin: '0 10px', verticalAlign: 'middle' }}>
+                <path d="M7 17L17 7M17 7H8M17 7V16" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              DOCS MENURU • DOKUMENTASI LENGKAP • PANDUAN PENGGUNAAN • API REFERENCE • TUTORIAL •
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ display: 'inline-block', margin: '0 10px', verticalAlign: 'middle' }}>
+                <path d="M7 17L17 7M17 7H8M17 7V16" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </span>
           </div>
         </div>
 
-        <div ref={contentRef}>
+        {/* Real-time timestamp */}
+        <div style={{
+          marginBottom: '2rem',
+          padding: '0.75rem 1.5rem',
+          backgroundColor: 'rgba(255,255,255,0.03)',
+          borderRadius: '4px',
+          fontSize: '0.9rem',
+          opacity: 0.7,
+          display: 'inline-block'
+        }}>
+          🕒 Terakhir diperbarui: {timeAgo}
+        </div>
+
+        <div ref={contentRef} style={{ maxWidth: '900px' }}>
           
-          {/* Title */}
+          {/* Judul Besar */}
           <div style={{
-            fontSize: '3rem',
-            fontWeight: '400',
-            letterSpacing: '-0.5px',
-            marginBottom: '2.5rem',
-            lineHeight: 1.2
+            fontSize: '4rem',
+            fontWeight: '900',
+            lineHeight: 1.1,
+            letterSpacing: '-1px',
+            marginBottom: '2rem',
+            paddingLeft: '1rem'
           }}>
-            {activeSection === "pembuka" 
-              ? contentData.pembuka.sections[activeSubSection as keyof typeof contentData.pembuka.sections]?.title
-              : contentData[activeSection as keyof typeof contentData]?.title}
+            {contentData[activeSection as keyof typeof contentData]?.title}
           </div>
 
-          {/* Content */}
+          {/* Deskripsi Utama */}
           <div style={{
-            fontSize: '1rem',
+            fontSize: '1.2rem',
+            lineHeight: 1.7,
+            opacity: 0.9,
             fontWeight: '300',
-            maxWidth: '800px'
+            letterSpacing: '0.2px',
+            paddingLeft: '1rem',
+            paddingRight: '2rem',
+            marginBottom: '3rem'
           }}>
-            {renderContent()}
+            {contentData[activeSection as keyof typeof contentData]?.description}
           </div>
 
-          {/* Footer */}
+          {/* Konten Lengkap */}
+          <div style={{
+            paddingLeft: '1rem',
+            paddingRight: '2rem'
+          }}>
+            {Object.entries(contentData[activeSection as keyof typeof contentData]?.fullContent || {}).map(([key, value]) => (
+              <motion.div
+                key={key}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                style={{
+                  marginBottom: '2.5rem'
+                }}
+              >
+                <div style={{
+                  fontSize: '1.5rem',
+                  fontWeight: '600',
+                  marginBottom: '1rem',
+                  opacity: 0.9,
+                  textTransform: 'capitalize',
+                  borderLeft: '3px solid white',
+                  paddingLeft: '1rem'
+                }}>
+                  {key.replace(/([A-Z])/g, ' $1').trim()}
+                </div>
+                <div style={{
+                  fontSize: '1rem',
+                  lineHeight: 1.8,
+                  opacity: 0.8,
+                  fontWeight: '300'
+                }}>
+                  {value}
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Authors Section */}
           <div style={{
             marginTop: '4rem',
-            paddingTop: '2rem',
+            padding: '2rem 1rem',
             borderTop: '1px solid rgba(255,255,255,0.1)',
-            fontSize: '0.85rem',
-            opacity: 0.4,
-            display: 'flex',
-            justifyContent: 'space-between'
+            borderBottom: '1px solid rgba(255,255,255,0.1)',
+            backgroundColor: 'rgba(255,255,255,0.02)'
           }}>
-            <span>© 2024 MENURU</span>
-            <span>Tim Pengembang MENURU</span>
+            <div style={{
+              fontSize: '1.3rem',
+              fontWeight: '600',
+              marginBottom: '1.5rem',
+              opacity: 0.9
+            }}>
+              TIM PENGEMBANG
+            </div>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+              gap: '1.5rem'
+            }}>
+              {authors.map((author, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.3, delay: index * 0.1 }}
+                  style={{
+                    padding: '1rem',
+                    backgroundColor: 'rgba(255,255,255,0.03)',
+                    borderRadius: '4px'
+                  }}
+                >
+                  <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>{author.avatar}</div>
+                  <div style={{ fontWeight: '600', marginBottom: '0.2rem' }}>{author.name}</div>
+                  <div style={{ fontSize: '0.9rem', opacity: 0.6, marginBottom: '0.5rem' }}>{author.role}</div>
+                  <div style={{ fontSize: '0.8rem', opacity: 0.5 }}>{author.contributions}</div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+
+          {/* Additional Info */}
+          <div style={{
+            marginTop: '3rem',
+            paddingLeft: '1rem',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))',
+            gap: '2rem'
+          }}>
+            <div>
+              <div style={{
+                fontSize: '0.9rem',
+                opacity: 0.5,
+                letterSpacing: '0.5px',
+                marginBottom: '0.5rem'
+              }}>
+                DOKUMENTASI TERAKHIR DIPERBARUI
+              </div>
+              <div style={{
+                fontSize: '1.1rem',
+                fontWeight: '500'
+              }}>
+                Desember 2024
+              </div>
+            </div>
+            <div>
+              <div style={{
+                fontSize: '0.9rem',
+                opacity: 0.5,
+                letterSpacing: '0.5px',
+                marginBottom: '0.5rem'
+              }}>
+                VERSI PLATFORM
+              </div>
+              <div style={{
+                fontSize: '1.1rem',
+                fontWeight: '500'
+              }}>
+                1.0.0 (Stable)
+              </div>
+            </div>
+            <div>
+              <div style={{
+                fontSize: '0.9rem',
+                opacity: 0.5,
+                letterSpacing: '0.5px',
+                marginBottom: '0.5rem'
+              }}>
+                LISENSI
+              </div>
+              <div style={{
+                fontSize: '1.1rem',
+                fontWeight: '500'
+              }}>
+                MIT License
+              </div>
+            </div>
           </div>
         </div>
       </div>
