@@ -450,8 +450,8 @@ export default function DocsPage() {
     </svg>
   );
 
-  // Verified Badge - Design persis Instagram (lingkaran biru dengan centang putih)
-  const VerifiedBadgeInstagram = () => (
+  // Instagram Verified Badge - Persis seperti di Instagram
+  const InstagramVerifiedBadge = () => (
     <svg 
       width="18" 
       height="18" 
@@ -464,57 +464,7 @@ export default function DocsPage() {
         verticalAlign: 'middle',
       }}
     >
-      <circle cx="12" cy="12" r="10" fill="#3897F0" /> {/* Biru Instagram */}
-      <path 
-        d="M7 12L10 15L17 8" 
-        stroke="white" 
-        strokeWidth="2.5" 
-        strokeLinecap="round" 
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-
-  // Verified Badge - Design persis Twitter/X (lingkaran biru dengan centang putih)
-  const VerifiedBadgeTwitter = () => (
-    <svg 
-      width="18" 
-      height="18" 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      xmlns="http://www.w3.org/2000/svg"
-      style={{
-        marginLeft: '0.35rem',
-        display: 'inline-block',
-        verticalAlign: 'middle',
-      }}
-    >
-      <circle cx="12" cy="12" r="10" fill="#1DA1F2" /> {/* Biru Twitter */}
-      <path 
-        d="M8 12L11 15L16 9" 
-        stroke="white" 
-        strokeWidth="2.5" 
-        strokeLinecap="round" 
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-
-  // Verified Badge - Design persis yang sering dipakai di berbagai platform
-  const VerifiedBadge = () => (
-    <svg 
-      width="18" 
-      height="18" 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      xmlns="http://www.w3.org/2000/svg"
-      style={{
-        marginLeft: '0.35rem',
-        display: 'inline-block',
-        verticalAlign: 'middle',
-      }}
-    >
-      <circle cx="12" cy="12" r="10" fill="#1D9BF0" /> {/* Biru cerah khas verified */}
+      <circle cx="12" cy="12" r="10" fill="#3897F0" />
       <path 
         d="M7 12L10 15L17 8" 
         stroke="white" 
@@ -899,7 +849,7 @@ export default function DocsPage() {
             {currentContent.title}
           </motion.div>
 
-          {/* Author dengan Verified Badge (Instagram/Twitter style) dan Info Update */}
+          {/* Author dengan Instagram Verified Badge di dekat nama */}
           {isClient && currentDateTime && (
             <div style={{
               paddingLeft: '1.5rem',
@@ -917,7 +867,7 @@ export default function DocsPage() {
                   <circle cx="12" cy="7" r="4" />
                 </svg>
                 <span style={{ opacity: 0.8, fontSize: '0.95rem' }}>{currentAuthor.name}</span>
-                {currentAuthor.verified && <VerifiedBadge />}
+                {currentAuthor.verified && <InstagramVerifiedBadge />}
                 <span style={{ opacity: 0.5, fontSize: '0.85rem', marginLeft: '0.25rem' }}>({currentAuthor.role})</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
@@ -940,7 +890,7 @@ export default function DocsPage() {
             {renderContent()}
           </div>
 
-          {/* Footer dengan verified badge juga */}
+          {/* Footer dengan Instagram verified badge */}
           {isClient && currentDateTime && (
             <motion.div
               initial={{ opacity: 0 }}
@@ -969,7 +919,7 @@ export default function DocsPage() {
                 <div style={{ fontSize: '0.8rem', opacity: 0.4, marginBottom: '0.5rem', color: 'white' }}>AUTHOR</div>
                 <div style={{ fontSize: '0.95rem', opacity: 0.8, color: 'white', display: 'flex', alignItems: 'center' }}>
                   {currentAuthor.name}
-                  <VerifiedBadge />
+                  <InstagramVerifiedBadge />
                 </div>
               </div>
               <div>
