@@ -8,6 +8,7 @@ import gsap from "gsap";
 interface Author {
   name: string;
   role: string;
+  verified: boolean;
 }
 
 // Definisikan tipe untuk konten
@@ -175,7 +176,7 @@ export default function DocsPage() {
     { id: "troubleshoot", title: "TROUBLESHOOT" }
   ];
 
-  // Data konten
+  // Data konten (sama seperti sebelumnya)
   const contentData: Record<string, ContentItem> = {
     salam: {
       title: "SALAM PEMBUKA",
@@ -392,18 +393,18 @@ export default function DocsPage() {
     }
   };
 
-  // Semua author adalah Farid Ardiansyah
+  // Semua author adalah Farid Ardiansyah dengan verified badge
   const authors: Record<string, Author> = {
-    salam: { name: "Farid Ardiansyah", role: "Lead Documentation" },
-    tentang: { name: "Farid Ardiansyah", role: "Lead Documentation" },
-    "visi-misi": { name: "Farid Ardiansyah", role: "Lead Documentation" },
-    "fitur-utama": { name: "Farid Ardiansyah", role: "Lead Documentation" },
-    penutup: { name: "Farid Ardiansyah", role: "Lead Documentation" },
-    arsitektur: { name: "Farid Ardiansyah", role: "Lead Documentation" },
-    instalasi: { name: "Farid Ardiansyah", role: "Lead Documentation" },
-    penggunaan: { name: "Farid Ardiansyah", role: "Lead Documentation" },
-    keamanan: { name: "Farid Ardiansyah", role: "Lead Documentation" },
-    troubleshoot: { name: "Farid Ardiansyah", role: "Lead Documentation" }
+    salam: { name: "Farid Ardiansyah", role: "Lead Documentation", verified: true },
+    tentang: { name: "Farid Ardiansyah", role: "Lead Documentation", verified: true },
+    "visi-misi": { name: "Farid Ardiansyah", role: "Lead Documentation", verified: true },
+    "fitur-utama": { name: "Farid Ardiansyah", role: "Lead Documentation", verified: true },
+    penutup: { name: "Farid Ardiansyah", role: "Lead Documentation", verified: true },
+    arsitektur: { name: "Farid Ardiansyah", role: "Lead Documentation", verified: true },
+    instalasi: { name: "Farid Ardiansyah", role: "Lead Documentation", verified: true },
+    penggunaan: { name: "Farid Ardiansyah", role: "Lead Documentation", verified: true },
+    keamanan: { name: "Farid Ardiansyah", role: "Lead Documentation", verified: true },
+    troubleshoot: { name: "Farid Ardiansyah", role: "Lead Documentation", verified: true }
   };
 
   const getCurrentAuthor = useCallback((): Author => {
@@ -449,6 +450,39 @@ export default function DocsPage() {
     </svg>
   );
 
+  // Ikon Verified Badge (seperti Instagram/Twitter)
+  const VerifiedBadge = () => (
+    <svg 
+      width="18" 
+      height="18" 
+      viewBox="0 0 24 24" 
+      fill="none" 
+      xmlns="http://www.w3.org/2000/svg"
+      style={{
+        marginLeft: '0.35rem',
+        display: 'inline-block',
+        verticalAlign: 'middle',
+        color: '#1DA1F2' // Warna biru Twitter/Instagram
+      }}
+    >
+      <path 
+        d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" 
+        stroke="currentColor" 
+        strokeWidth="2" 
+        strokeLinecap="round" 
+        strokeLinejoin="round"
+        fill="#1DA1F2"
+      />
+      <path 
+        d="M9 12L11 14L15 10" 
+        stroke="white" 
+        strokeWidth="2" 
+        strokeLinecap="round" 
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+
   const PlusIcon = ({ isOpen }: { isOpen: boolean }) => (
     <svg 
       width="16" 
@@ -472,7 +506,7 @@ export default function DocsPage() {
     </svg>
   );
 
-  // Fungsi untuk merender konten dengan aman (tanpa error #31)
+  // Fungsi untuk merender konten dengan aman
   const renderContentSafely = (content: any): React.ReactNode => {
     // Handle string
     if (typeof content === 'string') {
@@ -765,7 +799,7 @@ export default function DocsPage() {
         width: 'calc(100% - 280px)'
       }}>
         
-        {/* Marquee Text dengan Panah - Teks Normal (tidak tebal) */}
+        {/* Marquee Text dengan Panah - Teks Normal */}
         <div style={{
           position: 'fixed',
           top: 0,
@@ -786,7 +820,7 @@ export default function DocsPage() {
               gap: '0',
               color: 'white',
               fontSize: '1.2rem',
-              fontWeight: '400', // Normal, tidak bold
+              fontWeight: '400',
               letterSpacing: '0.5px'
             }}
           >
@@ -823,7 +857,7 @@ export default function DocsPage() {
             {currentContent.title}
           </motion.div>
 
-          {/* Author dan Info Update */}
+          {/* Author dengan Verified Badge dan Info Update */}
           {isClient && currentDateTime && (
             <div style={{
               paddingLeft: '1.5rem',
@@ -841,7 +875,8 @@ export default function DocsPage() {
                   <circle cx="12" cy="7" r="4" />
                 </svg>
                 <span style={{ opacity: 0.8, fontSize: '0.95rem' }}>{currentAuthor.name}</span>
-                <span style={{ opacity: 0.5, fontSize: '0.85rem' }}>({currentAuthor.role})</span>
+                {currentAuthor.verified && <VerifiedBadge />}
+                <span style={{ opacity: 0.5, fontSize: '0.85rem', marginLeft: '0.25rem' }}>({currentAuthor.role})</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
@@ -863,7 +898,7 @@ export default function DocsPage() {
             {renderContent()}
           </div>
 
-          {/* Footer */}
+          {/* Footer dengan verified badge juga */}
           {isClient && currentDateTime && (
             <motion.div
               initial={{ opacity: 0 }}
@@ -890,7 +925,10 @@ export default function DocsPage() {
               </div>
               <div>
                 <div style={{ fontSize: '0.8rem', opacity: 0.4, marginBottom: '0.5rem', color: 'white' }}>AUTHOR</div>
-                <div style={{ fontSize: '0.95rem', opacity: 0.8, color: 'white' }}>{currentAuthor.name}</div>
+                <div style={{ fontSize: '0.95rem', opacity: 0.8, color: 'white', display: 'flex', alignItems: 'center' }}>
+                  {currentAuthor.name}
+                  <VerifiedBadge />
+                </div>
               </div>
               <div>
                 <div style={{ fontSize: '0.8rem', opacity: 0.4, marginBottom: '0.5rem', color: 'white' }}>BUILD</div>
