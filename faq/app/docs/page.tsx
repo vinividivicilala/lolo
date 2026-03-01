@@ -451,37 +451,36 @@ export default function DocsPage() {
   );
 
 
-const InstagramVerifiedBadge = () => (
-  <svg 
-    width="18" 
-    height="18" 
-    viewBox="0 0 24 24" 
-    fill="none" 
+
+const InstagramVerifiedBadge = ({ size = 16 }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 40 40"
     xmlns="http://www.w3.org/2000/svg"
     style={{
-      marginLeft: '0.35rem',
-      display: 'inline-block',
-      verticalAlign: 'middle',
+      marginLeft: "4px",
+      display: "inline-block",
+      verticalAlign: "-3px",
     }}
   >
-    {/* Bentuk Bintang 12 Sudut (Starburst) - Sesuai Foto */}
-    <path 
-      d="M12 2L13.8 5.5L17.5 4.5L15.5 8.5L19.5 10L15.5 11.5L17.5 15.5L13.8 14.5L12 18L10.2 14.5L6.5 15.5L8.5 11.5L4.5 10L8.5 8.5L6.5 4.5L10.2 5.5L12 2Z" 
-      fill="#4DA6FF"
+    {/* Smooth Instagram Burst Shape */}
+    <path
+      fill="#0095F6"
+      d="M20 0.8l4.3 5 6.3-1.4 1.4 6.3 5 4.3-5 4.3-1.4 6.3-6.3-1.4-4.3 5-4.3-5-6.3 1.4-1.4-6.3-5-4.3 5-4.3 1.4-6.3 6.3 1.4L20 0.8z"
     />
-    {/* Checkmark Putih Tebal */}
-    <path 
-      d="M7.5 12L10.5 15L16.5 9" 
-      stroke="white" 
-      strokeWidth="2.5" 
-      strokeLinecap="round" 
+
+    {/* Instagram Check */}
+    <path
+      d="M14.5 20.5l4 4 7.5-7.5"
+      stroke="#ffffff"
+      strokeWidth="3"
+      fill="none"
+      strokeLinecap="round"
       strokeLinejoin="round"
     />
   </svg>
 );
-
-
-
 
 
 
@@ -945,6 +944,7 @@ const InstagramVerifiedBadge = () => (
     </div>
   );
 }
+
 
 
 
