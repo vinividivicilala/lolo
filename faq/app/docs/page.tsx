@@ -451,38 +451,50 @@ export default function DocsPage() {
   );
 
 
-
 const InstagramVerifiedBadge = ({ size = 16 }) => (
   <svg
     width={size}
     height={size}
-    viewBox="0 0 40 40"
+    viewBox="0 0 24 24"
     xmlns="http://www.w3.org/2000/svg"
     style={{
       marginLeft: "4px",
       display: "inline-block",
-      verticalAlign: "-3px",
+      verticalAlign: "-2px",
     }}
   >
-    {/* Smooth Instagram Burst Shape */}
+    {/* Rounded 8-point shape (lebih gemuk & smooth) */}
     <path
       fill="#0095F6"
-      d="M20 0.8l4.3 5 6.3-1.4 1.4 6.3 5 4.3-5 4.3-1.4 6.3-6.3-1.4-4.3 5-4.3-5-6.3 1.4-1.4-6.3-5-4.3 5-4.3 1.4-6.3 6.3 1.4L20 0.8z"
+      d="
+        M12 2.2
+        C13.6 3.8 16.2 3.8 17.8 2.2
+        C18.6 3.8 20.2 5.4 21.8 6.2
+        C20.2 7.8 20.2 10.4 21.8 12
+        C20.2 13.6 20.2 16.2 21.8 17.8
+        C20.2 18.6 18.6 20.2 17.8 21.8
+        C16.2 20.2 13.6 20.2 12 21.8
+        C10.4 20.2 7.8 20.2 6.2 21.8
+        C5.4 20.2 3.8 18.6 2.2 17.8
+        C3.8 16.2 3.8 13.6 2.2 12
+        C3.8 10.4 3.8 7.8 2.2 6.2
+        C3.8 5.4 5.4 3.8 6.2 2.2
+        C7.8 3.8 10.4 3.8 12 2.2
+        Z
+      "
     />
 
-    {/* Instagram Check */}
+    {/* Check proporsional */}
     <path
-      d="M14.5 20.5l4 4 7.5-7.5"
-      stroke="#ffffff"
-      strokeWidth="3"
+      d="M9.2 12.3l2 2 4.6-4.6"
+      stroke="white"
+      strokeWidth="2"
       fill="none"
       strokeLinecap="round"
       strokeLinejoin="round"
     />
   </svg>
 );
-
-
 
 
   
@@ -944,6 +956,7 @@ const InstagramVerifiedBadge = ({ size = 16 }) => (
     </div>
   );
 }
+
 
 
 
