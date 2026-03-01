@@ -450,7 +450,7 @@ export default function DocsPage() {
     </svg>
   );
 
-// Instagram Verified Badge - Shape persis seperti Instagram asli
+
 const InstagramVerifiedBadge = () => (
   <svg 
     width="18" 
@@ -464,22 +464,29 @@ const InstagramVerifiedBadge = () => (
       verticalAlign: 'middle',
     }}
   >
-    {/* Shape bintang bergigi (12 points) */}
+    {/* Bentuk Bintang 12 Sudut (Starburst) - Sesuai Foto */}
     <path 
-      d="M12 2L13.5 6.5L18 5L16.5 9.5L21 11L16.5 12.5L18 17L13.5 15.5L12 20L10.5 15.5L6 17L7.5 12.5L3 11L7.5 9.5L6 5L10.5 6.5L12 2Z" 
-      fill="#3897F0"
+      d="M12 2L13.8 5.5L17.5 4.5L15.5 8.5L19.5 10L15.5 11.5L17.5 15.5L13.8 14.5L12 18L10.2 14.5L6.5 15.5L8.5 11.5L4.5 10L8.5 8.5L6.5 4.5L10.2 5.5L12 2Z" 
+      fill="#4DA6FF"
     />
-    {/* Checkmark putih */}
+    {/* Checkmark Putih Tebal */}
     <path 
       d="M7.5 12L10.5 15L16.5 9" 
       stroke="white" 
-      strokeWidth="2" 
+      strokeWidth="2.5" 
       strokeLinecap="round" 
       strokeLinejoin="round"
     />
   </svg>
 );
 
+
+
+
+
+
+
+  
   const PlusIcon = ({ isOpen }: { isOpen: boolean }) => (
     <svg 
       width="16" 
@@ -938,5 +945,6 @@ const InstagramVerifiedBadge = () => (
     </div>
   );
 }
+
 
 
