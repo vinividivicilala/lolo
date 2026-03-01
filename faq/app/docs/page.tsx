@@ -450,30 +450,33 @@ export default function DocsPage() {
     </svg>
   );
 
-  // Instagram Verified Badge - Persis seperti di Instagram
-  const InstagramVerifiedBadge = () => (
-    <svg 
-      width="18" 
-      height="18" 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      xmlns="http://www.w3.org/2000/svg"
-      style={{
-        marginLeft: '0.35rem',
-        display: 'inline-block',
-        verticalAlign: 'middle',
-      }}
-    >
-      <circle cx="12" cy="12" r="10" fill="#3897F0" />
-      <path 
-        d="M7 12L10 15L17 8" 
-        stroke="white" 
-        strokeWidth="2.5" 
-        strokeLinecap="round" 
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
+const InstagramVerifiedBadge = () => (
+  <svg 
+    width="18" 
+    height="18" 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    xmlns="http://www.w3.org/2000/svg"
+    style={{
+      marginLeft: '0.35rem',
+      display: 'inline-block',
+      verticalAlign: 'middle',
+    }}
+  >
+    {/* Shape dengan rounded edges */}
+    <path 
+      d="M12.0001 2.00684L13.6901 6.26684L18.0001 5.00684L16.5001 9.50684L21.0001 11.0068L16.5001 12.5068L18.0001 17.0068L13.6901 15.7468L12.0001 20.0068L10.3101 15.7468L6.00012 17.0068L7.50012 12.5068L3.00012 11.0068L7.50012 9.50684L6.00012 5.00684L10.3101 6.26684L12.0001 2.00684Z" 
+      fill="#3897F0"
+    />
+    <path 
+      d="M7.5 12L10.5 15L16.5 9" 
+      stroke="white" 
+      strokeWidth="2" 
+      strokeLinecap="round" 
+      strokeLinejoin="round"
+    />
+  </svg>
+);
 
   const PlusIcon = ({ isOpen }: { isOpen: boolean }) => (
     <svg 
@@ -933,3 +936,4 @@ export default function DocsPage() {
     </div>
   );
 }
+
