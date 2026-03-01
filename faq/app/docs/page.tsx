@@ -450,6 +450,7 @@ export default function DocsPage() {
     </svg>
   );
 
+// Instagram Verified Badge - Shape persis seperti Instagram asli
 const InstagramVerifiedBadge = () => (
   <svg 
     width="18" 
@@ -463,11 +464,12 @@ const InstagramVerifiedBadge = () => (
       verticalAlign: 'middle',
     }}
   >
-    {/* Shape dengan rounded edges */}
+    {/* Shape bintang bergigi (12 points) */}
     <path 
-      d="M12.0001 2.00684L13.6901 6.26684L18.0001 5.00684L16.5001 9.50684L21.0001 11.0068L16.5001 12.5068L18.0001 17.0068L13.6901 15.7468L12.0001 20.0068L10.3101 15.7468L6.00012 17.0068L7.50012 12.5068L3.00012 11.0068L7.50012 9.50684L6.00012 5.00684L10.3101 6.26684L12.0001 2.00684Z" 
+      d="M12 2L13.5 6.5L18 5L16.5 9.5L21 11L16.5 12.5L18 17L13.5 15.5L12 20L10.5 15.5L6 17L7.5 12.5L3 11L7.5 9.5L6 5L10.5 6.5L12 2Z" 
       fill="#3897F0"
     />
+    {/* Checkmark putih */}
     <path 
       d="M7.5 12L10.5 15L16.5 9" 
       stroke="white" 
@@ -936,4 +938,5 @@ const InstagramVerifiedBadge = () => (
     </div>
   );
 }
+
 
