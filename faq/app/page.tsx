@@ -224,6 +224,9 @@ export default function HomePage(): React.JSX.Element {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [isLoadingEvents, setIsLoadingEvents] = useState(false);
 
+  // State untuk Note Overlay (Halaman Note dari kiri ke kanan)
+  const [showNoteOverlay, setShowNoteOverlay] = useState(false);
+
   const headerRef = useRef<HTMLDivElement>(null);
   const topNavRef = useRef<HTMLDivElement>(null);
   const topicContainerRef = useRef<HTMLDivElement>(null);
@@ -249,6 +252,9 @@ export default function HomePage(): React.JSX.Element {
 
   // Ref untuk modal kalender
   const calendarModalRef = useRef<HTMLDivElement>(null);
+
+  // Ref untuk Note Overlay
+  const noteOverlayRef = useRef<HTMLDivElement>(null);
 
 // Tambahkan state ini di dalam component HomePage (setelah state lainnya)
 const [openSection, setOpenSection] = useState<string | null>(null);
@@ -1370,7 +1376,7 @@ setIsLoadingEvents(false);
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
       // Biarkan scroll normal jika tidak dalam modal
-      if (!showUserProfileModal && !showMenuruFullPage && !showPhotoFullPage && !showCalendarModal) {
+      if (!showUserProfileModal && !showMenuruFullPage && !showPhotoFullPage && !showCalendarModal && !showNoteOverlay) {
         return;
       }
       
@@ -1392,7 +1398,7 @@ setIsLoadingEvents(false);
       document.removeEventListener('wheel', handleWheel);
       document.removeEventListener('mousedown', handleMouseDown);
     };
-  }, [showUserProfileModal, showMenuruFullPage, showPhotoFullPage, showCalendarModal]);
+  }, [showUserProfileModal, showMenuruFullPage, showPhotoFullPage, showCalendarModal, showNoteOverlay]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -1412,6 +1418,9 @@ setIsLoadingEvents(false);
       if (calendarModalRef.current && !calendarModalRef.current.contains(event.target as Node)) {
         setShowCalendarModal(false);
         setSelectedDate(null);
+      }
+      if (noteOverlayRef.current && !noteOverlayRef.current.contains(event.target as Node)) {
+        setShowNoteOverlay(false);
       }
     };
 
@@ -1501,6 +1510,15 @@ setIsLoadingEvents(false);
       });
     }
   }, [showMenuOverlay]);
+
+  // Handler untuk Note Overlay
+  const handleNoteClick = () => {
+    setShowNoteOverlay(true);
+  };
+
+  const handleCloseNoteOverlay = () => {
+    setShowNoteOverlay(false);
+  };
 
   // Fungsi untuk generate angka acak
   const generateRandomNumber = (): number => {
@@ -1654,6 +1672,9 @@ setIsLoadingEvents(false);
           setShowCalendarModal(false);
           setSelectedDate(null);
         }
+        if (showNoteOverlay) {
+          setShowNoteOverlay(false);
+        }
       }
     };
 
@@ -1678,7 +1699,7 @@ setIsLoadingEvents(false);
       }
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
-  }, [isMobile, showMenuruFullPage, showPhotoFullPage, showUserDropdown, showLogoutModal, showMenuOverlay, showNotification, showUserProfileModal, showDeleteAccountModal, showCalendarModal]);
+  }, [isMobile, showMenuruFullPage, showPhotoFullPage, showUserDropdown, showLogoutModal, showMenuOverlay, showNotification, showUserProfileModal, showDeleteAccountModal, showCalendarModal, showNoteOverlay]);
 
   // Animasi GSAP untuk tanda + di tombol Menuru
   useEffect(() => {
@@ -2119,6 +2140,401 @@ setIsLoadingEvents(false);
           Loading events...
         </div>
       )}
+
+      {/* Note Overlay - Halaman Note dari Kiri ke Kanan */}
+      <AnimatePresence>
+        {showNoteOverlay && (
+          <motion.div
+            ref={noteOverlayRef}
+            initial={{ x: '-100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '-100%' }}
+            transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              backgroundColor: 'rgba(0, 0, 0, 0.98)',
+              zIndex: 10003,
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'hidden',
+              borderRight: '1px solid rgba(255, 255, 255, 0.2)'
+            }}
+          >
+            {/* Header Note Overlay */}
+            <div style={{
+              padding: isMobile ? '1.5rem' : '2rem',
+              borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexShrink: 0
+            }}>
+              <h2 style={{
+                color: 'white',
+                fontSize: isMobile ? '1.8rem' : '2.5rem',
+                fontWeight: '300',
+                margin: 0,
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                letterSpacing: '1px'
+              }}>
+                Note Topics
+              </h2>
+              
+              <motion.button
+                onClick={handleCloseNoteOverlay}
+                style={{
+                  backgroundColor: 'transparent',
+                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                  color: 'white',
+                  width: '40px',
+                  height: '40px',
+                  borderRadius: '50%',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '1.5rem',
+                  fontFamily: 'Helvetica, Arial, sans-serif'
+                }}
+                whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+              >
+                ×
+              </motion.button>
+            </div>
+
+            {/* Konten Note Overlay - Daftar Topik Note (Bayangan/Placeholder) */}
+            <div style={{
+              flex: 1,
+              overflowY: 'auto',
+              padding: isMobile ? '2rem 1.5rem' : '3rem',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '2rem'
+            }}>
+              {/* Catatan Pribadi Section */}
+              <div>
+                <h3 style={{
+                  color: 'white',
+                  fontSize: isMobile ? '1.5rem' : '2rem',
+                  fontWeight: '300',
+                  margin: '0 0 1.5rem 0',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  letterSpacing: '0.5px',
+                  borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+                  paddingBottom: '0.5rem'
+                }}>
+                  Catatan Pribadi
+                </h3>
+                
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+                  gap: '1.5rem'
+                }}>
+                  {[1, 2, 3, 4].map((item) => (
+                    <motion.div
+                      key={`personal-${item}`}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: item * 0.1 }}
+                      style={{
+                        backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        borderRadius: '12px',
+                        padding: '1.5rem',
+                        cursor: 'pointer',
+                        transition: 'all 0.3s ease'
+                      }}
+                      whileHover={{ 
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        borderColor: 'rgba(255, 255, 255, 0.2)',
+                        y: -2
+                      }}
+                    >
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.8rem',
+                        marginBottom: '1rem'
+                      }}>
+                        <div style={{
+                          width: '32px',
+                          height: '32px',
+                          borderRadius: '50%',
+                          backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '1rem',
+                          color: 'white'
+                        }}>
+                          📝
+                        </div>
+                        <span style={{
+                          color: 'rgba(255, 255, 255, 0.6)',
+                          fontSize: '0.8rem',
+                          fontFamily: 'monospace'
+                        }}>
+                          #{item}
+                        </span>
+                      </div>
+                      <h4 style={{
+                        color: 'white',
+                        fontSize: '1.2rem',
+                        fontWeight: '400',
+                        margin: '0 0 0.5rem 0',
+                        fontFamily: 'Helvetica, Arial, sans-serif'
+                      }}>
+                        {item === 1 && 'Creative Process'}
+                        {item === 2 && 'Design Thinking'}
+                        {item === 3 && 'UX Research'}
+                        {item === 4 && 'Development Notes'}
+                      </h4>
+                      <p style={{
+                        color: 'rgba(255, 255, 255, 0.7)',
+                        fontSize: '0.9rem',
+                        margin: 0,
+                        lineHeight: 1.5,
+                        fontFamily: 'Helvetica, Arial, sans-serif'
+                      }}>
+                        {item === 1 && 'Exploring creative workflows and methodologies for better output.'}
+                        {item === 2 && 'Documenting design thinking processes and problem-solving approaches.'}
+                        {item === 3 && 'Research findings and user behavior analysis.'}
+                        {item === 4 && 'Technical notes and development best practices.'}
+                      </p>
+                      <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        marginTop: '1rem'
+                      }}>
+                        <span style={{
+                          color: 'rgba(255, 255, 255, 0.4)',
+                          fontSize: '0.75rem'
+                        }}>
+                          12 entries
+                        </span>
+                        <span style={{
+                          color: 'white',
+                          fontSize: '0.8rem',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.3rem'
+                        }}>
+                          View all
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                            <path d="M5 12h14"/>
+                            <path d="M12 5l7 7-7 7"/>
+                          </svg>
+                        </span>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Catatan Kolaborasi Section */}
+              <div>
+                <h3 style={{
+                  color: 'white',
+                  fontSize: isMobile ? '1.5rem' : '2rem',
+                  fontWeight: '300',
+                  margin: '2rem 0 1.5rem 0',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  letterSpacing: '0.5px',
+                  borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+                  paddingBottom: '0.5rem'
+                }}>
+                  Catatan Kolaborasi
+                </h3>
+                
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+                  gap: '1.5rem'
+                }}>
+                  {[1, 2, 3].map((item) => (
+                    <motion.div
+                      key={`collab-${item}`}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: (item + 4) * 0.1 }}
+                      style={{
+                        backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        borderRadius: '12px',
+                        padding: '1.5rem',
+                        cursor: 'pointer',
+                        transition: 'all 0.3s ease'
+                      }}
+                      whileHover={{ 
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        borderColor: 'rgba(255, 255, 255, 0.2)',
+                        y: -2
+                      }}
+                    >
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.8rem',
+                        marginBottom: '1rem'
+                      }}>
+                        <div style={{
+                          width: '32px',
+                          height: '32px',
+                          borderRadius: '50%',
+                          backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '1rem',
+                          color: 'white'
+                        }}>
+                          👥
+                        </div>
+                        <span style={{
+                          color: 'rgba(255, 255, 255, 0.6)',
+                          fontSize: '0.8rem',
+                          fontFamily: 'monospace'
+                        }}>
+                          #{item}
+                        </span>
+                      </div>
+                      <h4 style={{
+                        color: 'white',
+                        fontSize: '1.2rem',
+                        fontWeight: '400',
+                        margin: '0 0 0.5rem 0',
+                        fontFamily: 'Helvetica, Arial, sans-serif'
+                      }}>
+                        {item === 1 && 'Project Alpha'}
+                        {item === 2 && 'Community Ideas'}
+                        {item === 3 && 'Feedback Loop'}
+                      </h4>
+                      <p style={{
+                        color: 'rgba(255, 255, 255, 0.7)',
+                        fontSize: '0.9rem',
+                        margin: 0,
+                        lineHeight: 1.5,
+                        fontFamily: 'Helvetica, Arial, sans-serif'
+                      }}>
+                        {item === 1 && 'Collaborative notes on Project Alpha development.'}
+                        {item === 2 && 'Brainstorming and ideas from community members.'}
+                        {item === 3 && 'User feedback and improvement suggestions.'}
+                      </p>
+                      <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        marginTop: '1rem'
+                      }}>
+                        <span style={{
+                          color: 'rgba(255, 255, 255, 0.4)',
+                          fontSize: '0.75rem'
+                        }}>
+                          3 contributors
+                        </span>
+                        <span style={{
+                          color: 'white',
+                          fontSize: '0.8rem',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.3rem'
+                        }}>
+                          Join
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                            <path d="M5 12h14"/>
+                            <path d="M12 5l7 7-7 7"/>
+                          </svg>
+                        </span>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Catatan Arsip Section */}
+              <div>
+                <h3 style={{
+                  color: 'white',
+                  fontSize: isMobile ? '1.5rem' : '2rem',
+                  fontWeight: '300',
+                  margin: '2rem 0 1.5rem 0',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  letterSpacing: '0.5px',
+                  borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+                  paddingBottom: '0.5rem'
+                }}>
+                  Arsip
+                </h3>
+                
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '1rem'
+                }}>
+                  {[2024, 2023, 2022].map((year) => (
+                    <motion.div
+                      key={`archive-${year}`}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: (year - 2022) * 0.1 }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '1rem',
+                        borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+                        cursor: 'pointer'
+                      }}
+                      whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.03)' }}
+                    >
+                      <span style={{
+                        color: 'white',
+                        fontSize: '1.2rem',
+                        fontWeight: '300',
+                        fontFamily: 'Helvetica, Arial, sans-serif'
+                      }}>
+                        {year}
+                      </span>
+                      <span style={{
+                        color: 'rgba(255, 255, 255, 0.5)',
+                        fontSize: '0.9rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem'
+                      }}>
+                        {year === 2024 && '24 notes'}
+                        {year === 2023 && '18 notes'}
+                        {year === 2022 && '12 notes'}
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M9 18l6-6-6-6"/>
+                        </svg>
+                      </span>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Footer Note Overlay */}
+            <div style={{
+              padding: '1.5rem 2rem',
+              borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+              color: 'rgba(255, 255, 255, 0.5)',
+              fontSize: '0.9rem',
+              fontFamily: 'Helvetica, Arial, sans-serif',
+              textAlign: 'center'
+            }}>
+              Total 7 topics • Click any card to view notes
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Modal Kalender Tahun Baru */}
       <AnimatePresence>
@@ -6469,177 +6885,196 @@ setIsLoadingEvents(false);
           backgroundColor: 'transparent'
         }}
       >
-        {/* Left: Judul MENURU */}
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8, delay: 0.5 }}
-          style={{
-            display: 'flex',
-            alignItems: 'center'
-          }}
-        >
-          <div style={{
-            fontSize: isMobile ? '1.5rem' : '2rem',
-            fontWeight: '300',
-            fontFamily: 'Helvetica, Arial, sans-serif',
-            letterSpacing: '2px',
-            color: 'white',
-            display: 'flex',
-            alignItems: 'center'
-          }}>
-            ME
-            <AnimatePresence mode="wait">
-              {isLoading ? (
-                <motion.span
-                  key={loadingText}
-                  initial={{ opacity: 0, y: 5 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -5 }}
-                  transition={{ duration: 0.3 }}
-                  style={{ display: 'inline-block' }}
-                >
-                  {loadingText}
-                </motion.span>
-              ) : (
-                <motion.span
-                  key="nuru-final"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.5 }}
-                >
-                  NURU
-                </motion.span>
-              )}
-            </AnimatePresence>
-          </div>
-        </motion.div>
-
-        {/* Center: Menu Navigasi Teks Biasa */}
+        {/* Left: Judul MENURU + Menu Navigasi (digeser ke kiri) */}
         <div style={{
           display: 'flex',
           alignItems: 'center',
-          gap: isMobile ? '1.5rem' : '3rem',
-          position: 'absolute',
-          left: '50%',
-          transform: 'translateX(-50%)'
+          gap: isMobile ? '2rem' : '4rem'
         }}>
-          <motion.span
-            onClick={() => router.push('/docs')}
-            style={{
-              color: 'white',
-              fontSize: isMobile ? '1rem' : '1.2rem',
+          {/* Judul MENURU */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, delay: 0.5 }}
+          >
+            <div style={{
+              fontSize: isMobile ? '1.5rem' : '2rem',
               fontWeight: '300',
               fontFamily: 'Helvetica, Arial, sans-serif',
-              cursor: 'pointer',
-              letterSpacing: '1px',
-              transition: 'opacity 0.3s ease'
-            }}
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6, duration: 0.5 }}
-            whileHover={{ opacity: 0.7 }}
-          >
-            Docs
-          </motion.span>
+              letterSpacing: '2px',
+              color: 'white',
+              display: 'flex',
+              alignItems: 'center'
+            }}>
+              ME
+              <AnimatePresence mode="wait">
+                {isLoading ? (
+                  <motion.span
+                    key={loadingText}
+                    initial={{ opacity: 0, y: 5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -5 }}
+                    transition={{ duration: 0.3 }}
+                    style={{ display: 'inline-block' }}
+                  >
+                    {loadingText}
+                  </motion.span>
+                ) : (
+                  <motion.span
+                    key="nuru-final"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    NURU
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </div>
+          </motion.div>
 
-          <motion.span
-            onClick={() => router.push('/update')}
-            style={{
-              color: 'white',
-              fontSize: isMobile ? '1rem' : '1.2rem',
-              fontWeight: '300',
-              fontFamily: 'Helvetica, Arial, sans-serif',
-              cursor: 'pointer',
-              letterSpacing: '1px',
-              transition: 'opacity 0.3s ease'
-            }}
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.7, duration: 0.5 }}
-            whileHover={{ opacity: 0.7 }}
-          >
-            Update
-          </motion.span>
+          {/* Menu Navigasi Teks Biasa (sejajar di samping judul) */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: isMobile ? '1.5rem' : '2.5rem'
+          }}>
+            <motion.span
+              onClick={() => router.push('/docs')}
+              style={{
+                color: 'white',
+                fontSize: isMobile ? '1rem' : '1.2rem',
+                fontWeight: '300',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                cursor: 'pointer',
+                letterSpacing: '1px',
+                transition: 'opacity 0.3s ease'
+              }}
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6, duration: 0.5 }}
+              whileHover={{ opacity: 0.7 }}
+            >
+              Docs
+            </motion.span>
 
-          <motion.span
-            onClick={() => router.push('/timeline')}
-            style={{
-              color: 'white',
-              fontSize: isMobile ? '1rem' : '1.2rem',
-              fontWeight: '300',
-              fontFamily: 'Helvetica, Arial, sans-serif',
-              cursor: 'pointer',
-              letterSpacing: '1px',
-              transition: 'opacity 0.3s ease'
-            }}
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8, duration: 0.5 }}
-            whileHover={{ opacity: 0.7 }}
-          >
-            Timeline
-          </motion.span>
+            <motion.span
+              onClick={() => router.push('/update')}
+              style={{
+                color: 'white',
+                fontSize: isMobile ? '1rem' : '1.2rem',
+                fontWeight: '300',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                cursor: 'pointer',
+                letterSpacing: '1px',
+                transition: 'opacity 0.3s ease'
+              }}
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.7, duration: 0.5 }}
+              whileHover={{ opacity: 0.7 }}
+            >
+              Update
+            </motion.span>
 
-          <motion.span
-            onClick={() => router.push('/chatbot')}
-            style={{
-              color: 'white',
-              fontSize: isMobile ? '1rem' : '1.2rem',
-              fontWeight: '300',
-              fontFamily: 'Helvetica, Arial, sans-serif',
-              cursor: 'pointer',
-              letterSpacing: '1px',
-              transition: 'opacity 0.3s ease'
-            }}
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.9, duration: 0.5 }}
-            whileHover={{ opacity: 0.7 }}
-          >
-            Chatbot
-          </motion.span>
+            <motion.span
+              onClick={() => router.push('/timeline')}
+              style={{
+                color: 'white',
+                fontSize: isMobile ? '1rem' : '1.2rem',
+                fontWeight: '300',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                cursor: 'pointer',
+                letterSpacing: '1px',
+                transition: 'opacity 0.3s ease'
+              }}
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8, duration: 0.5 }}
+              whileHover={{ opacity: 0.7 }}
+            >
+              Timeline
+            </motion.span>
 
-          <motion.span
-            onClick={() => router.push('/calendar')}
-            style={{
-              color: 'white',
-              fontSize: isMobile ? '1rem' : '1.2rem',
-              fontWeight: '300',
-              fontFamily: 'Helvetica, Arial, sans-serif',
-              cursor: 'pointer',
-              letterSpacing: '1px',
-              transition: 'opacity 0.3s ease'
-            }}
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.0, duration: 0.5 }}
-            whileHover={{ opacity: 0.7 }}
-          >
-            Calendar
-          </motion.span>
+            <motion.span
+              onClick={() => router.push('/chatbot')}
+              style={{
+                color: 'white',
+                fontSize: isMobile ? '1rem' : '1.2rem',
+                fontWeight: '300',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                cursor: 'pointer',
+                letterSpacing: '1px',
+                transition: 'opacity 0.3s ease'
+              }}
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.9, duration: 0.5 }}
+              whileHover={{ opacity: 0.7 }}
+            >
+              Chatbot
+            </motion.span>
 
-          <motion.span
-            onClick={handleOpenMenu}
-            style={{
-              color: 'white',
-              fontSize: isMobile ? '1rem' : '1.2rem',
-              fontWeight: '300',
-              fontFamily: 'Helvetica, Arial, sans-serif',
-              cursor: 'pointer',
-              letterSpacing: '1px',
-              transition: 'opacity 0.3s ease'
-            }}
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.1, duration: 0.5 }}
-            whileHover={{ opacity: 0.7 }}
-          >
-            Menu
-          </motion.span>
+            <motion.span
+              onClick={handleNoteClick}
+              style={{
+                color: 'white',
+                fontSize: isMobile ? '1rem' : '1.2rem',
+                fontWeight: '300',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                cursor: 'pointer',
+                letterSpacing: '1px',
+                transition: 'opacity 0.3s ease'
+              }}
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.95, duration: 0.5 }}
+              whileHover={{ opacity: 0.7 }}
+            >
+              Note
+            </motion.span>
+
+            <motion.span
+              onClick={() => router.push('/calendar')}
+              style={{
+                color: 'white',
+                fontSize: isMobile ? '1rem' : '1.2rem',
+                fontWeight: '300',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                cursor: 'pointer',
+                letterSpacing: '1px',
+                transition: 'opacity 0.3s ease'
+              }}
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1.0, duration: 0.5 }}
+              whileHover={{ opacity: 0.7 }}
+            >
+              Calendar
+            </motion.span>
+
+            <motion.span
+              onClick={handleOpenMenu}
+              style={{
+                color: 'white',
+                fontSize: isMobile ? '1rem' : '1.2rem',
+                fontWeight: '300',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                cursor: 'pointer',
+                letterSpacing: '1px',
+                transition: 'opacity 0.3s ease'
+              }}
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1.1, duration: 0.5 }}
+              whileHover={{ opacity: 0.7 }}
+            >
+              Menu
+            </motion.span>
+          </div>
         </div>
 
-        {/* Right: Notification Bell dan Sign In dengan Warna Stabilo */}
+        {/* Right: Notification Bell dan Sign In */}
         <div style={{
           display: 'flex',
           alignItems: 'center',
@@ -6656,7 +7091,7 @@ setIsLoadingEvents(false);
               width: '40px',
               height: '40px',
               borderRadius: '50%',
-              backgroundColor: '#FFD700', // Warna kuning stabilo
+              backgroundColor: '#FFD700',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -6709,14 +7144,14 @@ setIsLoadingEvents(false);
             )}
           </motion.div>
 
-          {/* Sign In / User Button dengan Warna Stabilo */}
+          {/* Sign In / User Button dengan Teks Putih dan Panah North East */}
           <motion.div
             onClick={handleSignInClick}
             style={{
               display: 'flex',
               alignItems: 'center',
               gap: '0.5rem',
-              backgroundColor: '#FFD700', // Warna kuning stabilo
+              backgroundColor: '#FFD700',
               padding: '0.5rem 1rem',
               borderRadius: '30px',
               cursor: 'pointer',
@@ -6728,26 +7163,25 @@ setIsLoadingEvents(false);
             whileHover={{ opacity: 0.9 }}
           >
             <span style={{
-              color: 'black',
+              color: 'white',
               fontSize: isMobile ? '0.9rem' : '1rem',
               fontWeight: '600',
               fontFamily: 'Helvetica, Arial, sans-serif'
             }}>
               {user ? userDisplayName : 'SIGN IN'}
             </span>
-            {user && (
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="black"
-                strokeWidth="2"
-              >
-                <path d="M7 17L17 7"/>
-                <path d="M7 7h10v10"/>
-              </svg>
-            )}
+            {/* North East Arrow (↗) */}
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="white"
+              strokeWidth="2.5"
+            >
+              <path d="M7 17L17 7"/>
+              <path d="M7 7h10v10"/>
+            </svg>
           </motion.div>
         </div>
       </div>
