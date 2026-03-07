@@ -192,7 +192,7 @@ export default function HomePage(): React.JSX.Element {
   // State untuk menu overlay
   const [showMenuOverlay, setShowMenuOverlay] = useState(false);
 
-  // State untuk notifikasi
+  // State untuk notifikasi dan search
   const [showNotification, setShowNotification] = useState(false);
   const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false);
   const [notificationCount, setNotificationCount] = useState(0);
@@ -212,7 +212,7 @@ export default function HomePage(): React.JSX.Element {
   const [isUpdating, setIsUpdating] = useState(false);
   const [showDeleteAccountModal, setShowDeleteAccountModal] = useState(false);
 
-  // State untuk GSAP Loading
+  // State untuk GSAP Loading - DIPERBAIKI
   const [showGsapLoading, setShowGsapLoading] = useState(true);
   const [currentRandomNumber, setCurrentRandomNumber] = useState(0);
 
@@ -243,235 +243,245 @@ export default function HomePage(): React.JSX.Element {
   const notificationDropdownRef = useRef<HTMLDivElement>(null);
   const userProfileModalRef = useRef<HTMLDivElement>(null);
 
-  // Ref untuk GSAP Loading
+  // Ref untuk GSAP Loading - DIPERBAIKI
   const gsapLoadingRef = useRef<HTMLDivElement>(null);
   const loadingNumberRef = useRef<HTMLDivElement>(null);
 
   // Ref untuk modal kalender
   const calendarModalRef = useRef<HTMLDivElement>(null);
 
-  // State untuk toggle section di menu overlay
-  const [openSection, setOpenSection] = useState<string | null>(null);
+// Tambahkan state ini di dalam component HomePage (setelah state lainnya)
+const [openSection, setOpenSection] = useState<string | null>(null);
 
-  // Fungsi untuk toggle section
-  const handleToggleSection = (section: string) => {
-    setOpenSection(openSection === section ? null : section);
-  };
+// Fungsi untuk toggle section
+const handleToggleSection = (section: string) => {
+  setOpenSection(openSection === section ? null : section);
+};
 
   // State untuk Spotify
-  const [currentTrack, setCurrentTrack] = useState<string | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentEmbedUrl, setCurrentEmbedUrl] = useState<string>('');
+const [currentTrack, setCurrentTrack] = useState<string | null>(null);
+const [isPlaying, setIsPlaying] = useState(false);
+const [currentEmbedUrl, setCurrentEmbedUrl] = useState<string>('');
 
-  // Data playlist lagu kesukaan dengan Spotify embed URL
-  const favoriteTracks = [
-    // Hanin Dhiya
-    {
-      id: 'hanin1',
-      title: 'Pupus',
-      artist: 'Hanin Dhiya',
-      embedUrl: 'https://open.spotify.com/embed/track/4za8UJq7JI99ilRYQXVrkm?utm_source=generator',
-      spotifyUrl: 'https://open.spotify.com/track/4za8UJq7JI99ilRYQXVrkm?si=e767fcf3e9ae4a6c'
-    },
-    {
-      id: 'hanin2',
-      title: 'Suatu Saat Nanti',
-      artist: 'Hanin Dhiya',
-      embedUrl: 'https://open.spotify.com/embed/track/11nApQrr7tfBNYzBOmHWCc?utm_source=generator',
-      spotifyUrl: 'https://open.spotify.com/track/11nApQrr7tfBNYzBOmHWCc?si=a141c85a054d41b0'
-    },
-    // Stand Here Alone
-    {
-      id: 'sha1',
-      title: 'Kita Lawan Mereka',
-      artist: 'Stand Here Alone',
-      embedUrl: 'https://open.spotify.com/embed/track/2rj9nnNMZQNs2pZAPWuvze?utm_source=generator',
-      spotifyUrl: 'https://open.spotify.com/track/2rj9nnNMZQNs2pZAPWuvze?si=34b6e33a87454394'
-    },
-    {
-      id: 'sha2',
-      title: 'Korban Lelaki',
-      artist: 'Stand Here Alone',
-      embedUrl: 'https://open.spotify.com/embed/track/3u53sM4xrdWl0uDLzcFm6x?utm_source=generator',
-      spotifyUrl: 'https://open.spotify.com/track/3u53sM4xrdWl0uDLzcFm6x?si=ba3bbf39522a475e'
-    },
-    {
-      id: 'sha3',
-      title: 'Wanita Masih Banyak',
-      artist: 'Stand Here Alone',
-      embedUrl: 'https://open.spotify.com/embed/track/5H60BCrbWBocSIAoZwjxwD?utm_source=generator',
-      spotifyUrl: 'https://open.spotify.com/track/5H60BCrbWBocSIAoZwjxwD?si=2ac532c98a9b483e'
-    }
-  ];
+// Data playlist lagu kesukaan dengan Spotify embed URL
+const favoriteTracks = [
+  // Hanin Dhiya
+  {
+    id: 'hanin1',
+    title: 'Pupus',
+    artist: 'Hanin Dhiya',
+    embedUrl: 'https://open.spotify.com/embed/track/4za8UJq7JI99ilRYQXVrkm?utm_source=generator',
+    spotifyUrl: 'https://open.spotify.com/track/4za8UJq7JI99ilRYQXVrkm?si=e767fcf3e9ae4a6c'
+  },
+  {
+    id: 'hanin2',
+    title: 'Suatu Saat Nanti',
+    artist: 'Hanin Dhiya',
+    embedUrl: 'https://open.spotify.com/embed/track/11nApQrr7tfBNYzBOmHWCc?utm_source=generator',
+    spotifyUrl: 'https://open.spotify.com/track/11nApQrr7tfBNYzBOmHWCc?si=a141c85a054d41b0'
+  },
+  // Stand Here Alone
+  {
+    id: 'sha1',
+    title: 'Kita Lawan Mereka',
+    artist: 'Stand Here Alone',
+    embedUrl: 'https://open.spotify.com/embed/track/2rj9nnNMZQNs2pZAPWuvze?utm_source=generator',
+    spotifyUrl: 'https://open.spotify.com/track/2rj9nnNMZQNs2pZAPWuvze?si=34b6e33a87454394'
+  },
+  {
+    id: 'sha2',
+    title: 'Korban Lelaki',
+    artist: 'Stand Here Alone',
+    embedUrl: 'https://open.spotify.com/embed/track/3u53sM4xrdWl0uDLzcFm6x?utm_source=generator',
+    spotifyUrl: 'https://open.spotify.com/track/3u53sM4xrdWl0uDLzcFm6x?si=ba3bbf39522a475e'
+  },
+  {
+    id: 'sha3',
+    title: 'Wanita Masih Banyak',
+    artist: 'Stand Here Alone',
+    embedUrl: 'https://open.spotify.com/embed/track/5H60BCrbWBocSIAoZwjxwD?utm_source=generator',
+    spotifyUrl: 'https://open.spotify.com/track/5H60BCrbWBocSIAoZwjxwD?si=2ac532c98a9b483e'
+  }
+];
 
-  // Fungsi untuk memutar lagu
-  const playTrack = (track: typeof favoriteTracks[0]) => {
-    setCurrentTrack(track.id);
-    setCurrentEmbedUrl(track.embedUrl);
-    setIsPlaying(true);
-  };
+// Fungsi untuk memutar lagu
+const playTrack = (track: typeof favoriteTracks[0]) => {
+  setCurrentTrack(track.id);
+  setCurrentEmbedUrl(track.embedUrl);
+  setIsPlaying(true);
+};
 
-  // Component Menu Item
-  const MenuItem = ({ number, title, mainUrl, isOpen, onToggle, children }: {
-    number: string;
-    title: string;
-    mainUrl: string;
-    isOpen: boolean;
-    onToggle: () => void;
-    children: React.ReactNode;
-  }) => (
-    <motion.div
-      initial={{ opacity: 0, y: 30 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6 }}
-      style={{
-        borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
-      }}
-    >
-      <div
-        onClick={onToggle}
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          cursor: 'pointer',
-          padding: '1rem 0',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
-          <span style={{
-            color: 'rgba(255, 255, 255, 0.5)',
-            fontSize: '2rem',
-            fontWeight: '300',
-            fontFamily: 'monospace'
-          }}>{number}</span>
-          
-          <span
-            onClick={(e) => {
-              e.stopPropagation();
-              router.push(mainUrl);
-            }}
-            style={{
-              color: '#FFFFFF',
-              fontSize: isMobile ? '3rem' : '4.5rem',
-              fontWeight: '500',
-              fontFamily: 'Helvetica, Arial, sans-serif',
-              textShadow: '0 0 10px rgba(255,255,255,0.3)',
-              cursor: 'pointer',
-            }}
-          >
-            {title}
-          </span>
-        </div>
-        
-        <div style={{
-          transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)',
-          transition: 'transform 0.3s ease'
-        }}>
-          <svg
-            width="50"
-            height="50"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#FFFFFF"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            style={{
-              filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.5))'
-            }}
-          >
-            <path d="M7 7h10v10" />
-            <path d="M17 7L7 17" />
-          </svg>
-        </div>
-      </div>
-
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3 }}
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '0.8rem',
-              marginLeft: '6rem',
-              marginTop: '0.5rem',
-              marginBottom: '1rem',
-              overflow: 'hidden'
-            }}
-          >
-            {children}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.div>
-  );
-
-  // Component Sub Menu Item
-  const SubMenuItem = ({ number, title, url }: {
-    number: string;
-    title: string;
-    url: string;
-  }) => (
+// Component Menu Item - tanpa animasi gerak
+const MenuItem = ({ number, title, mainUrl, isOpen, onToggle, children }: {
+  number: string;
+  title: string;
+  mainUrl: string;
+  isOpen: boolean;
+  onToggle: () => void;
+  children: React.ReactNode;
+}) => (
+  <motion.div
+    initial={{ opacity: 0, y: 30 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.6 }}
+    style={{
+      borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+    }}
+  >
+    {/* Header yang bisa diklik untuk toggle - tanpa hover effect */}
     <div
+      onClick={onToggle}
       style={{
         display: 'flex',
         alignItems: 'center',
-        gap: '1.5rem',
-        padding: '0.5rem 0',
+        justifyContent: 'space-between',
         cursor: 'pointer',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
+        padding: '1rem 0',
+        transition: 'none' // Hapus transition
       }}
-      onClick={() => router.push(url)}
     >
-      <span style={{ 
-        color: 'rgba(255, 255, 255, 0.3)', 
-        fontSize: '0.9rem', 
-        fontFamily: 'monospace', 
-        width: '30px' 
+      <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+        <span style={{
+          color: 'rgba(255, 255, 255, 0.5)',
+          fontSize: '2rem',
+          fontWeight: '300',
+          fontFamily: 'monospace'
+        }}>{number}</span>
+        
+        {/* Title - tanpa hover effect */}
+        <span
+          onClick={(e) => {
+            e.stopPropagation();
+            router.push(mainUrl);
+          }}
+          style={{
+            color: '#FFFFFF',
+            fontSize: isMobile ? '3rem' : '4.5rem',
+            fontWeight: '500',
+            fontFamily: 'Helvetica, Arial, sans-serif',
+            textShadow: '0 0 10px rgba(255,255,255,0.3)',
+            cursor: 'pointer',
+            transition: 'none' // Hapus transition
+          }}
+        >
+          {title}
+        </span>
+      </div>
+      
+      {/* Arrow yang berubah sesuai state - tanpa animasi rotate */}
+      <div style={{
+        transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)',
+        transition: 'transform 0.3s ease' // Hanya arrow yang tetap punya animasi
       }}>
-        {number}
-      </span>
-      <span style={{ 
-        color: 'rgba(255, 255, 255, 0.8)', 
-        fontSize: '1.2rem',
-        flex: 1
-      }}>
-        {title}
-      </span>
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2">
-        <path d="M7 7h10v10" />
-        <path d="M17 7L7 17" />
-      </svg>
+        <svg
+          width="50"
+          height="50"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#FFFFFF"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          style={{
+            filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.5))'
+          }}
+        >
+          <path d="M7 7h10v10" />
+          <path d="M17 7L7 17" />
+        </svg>
+      </div>
     </div>
-  );
 
-  // State untuk jam Jakarta
-  const [jakartaTime, setJakartaTime] = useState<string>('');
+    {/* Sub-menu dengan animasi muncul/hilang - tetap ada animasi */}
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          exit={{ opacity: 0, height: 0 }}
+          transition={{ duration: 0.3 }}
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0.8rem',
+            marginLeft: '6rem',
+            marginTop: '0.5rem',
+            marginBottom: '1rem',
+            overflow: 'hidden'
+          }}
+        >
+          {children}
+        </motion.div>
+      )}
+    </AnimatePresence>
+  </motion.div>
+);
 
-  // useEffect untuk update jam Jakarta setiap detik
-  useEffect(() => {
-    const updateJakartaTime = () => {
-      const now = new Date();
-      const timeString = now.toLocaleTimeString('id-ID', { 
-        timeZone: 'Asia/Jakarta', 
-        hour12: false,
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit'
-      });
-      setJakartaTime(timeString);
-    };
+// Component Sub Menu Item - tanpa animasi hover
+const SubMenuItem = ({ number, title, url }: {
+  number: string;
+  title: string;
+  url: string;
+}) => (
+  <div // Ganti dari motion.div ke div biasa
+    style={{
+      display: 'flex',
+      alignItems: 'center',
+      gap: '1.5rem',
+      padding: '0.5rem 0',
+      cursor: 'pointer',
+      borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
+    }}
+    onClick={() => router.push(url)}
+  >
+    <span style={{ 
+      color: 'rgba(255, 255, 255, 0.3)', 
+      fontSize: '0.9rem', 
+      fontFamily: 'monospace', 
+      width: '30px' 
+    }}>
+      {number}
+    </span>
+    <span style={{ 
+      color: 'rgba(255, 255, 255, 0.8)', 
+      fontSize: '1.2rem',
+      flex: 1
+    }}>
+      {title}
+    </span>
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2">
+      <path d="M7 7h10v10" />
+      <path d="M17 7L7 17" />
+    </svg>
+  </div>
+);
 
-    updateJakartaTime();
-    const interval = setInterval(updateJakartaTime, 1000);
-    return () => clearInterval(interval);
-  }, []);
+// Tambahkan state ini di dalam component HomePage (setelah state lainnya)
+const [jakartaTime, setJakartaTime] = useState<string>('');
 
-  // Data untuk pencarian
+// useEffect untuk update jam Jakarta setiap detik
+useEffect(() => {
+  const updateJakartaTime = () => {
+    const now = new Date();
+    const timeString = now.toLocaleTimeString('id-ID', { 
+      timeZone: 'Asia/Jakarta', 
+      hour12: false,
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+    setJakartaTime(timeString);
+  };
+
+  // Update immediately
+  updateJakartaTime();
+
+  // Update every second
+  const interval = setInterval(updateJakartaTime, 1000);
+
+  return () => clearInterval(interval);
+}, []);
+
+  // Data untuk pencarian (tetap ada untuk fungsi lain jika diperlukan)
   const searchablePages = [
     {
       id: 1,
@@ -538,13 +548,13 @@ export default function HomePage(): React.JSX.Element {
       icon: "📝"
     },
     {
-      id: 9,
-      title: "Calendar",
-      description: "Lihat kalender kegiatan admin",
-      category: "Features",
-      url: "/calendar",
-      icon: "🗓️"
-    }
+    id: 9,
+    title: "Calendar",
+    description: "Lihat kalender kegiatan admin",
+    category: "Features",
+    url: "/calendar",
+    icon: "🗓️"
+  }
   ];
 
   // Animasi loading text
@@ -728,33 +738,33 @@ export default function HomePage(): React.JSX.Element {
   };
 
   const generateCalendar = () => {
-    const daysInMonth = getDaysInMonth(currentYear, currentMonth);
-    const firstDayOfMonth = getFirstDayOfMonth(currentYear, currentMonth);
-    const days = [];
-    
-    for (let i = 0; i < firstDayOfMonth; i++) {
-      days.push(null);
-    }
-    
-    for (let i = 1; i <= daysInMonth; i++) {
-      const currentDate = new Date(currentYear, currentMonth, i);
-      const dayEvents = calendarEvents.filter(event => {
-        const eventDate = event.date instanceof Date ? event.date : new Date(event.date);
-        return (
-          eventDate.getDate() === i &&
-          eventDate.getMonth() === currentMonth &&
-          eventDate.getFullYear() === currentYear
-        );
-      });
-      days.push({
-        date: i,
-        fullDate: currentDate,
-        isToday: currentDate.toDateString() === new Date().toDateString(),
-        events: dayEvents
-      });
-    }
-    return days;
-  };
+const daysInMonth = getDaysInMonth(currentYear, currentMonth);
+const firstDayOfMonth = getFirstDayOfMonth(currentYear, currentMonth);
+const days = [];
+// Tambahkan hari kosong untuk hari-hari sebelum bulan dimulai
+for (let i = 0; i < firstDayOfMonth; i++) {
+days.push(null);
+}
+// Tambahkan hari-hari dalam bulan
+for (let i = 1; i <= daysInMonth; i++) {
+const currentDate = new Date(currentYear, currentMonth, i);
+const dayEvents = calendarEvents.filter(event => {
+const eventDate = event.date instanceof Date ? event.date : new Date(event.date);
+return (
+eventDate.getDate() === i &&
+eventDate.getMonth() === currentMonth &&
+eventDate.getFullYear() === currentYear
+);
+});
+days.push({
+date: i,
+fullDate: currentDate,
+isToday: currentDate.toDateString() === new Date().toDateString(),
+events: dayEvents
+});
+}
+return days;
+};
 
   // Fungsi untuk navigasi bulan
   const navigateMonth = (direction: 'prev' | 'next') => {
@@ -784,197 +794,6 @@ export default function HomePage(): React.JSX.Element {
   const handleMonthSelect = (monthIndex: number) => {
     setCurrentMonth(monthIndex);
   };
-
-  // Handler untuk klik teks "Selamat Tahun Baru 2026"
-  const handleNewYearTextClick = () => {
-    setShowCalendarModal(true);
-    setCurrentYear(2026);
-    setCurrentMonth(0);
-    setSelectedDate(null);
-  };
-
-  // Fungsi untuk mengirim notifikasi
-  const sendNotification = async (notificationData: {
-    title: string;
-    message: string;
-    type: 'announcement' | 'update' | 'alert' | 'system';
-    userId?: string;
-    userDisplayName?: string;
-    userEmail?: string;
-    isAdminPost?: boolean;
-    adminName?: string;
-    priority?: 'low' | 'medium' | 'high';
-    category?: 'general' | 'feature' | 'maintenance' | 'security';
-  }) => {
-    try {
-      if (!db) {
-        console.error("❌ Firebase tidak tersedia untuk mengirim notifikasi");
-        return false;
-      }
-      
-      const newNotification = {
-        title: notificationData.title,
-        message: notificationData.message,
-        type: notificationData.type,
-        read: false,
-        timestamp: serverTimestamp(),
-        icon: getIconByType(notificationData.type),
-        userId: notificationData.userId || '',
-        userDisplayName: notificationData.userDisplayName || '',
-        userEmail: notificationData.userEmail || '',
-        userAvatar: notificationData.userDisplayName?.charAt(0).toUpperCase() || '👤',
-        isAdminPost: notificationData.isAdminPost || false,
-        adminName: notificationData.adminName || 'Admin',
-        priority: notificationData.priority || 'medium',
-        category: notificationData.category || 'general',
-        createdAt: serverTimestamp()
-      };
-
-      console.log("📤 Mengirim notifikasi:", newNotification);
-      
-      const docRef = await addDoc(collection(db, 'notifications'), newNotification);
-      console.log("✅ Notification sent successfully with ID:", docRef.id);
-      
-      setTimeout(() => {
-        console.log("🔄 Trigger refresh notifikasi");
-      }, 1000);
-      
-      return true;
-    } catch (error: any) {
-      console.error("❌ Error sending notification:", error);
-      console.error("Error code:", error.code);
-      console.error("Error message:", error.message);
-      return false;
-    }
-  };
-
-  // Fungsi untuk mark notification as read
-  const markAsRead = async (notificationId: string) => {
-    try {
-      if (!db || !auth) return;
-      
-      const currentUser = auth.currentUser;
-      const currentUserId = currentUser ? currentUser.uid : 
-                           localStorage.getItem('anonymous_user_id');
-      
-      if (!currentUserId) {
-        console.error("❌ No user ID found for marking as read");
-        return;
-      }
-      
-      const userIdToUse = currentUser ? currentUser.uid : currentUserId;
-      const notificationRef = doc(db, 'notifications', notificationId);
-      
-      await updateDoc(notificationRef, {
-        [`userReads.${userIdToUse}`]: true,
-        views: increment(1)
-      });
-      
-      console.log(`✅ Marked notification ${notificationId} as read for user ${userIdToUse}`);
-      
-      setNotifications(prev => prev.map(notif => {
-        if (notif.id === notificationId) {
-          return {
-            ...notif,
-            userReads: {
-              ...notif.userReads,
-              [userIdToUse]: true
-            },
-            views: (notif.views || 0) + 1
-          };
-        }
-        return notif;
-      }));
-      
-      setNotificationCount(prev => Math.max(0, prev - 1));
-      setHasUnreadNotifications(prev => {
-        const newCount = notificationCount - 1;
-        return newCount > 0;
-      });
-      
-    } catch (error) {
-      console.error("❌ Error marking notification as read:", error);
-    }
-  };
-
-  // Handler untuk klik notifikasi
-  const handleNotificationClick = async (notification: Notification) => {
-    if (notification.id && !notification.isRead) {
-      await markAsRead(notification.id);
-    }
-    
-    console.log("Notification clicked:", notification);
-    
-    setShowNotification(false);
-  };
-
-  // Fungsi untuk clear all notifications
-  const handleClearNotification = async () => {
-    try {
-      if (!db || !auth) return;
-      
-      const currentUser = auth.currentUser;
-      const currentUserId = currentUser ? currentUser.uid : 
-                           localStorage.getItem('anonymous_user_id');
-      
-      if (!currentUserId) {
-        console.error("❌ No user ID found for clearing notifications");
-        return;
-      }
-      
-      const userIdToUse = currentUser ? currentUser.uid : currentUserId;
-      
-      const batch = writeBatch(db);
-      const unreadNotifications = notifications.filter(notification => {
-        return !notification.userReads?.[userIdToUse];
-      });
-      
-      console.log(`🗑️ Clearing ${unreadNotifications.length} unread notifications`);
-      
-      unreadNotifications.forEach(notification => {
-        const notificationRef = doc(db, 'notifications', notification.id);
-        batch.update(notificationRef, {
-          [`userReads.${userIdToUse}`]: true,
-          views: increment(1)
-        });
-      });
-      
-      await batch.commit();
-      
-      setNotifications(prev => prev.map(notification => ({
-        ...notification,
-        userReads: {
-          ...notification.userReads,
-          [userIdToUse]: true
-        },
-        views: (notification.views || 0) + 1
-      })));
-      
-      setHasUnreadNotifications(false);
-      setNotificationCount(0);
-      setShowNotification(false);
-      
-      console.log("✅ All notifications marked as read");
-      
-    } catch (error) {
-      console.error("❌ Error clearing notifications:", error);
-    }
-  };
-
-  // Update waktu yang lalu secara real-time
-  useEffect(() => {
-    const updateTimes = () => {
-      const newTimes = progressPhotos.map(photo => 
-        calculateTimeAgo(photo.uploadTime)
-      );
-      setPhotoTimeAgo(newTimes);
-    };
-
-    updateTimes();
-    const interval = setInterval(updateTimes, 1000);
-
-    return () => clearInterval(interval);
-  }, []);
 
   // Fungsi untuk update user stats di Firestore
   const updateUserStats = async (userId: string, userName: string) => {
@@ -1081,7 +900,7 @@ export default function HomePage(): React.JSX.Element {
     loadTotalLoggedInUsers();
   }, []);
 
-  // Fungsi untuk load user notes dari Firebase
+  // Fungsi untuk load user notes dari Firebase - DIPERBAIKI
   const loadUserNotes = async (userId: string) => {
     if (!db || !userId) return;
     
@@ -1089,6 +908,7 @@ export default function HomePage(): React.JSX.Element {
       setIsLoadingNotes(true);
       console.log(`📝 Loading notes for user: ${userId} from userNotes collection`);
       
+      // Gunakan collection 'userNotes' yang sama dengan halaman notes
       const notesRef = collection(db, 'userNotes');
       const q = query(
         notesRef, 
@@ -1102,6 +922,17 @@ export default function HomePage(): React.JSX.Element {
       querySnapshot.forEach((doc) => {
         const data = doc.data();
         
+        // DEBUG: Tampilkan data yang diterima
+        console.log("Firestore note data:", {
+          id: doc.id,
+          data: data,
+          hasCategory: !!data.category,
+          hasLink: !!data.link,
+          hasDescription: !!data.description,
+          hasContent: !!data.content
+        });
+        
+        // Ambil field sesuai dengan struktur di halaman notes
         const noteTitle = data.title?.trim() || 'Untitled Note';
         const noteDescription = data.description?.trim() || data.content?.trim() || '';
         const noteCategory = data.category?.trim() || '';
@@ -1110,21 +941,22 @@ export default function HomePage(): React.JSX.Element {
         notesData.push({
           id: doc.id,
           title: noteTitle,
-          content: noteDescription,
+          content: noteDescription, // Gunakan description sebagai content
           userId: data.userId || userId,
           userName: data.userName || userDisplayName || 'User',
           userEmail: data.userEmail || user?.email || '',
           createdAt: data.createdAt || new Date(),
           updatedAt: data.updatedAt || new Date(),
           isPinned: data.isPinned || false,
-          category: noteCategory,
-          link: noteLink,
+          category: noteCategory, // Tambahkan category
+          link: noteLink, // Tambahkan link
           color: data.color || '#3B82F6',
           tags: data.tags || []
         });
       });
       
       console.log(`✅ Loaded ${notesData.length} notes for user ${userId}`);
+      console.log("Sample note data:", notesData[0]); // Debug: tampilkan contoh data
       
       setUserNotes(notesData);
       setTotalNotesCount(notesData.length);
@@ -1135,11 +967,12 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Fungsi untuk load user notes secara real-time
+  // Fungsi untuk load user notes secara real-time - DIPERBAIKI
   const loadUserNotesRealtime = (userId: string) => {
     if (!db || !userId) return () => {};
     
     try {
+      // Gunakan collection 'userNotes' yang sama
       const notesRef = collection(db, 'userNotes');
       const q = query(
         notesRef, 
@@ -1153,6 +986,7 @@ export default function HomePage(): React.JSX.Element {
         querySnapshot.forEach((doc) => {
           const data = doc.data();
           
+          // Ambil field sesuai dengan struktur di halaman notes
           const noteTitle = data.title?.trim() || 'Untitled Note';
           const noteDescription = data.description?.trim() || data.content?.trim() || '';
           const noteCategory = data.category?.trim() || '';
@@ -1161,15 +995,15 @@ export default function HomePage(): React.JSX.Element {
           notesData.push({
             id: doc.id,
             title: noteTitle,
-            content: noteDescription,
+            content: noteDescription, // Gunakan description sebagai content
             userId: data.userId || userId,
             userName: data.userName || userDisplayName || 'User',
             userEmail: data.userEmail || user?.email || '',
             createdAt: data.createdAt || new Date(),
             updatedAt: data.updatedAt || new Date(),
             isPinned: data.isPinned || false,
-            category: noteCategory,
-            link: noteLink,
+            category: noteCategory, // Tambahkan category
+            link: noteLink, // Tambahkan link
             color: data.color || '#3B82F6',
             tags: data.tags || []
           });
@@ -1453,51 +1287,52 @@ export default function HomePage(): React.JSX.Element {
     }
   }, [db, auth?.currentUser]);
 
-  // Load events kalender dari Firebase
-  useEffect(() => {
-    if (showCalendarModal && db) {
-      setIsLoadingEvents(true);
-      try {
-        const eventsRef = collection(db, 'calendarEvents');
-        const q = query(eventsRef, orderBy('date', 'asc'));
-        const unsubscribe = onSnapshot(q,
-          (querySnapshot) => {
-            const eventsData: CalendarEvent[] = [];
-            querySnapshot.forEach((doc) => {
-              const data = doc.data();
-              let eventDate = data.date;
-              if (eventDate && typeof eventDate.toDate === 'function') {
-                eventDate = eventDate.toDate();
-              } else if (typeof eventDate === 'string') {
-                eventDate = new Date(eventDate);
-              }
-              eventsData.push({
-                id: doc.id,
-                title: data.title || "No Title",
-                description: data.description || "",
-                date: eventDate,
-                color: data.color || "#3B82F6",
-                label: data.label || "Event",
-                createdBy: data.createdBy || "Unknown",
-                isAdmin: data.isAdmin || false
-              });
-            });
-            console.log(`✅ Loaded ${eventsData.length} calendar events for homepage`);
-            setCalendarEvents(eventsData);
-            setIsLoadingEvents(false);
-          },
-          (error) => {
-            console.error("❌ Error loading calendar events:", error);
-            setIsLoadingEvents(false);
-          }
-        );
-        return () => unsubscribe();
-      } catch (error) {
-        console.error("❌ Error setting up calendar listener:", error);
-        setIsLoadingEvents(false);
-      }
-    }
-  }, [showCalendarModal, db]);
+ // Load events kalender dari Firebase - DIPERBAIKI
+useEffect(() => {
+if (showCalendarModal && db) {
+setIsLoadingEvents(true);
+try {
+const eventsRef = collection(db, 'calendarEvents');
+const q = query(eventsRef, orderBy('date', 'asc'));
+const unsubscribe = onSnapshot(q,
+(querySnapshot) => {
+const eventsData: CalendarEvent[] = [];
+querySnapshot.forEach((doc) => {
+const data = doc.data();
+let eventDate = data.date;
+// Convert Firestore Timestamp to Date if needed
+if (eventDate && typeof eventDate.toDate === 'function') {
+eventDate = eventDate.toDate();
+} else if (typeof eventDate === 'string') {
+eventDate = new Date(eventDate);
+}
+eventsData.push({
+id: doc.id,
+title: data.title || "No Title",
+description: data.description || "",
+date: eventDate,
+color: data.color || "#3B82F6",
+label: data.label || "Event",
+createdBy: data.createdBy || "Unknown",
+isAdmin: data.isAdmin || false
+});
+});
+console.log(`✅ Loaded ${eventsData.length} calendar events for homepage`);
+setCalendarEvents(eventsData);
+setIsLoadingEvents(false);
+},
+(error) => {
+console.error("❌ Error loading calendar events:", error);
+setIsLoadingEvents(false);
+}
+);
+return () => unsubscribe();
+} catch (error) {
+console.error("❌ Error setting up calendar listener:", error);
+setIsLoadingEvents(false);
+}
+}
+}, [showCalendarModal, db]);
 
   // Animasi teks nama user berjalan
   useEffect(() => {
@@ -1534,14 +1369,17 @@ export default function HomePage(): React.JSX.Element {
   // Mouse wheel scroll handler
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
+      // Biarkan scroll normal jika tidak dalam modal
       if (!showUserProfileModal && !showMenuruFullPage && !showPhotoFullPage && !showCalendarModal) {
         return;
       }
       
+      // Jika dalam modal, izinkan scroll dengan mouse wheel
       e.stopPropagation();
     };
 
     const handleMouseDown = (e: MouseEvent) => {
+      // Middle click (scroll wheel click) untuk scroll
       if (e.button === 1) {
         e.preventDefault();
       }
@@ -1666,23 +1504,28 @@ export default function HomePage(): React.JSX.Element {
 
   // Fungsi untuk generate angka acak
   const generateRandomNumber = (): number => {
+    // 70% kemungkinan satuan (1-9)
+    // 20% kemungkinan puluhan (10-99)
+    // 10% kemungkinan ratusan (100-999)
     const random = Math.random();
     
     if (random < 0.7) {
-      return Math.floor(Math.random() * 9) + 1;
+      return Math.floor(Math.random() * 9) + 1; // 1-9
     } else if (random < 0.9) {
-      return Math.floor(Math.random() * 90) + 10;
+      return Math.floor(Math.random() * 90) + 10; // 10-99
     } else {
-      return Math.floor(Math.random() * 900) + 100;
+      return Math.floor(Math.random() * 900) + 100; // 100-999
     }
   };
 
-  // Animasi GSAP Loading dengan angka acak
+  // Animasi GSAP Loading dengan angka acak - DIPERBAIKI
   useEffect(() => {
     if (!loadingNumberRef.current) return;
 
+    // Timeline untuk animasi angka acak
     const loadingTimeline = gsap.timeline({
       onComplete: () => {
+        // Setelah selesai, tunggu sebentar lalu fade out
         setTimeout(() => {
           gsap.to(gsapLoadingRef.current, {
             opacity: 0,
@@ -1696,18 +1539,22 @@ export default function HomePage(): React.JSX.Element {
       }
     });
 
+    // Total durasi animasi: 3 detik
     const totalDuration = 3;
-    const numChanges = 15;
+    const numChanges = 15; // Jumlah perubahan angka
     const changeInterval = totalDuration / numChanges;
 
+    // Animasikan perubahan angka acak
     for (let i = 0; i < numChanges; i++) {
       loadingTimeline.to({}, {
         duration: changeInterval,
         onStart: () => {
+          // Generate angka acak baru
           const newNumber = generateRandomNumber();
           setCurrentRandomNumber(newNumber);
         },
         onUpdate: function() {
+          // Efek visual halus saat angka berubah
           if (loadingNumberRef.current) {
             const progress = this.progress();
             const scale = 1 + (Math.sin(progress * Math.PI * 2) * 0.05);
@@ -1721,6 +1568,7 @@ export default function HomePage(): React.JSX.Element {
       }, i * changeInterval);
     }
 
+    // Animasi awal untuk angka pertama
     loadingTimeline.fromTo(loadingNumberRef.current,
       {
         scale: 0.8,
@@ -1735,6 +1583,7 @@ export default function HomePage(): React.JSX.Element {
       0
     );
 
+    // Animasi akhir sebelum fade out
     loadingTimeline.to(loadingNumberRef.current, {
       scale: 1.1,
       duration: 0.3,
@@ -1972,10 +1821,11 @@ export default function HomePage(): React.JSX.Element {
     handleOpenPhotoFullPage();
   };
 
-  // Handler untuk Sign In / User Button
+  // Handler untuk Sign In / User Button - DIPERBAIKI
   const handleSignInClick = () => {
     if (user) {
       setShowUserProfileModal(true);
+      // Load notes ketika modal dibuka
       if (user) {
         loadUserNotes(user.uid);
       }
@@ -2141,6 +1991,7 @@ export default function HomePage(): React.JSX.Element {
     if (!user || !auth.currentUser) return;
     
     try {
+      // Hapus semua notes user
       const notesRef = collection(db, 'notes');
       const q = query(notesRef, where('userId', '==', user.uid));
       const querySnapshot = await getDocs(q);
@@ -2150,11 +2001,13 @@ export default function HomePage(): React.JSX.Element {
         batch.delete(doc.ref);
       });
       
+      // Hapus user stats
       const userStatsRef = doc(db, 'userStats', user.uid);
       batch.delete(userStatsRef);
       
       await batch.commit();
       
+      // Hapus user dari authentication
       await deleteUser(auth.currentUser);
       
       alert("Akun berhasil dihapus!");
@@ -2194,8 +2047,8 @@ export default function HomePage(): React.JSX.Element {
       WebkitFontSmoothing: 'antialiased',
       MozOsxFontSmoothing: 'grayscale'
     }}>
-
-      {/* GSAP Modern Loading Animation */}
+      
+      {/* GSAP Modern Loading Animation - DIPERBAIKI DENGAN ANGKA ACAK */}
       <AnimatePresence>
         {showGsapLoading && (
           <motion.div
@@ -2227,11 +2080,12 @@ export default function HomePage(): React.JSX.Element {
                 msUserSelect: 'none'
               }}
             >
+              {/* Angka loading acak dengan animasi GSAP */}
               <div 
                 ref={loadingNumberRef}
                 style={{
                   fontSize: isMobile ? '5rem' : '7rem',
-                  fontWeight: 400,
+                  fontWeight: 400, // Normal, tidak bold
                   fontFamily: 'Helvetica, Arial, sans-serif',
                   color: 'white',
                   opacity: 0,
@@ -2707,7 +2561,7 @@ export default function HomePage(): React.JSX.Element {
 
                     {(() => {
                       if (isLoadingEvents) {
-                        return null;
+                        return null; // Loading sudah ditampilkan di atas
                       }
                       const eventsForSelectedDate = calendarEvents.filter(event =>
                         event.date.getDate() === selectedDate.getDate() &&
@@ -2750,6 +2604,7 @@ export default function HomePage(): React.JSX.Element {
                                 alignItems: 'flex-start'
                               }}
                             >
+                              {/* Warna Label */}
                               <div style={{
                                 width: '4px',
                                 height: '100%',
@@ -2758,6 +2613,7 @@ export default function HomePage(): React.JSX.Element {
                                 flexShrink: 0
                               }} />
 
+                              {/* Konten Event */}
                               <div style={{ flex: 1 }}>
                                 <div style={{
                                   display: 'flex',
@@ -2897,7 +2753,7 @@ export default function HomePage(): React.JSX.Element {
         )}
       </AnimatePresence>
 
-      {/* Modal Profil User */}
+      {/* Modal Profil User - DIPERBAIKI */}
       <AnimatePresence>
         {showUserProfileModal && user && (
           <motion.div
@@ -4316,7 +4172,7 @@ export default function HomePage(): React.JSX.Element {
         )}
       </AnimatePresence>
 
-      {/* Menu Overlay dengan GSAP Animation */}
+      {/* Menu Overlay dengan GSAP Animation - Modern Awwwards Style */}
       <AnimatePresence>
         {showMenuOverlay && (
           <motion.div
@@ -4408,7 +4264,7 @@ export default function HomePage(): React.JSX.Element {
               <div style={{ justifySelf: 'end' }}></div>
             </div>
 
-            {/* Teks Berjalan dengan North East Arrow - PUTIH CERAH */}
+            {/* Teks Berjalan dengan North East Arrow - PUTIH CERAH (TETAP BERJALAN) */}
             <div style={{
               position: 'absolute',
               bottom: '10%',
@@ -4458,24 +4314,24 @@ export default function HomePage(): React.JSX.Element {
             {/* Container Utama dengan Scroll yang Stabil */}
             <div style={{
               position: 'absolute',
-              top: '15%',
-              bottom: '15%',
+              top: '15%', // Posisi tetap dari atas
+              bottom: '15%', // Posisi tetap dari bawah
               left: 0,
               right: 0,
               zIndex: 3,
               display: 'flex',
               justifyContent: 'center',
-              overflow: 'hidden'
+              overflow: 'hidden' // Mencegah scroll di container utama
             }}>
               {/* Konten dengan Scroll Internal */}
               <div style={{
                 width: '100%',
                 maxWidth: '1200px',
                 padding: isMobile ? '0 2rem' : '0 4rem',
-                overflowY: 'auto',
+                overflowY: 'auto', // Scroll hanya di dalam konten
                 overflowX: 'hidden',
-                scrollbarWidth: 'none',
-                msOverflowStyle: 'none',
+                scrollbarWidth: 'none', // Hide scrollbar Firefox
+                msOverflowStyle: 'none', // Hide scrollbar IE/Edge
                 position: 'relative',
                 height: '100%'
               }}>
@@ -4956,7 +4812,7 @@ export default function HomePage(): React.JSX.Element {
                               src={currentEmbedUrl}
                               frameBorder="0"
                               allowFullScreen
-                              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-picture"
+                              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
                               loading="lazy"
                             />
                           </div>
@@ -5350,7 +5206,7 @@ export default function HomePage(): React.JSX.Element {
           </motion.div>
         )}
       </AnimatePresence>
-
+      
       {/* Halaman Full Page MENURU */}
       <AnimatePresence>
         {showMenuruFullPage && (
@@ -6120,7 +5976,7 @@ export default function HomePage(): React.JSX.Element {
             style={{
               position: 'fixed',
               top: isMobile ? '6rem' : '7.5rem',
-              right: isMobile ? '5.5rem' : '7rem',
+              right: isMobile ? '1rem' : '2rem',
               backgroundColor: 'rgba(20, 20, 20, 0.98)',
               backdropFilter: 'blur(20px)',
               borderRadius: '15px',
@@ -6191,7 +6047,7 @@ export default function HomePage(): React.JSX.Element {
                     }}
                   >
                     Clear All
-                  </motion.button>
+                </motion.button>
                 )}
                 
                 <motion.button
@@ -6465,39 +6321,6 @@ export default function HomePage(): React.JSX.Element {
         )}
       </AnimatePresence>
 
-      {/* Teks "Selamat Tahun Baru 2026" - SEJAJAR DENGAN MENU NAVIGASI DI TENGAH */}
-      <motion.div
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.8, delay: 0.3 }}
-        onClick={handleNewYearTextClick}
-        style={{
-          position: 'fixed',
-          top: isMobile ? '1rem' : '1.5rem',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          color: 'white',
-          fontSize: isMobile ? '1rem' : '1.2rem',
-          fontWeight: '300',
-          fontFamily: 'Helvetica, Arial, sans-serif',
-          textTransform: 'uppercase',
-          letterSpacing: '1px',
-          zIndex: 1000,
-          backgroundColor: 'transparent',
-          padding: '0.5rem 1rem',
-          borderRadius: '4px',
-          cursor: 'pointer',
-          transition: 'all 0.3s ease',
-          whiteSpace: 'nowrap'
-        }}
-        whileHover={{ 
-          opacity: 0.8,
-          backgroundColor: 'rgba(255, 255, 255, 0.1)'
-        }}
-      >
-        Selamat Tahun Baru 2026
-      </motion.div>
-
       {/* User Dropdown Menu */}
       <AnimatePresence>
         {showUserDropdown && user && (
@@ -6629,451 +6452,302 @@ export default function HomePage(): React.JSX.Element {
         )}
       </AnimatePresence>
 
-      {/* Top Navigation Bar - SEMUA ITEM SELAIN SIGN IN DI TENGAH */}
+      {/* Top Navigation Bar - DESIGN DIPERBAIKI */}
       <div 
         ref={topNavRef}
         style={{
           position: 'fixed',
-          top: isMobile ? '3.5rem' : '4rem',
+          top: 0,
           left: 0,
           width: '100%',
-          padding: isMobile ? '0.8rem 1rem' : '1rem 2rem',
+          padding: isMobile ? '1rem 1.5rem' : '1.5rem 3rem',
           display: 'flex',
-          justifyContent: 'center',
+          justifyContent: 'space-between',
           alignItems: 'center',
           zIndex: 101,
           boxSizing: 'border-box',
-          opacity: 1
+          backgroundColor: 'transparent'
         }}
       >
+        {/* Left: Judul MENURU */}
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.8, delay: 0.5 }}
+          style={{
+            display: 'flex',
+            alignItems: 'center'
+          }}
+        >
+          <div style={{
+            fontSize: isMobile ? '1.5rem' : '2rem',
+            fontWeight: '300',
+            fontFamily: 'Helvetica, Arial, sans-serif',
+            letterSpacing: '2px',
+            color: 'white',
+            display: 'flex',
+            alignItems: 'center'
+          }}>
+            ME
+            <AnimatePresence mode="wait">
+              {isLoading ? (
+                <motion.span
+                  key={loadingText}
+                  initial={{ opacity: 0, y: 5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -5 }}
+                  transition={{ duration: 0.3 }}
+                  style={{ display: 'inline-block' }}
+                >
+                  {loadingText}
+                </motion.span>
+              ) : (
+                <motion.span
+                  key="nuru-final"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  NURU
+                </motion.span>
+              )}
+            </AnimatePresence>
+          </div>
+        </motion.div>
+
+        {/* Center: Menu Navigasi Teks Biasa */}
         <div style={{
           display: 'flex',
           alignItems: 'center',
-          gap: isMobile ? '1.5rem' : '2.5rem',
-          backgroundColor: 'transparent',
-          borderRadius: '0',
-          padding: isMobile ? '0.6rem 0' : '0.8rem 0',
-          border: 'none',
-          flexWrap: isMobile ? 'wrap' : 'nowrap',
-          justifyContent: 'center',
-          position: 'relative'
+          gap: isMobile ? '1.5rem' : '3rem',
+          position: 'absolute',
+          left: '50%',
+          transform: 'translateX(-50%)'
         }}>
-          
-          {/* Docs - with North East Arrow */}
-          <motion.div
+          <motion.span
             onClick={() => router.push('/docs')}
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              cursor: 'pointer',
-              padding: '0.4rem 0',
-              backgroundColor: 'transparent',
-              border: 'none',
-              transition: 'all 0.3s ease',
-              position: 'relative'
-            }}
-            whileHover={{ opacity: 0.7 }}
-          >
-            <span style={{
               color: 'white',
               fontSize: isMobile ? '1rem' : '1.2rem',
               fontWeight: '300',
               fontFamily: 'Helvetica, Arial, sans-serif',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.3rem'
-            }}>
-              Docs
-              <svg 
-                width={isMobile ? "14" : "16"} 
-                height={isMobile ? "14" : "16"} 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="white"
-                strokeWidth="1.5"
-              >
-                <path d="M7 7h10v10" />
-                <path d="M17 7L7 17" />
-              </svg>
-            </span>
-          </motion.div>
+              cursor: 'pointer',
+              letterSpacing: '1px',
+              transition: 'opacity 0.3s ease'
+            }}
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6, duration: 0.5 }}
+            whileHover={{ opacity: 0.7 }}
+          >
+            Docs
+          </motion.span>
 
-          {/* Update - with North East Arrow */}
-          <motion.div
+          <motion.span
             onClick={() => router.push('/update')}
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              cursor: 'pointer',
-              padding: '0.4rem 0',
-              backgroundColor: 'transparent',
-              border: 'none',
-              transition: 'all 0.3s ease',
-              position: 'relative'
-            }}
-            whileHover={{ opacity: 0.7 }}
-          >
-            <span style={{
               color: 'white',
               fontSize: isMobile ? '1rem' : '1.2rem',
               fontWeight: '300',
               fontFamily: 'Helvetica, Arial, sans-serif',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.3rem'
-            }}>
-              Update
-              <svg 
-                width={isMobile ? "14" : "16"} 
-                height={isMobile ? "14" : "16"} 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="white"
-                strokeWidth="1.5"
-              >
-                <path d="M7 7h10v10" />
-                <path d="M17 7L7 17" />
-              </svg>
-            </span>
-          </motion.div>
+              cursor: 'pointer',
+              letterSpacing: '1px',
+              transition: 'opacity 0.3s ease'
+            }}
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.7, duration: 0.5 }}
+            whileHover={{ opacity: 0.7 }}
+          >
+            Update
+          </motion.span>
 
-          {/* Timeline - with North East Arrow */}
-          <motion.div
+          <motion.span
             onClick={() => router.push('/timeline')}
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              cursor: 'pointer',
-              padding: '0.4rem 0',
-              backgroundColor: 'transparent',
-              border: 'none',
-              transition: 'all 0.3s ease',
-              position: 'relative'
-            }}
-            whileHover={{ opacity: 0.7 }}
-          >
-            <span style={{
               color: 'white',
               fontSize: isMobile ? '1rem' : '1.2rem',
               fontWeight: '300',
               fontFamily: 'Helvetica, Arial, sans-serif',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.3rem'
-            }}>
-              Timeline
-              <svg 
-                width={isMobile ? "14" : "16"} 
-                height={isMobile ? "14" : "16"} 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="white"
-                strokeWidth="1.5"
-              >
-                <path d="M7 7h10v10" />
-                <path d="M17 7L7 17" />
-              </svg>
-            </span>
-          </motion.div>
+              cursor: 'pointer',
+              letterSpacing: '1px',
+              transition: 'opacity 0.3s ease'
+            }}
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8, duration: 0.5 }}
+            whileHover={{ opacity: 0.7 }}
+          >
+            Timeline
+          </motion.span>
 
-          {/* Chatbot - with North East Arrow */}
-          <motion.div
-            data-nav-chatbot
+          <motion.span
             onClick={() => router.push('/chatbot')}
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              cursor: 'pointer',
-              padding: '0.4rem 0',
-              backgroundColor: 'transparent',
-              border: 'none',
-              transition: 'all 0.3s ease',
-              position: 'relative'
-            }}
-            whileHover={{ opacity: 0.7 }}
-          >
-            <span style={{
               color: 'white',
               fontSize: isMobile ? '1rem' : '1.2rem',
               fontWeight: '300',
               fontFamily: 'Helvetica, Arial, sans-serif',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.3rem'
-            }}>
-              Chatbot
-              <svg 
-                width={isMobile ? "14" : "16"} 
-                height={isMobile ? "14" : "16"} 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="white"
-                strokeWidth="1.5"
-              >
-                <path d="M7 7h10v10" />
-                <path d="M17 7L7 17" />
-              </svg>
-            </span>
-          </motion.div>
+              cursor: 'pointer',
+              letterSpacing: '1px',
+              transition: 'opacity 0.3s ease'
+            }}
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.9, duration: 0.5 }}
+            whileHover={{ opacity: 0.7 }}
+          >
+            Chatbot
+          </motion.span>
 
-          {/* Calendar - with North East Arrow */}
-          <motion.div
+          <motion.span
             onClick={() => router.push('/calendar')}
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              cursor: 'pointer',
-              padding: '0.4rem 0',
-              backgroundColor: 'transparent',
-              border: 'none',
-              transition: 'all 0.3s ease',
-              position: 'relative'
-            }}
-            whileHover={{ opacity: 0.7 }}
-          >
-            <span style={{
               color: 'white',
               fontSize: isMobile ? '1rem' : '1.2rem',
               fontWeight: '300',
               fontFamily: 'Helvetica, Arial, sans-serif',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.3rem'
-            }}>
-              Calendar
-              <svg 
-                width={isMobile ? "14" : "16"} 
-                height={isMobile ? "14" : "16"} 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="white"
-                strokeWidth="1.5"
-              >
-                <path d="M7 7h10v10" />
-                <path d="M17 7L7 17" />
-              </svg>
-            </span>
-          </motion.div>
+              cursor: 'pointer',
+              letterSpacing: '1px',
+              transition: 'opacity 0.3s ease'
+            }}
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.0, duration: 0.5 }}
+            whileHover={{ opacity: 0.7 }}
+          >
+            Calendar
+          </motion.span>
 
-          {/* Menu - with North East Arrow */}
-          <motion.div
+          <motion.span
             onClick={handleOpenMenu}
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              cursor: 'pointer',
-              padding: '0.4rem 0',
-              backgroundColor: 'transparent',
-              border: 'none',
-              transition: 'all 0.3s ease',
-              position: 'relative'
-            }}
-            whileHover={{ opacity: 0.7 }}
-          >
-            <span style={{
               color: 'white',
               fontSize: isMobile ? '1rem' : '1.2rem',
               fontWeight: '300',
               fontFamily: 'Helvetica, Arial, sans-serif',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.3rem'
-            }}>
-              Menu
-              <svg 
-                width={isMobile ? "14" : "16"} 
-                height={isMobile ? "14" : "16"} 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="white"
-                strokeWidth="1.5"
-              >
-                <path d="M7 7h10v10" />
-                <path d="M17 7L7 17" />
-              </svg>
-            </span>
-          </motion.div>
+              cursor: 'pointer',
+              letterSpacing: '1px',
+              transition: 'opacity 0.3s ease'
+            }}
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.1, duration: 0.5 }}
+            whileHover={{ opacity: 0.7 }}
+          >
+            Menu
+          </motion.span>
+        </div>
 
-          {/* Notification Bell - with North East Arrow */}
+        {/* Right: Notification Bell dan Sign In dengan Warna Stabilo */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '1rem'
+        }}>
+          {/* Notification Bell dengan Badge */}
           <motion.div
             ref={notificationRef}
-            onClick={() => setShowNotification(!showNotification)}
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 1.2, duration: 0.5 }}
             style={{
+              position: 'relative',
+              width: '40px',
+              height: '40px',
+              borderRadius: '50%',
+              backgroundColor: '#FFD700', // Warna kuning stabilo
               display: 'flex',
               alignItems: 'center',
-              gap: '0.5rem',
+              justifyContent: 'center',
               cursor: 'pointer',
-              padding: '0.4rem 0',
-              backgroundColor: 'transparent',
-              border: 'none',
-              transition: 'all 0.3s ease',
-              position: 'relative'
+              transition: 'all 0.3s ease'
             }}
-            whileHover={{ opacity: 0.7 }}
+            onClick={() => setShowNotification(!showNotification)}
           >
-            <span style={{
-              color: 'white',
-              fontSize: isMobile ? '1rem' : '1.2rem',
-              fontWeight: '300',
-              fontFamily: 'Helvetica, Arial, sans-serif',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.3rem',
-              position: 'relative'
-            }}>
-              Notif
-              {hasUnreadNotifications && notificationCount > 0 && (
-                <span style={{
+            <svg 
+              width="20" 
+              height="20" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="black" 
+              strokeWidth="2"
+            >
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+            
+            {hasUnreadNotifications && notificationCount > 0 && (
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 500, damping: 15 }}
+                style={{
                   position: 'absolute',
-                  top: '-8px',
-                  right: '-10px',
-                  minWidth: '16px',
-                  height: '16px',
-                  backgroundColor: 'transparent',
+                  top: '-2px',
+                  right: '-2px',
+                  minWidth: '18px',
+                  height: '18px',
+                  backgroundColor: 'black',
                   borderRadius: '50%',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  border: '1px solid rgba(255, 255, 255, 0.3)',
-                  fontSize: '0.6rem',
+                  border: '1px solid white'
+                }}
+              >
+                <span style={{
+                  color: 'white',
+                  fontSize: '0.65rem',
                   fontWeight: '700',
-                  padding: '0 2px'
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  padding: '0 4px'
                 }}>
                   {notificationCount > 9 ? '9+' : notificationCount}
                 </span>
-              )}
-              <svg 
-                width={isMobile ? "14" : "16"} 
-                height={isMobile ? "14" : "16"} 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="white"
-                strokeWidth="1.5"
-              >
-                <path d="M7 7h10v10" />
-                <path d="M17 7L7 17" />
-              </svg>
-            </span>
+              </motion.div>
+            )}
           </motion.div>
-        </div>
-      </div>
 
-      {/* Sign In Button - SISI KANAN */}
-      <motion.div
-        initial={{ opacity: 0, x: -10 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ delay: 1.2, duration: 0.6 }}
-        onClick={handleSignInClick}
-        style={{
-          position: 'fixed',
-          top: isMobile ? '1rem' : '1.5rem',
-          right: isMobile ? '1rem' : '2rem',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.5rem',
-          cursor: 'pointer',
-          padding: '0.5rem 1rem',
-          backgroundColor: 'transparent',
-          border: 'none',
-          transition: 'all 0.3s ease',
-          zIndex: 102
-        }}
-        whileHover={{ opacity: 0.9 }}
-      >
-        <span style={{
-          color: '#60A5FA',
-          fontSize: isMobile ? '1rem' : '1.2rem',
-          fontWeight: '500',
-          fontFamily: 'Helvetica, Arial, sans-serif',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.3rem',
-          textTransform: 'uppercase',
-          textShadow: '0 0 10px rgba(96, 165, 250, 0.5)'
-        }}>
-          {user ? userDisplayName : 'Sign In'}
-          <svg 
-            width={isMobile ? "14" : "16"} 
-            height={isMobile ? "14" : "16"} 
-            viewBox="0 0 24 24" 
-            fill="none" 
-            stroke="#60A5FA"
-            strokeWidth="1.8"
-          >
-            <path d="M7 7h10v10" />
-            <path d="M17 7L7 17" />
-          </svg>
-        </span>
-      </motion.div>
-
-      {/* Header Section - MENURU text */}
-      <div 
-        ref={headerRef}
-        style={{
-          position: 'fixed',
-          top: isMobile ? '1rem' : '1.5rem',
-          left: isMobile ? '1rem' : '2rem',
-          width: 'auto',
-          zIndex: 100,
-          opacity: 1
-        }}
-      >
-        {/* Left: "MENURU" saja */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center'
-        }}>
+          {/* Sign In / User Button dengan Warna Stabilo */}
           <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, delay: 0.5 }}
-          >
-            <div style={{
-              fontSize: isMobile ? '1.8rem' : '2.8rem',
-              fontWeight: '300',
-              fontFamily: 'Helvetica, Arial, sans-serif',
-              margin: 0,
-              letterSpacing: '2px',
-              lineHeight: 1,
-              textTransform: 'uppercase',
-              color: 'white',
-              minHeight: isMobile ? '2rem' : '3rem',
+            onClick={handleSignInClick}
+            style={{
               display: 'flex',
-              alignItems: 'center'
+              alignItems: 'center',
+              gap: '0.5rem',
+              backgroundColor: '#FFD700', // Warna kuning stabilo
+              padding: '0.5rem 1rem',
+              borderRadius: '30px',
+              cursor: 'pointer',
+              transition: 'all 0.3s ease'
+            }}
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 1.3, duration: 0.5 }}
+            whileHover={{ opacity: 0.9 }}
+          >
+            <span style={{
+              color: 'black',
+              fontSize: isMobile ? '0.9rem' : '1rem',
+              fontWeight: '600',
+              fontFamily: 'Helvetica, Arial, sans-serif'
             }}>
-              ME
-              <AnimatePresence mode="wait">
-                {isLoading ? (
-                  <motion.span
-                    key={loadingText}
-                    initial={{ opacity: 0, y: 5 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -5 }}
-                    transition={{ duration: 0.3 }}
-                    style={{
-                      display: 'inline-block'
-                    }}
-                  >
-                    {loadingText}
-                  </motion.span>
-                ) : (
-                  <motion.span
-                    key="nuru-final"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.5 }}
-                  >
-                    NURU
-                  </motion.span>
-                )}
-              </AnimatePresence>
-            </div>
+              {user ? userDisplayName : 'SIGN IN'}
+            </span>
+            {user && (
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="black"
+                strokeWidth="2"
+              >
+                <path d="M7 17L17 7"/>
+                <path d="M7 7h10v10"/>
+              </svg>
+            )}
           </motion.div>
         </div>
       </div>
