@@ -6465,7 +6465,7 @@ export default function HomePage(): React.JSX.Element {
         )}
       </AnimatePresence>
 
-      {/* Teks "Selamat Tahun Baru 2026" di pojok kiri atas - SEJAJAR DENGAN JUDUL */}
+      {/* Teks "Selamat Tahun Baru 2026" - SEJAJAR DENGAN MENU NAVIGASI DI TENGAH */}
       <motion.div
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
@@ -6474,7 +6474,8 @@ export default function HomePage(): React.JSX.Element {
         style={{
           position: 'fixed',
           top: isMobile ? '1rem' : '1.5rem',
-          left: isMobile ? 'calc(1rem + 80px)' : 'calc(2rem + 120px)',
+          left: '50%',
+          transform: 'translateX(-50%)',
           color: 'white',
           fontSize: isMobile ? '1rem' : '1.2rem',
           fontWeight: '300',
@@ -6486,7 +6487,8 @@ export default function HomePage(): React.JSX.Element {
           padding: '0.5rem 1rem',
           borderRadius: '4px',
           cursor: 'pointer',
-          transition: 'all 0.3s ease'
+          transition: 'all 0.3s ease',
+          whiteSpace: 'nowrap'
         }}
         whileHover={{ 
           opacity: 0.8,
@@ -6627,12 +6629,12 @@ export default function HomePage(): React.JSX.Element {
         )}
       </AnimatePresence>
 
-      {/* Top Navigation Bar - SEMUA ITEM SEJAJAR DENGAN JUDUL */}
+      {/* Top Navigation Bar - SEMUA ITEM SELAIN SIGN IN DI TENGAH */}
       <div 
         ref={topNavRef}
         style={{
           position: 'fixed',
-          top: 0,
+          top: isMobile ? '3.5rem' : '4rem',
           left: 0,
           width: '100%',
           padding: isMobile ? '0.8rem 1rem' : '1rem 2rem',
@@ -6641,8 +6643,7 @@ export default function HomePage(): React.JSX.Element {
           alignItems: 'center',
           zIndex: 101,
           boxSizing: 'border-box',
-          opacity: 1,
-          marginTop: 0 // No margin, sejajar dengan judul
+          opacity: 1
         }}
       >
         <div style={{
@@ -6655,8 +6656,7 @@ export default function HomePage(): React.JSX.Element {
           border: 'none',
           flexWrap: isMobile ? 'wrap' : 'nowrap',
           justifyContent: 'center',
-          position: 'relative',
-          left: isMobile ? 'calc(50% - 150px)' : 'calc(50% - 300px)' // Geser ke kanan
+          position: 'relative'
         }}>
           
           {/* Docs - with North East Arrow */}
@@ -6961,51 +6961,56 @@ export default function HomePage(): React.JSX.Element {
               </svg>
             </span>
           </motion.div>
-
-          {/* Sign In / User Button - with North East Arrow dan Biru Stabilo */}
-          <motion.div
-            onClick={handleSignInClick}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              cursor: 'pointer',
-              padding: '0.4rem 0',
-              backgroundColor: 'transparent',
-              border: 'none',
-              transition: 'all 0.3s ease',
-              position: 'relative',
-              marginLeft: '2rem' // Geser ke kanan
-            }}
-            whileHover={{ opacity: 0.9 }}
-          >
-            <span style={{
-              color: '#60A5FA', // Biru stabilo
-              fontSize: isMobile ? '1rem' : '1.2rem',
-              fontWeight: '500', // Sedikit lebih tebal
-              fontFamily: 'Helvetica, Arial, sans-serif',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.3rem',
-              textTransform: 'uppercase',
-              textShadow: '0 0 10px rgba(96, 165, 250, 0.5)' // Efek glow biru
-            }}>
-              {user ? userDisplayName : 'Sign In'}
-              <svg 
-                width={isMobile ? "14" : "16"} 
-                height={isMobile ? "14" : "16"} 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="#60A5FA" // Biru stabilo untuk arrow
-                strokeWidth="1.8"
-              >
-                <path d="M7 7h10v10" />
-                <path d="M17 7L7 17" />
-              </svg>
-            </span>
-          </motion.div>
         </div>
       </div>
+
+      {/* Sign In Button - SISI KANAN */}
+      <motion.div
+        initial={{ opacity: 0, x: -10 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: 1.2, duration: 0.6 }}
+        onClick={handleSignInClick}
+        style={{
+          position: 'fixed',
+          top: isMobile ? '1rem' : '1.5rem',
+          right: isMobile ? '1rem' : '2rem',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.5rem',
+          cursor: 'pointer',
+          padding: '0.5rem 1rem',
+          backgroundColor: 'transparent',
+          border: 'none',
+          transition: 'all 0.3s ease',
+          zIndex: 102
+        }}
+        whileHover={{ opacity: 0.9 }}
+      >
+        <span style={{
+          color: '#60A5FA',
+          fontSize: isMobile ? '1rem' : '1.2rem',
+          fontWeight: '500',
+          fontFamily: 'Helvetica, Arial, sans-serif',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.3rem',
+          textTransform: 'uppercase',
+          textShadow: '0 0 10px rgba(96, 165, 250, 0.5)'
+        }}>
+          {user ? userDisplayName : 'Sign In'}
+          <svg 
+            width={isMobile ? "14" : "16"} 
+            height={isMobile ? "14" : "16"} 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            stroke="#60A5FA"
+            strokeWidth="1.8"
+          >
+            <path d="M7 7h10v10" />
+            <path d="M17 7L7 17" />
+          </svg>
+        </span>
+      </motion.div>
 
       {/* Header Section - MENURU text */}
       <div 
