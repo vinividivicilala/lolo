@@ -192,10 +192,8 @@ export default function HomePage(): React.JSX.Element {
   // State untuk menu overlay
   const [showMenuOverlay, setShowMenuOverlay] = useState(false);
 
-  // State untuk notifikasi dan search
+  // State untuk notifikasi
   const [showNotification, setShowNotification] = useState(false);
-  const [showSearch, setShowSearch] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
   const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false);
   const [notificationCount, setNotificationCount] = useState(0);
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -213,10 +211,8 @@ export default function HomePage(): React.JSX.Element {
   const [editEmail, setEditEmail] = useState('');
   const [isUpdating, setIsUpdating] = useState(false);
   const [showDeleteAccountModal, setShowDeleteAccountModal] = useState(false);
-  const [searchResults, setSearchResults] = useState<any[]>([]);
-  const [showSearchResults, setShowSearchResults] = useState(false);
 
-  // State untuk GSAP Loading - DIPERBAIKI
+  // State untuk GSAP Loading
   const [showGsapLoading, setShowGsapLoading] = useState(true);
   const [currentRandomNumber, setCurrentRandomNumber] = useState(0);
 
@@ -242,269 +238,238 @@ export default function HomePage(): React.JSX.Element {
   const userDropdownRef = useRef<HTMLDivElement>(null);
   const menuOverlayRef = useRef<HTMLDivElement>(null);
   
-  // Ref untuk notifikasi dan search
+  // Ref untuk notifikasi
   const notificationRef = useRef<HTMLDivElement>(null);
   const notificationDropdownRef = useRef<HTMLDivElement>(null);
-  const searchInputRef = useRef<HTMLInputElement>(null);
-  const searchContainerRef = useRef<HTMLDivElement>(null);
   const userProfileModalRef = useRef<HTMLDivElement>(null);
 
-  // Ref untuk GSAP Loading - DIPERBAIKI
+  // Ref untuk GSAP Loading
   const gsapLoadingRef = useRef<HTMLDivElement>(null);
   const loadingNumberRef = useRef<HTMLDivElement>(null);
 
   // Ref untuk modal kalender
   const calendarModalRef = useRef<HTMLDivElement>(null);
 
-// Tambahkan state ini di dalam component HomePage (setelah state lainnya)
-const [openSection, setOpenSection] = useState<string | null>(null);
+  // State untuk toggle section di menu overlay
+  const [openSection, setOpenSection] = useState<string | null>(null);
 
-// Fungsi untuk toggle section
-const handleToggleSection = (section: string) => {
-  setOpenSection(openSection === section ? null : section);
-};
-
-
-
-
-
+  // Fungsi untuk toggle section
+  const handleToggleSection = (section: string) => {
+    setOpenSection(openSection === section ? null : section);
+  };
 
   // State untuk Spotify
-const [currentTrack, setCurrentTrack] = useState<string | null>(null);
-const [isPlaying, setIsPlaying] = useState(false);
-const [currentEmbedUrl, setCurrentEmbedUrl] = useState<string>('');
+  const [currentTrack, setCurrentTrack] = useState<string | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentEmbedUrl, setCurrentEmbedUrl] = useState<string>('');
 
-// Data playlist lagu kesukaan dengan Spotify embed URL
-const favoriteTracks = [
-  // Hanin Dhiya
-  {
-    id: 'hanin1',
-    title: 'Pupus',
-    artist: 'Hanin Dhiya',
-    embedUrl: 'https://open.spotify.com/embed/track/4za8UJq7JI99ilRYQXVrkm?utm_source=generator',
-    spotifyUrl: 'https://open.spotify.com/track/4za8UJq7JI99ilRYQXVrkm?si=e767fcf3e9ae4a6c'
-  },
-  {
-    id: 'hanin2',
-    title: 'Suatu Saat Nanti',
-    artist: 'Hanin Dhiya',
-    embedUrl: 'https://open.spotify.com/embed/track/11nApQrr7tfBNYzBOmHWCc?utm_source=generator',
-    spotifyUrl: 'https://open.spotify.com/track/11nApQrr7tfBNYzBOmHWCc?si=a141c85a054d41b0'
-  },
-  // Stand Here Alone
-  {
-    id: 'sha1',
-    title: 'Kita Lawan Mereka',
-    artist: 'Stand Here Alone',
-    embedUrl: 'https://open.spotify.com/embed/track/2rj9nnNMZQNs2pZAPWuvze?utm_source=generator',
-    spotifyUrl: 'https://open.spotify.com/track/2rj9nnNMZQNs2pZAPWuvze?si=34b6e33a87454394'
-  },
-  {
-    id: 'sha2',
-    title: 'Korban Lelaki',
-    artist: 'Stand Here Alone',
-    embedUrl: 'https://open.spotify.com/embed/track/3u53sM4xrdWl0uDLzcFm6x?utm_source=generator',
-    spotifyUrl: 'https://open.spotify.com/track/3u53sM4xrdWl0uDLzcFm6x?si=ba3bbf39522a475e'
-  },
-  {
-    id: 'sha3',
-    title: 'Wanita Masih Banyak',
-    artist: 'Stand Here Alone',
-    embedUrl: 'https://open.spotify.com/embed/track/5H60BCrbWBocSIAoZwjxwD?utm_source=generator',
-    spotifyUrl: 'https://open.spotify.com/track/5H60BCrbWBocSIAoZwjxwD?si=2ac532c98a9b483e'
-  }
-];
+  // Data playlist lagu kesukaan dengan Spotify embed URL
+  const favoriteTracks = [
+    // Hanin Dhiya
+    {
+      id: 'hanin1',
+      title: 'Pupus',
+      artist: 'Hanin Dhiya',
+      embedUrl: 'https://open.spotify.com/embed/track/4za8UJq7JI99ilRYQXVrkm?utm_source=generator',
+      spotifyUrl: 'https://open.spotify.com/track/4za8UJq7JI99ilRYQXVrkm?si=e767fcf3e9ae4a6c'
+    },
+    {
+      id: 'hanin2',
+      title: 'Suatu Saat Nanti',
+      artist: 'Hanin Dhiya',
+      embedUrl: 'https://open.spotify.com/embed/track/11nApQrr7tfBNYzBOmHWCc?utm_source=generator',
+      spotifyUrl: 'https://open.spotify.com/track/11nApQrr7tfBNYzBOmHWCc?si=a141c85a054d41b0'
+    },
+    // Stand Here Alone
+    {
+      id: 'sha1',
+      title: 'Kita Lawan Mereka',
+      artist: 'Stand Here Alone',
+      embedUrl: 'https://open.spotify.com/embed/track/2rj9nnNMZQNs2pZAPWuvze?utm_source=generator',
+      spotifyUrl: 'https://open.spotify.com/track/2rj9nnNMZQNs2pZAPWuvze?si=34b6e33a87454394'
+    },
+    {
+      id: 'sha2',
+      title: 'Korban Lelaki',
+      artist: 'Stand Here Alone',
+      embedUrl: 'https://open.spotify.com/embed/track/3u53sM4xrdWl0uDLzcFm6x?utm_source=generator',
+      spotifyUrl: 'https://open.spotify.com/track/3u53sM4xrdWl0uDLzcFm6x?si=ba3bbf39522a475e'
+    },
+    {
+      id: 'sha3',
+      title: 'Wanita Masih Banyak',
+      artist: 'Stand Here Alone',
+      embedUrl: 'https://open.spotify.com/embed/track/5H60BCrbWBocSIAoZwjxwD?utm_source=generator',
+      spotifyUrl: 'https://open.spotify.com/track/5H60BCrbWBocSIAoZwjxwD?si=2ac532c98a9b483e'
+    }
+  ];
 
-// Fungsi untuk memutar lagu
-const playTrack = (track: typeof favoriteTracks[0]) => {
-  setCurrentTrack(track.id);
-  setCurrentEmbedUrl(track.embedUrl);
-  setIsPlaying(true);
-};
+  // Fungsi untuk memutar lagu
+  const playTrack = (track: typeof favoriteTracks[0]) => {
+    setCurrentTrack(track.id);
+    setCurrentEmbedUrl(track.embedUrl);
+    setIsPlaying(true);
+  };
 
+  // Component Menu Item
+  const MenuItem = ({ number, title, mainUrl, isOpen, onToggle, children }: {
+    number: string;
+    title: string;
+    mainUrl: string;
+    isOpen: boolean;
+    onToggle: () => void;
+    children: React.ReactNode;
+  }) => (
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+      style={{
+        borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+      }}
+    >
+      <div
+        onClick={onToggle}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          cursor: 'pointer',
+          padding: '1rem 0',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+          <span style={{
+            color: 'rgba(255, 255, 255, 0.5)',
+            fontSize: '2rem',
+            fontWeight: '300',
+            fontFamily: 'monospace'
+          }}>{number}</span>
+          
+          <span
+            onClick={(e) => {
+              e.stopPropagation();
+              router.push(mainUrl);
+            }}
+            style={{
+              color: '#FFFFFF',
+              fontSize: isMobile ? '3rem' : '4.5rem',
+              fontWeight: '500',
+              fontFamily: 'Helvetica, Arial, sans-serif',
+              textShadow: '0 0 10px rgba(255,255,255,0.3)',
+              cursor: 'pointer',
+            }}
+          >
+            {title}
+          </span>
+        </div>
+        
+        <div style={{
+          transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)',
+          transition: 'transform 0.3s ease'
+        }}>
+          <svg
+            width="50"
+            height="50"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#FFFFFF"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            style={{
+              filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.5))'
+            }}
+          >
+            <path d="M7 7h10v10" />
+            <path d="M17 7L7 17" />
+          </svg>
+        </div>
+      </div>
 
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.8rem',
+              marginLeft: '6rem',
+              marginTop: '0.5rem',
+              marginBottom: '1rem',
+              overflow: 'hidden'
+            }}
+          >
+            {children}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
 
-
-
-
-
-  
-
-
-// Component Menu Item - tanpa animasi gerak
-const MenuItem = ({ number, title, mainUrl, isOpen, onToggle, children }: {
-  number: string;
-  title: string;
-  mainUrl: string;
-  isOpen: boolean;
-  onToggle: () => void;
-  children: React.ReactNode;
-}) => (
-  <motion.div
-    initial={{ opacity: 0, y: 30 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.6 }}
-    style={{
-      borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
-    }}
-  >
-    {/* Header yang bisa diklik untuk toggle - tanpa hover effect */}
+  // Component Sub Menu Item
+  const SubMenuItem = ({ number, title, url }: {
+    number: string;
+    title: string;
+    url: string;
+  }) => (
     <div
-      onClick={onToggle}
       style={{
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'space-between',
+        gap: '1.5rem',
+        padding: '0.5rem 0',
         cursor: 'pointer',
-        padding: '1rem 0',
-        transition: 'none' // Hapus transition
+        borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
       }}
+      onClick={() => router.push(url)}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
-        <span style={{
-          color: 'rgba(255, 255, 255, 0.5)',
-          fontSize: '2rem',
-          fontWeight: '300',
-          fontFamily: 'monospace'
-        }}>{number}</span>
-        
-        {/* Title - tanpa hover effect */}
-        <span
-          onClick={(e) => {
-            e.stopPropagation();
-            router.push(mainUrl);
-          }}
-          style={{
-            color: '#FFFFFF',
-            fontSize: isMobile ? '3rem' : '4.5rem',
-            fontWeight: '500',
-            fontFamily: 'Helvetica, Arial, sans-serif',
-            textShadow: '0 0 10px rgba(255,255,255,0.3)',
-            cursor: 'pointer',
-            transition: 'none' // Hapus transition
-          }}
-        >
-          {title}
-        </span>
-      </div>
-      
-      {/* Arrow yang berubah sesuai state - tanpa animasi rotate */}
-      <div style={{
-        transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)',
-        transition: 'transform 0.3s ease' // Hanya arrow yang tetap punya animasi
+      <span style={{ 
+        color: 'rgba(255, 255, 255, 0.3)', 
+        fontSize: '0.9rem', 
+        fontFamily: 'monospace', 
+        width: '30px' 
       }}>
-        <svg
-          width="50"
-          height="50"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="#FFFFFF"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          style={{
-            filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.5))'
-          }}
-        >
-          <path d="M7 7h10v10" />
-          <path d="M17 7L7 17" />
-        </svg>
-      </div>
+        {number}
+      </span>
+      <span style={{ 
+        color: 'rgba(255, 255, 255, 0.8)', 
+        fontSize: '1.2rem',
+        flex: 1
+      }}>
+        {title}
+      </span>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2">
+        <path d="M7 7h10v10" />
+        <path d="M17 7L7 17" />
+      </svg>
     </div>
+  );
 
-    {/* Sub-menu dengan animasi muncul/hilang - tetap ada animasi */}
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: 'auto' }}
-          exit={{ opacity: 0, height: 0 }}
-          transition={{ duration: 0.3 }}
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '0.8rem',
-            marginLeft: '6rem',
-            marginTop: '0.5rem',
-            marginBottom: '1rem',
-            overflow: 'hidden'
-          }}
-        >
-          {children}
-        </motion.div>
-      )}
-    </AnimatePresence>
-  </motion.div>
-);
+  // State untuk jam Jakarta
+  const [jakartaTime, setJakartaTime] = useState<string>('');
 
-// Component Sub Menu Item - tanpa animasi hover
-const SubMenuItem = ({ number, title, url }: {
-  number: string;
-  title: string;
-  url: string;
-}) => (
-  <div // Ganti dari motion.div ke div biasa
-    style={{
-      display: 'flex',
-      alignItems: 'center',
-      gap: '1.5rem',
-      padding: '0.5rem 0',
-      cursor: 'pointer',
-      borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
-    }}
-    onClick={() => router.push(url)}
-  >
-    <span style={{ 
-      color: 'rgba(255, 255, 255, 0.3)', 
-      fontSize: '0.9rem', 
-      fontFamily: 'monospace', 
-      width: '30px' 
-    }}>
-      {number}
-    </span>
-    <span style={{ 
-      color: 'rgba(255, 255, 255, 0.8)', 
-      fontSize: '1.2rem',
-      flex: 1
-    }}>
-      {title}
-    </span>
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2">
-      <path d="M7 7h10v10" />
-      <path d="M17 7L7 17" />
-    </svg>
-  </div>
-);
+  // useEffect untuk update jam Jakarta setiap detik
+  useEffect(() => {
+    const updateJakartaTime = () => {
+      const now = new Date();
+      const timeString = now.toLocaleTimeString('id-ID', { 
+        timeZone: 'Asia/Jakarta', 
+        hour12: false,
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      });
+      setJakartaTime(timeString);
+    };
 
-
-// Tambahkan state ini di dalam component HomePage (setelah state lainnya)
-const [jakartaTime, setJakartaTime] = useState<string>('');
-
-// useEffect untuk update jam Jakarta setiap detik
-useEffect(() => {
-  const updateJakartaTime = () => {
-    const now = new Date();
-    const timeString = now.toLocaleTimeString('id-ID', { 
-      timeZone: 'Asia/Jakarta', 
-      hour12: false,
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit'
-    });
-    setJakartaTime(timeString);
-  };
-
-  // Update immediately
-  updateJakartaTime();
-
-  // Update every second
-  const interval = setInterval(updateJakartaTime, 1000);
-
-  return () => clearInterval(interval);
-}, []);
-
-
-
-  
+    updateJakartaTime();
+    const interval = setInterval(updateJakartaTime, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Data untuk pencarian
   const searchablePages = [
@@ -573,13 +538,13 @@ useEffect(() => {
       icon: "📝"
     },
     {
-    id: 9,
-    title: "Calendar",
-    description: "Lihat kalender kegiatan admin",
-    category: "Features",
-    url: "/calendar",
-    icon: "🗓️"
-  }
+      id: 9,
+      title: "Calendar",
+      description: "Lihat kalender kegiatan admin",
+      category: "Features",
+      url: "/calendar",
+      icon: "🗓️"
+    }
   ];
 
   // Animasi loading text
@@ -618,9 +583,6 @@ useEffect(() => {
     { title: "Development", description: "Frontend & Backend" },
     { title: "Features", description: "Functionality & Integration" }
   ];
-
-
- 
 
   // Data untuk halaman Index
   const indexTopics = [
@@ -766,35 +728,33 @@ useEffect(() => {
   };
 
   const generateCalendar = () => {
-const daysInMonth = getDaysInMonth(currentYear, currentMonth);
-const firstDayOfMonth = getFirstDayOfMonth(currentYear, currentMonth);
-const days = [];
-// Tambahkan hari kosong untuk hari-hari sebelum bulan dimulai
-for (let i = 0; i < firstDayOfMonth; i++) {
-days.push(null);
-}
-// Tambahkan hari-hari dalam bulan
-for (let i = 1; i <= daysInMonth; i++) {
-const currentDate = new Date(currentYear, currentMonth, i);
-const dayEvents = calendarEvents.filter(event => {
-const eventDate = event.date instanceof Date ? event.date : new Date(event.date);
-return (
-eventDate.getDate() === i &&
-eventDate.getMonth() === currentMonth &&
-eventDate.getFullYear() === currentYear
-);
-});
-days.push({
-date: i,
-fullDate: currentDate,
-isToday: currentDate.toDateString() === new Date().toDateString(),
-events: dayEvents
-});
-}
-return days;
-};
-
-
+    const daysInMonth = getDaysInMonth(currentYear, currentMonth);
+    const firstDayOfMonth = getFirstDayOfMonth(currentYear, currentMonth);
+    const days = [];
+    
+    for (let i = 0; i < firstDayOfMonth; i++) {
+      days.push(null);
+    }
+    
+    for (let i = 1; i <= daysInMonth; i++) {
+      const currentDate = new Date(currentYear, currentMonth, i);
+      const dayEvents = calendarEvents.filter(event => {
+        const eventDate = event.date instanceof Date ? event.date : new Date(event.date);
+        return (
+          eventDate.getDate() === i &&
+          eventDate.getMonth() === currentMonth &&
+          eventDate.getFullYear() === currentYear
+        );
+      });
+      days.push({
+        date: i,
+        fullDate: currentDate,
+        isToday: currentDate.toDateString() === new Date().toDateString(),
+        events: dayEvents
+      });
+    }
+    return days;
+  };
 
   // Fungsi untuk navigasi bulan
   const navigateMonth = (direction: 'prev' | 'next') => {
@@ -831,89 +791,6 @@ return days;
     setCurrentYear(2026);
     setCurrentMonth(0);
     setSelectedDate(null);
-  };
-
-  // Fungsi untuk melakukan pencarian
-  const performSearch = (query: string) => {
-    if (!query.trim()) {
-      setSearchResults([]);
-      setShowSearchResults(false);
-      return;
-    }
-
-    const lowerQuery = query.toLowerCase().trim();
-    
-    const results = searchablePages.filter(page => 
-      page.title.toLowerCase().includes(lowerQuery) ||
-      page.description.toLowerCase().includes(lowerQuery) ||
-      page.category.toLowerCase().includes(lowerQuery)
-    );
-
-    setSearchResults(results);
-    setShowSearchResults(results.length > 0);
-    
-    if (results.length > 0 && searchContainerRef.current) {
-      gsap.fromTo(".search-result-item", 
-        { opacity: 0, y: -10 },
-        { 
-          opacity: 1, 
-          y: 0, 
-          duration: 0.3, 
-          stagger: 0.1,
-          ease: "power2.out" 
-        }
-      );
-    }
-  };
-
-  // Update handler untuk search query
-  const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setSearchQuery(value);
-    performSearch(value);
-  };
-
-  // Handler untuk klik pada hasil pencarian
-  const handleSearchResultClick = (url: string) => {
-    router.push(url);
-    setShowSearch(false);
-    setSearchQuery("");
-    setShowSearchResults(false);
-  };
-
-  // Handler untuk key press di search
-  const handleSearchKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && searchQuery.trim()) {
-      if (searchResults.length > 0) {
-        handleSearchResultClick(searchResults[0].url);
-      } else {
-        router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
-        setShowSearch(false);
-        setSearchQuery("");
-      }
-    } else if (e.key === 'Escape') {
-      setShowSearch(false);
-      setSearchQuery("");
-      setShowSearchResults(false);
-    }
-  };
-
-  // Handler untuk toggle search
-  const handleSearchToggle = () => {
-    const newShowSearch = !showSearch;
-    setShowSearch(newShowSearch);
-    
-    if (newShowSearch) {
-      setTimeout(() => {
-        if (searchInputRef.current) {
-          searchInputRef.current.focus();
-        }
-      }, 100);
-    } else {
-      setSearchQuery("");
-      setSearchResults([]);
-      setShowSearchResults(false);
-    }
   };
 
   // Fungsi untuk mengirim notifikasi
@@ -1204,7 +1081,7 @@ return days;
     loadTotalLoggedInUsers();
   }, []);
 
-  // Fungsi untuk load user notes dari Firebase - DIPERBAIKI
+  // Fungsi untuk load user notes dari Firebase
   const loadUserNotes = async (userId: string) => {
     if (!db || !userId) return;
     
@@ -1212,7 +1089,6 @@ return days;
       setIsLoadingNotes(true);
       console.log(`📝 Loading notes for user: ${userId} from userNotes collection`);
       
-      // Gunakan collection 'userNotes' yang sama dengan halaman notes
       const notesRef = collection(db, 'userNotes');
       const q = query(
         notesRef, 
@@ -1226,17 +1102,6 @@ return days;
       querySnapshot.forEach((doc) => {
         const data = doc.data();
         
-        // DEBUG: Tampilkan data yang diterima
-        console.log("Firestore note data:", {
-          id: doc.id,
-          data: data,
-          hasCategory: !!data.category,
-          hasLink: !!data.link,
-          hasDescription: !!data.description,
-          hasContent: !!data.content
-        });
-        
-        // Ambil field sesuai dengan struktur di halaman notes
         const noteTitle = data.title?.trim() || 'Untitled Note';
         const noteDescription = data.description?.trim() || data.content?.trim() || '';
         const noteCategory = data.category?.trim() || '';
@@ -1245,22 +1110,21 @@ return days;
         notesData.push({
           id: doc.id,
           title: noteTitle,
-          content: noteDescription, // Gunakan description sebagai content
+          content: noteDescription,
           userId: data.userId || userId,
           userName: data.userName || userDisplayName || 'User',
           userEmail: data.userEmail || user?.email || '',
           createdAt: data.createdAt || new Date(),
           updatedAt: data.updatedAt || new Date(),
           isPinned: data.isPinned || false,
-          category: noteCategory, // Tambahkan category
-          link: noteLink, // Tambahkan link
+          category: noteCategory,
+          link: noteLink,
           color: data.color || '#3B82F6',
           tags: data.tags || []
         });
       });
       
       console.log(`✅ Loaded ${notesData.length} notes for user ${userId}`);
-      console.log("Sample note data:", notesData[0]); // Debug: tampilkan contoh data
       
       setUserNotes(notesData);
       setTotalNotesCount(notesData.length);
@@ -1271,12 +1135,11 @@ return days;
     }
   };
 
-  // Fungsi untuk load user notes secara real-time - DIPERBAIKI
+  // Fungsi untuk load user notes secara real-time
   const loadUserNotesRealtime = (userId: string) => {
     if (!db || !userId) return () => {};
     
     try {
-      // Gunakan collection 'userNotes' yang sama
       const notesRef = collection(db, 'userNotes');
       const q = query(
         notesRef, 
@@ -1290,7 +1153,6 @@ return days;
         querySnapshot.forEach((doc) => {
           const data = doc.data();
           
-          // Ambil field sesuai dengan struktur di halaman notes
           const noteTitle = data.title?.trim() || 'Untitled Note';
           const noteDescription = data.description?.trim() || data.content?.trim() || '';
           const noteCategory = data.category?.trim() || '';
@@ -1299,15 +1161,15 @@ return days;
           notesData.push({
             id: doc.id,
             title: noteTitle,
-            content: noteDescription, // Gunakan description sebagai content
+            content: noteDescription,
             userId: data.userId || userId,
             userName: data.userName || userDisplayName || 'User',
             userEmail: data.userEmail || user?.email || '',
             createdAt: data.createdAt || new Date(),
             updatedAt: data.updatedAt || new Date(),
             isPinned: data.isPinned || false,
-            category: noteCategory, // Tambahkan category
-            link: noteLink, // Tambahkan link
+            category: noteCategory,
+            link: noteLink,
             color: data.color || '#3B82F6',
             tags: data.tags || []
           });
@@ -1591,52 +1453,51 @@ return days;
     }
   }, [db, auth?.currentUser]);
 
- // Load events kalender dari Firebase - DIPERBAIKI
-useEffect(() => {
-if (showCalendarModal && db) {
-setIsLoadingEvents(true);
-try {
-const eventsRef = collection(db, 'calendarEvents');
-const q = query(eventsRef, orderBy('date', 'asc'));
-const unsubscribe = onSnapshot(q,
-(querySnapshot) => {
-const eventsData: CalendarEvent[] = [];
-querySnapshot.forEach((doc) => {
-const data = doc.data();
-let eventDate = data.date;
-// Convert Firestore Timestamp to Date if needed
-if (eventDate && typeof eventDate.toDate === 'function') {
-eventDate = eventDate.toDate();
-} else if (typeof eventDate === 'string') {
-eventDate = new Date(eventDate);
-}
-eventsData.push({
-id: doc.id,
-title: data.title || "No Title",
-description: data.description || "",
-date: eventDate,
-color: data.color || "#3B82F6",
-label: data.label || "Event",
-createdBy: data.createdBy || "Unknown",
-isAdmin: data.isAdmin || false
-});
-});
-console.log(`✅ Loaded ${eventsData.length} calendar events for homepage`);
-setCalendarEvents(eventsData);
-setIsLoadingEvents(false);
-},
-(error) => {
-console.error("❌ Error loading calendar events:", error);
-setIsLoadingEvents(false);
-}
-);
-return () => unsubscribe();
-} catch (error) {
-console.error("❌ Error setting up calendar listener:", error);
-setIsLoadingEvents(false);
-}
-}
-}, [showCalendarModal, db]);
+  // Load events kalender dari Firebase
+  useEffect(() => {
+    if (showCalendarModal && db) {
+      setIsLoadingEvents(true);
+      try {
+        const eventsRef = collection(db, 'calendarEvents');
+        const q = query(eventsRef, orderBy('date', 'asc'));
+        const unsubscribe = onSnapshot(q,
+          (querySnapshot) => {
+            const eventsData: CalendarEvent[] = [];
+            querySnapshot.forEach((doc) => {
+              const data = doc.data();
+              let eventDate = data.date;
+              if (eventDate && typeof eventDate.toDate === 'function') {
+                eventDate = eventDate.toDate();
+              } else if (typeof eventDate === 'string') {
+                eventDate = new Date(eventDate);
+              }
+              eventsData.push({
+                id: doc.id,
+                title: data.title || "No Title",
+                description: data.description || "",
+                date: eventDate,
+                color: data.color || "#3B82F6",
+                label: data.label || "Event",
+                createdBy: data.createdBy || "Unknown",
+                isAdmin: data.isAdmin || false
+              });
+            });
+            console.log(`✅ Loaded ${eventsData.length} calendar events for homepage`);
+            setCalendarEvents(eventsData);
+            setIsLoadingEvents(false);
+          },
+          (error) => {
+            console.error("❌ Error loading calendar events:", error);
+            setIsLoadingEvents(false);
+          }
+        );
+        return () => unsubscribe();
+      } catch (error) {
+        console.error("❌ Error setting up calendar listener:", error);
+        setIsLoadingEvents(false);
+      }
+    }
+  }, [showCalendarModal, db]);
 
   // Animasi teks nama user berjalan
   useEffect(() => {
@@ -1670,47 +1531,17 @@ setIsLoadingEvents(false);
     }
   }, [user, userDisplayName, isMobile]);
 
-  // Animasi GSAP untuk search expand
-  useEffect(() => {
-    if (searchContainerRef.current) {
-      if (showSearch) {
-        gsap.to(searchContainerRef.current, {
-          width: 250,
-          duration: 0.3,
-          ease: "power2.out"
-        });
-        setTimeout(() => {
-          if (searchInputRef.current) {
-            searchInputRef.current.focus();
-          }
-        }, 100);
-      } else {
-        gsap.to(searchContainerRef.current, {
-          width: 40,
-          duration: 0.3,
-          ease: "power2.in",
-          onComplete: () => {
-            setSearchQuery("");
-          }
-        });
-      }
-    }
-  }, [showSearch]);
-
   // Mouse wheel scroll handler
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
-      // Biarkan scroll normal jika tidak dalam modal
       if (!showUserProfileModal && !showMenuruFullPage && !showPhotoFullPage && !showCalendarModal) {
         return;
       }
       
-      // Jika dalam modal, izinkan scroll dengan mouse wheel
       e.stopPropagation();
     };
 
     const handleMouseDown = (e: MouseEvent) => {
-      // Middle click (scroll wheel click) untuk scroll
       if (e.button === 1) {
         e.preventDefault();
       }
@@ -1736,9 +1567,6 @@ setIsLoadingEvents(false);
       }
       if (notificationDropdownRef.current && !notificationDropdownRef.current.contains(event.target as Node)) {
         setShowNotification(false);
-      }
-      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
-        setShowSearch(false);
       }
       if (userProfileModalRef.current && !userProfileModalRef.current.contains(event.target as Node)) {
         setShowUserProfileModal(false);
@@ -1838,28 +1666,23 @@ setIsLoadingEvents(false);
 
   // Fungsi untuk generate angka acak
   const generateRandomNumber = (): number => {
-    // 70% kemungkinan satuan (1-9)
-    // 20% kemungkinan puluhan (10-99)
-    // 10% kemungkinan ratusan (100-999)
     const random = Math.random();
     
     if (random < 0.7) {
-      return Math.floor(Math.random() * 9) + 1; // 1-9
+      return Math.floor(Math.random() * 9) + 1;
     } else if (random < 0.9) {
-      return Math.floor(Math.random() * 90) + 10; // 10-99
+      return Math.floor(Math.random() * 90) + 10;
     } else {
-      return Math.floor(Math.random() * 900) + 100; // 100-999
+      return Math.floor(Math.random() * 900) + 100;
     }
   };
 
-  // Animasi GSAP Loading dengan angka acak - DIPERBAIKI
+  // Animasi GSAP Loading dengan angka acak
   useEffect(() => {
     if (!loadingNumberRef.current) return;
 
-    // Timeline untuk animasi angka acak
     const loadingTimeline = gsap.timeline({
       onComplete: () => {
-        // Setelah selesai, tunggu sebentar lalu fade out
         setTimeout(() => {
           gsap.to(gsapLoadingRef.current, {
             opacity: 0,
@@ -1873,22 +1696,18 @@ setIsLoadingEvents(false);
       }
     });
 
-    // Total durasi animasi: 3 detik
     const totalDuration = 3;
-    const numChanges = 15; // Jumlah perubahan angka
+    const numChanges = 15;
     const changeInterval = totalDuration / numChanges;
 
-    // Animasikan perubahan angka acak
     for (let i = 0; i < numChanges; i++) {
       loadingTimeline.to({}, {
         duration: changeInterval,
         onStart: () => {
-          // Generate angka acak baru
           const newNumber = generateRandomNumber();
           setCurrentRandomNumber(newNumber);
         },
         onUpdate: function() {
-          // Efek visual halus saat angka berubah
           if (loadingNumberRef.current) {
             const progress = this.progress();
             const scale = 1 + (Math.sin(progress * Math.PI * 2) * 0.05);
@@ -1902,7 +1721,6 @@ setIsLoadingEvents(false);
       }, i * changeInterval);
     }
 
-    // Animasi awal untuk angka pertama
     loadingTimeline.fromTo(loadingNumberRef.current,
       {
         scale: 0.8,
@@ -1917,7 +1735,6 @@ setIsLoadingEvents(false);
       0
     );
 
-    // Animasi akhir sebelum fade out
     loadingTimeline.to(loadingNumberRef.current, {
       scale: 1.1,
       duration: 0.3,
@@ -1978,9 +1795,6 @@ setIsLoadingEvents(false);
         if (showNotification) {
           setShowNotification(false);
         }
-        if (showSearch) {
-          setShowSearch(false);
-        }
         if (showUserProfileModal) {
           setShowUserProfileModal(false);
         }
@@ -2015,7 +1829,7 @@ setIsLoadingEvents(false);
       }
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
-  }, [isMobile, showMenuruFullPage, showPhotoFullPage, showUserDropdown, showLogoutModal, showMenuOverlay, showNotification, showSearch, showUserProfileModal, showDeleteAccountModal, showCalendarModal]);
+  }, [isMobile, showMenuruFullPage, showPhotoFullPage, showUserDropdown, showLogoutModal, showMenuOverlay, showNotification, showUserProfileModal, showDeleteAccountModal, showCalendarModal]);
 
   // Animasi GSAP untuk tanda + di tombol Menuru
   useEffect(() => {
@@ -2158,11 +1972,10 @@ setIsLoadingEvents(false);
     handleOpenPhotoFullPage();
   };
 
-  // Handler untuk Sign In / User Button - DIPERBAIKI
+  // Handler untuk Sign In / User Button
   const handleSignInClick = () => {
     if (user) {
       setShowUserProfileModal(true);
-      // Load notes ketika modal dibuka
       if (user) {
         loadUserNotes(user.uid);
       }
@@ -2289,15 +2102,6 @@ setIsLoadingEvents(false);
     }
   };
 
-  // Handler untuk search
-  const handleSearch = () => {
-    if (searchQuery.trim()) {
-      console.log("Searching for:", searchQuery);
-      router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
-      setShowSearch(false);
-    }
-  };
-
   // Handler untuk update profile
   const handleUpdateProfile = async () => {
     if (!user || !auth.currentUser) return;
@@ -2337,7 +2141,6 @@ setIsLoadingEvents(false);
     if (!user || !auth.currentUser) return;
     
     try {
-      // Hapus semua notes user
       const notesRef = collection(db, 'notes');
       const q = query(notesRef, where('userId', '==', user.uid));
       const querySnapshot = await getDocs(q);
@@ -2347,13 +2150,11 @@ setIsLoadingEvents(false);
         batch.delete(doc.ref);
       });
       
-      // Hapus user stats
       const userStatsRef = doc(db, 'userStats', user.uid);
       batch.delete(userStatsRef);
       
       await batch.commit();
       
-      // Hapus user dari authentication
       await deleteUser(auth.currentUser);
       
       alert("Akun berhasil dihapus!");
@@ -2394,7 +2195,7 @@ setIsLoadingEvents(false);
       MozOsxFontSmoothing: 'grayscale'
     }}>
 
-      {/* GSAP Modern Loading Animation - DIPERBAIKI DENGAN ANGKA ACAK */}
+      {/* GSAP Modern Loading Animation */}
       <AnimatePresence>
         {showGsapLoading && (
           <motion.div
@@ -2426,12 +2227,11 @@ setIsLoadingEvents(false);
                 msUserSelect: 'none'
               }}
             >
-              {/* Angka loading acak dengan animasi GSAP */}
               <div 
                 ref={loadingNumberRef}
                 style={{
                   fontSize: isMobile ? '5rem' : '7rem',
-                  fontWeight: 400, // Normal, tidak bold
+                  fontWeight: 400,
                   fontFamily: 'Helvetica, Arial, sans-serif',
                   color: 'white',
                   opacity: 0,
@@ -2445,28 +2245,26 @@ setIsLoadingEvents(false);
         )}
       </AnimatePresence>
 
-
-
       {/* Loading State */}
-{isLoadingEvents && (
-<div style={{
-padding: '3rem 0',
-textAlign: 'center',
-color: 'rgba(255, 255, 255, 0.7)',
-fontFamily: 'Helvetica, Arial, sans-serif'
-}}>
-<motion.div
-animate={{ rotate: 360 }}
-transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-style={{ marginBottom: '1rem' }}
->
-<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-<path d="M21 12a9 9 0 1 1-6.219-8.56"/>
-</svg>
-</motion.div>
-Loading events...
-</div>
-)}
+      {isLoadingEvents && (
+        <div style={{
+          padding: '3rem 0',
+          textAlign: 'center',
+          color: 'rgba(255, 255, 255, 0.7)',
+          fontFamily: 'Helvetica, Arial, sans-serif'
+        }}>
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+            style={{ marginBottom: '1rem' }}
+          >
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+            </svg>
+          </motion.div>
+          Loading events...
+        </div>
+      )}
 
       {/* Modal Kalender Tahun Baru */}
       <AnimatePresence>
@@ -2531,15 +2329,15 @@ Loading events...
                     Kalender MENURU {currentYear}
                   </h2>
                   <div style={{
-backgroundColor: 'transparent',
-color: 'white',
-fontSize: '0.9rem',
-padding: '0.3rem 0.8rem',
-borderRadius: '20px',
-border: '1px solid rgba(255, 255, 255, 0.3)'
-}}>
-{calendarEvents.length} Events
-</div>
+                    backgroundColor: 'transparent',
+                    color: 'white',
+                    fontSize: '0.9rem',
+                    padding: '0.3rem 0.8rem',
+                    borderRadius: '20px',
+                    border: '1px solid rgba(255, 255, 255, 0.3)'
+                  }}>
+                    {calendarEvents.length} Events
+                  </div>
                 </div>
                 
                 <motion.button
@@ -2907,30 +2705,30 @@ border: '1px solid rgba(255, 255, 255, 0.3)'
                       </motion.button>
                     </div>
 
-                   {(() => {
-if (isLoadingEvents) {
-return null; // Loading sudah ditampilkan di atas
-}
-const eventsForSelectedDate = calendarEvents.filter(event =>
-event.date.getDate() === selectedDate.getDate() &&
-event.date.getMonth() === selectedDate.getMonth() &&
-event.date.getFullYear() === selectedDate.getFullYear()
-);
-if (eventsForSelectedDate.length === 0) {
-return (
-<div style={{
-padding: '2rem',
-textAlign: 'center',
-color: 'rgba(255, 255, 255, 0.5)',
-fontFamily: 'Helvetica, Arial, sans-serif'
-}}>
-<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ opacity: 0.5 }}>
-<path d="M8 2v4M16 2v4M3 10h18M5 4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V6a2 2 0 00-2-2H5z"/>
-</svg>
-<p style={{ marginTop: '1rem' }}>Tidak ada kegiatan pada tanggal ini</p>
-</div>
-);
-}
+                    {(() => {
+                      if (isLoadingEvents) {
+                        return null;
+                      }
+                      const eventsForSelectedDate = calendarEvents.filter(event =>
+                        event.date.getDate() === selectedDate.getDate() &&
+                        event.date.getMonth() === selectedDate.getMonth() &&
+                        event.date.getFullYear() === selectedDate.getFullYear()
+                      );
+                      if (eventsForSelectedDate.length === 0) {
+                        return (
+                          <div style={{
+                            padding: '2rem',
+                            textAlign: 'center',
+                            color: 'rgba(255, 255, 255, 0.5)',
+                            fontFamily: 'Helvetica, Arial, sans-serif'
+                          }}>
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ opacity: 0.5 }}>
+                              <path d="M8 2v4M16 2v4M3 10h18M5 4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V6a2 2 0 00-2-2H5z"/>
+                            </svg>
+                            <p style={{ marginTop: '1rem' }}>Tidak ada kegiatan pada tanggal ini</p>
+                          </div>
+                        );
+                      }
                       return (
                         <div style={{
                           display: 'flex',
@@ -2952,7 +2750,6 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                                 alignItems: 'flex-start'
                               }}
                             >
-                              {/* Warna Label */}
                               <div style={{
                                 width: '4px',
                                 height: '100%',
@@ -2961,7 +2758,6 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                                 flexShrink: 0
                               }} />
 
-                              {/* Konten Event */}
                               <div style={{ flex: 1 }}>
                                 <div style={{
                                   display: 'flex',
@@ -3101,7 +2897,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
         )}
       </AnimatePresence>
 
-      {/* Modal Profil User - DIPERBAIKI */}
+      {/* Modal Profil User */}
       <AnimatePresence>
         {showUserProfileModal && user && (
           <motion.div
@@ -4520,1044 +4316,1040 @@ fontFamily: 'Helvetica, Arial, sans-serif'
         )}
       </AnimatePresence>
 
-
-{/* Menu Overlay dengan GSAP Animation - Modern Awwwards Style */}
-<AnimatePresence>
-  {showMenuOverlay && (
-    <motion.div
-      ref={menuOverlayRef}
-      key="menu-overlay"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.3 }}
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        backgroundColor: 'black',
-        zIndex: 9995,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        overflow: 'hidden',
-        transform: 'translateY(-100%)'
-      }}
-    >
-      {/* Background dengan efek grain dan pattern */}
-      <div style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        backgroundImage: `radial-gradient(circle at 30% 40%, rgba(255,255,255,0.02) 0%, transparent 40%),
-                          radial-gradient(circle at 70% 60%, rgba(255,255,255,0.02) 0%, transparent 40%),
-                          repeating-linear-gradient(45deg, rgba(255,255,255,0.005) 0px, rgba(255,255,255,0.005) 2px, transparent 2px, transparent 12px)`,
-        pointerEvents: 'none',
-        zIndex: 1
-      }} />
-
-      {/* Header Menu - JAKARTA & Jam di Kiri, MENURU di Tengah, Close di Kanan */}
-      <div style={{
-        position: 'absolute',
-        top: isMobile ? '1.5rem' : '2rem',
-        left: 0,
-        right: 0,
-        width: '100%',
-        display: 'grid',
-        gridTemplateColumns: '1fr auto 1fr',
-        alignItems: 'center',
-        padding: isMobile ? '0 2rem' : '0 4rem',
-        boxSizing: 'border-box',
-        zIndex: 10,
-        pointerEvents: 'none'
-      }}>
-        {/* Kiri - JAKARTA dan Jam */}
-        <div style={{
-          color: '#FFFFFF',
-          fontSize: isMobile ? '1.2rem' : '1.8rem',
-          fontWeight: '300',
-          fontFamily: 'Helvetica, Arial, sans-serif',
-          letterSpacing: '1px',
-          opacity: 0.9,
-          textShadow: '0 0 10px rgba(255,255,255,0.3)',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'flex-start',
-          justifySelf: 'start'
-        }}>
-          <span style={{ fontSize: isMobile ? '1.2rem' : '1.8rem', fontWeight: '300' }}>JAKARTA</span>
-          <span style={{ fontSize: isMobile ? '1.2rem' : '1.8rem', fontWeight: '300', marginTop: '0.2rem' }}>{jakartaTime}</span>
-        </div>
-
-        {/* Tengah - MENURU */}
-        <div style={{
-          color: '#FFFFFF',
-          fontSize: isMobile ? '2rem' : '3rem',
-          fontWeight: '300',
-          fontFamily: 'Helvetica, Arial, sans-serif',
-          letterSpacing: '4px',
-          textTransform: 'uppercase',
-          opacity: 0.9,
-          textShadow: '0 0 20px rgba(255,255,255,0.5)',
-          justifySelf: 'center'
-        }}>
-          MENURU
-        </div>
-
-        {/* Kanan - Kosong untuk menyeimbangkan grid */}
-        <div style={{ justifySelf: 'end' }}></div>
-      </div>
-
-      {/* Teks Berjalan dengan North East Arrow - PUTIH CERAH (TETAP BERJALAN) */}
-      <div style={{
-        position: 'absolute',
-        bottom: '10%',
-        left: 0,
-        width: '100%',
-        overflow: 'hidden',
-        whiteSpace: 'nowrap',
-        zIndex: 2
-      }}>
-        <motion.div
-          animate={{ 
-            x: ['0%', '-50%']
-          }}
-          transition={{ 
-            duration: 25,
-            repeat: Infinity,
-            ease: "linear"
-          }}
-          style={{
-            display: 'inline-block',
-            whiteSpace: 'nowrap',
-            fontSize: isMobile ? '6rem' : '12rem',
-            fontWeight: '300',
-            color: '#FFFFFF',
-            fontFamily: 'Helvetica, Arial, sans-serif',
-            textTransform: 'uppercase',
-            letterSpacing: '8px',
-            lineHeight: 1,
-            opacity: 0.7,
-            textShadow: '0 0 20px rgba(255,255,255,0.5), 0 0 40px rgba(255,255,255,0.3)',
-            filter: 'brightness(1.3)'
-          }}
-        >
-          MENU <svg width="180" height="180" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="3" strokeLinecap="round" style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 2rem', filter: 'drop-shadow(0 0 10px rgba(255,255,255,0.8)) drop-shadow(0 0 20px rgba(255,255,255,0.5))' }}>
-            <path d="M7 7h10v10" />
-            <path d="M17 7L7 17" />
-          </svg> MENU <svg width="180" height="180" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="3" strokeLinecap="round" style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 2rem', filter: 'drop-shadow(0 0 10px rgba(255,255,255,0.8)) drop-shadow(0 0 20px rgba(255,255,255,0.5))' }}>
-            <path d="M7 7h10v10" />
-            <path d="M17 7L7 17" />
-          </svg> MENU <svg width="180" height="180" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="3" strokeLinecap="round" style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 2rem', filter: 'drop-shadow(0 0 10px rgba(255,255,255,0.8)) drop-shadow(0 0 20px rgba(255,255,255,0.5))' }}>
-            <path d="M7 7h10v10" />
-            <path d="M17 7L7 17" />
-          </svg>
-        </motion.div>
-      </div>
-
-      {/* Container Utama dengan Scroll yang Stabil */}
-      <div style={{
-        position: 'absolute',
-        top: '15%', // Posisi tetap dari atas
-        bottom: '15%', // Posisi tetap dari bawah
-        left: 0,
-        right: 0,
-        zIndex: 3,
-        display: 'flex',
-        justifyContent: 'center',
-        overflow: 'hidden' // Mencegah scroll di container utama
-      }}>
-        {/* Konten dengan Scroll Internal */}
-        <div style={{
-          width: '100%',
-          maxWidth: '1200px',
-          padding: isMobile ? '0 2rem' : '0 4rem',
-          overflowY: 'auto', // Scroll hanya di dalam konten
-          overflowX: 'hidden',
-          scrollbarWidth: 'none', // Hide scrollbar Firefox
-          msOverflowStyle: 'none', // Hide scrollbar IE/Edge
-          position: 'relative',
-          height: '100%'
-        }}>
-          {/* Custom scrollbar hide untuk Chrome/Safari */}
-          <style jsx>{`
-            div::-webkit-scrollbar {
-              display: none;
-            }
-          `}</style>
-
-          {/* Konten Menu - Posisi relatif normal */}
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '0.5rem',
-            paddingTop: '0.5rem',
-            paddingBottom: '2rem'
-          }}>
-            
-            {/* CATATAN SECTION */}
+      {/* Menu Overlay dengan GSAP Animation */}
+      <AnimatePresence>
+        {showMenuOverlay && (
+          <motion.div
+            ref={menuOverlayRef}
+            key="menu-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              backgroundColor: 'black',
+              zIndex: 9995,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              overflow: 'hidden',
+              transform: 'translateY(-100%)'
+            }}
+          >
+            {/* Background dengan efek grain dan pattern */}
             <div style={{
-              borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              backgroundImage: `radial-gradient(circle at 30% 40%, rgba(255,255,255,0.02) 0%, transparent 40%),
+                                radial-gradient(circle at 70% 60%, rgba(255,255,255,0.02) 0%, transparent 40%),
+                                repeating-linear-gradient(45deg, rgba(255,255,255,0.005) 0px, rgba(255,255,255,0.005) 2px, transparent 2px, transparent 12px)`,
+              pointerEvents: 'none',
+              zIndex: 1
+            }} />
+
+            {/* Header Menu - JAKARTA & Jam di Kiri, MENURU di Tengah, Close di Kanan */}
+            <div style={{
+              position: 'absolute',
+              top: isMobile ? '1.5rem' : '2rem',
+              left: 0,
+              right: 0,
+              width: '100%',
+              display: 'grid',
+              gridTemplateColumns: '1fr auto 1fr',
+              alignItems: 'center',
+              padding: isMobile ? '0 2rem' : '0 4rem',
+              boxSizing: 'border-box',
+              zIndex: 10,
+              pointerEvents: 'none'
             }}>
-              {/* Header */}
-              <div
-                onClick={() => handleToggleSection('catatan')}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  cursor: 'pointer',
-                  padding: '1rem 0',
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
-                  <span style={{
-                    color: 'rgba(255, 255, 255, 0.5)',
-                    fontSize: '2rem',
-                    fontWeight: '300',
-                    fontFamily: 'monospace'
-                  }}>01</span>
-                  
-                  <span
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      router.push('/catatan');
-                    }}
-                    style={{
-                      color: '#FFFFFF',
-                      fontSize: isMobile ? '3rem' : '4.5rem',
-                      fontWeight: '300',
-                      fontFamily: 'Helvetica, Arial, sans-serif',
-                      textShadow: '0 0 10px rgba(255,255,255,0.3)',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    CATATAN
-                  </span>
-                </div>
-                
-                {/* Arrow dengan animasi rotate */}
-                <div style={{
-                  transform: openSection === 'catatan' ? 'rotate(90deg)' : 'rotate(0deg)',
-                  transition: 'transform 0.3s ease'
-                }}>
-                  <svg
-                    width="50"
-                    height="50"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="#FFFFFF"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    style={{
-                      filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.5))'
-                    }}
-                  >
-                    <path d="M7 7h10v10" />
-                    <path d="M17 7L7 17" />
-                  </svg>
-                </div>
+              {/* Kiri - JAKARTA dan Jam */}
+              <div style={{
+                color: '#FFFFFF',
+                fontSize: isMobile ? '1.2rem' : '1.8rem',
+                fontWeight: '300',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                letterSpacing: '1px',
+                opacity: 0.9,
+                textShadow: '0 0 10px rgba(255,255,255,0.3)',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'flex-start',
+                justifySelf: 'start'
+              }}>
+                <span style={{ fontSize: isMobile ? '1.2rem' : '1.8rem', fontWeight: '300' }}>JAKARTA</span>
+                <span style={{ fontSize: isMobile ? '1.2rem' : '1.8rem', fontWeight: '300', marginTop: '0.2rem' }}>{jakartaTime}</span>
               </div>
 
-              {/* Sub-menu */}
-              {openSection === 'catatan' && (
-                <div style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '0.8rem',
-                  marginLeft: '6rem',
-                  marginTop: '0.5rem',
-                  marginBottom: '1rem',
-                }}>
-                  {[
-                    { number: '01', title: 'Creative Process', url: '/catatan/creative' },
-                    { number: '02', title: 'Design Thinking', url: '/catatan/design' },
-                    { number: '03', title: 'UX Research', url: '/catatan/ux' },
-                    { number: '04', title: 'Development', url: '/catatan/dev' }
-                  ].map((item, idx) => (
-                    <div
-                      key={idx}
-                      onClick={() => router.push(item.url)}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '1.5rem',
-                        padding: '0.5rem 0',
-                        cursor: 'pointer',
-                        borderBottom: idx < 3 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none'
-                      }}
-                    >
-                      <span style={{ 
-                        color: 'rgba(255, 255, 255, 0.3)', 
-                        fontSize: '0.9rem', 
-                        fontFamily: 'monospace', 
-                        width: '30px' 
-                      }}>
-                        {item.number}
-                      </span>
-                      <span style={{ 
-                        color: 'rgba(255, 255, 255, 0.8)', 
-                        fontSize: '1.2rem',
-                        flex: 1,
-                        fontWeight: '300',
-                        fontFamily: 'Helvetica, Arial, sans-serif'
-                      }}>
-                        {item.title}
-                      </span>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2">
-                        <path d="M7 7h10v10" />
-                        <path d="M17 7L7 17" />
-                      </svg>
-                    </div>
-                  ))}
-                </div>
-              )}
+              {/* Tengah - MENURU */}
+              <div style={{
+                color: '#FFFFFF',
+                fontSize: isMobile ? '2rem' : '3rem',
+                fontWeight: '300',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                letterSpacing: '4px',
+                textTransform: 'uppercase',
+                opacity: 0.9,
+                textShadow: '0 0 20px rgba(255,255,255,0.5)',
+                justifySelf: 'center'
+              }}>
+                MENURU
+              </div>
+
+              {/* Kanan - Kosong untuk menyeimbangkan grid */}
+              <div style={{ justifySelf: 'end' }}></div>
             </div>
 
-            {/* COMMUNITY SECTION */}
+            {/* Teks Berjalan dengan North East Arrow - PUTIH CERAH */}
             <div style={{
-              borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+              position: 'absolute',
+              bottom: '10%',
+              left: 0,
+              width: '100%',
+              overflow: 'hidden',
+              whiteSpace: 'nowrap',
+              zIndex: 2
             }}>
-              <div
-                onClick={() => handleToggleSection('community')}
+              <motion.div
+                animate={{ 
+                  x: ['0%', '-50%']
+                }}
+                transition={{ 
+                  duration: 25,
+                  repeat: Infinity,
+                  ease: "linear"
+                }}
                 style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  cursor: 'pointer',
-                  padding: '1rem 0',
+                  display: 'inline-block',
+                  whiteSpace: 'nowrap',
+                  fontSize: isMobile ? '6rem' : '12rem',
+                  fontWeight: '300',
+                  color: '#FFFFFF',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  textTransform: 'uppercase',
+                  letterSpacing: '8px',
+                  lineHeight: 1,
+                  opacity: 0.7,
+                  textShadow: '0 0 20px rgba(255,255,255,0.5), 0 0 40px rgba(255,255,255,0.3)',
+                  filter: 'brightness(1.3)'
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
-                  <span style={{
-                    color: 'rgba(255, 255, 255, 0.5)',
-                    fontSize: '2rem',
-                    fontWeight: '300',
-                    fontFamily: 'monospace'
-                  }}>02</span>
-                  <span
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      router.push('/community');
-                    }}
-                    style={{
-                      color: '#FFFFFF',
-                      fontSize: isMobile ? '3rem' : '4.5rem',
-                      fontWeight: '300',
-                      fontFamily: 'Helvetica, Arial, sans-serif',
-                      textShadow: '0 0 10px rgba(255,255,255,0.3)',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    COMMUNITY
-                  </span>
-                </div>
-                
-                <div style={{
-                  transform: openSection === 'community' ? 'rotate(90deg)' : 'rotate(0deg)',
-                  transition: 'transform 0.3s ease'
-                }}>
-                  <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" style={{ filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.5))' }}>
-                    <path d="M7 7h10v10" />
-                    <path d="M17 7L7 17" />
-                  </svg>
-                </div>
-              </div>
-
-              {openSection === 'community' && (
-                <div style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '0.8rem',
-                  marginLeft: '6rem',
-                  marginTop: '0.5rem',
-                  marginBottom: '1rem',
-                }}>
-                  {[
-                    { number: '01', title: 'Forum Diskusi', url: '/community/forum' },
-                    { number: '02', title: 'Events', url: '/community/events' },
-                    { number: '03', title: 'Members', url: '/community/members' },
-                    { number: '04', title: 'Gallery', url: '/community/gallery' }
-                  ].map((item, idx) => (
-                    <div
-                      key={idx}
-                      onClick={() => router.push(item.url)}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '1.5rem',
-                        padding: '0.5rem 0',
-                        cursor: 'pointer',
-                        borderBottom: idx < 3 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none'
-                      }}
-                    >
-                      <span style={{ color: 'rgba(255, 255, 255, 0.3)', fontSize: '0.9rem', fontFamily: 'monospace', width: '30px' }}>{item.number}</span>
-                      <span style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '1.2rem', flex: 1, fontWeight: '300', fontFamily: 'Helvetica, Arial, sans-serif' }}>{item.title}</span>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2">
-                        <path d="M7 7h10v10" />
-                        <path d="M17 7L7 17" />
-                      </svg>
-                    </div>
-                  ))}
-                </div>
-              )}
+                MENU <svg width="180" height="180" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="3" strokeLinecap="round" style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 2rem', filter: 'drop-shadow(0 0 10px rgba(255,255,255,0.8)) drop-shadow(0 0 20px rgba(255,255,255,0.5))' }}>
+                  <path d="M7 7h10v10" />
+                  <path d="M17 7L7 17" />
+                </svg> MENU <svg width="180" height="180" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="3" strokeLinecap="round" style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 2rem', filter: 'drop-shadow(0 0 10px rgba(255,255,255,0.8)) drop-shadow(0 0 20px rgba(255,255,255,0.5))' }}>
+                  <path d="M7 7h10v10" />
+                  <path d="M17 7L7 17" />
+                </svg> MENU <svg width="180" height="180" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="3" strokeLinecap="round" style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 2rem', filter: 'drop-shadow(0 0 10px rgba(255,255,255,0.8)) drop-shadow(0 0 20px rgba(255,255,255,0.5))' }}>
+                  <path d="M7 7h10v10" />
+                  <path d="M17 7L7 17" />
+                </svg>
+              </motion.div>
             </div>
 
-            {/* CALENDAR SECTION */}
+            {/* Container Utama dengan Scroll yang Stabil */}
             <div style={{
-              borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+              position: 'absolute',
+              top: '15%',
+              bottom: '15%',
+              left: 0,
+              right: 0,
+              zIndex: 3,
+              display: 'flex',
+              justifyContent: 'center',
+              overflow: 'hidden'
             }}>
-              <div
-                onClick={() => handleToggleSection('calendar')}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  cursor: 'pointer',
-                  padding: '1rem 0',
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
-                  <span style={{
-                    color: 'rgba(255, 255, 255, 0.5)',
-                    fontSize: '2rem',
-                    fontWeight: '300',
-                    fontFamily: 'monospace'
-                  }}>03</span>
-                  <span
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      router.push('/calendar');
-                    }}
-                    style={{
-                      color: '#FFFFFF',
-                      fontSize: isMobile ? '3rem' : '4.5rem',
-                      fontWeight: '300',
-                      fontFamily: 'Helvetica, Arial, sans-serif',
-                      textShadow: '0 0 10px rgba(255,255,255,0.3)',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    CALENDAR
-                  </span>
-                </div>
-                
-                <div style={{
-                  transform: openSection === 'calendar' ? 'rotate(90deg)' : 'rotate(0deg)',
-                  transition: 'transform 0.3s ease'
-                }}>
-                  <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" style={{ filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.5))' }}>
-                    <path d="M7 7h10v10" />
-                    <path d="M17 7L7 17" />
-                  </svg>
-                </div>
-              </div>
+              {/* Konten dengan Scroll Internal */}
+              <div style={{
+                width: '100%',
+                maxWidth: '1200px',
+                padding: isMobile ? '0 2rem' : '0 4rem',
+                overflowY: 'auto',
+                overflowX: 'hidden',
+                scrollbarWidth: 'none',
+                msOverflowStyle: 'none',
+                position: 'relative',
+                height: '100%'
+              }}>
+                {/* Custom scrollbar hide untuk Chrome/Safari */}
+                <style jsx>{`
+                  div::-webkit-scrollbar {
+                    display: none;
+                  }
+                `}</style>
 
-              {openSection === 'calendar' && (
+                {/* Konten Menu - Posisi relatif normal */}
                 <div style={{
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '0.8rem',
-                  marginLeft: '6rem',
-                  marginTop: '0.5rem',
-                  marginBottom: '1rem',
-                }}>
-                  {[
-                    { number: '01', title: 'Upcoming Events', url: '/calendar/upcoming' },
-                    { number: '02', title: 'Workshops', url: '/calendar/workshops' },
-                    { number: '03', title: 'Deadlines', url: '/calendar/deadlines' },
-                    { number: '04', title: 'Schedule', url: '/calendar/schedule' }
-                  ].map((item, idx) => (
-                    <div
-                      key={idx}
-                      onClick={() => router.push(item.url)}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '1.5rem',
-                        padding: '0.5rem 0',
-                        cursor: 'pointer',
-                        borderBottom: idx < 3 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none'
-                      }}
-                    >
-                      <span style={{ color: 'rgba(255, 255, 255, 0.3)', fontSize: '0.9rem', fontFamily: 'monospace', width: '30px' }}>{item.number}</span>
-                      <span style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '1.2rem', flex: 1, fontWeight: '300', fontFamily: 'Helvetica, Arial, sans-serif' }}>{item.title}</span>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2">
-                        <path d="M7 7h10v10" />
-                        <path d="M17 7L7 17" />
-                      </svg>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* BLOG SECTION */}
-            <div style={{
-              borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
-            }}>
-              <div
-                onClick={() => handleToggleSection('blog')}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  cursor: 'pointer',
-                  padding: '1rem 0',
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
-                  <span style={{
-                    color: 'rgba(255, 255, 255, 0.5)',
-                    fontSize: '2rem',
-                    fontWeight: '300',
-                    fontFamily: 'monospace'
-                  }}>04</span>
-                  <span
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      router.push('/blog');
-                    }}
-                    style={{
-                      color: '#FFFFFF',
-                      fontSize: isMobile ? '3rem' : '4.5rem',
-                      fontWeight: '300',
-                      fontFamily: 'Helvetica, Arial, sans-serif',
-                      textShadow: '0 0 10px rgba(255,255,255,0.3)',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    BLOG
-                  </span>
-                </div>
-                
-                <div style={{
-                  transform: openSection === 'blog' ? 'rotate(90deg)' : 'rotate(0deg)',
-                  transition: 'transform 0.3s ease'
-                }}>
-                  <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" style={{ filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.5))' }}>
-                    <path d="M7 7h10v10" />
-                    <path d="M17 7L7 17" />
-                  </svg>
-                </div>
-              </div>
-
-              {openSection === 'blog' && (
-                <div style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '0.8rem',
-                  marginLeft: '6rem',
-                  marginTop: '0.5rem',
-                  marginBottom: '1rem',
-                }}>
-                  {[
-                    { number: '01', title: 'Latest Posts', url: '/blog/latest' },
-                    { number: '02', title: 'Tutorials', url: '/blog/tutorials' },
-                    { number: '03', title: 'News', url: '/blog/news' },
-                    { number: '04', title: 'Insights', url: '/blog/insights' }
-                  ].map((item, idx) => (
-                    <div
-                      key={idx}
-                      onClick={() => router.push(item.url)}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '1.5rem',
-                        padding: '0.5rem 0',
-                        cursor: 'pointer',
-                        borderBottom: idx < 3 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none'
-                      }}
-                    >
-                      <span style={{ color: 'rgba(255, 255, 255, 0.3)', fontSize: '0.9rem', fontFamily: 'monospace', width: '30px' }}>{item.number}</span>
-                      <span style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '1.2rem', flex: 1, fontWeight: '300', fontFamily: 'Helvetica, Arial, sans-serif' }}>{item.title}</span>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2">
-                        <path d="M7 7h10v10" />
-                        <path d="M17 7L7 17" />
-                      </svg>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* SPOTIFY PLAYLIST SECTION - DENGAN PLAYER LANGSUNG */}
-            <div style={{
-              borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
-              paddingBottom: '1rem'
-            }}>
-              <div
-                onClick={() => handleToggleSection('spotify')}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  cursor: 'pointer',
-                  padding: '1rem 0',
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
-                  <span style={{
-                    color: 'rgba(255, 255, 255, 0.5)',
-                    fontSize: '2rem',
-                    fontWeight: '300',
-                    fontFamily: 'monospace'
-                  }}>05</span>
-                  
-                  <span
-                    onClick={(e) => {
-                      e.stopPropagation();
-                    }}
-                    style={{
-                      color: '#FFFFFF',
-                      fontSize: isMobile ? '3rem' : '4.5rem',
-                      fontWeight: '300',
-                      fontFamily: 'Helvetica, Arial, sans-serif',
-                      textShadow: '0 0 10px rgba(255,255,255,0.3)',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '1rem'
-                    }}
-                  >
-                    SPOTIFY PLAYLIST
-                  </span>
-                </div>
-                
-                <div style={{
-                  transform: openSection === 'spotify' ? 'rotate(90deg)' : 'rotate(0deg)',
-                  transition: 'transform 0.3s ease'
-                }}>
-                  <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" style={{ filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.5))' }}>
-                    <path d="M7 7h10v10" />
-                    <path d="M17 7L7 17" />
-                  </svg>
-                </div>
-              </div>
-
-              {openSection === 'spotify' && (
-                <div style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '2rem',
-                  marginLeft: isMobile ? '2rem' : '6rem',
-                  marginTop: '2rem',
-                  marginBottom: '2rem',
+                  gap: '0.5rem',
+                  paddingTop: '0.5rem',
+                  paddingBottom: '2rem'
                 }}>
                   
-                  {/* Spotify Player - Muncul jika ada lagu yang dipilih */}
-                  {currentEmbedUrl && (
-                    <div style={{
-                      width: '100%',
-                      marginBottom: '2rem'
-                    }}>
-                      <iframe
-                        style={{ borderRadius: '12px', width: '100%', height: '152px' }}
-                        src={currentEmbedUrl}
-                        frameBorder="0"
-                        allowFullScreen
-                        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                        loading="lazy"
-                      />
-                    </div>
-                  )}
-
-                  {/* Header Playlist */}
+                  {/* CATATAN SECTION */}
                   <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '2rem',
-                    marginBottom: '1rem'
+                    borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
                   }}>
-                    <div style={{
-                      width: isMobile ? '80px' : '100px',
-                      height: isMobile ? '80px' : '100px',
-                      borderRadius: '8px',
-                      backgroundColor: 'rgba(255,255,255,0.1)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      border: '1px solid rgba(255,255,255,0.2)'
-                    }}>
-                      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5">
-                        <circle cx="12" cy="12" r="10"/>
-                        <path d="M8 11L12 8L16 11" strokeLinecap="round"/>
-                        <path d="M8 15L12 12L16 15" strokeLinecap="round"/>
-                      </svg>
-                    </div>
-                    <div>
-                      <div style={{
-                        color: 'rgba(255,255,255,0.6)',
-                        fontSize: '0.9rem',
-                        marginBottom: '0.3rem',
-                        letterSpacing: '1px'
-                      }}>
-                        PLAYLIST • 5 LAGU
-                      </div>
-                      <div style={{
-                        color: '#FFFFFF',
-                        fontSize: isMobile ? '2rem' : '2.5rem',
-                        fontWeight: '300',
-                        fontFamily: 'Helvetica, Arial, sans-serif'
-                      }}>
-                        Lagu Kesukaan
-                      </div>
-                      <div style={{
-                        color: 'rgba(255,255,255,0.6)',
-                        fontSize: '0.9rem',
-                        marginTop: '0.3rem'
-                      }}>
-                        Hanin Dhiya • Stand Here Alone
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Daftar Lagu - Bisa Dipilih */}
-                  <div style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '1rem'
-                  }}>
-                    {/* Hanin Dhiya Section */}
-                    <div style={{
-                      marginBottom: '1rem'
-                    }}>
-                      <div style={{
-                        color: 'rgba(255,255,255,0.8)',
-                        fontSize: '1.2rem',
-                        fontWeight: '300',
-                        marginBottom: '1rem',
-                        paddingBottom: '0.5rem',
-                        borderBottom: '1px solid rgba(255,255,255,0.1)'
-                      }}>
-                        Hanin Dhiya
-                      </div>
-                      
-                      {favoriteTracks.filter(t => t.artist === 'Hanin Dhiya').map((track, idx) => (
-                        <div
-                          key={track.id}
-                          onClick={() => playTrack(track)}
+                    {/* Header */}
+                    <div
+                      onClick={() => handleToggleSection('catatan')}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        cursor: 'pointer',
+                        padding: '1rem 0',
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+                        <span style={{
+                          color: 'rgba(255, 255, 255, 0.5)',
+                          fontSize: '2rem',
+                          fontWeight: '300',
+                          fontFamily: 'monospace'
+                        }}>01</span>
+                        
+                        <span
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            router.push('/catatan');
+                          }}
                           style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '1.5rem',
-                            padding: '1rem 0',
+                            color: '#FFFFFF',
+                            fontSize: isMobile ? '3rem' : '4.5rem',
+                            fontWeight: '300',
+                            fontFamily: 'Helvetica, Arial, sans-serif',
+                            textShadow: '0 0 10px rgba(255,255,255,0.3)',
                             cursor: 'pointer',
-                            borderBottom: idx < 1 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none',
-                            backgroundColor: currentTrack === track.id ? 'rgba(255,255,255,0.05)' : 'transparent',
-                            transition: 'all 0.2s ease'
                           }}
                         >
-                          {/* Nomor */}
-                          <span style={{
-                            color: 'rgba(255, 255, 255, 0.3)',
-                            fontSize: '1.2rem',
-                            fontWeight: '300',
-                            fontFamily: 'monospace',
-                            width: '30px'
-                          }}>
-                            {idx + 1}
-                          </span>
+                          CATATAN
+                        </span>
+                      </div>
+                      
+                      {/* Arrow dengan animasi rotate */}
+                      <div style={{
+                        transform: openSection === 'catatan' ? 'rotate(90deg)' : 'rotate(0deg)',
+                        transition: 'transform 0.3s ease'
+                      }}>
+                        <svg
+                          width="50"
+                          height="50"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="#FFFFFF"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                          style={{
+                            filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.5))'
+                          }}
+                        >
+                          <path d="M7 7h10v10" />
+                          <path d="M17 7L7 17" />
+                        </svg>
+                      </div>
+                    </div>
 
-                          {/* Cover Album kecil */}
-                          <div style={{
-                            width: '50px',
-                            height: '50px',
-                            borderRadius: '4px',
-                            overflow: 'hidden',
-                            backgroundColor: 'rgba(255,255,255,0.1)',
-                            flexShrink: 0
-                          }}>
-                            <div style={{
-                              width: '100%',
-                              height: '100%',
+                    {/* Sub-menu */}
+                    {openSection === 'catatan' && (
+                      <div style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '0.8rem',
+                        marginLeft: '6rem',
+                        marginTop: '0.5rem',
+                        marginBottom: '1rem',
+                      }}>
+                        {[
+                          { number: '01', title: 'Creative Process', url: '/catatan/creative' },
+                          { number: '02', title: 'Design Thinking', url: '/catatan/design' },
+                          { number: '03', title: 'UX Research', url: '/catatan/ux' },
+                          { number: '04', title: 'Development', url: '/catatan/dev' }
+                        ].map((item, idx) => (
+                          <div
+                            key={idx}
+                            onClick={() => router.push(item.url)}
+                            style={{
                               display: 'flex',
                               alignItems: 'center',
-                              justifyContent: 'center',
-                              color: 'rgba(255,255,255,0.5)',
-                              fontSize: '1.5rem'
+                              gap: '1.5rem',
+                              padding: '0.5rem 0',
+                              cursor: 'pointer',
+                              borderBottom: idx < 3 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none'
+                            }}
+                          >
+                            <span style={{ 
+                              color: 'rgba(255, 255, 255, 0.3)', 
+                              fontSize: '0.9rem', 
+                              fontFamily: 'monospace', 
+                              width: '30px' 
                             }}>
-                              ♪
-                            </div>
-                          </div>
-
-                          {/* Info Lagu */}
-                          <div style={{ flex: 1 }}>
-                            <div style={{
-                              color: '#FFFFFF',
-                              fontSize: '1.5rem',
+                              {item.number}
+                            </span>
+                            <span style={{ 
+                              color: 'rgba(255, 255, 255, 0.8)', 
+                              fontSize: '1.2rem',
+                              flex: 1,
                               fontWeight: '300',
-                              fontFamily: 'Helvetica, Arial, sans-serif',
-                              marginBottom: '0.2rem'
+                              fontFamily: 'Helvetica, Arial, sans-serif'
                             }}>
-                              {track.title}
-                            </div>
-                            <div style={{
-                              color: 'rgba(255, 255, 255, 0.6)',
-                              fontSize: '1rem',
-                              fontWeight: '300'
-                            }}>
-                              {track.artist}
-                            </div>
+                              {item.title}
+                            </span>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2">
+                              <path d="M7 7h10v10" />
+                              <path d="M17 7L7 17" />
+                            </svg>
                           </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
 
-                          {/* Indikator Sedang Diputar */}
-                          {currentTrack === track.id && (
-                            <div style={{
-                              width: '8px',
-                              height: '8px',
-                              borderRadius: '50%',
-                              backgroundColor: 'white',
-                              marginRight: '0.5rem'
-                            }} />
-                          )}
+                  {/* COMMUNITY SECTION */}
+                  <div style={{
+                    borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+                  }}>
+                    <div
+                      onClick={() => handleToggleSection('community')}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        cursor: 'pointer',
+                        padding: '1rem 0',
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+                        <span style={{
+                          color: 'rgba(255, 255, 255, 0.5)',
+                          fontSize: '2rem',
+                          fontWeight: '300',
+                          fontFamily: 'monospace'
+                        }}>02</span>
+                        <span
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            router.push('/community');
+                          }}
+                          style={{
+                            color: '#FFFFFF',
+                            fontSize: isMobile ? '3rem' : '4.5rem',
+                            fontWeight: '300',
+                            fontFamily: 'Helvetica, Arial, sans-serif',
+                            textShadow: '0 0 10px rgba(255,255,255,0.3)',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          COMMUNITY
+                        </span>
+                      </div>
+                      
+                      <div style={{
+                        transform: openSection === 'community' ? 'rotate(90deg)' : 'rotate(0deg)',
+                        transition: 'transform 0.3s ease'
+                      }}>
+                        <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" style={{ filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.5))' }}>
+                          <path d="M7 7h10v10" />
+                          <path d="M17 7L7 17" />
+                        </svg>
+                      </div>
+                    </div>
 
-                          {/* Tombol Play */}
+                    {openSection === 'community' && (
+                      <div style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '0.8rem',
+                        marginLeft: '6rem',
+                        marginTop: '0.5rem',
+                        marginBottom: '1rem',
+                      }}>
+                        {[
+                          { number: '01', title: 'Forum Diskusi', url: '/community/forum' },
+                          { number: '02', title: 'Events', url: '/community/events' },
+                          { number: '03', title: 'Members', url: '/community/members' },
+                          { number: '04', title: 'Gallery', url: '/community/gallery' }
+                        ].map((item, idx) => (
+                          <div
+                            key={idx}
+                            onClick={() => router.push(item.url)}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '1.5rem',
+                              padding: '0.5rem 0',
+                              cursor: 'pointer',
+                              borderBottom: idx < 3 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none'
+                            }}
+                          >
+                            <span style={{ color: 'rgba(255, 255, 255, 0.3)', fontSize: '0.9rem', fontFamily: 'monospace', width: '30px' }}>{item.number}</span>
+                            <span style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '1.2rem', flex: 1, fontWeight: '300', fontFamily: 'Helvetica, Arial, sans-serif' }}>{item.title}</span>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2">
+                              <path d="M7 7h10v10" />
+                              <path d="M17 7L7 17" />
+                            </svg>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* CALENDAR SECTION */}
+                  <div style={{
+                    borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+                  }}>
+                    <div
+                      onClick={() => handleToggleSection('calendar')}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        cursor: 'pointer',
+                        padding: '1rem 0',
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+                        <span style={{
+                          color: 'rgba(255, 255, 255, 0.5)',
+                          fontSize: '2rem',
+                          fontWeight: '300',
+                          fontFamily: 'monospace'
+                        }}>03</span>
+                        <span
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            router.push('/calendar');
+                          }}
+                          style={{
+                            color: '#FFFFFF',
+                            fontSize: isMobile ? '3rem' : '4.5rem',
+                            fontWeight: '300',
+                            fontFamily: 'Helvetica, Arial, sans-serif',
+                            textShadow: '0 0 10px rgba(255,255,255,0.3)',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          CALENDAR
+                        </span>
+                      </div>
+                      
+                      <div style={{
+                        transform: openSection === 'calendar' ? 'rotate(90deg)' : 'rotate(0deg)',
+                        transition: 'transform 0.3s ease'
+                      }}>
+                        <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" style={{ filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.5))' }}>
+                          <path d="M7 7h10v10" />
+                          <path d="M17 7L7 17" />
+                        </svg>
+                      </div>
+                    </div>
+
+                    {openSection === 'calendar' && (
+                      <div style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '0.8rem',
+                        marginLeft: '6rem',
+                        marginTop: '0.5rem',
+                        marginBottom: '1rem',
+                      }}>
+                        {[
+                          { number: '01', title: 'Upcoming Events', url: '/calendar/upcoming' },
+                          { number: '02', title: 'Workshops', url: '/calendar/workshops' },
+                          { number: '03', title: 'Deadlines', url: '/calendar/deadlines' },
+                          { number: '04', title: 'Schedule', url: '/calendar/schedule' }
+                        ].map((item, idx) => (
+                          <div
+                            key={idx}
+                            onClick={() => router.push(item.url)}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '1.5rem',
+                              padding: '0.5rem 0',
+                              cursor: 'pointer',
+                              borderBottom: idx < 3 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none'
+                            }}
+                          >
+                            <span style={{ color: 'rgba(255, 255, 255, 0.3)', fontSize: '0.9rem', fontFamily: 'monospace', width: '30px' }}>{item.number}</span>
+                            <span style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '1.2rem', flex: 1, fontWeight: '300', fontFamily: 'Helvetica, Arial, sans-serif' }}>{item.title}</span>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2">
+                              <path d="M7 7h10v10" />
+                              <path d="M17 7L7 17" />
+                            </svg>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* BLOG SECTION */}
+                  <div style={{
+                    borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+                  }}>
+                    <div
+                      onClick={() => handleToggleSection('blog')}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        cursor: 'pointer',
+                        padding: '1rem 0',
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+                        <span style={{
+                          color: 'rgba(255, 255, 255, 0.5)',
+                          fontSize: '2rem',
+                          fontWeight: '300',
+                          fontFamily: 'monospace'
+                        }}>04</span>
+                        <span
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            router.push('/blog');
+                          }}
+                          style={{
+                            color: '#FFFFFF',
+                            fontSize: isMobile ? '3rem' : '4.5rem',
+                            fontWeight: '300',
+                            fontFamily: 'Helvetica, Arial, sans-serif',
+                            textShadow: '0 0 10px rgba(255,255,255,0.3)',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          BLOG
+                        </span>
+                      </div>
+                      
+                      <div style={{
+                        transform: openSection === 'blog' ? 'rotate(90deg)' : 'rotate(0deg)',
+                        transition: 'transform 0.3s ease'
+                      }}>
+                        <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" style={{ filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.5))' }}>
+                          <path d="M7 7h10v10" />
+                          <path d="M17 7L7 17" />
+                        </svg>
+                      </div>
+                    </div>
+
+                    {openSection === 'blog' && (
+                      <div style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '0.8rem',
+                        marginLeft: '6rem',
+                        marginTop: '0.5rem',
+                        marginBottom: '1rem',
+                      }}>
+                        {[
+                          { number: '01', title: 'Latest Posts', url: '/blog/latest' },
+                          { number: '02', title: 'Tutorials', url: '/blog/tutorials' },
+                          { number: '03', title: 'News', url: '/blog/news' },
+                          { number: '04', title: 'Insights', url: '/blog/insights' }
+                        ].map((item, idx) => (
+                          <div
+                            key={idx}
+                            onClick={() => router.push(item.url)}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '1.5rem',
+                              padding: '0.5rem 0',
+                              cursor: 'pointer',
+                              borderBottom: idx < 3 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none'
+                            }}
+                          >
+                            <span style={{ color: 'rgba(255, 255, 255, 0.3)', fontSize: '0.9rem', fontFamily: 'monospace', width: '30px' }}>{item.number}</span>
+                            <span style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '1.2rem', flex: 1, fontWeight: '300', fontFamily: 'Helvetica, Arial, sans-serif' }}>{item.title}</span>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2">
+                              <path d="M7 7h10v10" />
+                              <path d="M17 7L7 17" />
+                            </svg>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* SPOTIFY PLAYLIST SECTION - DENGAN PLAYER LANGSUNG */}
+                  <div style={{
+                    borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+                    paddingBottom: '1rem'
+                  }}>
+                    <div
+                      onClick={() => handleToggleSection('spotify')}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        cursor: 'pointer',
+                        padding: '1rem 0',
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+                        <span style={{
+                          color: 'rgba(255, 255, 255, 0.5)',
+                          fontSize: '2rem',
+                          fontWeight: '300',
+                          fontFamily: 'monospace'
+                        }}>05</span>
+                        
+                        <span
+                          onClick={(e) => {
+                            e.stopPropagation();
+                          }}
+                          style={{
+                            color: '#FFFFFF',
+                            fontSize: isMobile ? '3rem' : '4.5rem',
+                            fontWeight: '300',
+                            fontFamily: 'Helvetica, Arial, sans-serif',
+                            textShadow: '0 0 10px rgba(255,255,255,0.3)',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '1rem'
+                          }}
+                        >
+                          SPOTIFY PLAYLIST
+                        </span>
+                      </div>
+                      
+                      <div style={{
+                        transform: openSection === 'spotify' ? 'rotate(90deg)' : 'rotate(0deg)',
+                        transition: 'transform 0.3s ease'
+                      }}>
+                        <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" style={{ filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.5))' }}>
+                          <path d="M7 7h10v10" />
+                          <path d="M17 7L7 17" />
+                        </svg>
+                      </div>
+                    </div>
+
+                    {openSection === 'spotify' && (
+                      <div style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '2rem',
+                        marginLeft: isMobile ? '2rem' : '6rem',
+                        marginTop: '2rem',
+                        marginBottom: '2rem',
+                      }}>
+                        
+                        {/* Spotify Player - Muncul jika ada lagu yang dipilih */}
+                        {currentEmbedUrl && (
                           <div style={{
-                            width: '40px',
-                            height: '40px',
+                            width: '100%',
+                            marginBottom: '2rem'
+                          }}>
+                            <iframe
+                              style={{ borderRadius: '12px', width: '100%', height: '152px' }}
+                              src={currentEmbedUrl}
+                              frameBorder="0"
+                              allowFullScreen
+                              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-picture"
+                              loading="lazy"
+                            />
+                          </div>
+                        )}
+
+                        {/* Header Playlist */}
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '2rem',
+                          marginBottom: '1rem'
+                        }}>
+                          <div style={{
+                            width: isMobile ? '80px' : '100px',
+                            height: isMobile ? '80px' : '100px',
+                            borderRadius: '8px',
+                            backgroundColor: 'rgba(255,255,255,0.1)',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            flexShrink: 0
+                            border: '1px solid rgba(255,255,255,0.2)'
                           }}>
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
-                              <polygon points="5 3 19 12 5 21 5 3" />
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5">
+                              <circle cx="12" cy="12" r="10"/>
+                              <path d="M8 11L12 8L16 11" strokeLinecap="round"/>
+                              <path d="M8 15L12 12L16 15" strokeLinecap="round"/>
                             </svg>
                           </div>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Stand Here Alone Section */}
-                    <div>
-                      <div style={{
-                        color: 'rgba(255,255,255,0.8)',
-                        fontSize: '1.2rem',
-                        fontWeight: '300',
-                        marginBottom: '1rem',
-                        paddingBottom: '0.5rem',
-                        borderBottom: '1px solid rgba(255,255,255,0.1)'
-                      }}>
-                        Stand Here Alone
-                      </div>
-                      
-                      {favoriteTracks.filter(t => t.artist === 'Stand Here Alone').map((track, idx) => (
-                        <div
-                          key={track.id}
-                          onClick={() => playTrack(track)}
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '1.5rem',
-                            padding: '1rem 0',
-                            cursor: 'pointer',
-                            borderBottom: idx < 2 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none',
-                            backgroundColor: currentTrack === track.id ? 'rgba(255,255,255,0.05)' : 'transparent',
-                            transition: 'all 0.2s ease'
-                          }}
-                        >
-                          {/* Nomor */}
-                          <span style={{
-                            color: 'rgba(255, 255, 255, 0.3)',
-                            fontSize: '1.2rem',
-                            fontWeight: '300',
-                            fontFamily: 'monospace',
-                            width: '30px'
-                          }}>
-                            {idx + 1}
-                          </span>
-
-                          {/* Cover Album kecil */}
-                          <div style={{
-                            width: '50px',
-                            height: '50px',
-                            borderRadius: '4px',
-                            overflow: 'hidden',
-                            backgroundColor: 'rgba(255,255,255,0.1)',
-                            flexShrink: 0
-                          }}>
+                          <div>
                             <div style={{
-                              width: '100%',
-                              height: '100%',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              color: 'rgba(255,255,255,0.5)',
-                              fontSize: '1.5rem'
+                              color: 'rgba(255,255,255,0.6)',
+                              fontSize: '0.9rem',
+                              marginBottom: '0.3rem',
+                              letterSpacing: '1px'
                             }}>
-                              ♪
+                              PLAYLIST • 5 LAGU
                             </div>
-                          </div>
-
-                          {/* Info Lagu */}
-                          <div style={{ flex: 1 }}>
                             <div style={{
                               color: '#FFFFFF',
-                              fontSize: '1.5rem',
+                              fontSize: isMobile ? '2rem' : '2.5rem',
                               fontWeight: '300',
-                              fontFamily: 'Helvetica, Arial, sans-serif',
-                              marginBottom: '0.2rem'
+                              fontFamily: 'Helvetica, Arial, sans-serif'
                             }}>
-                              {track.title}
+                              Lagu Kesukaan
                             </div>
                             <div style={{
-                              color: 'rgba(255, 255, 255, 0.6)',
-                              fontSize: '1rem',
-                              fontWeight: '300'
+                              color: 'rgba(255,255,255,0.6)',
+                              fontSize: '0.9rem',
+                              marginTop: '0.3rem'
                             }}>
-                              {track.artist}
+                              Hanin Dhiya • Stand Here Alone
                             </div>
-                          </div>
-
-                          {/* Indikator Sedang Diputar */}
-                          {currentTrack === track.id && (
-                            <div style={{
-                              width: '8px',
-                              height: '8px',
-                              borderRadius: '50%',
-                              backgroundColor: 'white',
-                              marginRight: '0.5rem'
-                            }} />
-                          )}
-
-                          {/* Tombol Play */}
-                          <div style={{
-                            width: '40px',
-                            height: '40px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            flexShrink: 0
-                          }}>
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
-                              <polygon points="5 3 19 12 5 21 5 3" />
-                            </svg>
                           </div>
                         </div>
-                      ))}
-                    </div>
-                  </div>
 
-                  {/* Jika belum ada lagu yang dipilih */}
-                  {!currentEmbedUrl && (
-                    <div style={{
-                      textAlign: 'center',
-                      padding: '2rem',
-                      color: 'rgba(255,255,255,0.5)',
-                      fontSize: '1rem',
-                      border: '1px dashed rgba(255,255,255,0.2)',
-                      borderRadius: '8px'
-                    }}>
-                      Pilih lagu di atas untuk memutar
-                    </div>
-                  )}
+                        {/* Daftar Lagu - Bisa Dipilih */}
+                        <div style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '1rem'
+                        }}>
+                          {/* Hanin Dhiya Section */}
+                          <div style={{
+                            marginBottom: '1rem'
+                          }}>
+                            <div style={{
+                              color: 'rgba(255,255,255,0.8)',
+                              fontSize: '1.2rem',
+                              fontWeight: '300',
+                              marginBottom: '1rem',
+                              paddingBottom: '0.5rem',
+                              borderBottom: '1px solid rgba(255,255,255,0.1)'
+                            }}>
+                              Hanin Dhiya
+                            </div>
+                            
+                            {favoriteTracks.filter(t => t.artist === 'Hanin Dhiya').map((track, idx) => (
+                              <div
+                                key={track.id}
+                                onClick={() => playTrack(track)}
+                                style={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '1.5rem',
+                                  padding: '1rem 0',
+                                  cursor: 'pointer',
+                                  borderBottom: idx < 1 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none',
+                                  backgroundColor: currentTrack === track.id ? 'rgba(255,255,255,0.05)' : 'transparent',
+                                  transition: 'all 0.2s ease'
+                                }}
+                              >
+                                {/* Nomor */}
+                                <span style={{
+                                  color: 'rgba(255, 255, 255, 0.3)',
+                                  fontSize: '1.2rem',
+                                  fontWeight: '300',
+                                  fontFamily: 'monospace',
+                                  width: '30px'
+                                }}>
+                                  {idx + 1}
+                                </span>
 
-                  {/* Link ke Spotify */}
-                  <div style={{
-                    display: 'flex',
-                    justifyContent: 'flex-end',
-                    marginTop: '2rem',
-                    paddingTop: '1rem',
-                    borderTop: '1px solid rgba(255,255,255,0.1)'
-                  }}>
-                    <a
-                      href="https://open.spotify.com"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{
-                        color: 'rgba(255,255,255,0.8)',
-                        textDecoration: 'none',
-                        fontSize: '0.9rem',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.5rem',
-                        padding: '0.5rem 0',
-                        transition: 'all 0.2s ease'
-                      }}
-                    >
-                      Buka di Spotify
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-                        <polyline points="15 3 21 3 21 9" />
-                        <line x1="10" y1="14" x2="21" y2="3" />
-                      </svg>
-                    </a>
+                                {/* Cover Album kecil */}
+                                <div style={{
+                                  width: '50px',
+                                  height: '50px',
+                                  borderRadius: '4px',
+                                  overflow: 'hidden',
+                                  backgroundColor: 'rgba(255,255,255,0.1)',
+                                  flexShrink: 0
+                                }}>
+                                  <div style={{
+                                    width: '100%',
+                                    height: '100%',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    color: 'rgba(255,255,255,0.5)',
+                                    fontSize: '1.5rem'
+                                  }}>
+                                    ♪
+                                  </div>
+                                </div>
+
+                                {/* Info Lagu */}
+                                <div style={{ flex: 1 }}>
+                                  <div style={{
+                                    color: '#FFFFFF',
+                                    fontSize: '1.5rem',
+                                    fontWeight: '300',
+                                    fontFamily: 'Helvetica, Arial, sans-serif',
+                                    marginBottom: '0.2rem'
+                                  }}>
+                                    {track.title}
+                                  </div>
+                                  <div style={{
+                                    color: 'rgba(255, 255, 255, 0.6)',
+                                    fontSize: '1rem',
+                                    fontWeight: '300'
+                                  }}>
+                                    {track.artist}
+                                  </div>
+                                </div>
+
+                                {/* Indikator Sedang Diputar */}
+                                {currentTrack === track.id && (
+                                  <div style={{
+                                    width: '8px',
+                                    height: '8px',
+                                    borderRadius: '50%',
+                                    backgroundColor: 'white',
+                                    marginRight: '0.5rem'
+                                  }} />
+                                )}
+
+                                {/* Tombol Play */}
+                                <div style={{
+                                  width: '40px',
+                                  height: '40px',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  flexShrink: 0
+                                }}>
+                                  <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                                    <polygon points="5 3 19 12 5 21 5 3" />
+                                  </svg>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+
+                          {/* Stand Here Alone Section */}
+                          <div>
+                            <div style={{
+                              color: 'rgba(255,255,255,0.8)',
+                              fontSize: '1.2rem',
+                              fontWeight: '300',
+                              marginBottom: '1rem',
+                              paddingBottom: '0.5rem',
+                              borderBottom: '1px solid rgba(255,255,255,0.1)'
+                            }}>
+                              Stand Here Alone
+                            </div>
+                            
+                            {favoriteTracks.filter(t => t.artist === 'Stand Here Alone').map((track, idx) => (
+                              <div
+                                key={track.id}
+                                onClick={() => playTrack(track)}
+                                style={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '1.5rem',
+                                  padding: '1rem 0',
+                                  cursor: 'pointer',
+                                  borderBottom: idx < 2 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none',
+                                  backgroundColor: currentTrack === track.id ? 'rgba(255,255,255,0.05)' : 'transparent',
+                                  transition: 'all 0.2s ease'
+                                }}
+                              >
+                                {/* Nomor */}
+                                <span style={{
+                                  color: 'rgba(255, 255, 255, 0.3)',
+                                  fontSize: '1.2rem',
+                                  fontWeight: '300',
+                                  fontFamily: 'monospace',
+                                  width: '30px'
+                                }}>
+                                  {idx + 1}
+                                </span>
+
+                                {/* Cover Album kecil */}
+                                <div style={{
+                                  width: '50px',
+                                  height: '50px',
+                                  borderRadius: '4px',
+                                  overflow: 'hidden',
+                                  backgroundColor: 'rgba(255,255,255,0.1)',
+                                  flexShrink: 0
+                                }}>
+                                  <div style={{
+                                    width: '100%',
+                                    height: '100%',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    color: 'rgba(255,255,255,0.5)',
+                                    fontSize: '1.5rem'
+                                  }}>
+                                    ♪
+                                  </div>
+                                </div>
+
+                                {/* Info Lagu */}
+                                <div style={{ flex: 1 }}>
+                                  <div style={{
+                                    color: '#FFFFFF',
+                                    fontSize: '1.5rem',
+                                    fontWeight: '300',
+                                    fontFamily: 'Helvetica, Arial, sans-serif',
+                                    marginBottom: '0.2rem'
+                                  }}>
+                                    {track.title}
+                                  </div>
+                                  <div style={{
+                                    color: 'rgba(255, 255, 255, 0.6)',
+                                    fontSize: '1rem',
+                                    fontWeight: '300'
+                                  }}>
+                                    {track.artist}
+                                  </div>
+                                </div>
+
+                                {/* Indikator Sedang Diputar */}
+                                {currentTrack === track.id && (
+                                  <div style={{
+                                    width: '8px',
+                                    height: '8px',
+                                    borderRadius: '50%',
+                                    backgroundColor: 'white',
+                                    marginRight: '0.5rem'
+                                  }} />
+                                )}
+
+                                {/* Tombol Play */}
+                                <div style={{
+                                  width: '40px',
+                                  height: '40px',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  flexShrink: 0
+                                }}>
+                                  <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                                    <polygon points="5 3 19 12 5 21 5 3" />
+                                  </svg>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Jika belum ada lagu yang dipilih */}
+                        {!currentEmbedUrl && (
+                          <div style={{
+                            textAlign: 'center',
+                            padding: '2rem',
+                            color: 'rgba(255,255,255,0.5)',
+                            fontSize: '1rem',
+                            border: '1px dashed rgba(255,255,255,0.2)',
+                            borderRadius: '8px'
+                          }}>
+                            Pilih lagu di atas untuk memutar
+                          </div>
+                        )}
+
+                        {/* Link ke Spotify */}
+                        <div style={{
+                          display: 'flex',
+                          justifyContent: 'flex-end',
+                          marginTop: '2rem',
+                          paddingTop: '1rem',
+                          borderTop: '1px solid rgba(255,255,255,0.1)'
+                        }}>
+                          <a
+                            href="https://open.spotify.com"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                              color: 'rgba(255,255,255,0.8)',
+                              textDecoration: 'none',
+                              fontSize: '0.9rem',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.5rem',
+                              padding: '0.5rem 0',
+                              transition: 'all 0.2s ease'
+                            }}
+                          >
+                            Buka di Spotify
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                              <polyline points="15 3 21 3 21 9" />
+                              <line x1="10" y1="14" x2="21" y2="3" />
+                            </svg>
+                          </a>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
-              )}
+              </div>
             </div>
-          </div>
-        </div>
-      </div>
 
-      {/* Footer */}
-      <div style={{
-        position: 'absolute',
-        bottom: isMobile ? '2rem' : '3rem',
-        left: 0,
-        width: '100%',
-        display: 'flex',
-        justifyContent: 'space-between',
-        padding: isMobile ? '0 2rem' : '0 4rem',
-        boxSizing: 'border-box',
-        color: 'rgba(255, 255, 255, 0.9)',
-        fontSize: isMobile ? '0.9rem' : '1rem',
-        fontWeight: '300',
-        fontFamily: 'Helvetica, Arial, sans-serif',
-        zIndex: 10
-      }}>
-        <div style={{ display: 'flex', gap: '2rem' }}>
-          <span>© 2024 MENURU</span>
-          <span>All rights reserved</span>
-        </div>
-        <div style={{ display: 'flex', gap: '2rem' }}>
-          <a href="#" style={{ color: 'inherit', textDecoration: 'none' }}>IG</a>
-          <a href="#" style={{ color: 'inherit', textDecoration: 'none' }}>TW</a>
-          <a href="#" style={{ color: 'inherit', textDecoration: 'none' }}>GH</a>
-        </div>
-      </div>
+            {/* Footer */}
+            <div style={{
+              position: 'absolute',
+              bottom: isMobile ? '2rem' : '3rem',
+              left: 0,
+              width: '100%',
+              display: 'flex',
+              justifyContent: 'space-between',
+              padding: isMobile ? '0 2rem' : '0 4rem',
+              boxSizing: 'border-box',
+              color: 'rgba(255, 255, 255, 0.9)',
+              fontSize: isMobile ? '0.9rem' : '1rem',
+              fontWeight: '300',
+              fontFamily: 'Helvetica, Arial, sans-serif',
+              zIndex: 10
+            }}>
+              <div style={{ display: 'flex', gap: '2rem' }}>
+                <span>© 2024 MENURU</span>
+                <span>All rights reserved</span>
+              </div>
+              <div style={{ display: 'flex', gap: '2rem' }}>
+                <a href="#" style={{ color: 'inherit', textDecoration: 'none' }}>IG</a>
+                <a href="#" style={{ color: 'inherit', textDecoration: 'none' }}>TW</a>
+                <a href="#" style={{ color: 'inherit', textDecoration: 'none' }}>GH</a>
+              </div>
+            </div>
 
-      {/* Close Button - Posisi Absolute di Kanan */}
-      <div
-        onClick={handleCloseMenu}
-        style={{
-          position: 'absolute',
-          top: isMobile ? '1.5rem' : '2rem',
-          right: isMobile ? '1.5rem' : '2rem',
-          color: '#FFFFFF',
-          fontSize: isMobile ? '2.5rem' : '3rem',
-          fontWeight: '300',
-          cursor: 'pointer',
-          fontFamily: 'Helvetica, Arial, sans-serif',
-          zIndex: 20,
-          padding: '1rem',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          opacity: 0.9,
-          width: '60px',
-          height: '60px',
-          borderRadius: '50%',
-          border: '1px solid rgba(255, 255, 255, 0.4)',
-          backgroundColor: 'rgba(255, 255, 255, 0.03)',
-          textShadow: '0 0 15px rgba(255,255,255,0.5)',
-          boxShadow: '0 0 20px rgba(255,255,255,0.1)'
-        }}
-      >
-        ×
-      </div>
-    </motion.div>
-  )}
-</AnimatePresence>
-      
-
-      
+            {/* Close Button - Posisi Absolute di Kanan */}
+            <div
+              onClick={handleCloseMenu}
+              style={{
+                position: 'absolute',
+                top: isMobile ? '1.5rem' : '2rem',
+                right: isMobile ? '1.5rem' : '2rem',
+                color: '#FFFFFF',
+                fontSize: isMobile ? '2.5rem' : '3rem',
+                fontWeight: '300',
+                cursor: 'pointer',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                zIndex: 20,
+                padding: '1rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                opacity: 0.9,
+                width: '60px',
+                height: '60px',
+                borderRadius: '50%',
+                border: '1px solid rgba(255, 255, 255, 0.4)',
+                backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                textShadow: '0 0 15px rgba(255,255,255,0.5)',
+                boxShadow: '0 0 20px rgba(255,255,255,0.1)'
+              }}
+            >
+              ×
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Halaman Full Page MENURU */}
       <AnimatePresence>
@@ -6399,7 +6191,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                     }}
                   >
                     Clear All
-                </motion.button>
+                  </motion.button>
                 )}
                 
                 <motion.button
@@ -6673,7 +6465,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
         )}
       </AnimatePresence>
 
-      {/* Teks "Selamat Tahun Baru 2026" di pojok kiri atas - DIPERBAIKI dengan onClick */}
+      {/* Teks "Selamat Tahun Baru 2026" di pojok kiri atas */}
       <motion.div
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
@@ -6835,7 +6627,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
         )}
       </AnimatePresence>
 
-      {/* Top Navigation Bar */}
+      {/* Top Navigation Bar - NEW VERSION WITH NORTH EAST ARROW */}
       <div 
         ref={topNavRef}
         style={{
@@ -6850,20 +6642,22 @@ fontFamily: 'Helvetica, Arial, sans-serif'
           zIndex: 101,
           boxSizing: 'border-box',
           opacity: 1,
-          marginTop: isMobile ? '2.5rem' : '3rem'
+          marginTop: isMobile ? '3.5rem' : '4rem' // Adjusted to be below "Selamat Tahun Baru"
         }}
       >
         <div style={{
           display: 'flex',
           alignItems: 'center',
-          gap: isMobile ? '1rem' : '2rem',
+          gap: isMobile ? '1.5rem' : '2.5rem',
           backgroundColor: 'transparent',
-          borderRadius: '50px',
-          padding: isMobile ? '0.6rem 1rem' : '0.8rem 1.5rem',
-          border: '1px solid rgba(255,255,255,0.2)'
+          borderRadius: '0',
+          padding: isMobile ? '0.6rem 0' : '0.8rem 0',
+          border: 'none',
+          flexWrap: isMobile ? 'wrap' : 'nowrap',
+          justifyContent: 'center'
         }}>
           
-          {/* Docs */}
+          {/* Docs - with North East Arrow */}
           <motion.div
             onClick={() => router.push('/docs')}
             style={{
@@ -6871,32 +6665,18 @@ fontFamily: 'Helvetica, Arial, sans-serif'
               alignItems: 'center',
               gap: '0.5rem',
               cursor: 'pointer',
-              padding: '0.4rem 1rem 0.4rem 0.8rem',
-              borderRadius: '25px',
+              padding: '0.4rem 0',
               backgroundColor: 'transparent',
-              border: '1px solid rgba(255,255,255,0.2)',
+              border: 'none',
               transition: 'all 0.3s ease',
               position: 'relative'
             }}
+            whileHover={{ opacity: 0.7 }}
           >
-            <svg 
-              width={isMobile ? "18" : "20"} 
-              height={isMobile ? "18" : "20"} 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="white"
-              strokeWidth="2"
-            >
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-              <polyline points="14,2 14,8 20,8"/>
-              <line x1="16" y1="13" x2="8" y2="13"/>
-              <line x1="16" y1="17" x2="8" y2="17"/>
-              <polyline points="10,9 9,9 8,9"/>
-            </svg>
             <span style={{
               color: 'white',
-              fontSize: isMobile ? '0.8rem' : '0.9rem',
-              fontWeight: '600',
+              fontSize: isMobile ? '1rem' : '1.2rem',
+              fontWeight: '300',
               fontFamily: 'Helvetica, Arial, sans-serif',
               display: 'flex',
               alignItems: 'center',
@@ -6904,20 +6684,100 @@ fontFamily: 'Helvetica, Arial, sans-serif'
             }}>
               Docs
               <svg 
-                width={isMobile ? "12" : "14"} 
-                height={isMobile ? "12" : "14"} 
+                width={isMobile ? "14" : "16"} 
+                height={isMobile ? "14" : "16"} 
                 viewBox="0 0 24 24" 
                 fill="none" 
                 stroke="white"
-                strokeWidth="2"
+                strokeWidth="1.5"
               >
-                <path d="M5 12h14"/>
-                <path d="M12 5l7 7-7 7"/>
+                <path d="M7 7h10v10" />
+                <path d="M17 7L7 17" />
               </svg>
             </span>
           </motion.div>
 
-          {/* Chatbot */}
+          {/* Update - with North East Arrow */}
+          <motion.div
+            onClick={() => router.push('/update')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              cursor: 'pointer',
+              padding: '0.4rem 0',
+              backgroundColor: 'transparent',
+              border: 'none',
+              transition: 'all 0.3s ease',
+              position: 'relative'
+            }}
+            whileHover={{ opacity: 0.7 }}
+          >
+            <span style={{
+              color: 'white',
+              fontSize: isMobile ? '1rem' : '1.2rem',
+              fontWeight: '300',
+              fontFamily: 'Helvetica, Arial, sans-serif',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.3rem'
+            }}>
+              Update
+              <svg 
+                width={isMobile ? "14" : "16"} 
+                height={isMobile ? "14" : "16"} 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="white"
+                strokeWidth="1.5"
+              >
+                <path d="M7 7h10v10" />
+                <path d="M17 7L7 17" />
+              </svg>
+            </span>
+          </motion.div>
+
+          {/* Timeline - with North East Arrow */}
+          <motion.div
+            onClick={() => router.push('/timeline')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              cursor: 'pointer',
+              padding: '0.4rem 0',
+              backgroundColor: 'transparent',
+              border: 'none',
+              transition: 'all 0.3s ease',
+              position: 'relative'
+            }}
+            whileHover={{ opacity: 0.7 }}
+          >
+            <span style={{
+              color: 'white',
+              fontSize: isMobile ? '1rem' : '1.2rem',
+              fontWeight: '300',
+              fontFamily: 'Helvetica, Arial, sans-serif',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.3rem'
+            }}>
+              Timeline
+              <svg 
+                width={isMobile ? "14" : "16"} 
+                height={isMobile ? "14" : "16"} 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="white"
+                strokeWidth="1.5"
+              >
+                <path d="M7 7h10v10" />
+                <path d="M17 7L7 17" />
+              </svg>
+            </span>
+          </motion.div>
+
+          {/* Chatbot - with North East Arrow */}
           <motion.div
             data-nav-chatbot
             onClick={() => router.push('/chatbot')}
@@ -6926,30 +6786,18 @@ fontFamily: 'Helvetica, Arial, sans-serif'
               alignItems: 'center',
               gap: '0.5rem',
               cursor: 'pointer',
-              padding: '0.4rem 1rem 0.4rem 0.8rem',
-              borderRadius: '25px',
+              padding: '0.4rem 0',
               backgroundColor: 'transparent',
-              border: '1px solid rgba(255,255,255,0.2)',
+              border: 'none',
               transition: 'all 0.3s ease',
               position: 'relative'
             }}
+            whileHover={{ opacity: 0.7 }}
           >
-            <svg 
-              width={isMobile ? "18" : "20"} 
-              height={isMobile ? "18" : "20"} 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="white"
-              strokeWidth="2"
-            >
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-              <line x1="8" y1="7" x2="16" y2="7"/>
-              <line x1="8" y1="11" x2="12" y2="11"/>
-            </svg>
             <span style={{
               color: 'white',
-              fontSize: isMobile ? '0.8rem' : '0.9rem',
-              fontWeight: '600',
+              fontSize: isMobile ? '1rem' : '1.2rem',
+              fontWeight: '300',
               fontFamily: 'Helvetica, Arial, sans-serif',
               display: 'flex',
               alignItems: 'center',
@@ -6957,142 +6805,212 @@ fontFamily: 'Helvetica, Arial, sans-serif'
             }}>
               Chatbot
               <svg 
-                width={isMobile ? "12" : "14"} 
-                height={isMobile ? "12" : "14"} 
+                width={isMobile ? "14" : "16"} 
+                height={isMobile ? "14" : "16"} 
                 viewBox="0 0 24 24" 
                 fill="none" 
                 stroke="white"
-                strokeWidth="2"
+                strokeWidth="1.5"
               >
-                <path d="M5 12h14"/>
-                <path d="M12 5l7 7-7 7"/>
+                <path d="M7 7h10v10" />
+                <path d="M17 7L7 17" />
               </svg>
             </span>
           </motion.div>
 
-          {/* Update */}
+          {/* Calendar - with North East Arrow */}
           <motion.div
-            onClick={() => router.push('/update')}
+            onClick={() => router.push('/calendar')}
             style={{
               display: 'flex',
               alignItems: 'center',
               gap: '0.5rem',
               cursor: 'pointer',
-              padding: '0.4rem 1rem 0.4rem 0.8rem',
-              borderRadius: '25px',
+              padding: '0.4rem 0',
               backgroundColor: 'transparent',
-              border: '1px solid rgba(255,255,255,0.2)',
+              border: 'none',
               transition: 'all 0.3s ease',
               position: 'relative'
             }}
+            whileHover={{ opacity: 0.7 }}
           >
-            <svg 
-              width={isMobile ? "18" : "20"} 
-              height={isMobile ? "18" : "20"} 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="white"
-              strokeWidth="2"
-            >
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-              <polyline points="14,2 14,8 20,8"/>
-              <line x1="16" y1="13" x2="8" y2="13"/>
-              <line x1="16" y1="17" x2="8" y2="17"/>
-              <polyline points="10,9 9,9 8,9"/>
-            </svg>
             <span style={{
               color: 'white',
-              fontSize: isMobile ? '0.8rem' : '0.9rem',
-              fontWeight: '600',
+              fontSize: isMobile ? '1rem' : '1.2rem',
+              fontWeight: '300',
               fontFamily: 'Helvetica, Arial, sans-serif',
               display: 'flex',
               alignItems: 'center',
               gap: '0.3rem'
             }}>
-              Update
+              Calendar
               <svg 
-                width={isMobile ? "12" : "14"} 
-                height={isMobile ? "12" : "14"} 
+                width={isMobile ? "14" : "16"} 
+                height={isMobile ? "14" : "16"} 
                 viewBox="0 0 24 24" 
                 fill="none" 
                 stroke="white"
-                strokeWidth="2"
+                strokeWidth="1.5"
               >
-                <path d="M5 12h14"/>
-                <path d="M12 5l7 7-7 7"/>
+                <path d="M7 7h10v10" />
+                <path d="M17 7L7 17" />
               </svg>
             </span>
           </motion.div>
 
-          {/* Timeline */}
+          {/* Menu - with North East Arrow */}
           <motion.div
-            onClick={() => router.push('/timeline')}
+            onClick={handleOpenMenu}
             style={{
               display: 'flex',
               alignItems: 'center',
               gap: '0.5rem',
               cursor: 'pointer',
-              padding: '0.4rem 1rem 0.4rem 0.8rem',
-              borderRadius: '25px',
+              padding: '0.4rem 0',
               backgroundColor: 'transparent',
-              border: '1px solid rgba(255,255,255,0.2)',
+              border: 'none',
               transition: 'all 0.3s ease',
               position: 'relative'
             }}
+            whileHover={{ opacity: 0.7 }}
           >
-            <svg 
-              width={isMobile ? "18" : "20"} 
-              height={isMobile ? "18" : "20"} 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="white"
-              strokeWidth="2"
-            >
-              <polyline points="1 4 1 10 7 10"/>
-              <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
-              <line x1="12" y1="7" x2="12" y2="13"/>
-              <line x1="16" y1="11" x2="12" y2="7"/>
-            </svg>
             <span style={{
               color: 'white',
-              fontSize: isMobile ? '0.8rem' : '0.9rem',
-              fontWeight: '600',
+              fontSize: isMobile ? '1rem' : '1.2rem',
+              fontWeight: '300',
               fontFamily: 'Helvetica, Arial, sans-serif',
               display: 'flex',
               alignItems: 'center',
               gap: '0.3rem'
             }}>
-              Timeline
+              Menu
               <svg 
-                width={isMobile ? "12" : "14"} 
-                height={isMobile ? "12" : "14"} 
+                width={isMobile ? "14" : "16"} 
+                height={isMobile ? "14" : "16"} 
                 viewBox="0 0 24 24" 
                 fill="none" 
                 stroke="white"
-                strokeWidth="2"
+                strokeWidth="1.5"
               >
-                <path d="M5 12h14"/>
-                <path d="M12 5l7 7-7 7"/>
+                <path d="M7 7h10v10" />
+                <path d="M17 7L7 17" />
+              </svg>
+            </span>
+          </motion.div>
+
+          {/* Notification Bell - with North East Arrow */}
+          <motion.div
+            ref={notificationRef}
+            onClick={() => setShowNotification(!showNotification)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              cursor: 'pointer',
+              padding: '0.4rem 0',
+              backgroundColor: 'transparent',
+              border: 'none',
+              transition: 'all 0.3s ease',
+              position: 'relative'
+            }}
+            whileHover={{ opacity: 0.7 }}
+          >
+            <span style={{
+              color: 'white',
+              fontSize: isMobile ? '1rem' : '1.2rem',
+              fontWeight: '300',
+              fontFamily: 'Helvetica, Arial, sans-serif',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.3rem'
+            }}>
+              Notif
+              {hasUnreadNotifications && notificationCount > 0 && (
+                <span style={{
+                  position: 'absolute',
+                  top: '-5px',
+                  right: '-10px',
+                  minWidth: '18px',
+                  height: '18px',
+                  backgroundColor: 'transparent',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                  fontSize: '0.65rem',
+                  fontWeight: '700',
+                  padding: '0 4px'
+                }}>
+                  {notificationCount > 9 ? '9+' : notificationCount}
+                </span>
+              )}
+              <svg 
+                width={isMobile ? "14" : "16"} 
+                height={isMobile ? "14" : "16"} 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="white"
+                strokeWidth="1.5"
+              >
+                <path d="M7 7h10v10" />
+                <path d="M17 7L7 17" />
+              </svg>
+            </span>
+          </motion.div>
+
+          {/* Sign In / User Button - with North East Arrow */}
+          <motion.div
+            onClick={handleSignInClick}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              cursor: 'pointer',
+              padding: '0.4rem 0',
+              backgroundColor: 'transparent',
+              border: 'none',
+              transition: 'all 0.3s ease',
+              position: 'relative'
+            }}
+            whileHover={{ opacity: 0.7 }}
+          >
+            <span style={{
+              color: 'white',
+              fontSize: isMobile ? '1rem' : '1.2rem',
+              fontWeight: '300',
+              fontFamily: 'Helvetica, Arial, sans-serif',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.3rem',
+              textTransform: 'uppercase'
+            }}>
+              {user ? userDisplayName : 'Sign In'}
+              <svg 
+                width={isMobile ? "14" : "16"} 
+                height={isMobile ? "14" : "16"} 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="white"
+                strokeWidth="1.5"
+              >
+                <path d="M7 7h10v10" />
+                <path d="M17 7L7 17" />
               </svg>
             </span>
           </motion.div>
         </div>
       </div>
 
-      {/* Header Section */}
+      {/* Header Section - MENURU text */}
       <div 
         ref={headerRef}
         style={{
           position: 'fixed',
-          top: isMobile ? '5rem' : '6rem',
-          left: 0,
-          width: '100%',
-          padding: isMobile ? '1rem' : '2rem',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
+          top: isMobile ? '1rem' : '1.5rem',
+          left: isMobile ? '1rem' : '2rem',
+          width: 'auto',
           zIndex: 100,
-          boxSizing: 'border-box',
           opacity: 1
         }}
       >
@@ -7107,7 +7025,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
             transition={{ duration: 0.8, delay: 0.5 }}
           >
             <div style={{
-              fontSize: isMobile ? '1.5rem' : '2.5rem',
+              fontSize: isMobile ? '1.8rem' : '2.8rem',
               fontWeight: '300',
               fontFamily: 'Helvetica, Arial, sans-serif',
               margin: 0,
@@ -7115,7 +7033,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
               lineHeight: 1,
               textTransform: 'uppercase',
               color: 'white',
-              minHeight: isMobile ? '1.8rem' : '2.8rem',
+              minHeight: isMobile ? '2rem' : '3rem',
               display: 'flex',
               alignItems: 'center'
             }}>
@@ -7146,499 +7064,6 @@ fontFamily: 'Helvetica, Arial, sans-serif'
                 )}
               </AnimatePresence>
             </div>
-          </motion.div>
-        </div>
-        
-        {/* Right Side Buttons */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: isMobile ? '0.8rem' : '1rem',
-          position: 'relative'
-        }}>
-          {/* Search Bar dengan animasi GSAP dan dropdown results */}
-          <motion.div
-            ref={searchContainerRef}
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 1, duration: 0.5 }}
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              position: 'relative',
-              width: showSearch ? '350px' : '40px',
-              height: showSearch ? 'auto' : '40px',
-              borderRadius: '20px',
-              backgroundColor: 'transparent',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              overflow: 'hidden',
-              cursor: 'pointer',
-              transition: 'all 0.3s ease',
-              zIndex: 1002
-            }}
-          >
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              width: '100%',
-              height: '40px',
-              padding: '0 10px',
-              boxSizing: 'border-box'
-            }}>
-              <motion.div
-                onClick={handleSearchToggle}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  width: '20px',
-                  height: '100%',
-                  cursor: 'pointer',
-                  flexShrink: 0,
-                  marginRight: '8px'
-                }}
-              >
-                <svg 
-                  width="18" 
-                  height="18" 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  stroke={showSearch ? "white" : "white"} 
-                  strokeWidth="2"
-                >
-                  <circle cx="11" cy="11" r="8"/>
-                  <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                </svg>
-              </motion.div>
-              
-              <input
-                ref={searchInputRef}
-                type="text"
-                value={searchQuery}
-                onChange={handleSearchInputChange}
-                onKeyDown={handleSearchKeyPress}
-                placeholder="Search chatbot, sign in, notifikasi..."
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  padding: '0 8px',
-                  backgroundColor: 'transparent',
-                  border: 'none',
-                  color: 'white',
-                  fontSize: '0.9rem',
-                  outline: 'none',
-                  fontFamily: 'Helvetica, Arial, sans-serif',
-                  opacity: showSearch ? 1 : 0,
-                  pointerEvents: showSearch ? 'auto' : 'none',
-                  transition: 'opacity 0.2s ease'
-                }}
-              />
-              
-              {showSearch && searchQuery && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  onClick={() => {
-                    setSearchQuery("");
-                    setSearchResults([]);
-                    setShowSearchResults(false);
-                  }}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: '20px',
-                    height: '20px',
-                    cursor: 'pointer',
-                    backgroundColor: 'transparent',
-                    border: '1px solid rgba(255, 255, 255, 0.3)',
-                    borderRadius: '50%',
-                    flexShrink: 0,
-                    marginLeft: '8px'
-                  }}
-                >
-                  <svg 
-                    width="12" 
-                    height="12" 
-                    viewBox="0 0 24 24" 
-                    fill="none" 
-                    stroke="white" 
-                    strokeWidth="2"
-                  >
-                    <line x1="18" y1="6" x2="6" y2="18"/>
-                    <line x1="6" y1="6" x2="18" y2="18"/>
-                  </svg>
-                </motion.div>
-              )}
-            </div>
-
-            <AnimatePresence>
-              {showSearch && showSearchResults && searchResults.length > 0 && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  transition={{ duration: 0.3 }}
-                  style={{
-                    width: '100%',
-                    maxHeight: '400px',
-                    overflowY: 'auto',
-                    backgroundColor: 'rgba(15, 15, 15, 0.98)',
-                    borderTop: '1px solid rgba(255, 255, 255, 0.2)',
-                    padding: '10px 0'
-                  }}
-                >
-                  <div style={{
-                    padding: '0 15px 10px 15px',
-                    borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-                    marginBottom: '5px'
-                  }}>
-                    <div style={{
-                      color: 'rgba(255, 255, 255, 0.8)',
-                      fontSize: '0.8rem',
-                      fontWeight: '600',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.5px'
-                    }}>
-                      Hasil Pencarian ({searchResults.length})
-                    </div>
-                  </div>
-
-                  {searchResults.map((result, index) => (
-                    <motion.div
-                      key={result.id}
-                      className="search-result-item"
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                      onClick={() => handleSearchResultClick(result.url)}
-                      style={{
-                        padding: '12px 15px',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '12px',
-                        transition: 'all 0.2s ease',
-                        borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
-                      }}
-                    >
-                      <div style={{
-                        width: '36px',
-                        height: '36px',
-                        borderRadius: '8px',
-                        backgroundColor: 'transparent',
-                        border: '1px solid rgba(255, 255, 255, 0.3)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '1.2rem',
-                        flexShrink: 0
-                      }}>
-                        {result.icon}
-                      </div>
-
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'flex-start',
-                          marginBottom: '2px'
-                        }}>
-                          <div style={{
-                            color: 'white',
-                            fontSize: '0.95rem',
-                            fontWeight: '600',
-                            fontFamily: 'Helvetica, Arial, sans-serif',
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis'
-                          }}>
-                            {result.title}
-                          </div>
-                          <div style={{
-                            backgroundColor: 'transparent',
-                            color: 'white',
-                            fontSize: '0.7rem',
-                            fontWeight: '600',
-                            padding: '2px 6px',
-                            borderRadius: '10px',
-                            marginLeft: '8px',
-                            flexShrink: 0,
-                            border: '1px solid rgba(255, 255, 255, 0.3)'
-                          }}>
-                            {result.category}
-                          </div>
-                        </div>
-                        
-                        <div style={{
-                          color: 'rgba(255, 255, 255, 0.7)',
-                          fontSize: '0.8rem',
-                          whiteSpace: 'nowrap',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          marginBottom: '4px'
-                        }}>
-                          {result.description}
-                        </div>
-                        
-                        <div style={{
-                          color: 'white',
-                          fontSize: '0.75rem',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '4px'
-                        }}>
-                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2 2V8a2 2 0 0 1 2-2h6"/>
-                            <polyline points="15 3 21 3 21 9"/>
-                            <line x1="10" y1="14" x2="21" y2="3"/>
-                          </svg>
-                          {result.url}
-                        </div>
-                      </div>
-
-                      <motion.div
-                        initial={{ opacity: 0, x: -5 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.2 }}
-                        style={{
-                          opacity: 0.5,
-                          transition: 'all 0.2s ease'
-                        }}
-                      >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M5 12h14"/>
-                          <path d="M12 5l7 7-7 7"/>
-                        </svg>
-                      </motion.div>
-                    </motion.div>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            <AnimatePresence>
-              {showSearch && searchQuery.trim() && searchResults.length === 0 && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  style={{
-                    padding: '20px 15px',
-                    textAlign: 'center',
-                    color: 'rgba(255, 255, 255, 0.6)',
-                    fontSize: '0.9rem',
-                    backgroundColor: 'rgba(15, 15, 15, 0.98)',
-                    borderTop: '1px solid rgba(255, 255, 255, 0.2)'
-                  }}
-                >
-                  Tidak ditemukan hasil untuk "{searchQuery}"
-                  <div style={{ fontSize: '0.8rem', marginTop: '5px' }}>
-                    Coba kata kunci lain seperti: chatbot, sign in, notifikasi
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </motion.div>
-
-          {/* Notification Bell dengan Badge */}
-          <motion.div
-            ref={notificationRef}
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 1.05, duration: 0.5 }}
-            style={{
-              position: 'relative',
-              width: '40px',
-              height: '40px',
-              borderRadius: '50%',
-              backgroundColor: 'transparent',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              transition: 'all 0.3s ease'
-            }}
-            onClick={() => setShowNotification(!showNotification)}
-          >
-            <svg 
-              width="20" 
-              height="20" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="white" 
-              strokeWidth="2"
-            >
-              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-              <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-            </svg>
-            
-            {hasUnreadNotifications && notificationCount > 0 && (
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ type: "spring", stiffness: 500, damping: 15 }}
-                style={{
-                  position: 'absolute',
-                  top: '-2px',
-                  right: '-2px',
-                  minWidth: '18px',
-                  height: '18px',
-                  backgroundColor: 'transparent',
-                  borderRadius: '50%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  border: '1px solid rgba(255, 255, 255, 0.3)'
-                }}
-              >
-                <span style={{
-                  color: 'white',
-                  fontSize: '0.65rem',
-                  fontWeight: '700',
-                  fontFamily: 'Helvetica, Arial, sans-serif',
-                  padding: '0 4px'
-                }}>
-                  {notificationCount > 9 ? '9+' : notificationCount}
-                </span>
-              </motion.div>
-            )}
-          </motion.div>
-
-          {/* Tombol MENU */}
-          <motion.div
-            onClick={handleOpenMenu}
-            style={{
-              color: 'white',
-              fontSize: isMobile ? '1rem' : '1.5rem',
-              fontWeight: '400',
-              fontFamily: 'Helvetica, Arial, sans-serif',
-              cursor: 'pointer',
-              padding: isMobile ? '0.3rem 0.8rem' : '0.5rem 1rem',
-              whiteSpace: 'nowrap',
-              letterSpacing: '1px',
-              position: 'relative',
-              transition: 'all 0.3s ease'
-            }}
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 1.1, duration: 0.6 }}
-          >
-            MENU
-          </motion.div>
-
-          {/* Calendar Button di Header */}
-<motion.div
-  onClick={() => router.push('/calendar')}
-  style={{
-    color: 'white',
-    fontSize: isMobile ? '1rem' : '1.5rem',
-    fontWeight: '300',
-    fontFamily: 'Helvetica, Arial, sans-serif',
-    cursor: 'pointer',
-    padding: isMobile ? '0.3rem 0.8rem' : '0.5rem 1rem',
-    whiteSpace: 'nowrap',
-    letterSpacing: '1px',
-    position: 'relative',
-    transition: 'all 0.3s ease',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.5rem'
-  }}
-  initial={{ opacity: 0, x: -10 }}
-  animate={{ opacity: 1, x: 0 }}
-  transition={{ delay: 1.0, duration: 0.6 }}
->
-  <svg
-    width={isMobile ? "14" : "16"}
-    height={isMobile ? "14" : "16"}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="white"
-    strokeWidth="2"
-    style={{ flexShrink: 0 }}
-  >
-    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-    <line x1="16" y1="2" x2="16" y2="6"/>
-    <line x1="8" y1="2" x2="8" y2="6"/>
-    <line x1="3" y1="10" x2="21" y2="10"/>
-  </svg>
-  Calendar
-  <svg
-    width={isMobile ? "14" : "16"}
-    height={isMobile ? "14" : "16"}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="white"
-    strokeWidth="2"
-    style={{ flexShrink: 0 }}
-  >
-    <path d="M7 17L17 7"/>
-    <path d="M7 7h10v10"/>
-  </svg>
-</motion.div>
-
-          {/* Sign In / User Button - DIPERBAIKI dengan North East Arrow ketika sudah login */}
-          <motion.div
-            onClick={handleSignInClick}
-            style={{
-              color: 'white',
-              fontSize: isMobile ? '1rem' : '1.5rem',
-              fontWeight: '300',
-              fontFamily: 'Helvetica, Arial, sans-serif',
-              cursor: 'pointer',
-              padding: isMobile ? '0.3rem 0.8rem' : '0.5rem 1rem',
-              whiteSpace: 'nowrap',
-              letterSpacing: '2px',
-              position: 'relative',
-              textTransform: 'uppercase',
-              transition: 'all 0.3s ease',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem'
-            }}
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 1.2, duration: 0.6 }}
-          >
-            {user ? (
-              <>
-                {userDisplayName}
-                <motion.svg
-                  width={isMobile ? "14" : "16"}
-                  height={isMobile ? "14" : "16"}
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="white"
-                  strokeWidth="2"
-                  style={{
-                    flexShrink: 0
-                  }}
-                >
-                  <path d="M7 17L17 7"/>
-                  <path d="M7 7h10v10"/>
-                </motion.svg>
-              </>
-            ) : (
-              <>
-                SIGN IN
-                <motion.svg
-                  width={isMobile ? "14" : "16"}
-                  height={isMobile ? "14" : "16"}
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="white"
-                  strokeWidth="2"
-                  style={{
-                    flexShrink: 0
-                  }}
-                >
-                  <path d="M5 12h14"/>
-                  <path d="M12 5l7 7-7 7"/>
-                </motion.svg>
-              </>
-            )}
           </motion.div>
         </div>
       </div>
@@ -8007,32 +7432,3 @@ fontFamily: 'Helvetica, Arial, sans-serif'
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
