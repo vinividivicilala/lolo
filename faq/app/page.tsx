@@ -6465,7 +6465,7 @@ export default function HomePage(): React.JSX.Element {
         )}
       </AnimatePresence>
 
-      {/* Teks "Selamat Tahun Baru 2026" di pojok kiri atas */}
+      {/* Teks "Selamat Tahun Baru 2026" di pojok kiri atas - SEJAJAR DENGAN JUDUL */}
       <motion.div
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
@@ -6473,8 +6473,8 @@ export default function HomePage(): React.JSX.Element {
         onClick={handleNewYearTextClick}
         style={{
           position: 'fixed',
-          top: isMobile ? '0.8rem' : '1rem',
-          left: isMobile ? '1rem' : '2rem',
+          top: isMobile ? '1rem' : '1.5rem',
+          left: isMobile ? 'calc(1rem + 80px)' : 'calc(2rem + 120px)',
           color: 'white',
           fontSize: isMobile ? '1rem' : '1.2rem',
           fontWeight: '300',
@@ -6627,7 +6627,7 @@ export default function HomePage(): React.JSX.Element {
         )}
       </AnimatePresence>
 
-      {/* Top Navigation Bar - NEW VERSION WITH NORTH EAST ARROW */}
+      {/* Top Navigation Bar - SEMUA ITEM SEJAJAR DENGAN JUDUL */}
       <div 
         ref={topNavRef}
         style={{
@@ -6642,7 +6642,7 @@ export default function HomePage(): React.JSX.Element {
           zIndex: 101,
           boxSizing: 'border-box',
           opacity: 1,
-          marginTop: isMobile ? '3.5rem' : '4rem' // Adjusted to be below "Selamat Tahun Baru"
+          marginTop: 0 // No margin, sejajar dengan judul
         }}
       >
         <div style={{
@@ -6654,7 +6654,9 @@ export default function HomePage(): React.JSX.Element {
           padding: isMobile ? '0.6rem 0' : '0.8rem 0',
           border: 'none',
           flexWrap: isMobile ? 'wrap' : 'nowrap',
-          justifyContent: 'center'
+          justifyContent: 'center',
+          position: 'relative',
+          left: isMobile ? 'calc(50% - 150px)' : 'calc(50% - 300px)' // Geser ke kanan
         }}>
           
           {/* Docs - with North East Arrow */}
@@ -6922,25 +6924,26 @@ export default function HomePage(): React.JSX.Element {
               fontFamily: 'Helvetica, Arial, sans-serif',
               display: 'flex',
               alignItems: 'center',
-              gap: '0.3rem'
+              gap: '0.3rem',
+              position: 'relative'
             }}>
               Notif
               {hasUnreadNotifications && notificationCount > 0 && (
                 <span style={{
                   position: 'absolute',
-                  top: '-5px',
+                  top: '-8px',
                   right: '-10px',
-                  minWidth: '18px',
-                  height: '18px',
+                  minWidth: '16px',
+                  height: '16px',
                   backgroundColor: 'transparent',
                   borderRadius: '50%',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   border: '1px solid rgba(255, 255, 255, 0.3)',
-                  fontSize: '0.65rem',
+                  fontSize: '0.6rem',
                   fontWeight: '700',
-                  padding: '0 4px'
+                  padding: '0 2px'
                 }}>
                   {notificationCount > 9 ? '9+' : notificationCount}
                 </span>
@@ -6959,7 +6962,7 @@ export default function HomePage(): React.JSX.Element {
             </span>
           </motion.div>
 
-          {/* Sign In / User Button - with North East Arrow */}
+          {/* Sign In / User Button - with North East Arrow dan Biru Stabilo */}
           <motion.div
             onClick={handleSignInClick}
             style={{
@@ -6971,19 +6974,21 @@ export default function HomePage(): React.JSX.Element {
               backgroundColor: 'transparent',
               border: 'none',
               transition: 'all 0.3s ease',
-              position: 'relative'
+              position: 'relative',
+              marginLeft: '2rem' // Geser ke kanan
             }}
-            whileHover={{ opacity: 0.7 }}
+            whileHover={{ opacity: 0.9 }}
           >
             <span style={{
-              color: 'white',
+              color: '#60A5FA', // Biru stabilo
               fontSize: isMobile ? '1rem' : '1.2rem',
-              fontWeight: '300',
+              fontWeight: '500', // Sedikit lebih tebal
               fontFamily: 'Helvetica, Arial, sans-serif',
               display: 'flex',
               alignItems: 'center',
               gap: '0.3rem',
-              textTransform: 'uppercase'
+              textTransform: 'uppercase',
+              textShadow: '0 0 10px rgba(96, 165, 250, 0.5)' // Efek glow biru
             }}>
               {user ? userDisplayName : 'Sign In'}
               <svg 
@@ -6991,8 +6996,8 @@ export default function HomePage(): React.JSX.Element {
                 height={isMobile ? "14" : "16"} 
                 viewBox="0 0 24 24" 
                 fill="none" 
-                stroke="white"
-                strokeWidth="1.5"
+                stroke="#60A5FA" // Biru stabilo untuk arrow
+                strokeWidth="1.8"
               >
                 <path d="M7 7h10v10" />
                 <path d="M17 7L7 17" />
