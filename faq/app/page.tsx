@@ -1539,30 +1539,30 @@ setIsLoadingEvents(false);
     setShowNoteOverlay(false);
   };
 
-  // Handler untuk Community Overlay
-  const handleCommunityClick = () => {
+  // Handler untuk Community Overlay (HOVER)
+  const handleCommunityHover = () => {
     setShowCommunityOverlay(true);
   };
 
-  const handleCloseCommunityOverlay = () => {
+  const handleCommunityLeave = () => {
     setShowCommunityOverlay(false);
   };
 
-  // Handler untuk News Overlay
-  const handleNewsClick = () => {
+  // Handler untuk News Overlay (HOVER)
+  const handleNewsHover = () => {
     setShowNewsOverlay(true);
   };
 
-  const handleCloseNewsOverlay = () => {
+  const handleNewsLeave = () => {
     setShowNewsOverlay(false);
   };
 
-  // Handler untuk Stories Overlay
-  const handleStoriesClick = () => {
+  // Handler untuk Stories Overlay (HOVER)
+  const handleStoriesHover = () => {
     setShowStoriesOverlay(true);
   };
 
-  const handleCloseStoriesOverlay = () => {
+  const handleStoriesLeave = () => {
     setShowStoriesOverlay(false);
   };
 
@@ -2103,6 +2103,20 @@ setIsLoadingEvents(false);
     }
   };
 
+  // Handler untuk clear notification (placeholder)
+  const handleClearNotification = () => {
+    console.log("Clear all notifications");
+  };
+
+  // Handler untuk notification click (placeholder)
+  const handleNotificationClick = (notification: Notification) => {
+    console.log("Notification clicked:", notification);
+    if (notification.actionUrl) {
+      router.push(notification.actionUrl);
+    }
+    setShowNotification(false);
+  };
+
   // Komentar untuk foto saat ini
   const currentPhotoComments = comments.filter(comment => comment.photoIndex === currentPhotoIndex);
 
@@ -2196,7 +2210,7 @@ setIsLoadingEvents(false);
         </div>
       )}
 
-      {/* Community Overlay - dari atas hingga sebelum teks PRODUCT */}
+      {/* Community Overlay - dengan HOVER */}
       <AnimatePresence>
         {showCommunityOverlay && (
           <motion.div
@@ -2263,129 +2277,51 @@ setIsLoadingEvents(false);
               </motion.button>
             </div>
 
-            {/* Konten Community Overlay */}
+            {/* Konten Community Overlay - SEDERHANA */}
             <div style={{
-              padding: isMobile ? '2rem 1.5rem' : '3rem',
+              padding: isMobile ? '3rem 1.5rem' : '4rem 3rem',
               overflowY: 'auto',
-              maxHeight: 'calc(80vh - 100px)'
+              maxHeight: 'calc(80vh - 100px)',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              textAlign: 'center'
             }}>
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-                gap: '1.5rem'
+              <h3 style={{
+                color: 'white',
+                fontSize: isMobile ? '2.5rem' : '4rem',
+                fontWeight: '300',
+                margin: '0 0 2rem 0',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                letterSpacing: '1px',
+                opacity: 0.9
               }}>
-                {[1, 2, 3, 4].map((item) => (
-                  <motion.div
-                    key={`community-${item}`}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: item * 0.1 }}
-                    style={{
-                      backgroundColor: 'rgba(255, 255, 255, 0.03)',
-                      border: '1px solid rgba(255, 255, 255, 0.1)',
-                      borderRadius: '12px',
-                      padding: '1.5rem',
-                      cursor: 'pointer',
-                      transition: 'all 0.3s ease'
-                    }}
-                    whileHover={{ 
-                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                      borderColor: 'rgba(255, 255, 255, 0.2)',
-                      y: -2
-                    }}
-                  >
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.8rem',
-                      marginBottom: '1rem'
-                    }}>
-                      <div style={{
-                        width: '40px',
-                        height: '40px',
-                        borderRadius: '50%',
-                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '1.2rem',
-                        color: 'white'
-                      }}>
-                        {item === 1 && '👥'}
-                        {item === 2 && '💬'}
-                        {item === 3 && '📅'}
-                        {item === 4 && '🏆'}
-                      </div>
-                      <span style={{
-                        color: 'rgba(255, 255, 255, 0.6)',
-                        fontSize: '0.8rem',
-                        fontFamily: 'monospace'
-                      }}>
-                        #{item}
-                      </span>
-                    </div>
-                    <h4 style={{
-                      color: 'white',
-                      fontSize: '1.2rem',
-                      fontWeight: '400',
-                      margin: '0 0 0.5rem 0',
-                      fontFamily: 'Helvetica, Arial, sans-serif'
-                    }}>
-                      {item === 1 && 'Forum Diskusi'}
-                      {item === 2 && 'Obrolan Komunitas'}
-                      {item === 3 && 'Meetup & Event'}
-                      {item === 4 && 'Pencapaian'}
-                    </h4>
-                    <p style={{
-                      color: 'rgba(255, 255, 255, 0.7)',
-                      fontSize: '0.9rem',
-                      margin: 0,
-                      lineHeight: 1.5,
-                      fontFamily: 'Helvetica, Arial, sans-serif'
-                    }}>
-                      {item === 1 && 'Bergabung dalam diskusi seru dengan anggota komunitas lainnya.'}
-                      {item === 2 && 'Tempat ngobrol santai dan berbagi cerita.'}
-                      {item === 3 && 'Jadwal meetup, workshop, dan event komunitas.'}
-                      {item === 4 && 'Rayakan pencapaian dan milestone bersama.'}
-                    </p>
-                    <div style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      marginTop: '1rem'
-                    }}>
-                      <span style={{
-                        color: 'rgba(255, 255, 255, 0.4)',
-                        fontSize: '0.75rem'
-                      }}>
-                        {item === 1 && '1.2k diskusi'}
-                        {item === 2 && '3.4k pesan'}
-                        {item === 3 && '8 event'}
-                        {item === 4 && '150 pencapaian'}
-                      </span>
-                      <span style={{
-                        color: 'white',
-                        fontSize: '0.8rem',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.3rem'
-                      }}>
-                        Jelajahi
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-                          <path d="M5 12h14"/>
-                          <path d="M12 5l7 7-7 7"/>
-                        </svg>
-                      </span>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
+                Komunitas
+              </h3>
+              
+              <p style={{
+                color: 'rgba(255, 255, 255, 0.6)',
+                fontSize: isMobile ? '1rem' : '1.2rem',
+                maxWidth: '600px',
+                lineHeight: 1.8,
+                fontFamily: 'Helvetica, Arial, sans-serif'
+              }}>
+                Bergabunglah dengan ribuan kreator dan pengembang dari seluruh Indonesia.
+              </p>
+              
+              <div style={{
+                marginTop: '3rem',
+                width: '60px',
+                height: '1px',
+                backgroundColor: 'rgba(255, 255, 255, 0.3)'
+              }} />
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* News Overlay - dari atas hingga sebelum teks PRODUCT */}
+      {/* News Overlay - dengan HOVER */}
       <AnimatePresence>
         {showNewsOverlay && (
           <motion.div
@@ -2452,142 +2388,51 @@ setIsLoadingEvents(false);
               </motion.button>
             </div>
 
-            {/* Konten News Overlay */}
+            {/* Konten News Overlay - SEDERHANA */}
             <div style={{
-              padding: isMobile ? '2rem 1.5rem' : '3rem',
+              padding: isMobile ? '3rem 1.5rem' : '4rem 3rem',
               overflowY: 'auto',
-              maxHeight: 'calc(80vh - 100px)'
+              maxHeight: 'calc(80vh - 100px)',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              textAlign: 'center'
             }}>
-              <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '1.5rem'
+              <h3 style={{
+                color: 'white',
+                fontSize: isMobile ? '2.5rem' : '4rem',
+                fontWeight: '300',
+                margin: '0 0 2rem 0',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                letterSpacing: '1px',
+                opacity: 0.9
               }}>
-                {[1, 2, 3, 4, 5].map((item) => (
-                  <motion.div
-                    key={`news-${item}`}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: item * 0.1 }}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'flex-start',
-                      gap: '1.5rem',
-                      padding: '1rem 0',
-                      borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-                      cursor: 'pointer'
-                    }}
-                    whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.02)' }}
-                  >
-                    <div style={{
-                      width: '60px',
-                      height: '60px',
-                      borderRadius: '8px',
-                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '1.5rem',
-                      flexShrink: 0
-                    }}>
-                      {item === 1 && '📰'}
-                      {item === 2 && '🚀'}
-                      {item === 3 && '💡'}
-                      {item === 4 && '🔧'}
-                      {item === 5 && '🎉'}
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        marginBottom: '0.3rem'
-                      }}>
-                        <h4 style={{
-                          color: 'white',
-                          fontSize: '1.2rem',
-                          fontWeight: '400',
-                          margin: 0,
-                          fontFamily: 'Helvetica, Arial, sans-serif'
-                        }}>
-                          {item === 1 && 'Pembaruan Platform Q1 2025'}
-                          {item === 2 && 'Fitur Baru: Kolaborasi Real-time'}
-                          {item === 3 && 'Tips & Trik Menggunakan Notes'}
-                          {item === 4 && 'Pemeliharaan Sistem 15 Maret'}
-                          {item === 5 && 'Kompetisi Desain Komunitas'}
-                        </h4>
-                        <span style={{
-                          color: 'rgba(255, 255, 255, 0.4)',
-                          fontSize: '0.8rem'
-                        }}>
-                          {item === 1 && '2 jam lalu'}
-                          {item === 2 && '5 jam lalu'}
-                          {item === 3 && '1 hari lalu'}
-                          {item === 4 && '2 hari lalu'}
-                          {item === 5 && '3 hari lalu'}
-                        </span>
-                      </div>
-                      <p style={{
-                        color: 'rgba(255, 255, 255, 0.7)',
-                        fontSize: '0.9rem',
-                        margin: '0 0 0.5rem 0',
-                        lineHeight: 1.5
-                      }}>
-                        {item === 1 && 'Kami memperkenalkan beberapa pembaruan besar untuk meningkatkan pengalaman Anda...'}
-                        {item === 2 && 'Sekarang Anda dapat berkolaborasi secara real-time dengan tim Anda...'}
-                        {item === 3 && 'Pelajari cara maksimalkan fitur notes untuk produktivitas Anda...'}
-                        {item === 4 && 'Akan ada pemeliharaan sistem pada tanggal 15 Maret pukul 02:00 WIB...'}
-                        {item === 5 && 'Ikuti kompetisi desain dan menangkan hadiah menarik...'}
-                      </p>
-                      <div style={{
-                        display: 'flex',
-                        gap: '1rem',
-                        marginTop: '0.5rem'
-                      }}>
-                        <span style={{
-                          color: 'rgba(255, 255, 255, 0.5)',
-                          fontSize: '0.75rem',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.3rem'
-                        }}>
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                            <circle cx="12" cy="12" r="3"/>
-                          </svg>
-                          {item === 1 && '2.3k views'}
-                          {item === 2 && '1.8k views'}
-                          {item === 3 && '956 views'}
-                          {item === 4 && '1.2k views'}
-                          {item === 5 && '3.4k views'}
-                        </span>
-                        <span style={{
-                          color: 'rgba(255, 255, 255, 0.5)',
-                          fontSize: '0.75rem',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.3rem'
-                        }}>
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
-                          </svg>
-                          {item === 1 && '45 comments'}
-                          {item === 2 && '32 comments'}
-                          {item === 3 && '18 comments'}
-                          {item === 4 && '27 comments'}
-                          {item === 5 && '89 comments'}
-                        </span>
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
+                Berita
+              </h3>
+              
+              <p style={{
+                color: 'rgba(255, 255, 255, 0.6)',
+                fontSize: isMobile ? '1rem' : '1.2rem',
+                maxWidth: '600px',
+                lineHeight: 1.8,
+                fontFamily: 'Helvetica, Arial, sans-serif'
+              }}>
+                Update terbaru tentang pengembangan platform, fitur baru, dan acara mendatang.
+              </p>
+              
+              <div style={{
+                marginTop: '3rem',
+                width: '60px',
+                height: '1px',
+                backgroundColor: 'rgba(255, 255, 255, 0.3)'
+              }} />
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Stories Overlay - dari atas hingga sebelum teks PRODUCT */}
+      {/* Stories Overlay - HANYA JUDUL (sesuai permintaan) */}
       <AnimatePresence>
         {showStoriesOverlay && (
           <motion.div
@@ -2654,203 +2499,46 @@ setIsLoadingEvents(false);
               </motion.button>
             </div>
 
-            {/* Konten Stories Overlay */}
+            {/* Konten Stories Overlay - HANYA JUDUL */}
             <div style={{
-              padding: isMobile ? '2rem 1.5rem' : '3rem',
+              padding: isMobile ? '3rem 1.5rem' : '4rem 3rem',
               overflowY: 'auto',
-              maxHeight: 'calc(80vh - 100px)'
+              maxHeight: 'calc(80vh - 100px)',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              textAlign: 'center'
             }}>
-              <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '2rem'
+              <h3 style={{
+                color: 'white',
+                fontSize: isMobile ? '2.5rem' : '4rem',
+                fontWeight: '300',
+                margin: '0 0 2rem 0',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                letterSpacing: '1px',
+                opacity: 0.9
               }}>
-                {/* Featured Story */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  style={{
-                    backgroundColor: 'rgba(255, 255, 255, 0.03)',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                    borderRadius: '12px',
-                    padding: '2rem',
-                    cursor: 'pointer',
-                    position: 'relative',
-                    overflow: 'hidden'
-                  }}
-                  whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.05)' }}
-                >
-                  <div style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    height: '4px',
-                    background: 'linear-gradient(90deg, #6366F1, #8B5CF6, #EC4899)'
-                  }} />
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '1rem',
-                    marginBottom: '1rem'
-                  }}>
-                    <div style={{
-                      width: '50px',
-                      height: '50px',
-                      borderRadius: '50%',
-                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '1.5rem'
-                    }}>
-                      ✨
-                    </div>
-                    <div>
-                      <div style={{
-                        color: 'white',
-                        fontSize: '1.5rem',
-                        fontWeight: '300',
-                        fontFamily: 'Helvetica, Arial, sans-serif'
-                      }}>
-                        Story of the Week
-                      </div>
-                      <div style={{
-                        color: 'rgba(255, 255, 255, 0.5)',
-                        fontSize: '0.9rem'
-                      }}>
-                        By @creativemind • 3 jam lalu
-                      </div>
-                    </div>
-                  </div>
-                  <h3 style={{
-                    color: 'white',
-                    fontSize: '1.8rem',
-                    fontWeight: '300',
-                    margin: '0 0 1rem 0',
-                    fontFamily: 'Helvetica, Arial, sans-serif'
-                  }}>
-                    Perjalanan Kreatif: Dari Ide hingga Realisasi
-                  </h3>
-                  <p style={{
-                    color: 'rgba(255, 255, 255, 0.8)',
-                    fontSize: '1rem',
-                    lineHeight: 1.6,
-                    margin: '0 0 1.5rem 0'
-                  }}>
-                    Sebuah cerita tentang bagaimana sebuah ide sederhana berkembang menjadi proyek nyata, 
-                    melewati berbagai tantangan dan pembelajaran di sepanjang jalan.
-                  </p>
-                  <div style={{
-                    display: 'flex',
-                    gap: '2rem'
-                  }}>
-                    <span style={{ color: 'rgba(255, 255, 255, 0.5)', fontSize: '0.9rem' }}>❤️ 234 likes</span>
-                    <span style={{ color: 'rgba(255, 255, 255, 0.5)', fontSize: '0.9rem' }}>💬 56 comments</span>
-                  </div>
-                </motion.div>
-
-                {/* Story List */}
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-                  gap: '1.5rem'
-                }}>
-                  {[1, 2, 3, 4].map((item) => (
-                    <motion.div
-                      key={`story-${item}`}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: item * 0.1 }}
-                      style={{
-                        backgroundColor: 'rgba(255, 255, 255, 0.02)',
-                        border: '1px solid rgba(255, 255, 255, 0.1)',
-                        borderRadius: '8px',
-                        padding: '1.5rem',
-                        cursor: 'pointer'
-                      }}
-                      whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.03)' }}
-                    >
-                      <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.8rem',
-                        marginBottom: '1rem'
-                      }}>
-                        <div style={{
-                          width: '32px',
-                          height: '32px',
-                          borderRadius: '50%',
-                          backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontSize: '0.9rem'
-                        }}>
-                          {item === 1 && 'JD'}
-                          {item === 2 && 'MR'}
-                          {item === 3 && 'AL'}
-                          {item === 4 && 'SN'}
-                        </div>
-                        <span style={{
-                          color: 'white',
-                          fontSize: '0.9rem',
-                          fontWeight: '500'
-                        }}>
-                          {item === 1 && 'John Doe'}
-                          {item === 2 && 'Maria Rodriguez'}
-                          {item === 3 && 'Alex Lee'}
-                          {item === 4 && 'Sarah Nguyen'}
-                        </span>
-                      </div>
-                      <h4 style={{
-                        color: 'white',
-                        fontSize: '1.1rem',
-                        fontWeight: '400',
-                        margin: '0 0 0.5rem 0',
-                        fontFamily: 'Helvetica, Arial, sans-serif'
-                      }}>
-                        {item === 1 && 'Menemukan Passion di Dunia Desain'}
-                        {item === 2 && 'Dari Hobi Menjadi Profesi'}
-                        {item === 3 && 'Belajar dari Kegagalan'}
-                        {item === 4 && 'Kolaborasi Lintas Budaya'}
-                      </h4>
-                      <p style={{
-                        color: 'rgba(255, 255, 255, 0.6)',
-                        fontSize: '0.85rem',
-                        margin: '0 0 1rem 0',
-                        lineHeight: 1.5
-                      }}>
-                        {item === 1 && 'Bagaimana saya menemukan bahwa desain adalah panggilan saya...'}
-                        {item === 2 && 'Perjalanan mengubah hobi menggambar menjadi karir...'}
-                        {item === 3 && 'Pelajaran berharga dari setiap kegagalan...'}
-                        {item === 4 && 'Berkolaborasi dengan desainer dari berbagai negara...'}
-                      </p>
-                      <div style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center'
-                      }}>
-                        <span style={{
-                          color: 'rgba(255, 255, 255, 0.4)',
-                          fontSize: '0.75rem'
-                        }}>
-                          {item === 1 && '5 menit baca'}
-                          {item === 2 && '7 menit baca'}
-                          {item === 3 && '4 menit baca'}
-                          {item === 4 && '6 menit baca'}
-                        </span>
-                        <span style={{
-                          color: 'rgba(255, 255, 255, 0.4)',
-                          fontSize: '0.75rem'
-                        }}>
-                          ❤️ {item === 1 ? '45' : item === 2 ? '67' : item === 3 ? '23' : '89'}
-                        </span>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
+                Cerita
+              </h3>
+              
+              <p style={{
+                color: 'rgba(255, 255, 255, 0.6)',
+                fontSize: isMobile ? '1rem' : '1.2rem',
+                maxWidth: '600px',
+                lineHeight: 1.8,
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                fontStyle: 'italic'
+              }}>
+                "Setiap gambar memiliki cerita. Setiap cerita memiliki makna."
+              </p>
+              
+              <div style={{
+                marginTop: '3rem',
+                width: '60px',
+                height: '1px',
+                backgroundColor: 'rgba(255, 255, 255, 0.3)'
+              }} />
             </div>
           </motion.div>
         )}
@@ -7730,62 +7418,89 @@ setIsLoadingEvents(false);
               Chatbot
             </motion.span>
 
-            <motion.span
-              onClick={handleCommunityClick}
+            {/* Community dengan HOVER */}
+            <motion.div
+              onMouseEnter={handleCommunityHover}
+              onMouseLeave={handleCommunityLeave}
               style={{
-                color: 'white',
-                fontSize: isMobile ? '1rem' : '1.2rem',
-                fontWeight: '300',
-                fontFamily: 'Helvetica, Arial, sans-serif',
-                cursor: 'pointer',
-                letterSpacing: '1px',
-                transition: 'opacity 0.3s ease'
+                position: 'relative',
+                display: 'inline-block'
               }}
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.95, duration: 0.5 }}
-              whileHover={{ opacity: 0.7 }}
             >
-              Community
-            </motion.span>
+              <motion.span
+                style={{
+                  color: 'white',
+                  fontSize: isMobile ? '1rem' : '1.2rem',
+                  fontWeight: '300',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  cursor: 'pointer',
+                  letterSpacing: '1px',
+                  transition: 'opacity 0.3s ease'
+                }}
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.95, duration: 0.5 }}
+                whileHover={{ opacity: 0.7 }}
+              >
+                Community
+              </motion.span>
+            </motion.div>
 
-            <motion.span
-              onClick={handleNewsClick}
+            {/* News dengan HOVER */}
+            <motion.div
+              onMouseEnter={handleNewsHover}
+              onMouseLeave={handleNewsLeave}
               style={{
-                color: 'white',
-                fontSize: isMobile ? '1rem' : '1.2rem',
-                fontWeight: '300',
-                fontFamily: 'Helvetica, Arial, sans-serif',
-                cursor: 'pointer',
-                letterSpacing: '1px',
-                transition: 'opacity 0.3s ease'
+                position: 'relative',
+                display: 'inline-block'
               }}
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1.0, duration: 0.5 }}
-              whileHover={{ opacity: 0.7 }}
             >
-              News
-            </motion.span>
+              <motion.span
+                style={{
+                  color: 'white',
+                  fontSize: isMobile ? '1rem' : '1.2rem',
+                  fontWeight: '300',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  cursor: 'pointer',
+                  letterSpacing: '1px',
+                  transition: 'opacity 0.3s ease'
+                }}
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1.0, duration: 0.5 }}
+                whileHover={{ opacity: 0.7 }}
+              >
+                News
+              </motion.span>
+            </motion.div>
 
-            <motion.span
-              onClick={handleStoriesClick}
+            {/* Stories dengan HOVER */}
+            <motion.div
+              onMouseEnter={handleStoriesHover}
+              onMouseLeave={handleStoriesLeave}
               style={{
-                color: 'white',
-                fontSize: isMobile ? '1rem' : '1.2rem',
-                fontWeight: '300',
-                fontFamily: 'Helvetica, Arial, sans-serif',
-                cursor: 'pointer',
-                letterSpacing: '1px',
-                transition: 'opacity 0.3s ease'
+                position: 'relative',
+                display: 'inline-block'
               }}
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1.05, duration: 0.5 }}
-              whileHover={{ opacity: 0.7 }}
             >
-              Stories
-            </motion.span>
+              <motion.span
+                style={{
+                  color: 'white',
+                  fontSize: isMobile ? '1rem' : '1.2rem',
+                  fontWeight: '300',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  cursor: 'pointer',
+                  letterSpacing: '1px',
+                  transition: 'opacity 0.3s ease'
+                }}
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1.05, duration: 0.5 }}
+                whileHover={{ opacity: 0.7 }}
+              >
+                Stories
+              </motion.span>
+            </motion.div>
 
             <motion.span
               onClick={handleNoteClick}
