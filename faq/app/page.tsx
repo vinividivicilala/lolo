@@ -1548,6 +1548,10 @@ setIsLoadingEvents(false);
     setShowCommunityOverlay(false);
   };
 
+  const handleCloseCommunityOverlay = () => {
+    setShowCommunityOverlay(false);
+  };
+
   // Handler untuk News Overlay (HOVER)
   const handleNewsHover = () => {
     setShowNewsOverlay(true);
@@ -1557,12 +1561,20 @@ setIsLoadingEvents(false);
     setShowNewsOverlay(false);
   };
 
+  const handleCloseNewsOverlay = () => {
+    setShowNewsOverlay(false);
+  };
+
   // Handler untuk Stories Overlay (HOVER)
   const handleStoriesHover = () => {
     setShowStoriesOverlay(true);
   };
 
   const handleStoriesLeave = () => {
+    setShowStoriesOverlay(false);
+  };
+
+  const handleCloseStoriesOverlay = () => {
     setShowStoriesOverlay(false);
   };
 
@@ -2210,6 +2222,118 @@ setIsLoadingEvents(false);
         </div>
       )}
 
+      {/* Stories Overlay - HANYA JUDUL (sesuai permintaan) */}
+      <AnimatePresence>
+        {showStoriesOverlay && (
+          <motion.div
+            ref={storiesOverlayRef}
+            initial={{ y: '-100%' }}
+            animate={{ y: 0 }}
+            exit={{ y: '-100%' }}
+            transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: 'auto',
+              maxHeight: '80vh',
+              backgroundColor: 'rgba(0, 0, 0, 0.98)',
+              zIndex: 10004,
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'hidden',
+              borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+              boxShadow: '0 10px 30px rgba(0,0,0,0.5)'
+            }}
+          >
+            {/* Header Stories Overlay */}
+            <div style={{
+              padding: isMobile ? '1.5rem' : '2rem',
+              borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexShrink: 0
+            }}>
+              <h2 style={{
+                color: 'white',
+                fontSize: isMobile ? '1.8rem' : '2.5rem',
+                fontWeight: '300',
+                margin: 0,
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                letterSpacing: '1px'
+              }}>
+                Stories
+              </h2>
+              
+              <motion.button
+                onClick={handleCloseStoriesOverlay}
+                style={{
+                  backgroundColor: 'transparent',
+                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                  color: 'white',
+                  width: '40px',
+                  height: '40px',
+                  borderRadius: '50%',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '1.5rem',
+                  fontFamily: 'Helvetica, Arial, sans-serif'
+                }}
+                whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+              >
+                ×
+              </motion.button>
+            </div>
+
+            {/* Konten Stories Overlay - HANYA JUDUL */}
+            <div style={{
+              padding: isMobile ? '3rem 1.5rem' : '4rem 3rem',
+              overflowY: 'auto',
+              maxHeight: 'calc(80vh - 100px)',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              textAlign: 'center'
+            }}>
+              <h3 style={{
+                color: 'white',
+                fontSize: isMobile ? '2.5rem' : '4rem',
+                fontWeight: '300',
+                margin: '0 0 2rem 0',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                letterSpacing: '1px',
+                opacity: 0.9
+              }}>
+                Cerita
+              </h3>
+              
+              <p style={{
+                color: 'rgba(255, 255, 255, 0.6)',
+                fontSize: isMobile ? '1rem' : '1.2rem',
+                maxWidth: '600px',
+                lineHeight: 1.8,
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                fontStyle: 'italic'
+              }}>
+                "Setiap gambar memiliki cerita. Setiap cerita memiliki makna."
+              </p>
+              
+              <div style={{
+                marginTop: '3rem',
+                width: '60px',
+                height: '1px',
+                backgroundColor: 'rgba(255, 255, 255, 0.3)'
+              }} />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Community Overlay - dengan HOVER */}
       <AnimatePresence>
         {showCommunityOverlay && (
@@ -2419,118 +2543,6 @@ setIsLoadingEvents(false);
                 fontFamily: 'Helvetica, Arial, sans-serif'
               }}>
                 Update terbaru tentang pengembangan platform, fitur baru, dan acara mendatang.
-              </p>
-              
-              <div style={{
-                marginTop: '3rem',
-                width: '60px',
-                height: '1px',
-                backgroundColor: 'rgba(255, 255, 255, 0.3)'
-              }} />
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Stories Overlay - HANYA JUDUL (sesuai permintaan) */}
-      <AnimatePresence>
-        {showStoriesOverlay && (
-          <motion.div
-            ref={storiesOverlayRef}
-            initial={{ y: '-100%' }}
-            animate={{ y: 0 }}
-            exit={{ y: '-100%' }}
-            transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: 'auto',
-              maxHeight: '80vh',
-              backgroundColor: 'rgba(0, 0, 0, 0.98)',
-              zIndex: 10004,
-              display: 'flex',
-              flexDirection: 'column',
-              overflow: 'hidden',
-              borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
-              boxShadow: '0 10px 30px rgba(0,0,0,0.5)'
-            }}
-          >
-            {/* Header Stories Overlay */}
-            <div style={{
-              padding: isMobile ? '1.5rem' : '2rem',
-              borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              flexShrink: 0
-            }}>
-              <h2 style={{
-                color: 'white',
-                fontSize: isMobile ? '1.8rem' : '2.5rem',
-                fontWeight: '300',
-                margin: 0,
-                fontFamily: 'Helvetica, Arial, sans-serif',
-                letterSpacing: '1px'
-              }}>
-                Stories
-              </h2>
-              
-              <motion.button
-                onClick={handleCloseStoriesOverlay}
-                style={{
-                  backgroundColor: 'transparent',
-                  border: '1px solid rgba(255, 255, 255, 0.3)',
-                  color: 'white',
-                  width: '40px',
-                  height: '40px',
-                  borderRadius: '50%',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '1.5rem',
-                  fontFamily: 'Helvetica, Arial, sans-serif'
-                }}
-                whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
-              >
-                ×
-              </motion.button>
-            </div>
-
-            {/* Konten Stories Overlay - HANYA JUDUL */}
-            <div style={{
-              padding: isMobile ? '3rem 1.5rem' : '4rem 3rem',
-              overflowY: 'auto',
-              maxHeight: 'calc(80vh - 100px)',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              textAlign: 'center'
-            }}>
-              <h3 style={{
-                color: 'white',
-                fontSize: isMobile ? '2.5rem' : '4rem',
-                fontWeight: '300',
-                margin: '0 0 2rem 0',
-                fontFamily: 'Helvetica, Arial, sans-serif',
-                letterSpacing: '1px',
-                opacity: 0.9
-              }}>
-                Cerita
-              </h3>
-              
-              <p style={{
-                color: 'rgba(255, 255, 255, 0.6)',
-                fontSize: isMobile ? '1rem' : '1.2rem',
-                maxWidth: '600px',
-                lineHeight: 1.8,
-                fontFamily: 'Helvetica, Arial, sans-serif',
-                fontStyle: 'italic'
-              }}>
-                "Setiap gambar memiliki cerita. Setiap cerita memiliki makna."
               </p>
               
               <div style={{
