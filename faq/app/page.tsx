@@ -212,9 +212,9 @@ export default function HomePage(): React.JSX.Element {
   const [isUpdating, setIsUpdating] = useState(false);
   const [showDeleteAccountModal, setShowDeleteAccountModal] = useState(false);
 
-  // State untuk GSAP Loading - DIPERBAIKI
+  // State untuk GSAP Loading - ROTATING WORDS
   const [showGsapLoading, setShowGsapLoading] = useState(true);
-  const [currentRandomNumber, setCurrentRandomNumber] = useState(0);
+  const [currentWordIndex, setCurrentWordIndex] = useState(0);
 
   // State untuk kalender
   const [showCalendarModal, setShowCalendarModal] = useState(false);
@@ -251,9 +251,9 @@ export default function HomePage(): React.JSX.Element {
   const notificationDropdownRef = useRef<HTMLDivElement>(null);
   const userProfileModalRef = useRef<HTMLDivElement>(null);
 
-  // Ref untuk GSAP Loading - DIPERBAIKI
+  // Ref untuk GSAP Loading - ROTATING WORDS
   const gsapLoadingRef = useRef<HTMLDivElement>(null);
-  const loadingNumberRef = useRef<HTMLDivElement>(null);
+  const loadingTextRef = useRef<HTMLSpanElement>(null);
 
   // Ref untuk modal kalender
   const calendarModalRef = useRef<HTMLDivElement>(null);
@@ -278,6 +278,9 @@ const handleToggleSection = (section: string) => {
 const [currentTrack, setCurrentTrack] = useState<string | null>(null);
 const [isPlaying, setIsPlaying] = useState(false);
 const [currentEmbedUrl, setCurrentEmbedUrl] = useState<string>('');
+
+// Data untuk rotating words
+const rotatingWords = ["build", "design", "create"];
 
 // Data playlist lagu kesukaan dengan Spotify embed URL
 const favoriteTracks = [
@@ -1578,98 +1581,59 @@ setIsLoadingEvents(false);
     setShowStoriesOverlay(false);
   };
 
-  // Fungsi untuk generate angka acak
-  const generateRandomNumber = (): number => {
-    // 70% kemungkinan satuan (1-9)
-    // 20% kemungkinan puluhan (10-99)
-    // 10% kemungkinan ratusan (100-999)
-    const random = Math.random();
-    
-    if (random < 0.7) {
-      return Math.floor(Math.random() * 9) + 1; // 1-9
-    } else if (random < 0.9) {
-      return Math.floor(Math.random() * 90) + 10; // 10-99
-    } else {
-      return Math.floor(Math.random() * 900) + 100; // 100-999
-    }
-  };
-
-  // Animasi GSAP Loading dengan angka acak - DIPERBAIKI
+  // Animasi GSAP Loading dengan ROTATING WORDS
   useEffect(() => {
-    if (!loadingNumberRef.current) return;
+    if (!loadingTextRef.current) return;
 
-    // Timeline untuk animasi angka acak
+    // Timeline untuk animasi rotating words
     const loadingTimeline = gsap.timeline({
-      onComplete: () => {
-        // Setelah selesai, tunggu sebentar lalu fade out
-        setTimeout(() => {
-          gsap.to(gsapLoadingRef.current, {
-            opacity: 0,
-            duration: 0.5,
-            ease: "power2.out",
-            onComplete: () => {
-              setShowGsapLoading(false);
-            }
-          });
-        }, 500);
+      repeat: -1, // Loop terus menerus
+      repeatDelay: 0.2,
+      onReverseComplete: () => {
+        // Setelah selesai satu siklus, lanjut ke kata berikutnya
+        setCurrentWordIndex((prev) => (prev + 1) % rotatingWords.length);
       }
     });
 
-    // Total durasi animasi: 3 detik
-    const totalDuration = 3;
-    const numChanges = 15; // Jumlah perubahan angka
-    const changeInterval = totalDuration / numChanges;
-
-    // Animasikan perubahan angka acak
-    for (let i = 0; i < numChanges; i++) {
-      loadingTimeline.to({}, {
-        duration: changeInterval,
-        onStart: () => {
-          // Generate angka acak baru
-          const newNumber = generateRandomNumber();
-          setCurrentRandomNumber(newNumber);
-        },
-        onUpdate: function() {
-          // Efek visual halus saat angka berubah
-          if (loadingNumberRef.current) {
-            const progress = this.progress();
-            const scale = 1 + (Math.sin(progress * Math.PI * 2) * 0.05);
-            gsap.to(loadingNumberRef.current, {
-              scale: scale,
-              duration: changeInterval / 2,
-              ease: "power1.inOut"
-            });
-          }
+    // Animasi fade out - fade in untuk setiap kata
+    loadingTimeline
+      .to(loadingTextRef.current, {
+        opacity: 0,
+        y: -5,
+        duration: 0.3,
+        ease: "power1.in"
+      })
+      .to({}, { duration: 0.1 }) // Delay kecil
+      .set(loadingTextRef.current, {
+        onComplete: () => {
+          // Update kata setelah fade out selesai
+          setCurrentWordIndex((prev) => (prev + 1) % rotatingWords.length);
         }
-      }, i * changeInterval);
-    }
-
-    // Animasi awal untuk angka pertama
-    loadingTimeline.fromTo(loadingNumberRef.current,
-      {
-        scale: 0.8,
-        opacity: 0
-      },
-      {
-        scale: 1,
+      })
+      .to(loadingTextRef.current, {
         opacity: 1,
-        duration: 0.5,
-        ease: "power2.out"
-      },
-      0
-    );
+        y: 0,
+        duration: 0.3,
+        ease: "power1.out"
+      });
 
-    // Animasi akhir sebelum fade out
-    loadingTimeline.to(loadingNumberRef.current, {
-      scale: 1.1,
-      duration: 0.3,
-      ease: "power2.out",
-      yoyo: true,
-      repeat: 1
-    }, totalDuration - 0.6);
+    // Setelah 3 detik, fade out loading screen
+    const timeout = setTimeout(() => {
+      gsap.to(gsapLoadingRef.current, {
+        opacity: 0,
+        duration: 0.5,
+        ease: "power2.out",
+        onComplete: () => {
+          setShowGsapLoading(false);
+        }
+      });
+      // Hentikan timeline animasi kata
+      loadingTimeline.kill();
+    }, 3000);
 
     return () => {
       loadingTimeline.kill();
+      clearTimeout(timeout);
     };
   }, []);
 
@@ -2150,7 +2114,7 @@ setIsLoadingEvents(false);
       MozOsxFontSmoothing: 'grayscale'
     }}>
       
-      {/* GSAP Modern Loading Animation - DIPERBAIKI DENGAN ANGKA ACAK */}
+      {/* GSAP Modern Loading Animation - ROTATING WORDS */}
       <AnimatePresence>
         {showGsapLoading && (
           <motion.div
@@ -2179,23 +2143,24 @@ setIsLoadingEvents(false);
                 userSelect: 'none',
                 WebkitUserSelect: 'none',
                 MozUserSelect: 'none',
-                msUserSelect: 'none'
+                msUserSelect: 'none',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                fontSize: isMobile ? '3rem' : '4rem',
+                fontWeight: '300',
+                letterSpacing: '1px'
               }}
             >
-              {/* Angka loading acak dengan animasi GSAP */}
-              <div 
-                ref={loadingNumberRef}
+              <span>We </span>
+              <span 
+                ref={loadingTextRef}
                 style={{
-                  fontSize: isMobile ? '5rem' : '7rem',
-                  fontWeight: 400, // Normal, tidak bold
-                  fontFamily: 'Helvetica, Arial, sans-serif',
-                  color: 'white',
-                  opacity: 0,
-                  letterSpacing: '-2px'
+                  display: 'inline-block',
+                  minWidth: isMobile ? '150px' : '200px',
+                  textAlign: 'left'
                 }}
               >
-                {currentRandomNumber}
-              </div>
+                {rotatingWords[currentWordIndex]}
+              </span>
             </div>
           </motion.div>
         )}
