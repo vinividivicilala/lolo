@@ -477,6 +477,14 @@ const SubMenuItem = ({ number, title, url }: {
 // Tambahkan state ini di dalam component HomePage (setelah state lainnya)
 const [jakartaTime, setJakartaTime] = useState<string>('');
 
+  
+// State untuk rotating words
+const [currentRotatingWordIndex, setCurrentRotatingWordIndex] = useState(0);
+const rotatingWordsList = ["Community", "Catatan", "Blog"];
+
+  
+  
+
 // useEffect untuk update jam Jakarta setiap detik
 useEffect(() => {
   const updateJakartaTime = () => {
@@ -499,6 +507,18 @@ useEffect(() => {
 
   return () => clearInterval(interval);
 }, []);
+
+// Animasi rotating words GSAP
+useEffect(() => {
+  if (!showGsapLoading) {
+    const interval = setInterval(() => {
+      setCurrentRotatingWordIndex((prev) => (prev + 1) % rotatingWordsList.length);
+    }, 2500); // Ganti setiap 2.5 detik
+    
+    return () => clearInterval(interval);
+  }
+}, [showGsapLoading]);
+  
 
   // Data untuk pencarian (tetap ada untuk fungsi lain jika diperlukan)
   const searchablePages = [
@@ -7683,19 +7703,103 @@ setIsLoadingEvents(false);
               display: 'flex',
               alignItems: 'center'
             }}>
-              <h2 style={{
-                color: 'white',
-                fontSize: isMobile ? '5rem' : '7rem',
-                fontWeight: '900',
-                textTransform: 'uppercase',
-                fontFamily: 'Helvetica, Arial, sans-serif',
-                letterSpacing: '-3px',
-                margin: 0,
-                lineHeight: 0.8,
-                padding: 0
-              }}>
-                PRODUCT
-              </h2>
+             <h2 style={{
+    color: 'white',
+    fontSize: isMobile ? '5rem' : '7rem',
+    fontWeight: '900',
+    textTransform: 'uppercase',
+    fontFamily: 'Helvetica, Arial, sans-serif',
+    letterSpacing: '-3px',
+    margin: 0,
+    lineHeight: 0.8,
+    padding: 0
+  }}>
+    PRODUCT
+  </h2>
+  
+  {/* Southeast Arrow dengan Rotating Words */}
+  <div style={{
+    display: 'flex',
+    alignItems: 'center',
+    gap: '1rem',
+    marginLeft: '1rem'
+  }}>
+    <svg
+      width={isMobile ? "45" : "60"}
+      height={isMobile ? "45" : "60"}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="white"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      style={{
+        filter: 'drop-shadow(0 0 10px rgba(255,255,255,0.5))',
+        animation: 'pulse 2s ease-in-out infinite'
+      }}
+    >
+      <path d="M7 7L21 21" />
+      <path d="M21 7v14H7" />
+    </svg>
+    
+    {/* Rotating Words */}
+    <div style={{
+      position: 'relative',
+      width: isMobile ? '280px' : '350px',
+      height: isMobile ? '5rem' : '7rem',
+      overflow: 'hidden'
+    }}>
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={currentRotatingWordIndex}
+          initial={{ 
+            y: 30, 
+            opacity: 0,
+            scale: 0.9
+          }}
+          animate={{ 
+            y: 0, 
+            opacity: 1,
+            scale: 1
+          }}
+          exit={{ 
+            y: -30, 
+            opacity: 0,
+            scale: 0.9
+          }}
+          transition={{
+            y: { type: "spring", stiffness: 400, damping: 30 },
+            opacity: { duration: 0.4 },
+            scale: { duration: 0.3 }
+          }}
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'flex-start'
+          }}
+        >
+          <h2 style={{
+            color: 'white',
+            fontSize: isMobile ? '3.5rem' : '4.5rem',
+            fontWeight: '400',
+            fontFamily: 'Helvetica, Arial, sans-serif',
+            letterSpacing: '1px',
+            margin: 0,
+            lineHeight: 1,
+            textShadow: '0 0 20px rgba(255,255,255,0.5)',
+            whiteSpace: 'nowrap'
+          }}>
+            {rotatingWordsList[currentRotatingWordIndex]}
+          </h2>
+        </motion.div>
+      </AnimatePresence>
+    </div>
+  </div>
             </div>
 
             <div style={{
@@ -7991,6 +8095,19 @@ setIsLoadingEvents(false);
           </div>
 
         </div>
+
+        <style jsx>{`
+  @keyframes pulse {
+    0%, 100% {
+      opacity: 0.8;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.1);
+    }
+  }
+`}</style>
         
         {/* Spacer kecil sebelum konten berikutnya */}
         <div style={{
