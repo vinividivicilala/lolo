@@ -232,6 +232,15 @@ export default function HomePage(): React.JSX.Element {
   const [showNewsOverlay, setShowNewsOverlay] = useState(false);
   const [showStoriesOverlay, setShowStoriesOverlay] = useState(false);
 
+  // State untuk overlay halaman
+  const [showProductOverlay, setShowProductOverlay] = useState(false);
+  const [showVisualDesignerOverlay, setShowVisualDesignerOverlay] = useState(false);
+  const [showIndonesiaOverlay, setShowIndonesiaOverlay] = useState(false);
+
+  // State untuk rotating words
+  const [currentRotatingWordIndex, setCurrentRotatingWordIndex] = useState(0);
+  const rotatingWordsList = ["Community", "Catatan", "Blog"];
+
   const headerRef = useRef<HTMLDivElement>(null);
   const topNavRef = useRef<HTMLDivElement>(null);
   const topicContainerRef = useRef<HTMLDivElement>(null);
@@ -266,259 +275,253 @@ export default function HomePage(): React.JSX.Element {
   const newsOverlayRef = useRef<HTMLDivElement>(null);
   const storiesOverlayRef = useRef<HTMLDivElement>(null);
 
-// Tambahkan state ini di dalam component HomePage (setelah state lainnya)
-const [openSection, setOpenSection] = useState<string | null>(null);
+  // Ref untuk overlay product, visual designer, indonesia
+  const productOverlayRef = useRef<HTMLDivElement>(null);
+  const visualDesignerOverlayRef = useRef<HTMLDivElement>(null);
+  const indonesiaOverlayRef = useRef<HTMLDivElement>(null);
 
-// Fungsi untuk toggle section
-const handleToggleSection = (section: string) => {
-  setOpenSection(openSection === section ? null : section);
-};
+  const [openSection, setOpenSection] = useState<string | null>(null);
+
+  // Fungsi untuk toggle section
+  const handleToggleSection = (section: string) => {
+    setOpenSection(openSection === section ? null : section);
+  };
 
   // State untuk Spotify
-const [currentTrack, setCurrentTrack] = useState<string | null>(null);
-const [isPlaying, setIsPlaying] = useState(false);
-const [currentEmbedUrl, setCurrentEmbedUrl] = useState<string>('');
+  const [currentTrack, setCurrentTrack] = useState<string | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentEmbedUrl, setCurrentEmbedUrl] = useState<string>('');
 
-// Data untuk rotating words
-const rotatingWords = ["build", "design", "create"];
+  // Data untuk rotating words
+  const rotatingWords = ["build", "design", "create"];
 
-// Data playlist lagu kesukaan dengan Spotify embed URL
-const favoriteTracks = [
-  // Hanin Dhiya
-  {
-    id: 'hanin1',
-    title: 'Pupus',
-    artist: 'Hanin Dhiya',
-    embedUrl: 'https://open.spotify.com/embed/track/4za8UJq7JI99ilRYQXVrkm?utm_source=generator',
-    spotifyUrl: 'https://open.spotify.com/track/4za8UJq7JI99ilRYQXVrkm?si=e767fcf3e9ae4a6c'
-  },
-  {
-    id: 'hanin2',
-    title: 'Suatu Saat Nanti',
-    artist: 'Hanin Dhiya',
-    embedUrl: 'https://open.spotify.com/embed/track/11nApQrr7tfBNYzBOmHWCc?utm_source=generator',
-    spotifyUrl: 'https://open.spotify.com/track/11nApQrr7tfBNYzBOmHWCc?si=a141c85a054d41b0'
-  },
-  // Stand Here Alone
-  {
-    id: 'sha1',
-    title: 'Kita Lawan Mereka',
-    artist: 'Stand Here Alone',
-    embedUrl: 'https://open.spotify.com/embed/track/2rj9nnNMZQNs2pZAPWuvze?utm_source=generator',
-    spotifyUrl: 'https://open.spotify.com/track/2rj9nnNMZQNs2pZAPWuvze?si=34b6e33a87454394'
-  },
-  {
-    id: 'sha2',
-    title: 'Korban Lelaki',
-    artist: 'Stand Here Alone',
-    embedUrl: 'https://open.spotify.com/embed/track/3u53sM4xrdWl0uDLzcFm6x?utm_source=generator',
-    spotifyUrl: 'https://open.spotify.com/track/3u53sM4xrdWl0uDLzcFm6x?si=ba3bbf39522a475e'
-  },
-  {
-    id: 'sha3',
-    title: 'Wanita Masih Banyak',
-    artist: 'Stand Here Alone',
-    embedUrl: 'https://open.spotify.com/embed/track/5H60BCrbWBocSIAoZwjxwD?utm_source=generator',
-    spotifyUrl: 'https://open.spotify.com/track/5H60BCrbWBocSIAoZwjxwD?si=2ac532c98a9b483e'
-  }
-];
+  // Data playlist lagu kesukaan dengan Spotify embed URL
+  const favoriteTracks = [
+    // Hanin Dhiya
+    {
+      id: 'hanin1',
+      title: 'Pupus',
+      artist: 'Hanin Dhiya',
+      embedUrl: 'https://open.spotify.com/embed/track/4za8UJq7JI99ilRYQXVrkm?utm_source=generator',
+      spotifyUrl: 'https://open.spotify.com/track/4za8UJq7JI99ilRYQXVrkm?si=e767fcf3e9ae4a6c'
+    },
+    {
+      id: 'hanin2',
+      title: 'Suatu Saat Nanti',
+      artist: 'Hanin Dhiya',
+      embedUrl: 'https://open.spotify.com/embed/track/11nApQrr7tfBNYzBOmHWCc?utm_source=generator',
+      spotifyUrl: 'https://open.spotify.com/track/11nApQrr7tfBNYzBOmHWCc?si=a141c85a054d41b0'
+    },
+    // Stand Here Alone
+    {
+      id: 'sha1',
+      title: 'Kita Lawan Mereka',
+      artist: 'Stand Here Alone',
+      embedUrl: 'https://open.spotify.com/embed/track/2rj9nnNMZQNs2pZAPWuvze?utm_source=generator',
+      spotifyUrl: 'https://open.spotify.com/track/2rj9nnNMZQNs2pZAPWuvze?si=34b6e33a87454394'
+    },
+    {
+      id: 'sha2',
+      title: 'Korban Lelaki',
+      artist: 'Stand Here Alone',
+      embedUrl: 'https://open.spotify.com/embed/track/3u53sM4xrdWl0uDLzcFm6x?utm_source=generator',
+      spotifyUrl: 'https://open.spotify.com/track/3u53sM4xrdWl0uDLzcFm6x?si=ba3bbf39522a475e'
+    },
+    {
+      id: 'sha3',
+      title: 'Wanita Masih Banyak',
+      artist: 'Stand Here Alone',
+      embedUrl: 'https://open.spotify.com/embed/track/5H60BCrbWBocSIAoZwjxwD?utm_source=generator',
+      spotifyUrl: 'https://open.spotify.com/track/5H60BCrbWBocSIAoZwjxwD?si=2ac532c98a9b483e'
+    }
+  ];
 
-// Fungsi untuk memutar lagu
-const playTrack = (track: typeof favoriteTracks[0]) => {
-  setCurrentTrack(track.id);
-  setCurrentEmbedUrl(track.embedUrl);
-  setIsPlaying(true);
-};
+  // Fungsi untuk memutar lagu
+  const playTrack = (track: typeof favoriteTracks[0]) => {
+    setCurrentTrack(track.id);
+    setCurrentEmbedUrl(track.embedUrl);
+    setIsPlaying(true);
+  };
 
-// Component Menu Item - tanpa animasi gerak
-const MenuItem = ({ number, title, mainUrl, isOpen, onToggle, children }: {
-  number: string;
-  title: string;
-  mainUrl: string;
-  isOpen: boolean;
-  onToggle: () => void;
-  children: React.ReactNode;
-}) => (
-  <motion.div
-    initial={{ opacity: 0, y: 30 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.6 }}
-    style={{
-      borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
-    }}
-  >
-    {/* Header yang bisa diklik untuk toggle - tanpa hover effect */}
-    <div
-      onClick={onToggle}
+  // Component Menu Item - tanpa animasi gerak
+  const MenuItem = ({ number, title, mainUrl, isOpen, onToggle, children }: {
+    number: string;
+    title: string;
+    mainUrl: string;
+    isOpen: boolean;
+    onToggle: () => void;
+    children: React.ReactNode;
+  }) => (
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+      style={{
+        borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+      }}
+    >
+      {/* Header yang bisa diklik untuk toggle - tanpa hover effect */}
+      <div
+        onClick={onToggle}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          cursor: 'pointer',
+          padding: '1rem 0',
+          transition: 'none' // Hapus transition
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+          <span style={{
+            color: 'rgba(255, 255, 255, 0.5)',
+            fontSize: '2rem',
+            fontWeight: '300',
+            fontFamily: 'monospace'
+          }}>{number}</span>
+          
+          {/* Title - tanpa hover effect */}
+          <span
+            onClick={(e) => {
+              e.stopPropagation();
+              router.push(mainUrl);
+            }}
+            style={{
+              color: '#FFFFFF',
+              fontSize: isMobile ? '3rem' : '4.5rem',
+              fontWeight: '500',
+              fontFamily: 'Helvetica, Arial, sans-serif',
+              textShadow: '0 0 10px rgba(255,255,255,0.3)',
+              cursor: 'pointer',
+              transition: 'none' // Hapus transition
+            }}
+          >
+            {title}
+          </span>
+        </div>
+        
+        {/* Arrow yang berubah sesuai state - tanpa animasi rotate */}
+        <div style={{
+          transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)',
+          transition: 'transform 0.3s ease' // Hanya arrow yang tetap punya animasi
+        }}>
+          <svg
+            width="50"
+            height="50"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#FFFFFF"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            style={{
+              filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.5))'
+            }}
+          >
+            <path d="M7 7h10v10" />
+            <path d="M17 7L7 17" />
+          </svg>
+        </div>
+      </div>
+
+      {/* Sub-menu dengan animasi muncul/hilang - tetap ada animasi */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.8rem',
+              marginLeft: '6rem',
+              marginTop: '0.5rem',
+              marginBottom: '1rem',
+              overflow: 'hidden'
+            }}
+          >
+            {children}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+
+  // Component Sub Menu Item - tanpa animasi hover
+  const SubMenuItem = ({ number, title, url }: {
+    number: string;
+    title: string;
+    url: string;
+  }) => (
+    <div // Ganti dari motion.div ke div biasa
       style={{
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'space-between',
+        gap: '1.5rem',
+        padding: '0.5rem 0',
         cursor: 'pointer',
-        padding: '1rem 0',
-        transition: 'none' // Hapus transition
+        borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
       }}
+      onClick={() => router.push(url)}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
-        <span style={{
-          color: 'rgba(255, 255, 255, 0.5)',
-          fontSize: '2rem',
-          fontWeight: '300',
-          fontFamily: 'monospace'
-        }}>{number}</span>
-        
-        {/* Title - tanpa hover effect */}
-        <span
-          onClick={(e) => {
-            e.stopPropagation();
-            router.push(mainUrl);
-          }}
-          style={{
-            color: '#FFFFFF',
-            fontSize: isMobile ? '3rem' : '4.5rem',
-            fontWeight: '500',
-            fontFamily: 'Helvetica, Arial, sans-serif',
-            textShadow: '0 0 10px rgba(255,255,255,0.3)',
-            cursor: 'pointer',
-            transition: 'none' // Hapus transition
-          }}
-        >
-          {title}
-        </span>
-      </div>
-      
-      {/* Arrow yang berubah sesuai state - tanpa animasi rotate */}
-      <div style={{
-        transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)',
-        transition: 'transform 0.3s ease' // Hanya arrow yang tetap punya animasi
+      <span style={{ 
+        color: 'rgba(255, 255, 255, 0.3)', 
+        fontSize: '0.9rem', 
+        fontFamily: 'monospace', 
+        width: '30px' 
       }}>
-        <svg
-          width="50"
-          height="50"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="#FFFFFF"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          style={{
-            filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.5))'
-          }}
-        >
-          <path d="M7 7h10v10" />
-          <path d="M17 7L7 17" />
-        </svg>
-      </div>
+        {number}
+      </span>
+      <span style={{ 
+        color: 'rgba(255, 255, 255, 0.8)', 
+        fontSize: '1.2rem',
+        flex: 1
+      }}>
+        {title}
+      </span>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2">
+        <path d="M7 7h10v10" />
+        <path d="M17 7L7 17" />
+      </svg>
     </div>
+  );
 
-    {/* Sub-menu dengan animasi muncul/hilang - tetap ada animasi */}
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: 'auto' }}
-          exit={{ opacity: 0, height: 0 }}
-          transition={{ duration: 0.3 }}
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '0.8rem',
-            marginLeft: '6rem',
-            marginTop: '0.5rem',
-            marginBottom: '1rem',
-            overflow: 'hidden'
-          }}
-        >
-          {children}
-        </motion.div>
-      )}
-    </AnimatePresence>
-  </motion.div>
-);
+  const [jakartaTime, setJakartaTime] = useState<string>('');
 
-// Component Sub Menu Item - tanpa animasi hover
-const SubMenuItem = ({ number, title, url }: {
-  number: string;
-  title: string;
-  url: string;
-}) => (
-  <div // Ganti dari motion.div ke div biasa
-    style={{
-      display: 'flex',
-      alignItems: 'center',
-      gap: '1.5rem',
-      padding: '0.5rem 0',
-      cursor: 'pointer',
-      borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
-    }}
-    onClick={() => router.push(url)}
-  >
-    <span style={{ 
-      color: 'rgba(255, 255, 255, 0.3)', 
-      fontSize: '0.9rem', 
-      fontFamily: 'monospace', 
-      width: '30px' 
-    }}>
-      {number}
-    </span>
-    <span style={{ 
-      color: 'rgba(255, 255, 255, 0.8)', 
-      fontSize: '1.2rem',
-      flex: 1
-    }}>
-      {title}
-    </span>
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2">
-      <path d="M7 7h10v10" />
-      <path d="M17 7L7 17" />
-    </svg>
-  </div>
-);
+  // useEffect untuk update jam Jakarta setiap detik
+  useEffect(() => {
+    const updateJakartaTime = () => {
+      const now = new Date();
+      const timeString = now.toLocaleTimeString('id-ID', { 
+        timeZone: 'Asia/Jakarta', 
+        hour12: false,
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      });
+      setJakartaTime(timeString);
+    };
 
-// Tambahkan state ini di dalam component HomePage (setelah state lainnya)
-const [jakartaTime, setJakartaTime] = useState<string>('');
+    // Update immediately
+    updateJakartaTime();
 
-  
-// State untuk rotating words
-const [currentRotatingWordIndex, setCurrentRotatingWordIndex] = useState(0);
-const rotatingWordsList = ["Community", "Catatan", "Blog"];
+    // Update every second
+    const interval = setInterval(updateJakartaTime, 1000);
 
-  
-  
-
-// useEffect untuk update jam Jakarta setiap detik
-useEffect(() => {
-  const updateJakartaTime = () => {
-    const now = new Date();
-    const timeString = now.toLocaleTimeString('id-ID', { 
-      timeZone: 'Asia/Jakarta', 
-      hour12: false,
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit'
-    });
-    setJakartaTime(timeString);
-  };
-
-  // Update immediately
-  updateJakartaTime();
-
-  // Update every second
-  const interval = setInterval(updateJakartaTime, 1000);
-
-  return () => clearInterval(interval);
-}, []);
-
-// Animasi rotating words GSAP
-useEffect(() => {
-  if (!showGsapLoading) {
-    const interval = setInterval(() => {
-      setCurrentRotatingWordIndex((prev) => (prev + 1) % rotatingWordsList.length);
-    }, 2500); // Ganti setiap 2.5 detik
-    
     return () => clearInterval(interval);
-  }
-}, [showGsapLoading]);
-  
+  }, []);
+
+  // Animasi rotating words GSAP
+  useEffect(() => {
+    if (!showGsapLoading) {
+      const interval = setInterval(() => {
+        setCurrentRotatingWordIndex((prev) => (prev + 1) % rotatingWordsList.length);
+      }, 2500); // Ganti setiap 2.5 detik
+      
+      return () => clearInterval(interval);
+    }
+  }, [showGsapLoading]);
 
   // Data untuk pencarian (tetap ada untuk fungsi lain jika diperlukan)
   const searchablePages = [
@@ -1464,6 +1467,16 @@ setIsLoadingEvents(false);
       if (storiesOverlayRef.current && !storiesOverlayRef.current.contains(event.target as Node)) {
         setShowStoriesOverlay(false);
       }
+      if (productOverlayRef.current && !productOverlayRef.current.contains(event.target as Node)) {
+        // Optional: bisa diaktifkan jika ingin close saat klik di luar
+        // setShowProductOverlay(false);
+      }
+      if (visualDesignerOverlayRef.current && !visualDesignerOverlayRef.current.contains(event.target as Node)) {
+        // setShowVisualDesignerOverlay(false);
+      }
+      if (indonesiaOverlayRef.current && !indonesiaOverlayRef.current.contains(event.target as Node)) {
+        // setShowIndonesiaOverlay(false);
+      }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
@@ -1601,6 +1614,32 @@ setIsLoadingEvents(false);
     setShowStoriesOverlay(false);
   };
 
+  // Handler untuk membuka overlay product, visual designer, indonesia
+  const handleProductClick = () => {
+    setShowProductOverlay(true);
+  };
+
+  const handleVisualDesignerClick = () => {
+    setShowVisualDesignerOverlay(true);
+  };
+
+  const handleIndonesiaClick = () => {
+    setShowIndonesiaOverlay(true);
+  };
+
+  // Handler untuk menutup overlay
+  const handleCloseProductOverlay = () => {
+    setShowProductOverlay(false);
+  };
+
+  const handleCloseVisualDesignerOverlay = () => {
+    setShowVisualDesignerOverlay(false);
+  };
+
+  const handleCloseIndonesiaOverlay = () => {
+    setShowIndonesiaOverlay(false);
+  };
+
   // Animasi GSAP Loading dengan ROTATING WORDS
   useEffect(() => {
     if (!loadingTextRef.current) return;
@@ -1726,6 +1765,15 @@ setIsLoadingEvents(false);
         if (showStoriesOverlay) {
           setShowStoriesOverlay(false);
         }
+        if (showProductOverlay) {
+          setShowProductOverlay(false);
+        }
+        if (showVisualDesignerOverlay) {
+          setShowVisualDesignerOverlay(false);
+        }
+        if (showIndonesiaOverlay) {
+          setShowIndonesiaOverlay(false);
+        }
       }
     };
 
@@ -1750,7 +1798,7 @@ setIsLoadingEvents(false);
       }
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
-  }, [isMobile, showMenuruFullPage, showPhotoFullPage, showUserDropdown, showLogoutModal, showMenuOverlay, showNotification, showUserProfileModal, showDeleteAccountModal, showCalendarModal, showNoteOverlay, showCommunityOverlay, showNewsOverlay, showStoriesOverlay]);
+  }, [isMobile, showMenuruFullPage, showPhotoFullPage, showUserDropdown, showLogoutModal, showMenuOverlay, showNotification, showUserProfileModal, showDeleteAccountModal, showCalendarModal, showNoteOverlay, showCommunityOverlay, showNewsOverlay, showStoriesOverlay, showProductOverlay, showVisualDesignerOverlay, showIndonesiaOverlay]);
 
   // Animasi GSAP untuk tanda + di tombol Menuru
   useEffect(() => {
@@ -2536,6 +2584,908 @@ setIsLoadingEvents(false);
                 height: '1px',
                 backgroundColor: 'rgba(255, 255, 255, 0.3)'
               }} />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* PRODUCT OVERLAY - Tentang Shop */}
+      <AnimatePresence>
+        {showProductOverlay && (
+          <motion.div
+            ref={productOverlayRef}
+            initial={{ clipPath: 'circle(0% at 50% 50%)' }}
+            animate={{ clipPath: 'circle(150% at 50% 50%)' }}
+            exit={{ clipPath: 'circle(0% at 50% 50%)' }}
+            transition={{ duration: 1, ease: [0.76, 0, 0.24, 1] }}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              backgroundColor: '#0A0A0A',
+              zIndex: 10010,
+              display: 'flex',
+              flexDirection: 'column',
+              overflowY: 'auto',
+              color: 'white',
+              fontFamily: 'Helvetica, Arial, sans-serif'
+            }}
+          >
+            {/* Background pattern */}
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              backgroundImage: `
+                radial-gradient(circle at 20% 30%, rgba(255,255,255,0.02) 0%, transparent 30%),
+                radial-gradient(circle at 80% 70%, rgba(255,255,255,0.02) 0%, transparent 30%),
+                repeating-linear-gradient(45deg, rgba(255,255,255,0.005) 0px, rgba(255,255,255,0.005) 1px, transparent 1px, transparent 20px)
+              `,
+              pointerEvents: 'none',
+              zIndex: 1
+            }} />
+
+            {/* Close button */}
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              onClick={handleCloseProductOverlay}
+              style={{
+                position: 'fixed',
+                top: '2rem',
+                right: '2rem',
+                width: '60px',
+                height: '60px',
+                borderRadius: '50%',
+                border: '1px solid rgba(255,255,255,0.2)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                zIndex: 10020,
+                backgroundColor: 'rgba(0,0,0,0.5)',
+                backdropFilter: 'blur(10px)',
+                fontSize: '2rem',
+                color: 'white'
+              }}
+              whileHover={{ 
+                scale: 1.1,
+                borderColor: 'rgba(255,255,255,0.5)',
+                backgroundColor: 'rgba(255,255,255,0.1)'
+              }}
+              whileTap={{ scale: 0.95 }}
+            >
+              ×
+            </motion.div>
+
+            {/* Content */}
+            <div style={{
+              position: 'relative',
+              zIndex: 2,
+              padding: isMobile ? '6rem 2rem 4rem 2rem' : '8rem 4rem 4rem 4rem',
+              maxWidth: '1400px',
+              margin: '0 auto',
+              width: '100%'
+            }}>
+              {/* Header */}
+              <motion.div
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2, duration: 0.8 }}
+                style={{
+                  marginBottom: '4rem'
+                }}
+              >
+                <span style={{
+                  color: 'rgba(255,255,255,0.5)',
+                  fontSize: '1rem',
+                  letterSpacing: '4px',
+                  textTransform: 'uppercase',
+                  display: 'block',
+                  marginBottom: '1rem'
+                }}>
+                  — 01
+                </span>
+                
+                <h1 style={{
+                  fontSize: isMobile ? '4rem' : '7rem',
+                  fontWeight: '300',
+                  margin: 0,
+                  lineHeight: 1,
+                  letterSpacing: '-2px'
+                }}>
+                  SHOP
+                </h1>
+                
+                <div style={{
+                  width: '100px',
+                  height: '2px',
+                  backgroundColor: 'rgba(255,255,255,0.3)',
+                  marginTop: '2rem'
+                }} />
+              </motion.div>
+
+              {/* Grid Content */}
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
+                gap: '4rem',
+                marginBottom: '4rem'
+              }}>
+                {/* Left Column */}
+                <motion.div
+                  initial={{ opacity: 0, x: -30 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.4, duration: 0.8 }}
+                >
+                  <h2 style={{
+                    fontSize: '2rem',
+                    fontWeight: '300',
+                    margin: '0 0 2rem 0',
+                    color: 'rgba(255,255,255,0.9)'
+                  }}>
+                    Digital Products & Merchandise
+                  </h2>
+                  
+                  <p style={{
+                    fontSize: '1.2rem',
+                    lineHeight: 1.8,
+                    color: 'rgba(255,255,255,0.7)',
+                    marginBottom: '2rem'
+                  }}>
+                    Explore our collection of digital products, exclusive merchandise, 
+                    and creative tools designed to enhance your creative journey.
+                  </p>
+                  
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '1.5rem'
+                  }}>
+                    {[
+                      { label: 'Digital Assets', value: '50+ Items' },
+                      { label: 'Physical Products', value: '12 Items' },
+                      { label: 'Limited Edition', value: '5 Items' }
+                    ].map((item, index) => (
+                      <motion.div
+                        key={index}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.6 + (index * 0.1) }}
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          padding: '1rem 0',
+                          borderBottom: '1px solid rgba(255,255,255,0.1)'
+                        }}
+                      >
+                        <span style={{ color: 'rgba(255,255,255,0.6)' }}>{item.label}</span>
+                        <span style={{ color: 'white', fontSize: '1.2rem' }}>{item.value}</span>
+                      </motion.div>
+                    ))}
+                  </div>
+                </motion.div>
+
+                {/* Right Column */}
+                <motion.div
+                  initial={{ opacity: 0, x: 30 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.5, duration: 0.8 }}
+                >
+                  <div style={{
+                    backgroundColor: 'rgba(255,255,255,0.03)',
+                    padding: '2rem',
+                    borderRadius: '20px',
+                    border: '1px solid rgba(255,255,255,0.1)'
+                  }}>
+                    <h3 style={{
+                      fontSize: '1.5rem',
+                      fontWeight: '300',
+                      margin: '0 0 2rem 0'
+                    }}>
+                      Featured Products
+                    </h3>
+                    
+                    {[1, 2, 3].map((item) => (
+                      <motion.div
+                        key={item}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.7 + (item * 0.1) }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '1rem',
+                          padding: '1rem 0',
+                          borderBottom: item < 3 ? '1px solid rgba(255,255,255,0.1)' : 'none',
+                          cursor: 'pointer'
+                        }}
+                        whileHover={{ backgroundColor: 'rgba(255,255,255,0.03)' }}
+                      >
+                        <div style={{
+                          width: '60px',
+                          height: '60px',
+                          backgroundColor: 'rgba(255,255,255,0.1)',
+                          borderRadius: '10px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}>
+                          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5">
+                            <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
+                            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+                          </svg>
+                        </div>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontSize: '1.1rem', marginBottom: '0.3rem' }}>Product {item}</div>
+                          <div style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.5)' }}>$49.99</div>
+                        </div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                          <path d="M7 7h10v10"/>
+                          <path d="M17 7L7 17"/>
+                        </svg>
+                      </motion.div>
+                    ))}
+                  </div>
+                </motion.div>
+              </div>
+
+              {/* Footer */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.8 }}
+                style={{
+                  marginTop: '4rem',
+                  padding: '2rem 0',
+                  borderTop: '1px solid rgba(255,255,255,0.1)',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  flexWrap: 'wrap',
+                  gap: '2rem'
+                }}
+              >
+                <div style={{ color: 'rgba(255,255,255,0.5)' }}>
+                  © 2024 MENURU SHOP
+                </div>
+                <div style={{ display: 'flex', gap: '2rem' }}>
+                  {['Shop All', 'New Arrivals', 'Best Sellers'].map((item) => (
+                    <span key={item} style={{ cursor: 'pointer', color: 'rgba(255,255,255,0.8)' }}>
+                      {item}
+                    </span>
+                  ))}
+                </div>
+              </motion.div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* VISUAL DESIGNER OVERLAY - Tentang Tampilan Website */}
+      <AnimatePresence>
+        {showVisualDesignerOverlay && (
+          <motion.div
+            ref={visualDesignerOverlayRef}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.8 }}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              backgroundColor: '#050505',
+              zIndex: 10011,
+              display: 'flex',
+              flexDirection: 'column',
+              overflowY: 'auto',
+              color: 'white',
+              fontFamily: 'Helvetica, Arial, sans-serif'
+            }}
+          >
+            {/* Animated background lines */}
+            <motion.div
+              animate={{ 
+                x: ['-100%', '100%'],
+              }}
+              transition={{ 
+                duration: 20,
+                repeat: Infinity,
+                ease: "linear"
+              }}
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '200%',
+                height: '100%',
+                background: 'repeating-linear-gradient(90deg, transparent, transparent 50px, rgba(255,255,255,0.02) 50px, rgba(255,255,255,0.02) 51px)',
+                pointerEvents: 'none',
+                zIndex: 1
+              }}
+            />
+
+            {/* Close button with different animation */}
+            <motion.div
+              initial={{ opacity: 0, rotate: -180 }}
+              animate={{ opacity: 1, rotate: 0 }}
+              transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
+              onClick={handleCloseVisualDesignerOverlay}
+              style={{
+                position: 'fixed',
+                top: '2rem',
+                right: '2rem',
+                width: '60px',
+                height: '60px',
+                borderRadius: '0',
+                border: '1px solid rgba(255,255,255,0.2)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                zIndex: 10020,
+                backgroundColor: 'rgba(0,0,0,0.5)',
+                fontSize: '2rem',
+                color: 'white',
+                transform: 'rotate(45deg)'
+              }}
+              whileHover={{ 
+                rotate: '225deg',
+                borderColor: 'white',
+                backgroundColor: 'rgba(255,255,255,0.1)'
+              }}
+            >
+              +
+            </motion.div>
+
+            {/* Content */}
+            <div style={{
+              position: 'relative',
+              zIndex: 2,
+              padding: isMobile ? '6rem 2rem 4rem 2rem' : '8rem 4rem 4rem 4rem',
+              maxWidth: '1400px',
+              margin: '0 auto',
+              width: '100%'
+            }}>
+              {/* Header with split text */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.2 }}
+                style={{
+                  marginBottom: '4rem',
+                  display: 'flex',
+                  flexDirection: isMobile ? 'column' : 'row',
+                  justifyContent: 'space-between',
+                  alignItems: isMobile ? 'flex-start' : 'flex-end'
+                }}
+              >
+                <div>
+                  <span style={{
+                    color: 'rgba(255,255,255,0.5)',
+                    fontSize: '1rem',
+                    letterSpacing: '4px',
+                    textTransform: 'uppercase',
+                    display: 'block',
+                    marginBottom: '1rem'
+                  }}>
+                    — 02
+                  </span>
+                  
+                  <h1 style={{
+                    fontSize: isMobile ? '4rem' : '7rem',
+                    fontWeight: '300',
+                    margin: 0,
+                    lineHeight: 1,
+                    letterSpacing: '-2px'
+                  }}>
+                    VISUAL
+                  </h1>
+                  
+                  <h1 style={{
+                    fontSize: isMobile ? '4rem' : '7rem',
+                    fontWeight: '300',
+                    margin: 0,
+                    lineHeight: 1,
+                    letterSpacing: '-2px',
+                    color: 'rgba(255,255,255,0.7)'
+                  }}>
+                    DESIGNER
+                  </h1>
+                </div>
+                
+                <div style={{
+                  fontSize: '1.2rem',
+                  color: 'rgba(255,255,255,0.6)',
+                  maxWidth: '300px',
+                  textAlign: isMobile ? 'left' : 'right'
+                }}>
+                  Crafting digital experiences with minimalist aesthetics
+                </div>
+              </motion.div>
+
+              {/* Stats Grid */}
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)',
+                  gap: '2rem',
+                  marginBottom: '4rem'
+                }}
+              >
+                {[
+                  { number: '50+', label: 'Projects Completed' },
+                  { number: '30+', label: 'Happy Clients' },
+                  { number: '5+', label: 'Years Experience' }
+                ].map((stat, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.4 + (index * 0.1) }}
+                    style={{
+                      padding: '2rem',
+                      backgroundColor: 'rgba(255,255,255,0.02)',
+                      border: '1px solid rgba(255,255,255,0.1)',
+                      textAlign: 'center'
+                    }}
+                    whileHover={{
+                      backgroundColor: 'rgba(255,255,255,0.05)',
+                      borderColor: 'rgba(255,255,255,0.3)'
+                    }}
+                  >
+                    <div style={{ fontSize: '3rem', fontWeight: '300', marginBottom: '0.5rem' }}>{stat.number}</div>
+                    <div style={{ fontSize: '1rem', color: 'rgba(255,255,255,0.7)' }}>{stat.label}</div>
+                  </motion.div>
+                ))}
+              </motion.div>
+
+              {/* Design Philosophy */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5 }}
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
+                  gap: '4rem',
+                  marginBottom: '4rem'
+                }}
+              >
+                <div>
+                  <h2 style={{
+                    fontSize: '2.5rem',
+                    fontWeight: '300',
+                    margin: '0 0 2rem 0'
+                  }}>
+                    Design Philosophy
+                  </h2>
+                  
+                  <p style={{
+                    fontSize: '1.2rem',
+                    lineHeight: 1.8,
+                    color: 'rgba(255,255,255,0.7)',
+                    marginBottom: '2rem'
+                  }}>
+                    Every pixel tells a story. Our approach combines minimalist aesthetics 
+                    with functional design, creating websites that are both beautiful and intuitive.
+                  </p>
+                  
+                  <div style={{
+                    display: 'flex',
+                    gap: '1rem',
+                    flexWrap: 'wrap'
+                  }}>
+                    {['Minimalist', 'Responsive', 'Modern', 'Fast'].map((tag) => (
+                      <span key={tag} style={{
+                        padding: '0.5rem 1.5rem',
+                        border: '1px solid rgba(255,255,255,0.2)',
+                        borderRadius: '30px',
+                        fontSize: '0.9rem'
+                      }}>
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(2, 1fr)',
+                  gap: '1rem'
+                }}>
+                  {[1, 2, 3, 4].map((item) => (
+                    <motion.div
+                      key={item}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.6 + (item * 0.1) }}
+                      style={{
+                        aspectRatio: '1',
+                        backgroundColor: 'rgba(255,255,255,0.03)',
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '2rem',
+                        color: 'rgba(255,255,255,0.3)'
+                      }}
+                      whileHover={{
+                        backgroundColor: 'rgba(255,255,255,0.08)',
+                        borderColor: 'rgba(255,255,255,0.3)'
+                      }}
+                    >
+                      {item === 1 && '🖌️'}
+                      {item === 2 && '🎨'}
+                      {item === 3 && '✨'}
+                      {item === 4 && '🚀'}
+                    </motion.div>
+                  ))}
+                </div>
+              </motion.div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* INDONESIA OVERLAY - Tentang Posisi */}
+      <AnimatePresence>
+        {showIndonesiaOverlay && (
+          <motion.div
+            ref={indonesiaOverlayRef}
+            initial={{ y: '100%' }}
+            animate={{ y: 0 }}
+            exit={{ y: '100%' }}
+            transition={{ duration: 0.8, ease: [0.76, 0, 0.24, 1] }}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              backgroundColor: '#0A0F0A',
+              zIndex: 10012,
+              display: 'flex',
+              flexDirection: 'column',
+              overflowY: 'auto',
+              color: 'white',
+              fontFamily: 'Helvetica, Arial, sans-serif'
+            }}
+          >
+            {/* Map pattern background */}
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              backgroundImage: `
+                radial-gradient(circle at 10% 20%, rgba(255,255,255,0.02) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(255,255,255,0.02) 0%, transparent 20%),
+                repeating-linear-gradient(45deg, rgba(255,255,255,0.01) 0px, rgba(255,255,255,0.01) 1px, transparent 1px, transparent 30px)
+              `,
+              pointerEvents: 'none',
+              zIndex: 1
+            }} />
+
+            {/* Close button with slide animation */}
+            <motion.div
+              initial={{ y: -100, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.3 }}
+              onClick={handleCloseIndonesiaOverlay}
+              style={{
+                position: 'fixed',
+                top: '2rem',
+                right: '2rem',
+                width: '60px',
+                height: '60px',
+                borderRadius: '50%',
+                border: '1px solid rgba(255,255,255,0.2)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                zIndex: 10020,
+                backgroundColor: 'rgba(0,0,0,0.5)',
+                backdropFilter: 'blur(10px)',
+                fontSize: '2rem',
+                color: 'white'
+              }}
+              whileHover={{ 
+                scale: 1.1,
+                borderColor: 'white',
+                backgroundColor: 'rgba(255,255,255,0.1)'
+              }}
+            >
+              ←
+            </motion.div>
+
+            {/* Content */}
+            <div style={{
+              position: 'relative',
+              zIndex: 2,
+              padding: isMobile ? '6rem 2rem 4rem 2rem' : '8rem 4rem 4rem 4rem',
+              maxWidth: '1400px',
+              margin: '0 auto',
+              width: '100%'
+            }}>
+              {/* Header with location */}
+              <motion.div
+                initial={{ opacity: 0, x: -50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.2 }}
+                style={{
+                  marginBottom: '4rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '2rem',
+                  flexWrap: 'wrap'
+                }}
+              >
+                <div>
+                  <span style={{
+                    color: 'rgba(255,255,255,0.5)',
+                    fontSize: '1rem',
+                    letterSpacing: '4px',
+                    textTransform: 'uppercase',
+                    display: 'block',
+                    marginBottom: '1rem'
+                  }}>
+                    — 03
+                  </span>
+                  
+                  <h1 style={{
+                    fontSize: isMobile ? '4rem' : '7rem',
+                    fontWeight: '300',
+                    margin: 0,
+                    lineHeight: 1,
+                    letterSpacing: '-2px'
+                  }}>
+                    INDONESIA
+                  </h1>
+                </div>
+                
+                <motion.div
+                  animate={{ 
+                    scale: [1, 1.1, 1],
+                  }}
+                  transition={{ 
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
+                  style={{
+                    width: '12px',
+                    height: '12px',
+                    borderRadius: '50%',
+                    backgroundColor: '#00FF00',
+                    boxShadow: '0 0 20px #00FF00'
+                  }}
+                />
+              </motion.div>
+
+              {/* Location Info Grid */}
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: isMobile ? '1fr' : '2fr 1fr',
+                gap: '4rem',
+                marginBottom: '4rem'
+              }}>
+                {/* Left Column - Map visualization */}
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.3 }}
+                >
+                  <div style={{
+                    backgroundColor: 'rgba(255,255,255,0.02)',
+                    padding: '2rem',
+                    borderRadius: '20px',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    marginBottom: '2rem'
+                  }}>
+                    <div style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      marginBottom: '2rem'
+                    }}>
+                      <span style={{ fontSize: '1.2rem', fontWeight: '300' }}>Location Overview</span>
+                      <span style={{ color: '#00FF00', fontSize: '0.9rem' }}>● Active</span>
+                    </div>
+                    
+                    {/* Simple map representation */}
+                    <div style={{
+                      position: 'relative',
+                      height: '200px',
+                      backgroundColor: 'rgba(0,0,0,0.3)',
+                      borderRadius: '10px',
+                      overflow: 'hidden',
+                      marginBottom: '1.5rem'
+                    }}>
+                      {/* Grid lines */}
+                      <div style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: '100%',
+                        backgroundImage: `
+                          linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+                          linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)
+                        `,
+                        backgroundSize: '50px 50px'
+                      }} />
+                      
+                      {/* Indonesia dot */}
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ delay: 0.6, type: "spring" }}
+                        style={{
+                          position: 'absolute',
+                          top: '60%',
+                          left: '70%',
+                          width: '20px',
+                          height: '20px',
+                          borderRadius: '50%',
+                          backgroundColor: '#00FF00',
+                          boxShadow: '0 0 30px #00FF00',
+                          transform: 'translate(-50%, -50%)'
+                        }}
+                      >
+                        <motion.div
+                          animate={{ scale: [1, 1.5, 1] }}
+                          transition={{ duration: 2, repeat: Infinity }}
+                          style={{
+                            position: 'absolute',
+                            top: '50%',
+                            left: '50%',
+                            width: '40px',
+                            height: '40px',
+                            borderRadius: '50%',
+                            backgroundColor: 'rgba(0,255,0,0.2)',
+                            transform: 'translate(-50%, -50%)'
+                          }}
+                        />
+                      </motion.div>
+                    </div>
+                    
+                    <div style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      color: 'rgba(255,255,255,0.6)',
+                      fontSize: '0.9rem'
+                    }}>
+                      <span>Jakarta, Indonesia</span>
+                      <span>UTC+7</span>
+                    </div>
+                  </div>
+                  
+                  {/* Timezone info */}
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 1fr',
+                    gap: '1rem'
+                  }}>
+                    {[
+                      { label: 'Current Time', value: jakartaTime },
+                      { label: 'Timezone', value: 'WIB (UTC+7)' },
+                      { label: 'Coordinates', value: '6.2°S, 106.8°E' },
+                      { label: 'Population', value: '275M+' }
+                    ].map((item, index) => (
+                      <motion.div
+                        key={index}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.4 + (index * 0.1) }}
+                        style={{
+                          padding: '1rem',
+                          backgroundColor: 'rgba(255,255,255,0.02)',
+                          border: '1px solid rgba(255,255,255,0.1)',
+                          borderRadius: '10px'
+                        }}
+                      >
+                        <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', marginBottom: '0.3rem' }}>
+                          {item.label}
+                        </div>
+                        <div style={{ fontSize: '1.1rem', fontWeight: '300' }}>
+                          {item.value}
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                </motion.div>
+
+                {/* Right Column - About */}
+                <motion.div
+                  initial={{ opacity: 0, x: 30 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.4 }}
+                >
+                  <h2 style={{
+                    fontSize: '2rem',
+                    fontWeight: '300',
+                    margin: '0 0 2rem 0'
+                  }}>
+                    Based in Jakarta
+                  </h2>
+                  
+                  <p style={{
+                    fontSize: '1.2rem',
+                    lineHeight: 1.8,
+                    color: 'rgba(255,255,255,0.7)',
+                    marginBottom: '2rem'
+                  }}>
+                    Operating from the heart of Southeast Asia's most dynamic city, 
+                    we bring a unique perspective shaped by Indonesia's rich culture 
+                    and rapid digital transformation.
+                  </p>
+                  
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '1rem'
+                  }}>
+                    {[
+                      { city: 'Jakarta', desc: 'Capital city, business hub' },
+                      { city: 'Bandung', desc: 'Creative hub, tech community' },
+                      { city: 'Bali', desc: 'Digital nomad paradise' }
+                    ].map((location, index) => (
+                      <motion.div
+                        key={index}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.5 + (index * 0.1) }}
+                        style={{
+                          padding: '1rem',
+                          borderLeft: '2px solid rgba(255,255,255,0.2)',
+                          cursor: 'pointer'
+                        }}
+                        whileHover={{ borderLeftColor: '#00FF00', paddingLeft: '1.5rem' }}
+                      >
+                        <div style={{ fontSize: '1.2rem', marginBottom: '0.3rem' }}>{location.city}</div>
+                        <div style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.5)' }}>{location.desc}</div>
+                      </motion.div>
+                    ))}
+                  </div>
+                </motion.div>
+              </div>
+
+              {/* Footer */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.6 }}
+                style={{
+                  marginTop: '4rem',
+                  padding: '2rem 0',
+                  borderTop: '1px solid rgba(255,255,255,0.1)',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  flexWrap: 'wrap',
+                  gap: '2rem',
+                  color: 'rgba(255,255,255,0.5)',
+                  fontSize: '0.9rem'
+                }}
+              >
+                <div>Made with ❤️ in Indonesia</div>
+                <div>Available for remote collaboration worldwide</div>
+              </motion.div>
             </div>
           </motion.div>
         )}
@@ -7697,109 +8647,144 @@ setIsLoadingEvents(false);
             width: '100%',
             justifyContent: 'space-between'
           }}>
-            <div style={{
-              textAlign: 'left',
-              height: isMobile ? '5rem' : '7rem',
-              display: 'flex',
-              alignItems: 'center'
-            }}>
-             <h2 style={{
-    color: 'white',
-    fontSize: isMobile ? '5rem' : '7rem',
-    fontWeight: '900',
-    textTransform: 'uppercase',
-    fontFamily: 'Helvetica, Arial, sans-serif',
-    letterSpacing: '-3px',
-    margin: 0,
-    lineHeight: 0.8,
-    padding: 0
-  }}>
-    PRODUCT
-  </h2>
-  
-  {/* Southeast Arrow dengan Rotating Words */}
-  <div style={{
-    display: 'flex',
-    alignItems: 'center',
-    gap: '1rem',
-    marginLeft: '1rem'
-  }}>
-    <svg
-      width={isMobile ? "45" : "60"}
-      height={isMobile ? "45" : "60"}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="white"
-      strokeWidth="2.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      style={{
-        filter: 'drop-shadow(0 0 10px rgba(255,255,255,0.5))',
-        animation: 'pulse 2s ease-in-out infinite'
-      }}
-    >
-      <path d="M7 7L21 21" />
-      <path d="M21 7v14H7" />
-    </svg>
-    
-    {/* Rotating Words */}
-    <div style={{
-      position: 'relative',
-      width: isMobile ? '280px' : '350px',
-      height: isMobile ? '5rem' : '7rem',
-      overflow: 'hidden'
-    }}>
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={currentRotatingWordIndex}
-          initial={{ 
-            y: 30, 
-            opacity: 0,
-            scale: 0.9
-          }}
-          animate={{ 
-            y: 0, 
-            opacity: 1,
-            scale: 1
-          }}
-          exit={{ 
-            y: -30, 
-            opacity: 0,
-            scale: 0.9
-          }}
-          transition={{
-            y: { type: "spring", stiffness: 400, damping: 30 },
-            opacity: { duration: 0.4 },
-            scale: { duration: 0.3 }
-          }}
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'flex-start'
-          }}
-        >
-          <h2 style={{
-            color: 'white',
-            fontSize: isMobile ? '3.5rem' : '4.5rem',
-            fontWeight: '400',
-            fontFamily: 'Helvetica, Arial, sans-serif',
-            letterSpacing: '1px',
-            margin: 0,
-            lineHeight: 1,
-            textShadow: '0 0 20px rgba(255,255,255,0.5)',
-            whiteSpace: 'nowrap'
-          }}>
-            {rotatingWordsList[currentRotatingWordIndex]}
-          </h2>
-        </motion.div>
-      </AnimatePresence>
-    </div>
-  </div>
+            <div
+              onClick={handleProductClick}
+              style={{
+                textAlign: 'left',
+                height: isMobile ? '5rem' : '7rem',
+                display: 'flex',
+                alignItems: 'center',
+                cursor: 'pointer',
+                position: 'relative'
+              }}
+            >
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '2rem'
+              }}>
+                <h2 style={{
+                  color: 'white',
+                  fontSize: isMobile ? '5rem' : '7rem',
+                  fontWeight: '900',
+                  textTransform: 'uppercase',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  letterSpacing: '-3px',
+                  margin: 0,
+                  lineHeight: 0.8,
+                  padding: 0,
+                  transition: 'all 0.3s ease',
+                  position: 'relative'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.opacity = '0.7';
+                  e.currentTarget.style.transform = 'scale(1.02)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.opacity = '1';
+                  e.currentTarget.style.transform = 'scale(1)';
+                }}>
+                  PRODUCT
+                </h2>
+                
+                {/* Rotating Words dengan Southeast Arrow */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '1rem',
+                  marginLeft: '1rem'
+                }}>
+                  <svg
+                    width={isMobile ? "45" : "60"}
+                    height={isMobile ? "45" : "60"}
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="white"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    style={{
+                      filter: 'drop-shadow(0 0 10px rgba(255,255,255,0.5))',
+                    }}
+                  >
+                    <path d="M7 7L21 21" />
+                    <path d="M21 7v14H7" />
+                  </svg>
+                  
+                  {/* Rotating Words */}
+                  <div style={{
+                    position: 'relative',
+                    width: isMobile ? '280px' : '350px',
+                    height: isMobile ? '5rem' : '7rem',
+                    overflow: 'hidden'
+                  }}>
+                    <AnimatePresence mode="wait">
+                      <motion.div
+                        key={currentRotatingWordIndex}
+                        initial={{ 
+                          y: 30, 
+                          opacity: 0,
+                          scale: 0.9
+                        }}
+                        animate={{ 
+                          y: 0, 
+                          opacity: 1,
+                          scale: 1
+                        }}
+                        exit={{ 
+                          y: -30, 
+                          opacity: 0,
+                          scale: 0.9
+                        }}
+                        transition={{
+                          y: { type: "spring", stiffness: 400, damping: 30 },
+                          opacity: { duration: 0.4 },
+                          scale: { duration: 0.3 }
+                        }}
+                        style={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          width: '100%',
+                          height: '100%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'flex-start'
+                        }}
+                      >
+                        <h2 style={{
+                          color: 'white',
+                          fontSize: isMobile ? '3.5rem' : '4.5rem',
+                          fontWeight: '400',
+                          fontFamily: 'Helvetica, Arial, sans-serif',
+                          letterSpacing: '1px',
+                          margin: 0,
+                          lineHeight: 1,
+                          textShadow: '0 0 20px rgba(255,255,255,0.5)',
+                          whiteSpace: 'nowrap'
+                        }}>
+                          {rotatingWordsList[currentRotatingWordIndex]}
+                        </h2>
+                      </motion.div>
+                    </AnimatePresence>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Hover indicator */}
+              <motion.div
+                initial={{ opacity: 0, width: 0 }}
+                animate={{ opacity: 1, width: '30px' }}
+                transition={{ delay: 1.5 }}
+                style={{
+                  position: 'absolute',
+                  bottom: '-10px',
+                  left: 0,
+                  height: '2px',
+                  backgroundColor: 'rgba(255,255,255,0.5)',
+                  width: '30px'
+                }}
+              />
             </div>
 
             <div style={{
@@ -7916,12 +8901,17 @@ setIsLoadingEvents(false);
               </div>
             </div>
 
-            <div style={{
-              textAlign: 'left',
-              height: isMobile ? '5rem' : '7rem',
-              display: 'flex',
-              alignItems: 'center'
-            }}>
+            <div
+              onClick={handleVisualDesignerClick}
+              style={{
+                textAlign: 'left',
+                height: isMobile ? '5rem' : '7rem',
+                display: 'flex',
+                alignItems: 'center',
+                cursor: 'pointer',
+                position: 'relative'
+              }}
+            >
               <h2 style={{
                 color: 'white',
                 fontSize: isMobile ? '5rem' : '7rem',
@@ -7931,7 +8921,16 @@ setIsLoadingEvents(false);
                 letterSpacing: '-3px',
                 margin: 0,
                 lineHeight: 0.8,
-                whiteSpace: 'nowrap'
+                whiteSpace: 'nowrap',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.opacity = '0.7';
+                e.currentTarget.style.transform = 'scale(1.02)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.opacity = '1';
+                e.currentTarget.style.transform = 'scale(1)';
               }}>
                 VISUAL DESIGNER
               </h2>
@@ -8073,12 +9072,17 @@ setIsLoadingEvents(false);
               </div>
             </div>
 
-            <div style={{
-              textAlign: 'left',
-              height: isMobile ? '5rem' : '7rem',
-              display: 'flex',
-              alignItems: 'center'
-            }}>
+            <div
+              onClick={handleIndonesiaClick}
+              style={{
+                textAlign: 'left',
+                height: isMobile ? '5rem' : '7rem',
+                display: 'flex',
+                alignItems: 'center',
+                cursor: 'pointer',
+                position: 'relative'
+              }}
+            >
               <h2 style={{
                 color: 'white',
                 fontSize: isMobile ? '5rem' : '7rem',
@@ -8087,7 +9091,16 @@ setIsLoadingEvents(false);
                 fontFamily: 'Helvetica, Arial, sans-serif',
                 letterSpacing: '-3px',
                 margin: 0,
-                lineHeight: 0.8
+                lineHeight: 0.8,
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.opacity = '0.7';
+                e.currentTarget.style.transform = 'scale(1.02)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.opacity = '1';
+                e.currentTarget.style.transform = 'scale(1)';
               }}>
                 INDONESIA
               </h2>
@@ -8095,19 +9108,6 @@ setIsLoadingEvents(false);
           </div>
 
         </div>
-
-        <style jsx>{`
-  @keyframes pulse {
-    0%, 100% {
-      opacity: 0.8;
-      transform: scale(1);
-    }
-    50% {
-      opacity: 1;
-      transform: scale(1.1);
-    }
-  }
-`}</style>
         
         {/* Spacer kecil sebelum konten berikutnya */}
         <div style={{
