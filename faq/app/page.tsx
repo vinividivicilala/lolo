@@ -90,35 +90,34 @@ interface UserStats {
   userName: string;
 }
 
-// Type untuk notifikasi
+// Type untuk notifikasi - SESUAI DENGAN DESIGN fghaghx.txt
 interface Notification {
   id: string;
   title: string;
   message: string;
-  type: 'system' | 'announcement' | 'alert' | 'update' | 'comment' | 'personal';
-  priority: 'low' | 'medium' | 'high' | 'urgent';
+  type: string;
   senderId: string;
   senderName: string;
   senderEmail?: string;
-  senderPhotoURL?: string;
-  recipientType: 'all' | 'specific' | 'email_only' | 'app_only';
+  recipientType: 'all' | 'specific' | 'email';
   recipientIds?: string[];
   recipientEmails?: string[];
-  isRead: boolean;
-  isDeleted: boolean;
-  createdAt: Timestamp | Date;
-  actionUrl?: string;
-  icon: string;
-  color: string;
+  createdAt: Timestamp;
   userReads: Record<string, boolean>;
-  views?: number;
-  clicks?: number;
-  likes?: string[];
-  comments?: any[];
-  allowComments?: boolean;
-  isAdminPost?: boolean;
-  adminName?: string;
-  category?: string;
+  views: number;
+  likes: string[];
+  comments: any[];
+  status?: string;
+  reactions?: Record<string, number>;
+  links: {
+    youtube: string[];
+    pdf: string[];
+    images: string[];
+    videos: string[];
+    websites: string[];
+  };
+  hasLinks: boolean;
+  linkCount: number;
 }
 
 interface Note {
@@ -192,12 +191,15 @@ export default function HomePage(): React.JSX.Element {
   // State untuk menu overlay
   const [showMenuOverlay, setShowMenuOverlay] = useState(false);
 
-  // State untuk notifikasi dan search
+  // State untuk notifikasi dan search - DIPERBAIKI SESUAI DESIGN
   const [showNotification, setShowNotification] = useState(false);
   const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false);
   const [notificationCount, setNotificationCount] = useState(0);
+  const [previousNotificationCount, setPreviousNotificationCount] = useState(0);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isLoadingNotifications, setIsLoadingNotifications] = useState(false);
+  const [showNotificationAnimation, setShowNotificationAnimation] = useState(false);
+  const [newNotificationText, setNewNotificationText] = useState("");
 
   // State untuk modal profil user
   const [showUserProfileModal, setShowUserProfileModal] = useState(false);
@@ -255,9 +257,11 @@ export default function HomePage(): React.JSX.Element {
   const userDropdownRef = useRef<HTMLDivElement>(null);
   const menuOverlayRef = useRef<HTMLDivElement>(null);
   
-  // Ref untuk notifikasi
+  // Ref untuk notifikasi - DIPERBAIKI
   const notificationRef = useRef<HTMLDivElement>(null);
   const notificationDropdownRef = useRef<HTMLDivElement>(null);
+  const notificationBellRef = useRef<HTMLDivElement>(null);
+  const notificationTextRef = useRef<HTMLSpanElement>(null);
   const userProfileModalRef = useRef<HTMLDivElement>(null);
 
   // Ref untuk GSAP Loading - ROTATING WORDS
@@ -1172,7 +1176,7 @@ return days;
     return () => unsubscribe();
   }, []);
 
-  // Load notifications from Firebase
+  // Load notifications from Firebase - DIPERBAIKI SESUAI DESIGN fghaghx.txt
   useEffect(() => {
     console.log("🚀 Memulai loading notifikasi untuk halaman utama...");
     
@@ -1198,6 +1202,7 @@ return days;
             console.log("ℹ️ Tidak ada notifikasi di database");
             setNotifications([]);
             setHasUnreadNotifications(false);
+            setPreviousNotificationCount(notificationCount);
             setNotificationCount(0);
             setIsLoadingNotifications(false);
             return;
@@ -1205,6 +1210,7 @@ return days;
           
           const notificationsData: Notification[] = [];
           let unreadCount = 0;
+          let newNotificationsCount = 0;
           
           const currentUser = auth?.currentUser;
           const currentUserId = currentUser ? currentUser.uid : 
@@ -1238,14 +1244,8 @@ return days;
                   }
                   break;
                   
-                case 'email_only':
+                case 'email':
                   if (currentUser && data.recipientEmails?.includes(currentUser.email)) {
-                    shouldShow = true;
-                  }
-                  break;
-                  
-                case 'app_only':
-                  if (currentUser) {
                     shouldShow = true;
                   }
                   break;
@@ -1260,35 +1260,37 @@ return days;
                   timestamp = timestamp.toDate();
                 }
                 
+                // Ambil data links sesuai struktur di fghaghx.txt
+                const linksData = data.links || {};
+                
                 const notification: Notification = {
                   id: doc.id,
-                  title: data.title || "No Title",
-                  message: data.message || "",
-                  type: data.type || 'announcement',
-                  priority: data.priority || 'medium',
-                  senderId: data.senderId || 'system',
+                  title: data.title || '',
+                  message: data.message || '',
+                  type: data.type || 'info',
+                  senderId: data.senderId || '',
                   senderName: data.senderName || 'System',
                   senderEmail: data.senderEmail,
-                  senderPhotoURL: data.senderPhotoURL,
                   recipientType: data.recipientType || 'all',
                   recipientIds: data.recipientIds || [],
                   recipientEmails: data.recipientEmails || [],
-                  isRead: false,
-                  isDeleted: data.isDeleted || false,
-                  createdAt: timestamp || new Date(),
-                  actionUrl: data.actionUrl,
-                  icon: data.icon || getIconByType(data.type || 'announcement'),
-                  color: data.color || '#0050B7',
+                  createdAt: timestamp || Timestamp.now(),
                   userReads: data.userReads || {},
                   views: data.views || 0,
-                  clicks: data.clicks || 0,
                   likes: data.likes || [],
                   comments: data.comments || [],
-                  allowComments: data.allowComments || false,
-                  read: data.read || false,
-                  isAdminPost: data.isAdminPost || false,
-                  adminName: data.adminName || '',
-                  category: data.category || 'general'
+                  status: data.status || 'sent',
+                  reactions: data.reactions || {},
+                  links: {
+                    youtube: Array.isArray(linksData.youtube) ? linksData.youtube : [],
+                    pdf: Array.isArray(linksData.pdf) ? linksData.pdf : [],
+                    images: Array.isArray(linksData.images) ? linksData.images : [],
+                    videos: Array.isArray(linksData.videos) ? linksData.videos : [],
+                    websites: Array.isArray(linksData.websites) ? linksData.websites : []
+                  },
+                  hasLinks: data.hasLinks === true || 
+                            (linksData && Object.values(linksData).some(arr => arr && arr.length > 0)),
+                  linkCount: data.linkCount || 0
                 };
                 
                 const isReadByUser = notification.userReads[currentUserId] || 
@@ -1297,6 +1299,17 @@ return days;
                 
                 if (!isReadByUser) {
                   unreadCount++;
+                  // Cek apakah notifikasi ini baru (createdAt dalam 5 menit terakhir)
+                  if (notification.createdAt) {
+                    const now = new Date();
+                    const notifDate = notification.createdAt instanceof Timestamp 
+                      ? notification.createdAt.toDate() 
+                      : new Date(notification.createdAt);
+                    const diffMinutes = (now.getTime() - notifDate.getTime()) / (1000 * 60);
+                    if (diffMinutes < 5) {
+                      newNotificationsCount++;
+                    }
+                  }
                 }
                 
                 notificationsData.push(notification);
@@ -1306,7 +1319,21 @@ return days;
             }
           });
           
-          console.log(`📊 Total notifikasi untuk user: ${notificationsData.length}, Unread: ${unreadCount}`);
+          console.log(`📊 Total notifikasi untuk user: ${notificationsData.length}, Unread: ${unreadCount}, New: ${newNotificationsCount}`);
+          
+          // Simpan previous count untuk animasi
+          setPreviousNotificationCount(notificationCount);
+          
+          // Jika ada notifikasi baru, tampilkan animasi
+          if (newNotificationsCount > 0) {
+            setNewNotificationText(`${newNotificationsCount} notifikasi baru`);
+            setShowNotificationAnimation(true);
+            
+            // Sembunyikan animasi setelah 3 detik
+            setTimeout(() => {
+              setShowNotificationAnimation(false);
+            }, 3000);
+          }
           
           setNotifications(notificationsData);
           setHasUnreadNotifications(unreadCount > 0);
@@ -1941,7 +1968,7 @@ setIsLoadingEvents(false);
     handleOpenPhotoFullPage();
   };
 
-  // Handler untuk Sign In / User Button - DIPERBAIKI
+  // Handler untuk Sign In / User Button - DIPERBAIKI DENGAN WARNA CERAH
   const handleSignInClick = () => {
     if (user) {
       setShowUserProfileModal(true);
@@ -2147,17 +2174,16 @@ setIsLoadingEvents(false);
     }
   };
 
-  // Handler untuk clear notification (placeholder)
+  // Handler untuk clear notification - DIPERBAIKI
   const handleClearNotification = () => {
     console.log("Clear all notifications");
+    // Implementasi clear notifications jika diperlukan
   };
 
-  // Handler untuk notification click (placeholder)
+  // Handler untuk notification click - DIPERBAIKI
   const handleNotificationClick = (notification: Notification) => {
     console.log("Notification clicked:", notification);
-    if (notification.actionUrl) {
-      router.push(notification.actionUrl);
-    }
+    router.push('/notifications');
     setShowNotification(false);
   };
 
@@ -2234,26 +2260,44 @@ setIsLoadingEvents(false);
         )}
       </AnimatePresence>
 
-      {/* Loading State */}
-      {isLoadingEvents && (
-        <div style={{
-          padding: '3rem 0',
-          textAlign: 'center',
-          color: 'rgba(255, 255, 255, 0.7)',
-          fontFamily: 'Helvetica, Arial, sans-serif'
-        }}>
+      {/* Animasi Notifikasi Baru - Framer Motion */}
+      <AnimatePresence>
+        {showNotificationAnimation && (
           <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-            style={{ marginBottom: '1rem' }}
+            initial={{ opacity: 0, y: -50, x: '-50%' }}
+            animate={{ opacity: 1, y: 0, x: '-50%' }}
+            exit={{ opacity: 0, y: -50, x: '-50%' }}
+            transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+            style={{
+              position: 'fixed',
+              top: '6rem',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              backgroundColor: '#FFD700',
+              color: 'black',
+              padding: '1rem 2rem',
+              borderRadius: '50px',
+              zIndex: 10002,
+              boxShadow: '0 10px 30px rgba(255, 215, 0, 0.5)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '1rem',
+              border: '2px solid white'
+            }}
           >
-            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
-            </svg>
+            <motion.div
+              animate={{ scale: [1, 1.2, 1] }}
+              transition={{ repeat: Infinity, duration: 1 }}
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+              </svg>
+            </motion.div>
+            <span style={{ fontWeight: 'bold', fontSize: '1rem' }}>{newNotificationText}</span>
           </motion.div>
-          Loading events...
-        </div>
-      )}
+        )}
+      </AnimatePresence>
 
       {/* Stories Overlay - HANYA JUDUL (sesuai permintaan) */}
       <AnimatePresence>
@@ -7730,7 +7774,7 @@ setIsLoadingEvents(false);
         )}
       </AnimatePresence>
 
-      {/* Notification Dropdown */}
+      {/* Notification Dropdown - DIPERBAIKI SESUAI DESIGN fghaghx.txt */}
       <AnimatePresence>
         {showNotification && (
           <motion.div
@@ -7781,18 +7825,24 @@ setIsLoadingEvents(false);
                 </svg>
                 Notifications
                 {notificationCount > 0 && (
-                  <span style={{
-                    backgroundColor: 'transparent',
-                    color: 'white',
-                    fontSize: '0.8rem',
-                    fontWeight: '700',
-                    padding: '0.1rem 0.6rem',
-                    borderRadius: '10px',
-                    marginLeft: '0.5rem',
-                    border: '1px solid rgba(255, 255, 255, 0.3)'
-                  }}>
+                  <motion.span
+                    key={notificationCount}
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: "spring", stiffness: 500, damping: 15 }}
+                    style={{
+                      backgroundColor: 'transparent',
+                      color: 'white',
+                      fontSize: '0.8rem',
+                      fontWeight: '700',
+                      padding: '0.1rem 0.6rem',
+                      borderRadius: '10px',
+                      marginLeft: '0.5rem',
+                      border: '1px solid rgba(255, 255, 255, 0.3)'
+                    }}
+                  >
                     {notificationCount > 9 ? '9+' : notificationCount}
-                  </span>
+                  </motion.span>
                 )}
               </h3>
               
@@ -7893,95 +7943,97 @@ setIsLoadingEvents(false);
                 </div>
               ) : (
                 <div>
-                  {notifications.map((notification, index) => (
-                    <motion.div
-                      key={notification.id || index}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                      style={{
-                        padding: '1rem 1.5rem',
-                        borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s ease',
-                        backgroundColor: notification.isRead ? 'transparent' : 'transparent',
-                        position: 'relative'
-                      }}
-                      onClick={() => handleNotificationClick(notification)}
-                    >
-                      {!notification.read && (
-                        <div style={{
-                          position: 'absolute',
-                          left: '0.5rem',
-                          top: '50%',
-                          transform: 'translateY(-50%)',
-                          width: '8px',
-                          height: '8px',
-                          backgroundColor: 'white',
-                          borderRadius: '50%'
-                        }} />
-                      )}
-                      
-                      <div style={{
-                        display: 'flex',
-                        gap: '1rem',
-                        alignItems: 'flex-start'
-                      }}>
-                        <div style={{
-                          width: '40px',
-                          height: '40px',
-                          minWidth: '40px',
-                          borderRadius: '10px',
-                          backgroundColor: 'transparent',
-                          border: '1px solid rgba(255, 255, 255, 0.3)',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontSize: '1.2rem',
-                          color: 'white'
-                        }}>
-                          {notification.icon}
-                        </div>
+                  {notifications.map((notification, index) => {
+                    const currentUser = auth?.currentUser;
+                    const currentUserId = currentUser ? currentUser.uid : 
+                                          localStorage.getItem('anonymous_user_id') || 
+                                          'anonymous_' + Date.now();
+                    const isReadByUser = notification.userReads[currentUserId] || 
+                                        (currentUser && notification.userReads[currentUser.uid]) || 
+                                        false;
+                    
+                    return (
+                      <motion.div
+                        key={notification.id || index}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                        style={{
+                          padding: '1rem 1.5rem',
+                          borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease',
+                          backgroundColor: isReadByUser ? 'transparent' : 'rgba(255, 255, 255, 0.02)',
+                          position: 'relative'
+                        }}
+                        onClick={() => handleNotificationClick(notification)}
+                        whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.05)' }}
+                      >
+                        {!isReadByUser && (
+                          <motion.div
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{ type: "spring", stiffness: 500, damping: 15 }}
+                            style={{
+                              position: 'absolute',
+                              left: '0.5rem',
+                              top: '50%',
+                              transform: 'translateY(-50%)',
+                              width: '8px',
+                              height: '8px',
+                              backgroundColor: '#FFD700',
+                              borderRadius: '50%',
+                              boxShadow: '0 0 10px #FFD700'
+                            }}
+                          />
+                        )}
                         
-                        <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{
+                          display: 'flex',
+                          gap: '1rem',
+                          alignItems: 'flex-start'
+                        }}>
                           <div style={{
+                            width: '40px',
+                            height: '40px',
+                            minWidth: '40px',
+                            borderRadius: '10px',
+                            backgroundColor: 'transparent',
+                            border: '1px solid rgba(255, 255, 255, 0.3)',
                             display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'flex-start',
-                            marginBottom: '0.3rem',
-                            flexWrap: 'wrap',
-                            gap: '0.5rem'
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '1.2rem',
+                            color: 'white'
                           }}>
+                            {getIconByType(notification.type)}
+                          </div>
+                          
+                          <div style={{ flex: 1, minWidth: 0 }}>
                             <div style={{
                               display: 'flex',
-                              alignItems: 'center',
-                              gap: '0.5rem',
-                              flexWrap: 'wrap'
+                              justifyContent: 'space-between',
+                              alignItems: 'flex-start',
+                              marginBottom: '0.3rem',
+                              flexWrap: 'wrap',
+                              gap: '0.5rem'
                             }}>
-                              <h4 style={{
-                                color: 'white',
-                                fontSize: '1rem',
-                                fontWeight: '600',
-                                margin: 0,
-                                fontFamily: 'Helvetica, Arial, sans-serif'
+                              <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem',
+                                flexWrap: 'wrap'
                               }}>
-                                {notification.title}
-                              </h4>
-                              
-                              <span style={{
-                                backgroundColor: 'transparent',
-                                color: 'white',
-                                fontSize: '0.7rem',
-                                fontWeight: '600',
-                                padding: '0.1rem 0.5rem',
-                                borderRadius: '4px',
-                                textTransform: 'uppercase',
-                                border: '1px solid rgba(255, 255, 255, 0.3)'
-                              }}>
-                                {notification.type}
-                              </span>
-                              
-                              {notification.isAdminPost && (
+                                <h4 style={{
+                                  color: 'white',
+                                  fontSize: '1rem',
+                                  fontWeight: '600',
+                                  margin: 0,
+                                  fontFamily: 'Helvetica, Arial, sans-serif'
+                                }}>
+                                  {notification.title}
+                                </h4>
+                                
                                 <span style={{
                                   backgroundColor: 'transparent',
                                   color: 'white',
@@ -7989,59 +8041,115 @@ setIsLoadingEvents(false);
                                   fontWeight: '600',
                                   padding: '0.1rem 0.5rem',
                                   borderRadius: '4px',
+                                  textTransform: 'uppercase',
                                   border: '1px solid rgba(255, 255, 255, 0.3)'
                                 }}>
-                                  ADMIN
+                                  {notification.type}
                                 </span>
-                              )}
+                              </div>
+                              
+                              <span style={{
+                                color: 'rgba(255, 255, 255, 0.6)',
+                                fontSize: '0.75rem',
+                                whiteSpace: 'nowrap'
+                              }}>
+                                {calculateTimeAgo(notification.createdAt)}
+                              </span>
                             </div>
                             
-                            <span style={{
-                              color: 'rgba(255, 255, 255, 0.6)',
-                              fontSize: '0.75rem',
-                              whiteSpace: 'nowrap'
+                            <p style={{
+                              color: isReadByUser ? 'rgba(255, 255, 255, 0.8)' : 'white',
+                              fontSize: '0.9rem',
+                              margin: '0 0 0.5rem 0',
+                              lineHeight: 1.4,
+                              fontFamily: 'Helvetica, Arial, sans-serif',
+                              wordBreak: 'break-word'
                             }}>
-                              {calculateTimeAgo(notification.timestamp)}
-                            </span>
-                          </div>
-                          
-                          <p style={{
-                            color: notification.read ? 'rgba(255, 255, 255, 0.8)' : 'white',
-                            fontSize: '0.9rem',
-                            margin: '0 0 0.5rem 0',
-                            lineHeight: 1.4,
-                            fontFamily: 'Helvetica, Arial, sans-serif',
-                            wordBreak: 'break-word'
-                          }}>
-                            {notification.message}
-                          </p>
-                          
-                          {notification.isAdminPost && notification.adminName && (
+                              {notification.message}
+                            </p>
+                            
                             <div style={{
                               display: 'flex',
                               alignItems: 'center',
-                              gap: '0.3rem',
+                              gap: '1rem',
                               marginTop: '0.3rem'
                             }}>
-                              <span style={{
-                                color: 'rgba(255, 255, 255, 0.6)',
+                              <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.3rem',
+                                color: 'rgba(255, 255, 255, 0.5)',
                                 fontSize: '0.75rem'
                               }}>
-                                From:
-                              </span>
-                              <span style={{
-                                color: 'white',
-                                fontSize: '0.75rem',
-                                fontWeight: '500'
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                  <circle cx="12" cy="7" r="4"/>
+                                </svg>
+                                <span>{notification.senderName}</span>
+                              </div>
+                              
+                              <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.3rem',
+                                color: 'rgba(255, 255, 255, 0.5)',
+                                fontSize: '0.75rem'
                               }}>
-                                {notification.adminName}
-                              </span>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                  <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/>
+                                  <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                                <span>{notification.views || 0} views</span>
+                              </div>
+                              
+                              <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.3rem',
+                                color: 'rgba(255, 255, 255, 0.5)',
+                                fontSize: '0.75rem'
+                              }}>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                                </svg>
+                                <span>{(notification.likes?.length || 0)}</span>
+                              </div>
+                              
+                              <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.3rem',
+                                color: 'rgba(255, 255, 255, 0.5)',
+                                fontSize: '0.75rem'
+                              }}>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                                </svg>
+                                <span>{(notification.comments?.length || 0)}</span>
+                              </div>
                             </div>
-                          )}
+                            
+                            {notification.hasLinks && (
+                              <div style={{
+                                marginTop: '0.5rem',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.3rem',
+                                color: '#FFD700',
+                                fontSize: '0.7rem'
+                              }}>
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                                </svg>
+                                <span>{notification.linkCount} link{notification.linkCount !== 1 ? 's' : ''}</span>
+                              </div>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    </motion.div>
-                  ))}
+                      </motion.div>
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -8075,6 +8183,7 @@ setIsLoadingEvents(false);
                   alignItems: 'center',
                   gap: '0.5rem'
                 }}
+                whileHover={{ gap: '0.8rem' }}
               >
                 View All
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -8218,7 +8327,7 @@ setIsLoadingEvents(false);
         )}
       </AnimatePresence>
 
-      {/* Top Navigation Bar - DESIGN DIPERBAIKI */}
+      {/* Top Navigation Bar - DESIGN DIPERBAIKI DENGAN TOMBOL WARNA CERAH */}
       <div 
         ref={topNavRef}
         style={{
@@ -8508,13 +8617,13 @@ setIsLoadingEvents(false);
           </div>
         </div>
 
-        {/* Right: Notification Bell dan Sign In (Warna Abu-abu) */}
+        {/* Right: Notification Bell dan Sign In - WARNA CERAH STABILO */}
         <div style={{
           display: 'flex',
           alignItems: 'center',
           gap: '1rem'
         }}>
-          {/* Notification Bell dengan Badge - Warna Abu-abu */}
+          {/* Notification Bell dengan Badge - WARNA CERAH STABILO */}
           <motion.div
             ref={notificationRef}
             initial={{ opacity: 0, x: -10 }}
@@ -8525,14 +8634,21 @@ setIsLoadingEvents(false);
               width: '40px',
               height: '40px',
               borderRadius: '50%',
-              backgroundColor: '#404040', // Abu-abu
+              backgroundColor: '#FFD700', // Warna kuning stabilo
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               cursor: 'pointer',
-              transition: 'all 0.3s ease'
+              transition: 'all 0.3s ease',
+              boxShadow: '0 0 15px rgba(255, 215, 0, 0.7)' // Efek glow
             }}
             onClick={() => setShowNotification(!showNotification)}
+            whileHover={{ 
+              scale: 1.1,
+              backgroundColor: '#FFE55C',
+              boxShadow: '0 0 20px rgba(255, 215, 0, 0.9)'
+            }}
+            whileTap={{ scale: 0.95 }}
           >
             <svg 
               width="20" 
@@ -8562,7 +8678,7 @@ setIsLoadingEvents(false);
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  border: '1px solid white'
+                  border: '2px solid #FFD700'
                 }}
               >
                 <span style={{
@@ -8578,23 +8694,29 @@ setIsLoadingEvents(false);
             )}
           </motion.div>
 
-          {/* Sign In / User Button dengan Teks Hitam dan Panah Hitam */}
+          {/* Sign In / User Button - WARNA CERAH STABILO */}
           <motion.div
             onClick={handleSignInClick}
             style={{
               display: 'flex',
               alignItems: 'center',
               gap: '0.5rem',
-              backgroundColor: '#404040', // Abu-abu
+              backgroundColor: '#FFD700', // Warna kuning stabilo
               padding: '0.5rem 1rem',
               borderRadius: '30px',
               cursor: 'pointer',
-              transition: 'all 0.3s ease'
+              transition: 'all 0.3s ease',
+              boxShadow: '0 0 15px rgba(255, 215, 0, 0.7)' // Efek glow
             }}
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 1.3, duration: 0.5 }}
-            whileHover={{ opacity: 0.9 }}
+            whileHover={{ 
+              scale: 1.05,
+              backgroundColor: '#FFE55C',
+              boxShadow: '0 0 20px rgba(255, 215, 0, 0.9)'
+            }}
+            whileTap={{ scale: 0.95 }}
           >
             <span style={{
               color: 'black', // Teks hitam
