@@ -90,7 +90,7 @@ interface UserStats {
   userName: string;
 }
 
-// Type untuk notifikasi - SESUAI DENGAN DESIGN fghaghx.txt
+// Type untuk notifikasi
 interface Notification {
   id: string;
   title: string;
@@ -191,7 +191,7 @@ export default function HomePage(): React.JSX.Element {
   // State untuk menu overlay
   const [showMenuOverlay, setShowMenuOverlay] = useState(false);
 
-  // State untuk notifikasi dan search - DIPERBAIKI SESUAI DESIGN
+  // State untuk notifikasi
   const [showNotification, setShowNotification] = useState(false);
   const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false);
   const [notificationCount, setNotificationCount] = useState(0);
@@ -214,19 +214,19 @@ export default function HomePage(): React.JSX.Element {
   const [isUpdating, setIsUpdating] = useState(false);
   const [showDeleteAccountModal, setShowDeleteAccountModal] = useState(false);
 
-  // State untuk GSAP Loading - ROTATING WORDS
+  // State untuk GSAP Loading
   const [showGsapLoading, setShowGsapLoading] = useState(true);
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
 
   // State untuk kalender
   const [showCalendarModal, setShowCalendarModal] = useState(false);
   const [currentYear, setCurrentYear] = useState(2026);
-  const [currentMonth, setCurrentMonth] = useState(0); // 0 = Januari
+  const [currentMonth, setCurrentMonth] = useState(0);
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [isLoadingEvents, setIsLoadingEvents] = useState(false);
 
-  // State untuk Note Overlay (Halaman Note dari kiri ke kanan)
+  // State untuk Note Overlay
   const [showNoteOverlay, setShowNoteOverlay] = useState(false);
 
   // State untuk overlay baru (Community, News, Stories)
@@ -243,21 +243,16 @@ export default function HomePage(): React.JSX.Element {
   const [currentRotatingWordIndex, setCurrentRotatingWordIndex] = useState(0);
   const rotatingWordsList = ["Community", "Catatan", "Blog"];
 
-  // Data untuk Community Items
+  // Data untuk Community Items - HANYA TEKS
   const communityItems = [
-    { id: 1, name: "Point Blank", icon: "🎮", color: "#FF6B6B" },
-    { id: 2, name: "Lost Saga", icon: "⚔️", color: "#4ECDC4" },
-    { id: 3, name: "Persib", icon: "⚽", color: "#0050B7" },
-    { id: 4, name: "Coding", icon: "💻", color: "#FFD93D" },
-    { id: 5, name: "Pembersihan", icon: "🧹", color: "#6BCB77" },
-    { id: 6, name: "Pendidikan", icon: "📚", color: "#9D65C9" },
-    { id: 7, name: "Sosial", icon: "🤝", color: "#FF8C42" }
+    { id: 1, name: "Point Blank" },
+    { id: 2, name: "Lost Saga" },
+    { id: 3, name: "Persib" },
+    { id: 4, name: "Coding" },
+    { id: 5, name: "Pembersihan" },
+    { id: 6, name: "Pendidikan" },
+    { id: 7, name: "Sosial" }
   ];
-
-  // Bagi items menjadi 2 sisi (kiri 3, kanan 3, tengah 1)
-  const leftCommunityItems = communityItems.slice(0, 3); // Point Blank, Lost Saga, Persib
-  const centerCommunityItem = communityItems[3]; // Coding (tengah)
-  const rightCommunityItems = communityItems.slice(4, 7); // Pembersihan, Pendidikan, Sosial
 
   const headerRef = useRef<HTMLDivElement>(null);
   const topNavRef = useRef<HTMLDivElement>(null);
@@ -273,14 +268,14 @@ export default function HomePage(): React.JSX.Element {
   const userDropdownRef = useRef<HTMLDivElement>(null);
   const menuOverlayRef = useRef<HTMLDivElement>(null);
   
-  // Ref untuk notifikasi - DIPERBAIKI
+  // Ref untuk notifikasi
   const notificationRef = useRef<HTMLDivElement>(null);
   const notificationDropdownRef = useRef<HTMLDivElement>(null);
   const notificationBellRef = useRef<HTMLDivElement>(null);
   const notificationTextRef = useRef<HTMLSpanElement>(null);
   const userProfileModalRef = useRef<HTMLDivElement>(null);
 
-  // Ref untuk GSAP Loading - ROTATING WORDS
+  // Ref untuk GSAP Loading
   const gsapLoadingRef = useRef<HTMLDivElement>(null);
   const loadingTextRef = useRef<HTMLSpanElement>(null);
 
@@ -315,9 +310,8 @@ export default function HomePage(): React.JSX.Element {
   // Data untuk rotating words
   const rotatingWords = ["build", "design", "create"];
 
-  // Data playlist lagu kesukaan dengan Spotify embed URL
+  // Data playlist lagu kesukaan
   const favoriteTracks = [
-    // Hanin Dhiya
     {
       id: 'hanin1',
       title: 'Pupus',
@@ -332,7 +326,6 @@ export default function HomePage(): React.JSX.Element {
       embedUrl: 'https://open.spotify.com/embed/track/11nApQrr7tfBNYzBOmHWCc?utm_source=generator',
       spotifyUrl: 'https://open.spotify.com/track/11nApQrr7tfBNYzBOmHWCc?si=a141c85a054d41b0'
     },
-    // Stand Here Alone
     {
       id: 'sha1',
       title: 'Kita Lawan Mereka',
@@ -363,150 +356,6 @@ export default function HomePage(): React.JSX.Element {
     setIsPlaying(true);
   };
 
-  // Component Menu Item - tanpa animasi gerak
-  const MenuItem = ({ number, title, mainUrl, isOpen, onToggle, children }: {
-    number: string;
-    title: string;
-    mainUrl: string;
-    isOpen: boolean;
-    onToggle: () => void;
-    children: React.ReactNode;
-  }) => (
-    <motion.div
-      initial={{ opacity: 0, y: 30 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6 }}
-      style={{
-        borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
-      }}
-    >
-      {/* Header yang bisa diklik untuk toggle - tanpa hover effect */}
-      <div
-        onClick={onToggle}
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          cursor: 'pointer',
-          padding: '1rem 0',
-          transition: 'none' // Hapus transition
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
-          <span style={{
-            color: 'rgba(255, 255, 255, 0.5)',
-            fontSize: '2rem',
-            fontWeight: '300',
-            fontFamily: 'monospace'
-          }}>{number}</span>
-          
-          {/* Title - tanpa hover effect */}
-          <span
-            onClick={(e) => {
-              e.stopPropagation();
-              router.push(mainUrl);
-            }}
-            style={{
-              color: '#FFFFFF',
-              fontSize: isMobile ? '3rem' : '4.5rem',
-              fontWeight: '500',
-              fontFamily: 'Helvetica, Arial, sans-serif',
-              textShadow: '0 0 10px rgba(255,255,255,0.3)',
-              cursor: 'pointer',
-              transition: 'none' // Hapus transition
-            }}
-          >
-            {title}
-          </span>
-        </div>
-        
-        {/* Arrow yang berubah sesuai state - tanpa animasi rotate */}
-        <div style={{
-          transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)',
-          transition: 'transform 0.3s ease' // Hanya arrow yang tetap punya animasi
-        }}>
-          <svg
-            width="50"
-            height="50"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#FFFFFF"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            style={{
-              filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.5))'
-            }}
-          >
-            <path d="M7 7h10v10" />
-            <path d="M17 7L7 17" />
-          </svg>
-        </div>
-      </div>
-
-      {/* Sub-menu dengan animasi muncul/hilang - tetap ada animasi */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3 }}
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '0.8rem',
-              marginLeft: '6rem',
-              marginTop: '0.5rem',
-              marginBottom: '1rem',
-              overflow: 'hidden'
-            }}
-          >
-            {children}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.div>
-  );
-
-  // Component Sub Menu Item - tanpa animasi hover
-  const SubMenuItem = ({ number, title, url }: {
-    number: string;
-    title: string;
-    url: string;
-  }) => (
-    <div // Ganti dari motion.div ke div biasa
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '1.5rem',
-        padding: '0.5rem 0',
-        cursor: 'pointer',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
-      }}
-      onClick={() => router.push(url)}
-    >
-      <span style={{ 
-        color: 'rgba(255, 255, 255, 0.3)', 
-        fontSize: '0.9rem', 
-        fontFamily: 'monospace', 
-        width: '30px' 
-      }}>
-        {number}
-      </span>
-      <span style={{ 
-        color: 'rgba(255, 255, 255, 0.8)', 
-        fontSize: '1.2rem',
-        flex: 1
-      }}>
-        {title}
-      </span>
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2">
-        <path d="M7 7h10v10" />
-        <path d="M17 7L7 17" />
-      </svg>
-    </div>
-  );
-
   const [jakartaTime, setJakartaTime] = useState<string>('');
 
   // useEffect untuk update jam Jakarta setiap detik
@@ -523,12 +372,8 @@ export default function HomePage(): React.JSX.Element {
       setJakartaTime(timeString);
     };
 
-    // Update immediately
     updateJakartaTime();
-
-    // Update every second
     const interval = setInterval(updateJakartaTime, 1000);
-
     return () => clearInterval(interval);
   }, []);
 
@@ -537,86 +382,22 @@ export default function HomePage(): React.JSX.Element {
     if (!showGsapLoading) {
       const interval = setInterval(() => {
         setCurrentRotatingWordIndex((prev) => (prev + 1) % rotatingWordsList.length);
-      }, 2500); // Ganti setiap 2.5 detik
-      
+      }, 2500);
       return () => clearInterval(interval);
     }
   }, [showGsapLoading]);
 
-  // Data untuk pencarian (tetap ada untuk fungsi lain jika diperlukan)
+  // Data untuk pencarian
   const searchablePages = [
-    {
-      id: 1,
-      title: "Chatbot AI",
-      description: "AI Assistant dengan teknologi terbaru",
-      category: "Tools",
-      url: "/chatbot",
-      icon: "🤖"
-    },
-    {
-      id: 2,
-      title: "Sign In",
-      description: "Masuk ke akun Anda",
-      category: "Authentication",
-      url: "/signin",
-      icon: "🔐"
-    },
-    {
-      id: 3,
-      title: "Sign Up",
-      description: "Buat akun baru",
-      category: "Authentication",
-      url: "/signup",
-      icon: "👤"
-    },
-    {
-      id: 4,
-      title: "Notifikasi",
-      description: "Lihat semua notifikasi",
-      category: "System",
-      url: "/notifications",
-      icon: "🔔"
-    },
-    {
-      id: 5,
-      title: "Dokumentasi",
-      description: "Baca dokumentasi lengkap",
-      category: "Resources",
-      url: "/docs",
-      icon: "📚"
-    },
-    {
-      id: 6,
-      title: "Update",
-      description: "Pembaruan terbaru",
-      category: "News",
-      url: "/update",
-      icon: "🆕"
-    },
-    {
-      id: 7,
-      title: "Timeline",
-      description: "Linimasa aktivitas",
-      category: "Features",
-      url: "/timeline",
-      icon: "📅"
-    },
-    {
-      id: 8,
-      title: "Catatan",
-      description: "Catatan pribadi Anda",
-      category: "Personal",
-      url: "/notes",
-      icon: "📝"
-    },
-    {
-    id: 9,
-    title: "Calendar",
-    description: "Lihat kalender kegiatan admin",
-    category: "Features",
-    url: "/calendar",
-    icon: "🗓️"
-  }
+    { id: 1, title: "Chatbot AI", description: "AI Assistant dengan teknologi terbaru", category: "Tools", url: "/chatbot", icon: "🤖" },
+    { id: 2, title: "Sign In", description: "Masuk ke akun Anda", category: "Authentication", url: "/signin", icon: "🔐" },
+    { id: 3, title: "Sign Up", description: "Buat akun baru", category: "Authentication", url: "/signup", icon: "👤" },
+    { id: 4, title: "Notifikasi", description: "Lihat semua notifikasi", category: "System", url: "/notifications", icon: "🔔" },
+    { id: 5, title: "Dokumentasi", description: "Baca dokumentasi lengkap", category: "Resources", url: "/docs", icon: "📚" },
+    { id: 6, title: "Update", description: "Pembaruan terbaru", category: "News", url: "/update", icon: "🆕" },
+    { id: 7, title: "Timeline", description: "Linimasa aktivitas", category: "Features", url: "/timeline", icon: "📅" },
+    { id: 8, title: "Catatan", description: "Catatan pribadi Anda", category: "Personal", url: "/notes", icon: "📝" },
+    { id: 9, title: "Calendar", description: "Lihat kalender kegiatan admin", category: "Features", url: "/calendar", icon: "🗓️" }
   ];
 
   // Animasi loading text
@@ -628,24 +409,9 @@ export default function HomePage(): React.JSX.Element {
 
   // Data foto untuk progress bar
   const progressPhotos = [
-    { 
-      id: 1, 
-      src: "images/5.jpg", 
-      alt: "Photo 1",
-      uploadTime: new Date(Date.now() - 5 * 60 * 1000)
-    },
-    { 
-      id: 2, 
-      src: "images/6.jpg", 
-      alt: "Photo 2",
-      uploadTime: new Date(Date.now() - 2 * 60 * 1000)
-    },
-    { 
-      id: 3, 
-      src: "images/5.jpg", 
-      alt: "Photo 3",
-      uploadTime: new Date(Date.now() - 30 * 1000)
-    }
+    { id: 1, src: "images/5.jpg", alt: "Photo 1", uploadTime: new Date(Date.now() - 5 * 60 * 1000) },
+    { id: 2, src: "images/6.jpg", alt: "Photo 2", uploadTime: new Date(Date.now() - 2 * 60 * 1000) },
+    { id: 3, src: "images/5.jpg", alt: "Photo 3", uploadTime: new Date(Date.now() - 30 * 1000) }
   ];
 
   // Data untuk Roles
@@ -658,36 +424,11 @@ export default function HomePage(): React.JSX.Element {
 
   // Data untuk halaman Index
   const indexTopics = [
-    {
-      id: 1,
-      title: "Personal Journey",
-      description: "Exploring self-discovery.",
-      year: "2024"
-    },
-    {
-      id: 2,
-      title: "Creative Process",
-      description: "Ideas evolution documentation.",
-      year: "2024"
-    },
-    {
-      id: 3,
-      title: "Visual Storytelling",
-      description: "Photography for personal growth.",
-      year: "2024"
-    },
-    {
-      id: 4,
-      title: "Emotional Archive",
-      description: "Collection of feelings.",
-      year: "2024"
-    },
-    {
-      id: 5,
-      title: "Growth Metrics",
-      description: "Tracking development goals.",
-      year: "2024"
-    }
+    { id: 1, title: "Personal Journey", description: "Exploring self-discovery.", year: "2024" },
+    { id: 2, title: "Creative Process", description: "Ideas evolution documentation.", year: "2024" },
+    { id: 3, title: "Visual Storytelling", description: "Photography for personal growth.", year: "2024" },
+    { id: 4, title: "Emotional Archive", description: "Collection of feelings.", year: "2024" },
+    { id: 5, title: "Growth Metrics", description: "Tracking development goals.", year: "2024" }
   ];
 
   // Helper functions
@@ -715,26 +456,9 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  const getPriorityColor = (priority: string): string => {
-    switch (priority) {
-      case 'urgent': return '#FF4757';
-      case 'high': return '#FF6B6B';
-      case 'medium': return '#FFA502';
-      case 'low': return '#2ED573';
-      default: return '#747D8C';
-    }
-  };
-
-  const getBgColorByType = (type: string): string => {
-    const color = getColorByType(type);
-    return color + '20';
-  };
-
   const calculateTimeAgo = (date: Date | Timestamp | undefined | null): string => {
     try {
-      if (!date) {
-        return "Recently";
-      }
+      if (!date) return "Recently";
       
       const now = new Date();
       let commentDate: Date;
@@ -747,29 +471,16 @@ export default function HomePage(): React.JSX.Element {
         commentDate = new Date(date);
       }
       
-      if (!commentDate || isNaN(commentDate.getTime())) {
-        return "Recently";
-      }
+      if (!commentDate || isNaN(commentDate.getTime())) return "Recently";
       
       const diffInSeconds = Math.floor((now.getTime() - commentDate.getTime()) / 1000);
       
-      if (diffInSeconds < 60) {
-        return "Just now";
-      } else if (diffInSeconds < 3600) {
-        const minutes = Math.floor(diffInSeconds / 60);
-        return `${minutes}m ago`;
-      } else if (diffInSeconds < 86400) {
-        const hours = Math.floor(diffInSeconds / 3600);
-        return `${hours}h ago`;
-      } else if (diffInSeconds < 2592000) {
-        const days = Math.floor(diffInSeconds / 86400);
-        return `${days}d ago`;
-      } else {
-        const months = Math.floor(diffInSeconds / 2592000);
-        return `${months}mo ago`;
-      }
+      if (diffInSeconds < 60) return "Just now";
+      if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+      if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
+      if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)}d ago`;
+      return `${Math.floor(diffInSeconds / 2592000)}mo ago`;
     } catch (error) {
-      console.error("Error calculating time ago:", error);
       return "Recently";
     }
   };
@@ -794,39 +505,37 @@ export default function HomePage(): React.JSX.Element {
     return new Date(year, month + 1, 0).getDate();
   };
 
-  // Fungsi untuk mendapatkan hari pertama dalam bulan (0 = Minggu, 1 = Senin, dst)
+  // Fungsi untuk mendapatkan hari pertama dalam bulan
   const getFirstDayOfMonth = (year: number, month: number): number => {
     return new Date(year, month, 1).getDay();
   };
 
   const generateCalendar = () => {
-const daysInMonth = getDaysInMonth(currentYear, currentMonth);
-const firstDayOfMonth = getFirstDayOfMonth(currentYear, currentMonth);
-const days = [];
-// Tambahkan hari kosong untuk hari-hari sebelum bulan dimulai
-for (let i = 0; i < firstDayOfMonth; i++) {
-days.push(null);
-}
-// Tambahkan hari-hari dalam bulan
-for (let i = 1; i <= daysInMonth; i++) {
-const currentDate = new Date(currentYear, currentMonth, i);
-const dayEvents = calendarEvents.filter(event => {
-const eventDate = event.date instanceof Date ? event.date : new Date(event.date);
-return (
-eventDate.getDate() === i &&
-eventDate.getMonth() === currentMonth &&
-eventDate.getFullYear() === currentYear
-);
-});
-days.push({
-date: i,
-fullDate: currentDate,
-isToday: currentDate.toDateString() === new Date().toDateString(),
-events: dayEvents
-});
-}
-return days;
-};
+    const daysInMonth = getDaysInMonth(currentYear, currentMonth);
+    const firstDayOfMonth = getFirstDayOfMonth(currentYear, currentMonth);
+    const days = [];
+    for (let i = 0; i < firstDayOfMonth; i++) {
+      days.push(null);
+    }
+    for (let i = 1; i <= daysInMonth; i++) {
+      const currentDate = new Date(currentYear, currentMonth, i);
+      const dayEvents = calendarEvents.filter(event => {
+        const eventDate = event.date instanceof Date ? event.date : new Date(event.date);
+        return (
+          eventDate.getDate() === i &&
+          eventDate.getMonth() === currentMonth &&
+          eventDate.getFullYear() === currentYear
+        );
+      });
+      days.push({
+        date: i,
+        fullDate: currentDate,
+        isToday: currentDate.toDateString() === new Date().toDateString(),
+        events: dayEvents
+      });
+    }
+    return days;
+  };
 
   // Fungsi untuk navigasi bulan
   const navigateMonth = (direction: 'prev' | 'next') => {
@@ -920,7 +629,6 @@ return days;
           });
         }
       }
-
     } catch (error) {
       console.error("Error updating user stats:", error);
     }
@@ -932,7 +640,6 @@ return days;
       try {
         const totalUsersRef = doc(db, 'appStats', 'totalUsers');
         const totalUsersDoc = await getDoc(totalUsersRef);
-        
         if (totalUsersDoc.exists()) {
           setTotalUsers(totalUsersDoc.data().count || 0);
         }
@@ -940,7 +647,6 @@ return days;
         console.error("Error loading total users:", error);
       }
     };
-
     loadTotalUsers();
   }, []);
 
@@ -950,7 +656,6 @@ return days;
       try {
         const totalLoginsRef = doc(db, 'appStats', 'totalLogins');
         const totalLoginsDoc = await getDoc(totalLoginsRef);
-        
         if (totalLoginsDoc.exists()) {
           setTotalLoggedInUsers(totalLoginsDoc.data().count || 0);
         }
@@ -958,68 +663,40 @@ return days;
         console.error("Error loading total logged in users:", error);
       }
     };
-
     loadTotalLoggedInUsers();
   }, []);
 
-  // Fungsi untuk load user notes dari Firebase - DIPERBAIKI
+  // Fungsi untuk load user notes dari Firebase
   const loadUserNotes = async (userId: string) => {
     if (!db || !userId) return;
-    
     try {
       setIsLoadingNotes(true);
-      console.log(`📝 Loading notes for user: ${userId} from userNotes collection`);
-      
-      // Gunakan collection 'userNotes' yang sama dengan halaman notes
       const notesRef = collection(db, 'userNotes');
-      const q = query(
-        notesRef, 
-        where('userId', '==', userId),
-        orderBy('updatedAt', 'desc')
-      );
-      
+      const q = query(notesRef, where('userId', '==', userId), orderBy('updatedAt', 'desc'));
       const querySnapshot = await getDocs(q);
       const notesData: Note[] = [];
-      
       querySnapshot.forEach((doc) => {
         const data = doc.data();
-        
-        // DEBUG: Tampilkan data yang diterima
-        console.log("Firestore note data:", {
-          id: doc.id,
-          data: data,
-          hasCategory: !!data.category,
-          hasLink: !!data.link,
-          hasDescription: !!data.description,
-          hasContent: !!data.content
-        });
-        
-        // Ambil field sesuai dengan struktur di halaman notes
         const noteTitle = data.title?.trim() || 'Untitled Note';
         const noteDescription = data.description?.trim() || data.content?.trim() || '';
         const noteCategory = data.category?.trim() || '';
         const noteLink = data.link?.trim() || '';
-        
         notesData.push({
           id: doc.id,
           title: noteTitle,
-          content: noteDescription, // Gunakan description sebagai content
+          content: noteDescription,
           userId: data.userId || userId,
           userName: data.userName || userDisplayName || 'User',
           userEmail: data.userEmail || user?.email || '',
           createdAt: data.createdAt || new Date(),
           updatedAt: data.updatedAt || new Date(),
           isPinned: data.isPinned || false,
-          category: noteCategory, // Tambahkan category
-          link: noteLink, // Tambahkan link
+          category: noteCategory,
+          link: noteLink,
           color: data.color || '#3B82F6',
           tags: data.tags || []
         });
       });
-      
-      console.log(`✅ Loaded ${notesData.length} notes for user ${userId}`);
-      console.log("Sample note data:", notesData[0]); // Debug: tampilkan contoh data
-      
       setUserNotes(notesData);
       setTotalNotesCount(notesData.length);
       setIsLoadingNotes(false);
@@ -1029,55 +706,39 @@ return days;
     }
   };
 
-  // Fungsi untuk load user notes secara real-time - DIPERBAIKI
+  // Fungsi untuk load user notes secara real-time
   const loadUserNotesRealtime = (userId: string) => {
     if (!db || !userId) return () => {};
-    
     try {
-      // Gunakan collection 'userNotes' yang sama
       const notesRef = collection(db, 'userNotes');
-      const q = query(
-        notesRef, 
-        where('userId', '==', userId),
-        orderBy('updatedAt', 'desc')
-      );
-      
+      const q = query(notesRef, where('userId', '==', userId), orderBy('updatedAt', 'desc'));
       const unsubscribe = onSnapshot(q, (querySnapshot) => {
         const notesData: Note[] = [];
-        
         querySnapshot.forEach((doc) => {
           const data = doc.data();
-          
-          // Ambil field sesuai dengan struktur di halaman notes
           const noteTitle = data.title?.trim() || 'Untitled Note';
           const noteDescription = data.description?.trim() || data.content?.trim() || '';
           const noteCategory = data.category?.trim() || '';
           const noteLink = data.link?.trim() || '';
-          
           notesData.push({
             id: doc.id,
             title: noteTitle,
-            content: noteDescription, // Gunakan description sebagai content
+            content: noteDescription,
             userId: data.userId || userId,
             userName: data.userName || userDisplayName || 'User',
             userEmail: data.userEmail || user?.email || '',
             createdAt: data.createdAt || new Date(),
             updatedAt: data.updatedAt || new Date(),
             isPinned: data.isPinned || false,
-            category: noteCategory, // Tambahkan category
-            link: noteLink, // Tambahkan link
+            category: noteCategory,
+            link: noteLink,
             color: data.color || '#3B82F6',
             tags: data.tags || []
           });
         });
-        
-        console.log(`🔄 Realtime update: ${notesData.length} notes from userNotes`);
         setUserNotes(notesData);
         setTotalNotesCount(notesData.length);
-      }, (error) => {
-        console.error("Error in realtime notes listener:", error);
       });
-      
       return unsubscribe;
     } catch (error) {
       console.error("Error setting up realtime notes:", error);
@@ -1088,19 +749,14 @@ return days;
   // Fungsi untuk detect provider
   const detectProvider = (user: any) => {
     if (!user) return 'Unknown';
-    
     const providerData = user.providerData;
     if (providerData && providerData.length > 0) {
       const providerId = providerData[0].providerId;
       switch (providerId) {
-        case 'password':
-          return 'Email/Password';
-        case 'google.com':
-          return 'Google';
-        case 'github.com':
-          return 'GitHub';
-        default:
-          return providerId;
+        case 'password': return 'Email/Password';
+        case 'google.com': return 'Google';
+        case 'github.com': return 'GitHub';
+        default: return providerId;
       }
     }
     return 'Email/Password';
@@ -1111,28 +767,21 @@ return days;
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
-        const name = currentUser.displayName || 
-                     currentUser.email?.split('@')[0] || 
-                     'User';
+        const name = currentUser.displayName || currentUser.email?.split('@')[0] || 'User';
         setUserDisplayName(name);
         setEditName(name);
         setEditEmail(currentUser.email || '');
-        
         setUserProvider(detectProvider(currentUser));
-        
         await updateUserStats(currentUser.uid, name);
-        
         try {
           const userStatsRef = doc(db, 'userStats', currentUser.uid);
           const userStatsDoc = await getDoc(userStatsRef);
-          
           if (userStatsDoc.exists()) {
             setUserStats(userStatsDoc.data() as UserStats);
           }
         } catch (error) {
           console.error("Error loading user stats:", error);
         }
-        
         if (showUserProfileModal) {
           await loadUserNotes(currentUser.uid);
         }
@@ -1146,18 +795,15 @@ return days;
         setTotalNotesCount(0);
       }
     });
-
     return () => unsubscribe();
   }, [showUserProfileModal]);
 
   // Real-time listener untuk notes ketika modal terbuka
   useEffect(() => {
     let unsubscribe: (() => void) | undefined;
-    
     if (showUserProfileModal && user) {
       unsubscribe = loadUserNotesRealtime(user.uid);
     }
-    
     return () => {
       if (unsubscribe) unsubscribe();
     };
@@ -1165,17 +811,12 @@ return days;
 
   // Load comments from Firebase
   useEffect(() => {
-    console.log("Memulai loading komentar...");
     setIsLoadingComments(true);
-    
     const commentsRef = collection(db, 'photoComments');
     const q = query(commentsRef, orderBy('timestamp', 'desc'));
-    
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      console.log("Snapshot diterima, jumlah dokumen:", querySnapshot.size);
       const commentsData: Comment[] = [];
       querySnapshot.forEach((doc) => {
-        console.log("Komentar:", doc.id, doc.data());
         commentsData.push({
           id: doc.id,
           ...doc.data()
@@ -1185,186 +826,120 @@ return days;
       setIsLoadingComments(false);
     }, (error) => {
       console.error("Error loading comments:", error);
-      console.error("Error code:", error.code);
       setIsLoadingComments(false);
     });
-
     return () => unsubscribe();
   }, []);
 
-  // Load notifications from Firebase - DIPERBAIKI SESUAI DESIGN fghaghx.txt
+  // Load notifications from Firebase
   useEffect(() => {
-    console.log("🚀 Memulai loading notifikasi untuk halaman utama...");
-    
     if (!db) {
-      console.log("❌ Firebase belum siap");
       setIsLoadingNotifications(false);
       return;
     }
-    
     setIsLoadingNotifications(true);
-    
     try {
       const notificationsRef = collection(db, 'notifications');
       const q = query(notificationsRef, orderBy('createdAt', 'desc'));
-      
-      console.log("📡 Mendengarkan notifikasi dari Firestore...");
-      
-      const unsubscribe = onSnapshot(q, 
-        (querySnapshot) => {
-          console.log("✅ Notifikasi diterima:", querySnapshot.size, "dokumen");
-          
-          if (querySnapshot.empty) {
-            console.log("ℹ️ Tidak ada notifikasi di database");
-            setNotifications([]);
-            setHasUnreadNotifications(false);
-            setPreviousNotificationCount(notificationCount);
-            setNotificationCount(0);
-            setIsLoadingNotifications(false);
-            return;
-          }
-          
-          const notificationsData: Notification[] = [];
-          let unreadCount = 0;
-          let newNotificationsCount = 0;
-          
-          const currentUser = auth?.currentUser;
-          const currentUserId = currentUser ? currentUser.uid : 
-                                localStorage.getItem('anonymous_user_id') || 
-                                'anonymous_' + Date.now();
-          
-          if (!currentUser && !localStorage.getItem('anonymous_user_id')) {
-            localStorage.setItem('anonymous_user_id', currentUserId);
-          }
-          
-          querySnapshot.forEach((doc) => {
-            try {
-              const data = doc.data();
-              
-              if (data.isDeleted === true) {
-                return;
-              }
-              
-              let shouldShow = false;
-              
-              switch (data.recipientType) {
-                case 'all':
-                  shouldShow = true;
-                  break;
-                  
-                case 'specific':
-                  const recipientIds = data.recipientIds || [];
-                  if (recipientIds.includes(currentUserId) || 
-                      (currentUser && recipientIds.includes(currentUser.uid))) {
-                    shouldShow = true;
-                  }
-                  break;
-                  
-                case 'email':
-                  if (currentUser && data.recipientEmails?.includes(currentUser.email)) {
-                    shouldShow = true;
-                  }
-                  break;
-                  
-                default:
-                  shouldShow = false;
-              }
-              
-              if (shouldShow) {
-                let timestamp = data.createdAt;
-                if (timestamp && typeof timestamp.toDate === 'function') {
-                  timestamp = timestamp.toDate();
-                }
-                
-                // Ambil data links sesuai struktur di fghaghx.txt
-                const linksData = data.links || {};
-                
-                const notification: Notification = {
-                  id: doc.id,
-                  title: data.title || '',
-                  message: data.message || '',
-                  type: data.type || 'info',
-                  senderId: data.senderId || '',
-                  senderName: data.senderName || 'System',
-                  senderEmail: data.senderEmail,
-                  recipientType: data.recipientType || 'all',
-                  recipientIds: data.recipientIds || [],
-                  recipientEmails: data.recipientEmails || [],
-                  createdAt: timestamp || Timestamp.now(),
-                  userReads: data.userReads || {},
-                  views: data.views || 0,
-                  likes: data.likes || [],
-                  comments: data.comments || [],
-                  status: data.status || 'sent',
-                  reactions: data.reactions || {},
-                  links: {
-                    youtube: Array.isArray(linksData.youtube) ? linksData.youtube : [],
-                    pdf: Array.isArray(linksData.pdf) ? linksData.pdf : [],
-                    images: Array.isArray(linksData.images) ? linksData.images : [],
-                    videos: Array.isArray(linksData.videos) ? linksData.videos : [],
-                    websites: Array.isArray(linksData.websites) ? linksData.websites : []
-                  },
-                  hasLinks: data.hasLinks === true || 
-                            (linksData && Object.values(linksData).some(arr => arr && arr.length > 0)),
-                  linkCount: data.linkCount || 0
-                };
-                
-                const isReadByUser = notification.userReads[currentUserId] || 
-                                    (currentUser && notification.userReads[currentUser.uid]) || 
-                                    false;
-                
-                if (!isReadByUser) {
-                  unreadCount++;
-                  // Cek apakah notifikasi ini baru (createdAt dalam 5 menit terakhir)
-                  if (notification.createdAt) {
-                    const now = new Date();
-                    const notifDate = notification.createdAt instanceof Timestamp 
-                      ? notification.createdAt.toDate() 
-                      : new Date(notification.createdAt);
-                    const diffMinutes = (now.getTime() - notifDate.getTime()) / (1000 * 60);
-                    if (diffMinutes < 5) {
-                      newNotificationsCount++;
-                    }
-                  }
-                }
-                
-                notificationsData.push(notification);
-              }
-            } catch (error) {
-              console.error(`❌ Error processing notification ${doc.id}:`, error);
-            }
-          });
-          
-          console.log(`📊 Total notifikasi untuk user: ${notificationsData.length}, Unread: ${unreadCount}, New: ${newNotificationsCount}`);
-          
-          // Simpan previous count untuk animasi
+      const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        if (querySnapshot.empty) {
+          setNotifications([]);
+          setHasUnreadNotifications(false);
           setPreviousNotificationCount(notificationCount);
-          
-          // Jika ada notifikasi baru, tampilkan animasi
-          if (newNotificationsCount > 0) {
-            setNewNotificationText(`${newNotificationsCount} notifikasi baru`);
-            setShowNotificationAnimation(true);
-            
-            // Sembunyikan animasi setelah 3 detik
-            setTimeout(() => {
-              setShowNotificationAnimation(false);
-            }, 3000);
-          }
-          
-          setNotifications(notificationsData);
-          setHasUnreadNotifications(unreadCount > 0);
-          setNotificationCount(unreadCount);
+          setNotificationCount(0);
           setIsLoadingNotifications(false);
-        }, 
-        (error) => {
-          console.error("❌ Error loading notifications:", error);
-          console.error("Error code:", error.code);
-          console.error("Error message:", error.message);
-          
-          setIsLoadingNotifications(false);
+          return;
         }
-      );
-      
+        const notificationsData: Notification[] = [];
+        let unreadCount = 0;
+        let newNotificationsCount = 0;
+        const currentUser = auth?.currentUser;
+        const currentUserId = currentUser ? currentUser.uid : localStorage.getItem('anonymous_user_id') || 'anonymous_' + Date.now();
+        if (!currentUser && !localStorage.getItem('anonymous_user_id')) {
+          localStorage.setItem('anonymous_user_id', currentUserId);
+        }
+        querySnapshot.forEach((doc) => {
+          try {
+            const data = doc.data();
+            if (data.isDeleted === true) return;
+            let shouldShow = false;
+            switch (data.recipientType) {
+              case 'all': shouldShow = true; break;
+              case 'specific':
+                const recipientIds = data.recipientIds || [];
+                if (recipientIds.includes(currentUserId) || (currentUser && recipientIds.includes(currentUser.uid))) shouldShow = true;
+                break;
+              case 'email':
+                if (currentUser && data.recipientEmails?.includes(currentUser.email)) shouldShow = true;
+                break;
+              default: shouldShow = false;
+            }
+            if (shouldShow) {
+              let timestamp = data.createdAt;
+              if (timestamp && typeof timestamp.toDate === 'function') {
+                timestamp = timestamp.toDate();
+              }
+              const linksData = data.links || {};
+              const notification: Notification = {
+                id: doc.id,
+                title: data.title || '',
+                message: data.message || '',
+                type: data.type || 'info',
+                senderId: data.senderId || '',
+                senderName: data.senderName || 'System',
+                senderEmail: data.senderEmail,
+                recipientType: data.recipientType || 'all',
+                recipientIds: data.recipientIds || [],
+                recipientEmails: data.recipientEmails || [],
+                createdAt: timestamp || Timestamp.now(),
+                userReads: data.userReads || {},
+                views: data.views || 0,
+                likes: data.likes || [],
+                comments: data.comments || [],
+                status: data.status || 'sent',
+                reactions: data.reactions || {},
+                links: {
+                  youtube: Array.isArray(linksData.youtube) ? linksData.youtube : [],
+                  pdf: Array.isArray(linksData.pdf) ? linksData.pdf : [],
+                  images: Array.isArray(linksData.images) ? linksData.images : [],
+                  videos: Array.isArray(linksData.videos) ? linksData.videos : [],
+                  websites: Array.isArray(linksData.websites) ? linksData.websites : []
+                },
+                hasLinks: data.hasLinks === true || (linksData && Object.values(linksData).some(arr => arr && arr.length > 0)),
+                linkCount: data.linkCount || 0
+              };
+              const isReadByUser = notification.userReads[currentUserId] || (currentUser && notification.userReads[currentUser.uid]) || false;
+              if (!isReadByUser) {
+                unreadCount++;
+                if (notification.createdAt) {
+                  const now = new Date();
+                  const notifDate = notification.createdAt instanceof Timestamp ? notification.createdAt.toDate() : new Date(notification.createdAt);
+                  const diffMinutes = (now.getTime() - notifDate.getTime()) / (1000 * 60);
+                  if (diffMinutes < 5) newNotificationsCount++;
+                }
+              }
+              notificationsData.push(notification);
+            }
+          } catch (error) {
+            console.error(`❌ Error processing notification ${doc.id}:`, error);
+          }
+        });
+        setPreviousNotificationCount(notificationCount);
+        if (newNotificationsCount > 0) {
+          setNewNotificationText(`${newNotificationsCount} notifikasi baru`);
+          setShowNotificationAnimation(true);
+          setTimeout(() => {
+            setShowNotificationAnimation(false);
+          }, 3000);
+        }
+        setNotifications(notificationsData);
+        setHasUnreadNotifications(unreadCount > 0);
+        setNotificationCount(unreadCount);
+        setIsLoadingNotifications(false);
+      }, (error) => {
+        console.error("❌ Error loading notifications:", error);
+        setIsLoadingNotifications(false);
+      });
       return () => unsubscribe();
     } catch (error) {
       console.error("❌ Error in notifications useEffect:", error);
@@ -1372,79 +947,65 @@ return days;
     }
   }, [db, auth?.currentUser]);
 
- // Load events kalender dari Firebase - DIPERBAIKI
-useEffect(() => {
-if (showCalendarModal && db) {
-setIsLoadingEvents(true);
-try {
-const eventsRef = collection(db, 'calendarEvents');
-const q = query(eventsRef, orderBy('date', 'asc'));
-const unsubscribe = onSnapshot(q,
-(querySnapshot) => {
-const eventsData: CalendarEvent[] = [];
-querySnapshot.forEach((doc) => {
-const data = doc.data();
-let eventDate = data.date;
-// Convert Firestore Timestamp to Date if needed
-if (eventDate && typeof eventDate.toDate === 'function') {
-eventDate = eventDate.toDate();
-} else if (typeof eventDate === 'string') {
-eventDate = new Date(eventDate);
-}
-eventsData.push({
-id: doc.id,
-title: data.title || "No Title",
-description: data.description || "",
-date: eventDate,
-color: data.color || "#3B82F6",
-label: data.label || "Event",
-createdBy: data.createdBy || "Unknown",
-isAdmin: data.isAdmin || false
-});
-});
-console.log(`✅ Loaded ${eventsData.length} calendar events for homepage`);
-setCalendarEvents(eventsData);
-setIsLoadingEvents(false);
-},
-(error) => {
-console.error("❌ Error loading calendar events:", error);
-setIsLoadingEvents(false);
-}
-);
-return () => unsubscribe();
-} catch (error) {
-console.error("❌ Error setting up calendar listener:", error);
-setIsLoadingEvents(false);
-}
-}
-}, [showCalendarModal, db]);
+  // Load events kalender dari Firebase
+  useEffect(() => {
+    if (showCalendarModal && db) {
+      setIsLoadingEvents(true);
+      try {
+        const eventsRef = collection(db, 'calendarEvents');
+        const q = query(eventsRef, orderBy('date', 'asc'));
+        const unsubscribe = onSnapshot(q, (querySnapshot) => {
+          const eventsData: CalendarEvent[] = [];
+          querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            let eventDate = data.date;
+            if (eventDate && typeof eventDate.toDate === 'function') {
+              eventDate = eventDate.toDate();
+            } else if (typeof eventDate === 'string') {
+              eventDate = new Date(eventDate);
+            }
+            eventsData.push({
+              id: doc.id,
+              title: data.title || "No Title",
+              description: data.description || "",
+              date: eventDate,
+              color: data.color || "#3B82F6",
+              label: data.label || "Event",
+              createdBy: data.createdBy || "Unknown",
+              isAdmin: data.isAdmin || false
+            });
+          });
+          setCalendarEvents(eventsData);
+          setIsLoadingEvents(false);
+        }, (error) => {
+          console.error("❌ Error loading calendar events:", error);
+          setIsLoadingEvents(false);
+        });
+        return () => unsubscribe();
+      } catch (error) {
+        console.error("❌ Error setting up calendar listener:", error);
+        setIsLoadingEvents(false);
+      }
+    }
+  }, [showCalendarModal, db]);
 
   // Animasi teks nama user berjalan
   useEffect(() => {
     if (user && userTextRef.current && userButtonRef.current) {
       const textWidth = userTextRef.current.scrollWidth;
       const buttonWidth = userButtonRef.current.clientWidth;
-      
       if (textWidth > buttonWidth) {
         setIsNameScrolling(true);
-        
         const animation = gsap.to(userTextRef.current, {
           x: -(textWidth - buttonWidth + 20),
           duration: 5,
           repeat: -1,
           yoyo: true,
           ease: "power1.inOut",
-          onReverseComplete: () => {
-            setScrollDirection("right");
-          },
-          onComplete: () => {
-            setScrollDirection("left");
-          }
+          onReverseComplete: () => setScrollDirection("right"),
+          onComplete: () => setScrollDirection("left")
         });
-
-        return () => {
-          animation.kill();
-        };
+        return () => animation.kill();
       } else {
         setIsNameScrolling(false);
       }
@@ -1454,25 +1015,16 @@ setIsLoadingEvents(false);
   // Mouse wheel scroll handler
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
-      // Biarkan scroll normal jika tidak dalam modal
       if (!showUserProfileModal && !showMenuruFullPage && !showPhotoFullPage && !showCalendarModal && !showNoteOverlay && !showCommunityOverlay && !showNewsOverlay && !showStoriesOverlay) {
         return;
       }
-      
-      // Jika dalam modal, izinkan scroll dengan mouse wheel
       e.stopPropagation();
     };
-
     const handleMouseDown = (e: MouseEvent) => {
-      // Middle click (scroll wheel click) untuk scroll
-      if (e.button === 1) {
-        e.preventDefault();
-      }
+      if (e.button === 1) e.preventDefault();
     };
-
     document.addEventListener('wheel', handleWheel, { passive: false });
     document.addEventListener('mousedown', handleMouseDown);
-
     return () => {
       document.removeEventListener('wheel', handleWheel);
       document.removeEventListener('mousedown', handleMouseDown);
@@ -1482,56 +1034,26 @@ setIsLoadingEvents(false);
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (userDropdownRef.current && !userDropdownRef.current.contains(event.target as Node)) {
-        setShowUserDropdown(false);
-      }
-      if (menuOverlayRef.current && !menuOverlayRef.current.contains(event.target as Node)) {
-        handleCloseMenu();
-      }
-      if (notificationDropdownRef.current && !notificationDropdownRef.current.contains(event.target as Node)) {
-        setShowNotification(false);
-      }
-      if (userProfileModalRef.current && !userProfileModalRef.current.contains(event.target as Node)) {
-        setShowUserProfileModal(false);
-      }
+      if (userDropdownRef.current && !userDropdownRef.current.contains(event.target as Node)) setShowUserDropdown(false);
+      if (menuOverlayRef.current && !menuOverlayRef.current.contains(event.target as Node)) handleCloseMenu();
+      if (notificationDropdownRef.current && !notificationDropdownRef.current.contains(event.target as Node)) setShowNotification(false);
+      if (userProfileModalRef.current && !userProfileModalRef.current.contains(event.target as Node)) setShowUserProfileModal(false);
       if (calendarModalRef.current && !calendarModalRef.current.contains(event.target as Node)) {
         setShowCalendarModal(false);
         setSelectedDate(null);
       }
-      if (noteOverlayRef.current && !noteOverlayRef.current.contains(event.target as Node)) {
-        setShowNoteOverlay(false);
-      }
-      if (communityOverlayRef.current && !communityOverlayRef.current.contains(event.target as Node)) {
-        setShowCommunityOverlay(false);
-      }
-      if (newsOverlayRef.current && !newsOverlayRef.current.contains(event.target as Node)) {
-        setShowNewsOverlay(false);
-      }
-      if (storiesOverlayRef.current && !storiesOverlayRef.current.contains(event.target as Node)) {
-        setShowStoriesOverlay(false);
-      }
-      if (productOverlayRef.current && !productOverlayRef.current.contains(event.target as Node)) {
-        // Optional: bisa diaktifkan jika ingin close saat klik di luar
-        // setShowProductOverlay(false);
-      }
-      if (visualDesignerOverlayRef.current && !visualDesignerOverlayRef.current.contains(event.target as Node)) {
-        // setShowVisualDesignerOverlay(false);
-      }
-      if (indonesiaOverlayRef.current && !indonesiaOverlayRef.current.contains(event.target as Node)) {
-        // setShowIndonesiaOverlay(false);
-      }
+      if (noteOverlayRef.current && !noteOverlayRef.current.contains(event.target as Node)) setShowNoteOverlay(false);
+      if (communityOverlayRef.current && !communityOverlayRef.current.contains(event.target as Node)) setShowCommunityOverlay(false);
+      if (newsOverlayRef.current && !newsOverlayRef.current.contains(event.target as Node)) setShowNewsOverlay(false);
+      if (storiesOverlayRef.current && !storiesOverlayRef.current.contains(event.target as Node)) setShowStoriesOverlay(false);
     };
-
     document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   // Fungsi untuk mengupdate counter angka kiri
   const updateLeftCounter = (newIndex: number) => {
     const newLeftCounter = String(newIndex + 1).padStart(2, '0');
-    
     if (leftCounterRef.current) {
       gsap.to(leftCounterRef.current, {
         opacity: 0,
@@ -1539,15 +1061,9 @@ setIsLoadingEvents(false);
         duration: 0.2,
         onComplete: () => {
           setLeftCounter(newLeftCounter);
-          
           gsap.fromTo(leftCounterRef.current, 
             { opacity: 0, y: 10 },
-            { 
-              opacity: 1, 
-              y: 0, 
-              duration: 0.3,
-              ease: "power2.out"
-            }
+            { opacity: 1, y: 0, duration: 0.3, ease: "power2.out" }
           );
         }
       });
@@ -1556,50 +1072,40 @@ setIsLoadingEvents(false);
     }
   };
 
-  // Update counter ketika currentPhotoIndex berubah
   useEffect(() => {
     updateLeftCounter(currentPhotoIndex);
   }, [currentPhotoIndex]);
 
-  // Update posisi gambar ketika hoveredTopic berubah
   useEffect(() => {
     if (hoveredTopic !== null) {
       const topicIndex = indexTopics.findIndex(topic => topic.id === hoveredTopic);
-      const newPosition = topicIndex * 40;
-      setImagePosition(newPosition);
+      setImagePosition(topicIndex * 40);
     } else {
       setImagePosition(0);
     }
   }, [hoveredTopic]);
 
   // Handler untuk membuka menu overlay
-  const handleOpenMenu = () => {
-    setShowMenuOverlay(true);
-  };
+  const handleOpenMenu = () => setShowMenuOverlay(true);
 
   // Handler untuk menutup menu overlay
   const handleCloseMenu = () => {
     if (menuOverlayRef.current) {
       const tl = gsap.timeline();
-      
       tl.to(menuOverlayRef.current, {
         y: '-100%',
         duration: 0.5,
         ease: "power2.inOut",
-        onComplete: () => {
-          setShowMenuOverlay(false);
-        }
+        onComplete: () => setShowMenuOverlay(false)
       });
     } else {
       setShowMenuOverlay(false);
     }
   };
 
-  // Animasi GSAP saat menu dibuka
   useEffect(() => {
     if (showMenuOverlay && menuOverlayRef.current) {
       gsap.set(menuOverlayRef.current, { y: '-100%' });
-      
       const tl = gsap.timeline();
       tl.to(menuOverlayRef.current, {
         y: '0%',
@@ -1610,129 +1116,113 @@ setIsLoadingEvents(false);
   }, [showMenuOverlay]);
 
   // Handler untuk Note Overlay
-  const handleNoteClick = () => {
-    setShowNoteOverlay(true);
-  };
+  const handleNoteClick = () => setShowNoteOverlay(true);
+  const handleCloseNoteOverlay = () => setShowNoteOverlay(false);
 
-  const handleCloseNoteOverlay = () => {
-    setShowNoteOverlay(false);
-  };
+  // Handler untuk Community Overlay (HOVER) - DENGAN DELAY UNTUK USER LELUASA MELIHAT
+  const [communityHoverTimer, setCommunityHoverTimer] = useState<NodeJS.Timeout | null>(null);
+  const [communityLeaveTimer, setCommunityLeaveTimer] = useState<NodeJS.Timeout | null>(null);
 
-  // Handler untuk Community Overlay (HOVER)
   const handleCommunityHover = () => {
-    setShowCommunityOverlay(true);
+    if (communityLeaveTimer) clearTimeout(communityLeaveTimer);
+    const timer = setTimeout(() => {
+      setShowCommunityOverlay(true);
+    }, 100);
+    setCommunityHoverTimer(timer);
   };
 
   const handleCommunityLeave = () => {
-    setShowCommunityOverlay(false);
+    if (communityHoverTimer) clearTimeout(communityHoverTimer);
+    const timer = setTimeout(() => {
+      setShowCommunityOverlay(false);
+    }, 500); // Delay 500ms untuk user leluasa melihat
+    setCommunityLeaveTimer(timer);
   };
 
-  const handleCloseCommunityOverlay = () => {
-    setShowCommunityOverlay(false);
-  };
+  const handleCloseCommunityOverlay = () => setShowCommunityOverlay(false);
 
-  // Handler untuk News Overlay (HOVER)
+  // Handler untuk News Overlay (HOVER) - DENGAN DELAY
+  const [newsHoverTimer, setNewsHoverTimer] = useState<NodeJS.Timeout | null>(null);
+  const [newsLeaveTimer, setNewsLeaveTimer] = useState<NodeJS.Timeout | null>(null);
+
   const handleNewsHover = () => {
-    setShowNewsOverlay(true);
+    if (newsLeaveTimer) clearTimeout(newsLeaveTimer);
+    const timer = setTimeout(() => {
+      setShowNewsOverlay(true);
+    }, 100);
+    setNewsHoverTimer(timer);
   };
 
   const handleNewsLeave = () => {
-    setShowNewsOverlay(false);
+    if (newsHoverTimer) clearTimeout(newsHoverTimer);
+    const timer = setTimeout(() => {
+      setShowNewsOverlay(false);
+    }, 500);
+    setNewsLeaveTimer(timer);
   };
 
-  const handleCloseNewsOverlay = () => {
-    setShowNewsOverlay(false);
-  };
+  const handleCloseNewsOverlay = () => setShowNewsOverlay(false);
 
-  // Handler untuk Stories Overlay (HOVER)
+  // Handler untuk Stories Overlay (HOVER) - DENGAN DELAY
+  const [storiesHoverTimer, setStoriesHoverTimer] = useState<NodeJS.Timeout | null>(null);
+  const [storiesLeaveTimer, setStoriesLeaveTimer] = useState<NodeJS.Timeout | null>(null);
+
   const handleStoriesHover = () => {
-    setShowStoriesOverlay(true);
+    if (storiesLeaveTimer) clearTimeout(storiesLeaveTimer);
+    const timer = setTimeout(() => {
+      setShowStoriesOverlay(true);
+    }, 100);
+    setStoriesHoverTimer(timer);
   };
 
   const handleStoriesLeave = () => {
-    setShowStoriesOverlay(false);
+    if (storiesHoverTimer) clearTimeout(storiesHoverTimer);
+    const timer = setTimeout(() => {
+      setShowStoriesOverlay(false);
+    }, 500);
+    setStoriesLeaveTimer(timer);
   };
 
-  const handleCloseStoriesOverlay = () => {
-    setShowStoriesOverlay(false);
-  };
+  const handleCloseStoriesOverlay = () => setShowStoriesOverlay(false);
 
   // Handler untuk membuka overlay product, visual designer, indonesia
-  const handleProductClick = () => {
-    setShowProductOverlay(true);
-  };
-
-  const handleVisualDesignerClick = () => {
-    setShowVisualDesignerOverlay(true);
-  };
-
-  const handleIndonesiaClick = () => {
-    setShowIndonesiaOverlay(true);
-  };
+  const handleProductClick = () => setShowProductOverlay(true);
+  const handleVisualDesignerClick = () => setShowVisualDesignerOverlay(true);
+  const handleIndonesiaClick = () => setShowIndonesiaOverlay(true);
 
   // Handler untuk menutup overlay
-  const handleCloseProductOverlay = () => {
-    setShowProductOverlay(false);
-  };
+  const handleCloseProductOverlay = () => setShowProductOverlay(false);
+  const handleCloseVisualDesignerOverlay = () => setShowVisualDesignerOverlay(false);
+  const handleCloseIndonesiaOverlay = () => setShowIndonesiaOverlay(false);
 
-  const handleCloseVisualDesignerOverlay = () => {
-    setShowVisualDesignerOverlay(false);
-  };
-
-  const handleCloseIndonesiaOverlay = () => {
-    setShowIndonesiaOverlay(false);
-  };
-
-  // Animasi GSAP Loading dengan ROTATING WORDS
+  // Animasi GSAP Loading
   useEffect(() => {
     if (!loadingTextRef.current) return;
-
-    // Timeline untuk animasi rotating words
     const loadingTimeline = gsap.timeline({
-      repeat: -1, // Loop terus menerus
+      repeat: -1,
       repeatDelay: 0.2,
       onReverseComplete: () => {
-        // Setelah selesai satu siklus, lanjut ke kata berikutnya
         setCurrentWordIndex((prev) => (prev + 1) % rotatingWords.length);
       }
     });
-
-    // Animasi fade out - fade in untuk setiap kata
     loadingTimeline
-      .to(loadingTextRef.current, {
-        opacity: 0,
-        y: -5,
-        duration: 0.3,
-        ease: "power1.in"
-      })
-      .to({}, { duration: 0.1 }) // Delay kecil
+      .to(loadingTextRef.current, { opacity: 0, y: -5, duration: 0.3, ease: "power1.in" })
+      .to({}, { duration: 0.1 })
       .set(loadingTextRef.current, {
         onComplete: () => {
-          // Update kata setelah fade out selesai
           setCurrentWordIndex((prev) => (prev + 1) % rotatingWords.length);
         }
       })
-      .to(loadingTextRef.current, {
-        opacity: 1,
-        y: 0,
-        duration: 0.3,
-        ease: "power1.out"
-      });
-
-    // Setelah 3 detik, fade out loading screen
+      .to(loadingTextRef.current, { opacity: 1, y: 0, duration: 0.3, ease: "power1.out" });
     const timeout = setTimeout(() => {
       gsap.to(gsapLoadingRef.current, {
         opacity: 0,
         duration: 0.5,
         ease: "power2.out",
-        onComplete: () => {
-          setShowGsapLoading(false);
-        }
+        onComplete: () => setShowGsapLoading(false)
       });
-      // Hentikan timeline animasi kata
       loadingTimeline.kill();
     }, 3000);
-
     return () => {
       loadingTimeline.kill();
       clearTimeout(timeout);
@@ -1740,10 +1230,7 @@ setIsLoadingEvents(false);
   }, []);
 
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
     window.addEventListener('resize', checkMobile);
 
@@ -1760,63 +1247,29 @@ setIsLoadingEvents(false);
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (showPhotoFullPage) {
-        if (e.key === 'ArrowLeft') {
-          prevPhoto();
-        } else if (e.key === 'ArrowRight') {
-          nextPhoto();
-        }
+        if (e.key === 'ArrowLeft') prevPhoto();
+        else if (e.key === 'ArrowRight') nextPhoto();
       }
-      
       if (e.key === 'Escape') {
-        if (showMenuruFullPage) {
-          handleCloseMenuruFullPage();
-        }
-        if (showPhotoFullPage) {
-          handleClosePhotoFullPage();
-        }
-        if (showUserDropdown) {
-          setShowUserDropdown(false);
-        }
-        if (showLogoutModal) {
-          setShowLogoutModal(false);
-        }
-        if (showMenuOverlay) {
-          handleCloseMenu();
-        }
-        if (showNotification) {
-          setShowNotification(false);
-        }
-        if (showUserProfileModal) {
-          setShowUserProfileModal(false);
-        }
-        if (showDeleteAccountModal) {
-          setShowDeleteAccountModal(false);
-        }
+        if (showMenuruFullPage) handleCloseMenuruFullPage();
+        if (showPhotoFullPage) handleClosePhotoFullPage();
+        if (showUserDropdown) setShowUserDropdown(false);
+        if (showLogoutModal) setShowLogoutModal(false);
+        if (showMenuOverlay) handleCloseMenu();
+        if (showNotification) setShowNotification(false);
+        if (showUserProfileModal) setShowUserProfileModal(false);
+        if (showDeleteAccountModal) setShowDeleteAccountModal(false);
         if (showCalendarModal) {
           setShowCalendarModal(false);
           setSelectedDate(null);
         }
-        if (showNoteOverlay) {
-          setShowNoteOverlay(false);
-        }
-        if (showCommunityOverlay) {
-          setShowCommunityOverlay(false);
-        }
-        if (showNewsOverlay) {
-          setShowNewsOverlay(false);
-        }
-        if (showStoriesOverlay) {
-          setShowStoriesOverlay(false);
-        }
-        if (showProductOverlay) {
-          setShowProductOverlay(false);
-        }
-        if (showVisualDesignerOverlay) {
-          setShowVisualDesignerOverlay(false);
-        }
-        if (showIndonesiaOverlay) {
-          setShowIndonesiaOverlay(false);
-        }
+        if (showNoteOverlay) setShowNoteOverlay(false);
+        if (showCommunityOverlay) setShowCommunityOverlay(false);
+        if (showNewsOverlay) setShowNewsOverlay(false);
+        if (showStoriesOverlay) setShowStoriesOverlay(false);
+        if (showProductOverlay) setShowProductOverlay(false);
+        if (showVisualDesignerOverlay) setShowVisualDesignerOverlay(false);
+        if (showIndonesiaOverlay) setShowIndonesiaOverlay(false);
       }
     };
 
@@ -1827,27 +1280,17 @@ setIsLoadingEvents(false);
       clearInterval(textInterval);
       clearTimeout(loadingTimeout);
       document.removeEventListener('keydown', handleKeyDown);
-      if (progressAnimationRef.current) {
-        progressAnimationRef.current.kill();
-      }
-      if (plusSignRef.current) {
-        gsap.killTweensOf(plusSignRef.current);
-      }
-      if (backslashRef.current) {
-        gsap.killTweensOf(backslashRef.current);
-      }
-      if (leftCounterRef.current) {
-        gsap.killTweensOf(leftCounterRef.current);
-      }
+      if (progressAnimationRef.current) progressAnimationRef.current.kill();
+      if (plusSignRef.current) gsap.killTweensOf(plusSignRef.current);
+      if (backslashRef.current) gsap.killTweensOf(backslashRef.current);
+      if (leftCounterRef.current) gsap.killTweensOf(leftCounterRef.current);
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
   }, [isMobile, showMenuruFullPage, showPhotoFullPage, showUserDropdown, showLogoutModal, showMenuOverlay, showNotification, showUserProfileModal, showDeleteAccountModal, showCalendarModal, showNoteOverlay, showCommunityOverlay, showNewsOverlay, showStoriesOverlay, showProductOverlay, showVisualDesignerOverlay, showIndonesiaOverlay]);
 
-  // Animasi GSAP untuk tanda + di tombol Menuru
   useEffect(() => {
     if (plusSignRef.current && !showMenuruFullPage) {
       gsap.killTweensOf(plusSignRef.current);
-      
       gsap.to(plusSignRef.current, {
         scale: 1.1,
         duration: 1.5,
@@ -1858,11 +1301,9 @@ setIsLoadingEvents(false);
     }
   }, [showMenuruFullPage]);
 
-  // Animasi GSAP untuk tanda \ di halaman full page
   useEffect(() => {
     if (backslashRef.current && showMenuruFullPage) {
       gsap.killTweensOf(backslashRef.current);
-      
       gsap.to(backslashRef.current, {
         rotation: 360,
         duration: 8,
@@ -1876,71 +1317,50 @@ setIsLoadingEvents(false);
   const handleAcceptCookies = () => {
     localStorage.setItem('cookiesAccepted', 'true');
     setShowCookieNotification(false);
-    
     const date = new Date();
     date.setTime(date.getTime() + (30 * 24 * 60 * 60 * 1000));
     document.cookie = `cookiesAccepted=true; expires=${date.toUTCString()}; path=/`;
-    
     if (localStorage.getItem('themePreference')) {
-      const themePref = localStorage.getItem('themePreference');
-      document.cookie = `themePreference=${themePref}; expires=${date.toUTCString()}; path=/`;
+      document.cookie = `themePreference=${localStorage.getItem('themePreference')}; expires=${date.toUTCString()}; path=/`;
     }
   };
 
   // Fungsi untuk maju ke foto berikutnya
   const nextPhoto = () => {
-    setCurrentPhotoIndex((prev) => {
-      const nextIndex = (prev + 1) % progressPhotos.length;
-      return nextIndex;
-    });
+    setCurrentPhotoIndex((prev) => (prev + 1) % progressPhotos.length);
   };
 
   // Fungsi untuk mundur ke foto sebelumnya
   const prevPhoto = () => {
-    setCurrentPhotoIndex((prev) => {
-      const prevIndex = (prev - 1 + progressPhotos.length) % progressPhotos.length;
-      return prevIndex;
-    });
+    setCurrentPhotoIndex((prev) => (prev - 1 + progressPhotos.length) % progressPhotos.length);
   };
 
   // Start progress animation
   const startProgressAnimation = () => {
-    if (progressAnimationRef.current) {
-      progressAnimationRef.current.kill();
-    }
-
+    if (progressAnimationRef.current) progressAnimationRef.current.kill();
     const progressFills = document.querySelectorAll('.progress-fill');
     progressFills.forEach(fill => {
       (fill as HTMLElement).style.width = '0%';
     });
-
     const currentFill = document.querySelector(`.progress-fill[data-index="${currentPhotoIndex}"]`) as HTMLElement;
-    
     if (currentFill) {
       progressAnimationRef.current = gsap.to(currentFill, {
         width: '100%',
         duration: 15,
         ease: "linear",
         onComplete: () => {
-          if (isProgressActive) {
-            nextPhoto();
-          }
+          if (isProgressActive) nextPhoto();
         }
       });
     }
   };
 
-  // Mulai animasi progress ketika currentPhotoIndex berubah
   useEffect(() => {
-    if (isProgressActive) {
-      startProgressAnimation();
-    }
+    if (isProgressActive) startProgressAnimation();
   }, [currentPhotoIndex, isProgressActive]);
 
   // Handler untuk topic hover
-  const handleTopicHover = (topicId: number | null) => {
-    setHoveredTopic(topicId);
-  };
+  const handleTopicHover = (topicId: number | null) => setHoveredTopic(topicId);
 
   // Fungsi untuk toggle slider
   const toggleSlider = () => {
@@ -1954,44 +1374,23 @@ setIsLoadingEvents(false);
   };
 
   // Fungsi untuk toggle halaman full page MENURU
-  const toggleMenuruFullPage = () => {
-    setShowMenuruFullPage(!showMenuruFullPage);
-  };
-
-  // Handler untuk klik tombol MENURU
-  const handleMenuruClick = () => {
-    toggleMenuruFullPage();
-  };
-
-  // Fungsi untuk menutup halaman full page MENURU
-  const handleCloseMenuruFullPage = () => {
-    setShowMenuruFullPage(false);
-  };
+  const toggleMenuruFullPage = () => setShowMenuruFullPage(!showMenuruFullPage);
+  const handleMenuruClick = () => toggleMenuruFullPage();
+  const handleCloseMenuruFullPage = () => setShowMenuruFullPage(false);
 
   // Handler untuk membuka tampilan foto full page
-  const handleOpenPhotoFullPage = () => {
-    setShowPhotoFullPage(true);
-  };
-
-  // Handler untuk menutup tampilan foto full page
-  const handleClosePhotoFullPage = () => {
-    setShowPhotoFullPage(false);
-  };
-
-  // Handler untuk klik foto
+  const handleOpenPhotoFullPage = () => setShowPhotoFullPage(true);
+  const handleClosePhotoFullPage = () => setShowPhotoFullPage(false);
   const handlePhotoClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     handleOpenPhotoFullPage();
   };
 
-  // Handler untuk Sign In / User Button - DIPERBAIKI DENGAN WARNA CERAH
+  // Handler untuk Sign In / User Button
   const handleSignInClick = () => {
     if (user) {
       setShowUserProfileModal(true);
-      // Load notes ketika modal dibuka
-      if (user) {
-        loadUserNotes(user.uid);
-      }
+      if (user) loadUserNotes(user.uid);
     } else {
       router.push('/signin');
     }
@@ -2053,9 +1452,7 @@ setIsLoadingEvents(false);
   };
 
   // Handler untuk batal logout
-  const handleCancelLogout = () => {
-    setShowLogoutModal(false);
-  };
+  const handleCancelLogout = () => setShowLogoutModal(false);
 
   // Handler untuk mengirim komentar ke Firebase
   const handleSendMessage = async () => {
@@ -2063,13 +1460,11 @@ setIsLoadingEvents(false);
       alert("Komentar tidak boleh kosong");
       return;
     }
-    
     try {
       const userName = user ? userDisplayName : "Anonymous";
       const userId = user ? user.uid : null;
       const userEmail = user ? user.email : null;
       const userAvatar = userName.charAt(0).toUpperCase();
-      
       const newComment = {
         photoIndex: currentPhotoIndex,
         text: message.trim(),
@@ -2078,31 +1473,16 @@ setIsLoadingEvents(false);
         timestamp: serverTimestamp(),
         userAvatar: userAvatar
       };
-      
       console.log("Mengirim komentar:", newComment);
-      
       const docRef = await addDoc(collection(db, 'photoComments'), newComment);
       console.log("Komentar berhasil dikirim dengan ID:", docRef.id);
-      
       setMessage("");
-      
-      if (messageInputRef.current) {
-        messageInputRef.current.focus();
-      }
-      
+      if (messageInputRef.current) messageInputRef.current.focus();
     } catch (error: any) {
       console.error("Error detail:", error);
-      console.error("Error code:", error.code);
-      console.error("Error message:", error.message);
-      
       let errorMessage = "Gagal mengirim komentar. Silakan coba lagi.";
-      
-      if (error.code === 'permission-denied') {
-        errorMessage = "Anda tidak memiliki izin untuk mengirim komentar. Periksa Firebase Rules.";
-      } else if (error.code === 'unauthenticated') {
-        errorMessage = "Silakan login terlebih dahulu untuk mengirim komentar.";
-      }
-      
+      if (error.code === 'permission-denied') errorMessage = "Anda tidak memiliki izin untuk mengirim komentar. Periksa Firebase Rules.";
+      else if (error.code === 'unauthenticated') errorMessage = "Silakan login terlebih dahulu untuk mengirim komentar.";
       alert(errorMessage);
     }
   };
@@ -2118,27 +1498,20 @@ setIsLoadingEvents(false);
   // Handler untuk update profile
   const handleUpdateProfile = async () => {
     if (!user || !auth.currentUser) return;
-    
     try {
       setIsUpdating(true);
-      
       if (editName !== userDisplayName) {
-        await updateProfile(auth.currentUser, {
-          displayName: editName
-        });
+        await updateProfile(auth.currentUser, { displayName: editName });
         setUserDisplayName(editName);
       }
-      
       if (editEmail !== user.email && editEmail.trim() !== '') {
         await updateEmail(auth.currentUser, editEmail);
       }
-      
       const userStatsRef = doc(db, 'userStats', user.uid);
       await updateDoc(userStatsRef, {
         userName: editName,
         updatedAt: serverTimestamp()
       });
-      
       alert("Profil berhasil diperbarui!");
       setIsEditingProfile(false);
     } catch (error: any) {
@@ -2152,27 +1525,16 @@ setIsLoadingEvents(false);
   // Handler untuk hapus akun
   const handleDeleteAccount = async () => {
     if (!user || !auth.currentUser) return;
-    
     try {
-      // Hapus semua notes user
       const notesRef = collection(db, 'notes');
       const q = query(notesRef, where('userId', '==', user.uid));
       const querySnapshot = await getDocs(q);
-      
       const batch = writeBatch(db);
-      querySnapshot.forEach((doc) => {
-        batch.delete(doc.ref);
-      });
-      
-      // Hapus user stats
+      querySnapshot.forEach((doc) => batch.delete(doc.ref));
       const userStatsRef = doc(db, 'userStats', user.uid);
       batch.delete(userStatsRef);
-      
       await batch.commit();
-      
-      // Hapus user dari authentication
       await deleteUser(auth.currentUser);
-      
       alert("Akun berhasil dihapus!");
       setShowDeleteAccountModal(false);
       setShowUserProfileModal(false);
@@ -2185,18 +1547,15 @@ setIsLoadingEvents(false);
   // Handler untuk kirim feedback
   const handleSendFeedback = () => {
     const feedback = prompt("Masukkan feedback Anda:");
-    if (feedback && feedback.trim() !== '') {
-      alert("Terima kasih atas feedback Anda!");
-    }
+    if (feedback && feedback.trim() !== '') alert("Terima kasih atas feedback Anda!");
   };
 
-  // Handler untuk clear notification - DIPERBAIKI
+  // Handler untuk clear notification
   const handleClearNotification = () => {
     console.log("Clear all notifications");
-    // Implementasi clear notifications jika diperlukan
   };
 
-  // Handler untuk notification click - DIPERBAIKI
+  // Handler untuk notification click
   const handleNotificationClick = (notification: Notification) => {
     console.log("Notification clicked:", notification);
     router.push('/notifications');
@@ -2224,7 +1583,7 @@ setIsLoadingEvents(false);
       MozOsxFontSmoothing: 'grayscale'
     }}>
       
-      {/* GSAP Modern Loading Animation - ROTATING WORDS */}
+      {/* GSAP Modern Loading Animation */}
       <AnimatePresence>
         {showGsapLoading && (
           <motion.div
@@ -2276,7 +1635,7 @@ setIsLoadingEvents(false);
         )}
       </AnimatePresence>
 
-      {/* Animasi Notifikasi Baru - Framer Motion */}
+      {/* Animasi Notifikasi Baru */}
       <AnimatePresence>
         {showNotificationAnimation && (
           <motion.div
@@ -2315,7 +1674,7 @@ setIsLoadingEvents(false);
         )}
       </AnimatePresence>
 
-      {/* Stories Overlay - HANYA JUDUL (sesuai permintaan) */}
+      {/* Stories Overlay - HANYA JUDUL */}
       <AnimatePresence>
         {showStoriesOverlay && (
           <motion.div
@@ -2340,7 +1699,6 @@ setIsLoadingEvents(false);
               boxShadow: '0 10px 30px rgba(0,0,0,0.5)'
             }}
           >
-            {/* Header Stories Overlay */}
             <div style={{
               padding: isMobile ? '1.5rem' : '2rem',
               borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
@@ -2359,7 +1717,6 @@ setIsLoadingEvents(false);
               }}>
                 Stories
               </h2>
-              
               <motion.button
                 onClick={handleCloseStoriesOverlay}
                 style={{
@@ -2381,8 +1738,6 @@ setIsLoadingEvents(false);
                 ×
               </motion.button>
             </div>
-
-            {/* Konten Stories Overlay - HANYA JUDUL */}
             <div style={{
               padding: isMobile ? '3rem 1.5rem' : '4rem 3rem',
               overflowY: 'auto',
@@ -2404,7 +1759,6 @@ setIsLoadingEvents(false);
               }}>
                 Cerita
               </h3>
-              
               <p style={{
                 color: 'rgba(255, 255, 255, 0.6)',
                 fontSize: isMobile ? '1rem' : '1.2rem',
@@ -2415,7 +1769,6 @@ setIsLoadingEvents(false);
               }}>
                 "Setiap gambar memiliki cerita. Setiap cerita memiliki makna."
               </p>
-              
               <div style={{
                 marginTop: '3rem',
                 width: '60px',
@@ -2494,293 +1847,64 @@ setIsLoadingEvents(false);
               </motion.button>
             </div>
 
-            {/* Konten Community Overlay - Dengan Items 2 Sisi */}
+            {/* Konten Community Overlay - HANYA TEKS + PANAH DI SISI KIRI */}
             <div style={{
-              padding: isMobile ? '3rem 1.5rem' : '4rem 3rem',
+              padding: isMobile ? '2rem 1.5rem' : '3rem 3rem',
               overflowY: 'auto',
-              maxHeight: 'calc(80vh - 100px)',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center'
+              maxHeight: 'calc(80vh - 100px)'
             }}>
-              
-              {/* Judul Section */}
-              <h3 style={{
-                color: 'white',
-                fontSize: isMobile ? '2rem' : '3rem',
-                fontWeight: '300',
-                margin: '0 0 3rem 0',
-                fontFamily: 'Helvetica, Arial, sans-serif',
-                letterSpacing: '1px',
-                opacity: 0.9
-              }}>
-                Komunitas Pilihan
-              </h3>
-              
-              {/* Container 2 Sisi - Kiri dan Kanan */}
               <div style={{
                 display: 'flex',
-                justifyContent: 'space-between',
-                width: '100%',
-                maxWidth: '900px',
-                gap: '2rem',
-                position: 'relative'
+                flexDirection: 'column',
+                gap: '1.5rem'
               }}>
-                {/* Garis Tengah */}
-                <div style={{
-                  position: 'absolute',
-                  left: '50%',
-                  top: '10%',
-                  bottom: '10%',
-                  width: '1px',
-                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                  transform: 'translateX(-50%)'
-                }} />
-                
-                {/* Sisi Kiri - 3 Items */}
-                <div style={{
-                  flex: 1,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '2rem',
-                  paddingRight: '2rem'
-                }}>
-                  {leftCommunityItems.map((item, index) => (
-                    <motion.div
-                      key={`left-${item.id}`}
-                      initial={{ opacity: 0, x: -30 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.1 }}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '1.5rem',
-                        cursor: 'pointer',
-                        padding: '1rem',
-                        borderRadius: '15px',
-                        border: '1px solid rgba(255, 255, 255, 0.1)',
-                        backgroundColor: 'rgba(255, 255, 255, 0.02)',
-                        position: 'relative'
-                      }}
-                      whileHover={{
-                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                        borderColor: item.color,
-                        scale: 1.02
-                      }}
-                    >
-                      {/* Icon */}
-                      <div style={{
-                        width: '60px',
-                        height: '60px',
-                        borderRadius: '50%',
-                        backgroundColor: item.color + '20',
-                        border: `2px solid ${item.color}`,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '2rem'
-                      }}>
-                        {item.icon}
-                      </div>
-                      
-                      {/* Nama Komunitas */}
-                      <div style={{
-                        flex: 1,
-                        fontSize: isMobile ? '1.5rem' : '2rem',
-                        fontWeight: '300',
-                        color: 'white',
-                        fontFamily: 'Helvetica, Arial, sans-serif'
-                      }}>
-                        {item.name}
-                      </div>
-                      
-                      {/* North West Arrow SVG */}
-                      <svg
-                        width="30"
-                        height="30"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke={item.color}
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        style={{
-                          opacity: 0.7
-                        }}
-                      >
-                        <path d="M17 7L7 17" />
-                        <path d="M7 7h10v10" />
-                      </svg>
-                    </motion.div>
-                  ))}
-                </div>
-                
-                {/* Sisi Kanan - 3 Items */}
-                <div style={{
-                  flex: 1,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '2rem',
-                  paddingLeft: '2rem'
-                }}>
-                  {rightCommunityItems.map((item, index) => (
-                    <motion.div
-                      key={`right-${item.id}`}
-                      initial={{ opacity: 0, x: 30 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: (index + 4) * 0.1 }}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '1.5rem',
-                        cursor: 'pointer',
-                        padding: '1rem',
-                        borderRadius: '15px',
-                        border: '1px solid rgba(255, 255, 255, 0.1)',
-                        backgroundColor: 'rgba(255, 255, 255, 0.02)',
-                        position: 'relative'
-                      }}
-                      whileHover={{
-                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                        borderColor: item.color,
-                        scale: 1.02
-                      }}
-                    >
-                      {/* Icon */}
-                      <div style={{
-                        width: '60px',
-                        height: '60px',
-                        borderRadius: '50%',
-                        backgroundColor: item.color + '20',
-                        border: `2px solid ${item.color}`,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '2rem'
-                      }}>
-                        {item.icon}
-                      </div>
-                      
-                      {/* Nama Komunitas */}
-                      <div style={{
-                        flex: 1,
-                        fontSize: isMobile ? '1.5rem' : '2rem',
-                        fontWeight: '300',
-                        color: 'white',
-                        fontFamily: 'Helvetica, Arial, sans-serif'
-                      }}>
-                        {item.name}
-                      </div>
-                      
-                      {/* North West Arrow SVG */}
-                      <svg
-                        width="30"
-                        height="30"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke={item.color}
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        style={{
-                          opacity: 0.7
-                        }}
-                      >
-                        <path d="M17 7L7 17" />
-                        <path d="M7 7h10v10" />
-                      </svg>
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
-              
-              {/* Item Tengah - Coding (optional) */}
-              {centerCommunityItem && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.7 }}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '1.5rem',
-                    cursor: 'pointer',
-                    padding: '1rem 2rem',
-                    borderRadius: '15px',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                    backgroundColor: 'rgba(255, 255, 255, 0.02)',
-                    marginTop: '3rem',
-                    maxWidth: '400px',
-                    width: '100%'
-                  }}
-                  whileHover={{
-                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                    borderColor: centerCommunityItem.color,
-                    scale: 1.02
-                  }}
-                >
-                  {/* Icon */}
-                  <div style={{
-                    width: '50px',
-                    height: '50px',
-                    borderRadius: '50%',
-                    backgroundColor: centerCommunityItem.color + '20',
-                    border: `2px solid ${centerCommunityItem.color}`,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '1.5rem'
-                  }}>
-                    {centerCommunityItem.icon}
-                  </div>
-                  
-                  {/* Nama Komunitas */}
-                  <div style={{
-                    fontSize: isMobile ? '1.8rem' : '2.2rem',
-                    fontWeight: '300',
-                    color: 'white',
-                    fontFamily: 'Helvetica, Arial, sans-serif'
-                  }}>
-                    {centerCommunityItem.name}
-                  </div>
-                  
-                  {/* North West Arrow SVG */}
-                  <svg
-                    width="25"
-                    height="25"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke={centerCommunityItem.color}
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
+                {communityItems.map((item, index) => (
+                  <motion.div
+                    key={`community-${item.id}`}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.1 }}
                     style={{
-                      opacity: 0.7
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '1.5rem',
+                      cursor: 'pointer',
+                      padding: '0.5rem 0'
                     }}
+                    whileHover={{ x: 5 }}
                   >
-                    <path d="M17 7L7 17" />
-                    <path d="M7 7h10v10" />
-                  </svg>
-                </motion.div>
-              )}
-              
-              {/* Footer */}
-              <div style={{
-                marginTop: '3rem',
-                width: '60px',
-                height: '1px',
-                backgroundColor: 'rgba(255, 255, 255, 0.3)'
-              }} />
-              
-              <p style={{
-                color: 'rgba(255, 255, 255, 0.5)',
-                fontSize: '0.9rem',
-                marginTop: '2rem',
-                fontFamily: 'Helvetica, Arial, sans-serif'
-              }}>
-                {communityItems.length} Komunitas Aktif
-              </p>
+                    {/* North West Arrow SVG */}
+                    <svg
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="white"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      style={{
+                        opacity: 0.7,
+                        flexShrink: 0
+                      }}
+                    >
+                      <path d="M17 7L7 17" />
+                      <path d="M7 7h10v10" />
+                    </svg>
+                    
+                    {/* Teks Nama Komunitas - FONT STANDAR, TIDAK BOLD */}
+                    <span style={{
+                      color: 'white',
+                      fontSize: isMobile ? '1.5rem' : '2.2rem',
+                      fontWeight: '300',
+                      fontFamily: 'Helvetica, Arial, sans-serif',
+                      letterSpacing: '0.5px'
+                    }}>
+                      {item.name}
+                    </span>
+                  </motion.div>
+                ))}
+              </div>
             </div>
           </motion.div>
         )}
@@ -2811,7 +1935,6 @@ setIsLoadingEvents(false);
               boxShadow: '0 10px 30px rgba(0,0,0,0.5)'
             }}
           >
-            {/* Header News Overlay */}
             <div style={{
               padding: isMobile ? '1.5rem' : '2rem',
               borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
@@ -2830,7 +1953,6 @@ setIsLoadingEvents(false);
               }}>
                 News
               </h2>
-              
               <motion.button
                 onClick={handleCloseNewsOverlay}
                 style={{
@@ -2852,8 +1974,6 @@ setIsLoadingEvents(false);
                 ×
               </motion.button>
             </div>
-
-            {/* Konten News Overlay - SEDERHANA */}
             <div style={{
               padding: isMobile ? '3rem 1.5rem' : '4rem 3rem',
               overflowY: 'auto',
@@ -2875,7 +1995,6 @@ setIsLoadingEvents(false);
               }}>
                 Berita
               </h3>
-              
               <p style={{
                 color: 'rgba(255, 255, 255, 0.6)',
                 fontSize: isMobile ? '1rem' : '1.2rem',
@@ -2885,7 +2004,6 @@ setIsLoadingEvents(false);
               }}>
                 Update terbaru tentang pengembangan platform, fitur baru, dan acara mendatang.
               </p>
-              
               <div style={{
                 marginTop: '3rem',
                 width: '60px',
@@ -2921,7 +2039,6 @@ setIsLoadingEvents(false);
               fontFamily: 'Helvetica, Arial, sans-serif'
             }}
           >
-            {/* Background pattern */}
             <div style={{
               position: 'absolute',
               top: 0,
@@ -2937,7 +2054,6 @@ setIsLoadingEvents(false);
               zIndex: 1
             }} />
 
-            {/* Close button */}
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -2971,7 +2087,6 @@ setIsLoadingEvents(false);
               ×
             </motion.div>
 
-            {/* Content */}
             <div style={{
               position: 'relative',
               zIndex: 2,
@@ -2980,14 +2095,11 @@ setIsLoadingEvents(false);
               margin: '0 auto',
               width: '100%'
             }}>
-              {/* Header */}
               <motion.div
                 initial={{ opacity: 0, y: 50 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2, duration: 0.8 }}
-                style={{
-                  marginBottom: '4rem'
-                }}
+                style={{ marginBottom: '4rem' }}
               >
                 <span style={{
                   color: 'rgba(255,255,255,0.5)',
@@ -2999,7 +2111,6 @@ setIsLoadingEvents(false);
                 }}>
                   — 01
                 </span>
-                
                 <h1 style={{
                   fontSize: isMobile ? '4rem' : '7rem',
                   fontWeight: '300',
@@ -3009,7 +2120,6 @@ setIsLoadingEvents(false);
                 }}>
                   SHOP
                 </h1>
-                
                 <div style={{
                   width: '100px',
                   height: '2px',
@@ -3018,14 +2128,12 @@ setIsLoadingEvents(false);
                 }} />
               </motion.div>
 
-              {/* Grid Content */}
               <div style={{
                 display: 'grid',
                 gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
                 gap: '4rem',
                 marginBottom: '4rem'
               }}>
-                {/* Left Column */}
                 <motion.div
                   initial={{ opacity: 0, x: -30 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -3039,7 +2147,6 @@ setIsLoadingEvents(false);
                   }}>
                     Digital Products & Merchandise
                   </h2>
-                  
                   <p style={{
                     fontSize: '1.2rem',
                     lineHeight: 1.8,
@@ -3049,7 +2156,6 @@ setIsLoadingEvents(false);
                     Explore our collection of digital products, exclusive merchandise, 
                     and creative tools designed to enhance your creative journey.
                   </p>
-                  
                   <div style={{
                     display: 'flex',
                     flexDirection: 'column',
@@ -3080,7 +2186,6 @@ setIsLoadingEvents(false);
                   </div>
                 </motion.div>
 
-                {/* Right Column */}
                 <motion.div
                   initial={{ opacity: 0, x: 30 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -3099,7 +2204,6 @@ setIsLoadingEvents(false);
                     }}>
                       Featured Products
                     </h3>
-                    
                     {[1, 2, 3].map((item) => (
                       <motion.div
                         key={item}
@@ -3144,7 +2248,6 @@ setIsLoadingEvents(false);
                 </motion.div>
               </div>
 
-              {/* Footer */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -3176,7 +2279,7 @@ setIsLoadingEvents(false);
         )}
       </AnimatePresence>
 
-      {/* VISUAL DESIGNER OVERLAY - Tentang Tampilan Website */}
+      {/* VISUAL DESIGNER OVERLAY */}
       <AnimatePresence>
         {showVisualDesignerOverlay && (
           <motion.div
@@ -3200,16 +2303,9 @@ setIsLoadingEvents(false);
               fontFamily: 'Helvetica, Arial, sans-serif'
             }}
           >
-            {/* Animated background lines */}
             <motion.div
-              animate={{ 
-                x: ['-100%', '100%'],
-              }}
-              transition={{ 
-                duration: 20,
-                repeat: Infinity,
-                ease: "linear"
-              }}
+              animate={{ x: ['-100%', '100%'] }}
+              transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
               style={{
                 position: 'absolute',
                 top: 0,
@@ -3222,7 +2318,6 @@ setIsLoadingEvents(false);
               }}
             />
 
-            {/* Close button with different animation */}
             <motion.div
               initial={{ opacity: 0, rotate: -180 }}
               animate={{ opacity: 1, rotate: 0 }}
@@ -3255,7 +2350,6 @@ setIsLoadingEvents(false);
               +
             </motion.div>
 
-            {/* Content */}
             <div style={{
               position: 'relative',
               zIndex: 2,
@@ -3264,7 +2358,6 @@ setIsLoadingEvents(false);
               margin: '0 auto',
               width: '100%'
             }}>
-              {/* Header with split text */}
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -3288,7 +2381,6 @@ setIsLoadingEvents(false);
                   }}>
                     — 02
                   </span>
-                  
                   <h1 style={{
                     fontSize: isMobile ? '4rem' : '7rem',
                     fontWeight: '300',
@@ -3298,7 +2390,6 @@ setIsLoadingEvents(false);
                   }}>
                     VISUAL
                   </h1>
-                  
                   <h1 style={{
                     fontSize: isMobile ? '4rem' : '7rem',
                     fontWeight: '300',
@@ -3310,7 +2401,6 @@ setIsLoadingEvents(false);
                     DESIGNER
                   </h1>
                 </div>
-                
                 <div style={{
                   fontSize: '1.2rem',
                   color: 'rgba(255,255,255,0.6)',
@@ -3321,7 +2411,6 @@ setIsLoadingEvents(false);
                 </div>
               </motion.div>
 
-              {/* Stats Grid */}
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -3360,7 +2449,6 @@ setIsLoadingEvents(false);
                 ))}
               </motion.div>
 
-              {/* Design Philosophy */}
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -3380,7 +2468,6 @@ setIsLoadingEvents(false);
                   }}>
                     Design Philosophy
                   </h2>
-                  
                   <p style={{
                     fontSize: '1.2rem',
                     lineHeight: 1.8,
@@ -3390,7 +2477,6 @@ setIsLoadingEvents(false);
                     Every pixel tells a story. Our approach combines minimalist aesthetics 
                     with functional design, creating websites that are both beautiful and intuitive.
                   </p>
-                  
                   <div style={{
                     display: 'flex',
                     gap: '1rem',
@@ -3408,7 +2494,6 @@ setIsLoadingEvents(false);
                     ))}
                   </div>
                 </div>
-                
                 <div style={{
                   display: 'grid',
                   gridTemplateColumns: 'repeat(2, 1fr)',
@@ -3448,7 +2533,7 @@ setIsLoadingEvents(false);
         )}
       </AnimatePresence>
 
-      {/* INDONESIA OVERLAY - Tentang Posisi */}
+      {/* INDONESIA OVERLAY */}
       <AnimatePresence>
         {showIndonesiaOverlay && (
           <motion.div
@@ -3472,7 +2557,6 @@ setIsLoadingEvents(false);
               fontFamily: 'Helvetica, Arial, sans-serif'
             }}
           >
-            {/* Map pattern background */}
             <div style={{
               position: 'absolute',
               top: 0,
@@ -3488,7 +2572,6 @@ setIsLoadingEvents(false);
               zIndex: 1
             }} />
 
-            {/* Close button with slide animation */}
             <motion.div
               initial={{ y: -100, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
@@ -3521,7 +2604,6 @@ setIsLoadingEvents(false);
               ←
             </motion.div>
 
-            {/* Content */}
             <div style={{
               position: 'relative',
               zIndex: 2,
@@ -3530,7 +2612,6 @@ setIsLoadingEvents(false);
               margin: '0 auto',
               width: '100%'
             }}>
-              {/* Header with location */}
               <motion.div
                 initial={{ opacity: 0, x: -50 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -3554,7 +2635,6 @@ setIsLoadingEvents(false);
                   }}>
                     — 03
                   </span>
-                  
                   <h1 style={{
                     fontSize: isMobile ? '4rem' : '7rem',
                     fontWeight: '300',
@@ -3565,16 +2645,9 @@ setIsLoadingEvents(false);
                     INDONESIA
                   </h1>
                 </div>
-                
                 <motion.div
-                  animate={{ 
-                    scale: [1, 1.1, 1],
-                  }}
-                  transition={{ 
-                    duration: 2,
-                    repeat: Infinity,
-                    ease: "easeInOut"
-                  }}
+                  animate={{ scale: [1, 1.1, 1] }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                   style={{
                     width: '12px',
                     height: '12px',
@@ -3585,14 +2658,12 @@ setIsLoadingEvents(false);
                 />
               </motion.div>
 
-              {/* Location Info Grid */}
               <div style={{
                 display: 'grid',
                 gridTemplateColumns: isMobile ? '1fr' : '2fr 1fr',
                 gap: '4rem',
                 marginBottom: '4rem'
               }}>
-                {/* Left Column - Map visualization */}
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -3614,8 +2685,6 @@ setIsLoadingEvents(false);
                       <span style={{ fontSize: '1.2rem', fontWeight: '300' }}>Location Overview</span>
                       <span style={{ color: '#00FF00', fontSize: '0.9rem' }}>● Active</span>
                     </div>
-                    
-                    {/* Simple map representation */}
                     <div style={{
                       position: 'relative',
                       height: '200px',
@@ -3624,7 +2693,6 @@ setIsLoadingEvents(false);
                       overflow: 'hidden',
                       marginBottom: '1.5rem'
                     }}>
-                      {/* Grid lines */}
                       <div style={{
                         position: 'absolute',
                         top: 0,
@@ -3637,8 +2705,6 @@ setIsLoadingEvents(false);
                         `,
                         backgroundSize: '50px 50px'
                       }} />
-                      
-                      {/* Indonesia dot */}
                       <motion.div
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
@@ -3671,7 +2737,6 @@ setIsLoadingEvents(false);
                         />
                       </motion.div>
                     </div>
-                    
                     <div style={{
                       display: 'flex',
                       justifyContent: 'space-between',
@@ -3683,7 +2748,6 @@ setIsLoadingEvents(false);
                     </div>
                   </div>
                   
-                  {/* Timezone info */}
                   <div style={{
                     display: 'grid',
                     gridTemplateColumns: '1fr 1fr',
@@ -3718,7 +2782,6 @@ setIsLoadingEvents(false);
                   </div>
                 </motion.div>
 
-                {/* Right Column - About */}
                 <motion.div
                   initial={{ opacity: 0, x: 30 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -3731,7 +2794,6 @@ setIsLoadingEvents(false);
                   }}>
                     Based in Jakarta
                   </h2>
-                  
                   <p style={{
                     fontSize: '1.2rem',
                     lineHeight: 1.8,
@@ -3742,7 +2804,6 @@ setIsLoadingEvents(false);
                     we bring a unique perspective shaped by Indonesia's rich culture 
                     and rapid digital transformation.
                   </p>
-                  
                   <div style={{
                     display: 'flex',
                     flexDirection: 'column',
@@ -3773,7 +2834,6 @@ setIsLoadingEvents(false);
                 </motion.div>
               </div>
 
-              {/* Footer */}
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -3799,7 +2859,7 @@ setIsLoadingEvents(false);
         )}
       </AnimatePresence>
 
-      {/* Note Overlay - Halaman Note dari Kiri ke Kanan */}
+      {/* Note Overlay */}
       <AnimatePresence>
         {showNoteOverlay && (
           <motion.div
@@ -3822,7 +2882,6 @@ setIsLoadingEvents(false);
               borderRight: '1px solid rgba(255, 255, 255, 0.2)'
             }}
           >
-            {/* Header Note Overlay */}
             <div style={{
               padding: isMobile ? '1.5rem' : '2rem',
               borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
@@ -3841,7 +2900,6 @@ setIsLoadingEvents(false);
               }}>
                 Note Topics
               </h2>
-              
               <motion.button
                 onClick={handleCloseNoteOverlay}
                 style={{
@@ -3864,7 +2922,6 @@ setIsLoadingEvents(false);
               </motion.button>
             </div>
 
-            {/* Konten Note Overlay - Daftar Topik Note (Bayangan/Placeholder) */}
             <div style={{
               flex: 1,
               overflowY: 'auto',
@@ -3873,7 +2930,6 @@ setIsLoadingEvents(false);
               flexDirection: 'column',
               gap: '2rem'
             }}>
-              {/* Catatan Pribadi Section */}
               <div>
                 <h3 style={{
                   color: 'white',
@@ -3887,7 +2943,6 @@ setIsLoadingEvents(false);
                 }}>
                   Catatan Pribadi
                 </h3>
-                
                 <div style={{
                   display: 'grid',
                   gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
@@ -3995,7 +3050,6 @@ setIsLoadingEvents(false);
                 </div>
               </div>
 
-              {/* Catatan Kolaborasi Section */}
               <div>
                 <h3 style={{
                   color: 'white',
@@ -4009,7 +3063,6 @@ setIsLoadingEvents(false);
                 }}>
                   Catatan Kolaborasi
                 </h3>
-                
                 <div style={{
                   display: 'grid',
                   gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
@@ -4115,7 +3168,6 @@ setIsLoadingEvents(false);
                 </div>
               </div>
 
-              {/* Catatan Arsip Section */}
               <div>
                 <h3 style={{
                   color: 'white',
@@ -4129,7 +3181,6 @@ setIsLoadingEvents(false);
                 }}>
                   Arsip
                 </h3>
-                
                 <div style={{
                   display: 'flex',
                   flexDirection: 'column',
@@ -4179,7 +3230,6 @@ setIsLoadingEvents(false);
               </div>
             </div>
 
-            {/* Footer Note Overlay */}
             <div style={{
               padding: '1.5rem 2rem',
               borderTop: '1px solid rgba(255, 255, 255, 0.1)',
@@ -4236,7 +3286,6 @@ setIsLoadingEvents(false);
                 border: '1px solid rgba(255, 255, 255, 0.2)'
               }}
             >
-              {/* Header Modal */}
               <div style={{
                 padding: isMobile ? '1.5rem' : '2rem',
                 borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
@@ -4267,7 +3316,6 @@ setIsLoadingEvents(false);
                     {calendarEvents.length} Events
                   </div>
                 </div>
-                
                 <motion.button
                   onClick={() => {
                     setShowCalendarModal(false);
@@ -4293,7 +3341,6 @@ setIsLoadingEvents(false);
                 </motion.button>
               </div>
 
-              {/* Konten Kalender */}
               <div style={{
                 flex: 1,
                 overflowY: 'auto',
@@ -4302,7 +3349,6 @@ setIsLoadingEvents(false);
                 flexDirection: 'column',
                 gap: '2rem'
               }}>
-                {/* Kontrol Tahun & Bulan */}
                 <div style={{
                   display: 'flex',
                   justifyContent: 'space-between',
@@ -4310,12 +3356,7 @@ setIsLoadingEvents(false);
                   flexWrap: 'wrap',
                   gap: '1rem'
                 }}>
-                  {/* Navigasi Bulan */}
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '1rem'
-                  }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                     <motion.button
                       onClick={() => navigateMonth('prev')}
                       style={{
@@ -4336,7 +3377,6 @@ setIsLoadingEvents(false);
                         <path d="M15 18l-6-6 6-6"/>
                       </svg>
                     </motion.button>
-                    
                     <div style={{
                       color: 'white',
                       fontSize: isMobile ? '1.5rem' : '2rem',
@@ -4347,7 +3387,6 @@ setIsLoadingEvents(false);
                     }}>
                       {getMonthName(currentMonth)} {currentYear}
                     </div>
-                    
                     <motion.button
                       onClick={() => navigateMonth('next')}
                       style={{
@@ -4370,13 +3409,7 @@ setIsLoadingEvents(false);
                     </motion.button>
                   </div>
 
-                  {/* Pilih Tahun */}
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    flexWrap: 'wrap'
-                  }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
                     {[2024, 2025, 2026, 2027, 2028].map(year => (
                       <motion.button
                         key={year}
@@ -4399,16 +3432,8 @@ setIsLoadingEvents(false);
                     ))}
                   </div>
 
-                  {/* Pilih Bulan */}
-                  <div style={{
-                    display: 'flex',
-                    gap: '0.5rem',
-                    flexWrap: 'wrap'
-                  }}>
-                    {[
-                      'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
-                      'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'
-                    ].map((month, index) => (
+                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                    {['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'].map((month, index) => (
                       <motion.button
                         key={month}
                         onClick={() => handleMonthSelect(index)}
@@ -4431,13 +3456,7 @@ setIsLoadingEvents(false);
                   </div>
                 </div>
 
-                {/* Grid Kalender */}
-                <div style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '1rem'
-                }}>
-                  {/* Header Hari */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                   <div style={{
                     display: 'grid',
                     gridTemplateColumns: 'repeat(7, 1fr)',
@@ -4460,19 +3479,14 @@ setIsLoadingEvents(false);
                     ))}
                   </div>
 
-                  {/* Grid Tanggal */}
                   <div style={{
                     display: 'grid',
                     gridTemplateColumns: 'repeat(7, 1fr)',
                     gap: '0.5rem'
                   }}>
                     {generateCalendar().map((day, index) => {
-                      if (!day) {
-                        return <div key={`empty-${index}`} style={{ height: '100px' }} />;
-                      }
-
+                      if (!day) return <div key={`empty-${index}`} style={{ height: '100px' }} />;
                       const hasEvents = day.events && day.events.length > 0;
-                      
                       return (
                         <motion.div
                           key={`day-${day.date}`}
@@ -4495,7 +3509,6 @@ setIsLoadingEvents(false);
                             borderColor: 'rgba(255, 255, 255, 0.4)'
                           }}
                         >
-                          {/* Tanggal */}
                           <div style={{
                             color: day.isToday ? '#3B82F6' : 'white',
                             fontSize: isMobile ? '0.9rem' : '1rem',
@@ -4515,8 +3528,6 @@ setIsLoadingEvents(false);
                               }} />
                             )}
                           </div>
-
-                          {/* Event Indicators */}
                           {hasEvents && (
                             <div style={{
                               display: 'flex',
@@ -4584,7 +3595,6 @@ setIsLoadingEvents(false);
                   </div>
                 </div>
 
-                {/* Detail Event untuk Tanggal Terpilih */}
                 {selectedDate && (
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -4634,9 +3644,7 @@ setIsLoadingEvents(false);
                     </div>
 
                     {(() => {
-                      if (isLoadingEvents) {
-                        return null; // Loading sudah ditampilkan di atas
-                      }
+                      if (isLoadingEvents) return null;
                       const eventsForSelectedDate = calendarEvents.filter(event =>
                         event.date.getDate() === selectedDate.getDate() &&
                         event.date.getMonth() === selectedDate.getMonth() &&
@@ -4658,11 +3666,7 @@ setIsLoadingEvents(false);
                         );
                       }
                       return (
-                        <div style={{
-                          display: 'flex',
-                          flexDirection: 'column',
-                          gap: '1rem'
-                        }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                           {eventsForSelectedDate.map(event => (
                             <motion.div
                               key={event.id}
@@ -4678,7 +3682,6 @@ setIsLoadingEvents(false);
                                 alignItems: 'flex-start'
                               }}
                             >
-                              {/* Warna Label */}
                               <div style={{
                                 width: '4px',
                                 height: '100%',
@@ -4686,8 +3689,6 @@ setIsLoadingEvents(false);
                                 borderRadius: '2px',
                                 flexShrink: 0
                               }} />
-
-                              {/* Konten Event */}
                               <div style={{ flex: 1 }}>
                                 <div style={{
                                   display: 'flex',
@@ -4726,7 +3727,6 @@ setIsLoadingEvents(false);
                                       {event.label}
                                     </div>
                                   </div>
-                                  
                                   <div style={{
                                     color: 'rgba(255, 255, 255, 0.6)',
                                     fontSize: '0.8rem',
@@ -4741,7 +3741,6 @@ setIsLoadingEvents(false);
                                     {event.date.getHours().toString().padStart(2, '0')}:{event.date.getMinutes().toString().padStart(2, '0')}
                                   </div>
                                 </div>
-
                                 <p style={{
                                   color: 'rgba(255, 255, 255, 0.8)',
                                   fontSize: '0.9rem',
@@ -4751,7 +3750,6 @@ setIsLoadingEvents(false);
                                 }}>
                                   {event.description}
                                 </p>
-
                                 <div style={{
                                   display: 'flex',
                                   justifyContent: 'space-between',
@@ -4807,7 +3805,6 @@ setIsLoadingEvents(false);
                   </motion.div>
                 )}
 
-                {/* Footer Modal */}
                 <div style={{
                   paddingTop: '1.5rem',
                   borderTop: '1px solid rgba(255, 255, 255, 0.2)',
@@ -4827,7 +3824,7 @@ setIsLoadingEvents(false);
         )}
       </AnimatePresence>
 
-      {/* Modal Profil User - DIPERBAIKI */}
+      {/* Modal Profil User */}
       <AnimatePresence>
         {showUserProfileModal && user && (
           <motion.div
@@ -4870,7 +3867,6 @@ setIsLoadingEvents(false);
               }}
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Sidebar Tabs di Kiri - TRANSPARAN */}
               <div style={{
                 width: '300px',
                 backgroundColor: 'transparent',
@@ -4879,10 +3875,7 @@ setIsLoadingEvents(false);
                 padding: '2rem 0',
                 flexShrink: 0
               }}>
-                <div style={{
-                  padding: '0 2rem',
-                  marginBottom: '3rem'
-                }}>
+                <div style={{ padding: '0 2rem', marginBottom: '3rem' }}>
                   <h3 style={{
                     color: 'white',
                     fontSize: '2.5rem',
@@ -4904,19 +3897,13 @@ setIsLoadingEvents(false);
                   </p>
                 </div>
 
-                <div style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '0.5rem'
-                }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                   {['notes', 'settings', 'help', 'feedback'].map((tab) => (
                     <motion.button
                       key={tab}
                       onClick={() => {
                         setActiveTab(tab as any);
-                        if (tab === 'notes' && user) {
-                          loadUserNotes(user.uid);
-                        }
+                        if (tab === 'notes' && user) loadUserNotes(user.uid);
                       }}
                       style={{
                         width: '100%',
@@ -4940,8 +3927,7 @@ setIsLoadingEvents(false);
                       <span>
                         {tab === 'notes' ? 'Notes' :
                          tab === 'settings' ? 'Settings' :
-                         tab === 'help' ? 'Help' :
-                         'Feedback'}
+                         tab === 'help' ? 'Help' : 'Feedback'}
                       </span>
                       {activeTab === tab && (
                         <motion.div
@@ -4955,14 +3941,7 @@ setIsLoadingEvents(false);
                             justifyContent: 'center'
                           }}
                         >
-                          <svg
-                            width="20"
-                            height="20"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="white"
-                            strokeWidth="2"
-                          >
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
                             <path d="M6 18L18 6"/>
                             <path d="M8 6h10v10"/>
                           </svg>
@@ -4972,10 +3951,7 @@ setIsLoadingEvents(false);
                   ))}
                 </div>
 
-                <div style={{
-                  marginTop: 'auto',
-                  padding: '2rem'
-                }}>
+                <div style={{ marginTop: 'auto', padding: '2rem' }}>
                   <motion.button
                     onClick={handleLogoutClick}
                     style={{
@@ -5006,19 +3982,13 @@ setIsLoadingEvents(false);
                 </div>
               </div>
 
-              {/* Content Area di Kanan - TRANSPARAN */}
               <div style={{
                 flex: 1,
                 padding: '3rem',
                 overflowY: 'auto',
                 backgroundColor: 'transparent'
               }}>
-                {/* Close Button */}
-                <div style={{
-                  display: 'flex',
-                  justifyContent: 'flex-end',
-                  marginBottom: '2rem'
-                }}>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '2rem' }}>
                   <motion.button
                     onClick={() => setShowUserProfileModal(false)}
                     style={{
@@ -5040,7 +4010,6 @@ setIsLoadingEvents(false);
                   </motion.button>
                 </div>
 
-                {/* Notes Tab */}
                 {activeTab === 'notes' && (
                   <div>
                     <div style={{
@@ -5059,11 +4028,7 @@ setIsLoadingEvents(false);
                       }}>
                         Notes
                       </h4>
-                      <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '1rem'
-                      }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                         <motion.button
                           onClick={() => router.push('/notes')}
                           style={{
@@ -5087,10 +4052,7 @@ setIsLoadingEvents(false);
                             <path d="M7 17l9.2-9.2M17 17V7H7"/>
                           </svg>
                         </motion.button>
-                        <div style={{
-                          color: 'rgba(255, 255, 255, 0.5)',
-                          fontSize: '0.9rem'
-                        }}>
+                        <div style={{ color: 'rgba(255, 255, 255, 0.5)', fontSize: '0.9rem' }}>
                           Total: {totalNotesCount}
                         </div>
                       </div>
@@ -5156,80 +4118,47 @@ setIsLoadingEvents(false);
                         </motion.button>
                       </div>
                     ) : (
-                      <div style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '4rem'
-                      }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4rem' }}>
                         {Array.isArray(userNotes) && userNotes.map((note) => {
                           if (!note || !note.id) return null;
-                          
                           const getVideoEmbedUrl = (link: string | undefined) => {
                             if (!link || typeof link !== 'string' || link.trim() === '') return null;
-                            
                             try {
                               const url = new URL(link);
-                              
                               if (url.hostname.includes('youtube.com') || url.hostname.includes('youtu.be')) {
                                 const videoId = url.searchParams.get('v') || url.pathname.split('/').pop();
-                                if (videoId) {
-                                  return `https://www.youtube.com/embed/${videoId}?autoplay=0&rel=0&showinfo=0`;
-                                }
+                                if (videoId) return `https://www.youtube.com/embed/${videoId}?autoplay=0&rel=0&showinfo=0`;
                               }
-                              
                               if (url.hostname.includes('vimeo.com')) {
                                 const videoId = url.pathname.split('/').pop();
-                                if (videoId) {
-                                  return `https://player.vimeo.com/video/${videoId}?autoplay=0&title=0&byline=0&portrait=0`;
-                                }
+                                if (videoId) return `https://player.vimeo.com/video/${videoId}?autoplay=0&title=0&byline=0&portrait=0`;
                               }
-                              
-                              if (link.match(/\.(mp4|webm|ogg|mov|avi|wmv|flv|mkv)$/i)) {
-                                return link;
-                              }
-                              
+                              if (link.match(/\.(mp4|webm|ogg|mov|avi|wmv|flv|mkv)$/i)) return link;
                               return null;
-                            } catch {
-                              return null;
-                            }
+                            } catch { return null; }
                           };
-
                           const getVideoThumbnail = (link: string | undefined) => {
                             if (!link || typeof link !== 'string' || link.trim() === '') return null;
-                            
                             try {
                               const url = new URL(link);
-                              
                               if (url.hostname.includes('youtube.com') || url.hostname.includes('youtu.be')) {
                                 const videoId = url.searchParams.get('v') || url.pathname.split('/').pop();
-                                if (videoId) {
-                                  return `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
-                                }
+                                if (videoId) return `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
                               }
-                              
                               return null;
-                            } catch {
-                              return null;
-                            }
+                            } catch { return null; }
                           };
-
                           const videoEmbedUrl = note.link ? getVideoEmbedUrl(note.link) : null;
                           const videoThumbnail = note.link ? getVideoThumbnail(note.link) : null;
                           const hasValidCategory = note.category && typeof note.category === 'string' && note.category.trim() !== '';
                           const hasValidContent = note.content && typeof note.content === 'string' && note.content.trim() !== '';
                           const hasValidLink = note.link && typeof note.link === 'string' && note.link.trim() !== '';
-
                           return (
                             <motion.div
                               key={note.id}
                               initial={{ opacity: 0, y: 10 }}
                               animate={{ opacity: 1, y: 0 }}
-                              style={{
-                                cursor: 'pointer',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                gap: '1rem'
-                              }}
+                              style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: '1rem' }}
                               onClick={() => router.push('/notes')}
                             >
                               {hasValidCategory && (
@@ -5244,7 +4173,6 @@ setIsLoadingEvents(false);
                                   {note.category.trim()}
                                 </div>
                               )}
-
                               <div style={{
                                 fontSize: '2.5rem',
                                 fontFamily: 'Helvetica, Arial, sans-serif',
@@ -5254,7 +4182,6 @@ setIsLoadingEvents(false);
                               }}>
                                 {note.title || 'Untitled Note'}
                               </div>
-
                               {hasValidContent && (
                                 <div style={{
                                   fontSize: '1.3rem',
@@ -5267,12 +4194,8 @@ setIsLoadingEvents(false);
                                   {note.content}
                                 </div>
                               )}
-
                               {hasValidLink && videoEmbedUrl && (
-                                <div style={{
-                                  margin: '1.5rem 0',
-                                  position: 'relative'
-                                }}>
+                                <div style={{ margin: '1.5rem 0', position: 'relative' }}>
                                   {videoEmbedUrl.includes('youtube.com/embed') || videoEmbedUrl.includes('vimeo.com') ? (
                                     <div style={{
                                       position: 'relative',
@@ -5351,7 +4274,6 @@ setIsLoadingEvents(false);
                                   )}
                                 </div>
                               )}
-
                               <div style={{
                                 display: 'flex',
                                 justifyContent: 'space-between',
@@ -5365,7 +4287,6 @@ setIsLoadingEvents(false);
                                 }}>
                                   {note.updatedAt ? calculateTimeAgo(note.updatedAt) : 'Recently'}
                                 </span>
-                                
                                 {hasValidLink && (
                                   <a
                                     href={note.link}
@@ -5392,7 +4313,6 @@ setIsLoadingEvents(false);
                             </motion.div>
                           );
                         })}
-                        
                         {Array.isArray(userNotes) && userNotes.length > 0 && (
                           <motion.div
                             onClick={() => router.push('/notes')}
@@ -5444,7 +4364,6 @@ setIsLoadingEvents(false);
                   </div>
                 )}
 
-                {/* Settings Tab */}
                 {activeTab === 'settings' && (
                   <div>
                     <h4 style={{
@@ -5459,12 +4378,7 @@ setIsLoadingEvents(false);
                     </h4>
 
                     {isEditingProfile ? (
-                      <div style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '2.5rem',
-                        maxWidth: '600px'
-                      }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem', maxWidth: '600px' }}>
                         <div>
                           <label style={{
                             color: 'rgba(255, 255, 255, 0.8)',
@@ -5493,7 +4407,6 @@ setIsLoadingEvents(false);
                             }}
                           />
                         </div>
-
                         <div>
                           <label style={{
                             color: 'rgba(255, 255, 255, 0.8)',
@@ -5522,7 +4435,6 @@ setIsLoadingEvents(false);
                             }}
                           />
                         </div>
-
                         <div style={{
                           display: 'flex',
                           gap: '1.5rem',
@@ -5568,12 +4480,7 @@ setIsLoadingEvents(false);
                         </div>
                       </div>
                     ) : (
-                      <div style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '2.5rem',
-                        maxWidth: '700px'
-                      }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem', maxWidth: '700px' }}>
                         <motion.div
                           style={{
                             padding: '2rem',
@@ -5700,9 +4607,7 @@ setIsLoadingEvents(false);
                           </div>
                         </div>
 
-                        <div style={{
-                          marginTop: '1.5rem'
-                        }}>
+                        <div style={{ marginTop: '1.5rem' }}>
                           <motion.button
                             onClick={() => setShowDeleteAccountModal(true)}
                             style={{
@@ -5735,7 +4640,6 @@ setIsLoadingEvents(false);
                   </div>
                 )}
 
-                {/* Help Tab */}
                 {activeTab === 'help' && (
                   <div>
                     <h4 style={{
@@ -5748,21 +4652,8 @@ setIsLoadingEvents(false);
                     }}>
                       Help
                     </h4>
-
-                    <div style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '2.5rem',
-                      maxWidth: '800px'
-                    }}>
-                      <div
-                        style={{
-                          padding: '2.5rem',
-                          backgroundColor: 'transparent',
-                          borderRadius: '0',
-                          border: 'none'
-                        }}
-                      >
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem', maxWidth: '800px' }}>
+                      <div style={{ padding: '2.5rem', backgroundColor: 'transparent', borderRadius: '0', border: 'none' }}>
                         <h5 style={{
                           color: 'white',
                           fontSize: '1.5rem',
@@ -5782,15 +4673,7 @@ setIsLoadingEvents(false);
                           Welcome to MENURU. This platform helps you organize your creative journey. Start by creating notes, exploring features, and customizing your profile.
                         </p>
                       </div>
-
-                      <div
-                        style={{
-                          padding: '2.5rem',
-                          backgroundColor: 'transparent',
-                          borderRadius: '0',
-                          border: 'none'
-                        }}
-                      >
+                      <div style={{ padding: '2.5rem', backgroundColor: 'transparent', borderRadius: '0', border: 'none' }}>
                         <h5 style={{
                           color: 'white',
                           fontSize: '1.5rem',
@@ -5814,7 +4697,6 @@ setIsLoadingEvents(false);
                           • Notifications: Stay updated
                         </p>
                       </div>
-
                       <motion.button
                         onClick={() => router.push('/docs')}
                         style={{
@@ -5844,7 +4726,6 @@ setIsLoadingEvents(false);
                   </div>
                 )}
 
-                {/* Feedback Tab */}
                 {activeTab === 'feedback' && (
                   <div>
                     <h4 style={{
@@ -5857,21 +4738,8 @@ setIsLoadingEvents(false);
                     }}>
                       Feedback
                     </h4>
-
-                    <div style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '2.5rem',
-                      maxWidth: '800px'
-                    }}>
-                      <div
-                        style={{
-                          padding: '2.5rem',
-                          backgroundColor: 'transparent',
-                          borderRadius: '0',
-                          border: 'none'
-                        }}
-                      >
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem', maxWidth: '800px' }}>
+                      <div style={{ padding: '2.5rem', backgroundColor: 'transparent', borderRadius: '0', border: 'none' }}>
                         <h5 style={{
                           color: 'white',
                           fontSize: '1.5rem',
@@ -5891,7 +4759,6 @@ setIsLoadingEvents(false);
                           We value your feedback to improve MENURU. Share your suggestions, report issues, or tell us what features you'd like to see in future updates.
                         </p>
                       </div>
-
                       <motion.button
                         onClick={handleSendFeedback}
                         style={{
@@ -5916,16 +4783,7 @@ setIsLoadingEvents(false);
                           <path d="M8 6h10v10"/>
                         </svg>
                       </motion.button>
-
-                      <div
-                        style={{
-                          padding: '2.5rem',
-                          backgroundColor: 'transparent',
-                          borderRadius: '0',
-                          border: 'none',
-                          marginTop: '1rem'
-                        }}
-                      >
+                      <div style={{ padding: '2.5rem', backgroundColor: 'transparent', borderRadius: '0', border: 'none', marginTop: '1rem' }}>
                         <h5 style={{
                           color: 'white',
                           fontSize: '1.5rem',
@@ -6027,7 +4885,6 @@ setIsLoadingEvents(false);
               }}>
                 Delete account
               </h4>
-              
               <p style={{
                 color: 'rgba(255, 255, 255, 0.8)',
                 fontSize: '1rem',
@@ -6038,12 +4895,7 @@ setIsLoadingEvents(false);
                 Are you sure you want to delete your account? This action cannot be undone. 
                 All your notes and data will be permanently deleted.
               </p>
-              
-              <div style={{
-                display: 'flex',
-                gap: '1.5rem',
-                justifyContent: 'flex-end'
-              }}>
+              <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'flex-end' }}>
                 <motion.button
                   onClick={() => setShowDeleteAccountModal(false)}
                   style={{
@@ -6122,12 +4974,7 @@ setIsLoadingEvents(false);
               }}
               onClick={(e) => e.stopPropagation()}
             >
-              <div style={{ 
-                textAlign: 'center',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '1rem'
-              }}>
+              <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <h3 style={{
                   color: 'white',
                   fontSize: isMobile ? '2rem' : '2.5rem',
@@ -6148,14 +4995,7 @@ setIsLoadingEvents(false);
                   Are you sure you want to logout from {userDisplayName}?
                 </p>
               </div>
-
-              <div style={{
-                display: 'flex',
-                gap: '1.5rem',
-                justifyContent: 'center',
-                alignItems: 'center',
-                marginTop: '1rem'
-              }}>
+              <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center', alignItems: 'center', marginTop: '1rem' }}>
                 <motion.button
                   onClick={handleCancelLogout}
                   style={{
@@ -6188,13 +5028,7 @@ setIsLoadingEvents(false);
                     <path d="M7 17l9.2-9.2M17 17V7H7"/>
                   </svg>
                 </motion.button>
-
-                <div style={{
-                  width: '1px',
-                  height: '20px',
-                  backgroundColor: 'rgba(255, 255, 255, 0.2)'
-                }} />
-
+                <div style={{ width: '1px', height: '20px', backgroundColor: 'rgba(255, 255, 255, 0.2)' }} />
                 <motion.button
                   onClick={handleConfirmLogout}
                   style={{
@@ -6227,11 +5061,7 @@ setIsLoadingEvents(false);
                   </svg>
                 </motion.button>
               </div>
-
-              <div style={{
-                textAlign: 'center',
-                marginTop: '0.5rem'
-              }}>
+              <div style={{ textAlign: 'center', marginTop: '0.5rem' }}>
                 <p style={{
                   color: 'rgba(255, 255, 255, 0.5)',
                   fontSize: '0.9rem',
@@ -6246,7 +5076,7 @@ setIsLoadingEvents(false);
         )}
       </AnimatePresence>
 
-      {/* Menu Overlay dengan GSAP Animation - Modern Awwwards Style */}
+      {/* Menu Overlay dengan GSAP Animation */}
       <AnimatePresence>
         {showMenuOverlay && (
           <motion.div
@@ -6272,7 +5102,6 @@ setIsLoadingEvents(false);
               transform: 'translateY(-100%)'
             }}
           >
-            {/* Background dengan efek grain dan pattern */}
             <div style={{
               position: 'absolute',
               top: 0,
@@ -6286,7 +5115,6 @@ setIsLoadingEvents(false);
               zIndex: 1
             }} />
 
-            {/* Header Menu - JAKARTA & Jam di Kiri, MENURU di Tengah, Close di Kanan */}
             <div style={{
               position: 'absolute',
               top: isMobile ? '1.5rem' : '2rem',
@@ -6301,7 +5129,6 @@ setIsLoadingEvents(false);
               zIndex: 10,
               pointerEvents: 'none'
             }}>
-              {/* Kiri - JAKARTA dan Jam */}
               <div style={{
                 color: '#FFFFFF',
                 fontSize: isMobile ? '1.2rem' : '1.8rem',
@@ -6319,7 +5146,6 @@ setIsLoadingEvents(false);
                 <span style={{ fontSize: isMobile ? '1.2rem' : '1.8rem', fontWeight: '300', marginTop: '0.2rem' }}>{jakartaTime}</span>
               </div>
 
-              {/* Tengah - MENURU */}
               <div style={{
                 color: '#FFFFFF',
                 fontSize: isMobile ? '2rem' : '3rem',
@@ -6334,11 +5160,9 @@ setIsLoadingEvents(false);
                 MENURU
               </div>
 
-              {/* Kanan - Kosong untuk menyeimbangkan grid */}
               <div style={{ justifySelf: 'end' }}></div>
             </div>
 
-            {/* Teks Berjalan dengan North East Arrow - PUTIH CERAH (TETAP BERJALAN) */}
             <div style={{
               position: 'absolute',
               bottom: '10%',
@@ -6349,14 +5173,8 @@ setIsLoadingEvents(false);
               zIndex: 2
             }}>
               <motion.div
-                animate={{ 
-                  x: ['0%', '-50%']
-                }}
-                transition={{ 
-                  duration: 25,
-                  repeat: Infinity,
-                  ease: "linear"
-                }}
+                animate={{ x: ['0%', '-50%'] }}
+                transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
                 style={{
                   display: 'inline-block',
                   whiteSpace: 'nowrap',
@@ -6385,38 +5203,34 @@ setIsLoadingEvents(false);
               </motion.div>
             </div>
 
-            {/* Container Utama dengan Scroll yang Stabil */}
             <div style={{
               position: 'absolute',
-              top: '15%', // Posisi tetap dari atas
-              bottom: '15%', // Posisi tetap dari bawah
+              top: '15%',
+              bottom: '15%',
               left: 0,
               right: 0,
               zIndex: 3,
               display: 'flex',
               justifyContent: 'center',
-              overflow: 'hidden' // Mencegah scroll di container utama
+              overflow: 'hidden'
             }}>
-              {/* Konten dengan Scroll Internal */}
               <div style={{
                 width: '100%',
                 maxWidth: '1200px',
                 padding: isMobile ? '0 2rem' : '0 4rem',
-                overflowY: 'auto', // Scroll hanya di dalam konten
+                overflowY: 'auto',
                 overflowX: 'hidden',
-                scrollbarWidth: 'none', // Hide scrollbar Firefox
-                msOverflowStyle: 'none', // Hide scrollbar IE/Edge
+                scrollbarWidth: 'none',
+                msOverflowStyle: 'none',
                 position: 'relative',
                 height: '100%'
               }}>
-                {/* Custom scrollbar hide untuk Chrome/Safari */}
                 <style jsx>{`
                   div::-webkit-scrollbar {
                     display: none;
                   }
                 `}</style>
 
-                {/* Konten Menu - Posisi relatif normal */}
                 <div style={{
                   display: 'flex',
                   flexDirection: 'column',
@@ -6424,12 +5238,7 @@ setIsLoadingEvents(false);
                   paddingTop: '0.5rem',
                   paddingBottom: '2rem'
                 }}>
-                  
-                  {/* CATATAN SECTION */}
-                  <div style={{
-                    borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
-                  }}>
-                    {/* Header */}
+                  <div style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.2)' }}>
                     <div
                       onClick={() => handleToggleSection('catatan')}
                       style={{
@@ -6447,7 +5256,6 @@ setIsLoadingEvents(false);
                           fontWeight: '300',
                           fontFamily: 'monospace'
                         }}>01</span>
-                        
                         <span
                           onClick={(e) => {
                             e.stopPropagation();
@@ -6465,8 +5273,6 @@ setIsLoadingEvents(false);
                           CATATAN
                         </span>
                       </div>
-                      
-                      {/* Arrow dengan animasi rotate */}
                       <div style={{
                         transform: openSection === 'catatan' ? 'rotate(90deg)' : 'rotate(0deg)',
                         transition: 'transform 0.3s ease'
@@ -6479,9 +5285,7 @@ setIsLoadingEvents(false);
                           stroke="#FFFFFF"
                           strokeWidth="2.5"
                           strokeLinecap="round"
-                          style={{
-                            filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.5))'
-                          }}
+                          style={{ filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.5))' }}
                         >
                           <path d="M7 7h10v10" />
                           <path d="M17 7L7 17" />
@@ -6489,7 +5293,6 @@ setIsLoadingEvents(false);
                       </div>
                     </div>
 
-                    {/* Sub-menu */}
                     {openSection === 'catatan' && (
                       <div style={{
                         display: 'flex',
@@ -6517,21 +5320,10 @@ setIsLoadingEvents(false);
                               borderBottom: idx < 3 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none'
                             }}
                           >
-                            <span style={{ 
-                              color: 'rgba(255, 255, 255, 0.3)', 
-                              fontSize: '0.9rem', 
-                              fontFamily: 'monospace', 
-                              width: '30px' 
-                            }}>
+                            <span style={{ color: 'rgba(255, 255, 255, 0.3)', fontSize: '0.9rem', fontFamily: 'monospace', width: '30px' }}>
                               {item.number}
                             </span>
-                            <span style={{ 
-                              color: 'rgba(255, 255, 255, 0.8)', 
-                              fontSize: '1.2rem',
-                              flex: 1,
-                              fontWeight: '300',
-                              fontFamily: 'Helvetica, Arial, sans-serif'
-                            }}>
+                            <span style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '1.2rem', flex: 1, fontWeight: '300', fontFamily: 'Helvetica, Arial, sans-serif' }}>
                               {item.title}
                             </span>
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2">
@@ -6544,10 +5336,7 @@ setIsLoadingEvents(false);
                     )}
                   </div>
 
-                  {/* COMMUNITY SECTION */}
-                  <div style={{
-                    borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
-                  }}>
+                  <div style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.2)' }}>
                     <div
                       onClick={() => handleToggleSection('community')}
                       style={{
@@ -6582,7 +5371,6 @@ setIsLoadingEvents(false);
                           COMMUNITY
                         </span>
                       </div>
-                      
                       <div style={{
                         transform: openSection === 'community' ? 'rotate(90deg)' : 'rotate(0deg)',
                         transition: 'transform 0.3s ease'
@@ -6633,10 +5421,7 @@ setIsLoadingEvents(false);
                     )}
                   </div>
 
-                  {/* CALENDAR SECTION */}
-                  <div style={{
-                    borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
-                  }}>
+                  <div style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.2)' }}>
                     <div
                       onClick={() => handleToggleSection('calendar')}
                       style={{
@@ -6671,7 +5456,6 @@ setIsLoadingEvents(false);
                           CALENDAR
                         </span>
                       </div>
-                      
                       <div style={{
                         transform: openSection === 'calendar' ? 'rotate(90deg)' : 'rotate(0deg)',
                         transition: 'transform 0.3s ease'
@@ -6722,10 +5506,7 @@ setIsLoadingEvents(false);
                     )}
                   </div>
 
-                  {/* BLOG SECTION */}
-                  <div style={{
-                    borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
-                  }}>
+                  <div style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.2)' }}>
                     <div
                       onClick={() => handleToggleSection('blog')}
                       style={{
@@ -6760,7 +5541,6 @@ setIsLoadingEvents(false);
                           BLOG
                         </span>
                       </div>
-                      
                       <div style={{
                         transform: openSection === 'blog' ? 'rotate(90deg)' : 'rotate(0deg)',
                         transition: 'transform 0.3s ease'
@@ -6811,7 +5591,6 @@ setIsLoadingEvents(false);
                     )}
                   </div>
 
-                  {/* SPOTIFY PLAYLIST SECTION - DENGAN PLAYER LANGSUNG */}
                   <div style={{
                     borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
                     paddingBottom: '1rem'
@@ -6833,11 +5612,8 @@ setIsLoadingEvents(false);
                           fontWeight: '300',
                           fontFamily: 'monospace'
                         }}>05</span>
-                        
                         <span
-                          onClick={(e) => {
-                            e.stopPropagation();
-                          }}
+                          onClick={(e) => e.stopPropagation()}
                           style={{
                             color: '#FFFFFF',
                             fontSize: isMobile ? '3rem' : '4.5rem',
@@ -6853,7 +5629,6 @@ setIsLoadingEvents(false);
                           SPOTIFY PLAYLIST
                         </span>
                       </div>
-                      
                       <div style={{
                         transform: openSection === 'spotify' ? 'rotate(90deg)' : 'rotate(0deg)',
                         transition: 'transform 0.3s ease'
@@ -6874,13 +5649,8 @@ setIsLoadingEvents(false);
                         marginTop: '2rem',
                         marginBottom: '2rem',
                       }}>
-                        
-                        {/* Spotify Player - Muncul jika ada lagu yang dipilih */}
                         {currentEmbedUrl && (
-                          <div style={{
-                            width: '100%',
-                            marginBottom: '2rem'
-                          }}>
+                          <div style={{ width: '100%', marginBottom: '2rem' }}>
                             <iframe
                               style={{ borderRadius: '12px', width: '100%', height: '152px' }}
                               src={currentEmbedUrl}
@@ -6892,7 +5662,6 @@ setIsLoadingEvents(false);
                           </div>
                         )}
 
-                        {/* Header Playlist */}
                         <div style={{
                           display: 'flex',
                           alignItems: 'center',
@@ -6942,16 +5711,8 @@ setIsLoadingEvents(false);
                           </div>
                         </div>
 
-                        {/* Daftar Lagu - Bisa Dipilih */}
-                        <div style={{
-                          display: 'flex',
-                          flexDirection: 'column',
-                          gap: '1rem'
-                        }}>
-                          {/* Hanin Dhiya Section */}
-                          <div style={{
-                            marginBottom: '1rem'
-                          }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                          <div style={{ marginBottom: '1rem' }}>
                             <div style={{
                               color: 'rgba(255,255,255,0.8)',
                               fontSize: '1.2rem',
@@ -6962,7 +5723,6 @@ setIsLoadingEvents(false);
                             }}>
                               Hanin Dhiya
                             </div>
-                            
                             {favoriteTracks.filter(t => t.artist === 'Hanin Dhiya').map((track, idx) => (
                               <div
                                 key={track.id}
@@ -6978,7 +5738,6 @@ setIsLoadingEvents(false);
                                   transition: 'all 0.2s ease'
                                 }}
                               >
-                                {/* Nomor */}
                                 <span style={{
                                   color: 'rgba(255, 255, 255, 0.3)',
                                   fontSize: '1.2rem',
@@ -6988,8 +5747,6 @@ setIsLoadingEvents(false);
                                 }}>
                                   {idx + 1}
                                 </span>
-
-                                {/* Cover Album kecil */}
                                 <div style={{
                                   width: '50px',
                                   height: '50px',
@@ -7010,8 +5767,6 @@ setIsLoadingEvents(false);
                                     ♪
                                   </div>
                                 </div>
-
-                                {/* Info Lagu */}
                                 <div style={{ flex: 1 }}>
                                   <div style={{
                                     color: '#FFFFFF',
@@ -7030,8 +5785,6 @@ setIsLoadingEvents(false);
                                     {track.artist}
                                   </div>
                                 </div>
-
-                                {/* Indikator Sedang Diputar */}
                                 {currentTrack === track.id && (
                                   <div style={{
                                     width: '8px',
@@ -7041,8 +5794,6 @@ setIsLoadingEvents(false);
                                     marginRight: '0.5rem'
                                   }} />
                                 )}
-
-                                {/* Tombol Play */}
                                 <div style={{
                                   width: '40px',
                                   height: '40px',
@@ -7059,7 +5810,6 @@ setIsLoadingEvents(false);
                             ))}
                           </div>
 
-                          {/* Stand Here Alone Section */}
                           <div>
                             <div style={{
                               color: 'rgba(255,255,255,0.8)',
@@ -7071,7 +5821,6 @@ setIsLoadingEvents(false);
                             }}>
                               Stand Here Alone
                             </div>
-                            
                             {favoriteTracks.filter(t => t.artist === 'Stand Here Alone').map((track, idx) => (
                               <div
                                 key={track.id}
@@ -7087,7 +5836,6 @@ setIsLoadingEvents(false);
                                   transition: 'all 0.2s ease'
                                 }}
                               >
-                                {/* Nomor */}
                                 <span style={{
                                   color: 'rgba(255, 255, 255, 0.3)',
                                   fontSize: '1.2rem',
@@ -7097,8 +5845,6 @@ setIsLoadingEvents(false);
                                 }}>
                                   {idx + 1}
                                 </span>
-
-                                {/* Cover Album kecil */}
                                 <div style={{
                                   width: '50px',
                                   height: '50px',
@@ -7119,8 +5865,6 @@ setIsLoadingEvents(false);
                                     ♪
                                   </div>
                                 </div>
-
-                                {/* Info Lagu */}
                                 <div style={{ flex: 1 }}>
                                   <div style={{
                                     color: '#FFFFFF',
@@ -7139,8 +5883,6 @@ setIsLoadingEvents(false);
                                     {track.artist}
                                   </div>
                                 </div>
-
-                                {/* Indikator Sedang Diputar */}
                                 {currentTrack === track.id && (
                                   <div style={{
                                     width: '8px',
@@ -7150,8 +5892,6 @@ setIsLoadingEvents(false);
                                     marginRight: '0.5rem'
                                   }} />
                                 )}
-
-                                {/* Tombol Play */}
                                 <div style={{
                                   width: '40px',
                                   height: '40px',
@@ -7169,7 +5909,6 @@ setIsLoadingEvents(false);
                           </div>
                         </div>
 
-                        {/* Jika belum ada lagu yang dipilih */}
                         {!currentEmbedUrl && (
                           <div style={{
                             textAlign: 'center',
@@ -7183,7 +5922,6 @@ setIsLoadingEvents(false);
                           </div>
                         )}
 
-                        {/* Link ke Spotify */}
                         <div style={{
                           display: 'flex',
                           justifyContent: 'flex-end',
@@ -7221,7 +5959,6 @@ setIsLoadingEvents(false);
               </div>
             </div>
 
-            {/* Footer */}
             <div style={{
               position: 'absolute',
               bottom: isMobile ? '2rem' : '3rem',
@@ -7248,7 +5985,6 @@ setIsLoadingEvents(false);
               </div>
             </div>
 
-            {/* Close Button - Posisi Absolute di Kanan */}
             <div
               onClick={handleCloseMenu}
               style={{
@@ -7375,10 +6111,7 @@ setIsLoadingEvents(false);
                       initial={{ x: -30, opacity: 0 }}
                       animate={{ x: 0, opacity: 1 }}
                       transition={{ duration: 0.4, delay: 0.4 + (index * 0.1) }}
-                      style={{
-                        display: 'flex',
-                        flexDirection: 'column'
-                      }}
+                      style={{ display: 'flex', flexDirection: 'column' }}
                     >
                       <div style={{
                         color: 'white',
@@ -7390,7 +6123,6 @@ setIsLoadingEvents(false);
                       }}>
                         {role.title}
                       </div>
-                      
                       <div style={{
                         color: 'white',
                         fontSize: isMobile ? '1rem' : '1.3rem',
@@ -7493,10 +6225,7 @@ setIsLoadingEvents(false);
                   initial={{ y: 20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ duration: 0.6, delay: 0.6 }}
-                  style={{
-                    alignSelf: 'flex-start',
-                    marginBottom: isMobile ? '5rem' : '6rem'
-                  }}
+                  style={{ alignSelf: 'flex-start', marginBottom: isMobile ? '5rem' : '6rem' }}
                 >
                   <motion.a
                     href="/explore"
@@ -7588,13 +6317,7 @@ setIsLoadingEvents(false);
               </motion.div>
             </div>
 
-            <div style={{
-              height: '100vh',
-              width: '100%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
+            <div style={{ height: '100vh', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 0.5 }}
@@ -7687,12 +6410,7 @@ setIsLoadingEvents(false);
               </div>
             </div>
 
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              width: '100%',
-              flex: 1
-            }}>
+            <div style={{ display: 'flex', flexDirection: 'column', width: '100%', flex: 1 }}>
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -7730,7 +6448,6 @@ setIsLoadingEvents(false);
                         const rect = e.currentTarget.getBoundingClientRect();
                         const clickX = e.clientX - rect.left;
                         const width = rect.width;
-                        
                         if (clickX < width / 2) {
                           prevPhoto();
                         } else {
@@ -7823,10 +6540,7 @@ setIsLoadingEvents(false);
                     gap: '0.8rem',
                     marginBottom: '1rem'
                   }}>
-                    <div style={{
-                      flex: 1,
-                      position: 'relative'
-                    }}>
+                    <div style={{ flex: 1, position: 'relative' }}>
                       <input
                         ref={messageInputRef}
                         type="text"
@@ -7859,7 +6573,6 @@ setIsLoadingEvents(false);
                         Enter
                       </span>
                     </div>
-                    
                     <motion.button
                       onClick={handleSendMessage}
                       disabled={message.trim() === ""}
@@ -7890,10 +6603,7 @@ setIsLoadingEvents(false);
                       </svg>
                     </motion.button>
                   </div>
-                  
-                  <div style={{
-                    textAlign: 'center'
-                  }}>
+                  <div style={{ textAlign: 'center' }}>
                     <span style={{
                       color: 'rgba(255,255,255,0.5)',
                       fontSize: '0.75rem'
@@ -8038,7 +6748,7 @@ setIsLoadingEvents(false);
         )}
       </AnimatePresence>
 
-      {/* Notification Dropdown - DIPERBAIKI SESUAI DESIGN fghaghx.txt */}
+      {/* Notification Dropdown - DIPERBAIKI SESUAI DESIGN */}
       <AnimatePresence>
         {showNotification && (
           <motion.div
@@ -8129,7 +6839,6 @@ setIsLoadingEvents(false);
                     Clear All
                 </motion.button>
                 )}
-                
                 <motion.button
                   onClick={() => {
                     setIsLoadingNotifications(true);
@@ -8183,11 +6892,7 @@ setIsLoadingEvents(false);
                   color: 'rgba(255, 255, 255, 0.7)',
                   fontFamily: 'Helvetica, Arial, sans-serif'
                 }}>
-                  <div style={{ 
-                    fontSize: '3rem',
-                    marginBottom: '1rem',
-                    opacity: 0.5
-                  }}>
+                  <div style={{ fontSize: '3rem', marginBottom: '1rem', opacity: 0.5 }}>
                     🔔
                   </div>
                   <h4 style={{
@@ -8215,7 +6920,6 @@ setIsLoadingEvents(false);
                     const isReadByUser = notification.userReads[currentUserId] || 
                                         (currentUser && notification.userReads[currentUser.uid]) || 
                                         false;
-                    
                     return (
                       <motion.div
                         key={notification.id || index}
@@ -8252,11 +6956,7 @@ setIsLoadingEvents(false);
                           />
                         )}
                         
-                        <div style={{
-                          display: 'flex',
-                          gap: '1rem',
-                          alignItems: 'flex-start'
-                        }}>
+                        <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
                           <div style={{
                             width: '40px',
                             height: '40px',
@@ -8282,12 +6982,7 @@ setIsLoadingEvents(false);
                               flexWrap: 'wrap',
                               gap: '0.5rem'
                             }}>
-                              <div style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.5rem',
-                                flexWrap: 'wrap'
-                              }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
                                 <h4 style={{
                                   color: 'white',
                                   fontSize: '1rem',
@@ -8297,7 +6992,6 @@ setIsLoadingEvents(false);
                                 }}>
                                   {notification.title}
                                 </h4>
-                                
                                 <span style={{
                                   backgroundColor: 'transparent',
                                   color: 'white',
@@ -8311,7 +7005,6 @@ setIsLoadingEvents(false);
                                   {notification.type}
                                 </span>
                               </div>
-                              
                               <span style={{
                                 color: 'rgba(255, 255, 255, 0.6)',
                                 fontSize: '0.75rem',
@@ -8351,7 +7044,6 @@ setIsLoadingEvents(false);
                                 </svg>
                                 <span>{notification.senderName}</span>
                               </div>
-                              
                               <div style={{
                                 display: 'flex',
                                 alignItems: 'center',
@@ -8365,7 +7057,6 @@ setIsLoadingEvents(false);
                                 </svg>
                                 <span>{notification.views || 0} views</span>
                               </div>
-                              
                               <div style={{
                                 display: 'flex',
                                 alignItems: 'center',
@@ -8378,7 +7069,6 @@ setIsLoadingEvents(false);
                                 </svg>
                                 <span>{(notification.likes?.length || 0)}</span>
                               </div>
-                              
                               <div style={{
                                 display: 'flex',
                                 alignItems: 'center',
@@ -8528,11 +7218,7 @@ setIsLoadingEvents(false);
               </div>
             </div>
 
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              padding: '0.5rem 0'
-            }}>
+            <div style={{ display: 'flex', flexDirection: 'column', padding: '0.5rem 0' }}>
               <motion.button
                 onClick={handleNotesClick}
                 style={{
@@ -8608,13 +7294,7 @@ setIsLoadingEvents(false);
           backgroundColor: 'transparent'
         }}
       >
-        {/* Left: Judul MENURU + Menu Navigasi (digeser ke kiri) */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: isMobile ? '2rem' : '4rem'
-        }}>
-          {/* Judul MENURU */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '2rem' : '4rem' }}>
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -8656,12 +7336,7 @@ setIsLoadingEvents(false);
             </div>
           </motion.div>
 
-          {/* Menu Navigasi Teks Biasa (sejajar di samping judul) */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: isMobile ? '1.5rem' : '2.5rem'
-          }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '1.5rem' : '2.5rem' }}>
             <motion.span
               onClick={() => router.push('/docs')}
               style={{
@@ -8738,14 +7413,10 @@ setIsLoadingEvents(false);
               Chatbot
             </motion.span>
 
-            {/* Community dengan HOVER */}
             <motion.div
               onMouseEnter={handleCommunityHover}
               onMouseLeave={handleCommunityLeave}
-              style={{
-                position: 'relative',
-                display: 'inline-block'
-              }}
+              style={{ position: 'relative', display: 'inline-block' }}
             >
               <motion.span
                 style={{
@@ -8766,14 +7437,10 @@ setIsLoadingEvents(false);
               </motion.span>
             </motion.div>
 
-            {/* News dengan HOVER */}
             <motion.div
               onMouseEnter={handleNewsHover}
               onMouseLeave={handleNewsLeave}
-              style={{
-                position: 'relative',
-                display: 'inline-block'
-              }}
+              style={{ position: 'relative', display: 'inline-block' }}
             >
               <motion.span
                 style={{
@@ -8794,14 +7461,10 @@ setIsLoadingEvents(false);
               </motion.span>
             </motion.div>
 
-            {/* Stories dengan HOVER */}
             <motion.div
               onMouseEnter={handleStoriesHover}
               onMouseLeave={handleStoriesLeave}
-              style={{
-                position: 'relative',
-                display: 'inline-block'
-              }}
+              style={{ position: 'relative', display: 'inline-block' }}
             >
               <motion.span
                 style={{
@@ -8881,13 +7544,7 @@ setIsLoadingEvents(false);
           </div>
         </div>
 
-        {/* Right: Notification Bell dan Sign In - WARNA CERAH STABILO */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '1rem'
-        }}>
-          {/* Notification Bell dengan Badge - WARNA CERAH STABILO */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <motion.div
             ref={notificationRef}
             initial={{ opacity: 0, x: -10 }}
@@ -8898,13 +7555,13 @@ setIsLoadingEvents(false);
               width: '40px',
               height: '40px',
               borderRadius: '50%',
-              backgroundColor: '#FFD700', // Warna kuning stabilo
+              backgroundColor: '#FFD700',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               cursor: 'pointer',
               transition: 'all 0.3s ease',
-              boxShadow: '0 0 15px rgba(255, 215, 0, 0.7)' // Efek glow
+              boxShadow: '0 0 15px rgba(255, 215, 0, 0.7)'
             }}
             onClick={() => setShowNotification(!showNotification)}
             whileHover={{ 
@@ -8919,7 +7576,7 @@ setIsLoadingEvents(false);
               height="20" 
               viewBox="0 0 24 24" 
               fill="none" 
-              stroke="black" // Ikon hitam
+              stroke="black"
               strokeWidth="2"
             >
               <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
@@ -8958,19 +7615,18 @@ setIsLoadingEvents(false);
             )}
           </motion.div>
 
-          {/* Sign In / User Button - WARNA CERAH STABILO */}
           <motion.div
             onClick={handleSignInClick}
             style={{
               display: 'flex',
               alignItems: 'center',
               gap: '0.5rem',
-              backgroundColor: '#FFD700', // Warna kuning stabilo
+              backgroundColor: '#FFD700',
               padding: '0.5rem 1rem',
               borderRadius: '30px',
               cursor: 'pointer',
               transition: 'all 0.3s ease',
-              boxShadow: '0 0 15px rgba(255, 215, 0, 0.7)' // Efek glow
+              boxShadow: '0 0 15px rgba(255, 215, 0, 0.7)'
             }}
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
@@ -8983,20 +7639,19 @@ setIsLoadingEvents(false);
             whileTap={{ scale: 0.95 }}
           >
             <span style={{
-              color: 'black', // Teks hitam
+              color: 'black',
               fontSize: isMobile ? '0.9rem' : '1rem',
               fontWeight: '600',
               fontFamily: 'Helvetica, Arial, sans-serif'
             }}>
               {user ? userDisplayName : 'SIGN IN'}
             </span>
-            {/* North East Arrow (↗) - Hitam */}
             <svg
               width="16"
               height="16"
               viewBox="0 0 24 24"
               fill="none"
-              stroke="black" // Panah hitam
+              stroke="black"
               strokeWidth="2.5"
             >
               <path d="M7 17L17 7"/>
@@ -9044,11 +7699,7 @@ setIsLoadingEvents(false);
                 position: 'relative'
               }}
             >
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '2rem'
-              }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
                 <h2 style={{
                   color: 'white',
                   fontSize: isMobile ? '5rem' : '7rem',
@@ -9073,13 +7724,7 @@ setIsLoadingEvents(false);
                   PRODUCT
                 </h2>
                 
-                {/* Rotating Words dengan Southeast Arrow */}
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '1rem',
-                  marginLeft: '1rem'
-                }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginLeft: '1rem' }}>
                   <svg
                     width={isMobile ? "45" : "60"}
                     height={isMobile ? "45" : "60"}
@@ -9089,15 +7734,12 @@ setIsLoadingEvents(false);
                     strokeWidth="2.5"
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    style={{
-                      filter: 'drop-shadow(0 0 10px rgba(255,255,255,0.5))',
-                    }}
+                    style={{ filter: 'drop-shadow(0 0 10px rgba(255,255,255,0.5))' }}
                   >
                     <path d="M7 7L21 21" />
                     <path d="M21 7v14H7" />
                   </svg>
                   
-                  {/* Rotating Words */}
                   <div style={{
                     position: 'relative',
                     width: isMobile ? '280px' : '350px',
@@ -9107,21 +7749,9 @@ setIsLoadingEvents(false);
                     <AnimatePresence mode="wait">
                       <motion.div
                         key={currentRotatingWordIndex}
-                        initial={{ 
-                          y: 30, 
-                          opacity: 0,
-                          scale: 0.9
-                        }}
-                        animate={{ 
-                          y: 0, 
-                          opacity: 1,
-                          scale: 1
-                        }}
-                        exit={{ 
-                          y: -30, 
-                          opacity: 0,
-                          scale: 0.9
-                        }}
+                        initial={{ y: 30, opacity: 0, scale: 0.9 }}
+                        animate={{ y: 0, opacity: 1, scale: 1 }}
+                        exit={{ y: -30, opacity: 0, scale: 0.9 }}
                         transition={{
                           y: { type: "spring", stiffness: 400, damping: 30 },
                           opacity: { duration: 0.4 },
@@ -9157,7 +7787,6 @@ setIsLoadingEvents(false);
                 </div>
               </div>
               
-              {/* Hover indicator */}
               <motion.div
                 initial={{ opacity: 0, width: 0 }}
                 animate={{ opacity: 1, width: '30px' }}
@@ -9173,11 +7802,7 @@ setIsLoadingEvents(false);
               />
             </div>
 
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: isMobile ? '0.5rem' : '1rem'
-            }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '0.5rem' : '1rem' }}>
               <div style={{
                 textAlign: 'center',
                 height: isMobile ? '5rem' : '7rem',
@@ -9199,11 +7824,7 @@ setIsLoadingEvents(false);
                 </h2>
               </div>
 
-              <div style={{
-                position: 'relative',
-                display: 'flex',
-                alignItems: 'flex-end'
-              }}>
+              <div style={{ position: 'relative', display: 'flex', alignItems: 'flex-end' }}>
                 <div style={{
                   width: isMobile ? '140px' : '180px',
                   height: isMobile ? '5rem' : '7rem',
@@ -9223,7 +7844,6 @@ setIsLoadingEvents(false);
                     }}
                   />
                 </div>
-                
                 <div style={{
                   position: 'absolute',
                   bottom: '-0.8rem',
@@ -9248,11 +7868,7 @@ setIsLoadingEvents(false);
             justifyContent: 'flex-start',
             gap: isMobile ? '4rem' : '8rem'
           }}>
-            <div style={{
-              position: 'relative',
-              display: 'flex',
-              alignItems: 'flex-end'
-            }}>
+            <div style={{ position: 'relative', display: 'flex', alignItems: 'flex-end' }}>
               <div style={{
                 width: isMobile ? '140px' : '180px',
                 height: isMobile ? '5rem' : '7rem',
@@ -9272,7 +7888,6 @@ setIsLoadingEvents(false);
                   }}
                 />
               </div>
-              
               <div style={{
                 position: 'absolute',
                 bottom: '-0.8rem',
@@ -9350,11 +7965,7 @@ setIsLoadingEvents(false);
               </h2>
             </div>
 
-            <div style={{
-              position: 'relative',
-              display: 'flex',
-              alignItems: 'flex-end'
-            }}>
+            <div style={{ position: 'relative', display: 'flex', alignItems: 'flex-end' }}>
               <div style={{
                 width: isMobile ? '140px' : '180px',
                 height: isMobile ? '5rem' : '7rem',
@@ -9374,7 +7985,6 @@ setIsLoadingEvents(false);
                   }}
                 />
               </div>
-              
               <div style={{
                 position: 'absolute',
                 bottom: '-0.8rem',
@@ -9419,11 +8029,7 @@ setIsLoadingEvents(false);
             justifyContent: 'flex-start',
             gap: isMobile ? '4rem' : '8rem'
           }}>
-            <div style={{
-              position: 'relative',
-              display: 'flex',
-              alignItems: 'flex-end'
-            }}>
+            <div style={{ position: 'relative', display: 'flex', alignItems: 'flex-end' }}>
               <div style={{
                 width: isMobile ? '140px' : '180px',
                 height: isMobile ? '5rem' : '7rem',
@@ -9443,7 +8049,6 @@ setIsLoadingEvents(false);
                   }}
                 />
               </div>
-              
               <div style={{
                 position: 'absolute',
                 bottom: '-0.8rem',
@@ -9492,14 +8097,9 @@ setIsLoadingEvents(false);
               </h2>
             </div>
           </div>
-
         </div>
         
-        {/* Spacer kecil sebelum konten berikutnya */}
-        <div style={{
-          height: isMobile ? '3rem' : '4rem',
-          width: '100%'
-        }} />
+        <div style={{ height: isMobile ? '3rem' : '4rem', width: '100%' }} />
 
         <AnimatePresence mode="wait">
           {currentView === "main" && (
@@ -9509,8 +8109,7 @@ setIsLoadingEvents(false);
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.5 }}
-            >
-            </motion.div>
+            />
           )}
         </AnimatePresence>
       </div>
