@@ -243,6 +243,22 @@ export default function HomePage(): React.JSX.Element {
   const [currentRotatingWordIndex, setCurrentRotatingWordIndex] = useState(0);
   const rotatingWordsList = ["Community", "Catatan", "Blog"];
 
+  // Data untuk Community Items
+  const communityItems = [
+    { id: 1, name: "Point Blank", icon: "🎮", color: "#FF6B6B" },
+    { id: 2, name: "Lost Saga", icon: "⚔️", color: "#4ECDC4" },
+    { id: 3, name: "Persib", icon: "⚽", color: "#0050B7" },
+    { id: 4, name: "Coding", icon: "💻", color: "#FFD93D" },
+    { id: 5, name: "Pembersihan", icon: "🧹", color: "#6BCB77" },
+    { id: 6, name: "Pendidikan", icon: "📚", color: "#9D65C9" },
+    { id: 7, name: "Sosial", icon: "🤝", color: "#FF8C42" }
+  ];
+
+  // Bagi items menjadi 2 sisi (kiri 3, kanan 3, tengah 1)
+  const leftCommunityItems = communityItems.slice(0, 3); // Point Blank, Lost Saga, Persib
+  const centerCommunityItem = communityItems[3]; // Coding (tengah)
+  const rightCommunityItems = communityItems.slice(4, 7); // Pembersihan, Pendidikan, Sosial
+
   const headerRef = useRef<HTMLDivElement>(null);
   const topNavRef = useRef<HTMLDivElement>(null);
   const topicContainerRef = useRef<HTMLDivElement>(null);
@@ -2411,7 +2427,7 @@ setIsLoadingEvents(false);
         )}
       </AnimatePresence>
 
-      {/* Community Overlay - dengan HOVER */}
+      {/* Community Overlay - DIPERBAIKI SESUAI PERMINTAAN */}
       <AnimatePresence>
         {showCommunityOverlay && (
           <motion.div
@@ -2478,45 +2494,293 @@ setIsLoadingEvents(false);
               </motion.button>
             </div>
 
-            {/* Konten Community Overlay - SEDERHANA */}
+            {/* Konten Community Overlay - Dengan Items 2 Sisi */}
             <div style={{
               padding: isMobile ? '3rem 1.5rem' : '4rem 3rem',
               overflowY: 'auto',
               maxHeight: 'calc(80vh - 100px)',
               display: 'flex',
               flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              textAlign: 'center'
+              alignItems: 'center'
             }}>
+              
+              {/* Judul Section */}
               <h3 style={{
                 color: 'white',
-                fontSize: isMobile ? '2.5rem' : '4rem',
+                fontSize: isMobile ? '2rem' : '3rem',
                 fontWeight: '300',
-                margin: '0 0 2rem 0',
+                margin: '0 0 3rem 0',
                 fontFamily: 'Helvetica, Arial, sans-serif',
                 letterSpacing: '1px',
                 opacity: 0.9
               }}>
-                Komunitas
+                Komunitas Pilihan
               </h3>
               
-              <p style={{
-                color: 'rgba(255, 255, 255, 0.6)',
-                fontSize: isMobile ? '1rem' : '1.2rem',
-                maxWidth: '600px',
-                lineHeight: 1.8,
-                fontFamily: 'Helvetica, Arial, sans-serif'
+              {/* Container 2 Sisi - Kiri dan Kanan */}
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                width: '100%',
+                maxWidth: '900px',
+                gap: '2rem',
+                position: 'relative'
               }}>
-                Bergabunglah dengan ribuan kreator dan pengembang dari seluruh Indonesia.
-              </p>
+                {/* Garis Tengah */}
+                <div style={{
+                  position: 'absolute',
+                  left: '50%',
+                  top: '10%',
+                  bottom: '10%',
+                  width: '1px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                  transform: 'translateX(-50%)'
+                }} />
+                
+                {/* Sisi Kiri - 3 Items */}
+                <div style={{
+                  flex: 1,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '2rem',
+                  paddingRight: '2rem'
+                }}>
+                  {leftCommunityItems.map((item, index) => (
+                    <motion.div
+                      key={`left-${item.id}`}
+                      initial={{ opacity: 0, x: -30 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '1.5rem',
+                        cursor: 'pointer',
+                        padding: '1rem',
+                        borderRadius: '15px',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        backgroundColor: 'rgba(255, 255, 255, 0.02)',
+                        position: 'relative'
+                      }}
+                      whileHover={{
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        borderColor: item.color,
+                        scale: 1.02
+                      }}
+                    >
+                      {/* Icon */}
+                      <div style={{
+                        width: '60px',
+                        height: '60px',
+                        borderRadius: '50%',
+                        backgroundColor: item.color + '20',
+                        border: `2px solid ${item.color}`,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '2rem'
+                      }}>
+                        {item.icon}
+                      </div>
+                      
+                      {/* Nama Komunitas */}
+                      <div style={{
+                        flex: 1,
+                        fontSize: isMobile ? '1.5rem' : '2rem',
+                        fontWeight: '300',
+                        color: 'white',
+                        fontFamily: 'Helvetica, Arial, sans-serif'
+                      }}>
+                        {item.name}
+                      </div>
+                      
+                      {/* North West Arrow SVG */}
+                      <svg
+                        width="30"
+                        height="30"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke={item.color}
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        style={{
+                          opacity: 0.7
+                        }}
+                      >
+                        <path d="M17 7L7 17" />
+                        <path d="M7 7h10v10" />
+                      </svg>
+                    </motion.div>
+                  ))}
+                </div>
+                
+                {/* Sisi Kanan - 3 Items */}
+                <div style={{
+                  flex: 1,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '2rem',
+                  paddingLeft: '2rem'
+                }}>
+                  {rightCommunityItems.map((item, index) => (
+                    <motion.div
+                      key={`right-${item.id}`}
+                      initial={{ opacity: 0, x: 30 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: (index + 4) * 0.1 }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '1.5rem',
+                        cursor: 'pointer',
+                        padding: '1rem',
+                        borderRadius: '15px',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        backgroundColor: 'rgba(255, 255, 255, 0.02)',
+                        position: 'relative'
+                      }}
+                      whileHover={{
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        borderColor: item.color,
+                        scale: 1.02
+                      }}
+                    >
+                      {/* Icon */}
+                      <div style={{
+                        width: '60px',
+                        height: '60px',
+                        borderRadius: '50%',
+                        backgroundColor: item.color + '20',
+                        border: `2px solid ${item.color}`,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '2rem'
+                      }}>
+                        {item.icon}
+                      </div>
+                      
+                      {/* Nama Komunitas */}
+                      <div style={{
+                        flex: 1,
+                        fontSize: isMobile ? '1.5rem' : '2rem',
+                        fontWeight: '300',
+                        color: 'white',
+                        fontFamily: 'Helvetica, Arial, sans-serif'
+                      }}>
+                        {item.name}
+                      </div>
+                      
+                      {/* North West Arrow SVG */}
+                      <svg
+                        width="30"
+                        height="30"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke={item.color}
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        style={{
+                          opacity: 0.7
+                        }}
+                      >
+                        <path d="M17 7L7 17" />
+                        <path d="M7 7h10v10" />
+                      </svg>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
               
+              {/* Item Tengah - Coding (optional) */}
+              {centerCommunityItem && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.7 }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '1.5rem',
+                    cursor: 'pointer',
+                    padding: '1rem 2rem',
+                    borderRadius: '15px',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    backgroundColor: 'rgba(255, 255, 255, 0.02)',
+                    marginTop: '3rem',
+                    maxWidth: '400px',
+                    width: '100%'
+                  }}
+                  whileHover={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    borderColor: centerCommunityItem.color,
+                    scale: 1.02
+                  }}
+                >
+                  {/* Icon */}
+                  <div style={{
+                    width: '50px',
+                    height: '50px',
+                    borderRadius: '50%',
+                    backgroundColor: centerCommunityItem.color + '20',
+                    border: `2px solid ${centerCommunityItem.color}`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '1.5rem'
+                  }}>
+                    {centerCommunityItem.icon}
+                  </div>
+                  
+                  {/* Nama Komunitas */}
+                  <div style={{
+                    fontSize: isMobile ? '1.8rem' : '2.2rem',
+                    fontWeight: '300',
+                    color: 'white',
+                    fontFamily: 'Helvetica, Arial, sans-serif'
+                  }}>
+                    {centerCommunityItem.name}
+                  </div>
+                  
+                  {/* North West Arrow SVG */}
+                  <svg
+                    width="25"
+                    height="25"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke={centerCommunityItem.color}
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    style={{
+                      opacity: 0.7
+                    }}
+                  >
+                    <path d="M17 7L7 17" />
+                    <path d="M7 7h10v10" />
+                  </svg>
+                </motion.div>
+              )}
+              
+              {/* Footer */}
               <div style={{
                 marginTop: '3rem',
                 width: '60px',
                 height: '1px',
                 backgroundColor: 'rgba(255, 255, 255, 0.3)'
               }} />
+              
+              <p style={{
+                color: 'rgba(255, 255, 255, 0.5)',
+                fontSize: '0.9rem',
+                marginTop: '2rem',
+                fontFamily: 'Helvetica, Arial, sans-serif'
+              }}>
+                {communityItems.length} Komunitas Aktif
+              </p>
             </div>
           </motion.div>
         )}
