@@ -2224,7 +2224,9 @@ export default function HomePage(): React.JSX.Element {
         )}
       </AnimatePresence>
 
-{/* VISUAL DESIGNER OVERLAY - DIPERBAIKI TANPA MAP */}
+
+
+      {/* VISUAL DESIGNER OVERLAY - DIPERBAIKI TANPA MAP */}
 <AnimatePresence>
   {showVisualDesignerOverlay && (
     <motion.div
@@ -2384,7 +2386,7 @@ export default function HomePage(): React.JSX.Element {
               Every pixel tells a story, combining beauty with usability.
             </p>
             
-            {/* Design Philosophy - Menggunakan angka minimalis */}
+            {/* Design Philosophy - TETAP SAMA, hanya angka */}
             <div style={{ marginTop: '3rem' }}>
               <h3 style={{
                 fontSize: '1.5rem',
@@ -2397,41 +2399,42 @@ export default function HomePage(): React.JSX.Element {
                 Design Philosophy
               </h3>
               <div style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: '1.5rem'
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '1rem'
               }}>
                 {[
-                  { number: '01', label: 'Minimalist' },
-                  { number: '02', label: 'Responsive' },
-                  { number: '03', label: 'Modern' },
-                  { number: '04', label: 'Fast' }
+                  { label: 'Minimalist', desc: 'Clean, simple, purposeful' },
+                  { label: 'Responsive', desc: 'Adapts to every screen' },
+                  { label: 'Modern', desc: 'Contemporary aesthetics' },
+                  { label: 'Fast', desc: 'Optimized performance' }
                 ].map((item, index) => (
                   <motion.div
                     key={index}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.4 + (index * 0.1) }}
                     style={{
-                      padding: '1rem',
-                      backgroundColor: 'rgba(255,255,255,0.02)',
-                      border: '1px solid rgba(255,255,255,0.1)'
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '1rem',
+                      padding: '0.5rem 0',
+                      borderBottom: '1px solid rgba(255,255,255,0.05)'
                     }}
                   >
                     <div style={{
-                      color: 'rgba(255,255,255,0.3)',
-                      fontSize: '0.9rem',
-                      fontFamily: 'monospace',
-                      marginBottom: '0.5rem'
-                    }}>
-                      {item.number}
-                    </div>
-                    <div style={{
-                      color: 'white',
-                      fontSize: '1.2rem',
-                      fontWeight: '300'
-                    }}>
-                      {item.label}
+                      width: '8px',
+                      height: '8px',
+                      borderRadius: '50%',
+                      backgroundColor: 'rgba(255,255,255,0.3)'
+                    }} />
+                    <div>
+                      <span style={{ color: 'white', fontSize: '1.1rem', marginRight: '1rem' }}>
+                        {item.label}
+                      </span>
+                      <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.9rem' }}>
+                        {item.desc}
+                      </span>
                     </div>
                   </motion.div>
                 ))}
@@ -2439,63 +2442,21 @@ export default function HomePage(): React.JSX.Element {
             </div>
           </motion.div>
 
-          {/* Kolom Kanan - HANYA DESIGN PHILOSOPHY dengan angka */}
+          {/* Kolom Kanan - SEMUA DIHAPUS (stats, skills, tools) */}
           <motion.div
             initial={{ opacity: 0, x: 30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.4 }}
           >
-            {/* Stats, Skills & Expertise, Tools semuanya DIHAPUS */}
-            {/* Hanya menampilkan Design Philosophy yang sudah ada di kolom kiri */}
-            {/* Kolom kanan dibiarkan kosong dengan styling minimalis */}
-            <div style={{
-              height: '100%',
-              display: 'flex',
-              alignItems: 'flex-end',
-              justifyContent: 'flex-end'
-            }}>
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 0.3 }}
-                transition={{ delay: 0.8 }}
-                style={{
-                  width: '100px',
-                  height: '100px',
-                  border: '1px solid rgba(255,255,255,0.1)',
-                  marginBottom: '2rem'
-                }}
-              />
-            </div>
+            {/* KOSONG - semua konten dihapus */}
           </motion.div>
         </div>
 
-        {/* Tools Section - DIHAPUS isinya, hanya judul */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.7 }}
-          style={{
-            marginTop: '4rem',
-            padding: '2rem 0',
-            borderTop: '1px solid rgba(255,255,255,0.1)'
-          }}
-        >
-          <h3 style={{
-            fontSize: '1.5rem',
-            fontWeight: '300',
-            margin: '0 0 1rem 0',
-            color: 'white'
-          }}>
-            Tools & Technologies
-          </h3>
-          {/* Konten tools DIKOSONGKAN sesuai perintah */}
-          <div style={{ height: '1rem' }} />
-        </motion.div>
+        {/* Tools Section - DIHAPUS total (judul dan konten) */}
       </div>
     </motion.div>
   )}
 </AnimatePresence>
-
 
       
 
