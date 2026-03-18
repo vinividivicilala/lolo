@@ -293,6 +293,9 @@ export default function HomePage(): React.JSX.Element {
   const visualDesignerOverlayRef = useRef<HTMLDivElement>(null);
   const indonesiaOverlayRef = useRef<HTMLDivElement>(null);
 
+  // Ref untuk tombol close Indonesia
+  const indonesiaCloseRef = useRef<HTMLDivElement>(null);
+
   const [openSection, setOpenSection] = useState<string | null>(null);
 
   // Fungsi untuk toggle section
@@ -1140,6 +1143,35 @@ export default function HomePage(): React.JSX.Element {
   const handleCloseProductOverlay = () => setShowProductOverlay(false);
   const handleCloseVisualDesignerOverlay = () => setShowVisualDesignerOverlay(false);
   const handleCloseIndonesiaOverlay = () => setShowIndonesiaOverlay(false);
+
+  // Animasi GSAP untuk tombol close Indonesia
+  useEffect(() => {
+    if (showIndonesiaOverlay && indonesiaCloseRef.current) {
+      gsap.fromTo(indonesiaCloseRef.current,
+        { opacity: 0, scale: 0.8, rotate: -90 },
+        { opacity: 1, scale: 1, rotate: 0, duration: 0.8, delay: 0.3, ease: "power3.out" }
+      );
+      
+      // Animasi hover
+      indonesiaCloseRef.current.addEventListener('mouseenter', () => {
+        gsap.to(indonesiaCloseRef.current, {
+          scale: 1.1,
+          rotate: 90,
+          duration: 0.3,
+          ease: "power2.out"
+        });
+      });
+      
+      indonesiaCloseRef.current.addEventListener('mouseleave', () => {
+        gsap.to(indonesiaCloseRef.current, {
+          scale: 1,
+          rotate: 0,
+          duration: 0.3,
+          ease: "power2.out"
+        });
+      });
+    }
+  }, [showIndonesiaOverlay]);
 
   // Animasi GSAP Loading
   useEffect(() => {
@@ -2327,7 +2359,7 @@ export default function HomePage(): React.JSX.Element {
         )}
       </AnimatePresence>
 
-      {/* INDONESIA OVERLAY */}
+      {/* INDONESIA OVERLAY - DIPERBAIKI SESUAI PERMINTAAN */}
       <AnimatePresence>
         {showIndonesiaOverlay && (
           <motion.div
@@ -2351,6 +2383,7 @@ export default function HomePage(): React.JSX.Element {
               fontFamily: 'Helvetica, Arial, sans-serif'
             }}
           >
+            {/* Background Pattern Minimalis */}
             <div style={{
               position: 'absolute',
               top: 0,
@@ -2358,44 +2391,39 @@ export default function HomePage(): React.JSX.Element {
               width: '100%',
               height: '100%',
               backgroundImage: `
-                radial-gradient(circle at 10% 20%, rgba(255,255,255,0.02) 0%, transparent 20%),
-                radial-gradient(circle at 90% 80%, rgba(255,255,255,0.02) 0%, transparent 20%),
-                repeating-linear-gradient(45deg, rgba(255,255,255,0.01) 0px, rgba(255,255,255,0.01) 1px, transparent 1px, transparent 30px)
+                radial-gradient(circle at 20% 30%, rgba(0,255,0,0.02) 0%, transparent 30%),
+                radial-gradient(circle at 80% 70%, rgba(0,255,0,0.02) 0%, transparent 30%),
+                repeating-linear-gradient(45deg, rgba(255,255,255,0.01) 0px, rgba(255,255,255,0.01) 2px, transparent 2px, transparent 30px)
               `,
               pointerEvents: 'none',
               zIndex: 1
             }} />
 
+            {/* Tombol Close Minimalis dengan GSAP */}
             <motion.div
-              initial={{ y: -100, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.3 }}
+              ref={indonesiaCloseRef}
               onClick={handleCloseIndonesiaOverlay}
               style={{
                 position: 'fixed',
                 top: '2rem',
                 right: '2rem',
-                width: '60px',
-                height: '60px',
-                borderRadius: '50%',
-                border: '1px solid rgba(255,255,255,0.2)',
+                width: '50px',
+                height: '50px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 cursor: 'pointer',
                 zIndex: 10020,
-                backgroundColor: 'rgba(0,0,0,0.5)',
-                backdropFilter: 'blur(10px)',
-                fontSize: '2rem',
-                color: 'white'
-              }}
-              whileHover={{ 
-                scale: 1.1,
-                borderColor: 'white',
-                backgroundColor: 'rgba(255,255,255,0.1)'
+                backgroundColor: 'transparent',
+                border: '1px solid rgba(255,255,255,0.2)',
+                borderRadius: '0',
+                transform: 'rotate(0deg)'
               }}
             >
-              ←
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5">
+                <path d="M18 6L6 18" />
+                <path d="M6 6L18 18" />
+              </svg>
             </motion.div>
 
             <div style={{
@@ -2406,10 +2434,11 @@ export default function HomePage(): React.JSX.Element {
               margin: '0 auto',
               width: '100%'
             }}>
+              {/* Header dengan angka 03 dan panah SOUTH WEST */}
               <motion.div
                 initial={{ opacity: 0, x: -50 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.2 }}
+                transition={{ delay: 0.2, duration: 0.6 }}
                 style={{
                   marginBottom: '4rem',
                   display: 'flex',
@@ -2418,33 +2447,54 @@ export default function HomePage(): React.JSX.Element {
                   flexWrap: 'wrap'
                 }}
               >
-                <div>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '1.5rem'
+                }}>
                   <span style={{
-                    color: 'rgba(255,255,255,0.5)',
-                    fontSize: '1rem',
-                    letterSpacing: '4px',
-                    textTransform: 'uppercase',
-                    display: 'block',
-                    marginBottom: '1rem'
+                    color: 'rgba(255,255,255,0.3)',
+                    fontSize: '1.2rem',
+                    fontWeight: '300',
+                    letterSpacing: '2px',
+                    fontFamily: 'monospace'
                   }}>
-                    — 03
+                    03
                   </span>
+                  
+                  {/* SOUTH WEST ARROW */}
+                  <svg
+                    width="40"
+                    height="40"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="rgba(255,255,255,0.5)"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M17 7L7 17" />
+                    <path d="M7 7h10v10" />
+                  </svg>
+                  
                   <h1 style={{
                     fontSize: isMobile ? '4rem' : '7rem',
                     fontWeight: '300',
                     margin: 0,
                     lineHeight: 1,
-                    letterSpacing: '-2px'
+                    letterSpacing: '-2px',
+                    color: 'white'
                   }}>
                     INDONESIA
                   </h1>
                 </div>
+                
                 <motion.div
                   animate={{ scale: [1, 1.1, 1] }}
                   transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                   style={{
-                    width: '12px',
-                    height: '12px',
+                    width: '8px',
+                    height: '8px',
                     borderRadius: '50%',
                     backgroundColor: '#00FF00',
                     boxShadow: '0 0 20px #00FF00'
@@ -2452,12 +2502,14 @@ export default function HomePage(): React.JSX.Element {
                 />
               </motion.div>
 
+              {/* Grid Layout 2 Kolom */}
               <div style={{
                 display: 'grid',
-                gridTemplateColumns: isMobile ? '1fr' : '2fr 1fr',
+                gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
                 gap: '4rem',
                 marginBottom: '4rem'
               }}>
+                {/* Kolom Kiri - Map Peta Jakarta */}
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -2465,28 +2517,20 @@ export default function HomePage(): React.JSX.Element {
                 >
                   <div style={{
                     backgroundColor: 'rgba(255,255,255,0.02)',
-                    padding: '2rem',
-                    borderRadius: '20px',
-                    border: '1px solid rgba(255,255,255,0.1)',
+                    padding: '0',
+                    borderRadius: '0',
+                    border: 'none',
                     marginBottom: '2rem'
                   }}>
                     <div style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      marginBottom: '2rem'
-                    }}>
-                      <span style={{ fontSize: '1.2rem', fontWeight: '300' }}>Location Overview</span>
-                      <span style={{ color: '#00FF00', fontSize: '0.9rem' }}>● Active</span>
-                    </div>
-                    <div style={{
                       position: 'relative',
-                      height: '200px',
-                      backgroundColor: 'rgba(0,0,0,0.3)',
-                      borderRadius: '10px',
+                      height: isMobile ? '300px' : '400px',
+                      backgroundColor: '#0A1A0A',
+                      borderRadius: '0',
                       overflow: 'hidden',
-                      marginBottom: '1.5rem'
+                      border: '1px solid rgba(255,255,255,0.1)'
                     }}>
+                      {/* Grid Map */}
                       <div style={{
                         position: 'absolute',
                         top: 0,
@@ -2494,54 +2538,99 @@ export default function HomePage(): React.JSX.Element {
                         width: '100%',
                         height: '100%',
                         backgroundImage: `
-                          linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
-                          linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)
+                          linear-gradient(rgba(0,255,0,0.1) 1px, transparent 1px),
+                          linear-gradient(90deg, rgba(0,255,0,0.1) 1px, transparent 1px)
                         `,
-                        backgroundSize: '50px 50px'
+                        backgroundSize: '40px 40px'
                       }} />
-                      <motion.div
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        transition={{ delay: 0.6, type: "spring" }}
-                        style={{
-                          position: 'absolute',
-                          top: '60%',
-                          left: '70%',
-                          width: '20px',
-                          height: '20px',
-                          borderRadius: '50%',
-                          backgroundColor: '#00FF00',
-                          boxShadow: '0 0 30px #00FF00',
-                          transform: 'translate(-50%, -50%)'
-                        }}
-                      >
+                      
+                      {/* Garis Sungai/Kali */}
+                      <svg width="100%" height="100%" style={{ position: 'absolute', top: 0, left: 0 }}>
+                        <path d="M100,200 Q200,150 300,200 T500,180" stroke="rgba(0,255,0,0.3)" strokeWidth="2" fill="none" strokeDasharray="5,5" />
+                        <path d="M150,250 Q250,200 350,250 T550,230" stroke="rgba(0,255,0,0.3)" strokeWidth="2" fill="none" strokeDasharray="5,5" />
+                      </svg>
+                      
+                      {/* Titik-titik kota */}
+                      {[
+                        { top: '30%', left: '40%', label: 'Jakarta' },
+                        { top: '45%', left: '60%', label: 'Bekasi' },
+                        { top: '55%', left: '35%', label: 'Tangerang' },
+                        { top: '65%', left: '55%', label: 'Depok' },
+                        { top: '75%', left: '45%', label: 'Bogor' }
+                      ].map((city, index) => (
                         <motion.div
-                          animate={{ scale: [1, 1.5, 1] }}
-                          transition={{ duration: 2, repeat: Infinity }}
+                          key={index}
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          transition={{ delay: 0.5 + (index * 0.1), type: "spring" }}
                           style={{
                             position: 'absolute',
-                            top: '50%',
-                            left: '50%',
-                            width: '40px',
-                            height: '40px',
-                            borderRadius: '50%',
-                            backgroundColor: 'rgba(0,255,0,0.2)',
-                            transform: 'translate(-50%, -50%)'
+                            top: city.top,
+                            left: city.left,
+                            transform: 'translate(-50%, -50%)',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center'
                           }}
-                        />
-                      </motion.div>
-                    </div>
-                    <div style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      color: 'rgba(255,255,255,0.6)',
-                      fontSize: '0.9rem'
-                    }}>
-                      <span>Jakarta, Indonesia</span>
-                      <span>UTC+7</span>
+                        >
+                          <div style={{
+                            width: '8px',
+                            height: '8px',
+                            borderRadius: '50%',
+                            backgroundColor: index === 0 ? '#00FF00' : 'rgba(255,255,255,0.5)',
+                            boxShadow: index === 0 ? '0 0 20px #00FF00' : 'none',
+                            marginBottom: '4px'
+                          }} />
+                          <span style={{
+                            color: index === 0 ? '#00FF00' : 'rgba(255,255,255,0.5)',
+                            fontSize: '0.7rem',
+                            fontWeight: '300'
+                          }}>
+                            {city.label}
+                          </span>
+                        </motion.div>
+                      ))}
+                      
+                      {/* Pulau-pulau kecil */}
+                      <div style={{
+                        position: 'absolute',
+                        bottom: '10%',
+                        right: '10%',
+                        width: '30px',
+                        height: '20px',
+                        border: '1px solid rgba(0,255,0,0.2)',
+                        borderRadius: '50%',
+                        transform: 'rotate(10deg)'
+                      }} />
+                      <div style={{
+                        position: 'absolute',
+                        bottom: '15%',
+                        right: '15%',
+                        width: '20px',
+                        height: '15px',
+                        border: '1px solid rgba(0,255,0,0.2)',
+                        borderRadius: '50%',
+                        transform: 'rotate(-5deg)'
+                      }} />
+                      
+                      {/* Keterangan Map */}
+                      <div style={{
+                        position: 'absolute',
+                        bottom: '1rem',
+                        left: '1rem',
+                        display: 'flex',
+                        gap: '1rem',
+                        color: 'rgba(255,255,255,0.5)',
+                        fontSize: '0.7rem',
+                        fontFamily: 'monospace'
+                      }}>
+                        <span>● Jakarta</span>
+                        <span>○ Surrounding</span>
+                      </div>
                     </div>
                   </div>
                   
+                  {/* Info Grid - Hanya Waktu dan Timezone */}
                   <div style={{
                     display: 'grid',
                     gridTemplateColumns: '1fr 1fr',
@@ -2549,9 +2638,7 @@ export default function HomePage(): React.JSX.Element {
                   }}>
                     {[
                       { label: 'Current Time', value: jakartaTime },
-                      { label: 'Timezone', value: 'WIB (UTC+7)' },
-                      { label: 'Coordinates', value: '6.2°S, 106.8°E' },
-                      { label: 'Population', value: '275M+' }
+                      { label: 'Timezone', value: 'WIB (UTC+7)' }
                     ].map((item, index) => (
                       <motion.div
                         key={index}
@@ -2560,15 +2647,15 @@ export default function HomePage(): React.JSX.Element {
                         transition={{ delay: 0.4 + (index * 0.1) }}
                         style={{
                           padding: '1rem',
-                          backgroundColor: 'rgba(255,255,255,0.02)',
+                          backgroundColor: 'transparent',
                           border: '1px solid rgba(255,255,255,0.1)',
-                          borderRadius: '10px'
+                          borderRadius: '0'
                         }}
                       >
-                        <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', marginBottom: '0.3rem' }}>
+                        <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', marginBottom: '0.3rem', fontFamily: 'monospace' }}>
                           {item.label}
                         </div>
-                        <div style={{ fontSize: '1.1rem', fontWeight: '300' }}>
+                        <div style={{ fontSize: '1.1rem', fontWeight: '300', color: 'white' }}>
                           {item.value}
                         </div>
                       </motion.div>
@@ -2576,6 +2663,7 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 </motion.div>
 
+                {/* Kolom Kanan - Informasi */}
                 <motion.div
                   initial={{ opacity: 0, x: 30 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -2584,7 +2672,8 @@ export default function HomePage(): React.JSX.Element {
                   <h2 style={{
                     fontSize: '2rem',
                     fontWeight: '300',
-                    margin: '0 0 2rem 0'
+                    margin: '0 0 2rem 0',
+                    color: 'white'
                   }}>
                     Based in Jakarta
                   </h2>
@@ -2620,7 +2709,7 @@ export default function HomePage(): React.JSX.Element {
                         }}
                         whileHover={{ borderLeftColor: '#00FF00', paddingLeft: '1.5rem' }}
                       >
-                        <div style={{ fontSize: '1.2rem', marginBottom: '0.3rem' }}>{location.city}</div>
+                        <div style={{ fontSize: '1.2rem', marginBottom: '0.3rem', color: 'white' }}>{location.city}</div>
                         <div style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.5)' }}>{location.desc}</div>
                       </motion.div>
                     ))}
@@ -2628,13 +2717,14 @@ export default function HomePage(): React.JSX.Element {
                 </motion.div>
               </div>
 
+              {/* Footer minimal - tanpa teks menuru dan medsos */}
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.6 }}
                 style={{
                   marginTop: '4rem',
-                  padding: '2rem 0',
+                  padding: '2rem 0 0 0',
                   borderTop: '1px solid rgba(255,255,255,0.1)',
                   display: 'flex',
                   justifyContent: 'space-between',
