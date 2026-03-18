@@ -254,6 +254,55 @@ export default function HomePage(): React.JSX.Element {
     { id: 6, name: "Pendidikan" }
   ];
 
+  // Data deskripsi untuk setiap bagian di halaman utama
+  const sectionDescriptions = {
+    docs: {
+      title: "Dokumentasi",
+      description: "Panduan lengkap penggunaan platform MENURU, termasuk fitur-fitur, tutorial, dan best practices untuk memaksimalkan pengalaman Anda.",
+      features: ["API Reference", "User Guide", "Integration", "Examples"]
+    },
+    update: {
+      title: "Update",
+      description: "Informasi terbaru tentang pengembangan platform, rilis fitur baru, perbaikan bug, dan roadmap pengembangan MENURU ke depan.",
+      features: ["Version History", "New Features", "Bug Fixes", "Roadmap"]
+    },
+    timeline: {
+      title: "Timeline",
+      description: "Linimasa aktivitas dan perkembangan proyek MENURU, mencatat perjalanan dari awal hingga sekarang dalam bentuk kronologis.",
+      features: ["Project History", "Milestones", "Achievements", "Future Plans"]
+    },
+    chatbot: {
+      title: "Chatbot AI",
+      description: "Asisten AI cerdas yang siap membantu menjawab pertanyaan, memberikan saran, dan membantu navigasi platform MENURU.",
+      features: ["24/7 Availability", "Smart Responses", "Context Aware", "Multi-language"]
+    },
+    community: {
+      title: "Community",
+      description: "Ruang bagi pengguna MENURU untuk berinteraksi, berbagi ide, berdiskusi, dan membangun koneksi dengan sesama kreator.",
+      features: ["Forums", "Events", "Members", "Collaboration"]
+    },
+    news: {
+      title: "News",
+      description: "Berita dan pengumuman terbaru seputar MENURU, termasuk update platform, acara komunitas, dan kolaborasi menarik.",
+      features: ["Announcements", "Events", "Partnerships", "Media Coverage"]
+    },
+    stories: {
+      title: "Stories",
+      description: "Kumpulan cerita inspiratif dari pengguna MENURU, perjalanan kreatif mereka, dan bagaimana platform membantu mewujudkan ide.",
+      features: ["User Stories", "Success Stories", "Creative Journey", "Testimonials"]
+    },
+    note: {
+      title: "Note",
+      description: "Fitur catatan pribadi untuk merekam ide, pemikiran, dan inspirasi. Organisasikan catatan Anda dalam berbagai kategori.",
+      features: ["Personal Notes", "Collaborative Notes", "Categories", "Search & Filter"]
+    },
+    calendar: {
+      title: "Calendar",
+      description: "Kalender kegiatan yang menampilkan jadwal acara, deadline, dan event penting seputar MENURU dan komunitas.",
+      features: ["Events Schedule", "Deadlines", "Workshops", "Reminders"]
+    }
+  };
+
   const headerRef = useRef<HTMLDivElement>(null);
   const topNavRef = useRef<HTMLDivElement>(null);
   const topicContainerRef = useRef<HTMLDivElement>(null);
@@ -293,7 +342,8 @@ export default function HomePage(): React.JSX.Element {
   const visualDesignerOverlayRef = useRef<HTMLDivElement>(null);
   const indonesiaOverlayRef = useRef<HTMLDivElement>(null);
 
-  // Ref untuk tombol close Indonesia
+  // Ref untuk tombol close
+  const visualDesignerCloseRef = useRef<HTMLDivElement>(null);
   const indonesiaCloseRef = useRef<HTMLDivElement>(null);
 
   const [openSection, setOpenSection] = useState<string | null>(null);
@@ -1144,10 +1194,58 @@ export default function HomePage(): React.JSX.Element {
   const handleCloseVisualDesignerOverlay = () => setShowVisualDesignerOverlay(false);
   const handleCloseIndonesiaOverlay = () => setShowIndonesiaOverlay(false);
 
-  // Animasi GSAP untuk tombol close Indonesia (hanya X)
+  // Animasi GSAP untuk tombol close Visual Designer
+  useEffect(() => {
+    if (showVisualDesignerOverlay && visualDesignerCloseRef.current) {
+      gsap.fromTo(visualDesignerCloseRef.current,
+        { 
+          opacity: 0, 
+          scale: 0.5,
+          rotation: -180
+        },
+        { 
+          opacity: 1, 
+          scale: 1, 
+          rotation: 0,
+          duration: 0.8, 
+          delay: 0.3, 
+          ease: "power3.out" 
+        }
+      );
+      
+      const hoverIn = () => {
+        gsap.to(visualDesignerCloseRef.current, {
+          scale: 1.2,
+          rotation: 90,
+          duration: 0.3,
+          ease: "power2.out"
+        });
+      };
+      
+      const hoverOut = () => {
+        gsap.to(visualDesignerCloseRef.current, {
+          scale: 1,
+          rotation: 0,
+          duration: 0.3,
+          ease: "power2.out"
+        });
+      };
+      
+      visualDesignerCloseRef.current.addEventListener('mouseenter', hoverIn);
+      visualDesignerCloseRef.current.addEventListener('mouseleave', hoverOut);
+      
+      return () => {
+        if (visualDesignerCloseRef.current) {
+          visualDesignerCloseRef.current.removeEventListener('mouseenter', hoverIn);
+          visualDesignerCloseRef.current.removeEventListener('mouseleave', hoverOut);
+        }
+      };
+    }
+  }, [showVisualDesignerOverlay]);
+
+  // Animasi GSAP untuk tombol close Indonesia
   useEffect(() => {
     if (showIndonesiaOverlay && indonesiaCloseRef.current) {
-      // Animasi masuk
       gsap.fromTo(indonesiaCloseRef.current,
         { 
           opacity: 0, 
@@ -1164,7 +1262,6 @@ export default function HomePage(): React.JSX.Element {
         }
       );
       
-      // Animasi hover
       const hoverIn = () => {
         gsap.to(indonesiaCloseRef.current, {
           scale: 1.2,
@@ -2127,15 +2224,15 @@ export default function HomePage(): React.JSX.Element {
         )}
       </AnimatePresence>
 
-      {/* VISUAL DESIGNER OVERLAY */}
+      {/* VISUAL DESIGNER OVERLAY - DIPERBAIKI TANPA MAP */}
       <AnimatePresence>
         {showVisualDesignerOverlay && (
           <motion.div
             ref={visualDesignerOverlayRef}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.8 }}
+            initial={{ y: '100%' }}
+            animate={{ y: 0 }}
+            exit={{ y: '100%' }}
+            transition={{ duration: 0.8, ease: [0.76, 0, 0.24, 1] }}
             style={{
               position: 'fixed',
               top: 0,
@@ -2151,52 +2248,47 @@ export default function HomePage(): React.JSX.Element {
               fontFamily: 'Helvetica, Arial, sans-serif'
             }}
           >
-            <motion.div
-              animate={{ x: ['-100%', '100%'] }}
-              transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '200%',
-                height: '100%',
-                background: 'repeating-linear-gradient(90deg, transparent, transparent 50px, rgba(255,255,255,0.02) 50px, rgba(255,255,255,0.02) 51px)',
-                pointerEvents: 'none',
-                zIndex: 1
-              }}
-            />
+            {/* Background Pattern */}
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              backgroundImage: `
+                radial-gradient(circle at 30% 40%, rgba(255,255,255,0.02) 0%, transparent 40%),
+                radial-gradient(circle at 70% 60%, rgba(255,255,255,0.02) 0%, transparent 40%),
+                repeating-linear-gradient(45deg, rgba(255,255,255,0.005) 0px, rgba(255,255,255,0.005) 2px, transparent 2px, transparent 12px)
+              `,
+              pointerEvents: 'none',
+              zIndex: 1
+            }} />
 
-            <motion.div
-              initial={{ opacity: 0, rotate: -180 }}
-              animate={{ opacity: 1, rotate: 0 }}
-              transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
+            {/* Tombol Close Minimalis */}
+            <div
+              ref={visualDesignerCloseRef}
               onClick={handleCloseVisualDesignerOverlay}
               style={{
                 position: 'fixed',
                 top: '2rem',
                 right: '2rem',
-                width: '60px',
-                height: '60px',
-                borderRadius: '0',
-                border: '1px solid rgba(255,255,255,0.2)',
+                width: '50px',
+                height: '50px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 cursor: 'pointer',
                 zIndex: 10020,
-                backgroundColor: 'rgba(0,0,0,0.5)',
-                fontSize: '2rem',
                 color: 'white',
-                transform: 'rotate(45deg)'
-              }}
-              whileHover={{ 
-                rotate: '225deg',
-                borderColor: 'white',
-                backgroundColor: 'rgba(255,255,255,0.1)'
+                fontSize: '2rem',
+                fontWeight: '300',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                opacity: 0,
+                transform: 'scale(0.5) rotate(-180deg)'
               }}
             >
-              +
-            </motion.div>
+              ×
+            </div>
 
             <div style={{
               position: 'relative',
@@ -2206,115 +2298,81 @@ export default function HomePage(): React.JSX.Element {
               margin: '0 auto',
               width: '100%'
             }}>
+              {/* Header dengan angka 02 dan panah SOUTH WEST */}
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.2 }}
+                initial={{ opacity: 0, x: -50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.2, duration: 0.6 }}
                 style={{
                   marginBottom: '4rem',
                   display: 'flex',
-                  flexDirection: isMobile ? 'column' : 'row',
-                  justifyContent: 'space-between',
-                  alignItems: isMobile ? 'flex-start' : 'flex-end'
+                  alignItems: 'center',
+                  gap: '2rem',
+                  flexWrap: 'wrap'
                 }}
               >
-                <div>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '1.5rem'
+                }}>
                   <span style={{
-                    color: 'rgba(255,255,255,0.5)',
-                    fontSize: '1rem',
-                    letterSpacing: '4px',
-                    textTransform: 'uppercase',
-                    display: 'block',
-                    marginBottom: '1rem'
-                  }}>
-                    — 02
-                  </span>
-                  <h1 style={{
-                    fontSize: isMobile ? '4rem' : '7rem',
+                    color: 'rgba(255,255,255,0.3)',
+                    fontSize: '1.2rem',
                     fontWeight: '300',
-                    margin: 0,
-                    lineHeight: 1,
-                    letterSpacing: '-2px'
+                    letterSpacing: '2px',
+                    fontFamily: 'monospace'
                   }}>
-                    VISUAL
-                  </h1>
+                    02
+                  </span>
+                  
+                  {/* SOUTH WEST ARROW */}
+                  <svg
+                    width="40"
+                    height="40"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="rgba(255,255,255,0.5)"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M17 7L7 17" />
+                    <path d="M7 7h10v10" />
+                  </svg>
+                  
                   <h1 style={{
                     fontSize: isMobile ? '4rem' : '7rem',
                     fontWeight: '300',
                     margin: 0,
                     lineHeight: 1,
                     letterSpacing: '-2px',
-                    color: 'rgba(255,255,255,0.7)'
+                    color: 'white'
                   }}>
-                    DESIGNER
+                    VISUAL DESIGNER
                   </h1>
                 </div>
-                <div style={{
-                  fontSize: '1.2rem',
-                  color: 'rgba(255,255,255,0.6)',
-                  maxWidth: '300px',
-                  textAlign: isMobile ? 'left' : 'right'
-                }}>
-                  Crafting digital experiences with minimalist aesthetics
-                </div>
               </motion.div>
 
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)',
-                  gap: '2rem',
-                  marginBottom: '4rem'
-                }}
-              >
-                {[
-                  { number: '50+', label: 'Projects Completed' },
-                  { number: '30+', label: 'Happy Clients' },
-                  { number: '5+', label: 'Years Experience' }
-                ].map((stat, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.4 + (index * 0.1) }}
-                    style={{
-                      padding: '2rem',
-                      backgroundColor: 'rgba(255,255,255,0.02)',
-                      border: '1px solid rgba(255,255,255,0.1)',
-                      textAlign: 'center'
-                    }}
-                    whileHover={{
-                      backgroundColor: 'rgba(255,255,255,0.05)',
-                      borderColor: 'rgba(255,255,255,0.3)'
-                    }}
-                  >
-                    <div style={{ fontSize: '3rem', fontWeight: '300', marginBottom: '0.5rem' }}>{stat.number}</div>
-                    <div style={{ fontSize: '1rem', color: 'rgba(255,255,255,0.7)' }}>{stat.label}</div>
-                  </motion.div>
-                ))}
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.5 }}
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
-                  gap: '4rem',
-                  marginBottom: '4rem'
-                }}
-              >
-                <div>
+              {/* Grid Layout 2 Kolom */}
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
+                gap: '4rem'
+              }}>
+                {/* Kolom Kiri */}
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.3 }}
+                >
                   <h2 style={{
-                    fontSize: '2.5rem',
+                    fontSize: '2rem',
                     fontWeight: '300',
-                    margin: '0 0 2rem 0'
+                    margin: '0 0 2rem 0',
+                    color: 'white'
                   }}>
-                    Design Philosophy
+                    Visual Designer
                   </h2>
                   <p style={{
                     fontSize: '1.2rem',
@@ -2322,56 +2380,205 @@ export default function HomePage(): React.JSX.Element {
                     color: 'rgba(255,255,255,0.7)',
                     marginBottom: '2rem'
                   }}>
-                    Every pixel tells a story. Our approach combines minimalist aesthetics 
-                    with functional design, creating websites that are both beautiful and intuitive.
+                    Crafting digital experiences with minimalist aesthetics and functional design. 
+                    Every pixel tells a story, combining beauty with usability.
                   </p>
+                  
+                  {/* Design Philosophy */}
+                  <div style={{ marginTop: '3rem' }}>
+                    <h3 style={{
+                      fontSize: '1.5rem',
+                      fontWeight: '300',
+                      margin: '0 0 1.5rem 0',
+                      color: 'white',
+                      borderBottom: '1px solid rgba(255,255,255,0.1)',
+                      paddingBottom: '0.5rem'
+                    }}>
+                      Design Philosophy
+                    </h3>
+                    <div style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '1rem'
+                    }}>
+                      {[
+                        { label: 'Minimalist', desc: 'Clean, simple, purposeful' },
+                        { label: 'Responsive', desc: 'Adapts to every screen' },
+                        { label: 'Modern', desc: 'Contemporary aesthetics' },
+                        { label: 'Fast', desc: 'Optimized performance' }
+                      ].map((item, index) => (
+                        <motion.div
+                          key={index}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: 0.4 + (index * 0.1) }}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '1rem',
+                            padding: '0.5rem 0',
+                            borderBottom: '1px solid rgba(255,255,255,0.05)'
+                          }}
+                        >
+                          <div style={{
+                            width: '8px',
+                            height: '8px',
+                            borderRadius: '50%',
+                            backgroundColor: 'rgba(255,255,255,0.3)'
+                          }} />
+                          <div>
+                            <span style={{ color: 'white', fontSize: '1.1rem', marginRight: '1rem' }}>
+                              {item.label}
+                            </span>
+                            <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.9rem' }}>
+                              {item.desc}
+                            </span>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </div>
+                </motion.div>
+
+                {/* Kolom Kanan */}
+                <motion.div
+                  initial={{ opacity: 0, x: 30 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.4 }}
+                >
+                  {/* Stats */}
                   <div style={{
-                    display: 'flex',
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 1fr',
                     gap: '1rem',
-                    flexWrap: 'wrap'
+                    marginBottom: '3rem'
                   }}>
-                    {['Minimalist', 'Responsive', 'Modern', 'Fast'].map((tag) => (
-                      <span key={tag} style={{
-                        padding: '0.5rem 1.5rem',
-                        border: '1px solid rgba(255,255,255,0.2)',
-                        borderRadius: '30px',
-                        fontSize: '0.9rem'
-                      }}>
-                        {tag}
-                      </span>
+                    {[
+                      { number: '50+', label: 'Projects' },
+                      { number: '30+', label: 'Clients' },
+                      { number: '5+', label: 'Years' },
+                      { number: '100%', label: 'Satisfaction' }
+                    ].map((stat, index) => (
+                      <motion.div
+                        key={index}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.5 + (index * 0.1) }}
+                        style={{
+                          padding: '1.5rem',
+                          backgroundColor: 'rgba(255,255,255,0.02)',
+                          border: '1px solid rgba(255,255,255,0.1)',
+                          textAlign: 'center'
+                        }}
+                      >
+                        <div style={{ fontSize: '2rem', fontWeight: '300', color: 'white' }}>{stat.number}</div>
+                        <div style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.5)' }}>{stat.label}</div>
+                      </motion.div>
                     ))}
                   </div>
-                </div>
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(2, 1fr)',
-                  gap: '1rem'
+
+                  {/* Skills */}
+                  <h3 style={{
+                    fontSize: '1.5rem',
+                    fontWeight: '300',
+                    margin: '0 0 1.5rem 0',
+                    color: 'white',
+                    borderBottom: '1px solid rgba(255,255,255,0.1)',
+                    paddingBottom: '0.5rem'
+                  }}>
+                    Skills & Expertise
+                  </h3>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    {[
+                      { skill: 'UI/UX Design', level: '90%' },
+                      { skill: 'Visual Identity', level: '85%' },
+                      { skill: 'Frontend Development', level: '80%' },
+                      { skill: 'Motion Design', level: '75%' }
+                    ].map((item, index) => (
+                      <motion.div
+                        key={index}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.6 + (index * 0.1) }}
+                      >
+                        <div style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          marginBottom: '0.3rem',
+                          color: 'rgba(255,255,255,0.7)'
+                        }}>
+                          <span>{item.skill}</span>
+                          <span>{item.level}</span>
+                        </div>
+                        <div style={{
+                          width: '100%',
+                          height: '4px',
+                          backgroundColor: 'rgba(255,255,255,0.1)',
+                          borderRadius: '2px',
+                          overflow: 'hidden'
+                        }}>
+                          <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: item.level }}
+                            transition={{ delay: 0.8 + (index * 0.1), duration: 1 }}
+                            style={{
+                              height: '100%',
+                              backgroundColor: 'white',
+                              borderRadius: '2px'
+                            }}
+                          />
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                </motion.div>
+              </div>
+
+              {/* Tools Section */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.7 }}
+                style={{
+                  marginTop: '4rem',
+                  padding: '2rem 0',
+                  borderTop: '1px solid rgba(255,255,255,0.1)'
+                }}
+              >
+                <h3 style={{
+                  fontSize: '1.5rem',
+                  fontWeight: '300',
+                  margin: '0 0 2rem 0',
+                  color: 'white'
                 }}>
-                  {[1, 2, 3, 4].map((item) => (
+                  Tools & Technologies
+                </h3>
+                <div style={{
+                  display: 'flex',
+                  gap: '2rem',
+                  flexWrap: 'wrap',
+                  justifyContent: 'center'
+                }}>
+                  {['Figma', 'Adobe XD', 'Photoshop', 'Illustrator', 'After Effects', 'Framer', 'Webflow'].map((tool, index) => (
                     <motion.div
-                      key={item}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.6 + (item * 0.1) }}
+                      key={index}
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: 0.8 + (index * 0.1) }}
                       style={{
-                        aspectRatio: '1',
-                        backgroundColor: 'rgba(255,255,255,0.03)',
-                        border: '1px solid rgba(255,255,255,0.1)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '2rem',
-                        color: 'rgba(255,255,255,0.3)'
+                        padding: '0.8rem 2rem',
+                        border: '1px solid rgba(255,255,255,0.2)',
+                        borderRadius: '30px',
+                        color: 'rgba(255,255,255,0.8)',
+                        fontSize: '1rem'
                       }}
                       whileHover={{
-                        backgroundColor: 'rgba(255,255,255,0.08)',
-                        borderColor: 'rgba(255,255,255,0.3)'
+                        borderColor: 'white',
+                        color: 'white',
+                        scale: 1.05
                       }}
                     >
-                      {item === 1 && '🖌️'}
-                      {item === 2 && '🎨'}
-                      {item === 3 && '✨'}
-                      {item === 4 && '🚀'}
+                      {tool}
                     </motion.div>
                   ))}
                 </div>
@@ -2381,7 +2588,7 @@ export default function HomePage(): React.JSX.Element {
         )}
       </AnimatePresence>
 
-      {/* INDONESIA OVERLAY - DIPERBAIKI SESUAI PERMINTAAN */}
+      {/* INDONESIA OVERLAY */}
       <AnimatePresence>
         {showIndonesiaOverlay && (
           <motion.div
@@ -2421,7 +2628,7 @@ export default function HomePage(): React.JSX.Element {
               zIndex: 1
             }} />
 
-            {/* Tombol Close Minimalis - HANYA X dengan GSAP */}
+            {/* Tombol Close Minimalis */}
             <div
               ref={indonesiaCloseRef}
               onClick={handleCloseIndonesiaOverlay}
@@ -2567,23 +2774,14 @@ export default function HomePage(): React.JSX.Element {
                     we bring a unique perspective shaped by Indonesia's rich culture 
                     and rapid digital transformation.
                   </p>
-                  <div style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '1rem'
-                  }}>
-                    {/* Current Time dan Timezone dihapus sesuai permintaan */}
-                  </div>
                 </motion.div>
               </div>
-
-              {/* Footer dihapus total sesuai permintaan - tidak ada teks apapun */}
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Note Overlay */}
+      {/* Note Overlay - DENGAN DESKRIPSI */}
       <AnimatePresence>
         {showNoteOverlay && (
           <motion.div
@@ -2622,7 +2820,7 @@ export default function HomePage(): React.JSX.Element {
                 fontFamily: 'Helvetica, Arial, sans-serif',
                 letterSpacing: '1px'
               }}>
-                Note Topics
+                {sectionDescriptions.note.title}
               </h2>
               <motion.button
                 onClick={handleCloseNoteOverlay}
@@ -2649,320 +2847,82 @@ export default function HomePage(): React.JSX.Element {
             <div style={{
               flex: 1,
               overflowY: 'auto',
-              padding: isMobile ? '2rem 1.5rem' : '3rem',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '2rem'
+              padding: isMobile ? '2rem 1.5rem' : '3rem'
             }}>
-              <div>
-                <h3 style={{
-                  color: 'white',
-                  fontSize: isMobile ? '1.5rem' : '2rem',
-                  fontWeight: '300',
-                  margin: '0 0 1.5rem 0',
-                  fontFamily: 'Helvetica, Arial, sans-serif',
-                  letterSpacing: '0.5px',
-                  borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-                  paddingBottom: '0.5rem'
-                }}>
-                  Catatan Pribadi
-                </h3>
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-                  gap: '1.5rem'
-                }}>
-                  {[1, 2, 3, 4].map((item) => (
-                    <motion.div
-                      key={`personal-${item}`}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: item * 0.1 }}
-                      style={{
-                        backgroundColor: 'rgba(255, 255, 255, 0.03)',
-                        border: '1px solid rgba(255, 255, 255, 0.1)',
-                        borderRadius: '12px',
-                        padding: '1.5rem',
-                        cursor: 'pointer',
-                        transition: 'all 0.3s ease'
-                      }}
-                      whileHover={{ 
-                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                        borderColor: 'rgba(255, 255, 255, 0.2)',
-                        y: -2
-                      }}
-                    >
-                      <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.8rem',
-                        marginBottom: '1rem'
-                      }}>
-                        <div style={{
-                          width: '32px',
-                          height: '32px',
-                          borderRadius: '50%',
-                          backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontSize: '1rem',
-                          color: 'white'
-                        }}>
-                          📝
-                        </div>
-                        <span style={{
-                          color: 'rgba(255, 255, 255, 0.6)',
-                          fontSize: '0.8rem',
-                          fontFamily: 'monospace'
-                        }}>
-                          #{item}
-                        </span>
-                      </div>
-                      <h4 style={{
-                        color: 'white',
-                        fontSize: '1.2rem',
-                        fontWeight: '400',
-                        margin: '0 0 0.5rem 0',
-                        fontFamily: 'Helvetica, Arial, sans-serif'
-                      }}>
-                        {item === 1 && 'Creative Process'}
-                        {item === 2 && 'Design Thinking'}
-                        {item === 3 && 'UX Research'}
-                        {item === 4 && 'Development Notes'}
-                      </h4>
-                      <p style={{
-                        color: 'rgba(255, 255, 255, 0.7)',
-                        fontSize: '0.9rem',
-                        margin: 0,
-                        lineHeight: 1.5,
-                        fontFamily: 'Helvetica, Arial, sans-serif'
-                      }}>
-                        {item === 1 && 'Exploring creative workflows and methodologies for better output.'}
-                        {item === 2 && 'Documenting design thinking processes and problem-solving approaches.'}
-                        {item === 3 && 'Research findings and user behavior analysis.'}
-                        {item === 4 && 'Technical notes and development best practices.'}
-                      </p>
-                      <div style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        marginTop: '1rem'
-                      }}>
-                        <span style={{
-                          color: 'rgba(255, 255, 255, 0.4)',
-                          fontSize: '0.75rem'
-                        }}>
-                          12 entries
-                        </span>
-                        <span style={{
-                          color: 'white',
-                          fontSize: '0.8rem',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.3rem'
-                        }}>
-                          View all
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-                            <path d="M5 12h14"/>
-                            <path d="M12 5l7 7-7 7"/>
-                          </svg>
-                        </span>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
+              <p style={{
+                color: 'rgba(255,255,255,0.8)',
+                fontSize: '1.2rem',
+                lineHeight: 1.8,
+                marginBottom: '3rem',
+                fontFamily: 'Helvetica, Arial, sans-serif'
+              }}>
+                {sectionDescriptions.note.description}
+              </p>
+
+              <h3 style={{
+                color: 'white',
+                fontSize: '1.5rem',
+                fontWeight: '300',
+                margin: '0 0 1.5rem 0',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                letterSpacing: '0.5px',
+                borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+                paddingBottom: '0.5rem'
+              }}>
+                Features
+              </h3>
+              
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+                gap: '1rem',
+                marginBottom: '3rem'
+              }}>
+                {sectionDescriptions.note.features.map((feature, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    style={{
+                      padding: '1rem',
+                      backgroundColor: 'rgba(255,255,255,0.03)',
+                      border: '1px solid rgba(255,255,255,0.1)',
+                      borderRadius: '8px',
+                      textAlign: 'center',
+                      color: 'white'
+                    }}
+                  >
+                    {feature}
+                  </motion.div>
+                ))}
               </div>
 
-              <div>
-                <h3 style={{
+              <motion.button
+                onClick={() => router.push('/notes')}
+                style={{
+                  width: '100%',
+                  padding: '1.5rem',
+                  backgroundColor: 'transparent',
+                  border: '1px solid rgba(255,255,255,0.3)',
                   color: 'white',
-                  fontSize: isMobile ? '1.5rem' : '2rem',
+                  fontSize: '1.2rem',
                   fontWeight: '300',
-                  margin: '2rem 0 1.5rem 0',
+                  cursor: 'pointer',
                   fontFamily: 'Helvetica, Arial, sans-serif',
-                  letterSpacing: '0.5px',
-                  borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-                  paddingBottom: '0.5rem'
-                }}>
-                  Catatan Kolaborasi
-                </h3>
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-                  gap: '1.5rem'
-                }}>
-                  {[1, 2, 3].map((item) => (
-                    <motion.div
-                      key={`collab-${item}`}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: (item + 4) * 0.1 }}
-                      style={{
-                        backgroundColor: 'rgba(255, 255, 255, 0.03)',
-                        border: '1px solid rgba(255, 255, 255, 0.1)',
-                        borderRadius: '12px',
-                        padding: '1.5rem',
-                        cursor: 'pointer',
-                        transition: 'all 0.3s ease'
-                      }}
-                      whileHover={{ 
-                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                        borderColor: 'rgba(255, 255, 255, 0.2)',
-                        y: -2
-                      }}
-                    >
-                      <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.8rem',
-                        marginBottom: '1rem'
-                      }}>
-                        <div style={{
-                          width: '32px',
-                          height: '32px',
-                          borderRadius: '50%',
-                          backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontSize: '1rem',
-                          color: 'white'
-                        }}>
-                          👥
-                        </div>
-                        <span style={{
-                          color: 'rgba(255, 255, 255, 0.6)',
-                          fontSize: '0.8rem',
-                          fontFamily: 'monospace'
-                        }}>
-                          #{item}
-                        </span>
-                      </div>
-                      <h4 style={{
-                        color: 'white',
-                        fontSize: '1.2rem',
-                        fontWeight: '400',
-                        margin: '0 0 0.5rem 0',
-                        fontFamily: 'Helvetica, Arial, sans-serif'
-                      }}>
-                        {item === 1 && 'Project Alpha'}
-                        {item === 2 && 'Community Ideas'}
-                        {item === 3 && 'Feedback Loop'}
-                      </h4>
-                      <p style={{
-                        color: 'rgba(255, 255, 255, 0.7)',
-                        fontSize: '0.9rem',
-                        margin: 0,
-                        lineHeight: 1.5,
-                        fontFamily: 'Helvetica, Arial, sans-serif'
-                      }}>
-                        {item === 1 && 'Collaborative notes on Project Alpha development.'}
-                        {item === 2 && 'Brainstorming and ideas from community members.'}
-                        {item === 3 && 'User feedback and improvement suggestions.'}
-                      </p>
-                      <div style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        marginTop: '1rem'
-                      }}>
-                        <span style={{
-                          color: 'rgba(255, 255, 255, 0.4)',
-                          fontSize: '0.75rem'
-                        }}>
-                          3 contributors
-                        </span>
-                        <span style={{
-                          color: 'white',
-                          fontSize: '0.8rem',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.3rem'
-                        }}>
-                          Join
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-                            <path d="M5 12h14"/>
-                            <path d="M12 5l7 7-7 7"/>
-                          </svg>
-                        </span>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <h3 style={{
-                  color: 'white',
-                  fontSize: isMobile ? '1.5rem' : '2rem',
-                  fontWeight: '300',
-                  margin: '2rem 0 1.5rem 0',
-                  fontFamily: 'Helvetica, Arial, sans-serif',
-                  letterSpacing: '0.5px',
-                  borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-                  paddingBottom: '0.5rem'
-                }}>
-                  Arsip
-                </h3>
-                <div style={{
                   display: 'flex',
-                  flexDirection: 'column',
-                  gap: '1rem'
-                }}>
-                  {[2024, 2023, 2022].map((year) => (
-                    <motion.div
-                      key={`archive-${year}`}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: (year - 2022) * 0.1 }}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        padding: '1rem',
-                        borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-                        cursor: 'pointer'
-                      }}
-                      whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.03)' }}
-                    >
-                      <span style={{
-                        color: 'white',
-                        fontSize: '1.2rem',
-                        fontWeight: '300',
-                        fontFamily: 'Helvetica, Arial, sans-serif'
-                      }}>
-                        {year}
-                      </span>
-                      <span style={{
-                        color: 'rgba(255, 255, 255, 0.5)',
-                        fontSize: '0.9rem',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.5rem'
-                      }}>
-                        {year === 2024 && '24 notes'}
-                        {year === 2023 && '18 notes'}
-                        {year === 2022 && '12 notes'}
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M9 18l6-6-6-6"/>
-                        </svg>
-                      </span>
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <div style={{
-              padding: '1.5rem 2rem',
-              borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-              color: 'rgba(255, 255, 255, 0.5)',
-              fontSize: '0.9rem',
-              fontFamily: 'Helvetica, Arial, sans-serif',
-              textAlign: 'center'
-            }}>
-              Total 7 topics • Click any card to view notes
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '1rem',
+                  transition: 'all 0.3s ease'
+                }}
+                whileHover={{ backgroundColor: 'rgba(255,255,255,0.05)' }}
+              >
+                Go to Notes
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M7 17l9.2-9.2M17 17V7H7"/>
+                </svg>
+              </motion.button>
             </div>
           </motion.div>
         )}
@@ -3027,7 +2987,7 @@ export default function HomePage(): React.JSX.Element {
                     fontFamily: 'Helvetica, Arial, sans-serif',
                     letterSpacing: '1px'
                   }}>
-                    Kalender MENURU {currentYear}
+                    {sectionDescriptions.calendar.title} {currentYear}
                   </h2>
                   <div style={{
                     backgroundColor: 'transparent',
@@ -3073,6 +3033,51 @@ export default function HomePage(): React.JSX.Element {
                 flexDirection: 'column',
                 gap: '2rem'
               }}>
+                {/* Deskripsi Calendar */}
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  style={{
+                    padding: '1.5rem',
+                    backgroundColor: 'rgba(255,255,255,0.02)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '10px'
+                  }}
+                >
+                  <p style={{
+                    color: 'rgba(255,255,255,0.8)',
+                    fontSize: '1rem',
+                    lineHeight: 1.6,
+                    margin: 0,
+                    fontFamily: 'Helvetica, Arial, sans-serif'
+                  }}>
+                    {sectionDescriptions.calendar.description}
+                  </p>
+                  <div style={{
+                    display: 'flex',
+                    gap: '1rem',
+                    marginTop: '1rem',
+                    flexWrap: 'wrap'
+                  }}>
+                    {sectionDescriptions.calendar.features.map((feature, index) => (
+                      <span
+                        key={index}
+                        style={{
+                          padding: '0.3rem 1rem',
+                          backgroundColor: 'rgba(255,255,255,0.05)',
+                          borderRadius: '20px',
+                          color: 'rgba(255,255,255,0.7)',
+                          fontSize: '0.8rem'
+                        }}
+                      >
+                        {feature}
+                      </span>
+                    ))}
+                  </div>
+                </motion.div>
+
+                {/* Konten Kalender yang sudah ada */}
                 <div style={{
                   display: 'flex',
                   justifyContent: 'space-between',
@@ -3528,20 +3533,6 @@ export default function HomePage(): React.JSX.Element {
                     })()}
                   </motion.div>
                 )}
-
-                <div style={{
-                  paddingTop: '1.5rem',
-                  borderTop: '1px solid rgba(255, 255, 255, 0.2)',
-                  color: 'rgba(255, 255, 255, 0.6)',
-                  fontSize: '0.85rem',
-                  fontFamily: 'Helvetica, Arial, sans-serif',
-                  textAlign: 'center'
-                }}>
-                  Kalender kegiatan admin MENURU • Waktu dalam WIB (UTC+7) • 
-                  <span style={{ color: '#3B82F6', marginLeft: '0.3rem' }}>
-                    Titik biru menunjukkan hari ini
-                  </span>
-                </div>
               </div>
             </motion.div>
           </motion.div>
@@ -7197,6 +7188,7 @@ export default function HomePage(): React.JSX.Element {
               Stories
             </motion.span>
 
+            {/* Note - CLICK untuk buka overlay dengan deskripsi */}
             <motion.span
               onClick={handleNoteClick}
               style={{
@@ -7216,8 +7208,9 @@ export default function HomePage(): React.JSX.Element {
               Note
             </motion.span>
 
+            {/* Calendar - CLICK untuk buka modal dengan deskripsi */}
             <motion.span
-              onClick={() => router.push('/calendar')}
+              onClick={() => setShowCalendarModal(true)}
               style={{
                 color: 'white',
                 fontSize: isMobile ? '1rem' : '1.2rem',
