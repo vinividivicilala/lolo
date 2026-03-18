@@ -2223,22 +2223,23 @@ export default function HomePage(): React.JSX.Element {
           </motion.div>
         )}
       </AnimatePresence>
-{/* VISUAL DESIGNER OVERLAY - AWARDS STYLE MINIMALIS */}
+
+{/* VISUAL DESIGNER OVERLAY - DIPERBAIKI TANPA MAP */}
 <AnimatePresence>
   {showVisualDesignerOverlay && (
     <motion.div
       ref={visualDesignerOverlayRef}
-      initial={{ clipPath: 'polygon(0% 0%, 0% 0%, 0% 100%, 0% 100%)' }}
-      animate={{ clipPath: 'polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)' }}
-      exit={{ clipPath: 'polygon(100% 0%, 100% 0%, 100% 100%, 100% 100%)' }}
-      transition={{ duration: 1.2, ease: [0.76, 0, 0.24, 1] }}
+      initial={{ y: '100%' }}
+      animate={{ y: 0 }}
+      exit={{ y: '100%' }}
+      transition={{ duration: 0.8, ease: [0.76, 0, 0.24, 1] }}
       style={{
         position: 'fixed',
         top: 0,
         left: 0,
         width: '100%',
         height: '100%',
-        backgroundColor: '#0A0A0A',
+        backgroundColor: '#050505',
         zIndex: 10011,
         display: 'flex',
         flexDirection: 'column',
@@ -2247,7 +2248,7 @@ export default function HomePage(): React.JSX.Element {
         fontFamily: 'Helvetica, Arial, sans-serif'
       }}
     >
-      {/* Background Pattern Minimalis */}
+      {/* Background Pattern */}
       <div style={{
         position: 'absolute',
         top: 0,
@@ -2255,21 +2256,18 @@ export default function HomePage(): React.JSX.Element {
         width: '100%',
         height: '100%',
         backgroundImage: `
-          radial-gradient(circle at 20% 30%, rgba(255,255,255,0.02) 0%, transparent 40%),
-          radial-gradient(circle at 80% 70%, rgba(255,255,255,0.02) 0%, transparent 40%),
-          repeating-linear-gradient(90deg, rgba(255,255,255,0.005) 0px, rgba(255,255,255,0.005) 1px, transparent 1px, transparent 50px)
+          radial-gradient(circle at 30% 40%, rgba(255,255,255,0.02) 0%, transparent 40%),
+          radial-gradient(circle at 70% 60%, rgba(255,255,255,0.02) 0%, transparent 40%),
+          repeating-linear-gradient(45deg, rgba(255,255,255,0.005) 0px, rgba(255,255,255,0.005) 2px, transparent 2px, transparent 12px)
         `,
         pointerEvents: 'none',
         zIndex: 1
       }} />
 
-      {/* Tombol Close Minimalis dengan Animasi */}
-      <motion.div
+      {/* Tombol Close Minimalis */}
+      <div
         ref={visualDesignerCloseRef}
         onClick={handleCloseVisualDesignerOverlay}
-        initial={{ opacity: 0, scale: 0, rotate: -90 }}
-        animate={{ opacity: 1, scale: 1, rotate: 0 }}
-        transition={{ delay: 0.6, duration: 0.8, type: "spring", damping: 15 }}
         style={{
           position: 'fixed',
           top: '2rem',
@@ -2285,21 +2283,12 @@ export default function HomePage(): React.JSX.Element {
           fontSize: '2rem',
           fontWeight: '300',
           fontFamily: 'Helvetica, Arial, sans-serif',
-          border: '1px solid rgba(255,255,255,0.2)',
-          borderRadius: '50%',
-          backdropFilter: 'blur(10px)',
-          backgroundColor: 'rgba(255,255,255,0.05)'
+          opacity: 0,
+          transform: 'scale(0.5) rotate(-180deg)'
         }}
-        whileHover={{
-          scale: 1.1,
-          borderColor: 'rgba(255,255,255,0.5)',
-          backgroundColor: 'rgba(255,255,255,0.1)',
-          rotate: 90
-        }}
-        whileTap={{ scale: 0.95 }}
       >
         ×
-      </motion.div>
+      </div>
 
       <div style={{
         position: 'relative',
@@ -2309,113 +2298,182 @@ export default function HomePage(): React.JSX.Element {
         margin: '0 auto',
         width: '100%'
       }}>
-        {/* Header dengan angka 02 dan judul */}
+        {/* Header dengan angka 02 dan panah SOUTH WEST */}
         <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3, duration: 0.8 }}
+          initial={{ opacity: 0, x: -50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.2, duration: 0.6 }}
           style={{
             marginBottom: '4rem',
             display: 'flex',
             alignItems: 'center',
-            gap: '1rem'
+            gap: '2rem',
+            flexWrap: 'wrap'
           }}
         >
-          <span style={{
-            color: 'rgba(255,255,255,0.3)',
-            fontSize: '1rem',
-            fontWeight: '400',
-            letterSpacing: '4px',
-            fontFamily: 'monospace'
-          }}>
-            02
-          </span>
           <div style={{
-            width: '60px',
-            height: '1px',
-            backgroundColor: 'rgba(255,255,255,0.3)'
-          }} />
-          <h1 style={{
-            fontSize: isMobile ? '2.5rem' : '3.5rem',
-            fontWeight: '300',
-            margin: 0,
-            letterSpacing: '2px',
-            color: 'white'
+            display: 'flex',
+            alignItems: 'center',
+            gap: '1.5rem'
           }}>
-            VISUAL DESIGNER
-          </h1>
+            <span style={{
+              color: 'rgba(255,255,255,0.3)',
+              fontSize: '1.2rem',
+              fontWeight: '300',
+              letterSpacing: '2px',
+              fontFamily: 'monospace'
+            }}>
+              02
+            </span>
+            
+            {/* SOUTH WEST ARROW */}
+            <svg
+              width="40"
+              height="40"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="rgba(255,255,255,0.5)"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M17 7L7 17" />
+              <path d="M7 7h10v10" />
+            </svg>
+            
+            <h1 style={{
+              fontSize: isMobile ? '4rem' : '7rem',
+              fontWeight: '300',
+              margin: 0,
+              lineHeight: 1,
+              letterSpacing: '-2px',
+              color: 'white'
+            }}>
+              VISUAL DESIGNER
+            </h1>
+          </div>
         </motion.div>
 
-        {/* Design Philosophy - AWARDS STYLE dengan angka */}
+        {/* Grid Layout 2 Kolom */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: isMobile ? '1fr' : 'repeat(4, 1fr)',
-          gap: '2rem',
-          marginBottom: '4rem'
+          gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
+          gap: '4rem'
         }}>
-          {[
-            { number: '01', label: 'MINIMALIST', desc: 'Clean, simple, purposeful' },
-            { number: '02', label: 'RESPONSIVE', desc: 'Adapts to every screen' },
-            { number: '03', label: 'MODERN', desc: 'Contemporary aesthetics' },
-            { number: '04', label: 'FAST', desc: 'Optimized performance' }
-          ].map((item, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 + (index * 0.1), duration: 0.6 }}
-              style={{
-                padding: '2rem',
-                backgroundColor: 'rgba(255,255,255,0.02)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                position: 'relative'
-              }}
-              whileHover={{
-                backgroundColor: 'rgba(255,255,255,0.05)',
-                borderColor: 'rgba(255,255,255,0.3)',
-                transition: { duration: 0.3 }
-              }}
-            >
-              <div style={{
-                color: 'rgba(255,255,255,0.2)',
-                fontSize: '3rem',
+          {/* Kolom Kiri */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+          >
+            <h2 style={{
+              fontSize: '2rem',
+              fontWeight: '300',
+              margin: '0 0 2rem 0',
+              color: 'white'
+            }}>
+              Visual Designer
+            </h2>
+            <p style={{
+              fontSize: '1.2rem',
+              lineHeight: 1.8,
+              color: 'rgba(255,255,255,0.7)',
+              marginBottom: '2rem'
+            }}>
+              Crafting digital experiences with minimalist aesthetics and functional design. 
+              Every pixel tells a story, combining beauty with usability.
+            </p>
+            
+            {/* Design Philosophy - Menggunakan angka minimalis */}
+            <div style={{ marginTop: '3rem' }}>
+              <h3 style={{
+                fontSize: '1.5rem',
                 fontWeight: '300',
-                fontFamily: 'monospace',
-                position: 'absolute',
-                top: '1rem',
-                right: '1rem',
-                lineHeight: 1
+                margin: '0 0 1.5rem 0',
+                color: 'white',
+                borderBottom: '1px solid rgba(255,255,255,0.1)',
+                paddingBottom: '0.5rem'
               }}>
-                {item.number}
+                Design Philosophy
+              </h3>
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: '1.5rem'
+              }}>
+                {[
+                  { number: '01', label: 'Minimalist' },
+                  { number: '02', label: 'Responsive' },
+                  { number: '03', label: 'Modern' },
+                  { number: '04', label: 'Fast' }
+                ].map((item, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4 + (index * 0.1) }}
+                    style={{
+                      padding: '1rem',
+                      backgroundColor: 'rgba(255,255,255,0.02)',
+                      border: '1px solid rgba(255,255,255,0.1)'
+                    }}
+                  >
+                    <div style={{
+                      color: 'rgba(255,255,255,0.3)',
+                      fontSize: '0.9rem',
+                      fontFamily: 'monospace',
+                      marginBottom: '0.5rem'
+                    }}>
+                      {item.number}
+                    </div>
+                    <div style={{
+                      color: 'white',
+                      fontSize: '1.2rem',
+                      fontWeight: '300'
+                    }}>
+                      {item.label}
+                    </div>
+                  </motion.div>
+                ))}
               </div>
-              <div style={{ position: 'relative', zIndex: 2 }}>
-                <h3 style={{
-                  color: 'white',
-                  fontSize: '1.2rem',
-                  fontWeight: '400',
-                  margin: '0 0 1rem 0',
-                  letterSpacing: '1px'
-                }}>
-                  {item.label}
-                </h3>
-                <p style={{
-                  color: 'rgba(255,255,255,0.6)',
-                  fontSize: '0.9rem',
-                  lineHeight: 1.6,
-                  margin: 0
-                }}>
-                  {item.desc}
-                </p>
-              </div>
-            </motion.div>
-          ))}
+            </div>
+          </motion.div>
+
+          {/* Kolom Kanan - HANYA DESIGN PHILOSOPHY dengan angka */}
+          <motion.div
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.4 }}
+          >
+            {/* Stats, Skills & Expertise, Tools semuanya DIHAPUS */}
+            {/* Hanya menampilkan Design Philosophy yang sudah ada di kolom kiri */}
+            {/* Kolom kanan dibiarkan kosong dengan styling minimalis */}
+            <div style={{
+              height: '100%',
+              display: 'flex',
+              alignItems: 'flex-end',
+              justifyContent: 'flex-end'
+            }}>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0.3 }}
+                transition={{ delay: 0.8 }}
+                style={{
+                  width: '100px',
+                  height: '100px',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  marginBottom: '2rem'
+                }}
+              />
+            </div>
+          </motion.div>
         </div>
 
-        {/* Tools Section - Kosong hanya judul */}
+        {/* Tools Section - DIHAPUS isinya, hanya judul */}
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.8 }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.7 }}
           style={{
             marginTop: '4rem',
             padding: '2rem 0',
@@ -2423,37 +2481,20 @@ export default function HomePage(): React.JSX.Element {
           }}
         >
           <h3 style={{
-            fontSize: '1.2rem',
+            fontSize: '1.5rem',
             fontWeight: '300',
-            margin: '0 0 2rem 0',
-            color: 'white',
-            letterSpacing: '2px'
+            margin: '0 0 1rem 0',
+            color: 'white'
           }}>
-            TOOLS & TECHNOLOGIES
+            Tools & Technologies
           </h3>
-          
-          {/* Kosong - hanya placeholder untuk styling */}
-          <div style={{
-            height: '2rem'
-          }} />
+          {/* Konten tools DIKOSONGKAN sesuai perintah */}
+          <div style={{ height: '1rem' }} />
         </motion.div>
-
-        {/* Footer line dengan animasi */}
-        <motion.div
-          initial={{ width: 0 }}
-          animate={{ width: '100%' }}
-          transition={{ delay: 1, duration: 1 }}
-          style={{
-            height: '1px',
-            backgroundColor: 'rgba(255,255,255,0.2)',
-            marginTop: '4rem'
-          }}
-        />
       </div>
     </motion.div>
   )}
 </AnimatePresence>
-
 
 
       
