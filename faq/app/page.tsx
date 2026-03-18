@@ -229,10 +229,8 @@ export default function HomePage(): React.JSX.Element {
   // State untuk Note Overlay
   const [showNoteOverlay, setShowNoteOverlay] = useState(false);
 
-  // State untuk overlay baru (Community, News, Stories)
+  // State untuk Community Overlay
   const [showCommunityOverlay, setShowCommunityOverlay] = useState(false);
-  const [showNewsOverlay, setShowNewsOverlay] = useState(false);
-  const [showStoriesOverlay, setShowStoriesOverlay] = useState(false);
 
   // State untuk overlay halaman
   const [showProductOverlay, setShowProductOverlay] = useState(false);
@@ -243,15 +241,17 @@ export default function HomePage(): React.JSX.Element {
   const [currentRotatingWordIndex, setCurrentRotatingWordIndex] = useState(0);
   const rotatingWordsList = ["Community", "Catatan", "Blog"];
 
-  // Data untuk Community Items - HANYA TEKS
-  const communityItems = [
+  // Data untuk Community Items - Dibagi 2 kolom
+  const communityItemsLeft = [
     { id: 1, name: "Point Blank" },
     { id: 2, name: "Lost Saga" },
-    { id: 3, name: "Persib" },
+    { id: 3, name: "Persib" }
+  ];
+
+  const communityItemsRight = [
     { id: 4, name: "Coding" },
     { id: 5, name: "Pembersihan" },
-    { id: 6, name: "Pendidikan" },
-    { id: 7, name: "Sosial" }
+    { id: 6, name: "Pendidikan" }
   ];
 
   const headerRef = useRef<HTMLDivElement>(null);
@@ -285,10 +285,8 @@ export default function HomePage(): React.JSX.Element {
   // Ref untuk Note Overlay
   const noteOverlayRef = useRef<HTMLDivElement>(null);
 
-  // Ref untuk overlay baru
+  // Ref untuk Community Overlay
   const communityOverlayRef = useRef<HTMLDivElement>(null);
-  const newsOverlayRef = useRef<HTMLDivElement>(null);
-  const storiesOverlayRef = useRef<HTMLDivElement>(null);
 
   // Ref untuk overlay product, visual designer, indonesia
   const productOverlayRef = useRef<HTMLDivElement>(null);
@@ -1015,7 +1013,7 @@ export default function HomePage(): React.JSX.Element {
   // Mouse wheel scroll handler
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
-      if (!showUserProfileModal && !showMenuruFullPage && !showPhotoFullPage && !showCalendarModal && !showNoteOverlay && !showCommunityOverlay && !showNewsOverlay && !showStoriesOverlay) {
+      if (!showUserProfileModal && !showMenuruFullPage && !showPhotoFullPage && !showCalendarModal && !showNoteOverlay && !showCommunityOverlay && !showProductOverlay && !showVisualDesignerOverlay && !showIndonesiaOverlay) {
         return;
       }
       e.stopPropagation();
@@ -1029,7 +1027,7 @@ export default function HomePage(): React.JSX.Element {
       document.removeEventListener('wheel', handleWheel);
       document.removeEventListener('mousedown', handleMouseDown);
     };
-  }, [showUserProfileModal, showMenuruFullPage, showPhotoFullPage, showCalendarModal, showNoteOverlay, showCommunityOverlay, showNewsOverlay, showStoriesOverlay]);
+  }, [showUserProfileModal, showMenuruFullPage, showPhotoFullPage, showCalendarModal, showNoteOverlay, showCommunityOverlay, showProductOverlay, showVisualDesignerOverlay, showIndonesiaOverlay]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -1044,8 +1042,6 @@ export default function HomePage(): React.JSX.Element {
       }
       if (noteOverlayRef.current && !noteOverlayRef.current.contains(event.target as Node)) setShowNoteOverlay(false);
       if (communityOverlayRef.current && !communityOverlayRef.current.contains(event.target as Node)) setShowCommunityOverlay(false);
-      if (newsOverlayRef.current && !newsOverlayRef.current.contains(event.target as Node)) setShowNewsOverlay(false);
-      if (storiesOverlayRef.current && !storiesOverlayRef.current.contains(event.target as Node)) setShowStoriesOverlay(false);
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -1119,71 +1115,21 @@ export default function HomePage(): React.JSX.Element {
   const handleNoteClick = () => setShowNoteOverlay(true);
   const handleCloseNoteOverlay = () => setShowNoteOverlay(false);
 
-  // Handler untuk Community Overlay (HOVER) - DENGAN DELAY UNTUK USER LELUASA MELIHAT
-  const [communityHoverTimer, setCommunityHoverTimer] = useState<NodeJS.Timeout | null>(null);
-  const [communityLeaveTimer, setCommunityLeaveTimer] = useState<NodeJS.Timeout | null>(null);
-
-  const handleCommunityHover = () => {
-    if (communityLeaveTimer) clearTimeout(communityLeaveTimer);
-    const timer = setTimeout(() => {
-      setShowCommunityOverlay(true);
-    }, 100);
-    setCommunityHoverTimer(timer);
-  };
-
-  const handleCommunityLeave = () => {
-    if (communityHoverTimer) clearTimeout(communityHoverTimer);
-    const timer = setTimeout(() => {
-      setShowCommunityOverlay(false);
-    }, 500); // Delay 500ms untuk user leluasa melihat
-    setCommunityLeaveTimer(timer);
+  // Handler untuk Community Overlay - TETAP TAMPIL SAMPAI USER MENUTUP
+  const handleCommunityClick = () => {
+    setShowCommunityOverlay(true);
   };
 
   const handleCloseCommunityOverlay = () => setShowCommunityOverlay(false);
 
-  // Handler untuk News Overlay (HOVER) - DENGAN DELAY
-  const [newsHoverTimer, setNewsHoverTimer] = useState<NodeJS.Timeout | null>(null);
-  const [newsLeaveTimer, setNewsLeaveTimer] = useState<NodeJS.Timeout | null>(null);
-
-  const handleNewsHover = () => {
-    if (newsLeaveTimer) clearTimeout(newsLeaveTimer);
-    const timer = setTimeout(() => {
-      setShowNewsOverlay(true);
-    }, 100);
-    setNewsHoverTimer(timer);
+  // Handler untuk News dan Stories - LANGSUNG NAVIGASI
+  const handleNewsClick = () => {
+    router.push('/news');
   };
 
-  const handleNewsLeave = () => {
-    if (newsHoverTimer) clearTimeout(newsHoverTimer);
-    const timer = setTimeout(() => {
-      setShowNewsOverlay(false);
-    }, 500);
-    setNewsLeaveTimer(timer);
+  const handleStoriesClick = () => {
+    router.push('/stories');
   };
-
-  const handleCloseNewsOverlay = () => setShowNewsOverlay(false);
-
-  // Handler untuk Stories Overlay (HOVER) - DENGAN DELAY
-  const [storiesHoverTimer, setStoriesHoverTimer] = useState<NodeJS.Timeout | null>(null);
-  const [storiesLeaveTimer, setStoriesLeaveTimer] = useState<NodeJS.Timeout | null>(null);
-
-  const handleStoriesHover = () => {
-    if (storiesLeaveTimer) clearTimeout(storiesLeaveTimer);
-    const timer = setTimeout(() => {
-      setShowStoriesOverlay(true);
-    }, 100);
-    setStoriesHoverTimer(timer);
-  };
-
-  const handleStoriesLeave = () => {
-    if (storiesHoverTimer) clearTimeout(storiesHoverTimer);
-    const timer = setTimeout(() => {
-      setShowStoriesOverlay(false);
-    }, 500);
-    setStoriesLeaveTimer(timer);
-  };
-
-  const handleCloseStoriesOverlay = () => setShowStoriesOverlay(false);
 
   // Handler untuk membuka overlay product, visual designer, indonesia
   const handleProductClick = () => setShowProductOverlay(true);
@@ -1265,8 +1211,6 @@ export default function HomePage(): React.JSX.Element {
         }
         if (showNoteOverlay) setShowNoteOverlay(false);
         if (showCommunityOverlay) setShowCommunityOverlay(false);
-        if (showNewsOverlay) setShowNewsOverlay(false);
-        if (showStoriesOverlay) setShowStoriesOverlay(false);
         if (showProductOverlay) setShowProductOverlay(false);
         if (showVisualDesignerOverlay) setShowVisualDesignerOverlay(false);
         if (showIndonesiaOverlay) setShowIndonesiaOverlay(false);
@@ -1286,7 +1230,7 @@ export default function HomePage(): React.JSX.Element {
       if (leftCounterRef.current) gsap.killTweensOf(leftCounterRef.current);
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
-  }, [isMobile, showMenuruFullPage, showPhotoFullPage, showUserDropdown, showLogoutModal, showMenuOverlay, showNotification, showUserProfileModal, showDeleteAccountModal, showCalendarModal, showNoteOverlay, showCommunityOverlay, showNewsOverlay, showStoriesOverlay, showProductOverlay, showVisualDesignerOverlay, showIndonesiaOverlay]);
+  }, [isMobile, showMenuruFullPage, showPhotoFullPage, showUserDropdown, showLogoutModal, showMenuOverlay, showNotification, showUserProfileModal, showDeleteAccountModal, showCalendarModal, showNoteOverlay, showCommunityOverlay, showProductOverlay, showVisualDesignerOverlay, showIndonesiaOverlay]);
 
   useEffect(() => {
     if (plusSignRef.current && !showMenuruFullPage) {
@@ -1674,113 +1618,7 @@ export default function HomePage(): React.JSX.Element {
         )}
       </AnimatePresence>
 
-      {/* Stories Overlay - HANYA JUDUL */}
-      <AnimatePresence>
-        {showStoriesOverlay && (
-          <motion.div
-            ref={storiesOverlayRef}
-            initial={{ y: '-100%' }}
-            animate={{ y: 0 }}
-            exit={{ y: '-100%' }}
-            transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: 'auto',
-              maxHeight: '80vh',
-              backgroundColor: 'rgba(0, 0, 0, 0.98)',
-              zIndex: 10004,
-              display: 'flex',
-              flexDirection: 'column',
-              overflow: 'hidden',
-              borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
-              boxShadow: '0 10px 30px rgba(0,0,0,0.5)'
-            }}
-          >
-            <div style={{
-              padding: isMobile ? '1.5rem' : '2rem',
-              borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              flexShrink: 0
-            }}>
-              <h2 style={{
-                color: 'white',
-                fontSize: isMobile ? '1.8rem' : '2.5rem',
-                fontWeight: '300',
-                margin: 0,
-                fontFamily: 'Helvetica, Arial, sans-serif',
-                letterSpacing: '1px'
-              }}>
-                Stories
-              </h2>
-              <motion.button
-                onClick={handleCloseStoriesOverlay}
-                style={{
-                  backgroundColor: 'transparent',
-                  border: '1px solid rgba(255, 255, 255, 0.3)',
-                  color: 'white',
-                  width: '40px',
-                  height: '40px',
-                  borderRadius: '50%',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '1.5rem',
-                  fontFamily: 'Helvetica, Arial, sans-serif'
-                }}
-                whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
-              >
-                ×
-              </motion.button>
-            </div>
-            <div style={{
-              padding: isMobile ? '3rem 1.5rem' : '4rem 3rem',
-              overflowY: 'auto',
-              maxHeight: 'calc(80vh - 100px)',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              textAlign: 'center'
-            }}>
-              <h3 style={{
-                color: 'white',
-                fontSize: isMobile ? '2.5rem' : '4rem',
-                fontWeight: '300',
-                margin: '0 0 2rem 0',
-                fontFamily: 'Helvetica, Arial, sans-serif',
-                letterSpacing: '1px',
-                opacity: 0.9
-              }}>
-                Cerita
-              </h3>
-              <p style={{
-                color: 'rgba(255, 255, 255, 0.6)',
-                fontSize: isMobile ? '1rem' : '1.2rem',
-                maxWidth: '600px',
-                lineHeight: 1.8,
-                fontFamily: 'Helvetica, Arial, sans-serif',
-                fontStyle: 'italic'
-              }}>
-                "Setiap gambar memiliki cerita. Setiap cerita memiliki makna."
-              </p>
-              <div style={{
-                marginTop: '3rem',
-                width: '60px',
-                height: '1px',
-                backgroundColor: 'rgba(255, 255, 255, 0.3)'
-              }} />
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Community Overlay - DIPERBAIKI SESUAI PERMINTAAN */}
+      {/* Community Overlay - DIPERBAIKI SESUAI PERMINTAAN - 2 KOLOM DAN TETAP TAMPIL */}
       <AnimatePresence>
         {showCommunityOverlay && (
           <motion.div
@@ -1847,169 +1685,125 @@ export default function HomePage(): React.JSX.Element {
               </motion.button>
             </div>
 
-            {/* Konten Community Overlay - HANYA TEKS + PANAH DI SISI KIRI */}
+            {/* Konten Community Overlay - 2 KOLOM */}
             <div style={{
               padding: isMobile ? '2rem 1.5rem' : '3rem 3rem',
               overflowY: 'auto',
               maxHeight: 'calc(80vh - 100px)'
             }}>
               <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '1.5rem'
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: isMobile ? '2rem' : '4rem'
               }}>
-                {communityItems.map((item, index) => (
-                  <motion.div
-                    key={`community-${item.id}`}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '1.5rem',
-                      cursor: 'pointer',
-                      padding: '0.5rem 0'
-                    }}
-                    whileHover={{ x: 5 }}
-                  >
-                    {/* North West Arrow SVG */}
-                    <svg
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="white"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      style={{
-                        opacity: 0.7,
-                        flexShrink: 0
-                      }}
-                    >
-                      <path d="M17 7L7 17" />
-                      <path d="M7 7h10v10" />
-                    </svg>
-                    
-                    {/* Teks Nama Komunitas - FONT STANDAR, TIDAK BOLD */}
-                    <span style={{
-                      color: 'white',
-                      fontSize: isMobile ? '1.5rem' : '2.2rem',
-                      fontWeight: '300',
-                      fontFamily: 'Helvetica, Arial, sans-serif',
-                      letterSpacing: '0.5px'
-                    }}>
-                      {item.name}
-                    </span>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* News Overlay - dengan HOVER */}
-      <AnimatePresence>
-        {showNewsOverlay && (
-          <motion.div
-            ref={newsOverlayRef}
-            initial={{ y: '-100%' }}
-            animate={{ y: 0 }}
-            exit={{ y: '-100%' }}
-            transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: 'auto',
-              maxHeight: '80vh',
-              backgroundColor: 'rgba(0, 0, 0, 0.98)',
-              zIndex: 10004,
-              display: 'flex',
-              flexDirection: 'column',
-              overflow: 'hidden',
-              borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
-              boxShadow: '0 10px 30px rgba(0,0,0,0.5)'
-            }}
-          >
-            <div style={{
-              padding: isMobile ? '1.5rem' : '2rem',
-              borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              flexShrink: 0
-            }}>
-              <h2 style={{
-                color: 'white',
-                fontSize: isMobile ? '1.8rem' : '2.5rem',
-                fontWeight: '300',
-                margin: 0,
-                fontFamily: 'Helvetica, Arial, sans-serif',
-                letterSpacing: '1px'
-              }}>
-                News
-              </h2>
-              <motion.button
-                onClick={handleCloseNewsOverlay}
-                style={{
-                  backgroundColor: 'transparent',
-                  border: '1px solid rgba(255, 255, 255, 0.3)',
-                  color: 'white',
-                  width: '40px',
-                  height: '40px',
-                  borderRadius: '50%',
-                  cursor: 'pointer',
+                {/* Kolom Kiri */}
+                <div style={{
                   display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '1.5rem',
-                  fontFamily: 'Helvetica, Arial, sans-serif'
-                }}
-                whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
-              >
-                ×
-              </motion.button>
-            </div>
-            <div style={{
-              padding: isMobile ? '3rem 1.5rem' : '4rem 3rem',
-              overflowY: 'auto',
-              maxHeight: 'calc(80vh - 100px)',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              textAlign: 'center'
-            }}>
-              <h3 style={{
-                color: 'white',
-                fontSize: isMobile ? '2.5rem' : '4rem',
-                fontWeight: '300',
-                margin: '0 0 2rem 0',
-                fontFamily: 'Helvetica, Arial, sans-serif',
-                letterSpacing: '1px',
-                opacity: 0.9
-              }}>
-                Berita
-              </h3>
-              <p style={{
-                color: 'rgba(255, 255, 255, 0.6)',
-                fontSize: isMobile ? '1rem' : '1.2rem',
-                maxWidth: '600px',
-                lineHeight: 1.8,
-                fontFamily: 'Helvetica, Arial, sans-serif'
-              }}>
-                Update terbaru tentang pengembangan platform, fitur baru, dan acara mendatang.
-              </p>
-              <div style={{
-                marginTop: '3rem',
-                width: '60px',
-                height: '1px',
-                backgroundColor: 'rgba(255, 255, 255, 0.3)'
-              }} />
+                  flexDirection: 'column',
+                  gap: '1.5rem'
+                }}>
+                  {communityItemsLeft.map((item, index) => (
+                    <motion.div
+                      key={`community-left-${item.id}`}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '1.5rem',
+                        cursor: 'pointer',
+                        padding: '0.5rem 0'
+                      }}
+                      whileHover={{ x: 5 }}
+                    >
+                      {/* North West Arrow SVG */}
+                      <svg
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="white"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        style={{
+                          opacity: 0.7,
+                          flexShrink: 0
+                        }}
+                      >
+                        <path d="M17 7L7 17" />
+                        <path d="M7 7h10v10" />
+                      </svg>
+                      
+                      {/* Teks Nama Komunitas */}
+                      <span style={{
+                        color: 'white',
+                        fontSize: isMobile ? '1.5rem' : '2.2rem',
+                        fontWeight: '300',
+                        fontFamily: 'Helvetica, Arial, sans-serif',
+                        letterSpacing: '0.5px'
+                      }}>
+                        {item.name}
+                      </span>
+                    </motion.div>
+                  ))}
+                </div>
+
+                {/* Kolom Kanan */}
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '1.5rem'
+                }}>
+                  {communityItemsRight.map((item, index) => (
+                    <motion.div
+                      key={`community-right-${item.id}`}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: (index + 3) * 0.1 }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '1.5rem',
+                        cursor: 'pointer',
+                        padding: '0.5rem 0'
+                      }}
+                      whileHover={{ x: 5 }}
+                    >
+                      {/* North West Arrow SVG */}
+                      <svg
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="white"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        style={{
+                          opacity: 0.7,
+                          flexShrink: 0
+                        }}
+                      >
+                        <path d="M17 7L7 17" />
+                        <path d="M7 7h10v10" />
+                      </svg>
+                      
+                      {/* Teks Nama Komunitas */}
+                      <span style={{
+                        color: 'white',
+                        fontSize: isMobile ? '1.5rem' : '2.2rem',
+                        fontWeight: '300',
+                        fontFamily: 'Helvetica, Arial, sans-serif',
+                        letterSpacing: '0.5px'
+                      }}>
+                        {item.name}
+                      </span>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
             </div>
           </motion.div>
         )}
@@ -6748,7 +6542,7 @@ export default function HomePage(): React.JSX.Element {
         )}
       </AnimatePresence>
 
-      {/* Notification Dropdown - DIPERBAIKI SESUAI DESIGN */}
+      {/* Notification Dropdown */}
       <AnimatePresence>
         {showNotification && (
           <motion.div
@@ -7413,77 +7207,65 @@ export default function HomePage(): React.JSX.Element {
               Chatbot
             </motion.span>
 
-            <motion.div
-              onMouseEnter={handleCommunityHover}
-              onMouseLeave={handleCommunityLeave}
-              style={{ position: 'relative', display: 'inline-block' }}
+            {/* Community - CLICK untuk buka overlay */}
+            <motion.span
+              onClick={handleCommunityClick}
+              style={{
+                color: 'white',
+                fontSize: isMobile ? '1rem' : '1.2rem',
+                fontWeight: '300',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                cursor: 'pointer',
+                letterSpacing: '1px',
+                transition: 'opacity 0.3s ease'
+              }}
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.95, duration: 0.5 }}
+              whileHover={{ opacity: 0.7 }}
             >
-              <motion.span
-                style={{
-                  color: 'white',
-                  fontSize: isMobile ? '1rem' : '1.2rem',
-                  fontWeight: '300',
-                  fontFamily: 'Helvetica, Arial, sans-serif',
-                  cursor: 'pointer',
-                  letterSpacing: '1px',
-                  transition: 'opacity 0.3s ease'
-                }}
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.95, duration: 0.5 }}
-                whileHover={{ opacity: 0.7 }}
-              >
-                Community
-              </motion.span>
-            </motion.div>
+              Community
+            </motion.span>
 
-            <motion.div
-              onMouseEnter={handleNewsHover}
-              onMouseLeave={handleNewsLeave}
-              style={{ position: 'relative', display: 'inline-block' }}
+            {/* News - LANGSUNG NAVIGASI */}
+            <motion.span
+              onClick={handleNewsClick}
+              style={{
+                color: 'white',
+                fontSize: isMobile ? '1rem' : '1.2rem',
+                fontWeight: '300',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                cursor: 'pointer',
+                letterSpacing: '1px',
+                transition: 'opacity 0.3s ease'
+              }}
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1.0, duration: 0.5 }}
+              whileHover={{ opacity: 0.7 }}
             >
-              <motion.span
-                style={{
-                  color: 'white',
-                  fontSize: isMobile ? '1rem' : '1.2rem',
-                  fontWeight: '300',
-                  fontFamily: 'Helvetica, Arial, sans-serif',
-                  cursor: 'pointer',
-                  letterSpacing: '1px',
-                  transition: 'opacity 0.3s ease'
-                }}
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 1.0, duration: 0.5 }}
-                whileHover={{ opacity: 0.7 }}
-              >
-                News
-              </motion.span>
-            </motion.div>
+              News
+            </motion.span>
 
-            <motion.div
-              onMouseEnter={handleStoriesHover}
-              onMouseLeave={handleStoriesLeave}
-              style={{ position: 'relative', display: 'inline-block' }}
+            {/* Stories - LANGSUNG NAVIGASI */}
+            <motion.span
+              onClick={handleStoriesClick}
+              style={{
+                color: 'white',
+                fontSize: isMobile ? '1rem' : '1.2rem',
+                fontWeight: '300',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                cursor: 'pointer',
+                letterSpacing: '1px',
+                transition: 'opacity 0.3s ease'
+              }}
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1.05, duration: 0.5 }}
+              whileHover={{ opacity: 0.7 }}
             >
-              <motion.span
-                style={{
-                  color: 'white',
-                  fontSize: isMobile ? '1rem' : '1.2rem',
-                  fontWeight: '300',
-                  fontFamily: 'Helvetica, Arial, sans-serif',
-                  cursor: 'pointer',
-                  letterSpacing: '1px',
-                  transition: 'opacity 0.3s ease'
-                }}
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 1.05, duration: 0.5 }}
-                whileHover={{ opacity: 0.7 }}
-              >
-                Stories
-              </motion.span>
-            </motion.div>
+              Stories
+            </motion.span>
 
             <motion.span
               onClick={handleNoteClick}
