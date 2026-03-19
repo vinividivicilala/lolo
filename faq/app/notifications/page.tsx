@@ -42,6 +42,89 @@ if (typeof window !== "undefined") {
   auth = getAuth(app);
 }
 
+// Instagram Verified Badge Component
+const InstagramVerifiedBadge = ({ size = 16 }) => {
+  const [showTooltip, setShowTooltip] = useState(false);
+  
+  return (
+    <span 
+      style={{ 
+        position: 'relative', 
+        display: 'inline-block',
+        marginLeft: '4px',
+        verticalAlign: 'middle',
+        cursor: 'help'
+      }}
+      onMouseEnter={() => setShowTooltip(true)}
+      onMouseLeave={() => setShowTooltip(false)}
+    >
+      <svg
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          fill="#0095F6"
+          d="
+            M12 2.2
+            C13.6 3.8 16.2 3.8 17.8 2.2
+            C18.6 3.8 20.2 5.4 21.8 6.2
+            C20.2 7.8 20.2 10.4 21.8 12
+            C20.2 13.6 20.2 16.2 21.8 17.8
+            C20.2 18.6 18.6 20.2 17.8 21.8
+            C16.2 20.2 13.6 20.2 12 21.8
+            C10.4 20.2 7.8 20.2 6.2 21.8
+            C5.4 20.2 3.8 18.6 2.2 17.8
+            C3.8 16.2 3.8 13.6 2.2 12
+            C3.8 10.4 3.8 7.8 2.2 6.2
+            C3.8 5.4 5.4 3.8 6.2 2.2
+            C7.8 3.8 10.4 3.8 12 2.2
+            Z
+          "
+        />
+        <path
+          d="M9.2 12.3l2 2 4.6-4.6"
+          stroke="white"
+          strokeWidth="2"
+          fill="none"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+      
+      {showTooltip && (
+        <div style={{
+          position: 'absolute',
+          bottom: '100%',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          backgroundColor: '#333',
+          color: 'white',
+          padding: '4px 8px',
+          borderRadius: '4px',
+          fontSize: '11px',
+          whiteSpace: 'nowrap',
+          marginBottom: '5px',
+          zIndex: 1000,
+          boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
+        }}>
+          Akun Gmail Terverifikasi
+          <div style={{
+            position: 'absolute',
+            top: '100%',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            borderWidth: '4px',
+            borderStyle: 'solid',
+            borderColor: '#333 transparent transparent transparent'
+          }} />
+        </div>
+      )}
+    </span>
+  );
+};
+
 // Emoticon List untuk Reactions
 const EMOTICONS = [
   { id: 'like', emoji: '👍', label: 'Suka' },
@@ -182,6 +265,11 @@ export default function NotificationsPage(): React.JSX.Element {
   const getCurrentUserPhoto = () => {
     if (user?.photoURL) return user.photoURL;
     return `https://ui-avatars.com/api/?name=${getCurrentUserName()}&background=random&color=fff`;
+  };
+
+  // Check if user has Gmail (untuk verified badge)
+  const hasGmail = (email?: string) => {
+    return email?.toLowerCase().includes('@gmail.com') || false;
   };
 
   // Load notifications - FILTERED BY USER
@@ -1111,8 +1199,10 @@ export default function NotificationsPage(): React.JSX.Element {
         <div style={{ display: 'flex', alignItems: 'center', gap: '3rem' }}>
           <span style={{ fontSize: '1.8rem' }}>{currentTime}</span>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <span style={{ fontSize: '2rem' }}>
+            <span style={{ fontSize: '2rem', display: 'flex', alignItems: 'center' }}>
               {user?.displayName || user?.email || 'Visitor'}
+              {/* Instagram Verified Badge untuk user yang login dengan Gmail */}
+              {hasGmail(user?.email) && <InstagramVerifiedBadge />}
             </span>
             <NorthEastArrow />
           </div>
@@ -1217,7 +1307,11 @@ export default function NotificationsPage(): React.JSX.Element {
                     alignItems: 'center',
                     fontSize: '1.5rem'
                   }}>
-                    <span>From {notification.senderName}</span>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      From {notification.senderName}
+                      {/* Instagram Verified Badge untuk pengirim jika menggunakan Gmail */}
+                      {hasGmail(notification.senderEmail) && <InstagramVerifiedBadge size={14} />}
+                    </span>
                     <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
                       <div 
                         onClick={(e) => toggleNotificationLike(notification.id, e)}
@@ -1393,7 +1487,11 @@ export default function NotificationsPage(): React.JSX.Element {
                 fontSize: '2rem',
                 marginTop: '2rem'
               }}>
-                <span>— {selectedNotification.senderName}</span>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  — {selectedNotification.senderName}
+                  {/* Instagram Verified Badge untuk pengirim di modal */}
+                  {hasGmail(selectedNotification.senderEmail) && <InstagramVerifiedBadge />}
+                </span>
                 <div 
                   onClick={(e) => toggleNotificationLike(selectedNotification.id, e)}
                   style={{
@@ -1615,10 +1713,13 @@ export default function NotificationsPage(): React.JSX.Element {
                         color: 'white', 
                         fontSize: '1.2rem',
                         fontWeight: '500',
-                        display: 'block',
+                        display: 'flex',
+                        alignItems: 'center',
                         marginBottom: '4px'
                       }}>
                         {getCurrentUserName()}
+                        {/* Instagram Verified Badge untuk komentator */}
+                        {hasGmail(user?.email) && <InstagramVerifiedBadge size={14} />}
                       </span>
                       <span style={{ color: '#666666', fontSize: '0.9rem' }}>
                         Berkomentar sebagai pengguna
@@ -1757,10 +1858,14 @@ export default function NotificationsPage(): React.JSX.Element {
                               fontSize: '1.2rem',
                               fontWeight: '500',
                               color: 'white',
-                              display: 'block',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '4px',
                               marginBottom: '4px',
                             }}>
                               {comment.userName}
+                              {/* Instagram Verified Badge untuk komentator */}
+                              {hasGmail(comment.userEmail) && <InstagramVerifiedBadge size={14} />}
                             </span>
                             <span style={{
                               fontSize: '0.9rem',
@@ -1967,8 +2072,13 @@ export default function NotificationsPage(): React.JSX.Element {
                                       fontSize: '1rem',
                                       fontWeight: '500',
                                       color: 'white',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      gap: '4px',
                                     }}>
                                       {reply.userName}
+                                      {/* Instagram Verified Badge untuk reply */}
+                                      {hasGmail(reply.userEmail) && <InstagramVerifiedBadge size={12} />}
                                     </span>
                                     <span style={{
                                       fontSize: '0.8rem',
