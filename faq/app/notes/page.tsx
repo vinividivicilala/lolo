@@ -38,6 +38,89 @@ const firebaseConfig = {
   measurementId: "G-8LMP7F4BE9"
 };
 
+// Instagram Verified Badge Component
+const InstagramVerifiedBadge = ({ size = 16, showTooltip = false }) => {
+  const [showText, setShowText] = useState(false);
+  
+  return (
+    <span style={{ position: 'relative', display: 'inline-block' }}>
+      <svg
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg"
+        style={{
+          marginLeft: "4px",
+          display: "inline-block",
+          verticalAlign: "-2px",
+          cursor: 'pointer'
+        }}
+        onMouseEnter={() => setShowText(true)}
+        onMouseLeave={() => setShowText(false)}
+      >
+        {/* Rounded 8-point shape (lebih gemuk & smooth) */}
+        <path
+          fill="#0095F6"
+          d="
+            M12 2.2
+            C13.6 3.8 16.2 3.8 17.8 2.2
+            C18.6 3.8 20.2 5.4 21.8 6.2
+            C20.2 7.8 20.2 10.4 21.8 12
+            C20.2 13.6 20.2 16.2 21.8 17.8
+            C20.2 18.6 18.6 20.2 17.8 21.8
+            C16.2 20.2 13.6 20.2 12 21.8
+            C10.4 20.2 7.8 20.2 6.2 21.8
+            C5.4 20.2 3.8 18.6 2.2 17.8
+            C3.8 16.2 3.8 13.6 2.2 12
+            C3.8 10.4 3.8 7.8 2.2 6.2
+            C3.8 5.4 5.4 3.8 6.2 2.2
+            C7.8 3.8 10.4 3.8 12 2.2
+            Z
+          "
+        />
+
+        {/* Check proporsional */}
+        <path
+          d="M9.2 12.3l2 2 4.6-4.6"
+          stroke="white"
+          strokeWidth="2"
+          fill="none"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+      
+      {showText && showTooltip && (
+        <div style={{
+          position: 'absolute',
+          bottom: '100%',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          backgroundColor: '#333',
+          color: 'white',
+          padding: '4px 8px',
+          borderRadius: '4px',
+          fontSize: '12px',
+          whiteSpace: 'nowrap',
+          marginBottom: '5px',
+          zIndex: 1000
+        }}>
+          Akun Resmi
+          <div style={{
+            position: 'absolute',
+            top: '100%',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            borderWidth: '5px',
+            borderStyle: 'solid',
+            borderColor: '#333 transparent transparent transparent'
+          }} />
+        </div>
+      )}
+    </span>
+  );
+};
+
 interface Note {
   id?: string;
   title: string;
@@ -46,10 +129,14 @@ interface Note {
   description: string;
   userId: string;
   userName: string;
+  userEmail?: string;
   createdAt: any;
   updatedAt: any;
   savedBy?: string[];
   thumbnail?: string;
+  collaborators?: string[]; // Array of user IDs who can collaborate
+  collaboratorNames?: {[key: string]: string}; // Names of collaborators
+  isCollaborative?: boolean; // Flag for collaborative notes
 }
 
 interface Group {
@@ -64,9 +151,11 @@ interface Group {
 
 interface Notification {
   id?: string;
-  type: 'group_invite';
-  groupId: string;
-  groupName: string;
+  type: 'group_invite' | 'collaborate_invite';
+  groupId?: string;
+  groupName?: string;
+  noteId?: string;
+  noteTitle?: string;
   senderId: string;
   senderName: string;
   senderEmail?: string;
@@ -88,11 +177,20 @@ export default function NotesPage(): React.JSX.Element {
   const [showNewNoteForm, setShowNewNoteForm] = useState(false);
   const [showGroupModal, setShowGroupModal] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
+  const [showCollaborateModal, setShowCollaborateModal] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showEditNoteModal, setShowEditNoteModal] = useState(false);
   const [groups, setGroups] = useState<Group[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [currentGroup, setCurrentGroup] = useState<Group | null>(null);
+  const [currentNote, setCurrentNote] = useState<Note | null>(null);
   const [newNote, setNewNote] = useState({ 
+    title: "", 
+    category: "", 
+    link: "", 
+    description: "" 
+  });
+  const [editNote, setEditNote] = useState({ 
     title: "", 
     category: "", 
     link: "", 
@@ -100,6 +198,7 @@ export default function NotesPage(): React.JSX.Element {
   });
   const [newGroupName, setNewGroupName] = useState("");
   const [inviteEmail, setInviteEmail] = useState("");
+  const [collaborateEmail, setCollaborateEmail] = useState("");
   const [auth, setAuth] = useState<any>(null);
   const [db, setDb] = useState<any>(null);
   const videoRefs = useRef<{ [key: string]: HTMLVideoElement | null }>({});
@@ -212,7 +311,11 @@ export default function NotesPage(): React.JSX.Element {
     setIsLoading(true);
     try {
       const notesRef = collection(db, 'userNotes');
-      const q = query(notesRef, where('userId', '==', userId), orderBy('updatedAt', 'desc'));
+      const q = query(
+        notesRef, 
+        where('userId', '==', userId), 
+        orderBy('updatedAt', 'desc')
+      );
       
       const unsubscribe = onSnapshot(q, (querySnapshot) => {
         const notesData: Note[] = [];
@@ -223,8 +326,9 @@ export default function NotesPage(): React.JSX.Element {
             ...noteData
           });
         });
-        setNotes(notesData);
-        setIsLoading(false);
+        
+        // Also load notes where user is a collaborator
+        loadCollaborativeNotes(userId, notesData);
       });
 
       return unsubscribe;
@@ -232,6 +336,36 @@ export default function NotesPage(): React.JSX.Element {
       console.error("Error loading notes:", error);
       setIsLoading(false);
       return () => {};
+    }
+  };
+
+  const loadCollaborativeNotes = async (userId: string, existingNotes: Note[]) => {
+    if (!db) return;
+    
+    try {
+      const notesRef = collection(db, 'userNotes');
+      const q = query(notesRef, where('collaborators', 'array-contains', userId));
+      
+      const querySnapshot = await getDocs(q);
+      const collaborativeNotes: Note[] = [];
+      
+      querySnapshot.forEach((doc) => {
+        const noteData = doc.data() as Note;
+        // Avoid duplicates
+        if (!existingNotes.some(note => note.id === doc.id)) {
+          collaborativeNotes.push({
+            id: doc.id,
+            ...noteData,
+            isCollaborative: true
+          });
+        }
+      });
+      
+      setNotes([...existingNotes, ...collaborativeNotes]);
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Error loading collaborative notes:", error);
+      setIsLoading(false);
     }
   };
 
@@ -374,6 +508,63 @@ export default function NotesPage(): React.JSX.Element {
     }
   };
 
+  const handleInviteCollaborator = async () => {
+    if (!user || !db || !currentNote || !collaborateEmail.trim()) {
+      alert("Email harus diisi");
+      return;
+    }
+
+    try {
+      // Cari user berdasarkan email
+      const invitedUser = await findUserByEmail(collaborateEmail.trim());
+      let invitedUserId = invitedUser?.id;
+      let invitedUserName = invitedUser?.name || collaborateEmail.split('@')[0];
+
+      // Jika user tidak ditemukan, buat record baru
+      if (!invitedUser) {
+        invitedUserId = await createUserRecord(collaborateEmail.trim());
+        if (!invitedUserId) {
+          alert("Gagal membuat user record");
+          return;
+        }
+        invitedUserName = collaborateEmail.split('@')[0];
+      }
+
+      // Cek apakah user sudah menjadi kolaborator
+      if (currentNote.collaborators && currentNote.collaborators.includes(invitedUserId)) {
+        alert("User sudah menjadi kolaborator catatan ini");
+        return;
+      }
+
+      // Buat notifikasi kolaborasi
+      const notificationData = {
+        type: 'collaborate_invite',
+        noteId: currentNote.id,
+        noteTitle: currentNote.title,
+        senderId: user.uid,
+        senderName: userDisplayName,
+        senderEmail: userEmail,
+        receiverId: invitedUserId,
+        receiverEmail: collaborateEmail.trim().toLowerCase(),
+        receiverName: invitedUserName,
+        status: 'pending',
+        message: `${userDisplayName} mengundang Anda untuk berkolaborasi pada catatan "${currentNote.title}"`,
+        createdAt: serverTimestamp()
+      };
+
+      await addDoc(collection(db, 'notifications'), notificationData);
+      
+      setCollaborateEmail("");
+      setShowCollaborateModal(false);
+      
+      alert(`Undangan kolaborasi telah dikirim ke ${collaborateEmail}`);
+      
+    } catch (error) {
+      console.error("Error inviting collaborator:", error);
+      alert("Gagal mengundang kolaborator.");
+    }
+  };
+
   const handleInviteUser = async () => {
     if (!user || !db || !currentGroup || !inviteEmail.trim()) {
       alert("Email harus diisi");
@@ -444,41 +635,68 @@ export default function NotesPage(): React.JSX.Element {
       await updateDoc(notificationRef, {
         status: accept ? 'accepted' : 'rejected',
         message: accept ? 
-          `Anda telah menerima undangan ke grup "${notification.groupName}"` :
-          `Anda telah menolak undangan ke grup "${notification.groupName}"`
+          notification.type === 'group_invite' ?
+            `Anda telah menerima undangan ke grup "${notification.groupName}"` :
+            `Anda telah menerima undangan kolaborasi untuk catatan "${notification.noteTitle}"` :
+          notification.type === 'group_invite' ?
+            `Anda telah menolak undangan ke grup "${notification.groupName}"` :
+            `Anda telah menolak undangan kolaborasi untuk catatan "${notification.noteTitle}"`
       });
 
-      if (accept && notification.groupId) {
-        try {
-          // Tambahkan user ke grup
-          const groupRef = doc(db, 'groups', notification.groupId);
-          
-          // Tambahkan user ke members array
-          await updateDoc(groupRef, {
-            members: arrayUnion(user.uid),
-            [`memberNames.${user.uid}`]: userDisplayName
-          });
-          
-          alert(`Anda telah bergabung dengan grup "${notification.groupName}"`);
-          
-          // Reload groups
-          loadUserGroups(user.uid);
-          
-          // Tampilkan pesan di chat grup
-          const messageData = {
-            text: `${userDisplayName} telah bergabung ke grup melalui undangan dari ${notification.senderName}`,
-            userId: 'system',
-            userName: 'System',
-            groupId: notification.groupId,
-            type: 'text',
-            createdAt: serverTimestamp()
-          };
-          
-          await addDoc(collection(db, 'groupMessages'), messageData);
-          
-        } catch (error) {
-          console.error("Error adding user to group:", error);
-          alert("Gagal bergabung ke grup. Silakan coba lagi.");
+      if (accept) {
+        if (notification.type === 'group_invite' && notification.groupId) {
+          try {
+            // Tambahkan user ke grup
+            const groupRef = doc(db, 'groups', notification.groupId);
+            
+            // Tambahkan user ke members array
+            await updateDoc(groupRef, {
+              members: arrayUnion(user.uid),
+              [`memberNames.${user.uid}`]: userDisplayName
+            });
+            
+            alert(`Anda telah bergabung dengan grup "${notification.groupName}"`);
+            
+            // Reload groups
+            loadUserGroups(user.uid);
+            
+            // Tampilkan pesan di chat grup
+            const messageData = {
+              text: `${userDisplayName} telah bergabung ke grup melalui undangan dari ${notification.senderName}`,
+              userId: 'system',
+              userName: 'System',
+              groupId: notification.groupId,
+              type: 'text',
+              createdAt: serverTimestamp()
+            };
+            
+            await addDoc(collection(db, 'groupMessages'), messageData);
+            
+          } catch (error) {
+            console.error("Error adding user to group:", error);
+            alert("Gagal bergabung ke grup. Silakan coba lagi.");
+          }
+        } else if (notification.type === 'collaborate_invite' && notification.noteId) {
+          try {
+            // Tambahkan user sebagai kolaborator ke catatan
+            const noteRef = doc(db, 'userNotes', notification.noteId);
+            
+            // Tambahkan user ke collaborators array
+            await updateDoc(noteRef, {
+              collaborators: arrayUnion(user.uid),
+              [`collaboratorNames.${user.uid}`]: userDisplayName,
+              isCollaborative: true
+            });
+            
+            alert(`Anda sekarang dapat berkolaborasi pada catatan "${notification.noteTitle}"`);
+            
+            // Reload notes
+            loadUserNotes(user.uid);
+            
+          } catch (error) {
+            console.error("Error adding collaborator to note:", error);
+            alert("Gagal bergabung sebagai kolaborator. Silakan coba lagi.");
+          }
         }
       }
 
@@ -513,8 +731,12 @@ export default function NotesPage(): React.JSX.Element {
         description: newNote.description.trim(),
         userId: user.uid,
         userName: userDisplayName,
+        userEmail: userEmail,
         thumbnail: thumbnail,
         savedBy: [],
+        collaborators: [], // Empty array for collaborators
+        collaboratorNames: {},
+        isCollaborative: false,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       };
@@ -527,6 +749,31 @@ export default function NotesPage(): React.JSX.Element {
     } catch (error) {
       console.error("Error creating note:", error);
       alert("Gagal membuat catatan. Silakan coba lagi.");
+    }
+  };
+
+  const handleEditNote = async () => {
+    if (!user || !db || !currentNote) return;
+
+    try {
+      const noteRef = doc(db, 'userNotes', currentNote.id!);
+      
+      await updateDoc(noteRef, {
+        title: editNote.title.trim() || currentNote.title,
+        category: editNote.category.trim() || currentNote.category,
+        link: editNote.link.trim() || currentNote.link,
+        description: editNote.description.trim() || currentNote.description,
+        updatedAt: serverTimestamp()
+      });
+      
+      setShowEditNoteModal(false);
+      setCurrentNote(null);
+      
+      alert("Catatan berhasil diperbarui!");
+      
+    } catch (error) {
+      console.error("Error editing note:", error);
+      alert("Gagal mengedit catatan.");
     }
   };
 
@@ -705,6 +952,17 @@ export default function NotesPage(): React.JSX.Element {
   const pendingNotifications = notifications.filter(n => n.status === 'pending');
   const notificationCount = pendingNotifications.length;
 
+  // Check if current user is owner or collaborator
+  const canEditNote = (note: Note) => {
+    return note.userId === user?.uid || 
+           (note.collaborators && note.collaborators.includes(user?.uid));
+  };
+
+  // Check if user is owner (for inviting collaborators)
+  const isNoteOwner = (note: Note) => {
+    return note.userId === user?.uid;
+  };
+
   if (!auth || !db) {
     return (
       <div style={{
@@ -764,7 +1022,7 @@ export default function NotesPage(): React.JSX.Element {
           alignItems: 'center',
           gap: '30px'
         }}>
-          {/* Nama User dengan South East Arrow */}
+          {/* Nama User dengan South East Arrow dan Verified Badge untuk email tertentu */}
           <div style={{
             fontSize: '32px',
             fontFamily: 'Helvetica, Arial, sans-serif',
@@ -775,6 +1033,10 @@ export default function NotesPage(): React.JSX.Element {
             gap: '10px'
           }}>
             {userDisplayName}
+            {/* Tampilkan verified badge untuk email tertentu */}
+            {(userEmail === 'faridardiansyah061@gmail.com' || userEmail?.includes('gmail.com')) && (
+              <InstagramVerifiedBadge size={20} showTooltip={true} />
+            )}
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M7 17l9.2-9.2M17 17V7H7"/>
             </svg>
@@ -880,8 +1142,18 @@ export default function NotesPage(): React.JSX.Element {
                           marginBottom: '10px'
                         }}>
                           Dari: {notification.senderName || 'Unknown User'}
-                          <br />
-                          Grup: {notification.groupName || 'Unknown Group'}
+                          {notification.type === 'group_invite' && (
+                            <>
+                              <br />
+                              Grup: {notification.groupName || 'Unknown Group'}
+                            </>
+                          )}
+                          {notification.type === 'collaborate_invite' && (
+                            <>
+                              <br />
+                              Catatan: {notification.noteTitle || 'Unknown Note'}
+                            </>
+                          )}
                           <br />
                           Waktu: {formatTime(notification.createdAt)}
                         </div>
@@ -1182,6 +1454,8 @@ export default function NotesPage(): React.JSX.Element {
             {notes.map((note) => {
               const videoEmbedUrl = getVideoEmbedUrl(note.link);
               const isSaved = note.savedBy && note.savedBy.includes(user?.uid);
+              const userCanEdit = canEditNote(note);
+              const userIsOwner = isNoteOwner(note);
               
               return (
                 <div
@@ -1191,43 +1465,103 @@ export default function NotesPage(): React.JSX.Element {
                     flexDirection: 'column',
                     gap: '25px',
                     fontFamily: 'Helvetica, Arial, sans-serif',
+                    position: 'relative',
+                    border: note.isCollaborative ? '2px solid rgba(255,215,0,0.3)' : 'none',
+                    borderRadius: note.isCollaborative ? '16px' : '0',
+                    padding: note.isCollaborative ? '30px' : '0',
+                    backgroundColor: note.isCollaborative ? 'rgba(255,215,0,0.02)' : 'transparent'
                   }}
                 >
-                  {note.category && (
+                  {/* Badge Kolaborasi untuk catatan kolaboratif */}
+                  {note.isCollaborative && (
                     <div style={{
-                      fontSize: '28px',
-                      fontFamily: 'Helvetica, Arial, sans-serif',
-                      color: 'white',
-                      marginBottom: '15px',
-                      fontWeight: '600'
+                      position: 'absolute',
+                      top: '-15px',
+                      right: '20px',
+                      backgroundColor: 'gold',
+                      color: 'black',
+                      padding: '8px 20px',
+                      borderRadius: '30px',
+                      fontSize: '16px',
+                      fontWeight: 'bold',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      boxShadow: '0 4px 15px rgba(255,215,0,0.3)',
+                      zIndex: 10
                     }}>
-                      {note.category}
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M12 2a10 10 0 0 1 10 10c0 5.52-4.48 10-10 10S2 17.52 2 12 6.48 2 12 2z"/>
+                        <path d="M8 12h8M12 8v8"/>
+                      </svg>
+                      Kolaborasi
                     </div>
                   )}
 
+                  {/* Label Kategori */}
+                  {note.category && (
+                    <div style={{
+                      fontSize: '18px',
+                      fontFamily: 'Helvetica, Arial, sans-serif',
+                      color: '#aaa',
+                      marginBottom: '5px',
+                      letterSpacing: '1px',
+                      textTransform: 'uppercase'
+                    }}>
+                      Kategori: {note.category}
+                    </div>
+                  )}
+
+                  {/* Judul dengan Label */}
+                  <div style={{
+                    fontSize: '32px',
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    color: 'white',
+                    marginBottom: '5px',
+                    fontWeight: '300',
+                    letterSpacing: '0.5px'
+                  }}>
+                    Judul
+                  </div>
                   <div style={{
                     fontSize: '48px',
                     fontFamily: 'Helvetica, Arial, sans-serif',
                     lineHeight: '1.3',
                     color: 'white',
-                    fontWeight: 'bold'
+                    fontWeight: 'bold',
+                    marginTop: '-10px'
                   }}>
                     {note.title}
                   </div>
 
+                  {/* Deskripsi dengan Label */}
                   {note.description && (
-                    <div style={{
-                      fontSize: '28px',
-                      fontFamily: 'Helvetica, Arial, sans-serif',
-                      lineHeight: '1.6',
-                      color: 'white',
-                      marginTop: '25px',
-                      whiteSpace: 'pre-wrap'
-                    }}>
-                      {note.description}
-                    </div>
+                    <>
+                      <div style={{
+                        fontSize: '24px',
+                        fontFamily: 'Helvetica, Arial, sans-serif',
+                        color: 'white',
+                        marginTop: '20px',
+                        marginBottom: '5px',
+                        fontWeight: '300',
+                        letterSpacing: '0.5px'
+                      }}>
+                        Deskripsi
+                      </div>
+                      <div style={{
+                        fontSize: '28px',
+                        fontFamily: 'Helvetica, Arial, sans-serif',
+                        lineHeight: '1.6',
+                        color: 'white',
+                        whiteSpace: 'pre-wrap',
+                        marginTop: '-5px'
+                      }}>
+                        {note.description}
+                      </div>
+                    </>
                   )}
 
+                  {/* Thumbnail/Video */}
                   {note.thumbnail && !videoEmbedUrl && (
                     <div style={{
                       margin: '20px 0'
@@ -1322,31 +1656,87 @@ export default function NotesPage(): React.JSX.Element {
                     </div>
                   )}
 
+                  {/* Footer dengan Info Pengirim dan Actions */}
                   <div style={{
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
                     marginTop: '30px',
-                    fontFamily: 'Helvetica, Arial, sans-serif'
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    borderTop: '1px solid #333',
+                    paddingTop: '20px'
                   }}>
                     <div style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '20px'
+                      gap: '20px',
+                      flexWrap: 'wrap'
                     }}>
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px'
+                      }}>
+                        <span style={{
+                          fontSize: '18px',
+                          color: '#888'
+                        }}>
+                          Oleh:
+                        </span>
+                        <span style={{
+                          fontSize: '20px',
+                          color: 'white',
+                          fontWeight: 'bold',
+                          display: 'flex',
+                          alignItems: 'center'
+                        }}>
+                          {note.userName}
+                          {/* Tampilkan verified badge untuk email tertentu */}
+                          {(note.userEmail === 'faridardiansyah061@gmail.com' || note.userEmail?.includes('gmail.com')) && (
+                            <InstagramVerifiedBadge size={16} showTooltip={true} />
+                          )}
+                        </span>
+                      </div>
+                      
                       <span style={{
-                        fontSize: '22px',
+                        fontSize: '18px',
+                        color: '#666'
+                      }}>
+                        •
+                      </span>
+                      
+                      <span style={{
+                        fontSize: '18px',
                         fontFamily: 'Helvetica, Arial, sans-serif',
-                        color: 'white'
+                        color: '#888'
                       }}>
                         {formatDate(note.updatedAt)}
                       </span>
-                      <span style={{
-                        fontSize: '18px',
-                        color: '#aaa'
-                      }}>
-                        oleh {note.userName}
-                      </span>
+                      
+                      {/* Tampilkan jumlah kolaborator */}
+                      {note.collaborators && note.collaborators.length > 0 && (
+                        <>
+                          <span style={{
+                            fontSize: '18px',
+                            color: '#666'
+                          }}>
+                            •
+                          </span>
+                          <span style={{
+                            fontSize: '16px',
+                            color: 'gold',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '5px'
+                          }}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                              <circle cx="12" cy="7" r="4"/>
+                            </svg>
+                            {note.collaborators.length} kolaborator
+                          </span>
+                        </>
+                      )}
                     </div>
                     
                     <div style={{
@@ -1397,6 +1787,67 @@ export default function NotesPage(): React.JSX.Element {
                             <circle cx="18" cy="19" r="3"/>
                             <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
                             <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+                          </svg>
+                        </button>
+                      )}
+
+                      {/* Tombol Invite Collaborator (hanya untuk pemilik) */}
+                      {userIsOwner && (
+                        <button
+                          onClick={() => {
+                            setCurrentNote(note);
+                            setShowCollaborateModal(true);
+                          }}
+                          style={{
+                            backgroundColor: 'transparent',
+                            border: 'none',
+                            color: 'gold',
+                            fontSize: '24px',
+                            cursor: 'pointer',
+                            padding: '5px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
+                          title="Undang Kolaborator"
+                        >
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+                            <circle cx="8.5" cy="7" r="4"/>
+                            <line x1="20" y1="8" x2="20" y2="14"/>
+                            <line x1="23" y1="11" x2="17" y2="11"/>
+                          </svg>
+                        </button>
+                      )}
+
+                      {/* Tombol Edit (untuk pemilik dan kolaborator) */}
+                      {userCanEdit && (
+                        <button
+                          onClick={() => {
+                            setCurrentNote(note);
+                            setEditNote({
+                              title: note.title,
+                              category: note.category,
+                              link: note.link || '',
+                              description: note.description || ''
+                            });
+                            setShowEditNoteModal(true);
+                          }}
+                          style={{
+                            backgroundColor: 'transparent',
+                            border: 'none',
+                            color: 'white',
+                            fontSize: '24px',
+                            cursor: 'pointer',
+                            padding: '5px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
+                          title="Edit Catatan"
+                        >
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>
                           </svg>
                         </button>
                       )}
@@ -1525,18 +1976,27 @@ export default function NotesPage(): React.JSX.Element {
               fontFamily: 'Helvetica, Arial, sans-serif'
             }}>
               <div>
+                <div style={{
+                  fontSize: '16px',
+                  color: '#aaa',
+                  marginBottom: '5px',
+                  letterSpacing: '1px'
+                }}>
+                  JUDUL CATATAN
+                </div>
                 <input
                   type="text"
                   value={newNote.title}
                   onChange={(e) => setNewNote({...newNote, title: e.target.value})}
-                  placeholder="Judul Catatan"
+                  placeholder="Contoh: Tutorial React untuk Pemula"
                   style={{
                     width: '100%',
                     padding: '20px',
                     backgroundColor: 'transparent',
                     border: 'none',
+                    borderBottom: '1px solid #333',
                     color: 'white',
-                    fontSize: '32px',
+                    fontSize: '24px',
                     outline: 'none',
                     fontFamily: 'Helvetica, Arial, sans-serif',
                     lineHeight: '1.3'
@@ -1545,6 +2005,14 @@ export default function NotesPage(): React.JSX.Element {
               </div>
 
               <div>
+                <div style={{
+                  fontSize: '16px',
+                  color: '#aaa',
+                  marginBottom: '5px',
+                  letterSpacing: '1px'
+                }}>
+                  KATEGORI
+                </div>
                 <select
                   value={newNote.category}
                   onChange={(e) => setNewNote({...newNote, category: e.target.value})}
@@ -1553,6 +2021,7 @@ export default function NotesPage(): React.JSX.Element {
                     padding: '20px',
                     backgroundColor: 'transparent',
                     border: 'none',
+                    borderBottom: '1px solid #333',
                     color: 'white',
                     fontSize: '24px',
                     outline: 'none',
@@ -1581,16 +2050,25 @@ export default function NotesPage(): React.JSX.Element {
               </div>
 
               <div>
+                <div style={{
+                  fontSize: '16px',
+                  color: '#aaa',
+                  marginBottom: '5px',
+                  letterSpacing: '1px'
+                }}>
+                  LINK (YouTube, Vimeo, dll.)
+                </div>
                 <input
                   type="text"
                   value={newNote.link}
                   onChange={(e) => setNewNote({...newNote, link: e.target.value})}
-                  placeholder="Link Video/Gambar (YouTube, Vimeo, dll.)"
+                  placeholder="https://youtube.com/watch?v=..."
                   style={{
                     width: '100%',
                     padding: '20px',
                     backgroundColor: 'transparent',
                     border: 'none',
+                    borderBottom: '1px solid #333',
                     color: 'white',
                     fontSize: '24px',
                     outline: 'none',
@@ -1600,18 +2078,27 @@ export default function NotesPage(): React.JSX.Element {
               </div>
 
               <div>
+                <div style={{
+                  fontSize: '16px',
+                  color: '#aaa',
+                  marginBottom: '5px',
+                  letterSpacing: '1px'
+                }}>
+                  DESKRIPSI
+                </div>
                 <textarea
                   value={newNote.description}
                   onChange={(e) => setNewNote({...newNote, description: e.target.value})}
-                  placeholder="Deskripsi Catatan"
+                  placeholder="Tulis deskripsi lengkap tentang catatan ini..."
                   rows={8}
                   style={{
                     width: '100%',
                     padding: '20px',
                     backgroundColor: 'transparent',
                     border: 'none',
+                    borderBottom: '1px solid #333',
                     color: 'white',
-                    fontSize: '24px',
+                    fontSize: '20px',
                     outline: 'none',
                     fontFamily: 'Helvetica, Arial, sans-serif',
                     resize: 'none',
@@ -1659,6 +2146,244 @@ export default function NotesPage(): React.JSX.Element {
                   Simpan Catatan
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M7 17l9.2-9.2M17 17V7H7"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal edit catatan */}
+      {showEditNoteModal && currentNote && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.95)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          padding: '30px',
+          fontFamily: 'Helvetica, Arial, sans-serif'
+        }}>
+          <div style={{
+            backgroundColor: 'black',
+            width: '100%',
+            maxWidth: '700px',
+            padding: '60px',
+            fontFamily: 'Helvetica, Arial, sans-serif',
+          }}>
+            <div style={{
+              marginBottom: '50px',
+              fontFamily: 'Helvetica, Arial, sans-serif'
+            }}>
+              <div style={{
+                fontSize: '36px',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                marginBottom: '20px',
+                color: 'white',
+                fontWeight: 'bold',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px'
+              }}>
+                Edit Catatan
+                {currentNote.isCollaborative && (
+                  <span style={{
+                    backgroundColor: 'gold',
+                    color: 'black',
+                    padding: '4px 12px',
+                    borderRadius: '20px',
+                    fontSize: '16px'
+                  }}>
+                    Kolaborasi
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '30px',
+              fontFamily: 'Helvetica, Arial, sans-serif'
+            }}>
+              <div>
+                <div style={{
+                  fontSize: '16px',
+                  color: '#aaa',
+                  marginBottom: '5px',
+                  letterSpacing: '1px'
+                }}>
+                  JUDUL CATATAN
+                </div>
+                <input
+                  type="text"
+                  value={editNote.title}
+                  onChange={(e) => setEditNote({...editNote, title: e.target.value})}
+                  placeholder="Judul Catatan"
+                  style={{
+                    width: '100%',
+                    padding: '20px',
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    borderBottom: '1px solid #333',
+                    color: 'white',
+                    fontSize: '24px',
+                    outline: 'none',
+                    fontFamily: 'Helvetica, Arial, sans-serif'
+                  }}
+                />
+              </div>
+
+              <div>
+                <div style={{
+                  fontSize: '16px',
+                  color: '#aaa',
+                  marginBottom: '5px',
+                  letterSpacing: '1px'
+                }}>
+                  KATEGORI
+                </div>
+                <select
+                  value={editNote.category}
+                  onChange={(e) => setEditNote({...editNote, category: e.target.value})}
+                  style={{
+                    width: '100%',
+                    padding: '20px',
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    borderBottom: '1px solid #333',
+                    color: 'white',
+                    fontSize: '24px',
+                    outline: 'none',
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    cursor: 'pointer',
+                    appearance: 'none',
+                    backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
+                    backgroundRepeat: 'no-repeat',
+                    backgroundPosition: 'right 20px center',
+                    backgroundSize: '24px'
+                  }}
+                >
+                  <option value="" style={{ backgroundColor: 'black', color: 'white', fontSize: '20px' }}>
+                    Pilih Kategori
+                  </option>
+                  {categories.map((category) => (
+                    <option 
+                      key={category} 
+                      value={category}
+                      style={{ backgroundColor: 'black', color: 'white', fontSize: '20px' }}
+                    >
+                      {category}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <div style={{
+                  fontSize: '16px',
+                  color: '#aaa',
+                  marginBottom: '5px',
+                  letterSpacing: '1px'
+                }}>
+                  LINK
+                </div>
+                <input
+                  type="text"
+                  value={editNote.link}
+                  onChange={(e) => setEditNote({...editNote, link: e.target.value})}
+                  placeholder="Link Video/Gambar"
+                  style={{
+                    width: '100%',
+                    padding: '20px',
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    borderBottom: '1px solid #333',
+                    color: 'white',
+                    fontSize: '24px',
+                    outline: 'none',
+                    fontFamily: 'Helvetica, Arial, sans-serif'
+                  }}
+                />
+              </div>
+
+              <div>
+                <div style={{
+                  fontSize: '16px',
+                  color: '#aaa',
+                  marginBottom: '5px',
+                  letterSpacing: '1px'
+                }}>
+                  DESKRIPSI
+                </div>
+                <textarea
+                  value={editNote.description}
+                  onChange={(e) => setEditNote({...editNote, description: e.target.value})}
+                  placeholder="Deskripsi Catatan"
+                  rows={8}
+                  style={{
+                    width: '100%',
+                    padding: '20px',
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    borderBottom: '1px solid #333',
+                    color: 'white',
+                    fontSize: '20px',
+                    outline: 'none',
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    resize: 'none',
+                    lineHeight: '1.6'
+                  }}
+                />
+              </div>
+
+              <div style={{
+                display: 'flex',
+                justifyContent: 'flex-end',
+                gap: '25px',
+                marginTop: '50px',
+                fontFamily: 'Helvetica, Arial, sans-serif'
+              }}>
+                <button
+                  onClick={() => {
+                    setShowEditNoteModal(false);
+                    setCurrentNote(null);
+                  }}
+                  style={{
+                    padding: '15px 30px',
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    color: 'white',
+                    fontSize: '22px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Batal
+                </button>
+                <button
+                  onClick={handleEditNote}
+                  style={{
+                    padding: '15px 30px',
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    color: 'white',
+                    fontSize: '22px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px'
+                  }}
+                >
+                  Update Catatan
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M20 14.66V20a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2h5.34"/>
+                    <polygon points="18 2 22 6 12 16 8 16 8 12 18 2"/>
                   </svg>
                 </button>
               </div>
@@ -1726,6 +2451,7 @@ export default function NotesPage(): React.JSX.Element {
                   padding: '20px',
                   backgroundColor: 'transparent',
                   border: 'none',
+                  borderBottom: '1px solid #333',
                   color: 'white',
                   fontSize: '24px',
                   outline: 'none'
@@ -1779,7 +2505,7 @@ export default function NotesPage(): React.JSX.Element {
         </div>
       )}
 
-      {/* Modal invite user */}
+      {/* Modal invite user ke grup */}
       {showInviteModal && (
         <div style={{
           position: 'fixed',
@@ -1838,6 +2564,7 @@ export default function NotesPage(): React.JSX.Element {
                   padding: '20px',
                   backgroundColor: 'transparent',
                   border: 'none',
+                  borderBottom: '1px solid #333',
                   color: 'white',
                   fontSize: '20px',
                   outline: 'none'
@@ -1883,6 +2610,165 @@ export default function NotesPage(): React.JSX.Element {
                   Kirim Undangan
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal invite kolaborator */}
+      {showCollaborateModal && currentNote && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.95)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1001,
+          padding: '30px',
+          fontFamily: 'Helvetica, Arial, sans-serif'
+        }}>
+          <div style={{
+            backgroundColor: 'black',
+            width: '100%',
+            maxWidth: '500px',
+            padding: '50px',
+            fontFamily: 'Helvetica, Arial, sans-serif',
+          }}>
+            <div style={{
+              marginBottom: '40px',
+              fontFamily: 'Helvetica, Arial, sans-serif'
+            }}>
+              <div style={{
+                fontSize: '32px',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                marginBottom: '20px',
+                color: 'white',
+                fontWeight: 'bold'
+              }}>
+                Undang Kolaborator
+              </div>
+              <div style={{
+                fontSize: '20px',
+                color: 'white'
+              }}>
+                Undang user lain untuk berkolaborasi pada catatan:<br />
+                <strong style={{ color: 'gold' }}>"{currentNote.title}"</strong>
+              </div>
+              
+              {currentNote.collaborators && currentNote.collaborators.length > 0 && (
+                <div style={{
+                  marginTop: '20px',
+                  padding: '15px',
+                  backgroundColor: 'rgba(255,215,0,0.1)',
+                  borderRadius: '8px'
+                }}>
+                  <div style={{
+                    fontSize: '16px',
+                    color: '#aaa',
+                    marginBottom: '10px'
+                  }}>
+                    Kolaborator saat ini:
+                  </div>
+                  <div style={{
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    gap: '10px'
+                  }}>
+                    {currentNote.collaboratorNames && 
+                     Object.entries(currentNote.collaboratorNames).map(([id, name]) => (
+                      <span key={id} style={{
+                        backgroundColor: '#333',
+                        padding: '5px 12px',
+                        borderRadius: '20px',
+                        fontSize: '14px',
+                        color: 'white',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '5px'
+                      }}>
+                        {name}
+                        {id !== user?.uid && (
+                          <span style={{ fontSize: '12px', color: 'gold' }}>• kolaborator</span>
+                        )}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '25px'
+            }}>
+              <input
+                type="email"
+                value={collaborateEmail}
+                onChange={(e) => setCollaborateEmail(e.target.value)}
+                placeholder="Email user yang ingin diundang"
+                style={{
+                  width: '100%',
+                  padding: '20px',
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                  borderBottom: '1px solid #333',
+                  color: 'white',
+                  fontSize: '20px',
+                  outline: 'none'
+                }}
+              />
+
+              <div style={{
+                display: 'flex',
+                justifyContent: 'flex-end',
+                gap: '20px',
+                marginTop: '30px'
+              }}>
+                <button
+                  onClick={() => {
+                    setShowCollaborateModal(false);
+                    setCollaborateEmail("");
+                    setCurrentNote(null);
+                  }}
+                  style={{
+                    padding: '15px 30px',
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    color: 'white',
+                    fontSize: '20px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Batal
+                </button>
+                <button
+                  onClick={handleInviteCollaborator}
+                  style={{
+                    padding: '15px 30px',
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    color: 'gold',
+                    fontSize: '20px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    border: '1px solid gold',
+                    borderRadius: '8px'
+                  }}
+                >
+                  Kirim Undangan Kolaborasi
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M12 2a10 10 0 0 1 10 10c0 5.52-4.48 10-10 10S2 17.52 2 12 6.48 2 12 2z"/>
+                    <path d="M8 12h8M12 8v8"/>
                   </svg>
                 </button>
               </div>
