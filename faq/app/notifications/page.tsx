@@ -42,8 +42,8 @@ if (typeof window !== "undefined") {
   auth = getAuth(app);
 }
 
-// Instagram Verified Badge Component
-const InstagramVerifiedBadge = ({ size = 16 }) => {
+// Instagram Verified Badge Component - LEBIH BESAR
+const InstagramVerifiedBadge = ({ size = 24 }) => {
   const [showTooltip, setShowTooltip] = useState(false);
   
   return (
@@ -51,7 +51,7 @@ const InstagramVerifiedBadge = ({ size = 16 }) => {
       style={{ 
         position: 'relative', 
         display: 'inline-block',
-        marginLeft: '4px',
+        marginLeft: '8px',
         verticalAlign: 'middle',
         cursor: 'help'
       }}
@@ -63,6 +63,9 @@ const InstagramVerifiedBadge = ({ size = 16 }) => {
         height={size}
         viewBox="0 0 24 24"
         xmlns="http://www.w3.org/2000/svg"
+        style={{
+          display: 'block'
+        }}
       >
         <path
           fill="#0095F6"
@@ -101,27 +104,101 @@ const InstagramVerifiedBadge = ({ size = 16 }) => {
           transform: 'translateX(-50%)',
           backgroundColor: '#333',
           color: 'white',
-          padding: '4px 8px',
-          borderRadius: '4px',
-          fontSize: '11px',
+          padding: '6px 12px',
+          borderRadius: '6px',
+          fontSize: '13px',
+          fontWeight: '500',
           whiteSpace: 'nowrap',
-          marginBottom: '5px',
+          marginBottom: '8px',
           zIndex: 1000,
-          boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
+          boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+          letterSpacing: '0.3px'
         }}>
-          Akun Gmail Terverifikasi
+          Akun Resmi
           <div style={{
             position: 'absolute',
             top: '100%',
             left: '50%',
             transform: 'translateX(-50%)',
-            borderWidth: '4px',
+            borderWidth: '6px',
             borderStyle: 'solid',
             borderColor: '#333 transparent transparent transparent'
           }} />
         </div>
       )}
     </span>
+  );
+};
+
+// Like Button with Animation
+const LikeButton = ({ isLiked, count, onClick, disabled = false }) => {
+  const [isAnimating, setIsAnimating] = useState(false);
+  
+  const handleClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (disabled) return;
+    
+    setIsAnimating(true);
+    setTimeout(() => setIsAnimating(false), 600);
+    
+    onClick(e);
+  };
+  
+  return (
+    <div 
+      onClick={handleClick}
+      style={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        gap: '8px',
+        cursor: disabled ? 'default' : 'pointer',
+        padding: '8px 16px',
+        borderRadius: '30px',
+        background: isLiked ? 'rgba(59, 130, 246, 0.15)' : 'rgba(255,255,255,0.05)',
+        border: isLiked ? '1px solid #3b82f6' : '1px solid rgba(255,255,255,0.1)',
+        transition: 'all 0.2s ease',
+        position: 'relative'
+      }}
+    >
+      <svg 
+        width="24" 
+        height="24" 
+        viewBox="0 0 24 24" 
+        fill={isLiked ? "#3b82f6" : "none"} 
+        stroke={isLiked ? "#3b82f6" : "currentColor"} 
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        style={{
+          transform: isAnimating ? 'scale(1.3)' : 'scale(1)',
+          transition: 'transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+          animation: isAnimating ? 'likePop 0.4s ease' : 'none'
+        }}
+      >
+        <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>
+      </svg>
+      <span style={{ 
+        fontSize: '1.1rem', 
+        fontWeight: '500',
+        color: isLiked ? '#3b82f6' : 'white',
+        transform: isAnimating ? 'scale(1.1)' : 'scale(1)',
+        transition: 'transform 0.2s ease'
+      }}>
+        {count}
+      </span>
+      
+      <style jsx>{`
+        @keyframes likePop {
+          0% { transform: scale(1); }
+          25% { transform: scale(1.3); }
+          50% { transform: scale(1.2); }
+          75% { transform: scale(1.1); }
+          100% { transform: scale(1); }
+        }
+      `}</style>
+    </div>
   );
 };
 
@@ -267,9 +344,9 @@ export default function NotificationsPage(): React.JSX.Element {
     return `https://ui-avatars.com/api/?name=${getCurrentUserName()}&background=random&color=fff`;
   };
 
-  // Check if user has Gmail (untuk verified badge)
-  const hasGmail = (email?: string) => {
-    return email?.toLowerCase().includes('@gmail.com') || false;
+  // Check if user has email (semua email dapat badge - Akun Resmi)
+  const hasVerifiedBadge = (email?: string) => {
+    return email ? true : false; // Semua email dapat badge
   };
 
   // Load notifications - FILTERED BY USER
@@ -758,26 +835,10 @@ export default function NotificationsPage(): React.JSX.Element {
     </svg>
   );
 
-  // Like Icon
-  const LikeIcon = ({ filled = false }: { filled?: boolean }) => (
-    <svg 
-      width="20" 
-      height="20" 
-      viewBox="0 0 24 24" 
-      fill={filled ? "currentColor" : "none"} 
-      stroke="currentColor" 
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>
-    </svg>
-  );
-
   const CommentIcon = () => (
     <svg 
-      width="20" 
-      height="20" 
+      width="24" 
+      height="24" 
       viewBox="0 0 24 24" 
       fill="none" 
       stroke="currentColor" 
@@ -791,8 +852,8 @@ export default function NotificationsPage(): React.JSX.Element {
 
   const ReplyIcon = () => (
     <svg 
-      width="16" 
-      height="16" 
+      width="20" 
+      height="20" 
       viewBox="0 0 24 24" 
       fill="none" 
       stroke="currentColor" 
@@ -807,8 +868,8 @@ export default function NotificationsPage(): React.JSX.Element {
 
   const SendIcon = () => (
     <svg 
-      width="16" 
-      height="16" 
+      width="20" 
+      height="20" 
       viewBox="0 0 24 24" 
       fill="none" 
       stroke="currentColor" 
@@ -938,7 +999,7 @@ export default function NotificationsPage(): React.JSX.Element {
     );
   };
 
-  // Link Preview Component - LANGSUNG DITAMPILKAN TANPA TOMBOL
+  // Link Preview Component
   const LinkPreview = ({ notification }: { notification: Notification }) => {
     const links = notification.links || {
       youtube: [],
@@ -1198,11 +1259,11 @@ export default function NotificationsPage(): React.JSX.Element {
         
         <div style={{ display: 'flex', alignItems: 'center', gap: '3rem' }}>
           <span style={{ fontSize: '1.8rem' }}>{currentTime}</span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <span style={{ fontSize: '2rem', display: 'flex', alignItems: 'center' }}>
               {user?.displayName || user?.email || 'Visitor'}
-              {/* Instagram Verified Badge untuk user yang login dengan Gmail */}
-              {hasGmail(user?.email) && <InstagramVerifiedBadge />}
+              {/* Verified Badge untuk semua user */}
+              <InstagramVerifiedBadge />
             </span>
             <NorthEastArrow />
           </div>
@@ -1297,7 +1358,7 @@ export default function NotificationsPage(): React.JSX.Element {
                     {notification.message}
                   </div>
                   
-                  {/* Link Preview - LANGSUNG DITAMPILKAN TANPA TOMBOL */}
+                  {/* Link Preview */}
                   <LinkPreview notification={notification} />
                   
                   <div style={{ 
@@ -1309,26 +1370,17 @@ export default function NotificationsPage(): React.JSX.Element {
                   }}>
                     <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                       From {notification.senderName}
-                      {/* Instagram Verified Badge untuk pengirim jika menggunakan Gmail */}
-                      {hasGmail(notification.senderEmail) && <InstagramVerifiedBadge size={14} />}
+                      {/* Verified Badge untuk semua pengirim */}
+                      <InstagramVerifiedBadge size={20} />
                     </span>
                     <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
-                      <div 
+                      {/* Like Button dengan Animasi */}
+                      <LikeButton 
+                        isLiked={isLiked}
+                        count={notification.likes?.length || 0}
                         onClick={(e) => toggleNotificationLike(notification.id, e)}
-                        style={{ 
-                          display: 'flex', 
-                          alignItems: 'center', 
-                          gap: '0.5rem',
-                          cursor: user ? 'pointer' : 'default',
-                          padding: '8px 12px',
-                          borderRadius: '30px',
-                          background: isLiked ? 'rgba(59, 130, 246, 0.1)' : 'transparent',
-                          border: isLiked ? '1px solid #3b82f6' : 'none'
-                        }}
-                      >
-                        <LikeIcon filled={isLiked} />
-                        <span>{notification.likes?.length || 0}</span>
-                      </div>
+                        disabled={!user}
+                      />
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                         <CommentIcon />
                         <span>{notification.comments?.length || 0}</span>
@@ -1473,7 +1525,7 @@ export default function NotificationsPage(): React.JSX.Element {
                 </div>
               )}
               
-              {/* Links Section di Modal - LANGSUNG DITAMPILKAN TANPA TOMBOL */}
+              {/* Links Section di Modal */}
               {selectedNotification.links && Object.values(selectedNotification.links).some(arr => arr.length > 0) && (
                 <div style={{ marginBottom: '3rem' }}>
                   <LinkPreview notification={selectedNotification} />
@@ -1489,26 +1541,15 @@ export default function NotificationsPage(): React.JSX.Element {
               }}>
                 <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                   — {selectedNotification.senderName}
-                  {/* Instagram Verified Badge untuk pengirim di modal */}
-                  {hasGmail(selectedNotification.senderEmail) && <InstagramVerifiedBadge />}
+                  {/* Verified Badge untuk pengirim */}
+                  <InstagramVerifiedBadge />
                 </span>
-                <div 
+                <LikeButton 
+                  isLiked={selectedNotification.likes.includes(getCurrentUserId())}
+                  count={selectedNotification.likes?.length || 0}
                   onClick={(e) => toggleNotificationLike(selectedNotification.id, e)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    padding: '8px 16px',
-                    borderRadius: '30px',
-                    cursor: user ? 'pointer' : 'default',
-                    color: selectedNotification.likes.includes(getCurrentUserId()) ? '#3b82f6' : '#ffffff',
-                    background: selectedNotification.likes.includes(getCurrentUserId()) ? 'rgba(59, 130, 246, 0.1)' : 'transparent',
-                    border: selectedNotification.likes.includes(getCurrentUserId()) ? '1px solid #3b82f6' : 'none'
-                  }}
-                >
-                  <LikeIcon filled={selectedNotification.likes.includes(getCurrentUserId())} />
-                  <span>{selectedNotification.likes?.length || 0}</span>
-                </div>
+                  disabled={!user}
+                />
               </div>
             </div>
 
@@ -1718,8 +1759,8 @@ export default function NotificationsPage(): React.JSX.Element {
                         marginBottom: '4px'
                       }}>
                         {getCurrentUserName()}
-                        {/* Instagram Verified Badge untuk komentator */}
-                        {hasGmail(user?.email) && <InstagramVerifiedBadge size={14} />}
+                        {/* Verified Badge untuk komentator */}
+                        <InstagramVerifiedBadge size={20} />
                       </span>
                       <span style={{ color: '#666666', fontSize: '0.9rem' }}>
                         Berkomentar sebagai pengguna
@@ -1864,8 +1905,8 @@ export default function NotificationsPage(): React.JSX.Element {
                               marginBottom: '4px',
                             }}>
                               {comment.userName}
-                              {/* Instagram Verified Badge untuk komentator */}
-                              {hasGmail(comment.userEmail) && <InstagramVerifiedBadge size={14} />}
+                              {/* Verified Badge untuk komentator */}
+                              <InstagramVerifiedBadge size={20} />
                             </span>
                             <span style={{
                               fontSize: '0.9rem',
@@ -1876,26 +1917,13 @@ export default function NotificationsPage(): React.JSX.Element {
                           </div>
                         </div>
                         
-                        {/* Comment Like Button */}
-                        <div 
+                        {/* Comment Like Button dengan Animasi */}
+                        <LikeButton 
+                          isLiked={(comment.likedBy || []).includes(getCurrentUserId())}
+                          count={comment.likes || 0}
                           onClick={(e) => toggleLike(selectedNotification.id, comment.id, e)}
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px',
-                            background: (comment.likedBy || []).includes(getCurrentUserId()) ? 'rgba(59, 130, 246, 0.1)' : 'rgba(255,255,255,0.05)',
-                            border: (comment.likedBy || []).includes(getCurrentUserId()) ? '1px solid #3b82f6' : '1px solid rgba(255,255,255,0.1)',
-                            borderRadius: '30px',
-                            padding: '8px 16px',
-                            cursor: user ? 'pointer' : 'not-allowed',
-                            color: (comment.likedBy || []).includes(getCurrentUserId()) ? '#3b82f6' : 'white',
-                          }}
-                        >
-                          <LikeIcon filled={(comment.likedBy || []).includes(getCurrentUserId())} />
-                          <span style={{ fontSize: '1rem' }}>
-                            {comment.likes || 0}
-                          </span>
-                        </div>
+                          disabled={!user}
+                        />
                       </div>
 
                       {/* Comment Content */}
@@ -2077,8 +2105,8 @@ export default function NotificationsPage(): React.JSX.Element {
                                       gap: '4px',
                                     }}>
                                       {reply.userName}
-                                      {/* Instagram Verified Badge untuk reply */}
-                                      {hasGmail(reply.userEmail) && <InstagramVerifiedBadge size={12} />}
+                                      {/* Verified Badge untuk reply */}
+                                      <InstagramVerifiedBadge size={18} />
                                     </span>
                                     <span style={{
                                       fontSize: '0.8rem',
@@ -2095,23 +2123,12 @@ export default function NotificationsPage(): React.JSX.Element {
                                   }}>
                                     {reply.text}
                                   </p>
-                                  <div
+                                  <LikeButton 
+                                    isLiked={(reply.likedBy || []).includes(getCurrentUserId())}
+                                    count={reply.likes || 0}
                                     onClick={(e) => toggleLike(selectedNotification.id, comment.id, e, reply.id)}
-                                    style={{
-                                      display: 'flex',
-                                      alignItems: 'center',
-                                      gap: '5px',
-                                      width: 'fit-content',
-                                      padding: '4px 8px',
-                                      borderRadius: '20px',
-                                      cursor: user ? 'pointer' : 'not-allowed',
-                                      color: (reply.likedBy || []).includes(getCurrentUserId()) ? '#3b82f6' : '#666666',
-                                      backgroundColor: (reply.likedBy || []).includes(getCurrentUserId()) ? 'rgba(59, 130, 246, 0.1)' : 'transparent',
-                                    }}
-                                  >
-                                    <LikeIcon filled={(reply.likedBy || []).includes(getCurrentUserId())} />
-                                    <span>{reply.likes || 0}</span>
-                                  </div>
+                                    disabled={!user}
+                                  />
                                 </div>
                               </div>
                             </div>
