@@ -2653,152 +2653,494 @@ export default function HomePage(): React.JSX.Element {
         )}
       </AnimatePresence>
 
-      {/* Note Overlay - DENGAN DESKRIPSI */}
-      <AnimatePresence>
-        {showNoteOverlay && (
+{/* Note Overlay - AWARDS STYLE MINIMALIS DENGAN RIWAYAT NOTE PER USER */}
+<AnimatePresence>
+  {showNoteOverlay && (
+    <motion.div
+      ref={noteOverlayRef}
+      initial={{ x: '-100%' }}
+      animate={{ x: 0 }}
+      exit={{ x: '-100%' }}
+      transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        backgroundColor: '#0A0A0A',
+        zIndex: 10003,
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden',
+        borderRight: '1px solid rgba(255, 255, 255, 0.1)'
+      }}
+    >
+      {/* Background Pattern Minimalis */}
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        backgroundImage: `
+          radial-gradient(circle at 20% 30%, rgba(255,255,255,0.02) 0%, transparent 40%),
+          radial-gradient(circle at 80% 70%, rgba(255,255,255,0.02) 0%, transparent 40%),
+          repeating-linear-gradient(90deg, rgba(255,255,255,0.005) 0px, rgba(255,255,255,0.005) 1px, transparent 1px, transparent 40px)
+        `,
+        pointerEvents: 'none',
+        zIndex: 1
+      }} />
+
+      {/* Header */}
+      <div style={{
+        padding: isMobile ? '2rem 2rem 1rem 2rem' : '3rem 3rem 1rem 3rem',
+        borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        flexShrink: 0,
+        position: 'relative',
+        zIndex: 2
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+          <span style={{
+            color: 'rgba(255,255,255,0.3)',
+            fontSize: '1rem',
+            fontWeight: '400',
+            letterSpacing: '4px',
+            fontFamily: 'monospace'
+          }}>
+            01
+          </span>
+          <div style={{
+            width: '40px',
+            height: '1px',
+            backgroundColor: 'rgba(255,255,255,0.2)'
+          }} />
+          <h2 style={{
+            color: 'white',
+            fontSize: isMobile ? '2rem' : '2.5rem',
+            fontWeight: '300',
+            margin: 0,
+            fontFamily: 'Helvetica, Arial, sans-serif',
+            letterSpacing: '1px'
+          }}>
+            NOTES ARCHIVE
+          </h2>
+        </div>
+        
+        <motion.button
+          onClick={handleCloseNoteOverlay}
+          style={{
+            backgroundColor: 'transparent',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            color: 'white',
+            width: '40px',
+            height: '40px',
+            borderRadius: '50%',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '1.5rem',
+            fontFamily: 'Helvetica, Arial, sans-serif',
+            backdropFilter: 'blur(10px)'
+          }}
+          whileHover={{ 
+            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+            borderColor: 'rgba(255, 255, 255, 0.5)',
+            scale: 1.05
+          }}
+          whileTap={{ scale: 0.95 }}
+        >
+          ×
+        </motion.button>
+      </div>
+
+      {/* Konten Utama */}
+      <div style={{
+        flex: 1,
+        overflowY: 'auto',
+        padding: isMobile ? '2rem' : '3rem',
+        position: 'relative',
+        zIndex: 2
+      }}>
+        {!user ? (
+          /* Jika user belum login */
           <motion.div
-            ref={noteOverlayRef}
-            initial={{ x: '-100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '-100%' }}
-            transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
             style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              width: '100%',
               height: '100%',
-              backgroundColor: 'rgba(0, 0, 0, 0.98)',
-              zIndex: 10003,
               display: 'flex',
               flexDirection: 'column',
-              overflow: 'hidden',
-              borderRight: '1px solid rgba(255, 255, 255, 0.2)'
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '2rem',
+              color: 'rgba(255,255,255,0.7)'
             }}
           >
             <div style={{
-              padding: isMobile ? '1.5rem' : '2rem',
-              borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+              width: '80px',
+              height: '80px',
+              borderRadius: '50%',
+              border: '1px solid rgba(255,255,255,0.2)',
               display: 'flex',
-              justifyContent: 'space-between',
               alignItems: 'center',
-              flexShrink: 0
+              justifyContent: 'center',
+              fontSize: '2rem',
+              color: 'white'
             }}>
-              <h2 style={{
+              📝
+            </div>
+            <p style={{
+              fontSize: '1.2rem',
+              fontWeight: '300',
+              textAlign: 'center',
+              maxWidth: '400px'
+            }}>
+              Sign in to view your notes archive
+            </p>
+            <motion.button
+              onClick={handleSignInClick}
+              style={{
+                padding: '1rem 2.5rem',
+                backgroundColor: 'transparent',
+                border: '1px solid rgba(255,255,255,0.3)',
                 color: 'white',
-                fontSize: isMobile ? '1.8rem' : '2.5rem',
+                fontSize: '1rem',
                 fontWeight: '300',
-                margin: 0,
+                cursor: 'pointer',
                 fontFamily: 'Helvetica, Arial, sans-serif',
                 letterSpacing: '1px'
-              }}>
-                {sectionDescriptions.note.title}
-              </h2>
-              <motion.button
-                onClick={handleCloseNoteOverlay}
-                style={{
-                  backgroundColor: 'transparent',
-                  border: '1px solid rgba(255, 255, 255, 0.3)',
-                  color: 'white',
-                  width: '40px',
-                  height: '40px',
-                  borderRadius: '50%',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '1.5rem',
-                  fontFamily: 'Helvetica, Arial, sans-serif'
-                }}
-                whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
-              >
-                ×
-              </motion.button>
-            </div>
-
+              }}
+              whileHover={{
+                backgroundColor: 'rgba(255,255,255,0.1)',
+                borderColor: 'white'
+              }}
+            >
+              SIGN IN
+            </motion.button>
+          </motion.div>
+        ) : isLoadingNotes ? (
+          /* Loading state */
+          <div style={{
+            height: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+              style={{
+                width: '40px',
+                height: '40px',
+                border: '2px solid rgba(255,255,255,0.1)',
+                borderTopColor: 'white',
+                borderRadius: '50%'
+              }}
+            />
+          </div>
+        ) : !userNotes || userNotes.length === 0 ? (
+          /* Jika tidak ada notes */
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            style={{
+              height: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '2rem'
+            }}
+          >
             <div style={{
-              flex: 1,
-              overflowY: 'auto',
-              padding: isMobile ? '2rem 1.5rem' : '3rem'
+              width: '120px',
+              height: '120px',
+              borderRadius: '50%',
+              border: '1px solid rgba(255,255,255,0.1)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '3rem',
+              color: 'white'
             }}>
-              <p style={{
-                color: 'rgba(255,255,255,0.8)',
-                fontSize: '1.2rem',
-                lineHeight: 1.8,
-                marginBottom: '3rem',
-                fontFamily: 'Helvetica, Arial, sans-serif'
-              }}>
-                {sectionDescriptions.note.description}
-              </p>
-
-              <h3 style={{
+              📓
+            </div>
+            <p style={{
+              color: 'rgba(255,255,255,0.7)',
+              fontSize: '1.2rem',
+              fontWeight: '300',
+              textAlign: 'center'
+            }}>
+              No notes yet. Start writing your first note.
+            </p>
+            <motion.button
+              onClick={() => router.push('/notes')}
+              style={{
+                padding: '1rem 2.5rem',
+                backgroundColor: 'transparent',
+                border: '1px solid rgba(255,255,255,0.3)',
                 color: 'white',
-                fontSize: '1.5rem',
+                fontSize: '1rem',
                 fontWeight: '300',
-                margin: '0 0 1.5rem 0',
+                cursor: 'pointer',
                 fontFamily: 'Helvetica, Arial, sans-serif',
-                letterSpacing: '0.5px',
-                borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-                paddingBottom: '0.5rem'
-              }}>
-                Features
-              </h3>
-              
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-                gap: '1rem',
-                marginBottom: '3rem'
-              }}>
-                {sectionDescriptions.note.features.map((feature, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    style={{
-                      padding: '1rem',
-                      backgroundColor: 'rgba(255,255,255,0.03)',
-                      border: '1px solid rgba(255,255,255,0.1)',
-                      borderRadius: '8px',
-                      textAlign: 'center',
-                      color: 'white'
-                    }}
-                  >
-                    {feature}
-                  </motion.div>
-                ))}
-              </div>
+                letterSpacing: '1px'
+              }}
+              whileHover={{
+                backgroundColor: 'rgba(255,255,255,0.1)',
+                borderColor: 'white'
+              }}
+            >
+              CREATE NOTE
+            </motion.button>
+          </motion.div>
+        ) : (
+          /* Menampilkan notes per tahun - AWARDS STYLE */
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4rem' }}>
+            {Object.entries(
+              userNotes.reduce((acc: any, note) => {
+                const year = new Date(note.createdAt instanceof Timestamp ? note.createdAt.toDate() : note.createdAt).getFullYear();
+                if (!acc[year]) acc[year] = [];
+                acc[year].push(note);
+                return acc;
+              }, {})
+            )
+              .sort(([yearA]: [string, any], [yearB]: [string, any]) => Number(yearB) - Number(yearA))
+              .map(([year, notes]: [string, any[]], yearIndex) => (
+                <motion.div
+                  key={year}
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: yearIndex * 0.1 }}
+                >
+                  {/* Tahun dengan garis */}
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '2rem',
+                    marginBottom: '2rem'
+                  }}>
+                    <span style={{
+                      color: 'white',
+                      fontSize: '2rem',
+                      fontWeight: '300',
+                      fontFamily: 'Helvetica, Arial, sans-serif'
+                    }}>
+                      {year}
+                    </span>
+                    <div style={{
+                      flex: 1,
+                      height: '1px',
+                      backgroundColor: 'rgba(255,255,255,0.1)'
+                    }} />
+                    <span style={{
+                      color: 'rgba(255,255,255,0.3)',
+                      fontSize: '0.9rem',
+                      fontFamily: 'monospace'
+                    }}>
+                      {String(notes.length).padStart(2, '0')} NOTES
+                    </span>
+                  </div>
 
+                  {/* Grid notes per tahun */}
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+                    gap: '1rem'
+                  }}>
+                    {notes.map((note: Note, index: number) => {
+                      const createdAt = note.createdAt instanceof Timestamp ? note.createdAt.toDate() : new Date(note.createdAt);
+                      const formattedDate = createdAt.toLocaleDateString('id-ID', { 
+                        day: '2-digit', 
+                        month: 'short'
+                      });
+                      
+                      return (
+                        <motion.div
+                          key={note.id}
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ delay: (yearIndex * 0.1) + (index * 0.05) }}
+                          onClick={() => router.push(`/notes/${note.id}`)}
+                          style={{
+                            padding: '1.5rem',
+                            backgroundColor: 'rgba(255,255,255,0.02)',
+                            border: '1px solid rgba(255,255,255,0.1)',
+                            cursor: 'pointer',
+                            position: 'relative',
+                            transition: 'all 0.3s ease'
+                          }}
+                          whileHover={{
+                            backgroundColor: 'rgba(255,255,255,0.05)',
+                            borderColor: 'rgba(255,255,255,0.3)',
+                            y: -2
+                          }}
+                        >
+                          {/* Nomor urut di background */}
+                          <div style={{
+                            position: 'absolute',
+                            bottom: '0.5rem',
+                            right: '1rem',
+                            color: 'rgba(255,255,255,0.03)',
+                            fontSize: '4rem',
+                            fontWeight: '700',
+                            fontFamily: 'monospace',
+                            lineHeight: 1,
+                            zIndex: 1
+                          }}>
+                            {String(index + 1).padStart(2, '0')}
+                          </div>
+
+                          {/* Konten note */}
+                          <div style={{ position: 'relative', zIndex: 2 }}>
+                            {/* Tanggal */}
+                            <div style={{
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              marginBottom: '1rem'
+                            }}>
+                              <span style={{
+                                color: 'rgba(255,255,255,0.3)',
+                                fontSize: '0.8rem',
+                                fontFamily: 'monospace',
+                                letterSpacing: '1px'
+                              }}>
+                                {formattedDate}
+                              </span>
+                              {note.isPinned && (
+                                <span style={{
+                                  color: 'rgba(255,215,0,0.5)',
+                                  fontSize: '0.8rem'
+                                }}>
+                                  📌
+                                </span>
+                              )}
+                            </div>
+
+                            {/* Judul */}
+                            <h3 style={{
+                              color: 'white',
+                              fontSize: '1.2rem',
+                              fontWeight: '400',
+                              margin: '0 0 0.5rem 0',
+                              lineHeight: 1.4,
+                              fontFamily: 'Helvetica, Arial, sans-serif'
+                            }}>
+                              {note.title || 'Untitled Note'}
+                            </h3>
+
+                            {/* Konten preview */}
+                            {note.content && (
+                              <p style={{
+                                color: 'rgba(255,255,255,0.6)',
+                                fontSize: '0.9rem',
+                                lineHeight: 1.5,
+                                margin: '0 0 1rem 0',
+                                display: '-webkit-box',
+                                WebkitLineClamp: 2,
+                                WebkitBoxOrient: 'vertical',
+                                overflow: 'hidden'
+                              }}>
+                                {note.content}
+                              </p>
+                            )}
+
+                            {/* Category jika ada */}
+                            {note.category && (
+                              <div style={{
+                                display: 'inline-block',
+                                padding: '0.2rem 0.8rem',
+                                backgroundColor: 'rgba(255,255,255,0.05)',
+                                border: '1px solid rgba(255,255,255,0.1)',
+                                borderRadius: '20px',
+                                fontSize: '0.7rem',
+                                color: 'rgba(255,255,255,0.7)',
+                                fontFamily: 'monospace',
+                                letterSpacing: '0.5px'
+                              }}>
+                                {note.category}
+                              </div>
+                            )}
+                          </div>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                </motion.div>
+              ))}
+
+            {/* Footer dengan total notes */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.8 }}
+              style={{
+                marginTop: '2rem',
+                padding: '2rem 0',
+                borderTop: '1px solid rgba(255,255,255,0.1)',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}
+            >
+              <div style={{
+                color: 'rgba(255,255,255,0.5)',
+                fontSize: '0.9rem',
+                fontFamily: 'monospace'
+              }}>
+                TOTAL NOTES • {String(totalNotesCount).padStart(2, '0')}
+              </div>
+              
               <motion.button
                 onClick={() => router.push('/notes')}
                 style={{
-                  width: '100%',
-                  padding: '1.5rem',
+                  padding: '0.8rem 2rem',
                   backgroundColor: 'transparent',
-                  border: '1px solid rgba(255,255,255,0.3)',
+                  border: '1px solid rgba(255,255,255,0.2)',
                   color: 'white',
-                  fontSize: '1.2rem',
+                  fontSize: '0.9rem',
                   fontWeight: '300',
                   cursor: 'pointer',
                   fontFamily: 'Helvetica, Arial, sans-serif',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '1rem',
-                  transition: 'all 0.3s ease'
+                  gap: '0.8rem'
                 }}
-                whileHover={{ backgroundColor: 'rgba(255,255,255,0.05)' }}
+                whileHover={{
+                  borderColor: 'rgba(255,255,255,0.5)',
+                  gap: '1.2rem'
+                }}
               >
-                Go to Notes
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M7 17l9.2-9.2M17 17V7H7"/>
+                VIEW ALL NOTES
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <path d="M7 7h10v10" />
+                  <path d="M17 7L7 17" />
                 </svg>
               </motion.button>
-            </div>
-          </motion.div>
+            </motion.div>
+          </div>
         )}
-      </AnimatePresence>
+      </div>
+    </motion.div>
+  )}
+</AnimatePresence>
+
+
+
+
+
+
+
+
+      
 
       {/* Modal Kalender Tahun Baru */}
       <AnimatePresence>
