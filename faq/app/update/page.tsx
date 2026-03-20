@@ -38,6 +38,95 @@ const firebaseConfig = {
   measurementId: "G-8LMP7F4BE9"
 };
 
+// Instagram Verified Badge Component - LEBIH BESAR
+const InstagramVerifiedBadge = ({ size = 28 }) => {
+  const [showTooltip, setShowTooltip] = useState(false);
+  
+  return (
+    <span 
+      style={{ 
+        position: 'relative', 
+        display: 'inline-block',
+        marginLeft: '8px',
+        verticalAlign: 'middle',
+        cursor: 'help',
+        lineHeight: 1
+      }}
+      onMouseEnter={() => setShowTooltip(true)}
+      onMouseLeave={() => setShowTooltip(false)}
+    >
+      <svg
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg"
+        style={{
+          display: 'block'
+        }}
+      >
+        <path
+          fill="#0095F6"
+          d="
+            M12 2.2
+            C13.6 3.8 16.2 3.8 17.8 2.2
+            C18.6 3.8 20.2 5.4 21.8 6.2
+            C20.2 7.8 20.2 10.4 21.8 12
+            C20.2 13.6 20.2 16.2 21.8 17.8
+            C20.2 18.6 18.6 20.2 17.8 21.8
+            C16.2 20.2 13.6 20.2 12 21.8
+            C10.4 20.2 7.8 20.2 6.2 21.8
+            C5.4 20.2 3.8 18.6 2.2 17.8
+            C3.8 16.2 3.8 13.6 2.2 12
+            C3.8 10.4 3.8 7.8 2.2 6.2
+            C3.8 5.4 5.4 3.8 6.2 2.2
+            C7.8 3.8 10.4 3.8 12 2.2
+            Z
+          "
+        />
+        <path
+          d="M9.2 12.3l2 2 4.6-4.6"
+          stroke="white"
+          strokeWidth="2"
+          fill="none"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+      
+      {showTooltip && (
+        <div style={{
+          position: 'absolute',
+          bottom: '100%',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          backgroundColor: '#333',
+          color: 'white',
+          padding: '8px 16px',
+          borderRadius: '8px',
+          fontSize: '14px',
+          fontWeight: '500',
+          whiteSpace: 'nowrap',
+          marginBottom: '10px',
+          zIndex: 10000,
+          boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+          letterSpacing: '0.3px'
+        }}>
+          Akun Resmi
+          <div style={{
+            position: 'absolute',
+            top: '100%',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            borderWidth: '6px',
+            borderStyle: 'solid',
+            borderColor: '#333 transparent transparent transparent'
+          }} />
+        </div>
+      )}
+    </span>
+  );
+};
+
 interface Update {
   id?: string;
   title: string;
@@ -156,12 +245,16 @@ export default function UpdatesPage(): React.JSX.Element {
         setUserEmail(email);
         
         await saveUserToFirestore(currentUser.uid, name, email);
-        
-        loadUpdates();
-        loadMessages();
-        loadUserNotifications(currentUser.uid);
       } else {
-        router.push('/login');
+        setUser(null);
+        setUserDisplayName("Pengunjung");
+        setUserEmail("");
+      }
+      
+      loadUpdates();
+      loadMessages();
+      if (currentUser) {
+        loadUserNotifications(currentUser.uid);
       }
       setIsLoading(false);
     });
@@ -169,7 +262,7 @@ export default function UpdatesPage(): React.JSX.Element {
     return () => {
       if (unsubscribe) unsubscribe();
     };
-  }, [auth, router]);
+  }, [auth]);
 
   useEffect(() => {
     scrollToBottom();
@@ -322,7 +415,11 @@ export default function UpdatesPage(): React.JSX.Element {
   };
 
   const handleCreateUpdate = async () => {
-    if (!user || !db || !newUpdate.title.trim()) {
+    if (!user) {
+      alert("Silakan login terlebih dahulu untuk membuat update");
+      return;
+    }
+    if (!db || !newUpdate.title.trim()) {
       alert("Judul update harus diisi");
       return;
     }
@@ -374,7 +471,11 @@ export default function UpdatesPage(): React.JSX.Element {
   };
 
   const handleSaveUpdate = async (updateId: string) => {
-    if (!user || !db) return;
+    if (!user) {
+      alert("Silakan login terlebih dahulu untuk menyimpan update");
+      return;
+    }
+    if (!db) return;
 
     try {
       const updateRef = doc(db, 'updates', updateId);
@@ -398,7 +499,11 @@ export default function UpdatesPage(): React.JSX.Element {
   };
 
   const handleShareUpdate = async (updateId: string) => {
-    if (!user || !db) return;
+    if (!user) {
+      alert("Silakan login terlebih dahulu untuk membagikan update");
+      return;
+    }
+    if (!db) return;
 
     try {
       const update = updates.find(u => u.id === updateId);
@@ -434,6 +539,10 @@ export default function UpdatesPage(): React.JSX.Element {
   };
 
   const handleDeleteUpdate = async (updateId: string) => {
+    if (!user) {
+      alert("Silakan login terlebih dahulu untuk menghapus update");
+      return;
+    }
     if (!db) return;
     
     if (confirm("Apakah Anda yakin ingin menghapus update ini?")) {
@@ -447,7 +556,11 @@ export default function UpdatesPage(): React.JSX.Element {
   };
 
   const handleSendMessage = async () => {
-    if (!user || !db || !newMessage.trim()) {
+    if (!user) {
+      alert("Silakan login terlebih dahulu untuk mengirim pesan");
+      return;
+    }
+    if (!db || !newMessage.trim()) {
       alert("Pesan tidak boleh kosong");
       return;
     }
@@ -591,7 +704,6 @@ export default function UpdatesPage(): React.JSX.Element {
     }
   };
 
-  const pendingNotifications = notifications.filter(n => n.status === 'unread');
   const notificationCount = notifications.length;
 
   if (!auth || !db) {
@@ -654,7 +766,7 @@ export default function UpdatesPage(): React.JSX.Element {
           alignItems: 'center',
           gap: '30px'
         }}>
-          {/* Nama User dengan South East Arrow */}
+          {/* Nama User dengan South East Arrow dan Verified Badge */}
           <div style={{
             fontSize: '32px',
             fontFamily: 'Helvetica, Arial, sans-serif',
@@ -665,138 +777,236 @@ export default function UpdatesPage(): React.JSX.Element {
             gap: '10px'
           }}>
             {userDisplayName}
+            {/* Verified Badge untuk semua user */}
+            {user && <InstagramVerifiedBadge size={28} />}
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M7 17l9.2-9.2M17 17V7H7"/>
             </svg>
           </div>
           
-          {/* Tombol Notifikasi */}
-          <div style={{ position: 'relative' }}>
-            <button
-              onClick={() => setShowNotifications(!showNotifications)}
-              style={{
-                backgroundColor: 'transparent',
-                border: 'none',
-                color: 'white',
-                padding: '10px',
-                cursor: 'pointer',
-                fontSize: '24px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                position: 'relative'
-              }}
-              title="Notifikasi"
-            >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/>
-              </svg>
-              {notificationCount > 0 && (
-                <div style={{
-                  position: 'absolute',
-                  top: '5px',
-                  right: '5px',
-                  backgroundColor: 'red',
+          {/* Tombol Notifikasi - hanya untuk user yang login */}
+          {user && (
+            <div style={{ position: 'relative' }}>
+              <button
+                onClick={() => setShowNotifications(!showNotifications)}
+                style={{
+                  backgroundColor: 'transparent',
+                  border: 'none',
                   color: 'white',
-                  borderRadius: '50%',
-                  width: '20px',
-                  height: '20px',
+                  padding: '10px',
+                  cursor: 'pointer',
+                  fontSize: '24px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: '12px',
-                  fontWeight: 'bold'
-                }}>
-                  {notificationCount}
-                </div>
-              )}
-            </button>
-
-            {/* Dropdown Notifikasi */}
-            {showNotifications && (
-              <div style={{
-                position: 'absolute',
-                top: '50px',
-                right: 0,
-                backgroundColor: '#111',
-                border: '1px solid #333',
-                borderRadius: '8px',
-                width: '400px',
-                maxHeight: '500px',
-                overflowY: 'auto',
-                zIndex: 1000,
-                boxShadow: '0 4px 20px rgba(0,0,0,0.5)'
-              }}>
-                <div style={{
-                  padding: '20px',
-                  borderBottom: '1px solid #333',
-                  fontSize: '20px',
-                  fontWeight: 'bold'
-                }}>
-                  Notifikasi ({notifications.length})
-                </div>
-                
-                {notifications.length === 0 ? (
+                  position: 'relative'
+                }}
+                title="Notifikasi"
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/>
+                </svg>
+                {notificationCount > 0 && (
                   <div style={{
-                    padding: '30px',
-                    textAlign: 'center',
-                    color: '#888',
-                    fontSize: '18px'
+                    position: 'absolute',
+                    top: '5px',
+                    right: '5px',
+                    backgroundColor: 'red',
+                    color: 'white',
+                    borderRadius: '50%',
+                    width: '20px',
+                    height: '20px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '12px',
+                    fontWeight: 'bold'
                   }}>
-                    Tidak ada notifikasi
-                  </div>
-                ) : (
-                  <div>
-                    {notifications.map((notification) => (
-                      <div
-                        key={notification.id}
-                        style={{
-                          padding: '20px',
-                          borderBottom: '1px solid #222',
-                          backgroundColor: 'rgba(255,255,255,0.05)',
-                          cursor: 'pointer'
-                        }}
-                        onClick={() => notification.id && handleMarkNotificationAsRead(notification.id)}
-                      >
-                        <div style={{
-                          fontSize: '18px',
-                          marginBottom: '10px',
-                          color: 'white'
-                        }}>
-                          {notification.message}
-                        </div>
-                        
-                        <div style={{
-                          fontSize: '14px',
-                          color: '#666',
-                          marginBottom: '10px'
-                        }}>
-                          Dari: {notification.senderName || 'System'}
-                          <br />
-                          Waktu: {formatTime(notification.createdAt)}
-                        </div>
-                      </div>
-                    ))}
+                    {notificationCount}
                   </div>
                 )}
-              </div>
-            )}
-          </div>
+              </button>
+
+              {/* Dropdown Notifikasi */}
+              {showNotifications && (
+                <div style={{
+                  position: 'absolute',
+                  top: '50px',
+                  right: 0,
+                  backgroundColor: '#111',
+                  border: '1px solid #333',
+                  borderRadius: '8px',
+                  width: '400px',
+                  maxHeight: '500px',
+                  overflowY: 'auto',
+                  zIndex: 1000,
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.5)'
+                }}>
+                  <div style={{
+                    padding: '20px',
+                    borderBottom: '1px solid #333',
+                    fontSize: '20px',
+                    fontWeight: 'bold'
+                  }}>
+                    Notifikasi ({notifications.length})
+                  </div>
+                  
+                  {notifications.length === 0 ? (
+                    <div style={{
+                      padding: '30px',
+                      textAlign: 'center',
+                      color: '#888',
+                      fontSize: '18px'
+                    }}>
+                      Tidak ada notifikasi
+                    </div>
+                  ) : (
+                    <div>
+                      {notifications.map((notification) => (
+                        <div
+                          key={notification.id}
+                          style={{
+                            padding: '20px',
+                            borderBottom: '1px solid #222',
+                            backgroundColor: 'rgba(255,255,255,0.05)',
+                            cursor: 'pointer'
+                          }}
+                          onClick={() => notification.id && handleMarkNotificationAsRead(notification.id)}
+                        >
+                          <div style={{
+                            fontSize: '18px',
+                            marginBottom: '10px',
+                            color: 'white'
+                          }}>
+                            {notification.message}
+                          </div>
+                          
+                          <div style={{
+                            fontSize: '14px',
+                            color: '#666',
+                            marginBottom: '10px'
+                          }}>
+                            Dari: {notification.senderName || 'System'}
+                            <br />
+                            Waktu: {formatTime(notification.createdAt)}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
           
-          {/* Tombol Kirim Pesan */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '5px'
-          }}>
-            <span style={{
-              fontSize: '20px',
-              color: 'white'
+          {/* Tombol Kirim Pesan - hanya untuk user yang login */}
+          {user && (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '5px'
             }}>
-              Kirim Pesan
-            </span>
+              <span style={{
+                fontSize: '20px',
+                color: 'white'
+              }}>
+                Kirim Pesan
+              </span>
+              <button
+                onClick={() => setShowMessageModal(true)}
+                style={{
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                  color: 'white',
+                  padding: '10px',
+                  cursor: 'pointer',
+                  fontSize: '24px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+                title="Kirim Pesan"
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+                </svg>
+              </button>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M7 17L17 7M7 7H17V17"/>
+              </svg>
+            </div>
+          )}
+          
+          {/* Tombol Buat Update Baru dengan Teks - hanya untuk user yang login */}
+          {user && (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '5px'
+            }}>
+              <span style={{
+                fontSize: '20px',
+                color: 'white'
+              }}>
+                Buat Update
+              </span>
+              <button
+                onClick={() => setShowNewUpdateForm(true)}
+                style={{
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                  color: 'white',
+                  padding: '12px',
+                  cursor: 'pointer',
+                  fontSize: '28px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '50px',
+                  height: '50px'
+                }}
+                title="Buat Update Baru"
+              >
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M12 5v14M5 12h14"/>
+                </svg>
+              </button>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M7 17L17 7M7 7H17V17"/>
+              </svg>
+            </div>
+          )}
+
+          {/* Tombol Login - hanya untuk user yang belum login */}
+          {!user && (
             <button
-              onClick={() => setShowMessageModal(true)}
+              onClick={() => router.push('/login')}
+              style={{
+                backgroundColor: 'transparent',
+                border: '1px solid rgba(255,255,255,0.2)',
+                borderRadius: '30px',
+                padding: '10px 24px',
+                color: 'white',
+                fontSize: '16px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+                <polyline points="10 17 15 12 10 7"/>
+                <line x1="15" y1="12" x2="3" y2="12"/>
+              </svg>
+              Login
+            </button>
+          )}
+
+          {/* Tombol Logout - hanya untuk user yang login */}
+          {user && (
+            <button
+              onClick={handleLogout}
               style={{
                 backgroundColor: 'transparent',
                 border: 'none',
@@ -808,77 +1018,15 @@ export default function UpdatesPage(): React.JSX.Element {
                 alignItems: 'center',
                 justifyContent: 'center'
               }}
-              title="Kirim Pesan"
+              title="Logout"
             >
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+                <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+                <polyline points="16 17 21 12 16 7"/>
+                <line x1="21" y1="12" x2="9" y2="12"/>
               </svg>
             </button>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M7 17L17 7M7 7H17V17"/>
-            </svg>
-          </div>
-          
-          {/* Tombol Buat Update Baru dengan Teks */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '5px'
-          }}>
-            <span style={{
-              fontSize: '20px',
-              color: 'white'
-            }}>
-              Buat Update
-            </span>
-            <button
-              onClick={() => setShowNewUpdateForm(true)}
-              style={{
-                backgroundColor: 'transparent',
-                border: 'none',
-                color: 'white',
-                padding: '12px',
-                cursor: 'pointer',
-                fontSize: '28px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: '50px',
-                height: '50px'
-              }}
-              title="Buat Update Baru"
-            >
-              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M12 5v14M5 12h14"/>
-              </svg>
-            </button>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M7 17L17 7M7 7H17V17"/>
-            </svg>
-          </div>
-
-          {/* Tombol Logout */}
-          <button
-            onClick={handleLogout}
-            style={{
-              backgroundColor: 'transparent',
-              border: 'none',
-              color: 'white',
-              padding: '10px',
-              cursor: 'pointer',
-              fontSize: '24px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-            title="Logout"
-          >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
-              <polyline points="16 17 21 12 16 7"/>
-              <line x1="21" y1="12" x2="9" y2="12"/>
-            </svg>
-          </button>
+          )}
         </div>
       </div>
 
@@ -925,7 +1073,7 @@ export default function UpdatesPage(): React.JSX.Element {
                 fontFamily: 'Helvetica, Arial, sans-serif',
                 color: 'white'
               }}>
-                Buat update pertama Anda
+                {user ? 'Buat update pertama Anda' : 'Login untuk membuat update'}
               </div>
             </div>
           ) : (
@@ -937,7 +1085,7 @@ export default function UpdatesPage(): React.JSX.Element {
             }}>
               {updates.map((update) => {
                 const videoEmbedUrl = getVideoEmbedUrl(update.link);
-                const isSaved = update.savedBy && update.savedBy.includes(user?.uid);
+                const isSaved = update.savedBy && user && update.savedBy.includes(user?.uid);
                 
                 return (
                   <div
@@ -1117,9 +1265,14 @@ export default function UpdatesPage(): React.JSX.Element {
                         </span>
                         <span style={{
                           fontSize: '18px',
-                          color: '#aaa'
+                          color: '#aaa',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px'
                         }}>
                           oleh {update.userName}
+                          {/* Verified Badge untuk semua user */}
+                          <InstagramVerifiedBadge size={20} />
                         </span>
                       </div>
                       
@@ -1129,51 +1282,55 @@ export default function UpdatesPage(): React.JSX.Element {
                         gap: '20px',
                         fontFamily: 'Helvetica, Arial, sans-serif'
                       }}>
-                        {/* Save Button */}
-                        <button
-                          onClick={() => handleSaveUpdate(update.id!)}
-                          style={{
-                            backgroundColor: 'transparent',
-                            border: 'none',
-                            color: isSaved ? 'gold' : 'white',
-                            fontSize: '24px',
-                            cursor: 'pointer',
-                            padding: '5px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center'
-                          }}
-                          title={isSaved ? "Disimpan" : "Simpan Update"}
-                        >
-                          <svg width="24" height="24" viewBox="0 0 24 24" fill={isSaved ? "gold" : "none"} stroke="currentColor" strokeWidth="2">
-                            <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/>
-                          </svg>
-                        </button>
+                        {/* Save Button - hanya untuk user yang login */}
+                        {user && (
+                          <button
+                            onClick={() => handleSaveUpdate(update.id!)}
+                            style={{
+                              backgroundColor: 'transparent',
+                              border: 'none',
+                              color: isSaved ? 'gold' : 'white',
+                              fontSize: '24px',
+                              cursor: 'pointer',
+                              padding: '5px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center'
+                            }}
+                            title={isSaved ? "Disimpan" : "Simpan Update"}
+                          >
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill={isSaved ? "gold" : "none"} stroke="currentColor" strokeWidth="2">
+                              <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/>
+                            </svg>
+                          </button>
+                        )}
 
-                        {/* Share Button */}
-                        <button
-                          onClick={() => handleShareUpdate(update.id!)}
-                          style={{
-                            backgroundColor: 'transparent',
-                            border: 'none',
-                            color: 'white',
-                            fontSize: '24px',
-                            cursor: 'pointer',
-                            padding: '5px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center'
-                          }}
-                          title="Bagikan Update"
-                        >
-                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <circle cx="18" cy="5" r="3"/>
-                            <circle cx="6" cy="12" r="3"/>
-                            <circle cx="18" cy="19" r="3"/>
-                            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
-                            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
-                          </svg>
-                        </button>
+                        {/* Share Button - hanya untuk user yang login */}
+                        {user && (
+                          <button
+                            onClick={() => handleShareUpdate(update.id!)}
+                            style={{
+                              backgroundColor: 'transparent',
+                              border: 'none',
+                              color: 'white',
+                              fontSize: '24px',
+                              cursor: 'pointer',
+                              padding: '5px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center'
+                            }}
+                            title="Bagikan Update"
+                          >
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <circle cx="18" cy="5" r="3"/>
+                              <circle cx="6" cy="12" r="3"/>
+                              <circle cx="18" cy="19" r="3"/>
+                              <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+                              <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+                            </svg>
+                          </button>
+                        )}
 
                         {update.link && (
                           <a
@@ -1227,170 +1384,216 @@ export default function UpdatesPage(): React.JSX.Element {
           )}
         </div>
 
-        {/* Messages Column */}
-        <div>
+        {/* Messages Column - hanya untuk user yang login */}
+        {user ? (
+          <div>
+            <div style={{
+              backgroundColor: 'rgba(255,255,255,0.02)',
+              border: '1px solid rgba(255,255,255,0.1)',
+              borderRadius: '8px',
+              height: 'calc(100vh - 220px)',
+              display: 'flex',
+              flexDirection: 'column'
+            }}>
+              {/* Messages Header */}
+              <div style={{
+                padding: '25px',
+                borderBottom: '1px solid rgba(255,255,255,0.1)'
+              }}>
+                <div style={{
+                  fontSize: '24px',
+                  fontWeight: 'bold',
+                  color: 'white',
+                  marginBottom: '5px'
+                }}>
+                  Diskusi Update
+                </div>
+                <div style={{
+                  fontSize: '14px',
+                  color: 'rgba(255,255,255,0.6)'
+                }}>
+                  {messages.length} pesan
+                </div>
+              </div>
+
+              {/* Messages Container */}
+              <div style={{
+                flex: 1,
+                overflowY: 'auto',
+                padding: '20px'
+              }}>
+                {messages.length === 0 ? (
+                  <div style={{
+                    textAlign: 'center',
+                    padding: '60px 20px',
+                    color: 'rgba(255,255,255,0.4)',
+                    fontSize: '18px'
+                  }}>
+                    Belum ada pesan
+                  </div>
+                ) : (
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '20px'
+                  }}>
+                    {messages.map((message) => (
+                      <div key={message.id} style={{
+                        display: 'flex',
+                        gap: '12px'
+                      }}>
+                        <div style={{
+                          width: '36px',
+                          height: '36px',
+                          backgroundColor: 'rgba(255,255,255,0.1)',
+                          borderRadius: '50%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '14px',
+                          fontWeight: 'bold',
+                          color: 'white',
+                          flexShrink: 0
+                        }}>
+                          {message.userName?.charAt(0)?.toUpperCase() || 'U'}
+                        </div>
+                        <div style={{ flex: 1 }}>
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '10px',
+                            marginBottom: '5px'
+                          }}>
+                            <span style={{
+                              fontSize: '16px',
+                              fontWeight: 'bold',
+                              color: 'white',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '4px'
+                            }}>
+                              {message.userName}
+                              {/* Verified Badge untuk semua user */}
+                              <InstagramVerifiedBadge size={18} />
+                            </span>
+                            <span style={{
+                              fontSize: '12px',
+                              color: 'rgba(255,255,255,0.4)'
+                            }}>
+                              {formatDate(message.createdAt)}
+                            </span>
+                          </div>
+                          <div style={{
+                            fontSize: '16px',
+                            color: 'rgba(255,255,255,0.8)',
+                            lineHeight: '1.5'
+                          }}>
+                            {message.text}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    <div ref={messagesEndRef} />
+                  </div>
+                )}
+              </div>
+
+              {/* Message Input */}
+              <div style={{
+                padding: '20px',
+                borderTop: '1px solid rgba(255,255,255,0.1)'
+              }}>
+                <div style={{
+                  display: 'flex',
+                  gap: '10px'
+                }}>
+                  <input
+                    type="text"
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    placeholder="Ketik pesan... (Gunakan @nama untuk mention)"
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        handleSendMessage();
+                      }
+                    }}
+                    style={{
+                      flex: 1,
+                      padding: '12px 16px',
+                      backgroundColor: 'rgba(255,255,255,0.05)',
+                      border: '1px solid rgba(255,255,255,0.1)',
+                      borderRadius: '8px',
+                      color: 'white',
+                      fontSize: '16px',
+                      outline: 'none'
+                    }}
+                  />
+                  <button
+                    onClick={handleSendMessage}
+                    disabled={!newMessage.trim()}
+                    style={{
+                      padding: '12px 20px',
+                      backgroundColor: 'transparent',
+                      border: '1px solid rgba(255,255,255,0.2)',
+                      borderRadius: '8px',
+                      color: 'white',
+                      fontSize: '16px',
+                      cursor: newMessage.trim() ? 'pointer' : 'not-allowed',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px'
+                    }}
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <line x1="22" y1="2" x2="11" y2="13"/>
+                      <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
           <div style={{
             backgroundColor: 'rgba(255,255,255,0.02)',
             border: '1px solid rgba(255,255,255,0.1)',
             borderRadius: '8px',
             height: 'calc(100vh - 220px)',
             display: 'flex',
-            flexDirection: 'column'
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexDirection: 'column',
+            gap: '20px'
           }}>
-            {/* Messages Header */}
+            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
             <div style={{
-              padding: '25px',
-              borderBottom: '1px solid rgba(255,255,255,0.1)'
+              fontSize: '18px',
+              color: 'rgba(255,255,255,0.6)',
+              textAlign: 'center'
             }}>
-              <div style={{
-                fontSize: '24px',
-                fontWeight: 'bold',
+              Login untuk berdiskusi<br />
+              dan berinteraksi dengan update
+            </div>
+            <button
+              onClick={() => router.push('/login')}
+              style={{
+                backgroundColor: 'transparent',
+                border: '1px solid rgba(255,255,255,0.2)',
+                borderRadius: '30px',
+                padding: '10px 24px',
                 color: 'white',
-                marginBottom: '5px'
-              }}>
-                Diskusi Update
-              </div>
-              <div style={{
                 fontSize: '14px',
-                color: 'rgba(255,255,255,0.6)'
-              }}>
-                {messages.length} pesan
-              </div>
-            </div>
-
-            {/* Messages Container */}
-            <div style={{
-              flex: 1,
-              overflowY: 'auto',
-              padding: '20px'
-            }}>
-              {messages.length === 0 ? (
-                <div style={{
-                  textAlign: 'center',
-                  padding: '60px 20px',
-                  color: 'rgba(255,255,255,0.4)',
-                  fontSize: '18px'
-                }}>
-                  Belum ada pesan
-                </div>
-              ) : (
-                <div style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '20px'
-                }}>
-                  {messages.map((message) => (
-                    <div key={message.id} style={{
-                      display: 'flex',
-                      gap: '12px'
-                    }}>
-                      <div style={{
-                        width: '36px',
-                        height: '36px',
-                        backgroundColor: 'rgba(255,255,255,0.1)',
-                        borderRadius: '50%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '14px',
-                        fontWeight: 'bold',
-                        color: 'white',
-                        flexShrink: 0
-                      }}>
-                        {message.userName?.charAt(0)?.toUpperCase() || 'U'}
-                      </div>
-                      <div style={{ flex: 1 }}>
-                        <div style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '10px',
-                          marginBottom: '5px'
-                        }}>
-                          <span style={{
-                            fontSize: '16px',
-                            fontWeight: 'bold',
-                            color: 'white'
-                          }}>
-                            {message.userName}
-                          </span>
-                          <span style={{
-                            fontSize: '12px',
-                            color: 'rgba(255,255,255,0.4)'
-                          }}>
-                            {formatDate(message.createdAt)}
-                          </span>
-                        </div>
-                        <div style={{
-                          fontSize: '16px',
-                          color: 'rgba(255,255,255,0.8)',
-                          lineHeight: '1.5'
-                        }}>
-                          {message.text}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                  <div ref={messagesEndRef} />
-                </div>
-              )}
-            </div>
-
-            {/* Message Input */}
-            <div style={{
-              padding: '20px',
-              borderTop: '1px solid rgba(255,255,255,0.1)'
-            }}>
-              <div style={{
-                display: 'flex',
-                gap: '10px'
-              }}>
-                <input
-                  type="text"
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  placeholder="Ketik pesan... (Gunakan @nama untuk mention)"
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                      e.preventDefault();
-                      handleSendMessage();
-                    }
-                  }}
-                  style={{
-                    flex: 1,
-                    padding: '12px 16px',
-                    backgroundColor: 'rgba(255,255,255,0.05)',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    borderRadius: '8px',
-                    color: 'white',
-                    fontSize: '16px',
-                    outline: 'none'
-                  }}
-                />
-                <button
-                  onClick={handleSendMessage}
-                  disabled={!newMessage.trim()}
-                  style={{
-                    padding: '12px 20px',
-                    backgroundColor: 'transparent',
-                    border: '1px solid rgba(255,255,255,0.2)',
-                    borderRadius: '8px',
-                    color: 'white',
-                    fontSize: '16px',
-                    cursor: newMessage.trim() ? 'pointer' : 'not-allowed',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px'
-                  }}
-                >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <line x1="22" y1="2" x2="11" y2="13"/>
-                    <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-                  </svg>
-                </button>
-              </div>
-            </div>
+                cursor: 'pointer',
+                marginTop: '10px'
+              }}
+            >
+              Login
+            </button>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Modal buat update baru */}
