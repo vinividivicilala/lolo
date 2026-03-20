@@ -143,6 +143,54 @@ const EMOTICONS = [
   { id: 'angry', emoji: '😠', label: 'Marah' }
 ];
 
+// Data Nilai Akademik Sesuai Standar Universitas Gunadarma
+const academicData = [
+  { semester: 1, sks: 20, nilaiMutu: 3.25, total: 65.0 },
+  { semester: 2, sks: 22, nilaiMutu: 3.30, total: 72.6 },
+  { semester: 3, sks: 21, nilaiMutu: 3.40, total: 71.4 },
+  { semester: 4, sks: 20, nilaiMutu: 3.45, total: 69.0 },
+  { semester: 5, sks: 18, nilaiMutu: 3.50, total: 63.0 },
+  { semester: 6, sks: 18, nilaiMutu: 3.55, total: 63.9 },
+  { semester: 7, sks: 16, nilaiMutu: 3.60, total: 57.6 },
+  { semester: 8, sks: 14, nilaiMutu: 3.65, total: 51.1 }
+];
+
+// Data Blog Lainnya
+const otherBlogs = [
+  {
+    id: 1,
+    image: "/images/5.jpg",
+    title: "Tips Sukses Menghadapi Ujian Akhir Semester",
+    tags: ["Tips Belajar", "Ujian", "Mahasiswa"],
+    date: "15 Maret 2024",
+    slug: "tips-sukses-ujian-akhir-semester"
+  },
+  {
+    id: 2,
+    image: "/images/6.jpg",
+    title: "Pengalaman Magang di Perusahaan Startup Teknologi",
+    tags: ["Magang", "Karir", "Startup"],
+    date: "10 Februari 2024",
+    slug: "pengalaman-magang-startup-teknologi"
+  },
+  {
+    id: 3,
+    image: "/images/7.jpg",
+    title: "Review: 5 Aplikasi Belajar Terbaik untuk Mahasiswa",
+    tags: ["Review", "Aplikasi", "Belajar Online"],
+    date: "5 Januari 2024",
+    slug: "review-aplikasi-belajar-terbaik"
+  },
+  {
+    id: 4,
+    image: "/images/8.jpg",
+    title: "Cara Membangun Portofolio yang Menarik untuk Fresh Graduate",
+    tags: ["Portofolio", "Karir", "Fresh Graduate"],
+    date: "20 Desember 2023",
+    slug: "cara-membangun-portofolio"
+  }
+];
+
 export default function BlogPage() {
   const router = useRouter();
   const [isMounted, setIsMounted] = useState(false);
@@ -203,6 +251,11 @@ export default function BlogPage() {
 
   // Email penulis
   const authorEmail = "faridardiansyah061@gmail.com";
+
+  // Hitung total SKS, total nilai, dan IPK
+  const totalSKS = academicData.reduce((sum, item) => sum + item.sks, 0);
+  const totalNilai = academicData.reduce((sum, item) => sum + item.total, 0);
+  const ipk = (totalNilai / totalSKS).toFixed(2);
 
   // ============================================
   // 1. INITIALIZATION FIREBASE
@@ -1150,7 +1203,8 @@ export default function BlogPage() {
     { id: "organisasi", title: "Organisasi & Kegiatan" },
     { id: "tantangan", title: "Tantangan & Hambatan" },
     { id: "kesan", title: "Kesan & Pesan" },
-    { id: "penutup", title: "Penutup" }
+    { id: "penutup", title: "Penutup" },
+    { id: "nilai-akademik", title: "Nilai Akademik" }
   ];
 
   const scrollToSection = (sectionId: string) => {
@@ -1210,7 +1264,7 @@ export default function BlogPage() {
       paddingTop: isMobile ? '120px' : '180px',
     }}>
       
-      {/* ===== TEKS BERJALAN - LEBIH BESAR DENGAN PANAH ===== */}
+      {/* ===== TEKS BERJALAN ===== */}
       <div style={{
         position: 'fixed',
         top: 0,
@@ -1247,10 +1301,6 @@ export default function BlogPage() {
             paddingLeft: '30px',
           }}
         >
-          <NorthWestArrow width={isMobile ? 40 : 60} height={isMobile ? 40 : 60} style={{ strokeWidth: 2 }} />
-          <span style={{ background: 'linear-gradient(45deg, #fff, #aaa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>NOTE ADALAH TEMAN TERBAIK MU</span>
-          <NorthWestArrow width={isMobile ? 40 : 60} height={isMobile ? 40 : 60} style={{ strokeWidth: 2 }} />
-          <span style={{ background: 'linear-gradient(45deg, #fff, #aaa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>NOTE ADALAH TEMAN TERBAIK MU</span>
           <NorthWestArrow width={isMobile ? 40 : 60} height={isMobile ? 40 : 60} style={{ strokeWidth: 2 }} />
           <span style={{ background: 'linear-gradient(45deg, #fff, #aaa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>NOTE ADALAH TEMAN TERBAIK MU</span>
           <NorthWestArrow width={isMobile ? 40 : 60} height={isMobile ? 40 : 60} style={{ strokeWidth: 2 }} />
@@ -1407,7 +1457,7 @@ export default function BlogPage() {
           </span>
         </motion.button>
 
-        {/* User Info / Login Button - DENGAN VERIFIED BADGE */}
+        {/* User Info / Login Button */}
         {user ? (
           <motion.div
             initial={{ opacity: 0, x: 20 }}
@@ -1441,7 +1491,6 @@ export default function BlogPage() {
               alignItems: 'center',
             }}>
               {user.displayName || user.email?.split('@')[0]}
-              {/* Verified Badge untuk SEMUA EMAIL - UKURAN BESAR */}
               <InstagramVerifiedBadge size={24} />
             </span>
             <motion.button
@@ -1806,7 +1855,6 @@ export default function BlogPage() {
                                 marginBottom: '4px',
                               }}>
                                 {msg.userName} (Anda)
-                                {/* Verified Badge untuk SEMUA EMAIL - UKURAN BESAR */}
                                 <InstagramVerifiedBadge size={22} />
                               </span>
                               <span style={{
@@ -1912,7 +1960,6 @@ export default function BlogPage() {
                                     alignItems: 'center',
                                   }}>
                                     {reply.userName}
-                                    {/* Verified Badge untuk Penulis */}
                                     <InstagramVerifiedBadge size={20} />
                                   </span>
                                   <span style={{
@@ -2012,7 +2059,6 @@ export default function BlogPage() {
                                 marginBottom: '4px',
                               }}>
                                 {msg.userName}
-                                {/* Verified Badge untuk SEMUA EMAIL - UKURAN BESAR */}
                                 <InstagramVerifiedBadge size={22} />
                               </span>
                               <span style={{
@@ -2113,7 +2159,6 @@ export default function BlogPage() {
                                     alignItems: 'center',
                                   }}>
                                     {reply.userName}
-                                    {/* Verified Badge untuk Penulis */}
                                     <InstagramVerifiedBadge size={20} />
                                   </span>
                                   <span style={{
@@ -2684,7 +2729,6 @@ export default function BlogPage() {
                     }}
                   >
                     Farid Ardiansyah
-                    {/* Verified Badge untuk Penulis - UKURAN BESAR */}
                     <InstagramVerifiedBadge size={24} />
                   </motion.span>
                   <span style={{
@@ -2870,7 +2914,7 @@ export default function BlogPage() {
             Bagaimana Rasa nya Masuk Kuliah Di Universitas Gunadarma
           </motion.h2>
 
-          {/* KONTEN ARTIKEL - LENGKAP (sama seperti sebelumnya) */}
+          {/* KONTEN ARTIKEL */}
           <div style={{
             fontSize: isMobile ? '1.1rem' : '1.2rem',
             lineHeight: '1.8',
@@ -3127,9 +3171,150 @@ export default function BlogPage() {
                 Bagi teman-teman yang juga alumni atau mahasiswa Gunadarma, jangan ragu untuk berbagi cerita di kolom komentar. Aku sangat tertarik untuk mendengar perspektif kalian. Siapa tahu dari diskusi ini, kita bisa mendapatkan wawasan baru tentang kampus tercinta ini. Sampai jumpa di artikel selanjutnya!
               </p>
             </section>
+            
+            {/* SECTION NILAI AKADEMIK */}
+            <section 
+              id="nilai-akademik"
+              ref={el => sectionRefs.current["nilai-akademik"] = el}
+              style={{ scrollMarginTop: '160px', marginBottom: '3em' }}
+            >
+              <h3 style={{
+                fontSize: isMobile ? '1.3rem' : '1.5rem',
+                fontWeight: 'normal',
+                color: 'white',
+                marginBottom: '20px',
+              }}>
+                Nilai Akademik
+              </h3>
+              <p style={{ marginBottom: '1.5em' }}>
+                Berikut adalah rekapitulasi nilai akademik selama 8 semester perkuliahan di Universitas Gunadarma. Data ini mencerminkan perjalanan akademik yang konsisten dengan peningkatan kualitas pembelajaran setiap semesternya.
+              </p>
+              
+              {/* Tabel Nilai Akademik */}
+              <div style={{
+                overflowX: 'auto',
+                marginBottom: '30px',
+                borderRadius: '16px',
+                border: '1px solid #333333',
+              }}>
+                <table style={{
+                  width: '100%',
+                  borderCollapse: 'collapse',
+                  backgroundColor: '#111111',
+                }}>
+                  <thead>
+                    <tr style={{
+                      borderBottom: '2px solid #333333',
+                      backgroundColor: '#1a1a1a',
+                    }}>
+                      <th style={{
+                        padding: '15px 20px',
+                        textAlign: 'left',
+                        color: 'white',
+                        fontSize: '1rem',
+                        fontWeight: '500',
+                      }}>Semester</th>
+                      <th style={{
+                        padding: '15px 20px',
+                        textAlign: 'center',
+                        color: 'white',
+                        fontSize: '1rem',
+                        fontWeight: '500',
+                      }}>SKS</th>
+                      <th style={{
+                        padding: '15px 20px',
+                        textAlign: 'center',
+                        color: 'white',
+                        fontSize: '1rem',
+                        fontWeight: '500',
+                      }}>Nilai Mutu</th>
+                      <th style={{
+                        padding: '15px 20px',
+                        textAlign: 'center',
+                        color: 'white',
+                        fontSize: '1rem',
+                        fontWeight: '500',
+                      }}>Total Nilai</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {academicData.map((item, index) => (
+                      <tr key={item.semester} style={{
+                        borderBottom: index < academicData.length - 1 ? '1px solid #222222' : 'none',
+                        transition: 'background-color 0.2s',
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1a1a1a'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                      >
+                        <td style={{
+                          padding: '12px 20px',
+                          color: '#e0e0e0',
+                          fontSize: '0.95rem',
+                        }}>Semester {item.semester}</td>
+                        <td style={{
+                          padding: '12px 20px',
+                          textAlign: 'center',
+                          color: '#e0e0e0',
+                          fontSize: '0.95rem',
+                        }}>{item.sks}</td>
+                        <td style={{
+                          padding: '12px 20px',
+                          textAlign: 'center',
+                          color: '#e0e0e0',
+                          fontSize: '0.95rem',
+                        }}>{item.nilaiMutu.toFixed(2)}</td>
+                        <td style={{
+                          padding: '12px 20px',
+                          textAlign: 'center',
+                          color: '#e0e0e0',
+                          fontSize: '0.95rem',
+                        }}>{item.total.toFixed(1)}</td>
+                      </tr>
+                    ))}
+                    <tr style={{
+                      borderTop: '2px solid #333333',
+                      backgroundColor: '#1a1a1a',
+                      fontWeight: 'bold',
+                    }}>
+                      <td style={{
+                        padding: '15px 20px',
+                        color: 'white',
+                        fontSize: '1rem',
+                        fontWeight: 'bold',
+                      }}>Total / IPK</td>
+                      <td style={{
+                        padding: '15px 20px',
+                        textAlign: 'center',
+                        color: 'white',
+                        fontSize: '1rem',
+                        fontWeight: 'bold',
+                      }}>{totalSKS}</td>
+                      <td style={{
+                        padding: '15px 20px',
+                        textAlign: 'center',
+                        color: 'white',
+                        fontSize: '1rem',
+                        fontWeight: 'bold',
+                      }}>-</td>
+                      <td style={{
+                        padding: '15px 20px',
+                        textAlign: 'center',
+                        color: '#FFD700',
+                        fontSize: '1.1rem',
+                        fontWeight: 'bold',
+                      }}>{ipk}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              
+              <p style={{ marginBottom: '1.5em', fontSize: '0.9rem', color: '#888' }}>
+                *IPK (Indeks Prestasi Kumulatif) dihitung berdasarkan total nilai dibagi total SKS. Nilai mutu per semester menunjukkan peningkatan konsisten dari semester ke semester.
+              </p>
+            </section>
           </div>
 
-          {/* ===== TAG SECTION (2 TAG SAJA) ===== */}
+          {/* ===== TAG SECTION ===== */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -3161,6 +3346,7 @@ export default function BlogPage() {
             <div style={{
               display: 'flex',
               gap: '15px',
+              flexWrap: 'wrap',
             }}>
               <Link 
                 href="/tag/kuliah"
@@ -3179,7 +3365,7 @@ export default function BlogPage() {
                     cursor: 'pointer',
                   }}
                 >
-                  #kuliah
+                  kuliah
                 </motion.span>
               </Link>
               
@@ -3200,7 +3386,49 @@ export default function BlogPage() {
                     cursor: 'pointer',
                   }}
                 >
-                  #gunadarma
+                  gunadarma
+                </motion.span>
+              </Link>
+              
+              <Link 
+                href="/tag/akademik"
+                style={{ textDecoration: 'none' }}
+              >
+                <motion.span
+                  whileHover={{ x: 5 }}
+                  style={{
+                    display: 'inline-block',
+                    padding: '6px 18px',
+                    backgroundColor: '#222222',
+                    border: '1px solid #444444',
+                    borderRadius: '30px',
+                    color: '#cccccc',
+                    fontSize: '0.95rem',
+                    cursor: 'pointer',
+                  }}
+                >
+                  akademik
+                </motion.span>
+              </Link>
+              
+              <Link 
+                href="/tag/pengalaman"
+                style={{ textDecoration: 'none' }}
+              >
+                <motion.span
+                  whileHover={{ x: 5 }}
+                  style={{
+                    display: 'inline-block',
+                    padding: '6px 18px',
+                    backgroundColor: '#222222',
+                    border: '1px solid #444444',
+                    borderRadius: '30px',
+                    color: '#cccccc',
+                    fontSize: '0.95rem',
+                    cursor: 'pointer',
+                  }}
+                >
+                  pengalaman
                 </motion.span>
               </Link>
             </div>
@@ -3300,6 +3528,148 @@ export default function BlogPage() {
                   />
                 </motion.div>
               </Link>
+            </div>
+          </motion.div>
+
+          {/* ===== VARIAN BLOG LAINNYA ===== */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.35 }}
+            style={{
+              marginTop: '60px',
+              marginBottom: '80px',
+            }}
+          >
+            <div style={{
+              display: 'flex',
+              alignItems: 'baseline',
+              justifyContent: 'space-between',
+              marginBottom: '30px',
+              flexWrap: 'wrap',
+              gap: '15px',
+            }}>
+              <span style={{
+                fontSize: '1.8rem',
+                fontWeight: 'normal',
+                color: 'white',
+              }}>
+                Artikel Lainnya
+              </span>
+              <Link href="/blog" style={{
+                color: '#999999',
+                textDecoration: 'none',
+                fontSize: '0.95rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+              }}>
+                Lihat Semua
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+              </Link>
+            </div>
+            
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)',
+              gap: '30px',
+            }}>
+              {otherBlogs.map((blog, index) => (
+                <motion.div
+                  key={blog.id}
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.4 + (index * 0.1) }}
+                  whileHover={{ y: -5 }}
+                  style={{
+                    backgroundColor: '#111111',
+                    borderRadius: '20px',
+                    overflow: 'hidden',
+                    border: '1px solid #222222',
+                    transition: 'all 0.3s ease',
+                    cursor: 'pointer',
+                  }}
+                  onClick={() => router.push(`/blog/${blog.slug}`)}
+                >
+                  <div style={{
+                    position: 'relative',
+                    width: '100%',
+                    paddingBottom: '56.25%',
+                    overflow: 'hidden',
+                    backgroundColor: '#1a1a1a',
+                  }}>
+                    <img 
+                      src={blog.image}
+                      alt={blog.title}
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        transition: 'transform 0.3s ease',
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+                      onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                      onError={(e) => {
+                        e.currentTarget.src = `https://picsum.photos/400/225?random=${blog.id}`;
+                      }}
+                    />
+                  </div>
+                  
+                  <div style={{
+                    padding: '20px',
+                  }}>
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '12px',
+                      marginBottom: '12px',
+                      flexWrap: 'wrap',
+                    }}>
+                      {blog.tags.map((tag, tagIndex) => (
+                        <span
+                          key={tagIndex}
+                          style={{
+                            fontSize: '0.7rem',
+                            color: '#888888',
+                            backgroundColor: '#222222',
+                            padding: '4px 12px',
+                            borderRadius: '20px',
+                            textTransform: 'lowercase',
+                          }}
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                    
+                    <h3 style={{
+                      fontSize: '1.2rem',
+                      fontWeight: '500',
+                      color: 'white',
+                      margin: '0 0 12px 0',
+                      lineHeight: '1.4',
+                    }}>
+                      {blog.title}
+                    </h3>
+                    
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      fontSize: '0.8rem',
+                      color: '#666666',
+                    }}>
+                      <CalendarIcon width={14} height={14} />
+                      <span>{blog.date}</span>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
             </div>
           </motion.div>
 
@@ -3536,7 +3906,6 @@ export default function BlogPage() {
                         marginBottom: '4px'
                       }}>
                         {user?.displayName || user?.email?.split('@')[0]}
-                        {/* Verified Badge untuk Komentator - UKURAN BESAR */}
                         <InstagramVerifiedBadge size={24} />
                       </span>
                       <span style={{ color: '#666666', fontSize: '0.9rem' }}>
@@ -3607,7 +3976,7 @@ export default function BlogPage() {
             )}
           </AnimatePresence>
 
-          {/* Comments List - DENGAN VERIFIED BADGE */}
+          {/* Comments List */}
           <div style={{
             display: 'flex',
             flexDirection: 'column',
@@ -3686,7 +4055,6 @@ export default function BlogPage() {
                           marginBottom: '4px',
                         }}>
                           {comment.userName}
-                          {/* Verified Badge untuk Komentar - UKURAN BESAR */}
                           <InstagramVerifiedBadge size={22} />
                         </span>
                         <span style={{
@@ -3880,7 +4248,7 @@ export default function BlogPage() {
                     )}
                   </AnimatePresence>
 
-                  {/* Replies List - DENGAN VERIFIED BADGE */}
+                  {/* Replies List */}
                   {comment.replies && comment.replies.length > 0 && (
                     <div style={{
                       marginTop: '20px',
@@ -3932,7 +4300,6 @@ export default function BlogPage() {
                                   alignItems: 'center',
                                 }}>
                                   {reply.userName}
-                                  {/* Verified Badge untuk Reply - UKURAN BESAR */}
                                   <InstagramVerifiedBadge size={20} />
                                 </span>
                                 <span style={{
