@@ -44,6 +44,95 @@ const firebaseConfig = {
   measurementId: "G-8LMP7F4BE9"
 };
 
+// Instagram Verified Badge Component - LEBIH BESAR
+const InstagramVerifiedBadge = ({ size = 28 }) => {
+  const [showTooltip, setShowTooltip] = useState(false);
+  
+  return (
+    <span 
+      style={{ 
+        position: 'relative', 
+        display: 'inline-block',
+        marginLeft: '8px',
+        verticalAlign: 'middle',
+        cursor: 'help',
+        lineHeight: 1
+      }}
+      onMouseEnter={() => setShowTooltip(true)}
+      onMouseLeave={() => setShowTooltip(false)}
+    >
+      <svg
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg"
+        style={{
+          display: 'block'
+        }}
+      >
+        <path
+          fill="#0095F6"
+          d="
+            M12 2.2
+            C13.6 3.8 16.2 3.8 17.8 2.2
+            C18.6 3.8 20.2 5.4 21.8 6.2
+            C20.2 7.8 20.2 10.4 21.8 12
+            C20.2 13.6 20.2 16.2 21.8 17.8
+            C20.2 18.6 18.6 20.2 17.8 21.8
+            C16.2 20.2 13.6 20.2 12 21.8
+            C10.4 20.2 7.8 20.2 6.2 21.8
+            C5.4 20.2 3.8 18.6 2.2 17.8
+            C3.8 16.2 3.8 13.6 2.2 12
+            C3.8 10.4 3.8 7.8 2.2 6.2
+            C3.8 5.4 5.4 3.8 6.2 2.2
+            C7.8 3.8 10.4 3.8 12 2.2
+            Z
+          "
+        />
+        <path
+          d="M9.2 12.3l2 2 4.6-4.6"
+          stroke="white"
+          strokeWidth="2"
+          fill="none"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+      
+      {showTooltip && (
+        <div style={{
+          position: 'absolute',
+          bottom: '100%',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          backgroundColor: '#333',
+          color: 'white',
+          padding: '8px 16px',
+          borderRadius: '8px',
+          fontSize: '14px',
+          fontWeight: '500',
+          whiteSpace: 'nowrap',
+          marginBottom: '10px',
+          zIndex: 10000,
+          boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+          letterSpacing: '0.3px'
+        }}>
+          Akun Resmi
+          <div style={{
+            position: 'absolute',
+            top: '100%',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            borderWidth: '6px',
+            borderStyle: 'solid',
+            borderColor: '#333 transparent transparent transparent'
+          }} />
+        </div>
+      )}
+    </span>
+  );
+};
+
 // Emoticon List untuk Reactions (DISEDERHANAKAN MENJADI 6 EMOTICON)
 const EMOTICONS = [
   { id: 'like', emoji: '👍', label: 'Suka' },
@@ -602,6 +691,7 @@ export default function MemilihJurusanPage() {
         id: `${Date.now()}_${user.uid}`,
         userId: user.uid,
         userName: user.displayName || user.email?.split('@')[0] || 'Anonymous',
+        userEmail: user.email,
         userPhoto: user.photoURL || `https://ui-avatars.com/api/?name=${user.email}&background=random&color=fff`,
         text: replyText,
         createdAt: Timestamp.now(),
@@ -820,6 +910,7 @@ export default function MemilihJurusanPage() {
         id: `${Date.now()}_${user.uid}`,
         userId: user.uid,
         userName: user.displayName || "Farid Ardiansyah",
+        userEmail: user.email,
         userPhoto: user.photoURL || `https://ui-avatars.com/api/?name=Farid+Ardiansyah&background=random&color=fff`,
         text: replyMessage,
         createdAt: Timestamp.now()
@@ -1176,7 +1267,7 @@ export default function MemilihJurusanPage() {
         </motion.div>
       </div>
 
-      {/* HEADER - HALAMAN UTAMA & USER */}
+      {/* HEADER - HALAMAN UTAMA & USER - DENGAN VERIFIED BADGE */}
       <div style={{
         position: 'fixed',
         top: isMobile ? '100px' : '120px',
@@ -1323,7 +1414,7 @@ export default function MemilihJurusanPage() {
           </span>
         </motion.button>
 
-        {/* User Info / Login Button */}
+        {/* User Info / Login Button - DENGAN VERIFIED BADGE */}
         {user ? (
           <motion.div
             initial={{ opacity: 0, x: 20 }}
@@ -1353,8 +1444,11 @@ export default function MemilihJurusanPage() {
               fontSize: '1rem',
               color: 'white',
               fontWeight: '500',
+              display: 'flex',
+              alignItems: 'center',
             }}>
               {user.displayName || user.email?.split('@')[0]}
+              <InstagramVerifiedBadge size={24} />
             </span>
             <motion.button
               whileHover={{ scale: 1.05 }}
@@ -1423,7 +1517,7 @@ export default function MemilihJurusanPage() {
         </Link>
       </div>
 
-      {/* MESSAGE MODAL */}
+      {/* MESSAGE MODAL - dengan Verified Badge pada nama pengirim */}
       <AnimatePresence>
         {showMessageModal && (
           <motion.div
@@ -1631,7 +1725,7 @@ export default function MemilihJurusanPage() {
                 </motion.form>
               )}
 
-              {/* Riwayat Pesan untuk Pengirim (pembaca) */}
+              {/* Riwayat Pesan untuk Pengirim (pembaca) - DENGAN VERIFIED BADGE */}
               {user && user.email !== authorEmail && showUserMessageHistory && (
                 <div style={{
                   display: 'flex',
@@ -1686,7 +1780,7 @@ export default function MemilihJurusanPage() {
                           border: '1px solid rgba(255,255,255,0.05)',
                         }}
                       >
-                        {/* Header Pesan */}
+                        {/* Header Pesan - DENGAN VERIFIED BADGE */}
                         <div style={{
                           display: 'flex',
                           justifyContent: 'space-between',
@@ -1713,10 +1807,12 @@ export default function MemilihJurusanPage() {
                                 fontSize: '1.1rem',
                                 fontWeight: '500',
                                 color: 'white',
-                                display: 'block',
+                                display: 'flex',
+                                alignItems: 'center',
                                 marginBottom: '4px',
                               }}>
                                 {msg.userName} (Anda)
+                                <InstagramVerifiedBadge size={22} />
                               </span>
                               <span style={{
                                 fontSize: '0.85rem',
@@ -1776,7 +1872,7 @@ export default function MemilihJurusanPage() {
                           {msg.message}
                         </p>
 
-                        {/* Balasan dari Penulis */}
+                        {/* Balasan dari Penulis - DENGAN VERIFIED BADGE */}
                         {msg.replies && msg.replies.length > 0 && (
                           <div style={{
                             marginTop: '15px',
@@ -1817,8 +1913,11 @@ export default function MemilihJurusanPage() {
                                     fontSize: '0.9rem',
                                     fontWeight: '500',
                                     color: 'white',
+                                    display: 'flex',
+                                    alignItems: 'center',
                                   }}>
                                     {reply.userName}
+                                    <InstagramVerifiedBadge size={20} />
                                   </span>
                                   <span style={{
                                     fontSize: '0.75rem',
@@ -1847,7 +1946,7 @@ export default function MemilihJurusanPage() {
                 </div>
               )}
 
-              {/* Daftar Pesan untuk Penulis */}
+              {/* Daftar Pesan untuk Penulis - DENGAN VERIFIED BADGE */}
               {user && user.email === authorEmail && (
                 <div style={{
                   display: 'flex',
@@ -1885,7 +1984,7 @@ export default function MemilihJurusanPage() {
                           border: '1px solid rgba(255,255,255,0.05)',
                         }}
                       >
-                        {/* Header Pesan */}
+                        {/* Header Pesan - DENGAN VERIFIED BADGE */}
                         <div style={{
                           display: 'flex',
                           justifyContent: 'space-between',
@@ -1912,10 +2011,12 @@ export default function MemilihJurusanPage() {
                                 fontSize: '1.1rem',
                                 fontWeight: '500',
                                 color: 'white',
-                                display: 'block',
+                                display: 'flex',
+                                alignItems: 'center',
                                 marginBottom: '4px',
                               }}>
                                 {msg.userName}
+                                <InstagramVerifiedBadge size={22} />
                               </span>
                               <span style={{
                                 fontSize: '0.85rem',
@@ -1970,7 +2071,7 @@ export default function MemilihJurusanPage() {
                           {msg.message}
                         </p>
 
-                        {/* Balasan */}
+                        {/* Balasan - DENGAN VERIFIED BADGE */}
                         {msg.replies && msg.replies.length > 0 && (
                           <div style={{
                             marginTop: '15px',
@@ -2011,8 +2112,11 @@ export default function MemilihJurusanPage() {
                                     fontSize: '0.9rem',
                                     fontWeight: '500',
                                     color: 'white',
+                                    display: 'flex',
+                                    alignItems: 'center',
                                   }}>
                                     {reply.userName}
+                                    <InstagramVerifiedBadge size={20} />
                                   </span>
                                   <span style={{
                                     fontSize: '0.75rem',
@@ -2139,7 +2243,7 @@ export default function MemilihJurusanPage() {
         )}
       </AnimatePresence>
 
-      {/* SAVE HISTORY MODAL */}
+      {/* SAVE HISTORY MODAL - tetap sama */}
       <AnimatePresence>
         {showSaveHistory && (
           <motion.div
@@ -2285,7 +2389,7 @@ export default function MemilihJurusanPage() {
         )}
       </AnimatePresence>
 
-      {/* SHARE MODAL */}
+      {/* SHARE MODAL - tetap sama */}
       <AnimatePresence>
         {showShareModal && (
           <motion.div
@@ -2473,7 +2577,7 @@ export default function MemilihJurusanPage() {
         padding: isMobile ? '20px 0 40px' : '40px 0 60px',
       }}>
         
-        {/* SIDEBAR KIRI - RANGKUMAN */}
+        {/* SIDEBAR KIRI - RANGKUMAN dengan Verified Badge */}
         <div style={{
           flex: isMobile ? '1' : '0 0 280px',
           position: isMobile ? 'relative' : 'sticky',
@@ -2535,7 +2639,7 @@ export default function MemilihJurusanPage() {
                 <ClockIcon width={18} height={18} />
                 <span>10 menit membaca</span>
               </div>
-              {/* Author Info with Tooltip */}
+              {/* Author Info with Tooltip - DENGAN VERIFIED BADGE */}
               <div 
                 style={{
                   display: 'flex',
@@ -2576,14 +2680,13 @@ export default function MemilihJurusanPage() {
                       color: 'white',
                       fontSize: '1rem',
                       fontWeight: '500',
-                      display: 'block',
+                      display: 'flex',
+                      alignItems: 'center',
                       cursor: 'pointer',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
                     }}
                   >
                     Farid Ardiansyah
+                    <InstagramVerifiedBadge size={24} />
                   </motion.span>
                   <span style={{
                     color: '#999999',
@@ -2597,7 +2700,7 @@ export default function MemilihJurusanPage() {
                   </span>
                 </div>
 
-                {/* Author Tooltip */}
+                {/* Author Tooltip - dengan Verified Badge */}
                 <AnimatePresence>
                   {showAuthorTooltip && (
                     <motion.div
@@ -2645,10 +2748,12 @@ export default function MemilihJurusanPage() {
                             color: 'white',
                             fontSize: '1.1rem',
                             fontWeight: '500',
-                            display: 'block',
+                            display: 'flex',
+                            alignItems: 'center',
                             marginBottom: '4px',
                           }}>
                             Farid Ardiansyah
+                            <InstagramVerifiedBadge size={22} />
                           </span>
                           <span style={{
                             color: '#999999',
@@ -2862,7 +2967,7 @@ export default function MemilihJurusanPage() {
             </div>
           </motion.div>
 
-          {/* KONTEN ARTIKEL - MEMILIH JURUSAN */}
+          {/* KONTEN ARTIKEL - MEMILIH JURUSAN (semua section tetap sama) */}
           <div style={{
             fontSize: isMobile ? '1.1rem' : '1.2rem',
             lineHeight: '1.8',
@@ -3394,7 +3499,7 @@ export default function MemilihJurusanPage() {
             </div>
           </motion.div>
 
-          {/* ===== EMOTICON REACTIONS (DISEDERHANAKAN) ===== */}
+          {/* ===== EMOTICON REACTIONS ===== */}
           <div style={{
             marginTop: '40px',
             marginBottom: '40px',
@@ -3443,7 +3548,7 @@ export default function MemilihJurusanPage() {
               </motion.button>
             </motion.div>
 
-            {/* Emoticon Picker - DISEDERHANAKAN */}
+            {/* Emoticon Picker */}
             <AnimatePresence>
               {showEmoticonPicker && (
                 <motion.div
@@ -3507,7 +3612,7 @@ export default function MemilihJurusanPage() {
               )}
             </AnimatePresence>
 
-            {/* Active Reactions Summary - DISEDERHANAKAN */}
+            {/* Active Reactions Summary */}
             <div style={{
               display: 'flex',
               flexWrap: 'wrap',
@@ -3585,7 +3690,7 @@ export default function MemilihJurusanPage() {
             {user ? 'Tulis komentar Anda di sini...' : 'Login untuk menulis komentar'}
           </motion.button>
 
-          {/* Comment Form */}
+          {/* Comment Form - DENGAN VERIFIED BADGE */}
           <AnimatePresence>
             {showCommentForm && user && (
               <motion.div
@@ -3622,10 +3727,12 @@ export default function MemilihJurusanPage() {
                         color: 'white', 
                         fontSize: '1.2rem',
                         fontWeight: '500',
-                        display: 'block',
+                        display: 'flex',
+                        alignItems: 'center',
                         marginBottom: '4px'
                       }}>
                         {user?.displayName || user?.email?.split('@')[0]}
+                        <InstagramVerifiedBadge size={24} />
                       </span>
                       <span style={{ color: '#666666', fontSize: '0.9rem' }}>
                         Berkomentar sebagai pengguna
@@ -3695,7 +3802,7 @@ export default function MemilihJurusanPage() {
             )}
           </AnimatePresence>
 
-          {/* Comments List */}
+          {/* Comments List - DENGAN VERIFIED BADGE */}
           <div style={{
             display: 'flex',
             flexDirection: 'column',
@@ -3741,7 +3848,7 @@ export default function MemilihJurusanPage() {
                     border: '1px solid rgba(255,255,255,0.05)',
                   }}
                 >
-                  {/* Comment Header */}
+                  {/* Comment Header - DENGAN VERIFIED BADGE */}
                   <div style={{
                     display: 'flex',
                     justifyContent: 'space-between',
@@ -3769,10 +3876,12 @@ export default function MemilihJurusanPage() {
                           fontSize: '1.2rem',
                           fontWeight: '500',
                           color: 'white',
-                          display: 'block',
+                          display: 'flex',
+                          alignItems: 'center',
                           marginBottom: '4px',
                         }}>
                           {comment.userName}
+                          <InstagramVerifiedBadge size={22} />
                         </span>
                         <span style={{
                           fontSize: '0.9rem',
@@ -3965,7 +4074,7 @@ export default function MemilihJurusanPage() {
                     )}
                   </AnimatePresence>
 
-                  {/* Replies List */}
+                  {/* Replies List - DENGAN VERIFIED BADGE */}
                   {comment.replies && comment.replies.length > 0 && (
                     <div style={{
                       marginTop: '20px',
@@ -4013,8 +4122,11 @@ export default function MemilihJurusanPage() {
                                   fontSize: '1rem',
                                   fontWeight: '500',
                                   color: 'white',
+                                  display: 'flex',
+                                  alignItems: 'center',
                                 }}>
                                   {reply.userName}
+                                  <InstagramVerifiedBadge size={20} />
                                 </span>
                                 <span style={{
                                   fontSize: '0.8rem',
