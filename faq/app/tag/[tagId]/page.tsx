@@ -47,6 +47,95 @@ const firebaseConfig = {
   measurementId: "G-8LMP7F4BE9"
 };
 
+// Instagram Verified Badge Component - LEBIH BESAR
+const InstagramVerifiedBadge = ({ size = 28 }) => {
+  const [showTooltip, setShowTooltip] = useState(false);
+  
+  return (
+    <span 
+      style={{ 
+        position: 'relative', 
+        display: 'inline-block',
+        marginLeft: '8px',
+        verticalAlign: 'middle',
+        cursor: 'help',
+        lineHeight: 1
+      }}
+      onMouseEnter={() => setShowTooltip(true)}
+      onMouseLeave={() => setShowTooltip(false)}
+    >
+      <svg
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg"
+        style={{
+          display: 'block'
+        }}
+      >
+        <path
+          fill="#0095F6"
+          d="
+            M12 2.2
+            C13.6 3.8 16.2 3.8 17.8 2.2
+            C18.6 3.8 20.2 5.4 21.8 6.2
+            C20.2 7.8 20.2 10.4 21.8 12
+            C20.2 13.6 20.2 16.2 21.8 17.8
+            C20.2 18.6 18.6 20.2 17.8 21.8
+            C16.2 20.2 13.6 20.2 12 21.8
+            C10.4 20.2 7.8 20.2 6.2 21.8
+            C5.4 20.2 3.8 18.6 2.2 17.8
+            C3.8 16.2 3.8 13.6 2.2 12
+            C3.8 10.4 3.8 7.8 2.2 6.2
+            C3.8 5.4 5.4 3.8 6.2 2.2
+            C7.8 3.8 10.4 3.8 12 2.2
+            Z
+          "
+        />
+        <path
+          d="M9.2 12.3l2 2 4.6-4.6"
+          stroke="white"
+          strokeWidth="2"
+          fill="none"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+      
+      {showTooltip && (
+        <div style={{
+          position: 'absolute',
+          bottom: '100%',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          backgroundColor: '#333',
+          color: 'white',
+          padding: '8px 16px',
+          borderRadius: '8px',
+          fontSize: '14px',
+          fontWeight: '500',
+          whiteSpace: 'nowrap',
+          marginBottom: '10px',
+          zIndex: 10000,
+          boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+          letterSpacing: '0.3px'
+        }}>
+          Akun Resmi
+          <div style={{
+            position: 'absolute',
+            top: '100%',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            borderWidth: '6px',
+            borderStyle: 'solid',
+            borderColor: '#333 transparent transparent transparent'
+          }} />
+        </div>
+      )}
+    </span>
+  );
+};
+
 // Data blog posts dengan tags
 const BLOG_POSTS = [
   {
@@ -740,7 +829,7 @@ export default function TagPage() {
         </motion.div>
       </div>
 
-      {/* HEADER - HALAMAN UTAMA + PANAH + NAMA USER */}
+      {/* HEADER - HALAMAN UTAMA + PANAH + NAMA USER - DENGAN VERIFIED BADGE */}
       <div
         ref={headerRef}
         style={{
@@ -788,7 +877,7 @@ export default function TagPage() {
           </span>
         </Link>
 
-        {/* User Info / Login Button */}
+        {/* User Info / Login Button - DENGAN VERIFIED BADGE */}
         {user ? (
           <motion.div
             initial={{ opacity: 0, x: 20 }}
@@ -821,8 +910,11 @@ export default function TagPage() {
               fontSize: '1rem',
               color: 'white',
               fontWeight: '500',
+              display: 'flex',
+              alignItems: 'center',
             }}>
               {user.displayName || user.email?.split('@')[0] || 'User'}
+              <InstagramVerifiedBadge size={24} />
             </span>
             <motion.button
               whileHover={{ scale: 1.05 }}
@@ -1098,7 +1190,7 @@ export default function TagPage() {
           </motion.div>
         )}
 
-        {/* ===== SECTION SARAN PUBLIK - SEMUA USER BISA LIHAT ===== */}
+        {/* ===== SECTION SARAN PUBLIK - DENGAN VERIFIED BADGE ===== */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -1156,7 +1248,7 @@ export default function TagPage() {
             )}
           </div>
 
-          {/* Daftar Saran Publik */}
+          {/* Daftar Saran Publik - DENGAN VERIFIED BADGE */}
           {allSarans.length === 0 ? (
             <motion.div
               initial={{ opacity: 0 }}
@@ -1212,7 +1304,7 @@ export default function TagPage() {
                     border: '1px solid rgba(255,255,255,0.05)',
                   }}
                 >
-                  {/* Header Saran */}
+                  {/* Header Saran - DENGAN VERIFIED BADGE */}
                   <div style={{
                     display: 'flex',
                     justifyContent: 'space-between',
@@ -1247,8 +1339,11 @@ export default function TagPage() {
                             fontSize: '1.1rem',
                             fontWeight: '500',
                             color: 'white',
+                            display: 'flex',
+                            alignItems: 'center',
                           }}>
                             {saran.userName}
+                            <InstagramVerifiedBadge size={22} />
                           </span>
                           <span style={{
                             fontSize: '0.8rem',
@@ -1311,7 +1406,7 @@ export default function TagPage() {
                     {saran.saran}
                   </p>
 
-                  {/* Daftar Balasan */}
+                  {/* Daftar Balasan - DENGAN VERIFIED BADGE */}
                   {saran.replies && saran.replies.length > 0 && (
                     <div style={{
                       marginTop: '15px',
@@ -1353,8 +1448,11 @@ export default function TagPage() {
                               fontSize: '0.9rem',
                               fontWeight: '500',
                               color: 'white',
+                              display: 'flex',
+                              alignItems: 'center',
                             }}>
                               {reply.userName}
+                              <InstagramVerifiedBadge size={20} />
                             </span>
                             <span style={{
                               fontSize: '0.75rem',
@@ -1403,7 +1501,7 @@ export default function TagPage() {
                     </motion.button>
                   )}
 
-                  {/* Form Balas */}
+                  {/* Form Balas - DENGAN VERIFIED BADGE */}
                   {selectedSaranForReply === saran.id && user && (
                     <motion.div
                       initial={{ opacity: 0, height: 0 }}
@@ -1430,6 +1528,21 @@ export default function TagPage() {
                         <div style={{
                           flex: 1,
                         }}>
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            marginBottom: '8px',
+                          }}>
+                            <span style={{
+                              fontSize: '0.9rem',
+                              color: 'white',
+                              display: 'flex',
+                              alignItems: 'center',
+                            }}>
+                              {user.displayName || user.email?.split('@')[0] || 'User'}
+                              <InstagramVerifiedBadge size={20} />
+                            </span>
+                          </div>
                           <textarea
                             value={replyText}
                             onChange={(e) => setReplyText(e.target.value)}
