@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useRef } from "react";
@@ -43,6 +42,95 @@ const firebaseConfig = {
   messagingSenderId: "836899520599",
   appId: "1:836899520599:web:b346e4370ecfa9bb89e312",
   measurementId: "G-8LMP7F4BE9"
+};
+
+// Instagram Verified Badge Component - LEBIH BESAR
+const InstagramVerifiedBadge = ({ size = 28 }) => {
+  const [showTooltip, setShowTooltip] = useState(false);
+  
+  return (
+    <span 
+      style={{ 
+        position: 'relative', 
+        display: 'inline-block',
+        marginLeft: '8px',
+        verticalAlign: 'middle',
+        cursor: 'help',
+        lineHeight: 1
+      }}
+      onMouseEnter={() => setShowTooltip(true)}
+      onMouseLeave={() => setShowTooltip(false)}
+    >
+      <svg
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg"
+        style={{
+          display: 'block'
+        }}
+      >
+        <path
+          fill="#0095F6"
+          d="
+            M12 2.2
+            C13.6 3.8 16.2 3.8 17.8 2.2
+            C18.6 3.8 20.2 5.4 21.8 6.2
+            C20.2 7.8 20.2 10.4 21.8 12
+            C20.2 13.6 20.2 16.2 21.8 17.8
+            C20.2 18.6 18.6 20.2 17.8 21.8
+            C16.2 20.2 13.6 20.2 12 21.8
+            C10.4 20.2 7.8 20.2 6.2 21.8
+            C5.4 20.2 3.8 18.6 2.2 17.8
+            C3.8 16.2 3.8 13.6 2.2 12
+            C3.8 10.4 3.8 7.8 2.2 6.2
+            C3.8 5.4 5.4 3.8 6.2 2.2
+            C7.8 3.8 10.4 3.8 12 2.2
+            Z
+          "
+        />
+        <path
+          d="M9.2 12.3l2 2 4.6-4.6"
+          stroke="white"
+          strokeWidth="2"
+          fill="none"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+      
+      {showTooltip && (
+        <div style={{
+          position: 'absolute',
+          bottom: '100%',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          backgroundColor: '#333',
+          color: 'white',
+          padding: '8px 16px',
+          borderRadius: '8px',
+          fontSize: '14px',
+          fontWeight: '500',
+          whiteSpace: 'nowrap',
+          marginBottom: '10px',
+          zIndex: 10000,
+          boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+          letterSpacing: '0.3px'
+        }}>
+          Akun Resmi
+          <div style={{
+            position: 'absolute',
+            top: '100%',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            borderWidth: '6px',
+            borderStyle: 'solid',
+            borderColor: '#333 transparent transparent transparent'
+          }} />
+        </div>
+      )}
+    </span>
+  );
 };
 
 // Emoticon List untuk Reactions
@@ -592,6 +680,7 @@ export default function BlogPage() {
         id: `${Date.now()}_${user.uid}`,
         userId: user.uid,
         userName: user.displayName || user.email?.split('@')[0] || 'Anonymous',
+        userEmail: user.email,
         userPhoto: user.photoURL || `https://ui-avatars.com/api/?name=${user.email}&background=random&color=fff`,
         text: replyText,
         createdAt: Timestamp.now(),
@@ -810,6 +899,7 @@ export default function BlogPage() {
         id: `${Date.now()}_${user.uid}`,
         userId: user.uid,
         userName: user.displayName || "Farid Ardiansyah",
+        userEmail: user.email,
         userPhoto: user.photoURL || `https://ui-avatars.com/api/?name=Farid+Ardiansyah&background=random&color=fff`,
         text: replyMessage,
         createdAt: Timestamp.now()
@@ -1117,7 +1207,7 @@ export default function BlogPage() {
       color: 'white',
       position: 'relative',
       padding: isMobile ? '20px' : '40px',
-      paddingTop: isMobile ? '120px' : '180px', // Tambah padding top untuk memberi ruang teks berjalan
+      paddingTop: isMobile ? '120px' : '180px',
     }}>
       
       {/* ===== TEKS BERJALAN - LEBIH BESAR DENGAN PANAH ===== */}
@@ -1129,7 +1219,7 @@ export default function BlogPage() {
         zIndex: 9999,
         backgroundColor: 'rgba(0,0,0,0.95)',
         color: 'white',
-        padding: '20px 0', // Padding lebih besar
+        padding: '20px 0',
         borderBottom: '2px solid rgba(255,255,255,0.2)',
         backdropFilter: 'blur(12px)',
         overflow: 'hidden',
@@ -1139,7 +1229,7 @@ export default function BlogPage() {
       }}>
         <motion.div
           animate={{
-            x: [0, -2500] // Geser lebih jauh
+            x: [0, -2500]
           }}
           transition={{
             duration: 30,
@@ -1150,14 +1240,13 @@ export default function BlogPage() {
           style={{
             display: 'inline-flex',
             alignItems: 'center',
-            gap: '60px', // Jarak antar elemen lebih besar
-            fontSize: isMobile ? '1.8rem' : '2.5rem', // Ukuran font lebih besar
+            gap: '60px',
+            fontSize: isMobile ? '1.8rem' : '2.5rem',
             fontWeight: 'bold',
             letterSpacing: '2px',
             paddingLeft: '30px',
           }}
         >
-          {/* Elemen teks berjalan dengan arrow besar */}
           <NorthWestArrow width={isMobile ? 40 : 60} height={isMobile ? 40 : 60} style={{ strokeWidth: 2 }} />
           <span style={{ background: 'linear-gradient(45deg, #fff, #aaa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>NOTE ADALAH TEMAN TERBAIK MU</span>
           <NorthWestArrow width={isMobile ? 40 : 60} height={isMobile ? 40 : 60} style={{ strokeWidth: 2 }} />
@@ -1171,10 +1260,10 @@ export default function BlogPage() {
         </motion.div>
       </div>
 
-      {/* HEADER - HALAMAN UTAMA & USER - DIBERI JARAK DARI TEKS BERJALAN */}
+      {/* HEADER - HALAMAN UTAMA & USER */}
       <div style={{
         position: 'fixed',
-        top: isMobile ? '100px' : '120px', // Turunkan posisi (dari 80px jadi 120px)
+        top: isMobile ? '100px' : '120px',
         right: isMobile ? '20px' : '40px',
         zIndex: 100,
         display: 'flex',
@@ -1318,7 +1407,7 @@ export default function BlogPage() {
           </span>
         </motion.button>
 
-        {/* User Info / Login Button */}
+        {/* User Info / Login Button - DENGAN VERIFIED BADGE */}
         {user ? (
           <motion.div
             initial={{ opacity: 0, x: 20 }}
@@ -1348,8 +1437,12 @@ export default function BlogPage() {
               fontSize: '1rem',
               color: 'white',
               fontWeight: '500',
+              display: 'flex',
+              alignItems: 'center',
             }}>
               {user.displayName || user.email?.split('@')[0]}
+              {/* Verified Badge untuk SEMUA EMAIL - UKURAN BESAR */}
+              <InstagramVerifiedBadge size={24} />
             </span>
             <motion.button
               whileHover={{ scale: 1.05 }}
@@ -1626,7 +1719,7 @@ export default function BlogPage() {
                 </motion.form>
               )}
 
-              {/* Riwayat Pesan untuk Pengirim (pembaca) */}
+              {/* Riwayat Pesan untuk Pengirim (pembaca) - DENGAN VERIFIED BADGE */}
               {user && user.email !== authorEmail && showUserMessageHistory && (
                 <div style={{
                   display: 'flex',
@@ -1708,10 +1801,13 @@ export default function BlogPage() {
                                 fontSize: '1.1rem',
                                 fontWeight: '500',
                                 color: 'white',
-                                display: 'block',
+                                display: 'flex',
+                                alignItems: 'center',
                                 marginBottom: '4px',
                               }}>
                                 {msg.userName} (Anda)
+                                {/* Verified Badge untuk SEMUA EMAIL - UKURAN BESAR */}
+                                <InstagramVerifiedBadge size={22} />
                               </span>
                               <span style={{
                                 fontSize: '0.85rem',
@@ -1771,7 +1867,7 @@ export default function BlogPage() {
                           {msg.message}
                         </p>
 
-                        {/* Balasan dari Penulis */}
+                        {/* Balasan dari Penulis - DENGAN VERIFIED BADGE */}
                         {msg.replies && msg.replies.length > 0 && (
                           <div style={{
                             marginTop: '15px',
@@ -1812,8 +1908,12 @@ export default function BlogPage() {
                                     fontSize: '0.9rem',
                                     fontWeight: '500',
                                     color: 'white',
+                                    display: 'flex',
+                                    alignItems: 'center',
                                   }}>
                                     {reply.userName}
+                                    {/* Verified Badge untuk Penulis */}
+                                    <InstagramVerifiedBadge size={20} />
                                   </span>
                                   <span style={{
                                     fontSize: '0.75rem',
@@ -1842,7 +1942,7 @@ export default function BlogPage() {
                 </div>
               )}
 
-              {/* Daftar Pesan untuk Penulis */}
+              {/* Daftar Pesan untuk Penulis - DENGAN VERIFIED BADGE */}
               {user && user.email === authorEmail && (
                 <div style={{
                   display: 'flex',
@@ -1907,10 +2007,13 @@ export default function BlogPage() {
                                 fontSize: '1.1rem',
                                 fontWeight: '500',
                                 color: 'white',
-                                display: 'block',
+                                display: 'flex',
+                                alignItems: 'center',
                                 marginBottom: '4px',
                               }}>
                                 {msg.userName}
+                                {/* Verified Badge untuk SEMUA EMAIL - UKURAN BESAR */}
+                                <InstagramVerifiedBadge size={22} />
                               </span>
                               <span style={{
                                 fontSize: '0.85rem',
@@ -1965,7 +2068,7 @@ export default function BlogPage() {
                           {msg.message}
                         </p>
 
-                        {/* Balasan */}
+                        {/* Balasan - DENGAN VERIFIED BADGE */}
                         {msg.replies && msg.replies.length > 0 && (
                           <div style={{
                             marginTop: '15px',
@@ -2006,8 +2109,12 @@ export default function BlogPage() {
                                     fontSize: '0.9rem',
                                     fontWeight: '500',
                                     color: 'white',
+                                    display: 'flex',
+                                    alignItems: 'center',
                                   }}>
                                     {reply.userName}
+                                    {/* Verified Badge untuk Penulis */}
+                                    <InstagramVerifiedBadge size={20} />
                                   </span>
                                   <span style={{
                                     fontSize: '0.75rem',
@@ -2465,10 +2572,10 @@ export default function BlogPage() {
         gap: '60px',
         maxWidth: '1200px',
         margin: '0 auto',
-        padding: isMobile ? '20px 0 40px' : '40px 0 60px', // Kurangi padding top karena sudah di container utama
+        padding: isMobile ? '20px 0 40px' : '40px 0 60px',
       }}>
         
-        {/* SIDEBAR KIRI - RANGKUMAN (DIPERBAIKI: OVERFLOW-X HIDDEN) */}
+        {/* SIDEBAR KIRI - RANGKUMAN */}
         <div style={{
           flex: isMobile ? '1' : '0 0 280px',
           position: isMobile ? 'relative' : 'sticky',
@@ -2476,76 +2583,76 @@ export default function BlogPage() {
           alignSelf: 'flex-start',
           height: isMobile ? 'auto' : 'calc(100vh - 210px)',
           overflowY: isMobile ? 'visible' : 'auto',
-          overflowX: 'hidden', // PENTING: Hilangkan scrollbar horizontal
+          overflowX: 'hidden',
           paddingRight: '20px',
-          maxWidth: '100%', // Pastikan tidak melebihi lebar container
-          boxSizing: 'border-box', // Pastikan padding tidak menambah lebar
+          maxWidth: '100%',
+          boxSizing: 'border-box',
         }}>
           
-        {/* Blog Title - PERBAIKAN */}
-<div style={{
-  marginBottom: '50px',
-  width: '100%',
-  boxSizing: 'border-box',
-}}>
-  <h1 style={{
-    fontSize: isMobile ? 'clamp(2.5rem, 12vw, 4rem)' : 'clamp(3rem, 5vw, 6rem)',
-    fontWeight: 'normal',
-    color: 'white',
-    margin: '0 0 20px 0',
-    lineHeight: '0.9',
-    letterSpacing: '-2px',
-    wordBreak: 'break-word',
-    overflowWrap: 'break-word',
-    maxWidth: '100%',
-  }}>
-    Blog
-  </h1>
-  
-  <div style={{
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '12px',
-    marginTop: '20px',
-    color: '#999999',
-    fontSize: isMobile ? '0.9rem' : '1rem',
-    width: '100%',
-    boxSizing: 'border-box',
-  }}>
-    <div style={{
-      display: 'flex',
-      alignItems: 'center',
-      gap: '10px',
-      flexWrap: 'wrap',
-    }}>
-      <CalendarIcon width={18} height={18} />
-      <span style={{ wordBreak: 'break-word' }}>{formattedDate}</span>
-    </div>
-    <div style={{
-      display: 'flex',
-      alignItems: 'center',
-      gap: '10px',
-      flexWrap: 'wrap',
-    }}>
-      <ClockIcon width={18} height={18} />
-      <span>8 menit membaca</span>
-    </div>
-    {/* Author Info with Tooltip - KODE ASLI TIDAK BERUBAH */}
-    <div 
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '10px',
-        marginTop: '10px',
-        paddingTop: '10px',
-        borderTop: '1px solid #333333',
-        position: 'relative',
-        width: '100%',
-        overflow: 'visible',
-      }}
-      onMouseEnter={() => setShowAuthorTooltip(true)}
-      onMouseLeave={() => setShowAuthorTooltip(false)}
-    >
+          {/* Blog Title */}
+          <div style={{
+            marginBottom: '50px',
+            width: '100%',
+            boxSizing: 'border-box',
+          }}>
+            <h1 style={{
+              fontSize: isMobile ? 'clamp(2.5rem, 12vw, 4rem)' : 'clamp(3rem, 5vw, 6rem)',
+              fontWeight: 'normal',
+              color: 'white',
+              margin: '0 0 20px 0',
+              lineHeight: '0.9',
+              letterSpacing: '-2px',
+              wordBreak: 'break-word',
+              overflowWrap: 'break-word',
+              maxWidth: '100%',
+            }}>
+              Blog
+            </h1>
+            
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '12px',
+              marginTop: '20px',
+              color: '#999999',
+              fontSize: isMobile ? '0.9rem' : '1rem',
+              width: '100%',
+              boxSizing: 'border-box',
+            }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                flexWrap: 'wrap',
+              }}>
+                <CalendarIcon width={18} height={18} />
+                <span style={{ wordBreak: 'break-word' }}>{formattedDate}</span>
+              </div>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                flexWrap: 'wrap',
+              }}>
+                <ClockIcon width={18} height={18} />
+                <span>8 menit membaca</span>
+              </div>
+              {/* Author Info with Tooltip - DENGAN VERIFIED BADGE */}
+              <div 
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  marginTop: '10px',
+                  paddingTop: '10px',
+                  borderTop: '1px solid #333333',
+                  position: 'relative',
+                  width: '100%',
+                  overflow: 'visible',
+                }}
+                onMouseEnter={() => setShowAuthorTooltip(true)}
+                onMouseLeave={() => setShowAuthorTooltip(false)}
+              >
                 <motion.img 
                   whileHover={{ scale: 1.1, rotate: 5 }}
                   transition={{ type: "spring", stiffness: 400, damping: 10 }}
@@ -2557,7 +2664,7 @@ export default function BlogPage() {
                     borderRadius: '50%',
                     objectFit: 'cover',
                     cursor: 'pointer',
-                    flexShrink: 0, // Jangan mengecil
+                    flexShrink: 0,
                   }}
                 />
                 <div style={{ 
@@ -2571,14 +2678,14 @@ export default function BlogPage() {
                       color: 'white',
                       fontSize: '1rem',
                       fontWeight: '500',
-                      display: 'block',
+                      display: 'flex',
+                      alignItems: 'center',
                       cursor: 'pointer',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
                     }}
                   >
                     Farid Ardiansyah
+                    {/* Verified Badge untuk Penulis - UKURAN BESAR */}
+                    <InstagramVerifiedBadge size={24} />
                   </motion.span>
                   <span style={{
                     color: '#999999',
@@ -2592,7 +2699,7 @@ export default function BlogPage() {
                   </span>
                 </div>
 
-                {/* Author Tooltip - tetap sama */}
+                {/* Author Tooltip */}
                 <AnimatePresence>
                   {showAuthorTooltip && (
                     <motion.div
@@ -2609,7 +2716,7 @@ export default function BlogPage() {
                         border: '1px solid #333333',
                         borderRadius: '16px',
                         padding: '20px',
-                        width: '250px',
+                        width: '280px',
                         zIndex: 1000,
                         boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
                       }}
@@ -2640,10 +2747,12 @@ export default function BlogPage() {
                             color: 'white',
                             fontSize: '1.1rem',
                             fontWeight: '500',
-                            display: 'block',
+                            display: 'flex',
+                            alignItems: 'center',
                             marginBottom: '4px',
                           }}>
                             Farid Ardiansyah
+                            <InstagramVerifiedBadge size={22} />
                           </span>
                           <span style={{
                             color: '#999999',
@@ -2703,40 +2812,39 @@ export default function BlogPage() {
             </h3>
           </div>
           
-         <div style={{
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '12px',
-  width: '100%',
-  boxSizing: 'border-box',
-}}>
-  {rangkumanSections.map((section) => (
-    <motion.button
-      key={section.id}
-      onClick={() => scrollToSection(section.id)}
-      whileHover={{ x: 10 }}
-      transition={{ type: "spring", stiffness: 400, damping: 25 }}
-      style={{
-        background: 'none',
-        border: 'none',
-        padding: '5px 0',
-        color: activeSection === section.id ? 'white' : '#999999',
-        fontSize: isMobile ? '0.95rem' : '1rem',
-        textAlign: 'left',
-        cursor: 'pointer',
-        fontWeight: 'normal',
-        width: '100%',
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-        whiteSpace: 'nowrap',
-        maxWidth: '100%',
-        display: 'block',
-      }}
-      title={section.title}
-    >
-      {section.title}
-    </motion.button>
-
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '12px',
+            width: '100%',
+            boxSizing: 'border-box',
+          }}>
+            {rangkumanSections.map((section) => (
+              <motion.button
+                key={section.id}
+                onClick={() => scrollToSection(section.id)}
+                whileHover={{ x: 10 }}
+                transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  padding: '5px 0',
+                  color: activeSection === section.id ? 'white' : '#999999',
+                  fontSize: isMobile ? '0.95rem' : '1rem',
+                  textAlign: 'left',
+                  cursor: 'pointer',
+                  fontWeight: 'normal',
+                  width: '100%',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  maxWidth: '100%',
+                  display: 'block',
+                }}
+                title={section.title}
+              >
+                {section.title}
+              </motion.button>
             ))}
           </div>
         </div>
@@ -2762,7 +2870,7 @@ export default function BlogPage() {
             Bagaimana Rasa nya Masuk Kuliah Di Universitas Gunadarma
           </motion.h2>
 
-          {/* KONTEN ARTIKEL - LENGKAP */}
+          {/* KONTEN ARTIKEL - LENGKAP (sama seperti sebelumnya) */}
           <div style={{
             fontSize: isMobile ? '1.1rem' : '1.2rem',
             lineHeight: '1.8',
@@ -3423,10 +3531,13 @@ export default function BlogPage() {
                         color: 'white', 
                         fontSize: '1.2rem',
                         fontWeight: '500',
-                        display: 'block',
+                        display: 'flex',
+                        alignItems: 'center',
                         marginBottom: '4px'
                       }}>
                         {user?.displayName || user?.email?.split('@')[0]}
+                        {/* Verified Badge untuk Komentator - UKURAN BESAR */}
+                        <InstagramVerifiedBadge size={24} />
                       </span>
                       <span style={{ color: '#666666', fontSize: '0.9rem' }}>
                         Berkomentar sebagai pengguna
@@ -3496,7 +3607,7 @@ export default function BlogPage() {
             )}
           </AnimatePresence>
 
-          {/* Comments List */}
+          {/* Comments List - DENGAN VERIFIED BADGE */}
           <div style={{
             display: 'flex',
             flexDirection: 'column',
@@ -3570,10 +3681,13 @@ export default function BlogPage() {
                           fontSize: '1.2rem',
                           fontWeight: '500',
                           color: 'white',
-                          display: 'block',
+                          display: 'flex',
+                          alignItems: 'center',
                           marginBottom: '4px',
                         }}>
                           {comment.userName}
+                          {/* Verified Badge untuk Komentar - UKURAN BESAR */}
+                          <InstagramVerifiedBadge size={22} />
                         </span>
                         <span style={{
                           fontSize: '0.9rem',
@@ -3766,7 +3880,7 @@ export default function BlogPage() {
                     )}
                   </AnimatePresence>
 
-                  {/* Replies List */}
+                  {/* Replies List - DENGAN VERIFIED BADGE */}
                   {comment.replies && comment.replies.length > 0 && (
                     <div style={{
                       marginTop: '20px',
@@ -3814,8 +3928,12 @@ export default function BlogPage() {
                                   fontSize: '1rem',
                                   fontWeight: '500',
                                   color: 'white',
+                                  display: 'flex',
+                                  alignItems: 'center',
                                 }}>
                                   {reply.userName}
+                                  {/* Verified Badge untuk Reply - UKURAN BESAR */}
+                                  <InstagramVerifiedBadge size={20} />
                                 </span>
                                 <span style={{
                                   fontSize: '0.8rem',
@@ -3899,7 +4017,6 @@ export default function BlogPage() {
         </div>
       </div>
 
-
       {/* Tambahkan CSS untuk animasi notifikasi */}
       <style jsx>{`
         @keyframes slideIn {
@@ -3927,6 +4044,3 @@ export default function BlogPage() {
     </div>
   );
 }
-
-
-
