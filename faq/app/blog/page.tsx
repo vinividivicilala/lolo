@@ -167,7 +167,7 @@ const otherBlogs = [
   },
   {
     id: 2,
-    image: "/images/6.jpg",
+    image: "/images/5.jpg",
     title: "Pengalaman Magang di Perusahaan Startup Teknologi",
     tags: ["Magang", "Karir", "Startup"],
     date: "10 Februari 2024",
@@ -175,7 +175,7 @@ const otherBlogs = [
   },
   {
     id: 3,
-    image: "/images/7.jpg",
+    image: "/images/5.jpg",
     title: "Review: 5 Aplikasi Belajar Terbaik untuk Mahasiswa",
     tags: ["Review", "Aplikasi", "Belajar Online"],
     date: "5 Januari 2024",
@@ -183,7 +183,7 @@ const otherBlogs = [
   },
   {
     id: 4,
-    image: "/images/8.jpg",
+    image: "/images/5.jpg",
     title: "Cara Membangun Portofolio yang Menarik untuk Fresh Graduate",
     tags: ["Portofolio", "Karir", "Fresh Graduate"],
     date: "20 Desember 2023",
@@ -282,11 +282,8 @@ export default function BlogPage() {
       setFirebaseDb(db);
       setFirebaseInitialized(true);
       
-      // Initialize blog reactions document
       initializeBlogReactions(db);
-      // Initialize share count
       initializeShareCount(db);
-      // Initialize save count
       initializeSaveCount(db);
     } catch (error) {
       console.error("Firebase initialization error:", error);
@@ -378,8 +375,6 @@ export default function BlogPage() {
       if (doc.exists()) {
         setShareCount(doc.data().count || 0);
       }
-    }, (error) => {
-      console.error("Error loading share count:", error);
     });
 
     return () => unsubscribe();
@@ -397,8 +392,6 @@ export default function BlogPage() {
       if (doc.exists()) {
         setSaveCount(doc.data().count || 0);
       }
-    }, (error) => {
-      console.error("Error loading save count:", error);
     });
 
     return () => unsubscribe();
@@ -485,8 +478,6 @@ export default function BlogPage() {
       if (doc.exists()) {
         setReactions(doc.data().counts || {});
       }
-    }, (error) => {
-      console.error("Error loading reactions:", error);
     });
 
     return () => unsubscribe();
@@ -542,8 +533,6 @@ export default function BlogPage() {
         replies: doc.data().replies || []
       }));
       setComments(commentsData);
-    }, (error) => {
-      console.error("Error loading comments:", error);
     });
 
     return () => unsubscribe();
@@ -569,19 +558,15 @@ export default function BlogPage() {
       }));
       setMessages(messagesData);
       
-      // Hitung pesan yang belum dibaca (jika user adalah penulis)
       if (user && user.email === authorEmail) {
         const unread = messagesData.filter((msg: any) => !msg.isRead).length;
         setUnreadCount(unread);
       }
 
-      // Filter pesan untuk user yang sedang login (bukan penulis)
       if (user && user.email !== authorEmail) {
         const userMsgs = messagesData.filter((msg: any) => msg.userId === user.uid);
         setUserMessages(userMsgs);
       }
-    }, (error) => {
-      console.error("Error loading messages:", error);
     });
 
     return () => unsubscribe();
@@ -600,19 +585,6 @@ export default function BlogPage() {
     try {
       const reactionsRef = doc(firebaseDb, "blogReactions", "gunadarma-article");
       const userReactionsRef = doc(firebaseDb, "userReactions", `${user.uid}_gunadarma-article`);
-
-      const reactionsDoc = await getDoc(reactionsRef);
-      if (!reactionsDoc.exists()) {
-        const initialCounts: { [key: string]: number } = {};
-        EMOTICONS.forEach(emoticon => {
-          initialCounts[emoticon.id] = 0;
-        });
-        await setDoc(reactionsRef, {
-          articleId: "gunadarma-article",
-          counts: initialCounts,
-          createdAt: Timestamp.now()
-        });
-      }
 
       if (userReactions.includes(emoticonId)) {
         await updateDoc(reactionsRef, {
@@ -827,17 +799,11 @@ export default function BlogPage() {
       const userSaveRef = doc(firebaseDb, "userSaves", `${user.uid}_gunadarma-article`);
 
       if (isSaved) {
-        // Unsave
-        await updateDoc(saveRef, {
-          count: increment(-1)
-        });
+        await updateDoc(saveRef, { count: increment(-1) });
         await deleteDoc(userSaveRef);
         setIsSaved(false);
       } else {
-        // Save
-        await updateDoc(saveRef, {
-          count: increment(1)
-        });
+        await updateDoc(saveRef, { count: increment(1) });
         await setDoc(userSaveRef, {
           userId: user.uid,
           articleId: "gunadarma-article",
@@ -864,9 +830,7 @@ export default function BlogPage() {
     
     try {
       const shareRef = doc(firebaseDb, "blogShares", "gunadarma-article");
-      await updateDoc(shareRef, {
-        count: increment(1)
-      });
+      await updateDoc(shareRef, { count: increment(1) });
     } catch (error) {
       console.error("Error incrementing share count:", error);
     }
@@ -924,8 +888,6 @@ export default function BlogPage() {
       });
 
       setNewMessage("");
-      
-      // Tampilkan notifikasi
       showNotification("Pesan berhasil dikirim ke penulis");
     } catch (error) {
       console.error("Error sending message:", error);
@@ -965,8 +927,6 @@ export default function BlogPage() {
 
       setReplyMessage("");
       setSelectedMessage(null);
-      
-      // Tampilkan notifikasi
       showNotification("Balasan berhasil dikirim");
     } catch (error) {
       console.error("Error replying to message:", error);
@@ -983,10 +943,7 @@ export default function BlogPage() {
 
     try {
       const messageRef = doc(firebaseDb, "authorMessages", messageId);
-      await updateDoc(messageRef, {
-        isRead: true
-      });
-      
+      await updateDoc(messageRef, { isRead: true });
       showNotification("Pesan ditandai telah dibaca");
     } catch (error) {
       console.error("Error marking message as read:", error);
@@ -997,7 +954,6 @@ export default function BlogPage() {
   // 25. NOTIFICATION FUNCTION
   // ============================================
   const showNotification = (message: string, type: "success" | "error" = "success") => {
-    // Buat elemen notifikasi
     const notification = document.createElement("div");
     notification.style.position = "fixed";
     notification.style.bottom = "20px";
@@ -1016,7 +972,6 @@ export default function BlogPage() {
 
     document.body.appendChild(notification);
 
-    // Hapus setelah 3 detik
     setTimeout(() => {
       notification.style.animation = "slideOut 0.3s ease";
       setTimeout(() => {
@@ -1091,7 +1046,6 @@ export default function BlogPage() {
     </svg>
   );
 
-  // ===== NORTH WEST ARROW UNTUK TEKS BERJALAN =====
   const NorthWestArrow = ({ width, height, style }: { width: number | string, height: number | string, style?: React.CSSProperties }) => (
     <svg 
       width={width} 
@@ -1182,7 +1136,6 @@ export default function BlogPage() {
     </svg>
   );
 
-  // Twitter Icon
   const TwitterIcon = ({ size = 24 }: { size?: number }) => (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
       <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
@@ -1214,7 +1167,6 @@ export default function BlogPage() {
     }
   };
 
-  // Author Bio
   const authorBio = {
     name: "Farid Ardiansyah",
     role: "Penulis",
@@ -1323,7 +1275,6 @@ export default function BlogPage() {
         justifyContent: 'flex-end',
         maxWidth: 'calc(100% - 80px)',
       }}>
-        {/* Message to Author Button */}
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
@@ -1345,29 +1296,26 @@ export default function BlogPage() {
           <MessageIcon width={20} height={20} />
           <span>Pesan ke Penulis</span>
           {user && user.email === authorEmail && unreadCount > 0 && (
-            <span
-              style={{
-                position: 'absolute',
-                top: '-5px',
-                right: '-5px',
-                background: 'rgba(255,255,255,0.2)',
-                color: 'white',
-                fontSize: '0.75rem',
-                minWidth: '20px',
-                height: '20px',
-                borderRadius: '10px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                border: '1px solid rgba(255,255,255,0.3)',
-              }}
-            >
+            <span style={{
+              position: 'absolute',
+              top: '-5px',
+              right: '-5px',
+              background: 'rgba(255,255,255,0.2)',
+              color: 'white',
+              fontSize: '0.75rem',
+              minWidth: '20px',
+              height: '20px',
+              borderRadius: '10px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              border: '1px solid rgba(255,255,255,0.3)',
+            }}>
               {unreadCount}
             </span>
           )}
         </motion.button>
 
-        {/* Save Button with Count */}
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
@@ -1387,20 +1335,17 @@ export default function BlogPage() {
         >
           <SaveIcon width={20} height={20} filled={isSaved} />
           <span>{isSaved ? 'Tersimpan' : 'Simpan'}</span>
-          <span
-            style={{
-              background: 'rgba(255,255,255,0.1)',
-              padding: '2px 8px',
-              borderRadius: '20px',
-              fontSize: '0.85rem',
-              color: 'white',
-            }}
-          >
+          <span style={{
+            background: 'rgba(255,255,255,0.1)',
+            padding: '2px 8px',
+            borderRadius: '20px',
+            fontSize: '0.85rem',
+            color: 'white',
+          }}>
             {saveCount}
           </span>
         </motion.button>
 
-        {/* History Button */}
         {user && (
           <motion.button
             whileHover={{ scale: 1.05 }}
@@ -1424,7 +1369,6 @@ export default function BlogPage() {
           </motion.button>
         )}
 
-        {/* Share Button with Count */}
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
@@ -1444,20 +1388,17 @@ export default function BlogPage() {
         >
           <ShareIcon width={20} height={20} />
           <span>Bagikan</span>
-          <span
-            style={{
-              background: 'rgba(255,255,255,0.1)',
-              padding: '2px 8px',
-              borderRadius: '20px',
-              fontSize: '0.85rem',
-              color: 'white',
-            }}
-          >
+          <span style={{
+            background: 'rgba(255,255,255,0.1)',
+            padding: '2px 8px',
+            borderRadius: '20px',
+            fontSize: '0.85rem',
+            color: 'white',
+          }}>
             {shareCount}
           </span>
         </motion.button>
 
-        {/* User Info / Login Button */}
         {user ? (
           <motion.div
             initial={{ opacity: 0, x: 20 }}
@@ -1768,7 +1709,7 @@ export default function BlogPage() {
                 </motion.form>
               )}
 
-              {/* Riwayat Pesan untuk Pengirim (pembaca) - DENGAN VERIFIED BADGE */}
+              {/* Riwayat Pesan untuk Pengirim (pembaca) */}
               {user && user.email !== authorEmail && showUserMessageHistory && (
                 <div style={{
                   display: 'flex',
@@ -1823,7 +1764,6 @@ export default function BlogPage() {
                           border: '1px solid rgba(255,255,255,0.05)',
                         }}
                       >
-                        {/* Header Pesan */}
                         <div style={{
                           display: 'flex',
                           justifyContent: 'space-between',
@@ -1901,7 +1841,6 @@ export default function BlogPage() {
                           )}
                         </div>
 
-                        {/* Isi Pesan */}
                         <p style={{
                           fontSize: '1rem',
                           lineHeight: '1.6',
@@ -1915,7 +1854,6 @@ export default function BlogPage() {
                           {msg.message}
                         </p>
 
-                        {/* Balasan dari Penulis - DENGAN VERIFIED BADGE */}
                         {msg.replies && msg.replies.length > 0 && (
                           <div style={{
                             marginTop: '15px',
@@ -1989,7 +1927,7 @@ export default function BlogPage() {
                 </div>
               )}
 
-              {/* Daftar Pesan untuk Penulis - DENGAN VERIFIED BADGE */}
+              {/* Daftar Pesan untuk Penulis */}
               {user && user.email === authorEmail && (
                 <div style={{
                   display: 'flex',
@@ -2027,7 +1965,6 @@ export default function BlogPage() {
                           border: '1px solid rgba(255,255,255,0.05)',
                         }}
                       >
-                        {/* Header Pesan */}
                         <div style={{
                           display: 'flex',
                           justifyContent: 'space-between',
@@ -2100,7 +2037,6 @@ export default function BlogPage() {
                           )}
                         </div>
 
-                        {/* Isi Pesan */}
                         <p style={{
                           fontSize: '1rem',
                           lineHeight: '1.6',
@@ -2114,7 +2050,6 @@ export default function BlogPage() {
                           {msg.message}
                         </p>
 
-                        {/* Balasan - DENGAN VERIFIED BADGE */}
                         {msg.replies && msg.replies.length > 0 && (
                           <div style={{
                             marginTop: '15px',
@@ -2183,7 +2118,6 @@ export default function BlogPage() {
                           </div>
                         )}
 
-                        {/* Form Balasan */}
                         {selectedMessage === msg.id ? (
                           <div style={{
                             marginTop: '20px',
@@ -2519,7 +2453,6 @@ export default function BlogPage() {
                 </motion.button>
               </div>
 
-              {/* Copy Link */}
               <motion.div
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
@@ -2569,7 +2502,6 @@ export default function BlogPage() {
                 </div>
               </motion.div>
 
-              {/* Twitter Share */}
               <motion.div
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
@@ -2682,7 +2614,7 @@ export default function BlogPage() {
                 <ClockIcon width={18} height={18} />
                 <span>8 menit membaca</span>
               </div>
-              {/* Author Info with Tooltip - DENGAN VERIFIED BADGE */}
+              {/* Author Info with Tooltip */}
               <div 
                 style={{
                   display: 'flex',
@@ -2914,7 +2846,7 @@ export default function BlogPage() {
             Bagaimana Rasa nya Masuk Kuliah Di Universitas Gunadarma
           </motion.h2>
 
-          {/* KONTEN ARTIKEL */}
+          {/* KONTEN ARTIKEL - LENGKAP */}
           <div style={{
             fontSize: isMobile ? '1.1rem' : '1.2rem',
             lineHeight: '1.8',
@@ -3207,34 +3139,10 @@ export default function BlogPage() {
                       borderBottom: '2px solid #333333',
                       backgroundColor: '#1a1a1a',
                     }}>
-                      <th style={{
-                        padding: '15px 20px',
-                        textAlign: 'left',
-                        color: 'white',
-                        fontSize: '1rem',
-                        fontWeight: '500',
-                      }}>Semester</th>
-                      <th style={{
-                        padding: '15px 20px',
-                        textAlign: 'center',
-                        color: 'white',
-                        fontSize: '1rem',
-                        fontWeight: '500',
-                      }}>SKS</th>
-                      <th style={{
-                        padding: '15px 20px',
-                        textAlign: 'center',
-                        color: 'white',
-                        fontSize: '1rem',
-                        fontWeight: '500',
-                      }}>Nilai Mutu</th>
-                      <th style={{
-                        padding: '15px 20px',
-                        textAlign: 'center',
-                        color: 'white',
-                        fontSize: '1rem',
-                        fontWeight: '500',
-                      }}>Total Nilai</th>
+                      <th style={{ padding: '15px 20px', textAlign: 'left', color: 'white', fontSize: '1rem', fontWeight: '500' }}>Semester</th>
+                      <th style={{ padding: '15px 20px', textAlign: 'center', color: 'white', fontSize: '1rem', fontWeight: '500' }}>SKS</th>
+                      <th style={{ padding: '15px 20px', textAlign: 'center', color: 'white', fontSize: '1rem', fontWeight: '500' }}>Nilai Mutu</th>
+                      <th style={{ padding: '15px 20px', textAlign: 'center', color: 'white', fontSize: '1rem', fontWeight: '500' }}>Total Nilai</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -3246,29 +3154,10 @@ export default function BlogPage() {
                       onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1a1a1a'}
                       onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                       >
-                        <td style={{
-                          padding: '12px 20px',
-                          color: '#e0e0e0',
-                          fontSize: '0.95rem',
-                        }}>Semester {item.semester}</td>
-                        <td style={{
-                          padding: '12px 20px',
-                          textAlign: 'center',
-                          color: '#e0e0e0',
-                          fontSize: '0.95rem',
-                        }}>{item.sks}</td>
-                        <td style={{
-                          padding: '12px 20px',
-                          textAlign: 'center',
-                          color: '#e0e0e0',
-                          fontSize: '0.95rem',
-                        }}>{item.nilaiMutu.toFixed(2)}</td>
-                        <td style={{
-                          padding: '12px 20px',
-                          textAlign: 'center',
-                          color: '#e0e0e0',
-                          fontSize: '0.95rem',
-                        }}>{item.total.toFixed(1)}</td>
+                        <td style={{ padding: '12px 20px', color: '#e0e0e0', fontSize: '0.95rem' }}>Semester {item.semester}</td>
+                        <td style={{ padding: '12px 20px', textAlign: 'center', color: '#e0e0e0', fontSize: '0.95rem' }}>{item.sks}</td>
+                        <td style={{ padding: '12px 20px', textAlign: 'center', color: '#e0e0e0', fontSize: '0.95rem' }}>{item.nilaiMutu.toFixed(2)}</td>
+                        <td style={{ padding: '12px 20px', textAlign: 'center', color: '#e0e0e0', fontSize: '0.95rem' }}>{item.total.toFixed(1)}</td>
                       </tr>
                     ))}
                     <tr style={{
@@ -3276,33 +3165,10 @@ export default function BlogPage() {
                       backgroundColor: '#1a1a1a',
                       fontWeight: 'bold',
                     }}>
-                      <td style={{
-                        padding: '15px 20px',
-                        color: 'white',
-                        fontSize: '1rem',
-                        fontWeight: 'bold',
-                      }}>Total / IPK</td>
-                      <td style={{
-                        padding: '15px 20px',
-                        textAlign: 'center',
-                        color: 'white',
-                        fontSize: '1rem',
-                        fontWeight: 'bold',
-                      }}>{totalSKS}</td>
-                      <td style={{
-                        padding: '15px 20px',
-                        textAlign: 'center',
-                        color: 'white',
-                        fontSize: '1rem',
-                        fontWeight: 'bold',
-                      }}>-</td>
-                      <td style={{
-                        padding: '15px 20px',
-                        textAlign: 'center',
-                        color: '#FFD700',
-                        fontSize: '1.1rem',
-                        fontWeight: 'bold',
-                      }}>{ipk}</td>
+                      <td style={{ padding: '15px 20px', color: 'white', fontSize: '1rem', fontWeight: 'bold' }}>Total / IPK</td>
+                      <td style={{ padding: '15px 20px', textAlign: 'center', color: 'white', fontSize: '1rem', fontWeight: 'bold' }}>{totalSKS}</td>
+                      <td style={{ padding: '15px 20px', textAlign: 'center', color: 'white', fontSize: '1rem', fontWeight: 'bold' }}>-</td>
+                      <td style={{ padding: '15px 20px', textAlign: 'center', color: '#FFD700', fontSize: '1.1rem', fontWeight: 'bold' }}>{ipk}</td>
                     </tr>
                   </tbody>
                 </table>
@@ -3348,86 +3214,23 @@ export default function BlogPage() {
               gap: '15px',
               flexWrap: 'wrap',
             }}>
-              <Link 
-                href="/tag/kuliah"
-                style={{ textDecoration: 'none' }}
-              >
-                <motion.span
-                  whileHover={{ x: 5 }}
-                  style={{
-                    display: 'inline-block',
-                    padding: '6px 18px',
-                    backgroundColor: '#222222',
-                    border: '1px solid #444444',
-                    borderRadius: '30px',
-                    color: '#cccccc',
-                    fontSize: '0.95rem',
-                    cursor: 'pointer',
-                  }}
-                >
+              <Link href="/tag/kuliah" style={{ textDecoration: 'none' }}>
+                <motion.span whileHover={{ x: 5 }} style={{ display: 'inline-block', padding: '6px 18px', backgroundColor: '#222222', border: '1px solid #444444', borderRadius: '30px', color: '#cccccc', fontSize: '0.95rem', cursor: 'pointer' }}>
                   kuliah
                 </motion.span>
               </Link>
-              
-              <Link 
-                href="/tag/gunadarma"
-                style={{ textDecoration: 'none' }}
-              >
-                <motion.span
-                  whileHover={{ x: 5 }}
-                  style={{
-                    display: 'inline-block',
-                    padding: '6px 18px',
-                    backgroundColor: '#222222',
-                    border: '1px solid #444444',
-                    borderRadius: '30px',
-                    color: '#cccccc',
-                    fontSize: '0.95rem',
-                    cursor: 'pointer',
-                  }}
-                >
+              <Link href="/tag/gunadarma" style={{ textDecoration: 'none' }}>
+                <motion.span whileHover={{ x: 5 }} style={{ display: 'inline-block', padding: '6px 18px', backgroundColor: '#222222', border: '1px solid #444444', borderRadius: '30px', color: '#cccccc', fontSize: '0.95rem', cursor: 'pointer' }}>
                   gunadarma
                 </motion.span>
               </Link>
-              
-              <Link 
-                href="/tag/akademik"
-                style={{ textDecoration: 'none' }}
-              >
-                <motion.span
-                  whileHover={{ x: 5 }}
-                  style={{
-                    display: 'inline-block',
-                    padding: '6px 18px',
-                    backgroundColor: '#222222',
-                    border: '1px solid #444444',
-                    borderRadius: '30px',
-                    color: '#cccccc',
-                    fontSize: '0.95rem',
-                    cursor: 'pointer',
-                  }}
-                >
+              <Link href="/tag/akademik" style={{ textDecoration: 'none' }}>
+                <motion.span whileHover={{ x: 5 }} style={{ display: 'inline-block', padding: '6px 18px', backgroundColor: '#222222', border: '1px solid #444444', borderRadius: '30px', color: '#cccccc', fontSize: '0.95rem', cursor: 'pointer' }}>
                   akademik
                 </motion.span>
               </Link>
-              
-              <Link 
-                href="/tag/pengalaman"
-                style={{ textDecoration: 'none' }}
-              >
-                <motion.span
-                  whileHover={{ x: 5 }}
-                  style={{
-                    display: 'inline-block',
-                    padding: '6px 18px',
-                    backgroundColor: '#222222',
-                    border: '1px solid #444444',
-                    borderRadius: '30px',
-                    color: '#cccccc',
-                    fontSize: '0.95rem',
-                    cursor: 'pointer',
-                  }}
-                >
+              <Link href="/tag/pengalaman" style={{ textDecoration: 'none' }}>
+                <motion.span whileHover={{ x: 5 }} style={{ display: 'inline-block', padding: '6px 18px', backgroundColor: '#222222', border: '1px solid #444444', borderRadius: '30px', color: '#cccccc', fontSize: '0.95rem', cursor: 'pointer' }}>
                   pengalaman
                 </motion.span>
               </Link>
@@ -3490,42 +3293,16 @@ export default function BlogPage() {
                   flexDirection: 'column',
                   gap: '8px',
                 }}>
-                  <span style={{
-                    fontSize: '0.85rem',
-                    color: '#999999',
-                  }}>
-                    Previous Page
-                  </span>
-                  <span style={{
-                    fontSize: isMobile ? '1.3rem' : '1.8rem',
-                    fontWeight: 'normal',
-                    color: 'white',
-                  }}>
+                  <span style={{ fontSize: '0.85rem', color: '#999999' }}>Previous Page</span>
+                  <span style={{ fontSize: isMobile ? '1.3rem' : '1.8rem', fontWeight: 'normal', color: 'white' }}>
                     Mengapa saya memilih jurusan tersebut
                   </span>
-                  <span style={{
-                    fontSize: '0.95rem',
-                    color: '#666666',
-                    marginTop: '4px',
-                  }}>
+                  <span style={{ fontSize: '0.95rem', color: '#666666', marginTop: '4px' }}>
                     Alasan di balik keputusan memilih program studi
                   </span>
                 </div>
-                
-                <motion.div
-                  whileHover={{ x: 5, y: -5 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    marginLeft: '20px',
-                  }}
-                >
-                  <NorthEastArrow 
-                    width={isMobile ? 40 : 50} 
-                    height={isMobile ? 40 : 50} 
-                  />
+                <motion.div whileHover={{ x: 5, y: -5 }} transition={{ type: "spring", stiffness: 400, damping: 10 }} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginLeft: '20px' }}>
+                  <NorthEastArrow width={isMobile ? 40 : 50} height={isMobile ? 40 : 50} />
                 </motion.div>
               </Link>
             </div>
@@ -3549,21 +3326,8 @@ export default function BlogPage() {
               flexWrap: 'wrap',
               gap: '15px',
             }}>
-              <span style={{
-                fontSize: '1.8rem',
-                fontWeight: 'normal',
-                color: 'white',
-              }}>
-                Artikel Lainnya
-              </span>
-              <Link href="/blog" style={{
-                color: '#999999',
-                textDecoration: 'none',
-                fontSize: '0.95rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-              }}>
+              <span style={{ fontSize: '1.8rem', fontWeight: 'normal', color: 'white' }}>Artikel Lainnya</span>
+              <Link href="/blog" style={{ color: '#999999', textDecoration: 'none', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 Lihat Semua
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                   <path d="M5 12h14M12 5l7 7-7 7"/>
@@ -3574,7 +3338,7 @@ export default function BlogPage() {
             <div style={{
               display: 'grid',
               gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)',
-              gap: '30px',
+              gap: '40px',
             }}>
               {otherBlogs.map((blog, index) => (
                 <motion.div
@@ -3584,19 +3348,14 @@ export default function BlogPage() {
                   transition={{ duration: 0.5, delay: 0.4 + (index * 0.1) }}
                   whileHover={{ y: -5 }}
                   style={{
-                    backgroundColor: '#111111',
-                    borderRadius: '20px',
-                    overflow: 'hidden',
-                    border: '1px solid #222222',
-                    transition: 'all 0.3s ease',
                     cursor: 'pointer',
                   }}
                   onClick={() => router.push(`/blog/${blog.slug}`)}
                 >
+                  {/* Foto Full */}
                   <div style={{
-                    position: 'relative',
                     width: '100%',
-                    paddingBottom: '56.25%',
+                    marginBottom: '16px',
                     overflow: 'hidden',
                     backgroundColor: '#1a1a1a',
                   }}>
@@ -3604,69 +3363,61 @@ export default function BlogPage() {
                       src={blog.image}
                       alt={blog.title}
                       style={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
                         width: '100%',
-                        height: '100%',
-                        objectFit: 'cover',
+                        height: 'auto',
+                        display: 'block',
                         transition: 'transform 0.3s ease',
                       }}
-                      onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+                      onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
                       onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                      onError={(e) => {
-                        e.currentTarget.src = `https://picsum.photos/400/225?random=${blog.id}`;
-                      }}
                     />
                   </div>
                   
-                  <div style={{
-                    padding: '20px',
-                  }}>
+                  <div>
+                    {/* Tag dan Tanggal di baris yang sama, tag di kiri */}
                     <div style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '12px',
+                      gap: '16px',
                       marginBottom: '12px',
                       flexWrap: 'wrap',
                     }}>
-                      {blog.tags.map((tag, tagIndex) => (
-                        <span
-                          key={tagIndex}
-                          style={{
-                            fontSize: '0.7rem',
-                            color: '#888888',
-                            backgroundColor: '#222222',
-                            padding: '4px 12px',
-                            borderRadius: '20px',
-                            textTransform: 'lowercase',
-                          }}
-                        >
-                          {tag}
-                        </span>
-                      ))}
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                        flexWrap: 'wrap',
+                      }}>
+                        {blog.tags.map((tag, tagIndex) => (
+                          <span
+                            key={tagIndex}
+                            style={{
+                              fontSize: '0.8rem',
+                              color: '#888888',
+                              textTransform: 'lowercase',
+                            }}
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                      <span style={{
+                        fontSize: '0.8rem',
+                        color: '#666666',
+                      }}>
+                        {blog.date}
+                      </span>
                     </div>
                     
                     <h3 style={{
                       fontSize: '1.2rem',
                       fontWeight: '500',
                       color: 'white',
-                      margin: '0 0 12px 0',
+                      margin: 0,
                       lineHeight: '1.4',
                     }}>
                       {blog.title}
                     </h3>
-                    
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                      fontSize: '0.8rem',
-                      color: '#666666',
-                    }}>
-                      <CalendarIcon width={14} height={14} />
-                      <span>{blog.date}</span>
-                    </div>
                   </div>
                 </motion.div>
               ))}
@@ -3691,15 +3442,7 @@ export default function BlogPage() {
                 marginBottom: '30px',
               }}
             >
-              <h3 style={{
-                fontSize: '1.8rem',
-                fontWeight: 'normal',
-                color: 'white',
-                margin: 0,
-              }}>
-                Reaksi
-              </h3>
-              
+              <h3 style={{ fontSize: '1.8rem', fontWeight: 'normal', color: 'white', margin: 0 }}>Reaksi</h3>
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -3730,10 +3473,7 @@ export default function BlogPage() {
                   animate={{ opacity: 1, y: 0, height: 'auto' }}
                   exit={{ opacity: 0, y: -20, height: 0 }}
                   transition={{ duration: 0.3 }}
-                  style={{
-                    overflow: 'hidden',
-                    marginBottom: '30px',
-                  }}
+                  style={{ overflow: 'hidden', marginBottom: '30px' }}
                 >
                   <div style={{
                     display: 'grid',
@@ -3766,19 +3506,8 @@ export default function BlogPage() {
                         }}
                       >
                         <span style={{ fontSize: '2.5rem' }}>{emoticon.emoji}</span>
-                        <span style={{ 
-                          fontSize: '0.8rem', 
-                          color: userReactions.includes(emoticon.id) ? 'white' : '#999999' 
-                        }}>
-                          {emoticon.label}
-                        </span>
-                        <span style={{ 
-                          fontSize: '0.9rem', 
-                          color: 'white',
-                          fontWeight: 'bold' 
-                        }}>
-                          {reactions[emoticon.id] || 0}
-                        </span>
+                        <span style={{ fontSize: '0.8rem', color: userReactions.includes(emoticon.id) ? 'white' : '#999999' }}>{emoticon.label}</span>
+                        <span style={{ fontSize: '0.9rem', color: 'white', fontWeight: 'bold' }}>{reactions[emoticon.id] || 0}</span>
                       </motion.button>
                     ))}
                   </div>
@@ -3817,12 +3546,7 @@ export default function BlogPage() {
                       }}
                     >
                       <span style={{ fontSize: '1.3rem' }}>{emoticon.emoji}</span>
-                      <span style={{ 
-                        fontSize: '0.95rem', 
-                        color: 'white' 
-                      }}>
-                        {count}
-                      </span>
+                      <span style={{ fontSize: '0.95rem', color: 'white' }}>{count}</span>
                     </motion.button>
                   );
                 })}
@@ -3874,43 +3598,20 @@ export default function BlogPage() {
                 transition={{ duration: 0.3 }}
                 style={{ marginBottom: '40px' }}
               >
-                <form onSubmit={handleAddComment} style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '20px',
-                }}>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '15px',
-                  }}>
+                <form onSubmit={handleAddComment} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                     <motion.img 
                       whileHover={{ scale: 1.1 }}
                       src={user?.photoURL || `https://ui-avatars.com/api/?name=${user?.email}&background=random&color=fff`}
                       alt={user?.displayName}
-                      style={{
-                        width: '56px',
-                        height: '56px',
-                        borderRadius: '50%',
-                        objectFit: 'cover',
-                        border: '2px solid rgba(255,255,255,0.1)',
-                      }}
+                      style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(255,255,255,0.1)' }}
                     />
                     <div>
-                      <span style={{ 
-                        color: 'white', 
-                        fontSize: '1.2rem',
-                        fontWeight: '500',
-                        display: 'flex',
-                        alignItems: 'center',
-                        marginBottom: '4px'
-                      }}>
+                      <span style={{ color: 'white', fontSize: '1.2rem', fontWeight: '500', display: 'flex', alignItems: 'center', marginBottom: '4px' }}>
                         {user?.displayName || user?.email?.split('@')[0]}
                         <InstagramVerifiedBadge size={24} />
                       </span>
-                      <span style={{ color: '#666666', fontSize: '0.9rem' }}>
-                        Berkomentar sebagai pengguna
-                      </span>
+                      <span style={{ color: '#666666', fontSize: '0.9rem' }}>Berkomentar sebagai pengguna</span>
                     </div>
                   </div>
                   <textarea
@@ -3930,25 +3631,13 @@ export default function BlogPage() {
                       resize: 'vertical',
                     }}
                   />
-                  <div style={{
-                    display: 'flex',
-                    justifyContent: 'flex-end',
-                    gap: '15px',
-                  }}>
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '15px' }}>
                     <motion.button
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       type="button"
                       onClick={() => setShowCommentForm(false)}
-                      style={{
-                        padding: '12px 24px',
-                        background: 'none',
-                        border: '1px solid #333333',
-                        borderRadius: '30px',
-                        color: '#999999',
-                        fontSize: '1rem',
-                        cursor: 'pointer',
-                      }}
+                      style={{ padding: '12px 24px', background: 'none', border: '1px solid #333333', borderRadius: '30px', color: '#999999', fontSize: '1rem', cursor: 'pointer' }}
                     >
                       Batal
                     </motion.button>
@@ -3977,31 +3666,10 @@ export default function BlogPage() {
           </AnimatePresence>
 
           {/* Comments List */}
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '30px',
-          }}>
-            <div style={{
-              display: 'flex',
-              alignItems: 'baseline',
-              justifyContent: 'space-between',
-              marginBottom: '10px',
-            }}>
-              <h3 style={{
-                fontSize: '1.8rem',
-                fontWeight: 'normal',
-                color: 'white',
-                margin: 0,
-              }}>
-                Komentar
-              </h3>
-              <span style={{
-                fontSize: '1.2rem',
-                color: '#666666',
-              }}>
-                {comments.length} komentar
-              </span>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: '10px' }}>
+              <h3 style={{ fontSize: '1.8rem', fontWeight: 'normal', color: 'white', margin: 0 }}>Komentar</h3>
+              <span style={{ fontSize: '1.2rem', color: '#666666' }}>{comments.length} komentar</span>
             </div>
 
             <AnimatePresence>
@@ -4012,55 +3680,22 @@ export default function BlogPage() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -30 }}
                   transition={{ duration: 0.4, delay: index * 0.1 }}
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '15px',
-                    padding: '24px',
-                    backgroundColor: 'rgba(255,255,255,0.02)',
-                    borderRadius: '24px',
-                    border: '1px solid rgba(255,255,255,0.05)',
-                  }}
+                  style={{ display: 'flex', flexDirection: 'column', gap: '15px', padding: '24px', backgroundColor: 'rgba(255,255,255,0.02)', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)' }}
                 >
-                  {/* Comment Header */}
-                  <div style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                  }}>
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '15px',
-                    }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                       <motion.img 
                         whileHover={{ scale: 1.1 }}
                         src={comment.userPhoto || `https://ui-avatars.com/api/?name=${comment.userEmail}&background=random&color=fff`}
                         alt={comment.userName}
-                        style={{
-                          width: '48px',
-                          height: '48px',
-                          borderRadius: '50%',
-                          objectFit: 'cover',
-                          border: '2px solid rgba(255,255,255,0.1)',
-                        }}
+                        style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(255,255,255,0.1)' }}
                       />
                       <div>
-                        <span style={{
-                          fontSize: '1.2rem',
-                          fontWeight: '500',
-                          color: 'white',
-                          display: 'flex',
-                          alignItems: 'center',
-                          marginBottom: '4px',
-                        }}>
+                        <span style={{ fontSize: '1.2rem', fontWeight: '500', color: 'white', display: 'flex', alignItems: 'center', marginBottom: '4px' }}>
                           {comment.userName}
                           <InstagramVerifiedBadge size={22} />
                         </span>
-                        <span style={{
-                          fontSize: '0.9rem',
-                          color: '#666666',
-                        }}>
+                        <span style={{ fontSize: '0.9rem', color: '#666666' }}>
                           {comment.createdAt?.toLocaleDateString?.('id-ID', {
                             day: 'numeric',
                             month: 'long',
@@ -4072,7 +3707,6 @@ export default function BlogPage() {
                       </div>
                     </div>
                     
-                    {/* Comment Like Button */}
                     <motion.button
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.9 }}
@@ -4088,38 +3722,17 @@ export default function BlogPage() {
                         cursor: user ? 'pointer' : 'not-allowed',
                       }}
                     >
-                      <svg 
-                        width="20" 
-                        height="20" 
-                        viewBox="0 0 24 24" 
-                        fill={comment.likedBy?.includes(user?.uid) ? "white" : "none"} 
-                        stroke="white" 
-                        strokeWidth="1"
-                      >
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill={comment.likedBy?.includes(user?.uid) ? "white" : "none"} stroke="white" strokeWidth="1">
                         <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
                       </svg>
-                      <span style={{ 
-                        color: 'white',
-                        fontSize: '1rem'
-                      }}>
-                        {comment.likes || 0}
-                      </span>
+                      <span style={{ color: 'white', fontSize: '1rem' }}>{comment.likes || 0}</span>
                     </motion.button>
                   </div>
 
-                  {/* Comment Content */}
-                  <p style={{
-                    fontSize: '1.1rem',
-                    lineHeight: '1.7',
-                    color: '#e0e0e0',
-                    margin: '10px 0 5px 0',
-                    paddingLeft: '15px',
-                    borderLeft: '2px solid rgba(255,255,255,0.1)',
-                  }}>
+                  <p style={{ fontSize: '1.1rem', lineHeight: '1.7', color: '#e0e0e0', margin: '10px 0 5px 0', paddingLeft: '15px', borderLeft: '2px solid rgba(255,255,255,0.1)' }}>
                     {comment.comment}
                   </p>
 
-                  {/* Reply Button */}
                   <motion.button
                     whileHover={{ x: 5 }}
                     whileTap={{ scale: 0.95 }}
@@ -4127,23 +3740,10 @@ export default function BlogPage() {
                       if (!user) {
                         handleGoogleLogin();
                       } else {
-                        setSelectedCommentForReply(
-                          selectedCommentForReply === comment.id ? null : comment.id
-                        );
+                        setSelectedCommentForReply(selectedCommentForReply === comment.id ? null : comment.id);
                       }
                     }}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                      background: 'none',
-                      border: 'none',
-                      color: '#666666',
-                      fontSize: '0.95rem',
-                      cursor: 'pointer',
-                      padding: '8px 0',
-                      marginTop: '5px',
-                    }}
+                    style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'none', border: 'none', color: '#666666', fontSize: '0.95rem', cursor: 'pointer', padding: '8px 0', marginTop: '5px' }}
                   >
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
                       <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
@@ -4151,7 +3751,6 @@ export default function BlogPage() {
                     <span>Balas komentar</span>
                   </motion.button>
 
-                  {/* Reply Form */}
                   <AnimatePresence>
                     {selectedCommentForReply === comment.id && (
                       <motion.div
@@ -4159,67 +3758,28 @@ export default function BlogPage() {
                         animate={{ opacity: 1, height: 'auto' }}
                         exit={{ opacity: 0, height: 0 }}
                         transition={{ duration: 0.3 }}
-                        style={{
-                          marginTop: '15px',
-                          marginLeft: '30px',
-                          overflow: 'hidden',
-                        }}
+                        style={{ marginTop: '15px', marginLeft: '30px', overflow: 'hidden' }}
                       >
-                        <div style={{
-                          display: 'flex',
-                          alignItems: 'flex-start',
-                          gap: '15px',
-                        }}>
+                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '15px' }}>
                           <img 
                             src={user?.photoURL || `https://ui-avatars.com/api/?name=${user?.email}&background=random&color=fff`}
                             alt={user?.displayName}
-                            style={{
-                              width: '40px',
-                              height: '40px',
-                              borderRadius: '50%',
-                              objectFit: 'cover',
-                            }}
+                            style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
                           />
-                          <div style={{
-                            flex: 1,
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: '10px',
-                          }}>
+                          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '10px' }}>
                             <textarea
                               value={replyText}
                               onChange={(e) => setReplyText(e.target.value)}
                               placeholder="Tulis balasan Anda..."
                               rows={3}
-                              style={{
-                                padding: '15px',
-                                background: 'rgba(255,255,255,0.03)',
-                                border: '1px solid #333333',
-                                borderRadius: '16px',
-                                color: 'white',
-                                fontSize: '0.95rem',
-                                outline: 'none',
-                                resize: 'vertical',
-                              }}
+                              style={{ padding: '15px', background: 'rgba(255,255,255,0.03)', border: '1px solid #333333', borderRadius: '16px', color: 'white', fontSize: '0.95rem', outline: 'none', resize: 'vertical' }}
                             />
-                            <div style={{
-                              display: 'flex',
-                              gap: '10px',
-                              justifyContent: 'flex-end',
-                            }}>
+                            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
                               <motion.button
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
                                 onClick={() => setSelectedCommentForReply(null)}
-                                style={{
-                                  padding: '8px 16px',
-                                  background: 'none',
-                                  border: '1px solid #333333',
-                                  borderRadius: '20px',
-                                  color: '#999999',
-                                  fontSize: '0.9rem',
-                                  cursor: 'pointer',
-                                }}
+                                style={{ padding: '8px 16px', background: 'none', border: '1px solid #333333', borderRadius: '20px', color: '#999999', fontSize: '0.9rem', cursor: 'pointer' }}
                               >
                                 Batal
                               </motion.button>
@@ -4248,78 +3808,27 @@ export default function BlogPage() {
                     )}
                   </AnimatePresence>
 
-                  {/* Replies List */}
                   {comment.replies && comment.replies.length > 0 && (
-                    <div style={{
-                      marginTop: '20px',
-                      marginLeft: '30px',
-                      paddingLeft: '20px',
-                      borderLeft: '2px solid rgba(255,255,255,0.05)',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '20px',
-                    }}>
+                    <div style={{ marginTop: '20px', marginLeft: '30px', paddingLeft: '20px', borderLeft: '2px solid rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column', gap: '20px' }}>
                       {comment.replies.map((reply: any) => (
-                        <motion.div
-                          key={reply.id}
-                          initial={{ opacity: 0, x: -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'flex-start',
-                          }}
-                        >
-                          <div style={{
-                            display: 'flex',
-                            gap: '12px',
-                            flex: 1,
-                          }}>
+                        <motion.div key={reply.id} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                          <div style={{ display: 'flex', gap: '12px', flex: 1 }}>
                             <img 
                               src={reply.userPhoto || `https://ui-avatars.com/api/?name=${reply.userName}&background=random&color=fff`}
                               alt={reply.userName}
-                              style={{
-                                width: '32px',
-                                height: '32px',
-                                borderRadius: '50%',
-                                objectFit: 'cover',
-                              }}
+                              style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover' }}
                             />
                             <div style={{ flex: 1 }}>
-                              <div style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '10px',
-                                marginBottom: '5px',
-                              }}>
-                                <span style={{
-                                  fontSize: '1rem',
-                                  fontWeight: '500',
-                                  color: 'white',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '5px' }}>
+                                <span style={{ fontSize: '1rem', fontWeight: '500', color: 'white', display: 'flex', alignItems: 'center' }}>
                                   {reply.userName}
                                   <InstagramVerifiedBadge size={20} />
                                 </span>
-                                <span style={{
-                                  fontSize: '0.8rem',
-                                  color: '#666666',
-                                }}>
-                                  {reply.createdAt?.toDate?.()?.toLocaleDateString?.('id-ID', {
-                                    hour: '2-digit',
-                                    minute: '2-digit'
-                                  }) || 'Baru saja'}
+                                <span style={{ fontSize: '0.8rem', color: '#666666' }}>
+                                  {reply.createdAt?.toDate?.()?.toLocaleDateString?.('id-ID', { hour: '2-digit', minute: '2-digit' }) || 'Baru saja'}
                                 </span>
                               </div>
-                              <p style={{
-                                fontSize: '0.95rem',
-                                lineHeight: '1.6',
-                                color: '#e0e0e0',
-                                margin: '0 0 8px 0',
-                              }}>
-                                {reply.text}
-                              </p>
+                              <p style={{ fontSize: '0.95rem', lineHeight: '1.6', color: '#e0e0e0', margin: '0 0 8px 0' }}>{reply.text}</p>
                               <motion.button
                                 whileHover={{ scale: 1.1 }}
                                 whileTap={{ scale: 0.9 }}
@@ -4338,14 +3847,7 @@ export default function BlogPage() {
                                   backgroundColor: reply.likedBy?.includes(user?.uid) ? 'rgba(255,255,255,0.1)' : 'transparent',
                                 }}
                               >
-                                <svg 
-                                  width="14" 
-                                  height="14" 
-                                  viewBox="0 0 24 24" 
-                                  fill={reply.likedBy?.includes(user?.uid) ? "white" : "none"} 
-                                  stroke="currentColor" 
-                                  strokeWidth="1"
-                                >
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill={reply.likedBy?.includes(user?.uid) ? "white" : "none"} stroke="currentColor" strokeWidth="1">
                                   <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
                                 </svg>
                                 <span>{reply.likes || 0}</span>
@@ -4364,19 +3866,11 @@ export default function BlogPage() {
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                style={{
-                  padding: '60px',
-                  textAlign: 'center',
-                  color: '#666666',
-                  border: '1px dashed #333333',
-                  borderRadius: '24px',
-                }}
+                style={{ padding: '60px', textAlign: 'center', color: '#666666', border: '1px dashed #333333', borderRadius: '24px' }}
               >
                 <span style={{ fontSize: '3rem', display: 'block', marginBottom: '20px' }}>💬</span>
                 <p style={{ fontSize: '1.2rem', margin: 0 }}>Belum ada komentar.</p>
-                <p style={{ fontSize: '1rem', color: '#999999', marginTop: '10px' }}>
-                  Jadilah yang pertama untuk berdiskusi!
-                </p>
+                <p style={{ fontSize: '1rem', color: '#999999', marginTop: '10px' }}>Jadilah yang pertama untuk berdiskusi!</p>
               </motion.div>
             )}
           </div>
@@ -4384,28 +3878,14 @@ export default function BlogPage() {
         </div>
       </div>
 
-      {/* Tambahkan CSS untuk animasi notifikasi */}
       <style jsx>{`
         @keyframes slideIn {
-          from {
-            transform: translateX(-100%);
-            opacity: 0;
-          }
-          to {
-            transform: translateX(0);
-            opacity: 1;
-          }
+          from { transform: translateX(-100%); opacity: 0; }
+          to { transform: translateX(0); opacity: 1; }
         }
-        
         @keyframes slideOut {
-          from {
-            transform: translateX(0);
-            opacity: 1;
-          }
-          to {
-            transform: translateX(-100%);
-            opacity: 0;
-          }
+          from { transform: translateX(0); opacity: 1; }
+          to { transform: translateX(-100%); opacity: 0; }
         }
       `}</style>
     </div>
