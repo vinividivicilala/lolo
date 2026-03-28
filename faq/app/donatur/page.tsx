@@ -31,6 +31,7 @@ import {
   onSnapshot,
   increment
 } from "firebase/firestore";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 // Konfigurasi Firebase
 const firebaseConfig = {
@@ -44,19 +45,18 @@ const firebaseConfig = {
   measurementId: "G-8LMP7F4BE9"
 };
 
-// Instagram Verified Badge Component
-const InstagramVerifiedBadge = ({ size = 24 }) => {
+// Instagram Verified Badge Component - Minimalist
+const VerifiedBadge = ({ size = 16 }) => {
   const [showTooltip, setShowTooltip] = useState(false);
   
   return (
     <span 
       style={{ 
         position: 'relative', 
-        display: 'inline-block',
-        marginLeft: '6px',
-        verticalAlign: 'middle',
-        cursor: 'help',
-        lineHeight: 1
+        display: 'inline-flex',
+        alignItems: 'center',
+        marginLeft: '4px',
+        cursor: 'help'
       }}
       onMouseEnter={() => setShowTooltip(true)}
       onMouseLeave={() => setShowTooltip(false)}
@@ -64,15 +64,12 @@ const InstagramVerifiedBadge = ({ size = 24 }) => {
       <svg
         width={size}
         height={size}
-        viewBox="0 0 24 24"
+        viewBox="0 0 16 16"
+        fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        style={{ display: 'block' }}
       >
-        <path
-          fill="#0095F6"
-          d="M12 2.2 C13.6 3.8 16.2 3.8 17.8 2.2 C18.6 3.8 20.2 5.4 21.8 6.2 C20.2 7.8 20.2 10.4 21.8 12 C20.2 13.6 20.2 16.2 21.8 17.8 C20.2 18.6 18.6 20.2 17.8 21.8 C16.2 20.2 13.6 20.2 12 21.8 C10.4 20.2 7.8 20.2 6.2 21.8 C5.4 20.2 3.8 18.6 2.2 17.8 C3.8 16.2 3.8 13.6 2.2 12 C3.8 10.4 3.8 7.8 2.2 6.2 C3.8 5.4 5.4 3.8 6.2 2.2 C7.8 3.8 10.4 3.8 12 2.2 Z"
-        />
-        <path d="M9.2 12.3l2 2 4.6-4.6" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+        <circle cx="8" cy="8" r="7" fill="#1DA1F2" />
+        <path d="M5 8L7 10L11 6" stroke="white" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
       {showTooltip && (
         <div style={{
@@ -81,23 +78,21 @@ const InstagramVerifiedBadge = ({ size = 24 }) => {
           left: '50%',
           transform: 'translateX(-50%)',
           backgroundColor: '#1a1a1a',
-          color: 'white',
-          padding: '6px 12px',
-          borderRadius: '8px',
-          fontSize: '12px',
-          fontWeight: '500',
+          color: '#fff',
+          padding: '4px 8px',
+          borderRadius: '4px',
+          fontSize: '11px',
           whiteSpace: 'nowrap',
-          marginBottom: '8px',
-          zIndex: 10000,
-          boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
+          marginBottom: '6px',
+          zIndex: 1000
         }}>
-          Akun Resmi
+          Akun Terverifikasi
           <div style={{
             position: 'absolute',
             top: '100%',
             left: '50%',
             transform: 'translateX(-50%)',
-            borderWidth: '5px',
+            borderWidth: '4px',
             borderStyle: 'solid',
             borderColor: '#1a1a1a transparent transparent transparent'
           }} />
@@ -107,192 +102,25 @@ const InstagramVerifiedBadge = ({ size = 24 }) => {
   );
 };
 
-// North East Arrow SVG
-const NorthEastArrow = ({ width, height, style }: { width: number | string, height: number | string, style?: React.CSSProperties }) => (
-  <svg 
-    width={width} 
-    height={height} 
-    viewBox="0 0 24 24" 
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.5"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    style={style}
-  >
-    <path d="M7 7L17 17" stroke="currentColor"/>
-    <path d="M7 7H17" stroke="currentColor"/>
-    <path d="M7 17V7" stroke="currentColor"/>
+// Icons - Minimalist
+const PlusIcon = ({ size = 20 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+    <line x1="12" y1="5" x2="12" y2="19"/>
+    <line x1="5" y1="12" x2="19" y2="12"/>
   </svg>
 );
 
-// North West Arrow SVG
-const NorthWestArrow = ({ width, height, style }: { width: number | string, height: number | string, style?: React.CSSProperties }) => (
-  <svg 
-    width={width} 
-    height={height} 
-    viewBox="0 0 24 24" 
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.5"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    style={style}
-  >
-    <path d="M17 17L7 7" stroke="currentColor"/>
-    <path d="M17 7H7" stroke="currentColor"/>
-    <path d="M7 17V7" stroke="currentColor"/>
-  </svg>
-);
-
-// Data Donasi
-interface Donation {
-  id: string;
-  title: string;
-  description: string;
-  targetAmount: number;
-  currentAmount: number;
-  ownerName: string;
-  ownerEmail: string;
-  ownerPhoto?: string;
-  category: 'orphanage' | 'elderly' | 'medical' | 'education' | 'disaster';
-  location: string;
-  endDate: Date;
-  createdAt: Date;
-  donors: {
-    id: string;
-    name: string;
-    email: string;
-    amount: number;
-    message: string;
-    createdAt: Date;
-  }[];
-}
-
-// Data Donasi Statis untuk contoh
-const STATIC_DONATIONS: Donation[] = [
-  {
-    id: '1',
-    title: 'Bantu Renovasi Panti Asuhan Harapan Kita',
-    description: 'Panti Asuhan Harapan Kita membutuhkan dana untuk renovasi bangunan yang sudah rusak. Saat ini terdapat 45 anak yang tinggal di panti ini. Dana akan digunakan untuk memperbaiki atap bocor, kamar mandi, dan ruang belajar.',
-    targetAmount: 150000000,
-    currentAmount: 87500000,
-    ownerName: 'Panti Asuhan Harapan Kita',
-    ownerEmail: 'panti.harapankita@gmail.com',
-    category: 'orphanage',
-    location: 'Jakarta Timur',
-    endDate: new Date('2026-05-30'),
-    createdAt: new Date('2026-01-15'),
-    donors: [
-      { id: 'd1', name: 'Ahmad Fauzi', email: 'ahmad@gmail.com', amount: 5000000, message: 'Semoga bermanfaat', createdAt: new Date('2026-02-10') },
-      { id: 'd2', name: 'Siti Nurhaliza', email: 'siti@gmail.com', amount: 2500000, message: 'Terus semangat ya adik-adik', createdAt: new Date('2026-02-12') },
-      { id: 'd3', name: 'Budi Santoso', email: 'budi@gmail.com', amount: 1000000, message: 'Semoga lekas tercapai', createdAt: new Date('2026-02-15') }
-    ]
-  },
-  {
-    id: '2',
-    title: 'Bantuan untuk Panti Jompo Bunda Kasih',
-    description: 'Panti Jompo Bunda Kasih merawat 30 lansia yang membutuhkan perawatan khusus. Dana akan digunakan untuk pembelian obat-obatan, nutrisi, dan perawatan kesehatan rutin.',
-    targetAmount: 80000000,
-    currentAmount: 45000000,
-    ownerName: 'Panti Jompo Bunda Kasih',
-    ownerEmail: 'panti.bundakasih@gmail.com',
-    category: 'elderly',
-    location: 'Bandung',
-    endDate: new Date('2026-04-15'),
-    createdAt: new Date('2026-01-20'),
-    donors: [
-      { id: 'd4', name: 'Rina Wati', email: 'rina@gmail.com', amount: 2000000, message: 'Semoga para lansia sehat selalu', createdAt: new Date('2026-02-05') },
-      { id: 'd5', name: 'Dedi Kurniawan', email: 'dedi@gmail.com', amount: 1500000, message: 'Doa terbaik untuk semuanya', createdAt: new Date('2026-02-08') }
-    ]
-  },
-  {
-    id: '3',
-    title: 'Bantuan Pengobatan Ibu Siti (Kanker Payudara)',
-    description: 'Ibu Siti, 52 tahun, seorang ibu rumah tangga yang sedang berjuang melawan kanker payudara stadium 2. Beliau membutuhkan biaya kemoterapi dan operasi.',
-    targetAmount: 120000000,
-    currentAmount: 68000000,
-    ownerName: 'Ibu Siti Rahayu',
-    ownerEmail: 'siti.rahayu@gmail.com',
-    category: 'medical',
-    location: 'Surabaya',
-    endDate: new Date('2026-03-30'),
-    createdAt: new Date('2026-01-25'),
-    donors: [
-      { id: 'd6', name: 'Dokter Andi', email: 'andi@gmail.com', amount: 10000000, message: 'Semoga cepat sembuh', createdAt: new Date('2026-01-28') },
-      { id: 'd7', name: 'Yayasan Peduli Kanker', email: 'yayasan@gmail.com', amount: 25000000, message: 'Tetap semangat ibu', createdAt: new Date('2026-02-01') }
-    ]
-  },
-  {
-    id: '4',
-    title: 'Biaya Pendidikan 10 Anak Kurang Mampu',
-    description: 'Membantu 10 anak kurang mampu di desa Cipanas untuk melanjutkan pendidikan ke jenjang SMP. Dana akan digunakan untuk membeli seragam, buku, dan biaya SPP.',
-    targetAmount: 30000000,
-    currentAmount: 18500000,
-    ownerName: 'Komunitas Peduli Pendidikan',
-    ownerEmail: 'peduli.pendidikan@gmail.com',
-    category: 'education',
-    location: 'Cianjur',
-    endDate: new Date('2026-06-15'),
-    createdAt: new Date('2026-02-01'),
-    donors: [
-      { id: 'd8', name: 'Maria Ulfa', email: 'maria@gmail.com', amount: 500000, message: 'Teruslah belajar', createdAt: new Date('2026-02-02') },
-      { id: 'd9', name: 'Hendra Wijaya', email: 'hendra@gmail.com', amount: 2000000, message: 'Semangat anak-anak', createdAt: new Date('2026-02-03') }
-    ]
-  },
-  {
-    id: '5',
-    title: 'Bantuan Korban Banjir Bandang',
-    description: 'Bantuan untuk warga terdampak banjir bandang di Kabupaten Garut. Dana akan digunakan untuk pembelian makanan, pakaian layak pakai, dan kebutuhan pokok lainnya.',
-    targetAmount: 200000000,
-    currentAmount: 123000000,
-    ownerName: 'Posko Bencana Garut',
-    ownerEmail: 'posko.garut@gmail.com',
-    category: 'disaster',
-    location: 'Garut',
-    endDate: new Date('2026-03-20'),
-    createdAt: new Date('2026-02-05'),
-    donors: [
-      { id: 'd10', name: 'Relawan Garut', email: 'relawan@gmail.com', amount: 15000000, message: 'Semoga tabah', createdAt: new Date('2026-02-06') },
-      { id: 'd11', name: 'Masyarakat Peduli', email: 'masyarakat@gmail.com', amount: 5000000, message: 'Bersama kita kuat', createdAt: new Date('2026-02-07') }
-    ]
-  }
-];
-
-// Icons
-const HeartIcon = ({ filled = false, size = 24 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill={filled ? "#ff6b6b" : "none"} stroke={filled ? "#ff6b6b" : "white"} strokeWidth="1.5">
+const HeartIcon = ({ size = 20, filled = false }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill={filled ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.5">
     <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
   </svg>
 );
 
-const CalendarIcon = ({ size = 20 }) => (
+const ImageIcon = ({ size = 20 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-    <line x1="16" y1="2" x2="16" y2="6"/>
-    <line x1="8" y1="2" x2="8" y2="6"/>
-    <line x1="3" y1="10" x2="21" y2="10"/>
-  </svg>
-);
-
-const LocationIcon = ({ size = 20 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-    <circle cx="12" cy="10" r="3"/>
-  </svg>
-);
-
-const ClockIcon = ({ size = 20 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-    <circle cx="12" cy="12" r="10"/>
-    <polyline points="12 6 12 12 16 14"/>
-  </svg>
-);
-
-const UserIcon = ({ size = 20 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-    <circle cx="12" cy="7" r="4"/>
+    <rect x="2" y="2" width="20" height="20" rx="2" ry="2"/>
+    <circle cx="8.5" cy="8.5" r="1.5"/>
+    <polyline points="21 15 16 10 5 21"/>
   </svg>
 );
 
@@ -303,12 +131,106 @@ const SendIcon = ({ size = 20 }) => (
   </svg>
 );
 
-const CloseIcon = ({ size = 24 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+const CloseIcon = ({ size = 20 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
     <line x1="18" y1="6" x2="6" y2="18"/>
     <line x1="6" y1="6" x2="18" y2="18"/>
   </svg>
 );
+
+const MoreIcon = ({ size = 20 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+    <circle cx="12" cy="12" r="1"/>
+    <circle cx="19" cy="12" r="1"/>
+    <circle cx="5" cy="12" r="1"/>
+  </svg>
+);
+
+const CommentIcon = ({ size = 20 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+  </svg>
+);
+
+const ShareIcon = ({ size = 20 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+    <circle cx="18" cy="5" r="3"/>
+    <circle cx="6" cy="12" r="3"/>
+    <circle cx="18" cy="19" r="3"/>
+    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+  </svg>
+);
+
+const CalendarIcon = ({ size = 16 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+    <line x1="16" y1="2" x2="16" y2="6"/>
+    <line x1="8" y1="2" x2="8" y2="6"/>
+    <line x1="3" y1="10" x2="21" y2="10"/>
+  </svg>
+);
+
+const LocationIcon = ({ size = 16 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+    <circle cx="12" cy="10" r="3"/>
+  </svg>
+);
+
+const ArrowIcon = ({ size = 20 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+    <line x1="7" y1="7" x2="17" y2="17"/>
+    <polyline points="17 7 17 17 7 17"/>
+  </svg>
+);
+
+const NorthEastArrow = ({ size = 20 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+    <path d="M7 7L17 17" stroke="currentColor"/>
+    <path d="M7 7H17" stroke="currentColor"/>
+    <path d="M7 17V7" stroke="currentColor"/>
+  </svg>
+);
+
+// Types
+interface DonationEvent {
+  id: string;
+  title: string;
+  description: string;
+  targetAmount: number;
+  currentAmount: number;
+  organizerId: string;
+  organizerName: string;
+  organizerEmail: string;
+  organizerPhoto?: string;
+  imageUrl?: string;
+  location: string;
+  endDate: Date;
+  createdAt: Date;
+  likes: string[];
+  comments: Comment[];
+  donors: Donor[];
+}
+
+interface Donor {
+  id: string;
+  userId: string;
+  name: string;
+  email: string;
+  amount: number;
+  message: string;
+  createdAt: Date;
+}
+
+interface Comment {
+  id: string;
+  userId: string;
+  name: string;
+  email: string;
+  text: string;
+  createdAt: Date;
+}
 
 export default function DonationPage() {
   const router = useRouter();
@@ -319,32 +241,34 @@ export default function DonationPage() {
   const [firebaseInitialized, setFirebaseInitialized] = useState(false);
   const [firebaseAuth, setFirebaseAuth] = useState<any>(null);
   const [firebaseDb, setFirebaseDb] = useState<any>(null);
+  const [firebaseStorage, setFirebaseStorage] = useState<any>(null);
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   
-  // State untuk Donasi
-  const [donations, setDonations] = useState<Donation[]>(STATIC_DONATIONS);
-  const [selectedDonation, setSelectedDonation] = useState<Donation | null>(null);
-  const [showDonationModal, setShowDonationModal] = useState(false);
+  // State untuk Events
+  const [events, setEvents] = useState<DonationEvent[]>([]);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<DonationEvent | null>(null);
+  const [showDonateModal, setShowDonateModal] = useState(false);
   const [donationAmount, setDonationAmount] = useState("");
   const [donationMessage, setDonationMessage] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [animateAmount, setAnimateAmount] = useState<string | null>(null);
-  const [animateMessage, setAnimateMessage] = useState<string | null>(null);
-  const [showSuccessNotification, setShowSuccessNotification] = useState(false);
+  const [newComment, setNewComment] = useState("");
   
-  // Refs untuk animasi
-  const amountRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
-  const messageRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
-
-  // Format tanggal
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString('id-ID', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
-    });
-  };
+  // State untuk Create Event
+  const [newEvent, setNewEvent] = useState({
+    title: "",
+    description: "",
+    targetAmount: "",
+    location: "",
+    endDate: ""
+  });
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // State untuk animasi
+  const [animateDonation, setAnimateDonation] = useState<string | null>(null);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   // Format Rupiah
   const formatRupiah = (amount: number) => {
@@ -356,7 +280,31 @@ export default function DonationPage() {
     }).format(amount);
   };
 
-  // Hitung persentase donasi
+  // Format Date
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString('id-ID', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    });
+  };
+
+  const formatTime = (date: Date) => {
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+    
+    if (diffMins < 1) return 'Baru saja';
+    if (diffMins < 60) return `${diffMins}m`;
+    if (diffHours < 24) return `${diffHours}j`;
+    if (diffDays === 1) return 'Kemarin';
+    if (diffDays < 7) return `${diffDays}h`;
+    return formatDate(date);
+  };
+
+  // Hitung persentase
   const getPercentage = (current: number, target: number) => {
     return Math.min(Math.floor((current / target) * 100), 100);
   };
@@ -369,23 +317,96 @@ export default function DonationPage() {
     return diffDays > 0 ? diffDays : 0;
   };
 
-  // Animasi saat donasi bertambah
-  const animateDonationIncrease = (donationId: string, newAmount: number, message: string) => {
-    setAnimateAmount(donationId);
-    setAnimateMessage(message);
+  // Upload image ke Firebase Storage
+  const uploadImage = async (file: File): Promise<string | null> => {
+    if (!firebaseStorage) return null;
     
-    setTimeout(() => {
-      setAnimateAmount(null);
-      setAnimateMessage(null);
-    }, 3000);
+    try {
+      const storageRef = ref(firebaseStorage, `donation-images/${Date.now()}_${file.name}`);
+      await uploadBytes(storageRef, file);
+      const url = await getDownloadURL(storageRef);
+      return url;
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      return null;
+    }
   };
 
-  // Handle Donasi
-  const handleDonate = async () => {
+  // Create Event
+  const handleCreateEvent = async () => {
     if (!user) {
-      alert("Silakan login terlebih dahulu untuk berdonasi");
+      alert("Silakan login terlebih dahulu");
       return;
     }
+    
+    if (!newEvent.title.trim() || !newEvent.description.trim()) {
+      alert("Judul dan deskripsi harus diisi");
+      return;
+    }
+    
+    const targetAmount = parseInt(newEvent.targetAmount);
+    if (isNaN(targetAmount) || targetAmount < 10000) {
+      alert("Target donasi minimal Rp 10.000");
+      return;
+    }
+    
+    setIsSubmitting(true);
+    
+    try {
+      let imageUrl = null;
+      if (selectedImage) {
+        imageUrl = await uploadImage(selectedImage);
+      }
+      
+      const eventData = {
+        title: newEvent.title.trim(),
+        description: newEvent.description.trim(),
+        targetAmount: targetAmount,
+        currentAmount: 0,
+        organizerId: user.uid,
+        organizerName: user.displayName || user.email?.split('@')[0] || 'Anonymous',
+        organizerEmail: user.email,
+        organizerPhoto: user.photoURL,
+        imageUrl: imageUrl,
+        location: newEvent.location.trim() || 'Online',
+        endDate: newEvent.endDate ? new Date(newEvent.endDate) : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+        createdAt: new Date(),
+        likes: [],
+        comments: [],
+        donors: []
+      };
+      
+      const eventsRef = collection(firebaseDb, 'donationEvents');
+      const docRef = await addDoc(eventsRef, {
+        ...eventData,
+        createdAt: Timestamp.fromDate(eventData.createdAt),
+        endDate: Timestamp.fromDate(eventData.endDate)
+      });
+      
+      setEvents([{ id: docRef.id, ...eventData }, ...events]);
+      setShowCreateModal(false);
+      setNewEvent({ title: "", description: "", targetAmount: "", location: "", endDate: "" });
+      setSelectedImage(null);
+      setImagePreview(null);
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 3000);
+      
+    } catch (error) {
+      console.error("Error creating event:", error);
+      alert("Gagal membuat event");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Handle Donation
+  const handleDonate = async () => {
+    if (!user) {
+      alert("Silakan login terlebih dahulu");
+      return;
+    }
+    
+    if (!selectedEvent) return;
     
     const amount = parseInt(donationAmount);
     if (isNaN(amount) || amount < 10000) {
@@ -398,104 +419,150 @@ export default function DonationPage() {
       return;
     }
     
-    if (!selectedDonation) return;
-    
     setIsSubmitting(true);
     
-    // Simulasi proses donasi
-    setTimeout(() => {
+    try {
+      const eventRef = doc(firebaseDb, 'donationEvents', selectedEvent.id);
       const newDonor = {
-        id: `d${Date.now()}`,
+        id: `${Date.now()}_${user.uid}`,
+        userId: user.uid,
         name: user.displayName || user.email?.split('@')[0] || 'Anonymous',
-        email: user.email || '',
+        email: user.email,
         amount: amount,
         message: donationMessage,
         createdAt: new Date()
       };
       
-      const updatedDonations = donations.map(d => {
-        if (d.id === selectedDonation.id) {
-          const newCurrentAmount = d.currentAmount + amount;
-          return {
-            ...d,
-            currentAmount: newCurrentAmount,
-            donors: [newDonor, ...d.donors]
-          };
-        }
-        return d;
+      await updateDoc(eventRef, {
+        currentAmount: increment(amount),
+        donors: arrayUnion(newDonor)
       });
-      
-      setDonations(updatedDonations);
-      setSelectedDonation(updatedDonations.find(d => d.id === selectedDonation.id) || null);
-      animateDonationIncrease(selectedDonation.id, selectedDonation.currentAmount + amount, donationMessage);
       
       setDonationAmount("");
       setDonationMessage("");
-      setShowDonationModal(false);
-      setShowSuccessNotification(true);
+      setShowDonateModal(false);
+      setAnimateDonation(selectedEvent.id);
+      setShowSuccess(true);
       
       setTimeout(() => {
-        setShowSuccessNotification(false);
+        setAnimateDonation(null);
+        setShowSuccess(false);
       }, 3000);
       
+    } catch (error) {
+      console.error("Error donating:", error);
+      alert("Gagal mengirim donasi");
+    } finally {
       setIsSubmitting(false);
-    }, 1000);
+    }
   };
 
-  // Category badge color
-  const getCategoryColor = (category: string) => {
-    const colors = {
-      orphanage: '#4a90e2',
-      elderly: '#50c878',
-      medical: '#ff6b6b',
-      education: '#ffa500',
-      disaster: '#9370db'
-    };
-    return colors[category as keyof typeof colors] || '#666';
+  // Handle Like
+  const handleLike = async (eventId: string) => {
+    if (!user) {
+      alert("Silakan login terlebih dahulu");
+      return;
+    }
+    
+    try {
+      const eventRef = doc(firebaseDb, 'donationEvents', eventId);
+      const event = events.find(e => e.id === eventId);
+      
+      if (event?.likes.includes(user.uid)) {
+        await updateDoc(eventRef, {
+          likes: arrayRemove(user.uid)
+        });
+      } else {
+        await updateDoc(eventRef, {
+          likes: arrayUnion(user.uid)
+        });
+      }
+    } catch (error) {
+      console.error("Error liking:", error);
+    }
   };
 
-  const getCategoryName = (category: string) => {
-    const names = {
-      orphanage: 'Panti Asuhan',
-      elderly: 'Panti Jompo',
-      medical: 'Kesehatan',
-      education: 'Pendidikan',
-      disaster: 'Bencana'
-    };
-    return names[category as keyof typeof names] || category;
+  // Handle Comment
+  const handleComment = async (eventId: string) => {
+    if (!user) {
+      alert("Silakan login terlebih dahulu");
+      return;
+    }
+    
+    if (!newComment.trim()) return;
+    
+    try {
+      const eventRef = doc(firebaseDb, 'donationEvents', eventId);
+      const newCommentData = {
+        id: `${Date.now()}_${user.uid}`,
+        userId: user.uid,
+        name: user.displayName || user.email?.split('@')[0] || 'Anonymous',
+        email: user.email,
+        text: newComment,
+        createdAt: new Date()
+      };
+      
+      await updateDoc(eventRef, {
+        comments: arrayUnion(newCommentData)
+      });
+      
+      setNewComment("");
+    } catch (error) {
+      console.error("Error commenting:", error);
+    }
   };
 
-  // GSAP Animations
+  // Load Events
+  useEffect(() => {
+    if (!firebaseDb || !firebaseInitialized) return;
+    
+    const eventsRef = collection(firebaseDb, 'donationEvents');
+    const q = query(eventsRef, orderBy('createdAt', 'desc'));
+    
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const eventsData = snapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          ...data,
+          createdAt: data.createdAt?.toDate?.() || new Date(),
+          endDate: data.endDate?.toDate?.() || new Date(),
+          donors: data.donors || [],
+          comments: data.comments || [],
+          likes: data.likes || []
+        };
+      });
+      setEvents(eventsData);
+    });
+    
+    return () => unsubscribe();
+  }, [firebaseDb, firebaseInitialized]);
+
+  // Firebase Initialization
   useEffect(() => {
     setIsMounted(true);
     
     const checkScreenSize = () => {
       setIsMobile(window.innerWidth < 768);
     };
-    
     checkScreenSize();
     window.addEventListener('resize', checkScreenSize);
     
-    return () => window.removeEventListener('resize', checkScreenSize);
-  }, []);
-
-  // Firebase Initialization
-  useEffect(() => {
     try {
-      const app = getApps().length === 0
-        ? initializeApp(firebaseConfig)
-        : getApps()[0];
-      
+      const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
       const auth = getAuth(app);
       const db = getFirestore(app);
+      const storage = getStorage(app);
       
       setFirebaseAuth(auth);
       setFirebaseDb(db);
+      setFirebaseStorage(storage);
       setFirebaseInitialized(true);
-      
     } catch (error) {
       console.error("Firebase initialization error:", error);
     }
+    
+    return () => window.removeEventListener('resize', checkScreenSize);
   }, []);
 
   // Auth State Listener
@@ -506,7 +573,7 @@ export default function DonationPage() {
       setUser(currentUser);
       setLoading(false);
     });
-
+    
     return () => unsubscribe();
   }, [firebaseAuth, firebaseInitialized]);
 
@@ -537,26 +604,13 @@ export default function DonationPage() {
     return (
       <div style={{
         minHeight: '100vh',
-        backgroundColor: '#000000',
+        backgroundColor: '#fff',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        fontFamily: 'Helvetica, Arial, sans-serif',
+        fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif',
       }}>
-        <motion.div 
-          animate={{ 
-            scale: [1, 1.2, 1],
-            opacity: [0.5, 1, 0.5]
-          }}
-          transition={{ 
-            duration: 1.5,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-          style={{ color: 'white', fontSize: '1rem' }}
-        >
-          Loading...
-        </motion.div>
+        <div style={{ color: '#666', fontSize: '14px' }}>Loading...</div>
       </div>
     );
   }
@@ -564,373 +618,519 @@ export default function DonationPage() {
   return (
     <div style={{
       minHeight: '100vh',
-      backgroundColor: '#000000',
-      fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, Helvetica, Arial, sans-serif',
-      color: 'white',
+      backgroundColor: '#fff',
+      fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif',
+      color: '#111',
       position: 'relative',
-      padding: isMobile ? '20px' : '40px',
-      paddingTop: isMobile ? '100px' : '120px',
+      padding: isMobile ? '16px' : '24px',
+      paddingTop: isMobile ? '80px' : '100px',
     }}>
       
-      {/* Header */}
+      {/* Header - Minimalist */}
       <div style={{
         position: 'fixed',
         top: 0,
         left: 0,
         right: 0,
-        padding: '20px 40px',
+        padding: '16px 24px',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        backgroundColor: 'rgba(0,0,0,0.95)',
-        backdropFilter: 'blur(12px)',
+        backgroundColor: '#fff',
+        borderBottom: '1px solid #eee',
         zIndex: 100,
-        borderBottom: '1px solid rgba(255,255,255,0.1)'
       }}>
         <div style={{
-          fontSize: '32px',
+          fontSize: '20px',
           fontWeight: '500',
-          color: 'white',
-          letterSpacing: '-0.5px',
+          letterSpacing: '-0.3px',
           cursor: 'pointer'
         }} onClick={() => router.push('/')}>
           Menuru
         </div>
 
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '24px'
-        }}>
-          {/* User Info / Login Button */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          {/* Create Event Button */}
+          {user && (
+            <button
+              onClick={() => setShowCreateModal(true)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                background: 'none',
+                border: 'none',
+                fontSize: '14px',
+                color: '#111',
+                cursor: 'pointer',
+                padding: '8px 12px',
+                borderRadius: '20px',
+                transition: 'background 0.2s'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.background = '#f5f5f5'}
+              onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
+            >
+              <PlusIcon size={18} />
+              <span>Buat Kegiatan</span>
+            </button>
+          )}
+          
+          {/* User Info */}
           {user ? (
             <div style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '16px',
-              backgroundColor: 'rgba(255,255,255,0.05)',
-              padding: '6px 20px',
-              borderRadius: '40px',
-              border: '1px solid rgba(255,255,255,0.1)',
+              gap: '12px',
+              padding: '6px 12px',
+              borderRadius: '24px',
+              border: '1px solid #eee',
             }}>
               <img 
-                src={user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.email || 'User')}&background=random&color=fff`} 
+                src={user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.email || 'User')}&background=f5f5f5&color=666`} 
                 alt={user.displayName}
                 style={{
-                  width: '32px',
-                  height: '32px',
+                  width: '28px',
+                  height: '28px',
                   borderRadius: '50%',
                   objectFit: 'cover',
                 }}
               />
-              <span style={{
-                fontSize: '14px',
-                fontWeight: '500',
-                display: 'flex',
-                alignItems: 'center',
-              }}>
+              <span style={{ fontSize: '13px', fontWeight: '500' }}>
                 {user.displayName || user.email?.split('@')[0]}
-                <InstagramVerifiedBadge size={20} />
               </span>
               <button
                 onClick={handleLogout}
                 style={{
-                  background: 'rgba(255,255,255,0.1)',
+                  background: 'none',
                   border: 'none',
-                  borderRadius: '30px',
-                  padding: '6px 14px',
-                  color: 'white',
                   fontSize: '12px',
+                  color: '#999',
                   cursor: 'pointer',
                 }}
               >
-                Logout
+                Keluar
               </button>
             </div>
           ) : (
             <button
               onClick={handleGoogleLogin}
               style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                background: 'rgba(255,255,255,0.05)',
-                border: '1px solid rgba(255,255,255,0.2)',
-                borderRadius: '40px',
-                padding: '10px 24px',
-                color: 'white',
-                fontSize: '14px',
+                padding: '8px 16px',
+                background: 'none',
+                border: '1px solid #e0e0e0',
+                borderRadius: '24px',
+                fontSize: '13px',
+                color: '#111',
                 cursor: 'pointer',
+                transition: 'all 0.2s'
               }}
+              onMouseEnter={(e) => e.currentTarget.style.background = '#f5f5f5'}
+              onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
             >
-              <svg width="18" height="18" viewBox="0 0 24 24">
-                <path fill="#ffffff" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                <path fill="#ffffff" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                <path fill="#ffffff" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                <path fill="#ffffff" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-              </svg>
-              <span>Login</span>
+              Login dengan Google
             </button>
           )}
           
           <Link href="/" style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '10px',
+            gap: '6px',
             textDecoration: 'none',
-            color: 'white',
-            fontSize: '14px',
+            color: '#666',
+            fontSize: '13px',
           }}>
-            <NorthWestArrow width={18} height={18} />
-            <span>Halaman Utama</span>
+            <ArrowIcon size={14} />
+            <span>Home</span>
           </Link>
         </div>
       </div>
 
       {/* Hero Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        style={{
-          textAlign: 'center',
-          marginBottom: '60px',
-        }}
-      >
+      <div style={{
+        textAlign: 'center',
+        marginBottom: '48px',
+      }}>
         <h1 style={{
-          fontSize: isMobile ? '48px' : '72px',
+          fontSize: isMobile ? '32px' : '48px',
           fontWeight: '500',
-          letterSpacing: '-2px',
-          marginBottom: '20px',
-          background: 'linear-gradient(135deg, #fff 0%, #888 100%)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
+          letterSpacing: '-1px',
+          marginBottom: '12px',
+          color: '#111'
         }}>
           Berbagi Kebaikan
         </h1>
         <p style={{
-          fontSize: isMobile ? '16px' : '18px',
-          color: '#888',
-          maxWidth: '600px',
+          fontSize: '15px',
+          color: '#666',
+          maxWidth: '500px',
           margin: '0 auto',
-          lineHeight: '1.6'
+          lineHeight: '1.5'
         }}>
-          Setiap donasi adalah harapan. Bersama kita bisa membuat perubahan untuk mereka yang membutuhkan.
+          Buat kegiatan donasi, bagikan cerita, dan kumpulkan dukungan
         </p>
-      </motion.div>
+      </div>
 
-      {/* Donations Grid */}
+      {/* Events Feed - Like Social Media */}
       <div style={{
-        maxWidth: '1200px',
+        maxWidth: '600px',
         margin: '0 auto',
-        display: 'grid',
-        gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(380px, 1fr))',
-        gap: '40px',
       }}>
-        {donations.map((donation, index) => {
-          const percentage = getPercentage(donation.currentAmount, donation.targetAmount);
-          const daysRemaining = getDaysRemaining(donation.endDate);
-          const isAnimating = animateAmount === donation.id;
-          
-          return (
-            <motion.div
-              key={donation.id}
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              whileHover={{ y: -5 }}
-              style={{
-                backgroundColor: '#111',
-                borderRadius: '24px',
-                border: '1px solid rgba(255,255,255,0.05)',
-                overflow: 'hidden',
-                cursor: 'pointer',
-                transition: 'all 0.3s ease',
-              }}
-              onClick={() => {
-                setSelectedDonation(donation);
-                setShowDonationModal(true);
-              }}
-            >
-              {/* Category Badge */}
-              <div style={{
-                padding: '20px 20px 0 20px',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-              }}>
-                <span style={{
-                  backgroundColor: getCategoryColor(donation.category),
-                  padding: '4px 12px',
-                  borderRadius: '20px',
-                  fontSize: '12px',
-                  fontWeight: '500',
-                  color: 'white',
-                }}>
-                  {getCategoryName(donation.category)}
-                </span>
+        {events.length === 0 ? (
+          <div style={{
+            textAlign: 'center',
+            padding: '60px 20px',
+            color: '#999',
+            border: '1px solid #eee',
+            borderRadius: '12px',
+          }}>
+            <p style={{ marginBottom: '16px' }}>Belum ada kegiatan donasi</p>
+            {user && (
+              <button
+                onClick={() => setShowCreateModal(true)}
+                style={{
+                  background: 'none',
+                  border: '1px solid #e0e0e0',
+                  padding: '8px 20px',
+                  borderRadius: '24px',
+                  fontSize: '13px',
+                  cursor: 'pointer',
+                }}
+              >
+                Buat kegiatan pertama
+              </button>
+            )}
+          </div>
+        ) : (
+          events.map((event) => {
+            const isLiked = event.likes.includes(user?.uid);
+            const percentage = getPercentage(event.currentAmount, event.targetAmount);
+            const daysLeft = getDaysRemaining(event.endDate);
+            const isAnimating = animateDonation === event.id;
+            
+            return (
+              <motion.div
+                key={event.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                style={{
+                  marginBottom: '32px',
+                  borderBottom: '1px solid #f0f0f0',
+                  paddingBottom: '32px',
+                }}
+              >
+                {/* Header */}
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '6px',
-                  fontSize: '12px',
-                  color: '#666',
-                }}>
-                  <ClockIcon size={14} />
-                  <span>{daysRemaining} hari lagi</span>
-                </div>
-              </div>
-              
-              {/* Title */}
-              <div style={{ padding: '20px' }}>
-                <h2 style={{
-                  fontSize: '24px',
-                  fontWeight: '500',
+                  justifyContent: 'space-between',
                   marginBottom: '12px',
-                  lineHeight: '1.3',
                 }}>
-                  {donation.title}
-                </h2>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <img 
+                      src={event.organizerPhoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(event.organizerName)}&background=f5f5f5&color=666`}
+                      alt={event.organizerName}
+                      style={{
+                        width: '40px',
+                        height: '40px',
+                        borderRadius: '50%',
+                        objectFit: 'cover',
+                      }}
+                    />
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <span style={{ fontWeight: '500', fontSize: '14px' }}>
+                          {event.organizerName}
+                        </span>
+                        <VerifiedBadge size={14} />
+                      </div>
+                      <div style={{ fontSize: '12px', color: '#999', marginTop: '2px' }}>
+                        {formatTime(event.createdAt)} • {event.location}
+                      </div>
+                    </div>
+                  </div>
+                  <button style={{ background: 'none', border: 'none', color: '#999', cursor: 'pointer' }}>
+                    <MoreIcon size={18} />
+                  </button>
+                </div>
                 
-                {/* Description Preview */}
+                {/* Image */}
+                {event.imageUrl && (
+                  <div style={{
+                    marginBottom: '16px',
+                    borderRadius: '12px',
+                    overflow: 'hidden',
+                    backgroundColor: '#f5f5f5',
+                  }}>
+                    <img 
+                      src={event.imageUrl} 
+                      alt={event.title}
+                      style={{
+                        width: '100%',
+                        height: 'auto',
+                        display: 'block',
+                      }}
+                    />
+                  </div>
+                )}
+                
+                {/* Title & Description */}
+                <h2 style={{
+                  fontSize: '20px',
+                  fontWeight: '500',
+                  marginBottom: '8px',
+                  letterSpacing: '-0.2px',
+                }}>
+                  {event.title}
+                </h2>
                 <p style={{
                   fontSize: '14px',
-                  color: '#888',
-                  lineHeight: '1.6',
-                  marginBottom: '20px',
-                  display: '-webkit-box',
-                  WebkitLineClamp: 2,
-                  WebkitBoxOrient: 'vertical',
-                  overflow: 'hidden',
+                  color: '#666',
+                  lineHeight: '1.5',
+                  marginBottom: '16px',
                 }}>
-                  {donation.description}
+                  {event.description}
                 </p>
                 
-                {/* Progress Bar */}
+                {/* Progress */}
                 <div style={{ marginBottom: '16px' }}>
                   <div style={{
                     display: 'flex',
                     justifyContent: 'space-between',
+                    fontSize: '13px',
                     marginBottom: '8px',
-                    fontSize: '14px',
+                    color: '#666',
                   }}>
-                    <span style={{ color: '#888' }}>Terkumpul</span>
-                    <span style={{ fontWeight: '500' }}>{formatRupiah(donation.currentAmount)} / {formatRupiah(donation.targetAmount)}</span>
+                    <span>Terkumpul</span>
+                    <span>{formatRupiah(event.currentAmount)} / {formatRupiah(event.targetAmount)}</span>
                   </div>
                   <div style={{
                     height: '4px',
-                    backgroundColor: 'rgba(255,255,255,0.1)',
-                    borderRadius: '4px',
+                    backgroundColor: '#f0f0f0',
+                    borderRadius: '2px',
                     overflow: 'hidden',
                   }}>
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${percentage}%` }}
-                      transition={{ duration: 1, delay: 0.2 }}
-                      style={{
-                        height: '100%',
-                        backgroundColor: '#4a90e2',
-                        borderRadius: '4px',
-                      }}
-                    />
+                    <div style={{
+                      width: `${percentage}%`,
+                      height: '100%',
+                      backgroundColor: '#111',
+                      borderRadius: '2px',
+                    }} />
                   </div>
                   <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
                     marginTop: '8px',
                     fontSize: '12px',
-                    color: '#888',
+                    color: '#999',
                   }}>
-                    {percentage}% terkumpul
+                    <span>{percentage}% terkumpul</span>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <CalendarIcon size={12} />
+                      {daysLeft > 0 ? `${daysLeft} hari lagi` : 'Selesai'}
+                    </span>
                   </div>
                 </div>
                 
-                {/* Animasi Donasi Bertambah */}
+                {/* Animasi Donasi Baru */}
                 {isAnimating && (
                   <motion.div
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0 }}
                     style={{
-                      backgroundColor: 'rgba(74,144,226,0.1)',
-                      borderLeft: '3px solid #4a90e2',
                       padding: '12px',
+                      background: '#f8f8f8',
                       borderRadius: '8px',
                       marginBottom: '16px',
+                      fontSize: '13px',
+                      color: '#666',
                     }}
                   >
-                    <div style={{ fontSize: '13px', color: '#4a90e2', marginBottom: '4px' }}>
-                      + {formatRupiah(donation.currentAmount - (donation.currentAmount - (donation.donors[0]?.amount || 0)))}
-                    </div>
-                    <div style={{ fontSize: '12px', color: '#888' }}>
-                      "{animateMessage}"
-                    </div>
+                    + Donasi baru! Terima kasih atas dukungannya 🙏
                   </motion.div>
                 )}
                 
-                {/* Info Footer */}
+                {/* Actions */}
                 <div style={{
                   display: 'flex',
-                  justifyContent: 'space-between',
                   alignItems: 'center',
-                  paddingTop: '16px',
-                  borderTop: '1px solid rgba(255,255,255,0.05)',
+                  gap: '24px',
+                  padding: '12px 0',
+                  borderTop: '1px solid #f0f0f0',
+                  borderBottom: '1px solid #f0f0f0',
                 }}>
-                  <div style={{
+                  <button
+                    onClick={() => handleLike(event.id)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      background: 'none',
+                      border: 'none',
+                      fontSize: '13px',
+                      color: isLiked ? '#e74c3c' : '#999',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <HeartIcon size={18} filled={isLiked} />
+                    <span>{event.likes.length}</span>
+                  </button>
+                  <button
+                    onClick={() => setSelectedEvent(event)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      background: 'none',
+                      border: 'none',
+                      fontSize: '13px',
+                      color: '#999',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <CommentIcon size={18} />
+                    <span>{event.comments.length}</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      setSelectedEvent(event);
+                      setShowDonateModal(true);
+                    }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      background: 'none',
+                      border: 'none',
+                      fontSize: '13px',
+                      color: '#111',
+                      cursor: 'pointer',
+                      marginLeft: 'auto',
+                    }}
+                  >
+                    <SendIcon size={16} />
+                    <span>Donasi</span>
+                  </button>
+                  <button style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '8px',
+                    gap: '6px',
+                    background: 'none',
+                    border: 'none',
                     fontSize: '13px',
-                    color: '#888',
+                    color: '#999',
+                    cursor: 'pointer',
                   }}>
-                    <UserIcon size={14} />
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      {donation.ownerName}
-                      <InstagramVerifiedBadge size={16} />
-                    </span>
+                    <ShareIcon size={16} />
+                  </button>
+                </div>
+                
+                {/* Recent Donors */}
+                {event.donors.length > 0 && (
+                  <div style={{ marginTop: '12px' }}>
+                    <div style={{ fontSize: '12px', color: '#999', marginBottom: '8px' }}>
+                      {event.donors.length} donatur
+                    </div>
+                    <div style={{
+                      display: 'flex',
+                      flexWrap: 'wrap',
+                      gap: '8px',
+                    }}>
+                      {event.donors.slice(0, 3).map((donor) => (
+                        <div key={donor.id} style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          fontSize: '12px',
+                          color: '#666',
+                          background: '#f8f8f8',
+                          padding: '4px 10px',
+                          borderRadius: '20px',
+                        }}>
+                          <span>{donor.name}</span>
+                          <span>•</span>
+                          <span>{formatRupiah(donor.amount)}</span>
+                        </div>
+                      ))}
+                      {event.donors.length > 3 && (
+                        <span style={{ fontSize: '12px', color: '#999' }}>
+                          +{event.donors.length - 3} lainnya
+                        </span>
+                      )}
+                    </div>
                   </div>
+                )}
+                
+                {/* Comments Preview */}
+                {event.comments.length > 0 && (
+                  <div style={{ marginTop: '12px' }}>
+                    {event.comments.slice(0, 2).map((comment) => (
+                      <div key={comment.id} style={{
+                        marginBottom: '8px',
+                        fontSize: '13px',
+                      }}>
+                        <span style={{ fontWeight: '500' }}>{comment.name}</span>{' '}
+                        <span style={{ color: '#666' }}>{comment.text}</span>
+                        <span style={{ fontSize: '11px', color: '#999', marginLeft: '8px' }}>
+                          {formatTime(comment.createdAt)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                {/* Comment Input */}
+                {user && (
                   <div style={{
                     display: 'flex',
                     alignItems: 'center',
                     gap: '8px',
-                    fontSize: '12px',
-                    color: '#666',
+                    marginTop: '12px',
                   }}>
-                    <HeartIcon size={14} />
-                    <span>{donation.donors.length} donatur</span>
+                    <input
+                      type="text"
+                      value={selectedEvent?.id === event.id ? newComment : ''}
+                      onChange={(e) => {
+                        setSelectedEvent(event);
+                        setNewComment(e.target.value);
+                      }}
+                      placeholder="Tulis komentar..."
+                      style={{
+                        flex: 1,
+                        padding: '8px 12px',
+                        background: '#f8f8f8',
+                        border: '1px solid #eee',
+                        borderRadius: '20px',
+                        fontSize: '13px',
+                        outline: 'none',
+                      }}
+                    />
+                    <button
+                      onClick={() => handleComment(event.id)}
+                      disabled={!newComment.trim()}
+                      style={{
+                        padding: '8px 16px',
+                        background: 'none',
+                        border: '1px solid #e0e0e0',
+                        borderRadius: '20px',
+                        fontSize: '12px',
+                        cursor: newComment.trim() ? 'pointer' : 'not-allowed',
+                        color: newComment.trim() ? '#111' : '#ccc',
+                      }}
+                    >
+                      Kirim
+                    </button>
                   </div>
-                </div>
-              </div>
-              
-              {/* Donate Button with Arrow */}
-              <div style={{
-                padding: '16px 20px 20px 20px',
-                borderTop: '1px solid rgba(255,255,255,0.05)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-              }}>
-                <span style={{ fontSize: '13px', color: '#666' }}>
-                  Berakhir {formatDate(donation.endDate)}
-                </span>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  color: '#4a90e2',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                }}>
-                  <span>Donasi Sekarang</span>
-                  <NorthEastArrow width={18} height={18} style={{ stroke: '#4a90e2' }} />
-                </div>
-              </div>
-            </motion.div>
-          );
-        })}
+                )}
+              </motion.div>
+            );
+          })
+        )}
       </div>
 
-      {/* Donation Modal */}
+      {/* Create Event Modal */}
       <AnimatePresence>
-        {showDonationModal && selectedDonation && (
+        {showCreateModal && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -941,271 +1141,300 @@ export default function DonationPage() {
               left: 0,
               right: 0,
               bottom: 0,
-              backgroundColor: 'rgba(0,0,0,0.95)',
-              backdropFilter: 'blur(8px)',
+              backgroundColor: 'rgba(0,0,0,0.5)',
+              backdropFilter: 'blur(4px)',
               zIndex: 1000,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               padding: '20px',
             }}
-            onClick={() => setShowDonationModal(false)}
+            onClick={() => setShowCreateModal(false)}
           >
             <motion.div
-              initial={{ scale: 0.9, y: 20 }}
+              initial={{ scale: 0.95, y: 10 }}
               animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.9, y: 20 }}
-              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              exit={{ scale: 0.95, y: 10 }}
               style={{
-                background: '#111',
-                borderRadius: '32px',
-                padding: '40px',
-                maxWidth: '600px',
+                background: '#fff',
+                borderRadius: '16px',
+                padding: '32px',
+                maxWidth: '500px',
                 width: '100%',
                 maxHeight: '90vh',
                 overflowY: 'auto',
-                border: '1px solid rgba(255,255,255,0.1)',
               }}
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Modal Header */}
               <div style={{
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                marginBottom: '30px',
+                marginBottom: '24px',
               }}>
-                <div>
-                  <h2 style={{
-                    fontSize: '28px',
-                    fontWeight: '500',
-                    marginBottom: '8px',
-                  }}>
-                    {selectedDonation.title}
-                  </h2>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px',
-                    fontSize: '14px',
-                    color: '#888',
-                  }}>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <UserIcon size={14} />
-                      {selectedDonation.ownerName}
-                      <InstagramVerifiedBadge size={18} />
-                    </span>
-                    <span>•</span>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <LocationIcon size={14} />
-                      {selectedDonation.location}
-                    </span>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setShowDonationModal(false)}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: '#888',
-                    cursor: 'pointer',
-                  }}
-                >
-                  <CloseIcon size={24} />
+                <h2 style={{ fontSize: '20px', fontWeight: '500' }}>Buat Kegiatan Donasi</h2>
+                <button onClick={() => setShowCreateModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                  <CloseIcon size={20} />
                 </button>
               </div>
               
-              {/* Description */}
-              <p style={{
-                fontSize: '15px',
-                lineHeight: '1.6',
-                color: '#ccc',
-                marginBottom: '24px',
-              }}>
-                {selectedDonation.description}
-              </p>
-              
-              {/* Progress */}
-              <div style={{
-                background: '#1a1a1a',
-                borderRadius: '16px',
-                padding: '20px',
-                marginBottom: '24px',
-              }}>
-                <div style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  marginBottom: '12px',
-                }}>
-                  <span style={{ fontSize: '14px', color: '#888' }}>Terkumpul</span>
-                  <span style={{ fontSize: '14px', fontWeight: '500' }}>
-                    {formatRupiah(selectedDonation.currentAmount)} dari {formatRupiah(selectedDonation.targetAmount)}
-                  </span>
-                </div>
-                <div style={{
-                  height: '6px',
-                  backgroundColor: 'rgba(255,255,255,0.1)',
-                  borderRadius: '6px',
-                  overflow: 'hidden',
-                  marginBottom: '12px',
-                }}>
-                  <div style={{
-                    width: `${getPercentage(selectedDonation.currentAmount, selectedDonation.targetAmount)}%`,
-                    height: '100%',
-                    backgroundColor: '#4a90e2',
-                    borderRadius: '6px',
-                  }} />
-                </div>
-                <div style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  fontSize: '12px',
-                  color: '#666',
-                }}>
-                  <span>{getPercentage(selectedDonation.currentAmount, selectedDonation.targetAmount)}% terkumpul</span>
-                  <span>{getDaysRemaining(selectedDonation.endDate)} hari tersisa</span>
-                </div>
+              {/* Image Upload */}
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ fontSize: '13px', color: '#666', marginBottom: '8px', display: 'block' }}>
+                  Foto (opsional)
+                </label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      setSelectedImage(file);
+                      const reader = new FileReader();
+                      reader.onloadend = () => {
+                        setImagePreview(reader.result as string);
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                  }}
+                  style={{ display: 'none' }}
+                  id="image-upload"
+                />
+                <label
+                  htmlFor="image-upload"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    padding: '40px',
+                    border: '1px dashed #e0e0e0',
+                    borderRadius: '12px',
+                    cursor: 'pointer',
+                    background: '#fafafa',
+                  }}
+                >
+                  {imagePreview ? (
+                    <img src={imagePreview} alt="Preview" style={{ maxHeight: '150px', borderRadius: '8px' }} />
+                  ) : (
+                    <>
+                      <ImageIcon size={20} />
+                      <span style={{ fontSize: '13px', color: '#999' }}>Upload foto</span>
+                    </>
+                  )}
+                </label>
               </div>
               
-              {/* Donation Form */}
-              <div style={{ marginBottom: '24px' }}>
-                <h3 style={{
-                  fontSize: '18px',
-                  fontWeight: '500',
-                  marginBottom: '16px',
-                }}>
-                  Kirim Donasi
-                </h3>
+              <div style={{ marginBottom: '16px' }}>
                 <input
-                  type="number"
-                  value={donationAmount}
-                  onChange={(e) => setDonationAmount(e.target.value)}
-                  placeholder="Jumlah Donasi (min Rp 10.000)"
+                  type="text"
+                  value={newEvent.title}
+                  onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })}
+                  placeholder="Judul kegiatan"
                   style={{
                     width: '100%',
-                    padding: '14px 16px',
-                    background: '#1a1a1a',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    borderRadius: '12px',
-                    color: 'white',
+                    padding: '12px 0',
+                    border: 'none',
+                    borderBottom: '1px solid #e0e0e0',
                     fontSize: '16px',
-                    marginBottom: '16px',
                     outline: 'none',
                   }}
                 />
+              </div>
+              
+              <div style={{ marginBottom: '16px' }}>
                 <textarea
-                  value={donationMessage}
-                  onChange={(e) => setDonationMessage(e.target.value)}
-                  placeholder="Tulis pesan dukungan Anda..."
+                  value={newEvent.description}
+                  onChange={(e) => setNewEvent({ ...newEvent, description: e.target.value })}
+                  placeholder="Deskripsi kegiatan"
                   rows={3}
                   style={{
                     width: '100%',
-                    padding: '14px 16px',
-                    background: '#1a1a1a',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    borderRadius: '12px',
-                    color: 'white',
+                    padding: '12px 0',
+                    border: 'none',
+                    borderBottom: '1px solid #e0e0e0',
                     fontSize: '14px',
                     outline: 'none',
-                    resize: 'vertical',
+                    resize: 'none',
                   }}
                 />
               </div>
               
-              {/* Donors List */}
-              {selectedDonation.donors.length > 0 && (
-                <div style={{ marginBottom: '24px' }}>
-                  <h3 style={{
-                    fontSize: '16px',
-                    fontWeight: '500',
-                    marginBottom: '16px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                  }}>
-                    <HeartIcon size={16} />
-                    <span>Kata dari Donatur ({selectedDonation.donors.length})</span>
-                  </h3>
-                  <div style={{
-                    maxHeight: '200px',
-                    overflowY: 'auto',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '12px',
-                  }}>
-                    {selectedDonation.donors.map((donor) => (
-                      <div key={donor.id} style={{
-                        background: '#1a1a1a',
-                        borderRadius: '12px',
-                        padding: '12px',
-                      }}>
-                        <div style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          marginBottom: '8px',
-                        }}>
-                          <span style={{
-                            fontSize: '13px',
-                            fontWeight: '500',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '4px',
-                          }}>
-                            {donor.name}
-                            <InstagramVerifiedBadge size={14} />
-                          </span>
-                          <span style={{
-                            fontSize: '12px',
-                            color: '#4a90e2',
-                          }}>
-                            {formatRupiah(donor.amount)}
-                          </span>
-                        </div>
-                        <p style={{
-                          fontSize: '13px',
-                          color: '#888',
-                          lineHeight: '1.5',
-                        }}>
-                          "{donor.message}"
-                        </p>
-                        <div style={{
-                          fontSize: '10px',
-                          color: '#666',
-                          marginTop: '6px',
-                        }}>
-                          {formatDate(donor.createdAt)}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+              <div style={{ marginBottom: '16px' }}>
+                <input
+                  type="number"
+                  value={newEvent.targetAmount}
+                  onChange={(e) => setNewEvent({ ...newEvent, targetAmount: e.target.value })}
+                  placeholder="Target donasi (Rp)"
+                  style={{
+                    width: '100%',
+                    padding: '12px 0',
+                    border: 'none',
+                    borderBottom: '1px solid #e0e0e0',
+                    fontSize: '14px',
+                    outline: 'none',
+                  }}
+                />
+              </div>
               
-              {/* Submit Button */}
+              <div style={{ marginBottom: '16px' }}>
+                <input
+                  type="text"
+                  value={newEvent.location}
+                  onChange={(e) => setNewEvent({ ...newEvent, location: e.target.value })}
+                  placeholder="Lokasi"
+                  style={{
+                    width: '100%',
+                    padding: '12px 0',
+                    border: 'none',
+                    borderBottom: '1px solid #e0e0e0',
+                    fontSize: '14px',
+                    outline: 'none',
+                  }}
+                />
+              </div>
+              
+              <div style={{ marginBottom: '24px' }}>
+                <input
+                  type="date"
+                  value={newEvent.endDate}
+                  onChange={(e) => setNewEvent({ ...newEvent, endDate: e.target.value })}
+                  style={{
+                    width: '100%',
+                    padding: '12px 0',
+                    border: 'none',
+                    borderBottom: '1px solid #e0e0e0',
+                    fontSize: '14px',
+                    outline: 'none',
+                  }}
+                />
+              </div>
+              
               <button
-                onClick={handleDonate}
-                disabled={isSubmitting}
+                onClick={handleCreateEvent}
+                disabled={isSubmitting || !newEvent.title || !newEvent.description}
                 style={{
                   width: '100%',
-                  padding: '16px',
-                  background: '#4a90e2',
+                  padding: '12px',
+                  background: '#111',
                   border: 'none',
-                  borderRadius: '30px',
-                  color: 'white',
-                  fontSize: '16px',
-                  fontWeight: '600',
-                  cursor: isSubmitting ? 'not-allowed' : 'pointer',
-                  opacity: isSubmitting ? 0.7 : 1,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '12px',
+                  borderRadius: '24px',
+                  color: '#fff',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  cursor: isSubmitting || !newEvent.title || !newEvent.description ? 'not-allowed' : 'pointer',
+                  opacity: isSubmitting || !newEvent.title || !newEvent.description ? 0.5 : 1,
                 }}
               >
-                <SendIcon size={18} />
-                <span>{isSubmitting ? 'Memproses...' : 'Kirim Donasi'}</span>
-                <NorthEastArrow width={18} height={18} />
+                {isSubmitting ? 'Membuat...' : 'Buat Kegiatan'}
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Donate Modal */}
+      <AnimatePresence>
+        {showDonateModal && selectedEvent && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0,0,0,0.5)',
+              backdropFilter: 'blur(4px)',
+              zIndex: 1000,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '20px',
+            }}
+            onClick={() => setShowDonateModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, y: 10 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 10 }}
+              style={{
+                background: '#fff',
+                borderRadius: '16px',
+                padding: '32px',
+                maxWidth: '450px',
+                width: '100%',
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '24px',
+              }}>
+                <h2 style={{ fontSize: '18px', fontWeight: '500' }}>Kirim Donasi</h2>
+                <button onClick={() => setShowDonateModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                  <CloseIcon size={18} />
+                </button>
+              </div>
+              
+              <p style={{ fontSize: '14px', color: '#666', marginBottom: '20px' }}>
+                {selectedEvent.title}
+              </p>
+              
+              <input
+                type="number"
+                value={donationAmount}
+                onChange={(e) => setDonationAmount(e.target.value)}
+                placeholder="Jumlah donasi (min Rp 10.000)"
+                style={{
+                  width: '100%',
+                  padding: '12px 0',
+                  border: 'none',
+                  borderBottom: '1px solid #e0e0e0',
+                  fontSize: '14px',
+                  outline: 'none',
+                  marginBottom: '20px',
+                }}
+              />
+              
+              <textarea
+                value={donationMessage}
+                onChange={(e) => setDonationMessage(e.target.value)}
+                placeholder="Pesan dukungan..."
+                rows={3}
+                style={{
+                  width: '100%',
+                  padding: '12px 0',
+                  border: 'none',
+                  borderBottom: '1px solid #e0e0e0',
+                  fontSize: '14px',
+                  outline: 'none',
+                  resize: 'none',
+                  marginBottom: '24px',
+                }}
+              />
+              
+              <button
+                onClick={handleDonate}
+                disabled={isSubmitting || !donationAmount || !donationMessage}
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  background: '#111',
+                  border: 'none',
+                  borderRadius: '24px',
+                  color: '#fff',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  cursor: isSubmitting || !donationAmount || !donationMessage ? 'not-allowed' : 'pointer',
+                  opacity: isSubmitting || !donationAmount || !donationMessage ? 0.5 : 1,
+                }}
+              >
+                {isSubmitting ? 'Memproses...' : 'Kirim Donasi'}
               </button>
             </motion.div>
           </motion.div>
@@ -1214,60 +1443,28 @@ export default function DonationPage() {
       
       {/* Success Notification */}
       <AnimatePresence>
-        {showSuccessNotification && (
+        {showSuccess && (
           <motion.div
-            initial={{ opacity: 0, x: -100 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -100 }}
-            transition={{ type: "spring", damping: 20 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
             style={{
               position: 'fixed',
-              bottom: '30px',
-              left: '30px',
-              backgroundColor: '#1a1a1a',
-              border: '1px solid rgba(74,144,226,0.3)',
-              borderRadius: '12px',
-              padding: '16px 24px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px',
+              bottom: '24px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              background: '#111',
+              color: '#fff',
+              padding: '12px 24px',
+              borderRadius: '40px',
+              fontSize: '13px',
               zIndex: 1001,
-              boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
             }}
           >
-            <HeartIcon filled={true} size={20} />
-            <div>
-              <div style={{ fontWeight: '500', marginBottom: '2px' }}>Terima Kasih!</div>
-              <div style={{ fontSize: '12px', color: '#888' }}>Donasi Anda telah berhasil dikirim</div>
-            </div>
+            Terima kasih atas donasinya! 🙏
           </motion.div>
         )}
       </AnimatePresence>
-      
-      {/* CSS Animations */}
-      <style jsx>{`
-        @keyframes slideIn {
-          from {
-            transform: translateX(-100%);
-            opacity: 0;
-          }
-          to {
-            transform: translateX(0);
-            opacity: 1;
-          }
-        }
-        
-        @keyframes slideOut {
-          from {
-            transform: translateX(0);
-            opacity: 1;
-          }
-          to {
-            transform: translateX(-100%);
-            opacity: 0;
-          }
-        }
-      `}</style>
     </div>
   );
 }
