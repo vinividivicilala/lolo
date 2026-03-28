@@ -40,6 +40,18 @@ const firebaseConfig = {
   measurementId: "G-8LMP7F4BE9"
 };
 
+// Event Categories with Modern Colors
+const eventCategories = [
+  { id: "panti_asuhan", name: "Panti Asuhan", color: "#FF6B6B", bgColor: "rgba(255, 107, 107, 0.15)", borderColor: "rgba(255, 107, 107, 0.3)" },
+  { id: "panti_jompo", name: "Panti Jompo", color: "#4ECDC4", bgColor: "rgba(78, 205, 196, 0.15)", borderColor: "rgba(78, 205, 196, 0.3)" },
+  { id: "yayasan", name: "Yayasan", color: "#45B7D1", bgColor: "rgba(69, 183, 209, 0.15)", borderColor: "rgba(69, 183, 209, 0.3)" },
+  { id: "bencana_alam", name: "Bencana Alam", color: "#FFA07A", bgColor: "rgba(255, 160, 122, 0.15)", borderColor: "rgba(255, 160, 122, 0.3)" },
+  { id: "pendidikan", name: "Pendidikan", color: "#98D8C8", bgColor: "rgba(152, 216, 200, 0.15)", borderColor: "rgba(152, 216, 200, 0.3)" },
+  { id: "kesehatan", name: "Kesehatan", color: "#FFB347", bgColor: "rgba(255, 179, 71, 0.15)", borderColor: "rgba(255, 179, 71, 0.3)" },
+  { id: "masjid", name: "Masjid", color: "#96CEB4", bgColor: "rgba(150, 206, 180, 0.15)", borderColor: "rgba(150, 206, 180, 0.3)" },
+  { id: "umum", name: "Umum", color: "#AAAAAA", bgColor: "rgba(170, 170, 170, 0.15)", borderColor: "rgba(170, 170, 170, 0.3)" }
+];
+
 // Instagram Verified Badge Component
 const InstagramVerifiedBadge = ({ size = 24 }) => {
   const [showTooltip, setShowTooltip] = useState(false);
@@ -204,6 +216,17 @@ const TimeIcon = ({ size = 16 }) => (
   </svg>
 );
 
+const TrophyIcon = ({ size = 24 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M6 9H4.5C3.4 9 2.5 8.1 2.5 7V5C2.5 3.9 3.4 3 4.5 3H6" />
+    <path d="M18 9H19.5C20.6 9 21.5 8.1 21.5 7V5C21.5 3.9 20.6 3 19.5 3H18" />
+    <path d="M12 3v15" />
+    <path d="M7 18h10" />
+    <path d="M12 21v-3" />
+    <path d="M8 21h8" />
+  </svg>
+);
+
 // Types
 interface Donor {
   id: string;
@@ -255,6 +278,7 @@ interface DonationEvent {
   comments: Comment[];
   donors: Donor[];
   stories?: Story[];
+  category: string;
 }
 
 export default function DonationPage() {
@@ -276,6 +300,7 @@ export default function DonationPage() {
   const [donationMessage, setDonationMessage] = useState("");
   const [newComment, setNewComment] = useState("");
   const [newCommentEventId, setNewCommentEventId] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
   
   // State untuk Create Event
   const [newEvent, setNewEvent] = useState({
@@ -283,7 +308,8 @@ export default function DonationPage() {
     description: "",
     targetAmount: "",
     location: "",
-    endDate: ""
+    endDate: "",
+    category: "umum"
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -382,6 +408,56 @@ export default function DonationPage() {
     }
   };
 
+  // Get category style
+  const getCategoryStyle = (categoryId: string) => {
+    const category = eventCategories.find(c => c.id === categoryId);
+    return category || eventCategories.find(c => c.id === "umum");
+  };
+
+  // Get sorted events by category
+  const getSortedEvents = () => {
+    if (selectedCategory === "all") {
+      return events;
+    }
+    return events.filter(event => event.category === selectedCategory);
+  };
+
+  // Get leaderboard for an event
+  const getLeaderboard = (donors: Donor[]) => {
+    // Group donors by userId and sum amounts
+    const donorMap = new Map<string, { name: string; totalAmount: number; userId: string }>();
+    
+    donors.forEach(donor => {
+      const existing = donorMap.get(donor.userId);
+      if (existing) {
+        existing.totalAmount += donor.amount;
+      } else {
+        donorMap.set(donor.userId, {
+          name: donor.name,
+          totalAmount: donor.amount,
+          userId: donor.userId
+        });
+      }
+    });
+    
+    // Convert to array and sort by totalAmount descending
+    const leaderboard = Array.from(donorMap.values())
+      .sort((a, b) => b.totalAmount - a.totalAmount)
+      .slice(0, 10); // Top 10 donors
+    
+    return leaderboard;
+  };
+
+  // Get medal color based on rank
+  const getMedalColor = (rank: number) => {
+    switch(rank) {
+      case 0: return "#FFD700"; // Gold
+      case 1: return "#C0C0C0"; // Silver
+      case 2: return "#CD7F32"; // Bronze
+      default: return "#666";
+    }
+  };
+
   // Create Event
   const handleCreateEvent = async () => {
     if (!user) {
@@ -418,7 +494,8 @@ export default function DonationPage() {
         likes: [],
         comments: [],
         donors: [],
-        stories: []
+        stories: [],
+        category: newEvent.category
       };
       
       const eventsRef = collection(firebaseDb, 'donationEvents');
@@ -430,7 +507,7 @@ export default function DonationPage() {
       
       setEvents([{ id: docRef.id, ...eventData }, ...events]);
       setShowCreateModal(false);
-      setNewEvent({ title: "", description: "", targetAmount: "", location: "", endDate: "" });
+      setNewEvent({ title: "", description: "", targetAmount: "", location: "", endDate: "", category: "umum" });
       setSuccessMessage("Kegiatan berhasil dibuat!");
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 3000);
@@ -686,7 +763,8 @@ export default function DonationPage() {
           likes: data.likes || [],
           comments: data.comments || [],
           donors: data.donors || [],
-          stories: data.stories || []
+          stories: data.stories || [],
+          category: data.category || "umum"
         };
       });
       setEvents(eventsData);
@@ -751,6 +829,8 @@ export default function DonationPage() {
       console.error("Logout error:", error);
     }
   };
+
+  const sortedEvents = getSortedEvents();
 
   if (loading) {
     return (
@@ -913,6 +993,53 @@ export default function DonationPage() {
         </p>
       </div>
 
+      {/* Category Filters */}
+      <div style={{
+        maxWidth: '700px',
+        margin: '0 auto',
+        marginBottom: '32px',
+        display: 'flex',
+        flexWrap: 'wrap',
+        gap: '12px',
+        justifyContent: 'center',
+      }}>
+        <button
+          onClick={() => setSelectedCategory("all")}
+          style={{
+            padding: '10px 24px',
+            borderRadius: '40px',
+            fontSize: '14px',
+            fontWeight: '500',
+            background: selectedCategory === "all" ? '#fff' : 'transparent',
+            color: selectedCategory === "all" ? '#000' : '#666',
+            border: `1px solid ${selectedCategory === "all" ? '#fff' : '#333'}`,
+            cursor: 'pointer',
+            transition: 'all 0.2s',
+          }}
+        >
+          Semua
+        </button>
+        {eventCategories.map(category => (
+          <button
+            key={category.id}
+            onClick={() => setSelectedCategory(category.id)}
+            style={{
+              padding: '10px 24px',
+              borderRadius: '40px',
+              fontSize: '14px',
+              fontWeight: '500',
+              background: selectedCategory === category.id ? category.color : 'transparent',
+              color: selectedCategory === category.id ? '#fff' : category.color,
+              border: `1px solid ${category.color}`,
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+            }}
+          >
+            {category.name}
+          </button>
+        ))}
+      </div>
+
       {/* Tab Navigation - Transparent */}
       <div style={{
         maxWidth: '700px',
@@ -963,7 +1090,7 @@ export default function DonationPage() {
         {activeTab === 'feed' ? (
           // Feed Events
           <>
-            {events.length === 0 ? (
+            {sortedEvents.length === 0 ? (
               <div style={{
                 textAlign: 'center',
                 padding: '80px 20px',
@@ -990,11 +1117,13 @@ export default function DonationPage() {
                 )}
               </div>
             ) : (
-              events.map((event) => {
+              sortedEvents.map((event) => {
                 const isLiked = event.likes.includes(user?.uid);
                 const percentage = getPercentage(event.currentAmount, event.targetAmount);
                 const daysLeft = getDaysRemaining(event.endDate);
                 const isAnimating = animateDonation === event.id;
+                const categoryStyle = getCategoryStyle(event.category);
+                const leaderboard = getLeaderboard(event.donors);
                 
                 return (
                   <div
@@ -1038,6 +1167,22 @@ export default function DonationPage() {
                       <button style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer' }}>
                         <MoreIcon size={24} />
                       </button>
+                    </div>
+                    
+                    {/* Category Badge */}
+                    <div style={{ marginBottom: '12px' }}>
+                      <span style={{
+                        display: 'inline-block',
+                        padding: '6px 16px',
+                        borderRadius: '30px',
+                        fontSize: '13px',
+                        fontWeight: '500',
+                        backgroundColor: categoryStyle?.bgColor,
+                        color: categoryStyle?.color,
+                        border: `1px solid ${categoryStyle?.borderColor}`,
+                      }}>
+                        {categoryStyle?.name}
+                      </span>
                     </div>
                     
                     {/* Title */}
@@ -1114,6 +1259,74 @@ export default function DonationPage() {
                         </span>
                       </div>
                     </div>
+                    
+                    {/* Leaderboard Section */}
+                    {leaderboard.length > 0 && (
+                      <div style={{
+                        marginBottom: '24px',
+                        padding: '20px',
+                        background: '#111',
+                        borderRadius: '16px',
+                        border: '1px solid #222',
+                      }}>
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '10px',
+                          marginBottom: '16px',
+                        }}>
+                          <TrophyIcon size={22} />
+                          <h3 style={{
+                            fontSize: '18px',
+                            fontWeight: '600',
+                            color: '#fff',
+                            margin: 0,
+                          }}>
+                            Leaderboard Donatur
+                          </h3>
+                        </div>
+                        <div style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '12px',
+                        }}>
+                          {leaderboard.map((donor, index) => (
+                            <div
+                              key={donor.userId}
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                padding: '8px 12px',
+                                background: index < 3 ? 'rgba(255,255,255,0.05)' : 'transparent',
+                                borderRadius: '12px',
+                              }}
+                            >
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                <span style={{
+                                  width: '32px',
+                                  fontSize: '18px',
+                                  fontWeight: 'bold',
+                                  color: getMedalColor(index),
+                                }}>
+                                  {index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : `${index + 1}`}
+                                </span>
+                                <span style={{ fontSize: '15px', color: '#fff' }}>
+                                  {donor.name}
+                                </span>
+                              </div>
+                              <span style={{
+                                fontSize: '15px',
+                                fontWeight: '600',
+                                color: '#fff',
+                              }}>
+                                {formatRupiah(donor.totalAmount)}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                     
                     {/* Animasi Donasi Baru */}
                     {isAnimating && (
@@ -1637,6 +1850,29 @@ export default function DonationPage() {
                 marginBottom: '28px',
               }}
             />
+            
+            <select
+              value={newEvent.category}
+              onChange={(e) => setNewEvent({ ...newEvent, category: e.target.value })}
+              style={{
+                width: '100%',
+                padding: '16px 0',
+                border: 'none',
+                borderBottom: '1px solid #222',
+                background: 'transparent',
+                fontSize: '18px',
+                color: '#fff',
+                outline: 'none',
+                marginBottom: '28px',
+                cursor: 'pointer',
+              }}
+            >
+              {eventCategories.map(category => (
+                <option key={category.id} value={category.id} style={{ background: '#000', color: category.color }}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
             
             <input
               type="text"
