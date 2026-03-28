@@ -100,36 +100,32 @@ const InstagramVerifiedBadge = ({ size = 18 }) => {
   );
 };
 
-// Arrow Icons - Transparent with stroke only
+// Arrow Icons - Clear and Proper Shapes
 const NorthEastArrow = ({ size = 20, color = "#666" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M7 7L17 17" />
-    <path d="M7 7H17" />
-    <path d="M17 7V17" />
+    <path d="M7 7 L17 7 L17 17" />
+    <path d="M17 7 L7 17" />
   </svg>
 );
 
 const NorthWestArrow = ({ size = 20, color = "#666" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M17 7L7 17" />
-    <path d="M17 7H7" />
-    <path d="M7 7V17" />
+    <path d="M17 7 L7 7 L7 17" />
+    <path d="M7 7 L17 17" />
   </svg>
 );
 
 const SouthEastArrow = ({ size = 20, color = "#666" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M7 17L17 7" />
-    <path d="M17 17H7" />
-    <path d="M17 7V17" />
+    <path d="M7 17 L17 17 L17 7" />
+    <path d="M17 17 L7 7" />
   </svg>
 );
 
 const SouthWestArrow = ({ size = 20, color = "#666" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M17 17L7 7" />
-    <path d="M7 17H17" />
-    <path d="M7 7V17" />
+    <path d="M17 17 L7 17 L7 7" />
+    <path d="M7 17 L17 7" />
   </svg>
 );
 
