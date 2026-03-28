@@ -171,13 +171,6 @@ const LocationIcon = ({ size = 20 }) => (
   </svg>
 );
 
-const ArrowIcon = ({ size = 24 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <line x1="7" y1="7" x2="17" y2="17"/>
-    <polyline points="17 7 17 17 7 17"/>
-  </svg>
-);
-
 const NorthEastArrow = ({ size = 24 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
     <path d="M7 7L17 17" stroke="currentColor"/>
@@ -281,28 +274,43 @@ export default function DonationPage() {
     return parseInt(value.replace(/[^\d]/g, '')) || 0;
   };
 
-  // Format Date
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString('id-ID', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
-    });
+  // Format Date (memastikan date valid)
+  const formatDate = (date: Date | any) => {
+    if (!date) return "Baru saja";
+    try {
+      const dateObj = date instanceof Date ? date : new Date(date);
+      if (isNaN(dateObj.getTime())) return "Baru saja";
+      return dateObj.toLocaleDateString('id-ID', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      });
+    } catch {
+      return "Baru saja";
+    }
   };
 
-  const formatTime = (date: Date) => {
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-    const diffDays = Math.floor(diffMs / 86400000);
-    
-    if (diffMins < 1) return 'Baru saja';
-    if (diffMins < 60) return `${diffMins} menit lalu`;
-    if (diffHours < 24) return `${diffHours} jam lalu`;
-    if (diffDays === 1) return 'Kemarin';
-    if (diffDays < 7) return `${diffDays} hari lalu`;
-    return formatDate(date);
+  const formatTime = (date: Date | any) => {
+    if (!date) return "Baru saja";
+    try {
+      const dateObj = date instanceof Date ? date : new Date(date);
+      if (isNaN(dateObj.getTime())) return "Baru saja";
+      
+      const now = new Date();
+      const diffMs = now.getTime() - dateObj.getTime();
+      const diffMins = Math.floor(diffMs / 60000);
+      const diffHours = Math.floor(diffMs / 3600000);
+      const diffDays = Math.floor(diffMs / 86400000);
+      
+      if (diffMins < 1) return 'Baru saja';
+      if (diffMins < 60) return `${diffMins} menit lalu`;
+      if (diffHours < 24) return `${diffHours} jam lalu`;
+      if (diffDays === 1) return 'Kemarin';
+      if (diffDays < 7) return `${diffDays} hari lalu`;
+      return formatDate(dateObj);
+    } catch {
+      return "Baru saja";
+    }
   };
 
   // Hitung persentase
@@ -312,11 +320,18 @@ export default function DonationPage() {
   };
 
   // Hitung sisa hari
-  const getDaysRemaining = (endDate: Date) => {
-    const today = new Date();
-    const diffTime = endDate.getTime() - today.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays > 0 ? diffDays : 0;
+  const getDaysRemaining = (endDate: Date | any) => {
+    if (!endDate) return 0;
+    try {
+      const dateObj = endDate instanceof Date ? endDate : new Date(endDate);
+      if (isNaN(dateObj.getTime())) return 0;
+      const today = new Date();
+      const diffTime = dateObj.getTime() - today.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      return diffDays > 0 ? diffDays : 0;
+    } catch {
+      return 0;
+    }
   };
 
   // Create Event
@@ -379,7 +394,7 @@ export default function DonationPage() {
     }
   };
 
-  // Handle Donation (Manual input dengan format titik)
+  // Handle Donation
   const handleDonate = async () => {
     if (!user) {
       alert("Silakan login terlebih dahulu");
@@ -506,8 +521,8 @@ export default function DonationPage() {
         return {
           id: doc.id,
           ...data,
-          createdAt: data.createdAt?.toDate?.() || new Date(),
-          endDate: data.endDate?.toDate?.() || new Date(),
+          createdAt: data.createdAt?.toDate?.() ? data.createdAt.toDate() : new Date(),
+          endDate: data.endDate?.toDate?.() ? data.endDate.toDate() : new Date(),
           donors: data.donors || [],
           comments: data.comments || [],
           likes: data.likes || []
@@ -1114,7 +1129,7 @@ export default function DonationPage() {
               left: 0,
               right: 0,
               bottom: 0,
-              backgroundColor: 'rgba(0,0,0,0.9)',
+              backgroundColor: 'rgba(0,0,0,0.95)',
               zIndex: 1000,
               display: 'flex',
               alignItems: 'center',
@@ -1282,7 +1297,7 @@ export default function DonationPage() {
               left: 0,
               right: 0,
               bottom: 0,
-              backgroundColor: 'rgba(0,0,0,0.9)',
+              backgroundColor: 'rgba(0,0,0,0.95)',
               zIndex: 1000,
               display: 'flex',
               alignItems: 'center',
