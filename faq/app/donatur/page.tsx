@@ -31,7 +31,6 @@ import {
   onSnapshot,
   increment
 } from "firebase/firestore";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 // Konfigurasi Firebase
 const firebaseConfig = {
@@ -45,7 +44,7 @@ const firebaseConfig = {
   measurementId: "G-8LMP7F4BE9"
 };
 
-// Instagram Verified Badge Component - Minimalist
+// Verified Badge Component
 const VerifiedBadge = ({ size = 16 }) => {
   const [showTooltip, setShowTooltip] = useState(false);
   
@@ -77,7 +76,7 @@ const VerifiedBadge = ({ size = 16 }) => {
           bottom: '100%',
           left: '50%',
           transform: 'translateX(-50%)',
-          backgroundColor: '#1a1a1a',
+          backgroundColor: '#2a2a2a',
           color: '#fff',
           padding: '4px 8px',
           borderRadius: '4px',
@@ -94,7 +93,7 @@ const VerifiedBadge = ({ size = 16 }) => {
             transform: 'translateX(-50%)',
             borderWidth: '4px',
             borderStyle: 'solid',
-            borderColor: '#1a1a1a transparent transparent transparent'
+            borderColor: '#2a2a2a transparent transparent transparent'
           }} />
         </div>
       )}
@@ -102,7 +101,7 @@ const VerifiedBadge = ({ size = 16 }) => {
   );
 };
 
-// Icons - Minimalist
+// Icons
 const PlusIcon = ({ size = 20 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
     <line x1="12" y1="5" x2="12" y2="19"/>
@@ -113,14 +112,6 @@ const PlusIcon = ({ size = 20 }) => (
 const HeartIcon = ({ size = 20, filled = false }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill={filled ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.5">
     <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-  </svg>
-);
-
-const ImageIcon = ({ size = 20 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-    <rect x="2" y="2" width="20" height="20" rx="2" ry="2"/>
-    <circle cx="8.5" cy="8.5" r="1.5"/>
-    <polyline points="21 15 16 10 5 21"/>
   </svg>
 );
 
@@ -185,11 +176,11 @@ const ArrowIcon = ({ size = 20 }) => (
   </svg>
 );
 
-const NorthEastArrow = ({ size = 20 }) => (
+const ImageIcon = ({ size = 20 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-    <path d="M7 7L17 17" stroke="currentColor"/>
-    <path d="M7 7H17" stroke="currentColor"/>
-    <path d="M7 17V7" stroke="currentColor"/>
+    <rect x="2" y="2" width="20" height="20" rx="2" ry="2"/>
+    <circle cx="8.5" cy="8.5" r="1.5"/>
+    <polyline points="21 15 16 10 5 21"/>
   </svg>
 );
 
@@ -232,6 +223,18 @@ interface Comment {
   createdAt: Date;
 }
 
+// Daftar gambar lokal
+const LOCAL_IMAGES = [
+  "/images/1.jpg",
+  "/images/2.jpg",
+  "/images/3.jpg",
+  "/images/4.jpg",
+  "/images/5.jpg",
+  "/images/6.jpg",
+  "/images/7.jpg",
+  "/images/8.jpg",
+];
+
 export default function DonationPage() {
   const router = useRouter();
   const [isMounted, setIsMounted] = useState(false);
@@ -241,7 +244,6 @@ export default function DonationPage() {
   const [firebaseInitialized, setFirebaseInitialized] = useState(false);
   const [firebaseAuth, setFirebaseAuth] = useState<any>(null);
   const [firebaseDb, setFirebaseDb] = useState<any>(null);
-  const [firebaseStorage, setFirebaseStorage] = useState<any>(null);
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   
@@ -253,6 +255,7 @@ export default function DonationPage() {
   const [donationAmount, setDonationAmount] = useState("");
   const [donationMessage, setDonationMessage] = useState("");
   const [newComment, setNewComment] = useState("");
+  const [selectedImagePath, setSelectedImagePath] = useState("");
   
   // State untuk Create Event
   const [newEvent, setNewEvent] = useState({
@@ -262,13 +265,12 @@ export default function DonationPage() {
     location: "",
     endDate: ""
   });
-  const [selectedImage, setSelectedImage] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   // State untuk animasi
   const [animateDonation, setAnimateDonation] = useState<string | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
 
   // Format Rupiah
   const formatRupiah = (amount: number) => {
@@ -306,6 +308,7 @@ export default function DonationPage() {
 
   // Hitung persentase
   const getPercentage = (current: number, target: number) => {
+    if (target === 0) return 0;
     return Math.min(Math.floor((current / target) * 100), 100);
   };
 
@@ -317,19 +320,9 @@ export default function DonationPage() {
     return diffDays > 0 ? diffDays : 0;
   };
 
-  // Upload image ke Firebase Storage
-  const uploadImage = async (file: File): Promise<string | null> => {
-    if (!firebaseStorage) return null;
-    
-    try {
-      const storageRef = ref(firebaseStorage, `donation-images/${Date.now()}_${file.name}`);
-      await uploadBytes(storageRef, file);
-      const url = await getDownloadURL(storageRef);
-      return url;
-    } catch (error) {
-      console.error("Error uploading image:", error);
-      return null;
-    }
+  // Get random image from local
+  const getRandomImage = () => {
+    return LOCAL_IMAGES[Math.floor(Math.random() * LOCAL_IMAGES.length)];
   };
 
   // Create Event
@@ -345,18 +338,16 @@ export default function DonationPage() {
     }
     
     const targetAmount = parseInt(newEvent.targetAmount);
-    if (isNaN(targetAmount) || targetAmount < 10000) {
-      alert("Target donasi minimal Rp 10.000");
+    if (isNaN(targetAmount) || targetAmount < 1) {
+      alert("Target donasi harus diisi dengan angka yang valid");
       return;
     }
     
     setIsSubmitting(true);
     
     try {
-      let imageUrl = null;
-      if (selectedImage) {
-        imageUrl = await uploadImage(selectedImage);
-      }
+      // Gunakan gambar yang dipilih atau random
+      const imageUrl = selectedImagePath || getRandomImage();
       
       const eventData = {
         title: newEvent.title.trim(),
@@ -386,8 +377,8 @@ export default function DonationPage() {
       setEvents([{ id: docRef.id, ...eventData }, ...events]);
       setShowCreateModal(false);
       setNewEvent({ title: "", description: "", targetAmount: "", location: "", endDate: "" });
-      setSelectedImage(null);
-      setImagePreview(null);
+      setSelectedImagePath("");
+      setSuccessMessage("Kegiatan berhasil dibuat!");
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 3000);
       
@@ -399,7 +390,7 @@ export default function DonationPage() {
     }
   };
 
-  // Handle Donation
+  // Handle Donation (Manual input, unlimited)
   const handleDonate = async () => {
     if (!user) {
       alert("Silakan login terlebih dahulu");
@@ -409,8 +400,8 @@ export default function DonationPage() {
     if (!selectedEvent) return;
     
     const amount = parseInt(donationAmount);
-    if (isNaN(amount) || amount < 10000) {
-      alert("Minimal donasi Rp 10.000");
+    if (isNaN(amount) || amount < 1) {
+      alert("Masukkan nominal donasi yang valid");
       return;
     }
     
@@ -442,6 +433,7 @@ export default function DonationPage() {
       setDonationMessage("");
       setShowDonateModal(false);
       setAnimateDonation(selectedEvent.id);
+      setSuccessMessage(`Terima kasih atas donasi Rp ${amount.toLocaleString()}! 🙏`);
       setShowSuccess(true);
       
       setTimeout(() => {
@@ -552,11 +544,9 @@ export default function DonationPage() {
       const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
       const auth = getAuth(app);
       const db = getFirestore(app);
-      const storage = getStorage(app);
       
       setFirebaseAuth(auth);
       setFirebaseDb(db);
-      setFirebaseStorage(storage);
       setFirebaseInitialized(true);
     } catch (error) {
       console.error("Firebase initialization error:", error);
@@ -604,7 +594,7 @@ export default function DonationPage() {
     return (
       <div style={{
         minHeight: '100vh',
-        backgroundColor: '#fff',
+        backgroundColor: '#000',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
@@ -618,9 +608,9 @@ export default function DonationPage() {
   return (
     <div style={{
       minHeight: '100vh',
-      backgroundColor: '#fff',
+      backgroundColor: '#000',
       fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif',
-      color: '#111',
+      color: '#fff',
       position: 'relative',
       padding: isMobile ? '16px' : '24px',
       paddingTop: isMobile ? '80px' : '100px',
@@ -636,15 +626,16 @@ export default function DonationPage() {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        backgroundColor: '#fff',
-        borderBottom: '1px solid #eee',
+        backgroundColor: '#000',
+        borderBottom: '1px solid #222',
         zIndex: 100,
       }}>
         <div style={{
           fontSize: '20px',
           fontWeight: '500',
           letterSpacing: '-0.3px',
-          cursor: 'pointer'
+          cursor: 'pointer',
+          color: '#fff'
         }} onClick={() => router.push('/')}>
           Menuru
         </div>
@@ -661,13 +652,13 @@ export default function DonationPage() {
                 background: 'none',
                 border: 'none',
                 fontSize: '14px',
-                color: '#111',
+                color: '#fff',
                 cursor: 'pointer',
                 padding: '8px 12px',
                 borderRadius: '20px',
                 transition: 'background 0.2s'
               }}
-              onMouseEnter={(e) => e.currentTarget.style.background = '#f5f5f5'}
+              onMouseEnter={(e) => e.currentTarget.style.background = '#1a1a1a'}
               onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
             >
               <PlusIcon size={18} />
@@ -683,10 +674,10 @@ export default function DonationPage() {
               gap: '12px',
               padding: '6px 12px',
               borderRadius: '24px',
-              border: '1px solid #eee',
+              border: '1px solid #222',
             }}>
               <img 
-                src={user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.email || 'User')}&background=f5f5f5&color=666`} 
+                src={user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.email || 'User')}&background=1a1a1a&color=fff`} 
                 alt={user.displayName}
                 style={{
                   width: '28px',
@@ -695,7 +686,7 @@ export default function DonationPage() {
                   objectFit: 'cover',
                 }}
               />
-              <span style={{ fontSize: '13px', fontWeight: '500' }}>
+              <span style={{ fontSize: '13px', fontWeight: '500', color: '#fff' }}>
                 {user.displayName || user.email?.split('@')[0]}
               </span>
               <button
@@ -704,7 +695,7 @@ export default function DonationPage() {
                   background: 'none',
                   border: 'none',
                   fontSize: '12px',
-                  color: '#999',
+                  color: '#666',
                   cursor: 'pointer',
                 }}
               >
@@ -717,14 +708,14 @@ export default function DonationPage() {
               style={{
                 padding: '8px 16px',
                 background: 'none',
-                border: '1px solid #e0e0e0',
+                border: '1px solid #222',
                 borderRadius: '24px',
                 fontSize: '13px',
-                color: '#111',
+                color: '#fff',
                 cursor: 'pointer',
                 transition: 'all 0.2s'
               }}
-              onMouseEnter={(e) => e.currentTarget.style.background = '#f5f5f5'}
+              onMouseEnter={(e) => e.currentTarget.style.background = '#1a1a1a'}
               onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
             >
               Login dengan Google
@@ -755,7 +746,7 @@ export default function DonationPage() {
           fontWeight: '500',
           letterSpacing: '-1px',
           marginBottom: '12px',
-          color: '#111'
+          color: '#fff'
         }}>
           Berbagi Kebaikan
         </h1>
@@ -770,7 +761,7 @@ export default function DonationPage() {
         </p>
       </div>
 
-      {/* Events Feed - Like Social Media */}
+      {/* Events Feed */}
       <div style={{
         maxWidth: '600px',
         margin: '0 auto',
@@ -779,8 +770,8 @@ export default function DonationPage() {
           <div style={{
             textAlign: 'center',
             padding: '60px 20px',
-            color: '#999',
-            border: '1px solid #eee',
+            color: '#666',
+            border: '1px solid #222',
             borderRadius: '12px',
           }}>
             <p style={{ marginBottom: '16px' }}>Belum ada kegiatan donasi</p>
@@ -789,10 +780,11 @@ export default function DonationPage() {
                 onClick={() => setShowCreateModal(true)}
                 style={{
                   background: 'none',
-                  border: '1px solid #e0e0e0',
+                  border: '1px solid #222',
                   padding: '8px 20px',
                   borderRadius: '24px',
                   fontSize: '13px',
+                  color: '#fff',
                   cursor: 'pointer',
                 }}
               >
@@ -814,7 +806,7 @@ export default function DonationPage() {
                 animate={{ opacity: 1, y: 0 }}
                 style={{
                   marginBottom: '32px',
-                  borderBottom: '1px solid #f0f0f0',
+                  borderBottom: '1px solid #222',
                   paddingBottom: '32px',
                 }}
               >
@@ -827,7 +819,7 @@ export default function DonationPage() {
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                     <img 
-                      src={event.organizerPhoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(event.organizerName)}&background=f5f5f5&color=666`}
+                      src={event.organizerPhoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(event.organizerName)}&background=1a1a1a&color=fff`}
                       alt={event.organizerName}
                       style={{
                         width: '40px',
@@ -838,17 +830,17 @@ export default function DonationPage() {
                     />
                     <div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <span style={{ fontWeight: '500', fontSize: '14px' }}>
+                        <span style={{ fontWeight: '500', fontSize: '14px', color: '#fff' }}>
                           {event.organizerName}
                         </span>
                         <VerifiedBadge size={14} />
                       </div>
-                      <div style={{ fontSize: '12px', color: '#999', marginTop: '2px' }}>
+                      <div style={{ fontSize: '12px', color: '#666', marginTop: '2px' }}>
                         {formatTime(event.createdAt)} • {event.location}
                       </div>
                     </div>
                   </div>
-                  <button style={{ background: 'none', border: 'none', color: '#999', cursor: 'pointer' }}>
+                  <button style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer' }}>
                     <MoreIcon size={18} />
                   </button>
                 </div>
@@ -859,7 +851,7 @@ export default function DonationPage() {
                     marginBottom: '16px',
                     borderRadius: '12px',
                     overflow: 'hidden',
-                    backgroundColor: '#f5f5f5',
+                    backgroundColor: '#111',
                   }}>
                     <img 
                       src={event.imageUrl} 
@@ -879,12 +871,13 @@ export default function DonationPage() {
                   fontWeight: '500',
                   marginBottom: '8px',
                   letterSpacing: '-0.2px',
+                  color: '#fff'
                 }}>
                   {event.title}
                 </h2>
                 <p style={{
                   fontSize: '14px',
-                  color: '#666',
+                  color: '#888',
                   lineHeight: '1.5',
                   marginBottom: '16px',
                 }}>
@@ -898,21 +891,21 @@ export default function DonationPage() {
                     justifyContent: 'space-between',
                     fontSize: '13px',
                     marginBottom: '8px',
-                    color: '#666',
+                    color: '#888',
                   }}>
                     <span>Terkumpul</span>
                     <span>{formatRupiah(event.currentAmount)} / {formatRupiah(event.targetAmount)}</span>
                   </div>
                   <div style={{
                     height: '4px',
-                    backgroundColor: '#f0f0f0',
+                    backgroundColor: '#222',
                     borderRadius: '2px',
                     overflow: 'hidden',
                   }}>
                     <div style={{
                       width: `${percentage}%`,
                       height: '100%',
-                      backgroundColor: '#111',
+                      backgroundColor: '#fff',
                       borderRadius: '2px',
                     }} />
                   </div>
@@ -921,7 +914,7 @@ export default function DonationPage() {
                     justifyContent: 'space-between',
                     marginTop: '8px',
                     fontSize: '12px',
-                    color: '#999',
+                    color: '#666',
                   }}>
                     <span>{percentage}% terkumpul</span>
                     <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -939,11 +932,12 @@ export default function DonationPage() {
                     exit={{ opacity: 0 }}
                     style={{
                       padding: '12px',
-                      background: '#f8f8f8',
+                      background: '#111',
                       borderRadius: '8px',
                       marginBottom: '16px',
                       fontSize: '13px',
-                      color: '#666',
+                      color: '#fff',
+                      border: '1px solid #222',
                     }}
                   >
                     + Donasi baru! Terima kasih atas dukungannya 🙏
@@ -956,8 +950,8 @@ export default function DonationPage() {
                   alignItems: 'center',
                   gap: '24px',
                   padding: '12px 0',
-                  borderTop: '1px solid #f0f0f0',
-                  borderBottom: '1px solid #f0f0f0',
+                  borderTop: '1px solid #222',
+                  borderBottom: '1px solid #222',
                 }}>
                   <button
                     onClick={() => handleLike(event.id)}
@@ -968,7 +962,7 @@ export default function DonationPage() {
                       background: 'none',
                       border: 'none',
                       fontSize: '13px',
-                      color: isLiked ? '#e74c3c' : '#999',
+                      color: isLiked ? '#ff6b6b' : '#666',
                       cursor: 'pointer',
                     }}
                   >
@@ -984,7 +978,7 @@ export default function DonationPage() {
                       background: 'none',
                       border: 'none',
                       fontSize: '13px',
-                      color: '#999',
+                      color: '#666',
                       cursor: 'pointer',
                     }}
                   >
@@ -1003,7 +997,7 @@ export default function DonationPage() {
                       background: 'none',
                       border: 'none',
                       fontSize: '13px',
-                      color: '#111',
+                      color: '#fff',
                       cursor: 'pointer',
                       marginLeft: 'auto',
                     }}
@@ -1018,7 +1012,7 @@ export default function DonationPage() {
                     background: 'none',
                     border: 'none',
                     fontSize: '13px',
-                    color: '#999',
+                    color: '#666',
                     cursor: 'pointer',
                   }}>
                     <ShareIcon size={16} />
@@ -1028,7 +1022,7 @@ export default function DonationPage() {
                 {/* Recent Donors */}
                 {event.donors.length > 0 && (
                   <div style={{ marginTop: '12px' }}>
-                    <div style={{ fontSize: '12px', color: '#999', marginBottom: '8px' }}>
+                    <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>
                       {event.donors.length} donatur
                     </div>
                     <div style={{
@@ -1042,8 +1036,8 @@ export default function DonationPage() {
                           alignItems: 'center',
                           gap: '6px',
                           fontSize: '12px',
-                          color: '#666',
-                          background: '#f8f8f8',
+                          color: '#888',
+                          background: '#111',
                           padding: '4px 10px',
                           borderRadius: '20px',
                         }}>
@@ -1053,7 +1047,7 @@ export default function DonationPage() {
                         </div>
                       ))}
                       {event.donors.length > 3 && (
-                        <span style={{ fontSize: '12px', color: '#999' }}>
+                        <span style={{ fontSize: '12px', color: '#666' }}>
                           +{event.donors.length - 3} lainnya
                         </span>
                       )}
@@ -1069,9 +1063,9 @@ export default function DonationPage() {
                         marginBottom: '8px',
                         fontSize: '13px',
                       }}>
-                        <span style={{ fontWeight: '500' }}>{comment.name}</span>{' '}
-                        <span style={{ color: '#666' }}>{comment.text}</span>
-                        <span style={{ fontSize: '11px', color: '#999', marginLeft: '8px' }}>
+                        <span style={{ fontWeight: '500', color: '#fff' }}>{comment.name}</span>{' '}
+                        <span style={{ color: '#888' }}>{comment.text}</span>
+                        <span style={{ fontSize: '11px', color: '#666', marginLeft: '8px' }}>
                           {formatTime(comment.createdAt)}
                         </span>
                       </div>
@@ -1098,10 +1092,11 @@ export default function DonationPage() {
                       style={{
                         flex: 1,
                         padding: '8px 12px',
-                        background: '#f8f8f8',
-                        border: '1px solid #eee',
+                        background: '#111',
+                        border: '1px solid #222',
                         borderRadius: '20px',
                         fontSize: '13px',
+                        color: '#fff',
                         outline: 'none',
                       }}
                     />
@@ -1111,11 +1106,11 @@ export default function DonationPage() {
                       style={{
                         padding: '8px 16px',
                         background: 'none',
-                        border: '1px solid #e0e0e0',
+                        border: '1px solid #222',
                         borderRadius: '20px',
                         fontSize: '12px',
                         cursor: newComment.trim() ? 'pointer' : 'not-allowed',
-                        color: newComment.trim() ? '#111' : '#ccc',
+                        color: newComment.trim() ? '#fff' : '#444',
                       }}
                     >
                       Kirim
@@ -1141,7 +1136,7 @@ export default function DonationPage() {
               left: 0,
               right: 0,
               bottom: 0,
-              backgroundColor: 'rgba(0,0,0,0.5)',
+              backgroundColor: 'rgba(0,0,0,0.9)',
               backdropFilter: 'blur(4px)',
               zIndex: 1000,
               display: 'flex',
@@ -1156,13 +1151,14 @@ export default function DonationPage() {
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.95, y: 10 }}
               style={{
-                background: '#fff',
+                background: '#000',
                 borderRadius: '16px',
                 padding: '32px',
                 maxWidth: '500px',
                 width: '100%',
                 maxHeight: '90vh',
                 overflowY: 'auto',
+                border: '1px solid #222',
               }}
               onClick={(e) => e.stopPropagation()}
             >
@@ -1172,57 +1168,66 @@ export default function DonationPage() {
                 alignItems: 'center',
                 marginBottom: '24px',
               }}>
-                <h2 style={{ fontSize: '20px', fontWeight: '500' }}>Buat Kegiatan Donasi</h2>
-                <button onClick={() => setShowCreateModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                <h2 style={{ fontSize: '20px', fontWeight: '500', color: '#fff' }}>Buat Kegiatan Donasi</h2>
+                <button onClick={() => setShowCreateModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#666' }}>
                   <CloseIcon size={20} />
                 </button>
               </div>
               
-              {/* Image Upload */}
+              {/* Image Selection - Local Images */}
               <div style={{ marginBottom: '20px' }}>
                 <label style={{ fontSize: '13px', color: '#666', marginBottom: '8px', display: 'block' }}>
-                  Foto (opsional)
+                  Pilih Foto (opsional)
                 </label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      setSelectedImage(file);
-                      const reader = new FileReader();
-                      reader.onloadend = () => {
-                        setImagePreview(reader.result as string);
-                      };
-                      reader.readAsDataURL(file);
-                    }
-                  }}
-                  style={{ display: 'none' }}
-                  id="image-upload"
-                />
-                <label
-                  htmlFor="image-upload"
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '8px',
-                    padding: '40px',
-                    border: '1px dashed #e0e0e0',
-                    borderRadius: '12px',
-                    cursor: 'pointer',
-                    background: '#fafafa',
-                  }}
-                >
-                  {imagePreview ? (
-                    <img src={imagePreview} alt="Preview" style={{ maxHeight: '150px', borderRadius: '8px' }} />
-                  ) : (
-                    <>
-                      <ImageIcon size={20} />
-                      <span style={{ fontSize: '13px', color: '#999' }}>Upload foto</span>
-                    </>
-                  )}
-                </label>
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(4, 1fr)',
+                  gap: '8px',
+                  marginTop: '8px',
+                }}>
+                  <div
+                    onClick={() => setSelectedImagePath("")}
+                    style={{
+                      aspectRatio: '1',
+                      backgroundColor: '#111',
+                      borderRadius: '8px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'pointer',
+                      border: selectedImagePath === "" ? '2px solid #fff' : '1px solid #222',
+                    }}
+                  >
+                    <span style={{ fontSize: '12px', color: '#666' }}>Random</span>
+                  </div>
+                  {LOCAL_IMAGES.map((img, idx) => (
+                    <div
+                      key={idx}
+                      onClick={() => setSelectedImagePath(img)}
+                      style={{
+                        aspectRatio: '1',
+                        backgroundColor: '#111',
+                        borderRadius: '8px',
+                        overflow: 'hidden',
+                        cursor: 'pointer',
+                        border: selectedImagePath === img ? '2px solid #fff' : '1px solid #222',
+                      }}
+                    >
+                      <img 
+                        src={img} 
+                        alt={`Option ${idx + 1}`}
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover',
+                        }}
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                        }}
+                      />
+                    </div>
+                  ))}
+                </div>
               </div>
               
               <div style={{ marginBottom: '16px' }}>
@@ -1235,8 +1240,10 @@ export default function DonationPage() {
                     width: '100%',
                     padding: '12px 0',
                     border: 'none',
-                    borderBottom: '1px solid #e0e0e0',
+                    borderBottom: '1px solid #222',
+                    backgroundColor: 'transparent',
                     fontSize: '16px',
+                    color: '#fff',
                     outline: 'none',
                   }}
                 />
@@ -1252,8 +1259,10 @@ export default function DonationPage() {
                     width: '100%',
                     padding: '12px 0',
                     border: 'none',
-                    borderBottom: '1px solid #e0e0e0',
+                    borderBottom: '1px solid #222',
+                    backgroundColor: 'transparent',
                     fontSize: '14px',
+                    color: '#fff',
                     outline: 'none',
                     resize: 'none',
                   }}
@@ -1270,8 +1279,10 @@ export default function DonationPage() {
                     width: '100%',
                     padding: '12px 0',
                     border: 'none',
-                    borderBottom: '1px solid #e0e0e0',
+                    borderBottom: '1px solid #222',
+                    backgroundColor: 'transparent',
                     fontSize: '14px',
+                    color: '#fff',
                     outline: 'none',
                   }}
                 />
@@ -1287,8 +1298,10 @@ export default function DonationPage() {
                     width: '100%',
                     padding: '12px 0',
                     border: 'none',
-                    borderBottom: '1px solid #e0e0e0',
+                    borderBottom: '1px solid #222',
+                    backgroundColor: 'transparent',
                     fontSize: '14px',
+                    color: '#fff',
                     outline: 'none',
                   }}
                 />
@@ -1303,8 +1316,10 @@ export default function DonationPage() {
                     width: '100%',
                     padding: '12px 0',
                     border: 'none',
-                    borderBottom: '1px solid #e0e0e0',
+                    borderBottom: '1px solid #222',
+                    backgroundColor: 'transparent',
                     fontSize: '14px',
+                    color: '#fff',
                     outline: 'none',
                   }}
                 />
@@ -1316,10 +1331,10 @@ export default function DonationPage() {
                 style={{
                   width: '100%',
                   padding: '12px',
-                  background: '#111',
+                  background: '#fff',
                   border: 'none',
                   borderRadius: '24px',
-                  color: '#fff',
+                  color: '#000',
                   fontSize: '14px',
                   fontWeight: '500',
                   cursor: isSubmitting || !newEvent.title || !newEvent.description ? 'not-allowed' : 'pointer',
@@ -1346,7 +1361,7 @@ export default function DonationPage() {
               left: 0,
               right: 0,
               bottom: 0,
-              backgroundColor: 'rgba(0,0,0,0.5)',
+              backgroundColor: 'rgba(0,0,0,0.9)',
               backdropFilter: 'blur(4px)',
               zIndex: 1000,
               display: 'flex',
@@ -1361,11 +1376,12 @@ export default function DonationPage() {
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.95, y: 10 }}
               style={{
-                background: '#fff',
+                background: '#000',
                 borderRadius: '16px',
                 padding: '32px',
                 maxWidth: '450px',
                 width: '100%',
+                border: '1px solid #222',
               }}
               onClick={(e) => e.stopPropagation()}
             >
@@ -1375,8 +1391,8 @@ export default function DonationPage() {
                 alignItems: 'center',
                 marginBottom: '24px',
               }}>
-                <h2 style={{ fontSize: '18px', fontWeight: '500' }}>Kirim Donasi</h2>
-                <button onClick={() => setShowDonateModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                <h2 style={{ fontSize: '18px', fontWeight: '500', color: '#fff' }}>Kirim Donasi</h2>
+                <button onClick={() => setShowDonateModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#666' }}>
                   <CloseIcon size={18} />
                 </button>
               </div>
@@ -1389,13 +1405,15 @@ export default function DonationPage() {
                 type="number"
                 value={donationAmount}
                 onChange={(e) => setDonationAmount(e.target.value)}
-                placeholder="Jumlah donasi (min Rp 10.000)"
+                placeholder="Jumlah donasi"
                 style={{
                   width: '100%',
                   padding: '12px 0',
                   border: 'none',
-                  borderBottom: '1px solid #e0e0e0',
+                  borderBottom: '1px solid #222',
+                  backgroundColor: 'transparent',
                   fontSize: '14px',
+                  color: '#fff',
                   outline: 'none',
                   marginBottom: '20px',
                 }}
@@ -1410,8 +1428,10 @@ export default function DonationPage() {
                   width: '100%',
                   padding: '12px 0',
                   border: 'none',
-                  borderBottom: '1px solid #e0e0e0',
+                  borderBottom: '1px solid #222',
+                  backgroundColor: 'transparent',
                   fontSize: '14px',
+                  color: '#fff',
                   outline: 'none',
                   resize: 'none',
                   marginBottom: '24px',
@@ -1424,10 +1444,10 @@ export default function DonationPage() {
                 style={{
                   width: '100%',
                   padding: '12px',
-                  background: '#111',
+                  background: '#fff',
                   border: 'none',
                   borderRadius: '24px',
-                  color: '#fff',
+                  color: '#000',
                   fontSize: '14px',
                   fontWeight: '500',
                   cursor: isSubmitting || !donationAmount || !donationMessage ? 'not-allowed' : 'pointer',
@@ -1453,15 +1473,15 @@ export default function DonationPage() {
               bottom: '24px',
               left: '50%',
               transform: 'translateX(-50%)',
-              background: '#111',
-              color: '#fff',
+              background: '#fff',
+              color: '#000',
               padding: '12px 24px',
               borderRadius: '40px',
               fontSize: '13px',
               zIndex: 1001,
             }}
           >
-            Terima kasih atas donasinya! 🙏
+            {successMessage}
           </motion.div>
         )}
       </AnimatePresence>
