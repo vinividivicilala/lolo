@@ -1331,9 +1331,9 @@ export default function HomePage(): React.JSX.Element {
   };
   const handleCloseDonasiTracking = () => setShowDonasiTracking(false);
 
-  // Handler untuk navigasi ke halaman donasi
+  // Handler untuk navigasi ke halaman donasi (/donatur)
   const handleDonasiPageClick = () => {
-    router.push('/donation');
+    router.push('/donatur');
   };
 
   // Handler untuk menutup overlay
@@ -1808,6 +1808,7 @@ export default function HomePage(): React.JSX.Element {
   // Komentar untuk foto saat ini
   const currentPhotoComments = comments.filter(comment => comment.photoIndex === currentPhotoIndex);
 
+  // ==================== RENDER COMPONENT ====================
   return (
     <div style={{
       minHeight: '100vh',
@@ -1891,8 +1892,8 @@ export default function HomePage(): React.JSX.Element {
               top: '6rem',
               left: '50%',
               transform: 'translateX(-50%)',
-              backgroundColor: 'rgba(255,215,0,0.9)',
-              color: 'black',
+              backgroundColor: 'rgba(255,255,255,0.1)',
+              color: 'white',
               padding: '1rem 2rem',
               borderRadius: '50px',
               zIndex: 10002,
@@ -1900,14 +1901,14 @@ export default function HomePage(): React.JSX.Element {
               display: 'flex',
               alignItems: 'center',
               gap: '1rem',
-              border: '1px solid rgba(255,255,255,0.3)'
+              border: '1px solid rgba(255,255,255,0.2)'
             }}
           >
             <motion.div
               animate={{ scale: [1, 1.2, 1] }}
               transition={{ repeat: Infinity, duration: 1 }}
             >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
                 <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
                 <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
               </svg>
@@ -2966,7 +2967,7 @@ export default function HomePage(): React.JSX.Element {
                     <motion.button
                       onClick={() => {
                         handleCloseDonasiTracking();
-                        router.push('/donation');
+                        router.push('/donatur');
                       }}
                       style={{
                         marginTop: '1.5rem',
@@ -3065,7 +3066,7 @@ export default function HomePage(): React.JSX.Element {
                 <motion.button
                   onClick={() => {
                     handleCloseDonasiTracking();
-                    router.push('/donation');
+                    router.push('/donatur');
                   }}
                   style={{
                     display: 'flex',
@@ -3274,6 +3275,7 @@ export default function HomePage(): React.JSX.Element {
                     Total notes: {userNotes.length}
                   </div>
 
+                  {/* Kategori: Personal */}
                   {userNotes.filter(note => note.category?.toLowerCase() === 'personal').length > 0 && (
                     <div>
                       <div style={{
@@ -3410,6 +3412,7 @@ export default function HomePage(): React.JSX.Element {
                     </div>
                   )}
 
+                  {/* Kategori: Collaborate */}
                   {userNotes.filter(note => note.category?.toLowerCase() === 'collaborate').length > 0 && (
                     <div>
                       <div style={{
@@ -3546,6 +3549,7 @@ export default function HomePage(): React.JSX.Element {
                     </div>
                   )}
 
+                  {/* Kategori: Lainnya */}
                   {userNotes.filter(note => {
                     const cat = note.category?.toLowerCase() || '';
                     return cat !== 'personal' && cat !== 'collaborate';
@@ -7431,9 +7435,8 @@ export default function HomePage(): React.JSX.Element {
                               transform: 'translateY(-50%)',
                               width: '8px',
                               height: '8px',
-                              backgroundColor: 'rgba(255,215,0,0.8)',
-                              borderRadius: '50%',
-                              boxShadow: '0 0 10px rgba(255,215,0,0.5)'
+                              backgroundColor: 'rgba(255,255,255,0.5)',
+                              borderRadius: '50%'
                             }}
                           />
                         )}
@@ -7571,7 +7574,7 @@ export default function HomePage(): React.JSX.Element {
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: '0.3rem',
-                                color: 'rgba(255,215,0,0.8)',
+                                color: 'rgba(255,255,255,0.5)',
                                 fontSize: '0.7rem'
                               }}>
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -7759,7 +7762,7 @@ export default function HomePage(): React.JSX.Element {
         )}
       </AnimatePresence>
 
-      {/* Top Navigation Bar */}
+      {/* Top Navigation Bar - Tanpa warna kuning, transparan */}
       <div 
         ref={topNavRef}
         style={{
@@ -8012,6 +8015,7 @@ export default function HomePage(): React.JSX.Element {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          {/* Icon Notifikasi - Transparan tanpa background warna */}
           <motion.div
             ref={notificationRef}
             initial={{ opacity: 0, x: -10 }}
@@ -8022,8 +8026,8 @@ export default function HomePage(): React.JSX.Element {
               width: '40px',
               height: '40px',
               borderRadius: '50%',
-              backgroundColor: 'rgba(255,215,0,0.2)',
-              border: '1px solid rgba(255,215,0,0.5)',
+              backgroundColor: 'transparent',
+              border: '1px solid rgba(255,255,255,0.3)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -8033,8 +8037,8 @@ export default function HomePage(): React.JSX.Element {
             onClick={() => setShowNotification(!showNotification)}
             whileHover={{ 
               scale: 1.1,
-              backgroundColor: 'rgba(255,215,0,0.3)',
-              borderColor: 'rgba(255,215,0,0.8)'
+              borderColor: 'rgba(255,255,255,0.6)',
+              backgroundColor: 'rgba(255,255,255,0.05)'
             }}
             whileTap={{ scale: 0.95 }}
           >
@@ -8061,12 +8065,12 @@ export default function HomePage(): React.JSX.Element {
                   right: '-2px',
                   minWidth: '18px',
                   height: '18px',
-                  backgroundColor: 'rgba(255,215,0,0.9)',
+                  backgroundColor: 'rgba(255,255,255,0.8)',
                   borderRadius: '50%',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  border: '1px solid rgba(255,215,0,0.5)'
+                  border: '1px solid white'
                 }}
               >
                 <span style={{
@@ -8082,14 +8086,15 @@ export default function HomePage(): React.JSX.Element {
             )}
           </motion.div>
 
+          {/* Tombol SIGN IN - Transparan tanpa warna kuning */}
           <motion.div
             onClick={handleSignInClick}
             style={{
               display: 'flex',
               alignItems: 'center',
               gap: '0.5rem',
-              backgroundColor: 'rgba(255,215,0,0.2)',
-              border: '1px solid rgba(255,215,0,0.5)',
+              backgroundColor: 'transparent',
+              border: '1px solid rgba(255,255,255,0.3)',
               padding: '0.5rem 1rem',
               borderRadius: '30px',
               cursor: 'pointer',
@@ -8100,15 +8105,15 @@ export default function HomePage(): React.JSX.Element {
             transition={{ delay: 1.3, duration: 0.5 }}
             whileHover={{ 
               scale: 1.05,
-              backgroundColor: 'rgba(255,215,0,0.3)',
-              borderColor: 'rgba(255,215,0,0.8)'
+              backgroundColor: 'rgba(255,255,255,0.05)',
+              borderColor: 'rgba(255,255,255,0.6)'
             }}
             whileTap={{ scale: 0.95 }}
           >
             <span style={{
               color: 'white',
               fontSize: isMobile ? '0.9rem' : '1rem',
-              fontWeight: '500',
+              fontWeight: '400',
               fontFamily: 'Helvetica, Arial, sans-serif'
             }}>
               {user ? userDisplayName : 'SIGN IN'}
@@ -8405,7 +8410,7 @@ export default function HomePage(): React.JSX.Element {
             </div>
           </div>
 
-          {/* Baris 3: BASED + Foto + IN + PANTAU (Donasi Kamu) */}
+          {/* Baris 3: BASED + Foto + IN + PANTAU (Donasi Kamu) - Tanpa linebox */}
           <div style={{
             display: 'flex',
             alignItems: 'center',
@@ -8491,7 +8496,7 @@ export default function HomePage(): React.JSX.Element {
                 </h2>
               </div>
 
-              {/* Tombol PANTAU dengan SOUTH WEST ARROW dan teks "Donasi Kamu" */}
+              {/* Tombol PANTAU dengan SOUTH WEST ARROW dan teks "Donasi Kamu" - Tanpa linebox, font sama seperti nama website */}
               <motion.div
                 onClick={handleDonasiTrackingClick}
                 style={{
@@ -8500,13 +8505,12 @@ export default function HomePage(): React.JSX.Element {
                   gap: '0.8rem',
                   cursor: 'pointer',
                   padding: isMobile ? '0.5rem 1rem' : '0.8rem 1.5rem',
-                  border: '1px solid rgba(255,255,255,0.3)',
-                  borderRadius: '40px',
+                  border: 'none',
+                  borderRadius: '0',
                   transition: 'all 0.3s ease'
                 }}
                 whileHover={{ 
-                  borderColor: 'rgba(255,255,255,0.6)',
-                  backgroundColor: 'rgba(255,255,255,0.05)',
+                  opacity: 0.7,
                   scale: 1.02
                 }}
                 whileTap={{ scale: 0.98 }}
@@ -8536,8 +8540,8 @@ export default function HomePage(): React.JSX.Element {
                 </svg>
                 <span style={{
                   color: 'rgba(255,255,255,0.7)',
-                  fontSize: isMobile ? '0.8rem' : '0.9rem',
-                  fontWeight: '300',
+                  fontSize: isMobile ? '1rem' : '1.2rem',
+                  fontWeight: '400',
                   fontFamily: 'Helvetica, Arial, sans-serif',
                   letterSpacing: '0.5px'
                 }}>
