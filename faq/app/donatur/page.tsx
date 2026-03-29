@@ -40,16 +40,16 @@ const firebaseConfig = {
   measurementId: "G-8LMP7F4BE9"
 };
 
-// Event Categories with simple text styling
+// Event Categories - All White Text
 const eventCategories = [
-  { id: "panti_asuhan", name: "Panti Asuhan", color: "#FF6B6B" },
-  { id: "panti_jompo", name: "Panti Jompo", color: "#4ECDC4" },
-  { id: "yayasan", name: "Yayasan", color: "#45B7D1" },
-  { id: "bencana_alam", name: "Bencana Alam", color: "#FFA07A" },
-  { id: "pendidikan", name: "Pendidikan", color: "#98D8C8" },
-  { id: "kesehatan", name: "Kesehatan", color: "#FFB347" },
-  { id: "masjid", name: "Masjid", color: "#96CEB4" },
-  { id: "umum", name: "Umum", color: "#AAAAAA" }
+  { id: "panti_asuhan", name: "Panti Asuhan" },
+  { id: "panti_jompo", name: "Panti Jompo" },
+  { id: "yayasan", name: "Yayasan" },
+  { id: "bencana_alam", name: "Bencana Alam" },
+  { id: "pendidikan", name: "Pendidikan" },
+  { id: "kesehatan", name: "Kesehatan" },
+  { id: "masjid", name: "Masjid" },
+  { id: "umum", name: "Umum" }
 ];
 
 // Instagram Verified Badge Component
@@ -397,10 +397,10 @@ export default function DonationPage() {
     }
   };
 
-  // Get category style
-  const getCategoryStyle = (categoryId: string) => {
+  // Get category name
+  const getCategoryName = (categoryId: string) => {
     const category = eventCategories.find(c => c.id === categoryId);
-    return category || eventCategories.find(c => c.id === "umum");
+    return category ? category.name : "Umum";
   };
 
   // Get sorted events by category
@@ -972,7 +972,7 @@ export default function DonationPage() {
         </p>
       </div>
 
-      {/* Category Filters - Simple Text Only */}
+      {/* Category Filters - All White Text, No Colors */}
       <div style={{
         maxWidth: '700px',
         margin: '0 auto',
@@ -1008,8 +1008,8 @@ export default function DonationPage() {
               fontSize: '14px',
               fontWeight: selectedCategory === category.id ? '600' : '400',
               background: 'transparent',
-              color: selectedCategory === category.id ? category.color : '#666',
-              border: selectedCategory === category.id ? `1px solid ${category.color}` : '1px solid #333',
+              color: selectedCategory === category.id ? '#fff' : '#666',
+              border: selectedCategory === category.id ? '1px solid #fff' : '1px solid #333',
               cursor: 'pointer',
               transition: 'all 0.2s',
             }}
@@ -1101,7 +1101,7 @@ export default function DonationPage() {
                 const percentage = getPercentage(event.currentAmount, event.targetAmount);
                 const daysLeft = getDaysRemaining(event.endDate);
                 const isAnimating = animateDonation === event.id;
-                const categoryStyle = getCategoryStyle(event.category);
+                const categoryName = getCategoryName(event.category);
                 const leaderboard = getLeaderboard(event.donors);
                 
                 return (
@@ -1148,14 +1148,14 @@ export default function DonationPage() {
                       </button>
                     </div>
                     
-                    {/* Category Badge - Simple Text Only */}
+                    {/* Category - Simple White Text */}
                     <div style={{ marginBottom: '12px' }}>
                       <span style={{
                         fontSize: '13px',
-                        fontWeight: '500',
-                        color: categoryStyle?.color,
+                        fontWeight: '400',
+                        color: '#888',
                       }}>
-                        {categoryStyle?.name}
+                        {categoryName}
                       </span>
                     </div>
                     
@@ -1234,7 +1234,78 @@ export default function DonationPage() {
                       </div>
                     </div>
                     
-                    {/* Leaderboard Section - Medal Only, No Icon */}
+                    {/* Donation Messages Section */}
+                    {event.donors.length > 0 && (
+                      <div style={{
+                        marginBottom: '24px',
+                        padding: '20px',
+                        background: '#111',
+                        borderRadius: '16px',
+                        border: '1px solid #222',
+                      }}>
+                        <h3 style={{
+                          fontSize: '16px',
+                          fontWeight: '600',
+                          color: '#fff',
+                          marginBottom: '16px',
+                        }}>
+                          Pesan Donasi
+                        </h3>
+                        <div style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '16px',
+                        }}>
+                          {event.donors.slice(0, 5).map((donor) => (
+                            <div key={donor.id} style={{
+                              padding: '12px',
+                              background: '#0a0a0a',
+                              borderRadius: '12px',
+                              borderLeft: '2px solid #fff',
+                            }}>
+                              <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                marginBottom: '8px',
+                              }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                  <span style={{ fontSize: '14px', fontWeight: '500', color: '#fff' }}>
+                                    {donor.name}
+                                  </span>
+                                  <span style={{ fontSize: '11px', color: '#666' }}>
+                                    {formatTime(donor.createdAt)}
+                                  </span>
+                                </div>
+                                <span style={{ fontSize: '13px', fontWeight: '500', color: '#fff' }}>
+                                  {formatRupiah(donor.amount)}
+                                </span>
+                              </div>
+                              <p style={{
+                                fontSize: '13px',
+                                color: '#aaa',
+                                margin: 0,
+                                lineHeight: '1.5',
+                              }}>
+                                "{donor.message}"
+                              </p>
+                            </div>
+                          ))}
+                          {event.donors.length > 5 && (
+                            <div style={{
+                              textAlign: 'center',
+                              fontSize: '12px',
+                              color: '#666',
+                              paddingTop: '8px',
+                            }}>
+                              +{event.donors.length - 5} pesan donasi lainnya
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Leaderboard Section - Medal Only */}
                     {leaderboard.length > 0 && (
                       <div style={{
                         marginBottom: '24px',
@@ -1405,26 +1476,26 @@ export default function DonationPage() {
                       </button>
                     </div>
                     
-                    {/* Donors List */}
+                    {/* Donors List - Simplified */}
                     {event.donors.length > 0 && (
                       <div style={{ marginTop: '20px' }}>
                         <div style={{ fontSize: '14px', color: '#666', marginBottom: '12px' }}>
-                          {event.donors.length} donatur
+                          {event.donors.length} donatur terbaru
                         </div>
                         <div style={{
                           display: 'flex',
                           flexWrap: 'wrap',
                           gap: '12px',
                         }}>
-                          {event.donors.slice(0, 6).map((donor) => (
+                          {event.donors.slice(-5).reverse().map((donor) => (
                             <div key={donor.id} style={{
                               display: 'flex',
                               alignItems: 'center',
                               gap: '6px',
-                              fontSize: '14px',
+                              fontSize: '13px',
                               color: '#888',
                               background: '#111',
-                              padding: '8px 16px',
+                              padding: '6px 14px',
                               borderRadius: '30px',
                             }}>
                               <span>{donor.name}</span>
@@ -1432,11 +1503,6 @@ export default function DonationPage() {
                               <span style={{ color: '#fff' }}>{formatRupiah(donor.amount)}</span>
                             </div>
                           ))}
-                          {event.donors.length > 6 && (
-                            <span style={{ fontSize: '14px', color: '#666' }}>
-                              +{event.donors.length - 6}
-                            </span>
-                          )}
                         </div>
                       </div>
                     )}
@@ -1833,7 +1899,7 @@ export default function DonationPage() {
               }}
             >
               {eventCategories.map(category => (
-                <option key={category.id} value={category.id} style={{ background: '#000', color: category.color }}>
+                <option key={category.id} value={category.id} style={{ background: '#000', color: '#fff' }}>
                   {category.name}
                 </option>
               ))}
