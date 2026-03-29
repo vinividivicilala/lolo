@@ -552,6 +552,40 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
+  // Fungsi format waktu untuk donasi
+  const formatTime = (date: any): string => {
+    if (!date) return "Baru saja";
+    try {
+      const d = date instanceof Date ? date : new Date(date);
+      if (isNaN(d.getTime())) return "Baru saja";
+      
+      const now = new Date();
+      const diffMs = now.getTime() - d.getTime();
+      const diffMins = Math.floor(diffMs / 60000);
+      const diffHours = Math.floor(diffMs / 3600000);
+      const diffDays = Math.floor(diffMs / 86400000);
+      
+      if (diffMins < 1) return 'Baru saja';
+      if (diffMins < 60) return `${diffMins} menit lalu`;
+      if (diffHours < 24) return `${diffHours} jam lalu`;
+      if (diffDays === 1) return 'Kemarin';
+      if (diffDays < 7) return `${diffDays} hari lalu`;
+      return d.toLocaleDateString('id-ID');
+    } catch {
+      return "Baru saja";
+    }
+  };
+
+  // Format Rupiah
+  const formatRupiah = (amount: number) => {
+    return new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount);
+  };
+
   // Fungsi untuk mendapatkan nama bulan
   const getMonthName = (monthIndex: number): string => {
     const months = [
@@ -739,8 +773,7 @@ export default function HomePage(): React.JSX.Element {
     try {
       setIsLoadingDonations(true);
       const donationsRef = collection(db, 'donationEvents');
-      const q = query(donationsRef, where('donors', 'array-contains', { userId: userId }));
-      const querySnapshot = await getDocs(q);
+      const querySnapshot = await getDocs(donationsRef);
       const donationsData: UserDonation[] = [];
       querySnapshot.forEach((doc) => {
         const data = doc.data();
@@ -773,8 +806,7 @@ export default function HomePage(): React.JSX.Element {
     if (!db || !userId) return () => {};
     try {
       const donationsRef = collection(db, 'donationEvents');
-      const q = query(donationsRef);
-      const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const unsubscribe = onSnapshot(donationsRef, (querySnapshot) => {
         const donationsData: UserDonation[] = [];
         querySnapshot.forEach((doc) => {
           const data = doc.data();
@@ -898,16 +930,6 @@ export default function HomePage(): React.JSX.Element {
       }
     }
     return 'Email/Password';
-  };
-
-  // Format Rupiah
-  const formatRupiah = (amount: number) => {
-    return new Intl.NumberFormat('id-ID', {
-      style: 'currency',
-      currency: 'IDR',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(amount);
   };
 
   // Listen to auth state changes
@@ -1277,14 +1299,14 @@ export default function HomePage(): React.JSX.Element {
   const handleNoteClick = () => setShowNoteOverlay(true);
   const handleCloseNoteOverlay = () => setShowNoteOverlay(false);
 
-  // Handler untuk Community Overlay - TETAP TAMPIL SAMPAI USER MENUTUP
+  // Handler untuk Community Overlay
   const handleCommunityClick = () => {
     setShowCommunityOverlay(true);
   };
 
   const handleCloseCommunityOverlay = () => setShowCommunityOverlay(false);
 
-  // Handler untuk News dan Stories - LANGSUNG NAVIGASI
+  // Handler untuk News dan Stories
   const handleNewsClick = () => {
     router.push('/news');
   };
@@ -1869,16 +1891,16 @@ export default function HomePage(): React.JSX.Element {
               top: '6rem',
               left: '50%',
               transform: 'translateX(-50%)',
-              backgroundColor: '#FFD700',
+              backgroundColor: 'rgba(255,215,0,0.9)',
               color: 'black',
               padding: '1rem 2rem',
               borderRadius: '50px',
               zIndex: 10002,
-              boxShadow: '0 10px 30px rgba(255, 215, 0, 0.5)',
+              boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
               display: 'flex',
               alignItems: 'center',
               gap: '1rem',
-              border: '2px solid white'
+              border: '1px solid rgba(255,255,255,0.3)'
             }}
           >
             <motion.div
@@ -1895,7 +1917,7 @@ export default function HomePage(): React.JSX.Element {
         )}
       </AnimatePresence>
 
-      {/* Community Overlay - DIPERBAIKI SESUAI PERMINTAAN - 2 KOLOM DAN TETAP TAMPIL */}
+      {/* Community Overlay */}
       <AnimatePresence>
         {showCommunityOverlay && (
           <motion.div
@@ -1920,7 +1942,6 @@ export default function HomePage(): React.JSX.Element {
               boxShadow: '0 10px 30px rgba(0,0,0,0.5)'
             }}
           >
-            {/* Header Community Overlay */}
             <div style={{
               padding: isMobile ? '1.5rem' : '2rem',
               borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
@@ -1962,7 +1983,6 @@ export default function HomePage(): React.JSX.Element {
               </motion.button>
             </div>
 
-            {/* Konten Community Overlay - 2 KOLOM */}
             <div style={{
               padding: isMobile ? '2rem 1.5rem' : '3rem 3rem',
               overflowY: 'auto',
@@ -1973,7 +1993,6 @@ export default function HomePage(): React.JSX.Element {
                 gridTemplateColumns: '1fr 1fr',
                 gap: isMobile ? '2rem' : '4rem'
               }}>
-                {/* Kolom Kiri */}
                 <div style={{
                   display: 'flex',
                   flexDirection: 'column',
@@ -1994,7 +2013,6 @@ export default function HomePage(): React.JSX.Element {
                       }}
                       whileHover={{ x: 5 }}
                     >
-                      {/* North West Arrow SVG */}
                       <svg
                         width="24"
                         height="24"
@@ -2013,7 +2031,6 @@ export default function HomePage(): React.JSX.Element {
                         <path d="M7 7h10v10" />
                       </svg>
                       
-                      {/* Teks Nama Komunitas */}
                       <span style={{
                         color: 'white',
                         fontSize: isMobile ? '1.5rem' : '2.2rem',
@@ -2027,7 +2044,6 @@ export default function HomePage(): React.JSX.Element {
                   ))}
                 </div>
 
-                {/* Kolom Kanan */}
                 <div style={{
                   display: 'flex',
                   flexDirection: 'column',
@@ -2048,7 +2064,6 @@ export default function HomePage(): React.JSX.Element {
                       }}
                       whileHover={{ x: 5 }}
                     >
-                      {/* North West Arrow SVG */}
                       <svg
                         width="24"
                         height="24"
@@ -2067,7 +2082,6 @@ export default function HomePage(): React.JSX.Element {
                         <path d="M7 7h10v10" />
                       </svg>
                       
-                      {/* Teks Nama Komunitas */}
                       <span style={{
                         color: 'white',
                         fontSize: isMobile ? '1.5rem' : '2.2rem',
@@ -2086,7 +2100,7 @@ export default function HomePage(): React.JSX.Element {
         )}
       </AnimatePresence>
 
-      {/* PRODUCT OVERLAY - Tentang Shop */}
+      {/* PRODUCT OVERLAY */}
       <AnimatePresence>
         {showProductOverlay && (
           <motion.div
@@ -2350,7 +2364,7 @@ export default function HomePage(): React.JSX.Element {
         )}
       </AnimatePresence>
 
-      {/* VISUAL DESIGNER OVERLAY - DIPERBAIKI TANPA MAP */}
+      {/* VISUAL DESIGNER OVERLAY */}
       <AnimatePresence>
         {showVisualDesignerOverlay && (
           <motion.div
@@ -2374,7 +2388,6 @@ export default function HomePage(): React.JSX.Element {
               fontFamily: 'Helvetica, Arial, sans-serif'
             }}
           >
-            {/* Background Pattern */}
             <div style={{
               position: 'absolute',
               top: 0,
@@ -2390,7 +2403,6 @@ export default function HomePage(): React.JSX.Element {
               zIndex: 1
             }} />
 
-            {/* Tombol Close Minimalis */}
             <div
               ref={visualDesignerCloseRef}
               onClick={handleCloseVisualDesignerOverlay}
@@ -2424,7 +2436,6 @@ export default function HomePage(): React.JSX.Element {
               margin: '0 auto',
               width: '100%'
             }}>
-              {/* Header dengan angka 02 dan panah SOUTH WEST */}
               <motion.div
                 initial={{ opacity: 0, x: -50 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -2452,7 +2463,6 @@ export default function HomePage(): React.JSX.Element {
                     02
                   </span>
                   
-                  {/* SOUTH WEST ARROW */}
                   <svg
                     width="40"
                     height="40"
@@ -2480,13 +2490,11 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </motion.div>
 
-              {/* Grid Layout 2 Kolom */}
               <div style={{
                 display: 'grid',
                 gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
                 gap: '4rem'
               }}>
-                {/* Kolom Kiri */}
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -2510,7 +2518,6 @@ export default function HomePage(): React.JSX.Element {
                     Every pixel tells a story, combining beauty with usability.
                   </p>
                   
-                  {/* Design Philosophy - TETAP SAMA, hanya angka */}
                   <div style={{ marginTop: '3rem' }}>
                     <h3 style={{
                       fontSize: '1.5rem',
@@ -2566,17 +2573,12 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 </motion.div>
 
-                {/* Kolom Kanan - SEMUA DIHAPUS (stats, skills, tools) */}
                 <motion.div
                   initial={{ opacity: 0, x: 30 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.4 }}
-                >
-                  {/* KOSONG - semua konten dihapus */}
-                </motion.div>
+                />
               </div>
-
-              {/* Tools Section - DIHAPUS total (judul dan konten) */}
             </div>
           </motion.div>
         )}
@@ -2606,7 +2608,6 @@ export default function HomePage(): React.JSX.Element {
               fontFamily: 'Helvetica, Arial, sans-serif'
             }}
           >
-            {/* Background Pattern Minimalis */}
             <div style={{
               position: 'absolute',
               top: 0,
@@ -2622,7 +2623,6 @@ export default function HomePage(): React.JSX.Element {
               zIndex: 1
             }} />
 
-            {/* Tombol Close Minimalis */}
             <div
               ref={indonesiaCloseRef}
               onClick={handleCloseIndonesiaOverlay}
@@ -2656,7 +2656,6 @@ export default function HomePage(): React.JSX.Element {
               margin: '0 auto',
               width: '100%'
             }}>
-              {/* Header dengan angka 03 dan panah SOUTH WEST */}
               <motion.div
                 initial={{ opacity: 0, x: -50 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -2684,7 +2683,6 @@ export default function HomePage(): React.JSX.Element {
                     03
                   </span>
                   
-                  {/* SOUTH WEST ARROW */}
                   <svg
                     width="40"
                     height="40"
@@ -2712,13 +2710,11 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </motion.div>
 
-              {/* Grid Layout 2 Kolom */}
               <div style={{
                 display: 'grid',
                 gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
                 gap: '4rem'
               }}>
-                {/* Kolom Kiri - Map Jakarta (iframe Google Maps) */}
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -2744,7 +2740,6 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 </motion.div>
 
-                {/* Kolom Kanan - Hanya Based in Jakarta */}
                 <motion.div
                   initial={{ opacity: 0, x: 30 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -2779,7 +2774,6 @@ export default function HomePage(): React.JSX.Element {
       <AnimatePresence>
         {showDonasiTracking && user && (
           <motion.div
-            ref={userProfileModalRef}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -2840,11 +2834,11 @@ export default function HomePage(): React.JSX.Element {
                   </h2>
                   <div style={{
                     backgroundColor: 'transparent',
-                    color: '#FFD700',
+                    color: 'rgba(255,255,255,0.8)',
                     fontSize: '0.9rem',
                     padding: '0.3rem 0.8rem',
                     borderRadius: '20px',
-                    border: '1px solid rgba(255, 215, 0, 0.5)'
+                    border: '1px solid rgba(255,255,255,0.3)'
                   }}>
                     Total: {formatRupiah(totalDonasiUser)}
                   </div>
@@ -3036,7 +3030,7 @@ export default function HomePage(): React.JSX.Element {
                           <span style={{
                             fontSize: '1.2rem',
                             fontWeight: '600',
-                            color: '#FFD700'
+                            color: 'rgba(255,255,255,0.9)'
                           }}>
                             {formatRupiah(donation.amount)}
                           </span>
@@ -3109,7 +3103,7 @@ export default function HomePage(): React.JSX.Element {
         )}
       </AnimatePresence>
 
-      {/* Note Overlay - MENAMPILKAN RIWAYAT NOTE PER USER DENGAN KATEGORI & TAHUN */}
+      {/* Note Overlay */}
       <AnimatePresence>
         {showNoteOverlay && (
           <motion.div
@@ -3132,7 +3126,6 @@ export default function HomePage(): React.JSX.Element {
               borderRight: '1px solid rgba(255, 255, 255, 0.1)'
             }}
           >
-            {/* Header */}
             <div style={{
               padding: isMobile ? '1.5rem' : '2rem',
               borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
@@ -3187,14 +3180,12 @@ export default function HomePage(): React.JSX.Element {
               </motion.button>
             </div>
 
-            {/* Konten Utama */}
             <div style={{
               flex: 1,
               overflowY: 'auto',
               padding: isMobile ? '2rem 1.5rem' : '3rem'
             }}>
               {!user ? (
-                /* Jika user belum login */
                 <div style={{
                   display: 'flex',
                   flexDirection: 'column',
@@ -3227,7 +3218,6 @@ export default function HomePage(): React.JSX.Element {
                   </motion.button>
                 </div>
               ) : isLoadingNotes ? (
-                /* Loading state */
                 <div style={{
                   display: 'flex',
                   justifyContent: 'center',
@@ -3247,7 +3237,6 @@ export default function HomePage(): React.JSX.Element {
                   />
                 </div>
               ) : !userNotes || userNotes.length === 0 ? (
-                /* Jika tidak ada notes */
                 <div style={{
                   display: 'flex',
                   flexDirection: 'column',
@@ -3280,14 +3269,11 @@ export default function HomePage(): React.JSX.Element {
                   </motion.button>
                 </div>
               ) : (
-                /* Menampilkan notes berdasarkan kategori dan tahun */
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
-                  {/* Debug info - hapus setelah memastikan data muncul */}
                   <div style={{ color: 'white', marginBottom: '1rem', fontSize: '0.8rem', opacity: 0.5 }}>
                     Total notes: {userNotes.length}
                   </div>
 
-                  {/* Kategori: Personal */}
                   {userNotes.filter(note => note.category?.toLowerCase() === 'personal').length > 0 && (
                     <div>
                       <div style={{
@@ -3311,7 +3297,6 @@ export default function HomePage(): React.JSX.Element {
                         </span>
                       </div>
 
-                      {/* Group by tahun untuk Personal */}
                       {Object.entries(
                         userNotes
                           .filter(note => note.category?.toLowerCase() === 'personal')
@@ -3425,7 +3410,6 @@ export default function HomePage(): React.JSX.Element {
                     </div>
                   )}
 
-                  {/* Kategori: Collaborate */}
                   {userNotes.filter(note => note.category?.toLowerCase() === 'collaborate').length > 0 && (
                     <div>
                       <div style={{
@@ -3449,7 +3433,6 @@ export default function HomePage(): React.JSX.Element {
                         </span>
                       </div>
 
-                      {/* Group by tahun untuk Collaborate */}
                       {Object.entries(
                         userNotes
                           .filter(note => note.category?.toLowerCase() === 'collaborate')
@@ -3563,7 +3546,6 @@ export default function HomePage(): React.JSX.Element {
                     </div>
                   )}
 
-                  {/* Kategori: Lainnya (tanpa category atau category lain) */}
                   {userNotes.filter(note => {
                     const cat = note.category?.toLowerCase() || '';
                     return cat !== 'personal' && cat !== 'collaborate';
@@ -3593,7 +3575,6 @@ export default function HomePage(): React.JSX.Element {
                         </span>
                       </div>
 
-                      {/* Group by tahun untuk Lainnya */}
                       {Object.entries(
                         userNotes
                           .filter(note => {
@@ -3821,7 +3802,6 @@ export default function HomePage(): React.JSX.Element {
                 flexDirection: 'column',
                 gap: '2rem'
               }}>
-                {/* Deskripsi Calendar */}
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -3865,7 +3845,6 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 </motion.div>
 
-                {/* Konten Kalender yang sudah ada */}
                 <div style={{
                   display: 'flex',
                   justifyContent: 'space-between',
@@ -7452,9 +7431,9 @@ export default function HomePage(): React.JSX.Element {
                               transform: 'translateY(-50%)',
                               width: '8px',
                               height: '8px',
-                              backgroundColor: '#FFD700',
+                              backgroundColor: 'rgba(255,215,0,0.8)',
                               borderRadius: '50%',
-                              boxShadow: '0 0 10px #FFD700'
+                              boxShadow: '0 0 10px rgba(255,215,0,0.5)'
                             }}
                           />
                         )}
@@ -7592,7 +7571,7 @@ export default function HomePage(): React.JSX.Element {
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: '0.3rem',
-                                color: '#FFD700',
+                                color: 'rgba(255,215,0,0.8)',
                                 fontSize: '0.7rem'
                               }}>
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -7780,7 +7759,7 @@ export default function HomePage(): React.JSX.Element {
         )}
       </AnimatePresence>
 
-      {/* Top Navigation Bar - DESIGN DIPERBAIKI DENGAN TOMBOL WARNA CERAH */}
+      {/* Top Navigation Bar */}
       <div 
         ref={topNavRef}
         style={{
@@ -7916,7 +7895,6 @@ export default function HomePage(): React.JSX.Element {
               Chatbot
             </motion.span>
 
-            {/* Community - CLICK untuk buka overlay */}
             <motion.span
               onClick={handleCommunityClick}
               style={{
@@ -7936,7 +7914,6 @@ export default function HomePage(): React.JSX.Element {
               Community
             </motion.span>
 
-            {/* News - LANGSUNG NAVIGASI */}
             <motion.span
               onClick={handleNewsClick}
               style={{
@@ -7956,7 +7933,6 @@ export default function HomePage(): React.JSX.Element {
               News
             </motion.span>
 
-            {/* Stories - LANGSUNG NAVIGASI */}
             <motion.span
               onClick={handleStoriesClick}
               style={{
@@ -7976,7 +7952,6 @@ export default function HomePage(): React.JSX.Element {
               Stories
             </motion.span>
 
-            {/* Note - CLICK untuk buka overlay dengan deskripsi */}
             <motion.span
               onClick={handleNoteClick}
               style={{
@@ -7996,7 +7971,6 @@ export default function HomePage(): React.JSX.Element {
               Note
             </motion.span>
 
-            {/* Calendar - CLICK untuk buka modal dengan deskripsi */}
             <motion.span
               onClick={() => setShowCalendarModal(true)}
               style={{
@@ -8048,19 +8022,19 @@ export default function HomePage(): React.JSX.Element {
               width: '40px',
               height: '40px',
               borderRadius: '50%',
-              backgroundColor: '#FFD700',
+              backgroundColor: 'rgba(255,215,0,0.2)',
+              border: '1px solid rgba(255,215,0,0.5)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               cursor: 'pointer',
-              transition: 'all 0.3s ease',
-              boxShadow: '0 0 15px rgba(255, 215, 0, 0.7)'
+              transition: 'all 0.3s ease'
             }}
             onClick={() => setShowNotification(!showNotification)}
             whileHover={{ 
               scale: 1.1,
-              backgroundColor: '#FFE55C',
-              boxShadow: '0 0 20px rgba(255, 215, 0, 0.9)'
+              backgroundColor: 'rgba(255,215,0,0.3)',
+              borderColor: 'rgba(255,215,0,0.8)'
             }}
             whileTap={{ scale: 0.95 }}
           >
@@ -8069,7 +8043,7 @@ export default function HomePage(): React.JSX.Element {
               height="20" 
               viewBox="0 0 24 24" 
               fill="none" 
-              stroke="black"
+              stroke="white"
               strokeWidth="2"
             >
               <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
@@ -8087,16 +8061,16 @@ export default function HomePage(): React.JSX.Element {
                   right: '-2px',
                   minWidth: '18px',
                   height: '18px',
-                  backgroundColor: 'black',
+                  backgroundColor: 'rgba(255,215,0,0.9)',
                   borderRadius: '50%',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  border: '2px solid #FFD700'
+                  border: '1px solid rgba(255,215,0,0.5)'
                 }}
               >
                 <span style={{
-                  color: 'white',
+                  color: 'black',
                   fontSize: '0.65rem',
                   fontWeight: '700',
                   fontFamily: 'Helvetica, Arial, sans-serif',
@@ -8114,27 +8088,27 @@ export default function HomePage(): React.JSX.Element {
               display: 'flex',
               alignItems: 'center',
               gap: '0.5rem',
-              backgroundColor: '#FFD700',
+              backgroundColor: 'rgba(255,215,0,0.2)',
+              border: '1px solid rgba(255,215,0,0.5)',
               padding: '0.5rem 1rem',
               borderRadius: '30px',
               cursor: 'pointer',
-              transition: 'all 0.3s ease',
-              boxShadow: '0 0 15px rgba(255, 215, 0, 0.7)'
+              transition: 'all 0.3s ease'
             }}
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 1.3, duration: 0.5 }}
             whileHover={{ 
               scale: 1.05,
-              backgroundColor: '#FFE55C',
-              boxShadow: '0 0 20px rgba(255, 215, 0, 0.9)'
+              backgroundColor: 'rgba(255,215,0,0.3)',
+              borderColor: 'rgba(255,215,0,0.8)'
             }}
             whileTap={{ scale: 0.95 }}
           >
             <span style={{
-              color: 'black',
+              color: 'white',
               fontSize: isMobile ? '0.9rem' : '1rem',
-              fontWeight: '600',
+              fontWeight: '500',
               fontFamily: 'Helvetica, Arial, sans-serif'
             }}>
               {user ? userDisplayName : 'SIGN IN'}
@@ -8144,8 +8118,8 @@ export default function HomePage(): React.JSX.Element {
               height="16"
               viewBox="0 0 24 24"
               fill="none"
-              stroke="black"
-              strokeWidth="2.5"
+              stroke="white"
+              strokeWidth="2"
             >
               <path d="M7 17L17 7"/>
               <path d="M7 7h10v10"/>
@@ -8431,7 +8405,7 @@ export default function HomePage(): React.JSX.Element {
             </div>
           </div>
 
-          {/* Baris 3: BASED + Foto + IN + PANTAU */}
+          {/* Baris 3: BASED + Foto + IN + PANTAU (Donasi Kamu) */}
           <div style={{
             display: 'flex',
             alignItems: 'center',
@@ -8517,7 +8491,7 @@ export default function HomePage(): React.JSX.Element {
                 </h2>
               </div>
 
-              {/* Tombol PANTAU dengan SOUTH WEST ARROW */}
+              {/* Tombol PANTAU dengan SOUTH WEST ARROW dan teks "Donasi Kamu" */}
               <motion.div
                 onClick={handleDonasiTrackingClick}
                 style={{
@@ -8531,9 +8505,9 @@ export default function HomePage(): React.JSX.Element {
                   transition: 'all 0.3s ease'
                 }}
                 whileHover={{ 
-                  borderColor: '#FFD700',
-                  backgroundColor: 'rgba(255,215,0,0.1)',
-                  scale: 1.05
+                  borderColor: 'rgba(255,255,255,0.6)',
+                  backgroundColor: 'rgba(255,255,255,0.05)',
+                  scale: 1.02
                 }}
                 whileTap={{ scale: 0.98 }}
               >
@@ -8552,7 +8526,7 @@ export default function HomePage(): React.JSX.Element {
                   height={isMobile ? "24" : "28"}
                   viewBox="0 0 24 24"
                   fill="none"
-                  stroke="#FFD700"
+                  stroke="white"
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -8560,6 +8534,15 @@ export default function HomePage(): React.JSX.Element {
                   <path d="M17 7L7 17" />
                   <path d="M7 7h10v10" />
                 </svg>
+                <span style={{
+                  color: 'rgba(255,255,255,0.7)',
+                  fontSize: isMobile ? '0.8rem' : '0.9rem',
+                  fontWeight: '300',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  letterSpacing: '0.5px'
+                }}>
+                  Donasi Kamu
+                </span>
               </motion.div>
             </div>
           </div>
