@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -120,28 +120,6 @@ const NorthEastArrow = ({ size = 28, color = "#666" }) => (
   </svg>
 );
 
-const NorthWestArrow = ({ size = 28, color = "#666" }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M17 7 L7 7 L7 17" />
-    <path d="M7 7 L17 17" />
-  </svg>
-);
-
-const SouthEastArrow = ({ size = 28, color = "#666" }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M7 17 L17 17 L17 7" />
-    <path d="M17 17 L7 7" />
-  </svg>
-);
-
-const SouthWestArrow = ({ size = 28, color = "#666" }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M17 17 L7 17 L7 7" />
-    <path d="M7 17 L17 7" />
-  </svg>
-);
-
-// Icons
 const PlusIcon = ({ size = 28 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
     <line x1="12" y1="5" x2="12" y2="19"/>
@@ -290,6 +268,8 @@ export default function DonationPage() {
   const [newComment, setNewComment] = useState("");
   const [newCommentEventId, setNewCommentEventId] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [animateProgress, setAnimateProgress] = useState<string | null>(null);
+  const [progressKey, setProgressKey] = useState<number>(0);
   
   // State untuk Create Event
   const [newEvent, setNewEvent] = useState({
@@ -306,7 +286,6 @@ export default function DonationPage() {
   const [showStoryModal, setShowStoryModal] = useState(false);
   const [selectedEventForStory, setSelectedEventForStory] = useState<DonationEvent | null>(null);
   const [storyContent, setStoryContent] = useState("");
-  const [storyImages, setStoryImages] = useState<string[]>([]);
   const [storyComments, setStoryComments] = useState<{[key: string]: string}>({});
   
   // State untuk animasi
@@ -336,22 +315,6 @@ export default function DonationPage() {
     return parseInt(value.replace(/[^\d]/g, '')) || 0;
   };
 
-  // Format tanggal
-  const formatDate = (date: any) => {
-    if (!date) return "Baru saja";
-    try {
-      const d = date.toDate ? date.toDate() : new Date(date);
-      if (isNaN(d.getTime())) return "Baru saja";
-      return d.toLocaleDateString('id-ID', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric'
-      });
-    } catch {
-      return "Baru saja";
-    }
-  };
-
   // Format waktu relatif
   const formatTime = (date: any) => {
     if (!date) return "Baru saja";
@@ -370,7 +333,7 @@ export default function DonationPage() {
       if (diffHours < 24) return `${diffHours} jam lalu`;
       if (diffDays === 1) return 'Kemarin';
       if (diffDays < 7) return `${diffDays} hari lalu`;
-      return formatDate(d);
+      return d.toLocaleDateString('id-ID');
     } catch {
       return "Baru saja";
     }
@@ -517,7 +480,7 @@ export default function DonationPage() {
         userEmail: user.email,
         userPhoto: user.photoURL,
         content: storyContent,
-        images: storyImages,
+        images: [],
         likes: [],
         comments: [],
         createdAt: new Date()
@@ -529,7 +492,6 @@ export default function DonationPage() {
       });
       
       setStoryContent("");
-      setStoryImages([]);
       setShowStoryModal(false);
       setSelectedEventForStory(null);
       setSuccessMessage("Cerita berhasil dibagikan!");
@@ -544,7 +506,7 @@ export default function DonationPage() {
     }
   };
 
-  // Handle Donation
+  // Handle Donation with Progress Animation
   const handleDonate = async () => {
     if (!user) {
       alert("Silakan login terlebih dahulu");
@@ -565,6 +527,10 @@ export default function DonationPage() {
     }
     
     setIsSubmitting(true);
+    
+    // Trigger progress bar animation immediately
+    setAnimateProgress(selectedEvent.id);
+    setProgressKey(prev => prev + 1);
     
     try {
       const eventRef = doc(firebaseDb, 'donationEvents', selectedEvent.id);
@@ -592,12 +558,14 @@ export default function DonationPage() {
       
       setTimeout(() => {
         setAnimateDonation(null);
+        setAnimateProgress(null);
         setShowSuccess(false);
       }, 3000);
       
     } catch (error) {
       console.error("Error donating:", error);
       alert("Gagal mengirim donasi");
+      setAnimateProgress(null);
     } finally {
       setIsSubmitting(false);
     }
@@ -970,7 +938,7 @@ export default function DonationPage() {
         </p>
       </div>
 
-      {/* Category Filters - No Line Box, Transparent */}
+      {/* Category Filters - No Line Box */}
       <div style={{
         maxWidth: '700px',
         margin: '0 auto',
@@ -990,7 +958,6 @@ export default function DonationPage() {
             color: selectedCategory === "all" ? '#fff' : '#666',
             border: 'none',
             cursor: 'pointer',
-            transition: 'all 0.2s',
           }}
         >
           Semua
@@ -1007,7 +974,6 @@ export default function DonationPage() {
               color: selectedCategory === category.id ? '#fff' : '#666',
               border: 'none',
               cursor: 'pointer',
-              transition: 'all 0.2s',
             }}
           >
             {category.name}
@@ -1096,6 +1062,7 @@ export default function DonationPage() {
                 const percentage = getPercentage(event.currentAmount, event.targetAmount);
                 const daysLeft = getDaysRemaining(event.endDate);
                 const isAnimating = animateDonation === event.id;
+                const isProgressAnimating = animateProgress === event.id;
                 const categoryName = getCategoryName(event.category);
                 const leaderboard = getLeaderboard(event.donors);
                 
@@ -1143,7 +1110,7 @@ export default function DonationPage() {
                       </button>
                     </div>
                     
-                    {/* Category - Simple Text */}
+                    {/* Category */}
                     <div style={{ marginBottom: '12px' }}>
                       <span style={{
                         fontSize: '13px',
@@ -1174,7 +1141,7 @@ export default function DonationPage() {
                       {event.description}
                     </p>
                     
-                    {/* Progress */}
+                    {/* Progress with Animation on Donation */}
                     <div style={{ marginBottom: '28px' }}>
                       <div style={{
                         display: 'flex',
@@ -1184,7 +1151,15 @@ export default function DonationPage() {
                         color: '#888',
                       }}>
                         <span>Terkumpul</span>
-                        <span style={{ color: '#fff' }}>{formatRupiah(event.currentAmount)}</span>
+                        <motion.span 
+                          key={`amount-${event.id}-${event.currentAmount}`}
+                          initial={{ scale: 1.2, color: '#fff' }}
+                          animate={{ scale: 1, color: '#fff' }}
+                          transition={{ duration: 0.3 }}
+                          style={{ color: '#fff' }}
+                        >
+                          {formatRupiah(event.currentAmount)}
+                        </motion.span>
                       </div>
                       <div style={{
                         display: 'flex',
@@ -1204,9 +1179,10 @@ export default function DonationPage() {
                         marginTop: '16px',
                       }}>
                         <motion.div
-                          initial={{ width: 0 }}
+                          key={`progress-${event.id}-${progressKey}`}
+                          initial={{ width: `${getPercentage(event.currentAmount - (isProgressAnimating ? parseNumberFromDots(donationAmount) : 0), event.targetAmount)}%` }}
                           animate={{ width: `${percentage}%` }}
-                          transition={{ duration: 1, ease: "easeOut" }}
+                          transition={{ duration: 0.8, ease: "easeOut" }}
                           style={{
                             height: '100%',
                             backgroundColor: '#fff',
@@ -1229,7 +1205,7 @@ export default function DonationPage() {
                       </div>
                     </div>
                     
-                    {/* Donation Messages Section - Large Text, No Border Highlight */}
+                    {/* Donation Messages Section */}
                     {event.donors.length > 0 && (
                       <div style={{
                         marginBottom: '24px',
@@ -1249,7 +1225,12 @@ export default function DonationPage() {
                           gap: '20px',
                         }}>
                           {event.donors.slice(0, 5).map((donor) => (
-                            <div key={donor.id}>
+                            <motion.div 
+                              key={donor.id}
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ duration: 0.3 }}
+                            >
                               <div style={{
                                 display: 'flex',
                                 alignItems: 'baseline',
@@ -1277,7 +1258,7 @@ export default function DonationPage() {
                               }}>
                                 "{donor.message}"
                               </p>
-                            </div>
+                            </motion.div>
                           ))}
                           {event.donors.length > 5 && (
                             <div style={{
