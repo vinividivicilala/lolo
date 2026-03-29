@@ -40,16 +40,16 @@ const firebaseConfig = {
   measurementId: "G-8LMP7F4BE9"
 };
 
-// Event Categories with Modern Colors
+// Event Categories with simple text styling
 const eventCategories = [
-  { id: "panti_asuhan", name: "Panti Asuhan", color: "#FF6B6B", bgColor: "rgba(255, 107, 107, 0.15)", borderColor: "rgba(255, 107, 107, 0.3)" },
-  { id: "panti_jompo", name: "Panti Jompo", color: "#4ECDC4", bgColor: "rgba(78, 205, 196, 0.15)", borderColor: "rgba(78, 205, 196, 0.3)" },
-  { id: "yayasan", name: "Yayasan", color: "#45B7D1", bgColor: "rgba(69, 183, 209, 0.15)", borderColor: "rgba(69, 183, 209, 0.3)" },
-  { id: "bencana_alam", name: "Bencana Alam", color: "#FFA07A", bgColor: "rgba(255, 160, 122, 0.15)", borderColor: "rgba(255, 160, 122, 0.3)" },
-  { id: "pendidikan", name: "Pendidikan", color: "#98D8C8", bgColor: "rgba(152, 216, 200, 0.15)", borderColor: "rgba(152, 216, 200, 0.3)" },
-  { id: "kesehatan", name: "Kesehatan", color: "#FFB347", bgColor: "rgba(255, 179, 71, 0.15)", borderColor: "rgba(255, 179, 71, 0.3)" },
-  { id: "masjid", name: "Masjid", color: "#96CEB4", bgColor: "rgba(150, 206, 180, 0.15)", borderColor: "rgba(150, 206, 180, 0.3)" },
-  { id: "umum", name: "Umum", color: "#AAAAAA", bgColor: "rgba(170, 170, 170, 0.15)", borderColor: "rgba(170, 170, 170, 0.3)" }
+  { id: "panti_asuhan", name: "Panti Asuhan", color: "#FF6B6B" },
+  { id: "panti_jompo", name: "Panti Jompo", color: "#4ECDC4" },
+  { id: "yayasan", name: "Yayasan", color: "#45B7D1" },
+  { id: "bencana_alam", name: "Bencana Alam", color: "#FFA07A" },
+  { id: "pendidikan", name: "Pendidikan", color: "#98D8C8" },
+  { id: "kesehatan", name: "Kesehatan", color: "#FFB347" },
+  { id: "masjid", name: "Masjid", color: "#96CEB4" },
+  { id: "umum", name: "Umum", color: "#AAAAAA" }
 ];
 
 // Instagram Verified Badge Component
@@ -213,17 +213,6 @@ const TimeIcon = ({ size = 16 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
     <circle cx="12" cy="12" r="10"/>
     <polyline points="12 6 12 12 16 14"/>
-  </svg>
-);
-
-const TrophyIcon = ({ size = 24 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M6 9H4.5C3.4 9 2.5 8.1 2.5 7V5C2.5 3.9 3.4 3 4.5 3H6" />
-    <path d="M18 9H19.5C20.6 9 21.5 8.1 21.5 7V5C21.5 3.9 20.6 3 19.5 3H18" />
-    <path d="M12 3v15" />
-    <path d="M7 18h10" />
-    <path d="M12 21v-3" />
-    <path d="M8 21h8" />
   </svg>
 );
 
@@ -446,16 +435,6 @@ export default function DonationPage() {
       .slice(0, 10); // Top 10 donors
     
     return leaderboard;
-  };
-
-  // Get medal color based on rank
-  const getMedalColor = (rank: number) => {
-    switch(rank) {
-      case 0: return "#FFD700"; // Gold
-      case 1: return "#C0C0C0"; // Silver
-      case 2: return "#CD7F32"; // Bronze
-      default: return "#666";
-    }
   };
 
   // Create Event
@@ -993,7 +972,7 @@ export default function DonationPage() {
         </p>
       </div>
 
-      {/* Category Filters */}
+      {/* Category Filters - Simple Text Only */}
       <div style={{
         maxWidth: '700px',
         margin: '0 auto',
@@ -1006,13 +985,13 @@ export default function DonationPage() {
         <button
           onClick={() => setSelectedCategory("all")}
           style={{
-            padding: '10px 24px',
-            borderRadius: '40px',
+            padding: '8px 20px',
+            borderRadius: '30px',
             fontSize: '14px',
-            fontWeight: '500',
-            background: selectedCategory === "all" ? '#fff' : 'transparent',
-            color: selectedCategory === "all" ? '#000' : '#666',
-            border: `1px solid ${selectedCategory === "all" ? '#fff' : '#333'}`,
+            fontWeight: selectedCategory === "all" ? '600' : '400',
+            background: 'transparent',
+            color: selectedCategory === "all" ? '#fff' : '#666',
+            border: selectedCategory === "all" ? '1px solid #fff' : '1px solid #333',
             cursor: 'pointer',
             transition: 'all 0.2s',
           }}
@@ -1024,13 +1003,13 @@ export default function DonationPage() {
             key={category.id}
             onClick={() => setSelectedCategory(category.id)}
             style={{
-              padding: '10px 24px',
-              borderRadius: '40px',
+              padding: '8px 20px',
+              borderRadius: '30px',
               fontSize: '14px',
-              fontWeight: '500',
-              background: selectedCategory === category.id ? category.color : 'transparent',
-              color: selectedCategory === category.id ? '#fff' : category.color,
-              border: `1px solid ${category.color}`,
+              fontWeight: selectedCategory === category.id ? '600' : '400',
+              background: 'transparent',
+              color: selectedCategory === category.id ? category.color : '#666',
+              border: selectedCategory === category.id ? `1px solid ${category.color}` : '1px solid #333',
               cursor: 'pointer',
               transition: 'all 0.2s',
             }}
@@ -1169,17 +1148,12 @@ export default function DonationPage() {
                       </button>
                     </div>
                     
-                    {/* Category Badge */}
+                    {/* Category Badge - Simple Text Only */}
                     <div style={{ marginBottom: '12px' }}>
                       <span style={{
-                        display: 'inline-block',
-                        padding: '6px 16px',
-                        borderRadius: '30px',
                         fontSize: '13px',
                         fontWeight: '500',
-                        backgroundColor: categoryStyle?.bgColor,
                         color: categoryStyle?.color,
-                        border: `1px solid ${categoryStyle?.borderColor}`,
                       }}>
                         {categoryStyle?.name}
                       </span>
@@ -1260,7 +1234,7 @@ export default function DonationPage() {
                       </div>
                     </div>
                     
-                    {/* Leaderboard Section */}
+                    {/* Leaderboard Section - Medal Only, No Icon */}
                     {leaderboard.length > 0 && (
                       <div style={{
                         marginBottom: '24px',
@@ -1269,22 +1243,14 @@ export default function DonationPage() {
                         borderRadius: '16px',
                         border: '1px solid #222',
                       }}>
-                        <div style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '10px',
+                        <h3 style={{
+                          fontSize: '18px',
+                          fontWeight: '600',
+                          color: '#fff',
                           marginBottom: '16px',
                         }}>
-                          <TrophyIcon size={22} />
-                          <h3 style={{
-                            fontSize: '18px',
-                            fontWeight: '600',
-                            color: '#fff',
-                            margin: 0,
-                          }}>
-                            Leaderboard Donatur
-                          </h3>
-                        </div>
+                          Leaderboard Donatur
+                        </h3>
                         <div style={{
                           display: 'flex',
                           flexDirection: 'column',
@@ -1305,9 +1271,8 @@ export default function DonationPage() {
                               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                 <span style={{
                                   width: '32px',
-                                  fontSize: '18px',
+                                  fontSize: '20px',
                                   fontWeight: 'bold',
-                                  color: getMedalColor(index),
                                 }}>
                                   {index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : `${index + 1}`}
                                 </span>
