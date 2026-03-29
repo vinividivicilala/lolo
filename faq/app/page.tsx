@@ -148,6 +148,16 @@ interface CalendarEvent {
   isAdmin: boolean;
 }
 
+// Type untuk data donasi user
+interface UserDonation {
+  id: string;
+  eventId: string;
+  eventTitle: string;
+  amount: number;
+  message: string;
+  createdAt: Date;
+}
+
 export default function HomePage(): React.JSX.Element {
   const router = useRouter();
   const [isMobile, setIsMobile] = useState(false);
@@ -236,6 +246,12 @@ export default function HomePage(): React.JSX.Element {
   const [showProductOverlay, setShowProductOverlay] = useState(false);
   const [showVisualDesignerOverlay, setShowVisualDesignerOverlay] = useState(false);
   const [showIndonesiaOverlay, setShowIndonesiaOverlay] = useState(false);
+
+  // State untuk Donasi Tracking
+  const [showDonasiTracking, setShowDonasiTracking] = useState(false);
+  const [userDonations, setUserDonations] = useState<UserDonation[]>([]);
+  const [totalDonasiUser, setTotalDonasiUser] = useState(0);
+  const [isLoadingDonations, setIsLoadingDonations] = useState(false);
 
   // State untuk rotating words
   const [currentRotatingWordIndex, setCurrentRotatingWordIndex] = useState(0);
@@ -685,137 +701,6 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-
-
-// State untuk Donasi
-const [showDonasiModal, setShowDonasiModal] = useState(false);
-const [userDonations, setUserDonations] = useState<any[]>([]);
-const [totalUserDonations, setTotalUserDonations] = useState(0);
-const [isLoadingDonations, setIsLoadingDonations] = useState(false);
-const [selectedDonationEvent, setSelectedDonationEvent] = useState<any>(null);
-
-// Fungsi untuk load donasi user dari Firebase
-const loadUserDonations = async (userId: string) => {
-  if (!db || !userId) return;
-  try {
-    setIsLoadingDonations(true);
-    const eventsRef = collection(db, 'donationEvents');
-    const q = query(eventsRef, orderBy('createdAt', 'desc'));
-    const querySnapshot = await getDocs(q);
-    const donationsData: any[] = [];
-    let total = 0;
-    
-    querySnapshot.forEach((doc) => {
-      const data = doc.data();
-      const donors = data.donors || [];
-      const userDonationsFromEvent = donors.filter((donor: any) => donor.userId === userId);
-      
-      if (userDonationsFromEvent.length > 0) {
-        userDonationsFromEvent.forEach((donation: any) => {
-          donationsData.push({
-            eventId: doc.id,
-            eventTitle: data.title,
-            eventCategory: data.category,
-            amount: donation.amount,
-            message: donation.message,
-            name: donation.name,
-            createdAt: donation.createdAt,
-            eventEndDate: data.endDate,
-            eventCurrentAmount: data.currentAmount,
-            eventTargetAmount: data.targetAmount
-          });
-          total += donation.amount;
-        });
-      }
-    });
-    
-    setUserDonations(donationsData);
-    setTotalUserDonations(total);
-    setIsLoadingDonations(false);
-  } catch (error) {
-    console.error("Error loading user donations:", error);
-    setIsLoadingDonations(false);
-  }
-};
-
-// Real-time listener untuk donasi user
-const loadUserDonationsRealtime = (userId: string) => {
-  if (!db || !userId) return () => {};
-  try {
-    const eventsRef = collection(db, 'donationEvents');
-    const q = query(eventsRef, orderBy('createdAt', 'desc'));
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const donationsData: any[] = [];
-      let total = 0;
-      
-      querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        const donors = data.donors || [];
-        const userDonationsFromEvent = donors.filter((donor: any) => donor.userId === userId);
-        
-        if (userDonationsFromEvent.length > 0) {
-          userDonationsFromEvent.forEach((donation: any) => {
-            donationsData.push({
-              eventId: doc.id,
-              eventTitle: data.title,
-              eventCategory: data.category,
-              amount: donation.amount,
-              message: donation.message,
-              name: donation.name,
-              createdAt: donation.createdAt,
-              eventEndDate: data.endDate,
-              eventCurrentAmount: data.currentAmount,
-              eventTargetAmount: data.targetAmount
-            });
-            total += donation.amount;
-          });
-        }
-      });
-      
-      setUserDonations(donationsData);
-      setTotalUserDonations(total);
-    });
-    return unsubscribe;
-  } catch (error) {
-    console.error("Error setting up realtime donations:", error);
-    return () => {};
-  }
-};
-
-// Fungsi untuk membuka modal donasi
-const handlePantauDonasi = () => {
-  if (!user) {
-    router.push('/signin');
-    return;
-  }
-  setShowDonasiModal(true);
-  loadUserDonations(user.uid);
-};
-
-  const formatRupiahDonasi = (amount: number) => {
-  if (!amount && amount !== 0) return 'Rp0';
-  return new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0
-  }).format(amount);
-};
-
-// Tambahkan useEffect untuk realtime listener donasi
-useEffect(() => {
-  let unsubscribe: (() => void) | undefined;
-  if (showDonasiModal && user) {
-    unsubscribe = loadUserDonationsRealtime(user.uid);
-  }
-  return () => {
-    if (unsubscribe) unsubscribe();
-  };
-}, [showDonasiModal, user]);
-
-
-  
-
   // Load total users count
   useEffect(() => {
     const loadTotalUsers = async () => {
@@ -847,6 +732,77 @@ useEffect(() => {
     };
     loadTotalLoggedInUsers();
   }, []);
+
+  // Load user donations dari Firebase
+  const loadUserDonations = async (userId: string) => {
+    if (!db || !userId) return;
+    try {
+      setIsLoadingDonations(true);
+      const donationsRef = collection(db, 'donationEvents');
+      const q = query(donationsRef, where('donors', 'array-contains', { userId: userId }));
+      const querySnapshot = await getDocs(q);
+      const donationsData: UserDonation[] = [];
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        const donors = data.donors || [];
+        const userDonationsInEvent = donors.filter((d: any) => d.userId === userId);
+        userDonationsInEvent.forEach((donation: any) => {
+          donationsData.push({
+            id: donation.id,
+            eventId: doc.id,
+            eventTitle: data.title,
+            amount: donation.amount,
+            message: donation.message,
+            createdAt: donation.createdAt?.toDate ? donation.createdAt.toDate() : new Date(donation.createdAt)
+          });
+        });
+      });
+      donationsData.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+      setUserDonations(donationsData);
+      const total = donationsData.reduce((sum, d) => sum + d.amount, 0);
+      setTotalDonasiUser(total);
+      setIsLoadingDonations(false);
+    } catch (error) {
+      console.error("Error loading user donations:", error);
+      setIsLoadingDonations(false);
+    }
+  };
+
+  // Real-time listener untuk donasi user
+  const loadUserDonationsRealtime = (userId: string) => {
+    if (!db || !userId) return () => {};
+    try {
+      const donationsRef = collection(db, 'donationEvents');
+      const q = query(donationsRef);
+      const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        const donationsData: UserDonation[] = [];
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          const donors = data.donors || [];
+          const userDonationsInEvent = donors.filter((d: any) => d.userId === userId);
+          userDonationsInEvent.forEach((donation: any) => {
+            donationsData.push({
+              id: donation.id,
+              eventId: doc.id,
+              eventTitle: data.title,
+              amount: donation.amount,
+              message: donation.message,
+              createdAt: donation.createdAt?.toDate ? donation.createdAt.toDate() : new Date(donation.createdAt)
+            });
+          });
+        });
+        donationsData.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+        setUserDonations(donationsData);
+        const total = donationsData.reduce((sum, d) => sum + d.amount, 0);
+        setTotalDonasiUser(total);
+        setIsLoadingDonations(false);
+      });
+      return unsubscribe;
+    } catch (error) {
+      console.error("Error setting up realtime donations:", error);
+      return () => {};
+    }
+  };
 
   // Fungsi untuk load user notes dari Firebase
   const loadUserNotes = async (userId: string) => {
@@ -944,6 +900,16 @@ useEffect(() => {
     return 'Email/Password';
   };
 
+  // Format Rupiah
+  const formatRupiah = (amount: number) => {
+    return new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount);
+  };
+
   // Listen to auth state changes
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -990,6 +956,18 @@ useEffect(() => {
       if (unsubscribe) unsubscribe();
     };
   }, [showUserProfileModal, user]);
+
+  // Real-time listener untuk donasi user ketika modal tracking terbuka
+  useEffect(() => {
+    let unsubscribe: (() => void) | undefined;
+    if (showDonasiTracking && user) {
+      loadUserDonations(user.uid);
+      unsubscribe = loadUserDonationsRealtime(user.uid);
+    }
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
+  }, [showDonasiTracking, user]);
 
   // Load comments from Firebase
   useEffect(() => {
@@ -1197,7 +1175,7 @@ useEffect(() => {
   // Mouse wheel scroll handler
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
-      if (!showUserProfileModal && !showMenuruFullPage && !showPhotoFullPage && !showCalendarModal && !showNoteOverlay && !showCommunityOverlay && !showProductOverlay && !showVisualDesignerOverlay && !showIndonesiaOverlay) {
+      if (!showUserProfileModal && !showMenuruFullPage && !showPhotoFullPage && !showCalendarModal && !showNoteOverlay && !showCommunityOverlay && !showProductOverlay && !showVisualDesignerOverlay && !showIndonesiaOverlay && !showDonasiTracking) {
         return;
       }
       e.stopPropagation();
@@ -1211,7 +1189,7 @@ useEffect(() => {
       document.removeEventListener('wheel', handleWheel);
       document.removeEventListener('mousedown', handleMouseDown);
     };
-  }, [showUserProfileModal, showMenuruFullPage, showPhotoFullPage, showCalendarModal, showNoteOverlay, showCommunityOverlay, showProductOverlay, showVisualDesignerOverlay, showIndonesiaOverlay]);
+  }, [showUserProfileModal, showMenuruFullPage, showPhotoFullPage, showCalendarModal, showNoteOverlay, showCommunityOverlay, showProductOverlay, showVisualDesignerOverlay, showIndonesiaOverlay, showDonasiTracking]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -1319,6 +1297,22 @@ useEffect(() => {
   const handleProductClick = () => setShowProductOverlay(true);
   const handleVisualDesignerClick = () => setShowVisualDesignerOverlay(true);
   const handleIndonesiaClick = () => setShowIndonesiaOverlay(true);
+
+  // Handler untuk membuka Donasi Tracking
+  const handleDonasiTrackingClick = () => {
+    if (user) {
+      setShowDonasiTracking(true);
+      loadUserDonations(user.uid);
+    } else {
+      router.push('/signin');
+    }
+  };
+  const handleCloseDonasiTracking = () => setShowDonasiTracking(false);
+
+  // Handler untuk navigasi ke halaman donasi
+  const handleDonasiPageClick = () => {
+    router.push('/donation');
+  };
 
   // Handler untuk menutup overlay
   const handleCloseProductOverlay = () => setShowProductOverlay(false);
@@ -1496,6 +1490,7 @@ useEffect(() => {
         if (showProductOverlay) setShowProductOverlay(false);
         if (showVisualDesignerOverlay) setShowVisualDesignerOverlay(false);
         if (showIndonesiaOverlay) setShowIndonesiaOverlay(false);
+        if (showDonasiTracking) setShowDonasiTracking(false);
       }
     };
 
@@ -1512,7 +1507,7 @@ useEffect(() => {
       if (leftCounterRef.current) gsap.killTweensOf(leftCounterRef.current);
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
-  }, [isMobile, showMenuruFullPage, showPhotoFullPage, showUserDropdown, showLogoutModal, showMenuOverlay, showNotification, showUserProfileModal, showDeleteAccountModal, showCalendarModal, showNoteOverlay, showCommunityOverlay, showProductOverlay, showVisualDesignerOverlay, showIndonesiaOverlay]);
+  }, [isMobile, showMenuruFullPage, showPhotoFullPage, showUserDropdown, showLogoutModal, showMenuOverlay, showNotification, showUserProfileModal, showDeleteAccountModal, showCalendarModal, showNoteOverlay, showCommunityOverlay, showProductOverlay, showVisualDesignerOverlay, showIndonesiaOverlay, showDonasiTracking]);
 
   useEffect(() => {
     if (plusSignRef.current && !showMenuruFullPage) {
@@ -2355,241 +2350,237 @@ useEffect(() => {
         )}
       </AnimatePresence>
 
-
-
       {/* VISUAL DESIGNER OVERLAY - DIPERBAIKI TANPA MAP */}
-<AnimatePresence>
-  {showVisualDesignerOverlay && (
-    <motion.div
-      ref={visualDesignerOverlayRef}
-      initial={{ y: '100%' }}
-      animate={{ y: 0 }}
-      exit={{ y: '100%' }}
-      transition={{ duration: 0.8, ease: [0.76, 0, 0.24, 1] }}
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        backgroundColor: '#050505',
-        zIndex: 10011,
-        display: 'flex',
-        flexDirection: 'column',
-        overflowY: 'auto',
-        color: 'white',
-        fontFamily: 'Helvetica, Arial, sans-serif'
-      }}
-    >
-      {/* Background Pattern */}
-      <div style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        backgroundImage: `
-          radial-gradient(circle at 30% 40%, rgba(255,255,255,0.02) 0%, transparent 40%),
-          radial-gradient(circle at 70% 60%, rgba(255,255,255,0.02) 0%, transparent 40%),
-          repeating-linear-gradient(45deg, rgba(255,255,255,0.005) 0px, rgba(255,255,255,0.005) 2px, transparent 2px, transparent 12px)
-        `,
-        pointerEvents: 'none',
-        zIndex: 1
-      }} />
-
-      {/* Tombol Close Minimalis */}
-      <div
-        ref={visualDesignerCloseRef}
-        onClick={handleCloseVisualDesignerOverlay}
-        style={{
-          position: 'fixed',
-          top: '2rem',
-          right: '2rem',
-          width: '50px',
-          height: '50px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          cursor: 'pointer',
-          zIndex: 10020,
-          color: 'white',
-          fontSize: '2rem',
-          fontWeight: '300',
-          fontFamily: 'Helvetica, Arial, sans-serif',
-          opacity: 0,
-          transform: 'scale(0.5) rotate(-180deg)'
-        }}
-      >
-        ×
-      </div>
-
-      <div style={{
-        position: 'relative',
-        zIndex: 2,
-        padding: isMobile ? '6rem 2rem 4rem 2rem' : '8rem 4rem 4rem 4rem',
-        maxWidth: '1400px',
-        margin: '0 auto',
-        width: '100%'
-      }}>
-        {/* Header dengan angka 02 dan panah SOUTH WEST */}
-        <motion.div
-          initial={{ opacity: 0, x: -50 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.2, duration: 0.6 }}
-          style={{
-            marginBottom: '4rem',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '2rem',
-            flexWrap: 'wrap'
-          }}
-        >
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '1.5rem'
-          }}>
-            <span style={{
-              color: 'rgba(255,255,255,0.3)',
-              fontSize: '1.2rem',
-              fontWeight: '300',
-              letterSpacing: '2px',
-              fontFamily: 'monospace'
-            }}>
-              02
-            </span>
-            
-            {/* SOUTH WEST ARROW */}
-            <svg
-              width="40"
-              height="40"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="rgba(255,255,255,0.5)"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M17 7L7 17" />
-              <path d="M7 7h10v10" />
-            </svg>
-            
-            <h1 style={{
-              fontSize: isMobile ? '4rem' : '7rem',
-              fontWeight: '300',
-              margin: 0,
-              lineHeight: 1,
-              letterSpacing: '-2px',
-              color: 'white'
-            }}>
-              VISUAL DESIGNER
-            </h1>
-          </div>
-        </motion.div>
-
-        {/* Grid Layout 2 Kolom */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
-          gap: '4rem'
-        }}>
-          {/* Kolom Kiri */}
+      <AnimatePresence>
+        {showVisualDesignerOverlay && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
+            ref={visualDesignerOverlayRef}
+            initial={{ y: '100%' }}
+            animate={{ y: 0 }}
+            exit={{ y: '100%' }}
+            transition={{ duration: 0.8, ease: [0.76, 0, 0.24, 1] }}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              backgroundColor: '#050505',
+              zIndex: 10011,
+              display: 'flex',
+              flexDirection: 'column',
+              overflowY: 'auto',
+              color: 'white',
+              fontFamily: 'Helvetica, Arial, sans-serif'
+            }}
           >
-            <h2 style={{
-              fontSize: '2rem',
-              fontWeight: '300',
-              margin: '0 0 2rem 0',
-              color: 'white'
-            }}>
-              Visual Designer
-            </h2>
-            <p style={{
-              fontSize: '1.2rem',
-              lineHeight: 1.8,
-              color: 'rgba(255,255,255,0.7)',
-              marginBottom: '2rem'
-            }}>
-              Crafting digital experiences with minimalist aesthetics and functional design. 
-              Every pixel tells a story, combining beauty with usability.
-            </p>
-            
-            {/* Design Philosophy - TETAP SAMA, hanya angka */}
-            <div style={{ marginTop: '3rem' }}>
-              <h3 style={{
-                fontSize: '1.5rem',
-                fontWeight: '300',
-                margin: '0 0 1.5rem 0',
-                color: 'white',
-                borderBottom: '1px solid rgba(255,255,255,0.1)',
-                paddingBottom: '0.5rem'
-              }}>
-                Design Philosophy
-              </h3>
-              <div style={{
+            {/* Background Pattern */}
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              backgroundImage: `
+                radial-gradient(circle at 30% 40%, rgba(255,255,255,0.02) 0%, transparent 40%),
+                radial-gradient(circle at 70% 60%, rgba(255,255,255,0.02) 0%, transparent 40%),
+                repeating-linear-gradient(45deg, rgba(255,255,255,0.005) 0px, rgba(255,255,255,0.005) 2px, transparent 2px, transparent 12px)
+              `,
+              pointerEvents: 'none',
+              zIndex: 1
+            }} />
+
+            {/* Tombol Close Minimalis */}
+            <div
+              ref={visualDesignerCloseRef}
+              onClick={handleCloseVisualDesignerOverlay}
+              style={{
+                position: 'fixed',
+                top: '2rem',
+                right: '2rem',
+                width: '50px',
+                height: '50px',
                 display: 'flex',
-                flexDirection: 'column',
-                gap: '1rem'
-              }}>
-                {[
-                  { label: 'Minimalist', desc: 'Clean, simple, purposeful' },
-                  { label: 'Responsive', desc: 'Adapts to every screen' },
-                  { label: 'Modern', desc: 'Contemporary aesthetics' },
-                  { label: 'Fast', desc: 'Optimized performance' }
-                ].map((item, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.4 + (index * 0.1) }}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '1rem',
-                      padding: '0.5rem 0',
-                      borderBottom: '1px solid rgba(255,255,255,0.05)'
-                    }}
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                zIndex: 10020,
+                color: 'white',
+                fontSize: '2rem',
+                fontWeight: '300',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                opacity: 0,
+                transform: 'scale(0.5) rotate(-180deg)'
+              }}
+            >
+              ×
+            </div>
+
+            <div style={{
+              position: 'relative',
+              zIndex: 2,
+              padding: isMobile ? '6rem 2rem 4rem 2rem' : '8rem 4rem 4rem 4rem',
+              maxWidth: '1400px',
+              margin: '0 auto',
+              width: '100%'
+            }}>
+              {/* Header dengan angka 02 dan panah SOUTH WEST */}
+              <motion.div
+                initial={{ opacity: 0, x: -50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.2, duration: 0.6 }}
+                style={{
+                  marginBottom: '4rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '2rem',
+                  flexWrap: 'wrap'
+                }}
+              >
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '1.5rem'
+                }}>
+                  <span style={{
+                    color: 'rgba(255,255,255,0.3)',
+                    fontSize: '1.2rem',
+                    fontWeight: '300',
+                    letterSpacing: '2px',
+                    fontFamily: 'monospace'
+                  }}>
+                    02
+                  </span>
+                  
+                  {/* SOUTH WEST ARROW */}
+                  <svg
+                    width="40"
+                    height="40"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="rgba(255,255,255,0.5)"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
                   >
+                    <path d="M17 7L7 17" />
+                    <path d="M7 7h10v10" />
+                  </svg>
+                  
+                  <h1 style={{
+                    fontSize: isMobile ? '4rem' : '7rem',
+                    fontWeight: '300',
+                    margin: 0,
+                    lineHeight: 1,
+                    letterSpacing: '-2px',
+                    color: 'white'
+                  }}>
+                    VISUAL DESIGNER
+                  </h1>
+                </div>
+              </motion.div>
+
+              {/* Grid Layout 2 Kolom */}
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
+                gap: '4rem'
+              }}>
+                {/* Kolom Kiri */}
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.3 }}
+                >
+                  <h2 style={{
+                    fontSize: '2rem',
+                    fontWeight: '300',
+                    margin: '0 0 2rem 0',
+                    color: 'white'
+                  }}>
+                    Visual Designer
+                  </h2>
+                  <p style={{
+                    fontSize: '1.2rem',
+                    lineHeight: 1.8,
+                    color: 'rgba(255,255,255,0.7)',
+                    marginBottom: '2rem'
+                  }}>
+                    Crafting digital experiences with minimalist aesthetics and functional design. 
+                    Every pixel tells a story, combining beauty with usability.
+                  </p>
+                  
+                  {/* Design Philosophy - TETAP SAMA, hanya angka */}
+                  <div style={{ marginTop: '3rem' }}>
+                    <h3 style={{
+                      fontSize: '1.5rem',
+                      fontWeight: '300',
+                      margin: '0 0 1.5rem 0',
+                      color: 'white',
+                      borderBottom: '1px solid rgba(255,255,255,0.1)',
+                      paddingBottom: '0.5rem'
+                    }}>
+                      Design Philosophy
+                    </h3>
                     <div style={{
-                      width: '8px',
-                      height: '8px',
-                      borderRadius: '50%',
-                      backgroundColor: 'rgba(255,255,255,0.3)'
-                    }} />
-                    <div>
-                      <span style={{ color: 'white', fontSize: '1.1rem', marginRight: '1rem' }}>
-                        {item.label}
-                      </span>
-                      <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.9rem' }}>
-                        {item.desc}
-                      </span>
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '1rem'
+                    }}>
+                      {[
+                        { label: 'Minimalist', desc: 'Clean, simple, purposeful' },
+                        { label: 'Responsive', desc: 'Adapts to every screen' },
+                        { label: 'Modern', desc: 'Contemporary aesthetics' },
+                        { label: 'Fast', desc: 'Optimized performance' }
+                      ].map((item, index) => (
+                        <motion.div
+                          key={index}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: 0.4 + (index * 0.1) }}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '1rem',
+                            padding: '0.5rem 0',
+                            borderBottom: '1px solid rgba(255,255,255,0.05)'
+                          }}
+                        >
+                          <div style={{
+                            width: '8px',
+                            height: '8px',
+                            borderRadius: '50%',
+                            backgroundColor: 'rgba(255,255,255,0.3)'
+                          }} />
+                          <div>
+                            <span style={{ color: 'white', fontSize: '1.1rem', marginRight: '1rem' }}>
+                              {item.label}
+                            </span>
+                            <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.9rem' }}>
+                              {item.desc}
+                            </span>
+                          </div>
+                        </motion.div>
+                      ))}
                     </div>
-                  </motion.div>
-                ))}
+                  </div>
+                </motion.div>
+
+                {/* Kolom Kanan - SEMUA DIHAPUS (stats, skills, tools) */}
+                <motion.div
+                  initial={{ opacity: 0, x: 30 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.4 }}
+                >
+                  {/* KOSONG - semua konten dihapus */}
+                </motion.div>
               </div>
+
+              {/* Tools Section - DIHAPUS total (judul dan konten) */}
             </div>
           </motion.div>
-
-          {/* Kolom Kanan - SEMUA DIHAPUS (stats, skills, tools) */}
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.4 }}
-          >
-            {/* KOSONG - semua konten dihapus */}
-          </motion.div>
-        </div>
-
-        {/* Tools Section - DIHAPUS total (judul dan konten) */}
-      </div>
-    </motion.div>
-  )}
-</AnimatePresence>
-
-      
+        )}
+      </AnimatePresence>
 
       {/* INDONESIA OVERLAY */}
       <AnimatePresence>
@@ -2784,623 +2775,946 @@ useEffect(() => {
         )}
       </AnimatePresence>
 
+      {/* DONASI TRACKING OVERLAY - PANTAU DONASI USER */}
+      <AnimatePresence>
+        {showDonasiTracking && user && (
+          <motion.div
+            ref={userProfileModalRef}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              backgroundColor: 'rgba(0, 0, 0, 0.98)',
+              zIndex: 10013,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backdropFilter: 'blur(10px)'
+            }}
+            onClick={handleCloseDonasiTracking}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              transition={{ duration: 0.4 }}
+              style={{
+                backgroundColor: 'transparent',
+                borderRadius: '20px',
+                width: '95%',
+                maxWidth: '800px',
+                height: '90vh',
+                maxHeight: '700px',
+                display: 'flex',
+                flexDirection: 'column',
+                overflow: 'hidden',
+                border: '1px solid rgba(255, 255, 255, 0.2)'
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div style={{
+                padding: isMobile ? '1.5rem' : '2rem',
+                borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                flexShrink: 0
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <h2 style={{
+                    color: 'white',
+                    fontSize: isMobile ? '1.8rem' : '2.5rem',
+                    fontWeight: '300',
+                    margin: 0,
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    letterSpacing: '1px'
+                  }}>
+                    PANTAU DONASI
+                  </h2>
+                  <div style={{
+                    backgroundColor: 'transparent',
+                    color: '#FFD700',
+                    fontSize: '0.9rem',
+                    padding: '0.3rem 0.8rem',
+                    borderRadius: '20px',
+                    border: '1px solid rgba(255, 215, 0, 0.5)'
+                  }}>
+                    Total: {formatRupiah(totalDonasiUser)}
+                  </div>
+                </div>
+                
+                <motion.button
+                  onClick={handleCloseDonasiTracking}
+                  style={{
+                    backgroundColor: 'transparent',
+                    border: '1px solid rgba(255, 255, 255, 0.3)',
+                    color: 'white',
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: '50%',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '1.5rem',
+                    fontFamily: 'Helvetica, Arial, sans-serif'
+                  }}
+                  whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+                >
+                  ×
+                </motion.button>
+              </div>
 
+              {/* Info User */}
+              <div style={{
+                padding: isMobile ? '1rem 1.5rem' : '1.5rem 2rem',
+                borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '1rem',
+                flexShrink: 0
+              }}>
+                <div style={{
+                  width: '50px',
+                  height: '50px',
+                  borderRadius: '50%',
+                  backgroundColor: 'transparent',
+                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '1.2rem',
+                  fontWeight: '600',
+                  color: 'white'
+                }}>
+                  {userDisplayName.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <div style={{ color: 'white', fontSize: '1.2rem', fontWeight: '500' }}>
+                    {userDisplayName}
+                  </div>
+                  <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem' }}>
+                    {user.email}
+                  </div>
+                </div>
+              </div>
 
+              {/* Konten Donasi */}
+              <div style={{
+                flex: 1,
+                overflowY: 'auto',
+                padding: isMobile ? '1.5rem' : '2rem'
+              }}>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '1rem',
+                  marginBottom: '2rem'
+                }}>
+                  <div style={{
+                    flex: 1,
+                    height: '2px',
+                    backgroundColor: 'rgba(255,255,255,0.1)'
+                  }} />
+                  <span style={{
+                    color: 'rgba(255,255,255,0.6)',
+                    fontSize: '0.9rem',
+                    letterSpacing: '1px'
+                  }}>
+                    RIWAYAT DONASI
+                  </span>
+                  <div style={{
+                    flex: 1,
+                    height: '2px',
+                    backgroundColor: 'rgba(255,255,255,0.1)'
+                  }} />
+                </div>
 
+                {isLoadingDonations ? (
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    padding: '3rem'
+                  }}>
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                      style={{
+                        width: '30px',
+                        height: '30px',
+                        border: '2px solid rgba(255,255,255,0.2)',
+                        borderTopColor: 'white',
+                        borderRadius: '50%'
+                      }}
+                    />
+                  </div>
+                ) : userDonations.length === 0 ? (
+                  <div style={{
+                    textAlign: 'center',
+                    padding: '4rem 2rem',
+                    color: 'rgba(255,255,255,0.6)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '12px'
+                  }}>
+                    <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ opacity: 0.5, marginBottom: '1rem' }}>
+                      <path d="M12 2v4M4.93 4.93l2.83 2.83M2 12h4M4.93 19.07l2.83-2.83M12 22v-4M19.07 19.07l-2.83-2.83M22 12h-4M19.07 4.93l-2.83 2.83"/>
+                      <circle cx="12" cy="12" r="4"/>
+                    </svg>
+                    <p>Belum ada donasi yang dilakukan</p>
+                    <motion.button
+                      onClick={() => {
+                        handleCloseDonasiTracking();
+                        router.push('/donation');
+                      }}
+                      style={{
+                        marginTop: '1.5rem',
+                        padding: '0.8rem 2rem',
+                        backgroundColor: 'transparent',
+                        border: '1px solid rgba(255,255,255,0.3)',
+                        color: 'white',
+                        cursor: 'pointer',
+                        fontSize: '0.9rem'
+                      }}
+                      whileHover={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
+                    >
+                      Mulai Donasi
+                    </motion.button>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    {userDonations.map((donation, index) => (
+                      <motion.div
+                        key={donation.id}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                        style={{
+                          padding: '1.2rem',
+                          backgroundColor: 'rgba(255,255,255,0.02)',
+                          border: '1px solid rgba(255,255,255,0.1)',
+                          borderRadius: '12px'
+                        }}
+                      >
+                        <div style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'flex-start',
+                          marginBottom: '0.8rem'
+                        }}>
+                          <div>
+                            <h3 style={{
+                              color: 'white',
+                              fontSize: '1.1rem',
+                              fontWeight: '500',
+                              margin: 0
+                            }}>
+                              {donation.eventTitle}
+                            </h3>
+                            <p style={{
+                              color: 'rgba(255,255,255,0.6)',
+                              fontSize: '0.8rem',
+                              margin: '0.3rem 0 0 0',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.5rem'
+                            }}>
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <polyline points="12 6 12 12 16 14"/>
+                              </svg>
+                              {formatTime(donation.createdAt)}
+                            </p>
+                          </div>
+                          <span style={{
+                            fontSize: '1.2rem',
+                            fontWeight: '600',
+                            color: '#FFD700'
+                          }}>
+                            {formatRupiah(donation.amount)}
+                          </span>
+                        </div>
+                        {donation.message && (
+                          <div style={{
+                            marginTop: '0.8rem',
+                            padding: '0.8rem',
+                            backgroundColor: 'rgba(255,255,255,0.05)',
+                            borderRadius: '8px',
+                            fontStyle: 'italic',
+                            color: 'rgba(255,255,255,0.8)',
+                            fontSize: '0.9rem'
+                          }}>
+                            "{donation.message}"
+                          </div>
+                        )}
+                      </motion.div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Footer dengan tombol ke halaman donasi */}
+              <div style={{
+                padding: isMobile ? '1rem 1.5rem' : '1.5rem 2rem',
+                borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+                display: 'flex',
+                justifyContent: 'center',
+                flexShrink: 0
+              }}>
+                <motion.button
+                  onClick={() => {
+                    handleCloseDonasiTracking();
+                    router.push('/donation');
+                  }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '1rem',
+                    padding: '0.8rem 2rem',
+                    backgroundColor: 'transparent',
+                    border: '1px solid rgba(255,255,255,0.3)',
+                    borderRadius: '30px',
+                    color: 'white',
+                    cursor: 'pointer',
+                    fontSize: '1rem'
+                  }}
+                  whileHover={{ 
+                    backgroundColor: 'rgba(255,255,255,0.1)',
+                    gap: '1.2rem'
+                  }}
+                >
+                  <span>Buka Halaman Donasi</span>
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path d="M7 7h10v10" />
+                    <path d="M17 7L7 17" />
+                  </svg>
+                </motion.button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Note Overlay - MENAMPILKAN RIWAYAT NOTE PER USER DENGAN KATEGORI & TAHUN */}
-<AnimatePresence>
-  {showNoteOverlay && (
-    <motion.div
-      ref={noteOverlayRef}
-      initial={{ x: '-100%' }}
-      animate={{ x: 0 }}
-      exit={{ x: '-100%' }}
-      transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        backgroundColor: '#000000',
-        zIndex: 10003,
-        display: 'flex',
-        flexDirection: 'column',
-        overflow: 'hidden',
-        borderRight: '1px solid rgba(255, 255, 255, 0.1)'
-      }}
-    >
-      {/* Header */}
-      <div style={{
-        padding: isMobile ? '1.5rem' : '2rem',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        flexShrink: 0
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <h2 style={{
-            color: 'white',
-            fontSize: isMobile ? '1.8rem' : '2.5rem',
-            fontWeight: '300',
-            margin: 0,
-            fontFamily: 'Helvetica, Arial, sans-serif',
-            letterSpacing: '1px'
-          }}>
-            NOTE
-          </h2>
-          {user && (
-            <span style={{
-              color: 'rgba(255,255,255,0.5)',
-              fontSize: '0.9rem',
-              padding: '0.2rem 0.8rem',
-              border: '1px solid rgba(255,255,255,0.2)',
-              borderRadius: '20px'
+      <AnimatePresence>
+        {showNoteOverlay && (
+          <motion.div
+            ref={noteOverlayRef}
+            initial={{ x: '-100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '-100%' }}
+            transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              backgroundColor: '#000000',
+              zIndex: 10003,
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'hidden',
+              borderRight: '1px solid rgba(255, 255, 255, 0.1)'
+            }}
+          >
+            {/* Header */}
+            <div style={{
+              padding: isMobile ? '1.5rem' : '2rem',
+              borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexShrink: 0
             }}>
-              {totalNotesCount} notes
-            </span>
-          )}
-        </div>
-        
-        <motion.button
-          onClick={handleCloseNoteOverlay}
-          style={{
-            backgroundColor: 'transparent',
-            border: '1px solid rgba(255, 255, 255, 0.3)',
-            color: 'white',
-            width: '40px',
-            height: '40px',
-            borderRadius: '50%',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '1.5rem',
-            fontFamily: 'Helvetica, Arial, sans-serif'
-          }}
-          whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
-        >
-          ×
-        </motion.button>
-      </div>
-
-      {/* Konten Utama */}
-      <div style={{
-        flex: 1,
-        overflowY: 'auto',
-        padding: isMobile ? '2rem 1.5rem' : '3rem'
-      }}>
-        {!user ? (
-          /* Jika user belum login */
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            height: '100%',
-            color: 'rgba(255,255,255,0.7)',
-            gap: '2rem'
-          }}>
-            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-              <polyline points="14 2 14 8 20 8"/>
-              <line x1="16" y1="13" x2="8" y2="13"/>
-              <line x1="16" y1="17" x2="8" y2="17"/>
-            </svg>
-            <p style={{ textAlign: 'center' }}>Silakan login untuk melihat catatan Anda</p>
-            <motion.button
-              onClick={handleSignInClick}
-              style={{
-                padding: '0.8rem 2rem',
-                backgroundColor: 'transparent',
-                border: '1px solid rgba(255,255,255,0.3)',
-                color: 'white',
-                cursor: 'pointer',
-                fontSize: '1rem'
-              }}
-              whileHover={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
-            >
-              SIGN IN
-            </motion.button>
-          </div>
-        ) : isLoadingNotes ? (
-          /* Loading state */
-          <div style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            height: '100%'
-          }}>
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-              style={{
-                width: '40px',
-                height: '40px',
-                border: '2px solid rgba(255,255,255,0.1)',
-                borderTopColor: 'white',
-                borderRadius: '50%'
-              }}
-            />
-          </div>
-        ) : !userNotes || userNotes.length === 0 ? (
-          /* Jika tidak ada notes */
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            height: '100%',
-            color: 'rgba(255,255,255,0.7)',
-            gap: '2rem'
-          }}>
-            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-              <polyline points="14 2 14 8 20 8"/>
-              <line x1="16" y1="13" x2="8" y2="13"/>
-              <line x1="16" y1="17" x2="8" y2="17"/>
-            </svg>
-            <p style={{ textAlign: 'center' }}>Belum ada catatan</p>
-            <motion.button
-              onClick={() => router.push('/notes')}
-              style={{
-                padding: '0.8rem 2rem',
-                backgroundColor: 'transparent',
-                border: '1px solid rgba(255,255,255,0.3)',
-                color: 'white',
-                cursor: 'pointer',
-                fontSize: '1rem'
-              }}
-              whileHover={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
-            >
-              BUAT CATATAN
-            </motion.button>
-          </div>
-        ) : (
-          /* Menampilkan notes berdasarkan kategori dan tahun */
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
-            {/* Debug info - hapus setelah memastikan data muncul */}
-            <div style={{ color: 'white', marginBottom: '1rem', fontSize: '0.8rem', opacity: 0.5 }}>
-              Total notes: {userNotes.length}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <h2 style={{
+                  color: 'white',
+                  fontSize: isMobile ? '1.8rem' : '2.5rem',
+                  fontWeight: '300',
+                  margin: 0,
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  letterSpacing: '1px'
+                }}>
+                  NOTE
+                </h2>
+                {user && (
+                  <span style={{
+                    color: 'rgba(255,255,255,0.5)',
+                    fontSize: '0.9rem',
+                    padding: '0.2rem 0.8rem',
+                    border: '1px solid rgba(255,255,255,0.2)',
+                    borderRadius: '20px'
+                  }}>
+                    {totalNotesCount} notes
+                  </span>
+                )}
+              </div>
+              
+              <motion.button
+                onClick={handleCloseNoteOverlay}
+                style={{
+                  backgroundColor: 'transparent',
+                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                  color: 'white',
+                  width: '40px',
+                  height: '40px',
+                  borderRadius: '50%',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '1.5rem',
+                  fontFamily: 'Helvetica, Arial, sans-serif'
+                }}
+                whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+              >
+                ×
+              </motion.button>
             </div>
 
-            {/* Kategori: Personal */}
-            {userNotes.filter(note => note.category?.toLowerCase() === 'personal').length > 0 && (
-              <div>
+            {/* Konten Utama */}
+            <div style={{
+              flex: 1,
+              overflowY: 'auto',
+              padding: isMobile ? '2rem 1.5rem' : '3rem'
+            }}>
+              {!user ? (
+                /* Jika user belum login */
                 <div style={{
                   display: 'flex',
+                  flexDirection: 'column',
                   alignItems: 'center',
-                  gap: '1rem',
-                  marginBottom: '2rem'
+                  justifyContent: 'center',
+                  height: '100%',
+                  color: 'rgba(255,255,255,0.7)',
+                  gap: '2rem'
                 }}>
-                  <span style={{
-                    color: 'white',
-                    fontSize: '1.2rem',
-                    fontWeight: '300',
-                    textTransform: 'uppercase',
-                    letterSpacing: '2px'
-                  }}>
-                    PERSONAL
-                  </span>
-                  <div style={{ flex: 1, height: '1px', backgroundColor: 'rgba(255,255,255,0.1)' }} />
-                  <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem' }}>
-                    {userNotes.filter(n => n.category?.toLowerCase() === 'personal').length} notes
-                  </span>
+                  <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                    <line x1="16" y1="13" x2="8" y2="13"/>
+                    <line x1="16" y1="17" x2="8" y2="17"/>
+                  </svg>
+                  <p style={{ textAlign: 'center' }}>Silakan login untuk melihat catatan Anda</p>
+                  <motion.button
+                    onClick={handleSignInClick}
+                    style={{
+                      padding: '0.8rem 2rem',
+                      backgroundColor: 'transparent',
+                      border: '1px solid rgba(255,255,255,0.3)',
+                      color: 'white',
+                      cursor: 'pointer',
+                      fontSize: '1rem'
+                    }}
+                    whileHover={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
+                  >
+                    SIGN IN
+                  </motion.button>
                 </div>
+              ) : isLoadingNotes ? (
+                /* Loading state */
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  height: '100%'
+                }}>
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                    style={{
+                      width: '40px',
+                      height: '40px',
+                      border: '2px solid rgba(255,255,255,0.1)',
+                      borderTopColor: 'white',
+                      borderRadius: '50%'
+                    }}
+                  />
+                </div>
+              ) : !userNotes || userNotes.length === 0 ? (
+                /* Jika tidak ada notes */
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  height: '100%',
+                  color: 'rgba(255,255,255,0.7)',
+                  gap: '2rem'
+                }}>
+                  <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                    <line x1="16" y1="13" x2="8" y2="13"/>
+                    <line x1="16" y1="17" x2="8" y2="17"/>
+                  </svg>
+                  <p style={{ textAlign: 'center' }}>Belum ada catatan</p>
+                  <motion.button
+                    onClick={() => router.push('/notes')}
+                    style={{
+                      padding: '0.8rem 2rem',
+                      backgroundColor: 'transparent',
+                      border: '1px solid rgba(255,255,255,0.3)',
+                      color: 'white',
+                      cursor: 'pointer',
+                      fontSize: '1rem'
+                    }}
+                    whileHover={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
+                  >
+                    BUAT CATATAN
+                  </motion.button>
+                </div>
+              ) : (
+                /* Menampilkan notes berdasarkan kategori dan tahun */
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
+                  {/* Debug info - hapus setelah memastikan data muncul */}
+                  <div style={{ color: 'white', marginBottom: '1rem', fontSize: '0.8rem', opacity: 0.5 }}>
+                    Total notes: {userNotes.length}
+                  </div>
 
-                {/* Group by tahun untuk Personal */}
-                {Object.entries(
-                  userNotes
-                    .filter(note => note.category?.toLowerCase() === 'personal')
-                    .reduce((acc: any, note) => {
-                      let year = 'Unknown';
-                      if (note.createdAt) {
-                        const date = note.createdAt instanceof Timestamp 
-                          ? note.createdAt.toDate() 
-                          : new Date(note.createdAt);
-                        year = date.getFullYear().toString();
-                      }
-                      if (!acc[year]) acc[year] = [];
-                      acc[year].push(note);
-                      return acc;
-                    }, {})
-                )
-                  .sort(([yearA]: [string, any], [yearB]: [string, any]) => {
-                    if (yearA === 'Unknown') return 1;
-                    if (yearB === 'Unknown') return -1;
-                    return Number(yearB) - Number(yearA);
-                  })
-                  .map(([year, notes]: [string, any[]]) => (
-                    <div key={`personal-${year}`} style={{ marginBottom: '2rem' }}>
+                  {/* Kategori: Personal */}
+                  {userNotes.filter(note => note.category?.toLowerCase() === 'personal').length > 0 && (
+                    <div>
                       <div style={{
                         display: 'flex',
                         alignItems: 'center',
                         gap: '1rem',
-                        marginBottom: '1rem',
-                        marginLeft: '1rem'
+                        marginBottom: '2rem'
                       }}>
-                        <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.9rem' }}>{year}</span>
-                        <div style={{ width: '20px', height: '1px', backgroundColor: 'rgba(255,255,255,0.1)' }} />
-                        <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: '0.8rem' }}>
-                          {notes.length} note{notes.length > 1 ? 's' : ''}
+                        <span style={{
+                          color: 'white',
+                          fontSize: '1.2rem',
+                          fontWeight: '300',
+                          textTransform: 'uppercase',
+                          letterSpacing: '2px'
+                        }}>
+                          PERSONAL
+                        </span>
+                        <div style={{ flex: 1, height: '1px', backgroundColor: 'rgba(255,255,255,0.1)' }} />
+                        <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem' }}>
+                          {userNotes.filter(n => n.category?.toLowerCase() === 'personal').length} notes
                         </span>
                       </div>
-                      
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                        {notes.map((note: Note, index: number) => {
-                          let dateStr = '--/--';
-                          if (note.createdAt) {
-                            const date = note.createdAt instanceof Timestamp 
-                              ? note.createdAt.toDate() 
-                              : new Date(note.createdAt);
-                            dateStr = date.toLocaleDateString('id-ID', { 
-                              day: '2-digit', 
-                              month: '2-digit' 
-                            });
-                          }
-                          
-                          return (
-                            <motion.div
-                              key={note.id}
-                              initial={{ opacity: 0, x: -10 }}
-                              animate={{ opacity: 1, x: 0 }}
-                              transition={{ delay: index * 0.05 }}
-                              onClick={() => router.push(`/notes/${note.id}`)}
-                              style={{
-                                padding: '1rem 1.5rem',
-                                backgroundColor: 'transparent',
-                                border: '1px solid rgba(255,255,255,0.1)',
-                                cursor: 'pointer',
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'center'
-                              }}
-                              whileHover={{
-                                backgroundColor: 'rgba(255,255,255,0.02)',
-                                borderColor: 'rgba(255,255,255,0.3)',
-                                x: 5
-                              }}
-                            >
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1 }}>
-                                <span style={{ 
-                                  color: 'rgba(255,255,255,0.3)', 
-                                  fontSize: '0.8rem', 
-                                  minWidth: '45px',
-                                  fontFamily: 'monospace'
-                                }}>
-                                  {dateStr}
-                                </span>
-                                <div style={{ flex: 1 }}>
-                                  <div style={{ color: 'white', fontSize: '1rem' }}>
-                                    {note.title || 'Untitled Note'}
-                                  </div>
-                                  {note.content && (
-                                    <div style={{ 
-                                      color: 'rgba(255,255,255,0.5)', 
-                                      fontSize: '0.8rem',
-                                      marginTop: '0.2rem',
-                                      overflow: 'hidden',
-                                      textOverflow: 'ellipsis',
-                                      whiteSpace: 'nowrap',
-                                      maxWidth: '300px'
-                                    }}>
-                                      {note.content.substring(0, 50)}...
+
+                      {/* Group by tahun untuk Personal */}
+                      {Object.entries(
+                        userNotes
+                          .filter(note => note.category?.toLowerCase() === 'personal')
+                          .reduce((acc: any, note) => {
+                            let year = 'Unknown';
+                            if (note.createdAt) {
+                              const date = note.createdAt instanceof Timestamp 
+                                ? note.createdAt.toDate() 
+                                : new Date(note.createdAt);
+                              year = date.getFullYear().toString();
+                            }
+                            if (!acc[year]) acc[year] = [];
+                            acc[year].push(note);
+                            return acc;
+                          }, {})
+                      )
+                        .sort(([yearA]: [string, any], [yearB]: [string, any]) => {
+                          if (yearA === 'Unknown') return 1;
+                          if (yearB === 'Unknown') return -1;
+                          return Number(yearB) - Number(yearA);
+                        })
+                        .map(([year, notes]: [string, any[]]) => (
+                          <div key={`personal-${year}`} style={{ marginBottom: '2rem' }}>
+                            <div style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '1rem',
+                              marginBottom: '1rem',
+                              marginLeft: '1rem'
+                            }}>
+                              <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.9rem' }}>{year}</span>
+                              <div style={{ width: '20px', height: '1px', backgroundColor: 'rgba(255,255,255,0.1)' }} />
+                              <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: '0.8rem' }}>
+                                {notes.length} note{notes.length > 1 ? 's' : ''}
+                              </span>
+                            </div>
+                            
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                              {notes.map((note: Note, index: number) => {
+                                let dateStr = '--/--';
+                                if (note.createdAt) {
+                                  const date = note.createdAt instanceof Timestamp 
+                                    ? note.createdAt.toDate() 
+                                    : new Date(note.createdAt);
+                                  dateStr = date.toLocaleDateString('id-ID', { 
+                                    day: '2-digit', 
+                                    month: '2-digit' 
+                                  });
+                                }
+                                
+                                return (
+                                  <motion.div
+                                    key={note.id}
+                                    initial={{ opacity: 0, x: -10 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: index * 0.05 }}
+                                    onClick={() => router.push(`/notes/${note.id}`)}
+                                    style={{
+                                      padding: '1rem 1.5rem',
+                                      backgroundColor: 'transparent',
+                                      border: '1px solid rgba(255,255,255,0.1)',
+                                      cursor: 'pointer',
+                                      display: 'flex',
+                                      justifyContent: 'space-between',
+                                      alignItems: 'center'
+                                    }}
+                                    whileHover={{
+                                      backgroundColor: 'rgba(255,255,255,0.02)',
+                                      borderColor: 'rgba(255,255,255,0.3)',
+                                      x: 5
+                                    }}
+                                  >
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1 }}>
+                                      <span style={{ 
+                                        color: 'rgba(255,255,255,0.3)', 
+                                        fontSize: '0.8rem', 
+                                        minWidth: '45px',
+                                        fontFamily: 'monospace'
+                                      }}>
+                                        {dateStr}
+                                      </span>
+                                      <div style={{ flex: 1 }}>
+                                        <div style={{ color: 'white', fontSize: '1rem' }}>
+                                          {note.title || 'Untitled Note'}
+                                        </div>
+                                        {note.content && (
+                                          <div style={{ 
+                                            color: 'rgba(255,255,255,0.5)', 
+                                            fontSize: '0.8rem',
+                                            marginTop: '0.2rem',
+                                            overflow: 'hidden',
+                                            textOverflow: 'ellipsis',
+                                            whiteSpace: 'nowrap',
+                                            maxWidth: '300px'
+                                          }}>
+                                            {note.content.substring(0, 50)}...
+                                          </div>
+                                        )}
+                                      </div>
                                     </div>
-                                  )}
-                                </div>
-                              </div>
-                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5">
-                                <path d="M7 7h10v10" />
-                                <path d="M17 7L7 17" />
-                              </svg>
-                            </motion.div>
-                          );
-                        })}
-                      </div>
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5">
+                                      <path d="M7 7h10v10" />
+                                      <path d="M17 7L7 17" />
+                                    </svg>
+                                  </motion.div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        ))}
                     </div>
-                  ))}
-              </div>
-            )}
+                  )}
 
-            {/* Kategori: Collaborate */}
-            {userNotes.filter(note => note.category?.toLowerCase() === 'collaborate').length > 0 && (
-              <div>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '1rem',
-                  marginBottom: '2rem'
-                }}>
-                  <span style={{
-                    color: 'white',
-                    fontSize: '1.2rem',
-                    fontWeight: '300',
-                    textTransform: 'uppercase',
-                    letterSpacing: '2px'
-                  }}>
-                    COLLABORATE
-                  </span>
-                  <div style={{ flex: 1, height: '1px', backgroundColor: 'rgba(255,255,255,0.1)' }} />
-                  <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem' }}>
-                    {userNotes.filter(n => n.category?.toLowerCase() === 'collaborate').length} notes
-                  </span>
-                </div>
-
-                {/* Group by tahun untuk Collaborate */}
-                {Object.entries(
-                  userNotes
-                    .filter(note => note.category?.toLowerCase() === 'collaborate')
-                    .reduce((acc: any, note) => {
-                      let year = 'Unknown';
-                      if (note.createdAt) {
-                        const date = note.createdAt instanceof Timestamp 
-                          ? note.createdAt.toDate() 
-                          : new Date(note.createdAt);
-                        year = date.getFullYear().toString();
-                      }
-                      if (!acc[year]) acc[year] = [];
-                      acc[year].push(note);
-                      return acc;
-                    }, {})
-                )
-                  .sort(([yearA]: [string, any], [yearB]: [string, any]) => {
-                    if (yearA === 'Unknown') return 1;
-                    if (yearB === 'Unknown') return -1;
-                    return Number(yearB) - Number(yearA);
-                  })
-                  .map(([year, notes]: [string, any[]]) => (
-                    <div key={`collaborate-${year}`} style={{ marginBottom: '2rem' }}>
+                  {/* Kategori: Collaborate */}
+                  {userNotes.filter(note => note.category?.toLowerCase() === 'collaborate').length > 0 && (
+                    <div>
                       <div style={{
                         display: 'flex',
                         alignItems: 'center',
                         gap: '1rem',
-                        marginBottom: '1rem',
-                        marginLeft: '1rem'
+                        marginBottom: '2rem'
                       }}>
-                        <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.9rem' }}>{year}</span>
-                        <div style={{ width: '20px', height: '1px', backgroundColor: 'rgba(255,255,255,0.1)' }} />
-                        <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: '0.8rem' }}>
-                          {notes.length} note{notes.length > 1 ? 's' : ''}
+                        <span style={{
+                          color: 'white',
+                          fontSize: '1.2rem',
+                          fontWeight: '300',
+                          textTransform: 'uppercase',
+                          letterSpacing: '2px'
+                        }}>
+                          COLLABORATE
+                        </span>
+                        <div style={{ flex: 1, height: '1px', backgroundColor: 'rgba(255,255,255,0.1)' }} />
+                        <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem' }}>
+                          {userNotes.filter(n => n.category?.toLowerCase() === 'collaborate').length} notes
                         </span>
                       </div>
-                      
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                        {notes.map((note: Note, index: number) => {
-                          let dateStr = '--/--';
-                          if (note.createdAt) {
-                            const date = note.createdAt instanceof Timestamp 
-                              ? note.createdAt.toDate() 
-                              : new Date(note.createdAt);
-                            dateStr = date.toLocaleDateString('id-ID', { 
-                              day: '2-digit', 
-                              month: '2-digit' 
-                            });
-                          }
-                          
-                          return (
-                            <motion.div
-                              key={note.id}
-                              initial={{ opacity: 0, x: -10 }}
-                              animate={{ opacity: 1, x: 0 }}
-                              transition={{ delay: index * 0.05 }}
-                              onClick={() => router.push(`/notes/${note.id}`)}
-                              style={{
-                                padding: '1rem 1.5rem',
-                                backgroundColor: 'transparent',
-                                border: '1px solid rgba(255,255,255,0.1)',
-                                cursor: 'pointer',
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'center'
-                              }}
-                              whileHover={{
-                                backgroundColor: 'rgba(255,255,255,0.02)',
-                                borderColor: 'rgba(255,255,255,0.3)',
-                                x: 5
-                              }}
-                            >
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1 }}>
-                                <span style={{ 
-                                  color: 'rgba(255,255,255,0.3)', 
-                                  fontSize: '0.8rem', 
-                                  minWidth: '45px',
-                                  fontFamily: 'monospace'
-                                }}>
-                                  {dateStr}
-                                </span>
-                                <div style={{ flex: 1 }}>
-                                  <div style={{ color: 'white', fontSize: '1rem' }}>
-                                    {note.title || 'Untitled Note'}
-                                  </div>
-                                  {note.content && (
-                                    <div style={{ 
-                                      color: 'rgba(255,255,255,0.5)', 
-                                      fontSize: '0.8rem',
-                                      marginTop: '0.2rem',
-                                      overflow: 'hidden',
-                                      textOverflow: 'ellipsis',
-                                      whiteSpace: 'nowrap',
-                                      maxWidth: '300px'
-                                    }}>
-                                      {note.content.substring(0, 50)}...
+
+                      {/* Group by tahun untuk Collaborate */}
+                      {Object.entries(
+                        userNotes
+                          .filter(note => note.category?.toLowerCase() === 'collaborate')
+                          .reduce((acc: any, note) => {
+                            let year = 'Unknown';
+                            if (note.createdAt) {
+                              const date = note.createdAt instanceof Timestamp 
+                                ? note.createdAt.toDate() 
+                                : new Date(note.createdAt);
+                              year = date.getFullYear().toString();
+                            }
+                            if (!acc[year]) acc[year] = [];
+                            acc[year].push(note);
+                            return acc;
+                          }, {})
+                      )
+                        .sort(([yearA]: [string, any], [yearB]: [string, any]) => {
+                          if (yearA === 'Unknown') return 1;
+                          if (yearB === 'Unknown') return -1;
+                          return Number(yearB) - Number(yearA);
+                        })
+                        .map(([year, notes]: [string, any[]]) => (
+                          <div key={`collaborate-${year}`} style={{ marginBottom: '2rem' }}>
+                            <div style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '1rem',
+                              marginBottom: '1rem',
+                              marginLeft: '1rem'
+                            }}>
+                              <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.9rem' }}>{year}</span>
+                              <div style={{ width: '20px', height: '1px', backgroundColor: 'rgba(255,255,255,0.1)' }} />
+                              <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: '0.8rem' }}>
+                                {notes.length} note{notes.length > 1 ? 's' : ''}
+                              </span>
+                            </div>
+                            
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                              {notes.map((note: Note, index: number) => {
+                                let dateStr = '--/--';
+                                if (note.createdAt) {
+                                  const date = note.createdAt instanceof Timestamp 
+                                    ? note.createdAt.toDate() 
+                                    : new Date(note.createdAt);
+                                  dateStr = date.toLocaleDateString('id-ID', { 
+                                    day: '2-digit', 
+                                    month: '2-digit' 
+                                  });
+                                }
+                                
+                                return (
+                                  <motion.div
+                                    key={note.id}
+                                    initial={{ opacity: 0, x: -10 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: index * 0.05 }}
+                                    onClick={() => router.push(`/notes/${note.id}`)}
+                                    style={{
+                                      padding: '1rem 1.5rem',
+                                      backgroundColor: 'transparent',
+                                      border: '1px solid rgba(255,255,255,0.1)',
+                                      cursor: 'pointer',
+                                      display: 'flex',
+                                      justifyContent: 'space-between',
+                                      alignItems: 'center'
+                                    }}
+                                    whileHover={{
+                                      backgroundColor: 'rgba(255,255,255,0.02)',
+                                      borderColor: 'rgba(255,255,255,0.3)',
+                                      x: 5
+                                    }}
+                                  >
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1 }}>
+                                      <span style={{ 
+                                        color: 'rgba(255,255,255,0.3)', 
+                                        fontSize: '0.8rem', 
+                                        minWidth: '45px',
+                                        fontFamily: 'monospace'
+                                      }}>
+                                        {dateStr}
+                                      </span>
+                                      <div style={{ flex: 1 }}>
+                                        <div style={{ color: 'white', fontSize: '1rem' }}>
+                                          {note.title || 'Untitled Note'}
+                                        </div>
+                                        {note.content && (
+                                          <div style={{ 
+                                            color: 'rgba(255,255,255,0.5)', 
+                                            fontSize: '0.8rem',
+                                            marginTop: '0.2rem',
+                                            overflow: 'hidden',
+                                            textOverflow: 'ellipsis',
+                                            whiteSpace: 'nowrap',
+                                            maxWidth: '300px'
+                                          }}>
+                                            {note.content.substring(0, 50)}...
+                                          </div>
+                                        )}
+                                      </div>
                                     </div>
-                                  )}
-                                </div>
-                              </div>
-                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5">
-                                <path d="M7 7h10v10" />
-                                <path d="M17 7L7 17" />
-                              </svg>
-                            </motion.div>
-                          );
-                        })}
-                      </div>
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5">
+                                      <path d="M7 7h10v10" />
+                                      <path d="M17 7L7 17" />
+                                    </svg>
+                                  </motion.div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        ))}
                     </div>
-                  ))}
-              </div>
-            )}
+                  )}
 
-            {/* Kategori: Lainnya (tanpa category atau category lain) */}
-            {userNotes.filter(note => {
-              const cat = note.category?.toLowerCase() || '';
-              return cat !== 'personal' && cat !== 'collaborate';
-            }).length > 0 && (
-              <div>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '1rem',
-                  marginBottom: '2rem'
-                }}>
-                  <span style={{
-                    color: 'white',
-                    fontSize: '1.2rem',
-                    fontWeight: '300',
-                    textTransform: 'uppercase',
-                    letterSpacing: '2px'
-                  }}>
-                    LAINNY A
-                  </span>
-                  <div style={{ flex: 1, height: '1px', backgroundColor: 'rgba(255,255,255,0.1)' }} />
-                  <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem' }}>
-                    {userNotes.filter(n => {
-                      const cat = n.category?.toLowerCase() || '';
-                      return cat !== 'personal' && cat !== 'collaborate';
-                    }).length} notes
-                  </span>
-                </div>
-
-                {/* Group by tahun untuk Lainnya */}
-                {Object.entries(
-                  userNotes
-                    .filter(note => {
-                      const cat = note.category?.toLowerCase() || '';
-                      return cat !== 'personal' && cat !== 'collaborate';
-                    })
-                    .reduce((acc: any, note) => {
-                      let year = 'Unknown';
-                      if (note.createdAt) {
-                        const date = note.createdAt instanceof Timestamp 
-                          ? note.createdAt.toDate() 
-                          : new Date(note.createdAt);
-                        year = date.getFullYear().toString();
-                      }
-                      if (!acc[year]) acc[year] = [];
-                      acc[year].push(note);
-                      return acc;
-                    }, {})
-                )
-                  .sort(([yearA]: [string, any], [yearB]: [string, any]) => {
-                    if (yearA === 'Unknown') return 1;
-                    if (yearB === 'Unknown') return -1;
-                    return Number(yearB) - Number(yearA);
-                  })
-                  .map(([year, notes]: [string, any[]]) => (
-                    <div key={`lainnya-${year}`} style={{ marginBottom: '2rem' }}>
+                  {/* Kategori: Lainnya (tanpa category atau category lain) */}
+                  {userNotes.filter(note => {
+                    const cat = note.category?.toLowerCase() || '';
+                    return cat !== 'personal' && cat !== 'collaborate';
+                  }).length > 0 && (
+                    <div>
                       <div style={{
                         display: 'flex',
                         alignItems: 'center',
                         gap: '1rem',
-                        marginBottom: '1rem',
-                        marginLeft: '1rem'
+                        marginBottom: '2rem'
                       }}>
-                        <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.9rem' }}>{year}</span>
-                        <div style={{ width: '20px', height: '1px', backgroundColor: 'rgba(255,255,255,0.1)' }} />
-                        <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: '0.8rem' }}>
-                          {notes.length} note{notes.length > 1 ? 's' : ''}
+                        <span style={{
+                          color: 'white',
+                          fontSize: '1.2rem',
+                          fontWeight: '300',
+                          textTransform: 'uppercase',
+                          letterSpacing: '2px'
+                        }}>
+                          LAINNYA
+                        </span>
+                        <div style={{ flex: 1, height: '1px', backgroundColor: 'rgba(255,255,255,0.1)' }} />
+                        <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem' }}>
+                          {userNotes.filter(n => {
+                            const cat = n.category?.toLowerCase() || '';
+                            return cat !== 'personal' && cat !== 'collaborate';
+                          }).length} notes
                         </span>
                       </div>
-                      
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                        {notes.map((note: Note, index: number) => {
-                          let dateStr = '--/--';
-                          if (note.createdAt) {
-                            const date = note.createdAt instanceof Timestamp 
-                              ? note.createdAt.toDate() 
-                              : new Date(note.createdAt);
-                            dateStr = date.toLocaleDateString('id-ID', { 
-                              day: '2-digit', 
-                              month: '2-digit' 
-                            });
-                          }
-                          
-                          return (
-                            <motion.div
-                              key={note.id}
-                              initial={{ opacity: 0, x: -10 }}
-                              animate={{ opacity: 1, x: 0 }}
-                              transition={{ delay: index * 0.05 }}
-                              onClick={() => router.push(`/notes/${note.id}`)}
-                              style={{
-                                padding: '1rem 1.5rem',
-                                backgroundColor: 'transparent',
-                                border: '1px solid rgba(255,255,255,0.1)',
-                                cursor: 'pointer',
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'center'
-                              }}
-                              whileHover={{
-                                backgroundColor: 'rgba(255,255,255,0.02)',
-                                borderColor: 'rgba(255,255,255,0.3)',
-                                x: 5
-                              }}
-                            >
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1 }}>
-                                <span style={{ 
-                                  color: 'rgba(255,255,255,0.3)', 
-                                  fontSize: '0.8rem', 
-                                  minWidth: '45px',
-                                  fontFamily: 'monospace'
-                                }}>
-                                  {dateStr}
-                                </span>
-                                <div style={{ flex: 1 }}>
-                                  <div style={{ color: 'white', fontSize: '1rem' }}>
-                                    {note.title || 'Untitled Note'}
-                                  </div>
-                                  {note.content && (
-                                    <div style={{ 
-                                      color: 'rgba(255,255,255,0.5)', 
-                                      fontSize: '0.8rem',
-                                      marginTop: '0.2rem',
-                                      overflow: 'hidden',
-                                      textOverflow: 'ellipsis',
-                                      whiteSpace: 'nowrap',
-                                      maxWidth: '300px'
-                                    }}>
-                                      {note.content.substring(0, 50)}...
+
+                      {/* Group by tahun untuk Lainnya */}
+                      {Object.entries(
+                        userNotes
+                          .filter(note => {
+                            const cat = note.category?.toLowerCase() || '';
+                            return cat !== 'personal' && cat !== 'collaborate';
+                          })
+                          .reduce((acc: any, note) => {
+                            let year = 'Unknown';
+                            if (note.createdAt) {
+                              const date = note.createdAt instanceof Timestamp 
+                                ? note.createdAt.toDate() 
+                                : new Date(note.createdAt);
+                              year = date.getFullYear().toString();
+                            }
+                            if (!acc[year]) acc[year] = [];
+                            acc[year].push(note);
+                            return acc;
+                          }, {})
+                      )
+                        .sort(([yearA]: [string, any], [yearB]: [string, any]) => {
+                          if (yearA === 'Unknown') return 1;
+                          if (yearB === 'Unknown') return -1;
+                          return Number(yearB) - Number(yearA);
+                        })
+                        .map(([year, notes]: [string, any[]]) => (
+                          <div key={`lainnya-${year}`} style={{ marginBottom: '2rem' }}>
+                            <div style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '1rem',
+                              marginBottom: '1rem',
+                              marginLeft: '1rem'
+                            }}>
+                              <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.9rem' }}>{year}</span>
+                              <div style={{ width: '20px', height: '1px', backgroundColor: 'rgba(255,255,255,0.1)' }} />
+                              <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: '0.8rem' }}>
+                                {notes.length} note{notes.length > 1 ? 's' : ''}
+                              </span>
+                            </div>
+                            
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                              {notes.map((note: Note, index: number) => {
+                                let dateStr = '--/--';
+                                if (note.createdAt) {
+                                  const date = note.createdAt instanceof Timestamp 
+                                    ? note.createdAt.toDate() 
+                                    : new Date(note.createdAt);
+                                  dateStr = date.toLocaleDateString('id-ID', { 
+                                    day: '2-digit', 
+                                    month: '2-digit' 
+                                  });
+                                }
+                                
+                                return (
+                                  <motion.div
+                                    key={note.id}
+                                    initial={{ opacity: 0, x: -10 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: index * 0.05 }}
+                                    onClick={() => router.push(`/notes/${note.id}`)}
+                                    style={{
+                                      padding: '1rem 1.5rem',
+                                      backgroundColor: 'transparent',
+                                      border: '1px solid rgba(255,255,255,0.1)',
+                                      cursor: 'pointer',
+                                      display: 'flex',
+                                      justifyContent: 'space-between',
+                                      alignItems: 'center'
+                                    }}
+                                    whileHover={{
+                                      backgroundColor: 'rgba(255,255,255,0.02)',
+                                      borderColor: 'rgba(255,255,255,0.3)',
+                                      x: 5
+                                    }}
+                                  >
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1 }}>
+                                      <span style={{ 
+                                        color: 'rgba(255,255,255,0.3)', 
+                                        fontSize: '0.8rem', 
+                                        minWidth: '45px',
+                                        fontFamily: 'monospace'
+                                      }}>
+                                        {dateStr}
+                                      </span>
+                                      <div style={{ flex: 1 }}>
+                                        <div style={{ color: 'white', fontSize: '1rem' }}>
+                                          {note.title || 'Untitled Note'}
+                                        </div>
+                                        {note.content && (
+                                          <div style={{ 
+                                            color: 'rgba(255,255,255,0.5)', 
+                                            fontSize: '0.8rem',
+                                            marginTop: '0.2rem',
+                                            overflow: 'hidden',
+                                            textOverflow: 'ellipsis',
+                                            whiteSpace: 'nowrap',
+                                            maxWidth: '300px'
+                                          }}>
+                                            {note.content.substring(0, 50)}...
+                                          </div>
+                                        )}
+                                      </div>
                                     </div>
-                                  )}
-                                </div>
-                              </div>
-                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5">
-                                <path d="M7 7h10v10" />
-                                <path d="M17 7L7 17" />
-                              </svg>
-                            </motion.div>
-                          );
-                        })}
-                      </div>
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5">
+                                      <path d="M7 7h10v10" />
+                                      <path d="M17 7L7 17" />
+                                    </svg>
+                                  </motion.div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        ))}
                     </div>
-                  ))}
-              </div>
-            )}
-          </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </motion.div>
         )}
-      </div>
-    </motion.div>
-  )}
-</AnimatePresence>
-
-
-
-
-
-
-      
+      </AnimatePresence>
 
       {/* Modal Kalender Tahun Baru */}
       <AnimatePresence>
@@ -5025,395 +5339,6 @@ useEffect(() => {
           </motion.div>
         )}
       </AnimatePresence>
-
-
-{/* Modal Donasi - PANTAU Donasi User */}
-<AnimatePresence>
-  {showDonasiModal && user && (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.3 }}
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        backgroundColor: 'rgba(0, 0, 0, 0.98)',
-        zIndex: 10020,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backdropFilter: 'blur(10px)',
-        overflow: 'auto'
-      }}
-      onClick={() => setShowDonasiModal(false)}
-    >
-      <motion.div
-        initial={{ scale: 0.95, opacity: 0, y: 20 }}
-        animate={{ scale: 1, opacity: 1, y: 0 }}
-        exit={{ scale: 0.95, opacity: 0, y: 20 }}
-        transition={{ duration: 0.4 }}
-        style={{
-          backgroundColor: 'transparent',
-          borderRadius: '0',
-          width: '95%',
-          maxWidth: '800px',
-          maxHeight: '85vh',
-          display: 'flex',
-          flexDirection: 'column',
-          overflow: 'hidden',
-          border: '1px solid rgba(255, 255, 255, 0.2)',
-          position: 'relative'
-        }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div style={{
-          padding: isMobile ? '1.5rem' : '2rem',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexShrink: 0
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <h2 style={{
-              color: 'white',
-              fontSize: isMobile ? '1.8rem' : '2.5rem',
-              fontWeight: '300',
-              margin: 0,
-              fontFamily: 'Helvetica, Arial, sans-serif',
-              letterSpacing: '1px'
-            }}>
-              DONASI KAMU
-            </h2>
-            <div style={{
-              backgroundColor: 'transparent',
-              color: '#FFD700',
-              fontSize: '0.9rem',
-              padding: '0.3rem 0.8rem',
-              borderRadius: '20px',
-              border: '1px solid rgba(255, 215, 0, 0.5)'
-            }}>
-              Total: {formatRupiahDonasi(totalUserDonations)}
-            </div>
-          </div>
-          
-          <motion.button
-            onClick={() => setShowDonasiModal(false)}
-            style={{
-              backgroundColor: 'transparent',
-              border: '1px solid rgba(255, 255, 255, 0.3)',
-              color: 'white',
-              width: '40px',
-              height: '40px',
-              borderRadius: '50%',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '1.5rem',
-              fontFamily: 'Helvetica, Arial, sans-serif'
-            }}
-            whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
-          >
-            ×
-          </motion.button>
-        </div>
-
-        {/* Konten Utama */}
-        <div style={{
-          flex: 1,
-          overflowY: 'auto',
-          padding: isMobile ? '1.5rem' : '2rem'
-        }}>
-          {/* Tombol Navigasi ke Halaman Donasi */}
-          <motion.div
-            onClick={() => {
-              setShowDonasiModal(false);
-              router.push('/donation');
-            }}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '1rem 1.5rem',
-              marginBottom: '2rem',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              cursor: 'pointer',
-              transition: 'all 0.3s ease'
-            }}
-            whileHover={{ 
-              borderColor: 'rgba(255, 215, 0, 0.5)',
-              backgroundColor: 'rgba(255, 215, 0, 0.05)'
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FFD700" strokeWidth="1.5">
-                <path d="M3 9L12 3L21 9L12 15L3 9Z" />
-                <path d="M9 9L12 11L15 9" />
-                <path d="M12 15V21" />
-              </svg>
-              <div>
-                <div style={{ color: 'white', fontSize: '1.1rem', fontWeight: '500' }}>
-                  Lihat Semua Kegiatan Donasi
-                </div>
-                <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem' }}>
-                  Ikuti kegiatan donasi lainnya dan berbagi kebaikan
-                </div>
-              </div>
-            </div>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-              <path d="M17 7L7 17" />
-              <path d="M7 7h10v10" />
-            </svg>
-          </motion.div>
-
-          {isLoadingDonations ? (
-            <div style={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              padding: '4rem'
-            }}>
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                style={{
-                  width: '40px',
-                  height: '40px',
-                  border: '2px solid rgba(255,255,255,0.1)',
-                  borderTopColor: 'white',
-                  borderRadius: '50%'
-                }}
-              />
-            </div>
-          ) : userDonations.length === 0 ? (
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: '4rem 2rem',
-              textAlign: 'center'
-            }}>
-              <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5">
-                <path d="M3 9L12 3L21 9L12 15L3 9Z" />
-                <path d="M9 9L12 11L15 9" />
-                <path d="M12 15V21" />
-              </svg>
-              <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '1rem', marginTop: '1.5rem' }}>
-                Kamu belum memiliki riwayat donasi
-              </p>
-              <motion.button
-                onClick={() => {
-                  setShowDonasiModal(false);
-                  router.push('/donation');
-                }}
-                style={{
-                  marginTop: '1.5rem',
-                  padding: '0.8rem 2rem',
-                  backgroundColor: 'transparent',
-                  border: '1px solid rgba(255,255,255,0.3)',
-                  color: 'white',
-                  cursor: 'pointer',
-                  fontSize: '0.9rem'
-                }}
-                whileHover={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
-              >
-                Mulai Donasi Sekarang
-              </motion.button>
-            </div>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-              {userDonations.map((donation, index) => {
-                const getCategoryName = (categoryId: string) => {
-                  const categories: {[key: string]: string} = {
-                    'panti_asuhan': 'Panti Asuhan',
-                    'panti_jompo': 'Panti Jompo',
-                    'yayasan': 'Yayasan',
-                    'bencana_alam': 'Bencana Alam',
-                    'pendidikan': 'Pendidikan',
-                    'kesehatan': 'Kesehatan',
-                    'masjid': 'Masjid',
-                    'umum': 'Umum'
-                  };
-                  return categories[categoryId] || 'Umum';
-                };
-                
-                let donationDate = donation.createdAt;
-                let dateStr = '--/--/----';
-                if (donationDate) {
-                  const date = donationDate.toDate ? donationDate.toDate() : new Date(donationDate);
-                  if (!isNaN(date.getTime())) {
-                    dateStr = date.toLocaleDateString('id-ID', { 
-                      day: '2-digit', 
-                      month: '2-digit', 
-                      year: 'numeric' 
-                    });
-                  }
-                }
-                
-                return (
-                  <motion.div
-                    key={`donation-${donation.eventId}-${index}`}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                    style={{
-                      padding: '1.5rem',
-                      border: '1px solid rgba(255, 255, 255, 0.1)',
-                      transition: 'all 0.3s ease'
-                    }}
-                    whileHover={{ borderColor: 'rgba(255, 215, 0, 0.3)' }}
-                  >
-                    <div style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'flex-start',
-                      marginBottom: '1rem',
-                      flexWrap: 'wrap',
-                      gap: '0.5rem'
-                    }}>
-                      <div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                          <span style={{
-                            fontSize: '0.7rem',
-                            padding: '0.2rem 0.6rem',
-                            border: '1px solid rgba(255,255,255,0.2)',
-                            borderRadius: '20px',
-                            color: 'rgba(255,255,255,0.6)'
-                          }}>
-                            {getCategoryName(donation.eventCategory)}
-                          </span>
-                        </div>
-                        <h3 style={{
-                          color: 'white',
-                          fontSize: '1.2rem',
-                          fontWeight: '500',
-                          margin: '0.5rem 0 0.3rem 0',
-                          fontFamily: 'Helvetica, Arial, sans-serif'
-                        }}>
-                          {donation.eventTitle}
-                        </h3>
-                      </div>
-                      <div style={{
-                        textAlign: 'right'
-                      }}>
-                        <div style={{
-                          fontSize: '1.5rem',
-                          fontWeight: '600',
-                          color: '#FFD700'
-                        }}>
-                          {formatRupiahDonasi(donation.amount)}
-                        </div>
-                        <div style={{
-                          fontSize: '0.7rem',
-                          color: 'rgba(255,255,255,0.4)',
-                          marginTop: '0.2rem'
-                        }}>
-                          {dateStr}
-                        </div>
-                      </div>
-                    </div>
-                    
-                    {donation.message && (
-                      <div style={{
-                        margin: '1rem 0',
-                        padding: '0.8rem 1rem',
-                        backgroundColor: 'rgba(255,255,255,0.02)',
-                        borderLeft: '2px solid #FFD700'
-                      }}>
-                        <p style={{
-                          color: 'rgba(255,255,255,0.8)',
-                          fontSize: '0.9rem',
-                          margin: 0,
-                          fontStyle: 'italic',
-                          fontFamily: 'Helvetica, Arial, sans-serif'
-                        }}>
-                          "{donation.message}"
-                        </p>
-                      </div>
-                    )}
-                    
-                    <div style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      marginTop: '0.8rem',
-                      fontSize: '0.75rem',
-                      color: 'rgba(255,255,255,0.4)'
-                    }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <span>Donatur: {donation.name}</span>
-                      </div>
-                      <motion.button
-                        onClick={() => {
-                          setShowDonasiModal(false);
-                          router.push('/donation');
-                        }}
-                        style={{
-                          background: 'none',
-                          border: 'none',
-                          color: '#FFD700',
-                          cursor: 'pointer',
-                          fontSize: '0.75rem',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.3rem'
-                        }}
-                        whileHover={{ gap: '0.6rem' }}
-                      >
-                        Lihat Kegiatan
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M7 7h10v10" />
-                          <path d="M17 7L7 17" />
-                        </svg>
-                      </motion.button>
-                    </div>
-                  </motion.div>
-                );
-              })}
-              
-              {/* Tombol Lihat Semua */}
-              <motion.div
-                onClick={() => {
-                  setShowDonasiModal(false);
-                  router.push('/donation');
-                }}
-                style={{
-                  textAlign: 'center',
-                  padding: '1.5rem',
-                  marginTop: '1rem',
-                  borderTop: '1px solid rgba(255,255,255,0.1)',
-                  cursor: 'pointer'
-                }}
-                whileHover={{ opacity: 0.7 }}
-              >
-                <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem' }}>
-                  Lihat semua kegiatan donasi di halaman Donasi
-                </span>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" style={{ marginLeft: '0.5rem', display: 'inline-block' }}>
-                  <path d="M7 7h10v10" />
-                  <path d="M17 7L7 17" />
-                </svg>
-              </motion.div>
-            </div>
-          )}
-        </div>
-      </motion.div>
-    </motion.div>
-  )}
-</AnimatePresence>
-
-
-
-
-
-        
 
       {/* Modal Delete Account Confirmation */}
       <AnimatePresence>
@@ -8506,7 +8431,7 @@ useEffect(() => {
             </div>
           </div>
 
-          {/* Baris 3: BASED + Foto + IN */}
+          {/* Baris 3: BASED + Foto + IN + PANTAU */}
           <div style={{
             display: 'flex',
             alignItems: 'center',
@@ -8532,54 +8457,6 @@ useEffect(() => {
                 BASED
               </h2>
             </div>
-
-             {/* TOMBOL PANTAU - SOUTH WEST ARROW */}
-    <motion.div
-      onClick={handlePantauDonasi}
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '0.8rem',
-        cursor: 'pointer',
-        padding: isMobile ? '0.5rem 1rem' : '0.8rem 1.5rem',
-        border: '1px solid rgba(255, 215, 0, 0.5)',
-        backgroundColor: 'rgba(255, 215, 0, 0.05)',
-        transition: 'all 0.3s ease'
-      }}
-      whileHover={{ 
-        borderColor: '#FFD700',
-        backgroundColor: 'rgba(255, 215, 0, 0.15)',
-        scale: 1.02
-      }}
-      whileTap={{ scale: 0.98 }}
-    >
-      <span style={{
-        color: '#FFD700',
-        fontSize: isMobile ? '1rem' : '1.2rem',
-        fontWeight: '500',
-        fontFamily: 'Helvetica, Arial, sans-serif',
-        letterSpacing: '0.5px'
-      }}>
-        PANTAU
-      </span>
-      
-      {/* SOUTH WEST ARROW SVG */}
-      <svg
-        width={isMobile ? "20" : "24"}
-        height={isMobile ? "20" : "24"}
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="#FFD700"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M17 7L7 17" />
-        <path d="M7 7h10v10" />
-      </svg>
-    </motion.div>
-  </div>
-
 
             <div style={{ position: 'relative', display: 'flex', alignItems: 'flex-end' }}>
               <div style={{
@@ -8616,24 +8493,74 @@ useEffect(() => {
             </div>
 
             <div style={{
-              textAlign: 'right',
-              height: isMobile ? '5rem' : '7rem',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'flex-end'
+              gap: isMobile ? '1rem' : '2rem'
             }}>
-              <h2 style={{
-                color: 'white',
-                fontSize: isMobile ? '5rem' : '7rem',
-                fontWeight: '900',
-                textTransform: 'uppercase',
-                fontFamily: 'Helvetica, Arial, sans-serif',
-                letterSpacing: '-3px',
-                margin: 0,
-                lineHeight: 0.8
+              <div style={{
+                textAlign: 'right',
+                height: isMobile ? '5rem' : '7rem',
+                display: 'flex',
+                alignItems: 'center'
               }}>
-                IN
-              </h2>
+                <h2 style={{
+                  color: 'white',
+                  fontSize: isMobile ? '5rem' : '7rem',
+                  fontWeight: '900',
+                  textTransform: 'uppercase',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  letterSpacing: '-3px',
+                  margin: 0,
+                  lineHeight: 0.8
+                }}>
+                  IN
+                </h2>
+              </div>
+
+              {/* Tombol PANTAU dengan SOUTH WEST ARROW */}
+              <motion.div
+                onClick={handleDonasiTrackingClick}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.8rem',
+                  cursor: 'pointer',
+                  padding: isMobile ? '0.5rem 1rem' : '0.8rem 1.5rem',
+                  border: '1px solid rgba(255,255,255,0.3)',
+                  borderRadius: '40px',
+                  transition: 'all 0.3s ease'
+                }}
+                whileHover={{ 
+                  borderColor: '#FFD700',
+                  backgroundColor: 'rgba(255,215,0,0.1)',
+                  scale: 1.05
+                }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <span style={{
+                  color: 'white',
+                  fontSize: isMobile ? '1.2rem' : '1.5rem',
+                  fontWeight: '400',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  letterSpacing: '1px'
+                }}>
+                  PANTAU
+                </span>
+                {/* SOUTH WEST ARROW SVG */}
+                <svg
+                  width={isMobile ? "24" : "28"}
+                  height={isMobile ? "24" : "28"}
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#FFD700"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M17 7L7 17" />
+                  <path d="M7 7h10v10" />
+                </svg>
+              </motion.div>
             </div>
           </div>
 
