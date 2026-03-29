@@ -685,6 +685,137 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
+
+
+// State untuk Donasi
+const [showDonasiModal, setShowDonasiModal] = useState(false);
+const [userDonations, setUserDonations] = useState<any[]>([]);
+const [totalUserDonations, setTotalUserDonations] = useState(0);
+const [isLoadingDonations, setIsLoadingDonations] = useState(false);
+const [selectedDonationEvent, setSelectedDonationEvent] = useState<any>(null);
+
+// Fungsi untuk load donasi user dari Firebase
+const loadUserDonations = async (userId: string) => {
+  if (!db || !userId) return;
+  try {
+    setIsLoadingDonations(true);
+    const eventsRef = collection(db, 'donationEvents');
+    const q = query(eventsRef, orderBy('createdAt', 'desc'));
+    const querySnapshot = await getDocs(q);
+    const donationsData: any[] = [];
+    let total = 0;
+    
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      const donors = data.donors || [];
+      const userDonationsFromEvent = donors.filter((donor: any) => donor.userId === userId);
+      
+      if (userDonationsFromEvent.length > 0) {
+        userDonationsFromEvent.forEach((donation: any) => {
+          donationsData.push({
+            eventId: doc.id,
+            eventTitle: data.title,
+            eventCategory: data.category,
+            amount: donation.amount,
+            message: donation.message,
+            name: donation.name,
+            createdAt: donation.createdAt,
+            eventEndDate: data.endDate,
+            eventCurrentAmount: data.currentAmount,
+            eventTargetAmount: data.targetAmount
+          });
+          total += donation.amount;
+        });
+      }
+    });
+    
+    setUserDonations(donationsData);
+    setTotalUserDonations(total);
+    setIsLoadingDonations(false);
+  } catch (error) {
+    console.error("Error loading user donations:", error);
+    setIsLoadingDonations(false);
+  }
+};
+
+// Real-time listener untuk donasi user
+const loadUserDonationsRealtime = (userId: string) => {
+  if (!db || !userId) return () => {};
+  try {
+    const eventsRef = collection(db, 'donationEvents');
+    const q = query(eventsRef, orderBy('createdAt', 'desc'));
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const donationsData: any[] = [];
+      let total = 0;
+      
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        const donors = data.donors || [];
+        const userDonationsFromEvent = donors.filter((donor: any) => donor.userId === userId);
+        
+        if (userDonationsFromEvent.length > 0) {
+          userDonationsFromEvent.forEach((donation: any) => {
+            donationsData.push({
+              eventId: doc.id,
+              eventTitle: data.title,
+              eventCategory: data.category,
+              amount: donation.amount,
+              message: donation.message,
+              name: donation.name,
+              createdAt: donation.createdAt,
+              eventEndDate: data.endDate,
+              eventCurrentAmount: data.currentAmount,
+              eventTargetAmount: data.targetAmount
+            });
+            total += donation.amount;
+          });
+        }
+      });
+      
+      setUserDonations(donationsData);
+      setTotalUserDonations(total);
+    });
+    return unsubscribe;
+  } catch (error) {
+    console.error("Error setting up realtime donations:", error);
+    return () => {};
+  }
+};
+
+// Fungsi untuk membuka modal donasi
+const handlePantauDonasi = () => {
+  if (!user) {
+    router.push('/signin');
+    return;
+  }
+  setShowDonasiModal(true);
+  loadUserDonations(user.uid);
+};
+
+  const formatRupiahDonasi = (amount: number) => {
+  if (!amount && amount !== 0) return 'Rp0';
+  return new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  }).format(amount);
+};
+
+// Tambahkan useEffect untuk realtime listener donasi
+useEffect(() => {
+  let unsubscribe: (() => void) | undefined;
+  if (showDonasiModal && user) {
+    unsubscribe = loadUserDonationsRealtime(user.uid);
+  }
+  return () => {
+    if (unsubscribe) unsubscribe();
+  };
+}, [showDonasiModal, user]);
+
+
+  
+
   // Load total users count
   useEffect(() => {
     const loadTotalUsers = async () => {
@@ -4895,6 +5026,395 @@ export default function HomePage(): React.JSX.Element {
         )}
       </AnimatePresence>
 
+
+{/* Modal Donasi - PANTAU Donasi User */}
+<AnimatePresence>
+  {showDonasiModal && user && (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.3 }}
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        backgroundColor: 'rgba(0, 0, 0, 0.98)',
+        zIndex: 10020,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backdropFilter: 'blur(10px)',
+        overflow: 'auto'
+      }}
+      onClick={() => setShowDonasiModal(false)}
+    >
+      <motion.div
+        initial={{ scale: 0.95, opacity: 0, y: 20 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        exit={{ scale: 0.95, opacity: 0, y: 20 }}
+        transition={{ duration: 0.4 }}
+        style={{
+          backgroundColor: 'transparent',
+          borderRadius: '0',
+          width: '95%',
+          maxWidth: '800px',
+          maxHeight: '85vh',
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
+          position: 'relative'
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div style={{
+          padding: isMobile ? '1.5rem' : '2rem',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexShrink: 0
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <h2 style={{
+              color: 'white',
+              fontSize: isMobile ? '1.8rem' : '2.5rem',
+              fontWeight: '300',
+              margin: 0,
+              fontFamily: 'Helvetica, Arial, sans-serif',
+              letterSpacing: '1px'
+            }}>
+              DONASI KAMU
+            </h2>
+            <div style={{
+              backgroundColor: 'transparent',
+              color: '#FFD700',
+              fontSize: '0.9rem',
+              padding: '0.3rem 0.8rem',
+              borderRadius: '20px',
+              border: '1px solid rgba(255, 215, 0, 0.5)'
+            }}>
+              Total: {formatRupiahDonasi(totalUserDonations)}
+            </div>
+          </div>
+          
+          <motion.button
+            onClick={() => setShowDonasiModal(false)}
+            style={{
+              backgroundColor: 'transparent',
+              border: '1px solid rgba(255, 255, 255, 0.3)',
+              color: 'white',
+              width: '40px',
+              height: '40px',
+              borderRadius: '50%',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '1.5rem',
+              fontFamily: 'Helvetica, Arial, sans-serif'
+            }}
+            whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+          >
+            ×
+          </motion.button>
+        </div>
+
+        {/* Konten Utama */}
+        <div style={{
+          flex: 1,
+          overflowY: 'auto',
+          padding: isMobile ? '1.5rem' : '2rem'
+        }}>
+          {/* Tombol Navigasi ke Halaman Donasi */}
+          <motion.div
+            onClick={() => {
+              setShowDonasiModal(false);
+              router.push('/donation');
+            }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '1rem 1.5rem',
+              marginBottom: '2rem',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              cursor: 'pointer',
+              transition: 'all 0.3s ease'
+            }}
+            whileHover={{ 
+              borderColor: 'rgba(255, 215, 0, 0.5)',
+              backgroundColor: 'rgba(255, 215, 0, 0.05)'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FFD700" strokeWidth="1.5">
+                <path d="M3 9L12 3L21 9L12 15L3 9Z" />
+                <path d="M9 9L12 11L15 9" />
+                <path d="M12 15V21" />
+              </svg>
+              <div>
+                <div style={{ color: 'white', fontSize: '1.1rem', fontWeight: '500' }}>
+                  Lihat Semua Kegiatan Donasi
+                </div>
+                <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem' }}>
+                  Ikuti kegiatan donasi lainnya dan berbagi kebaikan
+                </div>
+              </div>
+            </div>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+              <path d="M17 7L7 17" />
+              <path d="M7 7h10v10" />
+            </svg>
+          </motion.div>
+
+          {isLoadingDonations ? (
+            <div style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              padding: '4rem'
+            }}>
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                style={{
+                  width: '40px',
+                  height: '40px',
+                  border: '2px solid rgba(255,255,255,0.1)',
+                  borderTopColor: 'white',
+                  borderRadius: '50%'
+                }}
+              />
+            </div>
+          ) : userDonations.length === 0 ? (
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '4rem 2rem',
+              textAlign: 'center'
+            }}>
+              <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5">
+                <path d="M3 9L12 3L21 9L12 15L3 9Z" />
+                <path d="M9 9L12 11L15 9" />
+                <path d="M12 15V21" />
+              </svg>
+              <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '1rem', marginTop: '1.5rem' }}>
+                Kamu belum memiliki riwayat donasi
+              </p>
+              <motion.button
+                onClick={() => {
+                  setShowDonasiModal(false);
+                  router.push('/donation');
+                }}
+                style={{
+                  marginTop: '1.5rem',
+                  padding: '0.8rem 2rem',
+                  backgroundColor: 'transparent',
+                  border: '1px solid rgba(255,255,255,0.3)',
+                  color: 'white',
+                  cursor: 'pointer',
+                  fontSize: '0.9rem'
+                }}
+                whileHover={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
+              >
+                Mulai Donasi Sekarang
+              </motion.button>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              {userDonations.map((donation, index) => {
+                const getCategoryName = (categoryId: string) => {
+                  const categories: {[key: string]: string} = {
+                    'panti_asuhan': 'Panti Asuhan',
+                    'panti_jompo': 'Panti Jompo',
+                    'yayasan': 'Yayasan',
+                    'bencana_alam': 'Bencana Alam',
+                    'pendidikan': 'Pendidikan',
+                    'kesehatan': 'Kesehatan',
+                    'masjid': 'Masjid',
+                    'umum': 'Umum'
+                  };
+                  return categories[categoryId] || 'Umum';
+                };
+                
+                let donationDate = donation.createdAt;
+                let dateStr = '--/--/----';
+                if (donationDate) {
+                  const date = donationDate.toDate ? donationDate.toDate() : new Date(donationDate);
+                  if (!isNaN(date.getTime())) {
+                    dateStr = date.toLocaleDateString('id-ID', { 
+                      day: '2-digit', 
+                      month: '2-digit', 
+                      year: 'numeric' 
+                    });
+                  }
+                }
+                
+                return (
+                  <motion.div
+                    key={`donation-${donation.eventId}-${index}`}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    style={{
+                      padding: '1.5rem',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      transition: 'all 0.3s ease'
+                    }}
+                    whileHover={{ borderColor: 'rgba(255, 215, 0, 0.3)' }}
+                  >
+                    <div style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'flex-start',
+                      marginBottom: '1rem',
+                      flexWrap: 'wrap',
+                      gap: '0.5rem'
+                    }}>
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                          <span style={{
+                            fontSize: '0.7rem',
+                            padding: '0.2rem 0.6rem',
+                            border: '1px solid rgba(255,255,255,0.2)',
+                            borderRadius: '20px',
+                            color: 'rgba(255,255,255,0.6)'
+                          }}>
+                            {getCategoryName(donation.eventCategory)}
+                          </span>
+                        </div>
+                        <h3 style={{
+                          color: 'white',
+                          fontSize: '1.2rem',
+                          fontWeight: '500',
+                          margin: '0.5rem 0 0.3rem 0',
+                          fontFamily: 'Helvetica, Arial, sans-serif'
+                        }}>
+                          {donation.eventTitle}
+                        </h3>
+                      </div>
+                      <div style={{
+                        textAlign: 'right'
+                      }}>
+                        <div style={{
+                          fontSize: '1.5rem',
+                          fontWeight: '600',
+                          color: '#FFD700'
+                        }}>
+                          {formatRupiahDonasi(donation.amount)}
+                        </div>
+                        <div style={{
+                          fontSize: '0.7rem',
+                          color: 'rgba(255,255,255,0.4)',
+                          marginTop: '0.2rem'
+                        }}>
+                          {dateStr}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {donation.message && (
+                      <div style={{
+                        margin: '1rem 0',
+                        padding: '0.8rem 1rem',
+                        backgroundColor: 'rgba(255,255,255,0.02)',
+                        borderLeft: '2px solid #FFD700'
+                      }}>
+                        <p style={{
+                          color: 'rgba(255,255,255,0.8)',
+                          fontSize: '0.9rem',
+                          margin: 0,
+                          fontStyle: 'italic',
+                          fontFamily: 'Helvetica, Arial, sans-serif'
+                        }}>
+                          "{donation.message}"
+                        </p>
+                      </div>
+                    )}
+                    
+                    <div style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      marginTop: '0.8rem',
+                      fontSize: '0.75rem',
+                      color: 'rgba(255,255,255,0.4)'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <span>Donatur: {donation.name}</span>
+                      </div>
+                      <motion.button
+                        onClick={() => {
+                          setShowDonasiModal(false);
+                          router.push('/donation');
+                        }}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          color: '#FFD700',
+                          cursor: 'pointer',
+                          fontSize: '0.75rem',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.3rem'
+                        }}
+                        whileHover={{ gap: '0.6rem' }}
+                      >
+                        Lihat Kegiatan
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M7 7h10v10" />
+                          <path d="M17 7L7 17" />
+                        </svg>
+                      </motion.button>
+                    </div>
+                  </motion.div>
+                );
+              })}
+              
+              {/* Tombol Lihat Semua */}
+              <motion.div
+                onClick={() => {
+                  setShowDonasiModal(false);
+                  router.push('/donation');
+                }}
+                style={{
+                  textAlign: 'center',
+                  padding: '1.5rem',
+                  marginTop: '1rem',
+                  borderTop: '1px solid rgba(255,255,255,0.1)',
+                  cursor: 'pointer'
+                }}
+                whileHover={{ opacity: 0.7 }}
+              >
+                <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem' }}>
+                  Lihat semua kegiatan donasi di halaman Donasi
+                </span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" style={{ marginLeft: '0.5rem', display: 'inline-block' }}>
+                  <path d="M7 7h10v10" />
+                  <path d="M17 7L7 17" />
+                </svg>
+              </motion.div>
+            </div>
+          )}
+        </div>
+      </motion.div>
+    </motion.div>
+  )}
+</AnimatePresence>
+
+
+
+
+
+        
+
       {/* Modal Delete Account Confirmation */}
       <AnimatePresence>
         {showDeleteAccountModal && (
@@ -8012,6 +8532,54 @@ export default function HomePage(): React.JSX.Element {
                 BASED
               </h2>
             </div>
+
+             {/* TOMBOL PANTAU - SOUTH WEST ARROW */}
+    <motion.div
+      onClick={handlePantauDonasi}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0.8rem',
+        cursor: 'pointer',
+        padding: isMobile ? '0.5rem 1rem' : '0.8rem 1.5rem',
+        border: '1px solid rgba(255, 215, 0, 0.5)',
+        backgroundColor: 'rgba(255, 215, 0, 0.05)',
+        transition: 'all 0.3s ease'
+      }}
+      whileHover={{ 
+        borderColor: '#FFD700',
+        backgroundColor: 'rgba(255, 215, 0, 0.15)',
+        scale: 1.02
+      }}
+      whileTap={{ scale: 0.98 }}
+    >
+      <span style={{
+        color: '#FFD700',
+        fontSize: isMobile ? '1rem' : '1.2rem',
+        fontWeight: '500',
+        fontFamily: 'Helvetica, Arial, sans-serif',
+        letterSpacing: '0.5px'
+      }}>
+        PANTAU
+      </span>
+      
+      {/* SOUTH WEST ARROW SVG */}
+      <svg
+        width={isMobile ? "20" : "24"}
+        height={isMobile ? "20" : "24"}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="#FFD700"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M17 7L7 17" />
+        <path d="M7 7h10v10" />
+      </svg>
+    </motion.div>
+  </div>
+
 
             <div style={{ position: 'relative', display: 'flex', alignItems: 'flex-end' }}>
               <div style={{
