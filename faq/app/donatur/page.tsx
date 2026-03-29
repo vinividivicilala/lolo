@@ -40,7 +40,7 @@ const firebaseConfig = {
   measurementId: "G-8LMP7F4BE9"
 };
 
-// Event Categories - All White Text
+// Event Categories
 const eventCategories = [
   { id: "panti_asuhan", name: "Panti Asuhan" },
   { id: "panti_jompo", name: "Panti Jompo" },
@@ -112,7 +112,7 @@ const InstagramVerifiedBadge = ({ size = 24 }) => {
   );
 };
 
-// Arrow Icons - Clear and Proper Shapes
+// Arrow Icons
 const NorthEastArrow = ({ size = 28, color = "#666" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
     <path d="M7 7 L17 7 L17 17" />
@@ -141,7 +141,7 @@ const SouthWestArrow = ({ size = 28, color = "#666" }) => (
   </svg>
 );
 
-// Icons - Enlarged
+// Icons
 const PlusIcon = ({ size = 28 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
     <line x1="12" y1="5" x2="12" y2="19"/>
@@ -413,7 +413,6 @@ export default function DonationPage() {
 
   // Get leaderboard for an event
   const getLeaderboard = (donors: Donor[]) => {
-    // Group donors by userId and sum amounts
     const donorMap = new Map<string, { name: string; totalAmount: number; userId: string }>();
     
     donors.forEach(donor => {
@@ -429,10 +428,9 @@ export default function DonationPage() {
       }
     });
     
-    // Convert to array and sort by totalAmount descending
     const leaderboard = Array.from(donorMap.values())
       .sort((a, b) => b.totalAmount - a.totalAmount)
-      .slice(0, 10); // Top 10 donors
+      .slice(0, 10);
     
     return leaderboard;
   };
@@ -972,26 +970,25 @@ export default function DonationPage() {
         </p>
       </div>
 
-      {/* Category Filters - All White Text, No Colors */}
+      {/* Category Filters - No Line Box, Transparent */}
       <div style={{
         maxWidth: '700px',
         margin: '0 auto',
         marginBottom: '32px',
         display: 'flex',
         flexWrap: 'wrap',
-        gap: '12px',
+        gap: '8px',
         justifyContent: 'center',
       }}>
         <button
           onClick={() => setSelectedCategory("all")}
           style={{
-            padding: '8px 20px',
-            borderRadius: '30px',
+            padding: '8px 16px',
             fontSize: '14px',
             fontWeight: selectedCategory === "all" ? '600' : '400',
             background: 'transparent',
             color: selectedCategory === "all" ? '#fff' : '#666',
-            border: selectedCategory === "all" ? '1px solid #fff' : '1px solid #333',
+            border: 'none',
             cursor: 'pointer',
             transition: 'all 0.2s',
           }}
@@ -1003,13 +1000,12 @@ export default function DonationPage() {
             key={category.id}
             onClick={() => setSelectedCategory(category.id)}
             style={{
-              padding: '8px 20px',
-              borderRadius: '30px',
+              padding: '8px 16px',
               fontSize: '14px',
               fontWeight: selectedCategory === category.id ? '600' : '400',
               background: 'transparent',
               color: selectedCategory === category.id ? '#fff' : '#666',
-              border: selectedCategory === category.id ? '1px solid #fff' : '1px solid #333',
+              border: 'none',
               cursor: 'pointer',
               transition: 'all 0.2s',
             }}
@@ -1019,7 +1015,7 @@ export default function DonationPage() {
         ))}
       </div>
 
-      {/* Tab Navigation - Transparent */}
+      {/* Tab Navigation */}
       <div style={{
         maxWidth: '700px',
         margin: '0 auto',
@@ -1067,7 +1063,6 @@ export default function DonationPage() {
         margin: '0 auto',
       }}>
         {activeTab === 'feed' ? (
-          // Feed Events
           <>
             {sortedEvents.length === 0 ? (
               <div style={{
@@ -1148,7 +1143,7 @@ export default function DonationPage() {
                       </button>
                     </div>
                     
-                    {/* Category - Simple White Text */}
+                    {/* Category - Simple Text */}
                     <div style={{ marginBottom: '12px' }}>
                       <span style={{
                         fontSize: '13px',
@@ -1179,7 +1174,7 @@ export default function DonationPage() {
                       {event.description}
                     </p>
                     
-                    {/* Progress with Animation */}
+                    {/* Progress */}
                     <div style={{ marginBottom: '28px' }}>
                       <div style={{
                         display: 'flex',
@@ -1234,58 +1229,51 @@ export default function DonationPage() {
                       </div>
                     </div>
                     
-                    {/* Donation Messages Section */}
+                    {/* Donation Messages Section - Large Text, No Border Highlight */}
                     {event.donors.length > 0 && (
                       <div style={{
                         marginBottom: '24px',
-                        padding: '20px',
-                        background: '#111',
-                        borderRadius: '16px',
-                        border: '1px solid #222',
+                        padding: '20px 0',
                       }}>
                         <h3 style={{
-                          fontSize: '16px',
+                          fontSize: '18px',
                           fontWeight: '600',
                           color: '#fff',
-                          marginBottom: '16px',
+                          marginBottom: '20px',
                         }}>
                           Pesan Donasi
                         </h3>
                         <div style={{
                           display: 'flex',
                           flexDirection: 'column',
-                          gap: '16px',
+                          gap: '20px',
                         }}>
                           {event.donors.slice(0, 5).map((donor) => (
-                            <div key={donor.id} style={{
-                              padding: '12px',
-                              background: '#0a0a0a',
-                              borderRadius: '12px',
-                              borderLeft: '2px solid #fff',
-                            }}>
+                            <div key={donor.id}>
                               <div style={{
                                 display: 'flex',
-                                alignItems: 'center',
+                                alignItems: 'baseline',
                                 justifyContent: 'space-between',
                                 marginBottom: '8px',
                               }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                  <span style={{ fontSize: '14px', fontWeight: '500', color: '#fff' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                                  <span style={{ fontSize: '16px', fontWeight: '500', color: '#fff' }}>
                                     {donor.name}
                                   </span>
-                                  <span style={{ fontSize: '11px', color: '#666' }}>
+                                  <span style={{ fontSize: '13px', color: '#666' }}>
                                     {formatTime(donor.createdAt)}
                                   </span>
                                 </div>
-                                <span style={{ fontSize: '13px', fontWeight: '500', color: '#fff' }}>
+                                <span style={{ fontSize: '15px', fontWeight: '500', color: '#fff' }}>
                                   {formatRupiah(donor.amount)}
                                 </span>
                               </div>
                               <p style={{
-                                fontSize: '13px',
+                                fontSize: '18px',
                                 color: '#aaa',
                                 margin: 0,
                                 lineHeight: '1.5',
+                                fontStyle: 'italic',
                               }}>
                                 "{donor.message}"
                               </p>
@@ -1294,7 +1282,7 @@ export default function DonationPage() {
                           {event.donors.length > 5 && (
                             <div style={{
                               textAlign: 'center',
-                              fontSize: '12px',
+                              fontSize: '13px',
                               color: '#666',
                               paddingTop: '8px',
                             }}>
@@ -1305,7 +1293,7 @@ export default function DonationPage() {
                       </div>
                     )}
                     
-                    {/* Leaderboard Section - Medal Only */}
+                    {/* Leaderboard Section */}
                     {leaderboard.length > 0 && (
                       <div style={{
                         marginBottom: '24px',
@@ -1364,7 +1352,7 @@ export default function DonationPage() {
                       </div>
                     )}
                     
-                    {/* Animasi Donasi Baru */}
+                    {/* Donation Animation */}
                     {isAnimating && (
                       <motion.div
                         initial={{ opacity: 0, y: -20 }}
@@ -1476,7 +1464,7 @@ export default function DonationPage() {
                       </button>
                     </div>
                     
-                    {/* Donors List - Simplified */}
+                    {/* Recent Donors */}
                     {event.donors.length > 0 && (
                       <div style={{ marginTop: '20px' }}>
                         <div style={{ fontSize: '14px', color: '#666', marginBottom: '12px' }}>
@@ -1593,7 +1581,6 @@ export default function DonationPage() {
               events.map((event) => (
                 event.stories && event.stories.length > 0 && (
                   <div key={event.id} style={{ marginBottom: '40px' }}>
-                    {/* Event Header */}
                     <div style={{
                       marginBottom: '28px',
                       padding: '24px',
@@ -1614,7 +1601,6 @@ export default function DonationPage() {
                       </p>
                     </div>
                     
-                    {/* Stories List */}
                     {event.stories.map((story) => {
                       const isStoryLiked = story.likes.includes(user?.uid);
                       
@@ -1631,7 +1617,6 @@ export default function DonationPage() {
                             border: '1px solid #222',
                           }}
                         >
-                          {/* Story Header */}
                           <div style={{
                             display: 'flex',
                             alignItems: 'center',
@@ -1669,7 +1654,6 @@ export default function DonationPage() {
                             </button>
                           </div>
                           
-                          {/* Story Content */}
                           <div style={{
                             fontSize: '16px',
                             lineHeight: '1.6',
@@ -1680,7 +1664,6 @@ export default function DonationPage() {
                             {story.content}
                           </div>
                           
-                          {/* Story Actions */}
                           <div style={{
                             display: 'flex',
                             alignItems: 'center',
@@ -1735,7 +1718,6 @@ export default function DonationPage() {
                             </button>
                           </div>
                           
-                          {/* Story Comments */}
                           {story.comments.length > 0 && (
                             <div style={{ marginTop: '18px' }}>
                               {story.comments.slice(0, 2).map((comment) => (
@@ -1753,7 +1735,6 @@ export default function DonationPage() {
                             </div>
                           )}
                           
-                          {/* Story Comment Input */}
                           {user && (
                             <div style={{
                               display: 'flex',
