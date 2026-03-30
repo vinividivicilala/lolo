@@ -435,6 +435,11 @@ export default function DonationPage() {
     
     // Donors Table
     if (event.donors.length > 0) {
+      if (yPos > pageHeight - 60) {
+        doc.addPage();
+        yPos = 20;
+      }
+      
       doc.setFont("helvetica", "bold");
       doc.text("Daftar Donatur", 20, yPos);
       yPos += 5;
@@ -1691,7 +1696,7 @@ export default function DonationPage() {
                     <div style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '32px',
+                      gap: '24px',
                       padding: '16px 0',
                       borderTop: '1px solid #222',
                       borderBottom: '1px solid #222',
@@ -1739,8 +1744,8 @@ export default function DonationPage() {
                           background: 'none',
                           border: '1px solid #333',
                           borderRadius: '30px',
-                          padding: '6px 12px',
-                          fontSize: '13px',
+                          padding: '8px 16px',
+                          fontSize: '14px',
                           color: '#fff',
                           cursor: 'pointer',
                           fontFamily: 'Helvetica, Arial, sans-serif',
@@ -1748,14 +1753,14 @@ export default function DonationPage() {
                         }}
                         onMouseEnter={(e) => {
                           e.currentTarget.style.borderColor = '#fff';
-                          e.currentTarget.style.color = '#fff';
+                          e.currentTarget.style.backgroundColor = '#222';
                         }}
                         onMouseLeave={(e) => {
                           e.currentTarget.style.borderColor = '#333';
-                          e.currentTarget.style.color = '#fff';
+                          e.currentTarget.style.backgroundColor = 'transparent';
                         }}
                       >
-                        <DownloadIcon size={18} color="#fff" />
+                        <DownloadIcon size={20} color="#fff" />
                         <span>Download PDF</span>
                       </button>
                       <button
