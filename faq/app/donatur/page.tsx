@@ -121,8 +121,8 @@ const NorthEastArrow = ({ size = 28, color = "#666" }) => (
   </svg>
 );
 
-const SouthWestArrow = ({ size = 28, color = "#fff" }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+const SouthWestArrow = ({ size = 48, color = "#fff" }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M17 17 L7 17 L7 7" />
     <path d="M7 17 L17 7" />
   </svg>
@@ -809,6 +809,7 @@ export default function DonationPage() {
       color: '#fff',
       padding: isMobile ? '24px' : '48px',
       paddingTop: isMobile ? '100px' : '120px',
+      paddingBottom: isMobile ? '100px' : '120px',
     }}>
       
       {/* Header */}
@@ -954,55 +955,6 @@ export default function DonationPage() {
         </p>
       </div>
 
-      {/* Marquee Text - Running from left to right */}
-      <div style={{
-        width: '100%',
-        overflow: 'hidden',
-        backgroundColor: '#111',
-        padding: '16px 0',
-        marginBottom: '40px',
-        borderTop: '1px solid #222',
-        borderBottom: '1px solid #222',
-      }}>
-        <div style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '24px',
-          whiteSpace: 'nowrap',
-          animation: 'marquee 20s linear infinite',
-        }}>
-          {[...Array(8)].map((_, i) => (
-            <div key={i} style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '16px',
-            }}>
-              <span style={{
-                fontSize: '20px',
-                fontWeight: '600',
-                color: '#fff',
-                letterSpacing: '2px',
-                fontFamily: 'Helvetica, Arial, sans-serif',
-              }}>
-                DONASI KAN UANG SECARA IKHLAS DAN TULUS
-              </span>
-              <SouthWestArrow size={28} color="#fff" />
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <style jsx>{`
-        @keyframes marquee {
-          0% {
-            transform: translateX(0%);
-          }
-          100% {
-            transform: translateX(-50%);
-          }
-        }
-      `}</style>
-
       {/* Category Filters - No Line Box */}
       <div style={{
         maxWidth: '700px',
@@ -1096,6 +1048,7 @@ export default function DonationPage() {
       <div style={{
         maxWidth: '700px',
         margin: '0 auto',
+        marginBottom: '80px',
       }}>
         {activeTab === 'feed' ? (
           <>
@@ -1872,6 +1825,58 @@ export default function DonationPage() {
         )}
       </div>
 
+      {/* Marquee Text - Bottom, Large Text, No Background */}
+      <div style={{
+        position: 'fixed',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        width: '100%',
+        overflow: 'hidden',
+        backgroundColor: '#000',
+        padding: '20px 0',
+        borderTop: '1px solid #222',
+        zIndex: 99,
+      }}>
+        <div style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '32px',
+          whiteSpace: 'nowrap',
+          animation: 'marquee 25s linear infinite',
+        }}>
+          {[...Array(10)].map((_, i) => (
+            <div key={i} style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '32px',
+            }}>
+              <span style={{
+                fontSize: '28px',
+                fontWeight: '400',
+                color: '#fff',
+                letterSpacing: '1px',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+              }}>
+                DONASI KAN UANG SECARA IKHLAS DAN TULUS
+              </span>
+              <SouthWestArrow size={48} color="#fff" />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <style jsx>{`
+        @keyframes marquee {
+          0% {
+            transform: translateX(0%);
+          }
+          100% {
+            transform: translateX(-50%);
+          }
+        }
+      `}</style>
+
       {/* Create Event Modal */}
       {showCreateModal && (
         <div style={{
@@ -2248,7 +2253,7 @@ export default function DonationPage() {
           exit={{ opacity: 0 }}
           style={{
             position: 'fixed',
-            bottom: '28px',
+            bottom: '100px',
             left: '50%',
             transform: 'translateX(-50%)',
             background: '#fff',
