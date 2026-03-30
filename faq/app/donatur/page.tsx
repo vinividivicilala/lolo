@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -94,7 +94,8 @@ const InstagramVerifiedBadge = ({ size = 24 }) => {
           fontSize: '12px',
           whiteSpace: 'nowrap',
           marginBottom: '8px',
-          zIndex: 1000
+          zIndex: 1000,
+          fontFamily: 'Helvetica, Arial, sans-serif',
         }}>
           Akun Resmi
           <div style={{
@@ -120,6 +121,14 @@ const NorthEastArrow = ({ size = 28, color = "#666" }) => (
   </svg>
 );
 
+const SouthWestArrow = ({ size = 28, color = "#fff" }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M17 17 L7 17 L7 7" />
+    <path d="M7 17 L17 7" />
+  </svg>
+);
+
+// Icons
 const PlusIcon = ({ size = 28 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
     <line x1="12" y1="5" x2="12" y2="19"/>
@@ -785,7 +794,7 @@ export default function DonationPage() {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        fontFamily: 'system-ui, -apple-system, sans-serif',
+        fontFamily: 'Helvetica, Arial, sans-serif',
       }}>
         <div style={{ color: '#fff', fontSize: '18px' }}>Loading...</div>
       </div>
@@ -796,7 +805,7 @@ export default function DonationPage() {
     <div style={{
       minHeight: '100vh',
       backgroundColor: '#000',
-      fontFamily: 'system-ui, -apple-system, sans-serif',
+      fontFamily: 'Helvetica, Arial, sans-serif',
       color: '#fff',
       padding: isMobile ? '24px' : '48px',
       paddingTop: isMobile ? '100px' : '120px',
@@ -820,7 +829,8 @@ export default function DonationPage() {
           fontSize: '32px',
           fontWeight: '600',
           cursor: 'pointer',
-          color: '#fff'
+          color: '#fff',
+          fontFamily: 'Helvetica, Arial, sans-serif',
         }} onClick={() => router.push('/')}>
           Menuru
         </div>
@@ -840,6 +850,7 @@ export default function DonationPage() {
                 cursor: 'pointer',
                 padding: '10px 24px',
                 borderRadius: '40px',
+                fontFamily: 'Helvetica, Arial, sans-serif',
               }}
             >
               <PlusIcon size={22} />
@@ -866,7 +877,7 @@ export default function DonationPage() {
                   objectFit: 'cover',
                 }}
               />
-              <span style={{ fontSize: '15px', color: '#fff' }}>
+              <span style={{ fontSize: '15px', color: '#fff', fontFamily: 'Helvetica, Arial, sans-serif' }}>
                 {user.displayName || user.email?.split('@')[0]?.slice(0, 12)}
               </span>
               <InstagramVerifiedBadge size={18} />
@@ -878,6 +889,7 @@ export default function DonationPage() {
                   fontSize: '13px',
                   color: '#666',
                   cursor: 'pointer',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
                 }}
               >
                 Keluar
@@ -894,6 +906,7 @@ export default function DonationPage() {
                 fontSize: '15px',
                 color: '#fff',
                 cursor: 'pointer',
+                fontFamily: 'Helvetica, Arial, sans-serif',
               }}
             >
               Login
@@ -907,6 +920,7 @@ export default function DonationPage() {
             textDecoration: 'none',
             color: '#666',
             fontSize: '15px',
+            fontFamily: 'Helvetica, Arial, sans-serif',
           }}>
             <NorthEastArrow size={20} color="#666" />
             <span>Home</span>
@@ -924,7 +938,8 @@ export default function DonationPage() {
           fontWeight: '600',
           letterSpacing: '-0.5px',
           marginBottom: '20px',
-          color: '#fff'
+          color: '#fff',
+          fontFamily: 'Helvetica, Arial, sans-serif',
         }}>
           Berbagi Kebaikan
         </h1>
@@ -933,10 +948,60 @@ export default function DonationPage() {
           color: '#666',
           maxWidth: '550px',
           margin: '0 auto',
+          fontFamily: 'Helvetica, Arial, sans-serif',
         }}>
           Buat kegiatan donasi, bagikan cerita, dan kumpulkan dukungan
         </p>
       </div>
+
+      {/* Marquee Text - Running from left to right */}
+      <div style={{
+        width: '100%',
+        overflow: 'hidden',
+        backgroundColor: '#111',
+        padding: '16px 0',
+        marginBottom: '40px',
+        borderTop: '1px solid #222',
+        borderBottom: '1px solid #222',
+      }}>
+        <div style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '24px',
+          whiteSpace: 'nowrap',
+          animation: 'marquee 20s linear infinite',
+        }}>
+          {[...Array(8)].map((_, i) => (
+            <div key={i} style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '16px',
+            }}>
+              <span style={{
+                fontSize: '20px',
+                fontWeight: '600',
+                color: '#fff',
+                letterSpacing: '2px',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+              }}>
+                DONASI KAN UANG SECARA IKHLAS DAN TULUS
+              </span>
+              <SouthWestArrow size={28} color="#fff" />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <style jsx>{`
+        @keyframes marquee {
+          0% {
+            transform: translateX(0%);
+          }
+          100% {
+            transform: translateX(-50%);
+          }
+        }
+      `}</style>
 
       {/* Category Filters - No Line Box */}
       <div style={{
@@ -958,6 +1023,7 @@ export default function DonationPage() {
             color: selectedCategory === "all" ? '#fff' : '#666',
             border: 'none',
             cursor: 'pointer',
+            fontFamily: 'Helvetica, Arial, sans-serif',
           }}
         >
           Semua
@@ -974,6 +1040,7 @@ export default function DonationPage() {
               color: selectedCategory === category.id ? '#fff' : '#666',
               border: 'none',
               cursor: 'pointer',
+              fontFamily: 'Helvetica, Arial, sans-serif',
             }}
           >
             {category.name}
@@ -1002,6 +1069,7 @@ export default function DonationPage() {
             color: activeTab === 'feed' ? '#fff' : '#666',
             cursor: 'pointer',
             borderBottom: activeTab === 'feed' ? '2px solid #fff' : 'none',
+            fontFamily: 'Helvetica, Arial, sans-serif',
           }}
         >
           Feed
@@ -1017,6 +1085,7 @@ export default function DonationPage() {
             color: activeTab === 'stories' ? '#fff' : '#666',
             cursor: 'pointer',
             borderBottom: activeTab === 'stories' ? '2px solid #fff' : 'none',
+            fontFamily: 'Helvetica, Arial, sans-serif',
           }}
         >
           Cerita
@@ -1037,6 +1106,7 @@ export default function DonationPage() {
                 color: '#666',
                 border: '1px solid #222',
                 borderRadius: '20px',
+                fontFamily: 'Helvetica, Arial, sans-serif',
               }}>
                 <p style={{ fontSize: '18px', marginBottom: '24px' }}>Belum ada kegiatan</p>
                 {user && (
@@ -1050,6 +1120,7 @@ export default function DonationPage() {
                       fontSize: '15px',
                       color: '#fff',
                       cursor: 'pointer',
+                      fontFamily: 'Helvetica, Arial, sans-serif',
                     }}
                   >
                     Buat kegiatan pertama
@@ -1095,12 +1166,12 @@ export default function DonationPage() {
                         />
                         <div>
                           <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '6px' }}>
-                            <span style={{ fontSize: '18px', fontWeight: '500', color: '#fff' }}>
+                            <span style={{ fontSize: '18px', fontWeight: '500', color: '#fff', fontFamily: 'Helvetica, Arial, sans-serif' }}>
                               {event.organizerName}
                             </span>
                             <InstagramVerifiedBadge size={18} />
                           </div>
-                          <div style={{ fontSize: '14px', color: '#666', marginTop: '4px' }}>
+                          <div style={{ fontSize: '14px', color: '#666', marginTop: '4px', fontFamily: 'Helvetica, Arial, sans-serif' }}>
                             {formatTime(event.createdAt)} • {event.location}
                           </div>
                         </div>
@@ -1116,6 +1187,7 @@ export default function DonationPage() {
                         fontSize: '13px',
                         fontWeight: '400',
                         color: '#888',
+                        fontFamily: 'Helvetica, Arial, sans-serif',
                       }}>
                         {categoryName}
                       </span>
@@ -1126,7 +1198,8 @@ export default function DonationPage() {
                       fontSize: '32px',
                       fontWeight: '600',
                       marginBottom: '12px',
-                      color: '#fff'
+                      color: '#fff',
+                      fontFamily: 'Helvetica, Arial, sans-serif',
                     }}>
                       {event.title}
                     </h2>
@@ -1137,6 +1210,7 @@ export default function DonationPage() {
                       color: '#888',
                       lineHeight: '1.6',
                       marginBottom: '28px',
+                      fontFamily: 'Helvetica, Arial, sans-serif',
                     }}>
                       {event.description}
                     </p>
@@ -1149,6 +1223,7 @@ export default function DonationPage() {
                         fontSize: '16px',
                         marginBottom: '12px',
                         color: '#888',
+                        fontFamily: 'Helvetica, Arial, sans-serif',
                       }}>
                         <span>Terkumpul</span>
                         <motion.span 
@@ -1156,7 +1231,7 @@ export default function DonationPage() {
                           initial={{ scale: 1.2, color: '#fff' }}
                           animate={{ scale: 1, color: '#fff' }}
                           transition={{ duration: 0.3 }}
-                          style={{ color: '#fff' }}
+                          style={{ color: '#fff', fontFamily: 'Helvetica, Arial, sans-serif' }}
                         >
                           {formatRupiah(event.currentAmount)}
                         </motion.span>
@@ -1167,9 +1242,10 @@ export default function DonationPage() {
                         fontSize: '16px',
                         marginBottom: '12px',
                         color: '#888',
+                        fontFamily: 'Helvetica, Arial, sans-serif',
                       }}>
                         <span>Target</span>
-                        <span style={{ color: '#fff' }}>{formatRupiah(event.targetAmount)}</span>
+                        <span style={{ color: '#fff', fontFamily: 'Helvetica, Arial, sans-serif' }}>{formatRupiah(event.targetAmount)}</span>
                       </div>
                       <div style={{
                         height: '8px',
@@ -1196,6 +1272,7 @@ export default function DonationPage() {
                         marginTop: '12px',
                         fontSize: '14px',
                         color: '#666',
+                        fontFamily: 'Helvetica, Arial, sans-serif',
                       }}>
                         <span>{percentage}% terkumpul</span>
                         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -1216,6 +1293,7 @@ export default function DonationPage() {
                           fontWeight: '600',
                           color: '#fff',
                           marginBottom: '20px',
+                          fontFamily: 'Helvetica, Arial, sans-serif',
                         }}>
                           Pesan Donasi
                         </h3>
@@ -1238,14 +1316,14 @@ export default function DonationPage() {
                                 marginBottom: '8px',
                               }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-                                  <span style={{ fontSize: '16px', fontWeight: '500', color: '#fff' }}>
+                                  <span style={{ fontSize: '16px', fontWeight: '500', color: '#fff', fontFamily: 'Helvetica, Arial, sans-serif' }}>
                                     {donor.name}
                                   </span>
-                                  <span style={{ fontSize: '13px', color: '#666' }}>
+                                  <span style={{ fontSize: '13px', color: '#666', fontFamily: 'Helvetica, Arial, sans-serif' }}>
                                     {formatTime(donor.createdAt)}
                                   </span>
                                 </div>
-                                <span style={{ fontSize: '15px', fontWeight: '500', color: '#fff' }}>
+                                <span style={{ fontSize: '15px', fontWeight: '500', color: '#fff', fontFamily: 'Helvetica, Arial, sans-serif' }}>
                                   {formatRupiah(donor.amount)}
                                 </span>
                               </div>
@@ -1255,6 +1333,7 @@ export default function DonationPage() {
                                 margin: 0,
                                 lineHeight: '1.5',
                                 fontStyle: 'italic',
+                                fontFamily: 'Helvetica, Arial, sans-serif',
                               }}>
                                 "{donor.message}"
                               </p>
@@ -1266,6 +1345,7 @@ export default function DonationPage() {
                               fontSize: '13px',
                               color: '#666',
                               paddingTop: '8px',
+                              fontFamily: 'Helvetica, Arial, sans-serif',
                             }}>
                               +{event.donors.length - 5} pesan donasi lainnya
                             </div>
@@ -1288,6 +1368,7 @@ export default function DonationPage() {
                           fontWeight: '600',
                           color: '#fff',
                           marginBottom: '16px',
+                          fontFamily: 'Helvetica, Arial, sans-serif',
                         }}>
                           Leaderboard Donatur
                         </h3>
@@ -1316,7 +1397,7 @@ export default function DonationPage() {
                                 }}>
                                   {index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : `${index + 1}`}
                                 </span>
-                                <span style={{ fontSize: '15px', color: '#fff' }}>
+                                <span style={{ fontSize: '15px', color: '#fff', fontFamily: 'Helvetica, Arial, sans-serif' }}>
                                   {donor.name}
                                 </span>
                               </div>
@@ -1324,6 +1405,7 @@ export default function DonationPage() {
                                 fontSize: '15px',
                                 fontWeight: '600',
                                 color: '#fff',
+                                fontFamily: 'Helvetica, Arial, sans-serif',
                               }}>
                                 {formatRupiah(donor.totalAmount)}
                               </span>
@@ -1348,6 +1430,7 @@ export default function DonationPage() {
                           color: '#fff',
                           border: '1px solid #333',
                           textAlign: 'center',
+                          fontFamily: 'Helvetica, Arial, sans-serif',
                         }}
                       >
                         ✨ Donasi baru! Terima kasih ✨
@@ -1374,6 +1457,7 @@ export default function DonationPage() {
                           fontSize: '16px',
                           color: isLiked ? '#ff6b6b' : '#666',
                           cursor: 'pointer',
+                          fontFamily: 'Helvetica, Arial, sans-serif',
                         }}
                       >
                         <HeartIcon size={26} filled={isLiked} />
@@ -1390,6 +1474,7 @@ export default function DonationPage() {
                           fontSize: '16px',
                           color: '#666',
                           cursor: 'pointer',
+                          fontFamily: 'Helvetica, Arial, sans-serif',
                         }}
                       >
                         <CommentIcon size={26} />
@@ -1410,6 +1495,7 @@ export default function DonationPage() {
                           color: '#fff',
                           cursor: 'pointer',
                           marginLeft: 'auto',
+                          fontFamily: 'Helvetica, Arial, sans-serif',
                         }}
                       >
                         <SendIcon size={24} />
@@ -1430,6 +1516,7 @@ export default function DonationPage() {
                           fontSize: '16px',
                           color: '#666',
                           cursor: 'pointer',
+                          fontFamily: 'Helvetica, Arial, sans-serif',
                         }}
                       >
                         <BookOpenIcon size={24} />
@@ -1448,7 +1535,7 @@ export default function DonationPage() {
                     {/* Recent Donors */}
                     {event.donors.length > 0 && (
                       <div style={{ marginTop: '20px' }}>
-                        <div style={{ fontSize: '14px', color: '#666', marginBottom: '12px' }}>
+                        <div style={{ fontSize: '14px', color: '#666', marginBottom: '12px', fontFamily: 'Helvetica, Arial, sans-serif' }}>
                           {event.donors.length} donatur terbaru
                         </div>
                         <div style={{
@@ -1466,6 +1553,7 @@ export default function DonationPage() {
                               background: '#111',
                               padding: '6px 14px',
                               borderRadius: '30px',
+                              fontFamily: 'Helvetica, Arial, sans-serif',
                             }}>
                               <span>{donor.name}</span>
                               <span>•</span>
@@ -1483,6 +1571,7 @@ export default function DonationPage() {
                           <div key={comment.id} style={{
                             marginBottom: '12px',
                             fontSize: '15px',
+                            fontFamily: 'Helvetica, Arial, sans-serif',
                           }}>
                             <span style={{ fontWeight: '500', color: '#fff', marginRight: '8px' }}>{comment.name}</span>
                             <span style={{ color: '#888' }}>{comment.text}</span>
@@ -1519,6 +1608,7 @@ export default function DonationPage() {
                             fontSize: '15px',
                             color: '#fff',
                             outline: 'none',
+                            fontFamily: 'Helvetica, Arial, sans-serif',
                           }}
                         />
                         <button
@@ -1532,6 +1622,7 @@ export default function DonationPage() {
                             fontSize: '15px',
                             cursor: newComment.trim() ? 'pointer' : 'not-allowed',
                             color: newComment.trim() ? '#fff' : '#444',
+                            fontFamily: 'Helvetica, Arial, sans-serif',
                           }}
                         >
                           Kirim
@@ -1553,6 +1644,7 @@ export default function DonationPage() {
                 color: '#666',
                 border: '1px solid #222',
                 borderRadius: '20px',
+                fontFamily: 'Helvetica, Arial, sans-serif',
               }}>
                 <BookOpenIcon size={56} stroke="#333" />
                 <p style={{ fontSize: '18px', marginTop: '24px', marginBottom: '12px' }}>Belum ada cerita</p>
@@ -1573,11 +1665,12 @@ export default function DonationPage() {
                         fontSize: '22px',
                         fontWeight: '600',
                         marginBottom: '8px',
-                        color: '#fff'
+                        color: '#fff',
+                        fontFamily: 'Helvetica, Arial, sans-serif',
                       }}>
                         {event.title}
                       </h3>
-                      <p style={{ fontSize: '14px', color: '#666' }}>
+                      <p style={{ fontSize: '14px', color: '#666', fontFamily: 'Helvetica, Arial, sans-serif' }}>
                         {event.stories.length} cerita dibagikan
                       </p>
                     </div>
@@ -1617,14 +1710,14 @@ export default function DonationPage() {
                               />
                               <div>
                                 <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '6px' }}>
-                                  <span style={{ fontSize: '16px', fontWeight: '500', color: '#fff' }}>
+                                  <span style={{ fontSize: '16px', fontWeight: '500', color: '#fff', fontFamily: 'Helvetica, Arial, sans-serif' }}>
                                     {story.userName}
                                   </span>
                                   <InstagramVerifiedBadge size={16} />
                                 </div>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
                                   <TimeIcon size={14} />
-                                  <span style={{ fontSize: '12px', color: '#666' }}>
+                                  <span style={{ fontSize: '12px', color: '#666', fontFamily: 'Helvetica, Arial, sans-serif' }}>
                                     {formatTime(story.createdAt)}
                                   </span>
                                 </div>
@@ -1641,6 +1734,7 @@ export default function DonationPage() {
                             color: '#ccc',
                             marginBottom: '24px',
                             whiteSpace: 'pre-wrap',
+                            fontFamily: 'Helvetica, Arial, sans-serif',
                           }}>
                             {story.content}
                           </div>
@@ -1664,6 +1758,7 @@ export default function DonationPage() {
                                 fontSize: '14px',
                                 color: isStoryLiked ? '#ff6b6b' : '#666',
                                 cursor: 'pointer',
+                                fontFamily: 'Helvetica, Arial, sans-serif',
                               }}
                             >
                               <HeartIcon size={22} filled={isStoryLiked} />
@@ -1679,6 +1774,7 @@ export default function DonationPage() {
                                 fontSize: '14px',
                                 color: '#666',
                                 cursor: 'pointer',
+                                fontFamily: 'Helvetica, Arial, sans-serif',
                               }}
                             >
                               <CommentIcon size={22} />
@@ -1694,6 +1790,7 @@ export default function DonationPage() {
                               color: '#666',
                               cursor: 'pointer',
                               marginLeft: 'auto',
+                              fontFamily: 'Helvetica, Arial, sans-serif',
                             }}>
                               <ShareIcon size={22} />
                             </button>
@@ -1705,6 +1802,7 @@ export default function DonationPage() {
                                 <div key={comment.id} style={{
                                   marginBottom: '10px',
                                   fontSize: '14px',
+                                  fontFamily: 'Helvetica, Arial, sans-serif',
                                 }}>
                                   <span style={{ fontWeight: '500', color: '#fff', marginRight: '8px' }}>{comment.name}</span>
                                   <span style={{ color: '#888' }}>{comment.text}</span>
@@ -1742,6 +1840,7 @@ export default function DonationPage() {
                                   fontSize: '14px',
                                   color: '#fff',
                                   outline: 'none',
+                                  fontFamily: 'Helvetica, Arial, sans-serif',
                                 }}
                               />
                               <button
@@ -1755,6 +1854,7 @@ export default function DonationPage() {
                                   fontSize: '13px',
                                   cursor: storyComments[story.id]?.trim() ? 'pointer' : 'not-allowed',
                                   color: storyComments[story.id]?.trim() ? '#fff' : '#444',
+                                  fontFamily: 'Helvetica, Arial, sans-serif',
                                 }}
                               >
                                 Kirim
@@ -1801,7 +1901,7 @@ export default function DonationPage() {
               alignItems: 'center',
               marginBottom: '32px',
             }}>
-              <h2 style={{ fontSize: '28px', fontWeight: '600', color: '#fff' }}>Buat Kegiatan</h2>
+              <h2 style={{ fontSize: '28px', fontWeight: '600', color: '#fff', fontFamily: 'Helvetica, Arial, sans-serif' }}>Buat Kegiatan</h2>
               <button onClick={() => setShowCreateModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#666' }}>
                 <CloseIcon size={26} />
               </button>
@@ -1822,6 +1922,7 @@ export default function DonationPage() {
                 color: '#fff',
                 outline: 'none',
                 marginBottom: '28px',
+                fontFamily: 'Helvetica, Arial, sans-serif',
               }}
             />
             
@@ -1841,6 +1942,7 @@ export default function DonationPage() {
                 outline: 'none',
                 resize: 'none',
                 marginBottom: '28px',
+                fontFamily: 'Helvetica, Arial, sans-serif',
               }}
             />
             
@@ -1858,10 +1960,11 @@ export default function DonationPage() {
                 outline: 'none',
                 marginBottom: '28px',
                 cursor: 'pointer',
+                fontFamily: 'Helvetica, Arial, sans-serif',
               }}
             >
               {eventCategories.map(category => (
-                <option key={category.id} value={category.id} style={{ background: '#000', color: '#fff' }}>
+                <option key={category.id} value={category.id} style={{ background: '#000', color: '#fff', fontFamily: 'Helvetica, Arial, sans-serif' }}>
                   {category.name}
                 </option>
               ))}
@@ -1882,6 +1985,7 @@ export default function DonationPage() {
                 color: '#fff',
                 outline: 'none',
                 marginBottom: '28px',
+                fontFamily: 'Helvetica, Arial, sans-serif',
               }}
             />
             
@@ -1900,6 +2004,7 @@ export default function DonationPage() {
                 color: '#fff',
                 outline: 'none',
                 marginBottom: '28px',
+                fontFamily: 'Helvetica, Arial, sans-serif',
               }}
             />
             
@@ -1917,6 +2022,7 @@ export default function DonationPage() {
                 color: '#fff',
                 outline: 'none',
                 marginBottom: '32px',
+                fontFamily: 'Helvetica, Arial, sans-serif',
               }}
             />
             
@@ -1934,6 +2040,7 @@ export default function DonationPage() {
                 fontWeight: '500',
                 cursor: isSubmitting || !newEvent.title || !newEvent.description ? 'not-allowed' : 'pointer',
                 opacity: isSubmitting || !newEvent.title || !newEvent.description ? 0.5 : 1,
+                fontFamily: 'Helvetica, Arial, sans-serif',
               }}
             >
               {isSubmitting ? 'Membuat...' : 'Buat Kegiatan'}
@@ -1971,7 +2078,7 @@ export default function DonationPage() {
               alignItems: 'center',
               marginBottom: '24px',
             }}>
-              <h2 style={{ fontSize: '26px', fontWeight: '600', color: '#fff' }}>Bagikan Cerita</h2>
+              <h2 style={{ fontSize: '26px', fontWeight: '600', color: '#fff', fontFamily: 'Helvetica, Arial, sans-serif' }}>Bagikan Cerita</h2>
               <button onClick={() => setShowStoryModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#666' }}>
                 <CloseIcon size={24} />
               </button>
@@ -1984,6 +2091,7 @@ export default function DonationPage() {
               padding: '14px',
               background: '#111',
               borderRadius: '12px',
+              fontFamily: 'Helvetica, Arial, sans-serif',
             }}>
               {selectedEventForStory.title}
             </p>
@@ -2004,6 +2112,7 @@ export default function DonationPage() {
                 outline: 'none',
                 resize: 'none',
                 marginBottom: '28px',
+                fontFamily: 'Helvetica, Arial, sans-serif',
               }}
             />
             
@@ -2021,6 +2130,7 @@ export default function DonationPage() {
                 fontWeight: '500',
                 cursor: isSubmitting || !storyContent.trim() ? 'not-allowed' : 'pointer',
                 opacity: isSubmitting || !storyContent.trim() ? 0.5 : 1,
+                fontFamily: 'Helvetica, Arial, sans-serif',
               }}
             >
               {isSubmitting ? 'Membagikan...' : 'Bagikan Cerita'}
@@ -2058,13 +2168,13 @@ export default function DonationPage() {
               alignItems: 'center',
               marginBottom: '24px',
             }}>
-              <h2 style={{ fontSize: '26px', fontWeight: '600', color: '#fff' }}>Kirim Donasi</h2>
+              <h2 style={{ fontSize: '26px', fontWeight: '600', color: '#fff', fontFamily: 'Helvetica, Arial, sans-serif' }}>Kirim Donasi</h2>
               <button onClick={() => setShowDonateModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#666' }}>
                 <CloseIcon size={24} />
               </button>
             </div>
             
-            <p style={{ fontSize: '16px', color: '#666', marginBottom: '32px' }}>
+            <p style={{ fontSize: '16px', color: '#666', marginBottom: '32px', fontFamily: 'Helvetica, Arial, sans-serif' }}>
               {selectedEvent.title}
             </p>
             
@@ -2083,6 +2193,7 @@ export default function DonationPage() {
                 color: '#fff',
                 outline: 'none',
                 marginBottom: '20px',
+                fontFamily: 'Helvetica, Arial, sans-serif',
               }}
             />
             
@@ -2102,6 +2213,7 @@ export default function DonationPage() {
                 outline: 'none',
                 resize: 'none',
                 marginBottom: '32px',
+                fontFamily: 'Helvetica, Arial, sans-serif',
               }}
             />
             
@@ -2119,6 +2231,7 @@ export default function DonationPage() {
                 fontWeight: '500',
                 cursor: isSubmitting || !donationAmount || !donationMessage ? 'not-allowed' : 'pointer',
                 opacity: isSubmitting || !donationAmount || !donationMessage ? 0.5 : 1,
+                fontFamily: 'Helvetica, Arial, sans-serif',
               }}
             >
               {isSubmitting ? 'Memproses...' : 'Kirim Donasi'}
@@ -2145,6 +2258,7 @@ export default function DonationPage() {
             fontSize: '15px',
             zIndex: 1001,
             fontWeight: '500',
+            fontFamily: 'Helvetica, Arial, sans-serif',
           }}
         >
           {successMessage}
