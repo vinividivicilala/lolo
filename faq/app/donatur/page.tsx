@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
+import gsap from "gsap";
 import { initializeApp, getApps } from "firebase/app";
 import { 
   getAuth, 
@@ -50,6 +51,34 @@ const eventCategories = [
   { id: "kesehatan", name: "Kesehatan" },
   { id: "masjid", name: "Masjid" },
   { id: "umum", name: "Umum" }
+];
+
+// FAQ Data
+const faqData = [
+  {
+    question: "Apa itu platform donasi ini?",
+    answer: "Platform ini adalah wadah untuk berbagi kebaikan melalui donasi. Anda dapat membuat kegiatan donasi, berdonasi, dan berbagi cerita tentang pengalaman donasi Anda."
+  },
+  {
+    question: "Bagaimana cara melakukan donasi?",
+    answer: "Untuk melakukan donasi, Anda perlu login terlebih dahulu menggunakan akun Google. Setelah login, pilih kegiatan donasi yang ingin Anda dukung, masukkan nominal donasi dan pesan dukungan, lalu klik Kirim Donasi."
+  },
+  {
+    question: "Apakah donasi saya aman?",
+    answer: "Ya, donasi Anda aman. Kami menggunakan sistem keamanan Firebase yang terenkripsi untuk melindungi semua data transaksi dan informasi pribadi Anda."
+  },
+  {
+    question: "Bagaimana cara membuat kegiatan donasi?",
+    answer: "Login ke akun Anda, klik tombol 'Buat Kegiatan', isi judul, deskripsi, target donasi, lokasi, dan tanggal berakhir, lalu klik 'Buat'. Kegiatan donasi Anda akan langsung terlihat di feed."
+  },
+  {
+    question: "Apakah ada biaya administrasi?",
+    answer: "Tidak ada biaya administrasi. 100% dari donasi Anda akan langsung masuk ke kegiatan donasi yang Anda pilih."
+  },
+  {
+    question: "Bagaimana cara melihat leaderboard donatur?",
+    answer: "Leaderboard donatur otomatis muncul di setiap kegiatan donasi. Leaderboard menampilkan 10 donatur dengan total donasi terbanyak, lengkap dengan medal emas, perak, dan perunggu untuk top 3."
+  }
 ];
 
 // Instagram Verified Badge Component
@@ -118,6 +147,13 @@ const NorthEastArrow = ({ size = 28, color = "#666" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
     <path d="M7 7 L17 7 L17 17" />
     <path d="M17 7 L7 17" />
+  </svg>
+);
+
+const NorthWestArrow = ({ size = 28, color = "#fff" }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M17 7 L7 7 L7 17" />
+    <path d="M7 7 L17 17" />
   </svg>
 );
 
@@ -203,6 +239,14 @@ const TimeIcon = ({ size = 16 }) => (
   </svg>
 );
 
+const QuestionIcon = ({ size = 28 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <circle cx="12" cy="12" r="10"/>
+    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+    <line x1="12" y1="17" x2="12.01" y2="17"/>
+  </svg>
+);
+
 // Types
 interface Donor {
   id: string;
@@ -260,6 +304,9 @@ interface DonationEvent {
 export default function DonationPage() {
   const router = useRouter();
   const [isMobile, setIsMobile] = useState(false);
+  const [showFaq, setShowFaq] = useState(false);
+  const faqRef = useRef<HTMLDivElement>(null);
+  const faqContentRef = useRef<HTMLDivElement>(null);
   
   // Firebase State
   const [firebaseAuth, setFirebaseAuth] = useState<any>(null);
@@ -302,6 +349,20 @@ export default function DonationPage() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [activeTab, setActiveTab] = useState<'feed' | 'stories'>('feed');
+
+  // GSAP Animation for FAQ
+  useEffect(() => {
+    if (showFaq && faqRef.current && faqContentRef.current) {
+      gsap.fromTo(faqRef.current,
+        { opacity: 0, scale: 0.9 },
+        { opacity: 1, scale: 1, duration: 0.3, ease: "backOut" }
+      );
+      gsap.fromTo(faqContentRef.current.children,
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, stagger: 0.1, duration: 0.4, ease: "power2.out" }
+      );
+    }
+  }, [showFaq]);
 
   // Format Rupiah
   const formatRupiah = (amount: number) => {
@@ -837,6 +898,27 @@ export default function DonationPage() {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+          <button
+            onClick={() => setShowFaq(true)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              background: 'none',
+              border: '1px solid #333',
+              fontSize: '14px',
+              color: '#fff',
+              cursor: 'pointer',
+              padding: '8px 20px',
+              borderRadius: '40px',
+              fontFamily: 'Helvetica, Arial, sans-serif',
+            }}
+          >
+            <QuestionIcon size={20} />
+            <span>Tanya Jawab</span>
+            <NorthWestArrow size={18} color="#fff" />
+          </button>
+          
           {user && (
             <button
               onClick={() => setShowCreateModal(true)}
@@ -928,6 +1010,129 @@ export default function DonationPage() {
           </Link>
         </div>
       </div>
+
+      {/* FAQ Modal */}
+      {showFaq && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.95)',
+          zIndex: 2000,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '24px',
+        }} onClick={() => setShowFaq(false)}>
+          <div
+            ref={faqRef}
+            style={{
+              background: '#000',
+              borderRadius: '32px',
+              padding: '40px',
+              maxWidth: '800px',
+              width: '100%',
+              maxHeight: '80vh',
+              overflowY: 'auto',
+              border: '1px solid #222',
+              position: 'relative',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setShowFaq(false)}
+              style={{
+                position: 'absolute',
+                top: '24px',
+                right: '24px',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                color: '#666',
+                padding: '8px',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'all 0.2s',
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.color = '#fff'}
+              onMouseLeave={(e) => e.currentTarget.style.color = '#666'}
+            >
+              <CloseIcon size={28} />
+            </button>
+            
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '16px',
+              marginBottom: '32px',
+            }}>
+              <QuestionIcon size={36} />
+              <h2 style={{
+                fontSize: '32px',
+                fontWeight: '600',
+                color: '#fff',
+                margin: 0,
+                fontFamily: 'Helvetica, Arial, sans-serif',
+              }}>
+                Tanya Jawab
+              </h2>
+              <NorthWestArrow size={32} color="#fff" />
+            </div>
+            
+            <div ref={faqContentRef} style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '24px',
+            }}>
+              {faqData.map((faq, index) => (
+                <div
+                  key={index}
+                  style={{
+                    padding: '20px',
+                    background: '#111',
+                    borderRadius: '20px',
+                    border: '1px solid #222',
+                    transition: 'all 0.3s',
+                  }}
+                >
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: '16px',
+                    marginBottom: '12px',
+                  }}>
+                    <NorthWestArrow size={24} color="#fff" />
+                    <h3 style={{
+                      fontSize: '20px',
+                      fontWeight: '600',
+                      color: '#fff',
+                      margin: 0,
+                      fontFamily: 'Helvetica, Arial, sans-serif',
+                      flex: 1,
+                    }}>
+                      {faq.question}
+                    </h3>
+                  </div>
+                  <p style={{
+                    fontSize: '16px',
+                    color: '#aaa',
+                    lineHeight: '1.6',
+                    margin: 0,
+                    paddingLeft: '40px',
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                  }}>
+                    {faq.answer}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Hero Section */}
       <div style={{
