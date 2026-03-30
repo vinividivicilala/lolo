@@ -28,6 +28,8 @@ import {
   onSnapshot,
   increment
 } from "firebase/firestore";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 // Konfigurasi Firebase
 const firebaseConfig = {
@@ -173,6 +175,14 @@ const ChevronDown = ({ size = 24, color = "#fff" }) => (
 const ChevronUp = ({ size = 24, color = "#fff" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <polyline points="18 15 12 9 6 15" />
+  </svg>
+);
+
+const DownloadIcon = ({ size = 24, color = "#fff" }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+    <polyline points="7 10 12 15 17 10" />
+    <line x1="12" y1="15" x2="12" y2="3" />
   </svg>
 );
 
@@ -361,6 +371,185 @@ export default function DonationPage() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [activeTab, setActiveTab] = useState<'feed' | 'stories'>('feed');
+
+  // PDF Export Function
+  const exportToPDF = (event: DonationEvent) => {
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    
+    // Header with website title
+    doc.setFillColor(0, 0, 0);
+    doc.rect(0, 0, pageWidth, 40, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(24);
+    doc.setFont("helvetica", "bold");
+    doc.text("Menuru", 20, 25);
+    
+    doc.setTextColor(100, 100, 100);
+    doc.setFontSize(10);
+    doc.text("Platform Donasi Online", 20, 35);
+    
+    // Event Title
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(20);
+    doc.setFont("helvetica", "bold");
+    doc.text("Laporan Donasi", 20, 60);
+    
+    doc.setFontSize(16);
+    doc.setTextColor(50, 50, 50);
+    doc.text(event.title, 20, 75);
+    
+    // Event Details
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(80, 80, 80);
+    
+    let yPos = 95;
+    const lineHeight = 7;
+    
+    doc.text(`Kategori: ${getCategoryName(event.category)}`, 20, yPos);
+    yPos += lineHeight;
+    doc.text(`Lokasi: ${event.location}`, 20, yPos);
+    yPos += lineHeight;
+    doc.text(`Target Donasi: ${formatRupiah(event.targetAmount)}`, 20, yPos);
+    yPos += lineHeight;
+    doc.text(`Terkumpul: ${formatRupiah(event.currentAmount)}`, 20, yPos);
+    yPos += lineHeight;
+    doc.text(`Persentase: ${getPercentage(event.currentAmount, event.targetAmount)}%`, 20, yPos);
+    yPos += lineHeight;
+    doc.text(`Tanggal Dibuat: ${formatDate(event.createdAt)}`, 20, yPos);
+    yPos += lineHeight;
+    doc.text(`Berakhir: ${formatDate(event.endDate)}`, 20, yPos);
+    yPos += lineHeight;
+    
+    // Description
+    yPos += 5;
+    doc.setFont("helvetica", "bold");
+    doc.text("Deskripsi Kegiatan:", 20, yPos);
+    yPos += lineHeight;
+    doc.setFont("helvetica", "normal");
+    const descriptionLines = doc.splitTextToSize(event.description, pageWidth - 40);
+    doc.text(descriptionLines, 20, yPos);
+    yPos += descriptionLines.length * lineHeight + 10;
+    
+    // Donors Table
+    if (event.donors.length > 0) {
+      doc.setFont("helvetica", "bold");
+      doc.text("Daftar Donatur", 20, yPos);
+      yPos += 5;
+      
+      const tableData = event.donors.map(donor => [
+        donor.name,
+        donor.email,
+        formatRupiah(donor.amount),
+        donor.message.length > 50 ? donor.message.substring(0, 47) + "..." : donor.message,
+        formatDate(donor.createdAt)
+      ]);
+      
+      autoTable(doc, {
+        startY: yPos,
+        head: [["Nama", "Email", "Jumlah", "Pesan", "Tanggal"]],
+        body: tableData,
+        theme: 'striped',
+        headStyles: { fillColor: [0, 0, 0], textColor: [255, 255, 255], fontStyle: 'bold' },
+        styles: { fontSize: 8, cellPadding: 3, font: 'helvetica' },
+        columnStyles: {
+          0: { cellWidth: 40 },
+          1: { cellWidth: 50 },
+          2: { cellWidth: 35 },
+          3: { cellWidth: 60 },
+          4: { cellWidth: 35 }
+        },
+        margin: { left: 20, right: 20 }
+      });
+      
+      const finalY = (doc as any).lastAutoTable.finalY || yPos;
+      yPos = finalY + 10;
+    }
+    
+    // Leaderboard
+    const leaderboard = getLeaderboard(event.donors);
+    if (leaderboard.length > 0) {
+      if (yPos > pageHeight - 60) {
+        doc.addPage();
+        yPos = 20;
+      }
+      
+      doc.setFont("helvetica", "bold");
+      doc.text("Leaderboard Donatur (Top 10)", 20, yPos);
+      yPos += 5;
+      
+      const leaderboardData = leaderboard.map((donor, index) => [
+        `${index + 1}`,
+        donor.name,
+        formatRupiah(donor.totalAmount)
+      ]);
+      
+      autoTable(doc, {
+        startY: yPos,
+        head: [["Rank", "Nama", "Total Donasi"]],
+        body: leaderboardData,
+        theme: 'striped',
+        headStyles: { fillColor: [0, 0, 0], textColor: [255, 255, 255], fontStyle: 'bold' },
+        styles: { fontSize: 10, cellPadding: 5, font: 'helvetica' },
+        columnStyles: {
+          0: { cellWidth: 30 },
+          1: { cellWidth: 80 },
+          2: { cellWidth: 60 }
+        },
+        margin: { left: 20, right: 20 }
+      });
+      
+      const finalY = (doc as any).lastAutoTable.finalY || yPos;
+      yPos = finalY + 10;
+    }
+    
+    // Summary
+    if (yPos > pageHeight - 40) {
+      doc.addPage();
+      yPos = 20;
+    }
+    
+    doc.setFont("helvetica", "bold");
+    doc.text("Ringkasan", 20, yPos);
+    yPos += lineHeight;
+    doc.setFont("helvetica", "normal");
+    doc.text(`Total Donatur: ${event.donors.length} orang`, 20, yPos);
+    yPos += lineHeight;
+    doc.text(`Total Terkumpul: ${formatRupiah(event.currentAmount)}`, 20, yPos);
+    yPos += lineHeight;
+    doc.text(`Target: ${formatRupiah(event.targetAmount)}`, 20, yPos);
+    yPos += lineHeight;
+    doc.text(`Persentase Tercapai: ${getPercentage(event.currentAmount, event.targetAmount)}%`, 20, yPos);
+    yPos += lineHeight * 2;
+    
+    // Footer
+    const footerY = pageHeight - 20;
+    doc.setFontSize(8);
+    doc.setTextColor(150, 150, 150);
+    doc.text(`Dokumen dibuat pada: ${new Date().toLocaleString('id-ID')}`, 20, footerY);
+    doc.text(`Menuru - Platform Donasi Online`, pageWidth - 70, footerY);
+    
+    // Save PDF
+    doc.save(`Laporan_Donasi_${event.title.replace(/\s/g, '_')}.pdf`);
+  };
+
+  // Format date for PDF
+  const formatDate = (date: any) => {
+    if (!date) return "-";
+    try {
+      const d = date.toDate ? date.toDate() : new Date(date);
+      if (isNaN(d.getTime())) return "-";
+      return d.toLocaleDateString('id-ID', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      });
+    } catch {
+      return "-";
+    }
+  };
 
   // GSAP Animation for FAQ
   useEffect(() => {
@@ -1540,6 +1729,25 @@ export default function DonationPage() {
                       >
                         <CommentIcon size={26} />
                         <span>{event.comments.length}</span>
+                      </button>
+                      <button
+                        onClick={() => exportToPDF(event)}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          background: 'none',
+                          border: '1px solid #333',
+                          borderRadius: '30px',
+                          padding: '6px 12px',
+                          fontSize: '13px',
+                          color: '#fff',
+                          cursor: 'pointer',
+                          fontFamily: 'Helvetica, Arial, sans-serif',
+                        }}
+                      >
+                        <DownloadIcon size={20} color="#fff" />
+                        <span>Download PDF</span>
                       </button>
                       <button
                         onClick={() => {
