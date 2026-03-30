@@ -164,6 +164,18 @@ const SouthWestArrow = ({ size = 56, color = "#fff" }) => (
   </svg>
 );
 
+const ChevronDown = ({ size = 24, color = "#fff" }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="6 9 12 15 18 9" />
+  </svg>
+);
+
+const ChevronUp = ({ size = 24, color = "#fff" }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="18 15 12 9 6 15" />
+  </svg>
+);
+
 // Icons
 const PlusIcon = ({ size = 28 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -304,9 +316,9 @@ interface DonationEvent {
 export default function DonationPage() {
   const router = useRouter();
   const [isMobile, setIsMobile] = useState(false);
-  const [showFaq, setShowFaq] = useState(false);
-  const faqRef = useRef<HTMLDivElement>(null);
-  const faqContentRef = useRef<HTMLDivElement>(null);
+  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
+  const faqRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const answerRefs = useRef<(HTMLDivElement | null)[]>([]);
   
   // Firebase State
   const [firebaseAuth, setFirebaseAuth] = useState<any>(null);
@@ -352,17 +364,52 @@ export default function DonationPage() {
 
   // GSAP Animation for FAQ
   useEffect(() => {
-    if (showFaq && faqRef.current && faqContentRef.current) {
-      gsap.fromTo(faqRef.current,
-        { opacity: 0, scale: 0.9 },
-        { opacity: 1, scale: 1, duration: 0.3, ease: "backOut" }
-      );
-      gsap.fromTo(faqContentRef.current.children,
-        { opacity: 0, y: 20 },
-        { opacity: 1, y: 0, stagger: 0.1, duration: 0.4, ease: "power2.out" }
-      );
+    faqRefs.current = faqRefs.current.slice(0, faqData.length);
+    answerRefs.current = answerRefs.current.slice(0, faqData.length);
+  }, []);
+
+  const toggleFaq = (index: number) => {
+    if (openFaqIndex === index) {
+      // Close animation
+      if (answerRefs.current[index]) {
+        gsap.to(answerRefs.current[index], {
+          height: 0,
+          opacity: 0,
+          duration: 0.3,
+          ease: "power2.inOut",
+          onComplete: () => {
+            setOpenFaqIndex(null);
+          }
+        });
+      }
+    } else {
+      // Close previously opened
+      if (openFaqIndex !== null && answerRefs.current[openFaqIndex]) {
+        gsap.to(answerRefs.current[openFaqIndex], {
+          height: 0,
+          opacity: 0,
+          duration: 0.3,
+          ease: "power2.inOut"
+        });
+      }
+      
+      // Open new one
+      setOpenFaqIndex(index);
+      setTimeout(() => {
+        if (answerRefs.current[index]) {
+          const answerElement = answerRefs.current[index];
+          const fullHeight = answerElement.scrollHeight;
+          gsap.set(answerElement, { height: 0, opacity: 0 });
+          gsap.to(answerElement, {
+            height: fullHeight,
+            opacity: 1,
+            duration: 0.4,
+            ease: "power2.out"
+          });
+        }
+      }, 10);
     }
-  }, [showFaq]);
+  };
 
   // Format Rupiah
   const formatRupiah = (amount: number) => {
@@ -898,27 +945,6 @@ export default function DonationPage() {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
-          <button
-            onClick={() => setShowFaq(true)}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              background: 'none',
-              border: '1px solid #333',
-              fontSize: '14px',
-              color: '#fff',
-              cursor: 'pointer',
-              padding: '8px 20px',
-              borderRadius: '40px',
-              fontFamily: 'Helvetica, Arial, sans-serif',
-            }}
-          >
-            <QuestionIcon size={20} />
-            <span>Tanya Jawab</span>
-            <NorthWestArrow size={18} color="#fff" />
-          </button>
-          
           {user && (
             <button
               onClick={() => setShowCreateModal(true)}
@@ -1010,129 +1036,6 @@ export default function DonationPage() {
           </Link>
         </div>
       </div>
-
-      {/* FAQ Modal */}
-      {showFaq && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0,0,0,0.95)',
-          zIndex: 2000,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '24px',
-        }} onClick={() => setShowFaq(false)}>
-          <div
-            ref={faqRef}
-            style={{
-              background: '#000',
-              borderRadius: '32px',
-              padding: '40px',
-              maxWidth: '800px',
-              width: '100%',
-              maxHeight: '80vh',
-              overflowY: 'auto',
-              border: '1px solid #222',
-              position: 'relative',
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              onClick={() => setShowFaq(false)}
-              style={{
-                position: 'absolute',
-                top: '24px',
-                right: '24px',
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                color: '#666',
-                padding: '8px',
-                borderRadius: '50%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                transition: 'all 0.2s',
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.color = '#fff'}
-              onMouseLeave={(e) => e.currentTarget.style.color = '#666'}
-            >
-              <CloseIcon size={28} />
-            </button>
-            
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '16px',
-              marginBottom: '32px',
-            }}>
-              <QuestionIcon size={36} />
-              <h2 style={{
-                fontSize: '32px',
-                fontWeight: '600',
-                color: '#fff',
-                margin: 0,
-                fontFamily: 'Helvetica, Arial, sans-serif',
-              }}>
-                Tanya Jawab
-              </h2>
-              <NorthWestArrow size={32} color="#fff" />
-            </div>
-            
-            <div ref={faqContentRef} style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '24px',
-            }}>
-              {faqData.map((faq, index) => (
-                <div
-                  key={index}
-                  style={{
-                    padding: '20px',
-                    background: '#111',
-                    borderRadius: '20px',
-                    border: '1px solid #222',
-                    transition: 'all 0.3s',
-                  }}
-                >
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    gap: '16px',
-                    marginBottom: '12px',
-                  }}>
-                    <NorthWestArrow size={24} color="#fff" />
-                    <h3 style={{
-                      fontSize: '20px',
-                      fontWeight: '600',
-                      color: '#fff',
-                      margin: 0,
-                      fontFamily: 'Helvetica, Arial, sans-serif',
-                      flex: 1,
-                    }}>
-                      {faq.question}
-                    </h3>
-                  </div>
-                  <p style={{
-                    fontSize: '16px',
-                    color: '#aaa',
-                    lineHeight: '1.6',
-                    margin: 0,
-                    paddingLeft: '40px',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
-                  }}>
-                    {faq.answer}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Hero Section */}
       <div style={{
@@ -2028,6 +1931,109 @@ export default function DonationPage() {
             )}
           </>
         )}
+
+        {/* FAQ Section - On Main Page */}
+        <div style={{
+          marginTop: '80px',
+          paddingTop: '40px',
+          borderTop: '1px solid #222',
+        }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '16px',
+            marginBottom: '32px',
+          }}>
+            <QuestionIcon size={32} />
+            <h2 style={{
+              fontSize: '28px',
+              fontWeight: '600',
+              color: '#fff',
+              margin: 0,
+              fontFamily: 'Helvetica, Arial, sans-serif',
+            }}>
+              Frequently Asked Questions
+            </h2>
+            <NorthWestArrow size={28} color="#fff" />
+          </div>
+          
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '16px',
+          }}>
+            {faqData.map((faq, index) => (
+              <div
+                key={index}
+                ref={(el) => { faqRefs.current[index] = el; }}
+                style={{
+                  background: '#111',
+                  borderRadius: '16px',
+                  border: '1px solid #222',
+                  overflow: 'hidden',
+                }}
+              >
+                <button
+                  onClick={() => toggleFaq(index)}
+                  style={{
+                    width: '100%',
+                    padding: '20px 24px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                  }}
+                >
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '16px',
+                    flex: 1,
+                  }}>
+                    <NorthWestArrow size={24} color="#fff" />
+                    <span style={{
+                      fontSize: '18px',
+                      fontWeight: '500',
+                      color: '#fff',
+                    }}>
+                      {faq.question}
+                    </span>
+                  </div>
+                  {openFaqIndex === index ? (
+                    <ChevronUp size={24} color="#fff" />
+                  ) : (
+                    <ChevronDown size={24} color="#fff" />
+                  )}
+                </button>
+                <div
+                  ref={(el) => { answerRefs.current[index] = el; }}
+                  style={{
+                    height: 0,
+                    opacity: 0,
+                    overflow: 'hidden',
+                    paddingLeft: '64px',
+                    paddingRight: '24px',
+                  }}
+                >
+                  <p style={{
+                    fontSize: '16px',
+                    color: '#aaa',
+                    lineHeight: '1.6',
+                    margin: '0',
+                    paddingBottom: '20px',
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                  }}>
+                    {faq.answer}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* Marquee Text - Bottom, Large Text, No Background, No Border */}
