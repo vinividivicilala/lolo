@@ -121,7 +121,7 @@ const NorthEastArrow = ({ size = 28, color = "#666" }) => (
   </svg>
 );
 
-const SouthWestArrow = ({ size = 48, color = "#fff" }) => (
+const SouthWestArrow = ({ size = 56, color = "#fff" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M17 17 L7 17 L7 7" />
     <path d="M7 17 L17 7" />
@@ -809,7 +809,7 @@ export default function DonationPage() {
       color: '#fff',
       padding: isMobile ? '24px' : '48px',
       paddingTop: isMobile ? '100px' : '120px',
-      paddingBottom: isMobile ? '100px' : '120px',
+      paddingBottom: isMobile ? '120px' : '150px',
     }}>
       
       {/* Header */}
@@ -1825,7 +1825,7 @@ export default function DonationPage() {
         )}
       </div>
 
-      {/* Marquee Text - Bottom, Large Text, No Background */}
+      {/* Marquee Text - Bottom, Large Text, No Background, No Border */}
       <div style={{
         position: 'fixed',
         bottom: 0,
@@ -1834,33 +1834,33 @@ export default function DonationPage() {
         width: '100%',
         overflow: 'hidden',
         backgroundColor: '#000',
-        padding: '20px 0',
-        borderTop: '1px solid #222',
+        padding: '24px 0',
         zIndex: 99,
       }}>
         <div style={{
           display: 'inline-flex',
           alignItems: 'center',
-          gap: '32px',
+          gap: '48px',
           whiteSpace: 'nowrap',
-          animation: 'marquee 25s linear infinite',
+          animation: 'marquee 20s linear infinite',
         }}>
-          {[...Array(10)].map((_, i) => (
+          {[...Array(12)].map((_, i) => (
             <div key={i} style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '32px',
+              gap: '48px',
             }}>
               <span style={{
-                fontSize: '28px',
-                fontWeight: '400',
+                fontSize: '56px',
+                fontWeight: '700',
                 color: '#fff',
-                letterSpacing: '1px',
+                letterSpacing: '4px',
                 fontFamily: 'Helvetica, Arial, sans-serif',
+                textTransform: 'uppercase',
               }}>
-                DONASI KAN UANG SECARA IKHLAS DAN TULUS
+                DONATUR
               </span>
-              <SouthWestArrow size={48} color="#fff" />
+              <SouthWestArrow size={56} color="#fff" />
             </div>
           ))}
         </div>
@@ -2253,7 +2253,7 @@ export default function DonationPage() {
           exit={{ opacity: 0 }}
           style={{
             position: 'fixed',
-            bottom: '100px',
+            bottom: '120px',
             left: '50%',
             transform: 'translateX(-50%)',
             background: '#fff',
