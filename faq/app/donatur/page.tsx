@@ -1744,9 +1744,18 @@ export default function DonationPage() {
                           color: '#fff',
                           cursor: 'pointer',
                           fontFamily: 'Helvetica, Arial, sans-serif',
+                          transition: 'all 0.2s',
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.borderColor = '#fff';
+                          e.currentTarget.style.color = '#fff';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.borderColor = '#333';
+                          e.currentTarget.style.color = '#fff';
                         }}
                       >
-                        <DownloadIcon size={20} color="#fff" />
+                        <DownloadIcon size={18} color="#fff" />
                         <span>Download PDF</span>
                       </button>
                       <button
