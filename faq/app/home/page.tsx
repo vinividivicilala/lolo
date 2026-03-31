@@ -10,11 +10,11 @@ export default function HomePage() {
   const [notifications, setNotifications] = useState([
     { id: 1, text: 'Donasi baru sebesar Rp 100.000', read: false },
     { id: 2, text: 'Kegiatan "Bantu Anak Yatim" telah selesai', read: false },
+    { id: 3, text: 'Selamat! Anda mendapatkan badge baru', read: false },
   ]);
   const [showNotifications, setShowNotifications] = useState(false);
   const [chatMessages, setChatMessages] = useState([
     { id: 1, text: 'Halo! Ada yang bisa dibantu?', sender: 'bot', time: '10:00' },
-    { id: 2, text: 'Saya ingin bertanya tentang donasi', sender: 'user', time: '10:01' },
   ]);
   const [newMessage, setNewMessage] = useState('');
 
@@ -45,7 +45,6 @@ export default function HomePage() {
       ]);
       setNewMessage('');
       
-      // Auto reply from bot
       setTimeout(() => {
         setChatMessages(prev => [
           ...prev,
@@ -80,7 +79,7 @@ export default function HomePage() {
               style={styles.iconButton}
               onClick={() => setShowNotifications(!showNotifications)}
             >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
                 <path d="M13.73 21a2 2 0 0 1-3.46 0" />
               </svg>
@@ -118,18 +117,20 @@ export default function HomePage() {
             style={styles.iconButton}
             onClick={() => setIsChatOpen(!isChatOpen)}
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
             </svg>
           </button>
         </div>
       </nav>
 
-      {/* Main Content - Kosong, hanya navbar */}
+      {/* Main Content - Kosong seperti onboarding */}
       <main style={styles.main}>
-        <div style={styles.welcomeCard}>
-          <h1 style={styles.welcomeTitle}>Selamat Datang, {userName.split(' ')[0]}!</h1>
-          <p style={styles.welcomeText}>Platform donasi online untuk berbagi kebaikan</p>
+        <div style={styles.contentCenter}>
+          <div style={styles.welcomeIcon}>✨</div>
+          <h1 style={styles.welcomeTitle}>Selamat Datang</h1>
+          <p style={styles.welcomeText}>{userName}</p>
+          <p style={styles.welcomeDesc}>Platform donasi online untuk berbagi kebaikan</p>
         </div>
       </main>
 
@@ -175,7 +176,7 @@ export default function HomePage() {
               style={styles.chatInput}
             />
             <button onClick={sendMessage} style={styles.sendButton}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <line x1="22" y1="2" x2="11" y2="13" />
                 <polygon points="22 2 15 22 11 13 2 9 22 2" />
               </svg>
@@ -190,9 +191,11 @@ export default function HomePage() {
 const styles: { [key: string]: React.CSSProperties } = {
   container: {
     minHeight: '100vh',
+    width: '100%',
     backgroundColor: '#000',
     fontFamily: '"Hubot Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
     color: '#fff',
+    position: 'relative',
   },
   navbar: {
     position: 'fixed',
@@ -220,19 +223,19 @@ const styles: { [key: string]: React.CSSProperties } = {
   navRight: {
     display: 'flex',
     alignItems: 'center',
-    gap: '20px',
+    gap: '16px',
   },
   userInfo: {
     display: 'flex',
     alignItems: 'center',
-    gap: '10px',
-    padding: '6px 12px',
+    gap: '8px',
+    padding: '6px 12px 6px 8px',
     borderRadius: '30px',
     backgroundColor: '#1c1c1e',
   },
   userAvatar: {
-    width: '32px',
-    height: '32px',
+    width: '28px',
+    height: '28px',
     borderRadius: '50%',
     backgroundColor: '#8be9fd',
     color: '#000',
@@ -240,10 +243,10 @@ const styles: { [key: string]: React.CSSProperties } = {
     alignItems: 'center',
     justifyContent: 'center',
     fontWeight: '600',
-    fontSize: '14px',
+    fontSize: '12px',
   },
   userName: {
-    fontSize: '14px',
+    fontSize: '13px',
     fontWeight: '500',
     color: '#fff',
   },
@@ -262,8 +265,8 @@ const styles: { [key: string]: React.CSSProperties } = {
   },
   badge: {
     position: 'absolute',
-    top: '0',
-    right: '0',
+    top: '2px',
+    right: '2px',
     backgroundColor: '#ff3b30',
     color: '#fff',
     fontSize: '10px',
@@ -296,6 +299,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     padding: '12px 16px',
     borderBottom: '1px solid #2c2c2e',
     fontWeight: '600',
+    fontSize: '14px',
   },
   closeDropdown: {
     background: 'none',
@@ -330,24 +334,36 @@ const styles: { [key: string]: React.CSSProperties } = {
     fontSize: '13px',
   },
   main: {
-    paddingTop: '80px',
     minHeight: '100vh',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
+    paddingTop: '80px',
+    paddingBottom: '40px',
   },
-  welcomeCard: {
+  contentCenter: {
     textAlign: 'center',
-    padding: '40px',
+    padding: '40px 24px',
+  },
+  welcomeIcon: {
+    fontSize: '64px',
+    marginBottom: '24px',
   },
   welcomeTitle: {
     fontSize: '32px',
     fontWeight: '600',
     marginBottom: '12px',
     color: '#fff',
+    letterSpacing: '-0.5px',
   },
   welcomeText: {
-    fontSize: '16px',
+    fontSize: '18px',
+    color: '#8be9fd',
+    marginBottom: '12px',
+    fontWeight: '500',
+  },
+  welcomeDesc: {
+    fontSize: '14px',
     color: '#8e8e93',
   },
   chatModal: {
@@ -355,7 +371,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     bottom: '20px',
     right: '20px',
     width: '320px',
-    height: '480px',
+    height: '460px',
     backgroundColor: '#1c1c1e',
     borderRadius: '16px',
     display: 'flex',
@@ -368,7 +384,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: '16px',
+    padding: '14px 16px',
     borderBottom: '1px solid #2c2c2e',
     backgroundColor: '#000',
   },
@@ -384,7 +400,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     backgroundColor: '#4cd964',
   },
   chatTitle: {
-    fontSize: '16px',
+    fontSize: '15px',
     fontWeight: '600',
     color: '#fff',
   },
@@ -406,13 +422,13 @@ const styles: { [key: string]: React.CSSProperties } = {
   message: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '4px',
+    gap: '2px',
   },
   messageBubble: {
     maxWidth: '80%',
     padding: '10px 14px',
     borderRadius: '18px',
-    fontSize: '14px',
+    fontSize: '13px',
     lineHeight: '1.4',
   },
   messageTime: {
@@ -433,7 +449,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     border: '1px solid #2c2c2e',
     backgroundColor: '#000',
     color: '#fff',
-    fontSize: '14px',
+    fontSize: '13px',
     outline: 'none',
     fontFamily: 'inherit',
   },
@@ -441,8 +457,8 @@ const styles: { [key: string]: React.CSSProperties } = {
     background: '#8be9fd',
     border: 'none',
     borderRadius: '50%',
-    width: '40px',
-    height: '40px',
+    width: '38px',
+    height: '38px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
