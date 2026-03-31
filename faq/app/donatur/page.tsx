@@ -2286,14 +2286,14 @@ export default function DonationPage() {
         </div>
       </div>
 
-      {/* Overlay that slides up from bottom */}
+      {/* Overlay that slides up from bottom - Teks DONATUR di pojok kiri atas ukuran 500px */}
       <AnimatePresence>
         {showOverlay && (
           <motion.div
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
-            transition={{ duration: 0.5, ease: "easeInOut" }}
+            transition={{ duration: 0.6, ease: "easeInOut" }}
             style={{
               position: 'fixed',
               bottom: 0,
@@ -2302,42 +2302,42 @@ export default function DonationPage() {
               top: 0,
               backgroundColor: '#000',
               zIndex: 200,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
               cursor: 'pointer',
             }}
             onClick={closeOverlay}
           >
+            {/* Teks DONATUR di pojok kiri atas, ukuran 500px, font normal (tidak tebal) */}
             <div
               style={{
-                textAlign: 'center',
-                padding: '20px',
+                position: 'absolute',
+                top: '40px',
+                left: '40px',
+                fontSize: '500px',
+                fontWeight: '400',
+                color: '#fff',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                lineHeight: '1',
+                letterSpacing: 'normal',
+                whiteSpace: 'nowrap',
               }}
             >
-              <div
-                style={{
-                  fontSize: isMobile ? '75px' : '120px',
-                  fontWeight: '400',
-                  color: '#fff',
-                  fontFamily: 'Helvetica, Arial, sans-serif',
-                  letterSpacing: '4px',
-                  marginBottom: '40px',
-                }}
-              >
-                DONATUR
-              </div>
-              <div
-                style={{
-                  fontSize: '14px',
-                  color: '#666',
-                  fontFamily: 'Helvetica, Arial, sans-serif',
-                  marginTop: '20px',
-                }}
-              >
-                Click anywhere to close
-              </div>
+              DONATUR
+            </div>
+            
+            {/* Optional: Hint to close */}
+            <div
+              style={{
+                position: 'absolute',
+                bottom: '40px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                fontSize: '14px',
+                color: '#666',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                textAlign: 'center',
+              }}
+            >
+              Click anywhere to close
             </div>
           </motion.div>
         )}
