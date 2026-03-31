@@ -2312,7 +2312,7 @@ export default function DonationPage() {
                 position: 'absolute',
                 top: '40px',
                 left: '40px',
-                fontSize: '500px',
+                fontSize: '400px',
                 fontWeight: '400',
                 color: '#fff',
                 fontFamily: 'Helvetica, Arial, sans-serif',
