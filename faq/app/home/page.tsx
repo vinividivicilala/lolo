@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function HomePage() {
   const router = useRouter();
@@ -21,6 +22,35 @@ export default function HomePage() {
   // Donation State
   const [donationTotal, setDonationTotal] = useState(1250000);
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Card Swipe State
+  const [currentCardIndex, setCurrentCardIndex] = useState(0);
+  const [dragStartX, setDragStartX] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState(0);
+  
+  // Notes Data
+  const [submittedNotes, setSubmittedNotes] = useState(24);
+  const [sentNotes, setSentNotes] = useState(18);
+  
+  const cards = [
+    {
+      id: 1,
+      title: 'Note Tersubmit',
+      count: submittedNotes,
+      icon: '📝',
+      color: '#8be9fd',
+      bgColor: '#1c1c1e',
+    },
+    {
+      id: 2,
+      title: 'Note Terkirim',
+      count: sentNotes,
+      icon: '✉️',
+      color: '#8be9fd',
+      bgColor: '#1c1c1e',
+    },
+  ];
 
   const formatRupiah = (amount: number) => {
     return new Intl.NumberFormat('id-ID', {
@@ -49,6 +79,43 @@ export default function HomePage() {
         element.classList.remove('animate-pulse');
       }, 500);
     }
+  };
+
+  // Swipe handlers
+  const handleDragStart = (e: React.MouseEvent | React.TouchEvent) => {
+    setIsDragging(true);
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    setDragStartX(clientX);
+  };
+
+  const handleDragMove = (e: React.MouseEvent | React.TouchEvent) => {
+    if (!isDragging) return;
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    const diff = clientX - dragStartX;
+    setDragOffset(diff);
+  };
+
+  const handleDragEnd = (e: React.MouseEvent | React.TouchEvent) => {
+    if (!isDragging) {
+      setIsDragging(false);
+      setDragOffset(0);
+      return;
+    }
+    
+    setIsDragging(false);
+    const threshold = 50;
+    
+    if (dragOffset > threshold && currentCardIndex > 0) {
+      setCurrentCardIndex(currentCardIndex - 1);
+    } else if (dragOffset < -threshold && currentCardIndex < cards.length - 1) {
+      setCurrentCardIndex(currentCardIndex + 1);
+    }
+    
+    setDragOffset(0);
+  };
+
+  const goToCard = (index: number) => {
+    setCurrentCardIndex(index);
   };
 
   const markAsRead = (id: number) => {
@@ -139,11 +206,11 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Card Donation - Di bawah judul web, di kiri atas */}
-        <div style={styles.cardWrapper}>
-          <div style={styles.card}>
-            <div style={styles.cardHeader}>
-              <h3 style={styles.cardTitle}>Jumlah Donasi</h3>
+        {/* Donation Card - Kiri atas */}
+        <div style={styles.donationCardWrapper}>
+          <div style={styles.donationCard}>
+            <div style={styles.donationCardHeader}>
+              <h3 style={styles.donationCardTitle}>Jumlah Donasi</h3>
               <button 
                 onClick={handleReload} 
                 style={styles.reloadButton}
@@ -183,6 +250,58 @@ export default function HomePage() {
               </svg>
               <span>Tambah Donasi</span>
             </button>
+          </div>
+        </div>
+
+        {/* Swipeable Cards Section */}
+        <div style={styles.cardsSection}>
+          <div style={styles.cardsContainer}>
+            <div
+              style={{
+                ...styles.cardsWrapper,
+                transform: `translateX(calc(-${currentCardIndex * 100}% + ${dragOffset}px))`,
+                transition: isDragging ? 'none' : 'transform 0.3s ease-out',
+              }}
+              onMouseDown={handleDragStart}
+              onMouseMove={handleDragMove}
+              onMouseUp={handleDragEnd}
+              onMouseLeave={handleDragEnd}
+              onTouchStart={handleDragStart}
+              onTouchMove={handleDragMove}
+              onTouchEnd={handleDragEnd}
+            >
+              {cards.map((card) => (
+                <div key={card.id} style={styles.cardItem}>
+                  <div style={styles.card}>
+                    <div style={styles.cardIcon}>{card.icon}</div>
+                    <h3 style={styles.cardTitle}>{card.title}</h3>
+                    <div style={styles.cardCount}>{card.count}</div>
+                    <div style={styles.cardSubtext}>Total</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Pagination Dots */}
+          <div style={styles.dotsContainer}>
+            {cards.map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => goToCard(idx)}
+                style={styles.dotWrapper}
+              >
+                {idx === currentCardIndex ? (
+                  <div style={styles.activeDotContainer}>
+                    <div style={styles.activeDotBg}>
+                      <div style={styles.activeDotFill} />
+                    </div>
+                  </div>
+                ) : (
+                  <div style={styles.inactiveDot} />
+                )}
+              </button>
+            ))}
           </div>
         </div>
 
@@ -441,12 +560,12 @@ const styles: { [key: string]: React.CSSProperties } = {
     color: '#8e8e93',
     fontSize: '13px',
   },
-  cardWrapper: {
+  donationCardWrapper: {
     display: 'flex',
     justifyContent: 'flex-start',
-    marginBottom: 'auto',
+    marginBottom: '24px',
   },
-  card: {
+  donationCard: {
     backgroundColor: '#1c1c1e',
     borderRadius: '16px',
     padding: '14px 18px',
@@ -455,13 +574,13 @@ const styles: { [key: string]: React.CSSProperties } = {
     maxWidth: '240px',
     boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
   },
-  cardHeader: {
+  donationCardHeader: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: '10px',
   },
-  cardTitle: {
+  donationCardTitle: {
     fontSize: '12px',
     fontWeight: '500',
     color: '#8e8e93',
@@ -519,6 +638,91 @@ const styles: { [key: string]: React.CSSProperties } = {
     fontWeight: '600',
     cursor: 'pointer',
     transition: 'all 0.2s',
+  },
+  cardsSection: {
+    marginBottom: '20px',
+  },
+  cardsContainer: {
+    overflow: 'hidden',
+    position: 'relative',
+    width: '100%',
+  },
+  cardsWrapper: {
+    display: 'flex',
+    width: '100%',
+    cursor: 'grab',
+    userSelect: 'none',
+  },
+  cardItem: {
+    flex: '0 0 100%',
+    padding: '0 4px',
+  },
+  card: {
+    backgroundColor: '#1c1c1e',
+    borderRadius: '24px',
+    padding: '28px 20px',
+    textAlign: 'center',
+    boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+    border: '1px solid #2c2c2e',
+  },
+  cardIcon: {
+    fontSize: '48px',
+    marginBottom: '16px',
+  },
+  cardTitle: {
+    fontSize: '16px',
+    fontWeight: '500',
+    color: '#8e8e93',
+    marginBottom: '12px',
+  },
+  cardCount: {
+    fontSize: '48px',
+    fontWeight: '700',
+    color: '#8be9fd',
+    marginBottom: '8px',
+  },
+  cardSubtext: {
+    fontSize: '12px',
+    color: '#5e5e62',
+  },
+  dotsContainer: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: '12px',
+    marginTop: '20px',
+  },
+  dotWrapper: {
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+    padding: 0,
+    display: 'flex',
+    alignItems: 'center',
+  },
+  inactiveDot: {
+    width: '8px',
+    height: '8px',
+    borderRadius: '50%',
+    backgroundColor: '#3a3a3c',
+    transition: 'all 0.3s ease',
+  },
+  activeDotContainer: {
+    width: '32px',
+    height: '8px',
+  },
+  activeDotBg: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: '#2c2c2e',
+    borderRadius: '4px',
+    overflow: 'hidden',
+  },
+  activeDotFill: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: '#8be9fd',
+    borderRadius: '4px',
   },
   content: {
     flex: 1,
