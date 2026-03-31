@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
 
 export default function HomePage() {
   const router = useRouter();
@@ -164,7 +163,7 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Cards Row - Donation Card & Note Card */}
+        {/* Cards Row - Donation Card & Note Card - Ukuran sama dan diperbesar */}
         <div style={styles.cardsRow}>
           {/* Donation Card */}
           <div style={styles.donationCard}>
@@ -176,8 +175,8 @@ export default function HomePage() {
                 disabled={isLoading}
               >
                 <svg 
-                  width="14" 
-                  height="14" 
+                  width="16" 
+                  height="16" 
                   viewBox="0 0 24 24" 
                   fill="none" 
                   stroke="currentColor" 
@@ -203,7 +202,7 @@ export default function HomePage() {
             </div>
             
             <button onClick={handleAddDonation} style={styles.addButton}>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <line x1="12" y1="5" x2="12" y2="19" />
                 <line x1="5" y1="12" x2="19" y2="12" />
               </svg>
@@ -211,7 +210,7 @@ export default function HomePage() {
             </button>
           </div>
 
-          {/* Note Card */}
+          {/* Note Card - Ukuran sama dengan Donation Card */}
           <div style={styles.noteCard}>
             <div style={styles.cardHeader}>
               <h3 style={styles.cardTitle}>Total Note</h3>
@@ -219,7 +218,7 @@ export default function HomePage() {
                 onClick={() => setShowAddNote(true)} 
                 style={styles.addNoteButton}
               >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                   <line x1="12" y1="5" x2="12" y2="19" />
                   <line x1="5" y1="12" x2="19" y2="12" />
                 </svg>
@@ -232,14 +231,14 @@ export default function HomePage() {
             
             <div style={styles.noteHistory}>
               <div style={styles.historyLabel}>Riwayat Terakhir:</div>
-              {noteHistory.slice(0, 2).map(note => (
+              {noteHistory.slice(0, 3).map(note => (
                 <div key={note.id} style={styles.historyItem}>
                   <div style={styles.historyText}>{note.text}</div>
                   <div style={styles.historyDate}>{note.date}</div>
                 </div>
               ))}
-              {noteHistory.length > 2 && (
-                <div style={styles.moreNotes}>+{noteHistory.length - 2} note lainnya</div>
+              {noteHistory.length > 3 && (
+                <div style={styles.moreNotes}>+{noteHistory.length - 3} note lainnya</div>
               )}
             </div>
           </div>
@@ -524,31 +523,30 @@ const styles: { [key: string]: React.CSSProperties } = {
   },
   cardsRow: {
     display: 'flex',
-    gap: '12px',
+    flexDirection: 'column',
+    gap: '16px',
     marginBottom: 'auto',
   },
   donationCard: {
-    flex: 1,
     backgroundColor: '#1c1c1e',
-    borderRadius: '16px',
-    padding: '14px',
+    borderRadius: '20px',
+    padding: '20px',
     boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
   },
   noteCard: {
-    flex: 1,
     backgroundColor: '#1c1c1e',
-    borderRadius: '16px',
-    padding: '14px',
+    borderRadius: '20px',
+    padding: '20px',
     boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
   },
   cardHeader: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: '12px',
+    marginBottom: '16px',
   },
   cardTitle: {
-    fontSize: '12px',
+    fontSize: '14px',
     fontWeight: '500',
     color: '#8e8e93',
     margin: 0,
@@ -578,27 +576,27 @@ const styles: { [key: string]: React.CSSProperties } = {
     transition: 'all 0.2s',
   },
   donationTotal: {
-    fontSize: '18px',
+    fontSize: '24px',
     fontWeight: '700',
     color: '#fff',
-    marginBottom: '12px',
+    marginBottom: '16px',
     textAlign: 'left',
     transition: 'all 0.3s ease',
   },
   noteTotal: {
-    fontSize: '28px',
+    fontSize: '48px',
     fontWeight: '700',
     color: '#8be9fd',
-    marginBottom: '12px',
+    marginBottom: '16px',
     textAlign: 'left',
   },
   skeletonLoader: {
-    height: '22px',
+    height: '30px',
     backgroundColor: '#2c2c2e',
-    borderRadius: '6px',
+    borderRadius: '8px',
     position: 'relative',
     overflow: 'hidden',
-    marginBottom: '12px',
+    marginBottom: '16px',
   },
   skeletonShimmer: {
     position: 'absolute',
@@ -613,48 +611,50 @@ const styles: { [key: string]: React.CSSProperties } = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: '6px',
+    gap: '8px',
     width: '100%',
-    padding: '8px',
+    padding: '12px',
     backgroundColor: '#8be9fd',
     border: 'none',
-    borderRadius: '20px',
+    borderRadius: '30px',
     color: '#000',
-    fontSize: '11px',
+    fontSize: '14px',
     fontWeight: '600',
     cursor: 'pointer',
     transition: 'all 0.2s',
   },
   noteHistory: {
-    marginTop: '8px',
+    marginTop: '16px',
     borderTop: '1px solid #2c2c2e',
-    paddingTop: '10px',
+    paddingTop: '16px',
   },
   historyLabel: {
-    fontSize: '10px',
+    fontSize: '11px',
     color: '#8e8e93',
-    marginBottom: '8px',
+    marginBottom: '12px',
   },
   historyItem: {
-    marginBottom: '8px',
+    marginBottom: '12px',
+    paddingBottom: '8px',
+    borderBottom: '1px solid #2c2c2e',
   },
   historyText: {
-    fontSize: '11px',
+    fontSize: '13px',
     color: '#fff',
-    marginBottom: '2px',
-    whiteSpace: 'nowrap',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
+    marginBottom: '4px',
+    lineHeight: '1.4',
   },
   historyDate: {
-    fontSize: '9px',
+    fontSize: '10px',
     color: '#5e5e62',
   },
   moreNotes: {
-    fontSize: '10px',
+    fontSize: '11px',
     color: '#8be9fd',
-    marginTop: '6px',
+    marginTop: '8px',
     cursor: 'pointer',
+    textAlign: 'center',
+    padding: '8px',
   },
   content: {
     flex: 1,
@@ -687,15 +687,15 @@ const styles: { [key: string]: React.CSSProperties } = {
   modal: {
     backgroundColor: '#1c1c1e',
     borderRadius: '20px',
-    padding: '20px',
-    width: '300px',
+    padding: '24px',
+    width: '320px',
     maxWidth: '90%',
   },
   modalHeader: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: '16px',
+    marginBottom: '20px',
   },
   modalTitle: {
     fontSize: '18px',
@@ -720,17 +720,17 @@ const styles: { [key: string]: React.CSSProperties } = {
     fontSize: '14px',
     fontFamily: 'inherit',
     resize: 'none',
-    marginBottom: '16px',
+    marginBottom: '20px',
     outline: 'none',
   },
   modalButton: {
     width: '100%',
-    padding: '12px',
+    padding: '14px',
     backgroundColor: '#8be9fd',
     border: 'none',
     borderRadius: '30px',
     color: '#000',
-    fontSize: '14px',
+    fontSize: '15px',
     fontWeight: '600',
     cursor: 'pointer',
   },
