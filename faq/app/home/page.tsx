@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function HomePage() {
   const router = useRouter();
@@ -17,13 +18,90 @@ export default function HomePage() {
     { id: 1, text: 'Halo! Ada yang bisa dibantu?', sender: 'bot', time: '10:00' },
   ]);
   const [newMessage, setNewMessage] = useState('');
+  
+  // Donation State
+  const [donationTotal, setDonationTotal] = useState(1250000);
+  const [isLoading, setIsLoading] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [progress, setProgress] = useState(0);
+  const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Dummy data for donation cards (pagination)
+  const donationCards = [
+    { id: 1, amount: 500000, title: 'Donasi Terbaru', date: 'Hari ini' },
+    { id: 2, amount: 300000, title: 'Donasi Minggu Ini', date: '3 hari lalu' },
+    { id: 3, amount: 450000, title: 'Donasi Bulan Ini', date: '2 minggu lalu' },
+  ];
+
+  // Progress animation for pagination dots
   useEffect(() => {
-    const storedName = localStorage.getItem('userName');
-    if (storedName) {
-      setUserName(storedName);
+    setProgress(0);
+    
+    if (progressIntervalRef.current) {
+      clearInterval(progressIntervalRef.current);
     }
-  }, []);
+    
+    const stepTime = 30;
+    const totalSteps = 3000 / stepTime;
+    let currentStep = 0;
+    
+    progressIntervalRef.current = setInterval(() => {
+      currentStep++;
+      const newProgress = (currentStep / totalSteps) * 100;
+      
+      if (newProgress >= 100) {
+        setProgress(100);
+        clearInterval(progressIntervalRef.current!);
+        
+        setTimeout(() => {
+          setCurrentIndex((prev) => (prev + 1) % donationCards.length);
+        }, 50);
+      } else {
+        setProgress(newProgress);
+      }
+    }, stepTime);
+    
+    return () => {
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current);
+      }
+    };
+  }, [currentIndex]);
+
+  const goToSlide = (index: number) => {
+    if (index === currentIndex) return;
+    setCurrentIndex(index);
+  };
+
+  const handleReload = () => {
+    setIsLoading(true);
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 800);
+  };
+
+  const handleAddDonation = () => {
+    const addAmount = 50000;
+    setDonationTotal(prev => prev + addAmount);
+    
+    // Animation effect
+    const element = document.querySelector('.donation-total');
+    if (element) {
+      element.classList.add('animate-pulse');
+      setTimeout(() => {
+        element.classList.remove('animate-pulse');
+      }, 500);
+    }
+  };
+
+  const formatRupiah = (amount: number) => {
+    return new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
+  };
 
   const markAsRead = (id: number) => {
     setNotifications(prev =>
@@ -57,7 +135,6 @@ export default function HomePage() {
         <div style={styles.header}>
           <div style={styles.logo}>Menuru</div>
           <div style={styles.navRight}>
-            {/* User Name */}
             <div style={styles.userInfo}>
               <div style={styles.userAvatar}>
                 {userName.charAt(0).toUpperCase()}
@@ -65,7 +142,6 @@ export default function HomePage() {
               <span style={styles.userName}>{userName.split(' ')[0]}</span>
             </div>
             
-            {/* Notifications */}
             <div style={styles.notificationWrapper}>
               <button 
                 style={styles.iconButton}
@@ -104,7 +180,6 @@ export default function HomePage() {
               )}
             </div>
             
-            {/* Live Chat */}
             <button 
               style={styles.iconButton}
               onClick={() => setIsChatOpen(!isChatOpen)}
@@ -116,9 +191,97 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Main Content - Kosong, hanya background hitam */}
+        {/* Main Content - Card Donation */}
         <div style={styles.content}>
-          {/* Tidak ada konten, hanya background hitam */}
+          {/* Card with border radius */}
+          <div style={styles.card}>
+            <div style={styles.cardHeader}>
+              <h3 style={styles.cardTitle}>Jumlah Donasi</h3>
+              <button 
+                onClick={handleReload} 
+                style={styles.reloadButton}
+                disabled={isLoading}
+              >
+                <svg 
+                  width="20" 
+                  height="20" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth="2"
+                  style={{
+                    animation: isLoading ? 'spin 0.8s linear infinite' : 'none',
+                  }}
+                >
+                  <path d="M23 4v6h-6M1 20v-6h6" />
+                  <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+                </svg>
+              </button>
+            </div>
+            
+            <div className="donation-total" style={styles.donationTotal}>
+              {isLoading ? (
+                <div style={styles.skeletonLoader}>
+                  <div style={styles.skeletonShimmer} />
+                </div>
+              ) : (
+                formatRupiah(donationTotal)
+              )}
+            </div>
+            
+            <button onClick={handleAddDonation} style={styles.addButton}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+              <span>Tambah Donasi</span>
+            </button>
+          </div>
+
+          {/* Pagination Dots like Onboarding */}
+          <div style={styles.dotsContainer}>
+            {donationCards.map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => goToSlide(idx)}
+                style={styles.dotWrapper}
+              >
+                {idx === currentIndex ? (
+                  <div style={styles.activeDotContainer}>
+                    <div style={styles.activeDotBg}>
+                      <motion.div
+                        style={{
+                          ...styles.activeDotFill,
+                          width: `${progress}%`,
+                          backgroundColor: '#8be9fd',
+                        }}
+                        animate={{ width: `${progress}%` }}
+                        transition={{ duration: 0.03 }}
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <div style={styles.inactiveDot} />
+                )}
+              </button>
+            ))}
+          </div>
+
+          {/* Donation Info Card (based on current index) */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentIndex}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+              style={styles.infoCard}
+            >
+              <div style={styles.infoCardTitle}>{donationCards[currentIndex].title}</div>
+              <div style={styles.infoCardAmount}>{formatRupiah(donationCards[currentIndex].amount)}</div>
+              <div style={styles.infoCardDate}>{donationCards[currentIndex].date}</div>
+            </motion.div>
+          </AnimatePresence>
         </div>
 
         {/* Home Indicator for iOS */}
@@ -177,6 +340,33 @@ export default function HomePage() {
           </div>
         </div>
       )}
+
+      <style jsx>{`
+        @keyframes spin {
+          from {
+            transform: rotate(0deg);
+          }
+          to {
+            transform: rotate(360deg);
+          }
+        }
+        
+        @keyframes pulse {
+          0% {
+            transform: scale(1);
+          }
+          50% {
+            transform: scale(1.05);
+          }
+          100% {
+            transform: scale(1);
+          }
+        }
+        
+        .animate-pulse {
+          animation: pulse 0.5s ease-in-out;
+        }
+      `}</style>
     </div>
   );
 }
@@ -344,7 +534,140 @@ const styles: { [key: string]: React.CSSProperties } = {
     alignItems: 'center',
     justifyContent: 'center',
     textAlign: 'center',
-    // Konten kosong, hanya background hitam
+    gap: '24px',
+  },
+  card: {
+    backgroundColor: '#1c1c1e',
+    borderRadius: '24px',
+    padding: '24px',
+    width: '100%',
+    maxWidth: '320px',
+    boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+  },
+  cardHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '20px',
+  },
+  cardTitle: {
+    fontSize: '16px',
+    fontWeight: '500',
+    color: '#8e8e93',
+    margin: 0,
+  },
+  reloadButton: {
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+    color: '#8e8e93',
+    padding: '8px',
+    borderRadius: '50%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    transition: 'all 0.2s',
+  },
+  donationTotal: {
+    fontSize: '36px',
+    fontWeight: '700',
+    color: '#fff',
+    marginBottom: '24px',
+    textAlign: 'center',
+    transition: 'all 0.3s ease',
+  },
+  skeletonLoader: {
+    height: '44px',
+    backgroundColor: '#2c2c2e',
+    borderRadius: '8px',
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  skeletonShimmer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent)',
+    animation: 'shimmer 1s infinite',
+  },
+  addButton: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '8px',
+    width: '100%',
+    padding: '12px',
+    backgroundColor: '#8be9fd',
+    border: 'none',
+    borderRadius: '30px',
+    color: '#000',
+    fontSize: '15px',
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'all 0.2s',
+  },
+  dotsContainer: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: '12px',
+    marginTop: '8px',
+  },
+  dotWrapper: {
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+    padding: 0,
+    display: 'flex',
+    alignItems: 'center',
+  },
+  inactiveDot: {
+    width: '8px',
+    height: '8px',
+    borderRadius: '50%',
+    backgroundColor: '#3a3a3c',
+    transition: 'all 0.3s ease',
+  },
+  activeDotContainer: {
+    width: '48px',
+    height: '8px',
+  },
+  activeDotBg: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: '#2c2c2e',
+    borderRadius: '4px',
+    overflow: 'hidden',
+  },
+  activeDotFill: {
+    height: '100%',
+    borderRadius: '4px',
+    transition: 'width 0.03s linear',
+  },
+  infoCard: {
+    backgroundColor: '#111',
+    borderRadius: '20px',
+    padding: '20px',
+    width: '100%',
+    maxWidth: '320px',
+    border: '1px solid #2c2c2e',
+  },
+  infoCardTitle: {
+    fontSize: '14px',
+    color: '#8e8e93',
+    marginBottom: '8px',
+  },
+  infoCardAmount: {
+    fontSize: '24px',
+    fontWeight: '600',
+    color: '#8be9fd',
+    marginBottom: '4px',
+  },
+  infoCardDate: {
+    fontSize: '12px',
+    color: '#5e5e62',
   },
   homeIndicator: {
     display: 'flex',
