@@ -1,35 +1,35 @@
+// app/onboarding/page.tsx
 'use client';
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// Images data
-const onboardingImages = [
+const onboardingData = [
   {
     id: 1,
-    src: '/images/5.jpg',
+    image: '/images/5.jpg',
     title: 'Mulai Berbagi Kebaikan',
-    description: 'Buat kegiatan donasi dan bagikan kebaikan kepada yang membutuhkan'
+    description: 'Buat kegiatan donasi dan bagikan kebaikan kepada yang membutuhkan',
   },
   {
     id: 2,
-    src: '/images/6.jpg',
+    image: '/images/6.jpg',
     title: 'Donasi dengan Mudah',
-    description: 'Donasi kapan saja, di mana saja dengan proses yang cepat dan aman'
+    description: 'Donasi kapan saja, di mana saja dengan proses yang cepat dan aman',
   },
   {
     id: 3,
-    src: '/images/7.jpg',
+    image: '/images/7.jpg',
     title: 'Bagikan Cerita',
-    description: 'Ceritakan pengalaman donasi Anda dan inspirasi orang lain'
+    description: 'Ceritakan pengalaman donasi Anda dan inspirasi orang lain',
   },
   {
     id: 4,
-    src: '/images/8.jpg',
+    image: '/images/8.jpg',
     title: 'Leaderboard Donatur',
-    description: 'Lihat peringkat donatur dan berkompetisi dalam kebaikan'
-  }
+    description: 'Lihat peringkat donatur dan berkompetisi dalam kebaikan',
+  },
 ];
 
 export default function OnboardingPage() {
@@ -40,48 +40,37 @@ export default function OnboardingPage() {
   // Auto slide every 3 seconds
   useEffect(() => {
     if (!isAutoPlaying) return;
-    
     const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % onboardingImages.length);
+      setCurrentIndex((prev) => (prev + 1) % onboardingData.length);
     }, 3000);
-    
     return () => clearInterval(interval);
   }, [isAutoPlaying]);
 
-  // Handle manual navigation
   const goToSlide = (index: number) => {
     setCurrentIndex(index);
     setIsAutoPlaying(false);
-    setTimeout(() => {
-      setIsAutoPlaying(true);
-    }, 5000);
+    setTimeout(() => setIsAutoPlaying(true), 5000);
   };
 
   const nextSlide = () => {
-    setCurrentIndex((prev) => (prev + 1) % onboardingImages.length);
+    setCurrentIndex((prev) => (prev + 1) % onboardingData.length);
     setIsAutoPlaying(false);
-    setTimeout(() => {
-      setIsAutoPlaying(true);
-    }, 5000);
+    setTimeout(() => setIsAutoPlaying(true), 5000);
   };
 
   const prevSlide = () => {
-    setCurrentIndex((prev) => (prev - 1 + onboardingImages.length) % onboardingImages.length);
+    setCurrentIndex((prev) => (prev - 1 + onboardingData.length) % onboardingData.length);
     setIsAutoPlaying(false);
-    setTimeout(() => {
-      setIsAutoPlaying(true);
-    }, 5000);
+    setTimeout(() => setIsAutoPlaying(true), 5000);
   };
 
   const handleSkip = () => {
+    localStorage.setItem('hasSeenOnboarding', 'true');
     router.push('/');
   };
 
-  const handleSignIn = () => {
-    router.push('/');
-  };
-
-  const handleSignUp = () => {
+  const handleGetStarted = () => {
+    localStorage.setItem('hasSeenOnboarding', 'true');
     router.push('/');
   };
 
@@ -89,8 +78,6 @@ export default function OnboardingPage() {
     <div
       style={{
         minHeight: '100vh',
-        width: '100%',
-        maxWidth: '100%',
         backgroundColor: '#000',
         fontFamily: 'Helvetica, Arial, sans-serif',
         display: 'flex',
@@ -98,38 +85,19 @@ export default function OnboardingPage() {
         position: 'relative',
       }}
     >
-      {/* Status Bar untuk efek seperti app mobile */}
+      {/* Header with skip button - top right */}
       <div
         style={{
-          paddingTop: 'env(safe-area-inset-top)',
-          backgroundColor: '#000',
-          height: '44px',
-          width: '100%',
-        }}
-      />
-
-      {/* Header - Kiri nama website, Kanan lewatin */}
-      <div
-        style={{
-          padding: '16px 24px',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          padding: '20px 24px',
           display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          width: '100%',
+          justifyContent: 'flex-end',
+          zIndex: 20,
         }}
       >
-        <div
-          style={{
-            fontSize: '28px',
-            fontWeight: '600',
-            color: '#fff',
-            fontFamily: 'Helvetica, Arial, sans-serif',
-            letterSpacing: '-0.5px',
-          }}
-        >
-          Menuru
-        </div>
-
         <button
           onClick={handleSkip}
           style={{
@@ -141,21 +109,14 @@ export default function OnboardingPage() {
             fontFamily: 'Helvetica, Arial, sans-serif',
             padding: '8px 16px',
             borderRadius: '30px',
-            transition: 'all 0.2s ease',
             backgroundColor: 'rgba(255,255,255,0.05)',
           }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)';
-          }}
         >
-          Lewatin
+          Lewati
         </button>
       </div>
 
-      {/* Main Content - Semua konten di tengah secara vertikal */}
+      {/* Main content - centered vertically */}
       <div
         style={{
           flex: 1,
@@ -163,33 +124,30 @@ export default function OnboardingPage() {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          padding: '20px 24px',
-          width: '100%',
+          padding: '0 24px',
         }}
       >
-        {/* Image Container */}
+        {/* Illustration Image */}
         <div
           style={{
-            position: 'relative',
             width: '280px',
             height: '280px',
-            maxWidth: '80vw',
-            maxHeight: '80vw',
-            marginBottom: '48px',
-            borderRadius: '28px',
+            maxWidth: '70vw',
+            maxHeight: '70vw',
+            marginBottom: '40px',
+            borderRadius: '24px',
             overflow: 'hidden',
-            boxShadow: '0 20px 40px rgba(0,0,0,0.3)',
           }}
         >
           <AnimatePresence mode="wait">
             <motion.img
               key={currentIndex}
-              src={onboardingImages[currentIndex].src}
-              alt={onboardingImages[currentIndex].title}
+              src={onboardingData[currentIndex].image}
+              alt={onboardingData[currentIndex].title}
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 1.05 }}
-              transition={{ duration: 0.4, ease: "easeInOut" }}
+              transition={{ duration: 0.4 }}
               style={{
                 width: '100%',
                 height: '100%',
@@ -202,42 +160,42 @@ export default function OnboardingPage() {
           </AnimatePresence>
         </div>
 
-        {/* Title and Description */}
-        <motion.div
-          key={`text-${currentIndex}`}
+        {/* Title */}
+        <motion.h1
+          key={`title-${currentIndex}`}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.1 }}
+          style={{
+            fontSize: '28px',
+            fontWeight: '600',
+            color: '#fff',
+            textAlign: 'center',
+            marginBottom: '12px',
+            fontFamily: 'Helvetica, Arial, sans-serif',
+          }}
+        >
+          {onboardingData[currentIndex].title}
+        </motion.h1>
+
+        {/* Description */}
+        <motion.p
+          key={`desc-${currentIndex}`}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.2 }}
           style={{
+            fontSize: '15px',
+            color: '#888',
             textAlign: 'center',
+            lineHeight: '1.5',
+            maxWidth: '280px',
             marginBottom: '32px',
-            width: '100%',
-            maxWidth: '300px',
+            fontFamily: 'Helvetica, Arial, sans-serif',
           }}
         >
-          <h2
-            style={{
-              fontSize: '26px',
-              fontWeight: '600',
-              color: '#fff',
-              marginBottom: '12px',
-              fontFamily: 'Helvetica, Arial, sans-serif',
-              letterSpacing: '-0.3px',
-            }}
-          >
-            {onboardingImages[currentIndex].title}
-          </h2>
-          <p
-            style={{
-              fontSize: '15px',
-              color: '#888',
-              lineHeight: '1.5',
-              fontFamily: 'Helvetica, Arial, sans-serif',
-            }}
-          >
-            {onboardingImages[currentIndex].description}
-          </p>
-        </motion.div>
+          {onboardingData[currentIndex].description}
+        </motion.p>
 
         {/* Pagination Dots */}
         <div
@@ -247,12 +205,12 @@ export default function OnboardingPage() {
             marginBottom: '48px',
           }}
         >
-          {onboardingImages.map((_, index) => (
+          {onboardingData.map((_, index) => (
             <button
               key={index}
               onClick={() => goToSlide(index)}
               style={{
-                width: index === currentIndex ? '28px' : '8px',
+                width: index === currentIndex ? '24px' : '8px',
                 height: '8px',
                 borderRadius: '4px',
                 backgroundColor: index === currentIndex ? '#fff' : '#333',
@@ -266,47 +224,17 @@ export default function OnboardingPage() {
         </div>
       </div>
 
-      {/* Bottom Buttons - Masuk dan Daftar */}
+      {/* Bottom Button */}
       <div
         style={{
           padding: '20px 24px',
           paddingBottom: 'max(20px, env(safe-area-inset-bottom))',
-          backgroundColor: '#000',
-          display: 'flex',
-          gap: '12px',
-          width: '100%',
         }}
       >
         <button
-          onClick={handleSignIn}
+          onClick={handleGetStarted}
           style={{
-            flex: 1,
-            padding: '16px',
-            backgroundColor: 'transparent',
-            border: '1px solid #333',
-            borderRadius: '30px',
-            fontSize: '16px',
-            fontWeight: '500',
-            color: '#fff',
-            cursor: 'pointer',
-            fontFamily: 'Helvetica, Arial, sans-serif',
-            transition: 'all 0.2s ease',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.borderColor = '#fff';
-            e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.borderColor = '#333';
-            e.currentTarget.style.backgroundColor = 'transparent';
-          }}
-        >
-          Masuk
-        </button>
-        <button
-          onClick={handleSignUp}
-          style={{
-            flex: 1,
+            width: '100%',
             padding: '16px',
             backgroundColor: '#fff',
             border: 'none',
@@ -316,20 +244,13 @@ export default function OnboardingPage() {
             color: '#000',
             cursor: 'pointer',
             fontFamily: 'Helvetica, Arial, sans-serif',
-            transition: 'all 0.2s ease',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = '#f0f0f0';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = '#fff';
           }}
         >
-          Daftar
+          Mulai
         </button>
       </div>
 
-      {/* Navigation Arrows - Untuk navigasi slide */}
+      {/* Navigation Arrows */}
       <button
         onClick={prevSlide}
         style={{
@@ -337,8 +258,8 @@ export default function OnboardingPage() {
           left: '16px',
           top: '50%',
           transform: 'translateY(-50%)',
-          background: 'rgba(0,0,0,0.6)',
-          backdropFilter: 'blur(10px)',
+          background: 'rgba(0,0,0,0.5)',
+          backdropFilter: 'blur(8px)',
           border: '1px solid rgba(255,255,255,0.1)',
           borderRadius: '40px',
           width: '44px',
@@ -348,18 +269,9 @@ export default function OnboardingPage() {
           justifyContent: 'center',
           cursor: 'pointer',
           zIndex: 20,
-          transition: 'all 0.2s ease',
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.background = 'rgba(255,255,255,0.2)';
-          e.currentTarget.style.backdropFilter = 'blur(10px)';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.background = 'rgba(0,0,0,0.6)';
-          e.currentTarget.style.backdropFilter = 'blur(10px)';
         }}
       >
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2">
           <path d="M15 18l-6-6 6-6" />
         </svg>
       </button>
@@ -371,8 +283,8 @@ export default function OnboardingPage() {
           right: '16px',
           top: '50%',
           transform: 'translateY(-50%)',
-          background: 'rgba(0,0,0,0.6)',
-          backdropFilter: 'blur(10px)',
+          background: 'rgba(0,0,0,0.5)',
+          backdropFilter: 'blur(8px)',
           border: '1px solid rgba(255,255,255,0.1)',
           borderRadius: '40px',
           width: '44px',
@@ -382,36 +294,12 @@ export default function OnboardingPage() {
           justifyContent: 'center',
           cursor: 'pointer',
           zIndex: 20,
-          transition: 'all 0.2s ease',
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.background = 'rgba(255,255,255,0.2)';
-          e.currentTarget.style.backdropFilter = 'blur(10px)';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.background = 'rgba(0,0,0,0.6)';
-          e.currentTarget.style.backdropFilter = 'blur(10px)';
         }}
       >
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2">
           <path d="M9 18l6-6-6-6" />
         </svg>
       </button>
-
-      {/* CSS untuk safe area dan responsive */}
-      <style jsx>{`
-        @media (max-width: 768px) {
-          body {
-            overflow-x: hidden;
-          }
-        }
-        
-        @supports (padding: max(0px)) {
-          .safe-area {
-            padding-bottom: max(20px, env(safe-area-inset-bottom));
-          }
-        }
-      `}</style>
     </div>
   );
 }
