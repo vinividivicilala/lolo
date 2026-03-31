@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function HomePage() {
@@ -21,6 +21,19 @@ export default function HomePage() {
   // Donation State
   const [donationTotal, setDonationTotal] = useState(1250000);
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Notes State
+  const [notes, setNotes] = useState([
+    { id: 1, text: 'Meeting dengan tim donor jam 14:00', timestamp: new Date() },
+    { id: 2, text: 'Follow up proposal beasiswa', timestamp: new Date() },
+    { id: 3, text: 'Belanja perlengkapan kegiatan sosial', timestamp: new Date() },
+  ]);
+  const [newNote, setNewNote] = useState('');
+  const [activeCardIndex, setActiveCardIndex] = useState(0);
+  const carouselRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
 
   const formatRupiah = (amount: number) => {
     return new Intl.NumberFormat('id-ID', {
@@ -29,6 +42,14 @@ export default function HomePage() {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(amount);
+  };
+
+  const formatDate = (date: Date) => {
+    const now = new Date();
+    const diffHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
+    if (diffHours < 1) return 'Baru saja';
+    if (diffHours < 24) return `${diffHours} jam lalu`;
+    return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
   };
 
   const handleReload = () => {
@@ -48,6 +69,27 @@ export default function HomePage() {
       setTimeout(() => {
         element.classList.remove('animate-pulse');
       }, 500);
+    }
+  };
+
+  const handleAddNote = () => {
+    if (newNote.trim()) {
+      const newNoteObj = {
+        id: Date.now(),
+        text: newNote,
+        timestamp: new Date(),
+      };
+      setNotes(prev => [newNoteObj, ...prev]);
+      setNewNote('');
+      
+      // Show animation on note count
+      const noteCountElement = document.querySelector('.note-count');
+      if (noteCountElement) {
+        noteCountElement.classList.add('animate-pulse');
+        setTimeout(() => {
+          noteCountElement.classList.remove('animate-pulse');
+        }, 500);
+      }
     }
   };
 
@@ -71,6 +113,46 @@ export default function HomePage() {
           { id: Date.now(), text: 'Terima kasih! Tim kami akan segera merespon.', sender: 'bot', time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }
         ]);
       }, 1000);
+    }
+  };
+
+  const handleCarouselScroll = () => {
+    if (carouselRef.current) {
+      const scrollPosition = carouselRef.current.scrollLeft;
+      const cardWidth = carouselRef.current.clientWidth;
+      const newIndex = Math.round(scrollPosition / cardWidth);
+      setActiveCardIndex(newIndex);
+    }
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setIsDragging(true);
+    setStartX(e.pageX - (carouselRef.current?.offsetLeft || 0));
+    setScrollLeft(carouselRef.current?.scrollLeft || 0);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging) return;
+    e.preventDefault();
+    const x = e.pageX - (carouselRef.current?.offsetLeft || 0);
+    const walk = (x - startX) * 1.5;
+    if (carouselRef.current) {
+      carouselRef.current.scrollLeft = scrollLeft - walk;
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const scrollToCard = (index: number) => {
+    if (carouselRef.current) {
+      const cardWidth = carouselRef.current.clientWidth;
+      carouselRef.current.scrollTo({
+        left: cardWidth * index,
+        behavior: 'smooth',
+      });
+      setActiveCardIndex(index);
     }
   };
 
@@ -139,50 +221,121 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Card Donation - Di bawah judul web, di kiri atas */}
-        <div style={styles.cardWrapper}>
-          <div style={styles.card}>
-            <div style={styles.cardHeader}>
-              <h3 style={styles.cardTitle}>Jumlah Donasi</h3>
-              <button 
-                onClick={handleReload} 
-                style={styles.reloadButton}
-                disabled={isLoading}
-              >
-                <svg 
-                  width="16" 
-                  height="16" 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  strokeWidth="2"
-                  style={{
-                    animation: isLoading ? 'spin 0.8s linear infinite' : 'none',
-                  }}
+        {/* Carousel Section */}
+        <div style={styles.carouselSection}>
+          <div 
+            ref={carouselRef}
+            style={styles.carouselContainer}
+            onScroll={handleCarouselScroll}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseUp}
+          >
+            {/* Card 1 - Donation Card */}
+            <div style={styles.card}>
+              <div style={styles.cardHeader}>
+                <h3 style={styles.cardTitle}>Jumlah Donasi</h3>
+                <button 
+                  onClick={handleReload} 
+                  style={styles.reloadButton}
+                  disabled={isLoading}
                 >
-                  <path d="M23 4v6h-6M1 20v-6h6" />
-                  <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+                  <svg 
+                    width="16" 
+                    height="16" 
+                    viewBox="0 0 24 24" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    strokeWidth="2"
+                    style={{
+                      animation: isLoading ? 'spin 0.8s linear infinite' : 'none',
+                    }}
+                  >
+                    <path d="M23 4v6h-6M1 20v-6h6" />
+                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+                  </svg>
+                </button>
+              </div>
+              
+              <div className="donation-total" style={styles.donationTotal}>
+                {isLoading ? (
+                  <div style={styles.skeletonLoader}>
+                    <div style={styles.skeletonShimmer} />
+                  </div>
+                ) : (
+                  formatRupiah(donationTotal)
+                )}
+              </div>
+              
+              <button onClick={handleAddDonation} style={styles.addButton}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
                 </svg>
+                <span>Tambah Donasi</span>
               </button>
             </div>
-            
-            <div className="donation-total" style={styles.donationTotal}>
-              {isLoading ? (
-                <div style={styles.skeletonLoader}>
-                  <div style={styles.skeletonShimmer} />
+
+            {/* Card 2 - Notes Card */}
+            <div style={{...styles.card, ...styles.notesCard}}>
+              <div style={styles.cardHeader}>
+                <h3 style={styles.cardTitle}>
+                  Catatan ({notes.length})
+                </h3>
+                <div style={styles.noteCount} className="note-count">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                  </svg>
                 </div>
-              ) : (
-                formatRupiah(donationTotal)
-              )}
+              </div>
+              
+              <div style={styles.notesList}>
+                {notes.length === 0 ? (
+                  <div style={styles.emptyNotes}>Belum ada catatan</div>
+                ) : (
+                  notes.map(note => (
+                    <div key={note.id} style={styles.noteItem}>
+                      <div style={styles.noteText}>{note.text}</div>
+                      <div style={styles.noteTime}>{formatDate(note.timestamp)}</div>
+                    </div>
+                  ))
+                )}
+              </div>
+              
+              <div style={styles.noteInputContainer}>
+                <input
+                  type="text"
+                  value={newNote}
+                  onChange={(e) => setNewNote(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleAddNote()}
+                  placeholder="Tulis catatan baru..."
+                  style={styles.noteInput}
+                />
+                <button onClick={handleAddNote} style={styles.addNoteButton}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                  </svg>
+                </button>
+              </div>
             </div>
-            
-            <button onClick={handleAddDonation} style={styles.addButton}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <line x1="12" y1="5" x2="12" y2="19" />
-                <line x1="5" y1="12" x2="19" y2="12" />
-              </svg>
-              <span>Tambah Donasi</span>
-            </button>
+          </div>
+          
+          {/* Dot Pagination */}
+          <div style={styles.pagination}>
+            {[0, 1].map((index) => (
+              <button
+                key={index}
+                onClick={() => scrollToCard(index)}
+                style={{
+                  ...styles.paginationDot,
+                  backgroundColor: activeCardIndex === index ? '#8be9fd' : '#3a3a3c',
+                  width: activeCardIndex === index ? '24px' : '8px',
+                }}
+              />
+            ))}
           </div>
         </div>
 
@@ -441,28 +594,42 @@ const styles: { [key: string]: React.CSSProperties } = {
     color: '#8e8e93',
     fontSize: '13px',
   },
-  cardWrapper: {
+  carouselSection: {
+    marginBottom: '20px',
+  },
+  carouselContainer: {
     display: 'flex',
-    justifyContent: 'flex-start',
-    marginBottom: 'auto',
+    overflowX: 'auto',
+    scrollSnapType: 'x mandatory',
+    gap: '16px',
+    paddingBottom: '12px',
+    cursor: 'grab',
+    scrollbarWidth: 'none',
+    msOverflowStyle: 'none',
+    WebkitOverflowScrolling: 'touch',
   },
   card: {
+    flex: '0 0 calc(100% - 0px)',
+    scrollSnapAlign: 'start',
     backgroundColor: '#1c1c1e',
     borderRadius: '16px',
-    padding: '14px 18px',
-    width: 'auto',
-    minWidth: '200px',
-    maxWidth: '240px',
+    padding: '18px 20px',
     boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+    transition: 'transform 0.2s',
+  },
+  notesCard: {
+    minHeight: '280px',
+    display: 'flex',
+    flexDirection: 'column',
   },
   cardHeader: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: '10px',
+    marginBottom: '12px',
   },
   cardTitle: {
-    fontSize: '12px',
+    fontSize: '13px',
     fontWeight: '500',
     color: '#8e8e93',
     margin: 0,
@@ -480,20 +647,20 @@ const styles: { [key: string]: React.CSSProperties } = {
     transition: 'all 0.2s',
   },
   donationTotal: {
-    fontSize: '22px',
+    fontSize: '26px',
     fontWeight: '700',
     color: '#fff',
-    marginBottom: '12px',
+    marginBottom: '16px',
     textAlign: 'left',
     transition: 'all 0.3s ease',
   },
   skeletonLoader: {
-    height: '28px',
+    height: '32px',
     backgroundColor: '#2c2c2e',
     borderRadius: '6px',
     position: 'relative',
     overflow: 'hidden',
-    marginBottom: '12px',
+    marginBottom: '16px',
   },
   skeletonShimmer: {
     position: 'absolute',
@@ -510,15 +677,87 @@ const styles: { [key: string]: React.CSSProperties } = {
     justifyContent: 'center',
     gap: '6px',
     width: '100%',
-    padding: '8px 12px',
+    padding: '10px 12px',
     backgroundColor: '#8be9fd',
     border: 'none',
     borderRadius: '24px',
     color: '#000',
-    fontSize: '12px',
+    fontSize: '13px',
     fontWeight: '600',
     cursor: 'pointer',
     transition: 'all 0.2s',
+  },
+  notesList: {
+    flex: 1,
+    maxHeight: '160px',
+    overflowY: 'auto',
+    marginBottom: '12px',
+  },
+  noteItem: {
+    padding: '10px 0',
+    borderBottom: '1px solid #2c2c2e',
+  },
+  noteText: {
+    fontSize: '13px',
+    color: '#fff',
+    marginBottom: '4px',
+    lineHeight: '1.4',
+  },
+  noteTime: {
+    fontSize: '10px',
+    color: '#8e8e93',
+  },
+  emptyNotes: {
+    textAlign: 'center',
+    color: '#8e8e93',
+    fontSize: '12px',
+    padding: '20px 0',
+  },
+  noteInputContainer: {
+    display: 'flex',
+    gap: '8px',
+    marginTop: '8px',
+  },
+  noteInput: {
+    flex: 1,
+    padding: '10px 12px',
+    borderRadius: '20px',
+    border: '1px solid #2c2c2e',
+    backgroundColor: '#000',
+    color: '#fff',
+    fontSize: '12px',
+    outline: 'none',
+    fontFamily: 'inherit',
+  },
+  addNoteButton: {
+    background: '#8be9fd',
+    border: 'none',
+    borderRadius: '50%',
+    width: '36px',
+    height: '36px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    cursor: 'pointer',
+    color: '#000',
+    transition: 'all 0.2s',
+  },
+  pagination: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: '8px',
+    marginTop: '8px',
+    paddingBottom: '4px',
+  },
+  paginationDot: {
+    width: '8px',
+    height: '8px',
+    borderRadius: '4px',
+    border: 'none',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+    padding: 0,
   },
   content: {
     flex: 1,
