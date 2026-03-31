@@ -1,8 +1,7 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
 
 export default function HomePage() {
   const router = useRouter();
@@ -43,7 +42,6 @@ export default function HomePage() {
     const addAmount = 50000;
     setDonationTotal(prev => prev + addAmount);
     
-    // Animation effect
     const element = document.querySelector('.donation-total');
     if (element) {
       element.classList.add('animate-pulse');
@@ -141,9 +139,8 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Main Content */}
-        <div style={styles.content}>
-          {/* Card Donation - Lebih kecil */}
+        {/* Card Donation - Di bawah judul web, di kiri atas */}
+        <div style={styles.cardWrapper}>
           <div style={styles.card}>
             <div style={styles.cardHeader}>
               <h3 style={styles.cardTitle}>Jumlah Donasi</h3>
@@ -153,8 +150,8 @@ export default function HomePage() {
                 disabled={isLoading}
               >
                 <svg 
-                  width="18" 
-                  height="18" 
+                  width="16" 
+                  height="16" 
                   viewBox="0 0 24 24" 
                   fill="none" 
                   stroke="currentColor" 
@@ -180,7 +177,7 @@ export default function HomePage() {
             </div>
             
             <button onClick={handleAddDonation} style={styles.addButton}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <line x1="12" y1="5" x2="12" y2="19" />
                 <line x1="5" y1="12" x2="19" y2="12" />
               </svg>
@@ -188,6 +185,9 @@ export default function HomePage() {
             </button>
           </div>
         </div>
+
+        {/* Main Content - Kosong */}
+        <div style={styles.content} />
 
         {/* Home Indicator for iOS */}
         <div style={styles.homeIndicator}>
@@ -307,7 +307,6 @@ const styles: { [key: string]: React.CSSProperties } = {
     height: '100vh',
     display: 'flex',
     flexDirection: 'column',
-    justifyContent: 'space-between',
     padding: '20px 24px 0 24px',
     backgroundColor: '#000',
     color: '#fff',
@@ -321,6 +320,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     paddingTop: 'env(safe-area-inset-top)',
     position: 'relative',
     zIndex: 10,
+    marginBottom: '20px',
   },
   logo: {
     fontSize: '22px',
@@ -441,30 +441,28 @@ const styles: { [key: string]: React.CSSProperties } = {
     color: '#8e8e93',
     fontSize: '13px',
   },
-  content: {
-    flex: 1,
+  cardWrapper: {
     display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    textAlign: 'center',
+    justifyContent: 'flex-start',
+    marginBottom: 'auto',
   },
   card: {
     backgroundColor: '#1c1c1e',
-    borderRadius: '20px',
-    padding: '16px 20px',
-    width: '100%',
-    maxWidth: '280px',
+    borderRadius: '16px',
+    padding: '14px 18px',
+    width: 'auto',
+    minWidth: '200px',
+    maxWidth: '240px',
     boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
   },
   cardHeader: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: '12px',
+    marginBottom: '10px',
   },
   cardTitle: {
-    fontSize: '13px',
+    fontSize: '12px',
     fontWeight: '500',
     color: '#8e8e93',
     margin: 0,
@@ -482,20 +480,20 @@ const styles: { [key: string]: React.CSSProperties } = {
     transition: 'all 0.2s',
   },
   donationTotal: {
-    fontSize: '28px',
+    fontSize: '22px',
     fontWeight: '700',
     color: '#fff',
-    marginBottom: '16px',
-    textAlign: 'center',
+    marginBottom: '12px',
+    textAlign: 'left',
     transition: 'all 0.3s ease',
   },
   skeletonLoader: {
-    height: '34px',
+    height: '28px',
     backgroundColor: '#2c2c2e',
-    borderRadius: '8px',
+    borderRadius: '6px',
     position: 'relative',
     overflow: 'hidden',
-    marginBottom: '16px',
+    marginBottom: '12px',
   },
   skeletonShimmer: {
     position: 'absolute',
@@ -512,15 +510,18 @@ const styles: { [key: string]: React.CSSProperties } = {
     justifyContent: 'center',
     gap: '6px',
     width: '100%',
-    padding: '10px',
+    padding: '8px 12px',
     backgroundColor: '#8be9fd',
     border: 'none',
-    borderRadius: '30px',
+    borderRadius: '24px',
     color: '#000',
-    fontSize: '13px',
+    fontSize: '12px',
     fontWeight: '600',
     cursor: 'pointer',
     transition: 'all 0.2s',
+  },
+  content: {
+    flex: 1,
   },
   homeIndicator: {
     display: 'flex',
