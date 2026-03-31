@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
+import { useDrag } from '@use-gesture/react';
 
 const slides = [
   {
@@ -11,17 +12,17 @@ const slides = [
     desc: 'Buat kegiatan donasi dan bagikan kebaikan kepada yang membutuhkan',
   },
   {
-    image: '/images/6.jpg',
+    image: '/images/5.jpg',
     title: 'Donasi dengan Mudah',
     desc: 'Donasi kapan saja, di mana saja dengan proses yang cepat dan aman',
   },
   {
-    image: '/images/7.jpg',
+    image: '/images/5.jpg',
     title: 'Bagikan Cerita',
     desc: 'Ceritakan pengalaman donasi Anda dan inspirasi orang lain',
   },
   {
-    image: '/images/8.jpg',
+    image: '/images/5.jpg',
     title: 'Leaderboard Donatur',
     desc: 'Lihat peringkat donatur dan berkompetisi dalam kebaikan',
   },
@@ -32,6 +33,9 @@ export default function Onboarding() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [progress, setProgress] = useState(0);
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [dragStartX, setDragStartX] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
 
   // Progress bar animation for each slide
   useEffect(() => {
@@ -68,6 +72,30 @@ export default function Onboarding() {
     };
   }, [currentIndex]);
 
+  // Mouse/Touch drag handlers
+  const handleDragStart = (e: React.MouseEvent | React.TouchEvent) => {
+    setIsDragging(true);
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    setDragStartX(clientX);
+  };
+
+  const handleDragEnd = (e: React.MouseEvent | React.TouchEvent) => {
+    if (!isDragging) return;
+    setIsDragging(false);
+    
+    const clientX = 'changedTouches' in e ? e.changedTouches[0].clientX : e.clientX;
+    const diff = clientX - dragStartX;
+    const threshold = 50;
+    
+    if (diff > threshold) {
+      // Swipe right - previous slide
+      setCurrentIndex((prev) => (prev - 1 + slides.length) % slides.length);
+    } else if (diff < -threshold) {
+      // Swipe left - next slide
+      setCurrentIndex((prev) => (prev + 1) % slides.length);
+    }
+  };
+
   const goToSlide = (index: number) => {
     if (index === currentIndex) return;
     setCurrentIndex(index);
@@ -88,9 +116,26 @@ export default function Onboarding() {
     router.push('/login');
   };
 
+  // Next slide manual
+  const nextSlide = () => {
+    setCurrentIndex((prev) => (prev + 1) % slides.length);
+  };
+
+  const prevSlide = () => {
+    setCurrentIndex((prev) => (prev - 1 + slides.length) % slides.length);
+  };
+
   return (
     <div style={styles.wrapper}>
-      <div style={styles.container}>
+      <div 
+        ref={containerRef}
+        style={styles.container}
+        onMouseDown={handleDragStart}
+        onMouseUp={handleDragEnd}
+        onMouseLeave={handleDragEnd}
+        onTouchStart={handleDragStart}
+        onTouchEnd={handleDragEnd}
+      >
         {/* Header */}
         <div style={styles.header}>
           <div style={styles.logo}>Menuru</div>
@@ -101,21 +146,19 @@ export default function Onboarding() {
 
         {/* Main Content */}
         <div style={styles.content}>
-          {/* Image */}
+          {/* Image - Portrait */}
           <div style={styles.imageWrapper}>
             <AnimatePresence mode="wait">
               <motion.img
                 key={currentIndex}
                 src={slides[currentIndex].image}
                 alt={slides[currentIndex].title}
-                initial={{ opacity: 0, scale: 0.98 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 1.02 }}
+                initial={{ opacity: 0, x: 50 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -50 }}
                 transition={{ duration: 0.3 }}
                 style={styles.image}
-                onError={(e) => {
-                  e.currentTarget.src = `https://picsum.photos/id/${currentIndex + 5}/320/320`;
-                }}
+                draggable={false}
               />
             </AnimatePresence>
           </div>
@@ -142,7 +185,7 @@ export default function Onboarding() {
             {slides[currentIndex].desc}
           </motion.p>
 
-          {/* Pagination Dots - Tank Style */}
+          {/* Pagination Dots - Active dot becomes wider */}
           <div style={styles.dotsContainer}>
             {slides.map((_, idx) => (
               <button
@@ -150,15 +193,13 @@ export default function Onboarding() {
                 onClick={() => goToSlide(idx)}
                 style={styles.dotWrapper}
               >
-                <div style={styles.dotBg}>
-                  <div
-                    style={{
-                      ...styles.dotFill,
-                      width: idx === currentIndex ? `${progress}%` : idx < currentIndex ? '100%' : '0%',
-                      backgroundColor: '#8be9fd',
-                    }}
-                  />
-                </div>
+                <div
+                  style={{
+                    ...styles.dot,
+                    width: idx === currentIndex ? '32px' : '8px',
+                    backgroundColor: idx === currentIndex ? '#8be9fd' : '#2c2c2e',
+                  }}
+                />
               </button>
             ))}
           </div>
@@ -176,6 +217,19 @@ export default function Onboarding() {
             </button>
           </div>
         </div>
+
+        {/* Navigation Arrows */}
+        <button onClick={prevSlide} style={styles.leftArrow}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2">
+            <path d="M15 18l-6-6 6-6" />
+          </svg>
+        </button>
+
+        <button onClick={nextSlide} style={styles.rightArrow}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2">
+            <path d="M9 18l6-6-6-6" />
+          </svg>
+        </button>
       </div>
     </div>
   );
@@ -183,29 +237,43 @@ export default function Onboarding() {
 
 const styles: { [key: string]: React.CSSProperties } = {
   wrapper: {
-    minHeight: '100vh',
+    height: '100vh',
+    width: '100vw',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#000',
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
+    overflow: 'hidden',
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
   },
   container: {
     width: '100%',
     maxWidth: '400px',
-    minHeight: '100vh',
+    height: '100vh',
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'space-between',
     padding: '20px 24px',
     backgroundColor: '#000',
     color: '#fff',
+    position: 'relative',
+    userSelect: 'none',
+    WebkitUserSelect: 'none',
+    cursor: 'grab',
+    overflow: 'hidden',
   },
   header: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingTop: 'env(safe-area-inset-top)',
+    position: 'relative',
+    zIndex: 10,
   },
   logo: {
     fontSize: '22px',
@@ -232,14 +300,18 @@ const styles: { [key: string]: React.CSSProperties } = {
     textAlign: 'center',
   },
   imageWrapper: {
-    marginBottom: '48px',
+    marginBottom: '40px',
+    width: '100%',
+    display: 'flex',
+    justifyContent: 'center',
   },
   image: {
     width: '280px',
-    height: '280px',
+    height: '360px',
     borderRadius: '28px',
     objectFit: 'cover',
     boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
+    pointerEvents: 'none',
   },
   title: {
     fontSize: '26px',
@@ -258,34 +330,27 @@ const styles: { [key: string]: React.CSSProperties } = {
   dotsContainer: {
     display: 'flex',
     justifyContent: 'center',
-    gap: '12px',
+    alignItems: 'center',
+    gap: '10px',
     marginTop: '48px',
-    width: '100%',
-    maxWidth: '280px',
   },
   dotWrapper: {
     background: 'none',
     border: 'none',
     cursor: 'pointer',
     padding: 0,
-    flex: 1,
+    display: 'flex',
+    alignItems: 'center',
   },
-  dotBg: {
-    width: '100%',
+  dot: {
     height: '8px',
-    backgroundColor: '#000',
     borderRadius: '4px',
-    overflow: 'hidden',
-    position: 'relative' as const,
-    border: '1px solid #2c2c2e',
-  },
-  dotFill: {
-    height: '100%',
-    borderRadius: '4px',
-    transition: 'width 0.03s linear',
+    transition: 'all 0.3s ease',
   },
   bottom: {
     paddingBottom: 'max(20px, env(safe-area-inset-bottom))',
+    position: 'relative',
+    zIndex: 10,
   },
   primaryButton: {
     width: '100%',
@@ -320,5 +385,41 @@ const styles: { [key: string]: React.CSSProperties } = {
     cursor: 'pointer',
     fontFamily: 'inherit',
     padding: '4px 8px',
+  },
+  leftArrow: {
+    position: 'absolute',
+    left: '8px',
+    top: '50%',
+    transform: 'translateY(-50%)',
+    background: 'rgba(0,0,0,0.4)',
+    backdropFilter: 'blur(10px)',
+    border: '1px solid rgba(255,255,255,0.1)',
+    borderRadius: '40px',
+    width: '44px',
+    height: '44px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    cursor: 'pointer',
+    zIndex: 20,
+    transition: 'all 0.2s ease',
+  },
+  rightArrow: {
+    position: 'absolute',
+    right: '8px',
+    top: '50%',
+    transform: 'translateY(-50%)',
+    background: 'rgba(0,0,0,0.4)',
+    backdropFilter: 'blur(10px)',
+    border: '1px solid rgba(255,255,255,0.1)',
+    borderRadius: '40px',
+    width: '44px',
+    height: '44px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    cursor: 'pointer',
+    zIndex: 20,
+    transition: 'all 0.2s ease',
   },
 };
