@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 
@@ -29,104 +29,159 @@ const slides = [
 
 export default function Onboarding() {
   const router = useRouter();
-  const [index, setIndex] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [progress, setProgress] = useState(0);
+  const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Progress bar animation for each slide
   useEffect(() => {
-    const interval = setInterval(() => {
-      setIndex((prev) => (prev + 1) % slides.length);
-    }, 3000);
-    return () => clearInterval(interval);
-  }, []);
+    // Reset progress when slide changes
+    setProgress(0);
+    
+    // Clear existing interval
+    if (progressIntervalRef.current) {
+      clearInterval(progressIntervalRef.current);
+    }
+    
+    // Start new progress animation (3 seconds total)
+    const stepTime = 30; // 30ms per step
+    const totalSteps = 3000 / stepTime; // 100 steps
+    let currentStep = 0;
+    
+    progressIntervalRef.current = setInterval(() => {
+      currentStep++;
+      const newProgress = (currentStep / totalSteps) * 100;
+      
+      if (newProgress >= 100) {
+        // Progress complete, move to next slide
+        setProgress(100);
+        clearInterval(progressIntervalRef.current!);
+        
+        // Auto move to next slide after a short delay
+        setTimeout(() => {
+          setCurrentIndex((prev) => (prev + 1) % slides.length);
+        }, 50);
+      } else {
+        setProgress(newProgress);
+      }
+    }, stepTime);
+    
+    return () => {
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current);
+      }
+    };
+  }, [currentIndex]);
+
+  const goToSlide = (index: number) => {
+    if (index === currentIndex) return;
+    setCurrentIndex(index);
+  };
 
   const handleSkip = () => {
+    localStorage.setItem('hasSeenOnboarding', 'true');
     router.push('/');
   };
 
-  const handleSignIn = () => {
-    router.push('/login');
-  };
-
   const handleSignUp = () => {
+    localStorage.setItem('hasSeenOnboarding', 'true');
     router.push('/register');
   };
 
+  const handleSignIn = () => {
+    localStorage.setItem('hasSeenOnboarding', 'true');
+    router.push('/login');
+  };
+
   return (
-    <div style={wrap}>
-      <div style={app}>
-        {/* HEADER */}
-        <div style={header}>
-          <div style={logo}>Menuru</div>
-          <button onClick={handleSkip} style={skip}>
+    <div style={styles.wrapper}>
+      <div style={styles.container}>
+        {/* Header */}
+        <div style={styles.header}>
+          <div style={styles.logo}>Menuru</div>
+          <button onClick={handleSkip} style={styles.skipButton}>
             Lewati
           </button>
         </div>
 
-        {/* CONTENT */}
-        <div style={content}>
-          {/* IMAGE */}
-          <div style={imageWrapper}>
+        {/* Main Content */}
+        <div style={styles.content}>
+          {/* Image */}
+          <div style={styles.imageWrapper}>
             <AnimatePresence mode="wait">
               <motion.img
-                key={index}
-                src={slides[index].image}
-                alt={slides[index].title}
-                initial={{ opacity: 0, scale: 0.95 }}
+                key={currentIndex}
+                src={slides[currentIndex].image}
+                alt={slides[currentIndex].title}
+                initial={{ opacity: 0, scale: 0.98 }}
                 animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 1.05 }}
-                transition={{ duration: 0.4 }}
-                style={image}
+                exit={{ opacity: 0, scale: 1.02 }}
+                transition={{ duration: 0.3 }}
+                style={styles.image}
                 onError={(e) => {
-                  e.currentTarget.src = `https://picsum.photos/id/${index + 5}/300/300`;
+                  e.currentTarget.src = `https://picsum.photos/id/${currentIndex + 5}/320/320`;
                 }}
               />
             </AnimatePresence>
           </div>
 
-          {/* TEXT */}
+          {/* Title */}
           <motion.h2
-            key={`title-${index}`}
+            key={`title-${currentIndex}`}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            style={styles.title}
+          >
+            {slides[currentIndex].title}
+          </motion.h2>
+
+          {/* Description */}
+          <motion.p
+            key={`desc-${currentIndex}`}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: 0.1 }}
-            style={title}
+            style={styles.description}
           >
-            {slides[index].title}
-          </motion.h2>
-          
-          <motion.p
-            key={`desc-${index}`}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.2 }}
-            style={desc}
-          >
-            {slides[index].desc}
+            {slides[currentIndex].desc}
           </motion.p>
 
-          {/* DOTS */}
-          <div style={dots}>
-            {slides.map((_, i) => (
+          {/* Pagination Dots with Progress Fill */}
+          <div style={styles.dotsContainer}>
+            {slides.map((_, idx) => (
               <button
-                key={i}
-                onClick={() => setIndex(i)}
-                style={{
-                  ...dot,
-                  width: i === index ? 24 : 6,
-                  backgroundColor: i === index ? '#fff' : '#3a3a3c',
-                }}
-              />
+                key={idx}
+                onClick={() => goToSlide(idx)}
+                style={styles.dotWrapper}
+              >
+                <div
+                  style={{
+                    ...styles.dotBg,
+                    backgroundColor: idx === currentIndex ? '#3a6ea5' : '#2c2c2e',
+                  }}
+                >
+                  <div
+                    style={{
+                      ...styles.dotFill,
+                      width: idx === currentIndex ? `${progress}%` : '0%',
+                      backgroundColor: '#5e9bff',
+                    }}
+                  />
+                </div>
+              </button>
             ))}
           </div>
         </div>
 
-        {/* BOTTOM BUTTONS */}
-        <div style={bottom}>
-          <button onClick={handleSignUp} style={btnPrimary}>
+        {/* Bottom Buttons */}
+        <div style={styles.bottom}>
+          <button onClick={handleSignUp} style={styles.primaryButton}>
             Daftar
           </button>
-          <div style={signInWrapper}>
-            <span style={signInText}>Sudah punya akun? </span>
-            <button onClick={handleSignIn} style={btnLink}>
+          <div style={styles.signInWrapper}>
+            <span style={styles.signInText}>Sudah punya akun? </span>
+            <button onClick={handleSignIn} style={styles.linkButton}>
               Masuk
             </button>
           </div>
@@ -136,147 +191,139 @@ export default function Onboarding() {
   );
 }
 
-// ========== STYLES ==========
-
-const wrap: React.CSSProperties = {
-  minHeight: '100vh',
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-  background: '#000',
-  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
-};
-
-const app: React.CSSProperties = {
-  width: '100%',
-  maxWidth: '420px',
-  minHeight: '100vh',
-  display: 'flex',
-  flexDirection: 'column',
-  justifyContent: 'space-between',
-  padding: '20px 24px',
-  background: '#000',
-  color: '#fff',
-};
-
-const header: React.CSSProperties = {
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  paddingTop: 'env(safe-area-inset-top)',
-};
-
-const logo: React.CSSProperties = {
-  fontSize: '20px',
-  fontWeight: '600',
-  letterSpacing: '-0.3px',
-  color: '#fff',
-};
-
-const skip: React.CSSProperties = {
-  background: 'none',
-  border: 'none',
-  fontSize: '15px',
-  color: '#8e8e93',
-  cursor: 'pointer',
-  fontFamily: 'inherit',
-  padding: '8px 12px',
-  borderRadius: '20px',
-  transition: 'opacity 0.2s',
-};
-
-const content: React.CSSProperties = {
-  flex: 1,
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  justifyContent: 'center',
-  textAlign: 'center',
-};
-
-const imageWrapper: React.CSSProperties = {
-  marginBottom: '48px',
-};
-
-const image: React.CSSProperties = {
-  width: '260px',
-  height: '260px',
-  borderRadius: '28px',
-  objectFit: 'cover',
-  boxShadow: '0 20px 40px rgba(0,0,0,0.4)',
-};
-
-const title: React.CSSProperties = {
-  fontSize: '28px',
-  fontWeight: '600',
-  marginBottom: '12px',
-  letterSpacing: '-0.3px',
-  color: '#fff',
-};
-
-const desc: React.CSSProperties = {
-  fontSize: '15px',
-  color: '#8e8e93',
-  lineHeight: '1.4',
-  maxWidth: '280px',
-  margin: '0 auto',
-};
-
-const dots: React.CSSProperties = {
-  display: 'flex',
-  justifyContent: 'center',
-  gap: '8px',
-  marginTop: '32px',
-};
-
-const dot: React.CSSProperties = {
-  height: '6px',
-  borderRadius: '3px',
-  border: 'none',
-  cursor: 'pointer',
-  transition: 'all 0.3s ease',
-  padding: 0,
-};
-
-const bottom: React.CSSProperties = {
-  paddingBottom: 'max(20px, env(safe-area-inset-bottom))',
-};
-
-const btnPrimary: React.CSSProperties = {
-  width: '100%',
-  padding: '16px',
-  borderRadius: '30px',
-  border: 'none',
-  background: '#fff',
-  color: '#000',
-  fontSize: '17px',
-  fontWeight: '600',
-  cursor: 'pointer',
-  fontFamily: 'inherit',
-  marginBottom: '16px',
-  transition: 'all 0.2s ease',
-};
-
-const signInWrapper: React.CSSProperties = {
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-  gap: '4px',
-};
-
-const signInText: React.CSSProperties = {
-  fontSize: '15px',
-  color: '#8e8e93',
-};
-
-const btnLink: React.CSSProperties = {
-  background: 'none',
-  border: 'none',
-  fontSize: '15px',
-  fontWeight: '500',
-  color: '#fff',
-  cursor: 'pointer',
-  fontFamily: 'inherit',
-  padding: '4px 8px',
-  transition: 'opacity 0.2s',
+const styles: { [key: string]: React.CSSProperties } = {
+  wrapper: {
+    minHeight: '100vh',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#000',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
+  },
+  container: {
+    width: '100%',
+    maxWidth: '400px',
+    minHeight: '100vh',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    padding: '20px 24px',
+    backgroundColor: '#000',
+    color: '#fff',
+  },
+  header: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingTop: 'env(safe-area-inset-top)',
+  },
+  logo: {
+    fontSize: '22px',
+    fontWeight: '600',
+    color: '#fff',
+    letterSpacing: '-0.3px',
+  },
+  skipButton: {
+    background: 'none',
+    border: 'none',
+    fontSize: '15px',
+    fontWeight: '500',
+    color: '#fff',
+    cursor: 'pointer',
+    fontFamily: 'inherit',
+    padding: '8px 12px',
+  },
+  content: {
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    textAlign: 'center',
+  },
+  imageWrapper: {
+    marginBottom: '48px',
+  },
+  image: {
+    width: '280px',
+    height: '280px',
+    borderRadius: '28px',
+    objectFit: 'cover',
+    boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
+  },
+  title: {
+    fontSize: '26px',
+    fontWeight: '600',
+    marginBottom: '12px',
+    color: '#fff',
+    letterSpacing: '-0.3px',
+  },
+  description: {
+    fontSize: '15px',
+    color: '#8e8e93',
+    lineHeight: '1.4',
+    maxWidth: '280px',
+    margin: '0 auto',
+  },
+  dotsContainer: {
+    display: 'flex',
+    justifyContent: 'center',
+    gap: '10px',
+    marginTop: '40px',
+  },
+  dotWrapper: {
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+    padding: 0,
+  },
+  dotBg: {
+    width: '28px',
+    height: '4px',
+    borderRadius: '2px',
+    overflow: 'hidden',
+    position: 'relative' as const,
+  },
+  dotFill: {
+    height: '100%',
+    borderRadius: '2px',
+    transition: 'width 0.03s linear',
+  },
+  bottom: {
+    paddingBottom: 'max(20px, env(safe-area-inset-bottom))',
+  },
+  primaryButton: {
+    width: '100%',
+    padding: '16px',
+    borderRadius: '30px',
+    border: 'none',
+    backgroundColor: '#fff',
+    color: '#000',
+    fontSize: '17px',
+    fontWeight: '600',
+    cursor: 'pointer',
+    fontFamily: 'inherit',
+    marginBottom: '16px',
+    transition: 'opacity 0.2s',
+  },
+  signInWrapper: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: '4px',
+  },
+  signInText: {
+    fontSize: '15px',
+    color: '#8e8e93',
+  },
+  linkButton: {
+    background: 'none',
+    border: 'none',
+    fontSize: '15px',
+    fontWeight: '500',
+    color: '#fff',
+    cursor: 'pointer',
+    fontFamily: 'inherit',
+    padding: '4px 8px',
+  },
 };
