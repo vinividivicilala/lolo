@@ -25,12 +25,6 @@ export default function HomePage() {
     }
   }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem('hasSeenOnboarding');
-    localStorage.removeItem('userName');
-    router.push('/onboarding');
-  };
-
   const markAsRead = (id: number) => {
     setNotifications(prev =>
       prev.map(notif => (notif.id === id ? { ...notif, read: true } : notif))
@@ -59,7 +53,7 @@ export default function HomePage() {
   return (
     <div style={styles.wrapper}>
       <div style={styles.container}>
-        {/* Header - iOS Style dengan Navbar */}
+        {/* Header - Navbar */}
         <div style={styles.header}>
           <div style={styles.logo}>Menuru</div>
           <div style={styles.navRight}>
@@ -122,42 +116,9 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Main Content - Sama seperti onboarding (terpusat) */}
+        {/* Main Content - Kosong, hanya background hitam */}
         <div style={styles.content}>
-          {/* Image - Portrait */}
-          <div style={styles.imageWrapper}>
-            <img
-              src="/images/5.jpg"
-              alt="Welcome"
-              style={styles.image}
-            />
-          </div>
-
-          {/* Title */}
-          <h2 style={styles.title}>
-            Selamat Datang!
-          </h2>
-
-          {/* Description */}
-          <p style={styles.description}>
-            {userName}
-          </p>
-          <p style={styles.subDescription}>
-            Platform donasi online untuk berbagi kebaikan
-          </p>
-
-          {/* Optional: Welcome Message */}
-          <div style={styles.welcomeCard}>
-            <div style={styles.welcomeIcon}>✨</div>
-            <p style={styles.welcomeText}>Siap berbagi kebaikan hari ini?</p>
-          </div>
-        </div>
-
-        {/* Bottom Buttons - Sama seperti onboarding */}
-        <div style={styles.bottom}>
-          <button onClick={handleLogout} style={styles.primaryButton}>
-            Keluar
-          </button>
+          {/* Tidak ada konten, hanya background hitam */}
         </div>
 
         {/* Home Indicator for iOS */}
@@ -383,75 +344,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     alignItems: 'center',
     justifyContent: 'center',
     textAlign: 'center',
-  },
-  imageWrapper: {
-    marginBottom: '40px',
-    width: '100%',
-    display: 'flex',
-    justifyContent: 'center',
-  },
-  image: {
-    width: '280px',
-    height: '360px',
-    borderRadius: '28px',
-    objectFit: 'cover',
-    boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
-    pointerEvents: 'none',
-  },
-  title: {
-    fontSize: '26px',
-    fontWeight: '600',
-    marginBottom: '12px',
-    color: '#fff',
-    letterSpacing: '-0.3px',
-  },
-  description: {
-    fontSize: '18px',
-    color: '#8be9fd',
-    marginBottom: '8px',
-    fontWeight: '500',
-  },
-  subDescription: {
-    fontSize: '15px',
-    color: '#8e8e93',
-    lineHeight: '1.4',
-    maxWidth: '280px',
-    margin: '0 auto',
-  },
-  welcomeCard: {
-    marginTop: '32px',
-    padding: '20px',
-    backgroundColor: '#1c1c1e',
-    borderRadius: '20px',
-    width: '100%',
-    maxWidth: '280px',
-  },
-  welcomeIcon: {
-    fontSize: '32px',
-    marginBottom: '8px',
-  },
-  welcomeText: {
-    fontSize: '14px',
-    color: '#8e8e93',
-  },
-  bottom: {
-    paddingBottom: '12px',
-    position: 'relative',
-    zIndex: 10,
-  },
-  primaryButton: {
-    width: '100%',
-    padding: '16px',
-    borderRadius: '30px',
-    border: 'none',
-    backgroundColor: '#fff',
-    color: '#000',
-    fontSize: '17px',
-    fontWeight: '600',
-    cursor: 'pointer',
-    fontFamily: 'inherit',
-    marginBottom: '16px',
-    transition: 'opacity 0.2s',
+    // Konten kosong, hanya background hitam
   },
   homeIndicator: {
     display: 'flex',
