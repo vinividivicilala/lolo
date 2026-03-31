@@ -95,28 +95,31 @@ export default function OnboardingPage() {
         display: 'flex',
         flexDirection: 'column',
         position: 'relative',
-        overflow: 'hidden',
       }}
     >
-      {/* Header - Left: Website Name, Right: Skip */}
+      {/* Status Bar untuk efek seperti app */}
       <div
         style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          padding: '24px 32px',
+          paddingTop: 'env(safe-area-inset-top)',
+          backgroundColor: '#000',
+          height: '44px',
+        }}
+      />
+
+      {/* Header - Kiri nama website, Kanan lewatin */}
+      <div
+        style={{
+          position: 'relative',
+          padding: '16px 24px',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
           zIndex: 20,
-          backgroundColor: 'transparent',
         }}
       >
-        {/* Left - Website Name */}
         <div
           style={{
-            fontSize: '28px',
+            fontSize: '24px',
             fontWeight: '600',
             color: '#fff',
             fontFamily: 'Helvetica, Arial, sans-serif',
@@ -126,28 +129,32 @@ export default function OnboardingPage() {
           Menuru
         </div>
 
-        {/* Right - Skip Button */}
         <button
           onClick={handleSkip}
           style={{
             background: 'none',
             border: 'none',
-            fontSize: '16px',
+            fontSize: '15px',
             color: '#fff',
             cursor: 'pointer',
             fontFamily: 'Helvetica, Arial, sans-serif',
             padding: '8px 16px',
-            borderRadius: '40px',
-            transition: 'opacity 0.3s',
+            borderRadius: '20px',
+            transition: 'all 0.2s ease',
+            backgroundColor: 'rgba(255,255,255,0.05)',
           }}
-          onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.7')}
-          onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)';
+          }}
         >
           Lewatin
         </button>
       </div>
 
-      {/* Main Content - Center Image */}
+      {/* Main Content - Center Image dengan layout mobile */}
       <div
         style={{
           flex: 1,
@@ -155,19 +162,20 @@ export default function OnboardingPage() {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          padding: '80px 24px 120px 24px',
+          padding: '20px 24px 100px 24px',
         }}
       >
-        {/* Image Container */}
+        {/* Image Container - Ukuran normal untuk mobile */}
         <div
           style={{
             position: 'relative',
             width: '100%',
-            maxWidth: '400px',
-            height: '400px',
-            marginBottom: '32px',
+            maxWidth: '320px',
+            height: '320px',
+            marginBottom: '40px',
+            borderRadius: '28px',
             overflow: 'hidden',
-            borderRadius: '24px',
+            boxShadow: '0 10px 40px rgba(0,0,0,0.3)',
           }}
         >
           <AnimatePresence mode="wait">
@@ -175,19 +183,17 @@ export default function OnboardingPage() {
               key={currentIndex}
               src={onboardingImages[currentIndex].src}
               alt={onboardingImages[currentIndex].title}
-              initial={{ opacity: 0, x: 100 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -100 }}
-              transition={{ duration: 0.5, ease: "easeInOut" }}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 1.05 }}
+              transition={{ duration: 0.4, ease: "easeInOut" }}
               style={{
                 width: '100%',
                 height: '100%',
                 objectFit: 'cover',
-                borderRadius: '24px',
               }}
               onError={(e) => {
-                // Fallback if image doesn't exist
-                e.currentTarget.src = 'https://via.placeholder.com/400x400/111/fff?text=Menuru';
+                e.currentTarget.src = 'https://via.placeholder.com/320x320/111/fff?text=Menuru';
               }}
             />
           </AnimatePresence>
@@ -198,28 +204,30 @@ export default function OnboardingPage() {
           key={`text-${currentIndex}`}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
+          transition={{ duration: 0.4, delay: 0.2 }}
           style={{
             textAlign: 'center',
             marginBottom: '32px',
+            padding: '0 20px',
           }}
         >
           <h2
             style={{
-              fontSize: '24px',
+              fontSize: '28px',
               fontWeight: '600',
               color: '#fff',
               marginBottom: '12px',
               fontFamily: 'Helvetica, Arial, sans-serif',
+              letterSpacing: '-0.3px',
             }}
           >
             {onboardingImages[currentIndex].title}
           </h2>
           <p
             style={{
-              fontSize: '16px',
+              fontSize: '15px',
               color: '#888',
-              maxWidth: '300px',
+              maxWidth: '280px',
               margin: '0 auto',
               fontFamily: 'Helvetica, Arial, sans-serif',
               lineHeight: '1.5',
@@ -233,8 +241,8 @@ export default function OnboardingPage() {
         <div
           style={{
             display: 'flex',
-            gap: '12px',
-            marginBottom: '48px',
+            gap: '8px',
+            marginBottom: '40px',
           }}
         >
           {onboardingImages.map((_, index) => (
@@ -242,9 +250,9 @@ export default function OnboardingPage() {
               key={index}
               onClick={() => goToSlide(index)}
               style={{
-                width: index === currentIndex ? '24px' : '8px',
-                height: '8px',
-                borderRadius: '4px',
+                width: index === currentIndex ? '24px' : '6px',
+                height: '6px',
+                borderRadius: '3px',
                 backgroundColor: index === currentIndex ? '#fff' : '#333',
                 border: 'none',
                 cursor: 'pointer',
@@ -256,18 +264,19 @@ export default function OnboardingPage() {
         </div>
       </div>
 
-      {/* Bottom Buttons - Sign In and Sign Up */}
+      {/* Bottom Buttons - Sign In and Sign Up dengan desain mobile */}
       <div
         style={{
           position: 'fixed',
           bottom: 0,
           left: 0,
           right: 0,
-          padding: '24px 32px',
+          padding: '20px 24px',
+          paddingBottom: 'max(20px, env(safe-area-inset-bottom))',
           backgroundColor: '#000',
-          borderTop: '1px solid #222',
+          borderTop: '1px solid rgba(255,255,255,0.1)',
           display: 'flex',
-          gap: '16px',
+          gap: '12px',
           zIndex: 20,
         }}
       >
@@ -275,24 +284,24 @@ export default function OnboardingPage() {
           onClick={handleSignIn}
           style={{
             flex: 1,
-            padding: '16px',
+            padding: '14px',
             backgroundColor: 'transparent',
             border: '1px solid #333',
-            borderRadius: '40px',
+            borderRadius: '30px',
             fontSize: '16px',
             fontWeight: '500',
             color: '#fff',
             cursor: 'pointer',
             fontFamily: 'Helvetica, Arial, sans-serif',
-            transition: 'all 0.3s ease',
+            transition: 'all 0.2s ease',
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.borderColor = '#fff';
-            e.currentTarget.style.color = '#fff';
+            e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)';
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.borderColor = '#333';
-            e.currentTarget.style.color = '#fff';
+            e.currentTarget.style.backgroundColor = 'transparent';
           }}
         >
           Masuk
@@ -301,39 +310,42 @@ export default function OnboardingPage() {
           onClick={handleSignUp}
           style={{
             flex: 1,
-            padding: '16px',
+            padding: '14px',
             backgroundColor: '#fff',
             border: 'none',
-            borderRadius: '40px',
+            borderRadius: '30px',
             fontSize: '16px',
             fontWeight: '500',
             color: '#000',
             cursor: 'pointer',
             fontFamily: 'Helvetica, Arial, sans-serif',
-            transition: 'all 0.3s ease',
+            transition: 'all 0.2s ease',
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = '#f0f0f0';
+            e.currentTarget.style.backgroundColor = '#f5f5f5';
+            e.currentTarget.style.transform = 'scale(0.98)';
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.backgroundColor = '#fff';
+            e.currentTarget.style.transform = 'scale(1)';
           }}
         >
           Daftar
         </button>
       </div>
 
-      {/* Navigation Arrows (Optional) */}
+      {/* Navigation Arrows - Mobile friendly di samping gambar */}
       <button
         onClick={prevSlide}
         style={{
-          position: 'fixed',
-          left: '20px',
+          position: 'absolute',
+          left: '16px',
           top: '50%',
           transform: 'translateY(-50%)',
-          background: 'rgba(0,0,0,0.5)',
-          border: '1px solid #333',
-          borderRadius: '50%',
+          background: 'rgba(0,0,0,0.6)',
+          backdropFilter: 'blur(10px)',
+          border: '1px solid rgba(255,255,255,0.1)',
+          borderRadius: '40px',
           width: '44px',
           height: '44px',
           display: 'flex',
@@ -341,16 +353,18 @@ export default function OnboardingPage() {
           justifyContent: 'center',
           cursor: 'pointer',
           zIndex: 20,
-          transition: 'all 0.3s ease',
+          transition: 'all 0.2s ease',
         }}
         onMouseEnter={(e) => {
           e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
+          e.currentTarget.style.backdropFilter = 'blur(10px)';
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.background = 'rgba(0,0,0,0.5)';
+          e.currentTarget.style.background = 'rgba(0,0,0,0.6)';
+          e.currentTarget.style.backdropFilter = 'blur(10px)';
         }}
       >
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M15 18l-6-6 6-6" />
         </svg>
       </button>
@@ -358,13 +372,14 @@ export default function OnboardingPage() {
       <button
         onClick={nextSlide}
         style={{
-          position: 'fixed',
-          right: '20px',
+          position: 'absolute',
+          right: '16px',
           top: '50%',
           transform: 'translateY(-50%)',
-          background: 'rgba(0,0,0,0.5)',
-          border: '1px solid #333',
-          borderRadius: '50%',
+          background: 'rgba(0,0,0,0.6)',
+          backdropFilter: 'blur(10px)',
+          border: '1px solid rgba(255,255,255,0.1)',
+          borderRadius: '40px',
           width: '44px',
           height: '44px',
           display: 'flex',
@@ -372,19 +387,30 @@ export default function OnboardingPage() {
           justifyContent: 'center',
           cursor: 'pointer',
           zIndex: 20,
-          transition: 'all 0.3s ease',
+          transition: 'all 0.2s ease',
         }}
         onMouseEnter={(e) => {
           e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
+          e.currentTarget.style.backdropFilter = 'blur(10px)';
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.background = 'rgba(0,0,0,0.5)';
+          e.currentTarget.style.background = 'rgba(0,0,0,0.6)';
+          e.currentTarget.style.backdropFilter = 'blur(10px)';
         }}
       >
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M9 18l6-6-6-6" />
         </svg>
       </button>
+
+      {/* Safe area untuk iPhone notch */}
+      <style jsx>{`
+        @media (max-width: 768px) {
+          .container {
+            padding: 0;
+          }
+        }
+      `}</style>
     </div>
   );
 }
