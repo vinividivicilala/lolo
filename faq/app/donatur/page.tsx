@@ -331,9 +331,7 @@ export default function DonationPage() {
   const answerRefs = useRef<(HTMLDivElement | null)[]>([]);
   
   // Scroll state for page transition
-  const [isScrolledToBottom, setIsScrolledToBottom] = useState(false);
-  const contentRef = useRef<HTMLDivElement>(null);
-  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [showSecondPage, setShowSecondPage] = useState(false);
   
   // Firebase State
   const [firebaseAuth, setFirebaseAuth] = useState<any>(null);
@@ -380,33 +378,36 @@ export default function DonationPage() {
   // Scroll handler for page transition
   useEffect(() => {
     const handleScroll = () => {
-      if (!contentRef.current) return;
-      
       const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
       const scrollHeight = document.documentElement.scrollHeight;
       const clientHeight = window.innerHeight;
       const distanceToBottom = scrollHeight - (scrollTop + clientHeight);
       
-      // Check if scrolled to bottom (within 50px)
-      const atBottom = distanceToBottom <= 50;
+      // Check if scrolled to bottom (within 10px)
+      const atBottom = distanceToBottom <= 10;
       
-      if (atBottom && !isScrolledToBottom) {
-        setIsScrolledToBottom(true);
-        // Scroll to top of the page
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+      if (atBottom && !showSecondPage) {
+        setShowSecondPage(true);
+        // Lock body scroll
+        document.body.style.overflow = 'hidden';
       }
       
-      // Check if scrolled to top (within 50px)
-      const atTop = scrollTop <= 50;
+      // Check if scrolled to top (within 10px) on second page
+      const atTop = scrollTop <= 10;
       
-      if (atTop && isScrolledToBottom) {
-        setIsScrolledToBottom(false);
+      if (atTop && showSecondPage) {
+        setShowSecondPage(false);
+        // Unlock body scroll
+        document.body.style.overflow = 'auto';
       }
     };
     
     window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [isScrolledToBottom]);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      document.body.style.overflow = 'auto';
+    };
+  }, [showSecondPage]);
 
   // PDF Export Function
   const exportToPDF = (event: DonationEvent) => {
@@ -1136,11 +1137,8 @@ export default function DonationPage() {
 
   return (
     <>
-      {/* Main Page - Transforms out when scrolled to bottom */}
-      <motion.div
-        initial={{ y: 0 }}
-        animate={{ y: isScrolledToBottom ? '-100%' : 0 }}
-        transition={{ duration: 0.6, ease: "easeInOut" }}
+      {/* Main Page */}
+      <div
         style={{
           minHeight: '100vh',
           backgroundColor: '#000',
@@ -1151,9 +1149,9 @@ export default function DonationPage() {
           paddingBottom: isMobile ? '120px' : '150px',
           position: 'relative',
           zIndex: 10,
+          display: showSecondPage ? 'none' : 'block',
         }}
       >
-        <div ref={contentRef}>
         {/* Header */}
         <div style={{
           position: 'fixed',
@@ -2288,95 +2286,61 @@ export default function DonationPage() {
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Marquee Text - Bottom, Large Text, No Background, No Border */}
-        <div style={{
-          position: 'fixed',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          width: '100%',
-          overflow: 'hidden',
-          backgroundColor: '#000',
-          padding: '24px 0',
-          zIndex: 99,
-        }}>
+      {/* Second Page - Shows when scrolled to bottom */}
+      {showSecondPage && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: '#000',
+            zIndex: 20,
+            overflow: 'auto',
+          }}
+          onScroll={(e) => {
+            const target = e.target as HTMLDivElement;
+            const scrollTop = target.scrollTop;
+            
+            // If scrolled to top of this page, go back to main page
+            if (scrollTop <= 10) {
+              setShowSecondPage(false);
+              document.body.style.overflow = 'auto';
+              // Scroll main page to bottom
+              window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'auto' });
+            }
+          }}
+        >
+          {/* DONATUR text at top left */}
           <div style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '48px',
-            whiteSpace: 'nowrap',
-            animation: 'marquee 20s linear infinite',
-          }}>
-            {[...Array(12)].map((_, i) => (
-              <div key={i} style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '48px',
-              }}>
-                <span style={{
-                  fontSize: '56px',
-                  fontWeight: '700',
-                  color: '#fff',
-                  letterSpacing: '4px',
-                  fontFamily: 'Helvetica, Arial, sans-serif',
-                  textTransform: 'uppercase',
-                }}>
-                  DONATUR
-                </span>
-                <SouthWestArrow size={56} color="#fff" />
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <style jsx>{`
-          @keyframes marquee {
-            0% {
-              transform: translateX(0%);
-            }
-            100% {
-              transform: translateX(-50%);
-            }
-          }
-        `}</style>
-        </div>
-      </motion.div>
-
-      {/* New Page that appears when scrolled to bottom */}
-      <motion.div
-        initial={{ y: '100%' }}
-        animate={{ y: isScrolledToBottom ? 0 : '100%' }}
-        transition={{ duration: 0.6, ease: "easeInOut" }}
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: '#000',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 20,
-          fontFamily: 'Helvetica, Arial, sans-serif',
-        }}
-      >
-        <div style={{
-          textAlign: 'center',
-        }}>
-          <span style={{
-            fontSize: isMobile ? '80px' : '160px',
-            fontWeight: '700',
+            position: 'absolute',
+            top: '40px',
+            left: '48px',
+            fontSize: isMobile ? '24px' : '32px',
+            fontWeight: '400',
             color: '#fff',
-            letterSpacing: '8px',
             fontFamily: 'Helvetica, Arial, sans-serif',
-            textTransform: 'uppercase',
+            letterSpacing: '2px',
           }}>
             DONATUR
-          </span>
+          </div>
+          
+          {/* Content of second page - you can add more content here */}
+          <div style={{
+            minHeight: '100vh',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '100px 48px',
+          }}>
+            {/* Add your second page content here */}
+          </div>
         </div>
-      </motion.div>
+      )}
 
       {/* Create Event Modal */}
       {showCreateModal && (
