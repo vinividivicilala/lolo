@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -23,34 +23,15 @@ export default function HomePage() {
   const [donationTotal, setDonationTotal] = useState(1250000);
   const [isLoading, setIsLoading] = useState(false);
   
-  // Card Swipe State
-  const [currentCardIndex, setCurrentCardIndex] = useState(0);
-  const [dragStartX, setDragStartX] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragOffset, setDragOffset] = useState(0);
-  
-  // Notes Data
-  const [submittedNotes, setSubmittedNotes] = useState(24);
-  const [sentNotes, setSentNotes] = useState(18);
-  
-  const cards = [
-    {
-      id: 1,
-      title: 'Note Tersubmit',
-      count: submittedNotes,
-      icon: '📝',
-      color: '#8be9fd',
-      bgColor: '#1c1c1e',
-    },
-    {
-      id: 2,
-      title: 'Note Terkirim',
-      count: sentNotes,
-      icon: '✉️',
-      color: '#8be9fd',
-      bgColor: '#1c1c1e',
-    },
-  ];
+  // Notes State
+  const [totalNotes, setTotalNotes] = useState(42);
+  const [noteHistory, setNoteHistory] = useState([
+    { id: 1, text: 'Donasi untuk panti asuhan', date: 'Hari ini, 10:30' },
+    { id: 2, text: 'Bantuan korban banjir', date: 'Kemarin, 14:20' },
+    { id: 3, text: 'Sumbangan buku sekolah', date: '2 hari lalu' },
+  ]);
+  const [newNoteText, setNewNoteText] = useState('');
+  const [showAddNote, setShowAddNote] = useState(false);
 
   const formatRupiah = (amount: number) => {
     return new Intl.NumberFormat('id-ID', {
@@ -81,41 +62,18 @@ export default function HomePage() {
     }
   };
 
-  // Swipe handlers
-  const handleDragStart = (e: React.MouseEvent | React.TouchEvent) => {
-    setIsDragging(true);
-    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
-    setDragStartX(clientX);
-  };
-
-  const handleDragMove = (e: React.MouseEvent | React.TouchEvent) => {
-    if (!isDragging) return;
-    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
-    const diff = clientX - dragStartX;
-    setDragOffset(diff);
-  };
-
-  const handleDragEnd = (e: React.MouseEvent | React.TouchEvent) => {
-    if (!isDragging) {
-      setIsDragging(false);
-      setDragOffset(0);
-      return;
+  const handleAddNote = () => {
+    if (newNoteText.trim()) {
+      const newNote = {
+        id: Date.now(),
+        text: newNoteText,
+        date: 'Baru saja',
+      };
+      setNoteHistory(prev => [newNote, ...prev]);
+      setTotalNotes(prev => prev + 1);
+      setNewNoteText('');
+      setShowAddNote(false);
     }
-    
-    setIsDragging(false);
-    const threshold = 50;
-    
-    if (dragOffset > threshold && currentCardIndex > 0) {
-      setCurrentCardIndex(currentCardIndex - 1);
-    } else if (dragOffset < -threshold && currentCardIndex < cards.length - 1) {
-      setCurrentCardIndex(currentCardIndex + 1);
-    }
-    
-    setDragOffset(0);
-  };
-
-  const goToCard = (index: number) => {
-    setCurrentCardIndex(index);
   };
 
   const markAsRead = (id: number) => {
@@ -206,19 +164,20 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Donation Card - Kiri atas */}
-        <div style={styles.donationCardWrapper}>
+        {/* Cards Row - Donation Card & Note Card */}
+        <div style={styles.cardsRow}>
+          {/* Donation Card */}
           <div style={styles.donationCard}>
-            <div style={styles.donationCardHeader}>
-              <h3 style={styles.donationCardTitle}>Jumlah Donasi</h3>
+            <div style={styles.cardHeader}>
+              <h3 style={styles.cardTitle}>Jumlah Donasi</h3>
               <button 
                 onClick={handleReload} 
                 style={styles.reloadButton}
                 disabled={isLoading}
               >
                 <svg 
-                  width="16" 
-                  height="16" 
+                  width="14" 
+                  height="14" 
                   viewBox="0 0 24 24" 
                   fill="none" 
                   stroke="currentColor" 
@@ -244,64 +203,45 @@ export default function HomePage() {
             </div>
             
             <button onClick={handleAddDonation} style={styles.addButton}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <line x1="12" y1="5" x2="12" y2="19" />
                 <line x1="5" y1="12" x2="19" y2="12" />
               </svg>
               <span>Tambah Donasi</span>
             </button>
           </div>
-        </div>
 
-        {/* Swipeable Cards Section */}
-        <div style={styles.cardsSection}>
-          <div style={styles.cardsContainer}>
-            <div
-              style={{
-                ...styles.cardsWrapper,
-                transform: `translateX(calc(-${currentCardIndex * 100}% + ${dragOffset}px))`,
-                transition: isDragging ? 'none' : 'transform 0.3s ease-out',
-              }}
-              onMouseDown={handleDragStart}
-              onMouseMove={handleDragMove}
-              onMouseUp={handleDragEnd}
-              onMouseLeave={handleDragEnd}
-              onTouchStart={handleDragStart}
-              onTouchMove={handleDragMove}
-              onTouchEnd={handleDragEnd}
-            >
-              {cards.map((card) => (
-                <div key={card.id} style={styles.cardItem}>
-                  <div style={styles.card}>
-                    <div style={styles.cardIcon}>{card.icon}</div>
-                    <h3 style={styles.cardTitle}>{card.title}</h3>
-                    <div style={styles.cardCount}>{card.count}</div>
-                    <div style={styles.cardSubtext}>Total</div>
-                  </div>
+          {/* Note Card */}
+          <div style={styles.noteCard}>
+            <div style={styles.cardHeader}>
+              <h3 style={styles.cardTitle}>Total Note</h3>
+              <button 
+                onClick={() => setShowAddNote(true)} 
+                style={styles.addNoteButton}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+              </button>
+            </div>
+            
+            <div style={styles.noteTotal}>
+              {totalNotes}
+            </div>
+            
+            <div style={styles.noteHistory}>
+              <div style={styles.historyLabel}>Riwayat Terakhir:</div>
+              {noteHistory.slice(0, 2).map(note => (
+                <div key={note.id} style={styles.historyItem}>
+                  <div style={styles.historyText}>{note.text}</div>
+                  <div style={styles.historyDate}>{note.date}</div>
                 </div>
               ))}
+              {noteHistory.length > 2 && (
+                <div style={styles.moreNotes}>+{noteHistory.length - 2} note lainnya</div>
+              )}
             </div>
-          </div>
-
-          {/* Pagination Dots */}
-          <div style={styles.dotsContainer}>
-            {cards.map((_, idx) => (
-              <button
-                key={idx}
-                onClick={() => goToCard(idx)}
-                style={styles.dotWrapper}
-              >
-                {idx === currentCardIndex ? (
-                  <div style={styles.activeDotContainer}>
-                    <div style={styles.activeDotBg}>
-                      <div style={styles.activeDotFill} />
-                    </div>
-                  </div>
-                ) : (
-                  <div style={styles.inactiveDot} />
-                )}
-              </button>
-            ))}
           </div>
         </div>
 
@@ -313,6 +253,28 @@ export default function HomePage() {
           <div style={styles.homeIndicatorBar} />
         </div>
       </div>
+
+      {/* Add Note Modal */}
+      {showAddNote && (
+        <div style={styles.modalOverlay} onClick={() => setShowAddNote(false)}>
+          <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
+            <div style={styles.modalHeader}>
+              <h3 style={styles.modalTitle}>Tambah Note</h3>
+              <button onClick={() => setShowAddNote(false)} style={styles.modalClose}>×</button>
+            </div>
+            <textarea
+              value={newNoteText}
+              onChange={(e) => setNewNoteText(e.target.value)}
+              placeholder="Tulis note..."
+              style={styles.modalTextarea}
+              rows={4}
+            />
+            <button onClick={handleAddNote} style={styles.modalButton}>
+              Simpan Note
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Live Chat Modal */}
       {isChatOpen && (
@@ -439,7 +401,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     paddingTop: 'env(safe-area-inset-top)',
     position: 'relative',
     zIndex: 10,
-    marginBottom: '20px',
+    marginBottom: '24px',
   },
   logo: {
     fontSize: '22px',
@@ -560,27 +522,32 @@ const styles: { [key: string]: React.CSSProperties } = {
     color: '#8e8e93',
     fontSize: '13px',
   },
-  donationCardWrapper: {
+  cardsRow: {
     display: 'flex',
-    justifyContent: 'flex-start',
-    marginBottom: '24px',
+    gap: '12px',
+    marginBottom: 'auto',
   },
   donationCard: {
+    flex: 1,
     backgroundColor: '#1c1c1e',
     borderRadius: '16px',
-    padding: '14px 18px',
-    width: 'auto',
-    minWidth: '200px',
-    maxWidth: '240px',
+    padding: '14px',
     boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
   },
-  donationCardHeader: {
+  noteCard: {
+    flex: 1,
+    backgroundColor: '#1c1c1e',
+    borderRadius: '16px',
+    padding: '14px',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+  },
+  cardHeader: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: '10px',
+    marginBottom: '12px',
   },
-  donationCardTitle: {
+  cardTitle: {
     fontSize: '12px',
     fontWeight: '500',
     color: '#8e8e93',
@@ -598,16 +565,35 @@ const styles: { [key: string]: React.CSSProperties } = {
     justifyContent: 'center',
     transition: 'all 0.2s',
   },
+  addNoteButton: {
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+    color: '#8be9fd',
+    padding: '4px',
+    borderRadius: '50%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    transition: 'all 0.2s',
+  },
   donationTotal: {
-    fontSize: '22px',
+    fontSize: '18px',
     fontWeight: '700',
     color: '#fff',
     marginBottom: '12px',
     textAlign: 'left',
     transition: 'all 0.3s ease',
   },
+  noteTotal: {
+    fontSize: '28px',
+    fontWeight: '700',
+    color: '#8be9fd',
+    marginBottom: '12px',
+    textAlign: 'left',
+  },
   skeletonLoader: {
-    height: '28px',
+    height: '22px',
     backgroundColor: '#2c2c2e',
     borderRadius: '6px',
     position: 'relative',
@@ -629,100 +615,46 @@ const styles: { [key: string]: React.CSSProperties } = {
     justifyContent: 'center',
     gap: '6px',
     width: '100%',
-    padding: '8px 12px',
+    padding: '8px',
     backgroundColor: '#8be9fd',
     border: 'none',
-    borderRadius: '24px',
+    borderRadius: '20px',
     color: '#000',
-    fontSize: '12px',
+    fontSize: '11px',
     fontWeight: '600',
     cursor: 'pointer',
     transition: 'all 0.2s',
   },
-  cardsSection: {
-    marginBottom: '20px',
+  noteHistory: {
+    marginTop: '8px',
+    borderTop: '1px solid #2c2c2e',
+    paddingTop: '10px',
   },
-  cardsContainer: {
-    overflow: 'hidden',
-    position: 'relative',
-    width: '100%',
-  },
-  cardsWrapper: {
-    display: 'flex',
-    width: '100%',
-    cursor: 'grab',
-    userSelect: 'none',
-  },
-  cardItem: {
-    flex: '0 0 100%',
-    padding: '0 4px',
-  },
-  card: {
-    backgroundColor: '#1c1c1e',
-    borderRadius: '24px',
-    padding: '28px 20px',
-    textAlign: 'center',
-    boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
-    border: '1px solid #2c2c2e',
-  },
-  cardIcon: {
-    fontSize: '48px',
-    marginBottom: '16px',
-  },
-  cardTitle: {
-    fontSize: '16px',
-    fontWeight: '500',
+  historyLabel: {
+    fontSize: '10px',
     color: '#8e8e93',
-    marginBottom: '12px',
-  },
-  cardCount: {
-    fontSize: '48px',
-    fontWeight: '700',
-    color: '#8be9fd',
     marginBottom: '8px',
   },
-  cardSubtext: {
-    fontSize: '12px',
+  historyItem: {
+    marginBottom: '8px',
+  },
+  historyText: {
+    fontSize: '11px',
+    color: '#fff',
+    marginBottom: '2px',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+  },
+  historyDate: {
+    fontSize: '9px',
     color: '#5e5e62',
   },
-  dotsContainer: {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: '12px',
-    marginTop: '20px',
-  },
-  dotWrapper: {
-    background: 'none',
-    border: 'none',
+  moreNotes: {
+    fontSize: '10px',
+    color: '#8be9fd',
+    marginTop: '6px',
     cursor: 'pointer',
-    padding: 0,
-    display: 'flex',
-    alignItems: 'center',
-  },
-  inactiveDot: {
-    width: '8px',
-    height: '8px',
-    borderRadius: '50%',
-    backgroundColor: '#3a3a3c',
-    transition: 'all 0.3s ease',
-  },
-  activeDotContainer: {
-    width: '32px',
-    height: '8px',
-  },
-  activeDotBg: {
-    width: '100%',
-    height: '100%',
-    backgroundColor: '#2c2c2e',
-    borderRadius: '4px',
-    overflow: 'hidden',
-  },
-  activeDotFill: {
-    width: '100%',
-    height: '100%',
-    backgroundColor: '#8be9fd',
-    borderRadius: '4px',
   },
   content: {
     flex: 1,
@@ -739,6 +671,68 @@ const styles: { [key: string]: React.CSSProperties } = {
     height: '5px',
     backgroundColor: '#3a3a3c',
     borderRadius: '3px',
+  },
+  modalOverlay: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.8)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 400,
+  },
+  modal: {
+    backgroundColor: '#1c1c1e',
+    borderRadius: '20px',
+    padding: '20px',
+    width: '300px',
+    maxWidth: '90%',
+  },
+  modalHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '16px',
+  },
+  modalTitle: {
+    fontSize: '18px',
+    fontWeight: '600',
+    color: '#fff',
+    margin: 0,
+  },
+  modalClose: {
+    background: 'none',
+    border: 'none',
+    color: '#8e8e93',
+    fontSize: '24px',
+    cursor: 'pointer',
+  },
+  modalTextarea: {
+    width: '100%',
+    padding: '12px',
+    backgroundColor: '#000',
+    border: '1px solid #2c2c2e',
+    borderRadius: '12px',
+    color: '#fff',
+    fontSize: '14px',
+    fontFamily: 'inherit',
+    resize: 'none',
+    marginBottom: '16px',
+    outline: 'none',
+  },
+  modalButton: {
+    width: '100%',
+    padding: '12px',
+    backgroundColor: '#8be9fd',
+    border: 'none',
+    borderRadius: '30px',
+    color: '#000',
+    fontSize: '14px',
+    fontWeight: '600',
+    cursor: 'pointer',
   },
   chatModal: {
     position: 'fixed',
