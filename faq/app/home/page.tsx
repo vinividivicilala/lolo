@@ -22,55 +22,14 @@ export default function HomePage() {
   // Donation State
   const [donationTotal, setDonationTotal] = useState(1250000);
   const [isLoading, setIsLoading] = useState(false);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [progress, setProgress] = useState(0);
-  const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Dummy data for donation cards (pagination)
-  const donationCards = [
-    { id: 1, amount: 500000, title: 'Donasi Terbaru', date: 'Hari ini' },
-    { id: 2, amount: 300000, title: 'Donasi Minggu Ini', date: '3 hari lalu' },
-    { id: 3, amount: 450000, title: 'Donasi Bulan Ini', date: '2 minggu lalu' },
-  ];
-
-  // Progress animation for pagination dots
-  useEffect(() => {
-    setProgress(0);
-    
-    if (progressIntervalRef.current) {
-      clearInterval(progressIntervalRef.current);
-    }
-    
-    const stepTime = 30;
-    const totalSteps = 3000 / stepTime;
-    let currentStep = 0;
-    
-    progressIntervalRef.current = setInterval(() => {
-      currentStep++;
-      const newProgress = (currentStep / totalSteps) * 100;
-      
-      if (newProgress >= 100) {
-        setProgress(100);
-        clearInterval(progressIntervalRef.current!);
-        
-        setTimeout(() => {
-          setCurrentIndex((prev) => (prev + 1) % donationCards.length);
-        }, 50);
-      } else {
-        setProgress(newProgress);
-      }
-    }, stepTime);
-    
-    return () => {
-      if (progressIntervalRef.current) {
-        clearInterval(progressIntervalRef.current);
-      }
-    };
-  }, [currentIndex]);
-
-  const goToSlide = (index: number) => {
-    if (index === currentIndex) return;
-    setCurrentIndex(index);
+  const formatRupiah = (amount: number) => {
+    return new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
   };
 
   const handleReload = () => {
@@ -92,15 +51,6 @@ export default function HomePage() {
         element.classList.remove('animate-pulse');
       }, 500);
     }
-  };
-
-  const formatRupiah = (amount: number) => {
-    return new Intl.NumberFormat('id-ID', {
-      style: 'currency',
-      currency: 'IDR',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
   };
 
   const markAsRead = (id: number) => {
@@ -191,9 +141,9 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Main Content - Card Donation */}
+        {/* Main Content */}
         <div style={styles.content}>
-          {/* Card with border radius */}
+          {/* Card Donation - Lebih kecil */}
           <div style={styles.card}>
             <div style={styles.cardHeader}>
               <h3 style={styles.cardTitle}>Jumlah Donasi</h3>
@@ -203,8 +153,8 @@ export default function HomePage() {
                 disabled={isLoading}
               >
                 <svg 
-                  width="20" 
-                  height="20" 
+                  width="18" 
+                  height="18" 
                   viewBox="0 0 24 24" 
                   fill="none" 
                   stroke="currentColor" 
@@ -230,58 +180,13 @@ export default function HomePage() {
             </div>
             
             <button onClick={handleAddDonation} style={styles.addButton}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <line x1="12" y1="5" x2="12" y2="19" />
                 <line x1="5" y1="12" x2="19" y2="12" />
               </svg>
               <span>Tambah Donasi</span>
             </button>
           </div>
-
-          {/* Pagination Dots like Onboarding */}
-          <div style={styles.dotsContainer}>
-            {donationCards.map((_, idx) => (
-              <button
-                key={idx}
-                onClick={() => goToSlide(idx)}
-                style={styles.dotWrapper}
-              >
-                {idx === currentIndex ? (
-                  <div style={styles.activeDotContainer}>
-                    <div style={styles.activeDotBg}>
-                      <motion.div
-                        style={{
-                          ...styles.activeDotFill,
-                          width: `${progress}%`,
-                          backgroundColor: '#8be9fd',
-                        }}
-                        animate={{ width: `${progress}%` }}
-                        transition={{ duration: 0.03 }}
-                      />
-                    </div>
-                  </div>
-                ) : (
-                  <div style={styles.inactiveDot} />
-                )}
-              </button>
-            ))}
-          </div>
-
-          {/* Donation Info Card (based on current index) */}
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentIndex}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-              style={styles.infoCard}
-            >
-              <div style={styles.infoCardTitle}>{donationCards[currentIndex].title}</div>
-              <div style={styles.infoCardAmount}>{formatRupiah(donationCards[currentIndex].amount)}</div>
-              <div style={styles.infoCardDate}>{donationCards[currentIndex].date}</div>
-            </motion.div>
-          </AnimatePresence>
         </div>
 
         {/* Home Indicator for iOS */}
@@ -356,10 +261,19 @@ export default function HomePage() {
             transform: scale(1);
           }
           50% {
-            transform: scale(1.05);
+            transform: scale(1.02);
           }
           100% {
             transform: scale(1);
+          }
+        }
+        
+        @keyframes shimmer {
+          0% {
+            transform: translateX(-100%);
+          }
+          100% {
+            transform: translateX(100%);
           }
         }
         
@@ -534,24 +448,23 @@ const styles: { [key: string]: React.CSSProperties } = {
     alignItems: 'center',
     justifyContent: 'center',
     textAlign: 'center',
-    gap: '24px',
   },
   card: {
     backgroundColor: '#1c1c1e',
-    borderRadius: '24px',
-    padding: '24px',
+    borderRadius: '20px',
+    padding: '16px 20px',
     width: '100%',
-    maxWidth: '320px',
-    boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+    maxWidth: '280px',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
   },
   cardHeader: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: '20px',
+    marginBottom: '12px',
   },
   cardTitle: {
-    fontSize: '16px',
+    fontSize: '13px',
     fontWeight: '500',
     color: '#8e8e93',
     margin: 0,
@@ -561,7 +474,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     border: 'none',
     cursor: 'pointer',
     color: '#8e8e93',
-    padding: '8px',
+    padding: '4px',
     borderRadius: '50%',
     display: 'flex',
     alignItems: 'center',
@@ -569,19 +482,20 @@ const styles: { [key: string]: React.CSSProperties } = {
     transition: 'all 0.2s',
   },
   donationTotal: {
-    fontSize: '36px',
+    fontSize: '28px',
     fontWeight: '700',
     color: '#fff',
-    marginBottom: '24px',
+    marginBottom: '16px',
     textAlign: 'center',
     transition: 'all 0.3s ease',
   },
   skeletonLoader: {
-    height: '44px',
+    height: '34px',
     backgroundColor: '#2c2c2e',
     borderRadius: '8px',
     position: 'relative',
     overflow: 'hidden',
+    marginBottom: '16px',
   },
   skeletonShimmer: {
     position: 'absolute',
@@ -596,78 +510,17 @@ const styles: { [key: string]: React.CSSProperties } = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: '8px',
+    gap: '6px',
     width: '100%',
-    padding: '12px',
+    padding: '10px',
     backgroundColor: '#8be9fd',
     border: 'none',
     borderRadius: '30px',
     color: '#000',
-    fontSize: '15px',
+    fontSize: '13px',
     fontWeight: '600',
     cursor: 'pointer',
     transition: 'all 0.2s',
-  },
-  dotsContainer: {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: '12px',
-    marginTop: '8px',
-  },
-  dotWrapper: {
-    background: 'none',
-    border: 'none',
-    cursor: 'pointer',
-    padding: 0,
-    display: 'flex',
-    alignItems: 'center',
-  },
-  inactiveDot: {
-    width: '8px',
-    height: '8px',
-    borderRadius: '50%',
-    backgroundColor: '#3a3a3c',
-    transition: 'all 0.3s ease',
-  },
-  activeDotContainer: {
-    width: '48px',
-    height: '8px',
-  },
-  activeDotBg: {
-    width: '100%',
-    height: '100%',
-    backgroundColor: '#2c2c2e',
-    borderRadius: '4px',
-    overflow: 'hidden',
-  },
-  activeDotFill: {
-    height: '100%',
-    borderRadius: '4px',
-    transition: 'width 0.03s linear',
-  },
-  infoCard: {
-    backgroundColor: '#111',
-    borderRadius: '20px',
-    padding: '20px',
-    width: '100%',
-    maxWidth: '320px',
-    border: '1px solid #2c2c2e',
-  },
-  infoCardTitle: {
-    fontSize: '14px',
-    color: '#8e8e93',
-    marginBottom: '8px',
-  },
-  infoCardAmount: {
-    fontSize: '24px',
-    fontWeight: '600',
-    color: '#8be9fd',
-    marginBottom: '4px',
-  },
-  infoCardDate: {
-    fontSize: '12px',
-    color: '#5e5e62',
   },
   homeIndicator: {
     display: 'flex',
