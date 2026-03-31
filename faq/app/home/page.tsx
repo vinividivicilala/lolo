@@ -31,9 +31,6 @@ export default function HomePage() {
   const [newNote, setNewNote] = useState('');
   const [activeCardIndex, setActiveCardIndex] = useState(0);
   const carouselRef = useRef<HTMLDivElement>(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const [startX, setStartX] = useState(0);
-  const [scrollLeft, setScrollLeft] = useState(0);
 
   const formatRupiah = (amount: number) => {
     return new Intl.NumberFormat('id-ID', {
@@ -125,26 +122,6 @@ export default function HomePage() {
     }
   };
 
-  const handleMouseDown = (e: React.MouseEvent) => {
-    setIsDragging(true);
-    setStartX(e.pageX - (carouselRef.current?.offsetLeft || 0));
-    setScrollLeft(carouselRef.current?.scrollLeft || 0);
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging) return;
-    e.preventDefault();
-    const x = e.pageX - (carouselRef.current?.offsetLeft || 0);
-    const walk = (x - startX) * 1.5;
-    if (carouselRef.current) {
-      carouselRef.current.scrollLeft = scrollLeft - walk;
-    }
-  };
-
-  const handleMouseUp = () => {
-    setIsDragging(false);
-  };
-
   const scrollToCard = (index: number) => {
     if (carouselRef.current) {
       const cardWidth = carouselRef.current.clientWidth;
@@ -227,10 +204,6 @@ export default function HomePage() {
             ref={carouselRef}
             style={styles.carouselContainer}
             onScroll={handleCarouselScroll}
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
-            onMouseUp={handleMouseUp}
-            onMouseLeave={handleMouseUp}
           >
             {/* Card 1 - Donation Card */}
             <div style={styles.card}>
@@ -278,12 +251,12 @@ export default function HomePage() {
             </div>
 
             {/* Card 2 - Notes Card */}
-            <div style={{...styles.card, ...styles.notesCard}}>
+            <div style={styles.card}>
               <div style={styles.cardHeader}>
                 <h3 style={styles.cardTitle}>
-                  Catatan ({notes.length})
+                  Catatan Saya ({notes.length})
                 </h3>
-                <div style={styles.noteCount} className="note-count">
+                <div className="note-count" style={styles.noteIcon}>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                     <polyline points="14 2 14 8 20 8" />
@@ -601,26 +574,23 @@ const styles: { [key: string]: React.CSSProperties } = {
     display: 'flex',
     overflowX: 'auto',
     scrollSnapType: 'x mandatory',
+    scrollBehavior: 'smooth',
     gap: '16px',
     paddingBottom: '12px',
-    cursor: 'grab',
     scrollbarWidth: 'none',
     msOverflowStyle: 'none',
     WebkitOverflowScrolling: 'touch',
+    '&::-webkit-scrollbar': {
+      display: 'none',
+    },
   },
   card: {
-    flex: '0 0 calc(100% - 0px)',
+    flex: '0 0 100%',
     scrollSnapAlign: 'start',
     backgroundColor: '#1c1c1e',
     borderRadius: '16px',
     padding: '18px 20px',
     boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-    transition: 'transform 0.2s',
-  },
-  notesCard: {
-    minHeight: '280px',
-    display: 'flex',
-    flexDirection: 'column',
   },
   cardHeader: {
     display: 'flex',
@@ -687,11 +657,14 @@ const styles: { [key: string]: React.CSSProperties } = {
     cursor: 'pointer',
     transition: 'all 0.2s',
   },
+  noteIcon: {
+    cursor: 'pointer',
+  },
   notesList: {
-    flex: 1,
-    maxHeight: '160px',
+    maxHeight: '180px',
     overflowY: 'auto',
     marginBottom: '12px',
+    marginTop: '8px',
   },
   noteItem: {
     padding: '10px 0',
@@ -751,7 +724,6 @@ const styles: { [key: string]: React.CSSProperties } = {
     paddingBottom: '4px',
   },
   paginationDot: {
-    width: '8px',
     height: '8px',
     borderRadius: '4px',
     border: 'none',
