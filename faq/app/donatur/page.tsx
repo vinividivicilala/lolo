@@ -33,7 +33,9 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
 // Register GSAP ScrollTrigger
-gsap.registerPlugin(ScrollTrigger);
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
 // Konfigurasi Firebase
 const firebaseConfig = {
@@ -383,14 +385,22 @@ export default function DonationPage() {
   
   // State for overlay visibility
   const [showOverlay, setShowOverlay] = useState(false);
+  const [scrollAnimationsInitialized, setScrollAnimationsInitialized] = useState(false);
 
   // GSAP Scroll Animation for Overlay Page
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    if (!mainContentRef.current || !overlayPageRef.current || !pinContainerRef.current) {
+      console.log("Refs not ready yet");
+      return;
+    }
+    
+    // Kill any existing ScrollTriggers
+    ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     
     // Set initial positions
-    gsap.set(mainContentRef.current, { y: 0 });
-    gsap.set(overlayPageRef.current, { y: "100%", visibility: "visible" });
+    gsap.set(mainContentRef.current, { y: 0, clearProps: "all" });
+    gsap.set(overlayPageRef.current, { y: "100%", visibility: "visible", clearProps: "all" });
     
     // Create ScrollTrigger for pinning
     const ctx = gsap.context(() => {
@@ -423,18 +433,22 @@ export default function DonationPage() {
       });
       
       // Main content scrolls up
-      scrollTimeline.to(mainContentRef.current, {
-        y: "-100%",
-        duration: 1,
-        ease: "power2.inOut"
-      }, 0);
+      if (mainContentRef.current) {
+        scrollTimeline.to(mainContentRef.current, {
+          y: "-100%",
+          duration: 1,
+          ease: "power2.inOut"
+        }, 0);
+      }
       
       // Overlay page comes from bottom
-      scrollTimeline.to(overlayPageRef.current, {
-        y: "0%",
-        duration: 1,
-        ease: "power2.inOut"
-      }, 0);
+      if (overlayPageRef.current) {
+        scrollTimeline.to(overlayPageRef.current, {
+          y: "0%",
+          duration: 1,
+          ease: "power2.inOut"
+        }, 0);
+      }
       
       // Text animation in overlay
       const overlayText = overlayPageRef.current?.querySelector('.overlay-text');
@@ -446,6 +460,8 @@ export default function DonationPage() {
         );
       }
     });
+    
+    setScrollAnimationsInitialized(true);
     
     return () => {
       ctx.revert();
@@ -463,18 +479,20 @@ export default function DonationPage() {
       });
       
       // Animate back
-      gsap.to(mainContentRef.current, {
-        y: "0%",
-        duration: 0.8,
-        ease: "power2.inOut"
-      });
-      
-      gsap.to(overlayPageRef.current, {
-        y: "100%",
-        duration: 0.8,
-        ease: "power2.inOut",
-        onComplete: () => setShowOverlay(false)
-      });
+      if (mainContentRef.current && overlayPageRef.current) {
+        gsap.to(mainContentRef.current, {
+          y: "0%",
+          duration: 0.8,
+          ease: "power2.inOut"
+        });
+        
+        gsap.to(overlayPageRef.current, {
+          y: "100%",
+          duration: 0.8,
+          ease: "power2.inOut",
+          onComplete: () => setShowOverlay(false)
+        });
+      }
     }
   };
 
@@ -483,17 +501,19 @@ export default function DonationPage() {
     const handleScroll = () => {
       if (window.scrollY === 0 && showOverlay) {
         // If at top and overlay is showing, hide overlay
-        gsap.to(mainContentRef.current, {
-          y: "0%",
-          duration: 0.6,
-          ease: "power2.inOut"
-        });
-        gsap.to(overlayPageRef.current, {
-          y: "100%",
-          duration: 0.6,
-          ease: "power2.inOut",
-          onComplete: () => setShowOverlay(false)
-        });
+        if (mainContentRef.current && overlayPageRef.current) {
+          gsap.to(mainContentRef.current, {
+            y: "0%",
+            duration: 0.6,
+            ease: "power2.inOut"
+          });
+          gsap.to(overlayPageRef.current, {
+            y: "100%",
+            duration: 0.6,
+            ease: "power2.inOut",
+            onComplete: () => setShowOverlay(false)
+          });
+        }
       }
     };
     
