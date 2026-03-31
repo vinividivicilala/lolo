@@ -338,7 +338,8 @@ export default function DonationPage() {
   
   // Refs for scroll sections
   const mainContentRef = useRef<HTMLDivElement>(null);
-  const overlayPageRef = useRef<HTMLDivElement>(null);
+  const newPageRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   
   // Firebase State
   const [firebaseAuth, setFirebaseAuth] = useState<any>(null);
@@ -382,70 +383,95 @@ export default function DonationPage() {
   const [successMessage, setSuccessMessage] = useState("");
   const [activeTab, setActiveTab] = useState<'feed' | 'stories'>('feed');
   
-  // State for overlay visibility
-  const [showOverlay, setShowOverlay] = useState(false);
+  // State for page visibility
+  const [showNewPage, setShowNewPage] = useState(false);
 
-  // GSAP Scroll Animation for Overlay Page
+  // GSAP Scroll Animation - Modern Awwwards Style
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    if (!mainContentRef.current || !overlayPageRef.current) {
+    if (!mainContentRef.current || !newPageRef.current || !containerRef.current) {
       return;
     }
     
     // Kill any existing ScrollTriggers
     ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     
-    // Set initial positions
-    gsap.set(mainContentRef.current, { y: 0 });
-    gsap.set(overlayPageRef.current, { y: "100%", visibility: "visible" });
+    // Set initial states
+    gsap.set(mainContentRef.current, { y: 0, opacity: 1 });
+    gsap.set(newPageRef.current, { y: "100%", visibility: "visible" });
     
-    // Create ScrollTrigger
     const ctx = gsap.context(() => {
-      // Animation for scrolling down - overlay comes in from bottom
-      const scrollTimeline = gsap.timeline({
+      // Create a scroll-triggered timeline
+      const tl = gsap.timeline({
         scrollTrigger: {
-          trigger: mainContentRef.current,
-          start: "bottom bottom",
-          end: "bottom 100px",
+          trigger: containerRef.current,
+          start: "top top",
+          end: "+=100%",
           scrub: 1.5,
+          pin: true,
+          pinSpacing: true,
           onUpdate: (self) => {
             const progress = self.progress;
-            if (progress >= 0.3) {
-              setShowOverlay(true);
+            if (progress >= 0.5) {
+              setShowNewPage(true);
             } else {
-              setShowOverlay(false);
+              setShowNewPage(false);
             }
           }
         }
       });
       
-      // Overlay page comes from bottom
-      if (overlayPageRef.current) {
-        scrollTimeline.to(overlayPageRef.current, {
-          y: "0%",
-          duration: 1,
-          ease: "power2.inOut"
-        }, 0);
-        
-        // Fade in and scale text in overlay
-        const overlayText = overlayPageRef.current.querySelector('.overlay-text');
-        const overlayContent = overlayPageRef.current.querySelector('.overlay-content');
-        
-        if (overlayText) {
-          scrollTimeline.fromTo(overlayText, 
-            { opacity: 0, y: 50, scale: 0.8 },
-            { opacity: 1, y: 0, scale: 1, duration: 0.8, ease: "back.out(0.5)" },
-            0.2
-          );
-        }
-        
-        if (overlayContent) {
-          scrollTimeline.fromTo(overlayContent,
-            { opacity: 0, y: 30 },
-            { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" },
-            0.5
-          );
-        }
+      // Animate main content - fade out and move up
+      tl.to(mainContentRef.current, {
+        y: "-100%",
+        opacity: 0,
+        duration: 1,
+        ease: "power3.inOut"
+      }, 0);
+      
+      // Animate new page - slide in from bottom with elastic effect
+      tl.to(newPageRef.current, {
+        y: "0%",
+        duration: 1.2,
+        ease: "power4.inOut"
+      }, 0);
+      
+      // Animate new page content
+      const heroText = newPageRef.current?.querySelector('.hero-text');
+      const subtitle = newPageRef.current?.querySelector('.subtitle');
+      const ctaButton = newPageRef.current?.querySelector('.cta-button');
+      const stats = newPageRef.current?.querySelectorAll('.stat-item');
+      
+      if (heroText) {
+        tl.fromTo(heroText,
+          { opacity: 0, y: 100, scale: 0.9 },
+          { opacity: 1, y: 0, scale: 1, duration: 0.8, ease: "back.out(0.6)" },
+          0.3
+        );
+      }
+      
+      if (subtitle) {
+        tl.fromTo(subtitle,
+          { opacity: 0, y: 50 },
+          { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" },
+          0.5
+        );
+      }
+      
+      if (ctaButton) {
+        tl.fromTo(ctaButton,
+          { opacity: 0, scale: 0.8 },
+          { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(0.5)" },
+          0.7
+        );
+      }
+      
+      if (stats && stats.length) {
+        tl.fromTo(stats,
+          { opacity: 0, y: 30 },
+          { opacity: 1, y: 0, duration: 0.5, stagger: 0.1, ease: "power2.out" },
+          0.8
+        );
       }
     });
     
@@ -455,46 +481,30 @@ export default function DonationPage() {
     };
   }, []);
 
-  // Handle scroll to top to show main page
-  const handleScrollToTop = () => {
-    if (showOverlay) {
-      // Scroll to top to return to main page
-      window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
+  // Handle scroll to top to return to main page
+  const handleBackToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+    
+    // Reset states
+    if (mainContentRef.current && newPageRef.current) {
+      gsap.to(mainContentRef.current, {
+        y: "0%",
+        opacity: 1,
+        duration: 0.8,
+        ease: "power3.inOut"
       });
       
-      // Animate back
-      if (mainContentRef.current && overlayPageRef.current) {
-        gsap.to(overlayPageRef.current, {
-          y: "100%",
-          duration: 0.8,
-          ease: "power2.inOut",
-          onComplete: () => setShowOverlay(false)
-        });
-      }
+      gsap.to(newPageRef.current, {
+        y: "100%",
+        duration: 0.8,
+        ease: "power4.inOut",
+        onComplete: () => setShowNewPage(false)
+      });
     }
   };
-
-  // Listen for scroll events to detect when user scrolls to top
-  useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY === 0 && showOverlay) {
-        // If at top and overlay is showing, hide overlay
-        if (overlayPageRef.current) {
-          gsap.to(overlayPageRef.current, {
-            y: "100%",
-            duration: 0.6,
-            ease: "power2.inOut",
-            onComplete: () => setShowOverlay(false)
-          });
-        }
-      }
-    };
-    
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [showOverlay]);
 
   // PDF Export Function
   const exportToPDF = (event: DonationEvent) => {
@@ -502,7 +512,6 @@ export default function DonationPage() {
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
     
-    // Header with website title
     doc.setFillColor(0, 0, 0);
     doc.rect(0, 0, pageWidth, 40, 'F');
     doc.setTextColor(255, 255, 255);
@@ -514,7 +523,6 @@ export default function DonationPage() {
     doc.setFontSize(10);
     doc.text("Platform Donasi Online", 20, 35);
     
-    // Event Title
     doc.setTextColor(0, 0, 0);
     doc.setFontSize(20);
     doc.setFont("helvetica", "bold");
@@ -524,7 +532,6 @@ export default function DonationPage() {
     doc.setTextColor(50, 50, 50);
     doc.text(event.title, 20, 75);
     
-    // Event Details
     doc.setFontSize(11);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(80, 80, 80);
@@ -547,7 +554,6 @@ export default function DonationPage() {
     doc.text(`Berakhir: ${formatDate(event.endDate)}`, 20, yPos);
     yPos += lineHeight;
     
-    // Description
     yPos += 5;
     doc.setFont("helvetica", "bold");
     doc.text("Deskripsi Kegiatan:", 20, yPos);
@@ -557,7 +563,6 @@ export default function DonationPage() {
     doc.text(descriptionLines, 20, yPos);
     yPos += descriptionLines.length * lineHeight + 10;
     
-    // Donors Table
     if (event.donors.length > 0) {
       doc.setFont("helvetica", "bold");
       doc.text("Daftar Donatur", 20, yPos);
@@ -592,7 +597,6 @@ export default function DonationPage() {
       yPos = finalY + 10;
     }
     
-    // Leaderboard
     const leaderboard = getLeaderboard(event.donors);
     if (leaderboard.length > 0) {
       if (yPos > pageHeight - 60) {
@@ -629,7 +633,6 @@ export default function DonationPage() {
       yPos = finalY + 10;
     }
     
-    // Summary
     if (yPos > pageHeight - 40) {
       doc.addPage();
       yPos = 20;
@@ -648,18 +651,15 @@ export default function DonationPage() {
     doc.text(`Persentase Tercapai: ${getPercentage(event.currentAmount, event.targetAmount)}%`, 20, yPos);
     yPos += lineHeight * 2;
     
-    // Footer
     const footerY = pageHeight - 20;
     doc.setFontSize(8);
     doc.setTextColor(150, 150, 150);
     doc.text(`Dokumen dibuat pada: ${new Date().toLocaleString('id-ID')}`, 20, footerY);
     doc.text(`Menuru - Platform Donasi Online`, pageWidth - 70, footerY);
     
-    // Save PDF
     doc.save(`Laporan_Donasi_${event.title.replace(/\s/g, '_')}.pdf`);
   };
 
-  // Format date for PDF
   const formatDate = (date: any) => {
     if (!date) return "-";
     try {
@@ -675,7 +675,6 @@ export default function DonationPage() {
     }
   };
 
-  // GSAP Animation for FAQ
   useEffect(() => {
     faqRefs.current = faqRefs.current.slice(0, faqData.length);
     answerRefs.current = answerRefs.current.slice(0, faqData.length);
@@ -683,7 +682,6 @@ export default function DonationPage() {
 
   const toggleFaq = (index: number) => {
     if (openFaqIndex === index) {
-      // Close animation
       if (answerRefs.current[index]) {
         gsap.to(answerRefs.current[index], {
           height: 0,
@@ -696,7 +694,6 @@ export default function DonationPage() {
         });
       }
     } else {
-      // Close previously opened
       if (openFaqIndex !== null && answerRefs.current[openFaqIndex]) {
         gsap.to(answerRefs.current[openFaqIndex], {
           height: 0,
@@ -706,7 +703,6 @@ export default function DonationPage() {
         });
       }
       
-      // Open new one
       setOpenFaqIndex(index);
       setTimeout(() => {
         if (answerRefs.current[index]) {
@@ -724,7 +720,6 @@ export default function DonationPage() {
     }
   };
 
-  // Format Rupiah
   const formatRupiah = (amount: number) => {
     return new Intl.NumberFormat('id-ID', {
       style: 'currency',
@@ -734,18 +729,15 @@ export default function DonationPage() {
     }).format(amount);
   };
 
-  // Format number dengan titik
   const formatNumberWithDots = (value: string) => {
     const number = value.replace(/[^\d]/g, '');
     return number.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
   };
 
-  // Parse number dari format titik
   const parseNumberFromDots = (value: string) => {
     return parseInt(value.replace(/[^\d]/g, '')) || 0;
   };
 
-  // Format waktu relatif
   const formatTime = (date: any) => {
     if (!date) return "Baru saja";
     try {
@@ -769,13 +761,11 @@ export default function DonationPage() {
     }
   };
 
-  // Hitung persentase
   const getPercentage = (current: number, target: number) => {
     if (target === 0) return 0;
     return Math.min(Math.floor((current / target) * 100), 100);
   };
 
-  // Hitung sisa hari
   const getDaysRemaining = (endDate: any) => {
     if (!endDate) return 0;
     try {
@@ -790,13 +780,11 @@ export default function DonationPage() {
     }
   };
 
-  // Get category name
   const getCategoryName = (categoryId: string) => {
     const category = eventCategories.find(c => c.id === categoryId);
     return category ? category.name : "Umum";
   };
 
-  // Get sorted events by category
   const getSortedEvents = () => {
     if (selectedCategory === "all") {
       return events;
@@ -804,7 +792,6 @@ export default function DonationPage() {
     return events.filter(event => event.category === selectedCategory);
   };
 
-  // Get leaderboard for an event
   const getLeaderboard = (donors: Donor[]) => {
     const donorMap = new Map<string, { name: string; totalAmount: number; userId: string }>();
     
@@ -828,7 +815,6 @@ export default function DonationPage() {
     return leaderboard;
   };
 
-  // Create Event
   const handleCreateEvent = async () => {
     if (!user) {
       alert("Silakan login terlebih dahulu");
@@ -890,7 +876,6 @@ export default function DonationPage() {
     }
   };
 
-  // Create Story
   const handleCreateStory = async () => {
     if (!user || !selectedEventForStory) return;
     
@@ -936,7 +921,6 @@ export default function DonationPage() {
     }
   };
 
-  // Handle Donation with Progress Animation
   const handleDonate = async () => {
     if (!user) {
       alert("Silakan login terlebih dahulu");
@@ -958,7 +942,6 @@ export default function DonationPage() {
     
     setIsSubmitting(true);
     
-    // Trigger progress bar animation immediately
     setAnimateProgress(selectedEvent.id);
     setProgressKey(prev => prev + 1);
     
@@ -1001,7 +984,6 @@ export default function DonationPage() {
     }
   };
 
-  // Handle Like for Event
   const handleLikeEvent = async (eventId: string) => {
     if (!user) {
       alert("Silakan login terlebih dahulu");
@@ -1026,7 +1008,6 @@ export default function DonationPage() {
     }
   };
 
-  // Handle Like for Story
   const handleLikeStory = async (eventId: string, storyId: string) => {
     if (!user) return;
     
@@ -1051,7 +1032,6 @@ export default function DonationPage() {
     }
   };
 
-  // Handle Comment for Event
   const handleCommentEvent = async (eventId: string) => {
     if (!user) {
       alert("Silakan login terlebih dahulu");
@@ -1082,7 +1062,6 @@ export default function DonationPage() {
     }
   };
 
-  // Handle Comment for Story
   const handleCommentStory = async (eventId: string, storyId: string) => {
     if (!user) return;
     
@@ -1112,7 +1091,6 @@ export default function DonationPage() {
     }
   };
 
-  // Load Events
   useEffect(() => {
     if (!firebaseDb) return;
     
@@ -1148,7 +1126,6 @@ export default function DonationPage() {
     return () => unsubscribe();
   }, [firebaseDb]);
 
-  // Firebase Initialization
   useEffect(() => {
     const checkScreenSize = () => {
       setIsMobile(window.innerWidth < 768);
@@ -1170,7 +1147,6 @@ export default function DonationPage() {
     return () => window.removeEventListener('resize', checkScreenSize);
   }, []);
 
-  // Auth State Listener
   useEffect(() => {
     if (!firebaseAuth) return;
     
@@ -1182,7 +1158,6 @@ export default function DonationPage() {
     return () => unsubscribe();
   }, [firebaseAuth]);
 
-  // Handle Google Login
   const handleGoogleLogin = async () => {
     if (!firebaseAuth) return;
     
@@ -1194,7 +1169,6 @@ export default function DonationPage() {
     }
   };
 
-  // Handle Logout
   const handleLogout = async () => {
     if (!firebaseAuth) return;
     
@@ -1223,7 +1197,8 @@ export default function DonationPage() {
   }
 
   return (
-    <>
+    <div ref={containerRef} style={{ position: 'relative', minHeight: '100vh' }}>
+      
       {/* Main Content */}
       <div 
         ref={mainContentRef}
@@ -1527,7 +1502,6 @@ export default function DonationPage() {
                         paddingBottom: '48px',
                       }}
                     >
-                      {/* Header */}
                       <div style={{
                         display: 'flex',
                         alignItems: 'center',
@@ -1562,7 +1536,6 @@ export default function DonationPage() {
                         </button>
                       </div>
                       
-                      {/* Category */}
                       <div style={{ marginBottom: '12px' }}>
                         <span style={{
                           fontSize: '13px',
@@ -1574,7 +1547,6 @@ export default function DonationPage() {
                         </span>
                       </div>
                       
-                      {/* Title */}
                       <h2 style={{
                         fontSize: '32px',
                         fontWeight: '600',
@@ -1585,7 +1557,6 @@ export default function DonationPage() {
                         {event.title}
                       </h2>
                       
-                      {/* Description */}
                       <p style={{
                         fontSize: '18px',
                         color: '#888',
@@ -1596,7 +1567,6 @@ export default function DonationPage() {
                         {event.description}
                       </p>
                       
-                      {/* Progress with Animation on Donation */}
                       <div style={{ marginBottom: '28px' }}>
                         <div style={{
                           display: 'flex',
@@ -1663,7 +1633,6 @@ export default function DonationPage() {
                         </div>
                       </div>
                       
-                      {/* Donation Messages Section */}
                       {event.donors.length > 0 && (
                         <div style={{
                           marginBottom: '24px',
@@ -1735,7 +1704,6 @@ export default function DonationPage() {
                         </div>
                       )}
                       
-                      {/* Leaderboard Section */}
                       {leaderboard.length > 0 && (
                         <div style={{
                           marginBottom: '24px',
@@ -1796,7 +1764,6 @@ export default function DonationPage() {
                         </div>
                       )}
                       
-                      {/* Donation Animation */}
                       {isAnimating && (
                         <motion.div
                           initial={{ opacity: 0, y: -20 }}
@@ -1818,7 +1785,6 @@ export default function DonationPage() {
                         </motion.div>
                       )}
                       
-                      {/* Actions */}
                       <div style={{
                         display: 'flex',
                         alignItems: 'center',
@@ -1932,7 +1898,6 @@ export default function DonationPage() {
                         </button>
                       </div>
                       
-                      {/* Recent Donors */}
                       {event.donors.length > 0 && (
                         <div style={{ marginTop: '20px' }}>
                           <div style={{ fontSize: '14px', color: '#666', marginBottom: '12px', fontFamily: 'Helvetica, Arial, sans-serif' }}>
@@ -1964,7 +1929,6 @@ export default function DonationPage() {
                         </div>
                       )}
                       
-                      {/* Comments */}
                       {event.comments.length > 0 && (
                         <div style={{ marginTop: '20px' }}>
                           {event.comments.slice(0, 3).map((comment) => (
@@ -1983,7 +1947,6 @@ export default function DonationPage() {
                         </div>
                       )}
                       
-                      {/* Comment Input */}
                       {user && (
                         <div style={{
                           display: 'flex',
@@ -2035,7 +1998,6 @@ export default function DonationPage() {
               )}
             </>
           ) : (
-            // Stories Tab
             <>
               {events.filter(event => event.stories && event.stories.length > 0).length === 0 ? (
                 <div style={{
@@ -2271,7 +2233,6 @@ export default function DonationPage() {
             </>
           )}
 
-          {/* FAQ Section - On Main Page */}
           <div style={{
             marginTop: '80px',
             paddingTop: '40px',
@@ -2375,7 +2336,6 @@ export default function DonationPage() {
           </div>
         </div>
 
-        {/* Marquee Text - Bottom */}
         <div style={{
           position: 'fixed',
           bottom: 0,
@@ -2417,103 +2377,189 @@ export default function DonationPage() {
         </div>
       </div>
 
-      {/* Overlay Page - Shows when scrolling to bottom */}
+      {/* New Page - Modern Awwwards Style */}
       <div 
-        ref={overlayPageRef}
+        ref={newPageRef}
         style={{
           position: 'fixed',
           top: 0,
           left: 0,
           width: '100%',
-          height: '100vh',
+          minHeight: '100vh',
           backgroundColor: '#000',
           zIndex: 10,
           visibility: 'visible',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
+          overflowY: 'auto',
           fontFamily: 'Helvetica, Arial, sans-serif',
-          pointerEvents: showOverlay ? 'auto' : 'none',
         }}
       >
-        <div className="overlay-content" style={{
-          textAlign: 'center',
-          opacity: 0,
+        <div style={{
+          minHeight: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: isMobile ? '40px 24px' : '80px 48px',
+          position: 'relative',
         }}>
-          <div className="overlay-text" style={{
-            marginBottom: '30px',
+          {/* Hero Text */}
+          <div className="hero-text" style={{
+            textAlign: 'center',
+            marginBottom: '40px',
           }}>
             <span style={{
-              fontSize: isMobile ? '80px' : '160px',
+              fontSize: isMobile ? '64px' : '140px',
               fontWeight: '700',
               color: '#fff',
-              letterSpacing: '8px',
+              letterSpacing: '4px',
               fontFamily: 'Helvetica, Arial, sans-serif',
               textTransform: 'uppercase',
               display: 'block',
-              lineHeight: '1.2',
+              lineHeight: '1.1',
             }}>
               DONATUR
             </span>
           </div>
           
-          <div style={{
-            fontSize: isMobile ? '18px' : '24px',
-            color: '#666',
-            fontFamily: 'Helvetica, Arial, sans-serif',
-            marginTop: '20px',
+          {/* Subtitle */}
+          <div className="subtitle" style={{
+            textAlign: 'center',
+            marginBottom: '60px',
           }}>
-            <p>Terima kasih telah menjadi bagian</p>
-            <p>dari kebaikan bersama</p>
+            <p style={{
+              fontSize: isMobile ? '18px' : '24px',
+              color: '#666',
+              fontFamily: 'Helvetica, Arial, sans-serif',
+              marginBottom: '16px',
+            }}>
+              Terima kasih telah menjadi bagian
+            </p>
+            <p style={{
+              fontSize: isMobile ? '18px' : '24px',
+              color: '#888',
+              fontFamily: 'Helvetica, Arial, sans-serif',
+            }}>
+              dari kebaikan bersama
+            </p>
           </div>
           
+          {/* Stats */}
           <div style={{
-            marginTop: '50px',
+            display: 'flex',
+            gap: isMobile ? '30px' : '60px',
+            marginBottom: '60px',
+            flexWrap: 'wrap',
+            justifyContent: 'center',
           }}>
-            <button
-              onClick={handleScrollToTop}
-              style={{
-                background: 'none',
-                border: '1px solid #333',
-                padding: '12px 32px',
-                borderRadius: '40px',
-                fontSize: '16px',
+            <div className="stat-item" style={{
+              textAlign: 'center',
+            }}>
+              <div style={{
+                fontSize: isMobile ? '32px' : '48px',
+                fontWeight: '700',
                 color: '#fff',
-                cursor: 'pointer',
                 fontFamily: 'Helvetica, Arial, sans-serif',
-                transition: 'all 0.3s ease',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = '#fff';
-                e.currentTarget.style.color = '#fff';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = '#333';
-                e.currentTarget.style.color = '#fff';
-              }}
-            >
-              Kembali ke Atas
-            </button>
+              }}>
+                {events.length}
+              </div>
+              <div style={{
+                fontSize: '14px',
+                color: '#666',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                marginTop: '8px',
+              }}>
+                Kegiatan Donasi
+              </div>
+            </div>
+            <div className="stat-item" style={{
+              textAlign: 'center',
+            }}>
+              <div style={{
+                fontSize: isMobile ? '32px' : '48px',
+                fontWeight: '700',
+                color: '#fff',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+              }}>
+                {events.reduce((total, event) => total + event.donors.length, 0)}
+              </div>
+              <div style={{
+                fontSize: '14px',
+                color: '#666',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                marginTop: '8px',
+              }}>
+                Total Donatur
+              </div>
+            </div>
+            <div className="stat-item" style={{
+              textAlign: 'center',
+            }}>
+              <div style={{
+                fontSize: isMobile ? '32px' : '48px',
+                fontWeight: '700',
+                color: '#fff',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+              }}>
+                {events.reduce((total, event) => total + event.stories?.length || 0, 0)}
+              </div>
+              <div style={{
+                fontSize: '14px',
+                color: '#666',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                marginTop: '8px',
+              }}>
+                Cerita Terbagi
+              </div>
+            </div>
           </div>
-        </div>
-        
-        {/* Scroll indicator */}
-        <div style={{
-          position: 'absolute',
-          bottom: '40px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          textAlign: 'center',
-          color: '#666',
-          fontSize: '14px',
-          fontFamily: 'Helvetica, Arial, sans-serif',
-          cursor: 'pointer',
-          transition: 'opacity 0.3s',
-        }}
-        onClick={handleScrollToTop}
-        >
-          <ChevronUp size={32} color="#666" />
-          <p style={{ marginTop: '8px' }}>Scroll ke atas</p>
+          
+          {/* CTA Button */}
+          <button 
+            className="cta-button"
+            onClick={handleBackToTop}
+            style={{
+              background: 'none',
+              border: '1px solid #333',
+              padding: '16px 48px',
+              borderRadius: '40px',
+              fontSize: '16px',
+              color: '#fff',
+              cursor: 'pointer',
+              fontFamily: 'Helvetica, Arial, sans-serif',
+              transition: 'all 0.3s ease',
+              marginBottom: '40px',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = '#fff';
+              e.currentTarget.style.backgroundColor = '#fff';
+              e.currentTarget.style.color = '#000';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = '#333';
+              e.currentTarget.style.backgroundColor = 'transparent';
+              e.currentTarget.style.color = '#fff';
+            }}
+          >
+            Kembali ke Beranda
+          </button>
+          
+          {/* Scroll indicator */}
+          <div style={{
+            position: 'absolute',
+            bottom: '30px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            textAlign: 'center',
+            color: '#666',
+            fontSize: '12px',
+            fontFamily: 'Helvetica, Arial, sans-serif',
+            cursor: 'pointer',
+          }}
+          onClick={handleBackToTop}
+          >
+            <ChevronUp size={24} color="#666" />
+            <p style={{ marginTop: '4px' }}>Scroll ke atas</p>
+          </div>
         </div>
       </div>
 
@@ -2528,7 +2574,7 @@ export default function DonationPage() {
         }
       `}</style>
 
-      {/* Create Event Modal */}
+      {/* Modals */}
       {showCreateModal && (
         <div style={{
           position: 'fixed',
@@ -2705,7 +2751,6 @@ export default function DonationPage() {
         </div>
       )}
 
-      {/* Create Story Modal */}
       {showStoryModal && selectedEventForStory && (
         <div style={{
           position: 'fixed',
@@ -2795,7 +2840,6 @@ export default function DonationPage() {
         </div>
       )}
 
-      {/* Donate Modal */}
       {showDonateModal && selectedEvent && (
         <div style={{
           position: 'fixed',
@@ -2896,7 +2940,6 @@ export default function DonationPage() {
         </div>
       )}
       
-      {/* Success Notification */}
       {showSuccess && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -2920,6 +2963,6 @@ export default function DonationPage() {
           {successMessage}
         </motion.div>
       )}
-    </>
+    </div>
   );
 }
