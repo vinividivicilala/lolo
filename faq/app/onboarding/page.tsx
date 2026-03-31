@@ -86,10 +86,8 @@ export default function Onboarding() {
     const threshold = 50;
     
     if (diff > threshold) {
-      // Swipe right - previous slide
       setCurrentIndex((prev) => (prev - 1 + slides.length) % slides.length);
     } else if (diff < -threshold) {
-      // Swipe left - next slide
       setCurrentIndex((prev) => (prev + 1) % slides.length);
     }
   };
@@ -173,7 +171,7 @@ export default function Onboarding() {
             {slides[currentIndex].desc}
           </motion.p>
 
-          {/* Pagination Dots with Fill Animation */}
+          {/* Pagination Dots - Small dot becomes wide bar when active */}
           <div style={styles.dotsContainer}>
             {slides.map((_, idx) => (
               <button
@@ -181,20 +179,25 @@ export default function Onboarding() {
                 onClick={() => goToSlide(idx)}
                 style={styles.dotWrapper}
               >
-                <div style={styles.dotBg}>
-                  <motion.div
-                    style={{
-                      ...styles.dotFill,
-                      width: idx === currentIndex ? `${progress}%` : idx < currentIndex ? '100%' : '0%',
-                      backgroundColor: '#8be9fd',
-                    }}
-                    initial={{ width: idx === currentIndex ? '0%' : idx < currentIndex ? '100%' : '0%' }}
-                    animate={{ 
-                      width: idx === currentIndex ? `${progress}%` : idx < currentIndex ? '100%' : '0%'
-                    }}
-                    transition={{ duration: 0.03 }}
-                  />
-                </div>
+                {idx === currentIndex ? (
+                  // Active slide - Wide bar with fill animation
+                  <div style={styles.activeDotContainer}>
+                    <div style={styles.activeDotBg}>
+                      <motion.div
+                        style={{
+                          ...styles.activeDotFill,
+                          width: `${progress}%`,
+                          backgroundColor: '#8be9fd',
+                        }}
+                        animate={{ width: `${progress}%` }}
+                        transition={{ duration: 0.03 }}
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  // Inactive slide - Small dot
+                  <div style={styles.inactiveDot} />
+                )}
               </button>
             ))}
           </div>
@@ -329,17 +332,30 @@ const styles: { [key: string]: React.CSSProperties } = {
     display: 'flex',
     alignItems: 'center',
   },
-  dotBg: {
-    width: '32px',
-    height: '4px',
-    backgroundColor: '#2c2c2e',
-    borderRadius: '2px',
-    overflow: 'hidden',
-    position: 'relative' as const,
+  // Inactive dot - small circle
+  inactiveDot: {
+    width: '8px',
+    height: '8px',
+    borderRadius: '50%',
+    backgroundColor: '#3a3a3c',
+    transition: 'all 0.3s ease',
   },
-  dotFill: {
+  // Active dot container - wide bar
+  activeDotContainer: {
+    width: '48px',
+    height: '8px',
+  },
+  activeDotBg: {
+    width: '100%',
     height: '100%',
-    borderRadius: '2px',
+    backgroundColor: '#2c2c2e',
+    borderRadius: '4px',
+    overflow: 'hidden',
+  },
+  activeDotFill: {
+    height: '100%',
+    borderRadius: '4px',
+    transition: 'width 0.03s linear',
   },
   bottom: {
     paddingBottom: '12px',
