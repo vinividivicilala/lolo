@@ -331,7 +331,7 @@ export default function DonationPage() {
   const answerRefs = useRef<(HTMLDivElement | null)[]>([]);
   
   // Scroll state for page transition
-  const [showSecondPage, setShowSecondPage] = useState(false);
+  const [showOverlay, setShowOverlay] = useState(false);
   
   // Firebase State
   const [firebaseAuth, setFirebaseAuth] = useState<any>(null);
@@ -375,7 +375,7 @@ export default function DonationPage() {
   const [successMessage, setSuccessMessage] = useState("");
   const [activeTab, setActiveTab] = useState<'feed' | 'stories'>('feed');
 
-  // Scroll handler for page transition
+  // Scroll handler for overlay transition
   useEffect(() => {
     const handleScroll = () => {
       const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
@@ -386,19 +386,10 @@ export default function DonationPage() {
       // Check if scrolled to bottom (within 10px)
       const atBottom = distanceToBottom <= 10;
       
-      if (atBottom && !showSecondPage) {
-        setShowSecondPage(true);
+      if (atBottom && !showOverlay) {
+        setShowOverlay(true);
         // Lock body scroll
         document.body.style.overflow = 'hidden';
-      }
-      
-      // Check if scrolled to top (within 10px) on second page
-      const atTop = scrollTop <= 10;
-      
-      if (atTop && showSecondPage) {
-        setShowSecondPage(false);
-        // Unlock body scroll
-        document.body.style.overflow = 'auto';
       }
     };
     
@@ -407,7 +398,15 @@ export default function DonationPage() {
       window.removeEventListener('scroll', handleScroll);
       document.body.style.overflow = 'auto';
     };
-  }, [showSecondPage]);
+  }, [showOverlay]);
+
+  // Close overlay and scroll to top
+  const closeOverlay = () => {
+    setShowOverlay(false);
+    document.body.style.overflow = 'auto';
+    // Scroll to top of main page
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   // PDF Export Function
   const exportToPDF = (event: DonationEvent) => {
@@ -1149,7 +1148,6 @@ export default function DonationPage() {
           paddingBottom: isMobile ? '120px' : '150px',
           position: 'relative',
           zIndex: 10,
-          display: showSecondPage ? 'none' : 'block',
         }}
       >
         {/* Header */}
@@ -2288,59 +2286,62 @@ export default function DonationPage() {
         </div>
       </div>
 
-      {/* Second Page - Shows when scrolled to bottom */}
-      {showSecondPage && (
-        <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: '#000',
-            zIndex: 20,
-            overflow: 'auto',
-          }}
-          onScroll={(e) => {
-            const target = e.target as HTMLDivElement;
-            const scrollTop = target.scrollTop;
-            
-            // If scrolled to top of this page, go back to main page
-            if (scrollTop <= 10) {
-              setShowSecondPage(false);
-              document.body.style.overflow = 'auto';
-              // Scroll main page to bottom
-              window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'auto' });
-            }
-          }}
-        >
-          {/* DONATUR text at top left */}
-          <div style={{
-            position: 'absolute',
-            top: '40px',
-            left: '48px',
-            fontSize: isMobile ? '24px' : '32px',
-            fontWeight: '400',
-            color: '#fff',
-            fontFamily: 'Helvetica, Arial, sans-serif',
-            letterSpacing: '2px',
-          }}>
-            DONATUR
-          </div>
-          
-          {/* Content of second page - you can add more content here */}
-          <div style={{
-            minHeight: '100vh',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '100px 48px',
-          }}>
-            {/* Add your second page content here */}
-          </div>
-        </div>
-      )}
+      {/* Overlay that slides up from bottom */}
+      <AnimatePresence>
+        {showOverlay && (
+          <motion.div
+            initial={{ y: "100%" }}
+            animate={{ y: 0 }}
+            exit={{ y: "100%" }}
+            transition={{ duration: 0.5, ease: "easeInOut" }}
+            style={{
+              position: 'fixed',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              top: 0,
+              backgroundColor: '#000',
+              zIndex: 200,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+            }}
+            onClick={closeOverlay}
+          >
+            <div
+              style={{
+                textAlign: 'center',
+                padding: '20px',
+              }}
+            >
+              <div
+                style={{
+                  fontSize: isMobile ? '75px' : '120px',
+                  fontWeight: '400',
+                  color: '#fff',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  letterSpacing: '4px',
+                  marginBottom: '40px',
+                }}
+              >
+                DONATUR
+              </div>
+              <div
+                style={{
+                  fontSize: '14px',
+                  color: '#666',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  marginTop: '20px',
+                }}
+              >
+                Click anywhere to close
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Create Event Modal */}
       {showCreateModal && (
