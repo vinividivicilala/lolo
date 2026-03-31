@@ -35,17 +35,14 @@ export default function Onboarding() {
 
   // Progress bar animation for each slide
   useEffect(() => {
-    // Reset progress when slide changes
     setProgress(0);
     
-    // Clear existing interval
     if (progressIntervalRef.current) {
       clearInterval(progressIntervalRef.current);
     }
     
-    // Start new progress animation (3 seconds total)
-    const stepTime = 30; // 30ms per step
-    const totalSteps = 3000 / stepTime; // 100 steps
+    const stepTime = 30;
+    const totalSteps = 3000 / stepTime;
     let currentStep = 0;
     
     progressIntervalRef.current = setInterval(() => {
@@ -53,11 +50,9 @@ export default function Onboarding() {
       const newProgress = (currentStep / totalSteps) * 100;
       
       if (newProgress >= 100) {
-        // Progress complete, move to next slide
         setProgress(100);
         clearInterval(progressIntervalRef.current!);
         
-        // Auto move to next slide after a short delay
         setTimeout(() => {
           setCurrentIndex((prev) => (prev + 1) % slides.length);
         }, 50);
@@ -147,7 +142,7 @@ export default function Onboarding() {
             {slides[currentIndex].desc}
           </motion.p>
 
-          {/* Pagination Dots with Progress Fill */}
+          {/* Pagination Dots - Tank Style */}
           <div style={styles.dotsContainer}>
             {slides.map((_, idx) => (
               <button
@@ -155,17 +150,12 @@ export default function Onboarding() {
                 onClick={() => goToSlide(idx)}
                 style={styles.dotWrapper}
               >
-                <div
-                  style={{
-                    ...styles.dotBg,
-                    backgroundColor: idx === currentIndex ? '#3a6ea5' : '#2c2c2e',
-                  }}
-                >
+                <div style={styles.dotBg}>
                   <div
                     style={{
                       ...styles.dotFill,
-                      width: idx === currentIndex ? `${progress}%` : '0%',
-                      backgroundColor: '#5e9bff',
+                      width: idx === currentIndex ? `${progress}%` : idx < currentIndex ? '100%' : '0%',
+                      backgroundColor: '#8be9fd',
                     }}
                   />
                 </div>
@@ -268,25 +258,30 @@ const styles: { [key: string]: React.CSSProperties } = {
   dotsContainer: {
     display: 'flex',
     justifyContent: 'center',
-    gap: '10px',
-    marginTop: '40px',
+    gap: '12px',
+    marginTop: '48px',
+    width: '100%',
+    maxWidth: '280px',
   },
   dotWrapper: {
     background: 'none',
     border: 'none',
     cursor: 'pointer',
     padding: 0,
+    flex: 1,
   },
   dotBg: {
-    width: '28px',
-    height: '4px',
-    borderRadius: '2px',
+    width: '100%',
+    height: '8px',
+    backgroundColor: '#000',
+    borderRadius: '4px',
     overflow: 'hidden',
     position: 'relative' as const,
+    border: '1px solid #2c2c2e',
   },
   dotFill: {
     height: '100%',
-    borderRadius: '2px',
+    borderRadius: '4px',
     transition: 'width 0.03s linear',
   },
   bottom: {
