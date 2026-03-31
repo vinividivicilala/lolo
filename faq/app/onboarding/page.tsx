@@ -99,17 +99,20 @@ export default function Onboarding() {
 
   const handleSkip = () => {
     localStorage.setItem('hasSeenOnboarding', 'true');
-    router.push('/');
+    localStorage.setItem('userName', 'Budi Santoso');
+    router.push('/home');
   };
 
   const handleSignUp = () => {
     localStorage.setItem('hasSeenOnboarding', 'true');
-    router.push('/register');
+    localStorage.setItem('userName', 'Budi Santoso');
+    router.push('/home');
   };
 
   const handleSignIn = () => {
     localStorage.setItem('hasSeenOnboarding', 'true');
-    router.push('/login');
+    localStorage.setItem('userName', 'Budi Santoso');
+    router.push('/home');
   };
 
   return (
@@ -332,7 +335,6 @@ const styles: { [key: string]: React.CSSProperties } = {
     display: 'flex',
     alignItems: 'center',
   },
-  // Inactive dot - small circle
   inactiveDot: {
     width: '8px',
     height: '8px',
@@ -340,7 +342,6 @@ const styles: { [key: string]: React.CSSProperties } = {
     backgroundColor: '#3a3a3c',
     transition: 'all 0.3s ease',
   },
-  // Active dot container - wide bar
   activeDotContainer: {
     width: '48px',
     height: '8px',
