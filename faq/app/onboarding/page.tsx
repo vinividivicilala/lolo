@@ -34,6 +34,7 @@ export default function Onboarding() {
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
+  const isDragging = useRef(false);
 
   // Progress animation for each slide
   useEffect(() => {
@@ -73,35 +74,47 @@ export default function Onboarding() {
   // Touch handlers for swipe
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX;
+    isDragging.current = true;
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging.current) return;
     touchEndX.current = e.touches[0].clientX;
   };
 
   const handleTouchEnd = () => {
+    if (!isDragging.current) return;
+    
     const diff = touchEndX.current - touchStartX.current;
     const threshold = 50;
     
     if (diff > threshold) {
-      // Swipe kanan - slide sebelumnya
       setCurrentIndex((prev) => (prev - 1 + slides.length) % slides.length);
     } else if (diff < -threshold) {
-      // Swipe kiri - slide berikutnya
       setCurrentIndex((prev) => (prev + 1) % slides.length);
     }
     
     touchStartX.current = 0;
     touchEndX.current = 0;
+    isDragging.current = false;
   };
 
-  // Mouse handlers for drag (desktop)
+  // Mouse handlers for desktop drag
   const handleMouseDown = (e: React.MouseEvent) => {
     touchStartX.current = e.clientX;
+    isDragging.current = true;
+    e.preventDefault();
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging.current) return;
+    touchEndX.current = e.clientX;
   };
 
   const handleMouseUp = (e: React.MouseEvent) => {
-    const diff = e.clientX - touchStartX.current;
+    if (!isDragging.current) return;
+    
+    const diff = touchEndX.current - touchStartX.current;
     const threshold = 50;
     
     if (diff > threshold) {
@@ -111,6 +124,8 @@ export default function Onboarding() {
     }
     
     touchStartX.current = 0;
+    touchEndX.current = 0;
+    isDragging.current = false;
   };
 
   const goToSlide = (index: number) => {
@@ -143,16 +158,18 @@ export default function Onboarding() {
         </button>
       </div>
 
-      {/* Main Content - Swipeable */}
+      {/* Main Content - Swipeable Area */}
       <div
         style={styles.content}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
         onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
       >
-        {/* Image */}
+        {/* Image - Portrait */}
         <div style={styles.imageWrapper}>
           <AnimatePresence mode="wait">
             <motion.img
@@ -162,7 +179,7 @@ export default function Onboarding() {
               initial={{ opacity: 0, x: 100 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -100 }}
-              transition={{ duration: 0.3 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
               style={styles.image}
               draggable={false}
             />
@@ -205,21 +222,17 @@ export default function Onboarding() {
               onClick={() => goToSlide(idx)}
               style={styles.dotButton}
             >
-              <div style={styles.dotWrapper}>
+              <div style={styles.dotTrack}>
                 <div
                   style={{
-                    ...styles.dotBg,
-                    backgroundColor: idx === currentIndex ? '#2c2c2e' : '#2c2c2e',
+                    ...styles.dotFill,
+                    width: idx === currentIndex 
+                      ? `${progress}%` 
+                      : idx < currentIndex 
+                        ? '100%' 
+                        : '0%',
                   }}
-                >
-                  <div
-                    style={{
-                      ...styles.dotFill,
-                      width: idx === currentIndex ? `${progress}%` : idx < currentIndex ? '100%' : '0%',
-                      backgroundColor: '#8be9fd',
-                    }}
-                  />
-                </div>
+                />
               </div>
             </button>
           ))}
@@ -265,6 +278,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     padding: '20px 24px',
     paddingTop: 'max(20px, env(safe-area-inset-top))',
     backgroundColor: '#000',
+    zIndex: 10,
   },
   logo: {
     fontSize: '22px',
@@ -291,6 +305,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     textAlign: 'center',
     cursor: 'grab',
     touchAction: 'pan-y',
+    padding: '0 24px',
   },
   imageWrapper: {
     marginBottom: '48px',
@@ -321,9 +336,10 @@ const styles: { [key: string]: React.CSSProperties } = {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    gap: '12px',
+    gap: '10px',
     marginTop: '48px',
-    padding: '0 20px',
+    width: '100%',
+    maxWidth: '240px',
   },
   dotButton: {
     background: 'none',
@@ -331,24 +347,18 @@ const styles: { [key: string]: React.CSSProperties } = {
     cursor: 'pointer',
     padding: 0,
     flex: 1,
-    maxWidth: '60px',
   },
-  dotWrapper: {
+  dotTrack: {
     width: '100%',
-    height: '6px',
-    borderRadius: '3px',
+    height: '4px',
+    backgroundColor: '#2c2c2e',
+    borderRadius: '2px',
     overflow: 'hidden',
-  },
-  dotBg: {
-    width: '100%',
-    height: '100%',
-    borderRadius: '3px',
-    overflow: 'hidden',
-    position: 'relative' as const,
   },
   dotFill: {
     height: '100%',
-    borderRadius: '3px',
+    backgroundColor: '#8be9fd',
+    borderRadius: '2px',
     transition: 'width 0.03s linear',
   },
   bottom: {
