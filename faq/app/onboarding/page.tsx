@@ -1,8 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useRouter } from 'next/navigation';
 
 const slides = [
   {
@@ -23,90 +22,63 @@ const slides = [
 ];
 
 export default function Onboarding() {
-  const router = useRouter();
   const [index, setIndex] = useState(0);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setIndex((prev) => (prev + 1) % slides.length);
+    const i = setInterval(() => {
+      setIndex((p) => (p + 1) % slides.length);
     }, 3000);
-    return () => clearInterval(interval);
+    return () => clearInterval(i);
   }, []);
 
-  const handleStart = () => {
-    localStorage.setItem('onboarded', 'true');
-    router.push('/');
-  };
-
   return (
-    <div style={styles.wrapper}>
-      <div style={styles.app}>
+    <div style={wrap}>
+      <div style={app}>
         
-        {/* Header */}
-        <div style={styles.header}>
-          <span style={styles.logo}>Kliktron</span>
-          <button style={styles.skip} onClick={handleStart}>
-            Lewati
-          </button>
+        {/* HEADER */}
+        <div style={header}>
+          <div style={{ fontWeight: 600 }}>Kliktron</div>
+          <div style={skip}>Lewati</div>
         </div>
 
-        {/* Content */}
-        <div style={styles.content}>
-          
-          {/* Image */}
-          <div style={styles.imageBox}>
-            <AnimatePresence mode="wait">
-              <motion.img
-                key={index}
-                src={slides[index].image}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.4 }}
-                style={styles.image}
-              />
-            </AnimatePresence>
-          </div>
+        {/* CONTENT */}
+        <div style={content}>
 
-          {/* Text */}
-          <motion.h2
-            key={slides[index].title}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            style={styles.title}
-          >
-            {slides[index].title}
-          </motion.h2>
+          {/* IMAGE */}
+          <AnimatePresence mode="wait">
+            <motion.img
+              key={index}
+              src={slides[index].image}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.4 }}
+              style={image}
+            />
+          </AnimatePresence>
 
-          <motion.p
-            key={slides[index].desc}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            style={styles.desc}
-          >
-            {slides[index].desc}
-          </motion.p>
+          {/* TEXT */}
+          <h2 style={title}>{slides[index].title}</h2>
+          <p style={desc}>{slides[index].desc}</p>
 
-          {/* Dots */}
-          <div style={styles.dots}>
+          {/* DOT */}
+          <div style={dots}>
             {slides.map((_, i) => (
               <div
                 key={i}
                 style={{
-                  ...styles.dot,
-                  width: i === index ? 24 : 8,
-                  background: i === index ? '#000' : '#ccc',
+                  ...dot,
+                  width: i === index ? 18 : 6,
+                  opacity: i === index ? 1 : 0.3,
                 }}
               />
             ))}
           </div>
         </div>
 
-        {/* Bottom Button */}
-        <div style={styles.bottom}>
-          <button style={styles.button} onClick={handleStart}>
-            Mulai
-          </button>
+        {/* BUTTON */}
+        <div style={bottom}>
+          <button style={btn}>Mulai</button>
         </div>
 
       </div>
@@ -114,98 +86,79 @@ export default function Onboarding() {
   );
 }
 
-const styles: any = {
-  wrapper: {
-    background: '#f5f6f8',
-    height: '100vh',
-    display: 'flex',
-    justifyContent: 'center',
-  },
+const wrap = {
+  height: '100vh',
+  display: 'flex',
+  justifyContent: 'center',
+  background: '#fff',
+};
 
-  app: {
-    width: '100%',
-    maxWidth: '420px',
-    height: '100vh',
-    background: '#fff',
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'space-between',
-    padding: '20px',
-  },
+const app = {
+  width: '100%',
+  maxWidth: '420px',
+  height: '100vh',
+  display: 'flex',
+  flexDirection: 'column',
+  justifyContent: 'space-between',
+  padding: '20px',
+};
 
-  header: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
+const header = {
+  display: 'flex',
+  justifyContent: 'space-between',
+  fontSize: '14px',
+};
 
-  logo: {
-    fontWeight: '600',
-    fontSize: '16px',
-  },
+const skip = {
+  color: '#007aff',
+};
 
-  skip: {
-    background: 'none',
-    border: 'none',
-    color: '#007aff',
-    fontSize: '14px',
-    cursor: 'pointer',
-  },
+const content = {
+  textAlign: 'center',
+  marginTop: '40px',
+};
 
-  content: {
-    textAlign: 'center',
-    marginTop: '40px',
-  },
+const image = {
+  width: '260px',
+  margin: '0 auto 40px',
+};
 
-  imageBox: {
-    width: '100%',
-    maxWidth: '280px',
-    margin: '0 auto 30px',
-  },
+const title = {
+  fontSize: '24px',
+  fontWeight: 600,
+  marginBottom: '10px',
+};
 
-  image: {
-    width: '100%',
-    borderRadius: '20px',
-  },
+const desc = {
+  fontSize: '14px',
+  color: '#8e8e93',
+  maxWidth: '280px',
+  margin: '0 auto',
+};
 
-  title: {
-    fontSize: '22px',
-    fontWeight: '600',
-    marginBottom: '10px',
-  },
+const dots = {
+  display: 'flex',
+  justifyContent: 'center',
+  gap: '6px',
+  marginTop: '20px',
+};
 
-  desc: {
-    fontSize: '14px',
-    color: '#666',
-    maxWidth: '280px',
-    margin: '0 auto',
-  },
+const dot = {
+  height: '6px',
+  background: '#000',
+  borderRadius: '10px',
+  transition: '0.3s',
+};
 
-  dots: {
-    display: 'flex',
-    justifyContent: 'center',
-    marginTop: '20px',
-    gap: '6px',
-  },
+const bottom = {
+  paddingBottom: '20px',
+};
 
-  dot: {
-    height: '8px',
-    borderRadius: '10px',
-    transition: '0.3s',
-  },
-
-  bottom: {
-    paddingBottom: '20px',
-  },
-
-  button: {
-    width: '100%',
-    padding: '14px',
-    background: '#000',
-    color: '#fff',
-    border: 'none',
-    borderRadius: '30px',
-    fontSize: '16px',
-    cursor: 'pointer',
-  },
+const btn = {
+  width: '100%',
+  padding: '14px',
+  borderRadius: '30px',
+  border: 'none',
+  background: '#000',
+  color: '#fff',
 };
