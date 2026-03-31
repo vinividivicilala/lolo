@@ -57,82 +57,114 @@ export default function HomePage() {
   const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
-    <div style={styles.container}>
-      {/* Navbar */}
-      <nav style={styles.navbar}>
-        <div style={styles.navLeft}>
+    <div style={styles.wrapper}>
+      <div style={styles.container}>
+        {/* Header - iOS Style dengan Navbar */}
+        <div style={styles.header}>
           <div style={styles.logo}>Menuru</div>
-        </div>
-        
-        <div style={styles.navRight}>
-          {/* User Name */}
-          <div style={styles.userInfo}>
-            <div style={styles.userAvatar}>
-              {userName.charAt(0).toUpperCase()}
+          <div style={styles.navRight}>
+            {/* User Name */}
+            <div style={styles.userInfo}>
+              <div style={styles.userAvatar}>
+                {userName.charAt(0).toUpperCase()}
+              </div>
+              <span style={styles.userName}>{userName.split(' ')[0]}</span>
             </div>
-            <span style={styles.userName}>{userName}</span>
-          </div>
-          
-          {/* Notifications */}
-          <div style={styles.notificationWrapper}>
+            
+            {/* Notifications */}
+            <div style={styles.notificationWrapper}>
+              <button 
+                style={styles.iconButton}
+                onClick={() => setShowNotifications(!showNotifications)}
+              >
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                  <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                </svg>
+                {unreadCount > 0 && (
+                  <span style={styles.badge}>{unreadCount}</span>
+                )}
+              </button>
+              
+              {showNotifications && (
+                <div style={styles.notificationDropdown}>
+                  <div style={styles.dropdownHeader}>
+                    <span>Notifikasi</span>
+                    <button onClick={() => setShowNotifications(false)} style={styles.closeDropdown}>×</button>
+                  </div>
+                  {notifications.length === 0 ? (
+                    <div style={styles.emptyState}>Tidak ada notifikasi</div>
+                  ) : (
+                    notifications.map(notif => (
+                      <div 
+                        key={notif.id} 
+                        style={{...styles.notificationItem, opacity: notif.read ? 0.6 : 1}}
+                        onClick={() => markAsRead(notif.id)}
+                      >
+                        <div style={styles.notificationDot} />
+                        <span style={styles.notificationText}>{notif.text}</span>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+            </div>
+            
+            {/* Live Chat */}
             <button 
               style={styles.iconButton}
-              onClick={() => setShowNotifications(!showNotifications)}
+              onClick={() => setIsChatOpen(!isChatOpen)}
             >
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
               </svg>
-              {unreadCount > 0 && (
-                <span style={styles.badge}>{unreadCount}</span>
-              )}
             </button>
-            
-            {showNotifications && (
-              <div style={styles.notificationDropdown}>
-                <div style={styles.dropdownHeader}>
-                  <span>Notifikasi</span>
-                  <button onClick={() => setShowNotifications(false)} style={styles.closeDropdown}>×</button>
-                </div>
-                {notifications.length === 0 ? (
-                  <div style={styles.emptyState}>Tidak ada notifikasi</div>
-                ) : (
-                  notifications.map(notif => (
-                    <div 
-                      key={notif.id} 
-                      style={{...styles.notificationItem, opacity: notif.read ? 0.6 : 1}}
-                      onClick={() => markAsRead(notif.id)}
-                    >
-                      <div style={styles.notificationDot} />
-                      <span style={styles.notificationText}>{notif.text}</span>
-                    </div>
-                  ))
-                )}
-              </div>
-            )}
           </div>
-          
-          {/* Live Chat */}
-          <button 
-            style={styles.iconButton}
-            onClick={() => setIsChatOpen(!isChatOpen)}
-          >
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-            </svg>
+        </div>
+
+        {/* Main Content - Sama seperti onboarding (terpusat) */}
+        <div style={styles.content}>
+          {/* Image - Portrait */}
+          <div style={styles.imageWrapper}>
+            <img
+              src="/images/5.jpg"
+              alt="Welcome"
+              style={styles.image}
+            />
+          </div>
+
+          {/* Title */}
+          <h2 style={styles.title}>
+            Selamat Datang!
+          </h2>
+
+          {/* Description */}
+          <p style={styles.description}>
+            {userName}
+          </p>
+          <p style={styles.subDescription}>
+            Platform donasi online untuk berbagi kebaikan
+          </p>
+
+          {/* Optional: Welcome Message */}
+          <div style={styles.welcomeCard}>
+            <div style={styles.welcomeIcon}>✨</div>
+            <p style={styles.welcomeText}>Siap berbagi kebaikan hari ini?</p>
+          </div>
+        </div>
+
+        {/* Bottom Buttons - Sama seperti onboarding */}
+        <div style={styles.bottom}>
+          <button onClick={handleLogout} style={styles.primaryButton}>
+            Keluar
           </button>
         </div>
-      </nav>
 
-      {/* Main Content - Kosong seperti onboarding */}
-      <main style={styles.main}>
-        <div style={styles.contentCenter}>
-          <div style={styles.welcomeIcon}>✨</div>
-          <h1 style={styles.welcomeTitle}>Selamat Datang</h1>
-          <p style={styles.welcomeText}>{userName}</p>
-          <p style={styles.welcomeDesc}>Platform donasi online untuk berbagi kebaikan</p>
+        {/* Home Indicator for iOS */}
+        <div style={styles.homeIndicator}>
+          <div style={styles.homeIndicatorBar} />
         </div>
-      </main>
+      </div>
 
       {/* Live Chat Modal */}
       {isChatOpen && (
@@ -189,41 +221,52 @@ export default function HomePage() {
 }
 
 const styles: { [key: string]: React.CSSProperties } = {
-  container: {
-    minHeight: '100vh',
-    width: '100%',
+  wrapper: {
+    height: '100vh',
+    width: '100vw',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
     backgroundColor: '#000',
-    fontFamily: '"Hubot Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
-    color: '#fff',
-    position: 'relative',
-  },
-  navbar: {
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
+    overflow: 'hidden',
     position: 'fixed',
     top: 0,
     left: 0,
     right: 0,
+    bottom: 0,
+  },
+  container: {
+    width: '100%',
+    maxWidth: '400px',
+    height: '100vh',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    padding: '20px 24px 0 24px',
+    backgroundColor: '#000',
+    color: '#fff',
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  header: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: '16px 24px',
-    backgroundColor: '#000',
-    borderBottom: '1px solid #2c2c2e',
-    zIndex: 100,
-  },
-  navLeft: {
-    display: 'flex',
-    alignItems: 'center',
+    paddingTop: 'env(safe-area-inset-top)',
+    position: 'relative',
+    zIndex: 10,
   },
   logo: {
-    fontSize: '24px',
+    fontSize: '22px',
     fontWeight: '600',
     color: '#fff',
-    letterSpacing: '-0.5px',
+    letterSpacing: '-0.3px',
   },
   navRight: {
     display: 'flex',
     alignItems: 'center',
-    gap: '16px',
+    gap: '12px',
   },
   userInfo: {
     display: 'flex',
@@ -333,38 +376,95 @@ const styles: { [key: string]: React.CSSProperties } = {
     color: '#8e8e93',
     fontSize: '13px',
   },
-  main: {
-    minHeight: '100vh',
+  content: {
+    flex: 1,
     display: 'flex',
+    flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingTop: '80px',
-    paddingBottom: '40px',
-  },
-  contentCenter: {
     textAlign: 'center',
-    padding: '40px 24px',
   },
-  welcomeIcon: {
-    fontSize: '64px',
-    marginBottom: '24px',
+  imageWrapper: {
+    marginBottom: '40px',
+    width: '100%',
+    display: 'flex',
+    justifyContent: 'center',
   },
-  welcomeTitle: {
-    fontSize: '32px',
+  image: {
+    width: '280px',
+    height: '360px',
+    borderRadius: '28px',
+    objectFit: 'cover',
+    boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
+    pointerEvents: 'none',
+  },
+  title: {
+    fontSize: '26px',
     fontWeight: '600',
     marginBottom: '12px',
     color: '#fff',
-    letterSpacing: '-0.5px',
+    letterSpacing: '-0.3px',
   },
-  welcomeText: {
+  description: {
     fontSize: '18px',
     color: '#8be9fd',
-    marginBottom: '12px',
+    marginBottom: '8px',
     fontWeight: '500',
   },
-  welcomeDesc: {
+  subDescription: {
+    fontSize: '15px',
+    color: '#8e8e93',
+    lineHeight: '1.4',
+    maxWidth: '280px',
+    margin: '0 auto',
+  },
+  welcomeCard: {
+    marginTop: '32px',
+    padding: '20px',
+    backgroundColor: '#1c1c1e',
+    borderRadius: '20px',
+    width: '100%',
+    maxWidth: '280px',
+  },
+  welcomeIcon: {
+    fontSize: '32px',
+    marginBottom: '8px',
+  },
+  welcomeText: {
     fontSize: '14px',
     color: '#8e8e93',
+  },
+  bottom: {
+    paddingBottom: '12px',
+    position: 'relative',
+    zIndex: 10,
+  },
+  primaryButton: {
+    width: '100%',
+    padding: '16px',
+    borderRadius: '30px',
+    border: 'none',
+    backgroundColor: '#fff',
+    color: '#000',
+    fontSize: '17px',
+    fontWeight: '600',
+    cursor: 'pointer',
+    fontFamily: 'inherit',
+    marginBottom: '16px',
+    transition: 'opacity 0.2s',
+  },
+  homeIndicator: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingBottom: 'max(8px, env(safe-area-inset-bottom))',
+    paddingTop: '8px',
+  },
+  homeIndicatorBar: {
+    width: '140px',
+    height: '5px',
+    backgroundColor: '#3a3a3c',
+    borderRadius: '3px',
   },
   chatModal: {
     position: 'fixed',
