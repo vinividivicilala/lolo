@@ -32,11 +32,10 @@ export default function Onboarding() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [progress, setProgress] = useState(0);
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const touchStartX = useRef(0);
-  const touchEndX = useRef(0);
-  const isDragging = useRef(false);
+  const [dragStartX, setDragStartX] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
 
-  // Progress animation for each slide
+  // Progress bar animation for each slide
   useEffect(() => {
     setProgress(0);
     
@@ -71,61 +70,28 @@ export default function Onboarding() {
     };
   }, [currentIndex]);
 
-  // Touch handlers for swipe
-  const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0].clientX;
-    isDragging.current = true;
+  // Mouse/Touch drag handlers for swipe
+  const handleDragStart = (e: React.MouseEvent | React.TouchEvent) => {
+    setIsDragging(true);
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    setDragStartX(clientX);
   };
 
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isDragging.current) return;
-    touchEndX.current = e.touches[0].clientX;
-  };
-
-  const handleTouchEnd = () => {
-    if (!isDragging.current) return;
+  const handleDragEnd = (e: React.MouseEvent | React.TouchEvent) => {
+    if (!isDragging) return;
+    setIsDragging(false);
     
-    const diff = touchEndX.current - touchStartX.current;
+    const clientX = 'changedTouches' in e ? e.changedTouches[0].clientX : e.clientX;
+    const diff = clientX - dragStartX;
     const threshold = 50;
     
     if (diff > threshold) {
+      // Swipe right - previous slide
       setCurrentIndex((prev) => (prev - 1 + slides.length) % slides.length);
     } else if (diff < -threshold) {
+      // Swipe left - next slide
       setCurrentIndex((prev) => (prev + 1) % slides.length);
     }
-    
-    touchStartX.current = 0;
-    touchEndX.current = 0;
-    isDragging.current = false;
-  };
-
-  // Mouse handlers for desktop drag
-  const handleMouseDown = (e: React.MouseEvent) => {
-    touchStartX.current = e.clientX;
-    isDragging.current = true;
-    e.preventDefault();
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging.current) return;
-    touchEndX.current = e.clientX;
-  };
-
-  const handleMouseUp = (e: React.MouseEvent) => {
-    if (!isDragging.current) return;
-    
-    const diff = touchEndX.current - touchStartX.current;
-    const threshold = 50;
-    
-    if (diff > threshold) {
-      setCurrentIndex((prev) => (prev - 1 + slides.length) % slides.length);
-    } else if (diff < -threshold) {
-      setCurrentIndex((prev) => (prev + 1) % slides.length);
-    }
-    
-    touchStartX.current = 0;
-    touchEndX.current = 0;
-    isDragging.current = false;
   };
 
   const goToSlide = (index: number) => {
@@ -149,106 +115,107 @@ export default function Onboarding() {
   };
 
   return (
-    <div style={styles.container}>
-      {/* Header */}
-      <div style={styles.header}>
-        <div style={styles.logo}>Menuru</div>
-        <button onClick={handleSkip} style={styles.skipButton}>
-          Lewati
-        </button>
-      </div>
-
-      {/* Main Content - Swipeable Area */}
-      <div
-        style={styles.content}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
+    <div style={styles.wrapper}>
+      <div 
+        style={styles.container}
+        onMouseDown={handleDragStart}
+        onMouseUp={handleDragEnd}
+        onMouseLeave={handleDragEnd}
+        onTouchStart={handleDragStart}
+        onTouchEnd={handleDragEnd}
       >
-        {/* Image - Portrait */}
-        <div style={styles.imageWrapper}>
-          <AnimatePresence mode="wait">
-            <motion.img
-              key={currentIndex}
-              src={slides[currentIndex].image}
-              alt={slides[currentIndex].title}
-              initial={{ opacity: 0, x: 100 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -100 }}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
-              style={styles.image}
-              draggable={false}
-            />
-          </AnimatePresence>
+        {/* Header - iOS Style */}
+        <div style={styles.header}>
+          <div style={styles.logo}>Menuru</div>
+          <button onClick={handleSkip} style={styles.skipButton}>
+            Lewati
+          </button>
         </div>
 
-        {/* Title */}
-        <AnimatePresence mode="wait">
+        {/* Main Content */}
+        <div style={styles.content}>
+          {/* Image - Portrait */}
+          <div style={styles.imageWrapper}>
+            <AnimatePresence mode="wait">
+              <motion.img
+                key={currentIndex}
+                src={slides[currentIndex].image}
+                alt={slides[currentIndex].title}
+                initial={{ opacity: 0, x: 50 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -50 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+                style={styles.image}
+                draggable={false}
+              />
+            </AnimatePresence>
+          </div>
+
+          {/* Title */}
           <motion.h2
             key={`title-${currentIndex}`}
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
             style={styles.title}
           >
             {slides[currentIndex].title}
           </motion.h2>
-        </AnimatePresence>
 
-        {/* Description */}
-        <AnimatePresence mode="wait">
+          {/* Description */}
           <motion.p
             key={`desc-${currentIndex}`}
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3, delay: 0.1 }}
             style={styles.description}
           >
             {slides[currentIndex].desc}
           </motion.p>
-        </AnimatePresence>
 
-        {/* Pagination Dots with Fill Animation */}
-        <div style={styles.dotsContainer}>
-          {slides.map((_, idx) => (
-            <button
-              key={idx}
-              onClick={() => goToSlide(idx)}
-              style={styles.dotButton}
-            >
-              <div style={styles.dotTrack}>
-                <div
-                  style={{
-                    ...styles.dotFill,
-                    width: idx === currentIndex 
-                      ? `${progress}%` 
-                      : idx < currentIndex 
-                        ? '100%' 
-                        : '0%',
-                  }}
-                />
-              </div>
-            </button>
-          ))}
+          {/* Pagination Dots with Fill Animation */}
+          <div style={styles.dotsContainer}>
+            {slides.map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => goToSlide(idx)}
+                style={styles.dotWrapper}
+              >
+                <div style={styles.dotBg}>
+                  <motion.div
+                    style={{
+                      ...styles.dotFill,
+                      width: idx === currentIndex ? `${progress}%` : idx < currentIndex ? '100%' : '0%',
+                      backgroundColor: '#8be9fd',
+                    }}
+                    initial={{ width: idx === currentIndex ? '0%' : idx < currentIndex ? '100%' : '0%' }}
+                    animate={{ 
+                      width: idx === currentIndex ? `${progress}%` : idx < currentIndex ? '100%' : '0%'
+                    }}
+                    transition={{ duration: 0.03 }}
+                  />
+                </div>
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
 
-      {/* Bottom Buttons */}
-      <div style={styles.bottom}>
-        <button onClick={handleSignUp} style={styles.primaryButton}>
-          Daftar
-        </button>
-        <div style={styles.signInWrapper}>
-          <span style={styles.signInText}>Sudah punya akun? </span>
-          <button onClick={handleSignIn} style={styles.linkButton}>
-            Masuk
+        {/* Bottom Buttons - iOS Style */}
+        <div style={styles.bottom}>
+          <button onClick={handleSignUp} style={styles.primaryButton}>
+            Daftar
           </button>
+          <div style={styles.signInWrapper}>
+            <span style={styles.signInText}>Sudah punya akun? </span>
+            <button onClick={handleSignIn} style={styles.linkButton}>
+              Masuk
+            </button>
+          </div>
+        </div>
+
+        {/* Home Indicator for iOS */}
+        <div style={styles.homeIndicator}>
+          <div style={styles.homeIndicatorBar} />
         </div>
       </div>
     </div>
@@ -256,28 +223,43 @@ export default function Onboarding() {
 }
 
 const styles: { [key: string]: React.CSSProperties } = {
-  container: {
+  wrapper: {
     height: '100vh',
     width: '100vw',
     display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
+    alignItems: 'center',
     backgroundColor: '#000',
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
+    overflow: 'hidden',
     position: 'fixed',
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
+  },
+  container: {
+    width: '100%',
+    maxWidth: '400px',
+    height: '100vh',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    padding: '20px 24px 0 24px',
+    backgroundColor: '#000',
+    color: '#fff',
+    position: 'relative',
+    userSelect: 'none',
+    WebkitUserSelect: 'none',
+    cursor: 'grab',
     overflow: 'hidden',
   },
   header: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: '20px 24px',
-    paddingTop: 'max(20px, env(safe-area-inset-top))',
-    backgroundColor: '#000',
+    paddingTop: 'env(safe-area-inset-top)',
+    position: 'relative',
     zIndex: 10,
   },
   logo: {
@@ -291,7 +273,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     border: 'none',
     fontSize: '15px',
     fontWeight: '500',
-    color: '#fff',
+    color: '#8e8e93',
     cursor: 'pointer',
     fontFamily: 'inherit',
     padding: '8px 12px',
@@ -303,12 +285,12 @@ const styles: { [key: string]: React.CSSProperties } = {
     alignItems: 'center',
     justifyContent: 'center',
     textAlign: 'center',
-    cursor: 'grab',
-    touchAction: 'pan-y',
-    padding: '0 24px',
   },
   imageWrapper: {
-    marginBottom: '48px',
+    marginBottom: '40px',
+    width: '100%',
+    display: 'flex',
+    justifyContent: 'center',
   },
   image: {
     width: '280px',
@@ -336,35 +318,33 @@ const styles: { [key: string]: React.CSSProperties } = {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    gap: '10px',
+    gap: '12px',
     marginTop: '48px',
-    width: '100%',
-    maxWidth: '240px',
   },
-  dotButton: {
+  dotWrapper: {
     background: 'none',
     border: 'none',
     cursor: 'pointer',
     padding: 0,
-    flex: 1,
+    display: 'flex',
+    alignItems: 'center',
   },
-  dotTrack: {
-    width: '100%',
+  dotBg: {
+    width: '32px',
     height: '4px',
     backgroundColor: '#2c2c2e',
     borderRadius: '2px',
     overflow: 'hidden',
+    position: 'relative' as const,
   },
   dotFill: {
     height: '100%',
-    backgroundColor: '#8be9fd',
     borderRadius: '2px',
-    transition: 'width 0.03s linear',
   },
   bottom: {
-    padding: '20px 24px',
-    paddingBottom: 'max(20px, env(safe-area-inset-bottom))',
-    backgroundColor: '#000',
+    paddingBottom: '12px',
+    position: 'relative',
+    zIndex: 10,
   },
   primaryButton: {
     width: '100%',
@@ -378,6 +358,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     cursor: 'pointer',
     fontFamily: 'inherit',
     marginBottom: '16px',
+    transition: 'opacity 0.2s',
   },
   signInWrapper: {
     display: 'flex',
@@ -398,5 +379,18 @@ const styles: { [key: string]: React.CSSProperties } = {
     cursor: 'pointer',
     fontFamily: 'inherit',
     padding: '4px 8px',
+  },
+  homeIndicator: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingBottom: 'max(8px, env(safe-area-inset-bottom))',
+    paddingTop: '8px',
+  },
+  homeIndicatorBar: {
+    width: '140px',
+    height: '5px',
+    backgroundColor: '#3a3a3c',
+    borderRadius: '3px',
   },
 };
