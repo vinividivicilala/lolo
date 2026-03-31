@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function HomePage() {
   const router = useRouter();
@@ -20,17 +21,23 @@ export default function HomePage() {
   
   // Donation State
   const [donationTotal, setDonationTotal] = useState(1250000);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isDonationLoading, setIsDonationLoading] = useState(false);
   
   // Notes State
-  const [totalNotes, setTotalNotes] = useState(42);
-  const [noteHistory, setNoteHistory] = useState([
-    { id: 1, text: 'Donasi untuk panti asuhan', date: 'Hari ini, 10:30' },
-    { id: 2, text: 'Bantuan korban banjir', date: 'Kemarin, 14:20' },
-    { id: 3, text: 'Sumbangan buku sekolah', date: '2 hari lalu' },
-  ]);
-  const [newNoteText, setNewNoteText] = useState('');
-  const [showAddNote, setShowAddNote] = useState(false);
+  const [notesTotal, setNotesTotal] = useState(48);
+  const [isNotesLoading, setIsNotesLoading] = useState(false);
+  
+  // Swipe State
+  const [currentCardIndex, setCurrentCardIndex] = useState(0);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStartX, setDragStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
+
+  const cards = [
+    { id: 0, title: 'Donasi', type: 'donation' },
+    { id: 1, title: 'Notes', type: 'notes' }
+  ];
 
   const formatRupiah = (amount: number) => {
     return new Intl.NumberFormat('id-ID', {
@@ -41,10 +48,17 @@ export default function HomePage() {
     }).format(amount);
   };
 
-  const handleReload = () => {
-    setIsLoading(true);
+  const handleDonationReload = () => {
+    setIsDonationLoading(true);
     setTimeout(() => {
-      setIsLoading(false);
+      setIsDonationLoading(false);
+    }, 800);
+  };
+
+  const handleNotesReload = () => {
+    setIsNotesLoading(true);
+    setTimeout(() => {
+      setIsNotesLoading(false);
     }, 800);
   };
 
@@ -62,16 +76,78 @@ export default function HomePage() {
   };
 
   const handleAddNote = () => {
-    if (newNoteText.trim()) {
-      const newNote = {
-        id: Date.now(),
-        text: newNoteText,
-        date: 'Baru saja',
-      };
-      setNoteHistory(prev => [newNote, ...prev]);
-      setTotalNotes(prev => prev + 1);
-      setNewNoteText('');
-      setShowAddNote(false);
+    setNotesTotal(prev => prev + 1);
+    
+    const element = document.querySelector('.notes-total');
+    if (element) {
+      element.classList.add('animate-pulse');
+      setTimeout(() => {
+        element.classList.remove('animate-pulse');
+      }, 500);
+    }
+  };
+
+  // Handle scroll to update active card index
+  const handleScroll = () => {
+    if (scrollContainerRef.current) {
+      const scrollPosition = scrollContainerRef.current.scrollLeft;
+      const cardWidth = scrollContainerRef.current.clientWidth;
+      const newIndex = Math.round(scrollPosition / cardWidth);
+      if (newIndex !== currentCardIndex) {
+        setCurrentCardIndex(newIndex);
+      }
+    }
+  };
+
+  // Handle drag/swipe for mobile
+  const handleDragStart = (e: React.MouseEvent | React.TouchEvent) => {
+    setIsDragging(true);
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    setDragStartX(clientX);
+    if (scrollContainerRef.current) {
+      setScrollLeft(scrollContainerRef.current.scrollLeft);
+    }
+  };
+
+  const handleDragEnd = (e: React.MouseEvent | React.TouchEvent) => {
+    if (!isDragging) return;
+    setIsDragging(false);
+    
+    const clientX = 'changedTouches' in e ? e.changedTouches[0].clientX : e.clientX;
+    const diff = clientX - dragStartX;
+    const threshold = 50;
+    
+    if (Math.abs(diff) > threshold && scrollContainerRef.current) {
+      const cardWidth = scrollContainerRef.current.clientWidth;
+      const newIndex = diff > 0 ? currentCardIndex - 1 : currentCardIndex + 1;
+      if (newIndex >= 0 && newIndex < cards.length) {
+        scrollContainerRef.current.scrollTo({
+          left: newIndex * cardWidth,
+          behavior: 'smooth'
+        });
+        setCurrentCardIndex(newIndex);
+      }
+    }
+  };
+
+  const handleDragMove = (e: React.MouseEvent | React.TouchEvent) => {
+    if (!isDragging) return;
+    e.preventDefault();
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    const diff = clientX - dragStartX;
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollLeft = scrollLeft - diff;
+    }
+  };
+
+  const goToCard = (index: number) => {
+    if (scrollContainerRef.current) {
+      const cardWidth = scrollContainerRef.current.clientWidth;
+      scrollContainerRef.current.scrollTo({
+        left: index * cardWidth,
+        behavior: 'smooth'
+      });
+      setCurrentCardIndex(index);
     }
   };
 
@@ -163,16 +239,27 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Cards Row - Donation Card & Note Card - Ukuran sama dan diperbesar */}
-        <div style={styles.cardsRow}>
-          {/* Donation Card */}
-          <div style={styles.donationCard}>
+        {/* Scrollable Cards Container */}
+        <div 
+          ref={scrollContainerRef}
+          style={styles.scrollContainer}
+          onScroll={handleScroll}
+          onMouseDown={handleDragStart}
+          onMouseUp={handleDragEnd}
+          onMouseMove={handleDragMove}
+          onMouseLeave={handleDragEnd}
+          onTouchStart={handleDragStart}
+          onTouchEnd={handleDragEnd}
+          onTouchMove={handleDragMove}
+        >
+          {/* Card 1 - Donasi */}
+          <div style={styles.card}>
             <div style={styles.cardHeader}>
               <h3 style={styles.cardTitle}>Jumlah Donasi</h3>
               <button 
-                onClick={handleReload} 
+                onClick={handleDonationReload} 
                 style={styles.reloadButton}
-                disabled={isLoading}
+                disabled={isDonationLoading}
               >
                 <svg 
                   width="16" 
@@ -182,7 +269,7 @@ export default function HomePage() {
                   stroke="currentColor" 
                   strokeWidth="2"
                   style={{
-                    animation: isLoading ? 'spin 0.8s linear infinite' : 'none',
+                    animation: isDonationLoading ? 'spin 0.8s linear infinite' : 'none',
                   }}
                 >
                   <path d="M23 4v6h-6M1 20v-6h6" />
@@ -192,7 +279,7 @@ export default function HomePage() {
             </div>
             
             <div className="donation-total" style={styles.donationTotal}>
-              {isLoading ? (
+              {isDonationLoading ? (
                 <div style={styles.skeletonLoader}>
                   <div style={styles.skeletonShimmer} />
                 </div>
@@ -210,70 +297,78 @@ export default function HomePage() {
             </button>
           </div>
 
-          {/* Note Card - Ukuran sama dengan Donation Card */}
-          <div style={styles.noteCard}>
+          {/* Card 2 - Notes */}
+          <div style={styles.card}>
             <div style={styles.cardHeader}>
-              <h3 style={styles.cardTitle}>Total Note</h3>
+              <h3 style={styles.cardTitle}>Notes Terkirim</h3>
               <button 
-                onClick={() => setShowAddNote(true)} 
-                style={styles.addNoteButton}
+                onClick={handleNotesReload} 
+                style={styles.reloadButton}
+                disabled={isNotesLoading}
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                  <line x1="12" y1="5" x2="12" y2="19" />
-                  <line x1="5" y1="12" x2="19" y2="12" />
+                <svg 
+                  width="16" 
+                  height="16" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth="2"
+                  style={{
+                    animation: isNotesLoading ? 'spin 0.8s linear infinite' : 'none',
+                  }}
+                >
+                  <path d="M23 4v6h-6M1 20v-6h6" />
+                  <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
                 </svg>
               </button>
             </div>
             
-            <div style={styles.noteTotal}>
-              {totalNotes}
-            </div>
-            
-            <div style={styles.noteHistory}>
-              <div style={styles.historyLabel}>Riwayat Terakhir:</div>
-              {noteHistory.slice(0, 3).map(note => (
-                <div key={note.id} style={styles.historyItem}>
-                  <div style={styles.historyText}>{note.text}</div>
-                  <div style={styles.historyDate}>{note.date}</div>
+            <div className="notes-total" style={styles.notesTotal}>
+              {isNotesLoading ? (
+                <div style={styles.skeletonLoader}>
+                  <div style={styles.skeletonShimmer} />
                 </div>
-              ))}
-              {noteHistory.length > 3 && (
-                <div style={styles.moreNotes}>+{noteHistory.length - 3} note lainnya</div>
+              ) : (
+                `${notesTotal} Notes`
               )}
             </div>
+            
+            <button onClick={handleAddNote} style={styles.addButton}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+              <span>Tambah Notes</span>
+            </button>
           </div>
         </div>
 
-        {/* Main Content - Kosong */}
-        <div style={styles.content} />
+        {/* Pagination Dots */}
+        <div style={styles.dotsContainer}>
+          {cards.map((_, idx) => (
+            <button
+              key={idx}
+              onClick={() => goToCard(idx)}
+              style={styles.dotWrapper}
+            >
+              <div style={styles.dotBg}>
+                <div
+                  style={{
+                    ...styles.dotFill,
+                    width: currentCardIndex === idx ? '100%' : '0%',
+                    backgroundColor: '#8be9fd',
+                  }}
+                />
+              </div>
+            </button>
+          ))}
+        </div>
 
         {/* Home Indicator for iOS */}
         <div style={styles.homeIndicator}>
           <div style={styles.homeIndicatorBar} />
         </div>
       </div>
-
-      {/* Add Note Modal */}
-      {showAddNote && (
-        <div style={styles.modalOverlay} onClick={() => setShowAddNote(false)}>
-          <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
-            <div style={styles.modalHeader}>
-              <h3 style={styles.modalTitle}>Tambah Note</h3>
-              <button onClick={() => setShowAddNote(false)} style={styles.modalClose}>×</button>
-            </div>
-            <textarea
-              value={newNoteText}
-              onChange={(e) => setNewNoteText(e.target.value)}
-              placeholder="Tulis note..."
-              style={styles.modalTextarea}
-              rows={4}
-            />
-            <button onClick={handleAddNote} style={styles.modalButton}>
-              Simpan Note
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* Live Chat Modal */}
       {isChatOpen && (
@@ -400,7 +495,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     paddingTop: 'env(safe-area-inset-top)',
     position: 'relative',
     zIndex: 10,
-    marginBottom: '24px',
+    marginBottom: '20px',
   },
   logo: {
     fontSize: '22px',
@@ -521,22 +616,27 @@ const styles: { [key: string]: React.CSSProperties } = {
     color: '#8e8e93',
     fontSize: '13px',
   },
-  cardsRow: {
+  scrollContainer: {
     display: 'flex',
-    flexDirection: 'column',
+    overflowX: 'scroll',
+    scrollSnapType: 'x mandatory',
+    scrollBehavior: 'smooth',
     gap: '16px',
-    marginBottom: 'auto',
+    paddingBottom: '16px',
+    marginBottom: '20px',
+    cursor: 'grab',
+    WebkitOverflowScrolling: 'touch',
+    scrollbarWidth: 'none',
+    msOverflowStyle: 'none',
   },
-  donationCard: {
+  card: {
+    flex: '0 0 auto',
+    width: '100%',
+    maxWidth: 'calc(100% - 0px)',
     backgroundColor: '#1c1c1e',
     borderRadius: '20px',
     padding: '20px',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-  },
-  noteCard: {
-    backgroundColor: '#1c1c1e',
-    borderRadius: '20px',
-    padding: '20px',
+    scrollSnapAlign: 'start',
     boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
   },
   cardHeader: {
@@ -563,40 +663,29 @@ const styles: { [key: string]: React.CSSProperties } = {
     justifyContent: 'center',
     transition: 'all 0.2s',
   },
-  addNoteButton: {
-    background: 'none',
-    border: 'none',
-    cursor: 'pointer',
-    color: '#8be9fd',
-    padding: '4px',
-    borderRadius: '50%',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    transition: 'all 0.2s',
-  },
   donationTotal: {
-    fontSize: '24px',
+    fontSize: '28px',
     fontWeight: '700',
     color: '#fff',
-    marginBottom: '16px',
-    textAlign: 'left',
+    marginBottom: '20px',
+    textAlign: 'center',
     transition: 'all 0.3s ease',
   },
-  noteTotal: {
-    fontSize: '48px',
+  notesTotal: {
+    fontSize: '28px',
     fontWeight: '700',
-    color: '#8be9fd',
-    marginBottom: '16px',
-    textAlign: 'left',
+    color: '#fff',
+    marginBottom: '20px',
+    textAlign: 'center',
+    transition: 'all 0.3s ease',
   },
   skeletonLoader: {
-    height: '30px',
+    height: '34px',
     backgroundColor: '#2c2c2e',
     borderRadius: '8px',
     position: 'relative',
     overflow: 'hidden',
-    marginBottom: '16px',
+    marginBottom: '20px',
   },
   skeletonShimmer: {
     position: 'absolute',
@@ -623,41 +712,33 @@ const styles: { [key: string]: React.CSSProperties } = {
     cursor: 'pointer',
     transition: 'all 0.2s',
   },
-  noteHistory: {
-    marginTop: '16px',
-    borderTop: '1px solid #2c2c2e',
-    paddingTop: '16px',
+  dotsContainer: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: '12px',
+    marginBottom: '20px',
   },
-  historyLabel: {
-    fontSize: '11px',
-    color: '#8e8e93',
-    marginBottom: '12px',
-  },
-  historyItem: {
-    marginBottom: '12px',
-    paddingBottom: '8px',
-    borderBottom: '1px solid #2c2c2e',
-  },
-  historyText: {
-    fontSize: '13px',
-    color: '#fff',
-    marginBottom: '4px',
-    lineHeight: '1.4',
-  },
-  historyDate: {
-    fontSize: '10px',
-    color: '#5e5e62',
-  },
-  moreNotes: {
-    fontSize: '11px',
-    color: '#8be9fd',
-    marginTop: '8px',
+  dotWrapper: {
+    background: 'none',
+    border: 'none',
     cursor: 'pointer',
-    textAlign: 'center',
-    padding: '8px',
+    padding: 0,
+    display: 'flex',
+    alignItems: 'center',
   },
-  content: {
-    flex: 1,
+  dotBg: {
+    width: '32px',
+    height: '4px',
+    backgroundColor: '#2c2c2e',
+    borderRadius: '2px',
+    overflow: 'hidden',
+    position: 'relative' as const,
+  },
+  dotFill: {
+    height: '100%',
+    borderRadius: '2px',
+    transition: 'width 0.3s ease',
   },
   homeIndicator: {
     display: 'flex',
@@ -671,68 +752,6 @@ const styles: { [key: string]: React.CSSProperties } = {
     height: '5px',
     backgroundColor: '#3a3a3c',
     borderRadius: '3px',
-  },
-  modalOverlay: {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.8)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 400,
-  },
-  modal: {
-    backgroundColor: '#1c1c1e',
-    borderRadius: '20px',
-    padding: '24px',
-    width: '320px',
-    maxWidth: '90%',
-  },
-  modalHeader: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: '20px',
-  },
-  modalTitle: {
-    fontSize: '18px',
-    fontWeight: '600',
-    color: '#fff',
-    margin: 0,
-  },
-  modalClose: {
-    background: 'none',
-    border: 'none',
-    color: '#8e8e93',
-    fontSize: '24px',
-    cursor: 'pointer',
-  },
-  modalTextarea: {
-    width: '100%',
-    padding: '12px',
-    backgroundColor: '#000',
-    border: '1px solid #2c2c2e',
-    borderRadius: '12px',
-    color: '#fff',
-    fontSize: '14px',
-    fontFamily: 'inherit',
-    resize: 'none',
-    marginBottom: '20px',
-    outline: 'none',
-  },
-  modalButton: {
-    width: '100%',
-    padding: '14px',
-    backgroundColor: '#8be9fd',
-    border: 'none',
-    borderRadius: '30px',
-    color: '#000',
-    fontSize: '15px',
-    fontWeight: '600',
-    cursor: 'pointer',
   },
   chatModal: {
     position: 'fixed',
