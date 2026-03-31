@@ -1,8 +1,7 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
 
 export default function HomePage() {
   const router = useRouter();
@@ -21,23 +20,7 @@ export default function HomePage() {
   
   // Donation State
   const [donationTotal, setDonationTotal] = useState(1250000);
-  const [isDonationLoading, setIsDonationLoading] = useState(false);
-  
-  // Notes State
-  const [notesTotal, setNotesTotal] = useState(48);
-  const [isNotesLoading, setIsNotesLoading] = useState(false);
-  
-  // Swipe State
-  const [currentCardIndex, setCurrentCardIndex] = useState(0);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragStartX, setDragStartX] = useState(0);
-  const [scrollLeft, setScrollLeft] = useState(0);
-
-  const cards = [
-    { id: 0, title: 'Donasi', type: 'donation' },
-    { id: 1, title: 'Notes', type: 'notes' }
-  ];
+  const [isLoading, setIsLoading] = useState(false);
 
   const formatRupiah = (amount: number) => {
     return new Intl.NumberFormat('id-ID', {
@@ -48,17 +31,10 @@ export default function HomePage() {
     }).format(amount);
   };
 
-  const handleDonationReload = () => {
-    setIsDonationLoading(true);
+  const handleReload = () => {
+    setIsLoading(true);
     setTimeout(() => {
-      setIsDonationLoading(false);
-    }, 800);
-  };
-
-  const handleNotesReload = () => {
-    setIsNotesLoading(true);
-    setTimeout(() => {
-      setIsNotesLoading(false);
+      setIsLoading(false);
     }, 800);
   };
 
@@ -72,82 +48,6 @@ export default function HomePage() {
       setTimeout(() => {
         element.classList.remove('animate-pulse');
       }, 500);
-    }
-  };
-
-  const handleAddNote = () => {
-    setNotesTotal(prev => prev + 1);
-    
-    const element = document.querySelector('.notes-total');
-    if (element) {
-      element.classList.add('animate-pulse');
-      setTimeout(() => {
-        element.classList.remove('animate-pulse');
-      }, 500);
-    }
-  };
-
-  // Handle scroll to update active card index
-  const handleScroll = () => {
-    if (scrollContainerRef.current) {
-      const scrollPosition = scrollContainerRef.current.scrollLeft;
-      const cardWidth = scrollContainerRef.current.clientWidth;
-      const newIndex = Math.round(scrollPosition / cardWidth);
-      if (newIndex !== currentCardIndex) {
-        setCurrentCardIndex(newIndex);
-      }
-    }
-  };
-
-  // Handle drag/swipe for mobile
-  const handleDragStart = (e: React.MouseEvent | React.TouchEvent) => {
-    setIsDragging(true);
-    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
-    setDragStartX(clientX);
-    if (scrollContainerRef.current) {
-      setScrollLeft(scrollContainerRef.current.scrollLeft);
-    }
-  };
-
-  const handleDragEnd = (e: React.MouseEvent | React.TouchEvent) => {
-    if (!isDragging) return;
-    setIsDragging(false);
-    
-    const clientX = 'changedTouches' in e ? e.changedTouches[0].clientX : e.clientX;
-    const diff = clientX - dragStartX;
-    const threshold = 50;
-    
-    if (Math.abs(diff) > threshold && scrollContainerRef.current) {
-      const cardWidth = scrollContainerRef.current.clientWidth;
-      const newIndex = diff > 0 ? currentCardIndex - 1 : currentCardIndex + 1;
-      if (newIndex >= 0 && newIndex < cards.length) {
-        scrollContainerRef.current.scrollTo({
-          left: newIndex * cardWidth,
-          behavior: 'smooth'
-        });
-        setCurrentCardIndex(newIndex);
-      }
-    }
-  };
-
-  const handleDragMove = (e: React.MouseEvent | React.TouchEvent) => {
-    if (!isDragging) return;
-    e.preventDefault();
-    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
-    const diff = clientX - dragStartX;
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollLeft = scrollLeft - diff;
-    }
-  };
-
-  const goToCard = (index: number) => {
-    if (scrollContainerRef.current) {
-      const cardWidth = scrollContainerRef.current.clientWidth;
-      scrollContainerRef.current.scrollTo({
-        left: index * cardWidth,
-        behavior: 'smooth'
-      });
-      setCurrentCardIndex(index);
     }
   };
 
@@ -239,27 +139,15 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Scrollable Cards Container */}
-        <div 
-          ref={scrollContainerRef}
-          style={styles.scrollContainer}
-          onScroll={handleScroll}
-          onMouseDown={handleDragStart}
-          onMouseUp={handleDragEnd}
-          onMouseMove={handleDragMove}
-          onMouseLeave={handleDragEnd}
-          onTouchStart={handleDragStart}
-          onTouchEnd={handleDragEnd}
-          onTouchMove={handleDragMove}
-        >
-          {/* Card 1 - Donasi */}
+        {/* Card Donation - Di bawah judul web, di kiri atas */}
+        <div style={styles.cardWrapper}>
           <div style={styles.card}>
             <div style={styles.cardHeader}>
               <h3 style={styles.cardTitle}>Jumlah Donasi</h3>
               <button 
-                onClick={handleDonationReload} 
+                onClick={handleReload} 
                 style={styles.reloadButton}
-                disabled={isDonationLoading}
+                disabled={isLoading}
               >
                 <svg 
                   width="16" 
@@ -269,7 +157,7 @@ export default function HomePage() {
                   stroke="currentColor" 
                   strokeWidth="2"
                   style={{
-                    animation: isDonationLoading ? 'spin 0.8s linear infinite' : 'none',
+                    animation: isLoading ? 'spin 0.8s linear infinite' : 'none',
                   }}
                 >
                   <path d="M23 4v6h-6M1 20v-6h6" />
@@ -279,7 +167,7 @@ export default function HomePage() {
             </div>
             
             <div className="donation-total" style={styles.donationTotal}>
-              {isDonationLoading ? (
+              {isLoading ? (
                 <div style={styles.skeletonLoader}>
                   <div style={styles.skeletonShimmer} />
                 </div>
@@ -296,73 +184,10 @@ export default function HomePage() {
               <span>Tambah Donasi</span>
             </button>
           </div>
-
-          {/* Card 2 - Notes */}
-          <div style={styles.card}>
-            <div style={styles.cardHeader}>
-              <h3 style={styles.cardTitle}>Notes Terkirim</h3>
-              <button 
-                onClick={handleNotesReload} 
-                style={styles.reloadButton}
-                disabled={isNotesLoading}
-              >
-                <svg 
-                  width="16" 
-                  height="16" 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  strokeWidth="2"
-                  style={{
-                    animation: isNotesLoading ? 'spin 0.8s linear infinite' : 'none',
-                  }}
-                >
-                  <path d="M23 4v6h-6M1 20v-6h6" />
-                  <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
-                </svg>
-              </button>
-            </div>
-            
-            <div className="notes-total" style={styles.notesTotal}>
-              {isNotesLoading ? (
-                <div style={styles.skeletonLoader}>
-                  <div style={styles.skeletonShimmer} />
-                </div>
-              ) : (
-                `${notesTotal} Notes`
-              )}
-            </div>
-            
-            <button onClick={handleAddNote} style={styles.addButton}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <line x1="12" y1="5" x2="12" y2="19" />
-                <line x1="5" y1="12" x2="19" y2="12" />
-              </svg>
-              <span>Tambah Notes</span>
-            </button>
-          </div>
         </div>
 
-        {/* Pagination Dots */}
-        <div style={styles.dotsContainer}>
-          {cards.map((_, idx) => (
-            <button
-              key={idx}
-              onClick={() => goToCard(idx)}
-              style={styles.dotWrapper}
-            >
-              <div style={styles.dotBg}>
-                <div
-                  style={{
-                    ...styles.dotFill,
-                    width: currentCardIndex === idx ? '100%' : '0%',
-                    backgroundColor: '#8be9fd',
-                  }}
-                />
-              </div>
-            </button>
-          ))}
-        </div>
+        {/* Main Content - Kosong */}
+        <div style={styles.content} />
 
         {/* Home Indicator for iOS */}
         <div style={styles.homeIndicator}>
@@ -616,37 +441,28 @@ const styles: { [key: string]: React.CSSProperties } = {
     color: '#8e8e93',
     fontSize: '13px',
   },
-  scrollContainer: {
+  cardWrapper: {
     display: 'flex',
-    overflowX: 'scroll',
-    scrollSnapType: 'x mandatory',
-    scrollBehavior: 'smooth',
-    gap: '16px',
-    paddingBottom: '16px',
-    marginBottom: '20px',
-    cursor: 'grab',
-    WebkitOverflowScrolling: 'touch',
-    scrollbarWidth: 'none',
-    msOverflowStyle: 'none',
+    justifyContent: 'flex-start',
+    marginBottom: 'auto',
   },
   card: {
-    flex: '0 0 auto',
-    width: '100%',
-    maxWidth: 'calc(100% - 0px)',
     backgroundColor: '#1c1c1e',
-    borderRadius: '20px',
-    padding: '20px',
-    scrollSnapAlign: 'start',
+    borderRadius: '16px',
+    padding: '14px 18px',
+    width: 'auto',
+    minWidth: '200px',
+    maxWidth: '240px',
     boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
   },
   cardHeader: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: '16px',
+    marginBottom: '10px',
   },
   cardTitle: {
-    fontSize: '14px',
+    fontSize: '12px',
     fontWeight: '500',
     color: '#8e8e93',
     margin: 0,
@@ -664,28 +480,20 @@ const styles: { [key: string]: React.CSSProperties } = {
     transition: 'all 0.2s',
   },
   donationTotal: {
-    fontSize: '28px',
+    fontSize: '22px',
     fontWeight: '700',
     color: '#fff',
-    marginBottom: '20px',
-    textAlign: 'center',
-    transition: 'all 0.3s ease',
-  },
-  notesTotal: {
-    fontSize: '28px',
-    fontWeight: '700',
-    color: '#fff',
-    marginBottom: '20px',
-    textAlign: 'center',
+    marginBottom: '12px',
+    textAlign: 'left',
     transition: 'all 0.3s ease',
   },
   skeletonLoader: {
-    height: '34px',
+    height: '28px',
     backgroundColor: '#2c2c2e',
-    borderRadius: '8px',
+    borderRadius: '6px',
     position: 'relative',
     overflow: 'hidden',
-    marginBottom: '20px',
+    marginBottom: '12px',
   },
   skeletonShimmer: {
     position: 'absolute',
@@ -700,45 +508,20 @@ const styles: { [key: string]: React.CSSProperties } = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: '8px',
+    gap: '6px',
     width: '100%',
-    padding: '12px',
+    padding: '8px 12px',
     backgroundColor: '#8be9fd',
     border: 'none',
-    borderRadius: '30px',
+    borderRadius: '24px',
     color: '#000',
-    fontSize: '14px',
+    fontSize: '12px',
     fontWeight: '600',
     cursor: 'pointer',
     transition: 'all 0.2s',
   },
-  dotsContainer: {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: '12px',
-    marginBottom: '20px',
-  },
-  dotWrapper: {
-    background: 'none',
-    border: 'none',
-    cursor: 'pointer',
-    padding: 0,
-    display: 'flex',
-    alignItems: 'center',
-  },
-  dotBg: {
-    width: '32px',
-    height: '4px',
-    backgroundColor: '#2c2c2e',
-    borderRadius: '2px',
-    overflow: 'hidden',
-    position: 'relative' as const,
-  },
-  dotFill: {
-    height: '100%',
-    borderRadius: '2px',
-    transition: 'width 0.3s ease',
+  content: {
+    flex: 1,
   },
   homeIndicator: {
     display: 'flex',
