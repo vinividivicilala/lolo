@@ -22,13 +22,11 @@ export default function HomePage() {
   const [donationTotal, setDonationTotal] = useState(1250000);
   const [isLoading, setIsLoading] = useState(false);
   
-  // Donation History State
+  // Donation History State - only show last 3 donations
   const [donationHistory, setDonationHistory] = useState([
     { id: 1, amount: 50000, date: new Date(), campaign: 'Bantu Anak Yatim', status: 'success' },
     { id: 2, amount: 100000, date: new Date(Date.now() - 86400000), campaign: 'Kebersihan Lingkungan', status: 'success' },
     { id: 3, amount: 75000, date: new Date(Date.now() - 172800000), campaign: 'Donasi Bencana Alam', status: 'success' },
-    { id: 4, amount: 200000, date: new Date(Date.now() - 259200000), campaign: 'Pendidikan Anak', status: 'success' },
-    { id: 5, amount: 50000, date: new Date(Date.now() - 345600000), campaign: 'Bantuan Sembako', status: 'success' },
   ]);
   
   const [activeCardIndex, setActiveCardIndex] = useState(0);
@@ -55,7 +53,7 @@ export default function HomePage() {
     if (diffHours < 1) return 'Baru saja';
     if (diffHours < 24) return `${diffHours} jam lalu`;
     if (diffHours < 48) return 'Kemarin';
-    return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+    return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
   };
 
   const handleReload = () => {
@@ -69,7 +67,7 @@ export default function HomePage() {
     const addAmount = 50000;
     setDonationTotal(prev => prev + addAmount);
     
-    // Add to donation history automatically
+    // Add to donation history and keep only last 3
     const newDonation = {
       id: Date.now(),
       amount: addAmount,
@@ -77,7 +75,11 @@ export default function HomePage() {
       campaign: 'Donasi Mandiri',
       status: 'success' as const,
     };
-    setDonationHistory(prev => [newDonation, ...prev]);
+    setDonationHistory(prev => {
+      const updated = [newDonation, ...prev];
+      // Keep only last 3 donations
+      return updated.slice(0, 3);
+    });
     
     const element = document.querySelector('.donation-total');
     if (element) {
@@ -332,9 +334,10 @@ export default function HomePage() {
                   {donationHistory.length === 0 ? (
                     <div style={styles.emptyHistory}>Belum ada riwayat donasi</div>
                   ) : (
-                    donationHistory.map(donation => (
+                    donationHistory.map((donation, index) => (
                       <div key={donation.id} style={styles.historyItem}>
-                        <div style={styles.historyLeft}>
+                        <div style={styles.historyNumber}>{index + 1}</div>
+                        <div style={styles.historyContent}>
                           <div style={styles.historyAmount}>{formatRupiah(donation.amount)}</div>
                           <div style={styles.historyCampaign}>{donation.campaign}</div>
                         </div>
@@ -720,40 +723,55 @@ const styles: { [key: string]: React.CSSProperties } = {
     marginTop: '8px',
   },
   historyList: {
-    maxHeight: '280px',
-    overflowY: 'auto',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '16px',
     marginTop: '8px',
   },
   historyItem: {
     display: 'flex',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    gap: '12px',
     padding: '12px 0',
     borderBottom: '1px solid #2c2c2e',
   },
-  historyLeft: {
+  historyNumber: {
+    width: '28px',
+    height: '28px',
+    borderRadius: '50%',
+    backgroundColor: '#4cd964',
+    color: '#000',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: '12px',
+    fontWeight: '600',
+    flexShrink: 0,
+  },
+  historyContent: {
     flex: 1,
   },
   historyAmount: {
-    fontSize: '15px',
+    fontSize: '14px',
     fontWeight: '600',
     color: '#fff',
-    marginBottom: '4px',
+    marginBottom: '2px',
   },
   historyCampaign: {
-    fontSize: '12px',
+    fontSize: '11px',
     color: '#8e8e93',
   },
   historyRight: {
     textAlign: 'right',
+    flexShrink: 0,
   },
   historyDate: {
-    fontSize: '11px',
+    fontSize: '10px',
     color: '#8e8e93',
     marginBottom: '2px',
   },
   historyStatus: {
-    fontSize: '11px',
+    fontSize: '10px',
     color: '#4cd964',
     fontWeight: '500',
   },
