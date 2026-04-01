@@ -62,7 +62,7 @@ export default function CategoriesPage() {
   };
 
   const renderNorthwestArrow = () => (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M15 9L9 15" />
       <path d="M9 9L15 15" />
       <path d="M9 9H15V15" />
@@ -70,51 +70,53 @@ export default function CategoriesPage() {
   );
 
   return (
-    <div style={styles.wrapper}>
-      <div style={styles.container} className="categories-container">
-        <div style={styles.header}>
-          <button onClick={handleBack} style={styles.backButton}>
-            {renderNorthwestArrow()}
-          </button>
-          <h1 style={styles.title}>Categories</h1>
-          <div style={styles.placeholder} />
-        </div>
-
-        <div style={styles.content}>
-          {/* Favorite Section */}
-          <div style={styles.section}>
-            <h2 style={styles.sectionTitle}>Menu Favorit</h2>
-            <div style={styles.favoriteList}>
-              {favoriteCategories.length === 0 ? (
-                <div style={styles.emptyFavorites}>Belum ada menu favorit</div>
-              ) : (
-                favoriteCategories.map((category) => (
-                  <div 
-                    key={category.id} 
-                    style={styles.favoriteItem}
-                    onClick={() => handleCategoryClick(category.name)}
-                  >
-                    <span style={styles.favoriteName}>{category.name}</span>
-                    <span style={styles.visitCount}>{category.visitCount} kali</span>
-                  </div>
-                ))
-              )}
-            </div>
+    <>
+      <div style={styles.wrapper}>
+        <div style={styles.container} className="categories-container page-enter">
+          <div style={styles.header}>
+            <button onClick={handleBack} style={styles.backButton}>
+              {renderNorthwestArrow()}
+            </button>
+            <h1 style={styles.title}>Categories</h1>
+            <div style={styles.placeholder} />
           </div>
 
-          {/* All Categories Section */}
-          <div style={styles.section}>
-            <h2 style={styles.sectionTitle}>Lainnya</h2>
-            <div style={styles.categoryGrid}>
-              {allCategories.map((category) => (
-                <div 
-                  key={category.id} 
-                  style={styles.categoryItem}
-                  onClick={() => handleCategoryClick(category.name)}
-                >
-                  <span style={styles.categoryName}>{category.name}</span>
-                </div>
-              ))}
+          <div style={styles.content}>
+            {/* Favorite Section */}
+            <div style={styles.section}>
+              <h2 style={styles.sectionTitle}>Menu Favorit</h2>
+              <div style={styles.favoriteList}>
+                {favoriteCategories.length === 0 ? (
+                  <div style={styles.emptyFavorites}>Belum ada menu favorit</div>
+                ) : (
+                  favoriteCategories.map((category) => (
+                    <div 
+                      key={category.id} 
+                      style={styles.favoriteItem}
+                      onClick={() => handleCategoryClick(category.name)}
+                    >
+                      <span style={styles.favoriteName}>{category.name}</span>
+                      <span style={styles.visitCount}>{category.visitCount} kali</span>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            {/* All Categories Section */}
+            <div style={styles.section}>
+              <h2 style={styles.sectionTitle}>Lainnya</h2>
+              <div style={styles.categoryGrid}>
+                {allCategories.map((category) => (
+                  <div 
+                    key={category.id} 
+                    style={styles.categoryItem}
+                    onClick={() => handleCategoryClick(category.name)}
+                  >
+                    <span style={styles.categoryName}>{category.name}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -125,6 +127,9 @@ export default function CategoriesPage() {
         
         * {
           font-family: 'Hubot Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
         }
         
         @keyframes slideInFromRight {
@@ -149,7 +154,7 @@ export default function CategoriesPage() {
           }
         }
         
-        .categories-container {
+        .page-enter {
           animation: slideInFromRight 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
         }
         
@@ -157,16 +162,18 @@ export default function CategoriesPage() {
           animation: slideOutToLeft 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
         }
         
-        .category-item-hover {
-          transition: all 0.2s ease;
+        button {
+          background: none;
+          border: none;
+          cursor: pointer;
         }
         
-        .category-item-hover:active {
-          transform: scale(0.98);
-          background-color: #2c2c2e;
+        ::-webkit-scrollbar {
+          width: 0;
+          background: transparent;
         }
       `}</style>
-    </div>
+    </>
   );
 }
 
@@ -202,7 +209,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingTop: 'env(safe-area-inset-top)',
-    marginBottom: '24px',
+    marginBottom: '32px',
     flexShrink: 0,
   },
   backButton: {
@@ -210,11 +217,12 @@ const styles: { [key: string]: React.CSSProperties } = {
     border: 'none',
     cursor: 'pointer',
     color: '#007aff',
-    padding: '8px',
+    padding: '4px',
     borderRadius: '50%',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
+    transition: 'all 0.2s ease',
   },
   title: {
     fontSize: '18px',
@@ -223,12 +231,13 @@ const styles: { [key: string]: React.CSSProperties } = {
     margin: 0,
   },
   placeholder: {
-    width: '40px',
+    width: '36px',
   },
   content: {
     flex: 1,
     overflowY: 'auto',
     overflowX: 'hidden',
+    paddingBottom: '20px',
   },
   section: {
     marginBottom: '32px',
@@ -239,6 +248,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     color: '#8e8e93',
     marginBottom: '12px',
     letterSpacing: '-0.2px',
+    textTransform: 'uppercase',
   },
   favoriteList: {
     display: 'flex',
@@ -274,29 +284,26 @@ const styles: { [key: string]: React.CSSProperties } = {
     borderRadius: '12px',
   },
   categoryGrid: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '6px',
+    display: 'grid',
+    gridTemplateColumns: 'repeat(4, 1fr)',
+    gap: '8px',
   },
   categoryItem: {
     display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: '14px 16px',
-    backgroundColor: '#1c1c1e',
-    borderRadius: '12px',
-    cursor: 'pointer',
-    transition: 'all 0.2s ease',
-  },
-  categoryName: {
-    fontSize: '16px',
-    fontWeight: '500',
-    color: '#ffffff',
-  },
-  arrowIcon: {
-    color: '#007aff',
-    display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
+    padding: '12px 8px',
+    backgroundColor: 'transparent',
+    borderRadius: '0',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+    textAlign: 'center',
+  },
+  categoryName: {
+    fontSize: '14px',
+    fontWeight: '500',
+    color: '#ffffff',
+    textAlign: 'center',
+    lineHeight: '1.3',
   },
 };
