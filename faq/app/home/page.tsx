@@ -39,10 +39,9 @@ export default function HomePage() {
   const [scrollLeft, setScrollLeft] = useState(0);
 
   const categories = [
-    { id: 1, name: 'Masjid', icon: 'mosque' },
-    { id: 2, name: 'Pendidikan', icon: 'education' },
-    { id: 3, name: 'Kesehatan', icon: 'health' },
-    { id: 4, name: 'Umum', icon: 'general' },
+    { id: 1, name: 'Panti Asuhan', icon: 'orphanage' },
+    { id: 2, name: 'Masjid', icon: 'mosque' },
+    { id: 3, name: 'Lainnya', icon: 'more' },
   ];
 
   const formatRupiah = (amount: number) => {
@@ -74,7 +73,6 @@ export default function HomePage() {
     const addAmount = 50000;
     setDonationTotal(prev => prev + addAmount);
     
-    // Add to donation history and keep only last 3
     const newDonation = {
       id: Date.now(),
       amount: addAmount,
@@ -84,7 +82,6 @@ export default function HomePage() {
     };
     setDonationHistory(prev => {
       const updated = [newDonation, ...prev];
-      // Keep only last 3 donations
       return updated.slice(0, 3);
     });
     
@@ -140,7 +137,6 @@ export default function HomePage() {
     }
   };
 
-  // Mouse drag handlers for desktop
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsDragging(true);
     setStartX(e.pageX - (carouselRef.current?.offsetLeft || 0));
@@ -164,7 +160,6 @@ export default function HomePage() {
     setIsDragging(false);
     if (carouselRef.current) {
       carouselRef.current.style.cursor = 'grab';
-      // Snap to nearest card after drag
       const scrollPosition = carouselRef.current.scrollLeft;
       const cardWidth = carouselRef.current.clientWidth;
       const newIndex = Math.round(scrollPosition / cardWidth);
@@ -172,7 +167,6 @@ export default function HomePage() {
     }
   };
 
-  // Touch handlers for mobile
   const handleTouchStart = (e: React.TouchEvent) => {
     setIsDragging(true);
     setStartX(e.touches[0].pageX - (carouselRef.current?.offsetLeft || 0));
@@ -191,7 +185,6 @@ export default function HomePage() {
   const handleTouchEnd = () => {
     setIsDragging(false);
     if (carouselRef.current) {
-      // Snap to nearest card after swipe
       const scrollPosition = carouselRef.current.scrollLeft;
       const cardWidth = carouselRef.current.clientWidth;
       const newIndex = Math.round(scrollPosition / cardWidth);
@@ -200,20 +193,30 @@ export default function HomePage() {
   };
 
   const handleCategoryClick = (categoryName: string) => {
-    router.push(`/categories/${categoryName.toLowerCase()}`);
-  };
-
-  const handleLainnyaClick = () => {
-    router.push('/categories');
+    if (categoryName === 'Lainnya') {
+      router.push('/categories');
+    } else {
+      router.push(`/categories/${categoryName.toLowerCase()}`);
+    }
   };
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
   const renderIcon = (iconName: string) => {
     switch(iconName) {
+      case 'orphanage':
+        return (
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 9L12 3L21 9L12 15L3 9Z" />
+            <path d="M12 15V21" />
+            <path d="M8 12V18" />
+            <path d="M16 12V18" />
+            <path d="M6 21H18" />
+          </svg>
+        );
       case 'mosque':
         return (
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M12 2L15 6H9L12 2Z" />
             <path d="M5 10L7 6H17L19 10H5Z" />
             <path d="M4 10H20V20H4V10Z" />
@@ -221,52 +224,22 @@ export default function HomePage() {
             <path d="M8 14H16" />
           </svg>
         );
-      case 'education':
+      case 'more':
         return (
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-            <path d="M12 3L2 8L12 13L22 8L12 3Z" />
-            <path d="M2 8V16" />
-            <path d="M6 11V17" />
-            <path d="M18 11V17" />
-            <path d="M22 8V16" />
-            <path d="M12 13V21" />
-          </svg>
-        );
-      case 'health':
-        return (
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-            <path d="M12 2L12 6" />
-            <path d="M12 10L12 14" />
-            <path d="M12 18L12 22" />
-            <path d="M2 12L6 12" />
-            <path d="M10 12L14 12" />
-            <path d="M18 12L22 12" />
-            <circle cx="12" cy="12" r="4" />
-          </svg>
-        );
-      case 'general':
-        return (
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="12" cy="12" r="10" />
-            <path d="M12 8L12 12" />
-            <path d="M12 16L12.01 16" />
+            <path d="M12 8V16" />
+            <path d="M8 12H16" />
           </svg>
         );
       default:
-        return (
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-            <path d="M12 2L15 6H9L12 2Z" />
-            <path d="M5 10L7 6H17L19 10H5Z" />
-            <path d="M4 10H20V20H4V10Z" />
-          </svg>
-        );
+        return null;
     }
   };
 
   return (
     <div style={styles.wrapper}>
       <div style={styles.container}>
-        {/* Header - Navbar */}
         <div style={styles.header}>
           <div style={styles.userInfo}>
             <div style={styles.userAvatar}>
@@ -281,7 +254,7 @@ export default function HomePage() {
                 style={styles.iconButton}
                 onClick={() => setShowNotifications(!showNotifications)}
               >
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                   <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
                   <path d="M13.73 21a2 2 0 0 1-3.46 0" />
                 </svg>
@@ -318,19 +291,17 @@ export default function HomePage() {
               style={styles.iconButton}
               onClick={() => setIsChatOpen(!isChatOpen)}
             >
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
               </svg>
             </button>
           </div>
         </div>
 
-        {/* Scrollable Main Content */}
         <div 
           ref={mainContentRef}
           style={styles.mainContent}
         >
-          {/* Carousel Section */}
           <div style={styles.carouselSection}>
             <div 
               ref={carouselRef}
@@ -344,7 +315,6 @@ export default function HomePage() {
               onTouchMove={handleTouchMove}
               onTouchEnd={handleTouchEnd}
             >
-              {/* Card 1 - Donation Card */}
               <div style={styles.card}>
                 <div style={styles.cardHeader}>
                   <h3 style={styles.cardTitle}>Jumlah Donasi</h3>
@@ -359,7 +329,7 @@ export default function HomePage() {
                       viewBox="0 0 24 24" 
                       fill="none" 
                       stroke="currentColor" 
-                      strokeWidth="2"
+                      strokeWidth="1.5"
                       style={{
                         animation: isLoading ? 'spin 0.8s linear infinite' : 'none',
                       }}
@@ -381,19 +351,18 @@ export default function HomePage() {
                 </div>
                 
                 <button onClick={handleAddDonation} style={styles.addButton}>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                     <line x1="12" y1="5" x2="12" y2="19" />
                     <line x1="5" y1="12" x2="19" y2="12" />
                   </svg>
                 </button>
               </div>
 
-              {/* Card 2 - Donation History Card */}
               <div style={styles.card}>
                 <div style={styles.cardHeader}>
                   <h3 style={styles.cardTitle}>Riwayat Donasi</h3>
                   <div style={styles.historyIcon}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                       <path d="M12 8v4l3 3M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" />
                     </svg>
                   </div>
@@ -421,7 +390,6 @@ export default function HomePage() {
               </div>
             </div>
             
-            {/* Dot Pagination */}
             <div style={styles.pagination}>
               {[0, 1].map((index) => (
                 <button
@@ -429,14 +397,13 @@ export default function HomePage() {
                   onClick={() => scrollToCard(index)}
                   style={{
                     ...styles.paginationDot,
-                    backgroundColor: activeCardIndex === index ? '#4cd964' : '#3a3a3c',
+                    backgroundColor: activeCardIndex === index ? '#ffffff' : '#3a3a3c',
                     width: activeCardIndex === index ? '24px' : '8px',
                   }}
                 />
               ))}
             </div>
 
-            {/* Category Icons Section */}
             <div style={styles.categorySection}>
               <div style={styles.categoryGrid}>
                 {categories.map((category) => (
@@ -451,34 +418,18 @@ export default function HomePage() {
                     <span style={styles.categoryName}>{category.name}</span>
                   </div>
                 ))}
-                <div 
-                  style={styles.categoryItem}
-                  onClick={handleLainnyaClick}
-                >
-                  <div style={styles.categoryIcon}>
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                      <circle cx="12" cy="12" r="10" />
-                      <path d="M12 8L12 16" />
-                      <path d="M8 12L16 12" />
-                    </svg>
-                  </div>
-                  <span style={styles.categoryName}>Lainnya</span>
-                </div>
               </div>
             </div>
           </div>
 
-          {/* Additional Content Space */}
           <div style={styles.extraSpace} />
         </div>
 
-        {/* Home Indicator for iOS */}
         <div style={styles.homeIndicator}>
           <div style={styles.homeIndicatorBar} />
         </div>
       </div>
 
-      {/* Live Chat Modal */}
       {isChatOpen && (
         <div style={styles.chatModal}>
           <div style={styles.chatHeader}>
@@ -500,8 +451,8 @@ export default function HomePage() {
               >
                 <div style={{
                   ...styles.messageBubble,
-                  backgroundColor: msg.sender === 'user' ? '#4cd964' : '#2c2c2e',
-                  color: msg.sender === 'user' ? '#000' : '#fff'
+                  backgroundColor: msg.sender === 'user' ? '#ffffff' : '#2c2c2e',
+                  color: msg.sender === 'user' ? '#000000' : '#ffffff'
                 }}>
                   {msg.text}
                 </div>
@@ -520,7 +471,7 @@ export default function HomePage() {
               style={styles.chatInput}
             />
             <button onClick={sendMessage} style={styles.sendButton}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                 <line x1="22" y1="2" x2="11" y2="13" />
                 <polygon points="22 2 15 22 11 13 2 9 22 2" />
               </svg>
@@ -529,7 +480,13 @@ export default function HomePage() {
         </div>
       )}
 
-      <style jsx>{`
+      <style jsx global>{`
+        @import url('https://fonts.googleapis.com/css2?family=Hubot+Sans:wght@400;500;600;700&display=swap');
+        
+        * {
+          font-family: 'Hubot Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+        
         @keyframes spin {
           from {
             transform: rotate(0deg);
@@ -575,8 +532,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#000',
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
+    backgroundColor: '#000000',
     overflow: 'hidden',
     position: 'fixed',
     top: 0,
@@ -591,8 +547,8 @@ const styles: { [key: string]: React.CSSProperties } = {
     display: 'flex',
     flexDirection: 'column',
     padding: '20px 24px 0 24px',
-    backgroundColor: '#000',
-    color: '#fff',
+    backgroundColor: '#000000',
+    color: '#ffffff',
     position: 'relative',
     overflow: 'hidden',
   },
@@ -615,8 +571,8 @@ const styles: { [key: string]: React.CSSProperties } = {
     width: '40px',
     height: '40px',
     borderRadius: '50%',
-    backgroundColor: '#4cd964',
-    color: '#fff',
+    backgroundColor: '#ffffff',
+    color: '#000000',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -626,7 +582,7 @@ const styles: { [key: string]: React.CSSProperties } = {
   userName: {
     fontSize: '16px',
     fontWeight: '600',
-    color: '#fff',
+    color: '#ffffff',
   },
   navRight: {
     display: 'flex',
@@ -637,7 +593,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     background: 'none',
     border: 'none',
     cursor: 'pointer',
-    color: '#fff',
+    color: '#ffffff',
     padding: '8px',
     borderRadius: '50%',
     display: 'flex',
@@ -651,7 +607,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     top: '2px',
     right: '2px',
     backgroundColor: '#ff3b30',
-    color: '#fff',
+    color: '#ffffff',
     fontSize: '10px',
     fontWeight: '600',
     width: '16px',
@@ -704,11 +660,11 @@ const styles: { [key: string]: React.CSSProperties } = {
     width: '8px',
     height: '8px',
     borderRadius: '50%',
-    backgroundColor: '#4cd964',
+    backgroundColor: '#ffffff',
   },
   notificationText: {
     fontSize: '13px',
-    color: '#fff',
+    color: '#ffffff',
   },
   emptyState: {
     padding: '20px',
@@ -723,7 +679,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     marginRight: '-24px',
     paddingRight: '24px',
     scrollbarWidth: 'thin',
-    scrollbarColor: '#4cd964 #2c2c2e',
+    scrollbarColor: '#ffffff #2c2c2e',
   },
   carouselSection: {
     marginBottom: '20px',
@@ -786,7 +742,7 @@ const styles: { [key: string]: React.CSSProperties } = {
   donationTotal: {
     fontSize: '32px',
     fontWeight: '700',
-    color: '#fff',
+    color: '#ffffff',
     marginBottom: '20px',
     textAlign: 'left',
     transition: 'all 0.3s ease',
@@ -814,10 +770,10 @@ const styles: { [key: string]: React.CSSProperties } = {
     justifyContent: 'center',
     width: '48px',
     height: '48px',
-    backgroundColor: '#4cd964',
+    backgroundColor: '#ffffff',
     border: 'none',
     borderRadius: '50%',
-    color: '#000',
+    color: '#000000',
     cursor: 'pointer',
     transition: 'all 0.2s',
     marginTop: '8px',
@@ -839,8 +795,8 @@ const styles: { [key: string]: React.CSSProperties } = {
     width: '28px',
     height: '28px',
     borderRadius: '50%',
-    backgroundColor: '#4cd964',
-    color: '#000',
+    backgroundColor: '#ffffff',
+    color: '#000000',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -854,7 +810,7 @@ const styles: { [key: string]: React.CSSProperties } = {
   historyAmount: {
     fontSize: '14px',
     fontWeight: '600',
-    color: '#fff',
+    color: '#ffffff',
     marginBottom: '2px',
   },
   historyCampaign: {
@@ -872,7 +828,7 @@ const styles: { [key: string]: React.CSSProperties } = {
   },
   historyStatus: {
     fontSize: '10px',
-    color: '#4cd964',
+    color: '#ffffff',
     fontWeight: '500',
   },
   emptyHistory: {
@@ -898,14 +854,14 @@ const styles: { [key: string]: React.CSSProperties } = {
     padding: 0,
   },
   categorySection: {
-    marginTop: '24px',
+    marginTop: '32px',
     marginBottom: '8px',
   },
   categoryGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(4, 1fr)',
+    display: 'flex',
+    justifyContent: 'space-around',
+    alignItems: 'center',
     gap: '16px',
-    rowGap: '20px',
   },
   categoryItem: {
     display: 'flex',
@@ -914,6 +870,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     gap: '8px',
     cursor: 'pointer',
     transition: 'transform 0.2s ease',
+    flex: 1,
   },
   categoryIcon: {
     width: '56px',
@@ -924,10 +881,10 @@ const styles: { [key: string]: React.CSSProperties } = {
     alignItems: 'center',
     justifyContent: 'center',
     transition: 'all 0.2s ease',
-    color: '#4cd964',
+    color: '#ffffff',
   },
   categoryName: {
-    fontSize: '11px',
+    fontSize: '12px',
     color: '#8e8e93',
     textAlign: 'center',
     fontWeight: '500',
@@ -969,7 +926,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     alignItems: 'center',
     padding: '14px 16px',
     borderBottom: '1px solid #2c2c2e',
-    backgroundColor: '#000',
+    backgroundColor: '#000000',
   },
   chatHeaderLeft: {
     display: 'flex',
@@ -980,12 +937,12 @@ const styles: { [key: string]: React.CSSProperties } = {
     width: '8px',
     height: '8px',
     borderRadius: '50%',
-    backgroundColor: '#4cd964',
+    backgroundColor: '#ffffff',
   },
   chatTitle: {
     fontSize: '15px',
     fontWeight: '600',
-    color: '#fff',
+    color: '#ffffff',
   },
   closeChat: {
     background: 'none',
@@ -1030,14 +987,14 @@ const styles: { [key: string]: React.CSSProperties } = {
     padding: '10px 14px',
     borderRadius: '24px',
     border: '1px solid #2c2c2e',
-    backgroundColor: '#000',
-    color: '#fff',
+    backgroundColor: '#000000',
+    color: '#ffffff',
     fontSize: '13px',
     outline: 'none',
     fontFamily: 'inherit',
   },
   sendButton: {
-    background: '#4cd964',
+    background: '#ffffff',
     border: 'none',
     borderRadius: '50%',
     width: '38px',
@@ -1046,6 +1003,6 @@ const styles: { [key: string]: React.CSSProperties } = {
     alignItems: 'center',
     justifyContent: 'center',
     cursor: 'pointer',
-    color: '#000',
+    color: '#000000',
   },
 };
