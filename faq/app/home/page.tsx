@@ -38,6 +38,16 @@ export default function HomePage() {
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
 
+  const categories = [
+    { id: 1, name: 'Masjid', icon: '🕌' },
+    { id: 2, name: 'Pendidikan', icon: '📚' },
+    { id: 3, name: 'Kesehatan', icon: '🏥' },
+    { id: 4, name: 'Umum', icon: '🤝' },
+    { id: 5, name: 'Panti Asuhan', icon: '🏠' },
+    { id: 6, name: 'Panti Jompo', icon: '👴' },
+    { id: 7, name: 'Lainnya', icon: '📌' },
+  ];
+
   const formatRupiah = (amount: number) => {
     return new Intl.NumberFormat('id-ID', {
       style: 'currency',
@@ -365,6 +375,20 @@ export default function HomePage() {
                   }}
                 />
               ))}
+            </div>
+
+            {/* Category Icons Section */}
+            <div style={styles.categorySection}>
+              <div style={styles.categoryGrid}>
+                {categories.map((category) => (
+                  <div key={category.id} style={styles.categoryItem}>
+                    <div style={styles.categoryIcon}>
+                      <span style={styles.categoryIconText}>{category.icon}</span>
+                    </div>
+                    <span style={styles.categoryName}>{category.name}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -796,6 +820,43 @@ const styles: { [key: string]: React.CSSProperties } = {
     cursor: 'pointer',
     transition: 'all 0.3s ease',
     padding: 0,
+  },
+  categorySection: {
+    marginTop: '24px',
+    marginBottom: '8px',
+  },
+  categoryGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(4, 1fr)',
+    gap: '16px',
+    rowGap: '20px',
+  },
+  categoryItem: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '8px',
+    cursor: 'pointer',
+    transition: 'transform 0.2s ease',
+  },
+  categoryIcon: {
+    width: '56px',
+    height: '56px',
+    borderRadius: '28px',
+    backgroundColor: '#1c1c1e',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    transition: 'all 0.2s ease',
+  },
+  categoryIconText: {
+    fontSize: '28px',
+  },
+  categoryName: {
+    fontSize: '11px',
+    color: '#8e8e93',
+    textAlign: 'center',
+    fontWeight: '500',
   },
   extraSpace: {
     height: '20px',
