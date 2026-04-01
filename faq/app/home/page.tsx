@@ -22,11 +22,9 @@ export default function HomePage() {
   const [donationTotal, setDonationTotal] = useState(1250000);
   const [isLoading, setIsLoading] = useState(false);
   
-  // Donation History State - only show last 3 donations
+  // Donation History State - only show last 1 donation
   const [donationHistory, setDonationHistory] = useState([
     { id: 1, amount: 50000, date: new Date(), campaign: 'Bantu Anak Yatim', status: 'success' },
-    { id: 2, amount: 100000, date: new Date(Date.now() - 86400000), campaign: 'Kebersihan Lingkungan', status: 'success' },
-    { id: 3, amount: 75000, date: new Date(Date.now() - 172800000), campaign: 'Donasi Bencana Alam', status: 'success' },
   ]);
   
   const [activeCardIndex, setActiveCardIndex] = useState(0);
@@ -39,9 +37,10 @@ export default function HomePage() {
   const [scrollLeft, setScrollLeft] = useState(0);
 
   const categories = [
-    { id: 1, name: 'Panti Asuhan', icon: 'orphanage' },
-    { id: 2, name: 'Masjid', icon: 'mosque' },
-    { id: 3, name: 'Lainnya', icon: 'more' },
+    { id: 1, name: 'Panti Asuhan' },
+    { id: 2, name: 'Masjid' },
+    { id: 3, name: 'Umum' },
+    { id: 4, name: 'Lainnya' },
   ];
 
   const formatRupiah = (amount: number) => {
@@ -82,7 +81,7 @@ export default function HomePage() {
     };
     setDonationHistory(prev => {
       const updated = [newDonation, ...prev];
-      return updated.slice(0, 3);
+      return updated.slice(0, 1);
     });
     
     const element = document.querySelector('.donation-total');
@@ -201,41 +200,6 @@ export default function HomePage() {
   };
 
   const unreadCount = notifications.filter(n => !n.read).length;
-
-  const renderIcon = (iconName: string) => {
-    switch(iconName) {
-      case 'orphanage':
-        return (
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M3 9L12 3L21 9L12 15L3 9Z" />
-            <path d="M12 15V21" />
-            <path d="M8 12V18" />
-            <path d="M16 12V18" />
-            <path d="M6 21H18" />
-          </svg>
-        );
-      case 'mosque':
-        return (
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 2L15 6H9L12 2Z" />
-            <path d="M5 10L7 6H17L19 10H5Z" />
-            <path d="M4 10H20V20H4V10Z" />
-            <path d="M12 14V20" />
-            <path d="M8 14H16" />
-          </svg>
-        );
-      case 'more':
-        return (
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="10" />
-            <path d="M12 8V16" />
-            <path d="M8 12H16" />
-          </svg>
-        );
-      default:
-        return null;
-    }
-  };
 
   return (
     <div style={styles.wrapper}>
@@ -372,9 +336,8 @@ export default function HomePage() {
                   {donationHistory.length === 0 ? (
                     <div style={styles.emptyHistory}>Belum ada riwayat donasi</div>
                   ) : (
-                    donationHistory.map((donation, index) => (
+                    donationHistory.map((donation) => (
                       <div key={donation.id} style={styles.historyItem}>
-                        <div style={styles.historyNumber}>{index + 1}</div>
                         <div style={styles.historyContent}>
                           <div style={styles.historyAmount}>{formatRupiah(donation.amount)}</div>
                           <div style={styles.historyCampaign}>{donation.campaign}</div>
@@ -397,7 +360,7 @@ export default function HomePage() {
                   onClick={() => scrollToCard(index)}
                   style={{
                     ...styles.paginationDot,
-                    backgroundColor: activeCardIndex === index ? '#ffffff' : '#3a3a3c',
+                    backgroundColor: activeCardIndex === index ? '#007aff' : '#3a3a3c',
                     width: activeCardIndex === index ? '24px' : '8px',
                   }}
                 />
@@ -412,9 +375,6 @@ export default function HomePage() {
                     style={styles.categoryItem}
                     onClick={() => handleCategoryClick(category.name)}
                   >
-                    <div style={styles.categoryIcon}>
-                      {renderIcon(category.icon)}
-                    </div>
                     <span style={styles.categoryName}>{category.name}</span>
                   </div>
                 ))}
@@ -451,8 +411,8 @@ export default function HomePage() {
               >
                 <div style={{
                   ...styles.messageBubble,
-                  backgroundColor: msg.sender === 'user' ? '#ffffff' : '#2c2c2e',
-                  color: msg.sender === 'user' ? '#000000' : '#ffffff'
+                  backgroundColor: msg.sender === 'user' ? '#007aff' : '#2c2c2e',
+                  color: msg.sender === 'user' ? '#ffffff' : '#ffffff'
                 }}>
                   {msg.text}
                 </div>
@@ -571,8 +531,8 @@ const styles: { [key: string]: React.CSSProperties } = {
     width: '40px',
     height: '40px',
     borderRadius: '50%',
-    backgroundColor: '#ffffff',
-    color: '#000000',
+    backgroundColor: '#007aff',
+    color: '#ffffff',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -606,7 +566,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     position: 'absolute',
     top: '2px',
     right: '2px',
-    backgroundColor: '#ff3b30',
+    backgroundColor: '#007aff',
     color: '#ffffff',
     fontSize: '10px',
     fontWeight: '600',
@@ -660,7 +620,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     width: '8px',
     height: '8px',
     borderRadius: '50%',
-    backgroundColor: '#ffffff',
+    backgroundColor: '#007aff',
   },
   notificationText: {
     fontSize: '13px',
@@ -679,7 +639,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     marginRight: '-24px',
     paddingRight: '24px',
     scrollbarWidth: 'thin',
-    scrollbarColor: '#ffffff #2c2c2e',
+    scrollbarColor: '#007aff #2c2c2e',
   },
   carouselSection: {
     marginBottom: '20px',
@@ -770,10 +730,10 @@ const styles: { [key: string]: React.CSSProperties } = {
     justifyContent: 'center',
     width: '48px',
     height: '48px',
-    backgroundColor: '#ffffff',
+    backgroundColor: '#007aff',
     border: 'none',
     borderRadius: '50%',
-    color: '#000000',
+    color: '#ffffff',
     cursor: 'pointer',
     transition: 'all 0.2s',
     marginTop: '8px',
@@ -786,35 +746,23 @@ const styles: { [key: string]: React.CSSProperties } = {
   },
   historyItem: {
     display: 'flex',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    gap: '12px',
-    padding: '12px 0',
-    borderBottom: '1px solid #2c2c2e',
-  },
-  historyNumber: {
-    width: '28px',
-    height: '28px',
-    borderRadius: '50%',
-    backgroundColor: '#ffffff',
-    color: '#000000',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: '12px',
-    fontWeight: '600',
-    flexShrink: 0,
+    padding: '16px',
+    backgroundColor: '#2c2c2e',
+    borderRadius: '12px',
   },
   historyContent: {
     flex: 1,
   },
   historyAmount: {
-    fontSize: '14px',
+    fontSize: '16px',
     fontWeight: '600',
     color: '#ffffff',
-    marginBottom: '2px',
+    marginBottom: '4px',
   },
   historyCampaign: {
-    fontSize: '11px',
+    fontSize: '12px',
     color: '#8e8e93',
   },
   historyRight: {
@@ -822,13 +770,13 @@ const styles: { [key: string]: React.CSSProperties } = {
     flexShrink: 0,
   },
   historyDate: {
-    fontSize: '10px',
+    fontSize: '11px',
     color: '#8e8e93',
     marginBottom: '2px',
   },
   historyStatus: {
-    fontSize: '10px',
-    color: '#ffffff',
+    fontSize: '11px',
+    color: '#007aff',
     fontWeight: '500',
   },
   emptyHistory: {
@@ -859,35 +807,25 @@ const styles: { [key: string]: React.CSSProperties } = {
   },
   categoryGrid: {
     display: 'flex',
-    justifyContent: 'space-around',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    gap: '16px',
+    gap: '8px',
   },
   categoryItem: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    gap: '8px',
+    gap: '0px',
     cursor: 'pointer',
     transition: 'transform 0.2s ease',
     flex: 1,
-  },
-  categoryIcon: {
-    width: '56px',
-    height: '56px',
-    borderRadius: '28px',
-    backgroundColor: '#1c1c1e',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    transition: 'all 0.2s ease',
-    color: '#ffffff',
+    padding: '12px 0',
   },
   categoryName: {
-    fontSize: '12px',
-    color: '#8e8e93',
-    textAlign: 'center',
+    fontSize: '16px',
     fontWeight: '500',
+    color: '#ffffff',
+    textAlign: 'center',
   },
   extraSpace: {
     height: '20px',
@@ -937,7 +875,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     width: '8px',
     height: '8px',
     borderRadius: '50%',
-    backgroundColor: '#ffffff',
+    backgroundColor: '#007aff',
   },
   chatTitle: {
     fontSize: '15px',
@@ -994,7 +932,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     fontFamily: 'inherit',
   },
   sendButton: {
-    background: '#ffffff',
+    background: '#007aff',
     border: 'none',
     borderRadius: '50%',
     width: '38px',
@@ -1003,6 +941,6 @@ const styles: { [key: string]: React.CSSProperties } = {
     alignItems: 'center',
     justifyContent: 'center',
     cursor: 'pointer',
-    color: '#000000',
+    color: '#ffffff',
   },
 };
