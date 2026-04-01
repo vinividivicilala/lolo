@@ -2,6 +2,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 interface CategoryPageProps {
   params: {
@@ -12,8 +13,12 @@ interface CategoryPageProps {
 export default function CategoryDetailPage({ params }: CategoryPageProps) {
   const router = useRouter();
   const categoryName = params.slug.replace(/-/g, ' ');
+  const [isAnimating, setIsAnimating] = useState(false);
 
   const handleBack = () => {
+    if (isAnimating) return;
+    setIsAnimating(true);
+    
     const container = document.querySelector('.category-container');
     if (container) {
       container.classList.add('page-transition-out');
@@ -25,12 +30,24 @@ export default function CategoryDetailPage({ params }: CategoryPageProps) {
     }
   };
 
+  useEffect(() => {
+    const handlePopState = () => {
+      const container = document.querySelector('.category-container');
+      if (container) {
+        container.classList.add('page-transition-out');
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
   return (
     <div style={styles.wrapper}>
       <div className="category-container" style={styles.container}>
         <div style={styles.header}>
           <button onClick={handleBack} style={styles.backButton}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M15 18l-6-6 6-6" />
             </svg>
           </button>
@@ -39,7 +56,27 @@ export default function CategoryDetailPage({ params }: CategoryPageProps) {
         </div>
 
         <div style={styles.content}>
-          <p style={styles.description}>Halaman donasi untuk kategori {categoryName}</p>
+          <div style={styles.categoriesGrid}>
+            {/* Daftar kategori akan ditampilkan di sini */}
+            <div style={styles.categoryItem}>
+              <span style={styles.categoryName}>Donasi Pendidikan</span>
+            </div>
+            <div style={styles.categoryItem}>
+              <span style={styles.categoryName}>Donasi Kesehatan</span>
+            </div>
+            <div style={styles.categoryItem}>
+              <span style={styles.categoryName}>Donasi Bencana</span>
+            </div>
+            <div style={styles.categoryItem}>
+              <span style={styles.categoryName}>Donasi Sosial</span>
+            </div>
+            <div style={styles.categoryItem}>
+              <span style={styles.categoryName}>Donasi Lingkungan</span>
+            </div>
+            <div style={styles.categoryItem}>
+              <span style={styles.categoryName}>Donasi Infrastruktur</span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -73,11 +110,11 @@ export default function CategoryDetailPage({ params }: CategoryPageProps) {
         }
         
         .page-transition-out {
-          animation: slideOutLeft 0.3s ease-out forwards;
+          animation: slideOutLeft 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
         }
         
         .category-container {
-          animation: slideInRight 0.3s ease-out;
+          animation: slideInRight 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
       `}</style>
     </div>
@@ -109,15 +146,21 @@ const styles: { [key: string]: React.CSSProperties } = {
     backgroundColor: '#000000',
     color: '#ffffff',
     position: 'relative',
-    overflow: 'hidden',
+    overflowY: 'auto',
+    overflowX: 'hidden',
   },
   header: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingTop: 'env(safe-area-inset-top)',
-    marginBottom: '24px',
+    marginBottom: '32px',
     flexShrink: 0,
+    position: 'sticky',
+    top: 0,
+    backgroundColor: '#000000',
+    zIndex: 10,
+    paddingBottom: '12px',
   },
   backButton: {
     background: 'none',
@@ -129,13 +172,15 @@ const styles: { [key: string]: React.CSSProperties } = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
+    transition: 'opacity 0.2s',
   },
   title: {
-    fontSize: '18px',
+    fontSize: '20px',
     fontWeight: '600',
     color: '#ffffff',
     margin: 0,
     textTransform: 'capitalize',
+    letterSpacing: '-0.3px',
   },
   placeholder: {
     width: '40px',
@@ -143,12 +188,26 @@ const styles: { [key: string]: React.CSSProperties } = {
   content: {
     flex: 1,
     display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
+    flexDirection: 'column',
   },
-  description: {
-    fontSize: '16px',
-    color: '#8e8e93',
-    textAlign: 'center',
+  categoriesGrid: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0px',
+    width: '100%',
+  },
+  categoryItem: {
+    display: 'flex',
+    alignItems: 'center',
+    padding: '16px 0',
+    borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+    cursor: 'pointer',
+    transition: 'background-color 0.2s',
+  },
+  categoryName: {
+    fontSize: '17px',
+    fontWeight: '400',
+    color: '#ffffff',
+    flex: 1,
   },
 };
