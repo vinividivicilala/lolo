@@ -228,6 +228,10 @@ export default function HomePage(): React.JSX.Element {
   const [showGsapLoading, setShowGsapLoading] = useState(true);
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
 
+  // State untuk MENURU Overlay setelah loading
+  const [showMenuruOverlay, setShowMenuruOverlay] = useState(true);
+  const [hasScrolled, setHasScrolled] = useState(false);
+
   // State untuk kalender
   const [showCalendarModal, setShowCalendarModal] = useState(false);
   const [currentYear, setCurrentYear] = useState(2026);
@@ -1463,7 +1467,11 @@ export default function HomePage(): React.JSX.Element {
         opacity: 0,
         duration: 0.5,
         ease: "power2.out",
-        onComplete: () => setShowGsapLoading(false)
+        onComplete: () => {
+          setShowGsapLoading(false);
+          // Setelah loading selesai, tampilkan MENURU overlay
+          setShowMenuruOverlay(true);
+        }
       });
       loadingTimeline.kill();
     }, 3000);
@@ -1472,6 +1480,34 @@ export default function HomePage(): React.JSX.Element {
       clearTimeout(timeout);
     };
   }, []);
+
+  // Scroll handler untuk menghilangkan MENURU overlay
+  useEffect(() => {
+    if (!showMenuruOverlay) return;
+
+    const handleScroll = () => {
+      if (!hasScrolled && window.scrollY > 50) {
+        setHasScrolled(true);
+        // Animasi fade out untuk overlay
+        const overlayElement = document.getElementById('menuru-overlay');
+        if (overlayElement) {
+          gsap.to(overlayElement, {
+            opacity: 0,
+            duration: 0.8,
+            ease: "power2.out",
+            onComplete: () => {
+              setShowMenuruOverlay(false);
+            }
+          });
+        } else {
+          setShowMenuruOverlay(false);
+        }
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [showMenuruOverlay, hasScrolled]);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -1827,6 +1863,83 @@ export default function HomePage(): React.JSX.Element {
       MozOsxFontSmoothing: 'grayscale'
     }}>
       
+      {/* MENURU OVERLAY - Setelah Loading Selesai */}
+      <AnimatePresence>
+        {showMenuruOverlay && (
+          <motion.div
+            id="menuru-overlay"
+            initial={{ opacity: 1 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.8 }}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              backgroundColor: 'black',
+              zIndex: 99998,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              overflow: 'hidden'
+            }}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.2, ease: "power2.out" }}
+              style={{
+                textAlign: 'center'
+              }}
+            >
+              <div
+                style={{
+                  color: 'white',
+                  fontSize: isMobile ? '8rem' : '25rem',
+                  fontWeight: '900',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  letterSpacing: isMobile ? '-0.02em' : '-0.03em',
+                  textTransform: 'uppercase',
+                  lineHeight: 1,
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                MENURU
+              </div>
+              <motion.div
+                initial={{ width: 0, opacity: 0 }}
+                animate={{ width: '100%', opacity: 1 }}
+                transition={{ duration: 0.8, delay: 0.8 }}
+                style={{
+                  height: '2px',
+                  backgroundColor: 'rgba(255,255,255,0.3)',
+                  marginTop: isMobile ? '2rem' : '4rem',
+                  width: isMobile ? '80%' : '60%',
+                  marginLeft: 'auto',
+                  marginRight: 'auto'
+                }}
+              />
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 1 }}
+                style={{
+                  color: 'rgba(255,255,255,0.6)',
+                  fontSize: isMobile ? '0.9rem' : '1.2rem',
+                  marginTop: isMobile ? '1.5rem' : '2.5rem',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  letterSpacing: '2px'
+                }}
+              >
+                SCROLL DOWN
+              </motion.p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* GSAP Modern Loading Animation */}
       <AnimatePresence>
         {showGsapLoading && (
