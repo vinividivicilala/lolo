@@ -26,7 +26,6 @@ export default function CategoriesPage() {
   ];
 
   useEffect(() => {
-    // Simulate tracking category visits from localStorage or state
     const storedVisits = localStorage.getItem('categoryVisits');
     if (storedVisits) {
       const visits = JSON.parse(storedVisits);
@@ -39,7 +38,6 @@ export default function CategoriesPage() {
   }, []);
 
   const handleCategoryClick = (categoryName: string) => {
-    // Track visit count
     const storedVisits = localStorage.getItem('categoryVisits');
     let visits = storedVisits ? JSON.parse(storedVisits) : {};
     visits[categoryName] = (visits[categoryName] || 0) + 1;
@@ -49,7 +47,6 @@ export default function CategoriesPage() {
   };
 
   const handleBack = () => {
-    // Add exit animation before navigating back
     const container = document.querySelector('.categories-container');
     if (container) {
       container.classList.add('page-exit');
@@ -62,9 +59,14 @@ export default function CategoriesPage() {
   };
 
   const renderNorthwestArrow = () => (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M5 5L19 19" />
-      <path d="M5 12V5H12" />
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path 
+        d="M7 7L17 17M7 7L7 15M7 7L15 7" 
+        stroke="currentColor" 
+        strokeWidth="1.5" 
+        strokeLinecap="round" 
+        strokeLinejoin="round"
+      />
     </svg>
   );
 
@@ -81,7 +83,6 @@ export default function CategoriesPage() {
           </div>
 
           <div style={styles.content}>
-            {/* Favorite Section */}
             <div style={styles.section}>
               <h2 style={styles.sectionTitle}>Menu Favorit</h2>
               <div style={styles.favoriteList}>
@@ -102,7 +103,6 @@ export default function CategoriesPage() {
               </div>
             </div>
 
-            {/* All Categories Section */}
             <div style={styles.section}>
               <h2 style={styles.sectionTitle}>Lainnya</h2>
               <div style={styles.categoryGrid}>
@@ -154,7 +154,7 @@ export default function CategoriesPage() {
         }
         
         .page-enter {
-          animation: slideInFromRight 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+          animation: slideInFromRight 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
         
         .page-exit {
@@ -216,12 +216,13 @@ const styles: { [key: string]: React.CSSProperties } = {
     border: 'none',
     cursor: 'pointer',
     color: '#ffffff',
-    padding: '4px',
+    padding: '8px',
     borderRadius: '50%',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    transition: 'all 0.2s ease',
+    transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+    opacity: 0.8,
   },
   title: {
     fontSize: '18px',
@@ -230,7 +231,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     margin: 0,
   },
   placeholder: {
-    width: '36px',
+    width: '44px',
   },
   content: {
     flex: 1,
@@ -242,11 +243,11 @@ const styles: { [key: string]: React.CSSProperties } = {
     marginBottom: '32px',
   },
   sectionTitle: {
-    fontSize: '14px',
+    fontSize: '13px',
     fontWeight: '500',
     color: '#8e8e93',
     marginBottom: '12px',
-    letterSpacing: '-0.2px',
+    letterSpacing: '0.5px',
     textTransform: 'uppercase',
   },
   favoriteList: {
@@ -262,7 +263,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     backgroundColor: '#1c1c1e',
     borderRadius: '12px',
     cursor: 'pointer',
-    transition: 'all 0.2s ease',
+    transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
   },
   favoriteName: {
     fontSize: '16px',
@@ -295,7 +296,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     backgroundColor: 'transparent',
     borderRadius: '0',
     cursor: 'pointer',
-    transition: 'all 0.2s ease',
+    transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
     textAlign: 'center',
   },
   categoryName: {
