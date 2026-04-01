@@ -382,21 +382,21 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* TERBAIK Section - placed below category menu */}
+          {/* TERBAIK Section - placed below category menu with proper spacing */}
           <div style={styles.bestSection}>
             <div style={styles.bestHeader}>
               <span style={styles.bestBadge}>TERBAIK</span>
               <svg 
-                width="20" 
-                height="20" 
+                width="18" 
+                height="18" 
                 viewBox="0 0 24 24" 
                 fill="none" 
                 stroke="currentColor" 
-                strokeWidth="1.5"
+                strokeWidth="2"
                 style={styles.arrowIcon}
               >
                 <line x1="5" y1="19" x2="19" y2="5" />
-                <polyline points="9 5 19 5 19 15" />
+                <polyline points="15 5 19 5 19 9" />
               </svg>
             </div>
             <div style={styles.bestSubtitle}>
@@ -831,7 +831,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    gap: '8px',
+    gap: '16px',
   },
   categoryItem: {
     display: 'flex',
@@ -841,7 +841,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     cursor: 'pointer',
     transition: 'transform 0.2s ease',
     flex: 1,
-    padding: '12px 0',
+    padding: '8px 0',
   },
   categoryName: {
     fontSize: '16px',
@@ -849,18 +849,16 @@ const styles: { [key: string]: React.CSSProperties } = {
     color: '#ffffff',
     textAlign: 'center',
   },
-  // Best section styles
+  // Best section styles - no border line, proper spacing
   bestSection: {
-    marginTop: '24px',
+    marginTop: '28px',
     marginBottom: '16px',
-    paddingTop: '8px',
-    borderTop: '1px solid #2c2c2e',
   },
   bestHeader: {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: '4px',
+    marginBottom: '6px',
   },
   bestBadge: {
     fontSize: '20px',
@@ -870,7 +868,7 @@ const styles: { [key: string]: React.CSSProperties } = {
   },
   arrowIcon: {
     color: '#ffffff',
-    strokeWidth: '1.5',
+    strokeWidth: '2',
   },
   bestSubtitle: {
     fontSize: '13px',
