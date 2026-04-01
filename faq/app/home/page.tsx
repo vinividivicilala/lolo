@@ -39,13 +39,10 @@ export default function HomePage() {
   const [scrollLeft, setScrollLeft] = useState(0);
 
   const categories = [
-    { id: 1, name: 'Masjid', icon: '🕌' },
-    { id: 2, name: 'Pendidikan', icon: '📚' },
-    { id: 3, name: 'Kesehatan', icon: '🏥' },
-    { id: 4, name: 'Umum', icon: '🤝' },
-    { id: 5, name: 'Panti Asuhan', icon: '🏠' },
-    { id: 6, name: 'Panti Jompo', icon: '👴' },
-    { id: 7, name: 'Lainnya', icon: '📌' },
+    { id: 1, name: 'Masjid', icon: 'mosque' },
+    { id: 2, name: 'Pendidikan', icon: 'education' },
+    { id: 3, name: 'Kesehatan', icon: 'health' },
+    { id: 4, name: 'Umum', icon: 'general' },
   ];
 
   const formatRupiah = (amount: number) => {
@@ -202,7 +199,69 @@ export default function HomePage() {
     }
   };
 
+  const handleCategoryClick = (categoryName: string) => {
+    router.push(`/categories/${categoryName.toLowerCase()}`);
+  };
+
+  const handleLainnyaClick = () => {
+    router.push('/categories');
+  };
+
   const unreadCount = notifications.filter(n => !n.read).length;
+
+  const renderIcon = (iconName: string) => {
+    switch(iconName) {
+      case 'mosque':
+        return (
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <path d="M12 2L15 6H9L12 2Z" />
+            <path d="M5 10L7 6H17L19 10H5Z" />
+            <path d="M4 10H20V20H4V10Z" />
+            <path d="M12 14V20" />
+            <path d="M8 14H16" />
+          </svg>
+        );
+      case 'education':
+        return (
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <path d="M12 3L2 8L12 13L22 8L12 3Z" />
+            <path d="M2 8V16" />
+            <path d="M6 11V17" />
+            <path d="M18 11V17" />
+            <path d="M22 8V16" />
+            <path d="M12 13V21" />
+          </svg>
+        );
+      case 'health':
+        return (
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <path d="M12 2L12 6" />
+            <path d="M12 10L12 14" />
+            <path d="M12 18L12 22" />
+            <path d="M2 12L6 12" />
+            <path d="M10 12L14 12" />
+            <path d="M18 12L22 12" />
+            <circle cx="12" cy="12" r="4" />
+          </svg>
+        );
+      case 'general':
+        return (
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 8L12 12" />
+            <path d="M12 16L12.01 16" />
+          </svg>
+        );
+      default:
+        return (
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <path d="M12 2L15 6H9L12 2Z" />
+            <path d="M5 10L7 6H17L19 10H5Z" />
+            <path d="M4 10H20V20H4V10Z" />
+          </svg>
+        );
+    }
+  };
 
   return (
     <div style={styles.wrapper}>
@@ -381,13 +440,30 @@ export default function HomePage() {
             <div style={styles.categorySection}>
               <div style={styles.categoryGrid}>
                 {categories.map((category) => (
-                  <div key={category.id} style={styles.categoryItem}>
+                  <div 
+                    key={category.id} 
+                    style={styles.categoryItem}
+                    onClick={() => handleCategoryClick(category.name)}
+                  >
                     <div style={styles.categoryIcon}>
-                      <span style={styles.categoryIconText}>{category.icon}</span>
+                      {renderIcon(category.icon)}
                     </div>
                     <span style={styles.categoryName}>{category.name}</span>
                   </div>
                 ))}
+                <div 
+                  style={styles.categoryItem}
+                  onClick={handleLainnyaClick}
+                >
+                  <div style={styles.categoryIcon}>
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                      <circle cx="12" cy="12" r="10" />
+                      <path d="M12 8L12 16" />
+                      <path d="M8 12L16 12" />
+                    </svg>
+                  </div>
+                  <span style={styles.categoryName}>Lainnya</span>
+                </div>
               </div>
             </div>
           </div>
@@ -848,9 +924,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     alignItems: 'center',
     justifyContent: 'center',
     transition: 'all 0.2s ease',
-  },
-  categoryIconText: {
-    fontSize: '28px',
+    color: '#4cd964',
   },
   categoryName: {
     fontSize: '11px',
