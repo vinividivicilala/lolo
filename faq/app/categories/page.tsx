@@ -1,18 +1,42 @@
-// app/page.tsx
+// app/categories/page.tsx
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { useEffect } from 'react';
 
-export default function HomePage() {
+export default function CategoriesPage() {
   const router = useRouter();
 
-  const categories = [
-    'Panti Asuhan', 'Panti Jompo', 'Masjid', 'Pendidikan',
-    'Kesehatan', 'Umum', 'Bencana Alam', 'Yatim Piatu',
-    'Lingkungan', 'Dakwah'
+  const [favoriteCategories, setFavoriteCategories] = useState([
+    { id: 1, name: 'Panti Asuhan', visitCount: 5 },
+    { id: 2, name: 'Masjid', visitCount: 3 },
+  ]);
+
+  const allCategories = [
+    { id: 1, name: 'Panti Asuhan' },
+    { id: 2, name: 'Panti Jompo' },
+    { id: 3, name: 'Masjid' },
+    { id: 4, name: 'Pendidikan' },
+    { id: 5, name: 'Kesehatan' },
+    { id: 6, name: 'Umum' },
+    { id: 7, name: 'Bencana Alam' },
+    { id: 8, name: 'Yatim Piatu' },
+    { id: 9, name: 'Lingkungan' },
+    { id: 10, name: 'Dakwah' },
   ];
+
+  useEffect(() => {
+    // Simulate tracking category visits from localStorage or state
+    const storedVisits = localStorage.getItem('categoryVisits');
+    if (storedVisits) {
+      const visits = JSON.parse(storedVisits);
+      const sorted = Object.entries(visits)
+        .map(([name, count]) => ({ name, visitCount: count as number }))
+        .sort((a, b) => b.visitCount - a.visitCount)
+        .slice(0, 2);
+      setFavoriteCategories(sorted);
+    }
+  }, []);
 
   const handleCategoryClick = (categoryName: string) => {
     // Track visit count
@@ -24,35 +48,63 @@ export default function HomePage() {
     router.push(`/categories/${categoryName.toLowerCase()}`);
   };
 
-  const handleSeeAllClick = () => {
-    router.push('/categories');
+  const handleBack = () => {
+    router.back();
   };
+
+  const renderNorthwestArrow = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M15 9L9 15" />
+      <path d="M9 9L15 15" />
+      <path d="M9 9H15V15" />
+    </svg>
+  );
 
   return (
     <>
       <div style={styles.wrapper}>
-        <div style={styles.container}>
+        <div style={styles.container} className="page-enter">
           <div style={styles.header}>
-            <h1 style={styles.title}>Donasi</h1>
+            <button onClick={handleBack} style={styles.backButton}>
+              {renderNorthwestArrow()}
+            </button>
+            <h1 style={styles.title}>Categories</h1>
+            <div style={styles.placeholder} />
           </div>
 
           <div style={styles.content}>
-            {/* Categories Section */}
+            {/* Favorite Section */}
             <div style={styles.section}>
-              <div style={styles.sectionHeader}>
-                <h2 style={styles.sectionTitle}>Kategori</h2>
-                <button onClick={handleSeeAllClick} style={styles.seeAllButton}>
-                  Lihat semua
-                </button>
+              <h2 style={styles.sectionTitle}>Menu Favorit</h2>
+              <div style={styles.favoriteList}>
+                {favoriteCategories.length === 0 ? (
+                  <div style={styles.emptyFavorites}>Belum ada menu favorit</div>
+                ) : (
+                  favoriteCategories.map((category) => (
+                    <div 
+                      key={category.id} 
+                      style={styles.favoriteItem}
+                      onClick={() => handleCategoryClick(category.name)}
+                    >
+                      <span style={styles.favoriteName}>{category.name}</span>
+                      <span style={styles.visitCount}>{category.visitCount} kali</span>
+                    </div>
+                  ))
+                )}
               </div>
+            </div>
+
+            {/* All Categories Section */}
+            <div style={styles.section}>
+              <h2 style={styles.sectionTitle}>Lainnya</h2>
               <div style={styles.categoryGrid}>
-                {categories.map((category, index) => (
-                  <div
-                    key={index}
+                {allCategories.map((category) => (
+                  <div 
+                    key={category.id} 
                     style={styles.categoryItem}
-                    onClick={() => handleCategoryClick(category)}
+                    onClick={() => handleCategoryClick(category.name)}
                   >
-                    <span style={styles.categoryName}>{category}</span>
+                    <span style={styles.categoryName}>{category.name}</span>
                   </div>
                 ))}
               </div>
@@ -68,34 +120,34 @@ export default function HomePage() {
           font-family: 'Hubot Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         }
         
-        @keyframes slideInFromLeft {
+        @keyframes slideInFromRight {
           0% {
-            transform: translateX(-100%);
-            opacity: 0;
-          }
-          100% {
-            transform: translateX(0);
-            opacity: 1;
-          }
-        }
-        
-        @keyframes slideOutToRight {
-          0% {
-            transform: translateX(0);
-            opacity: 1;
-          }
-          100% {
             transform: translateX(100%);
             opacity: 0;
           }
+          100% {
+            transform: translateX(0);
+            opacity: 1;
+          }
         }
         
-        .home-enter {
-          animation: slideInFromLeft 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        @keyframes slideOutToLeft {
+          0% {
+            transform: translateX(0);
+            opacity: 1;
+          }
+          100% {
+            transform: translateX(-100%);
+            opacity: 0;
+          }
         }
         
-        .home-exit {
-          animation: slideOutToRight 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        .page-enter {
+          animation: slideInFromRight 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+        
+        .page-exit {
+          animation: slideOutToLeft 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
         }
         
         .category-item-hover {
@@ -136,7 +188,6 @@ const styles: { [key: string]: React.CSSProperties } = {
     color: '#ffffff',
     position: 'relative',
     overflow: 'hidden',
-    animation: 'slideInFromLeft 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards',
   },
   header: {
     display: 'flex',
@@ -146,11 +197,26 @@ const styles: { [key: string]: React.CSSProperties } = {
     marginBottom: '32px',
     flexShrink: 0,
   },
+  backButton: {
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+    color: '#007aff',
+    padding: '8px',
+    borderRadius: '50%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    transition: 'all 0.2s ease',
+  },
   title: {
-    fontSize: '28px',
-    fontWeight: '700',
+    fontSize: '18px',
+    fontWeight: '600',
     color: '#ffffff',
     margin: 0,
+  },
+  placeholder: {
+    width: '40px',
   },
   content: {
     flex: 1,
@@ -161,29 +227,46 @@ const styles: { [key: string]: React.CSSProperties } = {
   section: {
     marginBottom: '32px',
   },
-  sectionHeader: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: '12px',
-  },
   sectionTitle: {
     fontSize: '14px',
     fontWeight: '500',
     color: '#8e8e93',
+    marginBottom: '12px',
     letterSpacing: '-0.2px',
     textTransform: 'uppercase',
-    margin: 0,
   },
-  seeAllButton: {
-    background: 'none',
-    border: 'none',
-    color: '#007aff',
-    fontSize: '13px',
-    fontWeight: '500',
+  favoriteList: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '8px',
+  },
+  favoriteItem: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '14px 16px',
+    backgroundColor: '#1c1c1e',
+    borderRadius: '12px',
     cursor: 'pointer',
-    padding: '4px 8px',
     transition: 'all 0.2s ease',
+  },
+  favoriteName: {
+    fontSize: '16px',
+    fontWeight: '500',
+    color: '#ffffff',
+  },
+  visitCount: {
+    fontSize: '13px',
+    color: '#007aff',
+    fontWeight: '500',
+  },
+  emptyFavorites: {
+    padding: '40px 20px',
+    textAlign: 'center',
+    color: '#8e8e93',
+    fontSize: '14px',
+    backgroundColor: '#1c1c1e',
+    borderRadius: '12px',
   },
   categoryGrid: {
     display: 'grid',
