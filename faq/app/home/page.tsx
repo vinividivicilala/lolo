@@ -1,3 +1,4 @@
+// app/page.tsx
 'use client';
 
 import { useState, useRef } from 'react';
@@ -5,7 +6,7 @@ import { useRouter } from 'next/navigation';
 
 export default function HomePage() {
   const router = useRouter();
-  const [userName, setUserName] = useState('Budi Santoso');
+  const [userName] = useState('Budi Santoso');
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [notifications, setNotifications] = useState([
     { id: 1, text: 'Donasi baru sebesar Rp 100.000', read: false },
@@ -14,7 +15,7 @@ export default function HomePage() {
   ]);
   const [showNotifications, setShowNotifications] = useState(false);
   const [chatMessages, setChatMessages] = useState([
-    { id: 1, text: 'Halo! Ada yang bisa dibantu?', sender: 'bot', time: '10:00' },
+    { id: 1, text: 'Halo! Ada yang bisa dibantuan?', sender: 'bot', time: '10:00' },
   ]);
   const [newMessage, setNewMessage] = useState('');
   
@@ -22,7 +23,7 @@ export default function HomePage() {
   const [donationTotal, setDonationTotal] = useState(1250000);
   const [isLoading, setIsLoading] = useState(false);
   
-  // Donation History State - only show last 1 donation
+  // Donation History State
   const [donationHistory, setDonationHistory] = useState([
     { id: 1, amount: 50000, date: new Date(), campaign: 'Bantu Anak Yatim', status: 'success' },
   ]);
@@ -40,7 +41,13 @@ export default function HomePage() {
     { id: 1, name: 'Panti Asuhan' },
     { id: 2, name: 'Masjid' },
     { id: 3, name: 'Umum' },
-    { id: 4, name: 'Lainnya' },
+    { id: 4, name: 'Panti Jompo' },
+    { id: 5, name: 'Pendidikan' },
+    { id: 6, name: 'Kesehatan' },
+    { id: 7, name: 'Bencana Alam' },
+    { id: 8, name: 'Yatim Piatu' },
+    { id: 9, name: 'Lingkungan' },
+    { id: 10, name: 'Dakwah' },
   ];
 
   const formatRupiah = (amount: number) => {
@@ -83,14 +90,6 @@ export default function HomePage() {
       const updated = [newDonation, ...prev];
       return updated.slice(0, 1);
     });
-    
-    const element = document.querySelector('.donation-total');
-    if (element) {
-      element.classList.add('animate-pulse');
-      setTimeout(() => {
-        element.classList.remove('animate-pulse');
-      }, 500);
-    }
   };
 
   const markAsRead = (id: number) => {
@@ -192,10 +191,14 @@ export default function HomePage() {
   };
 
   const handleCategoryClick = (categoryName: string) => {
-    if (categoryName === 'Lainnya') {
-      router.push('/categories');
+    const container = document.querySelector('.home-container');
+    if (container) {
+      container.classList.add('page-transition-out');
+      setTimeout(() => {
+        router.push(`/categories/${categoryName.toLowerCase().replace(/\s+/g, '-')}`);
+      }, 300);
     } else {
-      router.push(`/categories/${categoryName.toLowerCase()}`);
+      router.push(`/categories/${categoryName.toLowerCase().replace(/\s+/g, '-')}`);
     }
   };
 
@@ -203,7 +206,7 @@ export default function HomePage() {
 
   return (
     <div style={styles.wrapper}>
-      <div style={styles.container}>
+      <div className="home-container" style={styles.container}>
         <div style={styles.header}>
           <div style={styles.userInfo}>
             <div style={styles.userAvatar}>
@@ -294,9 +297,6 @@ export default function HomePage() {
                       fill="none" 
                       stroke="currentColor" 
                       strokeWidth="1.5"
-                      style={{
-                        animation: isLoading ? 'spin 0.8s linear infinite' : 'none',
-                      }}
                     >
                       <path d="M23 4v6h-6M1 20v-6h6" />
                       <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
@@ -304,7 +304,7 @@ export default function HomePage() {
                   </button>
                 </div>
                 
-                <div className="donation-total" style={styles.donationTotal}>
+                <div style={styles.donationTotal}>
                   {isLoading ? (
                     <div style={styles.skeletonLoader}>
                       <div style={styles.skeletonShimmer} />
@@ -368,7 +368,7 @@ export default function HomePage() {
             </div>
 
             <div style={styles.categorySection}>
-              <div style={styles.categoryGrid}>
+              <div style={styles.categoryList}>
                 {categories.map((category) => (
                   <div 
                     key={category.id} 
@@ -412,7 +412,7 @@ export default function HomePage() {
                 <div style={{
                   ...styles.messageBubble,
                   backgroundColor: msg.sender === 'user' ? '#007aff' : '#2c2c2e',
-                  color: msg.sender === 'user' ? '#ffffff' : '#ffffff'
+                  color: '#ffffff'
                 }}>
                   {msg.text}
                 </div>
@@ -440,7 +440,7 @@ export default function HomePage() {
         </div>
       )}
 
-      <style jsx global>{`
+      <style jsx>{`
         @import url('https://fonts.googleapis.com/css2?family=Hubot+Sans:wght@400;500;600;700&display=swap');
         
         * {
@@ -475,6 +475,21 @@ export default function HomePage() {
           100% {
             transform: translateX(100%);
           }
+        }
+        
+        @keyframes slideOutLeft {
+          0% {
+            transform: translateX(0);
+            opacity: 1;
+          }
+          100% {
+            transform: translateX(-100%);
+            opacity: 0;
+          }
+        }
+        
+        .page-transition-out {
+          animation: slideOutLeft 0.3s ease-out forwards;
         }
         
         .animate-pulse {
@@ -656,12 +671,6 @@ const styles: { [key: string]: React.CSSProperties } = {
     WebkitOverflowScrolling: 'touch',
     cursor: 'grab',
     userSelect: 'none',
-    '&::-webkit-scrollbar': {
-      display: 'none',
-    },
-    '&:active': {
-      cursor: 'grabbing',
-    },
   },
   card: {
     flex: '0 0 100%',
@@ -803,29 +812,25 @@ const styles: { [key: string]: React.CSSProperties } = {
   },
   categorySection: {
     marginTop: '32px',
-    marginBottom: '8px',
+    marginBottom: '20px',
   },
-  categoryGrid: {
+  categoryList: {
     display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    gap: '8px',
+    flexDirection: 'column',
+    gap: '12px',
   },
   categoryItem: {
     display: 'flex',
-    flexDirection: 'column',
     alignItems: 'center',
-    gap: '0px',
     cursor: 'pointer',
-    transition: 'transform 0.2s ease',
-    flex: 1,
-    padding: '12px 0',
+    transition: 'opacity 0.2s ease',
+    padding: '4px 0',
   },
   categoryName: {
-    fontSize: '16px',
+    fontSize: '17px',
     fontWeight: '500',
     color: '#ffffff',
-    textAlign: 'center',
+    letterSpacing: '-0.3px',
   },
   extraSpace: {
     height: '20px',
