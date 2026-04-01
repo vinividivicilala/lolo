@@ -1870,7 +1870,8 @@ useEffect(() => {
       WebkitFontSmoothing: 'antialiased',
       MozOsxFontSmoothing: 'grayscale'
     }}>
-      {/* MENURU OVERLAY - Setelah Loading Selesai */}
+
+     {/* MENURU OVERLAY - Setelah Loading Selesai */}
 <AnimatePresence>
   {showMenuruOverlay && (
     <motion.div
@@ -1887,63 +1888,28 @@ useEffect(() => {
         height: '100%',
         backgroundColor: 'black',
         zIndex: 99998,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        overflow: 'hidden'
+        overflow: 'hidden',
+        pointerEvents: 'auto'
       }}
     >
-      <motion.div
-        initial={{ scale: 0.95, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 0.8, delay: 0.2, ease: "power2.out" }}
+      <div
         style={{
-          textAlign: 'center'
+          position: 'absolute',
+          top: isMobile ? '1rem' : '2rem',
+          left: isMobile ? '1rem' : '2rem',
+          color: 'white',
+          fontSize: isMobile ? '200px' : '500px',
+          fontWeight: '300',
+          fontFamily: 'Helvetica, Arial, sans-serif',
+          textTransform: 'uppercase',
+          lineHeight: 0.8,
+          letterSpacing: '-0.02em',
+          opacity: 0.7,
+          whiteSpace: 'nowrap'
         }}
       >
-        <div
-          style={{
-            color: 'white',
-            fontSize: isMobile ? '5rem' : '15rem',
-            fontWeight: '400',
-            fontFamily: 'Helvetica, Arial, sans-serif',
-            letterSpacing: isMobile ? '0.05em' : '0.03em',
-            textTransform: 'uppercase',
-            lineHeight: 1,
-            whiteSpace: 'nowrap'
-          }}
-        >
-          MENURU
-        </div>
-        <motion.div
-          initial={{ width: 0, opacity: 0 }}
-          animate={{ width: '100%', opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.8 }}
-          style={{
-            height: '1px',
-            backgroundColor: 'rgba(255,255,255,0.3)',
-            marginTop: isMobile ? '2rem' : '3rem',
-            width: isMobile ? '80%' : '60%',
-            marginLeft: 'auto',
-            marginRight: 'auto'
-          }}
-        />
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 1 }}
-          style={{
-            color: 'rgba(255,255,255,0.6)',
-            fontSize: isMobile ? '0.9rem' : '1rem',
-            marginTop: isMobile ? '1.5rem' : '2rem',
-            fontFamily: 'Helvetica, Arial, sans-serif',
-            letterSpacing: '2px',
-            fontWeight: '300'
-          }}
-        >
-          SCROLL DOWN
-        </motion.p>
-      </motion.div>
+        MENURU
+      </div>
     </motion.div>
   )}
 </AnimatePresence>
