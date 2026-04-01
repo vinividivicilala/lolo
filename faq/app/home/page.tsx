@@ -262,6 +262,28 @@ export default function HomePage() {
           </div>
         </div>
 
+        {/* NEW SECTION: TERBAIK with Arrow */}
+        <div style={styles.bestSection}>
+          <div style={styles.bestHeader}>
+            <span style={styles.bestBadge}>TERBAIK</span>
+            <svg 
+              width="20" 
+              height="20" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="1.5"
+              style={styles.arrowIcon}
+            >
+              <line x1="5" y1="19" x2="19" y2="5" />
+              <polyline points="9 5 19 5 19 15" />
+            </svg>
+          </div>
+          <div style={styles.bestSubtitle}>
+            Pilihan solusi terbaikmu
+          </div>
+        </div>
+
         <div 
           ref={mainContentRef}
           style={styles.mainContent}
@@ -631,6 +653,32 @@ const styles: { [key: string]: React.CSSProperties } = {
     textAlign: 'center',
     color: '#8e8e93',
     fontSize: '13px',
+  },
+  // New styles for TERBAIK section
+  bestSection: {
+    marginBottom: '20px',
+    flexShrink: 0,
+  },
+  bestHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    marginBottom: '4px',
+  },
+  bestBadge: {
+    fontSize: '20px',
+    fontWeight: '700',
+    color: '#ffffff',
+    letterSpacing: '-0.5px',
+  },
+  arrowIcon: {
+    color: '#ffffff',
+    strokeWidth: '1.5',
+  },
+  bestSubtitle: {
+    fontSize: '13px',
+    color: '#8e8e93',
+    fontWeight: '400',
   },
   mainContent: {
     flex: 1,
