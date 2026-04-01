@@ -3,13 +3,20 @@
 
 import { useRouter } from 'next/navigation';
 
-export default function CategoryDetailPage({ params }: { params: { slug: string } }) {
+interface CategoryPageProps {
+  params: {
+    slug: string;
+  };
+}
+
+export default function CategoryDetailPage({ params }: CategoryPageProps) {
   const router = useRouter();
+  const categoryName = params.slug.replace(/-/g, ' ');
 
   const handleBack = () => {
-    const element = document.querySelector('.container');
-    if (element) {
-      element.classList.add('page-transition-out');
+    const container = document.querySelector('.category-container');
+    if (container) {
+      container.classList.add('page-transition-out');
       setTimeout(() => {
         router.back();
       }, 300);
@@ -20,24 +27,23 @@ export default function CategoryDetailPage({ params }: { params: { slug: string 
 
   return (
     <div style={styles.wrapper}>
-      <div className="container" style={styles.container}>
+      <div className="category-container" style={styles.container}>
         <div style={styles.header}>
           <button onClick={handleBack} style={styles.backButton}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <path d="M19 12H5" />
-              <path d="M12 19L5 12L12 5" />
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M15 18l-6-6 6-6" />
             </svg>
           </button>
-          <h1 style={styles.title}>{params.slug.charAt(0).toUpperCase() + params.slug.slice(1)}</h1>
+          <h1 style={styles.title}>{categoryName}</h1>
           <div style={styles.placeholder} />
         </div>
 
         <div style={styles.content}>
-          <p style={styles.description}>Halaman donasi untuk kategori {params.slug}</p>
+          <p style={styles.description}>Halaman donasi untuk kategori {categoryName}</p>
         </div>
       </div>
 
-      <style jsx global>{`
+      <style jsx>{`
         @import url('https://fonts.googleapis.com/css2?family=Hubot+Sans:wght@400;500;600;700&display=swap');
         
         * {
@@ -70,8 +76,8 @@ export default function CategoryDetailPage({ params }: { params: { slug: string 
           animation: slideOutLeft 0.3s ease-out forwards;
         }
         
-        .page-transition-in {
-          animation: slideInRight 0.3s ease-out forwards;
+        .category-container {
+          animation: slideInRight 0.3s ease-out;
         }
       `}</style>
     </div>
@@ -129,6 +135,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     fontWeight: '600',
     color: '#ffffff',
     margin: 0,
+    textTransform: 'capitalize',
   },
   placeholder: {
     width: '40px',
