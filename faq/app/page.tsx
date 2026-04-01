@@ -1871,7 +1871,7 @@ useEffect(() => {
       MozOsxFontSmoothing: 'grayscale'
     }}>
 
-     {/* MENURU OVERLAY - Setelah Loading Selesai */}
+    {/* MENURU OVERLAY - Setelah Loading Selesai */}
 <AnimatePresence>
   {showMenuruOverlay && (
     <motion.div
@@ -1897,14 +1897,13 @@ useEffect(() => {
           position: 'absolute',
           top: isMobile ? '1rem' : '2rem',
           left: isMobile ? '1rem' : '2rem',
-          color: 'white',
-          fontSize: isMobile ? '200px' : '500px',
+          color: '#FFFFFF',
+          fontSize: isMobile ? '200px' : '400px',
           fontWeight: '300',
           fontFamily: 'Helvetica, Arial, sans-serif',
           textTransform: 'uppercase',
           lineHeight: 0.8,
           letterSpacing: '-0.02em',
-          opacity: 0.7,
           whiteSpace: 'nowrap'
         }}
       >
