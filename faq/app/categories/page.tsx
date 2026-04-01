@@ -216,7 +216,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     background: 'none',
     border: 'none',
     cursor: 'pointer',
-    color: '#007aff',
+    color: '#ffffff',
     padding: '4px',
     borderRadius: '50%',
     display: 'flex',
