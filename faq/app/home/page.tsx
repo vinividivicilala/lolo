@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function HomePage() {
@@ -34,6 +34,11 @@ export default function HomePage() {
   const [activeCardIndex, setActiveCardIndex] = useState(0);
   const carouselRef = useRef<HTMLDivElement>(null);
   const mainContentRef = useRef<HTMLDivElement>(null);
+  
+  // Drag/swipe states
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
 
   const formatRupiah = (amount: number) => {
     return new Intl.NumberFormat('id-ID', {
@@ -126,29 +131,63 @@ export default function HomePage() {
     }
   };
 
-  // Handle touch events for carousel
-  const touchStartX = useRef(0);
-  const touchEndX = useRef(0);
+  // Mouse drag handlers for desktop
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setIsDragging(true);
+    setStartX(e.pageX - (carouselRef.current?.offsetLeft || 0));
+    setScrollLeft(carouselRef.current?.scrollLeft || 0);
+    if (carouselRef.current) {
+      carouselRef.current.style.cursor = 'grabbing';
+    }
+  };
 
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging) return;
+    e.preventDefault();
+    const x = e.pageX - (carouselRef.current?.offsetLeft || 0);
+    const walk = (x - startX) * 1.5;
+    if (carouselRef.current) {
+      carouselRef.current.scrollLeft = scrollLeft - walk;
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+    if (carouselRef.current) {
+      carouselRef.current.style.cursor = 'grab';
+      // Snap to nearest card after drag
+      const scrollPosition = carouselRef.current.scrollLeft;
+      const cardWidth = carouselRef.current.clientWidth;
+      const newIndex = Math.round(scrollPosition / cardWidth);
+      scrollToCard(newIndex);
+    }
+  };
+
+  // Touch handlers for mobile
   const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0].clientX;
+    setIsDragging(true);
+    setStartX(e.touches[0].pageX - (carouselRef.current?.offsetLeft || 0));
+    setScrollLeft(carouselRef.current?.scrollLeft || 0);
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    touchEndX.current = e.touches[0].clientX;
+    if (!isDragging) return;
+    const x = e.touches[0].pageX - (carouselRef.current?.offsetLeft || 0);
+    const walk = (x - startX) * 1.5;
+    if (carouselRef.current) {
+      carouselRef.current.scrollLeft = scrollLeft - walk;
+    }
   };
 
   const handleTouchEnd = () => {
-    const diff = touchStartX.current - touchEndX.current;
-    if (Math.abs(diff) > 50) {
-      if (diff > 0 && activeCardIndex < 1) {
-        scrollToCard(activeCardIndex + 1);
-      } else if (diff < 0 && activeCardIndex > 0) {
-        scrollToCard(activeCardIndex - 1);
-      }
+    setIsDragging(false);
+    if (carouselRef.current) {
+      // Snap to nearest card after swipe
+      const scrollPosition = carouselRef.current.scrollLeft;
+      const cardWidth = carouselRef.current.clientWidth;
+      const newIndex = Math.round(scrollPosition / cardWidth);
+      scrollToCard(newIndex);
     }
-    touchStartX.current = 0;
-    touchEndX.current = 0;
   };
 
   const unreadCount = notifications.filter(n => !n.read).length;
@@ -226,6 +265,10 @@ export default function HomePage() {
               ref={carouselRef}
               style={styles.carouselContainer}
               onScroll={handleCarouselScroll}
+              onMouseDown={handleMouseDown}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUp}
+              onMouseLeave={handleMouseUp}
               onTouchStart={handleTouchStart}
               onTouchMove={handleTouchMove}
               onTouchEnd={handleTouchEnd}
@@ -586,14 +629,19 @@ const styles: { [key: string]: React.CSSProperties } = {
     display: 'flex',
     overflowX: 'auto',
     scrollSnapType: 'x mandatory',
-    scrollBehavior: 'smooth',
+    scrollBehavior: 'auto',
     gap: '16px',
     paddingBottom: '12px',
     scrollbarWidth: 'none',
     msOverflowStyle: 'none',
     WebkitOverflowScrolling: 'touch',
+    cursor: 'grab',
+    userSelect: 'none',
     '&::-webkit-scrollbar': {
       display: 'none',
+    },
+    '&:active': {
+      cursor: 'grabbing',
     },
   },
   card: {
@@ -603,6 +651,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     borderRadius: '16px',
     padding: '20px',
     boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+    pointerEvents: 'auto',
   },
   cardHeader: {
     display: 'flex',
