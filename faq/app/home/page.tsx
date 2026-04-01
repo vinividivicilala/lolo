@@ -2,8 +2,10 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import InstallPrompt from '@/components/InstallPrompt';
 
 export default function HomePage() {
+  // ... semua kode yang sudah ada tetap sama persis ...
   const router = useRouter();
   const [userName, setUserName] = useState('Budi Santoso');
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -79,7 +81,6 @@ export default function HomePage() {
       setNotes(prev => [newNoteObj, ...prev]);
       setNewNote('');
       
-      // Show animation on note count
       const noteCountElement = document.querySelector('.note-count');
       if (noteCountElement) {
         noteCountElement.classList.add('animate-pulse');
@@ -136,282 +137,250 @@ export default function HomePage() {
   const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
-    <div style={styles.wrapper}>
-      <div style={styles.container}>
-        {/* Header - Navbar */}
-        <div style={styles.header}>
-          <div style={styles.logo}>Menuru</div>
-          <div style={styles.navRight}>
-            <div style={styles.userInfo}>
-              <div style={styles.userAvatar}>
-                {userName.charAt(0).toUpperCase()}
+    <>
+      <InstallPrompt />
+      <div style={styles.wrapper}>
+        <div style={styles.container}>
+          {/* Header - Navbar */}
+          <div style={styles.header}>
+            <div style={styles.logo}>Menuru</div>
+            <div style={styles.navRight}>
+              <div style={styles.userInfo}>
+                <div style={styles.userAvatar}>
+                  {userName.charAt(0).toUpperCase()}
+                </div>
+                <span style={styles.userName}>{userName.split(' ')[0]}</span>
               </div>
-              <span style={styles.userName}>{userName.split(' ')[0]}</span>
-            </div>
-            
-            <div style={styles.notificationWrapper}>
+              
+              <div style={styles.notificationWrapper}>
+                <button 
+                  style={styles.iconButton}
+                  onClick={() => setShowNotifications(!showNotifications)}
+                >
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                  </svg>
+                  {unreadCount > 0 && (
+                    <span style={styles.badge}>{unreadCount}</span>
+                  )}
+                </button>
+                
+                {showNotifications && (
+                  <div style={styles.notificationDropdown}>
+                    <div style={styles.dropdownHeader}>
+                      <span>Notifikasi</span>
+                      <button onClick={() => setShowNotifications(false)} style={styles.closeDropdown}>×</button>
+                    </div>
+                    {notifications.length === 0 ? (
+                      <div style={styles.emptyState}>Tidak ada notifikasi</div>
+                    ) : (
+                      notifications.map(notif => (
+                        <div 
+                          key={notif.id} 
+                          style={{...styles.notificationItem, opacity: notif.read ? 0.6 : 1}}
+                          onClick={() => markAsRead(notif.id)}
+                        >
+                          <div style={styles.notificationDot} />
+                          <span style={styles.notificationText}>{notif.text}</span>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
+              </div>
+              
               <button 
                 style={styles.iconButton}
-                onClick={() => setShowNotifications(!showNotifications)}
+                onClick={() => setIsChatOpen(!isChatOpen)}
               >
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-                  <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
                 </svg>
-                {unreadCount > 0 && (
-                  <span style={styles.badge}>{unreadCount}</span>
-                )}
               </button>
-              
-              {showNotifications && (
-                <div style={styles.notificationDropdown}>
-                  <div style={styles.dropdownHeader}>
-                    <span>Notifikasi</span>
-                    <button onClick={() => setShowNotifications(false)} style={styles.closeDropdown}>×</button>
-                  </div>
-                  {notifications.length === 0 ? (
-                    <div style={styles.emptyState}>Tidak ada notifikasi</div>
+            </div>
+          </div>
+
+          {/* Carousel Section */}
+          <div style={styles.carouselSection}>
+            <div 
+              ref={carouselRef}
+              style={styles.carouselContainer}
+              onScroll={handleCarouselScroll}
+            >
+              {/* Card 1 - Donation Card */}
+              <div style={styles.card}>
+                <div style={styles.cardHeader}>
+                  <h3 style={styles.cardTitle}>Jumlah Donasi</h3>
+                  <button 
+                    onClick={handleReload} 
+                    style={styles.reloadButton}
+                    disabled={isLoading}
+                  >
+                    <svg 
+                      width="16" 
+                      height="16" 
+                      viewBox="0 0 24 24" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      strokeWidth="2"
+                      style={{
+                        animation: isLoading ? 'spin 0.8s linear infinite' : 'none',
+                      }}
+                    >
+                      <path d="M23 4v6h-6M1 20v-6h6" />
+                      <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+                    </svg>
+                  </button>
+                </div>
+                
+                <div className="donation-total" style={styles.donationTotal}>
+                  {isLoading ? (
+                    <div style={styles.skeletonLoader}>
+                      <div style={styles.skeletonShimmer} />
+                    </div>
                   ) : (
-                    notifications.map(notif => (
-                      <div 
-                        key={notif.id} 
-                        style={{...styles.notificationItem, opacity: notif.read ? 0.6 : 1}}
-                        onClick={() => markAsRead(notif.id)}
-                      >
-                        <div style={styles.notificationDot} />
-                        <span style={styles.notificationText}>{notif.text}</span>
-                      </div>
-                    ))
+                    formatRupiah(donationTotal)
                   )}
                 </div>
-              )}
-            </div>
-            
-            <button 
-              style={styles.iconButton}
-              onClick={() => setIsChatOpen(!isChatOpen)}
-            >
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        {/* Carousel Section */}
-        <div style={styles.carouselSection}>
-          <div 
-            ref={carouselRef}
-            style={styles.carouselContainer}
-            onScroll={handleCarouselScroll}
-          >
-            {/* Card 1 - Donation Card */}
-            <div style={styles.card}>
-              <div style={styles.cardHeader}>
-                <h3 style={styles.cardTitle}>Jumlah Donasi</h3>
-                <button 
-                  onClick={handleReload} 
-                  style={styles.reloadButton}
-                  disabled={isLoading}
-                >
-                  <svg 
-                    width="16" 
-                    height="16" 
-                    viewBox="0 0 24 24" 
-                    fill="none" 
-                    stroke="currentColor" 
-                    strokeWidth="2"
-                    style={{
-                      animation: isLoading ? 'spin 0.8s linear infinite' : 'none',
-                    }}
-                  >
-                    <path d="M23 4v6h-6M1 20v-6h6" />
-                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
-                  </svg>
-                </button>
-              </div>
-              
-              <div className="donation-total" style={styles.donationTotal}>
-                {isLoading ? (
-                  <div style={styles.skeletonLoader}>
-                    <div style={styles.skeletonShimmer} />
-                  </div>
-                ) : (
-                  formatRupiah(donationTotal)
-                )}
-              </div>
-              
-              <button onClick={handleAddDonation} style={styles.addButton}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                  <line x1="12" y1="5" x2="12" y2="19" />
-                  <line x1="5" y1="12" x2="19" y2="12" />
-                </svg>
-                <span>Tambah Donasi</span>
-              </button>
-            </div>
-
-            {/* Card 2 - Notes Card */}
-            <div style={styles.card}>
-              <div style={styles.cardHeader}>
-                <h3 style={styles.cardTitle}>
-                  Catatan Saya ({notes.length})
-                </h3>
-                <div className="note-count" style={styles.noteIcon}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                    <polyline points="14 2 14 8 20 8" />
-                  </svg>
-                </div>
-              </div>
-              
-              <div style={styles.notesList}>
-                {notes.length === 0 ? (
-                  <div style={styles.emptyNotes}>Belum ada catatan</div>
-                ) : (
-                  notes.map(note => (
-                    <div key={note.id} style={styles.noteItem}>
-                      <div style={styles.noteText}>{note.text}</div>
-                      <div style={styles.noteTime}>{formatDate(note.timestamp)}</div>
-                    </div>
-                  ))
-                )}
-              </div>
-              
-              <div style={styles.noteInputContainer}>
-                <input
-                  type="text"
-                  value={newNote}
-                  onChange={(e) => setNewNote(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleAddNote()}
-                  placeholder="Tulis catatan baru..."
-                  style={styles.noteInput}
-                />
-                <button onClick={handleAddNote} style={styles.addNoteButton}>
+                
+                <button onClick={handleAddDonation} style={styles.addButton}>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                     <line x1="12" y1="5" x2="12" y2="19" />
                     <line x1="5" y1="12" x2="19" y2="12" />
                   </svg>
+                  <span>Tambah Donasi</span>
                 </button>
               </div>
-            </div>
-          </div>
-          
-          {/* Dot Pagination */}
-          <div style={styles.pagination}>
-            {[0, 1].map((index) => (
-              <button
-                key={index}
-                onClick={() => scrollToCard(index)}
-                style={{
-                  ...styles.paginationDot,
-                  backgroundColor: activeCardIndex === index ? '#8be9fd' : '#3a3a3c',
-                  width: activeCardIndex === index ? '24px' : '8px',
-                }}
-              />
-            ))}
-          </div>
-        </div>
 
-        {/* Main Content - Kosong */}
-        <div style={styles.content} />
-
-        {/* Home Indicator for iOS */}
-        <div style={styles.homeIndicator}>
-          <div style={styles.homeIndicatorBar} />
-        </div>
-      </div>
-
-      {/* Live Chat Modal */}
-      {isChatOpen && (
-        <div style={styles.chatModal}>
-          <div style={styles.chatHeader}>
-            <div style={styles.chatHeaderLeft}>
-              <div style={styles.chatStatusDot} />
-              <span style={styles.chatTitle}>Live Chat Support</span>
-            </div>
-            <button onClick={() => setIsChatOpen(false)} style={styles.closeChat}>×</button>
-          </div>
-          
-          <div style={styles.chatMessages}>
-            {chatMessages.map(msg => (
-              <div 
-                key={msg.id} 
-                style={{
-                  ...styles.message,
-                  justifyContent: msg.sender === 'user' ? 'flex-end' : 'flex-start'
-                }}
-              >
-                <div style={{
-                  ...styles.messageBubble,
-                  backgroundColor: msg.sender === 'user' ? '#8be9fd' : '#2c2c2e',
-                  color: msg.sender === 'user' ? '#000' : '#fff'
-                }}>
-                  {msg.text}
+              {/* Card 2 - Notes Card */}
+              <div style={styles.card}>
+                <div style={styles.cardHeader}>
+                  <h3 style={styles.cardTitle}>
+                    Catatan Saya ({notes.length})
+                  </h3>
+                  <div className="note-count" style={styles.noteIcon}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                      <polyline points="14 2 14 8 20 8" />
+                    </svg>
+                  </div>
                 </div>
-                <span style={styles.messageTime}>{msg.time}</span>
+                
+                <div style={styles.notesList}>
+                  {notes.length === 0 ? (
+                    <div style={styles.emptyNotes}>Belum ada catatan</div>
+                  ) : (
+                    notes.map(note => (
+                      <div key={note.id} style={styles.noteItem}>
+                        <div style={styles.noteText}>{note.text}</div>
+                        <div style={styles.noteTime}>{formatDate(note.timestamp)}</div>
+                      </div>
+                    ))
+                  )}
+                </div>
+                
+                <div style={styles.noteInputContainer}>
+                  <input
+                    type="text"
+                    value={newNote}
+                    onChange={(e) => setNewNote(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && handleAddNote()}
+                    placeholder="Tulis catatan baru..."
+                    style={styles.noteInput}
+                  />
+                  <button onClick={handleAddNote} style={styles.addNoteButton}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                      <line x1="12" y1="5" x2="12" y2="19" />
+                      <line x1="5" y1="12" x2="19" y2="12" />
+                    </svg>
+                  </button>
+                </div>
               </div>
-            ))}
+            </div>
+            
+            {/* Dot Pagination */}
+            <div style={styles.pagination}>
+              {[0, 1].map((index) => (
+                <button
+                  key={index}
+                  onClick={() => scrollToCard(index)}
+                  style={{
+                    ...styles.paginationDot,
+                    backgroundColor: activeCardIndex === index ? '#8be9fd' : '#3a3a3c',
+                    width: activeCardIndex === index ? '24px' : '8px',
+                  }}
+                />
+              ))}
+            </div>
           </div>
-          
-          <div style={styles.chatInputContainer}>
-            <input
-              type="text"
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-              placeholder="Ketik pesan..."
-              style={styles.chatInput}
-            />
-            <button onClick={sendMessage} style={styles.sendButton}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <line x1="22" y1="2" x2="11" y2="13" />
-                <polygon points="22 2 15 22 11 13 2 9 22 2" />
-              </svg>
-            </button>
+
+          {/* Main Content - Kosong */}
+          <div style={styles.content} />
+
+          {/* Home Indicator for iOS */}
+          <div style={styles.homeIndicator}>
+            <div style={styles.homeIndicatorBar} />
           </div>
         </div>
-      )}
 
-      <style jsx>{`
-        @keyframes spin {
-          from {
-            transform: rotate(0deg);
-          }
-          to {
-            transform: rotate(360deg);
-          }
-        }
-        
-        @keyframes pulse {
-          0% {
-            transform: scale(1);
-          }
-          50% {
-            transform: scale(1.02);
-          }
-          100% {
-            transform: scale(1);
-          }
-        }
-        
-        @keyframes shimmer {
-          0% {
-            transform: translateX(-100%);
-          }
-          100% {
-            transform: translateX(100%);
-          }
-        }
-        
-        .animate-pulse {
-          animation: pulse 0.5s ease-in-out;
-        }
-      `}</style>
-    </div>
+        {/* Live Chat Modal */}
+        {isChatOpen && (
+          <div style={styles.chatModal}>
+            <div style={styles.chatHeader}>
+              <div style={styles.chatHeaderLeft}>
+                <div style={styles.chatStatusDot} />
+                <span style={styles.chatTitle}>Live Chat Support</span>
+              </div>
+              <button onClick={() => setIsChatOpen(false)} style={styles.closeChat}>×</button>
+            </div>
+            
+            <div style={styles.chatMessages}>
+              {chatMessages.map(msg => (
+                <div 
+                  key={msg.id} 
+                  style={{
+                    ...styles.message,
+                    justifyContent: msg.sender === 'user' ? 'flex-end' : 'flex-start'
+                  }}
+                >
+                  <div style={{
+                    ...styles.messageBubble,
+                    backgroundColor: msg.sender === 'user' ? '#8be9fd' : '#2c2c2e',
+                    color: msg.sender === 'user' ? '#000' : '#fff'
+                  }}>
+                    {msg.text}
+                  </div>
+                  <span style={styles.messageTime}>{msg.time}</span>
+                </div>
+              ))}
+            </div>
+            
+            <div style={styles.chatInputContainer}>
+              <input
+                type="text"
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                placeholder="Ketik pesan..."
+                style={styles.chatInput}
+              />
+              <button onClick={sendMessage} style={styles.sendButton}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="22" y1="2" x2="11" y2="13" />
+                  <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </>
   );
 }
 
 const styles: { [key: string]: React.CSSProperties } = {
+  // ... semua styles yang sudah ada tetap sama persis ...
   wrapper: {
     height: '100vh',
     width: '100vw',
@@ -580,9 +549,6 @@ const styles: { [key: string]: React.CSSProperties } = {
     scrollbarWidth: 'none',
     msOverflowStyle: 'none',
     WebkitOverflowScrolling: 'touch',
-    '&::-webkit-scrollbar': {
-      display: 'none',
-    },
   },
   card: {
     flex: '0 0 100%',
