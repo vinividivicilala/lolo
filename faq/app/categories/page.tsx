@@ -63,9 +63,8 @@ export default function CategoriesPage() {
 
   const renderNorthwestArrow = () => (
     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M15 9L9 15" />
-      <path d="M9 9L15 15" />
-      <path d="M9 9H15V15" />
+      <path d="M5 5L19 19" />
+      <path d="M5 12V5H12" />
     </svg>
   );
 
