@@ -1898,7 +1898,7 @@ useEffect(() => {
           top: isMobile ? '1rem' : '2rem',
           left: isMobile ? '1rem' : '2rem',
           color: '#FFFFFF',
-          fontSize: isMobile ? '200px' : '400px',
+          fontSize: isMobile ? '200px' : '490px',
           fontWeight: '300',
           fontFamily: 'Helvetica, Arial, sans-serif',
           textTransform: 'uppercase',
