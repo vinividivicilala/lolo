@@ -2,8 +2,6 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-// Hapus baris ini
-// import InstallPrompt from '@/components/InstallPrompt';
 
 export default function HomePage() {
   const router = useRouter();
@@ -141,15 +139,14 @@ export default function HomePage() {
       <div style={styles.container}>
         {/* Header - Navbar */}
         <div style={styles.header}>
-          <div style={styles.logo}>Menuru</div>
-          <div style={styles.navRight}>
-            <div style={styles.userInfo}>
-              <div style={styles.userAvatar}>
-                {userName.charAt(0).toUpperCase()}
-              </div>
-              <span style={styles.userName}>{userName.split(' ')[0]}</span>
+          <div style={styles.userInfo}>
+            <div style={styles.userAvatar}>
+              {userName.charAt(0).toUpperCase()}
             </div>
-            
+            <span style={styles.userName}>{userName.split(' ')[0]}</span>
+          </div>
+          
+          <div style={styles.navRight}>
             <div style={styles.notificationWrapper}>
               <button 
                 style={styles.iconButton}
@@ -209,7 +206,9 @@ export default function HomePage() {
             {/* Card 1 - Donation Card */}
             <div style={styles.card}>
               <div style={styles.cardHeader}>
-                <h3 style={styles.cardTitle}>Jumlah Donasi</h3>
+                <div style={styles.cardTitleWrapper}>
+                  <h3 style={styles.cardTitle}>Jumlah Donasi</h3>
+                </div>
                 <button 
                   onClick={handleReload} 
                   style={styles.reloadButton}
@@ -243,7 +242,7 @@ export default function HomePage() {
               </div>
               
               <button onClick={handleAddDonation} style={styles.addButton}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                   <line x1="12" y1="5" x2="12" y2="19" />
                   <line x1="5" y1="12" x2="19" y2="12" />
                 </svg>
@@ -305,7 +304,7 @@ export default function HomePage() {
                 onClick={() => scrollToCard(index)}
                 style={{
                   ...styles.paginationDot,
-                  backgroundColor: activeCardIndex === index ? '#8be9fd' : '#3a3a3c',
+                  backgroundColor: activeCardIndex === index ? '#4cd964' : '#3a3a3c',
                   width: activeCardIndex === index ? '24px' : '8px',
                 }}
               />
@@ -344,7 +343,7 @@ export default function HomePage() {
               >
                 <div style={{
                   ...styles.messageBubble,
-                  backgroundColor: msg.sender === 'user' ? '#8be9fd' : '#2c2c2e',
+                  backgroundColor: msg.sender === 'user' ? '#4cd964' : '#2c2c2e',
                   color: msg.sender === 'user' ? '#000' : '#fff'
                 }}>
                   {msg.text}
@@ -449,41 +448,32 @@ const styles: { [key: string]: React.CSSProperties } = {
     zIndex: 10,
     marginBottom: '20px',
   },
-  logo: {
-    fontSize: '22px',
+  userInfo: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
+  },
+  userAvatar: {
+    width: '40px',
+    height: '40px',
+    borderRadius: '50%',
+    backgroundColor: '#4cd964',
+    color: '#fff',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontWeight: '600',
+    fontSize: '18px',
+  },
+  userName: {
+    fontSize: '16px',
     fontWeight: '600',
     color: '#fff',
-    letterSpacing: '-0.3px',
   },
   navRight: {
     display: 'flex',
     alignItems: 'center',
     gap: '12px',
-  },
-  userInfo: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    padding: '6px 12px 6px 8px',
-    borderRadius: '30px',
-    backgroundColor: '#1c1c1e',
-  },
-  userAvatar: {
-    width: '28px',
-    height: '28px',
-    borderRadius: '50%',
-    backgroundColor: '#8be9fd',
-    color: '#000',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontWeight: '600',
-    fontSize: '12px',
-  },
-  userName: {
-    fontSize: '13px',
-    fontWeight: '500',
-    color: '#fff',
   },
   iconButton: {
     background: 'none',
@@ -556,7 +546,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     width: '8px',
     height: '8px',
     borderRadius: '50%',
-    backgroundColor: '#8be9fd',
+    backgroundColor: '#4cd964',
   },
   notificationText: {
     fontSize: '13px',
@@ -590,17 +580,20 @@ const styles: { [key: string]: React.CSSProperties } = {
     scrollSnapAlign: 'start',
     backgroundColor: '#1c1c1e',
     borderRadius: '16px',
-    padding: '18px 20px',
+    padding: '20px',
     boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
   },
   cardHeader: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: '12px',
+    marginBottom: '16px',
+  },
+  cardTitleWrapper: {
+    flex: 1,
   },
   cardTitle: {
-    fontSize: '13px',
+    fontSize: '14px',
     fontWeight: '500',
     color: '#8e8e93',
     margin: 0,
@@ -610,7 +603,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     border: 'none',
     cursor: 'pointer',
     color: '#8e8e93',
-    padding: '4px',
+    padding: '6px',
     borderRadius: '50%',
     display: 'flex',
     alignItems: 'center',
@@ -618,20 +611,20 @@ const styles: { [key: string]: React.CSSProperties } = {
     transition: 'all 0.2s',
   },
   donationTotal: {
-    fontSize: '26px',
+    fontSize: '32px',
     fontWeight: '700',
     color: '#fff',
-    marginBottom: '16px',
+    marginBottom: '20px',
     textAlign: 'left',
     transition: 'all 0.3s ease',
   },
   skeletonLoader: {
-    height: '32px',
+    height: '38px',
     backgroundColor: '#2c2c2e',
     borderRadius: '6px',
     position: 'relative',
     overflow: 'hidden',
-    marginBottom: '16px',
+    marginBottom: '20px',
   },
   skeletonShimmer: {
     position: 'absolute',
@@ -646,14 +639,14 @@ const styles: { [key: string]: React.CSSProperties } = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: '6px',
+    gap: '8px',
     width: '100%',
-    padding: '10px 12px',
-    backgroundColor: '#8be9fd',
+    padding: '12px',
+    backgroundColor: '#4cd964',
     border: 'none',
     borderRadius: '24px',
     color: '#000',
-    fontSize: '13px',
+    fontSize: '14px',
     fontWeight: '600',
     cursor: 'pointer',
     transition: 'all 0.2s',
@@ -704,7 +697,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     fontFamily: 'inherit',
   },
   addNoteButton: {
-    background: '#8be9fd',
+    background: '#4cd964',
     border: 'none',
     borderRadius: '50%',
     width: '36px',
@@ -721,7 +714,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     justifyContent: 'center',
     alignItems: 'center',
     gap: '8px',
-    marginTop: '8px',
+    marginTop: '12px',
     paddingBottom: '4px',
   },
   paginationDot: {
@@ -836,7 +829,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     fontFamily: 'inherit',
   },
   sendButton: {
-    background: '#8be9fd',
+    background: '#4cd964',
     border: 'none',
     borderRadius: '50%',
     width: '38px',
