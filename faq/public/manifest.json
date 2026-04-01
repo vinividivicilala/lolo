@@ -1,0 +1,86 @@
+{
+  "name": "Menuru - Platform Donasi",
+  "short_name": "Menuru",
+  "description": "Platform donasi dan kegiatan sosial",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#8be9fd",
+  "orientation": "portrait",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/icons/icon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Tambah Donasi",
+      "short_name": "Donasi",
+      "description": "Tambah donasi baru",
+      "url": "/?action=donation",
+      "icons": [{ "src": "/icons/donation-96x96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Catatan Saya",
+      "short_name": "Catatan",
+      "description": "Lihat catatan",
+      "url": "/?action=notes",
+      "icons": [{ "src": "/icons/notes-96x96.png", "sizes": "96x96" }]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/mobile.png",
+      "sizes": "360x720",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Tampilan Mobile Menuru"
+    }
+  ]
+}
