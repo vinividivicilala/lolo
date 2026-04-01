@@ -382,21 +382,22 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* TERBAIK Section - placed below category menu with proper spacing */}
+          {/* TERBAIK Section - minimalist arrow */}
           <div style={styles.bestSection}>
             <div style={styles.bestHeader}>
               <span style={styles.bestBadge}>TERBAIK</span>
               <svg 
-                width="18" 
-                height="18" 
+                width="20" 
+                height="20" 
                 viewBox="0 0 24 24" 
                 fill="none" 
                 stroke="currentColor" 
-                strokeWidth="2"
+                strokeWidth="1.5"
                 style={styles.arrowIcon}
               >
-                <line x1="5" y1="19" x2="19" y2="5" />
-                <polyline points="15 5 19 5 19 9" />
+                <path d="M7 17L17 7" />
+                <path d="M17 7L17 15" />
+                <path d="M17 7L9 7" />
               </svg>
             </div>
             <div style={styles.bestSubtitle}>
@@ -849,7 +850,6 @@ const styles: { [key: string]: React.CSSProperties } = {
     color: '#ffffff',
     textAlign: 'center',
   },
-  // Best section styles - no border line, proper spacing
   bestSection: {
     marginTop: '28px',
     marginBottom: '16px',
@@ -868,7 +868,7 @@ const styles: { [key: string]: React.CSSProperties } = {
   },
   arrowIcon: {
     color: '#ffffff',
-    strokeWidth: '2',
+    strokeWidth: '1.5',
   },
   bestSubtitle: {
     fontSize: '13px',
