@@ -1,129 +1,70 @@
 // app/categories/page.tsx
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function CategoriesPage() {
   const router = useRouter();
 
+  const [favoriteCategories, setFavoriteCategories] = useState([
+    { id: 1, name: 'Panti Asuhan', visitCount: 5 },
+    { id: 2, name: 'Masjid', visitCount: 3 },
+  ]);
+
   const allCategories = [
-    { id: 1, name: 'Panti Asuhan', icon: 'orphanage' },
-    { id: 2, name: 'Panti Jompo', icon: 'elderly' },
-    { id: 3, name: 'Masjid', icon: 'mosque' },
-    { id: 4, name: 'Pendidikan', icon: 'education' },
-    { id: 5, name: 'Kesehatan', icon: 'health' },
-    { id: 6, name: 'Umum', icon: 'general' },
-    { id: 7, name: 'Bencana Alam', icon: 'disaster' },
-    { id: 8, name: 'Yatim Piatu', icon: 'orphan' },
-    { id: 9, name: 'Lingkungan', icon: 'environment' },
-    { id: 10, name: 'Dakwah', icon: 'dawah' },
+    { id: 1, name: 'Panti Asuhan' },
+    { id: 2, name: 'Panti Jompo' },
+    { id: 3, name: 'Masjid' },
+    { id: 4, name: 'Pendidikan' },
+    { id: 5, name: 'Kesehatan' },
+    { id: 6, name: 'Umum' },
+    { id: 7, name: 'Bencana Alam' },
+    { id: 8, name: 'Yatim Piatu' },
+    { id: 9, name: 'Lingkungan' },
+    { id: 10, name: 'Dakwah' },
   ];
 
-  const renderIcon = (iconName: string) => {
-    switch(iconName) {
-      case 'orphanage':
-        return (
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M3 9L12 3L21 9L12 15L3 9Z" />
-            <path d="M12 15V21" />
-            <path d="M8 12V18" />
-            <path d="M16 12V18" />
-            <path d="M6 21H18" />
-          </svg>
-        );
-      case 'elderly':
-        return (
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="8" r="4" />
-            <path d="M12 12V16" />
-            <path d="M8 20L12 16L16 20" />
-          </svg>
-        );
-      case 'mosque':
-        return (
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 2L15 6H9L12 2Z" />
-            <path d="M5 10L7 6H17L19 10H5Z" />
-            <path d="M4 10H20V20H4V10Z" />
-            <path d="M12 14V20" />
-            <path d="M8 14H16" />
-          </svg>
-        );
-      case 'education':
-        return (
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 3L2 8L12 13L22 8L12 3Z" />
-            <path d="M2 8V16" />
-            <path d="M6 11V17" />
-            <path d="M18 11V17" />
-            <path d="M22 8V16" />
-            <path d="M12 13V21" />
-          </svg>
-        );
-      case 'health':
-        return (
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 2L12 6" />
-            <path d="M12 10L12 14" />
-            <path d="M12 18L12 22" />
-            <path d="M2 12L6 12" />
-            <path d="M10 12L14 12" />
-            <path d="M18 12L22 12" />
-            <circle cx="12" cy="12" r="4" />
-          </svg>
-        );
-      case 'general':
-        return (
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="10" />
-            <path d="M12 8L12 12" />
-            <path d="M12 16L12.01 16" />
-          </svg>
-        );
-      case 'disaster':
-        return (
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 2L15 6H9L12 2Z" />
-            <path d="M4 14L12 8L20 14L12 20L4 14Z" />
-          </svg>
-        );
-      case 'orphan':
-        return (
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="8" r="3" />
-            <path d="M6 21L12 15L18 21" />
-          </svg>
-        );
-      case 'environment':
-        return (
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 2L15 6H9L12 2Z" />
-            <path d="M5 10L12 6L19 10" />
-            <path d="M12 6V16" />
-          </svg>
-        );
-      case 'dawah':
-        return (
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M4 4L20 20" />
-            <path d="M20 4L4 20" />
-            <circle cx="12" cy="12" r="2" />
-          </svg>
-        );
-      default:
-        return null;
+  useEffect(() => {
+    // Simulate tracking category visits from localStorage or state
+    const storedVisits = localStorage.getItem('categoryVisits');
+    if (storedVisits) {
+      const visits = JSON.parse(storedVisits);
+      const sorted = Object.entries(visits)
+        .map(([name, count]) => ({ name, visitCount: count as number }))
+        .sort((a, b) => b.visitCount - a.visitCount)
+        .slice(0, 2);
+      setFavoriteCategories(sorted);
     }
-  };
+  }, []);
 
   const handleCategoryClick = (categoryName: string) => {
+    // Track visit count
+    const storedVisits = localStorage.getItem('categoryVisits');
+    let visits = storedVisits ? JSON.parse(storedVisits) : {};
+    visits[categoryName] = (visits[categoryName] || 0) + 1;
+    localStorage.setItem('categoryVisits', JSON.stringify(visits));
+    
     router.push(`/categories/${categoryName.toLowerCase()}`);
   };
+
+  const handleBack = () => {
+    router.back();
+  };
+
+  const renderNorthwestArrow = () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M15 9L9 15" />
+      <path d="M9 9L15 15" />
+      <path d="M9 9H15V15" />
+    </svg>
+  );
 
   return (
     <div style={styles.wrapper}>
       <div style={styles.container}>
         <div style={styles.header}>
-          <button onClick={() => router.back()} style={styles.backButton}>
+          <button onClick={handleBack} style={styles.backButton}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
               <path d="M15 18l-6-6 6-6" />
             </svg>
@@ -133,19 +74,44 @@ export default function CategoriesPage() {
         </div>
 
         <div style={styles.content}>
-          <div style={styles.categoryGrid}>
-            {allCategories.map((category) => (
-              <div 
-                key={category.id} 
-                style={styles.categoryItem}
-                onClick={() => handleCategoryClick(category.name)}
-              >
-                <div style={styles.categoryIcon}>
-                  {renderIcon(category.icon)}
+          {/* Favorite Section */}
+          <div style={styles.section}>
+            <h2 style={styles.sectionTitle}>Menu Favorit</h2>
+            <div style={styles.favoriteList}>
+              {favoriteCategories.length === 0 ? (
+                <div style={styles.emptyFavorites}>Belum ada menu favorit</div>
+              ) : (
+                favoriteCategories.map((category) => (
+                  <div 
+                    key={category.id} 
+                    style={styles.favoriteItem}
+                    onClick={() => handleCategoryClick(category.name)}
+                  >
+                    <span style={styles.favoriteName}>{category.name}</span>
+                    <span style={styles.visitCount}>{category.visitCount} kali</span>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          {/* All Categories Section */}
+          <div style={styles.section}>
+            <h2 style={styles.sectionTitle}>Lainnya</h2>
+            <div style={styles.categoryGrid}>
+              {allCategories.map((category) => (
+                <div 
+                  key={category.id} 
+                  style={styles.categoryItem}
+                  onClick={() => handleCategoryClick(category.name)}
+                >
+                  <span style={styles.categoryName}>{category.name}</span>
+                  <div style={styles.arrowIcon}>
+                    {renderNorthwestArrow()}
+                  </div>
                 </div>
-                <span style={styles.categoryName}>{category.name}</span>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -200,7 +166,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     background: 'none',
     border: 'none',
     cursor: 'pointer',
-    color: '#ffffff',
+    color: '#007aff',
     padding: '8px',
     borderRadius: '50%',
     display: 'flex',
@@ -221,39 +187,73 @@ const styles: { [key: string]: React.CSSProperties } = {
     overflowY: 'auto',
     overflowX: 'hidden',
   },
+  section: {
+    marginBottom: '32px',
+  },
+  sectionTitle: {
+    fontSize: '14px',
+    fontWeight: '500',
+    color: '#8e8e93',
+    marginBottom: '12px',
+    letterSpacing: '-0.2px',
+  },
+  favoriteList: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '8px',
+  },
+  favoriteItem: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '14px 16px',
+    backgroundColor: '#1c1c1e',
+    borderRadius: '12px',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+  },
+  favoriteName: {
+    fontSize: '16px',
+    fontWeight: '500',
+    color: '#ffffff',
+  },
+  visitCount: {
+    fontSize: '13px',
+    color: '#007aff',
+    fontWeight: '500',
+  },
+  emptyFavorites: {
+    padding: '40px 20px',
+    textAlign: 'center',
+    color: '#8e8e93',
+    fontSize: '14px',
+    backgroundColor: '#1c1c1e',
+    borderRadius: '12px',
+  },
   categoryGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(2, 1fr)',
-    gap: '20px',
-    rowGap: '24px',
-    paddingBottom: '20px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '6px',
   },
   categoryItem: {
     display: 'flex',
-    flexDirection: 'column',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    gap: '12px',
-    cursor: 'pointer',
-    transition: 'transform 0.2s ease',
-    padding: '16px',
+    padding: '14px 16px',
     backgroundColor: '#1c1c1e',
-    borderRadius: '16px',
+    borderRadius: '12px',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
   },
-  categoryIcon: {
-    width: '64px',
-    height: '64px',
-    borderRadius: '32px',
-    backgroundColor: '#2c2c2e',
+  categoryName: {
+    fontSize: '16px',
+    fontWeight: '500',
+    color: '#ffffff',
+  },
+  arrowIcon: {
+    color: '#007aff',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    transition: 'all 0.2s ease',
-    color: '#ffffff',
-  },
-  categoryName: {
-    fontSize: '14px',
-    color: '#ffffff',
-    textAlign: 'center',
-    fontWeight: '500',
   },
 };
