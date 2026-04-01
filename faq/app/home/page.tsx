@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function HomePage() {
@@ -21,6 +21,19 @@ export default function HomePage() {
   // Donation State
   const [donationTotal, setDonationTotal] = useState(1250000);
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Donation History State
+  const [donationHistory, setDonationHistory] = useState([
+    { id: 1, amount: 50000, date: new Date(), campaign: 'Bantu Anak Yatim', status: 'success' },
+    { id: 2, amount: 100000, date: new Date(Date.now() - 86400000), campaign: 'Kebersihan Lingkungan', status: 'success' },
+    { id: 3, amount: 75000, date: new Date(Date.now() - 172800000), campaign: 'Donasi Bencana Alam', status: 'success' },
+    { id: 4, amount: 200000, date: new Date(Date.now() - 259200000), campaign: 'Pendidikan Anak', status: 'success' },
+    { id: 5, amount: 50000, date: new Date(Date.now() - 345600000), campaign: 'Bantuan Sembako', status: 'success' },
+  ]);
+  
+  const [activeCardIndex, setActiveCardIndex] = useState(0);
+  const carouselRef = useRef<HTMLDivElement>(null);
+  const mainContentRef = useRef<HTMLDivElement>(null);
 
   const formatRupiah = (amount: number) => {
     return new Intl.NumberFormat('id-ID', {
@@ -29,6 +42,15 @@ export default function HomePage() {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(amount);
+  };
+
+  const formatDate = (date: Date) => {
+    const now = new Date();
+    const diffHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
+    if (diffHours < 1) return 'Baru saja';
+    if (diffHours < 24) return `${diffHours} jam lalu`;
+    if (diffHours < 48) return 'Kemarin';
+    return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
   };
 
   const handleReload = () => {
@@ -41,6 +63,16 @@ export default function HomePage() {
   const handleAddDonation = () => {
     const addAmount = 50000;
     setDonationTotal(prev => prev + addAmount);
+    
+    // Add to donation history automatically
+    const newDonation = {
+      id: Date.now(),
+      amount: addAmount,
+      date: new Date(),
+      campaign: 'Donasi Mandiri',
+      status: 'success' as const,
+    };
+    setDonationHistory(prev => [newDonation, ...prev]);
     
     const element = document.querySelector('.donation-total');
     if (element) {
@@ -72,6 +104,51 @@ export default function HomePage() {
         ]);
       }, 1000);
     }
+  };
+
+  const handleCarouselScroll = () => {
+    if (carouselRef.current) {
+      const scrollPosition = carouselRef.current.scrollLeft;
+      const cardWidth = carouselRef.current.clientWidth;
+      const newIndex = Math.round(scrollPosition / cardWidth);
+      setActiveCardIndex(newIndex);
+    }
+  };
+
+  const scrollToCard = (index: number) => {
+    if (carouselRef.current) {
+      const cardWidth = carouselRef.current.clientWidth;
+      carouselRef.current.scrollTo({
+        left: cardWidth * index,
+        behavior: 'smooth',
+      });
+      setActiveCardIndex(index);
+    }
+  };
+
+  // Handle touch events for carousel
+  const touchStartX = useRef(0);
+  const touchEndX = useRef(0);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    touchEndX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = () => {
+    const diff = touchStartX.current - touchEndX.current;
+    if (Math.abs(diff) > 50) {
+      if (diff > 0 && activeCardIndex < 1) {
+        scrollToCard(activeCardIndex + 1);
+      } else if (diff < 0 && activeCardIndex > 0) {
+        scrollToCard(activeCardIndex - 1);
+      }
+    }
+    touchStartX.current = 0;
+    touchEndX.current = 0;
   };
 
   const unreadCount = notifications.filter(n => !n.read).length;
@@ -138,54 +215,116 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Donation Card */}
-        <div style={styles.cardContainer}>
-          <div style={styles.card}>
-            <div style={styles.cardHeader}>
-              <h3 style={styles.cardTitle}>Jumlah Donasi</h3>
-              <button 
-                onClick={handleReload} 
-                style={styles.reloadButton}
-                disabled={isLoading}
-              >
-                <svg 
-                  width="18" 
-                  height="18" 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  strokeWidth="2"
-                  style={{
-                    animation: isLoading ? 'spin 0.8s linear infinite' : 'none',
-                  }}
-                >
-                  <path d="M23 4v6h-6M1 20v-6h6" />
-                  <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
-                </svg>
-              </button>
-            </div>
-            
-            <div className="donation-total" style={styles.donationTotal}>
-              {isLoading ? (
-                <div style={styles.skeletonLoader}>
-                  <div style={styles.skeletonShimmer} />
+        {/* Scrollable Main Content */}
+        <div 
+          ref={mainContentRef}
+          style={styles.mainContent}
+        >
+          {/* Carousel Section */}
+          <div style={styles.carouselSection}>
+            <div 
+              ref={carouselRef}
+              style={styles.carouselContainer}
+              onScroll={handleCarouselScroll}
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+            >
+              {/* Card 1 - Donation Card */}
+              <div style={styles.card}>
+                <div style={styles.cardHeader}>
+                  <h3 style={styles.cardTitle}>Jumlah Donasi</h3>
+                  <button 
+                    onClick={handleReload} 
+                    style={styles.reloadButton}
+                    disabled={isLoading}
+                  >
+                    <svg 
+                      width="18" 
+                      height="18" 
+                      viewBox="0 0 24 24" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      strokeWidth="2"
+                      style={{
+                        animation: isLoading ? 'spin 0.8s linear infinite' : 'none',
+                      }}
+                    >
+                      <path d="M23 4v6h-6M1 20v-6h6" />
+                      <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+                    </svg>
+                  </button>
                 </div>
-              ) : (
-                formatRupiah(donationTotal)
-              )}
+                
+                <div className="donation-total" style={styles.donationTotal}>
+                  {isLoading ? (
+                    <div style={styles.skeletonLoader}>
+                      <div style={styles.skeletonShimmer} />
+                    </div>
+                  ) : (
+                    formatRupiah(donationTotal)
+                  )}
+                </div>
+                
+                <button onClick={handleAddDonation} style={styles.addButton}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Card 2 - Donation History Card */}
+              <div style={styles.card}>
+                <div style={styles.cardHeader}>
+                  <h3 style={styles.cardTitle}>Riwayat Donasi</h3>
+                  <div style={styles.historyIcon}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M12 8v4l3 3M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" />
+                    </svg>
+                  </div>
+                </div>
+                
+                <div style={styles.historyList}>
+                  {donationHistory.length === 0 ? (
+                    <div style={styles.emptyHistory}>Belum ada riwayat donasi</div>
+                  ) : (
+                    donationHistory.map(donation => (
+                      <div key={donation.id} style={styles.historyItem}>
+                        <div style={styles.historyLeft}>
+                          <div style={styles.historyAmount}>{formatRupiah(donation.amount)}</div>
+                          <div style={styles.historyCampaign}>{donation.campaign}</div>
+                        </div>
+                        <div style={styles.historyRight}>
+                          <div style={styles.historyDate}>{formatDate(donation.date)}</div>
+                          <div style={styles.historyStatus}>{donation.status === 'success' ? '✓ Berhasil' : 'Pending'}</div>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
             </div>
             
-            <button onClick={handleAddDonation} style={styles.addButton}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <line x1="12" y1="5" x2="12" y2="19" />
-                <line x1="5" y1="12" x2="19" y2="12" />
-              </svg>
-            </button>
+            {/* Dot Pagination */}
+            <div style={styles.pagination}>
+              {[0, 1].map((index) => (
+                <button
+                  key={index}
+                  onClick={() => scrollToCard(index)}
+                  style={{
+                    ...styles.paginationDot,
+                    backgroundColor: activeCardIndex === index ? '#4cd964' : '#3a3a3c',
+                    width: activeCardIndex === index ? '24px' : '8px',
+                  }}
+                />
+              ))}
+            </div>
           </div>
-        </div>
 
-        {/* Main Content - Kosong */}
-        <div style={styles.content} />
+          {/* Additional Content Space */}
+          <div style={styles.extraSpace} />
+        </div>
 
         {/* Home Indicator for iOS */}
         <div style={styles.homeIndicator}>
@@ -319,6 +458,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     position: 'relative',
     zIndex: 10,
     marginBottom: '20px',
+    flexShrink: 0,
   },
   userInfo: {
     display: 'flex',
@@ -430,10 +570,35 @@ const styles: { [key: string]: React.CSSProperties } = {
     color: '#8e8e93',
     fontSize: '13px',
   },
-  cardContainer: {
+  mainContent: {
+    flex: 1,
+    overflowY: 'auto',
+    overflowX: 'hidden',
+    marginRight: '-24px',
+    paddingRight: '24px',
+    scrollbarWidth: 'thin',
+    scrollbarColor: '#4cd964 #2c2c2e',
+  },
+  carouselSection: {
     marginBottom: '20px',
   },
+  carouselContainer: {
+    display: 'flex',
+    overflowX: 'auto',
+    scrollSnapType: 'x mandatory',
+    scrollBehavior: 'smooth',
+    gap: '16px',
+    paddingBottom: '12px',
+    scrollbarWidth: 'none',
+    msOverflowStyle: 'none',
+    WebkitOverflowScrolling: 'touch',
+    '&::-webkit-scrollbar': {
+      display: 'none',
+    },
+  },
   card: {
+    flex: '0 0 100%',
+    scrollSnapAlign: 'start',
     backgroundColor: '#1c1c1e',
     borderRadius: '16px',
     padding: '20px',
@@ -462,6 +627,9 @@ const styles: { [key: string]: React.CSSProperties } = {
     alignItems: 'center',
     justifyContent: 'center',
     transition: 'all 0.2s',
+  },
+  historyIcon: {
+    color: '#8e8e93',
   },
   donationTotal: {
     fontSize: '32px',
@@ -502,8 +670,68 @@ const styles: { [key: string]: React.CSSProperties } = {
     transition: 'all 0.2s',
     marginTop: '8px',
   },
-  content: {
+  historyList: {
+    maxHeight: '280px',
+    overflowY: 'auto',
+    marginTop: '8px',
+  },
+  historyItem: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '12px 0',
+    borderBottom: '1px solid #2c2c2e',
+  },
+  historyLeft: {
     flex: 1,
+  },
+  historyAmount: {
+    fontSize: '15px',
+    fontWeight: '600',
+    color: '#fff',
+    marginBottom: '4px',
+  },
+  historyCampaign: {
+    fontSize: '12px',
+    color: '#8e8e93',
+  },
+  historyRight: {
+    textAlign: 'right',
+  },
+  historyDate: {
+    fontSize: '11px',
+    color: '#8e8e93',
+    marginBottom: '2px',
+  },
+  historyStatus: {
+    fontSize: '11px',
+    color: '#4cd964',
+    fontWeight: '500',
+  },
+  emptyHistory: {
+    textAlign: 'center',
+    color: '#8e8e93',
+    fontSize: '13px',
+    padding: '40px 0',
+  },
+  pagination: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: '8px',
+    marginTop: '12px',
+    paddingBottom: '4px',
+  },
+  paginationDot: {
+    height: '8px',
+    borderRadius: '4px',
+    border: 'none',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+    padding: 0,
+  },
+  extraSpace: {
+    height: '20px',
   },
   homeIndicator: {
     display: 'flex',
@@ -511,6 +739,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     alignItems: 'center',
     paddingBottom: 'max(8px, env(safe-area-inset-bottom))',
     paddingTop: '8px',
+    flexShrink: 0,
   },
   homeIndicatorBar: {
     width: '140px',
