@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import Lenis from "@studio-freight/lenis";
 import { initializeApp, getApps } from "firebase/app";
 import { 
   getAuth, 
@@ -225,13 +226,7 @@ export default function HomePage(): React.JSX.Element {
   const [isUpdating, setIsUpdating] = useState(false);
   const [showDeleteAccountModal, setShowDeleteAccountModal] = useState(false);
 
- // State untuk GSAP Loading
-const [showGsapLoading, setShowGsapLoading] = useState(true);
-const [currentWordIndex, setCurrentWordIndex] = useState(0);
 
-// State untuk MENURU Overlay setelah loading
-const [showMenuruOverlay, setShowMenuruOverlay] = useState(true);
-const [hasScrolled, setHasScrolled] = useState(false);
 
   // State untuk kalender
   const [showCalendarModal, setShowCalendarModal] = useState(false);
@@ -1485,90 +1480,123 @@ useEffect(() => {
 
 
   
-
-// Perbaiki useEffect untuk scroll handler di MENURU overlay
+// Scroll handler untuk MENURU dengan efek smooth seperti Lenis/GSAP
 useEffect(() => {
   if (!showMenuruOverlay) return;
 
-  let scrollTimeout: NodeJS.Timeout;
-  
-  const handleScroll = () => {
-    // Hanya proses jika user scroll ke bawah lebih dari 50px
-    if (!hasScrolled && window.scrollY > 50) {
-      // Gunakan debounce untuk mencegah multiple trigger
-      if (scrollTimeout) clearTimeout(scrollTimeout);
+  let lenis: Lenis | null = null;
+  let animationFrame: number;
+  let startY = 0;
+  let isAnimating = false;
+
+  // Inisialisasi Lenis untuk smooth scroll (opsional)
+  if (typeof window !== 'undefined') {
+    lenis = new Lenis({
+      duration: 1.2,
+      easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      orientation: 'vertical',
+      gestureOrientation: 'vertical',
+      smoothWheel: true,
+      smoothTouch: true,
+      touchMultiplier: 2,
+    });
+
+    function raf(time: number) {
+      lenis?.raf(time);
+      animationFrame = requestAnimationFrame(raf);
+    }
+    animationFrame = requestAnimationFrame(raf);
+  }
+
+  // Handler untuk wheel dengan animasi smooth
+  const handleWheel = (e: WheelEvent) => {
+    if (e.deltaY > 0 && !hasScrolled && !isAnimating) {
+      e.preventDefault();
+      isAnimating = true;
       
-      scrollTimeout = setTimeout(() => {
-        setHasScrolled(true);
-        
-        // Animasi fade out untuk overlay
-        const overlayElement = document.getElementById('menuru-overlay');
-        if (overlayElement) {
-          // Pastikan body tidak bisa scroll selama animasi
-          document.body.style.overflow = 'hidden';
-          
-          gsap.to(overlayElement, {
-            opacity: 0,
-            duration: 0.6,
-            ease: "power2.inOut",
-            onComplete: () => {
-              setShowMenuruOverlay(false);
-              // Kembalikan scroll body
-              document.body.style.overflow = '';
-              // Scroll ke posisi 0 untuk menampilkan halaman utama
+      const overlay = document.getElementById('menuru-overlay');
+      const menuruText = document.querySelector('.menuru-text');
+      const scrollIndicator = document.querySelector('.scroll-indicator');
+      
+      if (overlay) {
+        // Animasi fade out dan slide up untuk overlay
+        gsap.to(overlay, {
+          opacity: 0,
+          y: -100,
+          duration: 0.8,
+          ease: "power3.inOut",
+          onComplete: () => {
+            setHasScrolled(true);
+            setShowMenuruOverlay(false);
+            // Smooth scroll ke atas
+            if (lenis) {
+              lenis.scrollTo(0, { immediate: true });
+            } else {
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }
+            isAnimating = false;
+          }
+        });
+        
+        // Animasi untuk teks MENURU
+        if (menuruText) {
+          gsap.to(menuruText, {
+            scale: 0.8,
+            opacity: 0,
+            y: 50,
+            duration: 0.6,
+            ease: "power2.in",
+            delay: 0.1
           });
-        } else {
-          document.body.style.overflow = '';
-          setShowMenuruOverlay(false);
-          window.scrollTo({ top: 0, behavior: 'smooth' });
         }
-      }, 50); // Debounce 50ms
-    }
-  };
-
-  // Pastikan window bisa scroll saat overlay aktif
-  // Tapi scroll hanya untuk menghilangkan overlay, bukan untuk scroll halaman di bawahnya
-  const preventBodyScroll = (e: WheelEvent) => {
-    // Jika belum scroll dan sedang di overlay, izinkan scroll untuk trigger
-    if (!hasScrolled && showMenuruOverlay) {
-      // Biarkan scroll berjalan untuk trigger, tapi jangan scroll body
-      if (window.scrollY === 0) {
-        // Jika di posisi 0, izinkan sedikit scroll untuk trigger
-        return;
+        
+        // Animasi untuk scroll indicator
+        if (scrollIndicator) {
+          gsap.to(scrollIndicator, {
+            opacity: 0,
+            y: 20,
+            duration: 0.4,
+            ease: "power2.in"
+          });
+        }
+      } else {
+        setHasScrolled(true);
+        setShowMenuruOverlay(false);
+        if (lenis) lenis.scrollTo(0, { immediate: true });
+        else window.scrollTo({ top: 0, behavior: 'smooth' });
+        isAnimating = false;
       }
     }
   };
-  
-  // Alternatif: Gunakan touch event untuk mobile
+
+  // Handler untuk touch (mobile)
+  let touchStartY = 0;
+  const handleTouchStart = (e: TouchEvent) => {
+    touchStartY = e.touches[0].clientY;
+  };
+
   const handleTouchMove = (e: TouchEvent) => {
-    if (!hasScrolled && showMenuruOverlay && window.scrollY === 0) {
-      const touchY = e.touches[0].clientY;
-      // Jika swipe ke bawah
-      if (touchY > 100) {
-        e.preventDefault();
-        // Trigger scroll handler
-        window.dispatchEvent(new Event('scroll'));
-      }
+    const touchEndY = e.touches[0].clientY;
+    const deltaY = touchStartY - touchEndY;
+    
+    if (deltaY < -30 && !hasScrolled && !isAnimating) {
+      e.preventDefault();
+      handleWheel(new WheelEvent('wheel', { deltaY: 1 }));
     }
   };
 
-  window.addEventListener('scroll', handleScroll);
-  window.addEventListener('wheel', preventBodyScroll, { passive: false });
+  window.addEventListener('wheel', handleWheel, { passive: false });
+  window.addEventListener('touchstart', handleTouchStart);
   window.addEventListener('touchmove', handleTouchMove, { passive: false });
-  
+
   return () => {
-    window.removeEventListener('scroll', handleScroll);
-    window.removeEventListener('wheel', preventBodyScroll);
+    if (animationFrame) cancelAnimationFrame(animationFrame);
+    if (lenis) lenis.destroy();
+    window.removeEventListener('wheel', handleWheel);
+    window.removeEventListener('touchstart', handleTouchStart);
     window.removeEventListener('touchmove', handleTouchMove);
-    if (scrollTimeout) clearTimeout(scrollTimeout);
-    document.body.style.overflow = '';
   };
 }, [showMenuruOverlay, hasScrolled]);
-
-
-
 
 
 
@@ -1932,74 +1960,188 @@ useEffect(() => {
     }}>
 
       
-{/* MENURU OVERLAY - Setelah Loading Selesai */}
-<AnimatePresence>
+
+
+{/* MENURU OVERLAY dengan efek smooth seperti Lenis/GSAP */}
+<AnimatePresence mode="wait">
   {showMenuruOverlay && (
     <motion.div
       id="menuru-overlay"
-      initial={{ opacity: 1 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.6 }}
+      initial={{ opacity: 1, y: 0 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -100 }}
+      transition={{ duration: 0.8, ease: [0.76, 0, 0.24, 1] }}
       style={{
         position: 'fixed',
         top: 0,
         left: 0,
         width: '100%',
         height: '100%',
-        backgroundColor: 'black',
+        backgroundColor: '#000000',
         zIndex: 99998,
         overflow: 'hidden',
-        pointerEvents: 'auto',
-        cursor: 'default'
+        cursor: 'default',
+        willChange: 'transform, opacity'
       }}
     >
+      {/* Background pattern untuk efek premium */}
       <div
         style={{
           position: 'absolute',
-          top: isMobile ? '1rem' : '2rem',
-          left: isMobile ? '1rem' : '2rem',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          backgroundImage: `
+            radial-gradient(circle at 20% 30%, rgba(255,255,255,0.03) 0%, transparent 50%),
+            radial-gradient(circle at 80% 70%, rgba(255,255,255,0.02) 0%, transparent 50%),
+            repeating-linear-gradient(45deg, rgba(255,255,255,0.01) 0px, rgba(255,255,255,0.01) 1px, transparent 1px, transparent 20px)
+          `,
+          pointerEvents: 'none'
+        }}
+      />
+
+      {/* Teks MENURU utama dengan efek scale */}
+      <motion.div
+        className="menuru-text"
+        initial={{ scale: 1, opacity: 1, y: 0 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        exit={{ scale: 0.8, opacity: 0, y: 50 }}
+        transition={{ duration: 0.6, delay: 0.1 }}
+        style={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
           color: '#FFFFFF',
-          fontSize: isMobile ? '200px' : '490px',
-          fontWeight: '300',
+          fontSize: isMobile ? '15vw' : '490px',
+          fontWeight: '400',
           fontFamily: 'Helvetica, Arial, sans-serif',
           textTransform: 'uppercase',
-          lineHeight: 0.8,
+          lineHeight: 0.9,
           letterSpacing: '-0.02em',
-          whiteSpace: 'nowrap'
+          whiteSpace: 'nowrap',
+          textAlign: 'center',
+          zIndex: 2
         }}
       >
         MENURU
-      </div>
-      
-      {/* Tambahkan indicator scroll */}
+      </motion.div>
+
+      {/* Subtitle dengan efek fade in */}
       <motion.div
-        initial={{ opacity: 0, y: -20 }}
+        initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 0.6, y: 0 }}
-        transition={{ delay: 1, duration: 0.8, repeat: Infinity, repeatType: "reverse" }}
+        transition={{ delay: 0.5, duration: 0.8 }}
+        style={{
+          position: 'absolute',
+          bottom: '30%',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          color: 'rgba(255,255,255,0.6)',
+          fontSize: isMobile ? '0.8rem' : '1rem',
+          fontFamily: 'Helvetica, Arial, sans-serif',
+          letterSpacing: '4px',
+          textTransform: 'uppercase',
+          whiteSpace: 'nowrap',
+          zIndex: 2
+        }}
+      >
+        CREATIVE STUDIO
+      </motion.div>
+
+      {/* Scroll indicator dengan animasi bounce GSAP */}
+      <motion.div
+        className="scroll-indicator"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 0.7, y: 0 }}
+        transition={{ delay: 1, duration: 0.8 }}
         style={{
           position: 'absolute',
           bottom: '3rem',
           left: '50%',
           transform: 'translateX(-50%)',
-          color: 'rgba(255,255,255,0.6)',
-          fontSize: '0.8rem',
+          color: 'rgba(255,255,255,0.7)',
+          fontSize: '0.7rem',
           fontFamily: 'Helvetica, Arial, sans-serif',
-          letterSpacing: '2px',
+          letterSpacing: '3px',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          gap: '0.5rem'
+          gap: '0.8rem',
+          zIndex: 2,
+          cursor: 'pointer'
+        }}
+        onClick={() => {
+          // Trigger scroll saat diklik
+          const event = new WheelEvent('wheel', { deltaY: 1 });
+          window.dispatchEvent(event);
         }}
       >
-        <span>SCROLL TO ENTER</span>
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5">
+        <span>SCROLL TO EXPLORE</span>
+        <motion.svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="white"
+          strokeWidth="1.5"
+          animate={{ y: [0, 8, 0] }}
+          transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+        >
           <path d="M12 5v14M5 12l7 7 7-7"/>
-        </svg>
+        </motion.svg>
       </motion.div>
+
+      {/* Garis dekoratif di sudut */}
+      <div
+        style={{
+          position: 'absolute',
+          top: '2rem',
+          left: '2rem',
+          width: '40px',
+          height: '2px',
+          backgroundColor: 'rgba(255,255,255,0.3)',
+          zIndex: 2
+        }}
+      />
+      <div
+        style={{
+          position: 'absolute',
+          bottom: '2rem',
+          right: '2rem',
+          width: '40px',
+          height: '2px',
+          backgroundColor: 'rgba(255,255,255,0.3)',
+          zIndex: 2
+        }}
+      />
+
+      {/* Efek glitch pada teks (opsional) */}
+      <style>{`
+        @keyframes glitch {
+          0%, 100% { transform: skew(0deg, 0deg); opacity: 1; }
+          95% { transform: skew(0deg, 0deg); opacity: 1; }
+          96% { transform: skew(5deg, 2deg); opacity: 0.8; }
+          97% { transform: skew(-3deg, -1deg); opacity: 0.9; }
+          98% { transform: skew(0deg, 0deg); opacity: 1; }
+        }
+        
+        .menuru-text {
+          animation: glitch 8s infinite;
+        }
+      `}</style>
     </motion.div>
   )}
 </AnimatePresence>
+
+
+
+
+
+
+
+      
 
       {/* GSAP Modern Loading Animation */}
       <AnimatePresence>
