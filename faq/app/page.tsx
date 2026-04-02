@@ -226,7 +226,18 @@ export default function HomePage(): React.JSX.Element {
   const [isUpdating, setIsUpdating] = useState(false);
   const [showDeleteAccountModal, setShowDeleteAccountModal] = useState(false);
 
+// State untuk GSAP Loading
+const [showGsapLoading, setShowGsapLoading] = useState(true);
+const [currentWordIndex, setCurrentWordIndex] = useState(0);
 
+// State untuk MENURU Overlay setelah loading
+const [showMenuruOverlay, setShowMenuruOverlay] = useState(true);
+const [hasScrolled, setHasScrolled] = useState(false);
+
+
+
+
+  
 
   // State untuk kalender
   const [showCalendarModal, setShowCalendarModal] = useState(false);
