@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useRef } from "react";
@@ -224,26 +225,13 @@ export default function HomePage(): React.JSX.Element {
   const [isUpdating, setIsUpdating] = useState(false);
   const [showDeleteAccountModal, setShowDeleteAccountModal] = useState(false);
 
-
-// State untuk GSAP Loading
+ // State untuk GSAP Loading
 const [showGsapLoading, setShowGsapLoading] = useState(true);
 const [currentWordIndex, setCurrentWordIndex] = useState(0);
 
 // State untuk MENURU Overlay setelah loading
-const [showMenuruOverlay, setShowMenuruOverlay] = useState(false);
+const [showMenuruOverlay, setShowMenuruOverlay] = useState(true);
 const [hasScrolled, setHasScrolled] = useState(false);
-
-
-
-
-
-
-
-
-
-
-
-  
 
   // State untuk kalender
   const [showCalendarModal, setShowCalendarModal] = useState(false);
@@ -1456,27 +1444,27 @@ const [hasScrolled, setHasScrolled] = useState(false);
     }
   }, [showIndonesiaOverlay]);
 
+
 // Animasi GSAP Loading
 useEffect(() => {
   if (!loadingTextRef.current) return;
-  
-  // Animasi rotating words selama loading
   const loadingTimeline = gsap.timeline({
     repeat: -1,
     repeatDelay: 0.2,
+    onReverseComplete: () => {
+      setCurrentWordIndex((prev) => (prev + 1) % rotatingWords.length);
+    }
   });
-  
   loadingTimeline
     .to(loadingTextRef.current, { opacity: 0, y: -5, duration: 0.3, ease: "power1.in" })
     .to({}, { duration: 0.1 })
-    .call(() => {
-      setCurrentWordIndex((prev) => (prev + 1) % rotatingWords.length);
+    .set(loadingTextRef.current, {
+      onComplete: () => {
+        setCurrentWordIndex((prev) => (prev + 1) % rotatingWords.length);
+      }
     })
     .to(loadingTextRef.current, { opacity: 1, y: 0, duration: 0.3, ease: "power1.out" });
-  
-  // Set timeout untuk mengakhiri loading setelah 3 detik
   const timeout = setTimeout(() => {
-    // Animasi fade out loading screen
     gsap.to(gsapLoadingRef.current, {
       opacity: 0,
       duration: 0.5,
@@ -1489,13 +1477,11 @@ useEffect(() => {
     });
     loadingTimeline.kill();
   }, 3000);
-  
   return () => {
     loadingTimeline.kill();
     clearTimeout(timeout);
   };
 }, []);
-
 
 
   
@@ -1529,6 +1515,7 @@ useEffect(() => {
   window.addEventListener('scroll', handleScroll);
   return () => window.removeEventListener('scroll', handleScroll);
 }, [showMenuruOverlay, hasScrolled]);
+
   
 
   useEffect(() => {
@@ -1885,9 +1872,7 @@ useEffect(() => {
       MozOsxFontSmoothing: 'grayscale'
     }}>
 
-
-
-{/* MENURU OVERLAY - Setelah Loading Selesai, dengan animasi masuk yang lebih halus */}
+    {/* MENURU OVERLAY - Setelah Loading Selesai */}
 <AnimatePresence>
   {showMenuruOverlay && (
     <motion.div
@@ -1908,123 +1893,78 @@ useEffect(() => {
         pointerEvents: 'auto'
       }}
     >
-      {/* Text MENURU dengan animasi masuk */}
-      <motion.div
-        initial={{ scale: 0.9, opacity: 0, y: 20 }}
-        animate={{ scale: 1, opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
+      <div
         style={{
           position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
+          top: isMobile ? '1rem' : '2rem',
+          left: isMobile ? '1rem' : '2rem',
           color: '#FFFFFF',
-          fontSize: isMobile ? '3rem' : '6rem',
+          fontSize: isMobile ? '200px' : '490px',
           fontWeight: '300',
           fontFamily: 'Helvetica, Arial, sans-serif',
           textTransform: 'uppercase',
-          lineHeight: 1,
+          lineHeight: 0.8,
           letterSpacing: '-0.02em',
-          whiteSpace: 'nowrap',
-          textAlign: 'center'
+          whiteSpace: 'nowrap'
         }}
       >
         MENURU
-      </motion.div>
-
-      {/* Arrow indicator untuk scroll */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 0.6, y: 0 }}
-        transition={{ duration: 0.8, delay: 0.8, repeat: Infinity, repeatType: "reverse" }}
-        style={{
-          position: 'absolute',
-          bottom: '2rem',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          color: 'rgba(255,255,255,0.6)',
-          fontSize: isMobile ? '1.5rem' : '2rem',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: '0.5rem'
-        }}
-      >
-        <span style={{ fontSize: '0.8rem', letterSpacing: '1px' }}>SCROLL</span>
-        <svg
-          width={isMobile ? "24" : "32"}
-          height={isMobile ? "24" : "32"}
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="white"
-          strokeWidth="1.5"
-        >
-          <path d="M12 5v14M5 12l7 7 7-7" />
-        </svg>
-      </motion.div>
-    </motion.div>
-  )}
-</AnimatePresence>
-
-
-
-
-
-
-
-      
-      {/* GSAP Modern Loading Animation */}
-<AnimatePresence>
-  {showGsapLoading && (
-    <motion.div
-      initial={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.5 }}
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        backgroundColor: 'black',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 99999,
-        cursor: 'default'
-      }}
-    >
-      <div
-        ref={gsapLoadingRef}
-        style={{
-          color: 'white',
-          textAlign: 'center',
-          userSelect: 'none',
-          WebkitUserSelect: 'none',
-          MozUserSelect: 'none',
-          msUserSelect: 'none',
-          fontFamily: 'Helvetica, Arial, sans-serif',
-          fontSize: isMobile ? '3rem' : '4rem',
-          fontWeight: '300',
-          letterSpacing: '1px'
-        }}
-      >
-        <span>We </span>
-        <span 
-          ref={loadingTextRef}
-          style={{
-            display: 'inline-block',
-            minWidth: isMobile ? '150px' : '200px',
-            textAlign: 'left'
-          }}
-        >
-          {rotatingWords[currentWordIndex]}
-        </span>
       </div>
     </motion.div>
   )}
 </AnimatePresence>
 
+      {/* GSAP Modern Loading Animation */}
+      <AnimatePresence>
+        {showGsapLoading && (
+          <motion.div
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              backgroundColor: 'black',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 99999,
+              cursor: 'default'
+            }}
+          >
+            <div
+              ref={gsapLoadingRef}
+              style={{
+                color: 'white',
+                textAlign: 'center',
+                userSelect: 'none',
+                WebkitUserSelect: 'none',
+                MozUserSelect: 'none',
+                msUserSelect: 'none',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                fontSize: isMobile ? '3rem' : '4rem',
+                fontWeight: '300',
+                letterSpacing: '1px'
+              }}
+            >
+              <span>We </span>
+              <span 
+                ref={loadingTextRef}
+                style={{
+                  display: 'inline-block',
+                  minWidth: isMobile ? '150px' : '200px',
+                  textAlign: 'left'
+                }}
+              >
+                {rotatingWords[currentWordIndex]}
+              </span>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Animasi Notifikasi Baru */}
       <AnimatePresence>
