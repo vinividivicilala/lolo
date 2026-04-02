@@ -1971,15 +1971,15 @@ useEffect(() => {
     }}>
 
       
-{/* MENURU OVERLAY - VERSI MINIMALIS */}
-<AnimatePresence mode="wait">
+{/* MENURU OVERLAY - Setelah Loading Selesai */}
+<AnimatePresence>
   {showMenuruOverlay && (
     <motion.div
       id="menuru-overlay"
       initial={{ opacity: 1 }}
       animate={{ opacity: 1 }}
-      exit={{ opacity: 0, y: -100 }}
-      transition={{ duration: 0.6, ease: [0.76, 0, 0.24, 1] }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.8 }}
       style={{
         position: 'fixed',
         top: 0,
@@ -1988,42 +1988,30 @@ useEffect(() => {
         height: '100%',
         backgroundColor: 'black',
         zIndex: 99998,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        cursor: 'default'
-      }}
-      onWheel={(e) => {
-        if (e.deltaY > 0 && !hasScrolled) {
-          setHasScrolled(true);
-          setShowMenuruOverlay(false);
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
+        overflow: 'hidden',
+        pointerEvents: 'auto'
       }}
     >
-      {/* Teks MENURU saja */}
-      <motion.div
-        initial={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.7, opacity: 0, y: 50 }}
-        transition={{ duration: 0.5 }}
+      <div
         style={{
-          color: 'white',
-          fontSize: isMobile ? '15vw' : '490px',
-          fontWeight: '400',
+          position: 'absolute',
+          top: isMobile ? '1rem' : '2rem',
+          left: isMobile ? '1rem' : '2rem',
+          color: '#FFFFFF',
+          fontSize: isMobile ? '200px' : '490px',
+          fontWeight: '300',
           fontFamily: 'Helvetica, Arial, sans-serif',
           textTransform: 'uppercase',
-          lineHeight: 0.9,
+          lineHeight: 0.8,
           letterSpacing: '-0.02em',
           whiteSpace: 'nowrap'
         }}
       >
         MENURU
-      </motion.div>
+      </div>
     </motion.div>
   )}
 </AnimatePresence>
-
-
 
 
 
