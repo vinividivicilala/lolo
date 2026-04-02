@@ -1489,9 +1489,7 @@ useEffect(() => {
   };
 }, []);
 
-
-
-// Scroll handler untuk MENURU overlay - FIXED
+// Scroll handler untuk MENURU overlay - SMOOTH TRANSITION (tanpa design tambahan)
 useEffect(() => {
   if (!showMenuruOverlay) return;
 
@@ -1518,7 +1516,7 @@ useEffect(() => {
     animationFrame = requestAnimationFrame(raf);
   }
 
-  // Handler untuk wheel - LANGSUNG HILANGKAN OVERLAY, SEKALI SAJA
+  // Handler untuk wheel - LANGSUNG HILANGKAN OVERLAY
   const handleWheel = (e: WheelEvent) => {
     // Cek apakah scroll ke bawah dan belum dalam animasi
     if (e.deltaY > 0 && !isAnimating) {
@@ -1531,10 +1529,10 @@ useEffect(() => {
         // Animasi fade out untuk overlay
         gsap.to(overlay, {
           opacity: 0,
-          duration: 0.5,
-          ease: "power2.inOut",
+          duration: 0.4,
+          ease: "power2.out",
           onComplete: () => {
-            // Langsung hilangkan overlay dan reset
+            // Langsung hilangkan overlay
             setShowMenuruOverlay(false);
             setHasScrolled(true);
             
@@ -1549,7 +1547,6 @@ useEffect(() => {
           }
         });
       } else {
-        // Jika overlay tidak ditemukan, langsung hilangkan
         setShowMenuruOverlay(false);
         setHasScrolled(true);
         if (lenis) lenis.scrollTo(0, { immediate: true });
@@ -1572,15 +1569,15 @@ useEffect(() => {
     // Swipe ke bawah (deltaY negatif)
     if (deltaY < -30 && !isAnimating) {
       e.preventDefault();
-      
       isAnimating = true;
+      
       const overlay = document.getElementById('menuru-overlay');
       
       if (overlay) {
         gsap.to(overlay, {
           opacity: 0,
-          duration: 0.5,
-          ease: "power2.inOut",
+          duration: 0.4,
+          ease: "power2.out",
           onComplete: () => {
             setShowMenuruOverlay(false);
             setHasScrolled(true);
@@ -1611,10 +1608,6 @@ useEffect(() => {
     window.removeEventListener('touchend', handleTouchEnd);
   };
 }, [showMenuruOverlay]);
-
-
-
-
 
 
 
@@ -1979,8 +1972,7 @@ useEffect(() => {
       MozOsxFontSmoothing: 'grayscale'
     }}>
 
-      
-{/* MENURU OVERLAY - Setelah Loading Selesai */}
+      {/* MENURU OVERLAY - Setelah Loading Selesai - TANPA DESIGN TAMBAHAN */}
 <AnimatePresence>
   {showMenuruOverlay && (
     <motion.div
@@ -1988,7 +1980,7 @@ useEffect(() => {
       initial={{ opacity: 1 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.8 }}
+      transition={{ duration: 0.4 }}
       style={{
         position: 'fixed',
         top: 0,
