@@ -1485,36 +1485,95 @@ useEffect(() => {
 
 
   
-// Scroll handler untuk menghilangkan MENURU overlay dan menampilkan halaman utama
+
+// Perbaiki useEffect untuk scroll handler di MENURU overlay
 useEffect(() => {
   if (!showMenuruOverlay) return;
 
+  let scrollTimeout: NodeJS.Timeout;
+  
   const handleScroll = () => {
+    // Hanya proses jika user scroll ke bawah lebih dari 50px
     if (!hasScrolled && window.scrollY > 50) {
-      setHasScrolled(true);
-      // Animasi fade out untuk overlay
-      const overlayElement = document.getElementById('menuru-overlay');
-      if (overlayElement) {
-        gsap.to(overlayElement, {
-          opacity: 0,
-          duration: 0.8,
-          ease: "power2.out",
-          onComplete: () => {
-            setShowMenuruOverlay(false);
-            // Scroll ke posisi 0 untuk menampilkan halaman utama
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }
-        });
-      } else {
-        setShowMenuruOverlay(false);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+      // Gunakan debounce untuk mencegah multiple trigger
+      if (scrollTimeout) clearTimeout(scrollTimeout);
+      
+      scrollTimeout = setTimeout(() => {
+        setHasScrolled(true);
+        
+        // Animasi fade out untuk overlay
+        const overlayElement = document.getElementById('menuru-overlay');
+        if (overlayElement) {
+          // Pastikan body tidak bisa scroll selama animasi
+          document.body.style.overflow = 'hidden';
+          
+          gsap.to(overlayElement, {
+            opacity: 0,
+            duration: 0.6,
+            ease: "power2.inOut",
+            onComplete: () => {
+              setShowMenuruOverlay(false);
+              // Kembalikan scroll body
+              document.body.style.overflow = '';
+              // Scroll ke posisi 0 untuk menampilkan halaman utama
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+          });
+        } else {
+          document.body.style.overflow = '';
+          setShowMenuruOverlay(false);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      }, 50); // Debounce 50ms
+    }
+  };
+
+  // Pastikan window bisa scroll saat overlay aktif
+  // Tapi scroll hanya untuk menghilangkan overlay, bukan untuk scroll halaman di bawahnya
+  const preventBodyScroll = (e: WheelEvent) => {
+    // Jika belum scroll dan sedang di overlay, izinkan scroll untuk trigger
+    if (!hasScrolled && showMenuruOverlay) {
+      // Biarkan scroll berjalan untuk trigger, tapi jangan scroll body
+      if (window.scrollY === 0) {
+        // Jika di posisi 0, izinkan sedikit scroll untuk trigger
+        return;
+      }
+    }
+  };
+  
+  // Alternatif: Gunakan touch event untuk mobile
+  const handleTouchMove = (e: TouchEvent) => {
+    if (!hasScrolled && showMenuruOverlay && window.scrollY === 0) {
+      const touchY = e.touches[0].clientY;
+      // Jika swipe ke bawah
+      if (touchY > 100) {
+        e.preventDefault();
+        // Trigger scroll handler
+        window.dispatchEvent(new Event('scroll'));
       }
     }
   };
 
   window.addEventListener('scroll', handleScroll);
-  return () => window.removeEventListener('scroll', handleScroll);
+  window.addEventListener('wheel', preventBodyScroll, { passive: false });
+  window.addEventListener('touchmove', handleTouchMove, { passive: false });
+  
+  return () => {
+    window.removeEventListener('scroll', handleScroll);
+    window.removeEventListener('wheel', preventBodyScroll);
+    window.removeEventListener('touchmove', handleTouchMove);
+    if (scrollTimeout) clearTimeout(scrollTimeout);
+    document.body.style.overflow = '';
+  };
 }, [showMenuruOverlay, hasScrolled]);
+
+
+
+
+
+
+
+
 
   
 
@@ -1872,7 +1931,8 @@ useEffect(() => {
       MozOsxFontSmoothing: 'grayscale'
     }}>
 
-    {/* MENURU OVERLAY - Setelah Loading Selesai */}
+      
+{/* MENURU OVERLAY - Setelah Loading Selesai */}
 <AnimatePresence>
   {showMenuruOverlay && (
     <motion.div
@@ -1880,7 +1940,7 @@ useEffect(() => {
       initial={{ opacity: 1 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.8 }}
+      transition={{ duration: 0.6 }}
       style={{
         position: 'fixed',
         top: 0,
@@ -1890,7 +1950,8 @@ useEffect(() => {
         backgroundColor: 'black',
         zIndex: 99998,
         overflow: 'hidden',
-        pointerEvents: 'auto'
+        pointerEvents: 'auto',
+        cursor: 'default'
       }}
     >
       <div
@@ -1910,6 +1971,32 @@ useEffect(() => {
       >
         MENURU
       </div>
+      
+      {/* Tambahkan indicator scroll */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 0.6, y: 0 }}
+        transition={{ delay: 1, duration: 0.8, repeat: Infinity, repeatType: "reverse" }}
+        style={{
+          position: 'absolute',
+          bottom: '3rem',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          color: 'rgba(255,255,255,0.6)',
+          fontSize: '0.8rem',
+          fontFamily: 'Helvetica, Arial, sans-serif',
+          letterSpacing: '2px',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '0.5rem'
+        }}
+      >
+        <span>SCROLL TO ENTER</span>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5">
+          <path d="M12 5v14M5 12l7 7 7-7"/>
+        </svg>
+      </motion.div>
     </motion.div>
   )}
 </AnimatePresence>
