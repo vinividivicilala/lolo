@@ -1490,17 +1490,16 @@ useEffect(() => {
 }, []);
 
 
-  
-// Scroll handler untuk MENURU dengan efek smooth seperti Lenis/GSAP
+
+// Scroll handler untuk MENURU overlay - FIXED
 useEffect(() => {
   if (!showMenuruOverlay) return;
 
   let lenis: Lenis | null = null;
   let animationFrame: number;
-  let startY = 0;
   let isAnimating = false;
 
-  // Inisialisasi Lenis untuk smooth scroll (opsional)
+  // Inisialisasi Lenis untuk smooth scroll
   if (typeof window !== 'undefined') {
     lenis = new Lenis({
       duration: 1.2,
@@ -1519,95 +1518,105 @@ useEffect(() => {
     animationFrame = requestAnimationFrame(raf);
   }
 
-  // Handler untuk wheel dengan animasi smooth
+  // Handler untuk wheel - LANGSUNG HILANGKAN OVERLAY, SEKALI SAJA
   const handleWheel = (e: WheelEvent) => {
-    if (e.deltaY > 0 && !hasScrolled && !isAnimating) {
+    // Cek apakah scroll ke bawah dan belum dalam animasi
+    if (e.deltaY > 0 && !isAnimating) {
       e.preventDefault();
       isAnimating = true;
       
       const overlay = document.getElementById('menuru-overlay');
-      const menuruText = document.querySelector('.menuru-text');
-      const scrollIndicator = document.querySelector('.scroll-indicator');
       
       if (overlay) {
-        // Animasi fade out dan slide up untuk overlay
+        // Animasi fade out untuk overlay
         gsap.to(overlay, {
           opacity: 0,
-          y: -100,
-          duration: 0.8,
-          ease: "power3.inOut",
+          duration: 0.5,
+          ease: "power2.inOut",
           onComplete: () => {
-            setHasScrolled(true);
+            // Langsung hilangkan overlay dan reset
             setShowMenuruOverlay(false);
-            // Smooth scroll ke atas
+            setHasScrolled(true);
+            
+            // Reset scroll ke atas
             if (lenis) {
               lenis.scrollTo(0, { immediate: true });
             } else {
-              window.scrollTo({ top: 0, behavior: 'smooth' });
+              window.scrollTo(0, 0);
             }
+            
             isAnimating = false;
           }
         });
-        
-        // Animasi untuk teks MENURU
-        if (menuruText) {
-          gsap.to(menuruText, {
-            scale: 0.8,
-            opacity: 0,
-            y: 50,
-            duration: 0.6,
-            ease: "power2.in",
-            delay: 0.1
-          });
-        }
-        
-        // Animasi untuk scroll indicator
-        if (scrollIndicator) {
-          gsap.to(scrollIndicator, {
-            opacity: 0,
-            y: 20,
-            duration: 0.4,
-            ease: "power2.in"
-          });
-        }
       } else {
-        setHasScrolled(true);
+        // Jika overlay tidak ditemukan, langsung hilangkan
         setShowMenuruOverlay(false);
+        setHasScrolled(true);
         if (lenis) lenis.scrollTo(0, { immediate: true });
-        else window.scrollTo({ top: 0, behavior: 'smooth' });
+        else window.scrollTo(0, 0);
         isAnimating = false;
       }
     }
   };
 
-  // Handler untuk touch (mobile)
+  // Untuk touch device (mobile)
   let touchStartY = 0;
   const handleTouchStart = (e: TouchEvent) => {
     touchStartY = e.touches[0].clientY;
   };
 
-  const handleTouchMove = (e: TouchEvent) => {
-    const touchEndY = e.touches[0].clientY;
+  const handleTouchEnd = (e: TouchEvent) => {
+    const touchEndY = e.changedTouches[0].clientY;
     const deltaY = touchStartY - touchEndY;
     
-    if (deltaY < -30 && !hasScrolled && !isAnimating) {
+    // Swipe ke bawah (deltaY negatif)
+    if (deltaY < -30 && !isAnimating) {
       e.preventDefault();
-      handleWheel(new WheelEvent('wheel', { deltaY: 1 }));
+      
+      isAnimating = true;
+      const overlay = document.getElementById('menuru-overlay');
+      
+      if (overlay) {
+        gsap.to(overlay, {
+          opacity: 0,
+          duration: 0.5,
+          ease: "power2.inOut",
+          onComplete: () => {
+            setShowMenuruOverlay(false);
+            setHasScrolled(true);
+            if (lenis) lenis.scrollTo(0, { immediate: true });
+            else window.scrollTo(0, 0);
+            isAnimating = false;
+          }
+        });
+      } else {
+        setShowMenuruOverlay(false);
+        setHasScrolled(true);
+        if (lenis) lenis.scrollTo(0, { immediate: true });
+        else window.scrollTo(0, 0);
+        isAnimating = false;
+      }
     }
   };
 
   window.addEventListener('wheel', handleWheel, { passive: false });
   window.addEventListener('touchstart', handleTouchStart);
-  window.addEventListener('touchmove', handleTouchMove, { passive: false });
+  window.addEventListener('touchend', handleTouchEnd);
 
   return () => {
     if (animationFrame) cancelAnimationFrame(animationFrame);
     if (lenis) lenis.destroy();
     window.removeEventListener('wheel', handleWheel);
     window.removeEventListener('touchstart', handleTouchStart);
-    window.removeEventListener('touchmove', handleTouchMove);
+    window.removeEventListener('touchend', handleTouchEnd);
   };
-}, [showMenuruOverlay, hasScrolled]);
+}, [showMenuruOverlay]);
+
+
+
+
+
+
 
 
 
