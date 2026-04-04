@@ -72,60 +72,66 @@ export default function ProfilePage() {
         </motion.div>
       </div>
 
-      {/* Konten utama - Posisi tengah (center) */}
+      {/* Konten utama - dipindahkan ke tengah */}
       <div style={{
         position: 'absolute',
         top: '50%',
         left: '50%',
         transform: 'translate(-50%, -50%)',
         width: '100%',
-        padding: isMobile ? '1.5rem' : '2rem',
-        boxSizing: 'border-box'
+        textAlign: 'center'
       }}>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3, duration: 0.6, ease: [0.76, 0, 0.24, 1] }}
           style={{
-            textAlign: 'center',
-            maxWidth: '900px',
-            margin: '0 auto'
+            display: 'inline-block',
+            textAlign: 'left'
           }}
         >
-          {/* TEKS UTAMA - 2 BARIS */}
-          <div style={{ marginBottom: '80px' }}>
-            <div style={{
-              color: 'white',
-              fontSize: isMobile ? '40px' : '80px',
-              fontWeight: '400',
-              fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-              textTransform: 'capitalize',
-              lineHeight: 1.2,
-              marginBottom: '20px'
-            }}>
-              Tell Donate Record With All Your Heart
+          {/* Teks utama 80px - 2 baris */}
+          <div style={{
+            marginBottom: '4rem'
+          }}>
+            <div>
+              <span style={{
+                color: 'white',
+                fontSize: isMobile ? '3rem' : '80px',
+                fontWeight: '400',
+                fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+                textTransform: 'capitalize',
+                lineHeight: 1.2,
+                display: 'block'
+              }}>
+                Tell Donate Record With All Your Heart
+              </span>
             </div>
-            <div style={{
-              color: 'white',
-              fontSize: isMobile ? '40px' : '80px',
-              fontWeight: '400',
-              fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-              textTransform: 'capitalize',
-              lineHeight: 1.2
-            }}>
-              Logic Feelings
+            <div>
+              <span style={{
+                color: 'white',
+                fontSize: isMobile ? '3rem' : '80px',
+                fontWeight: '400',
+                fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+                textTransform: 'capitalize',
+                lineHeight: 1.2,
+                display: 'block'
+              }}>
+                Logic Feelings
+              </span>
             </div>
           </div>
 
-          {/* TEKS DESKRIPSI */}
-          <div style={{ maxWidth: '700px', margin: '0 auto' }}>
+          {/* Teks deskripsi 24px */}
+          <div>
             <p style={{
               color: 'rgba(255,255,255,0.7)',
-              fontSize: isMobile ? '16px' : '24px',
+              fontSize: isMobile ? '1rem' : '24px',
               fontWeight: '400',
               fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
               lineHeight: 1.5,
-              margin: 0
+              margin: 0,
+              maxWidth: '600px'
             }}>
               From concept to code, I work hand-in-hand with developers and designers—juxtaposing the intuitive with the curious to create delightful and engaging experiences for the world wide web
             </p>
