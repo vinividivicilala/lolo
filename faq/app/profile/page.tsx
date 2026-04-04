@@ -25,17 +25,16 @@ export default function ProfilePage() {
       fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
       position: 'relative'
     }}>
-      {/* Header hanya dengan tombol back dan tanda panah */}
+      {/* Header dengan tombol back dan tanda panah */}
       <div style={{
-        position: 'sticky',
+        position: 'fixed',
         top: 0,
         left: 0,
         width: '100%',
         padding: isMobile ? '1.5rem' : '2rem',
-        backgroundColor: 'black',
+        backgroundColor: 'transparent',
         zIndex: 10
       }}>
-        {/* NORTH WEST ARROW - tombol back */}
         <motion.div
           onClick={() => router.back()}
           style={{
@@ -73,53 +72,61 @@ export default function ProfilePage() {
         </motion.div>
       </div>
 
-      {/* Teks di sisi kiri tengah - 2 baris */}
+      {/* Teks di tengah arah ke kiri - rata kiri */}
       <div style={{
         position: 'absolute',
         top: '50%',
-        left: isMobile ? '1.5rem' : '2rem',
-        transform: 'translateY(-50%)'
+        left: 0,
+        right: 0,
+        transform: 'translateY(-50%)',
+        paddingLeft: isMobile ? '2rem' : '4rem'
       }}>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3, duration: 0.5 }}
+          transition={{ delay: 0.3, duration: 0.6, ease: [0.76, 0, 0.24, 1] }}
           style={{
             display: 'flex',
             flexDirection: 'column',
-            gap: '1rem'
+            gap: isMobile ? '1.5rem' : '2rem',
+            textAlign: 'left',
+            alignItems: 'flex-start'
           }}
         >
           {/* Baris 1 */}
           <div style={{
             display: 'flex',
-            gap: '2rem',
+            gap: isMobile ? '1.5rem' : '2.5rem',
             flexWrap: 'wrap'
           }}>
             <span style={{
               color: 'white',
-              fontSize: '24px',
+              fontSize: isMobile ? '2rem' : '3rem',
               fontWeight: '400',
               fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-              letterSpacing: '0.5px'
+              letterSpacing: '-0.02em',
+              lineHeight: 1.2
             }}>
               tell
             </span>
             <span style={{
               color: 'white',
-              fontSize: '24px',
+              fontSize: isMobile ? '2rem' : '3rem',
               fontWeight: '400',
               fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-              letterSpacing: '0.5px'
+              letterSpacing: '-0.02em',
+              lineHeight: 1.2
             }}>
               donate
             </span>
             <span style={{
               color: 'white',
-              fontSize: '24px',
+              fontSize: isMobile ? '2rem' : '3rem',
               fontWeight: '400',
               fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-              letterSpacing: '0.5px'
+              letterSpacing: '-0.02em',
+              lineHeight: 1.2,
+              whiteSpace: 'nowrap'
             }}>
               record with all your heart
             </span>
@@ -128,24 +135,26 @@ export default function ProfilePage() {
           {/* Baris 2 */}
           <div style={{
             display: 'flex',
-            gap: '2rem',
+            gap: isMobile ? '1.5rem' : '2.5rem',
             flexWrap: 'wrap'
           }}>
             <span style={{
               color: 'white',
-              fontSize: '24px',
+              fontSize: isMobile ? '2rem' : '3rem',
               fontWeight: '400',
               fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-              letterSpacing: '0.5px'
+              letterSpacing: '-0.02em',
+              lineHeight: 1.2
             }}>
               logic
             </span>
             <span style={{
               color: 'white',
-              fontSize: '24px',
+              fontSize: isMobile ? '2rem' : '3rem',
               fontWeight: '400',
               fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-              letterSpacing: '0.5px'
+              letterSpacing: '-0.02em',
+              lineHeight: 1.2
             }}>
               feelings
             </span>
