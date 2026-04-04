@@ -91,39 +91,35 @@ export default function ProfilePage() {
             maxWidth: '800px'
           }}
         >
-          {/* Teks utama 80px - 2 baris */}
+          {/* Teks utama 80px - HANYA 2 BARIS */}
           <div style={{
             marginBottom: '4rem'
           }}>
-            <div>
-              <span style={{
-                color: 'white',
-                fontSize: isMobile ? '3rem' : '80px',
-                fontWeight: '400',
-                fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-                textTransform: 'capitalize',
-                lineHeight: 1.2,
-                display: 'block'
-              }}>
-                Tell Donate Record With All Your Heart
-              </span>
-            </div>
-            <div>
-              <span style={{
-                color: 'white',
-                fontSize: isMobile ? '3rem' : '80px',
-                fontWeight: '400',
-                fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-                textTransform: 'capitalize',
-                lineHeight: 1.2,
-                display: 'block'
-              }}>
-                Logic Feelings
-              </span>
-            </div>
+            <span style={{
+              color: 'white',
+              fontSize: isMobile ? '3rem' : '80px',
+              fontWeight: '400',
+              fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+              textTransform: 'capitalize',
+              lineHeight: 1.2,
+              display: 'block'
+            }}>
+              Tell Donate Record With All Your Heart
+            </span>
+            <span style={{
+              color: 'white',
+              fontSize: isMobile ? '3rem' : '80px',
+              fontWeight: '400',
+              fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+              textTransform: 'capitalize',
+              lineHeight: 1.2,
+              display: 'block'
+            }}>
+              Logic Feelings
+            </span>
           </div>
 
-          {/* Teks deskripsi 24px - jarak besar dari teks utama */}
+          {/* Teks deskripsi 24px */}
           <div>
             <p style={{
               color: 'rgba(255,255,255,0.7)',
