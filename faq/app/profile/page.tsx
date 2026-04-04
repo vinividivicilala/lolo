@@ -72,18 +72,25 @@ export default function ProfilePage() {
         </motion.div>
       </div>
 
-      {/* Konten utama */}
+      {/* Konten utama - Posisi tengah (center) */}
       <div style={{
         position: 'absolute',
         top: '50%',
-        left: isMobile ? '1.5rem' : '3rem',
-        right: isMobile ? '1.5rem' : '3rem',
-        transform: 'translateY(-50%)'
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        width: '100%',
+        padding: isMobile ? '1.5rem' : '2rem',
+        boxSizing: 'border-box'
       }}>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3, duration: 0.6, ease: [0.76, 0, 0.24, 1] }}
+          style={{
+            textAlign: 'center',
+            maxWidth: '900px',
+            margin: '0 auto'
+          }}
         >
           {/* TEKS UTAMA - 2 BARIS */}
           <div style={{ marginBottom: '80px' }}>
@@ -110,8 +117,8 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          {/* TEKS DESKRIPSI - JARAK BESAR DARI TEKS UTAMA */}
-          <div style={{ maxWidth: '600px' }}>
+          {/* TEKS DESKRIPSI */}
+          <div style={{ maxWidth: '700px', margin: '0 auto' }}>
             <p style={{
               color: 'rgba(255,255,255,0.7)',
               fontSize: isMobile ? '16px' : '24px',
