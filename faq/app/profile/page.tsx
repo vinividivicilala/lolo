@@ -33,7 +33,7 @@ export default function ProfilePage() {
       minHeight: '100vh',
       backgroundColor: 'black',
       fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-      paddingTop: '120px', // 🔥 kasih jarak dari header
+      paddingTop: '120px',
       paddingBottom: '80px'
     }}>
 
@@ -52,45 +52,46 @@ export default function ProfilePage() {
             display: 'flex',
             alignItems: 'center',
             gap: '0.8rem',
-            cursor: 'pointer',
-            width: 'fit-content'
+            cursor: 'pointer'
           }}
           whileHover={{ x: -3 }}
-          whileTap={{ scale: 0.95 }}
         >
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
             <path d="M17 7L7 17" />
             <path d="M7 7h10v10" />
           </svg>
-          <span style={{ color: 'white', fontSize: '1rem' }}>Back</span>
+          <span style={{ color: 'white' }}>Back</span>
         </motion.div>
       </div>
 
-      {/* CONTENT NORMAL FLOW */}
+      {/* CONTENT */}
       <div style={{
         maxWidth: '1100px',
         margin: '0 auto',
         padding: isMobile ? '0 1.5rem' : '0 3rem'
       }}>
 
-        {/* HERO */}
+        {/* 🔥 HERO (DIJAGA 2 BARIS FIX) */}
         <div style={{ marginBottom: '4rem' }}>
-          <span style={{
+          <h1 style={{
             color: 'white',
-            fontSize: isMobile ? '3rem' : '80px',
-            display: 'block',
-            lineHeight: 1.2
+            fontSize: isMobile ? '2.5rem' : '80px',
+            lineHeight: 1.1,
+            margin: 0,
+            whiteSpace: 'nowrap' // ✅ paksa 1 baris
           }}>
             Tell Donate Record With All Your Heart
-          </span>
-          <span style={{
+          </h1>
+
+          <h1 style={{
             color: 'white',
-            fontSize: isMobile ? '3rem' : '80px',
-            display: 'block',
-            lineHeight: 1.2
+            fontSize: isMobile ? '2.5rem' : '80px',
+            lineHeight: 1.1,
+            margin: 0,
+            whiteSpace: 'nowrap'
           }}>
             Logic Feelings
-          </span>
+          </h1>
         </div>
 
         {/* DESC */}
@@ -105,13 +106,12 @@ export default function ProfilePage() {
 
         {/* LINE */}
         <div style={{
-          width: '100%',
           height: '1px',
           backgroundColor: 'rgba(255,255,255,0.2)',
           marginBottom: '1rem'
         }} />
 
-        {/* TABLE */}
+        {/* 🔥 TABLE */}
         <div>
           {tableData.map((item, index) => (
             <motion.div
@@ -133,30 +133,36 @@ export default function ProfilePage() {
               }}
             >
 
-              {/* LEFT */}
-              <div style={{ minWidth: isMobile ? '140px' : '220px' }}>
+              {/* LEFT (🔥 DIPERBESAR) */}
+              <div style={{
+                minWidth: isMobile ? '160px' : '240px'
+              }}>
                 <span style={{
                   color: 'white',
-                  fontSize: isMobile ? '1rem' : '1.1rem'
+                  fontSize: isMobile ? '1.1rem' : '1.4rem', // ✅ lebih besar
+                  fontWeight: '500'
                 }}>
                   {item.year}
                 </span>
               </div>
 
               {/* CENTER */}
-              <div style={{ flex: 1, padding: '0 2rem' }}>
+              <div style={{
+                flex: 1,
+                padding: '0 2rem'
+              }}>
                 <span style={{
                   color: 'white',
-                  fontSize: isMobile ? '1.2rem' : '1.5rem'
+                  fontSize: isMobile ? '1.3rem' : '1.7rem'
                 }}>
                   {item.title}
                 </span>
               </div>
 
-              {/* ARROW */}
+              {/* RIGHT */}
               <svg
-                width={isMobile ? "26" : "32"}
-                height={isMobile ? "26" : "32"}
+                width={isMobile ? "28" : "34"}
+                height={isMobile ? "28" : "34"}
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="white"
