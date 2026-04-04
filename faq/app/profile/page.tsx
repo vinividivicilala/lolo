@@ -156,7 +156,7 @@ export default function ProfilePage() {
             marginBottom: '1rem'
           }} />
 
-          {/* Tabel - lebih besar, teks rata tengah */}
+          {/* Tabel - tanpa angka, teks deskripsi ke tengah */}
           <div style={{
             width: '100%',
             minWidth: isMobile ? '350px' : '650px'
@@ -177,21 +177,11 @@ export default function ProfilePage() {
                 }}
                 whileHover={{ backgroundColor: 'rgba(255,255,255,0.03)' }}
               >
-                {/* Kolom kiri - Nomor dan Donasi - rata tengah */}
+                {/* Kolom kiri - Donasi saja (tanpa angka) */}
                 <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '1.5rem',
-                  minWidth: '160px'
+                  minWidth: '120px',
+                  textAlign: 'center'
                 }}>
-                  <span style={{
-                    color: 'rgba(255,255,255,0.4)',
-                    fontSize: '1.1rem',
-                    fontFamily: 'monospace'
-                  }}>
-                    {String(item.id).padStart(2, '0')}
-                  </span>
                   <span style={{
                     color: 'white',
                     fontSize: '1.2rem',
