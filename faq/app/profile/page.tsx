@@ -15,7 +15,6 @@ export default function ProfilePage() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // DATA
   const tableData = [
     { year: "interview 2023", title: "Top Interactive Agencies Interview" },
     { year: "interview 2022", title: "Lovers Magazine Interview" },
@@ -33,14 +32,12 @@ export default function ProfilePage() {
     <div style={{
       minHeight: '100vh',
       backgroundColor: 'black',
-      margin: 0,
-      padding: 0,
-      width: '100%',
       fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-      position: 'relative'
+      paddingTop: '120px', // 🔥 kasih jarak dari header
+      paddingBottom: '80px'
     }}>
 
-      {/* HEADER BACK */}
+      {/* HEADER */}
       <div style={{
         position: 'fixed',
         top: 0,
@@ -69,51 +66,42 @@ export default function ProfilePage() {
         </motion.div>
       </div>
 
-      {/* CONTENT CENTER */}
+      {/* CONTENT NORMAL FLOW */}
       <div style={{
-        position: 'absolute',
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-        width: '100%',
         maxWidth: '1100px',
+        margin: '0 auto',
         padding: isMobile ? '0 1.5rem' : '0 3rem'
       }}>
 
-        {/* HERO TEXT */}
+        {/* HERO */}
         <div style={{ marginBottom: '4rem' }}>
           <span style={{
             color: 'white',
             fontSize: isMobile ? '3rem' : '80px',
-            fontWeight: '400',
-            lineHeight: 1.2,
-            display: 'block'
+            display: 'block',
+            lineHeight: 1.2
           }}>
             Tell Donate Record With All Your Heart
           </span>
           <span style={{
             color: 'white',
             fontSize: isMobile ? '3rem' : '80px',
-            fontWeight: '400',
-            lineHeight: 1.2,
-            display: 'block'
+            display: 'block',
+            lineHeight: 1.2
           }}>
             Logic Feelings
           </span>
         </div>
 
-        {/* DESCRIPTION */}
-        <div style={{ marginBottom: '4rem' }}>
-          <p style={{
-            color: 'rgba(255,255,255,0.7)',
-            fontSize: isMobile ? '1rem' : '24px',
-            lineHeight: 1.5,
-            maxWidth: '600px',
-            margin: 0
-          }}>
-            From concept to code, I work hand-in-hand with developers and designers—juxtaposing the intuitive with the curious to create delightful and engaging experiences for the world wide web
-          </p>
-        </div>
+        {/* DESC */}
+        <p style={{
+          color: 'rgba(255,255,255,0.7)',
+          fontSize: isMobile ? '1rem' : '24px',
+          maxWidth: '600px',
+          marginBottom: '4rem'
+        }}>
+          From concept to code, I work hand-in-hand with developers and designers—juxtaposing the intuitive with the curious to create delightful and engaging experiences for the world wide web
+        </p>
 
         {/* LINE */}
         <div style={{
@@ -123,8 +111,8 @@ export default function ProfilePage() {
           marginBottom: '1rem'
         }} />
 
-        {/* ✅ TABLE */}
-        <div style={{ width: '100%' }}>
+        {/* TABLE */}
+        <div>
           {tableData.map((item, index) => (
             <motion.div
               key={index}
@@ -146,50 +134,37 @@ export default function ProfilePage() {
             >
 
               {/* LEFT */}
-              <div style={{
-                minWidth: isMobile ? '140px' : '220px'
-              }}>
+              <div style={{ minWidth: isMobile ? '140px' : '220px' }}>
                 <span style={{
                   color: 'white',
-                  fontSize: isMobile ? '1rem' : '1.1rem',
-                  textTransform: 'lowercase',
-                  letterSpacing: '0.5px'
+                  fontSize: isMobile ? '1rem' : '1.1rem'
                 }}>
                   {item.year}
                 </span>
               </div>
 
               {/* CENTER */}
-              <div style={{
-                flex: 1,
-                paddingLeft: '2rem',
-                paddingRight: '2rem'
-              }}>
+              <div style={{ flex: 1, padding: '0 2rem' }}>
                 <span style={{
                   color: 'white',
-                  fontSize: isMobile ? '1.2rem' : '1.5rem',
-                  lineHeight: 1.4
+                  fontSize: isMobile ? '1.2rem' : '1.5rem'
                 }}>
                   {item.title}
                 </span>
               </div>
 
-              {/* RIGHT ARROW */}
-              <div>
-                <svg
-                  width={isMobile ? "26" : "32"}
-                  height={isMobile ? "26" : "32"}
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="white"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M7 17L17 7" />
-                  <path d="M7 7h10v10" />
-                </svg>
-              </div>
+              {/* ARROW */}
+              <svg
+                width={isMobile ? "26" : "32"}
+                height={isMobile ? "26" : "32"}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="white"
+                strokeWidth="2.5"
+              >
+                <path d="M7 17L17 7" />
+                <path d="M7 7h10v10" />
+              </svg>
 
             </motion.div>
           ))}
