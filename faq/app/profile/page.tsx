@@ -72,11 +72,12 @@ export default function ProfilePage() {
         </motion.div>
       </div>
 
-      {/* Teks 2 baris rata kiri, posisi tengah vertikal */}
+      {/* Konten utama - rata kiri, posisi tengah vertikal */}
       <div style={{
         position: 'absolute',
         top: '50%',
         left: isMobile ? '1.5rem' : '3rem',
+        right: isMobile ? '1.5rem' : '3rem',
         transform: 'translateY(-50%)'
       }}>
         <motion.div
@@ -86,33 +87,68 @@ export default function ProfilePage() {
           style={{
             display: 'flex',
             flexDirection: 'column',
-            textAlign: 'left'
+            textAlign: 'left',
+            maxWidth: '800px'
           }}
         >
-          {/* Baris 1 */}
-          <div>
-            <span style={{
-              color: 'white',
-              fontSize: isMobile ? '2.5rem' : '4rem',
-              fontWeight: '400',
-              fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-              textTransform: 'capitalize'
-            }}>
-              Tell Donate Record With All Your Heart
-            </span>
+          {/* Teks utama 80px - 2 baris */}
+          <div style={{
+            marginBottom: '2rem'
+          }}>
+            <div>
+              <span style={{
+                color: 'white',
+                fontSize: isMobile ? '3rem' : '80px',
+                fontWeight: '400',
+                fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+                textTransform: 'capitalize',
+                lineHeight: 1.2,
+                display: 'block'
+              }}>
+                Tell Donate Record
+              </span>
+            </div>
+            <div>
+              <span style={{
+                color: 'white',
+                fontSize: isMobile ? '3rem' : '80px',
+                fontWeight: '400',
+                fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+                textTransform: 'capitalize',
+                lineHeight: 1.2,
+                display: 'block'
+              }}>
+                With All Your Heart
+              </span>
+            </div>
+            <div>
+              <span style={{
+                color: 'white',
+                fontSize: isMobile ? '3rem' : '80px',
+                fontWeight: '400',
+                fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+                textTransform: 'capitalize',
+                lineHeight: 1.2,
+                display: 'block'
+              }}>
+                Logic Feelings
+              </span>
+            </div>
           </div>
 
-          {/* Baris 2 */}
+          {/* Teks deskripsi 24px */}
           <div>
-            <span style={{
-              color: 'white',
-              fontSize: isMobile ? '2.5rem' : '4rem',
+            <p style={{
+              color: 'rgba(255,255,255,0.7)',
+              fontSize: isMobile ? '1rem' : '24px',
               fontWeight: '400',
               fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-              textTransform: 'capitalize'
+              lineHeight: 1.5,
+              margin: 0,
+              maxWidth: '600px'
             }}>
-              Logic Feelings
-            </span>
+              From concept to code, I work hand-in-hand with developers and designers—juxtaposing the intuitive with the curious to create delightful and engaging experiences for the world wide web
+            </p>
           </div>
         </motion.div>
       </div>
