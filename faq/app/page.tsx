@@ -1972,7 +1972,9 @@ useEffect(() => {
       MozOsxFontSmoothing: 'grayscale'
     }}>
 
-      {/* MENURU OVERLAY - Setelah Loading Selesai - TANPA DESIGN TAMBAHAN */}
+
+
+{/* MENURU OVERLAY - Setelah Loading Selesai */}
 <AnimatePresence>
   {showMenuruOverlay && (
     <motion.div
@@ -2010,10 +2012,87 @@ useEffect(() => {
       >
         MENURU
       </div>
+
+      {/* TAMBAHAN: Profile Link dengan underline dan angka design awwards */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3, duration: 0.5 }}
+        onClick={() => {
+          setShowMenuruOverlay(false);
+          router.push('/profile');
+        }}
+        style={{
+          position: 'absolute',
+          bottom: isMobile ? '3rem' : '5rem',
+          right: isMobile ? '2rem' : '4rem',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '1rem',
+          zIndex: 99999
+        }}
+        whileHover={{ x: -5 }}
+      >
+        <div style={{ position: 'relative' }}>
+          <span style={{
+            color: '#FFFFFF',
+            fontSize: isMobile ? '1.2rem' : '1.5rem',
+            fontWeight: '400',
+            fontFamily: 'Helvetica, Arial, sans-serif',
+            letterSpacing: '2px',
+            textTransform: 'uppercase'
+          }}>
+            Profile
+          </span>
+          <motion.div
+            initial={{ width: 0 }}
+            animate={{ width: '100%' }}
+            transition={{ delay: 0.5, duration: 0.5 }}
+            style={{
+              position: 'absolute',
+              bottom: '-5px',
+              left: 0,
+              height: '1px',
+              backgroundColor: '#FFFFFF'
+            }}
+          />
+        </div>
+        
+        {/* Angka design awwards */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'baseline',
+          gap: '0.2rem'
+        }}>
+          <span style={{
+            color: 'rgba(255,255,255,0.6)',
+            fontSize: isMobile ? '0.8rem' : '1rem',
+            fontFamily: 'monospace'
+          }}>
+            01
+          </span>
+          <svg
+            width={isMobile ? "20" : "24"}
+            height={isMobile ? "20" : "24"}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#FFFFFF"
+            strokeWidth="2"
+            strokeLinecap="round"
+          >
+            <path d="M7 7L17 17" />
+            <path d="M17 7v10H7" />
+          </svg>
+        </div>
+      </motion.div>
     </motion.div>
   )}
 </AnimatePresence>
 
+
+
+      
 
 
       
