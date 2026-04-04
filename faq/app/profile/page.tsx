@@ -15,33 +15,36 @@ export default function ProfilePage() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Data untuk tabel
+  // ✅ DATA SESUAI DESIGN GAMBAR
   const tableData = [
-    { id: 1, title: "Donasi", description: "Membantu sesama melalui donasi" },
-    { id: 2, title: "Donasi", description: "Donasi untuk pendidikan" },
-    { id: 3, title: "Donasi", description: "Donasi untuk kemanusiaan" },
-    { id: 4, title: "Donasi", description: "Donasi untuk lingkungan" },
-    { id: 5, title: "Donasi", description: "Donasi untuk kesehatan" },
+    { year: "interview 2023", title: "Top Interactive Agencies Interview" },
+    { year: "interview 2022", title: "Lovers Magazine Interview" },
+    { year: "publication 2020", title: "Centogene Solutions" },
+    { year: "talk 2020", title: "Creative collaboration at WeTransfer" },
+    { year: "publication 2020", title: "Madeleine Dalla Site of the Month Insight" },
+    { year: "talk 2020", title: "Rendering Illusions at Awwwards" },
+    { year: "publication 2019", title: "Real-time Multiside Refraction in Three Steps" },
+    { year: "publication 2019", title: "Making a connected flip-dot installation" },
+    { year: "publication 2019", title: "Bandito Immersive Experience" },
+    { year: "publication 2018", title: "Resn’s Little Help AR" },
   ];
 
   return (
     <div style={{
       minHeight: '100vh',
       backgroundColor: 'black',
-      margin: 0,
-      padding: 0,
-      width: '100%',
       fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-      position: 'relative'
+      position: 'relative',
+      padding: isMobile ? '6rem 1.5rem' : '8rem 4rem'
     }}>
-      {/* Header dengan tombol back */}
+
+      {/* HEADER BACK */}
       <div style={{
         position: 'fixed',
         top: 0,
         left: 0,
         width: '100%',
         padding: isMobile ? '1.5rem' : '2rem',
-        backgroundColor: 'transparent',
         zIndex: 10
       }}>
         <motion.div
@@ -56,178 +59,127 @@ export default function ProfilePage() {
           whileHover={{ x: -3 }}
           whileTap={{ scale: 0.95 }}
         >
-          <svg
-            width={isMobile ? "28" : "32"}
-            height={isMobile ? "28" : "32"}
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="white"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
             <path d="M17 7L7 17" />
             <path d="M7 7h10v10" />
           </svg>
-          <span style={{
-            color: 'white',
-            fontSize: isMobile ? '1rem' : '1.2rem',
-            fontWeight: '300',
-            letterSpacing: '1px',
-            fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif'
-          }}>
-            Back
-          </span>
+          <span style={{ color: 'white', fontSize: '1rem' }}>Back</span>
         </motion.div>
       </div>
 
-      {/* Konten utama - di tengah */}
-      <div style={{
-        position: 'absolute',
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-        width: '100%',
-        textAlign: 'center'
-      }}>
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3, duration: 0.6, ease: [0.76, 0, 0.24, 1] }}
-          style={{
-            display: 'inline-block',
-            textAlign: 'left'
-          }}
-        >
-          {/* Teks utama 80px - 2 baris */}
-          <div style={{
-            marginBottom: '4rem'
+      {/* CONTENT */}
+      <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
+
+        {/* TITLE */}
+        <div style={{ marginBottom: '4rem' }}>
+          <h1 style={{
+            color: 'white',
+            fontSize: isMobile ? '2.5rem' : '80px',
+            fontWeight: '400',
+            lineHeight: 1.2,
+            margin: 0
           }}>
-            <div>
-              <span style={{
-                color: 'white',
-                fontSize: isMobile ? '3rem' : '80px',
-                fontWeight: '400',
-                fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-                textTransform: 'capitalize',
-                lineHeight: 1.2,
-                display: 'block'
+            Tell Donate Record With All Your Heart
+          </h1>
+          <h1 style={{
+            color: 'white',
+            fontSize: isMobile ? '2.5rem' : '80px',
+            fontWeight: '400',
+            lineHeight: 1.2,
+            margin: 0
+          }}>
+            Logic Feelings
+          </h1>
+        </div>
+
+        {/* DESCRIPTION */}
+        <p style={{
+          color: 'rgba(255,255,255,0.7)',
+          fontSize: isMobile ? '1rem' : '22px',
+          maxWidth: '600px',
+          marginBottom: '4rem'
+        }}>
+          From concept to code, I work hand-in-hand with developers and designers—juxtaposing the intuitive with the curious to create delightful and engaging experiences for the world wide web
+        </p>
+
+        {/* LINE */}
+        <div style={{
+          width: '100%',
+          height: '1px',
+          backgroundColor: 'rgba(255,255,255,0.2)',
+          marginBottom: '1rem'
+        }} />
+
+        {/* ✅ TABLE STYLE AWWWARDS */}
+        <div style={{ width: '100%' }}>
+          {tableData.map((item, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 + index * 0.05 }}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: isMobile ? '1.2rem 0' : '1.6rem 0',
+                borderBottom: '1px solid rgba(255,255,255,0.15)',
+                cursor: 'pointer'
+              }}
+              whileHover={{
+                backgroundColor: 'rgba(255,255,255,0.03)',
+                paddingLeft: '10px'
+              }}
+            >
+
+              {/* LEFT */}
+              <div style={{
+                minWidth: isMobile ? '120px' : '180px'
               }}>
-                Tell Donate Record With All Your Heart
-              </span>
-            </div>
-            <div>
-              <span style={{
-                color: 'white',
-                fontSize: isMobile ? '3rem' : '80px',
-                fontWeight: '400',
-                fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-                textTransform: 'capitalize',
-                lineHeight: 1.2,
-                display: 'block'
+                <span style={{
+                  color: 'rgba(255,255,255,0.6)',
+                  fontSize: isMobile ? '0.8rem' : '0.9rem',
+                  textTransform: 'lowercase',
+                  letterSpacing: '0.5px'
+                }}>
+                  {item.year}
+                </span>
+              </div>
+
+              {/* CENTER */}
+              <div style={{
+                flex: 1,
+                paddingLeft: '2rem',
+                paddingRight: '2rem'
               }}>
-                Logic Feelings
-              </span>
-            </div>
-          </div>
-
-          {/* Teks deskripsi 24px */}
-          <div style={{
-            marginBottom: '4rem'
-          }}>
-            <p style={{
-              color: 'rgba(255,255,255,0.7)',
-              fontSize: isMobile ? '1rem' : '24px',
-              fontWeight: '400',
-              fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-              lineHeight: 1.5,
-              margin: 0,
-              maxWidth: '600px'
-            }}>
-              From concept to code, I work hand-in-hand with developers and designers—juxtaposing the intuitive with the curious to create delightful and engaging experiences for the world wide web
-            </p>
-          </div>
-
-          {/* Line di atas tabel */}
-          <div style={{
-            width: '100%',
-            height: '1px',
-            backgroundColor: 'rgba(255,255,255,0.2)',
-            marginBottom: '1rem'
-          }} />
-
-          {/* Tabel - tanpa angka, teks deskripsi ke tengah */}
-          <div style={{
-            width: '100%',
-            minWidth: isMobile ? '350px' : '650px'
-          }}>
-            {tableData.map((item, index) => (
-              <motion.div
-                key={item.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.5 + (index * 0.1) }}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: '1.5rem 0',
-                  borderBottom: index < tableData.length - 1 ? '1px solid rgba(255,255,255,0.1)' : 'none',
-                  cursor: 'pointer'
-                }}
-                whileHover={{ backgroundColor: 'rgba(255,255,255,0.03)' }}
-              >
-                {/* Kolom kiri - Donasi saja (tanpa angka) */}
-                <div style={{
-                  minWidth: '120px',
-                  textAlign: 'center'
+                <span style={{
+                  color: 'white',
+                  fontSize: isMobile ? '1rem' : '1.2rem',
+                  lineHeight: 1.4
                 }}>
-                  <span style={{
-                    color: 'white',
-                    fontSize: '1.2rem',
-                    fontWeight: '400',
-                    fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif'
-                  }}>
-                    {item.title}
-                  </span>
-                </div>
+                  {item.title}
+                </span>
+              </div>
 
-                {/* Kolom tengah - Deskripsi - rata tengah */}
-                <div style={{
-                  flex: 1,
-                  marginLeft: '2rem',
-                  marginRight: '2rem',
-                  textAlign: 'center'
-                }}>
-                  <span style={{
-                    color: 'rgba(255,255,255,0.7)',
-                    fontSize: '1rem',
-                    fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif'
-                  }}>
-                    {item.description}
-                  </span>
-                </div>
+              {/* RIGHT ARROW */}
+              <div>
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="rgba(255,255,255,0.6)"
+                  strokeWidth="2"
+                >
+                  <path d="M7 17L17 7" />
+                  <path d="M7 7h10v10" />
+                </svg>
+              </div>
 
-                {/* Kolom kanan - SOUTH WEST ARROW SVG */}
-                <div>
-                  <svg
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="rgba(255,255,255,0.6)"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M17 7L7 17" />
-                    <path d="M7 7h10v10" />
-                  </svg>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
+            </motion.div>
+          ))}
+        </div>
+
       </div>
     </div>
   );
