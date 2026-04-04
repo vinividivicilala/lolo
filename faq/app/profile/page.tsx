@@ -1,11 +1,77 @@
+
 'use client';
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
-import { getFirestore, doc, getDoc } from "firebase/firestore";
-import { app, auth, db } from "../lib/firebase"; // Sesuaikan dengan path firebase config Anda
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import Lenis from "@studio-freight/lenis";
+import { initializeApp, getApps } from "firebase/app";
+import { 
+  getAuth, 
+  onAuthStateChanged, 
+  signOut,
+  GithubAuthProvider,
+  GoogleAuthProvider,
+  signInWithPopup,
+  updateProfile,
+  updateEmail,
+  deleteUser
+} from "firebase/auth";
+import { 
+  getFirestore, 
+  collection, 
+  addDoc, 
+  query, 
+  orderBy, 
+  onSnapshot,
+  serverTimestamp,
+  Timestamp,
+  doc,
+  setDoc,
+  getDoc,
+  updateDoc,
+  increment,
+  writeBatch,
+  where,
+  deleteDoc,
+  getDocs
+} from "firebase/firestore";
+
+// Register GSAP plugins
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger);
+}
+
+// Konfigurasi Firebase
+const firebaseConfig = {
+  apiKey: "AIzaSyD_htQZ1TClnXKZGRJ4izbMQ02y6V3aNAQ",
+  authDomain: "wawa44-58d1e.firebaseapp.com",
+  databaseURL: "https://wawa44-58d1e-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "wawa44-58d1e",
+  storageBucket: "wawa44-58d1e.firebasestorage.app",
+  messagingSenderId: "836899520599",
+  appId: "1:836899520599:web:b346e4370ecfa9bb89e312",
+  measurementId: "G-8LMP7F4BE9"
+};
+
+let app = null;
+let auth = null;
+let db = null;
+
+if (typeof window !== "undefined") {
+  app = getApps().length === 0
+    ? initializeApp(firebaseConfig)
+    : getApps()[0];
+
+  auth = getAuth(app);
+  db = getFirestore(app);
+}
+
+// Providers untuk login
+const githubProvider = new GithubAuthProvider();
+const googleProvider = new GoogleAuthProvider();
 
 interface UserStats {
   totalLogins: number;
