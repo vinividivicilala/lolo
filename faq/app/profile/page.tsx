@@ -15,7 +15,7 @@ export default function ProfilePage() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // ✅ DATA SESUAI DESIGN GAMBAR
+  // DATA
   const tableData = [
     { year: "interview 2023", title: "Top Interactive Agencies Interview" },
     { year: "interview 2022", title: "Lovers Magazine Interview" },
@@ -33,9 +33,11 @@ export default function ProfilePage() {
     <div style={{
       minHeight: '100vh',
       backgroundColor: 'black',
+      margin: 0,
+      padding: 0,
+      width: '100%',
       fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-      position: 'relative',
-      padding: isMobile ? '6rem 1.5rem' : '8rem 4rem'
+      position: 'relative'
     }}>
 
       {/* HEADER BACK */}
@@ -67,40 +69,51 @@ export default function ProfilePage() {
         </motion.div>
       </div>
 
-      {/* CONTENT */}
-      <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
+      {/* CONTENT CENTER */}
+      <div style={{
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        width: '100%',
+        maxWidth: '1100px',
+        padding: isMobile ? '0 1.5rem' : '0 3rem'
+      }}>
 
-        {/* TITLE */}
+        {/* HERO TEXT */}
         <div style={{ marginBottom: '4rem' }}>
-          <h1 style={{
+          <span style={{
             color: 'white',
-            fontSize: isMobile ? '2.5rem' : '80px',
+            fontSize: isMobile ? '3rem' : '80px',
             fontWeight: '400',
             lineHeight: 1.2,
-            margin: 0
+            display: 'block'
           }}>
             Tell Donate Record With All Your Heart
-          </h1>
-          <h1 style={{
+          </span>
+          <span style={{
             color: 'white',
-            fontSize: isMobile ? '2.5rem' : '80px',
+            fontSize: isMobile ? '3rem' : '80px',
             fontWeight: '400',
             lineHeight: 1.2,
-            margin: 0
+            display: 'block'
           }}>
             Logic Feelings
-          </h1>
+          </span>
         </div>
 
         {/* DESCRIPTION */}
-        <p style={{
-          color: 'rgba(255,255,255,0.7)',
-          fontSize: isMobile ? '1rem' : '22px',
-          maxWidth: '600px',
-          marginBottom: '4rem'
-        }}>
-          From concept to code, I work hand-in-hand with developers and designers—juxtaposing the intuitive with the curious to create delightful and engaging experiences for the world wide web
-        </p>
+        <div style={{ marginBottom: '4rem' }}>
+          <p style={{
+            color: 'rgba(255,255,255,0.7)',
+            fontSize: isMobile ? '1rem' : '24px',
+            lineHeight: 1.5,
+            maxWidth: '600px',
+            margin: 0
+          }}>
+            From concept to code, I work hand-in-hand with developers and designers—juxtaposing the intuitive with the curious to create delightful and engaging experiences for the world wide web
+          </p>
+        </div>
 
         {/* LINE */}
         <div style={{
@@ -110,7 +123,7 @@ export default function ProfilePage() {
           marginBottom: '1rem'
         }} />
 
-        {/* ✅ TABLE STYLE AWWWARDS */}
+        {/* ✅ TABLE */}
         <div style={{ width: '100%' }}>
           {tableData.map((item, index) => (
             <motion.div
@@ -122,23 +135,23 @@ export default function ProfilePage() {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                padding: isMobile ? '1.2rem 0' : '1.6rem 0',
-                borderBottom: '1px solid rgba(255,255,255,0.15)',
+                padding: isMobile ? '1.5rem 0' : '2rem 0',
+                borderBottom: '1px solid rgba(255,255,255,0.2)',
                 cursor: 'pointer'
               }}
               whileHover={{
-                backgroundColor: 'rgba(255,255,255,0.03)',
-                paddingLeft: '10px'
+                backgroundColor: 'rgba(255,255,255,0.05)',
+                paddingLeft: '12px'
               }}
             >
 
               {/* LEFT */}
               <div style={{
-                minWidth: isMobile ? '120px' : '180px'
+                minWidth: isMobile ? '140px' : '220px'
               }}>
                 <span style={{
-                  color: 'rgba(255,255,255,0.6)',
-                  fontSize: isMobile ? '0.8rem' : '0.9rem',
+                  color: 'white',
+                  fontSize: isMobile ? '1rem' : '1.1rem',
                   textTransform: 'lowercase',
                   letterSpacing: '0.5px'
                 }}>
@@ -154,7 +167,7 @@ export default function ProfilePage() {
               }}>
                 <span style={{
                   color: 'white',
-                  fontSize: isMobile ? '1rem' : '1.2rem',
+                  fontSize: isMobile ? '1.2rem' : '1.5rem',
                   lineHeight: 1.4
                 }}>
                   {item.title}
@@ -164,12 +177,14 @@ export default function ProfilePage() {
               {/* RIGHT ARROW */}
               <div>
                 <svg
-                  width="20"
-                  height="20"
+                  width={isMobile ? "26" : "32"}
+                  height={isMobile ? "26" : "32"}
                   viewBox="0 0 24 24"
                   fill="none"
-                  stroke="rgba(255,255,255,0.6)"
-                  strokeWidth="2"
+                  stroke="white"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 >
                   <path d="M7 17L17 7" />
                   <path d="M7 7h10v10" />
