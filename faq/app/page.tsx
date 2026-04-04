@@ -1974,7 +1974,9 @@ useEffect(() => {
 
 
 
-{/* MENURU OVERLAY - Setelah Loading Selesai */}
+
+
+      {/* MENURU OVERLAY - Setelah Loading Selesai */}
 <AnimatePresence>
   {showMenuruOverlay && (
     <motion.div
@@ -2013,7 +2015,7 @@ useEffect(() => {
         MENURU
       </div>
 
-      {/* TAMBAHAN: Profile Link dengan underline dan angka design awwards */}
+      {/* Profile Link - di sisi kiri, huruf kapital di depan, font NeueHaasGrotesk, underline modern */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -2025,74 +2027,57 @@ useEffect(() => {
         style={{
           position: 'absolute',
           bottom: isMobile ? '3rem' : '5rem',
-          right: isMobile ? '2rem' : '4rem',
+          left: isMobile ? '2rem' : '4rem',
           cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '1rem',
           zIndex: 99999
         }}
-        whileHover={{ x: -5 }}
+        whileHover={{ x: 5 }}
       >
-        <div style={{ position: 'relative' }}>
+        <div style={{ position: 'relative', display: 'inline-block' }}>
           <span style={{
             color: '#FFFFFF',
-            fontSize: isMobile ? '1.2rem' : '1.5rem',
+            fontSize: isMobile ? '3rem' : '5rem',
             fontWeight: '400',
-            fontFamily: 'Helvetica, Arial, sans-serif',
-            letterSpacing: '2px',
-            textTransform: 'uppercase'
+            fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+            letterSpacing: '1px',
+            textTransform: 'capitalize'
           }}>
             Profile
           </span>
+          
+          {/* Underline modern seperti Awwards */}
           <motion.div
-            initial={{ width: 0 }}
-            animate={{ width: '100%' }}
-            transition={{ delay: 0.5, duration: 0.5 }}
+            initial={{ width: 0, opacity: 0 }}
+            animate={{ width: '100%', opacity: 1 }}
+            transition={{ delay: 0.5, duration: 0.6, ease: [0.76, 0, 0.24, 1] }}
             style={{
               position: 'absolute',
-              bottom: '-5px',
+              bottom: '-8px',
               left: 0,
-              height: '1px',
+              height: '2px',
               backgroundColor: '#FFFFFF'
             }}
           />
-        </div>
-        
-        {/* Angka design awwards */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'baseline',
-          gap: '0.2rem'
-        }}>
-          <span style={{
-            color: 'rgba(255,255,255,0.6)',
-            fontSize: isMobile ? '0.8rem' : '1rem',
-            fontFamily: 'monospace'
-          }}>
-            01
-          </span>
-          <svg
-            width={isMobile ? "20" : "24"}
-            height={isMobile ? "20" : "24"}
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#FFFFFF"
-            strokeWidth="2"
-            strokeLinecap="round"
-          >
-            <path d="M7 7L17 17" />
-            <path d="M17 7v10H7" />
-          </svg>
+          
+          {/* Underline accent line - garis tipis tambahan di atas */}
+          <motion.div
+            initial={{ width: 0, opacity: 0 }}
+            animate={{ width: '30%', opacity: 0.5 }}
+            transition={{ delay: 0.7, duration: 0.4, ease: [0.76, 0, 0.24, 1] }}
+            style={{
+              position: 'absolute',
+              bottom: '-8px',
+              left: 0,
+              height: '2px',
+              backgroundColor: '#FFFFFF',
+              opacity: 0.5
+            }}
+          />
         </div>
       </motion.div>
     </motion.div>
   )}
 </AnimatePresence>
-
-
-
-      
 
 
       
