@@ -1972,8 +1972,6 @@ useEffect(() => {
       MozOsxFontSmoothing: 'grayscale'
     }}>
 
-
-
 {/* MENURU OVERLAY - Setelah Loading Selesai */}
 <AnimatePresence>
   {showMenuruOverlay && (
@@ -1995,6 +1993,7 @@ useEffect(() => {
         pointerEvents: 'auto'
       }}
     >
+      {/* Teks MENURU besar di kiri atas */}
       <div
         style={{
           position: 'absolute',
@@ -2013,7 +2012,7 @@ useEffect(() => {
         MENURU
       </div>
 
-      {/* Profile Link - posisi lebih ke atas, dengan angka 01 gaya Awwards */}
+      {/* Profile Link - dengan jarak yang tepat dari teks MENURU */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -2024,7 +2023,7 @@ useEffect(() => {
         }}
         style={{
           position: 'absolute',
-          top: isMobile ? '30%' : '35%',
+          top: isMobile ? 'calc(200px + 3rem)' : 'calc(490px + 4rem)',
           left: isMobile ? '2rem' : '4rem',
           cursor: 'pointer',
           zIndex: 99999
@@ -2059,7 +2058,6 @@ useEffect(() => {
     </motion.div>
   )}
 </AnimatePresence>
-
 
       
 
