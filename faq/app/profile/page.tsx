@@ -25,7 +25,7 @@ export default function ProfilePage() {
       fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
       position: 'relative'
     }}>
-      {/* Header dengan tombol back dan tanda panah */}
+      {/* Header dengan tombol back */}
       <div style={{
         position: 'fixed',
         top: 0,
@@ -72,14 +72,13 @@ export default function ProfilePage() {
         </motion.div>
       </div>
 
-      {/* Teks di tengah arah ke kiri - rata kiri */}
+      {/* Teks di tengah - setiap kata di baris baru */}
       <div style={{
         position: 'absolute',
         top: '50%',
-        left: 0,
-        right: 0,
-        transform: 'translateY(-50%)',
-        paddingLeft: isMobile ? '2rem' : '4rem'
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        textAlign: 'center'
       }}>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -88,77 +87,60 @@ export default function ProfilePage() {
           style={{
             display: 'flex',
             flexDirection: 'column',
-            gap: isMobile ? '1.5rem' : '2rem',
-            textAlign: 'left',
-            alignItems: 'flex-start'
+            gap: isMobile ? '1rem' : '1.5rem'
           }}
         >
-          {/* Baris 1 */}
-          <div style={{
-            display: 'flex',
-            gap: isMobile ? '1.5rem' : '2.5rem',
-            flexWrap: 'wrap'
+          <span style={{
+            color: 'white',
+            fontSize: isMobile ? '2.5rem' : '4rem',
+            fontWeight: '400',
+            fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+            letterSpacing: '-0.02em',
+            textTransform: 'capitalize'
           }}>
-            <span style={{
-              color: 'white',
-              fontSize: isMobile ? '2rem' : '3rem',
-              fontWeight: '400',
-              fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-              letterSpacing: '-0.02em',
-              lineHeight: 1.2
-            }}>
-              tell
-            </span>
-            <span style={{
-              color: 'white',
-              fontSize: isMobile ? '2rem' : '3rem',
-              fontWeight: '400',
-              fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-              letterSpacing: '-0.02em',
-              lineHeight: 1.2
-            }}>
-              donate
-            </span>
-            <span style={{
-              color: 'white',
-              fontSize: isMobile ? '2rem' : '3rem',
-              fontWeight: '400',
-              fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-              letterSpacing: '-0.02em',
-              lineHeight: 1.2,
-              whiteSpace: 'nowrap'
-            }}>
-              record with all your heart
-            </span>
-          </div>
-
-          {/* Baris 2 */}
-          <div style={{
-            display: 'flex',
-            gap: isMobile ? '1.5rem' : '2.5rem',
-            flexWrap: 'wrap'
+            Tell
+          </span>
+          <span style={{
+            color: 'white',
+            fontSize: isMobile ? '2.5rem' : '4rem',
+            fontWeight: '400',
+            fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+            letterSpacing: '-0.02em',
+            textTransform: 'capitalize'
           }}>
-            <span style={{
-              color: 'white',
-              fontSize: isMobile ? '2rem' : '3rem',
-              fontWeight: '400',
-              fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-              letterSpacing: '-0.02em',
-              lineHeight: 1.2
-            }}>
-              logic
-            </span>
-            <span style={{
-              color: 'white',
-              fontSize: isMobile ? '2rem' : '3rem',
-              fontWeight: '400',
-              fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-              letterSpacing: '-0.02em',
-              lineHeight: 1.2
-            }}>
-              feelings
-            </span>
-          </div>
+            Donate
+          </span>
+          <span style={{
+            color: 'white',
+            fontSize: isMobile ? '2rem' : '3rem',
+            fontWeight: '400',
+            fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+            letterSpacing: '-0.02em',
+            textTransform: 'capitalize',
+            whiteSpace: 'nowrap'
+          }}>
+            Record With All Your Heart
+          </span>
+          <span style={{
+            color: 'white',
+            fontSize: isMobile ? '2.5rem' : '4rem',
+            fontWeight: '400',
+            fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+            letterSpacing: '-0.02em',
+            textTransform: 'capitalize'
+          }}>
+            Logic
+          </span>
+          <span style={{
+            color: 'white',
+            fontSize: isMobile ? '2.5rem' : '4rem',
+            fontWeight: '400',
+            fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+            letterSpacing: '-0.02em',
+            textTransform: 'capitalize'
+          }}>
+            Feelings
+          </span>
         </motion.div>
       </div>
     </div>
