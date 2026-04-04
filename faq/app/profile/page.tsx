@@ -73,12 +73,12 @@ export default function ProfilePage() {
         </motion.div>
       </div>
 
-      {/* Teks di sisi kiri tengah bawah */}
+      {/* Teks di sisi kiri tengah - 2 baris */}
       <div style={{
         position: 'absolute',
-        bottom: isMobile ? '3rem' : '4rem',
+        top: '50%',
         left: isMobile ? '1.5rem' : '2rem',
-        right: 0
+        transform: 'translateY(-50%)'
       }}>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -87,54 +87,69 @@ export default function ProfilePage() {
           style={{
             display: 'flex',
             flexDirection: 'column',
-            gap: '0.5rem'
+            gap: '1rem'
           }}
         >
-          <span style={{
-            color: 'white',
-            fontSize: isMobile ? '1rem' : '1.2rem',
-            fontWeight: '300',
-            fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-            letterSpacing: '1px'
+          {/* Baris 1 */}
+          <div style={{
+            display: 'flex',
+            gap: '2rem',
+            flexWrap: 'wrap'
           }}>
-            tell
-          </span>
-          <span style={{
-            color: 'white',
-            fontSize: isMobile ? '1rem' : '1.2rem',
-            fontWeight: '300',
-            fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-            letterSpacing: '1px'
+            <span style={{
+              color: 'white',
+              fontSize: '24px',
+              fontWeight: '400',
+              fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+              letterSpacing: '0.5px'
+            }}>
+              tell
+            </span>
+            <span style={{
+              color: 'white',
+              fontSize: '24px',
+              fontWeight: '400',
+              fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+              letterSpacing: '0.5px'
+            }}>
+              donate
+            </span>
+            <span style={{
+              color: 'white',
+              fontSize: '24px',
+              fontWeight: '400',
+              fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+              letterSpacing: '0.5px'
+            }}>
+              record with all your heart
+            </span>
+          </div>
+
+          {/* Baris 2 */}
+          <div style={{
+            display: 'flex',
+            gap: '2rem',
+            flexWrap: 'wrap'
           }}>
-            donate
-          </span>
-          <span style={{
-            color: 'white',
-            fontSize: isMobile ? '1rem' : '1.2rem',
-            fontWeight: '300',
-            fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-            letterSpacing: '1px'
-          }}>
-            record with all your heart
-          </span>
-          <span style={{
-            color: 'white',
-            fontSize: isMobile ? '1rem' : '1.2rem',
-            fontWeight: '300',
-            fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-            letterSpacing: '1px'
-          }}>
-            logic
-          </span>
-          <span style={{
-            color: 'white',
-            fontSize: isMobile ? '1rem' : '1.2rem',
-            fontWeight: '300',
-            fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-            letterSpacing: '1px'
-          }}>
-            feelings
-          </span>
+            <span style={{
+              color: 'white',
+              fontSize: '24px',
+              fontWeight: '400',
+              fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+              letterSpacing: '0.5px'
+            }}>
+              logic
+            </span>
+            <span style={{
+              color: 'white',
+              fontSize: '24px',
+              fontWeight: '400',
+              fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+              letterSpacing: '0.5px'
+            }}>
+              feelings
+            </span>
+          </div>
         </motion.div>
       </div>
     </div>
