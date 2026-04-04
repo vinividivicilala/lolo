@@ -72,7 +72,7 @@ export default function ProfilePage() {
         </motion.div>
       </div>
 
-      {/* Konten utama - rata kiri, posisi tengah vertikal */}
+      {/* Konten utama */}
       <div style={{
         position: 'absolute',
         top: '50%',
@@ -84,51 +84,41 @@ export default function ProfilePage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3, duration: 0.6, ease: [0.76, 0, 0.24, 1] }}
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            textAlign: 'left',
-            maxWidth: '800px'
-          }}
         >
-          {/* Teks utama 80px - HANYA 2 BARIS */}
-          <div style={{
-            marginBottom: '4rem'
-          }}>
-            <span style={{
+          {/* TEKS UTAMA - 2 BARIS */}
+          <div style={{ marginBottom: '80px' }}>
+            <div style={{
               color: 'white',
-              fontSize: isMobile ? '3rem' : '80px',
+              fontSize: isMobile ? '40px' : '80px',
               fontWeight: '400',
               fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
               textTransform: 'capitalize',
               lineHeight: 1.2,
-              display: 'block'
+              marginBottom: '20px'
             }}>
               Tell Donate Record With All Your Heart
-            </span>
-            <span style={{
+            </div>
+            <div style={{
               color: 'white',
-              fontSize: isMobile ? '3rem' : '80px',
+              fontSize: isMobile ? '40px' : '80px',
               fontWeight: '400',
               fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
               textTransform: 'capitalize',
-              lineHeight: 1.2,
-              display: 'block'
+              lineHeight: 1.2
             }}>
               Logic Feelings
-            </span>
+            </div>
           </div>
 
-          {/* Teks deskripsi 24px */}
-          <div>
+          {/* TEKS DESKRIPSI - JARAK BESAR DARI TEKS UTAMA */}
+          <div style={{ maxWidth: '600px' }}>
             <p style={{
               color: 'rgba(255,255,255,0.7)',
-              fontSize: isMobile ? '1rem' : '24px',
+              fontSize: isMobile ? '16px' : '24px',
               fontWeight: '400',
               fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
               lineHeight: 1.5,
-              margin: 0,
-              maxWidth: '600px'
+              margin: 0
             }}>
               From concept to code, I work hand-in-hand with developers and designers—juxtaposing the intuitive with the curious to create delightful and engaging experiences for the world wide web
             </p>
