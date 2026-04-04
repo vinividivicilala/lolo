@@ -15,6 +15,15 @@ export default function ProfilePage() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // Data untuk tabel
+  const tableData = [
+    { id: 1, title: "Donasi", description: "Membantu sesama melalui donasi" },
+    { id: 2, title: "Donasi", description: "Donasi untuk pendidikan" },
+    { id: 3, title: "Donasi", description: "Donasi untuk kemanusiaan" },
+    { id: 4, title: "Donasi", description: "Donasi untuk lingkungan" },
+    { id: 5, title: "Donasi", description: "Donasi untuk kesehatan" },
+  ];
+
   return (
     <div style={{
       minHeight: '100vh',
@@ -72,7 +81,7 @@ export default function ProfilePage() {
         </motion.div>
       </div>
 
-      {/* Konten utama - dipindahkan ke tengah */}
+      {/* Konten utama - di tengah */}
       <div style={{
         position: 'absolute',
         top: '50%',
@@ -123,7 +132,9 @@ export default function ProfilePage() {
           </div>
 
           {/* Teks deskripsi 24px */}
-          <div>
+          <div style={{
+            marginBottom: '4rem'
+          }}>
             <p style={{
               color: 'rgba(255,255,255,0.7)',
               fontSize: isMobile ? '1rem' : '24px',
@@ -135,6 +146,86 @@ export default function ProfilePage() {
             }}>
               From concept to code, I work hand-in-hand with developers and designers—juxtaposing the intuitive with the curious to create delightful and engaging experiences for the world wide web
             </p>
+          </div>
+
+          {/* Tabel - 2 line setiap nomor */}
+          <div style={{
+            width: '100%',
+            minWidth: isMobile ? '300px' : '500px'
+          }}>
+            {tableData.map((item, index) => (
+              <motion.div
+                key={item.id}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.5 + (index * 0.1) }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '1rem 0',
+                  borderBottom: index < tableData.length - 1 ? '1px solid rgba(255,255,255,0.1)' : 'none',
+                  cursor: 'pointer'
+                }}
+                whileHover={{ backgroundColor: 'rgba(255,255,255,0.03)' }}
+              >
+                {/* Kolom kiri - Nomor dan Donasi */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'baseline',
+                  gap: '1rem',
+                  minWidth: '120px'
+                }}>
+                  <span style={{
+                    color: 'rgba(255,255,255,0.3)',
+                    fontSize: '0.9rem',
+                    fontFamily: 'monospace'
+                  }}>
+                    {String(item.id).padStart(2, '0')}
+                  </span>
+                  <span style={{
+                    color: 'white',
+                    fontSize: '1rem',
+                    fontWeight: '400',
+                    fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif'
+                  }}>
+                    {item.title}
+                  </span>
+                </div>
+
+                {/* Kolom tengah - Deskripsi */}
+                <div style={{
+                  flex: 1,
+                  marginLeft: '2rem',
+                  marginRight: '2rem'
+                }}>
+                  <span style={{
+                    color: 'rgba(255,255,255,0.6)',
+                    fontSize: '0.9rem',
+                    fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif'
+                  }}>
+                    {item.description}
+                  </span>
+                </div>
+
+                {/* Kolom kanan - SOUTH WEST ARROW SVG */}
+                <div>
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="rgba(255,255,255,0.5)"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M17 7L7 17" />
+                    <path d="M7 7h10v10" />
+                  </svg>
+                </div>
+              </motion.div>
+            ))}
           </div>
         </motion.div>
       </div>
