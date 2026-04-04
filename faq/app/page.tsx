@@ -1974,9 +1974,7 @@ useEffect(() => {
 
 
 
-
-
-      {/* MENURU OVERLAY - Setelah Loading Selesai */}
+{/* MENURU OVERLAY - Setelah Loading Selesai */}
 <AnimatePresence>
   {showMenuruOverlay && (
     <motion.div
@@ -2015,7 +2013,7 @@ useEffect(() => {
         MENURU
       </div>
 
-      {/* Profile Link - di sisi kiri, huruf kapital di depan, font NeueHaasGrotesk, underline modern */}
+      {/* Profile Link - posisi lebih ke atas, dengan angka 01 gaya Awwards */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -2026,53 +2024,36 @@ useEffect(() => {
         }}
         style={{
           position: 'absolute',
-          bottom: isMobile ? '3rem' : '5rem',
+          top: isMobile ? '30%' : '35%',
           left: isMobile ? '2rem' : '4rem',
           cursor: 'pointer',
           zIndex: 99999
         }}
         whileHover={{ x: 5 }}
       >
-        <div style={{ position: 'relative', display: 'inline-block' }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: '1rem' }}>
+          {/* Angka 01 gaya Awwards */}
+          <span style={{
+            color: 'rgba(255,255,255,0.4)',
+            fontSize: isMobile ? '1.2rem' : '1.5rem',
+            fontWeight: '300',
+            fontFamily: 'monospace',
+            letterSpacing: '1px'
+          }}>
+            01
+          </span>
+          
+          {/* Teks Profile - tanpa underline, tidak tebal */}
           <span style={{
             color: '#FFFFFF',
-            fontSize: isMobile ? '3rem' : '5rem',
-            fontWeight: '400',
+            fontSize: isMobile ? '2.5rem' : '4rem',
+            fontWeight: '300',
             fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
             letterSpacing: '1px',
             textTransform: 'capitalize'
           }}>
             Profile
           </span>
-          
-          {/* Underline modern seperti Awwards */}
-          <motion.div
-            initial={{ width: 0, opacity: 0 }}
-            animate={{ width: '100%', opacity: 1 }}
-            transition={{ delay: 0.5, duration: 0.6, ease: [0.76, 0, 0.24, 1] }}
-            style={{
-              position: 'absolute',
-              bottom: '-8px',
-              left: 0,
-              height: '2px',
-              backgroundColor: '#FFFFFF'
-            }}
-          />
-          
-          {/* Underline accent line - garis tipis tambahan di atas */}
-          <motion.div
-            initial={{ width: 0, opacity: 0 }}
-            animate={{ width: '30%', opacity: 0.5 }}
-            transition={{ delay: 0.7, duration: 0.4, ease: [0.76, 0, 0.24, 1] }}
-            style={{
-              position: 'absolute',
-              bottom: '-8px',
-              left: 0,
-              height: '2px',
-              backgroundColor: '#FFFFFF',
-              opacity: 0.5
-            }}
-          />
         </div>
       </motion.div>
     </motion.div>
