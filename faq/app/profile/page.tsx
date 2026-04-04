@@ -148,10 +148,18 @@ export default function ProfilePage() {
             </p>
           </div>
 
-          {/* Tabel - 2 line setiap nomor */}
+          {/* Line di atas tabel */}
           <div style={{
             width: '100%',
-            minWidth: isMobile ? '300px' : '500px'
+            height: '1px',
+            backgroundColor: 'rgba(255,255,255,0.2)',
+            marginBottom: '1rem'
+          }} />
+
+          {/* Tabel - lebih besar, teks rata tengah */}
+          <div style={{
+            width: '100%',
+            minWidth: isMobile ? '350px' : '650px'
           }}>
             {tableData.map((item, index) => (
               <motion.div
@@ -163,29 +171,30 @@ export default function ProfilePage() {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  padding: '1rem 0',
+                  padding: '1.5rem 0',
                   borderBottom: index < tableData.length - 1 ? '1px solid rgba(255,255,255,0.1)' : 'none',
                   cursor: 'pointer'
                 }}
                 whileHover={{ backgroundColor: 'rgba(255,255,255,0.03)' }}
               >
-                {/* Kolom kiri - Nomor dan Donasi */}
+                {/* Kolom kiri - Nomor dan Donasi - rata tengah */}
                 <div style={{
                   display: 'flex',
-                  alignItems: 'baseline',
-                  gap: '1rem',
-                  minWidth: '120px'
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '1.5rem',
+                  minWidth: '160px'
                 }}>
                   <span style={{
-                    color: 'rgba(255,255,255,0.3)',
-                    fontSize: '0.9rem',
+                    color: 'rgba(255,255,255,0.4)',
+                    fontSize: '1.1rem',
                     fontFamily: 'monospace'
                   }}>
                     {String(item.id).padStart(2, '0')}
                   </span>
                   <span style={{
                     color: 'white',
-                    fontSize: '1rem',
+                    fontSize: '1.2rem',
                     fontWeight: '400',
                     fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif'
                   }}>
@@ -193,15 +202,16 @@ export default function ProfilePage() {
                   </span>
                 </div>
 
-                {/* Kolom tengah - Deskripsi */}
+                {/* Kolom tengah - Deskripsi - rata tengah */}
                 <div style={{
                   flex: 1,
                   marginLeft: '2rem',
-                  marginRight: '2rem'
+                  marginRight: '2rem',
+                  textAlign: 'center'
                 }}>
                   <span style={{
-                    color: 'rgba(255,255,255,0.6)',
-                    fontSize: '0.9rem',
+                    color: 'rgba(255,255,255,0.7)',
+                    fontSize: '1rem',
                     fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif'
                   }}>
                     {item.description}
@@ -211,11 +221,11 @@ export default function ProfilePage() {
                 {/* Kolom kanan - SOUTH WEST ARROW SVG */}
                 <div>
                   <svg
-                    width="20"
-                    height="20"
+                    width="24"
+                    height="24"
                     viewBox="0 0 24 24"
                     fill="none"
-                    stroke="rgba(255,255,255,0.5)"
+                    stroke="rgba(255,255,255,0.6)"
                     strokeWidth="2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
