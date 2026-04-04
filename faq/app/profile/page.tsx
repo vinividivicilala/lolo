@@ -21,7 +21,9 @@ export default function ProfilePage() {
       backgroundColor: 'black',
       margin: 0,
       padding: 0,
-      width: '100%'
+      width: '100%',
+      fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+      position: 'relative'
     }}>
       {/* Header hanya dengan tombol back dan tanda panah */}
       <div style={{
@@ -63,20 +65,77 @@ export default function ProfilePage() {
             color: 'white',
             fontSize: isMobile ? '1rem' : '1.2rem',
             fontWeight: '300',
-            letterSpacing: '1px'
+            letterSpacing: '1px',
+            fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif'
           }}>
             Back
           </span>
         </motion.div>
       </div>
 
-      {/* Konten kosong - hanya background hitam */}
+      {/* Teks di sisi kiri tengah bawah */}
       <div style={{
-        padding: isMobile ? '2rem 1.5rem' : '3rem 2rem',
-        maxWidth: '600px',
-        margin: '0 auto'
+        position: 'absolute',
+        bottom: isMobile ? '3rem' : '4rem',
+        left: isMobile ? '1.5rem' : '2rem',
+        right: 0
       }}>
-        {/* Halaman Profile - Kosong */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3, duration: 0.5 }}
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0.5rem'
+          }}
+        >
+          <span style={{
+            color: 'white',
+            fontSize: isMobile ? '1rem' : '1.2rem',
+            fontWeight: '300',
+            fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+            letterSpacing: '1px'
+          }}>
+            tell
+          </span>
+          <span style={{
+            color: 'white',
+            fontSize: isMobile ? '1rem' : '1.2rem',
+            fontWeight: '300',
+            fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+            letterSpacing: '1px'
+          }}>
+            donate
+          </span>
+          <span style={{
+            color: 'white',
+            fontSize: isMobile ? '1rem' : '1.2rem',
+            fontWeight: '300',
+            fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+            letterSpacing: '1px'
+          }}>
+            record with all your heart
+          </span>
+          <span style={{
+            color: 'white',
+            fontSize: isMobile ? '1rem' : '1.2rem',
+            fontWeight: '300',
+            fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+            letterSpacing: '1px'
+          }}>
+            logic
+          </span>
+          <span style={{
+            color: 'white',
+            fontSize: isMobile ? '1rem' : '1.2rem',
+            fontWeight: '300',
+            fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+            letterSpacing: '1px'
+          }}>
+            feelings
+          </span>
+        </motion.div>
       </div>
     </div>
   );
