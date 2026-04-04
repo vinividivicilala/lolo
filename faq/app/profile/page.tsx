@@ -105,7 +105,20 @@ export default function ProfilePage() {
                 lineHeight: 1.2,
                 display: 'block'
               }}>
-                Tell Donate Record With All Your Heart
+                Tell Donate Record
+              </span>
+            </div>
+            <div>
+              <span style={{
+                color: 'white',
+                fontSize: isMobile ? '3rem' : '80px',
+                fontWeight: '400',
+                fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+                textTransform: 'capitalize',
+                lineHeight: 1.2,
+                display: 'block'
+              }}>
+                With All Your Heart
               </span>
             </div>
             <div>
