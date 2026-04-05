@@ -52,7 +52,8 @@ export default function ProfilePage() {
             display: 'flex',
             alignItems: 'center',
             gap: '0.8rem',
-            cursor: 'pointer'
+            cursor: 'pointer',
+            width: 'fit-content'
           }}
           whileHover={{ x: -3 }}
         >
@@ -60,7 +61,7 @@ export default function ProfilePage() {
             <path d="M17 7L7 17" />
             <path d="M7 7h10v10" />
           </svg>
-          <span style={{ color: 'white' }}>Back</span>
+          <span style={{ color: 'white', fontWeight: 'normal' }}>Back</span>
         </motion.div>
       </div>
 
@@ -71,14 +72,15 @@ export default function ProfilePage() {
         padding: isMobile ? '0 1.5rem' : '0 3rem'
       }}>
 
-        {/* 🔥 HERO (DIJAGA 2 BARIS FIX) */}
+        {/* HERO - Fixed 2 lines, not bold */}
         <div style={{ marginBottom: '4rem' }}>
           <h1 style={{
             color: 'white',
             fontSize: isMobile ? '2.5rem' : '80px',
             lineHeight: 1.1,
             margin: 0,
-            whiteSpace: 'nowrap' // ✅ paksa 1 baris
+            whiteSpace: 'nowrap',
+            fontWeight: 'normal' // ✅ removed bold
           }}>
             Tell Donate Record With All Your Heart
           </h1>
@@ -88,7 +90,8 @@ export default function ProfilePage() {
             fontSize: isMobile ? '2.5rem' : '80px',
             lineHeight: 1.1,
             margin: 0,
-            whiteSpace: 'nowrap'
+            whiteSpace: 'nowrap',
+            fontWeight: 'normal' // ✅ removed bold
           }}>
             Logic Feelings
           </h1>
@@ -99,7 +102,8 @@ export default function ProfilePage() {
           color: 'rgba(255,255,255,0.7)',
           fontSize: isMobile ? '1rem' : '24px',
           maxWidth: '600px',
-          marginBottom: '4rem'
+          marginBottom: '4rem',
+          fontWeight: 'normal' // ✅ removed bold
         }}>
           From concept to code, I work hand-in-hand with developers and designers—juxtaposing the intuitive with the curious to create delightful and engaging experiences for the world wide web
         </p>
@@ -111,7 +115,7 @@ export default function ProfilePage() {
           marginBottom: '1rem'
         }} />
 
-        {/* 🔥 TABLE */}
+        {/* TABLE - No text movement on hover */}
         <div>
           {tableData.map((item, index) => (
             <motion.div
@@ -125,21 +129,22 @@ export default function ProfilePage() {
                 justifyContent: 'space-between',
                 padding: isMobile ? '1.5rem 0' : '2rem 0',
                 borderBottom: '1px solid rgba(255,255,255,0.2)',
-                cursor: 'pointer'
+                cursor: 'pointer',
+                transition: 'background-color 0.2s ease' // ✅ smooth transition for background only
               }}
               whileHover={{
-                backgroundColor: 'rgba(255,255,255,0.05)',
-                paddingLeft: '12px'
+                backgroundColor: 'rgba(255,255,255,0.05)'
+                // ✅ removed paddingLeft to prevent text movement
               }}
             >
 
-              {/* LEFT (🔥 DIPERBESAR) */}
+              {/* LEFT */}
               <div style={{
                 minWidth: isMobile ? '160px' : '240px'
               }}>
                 <span style={{
                   color: 'white',
-                  fontSize: isMobile ? '1.1rem' : '1.4rem', // ✅ lebih besar
+                  fontSize: isMobile ? '1.1rem' : '1.4rem',
                   fontWeight: '500'
                 }}>
                   {item.year}
@@ -153,7 +158,8 @@ export default function ProfilePage() {
               }}>
                 <span style={{
                   color: 'white',
-                  fontSize: isMobile ? '1.3rem' : '1.7rem'
+                  fontSize: isMobile ? '1.3rem' : '1.7rem',
+                  fontWeight: 'normal' // ✅ removed bold
                 }}>
                   {item.title}
                 </span>
@@ -167,6 +173,7 @@ export default function ProfilePage() {
                 fill="none"
                 stroke="white"
                 strokeWidth="2.5"
+                style={{ flexShrink: 0 }} // ✅ prevents icon from moving
               >
                 <path d="M7 17L17 7" />
                 <path d="M7 7h10v10" />
