@@ -79,9 +79,9 @@ export default function ProfilePage() {
   const [isLoginMode, setIsLoginMode] = useState(true);
   const [authError, setAuthError] = useState("");
   const [authName, setAuthName] = useState("");
-  const [showProfileText, setShowProfileText] = useState(false);
+  const [showProfileFooter, setShowProfileFooter] = useState(false);
   const chatEndRef = useRef(null);
-  const scrollTriggerRef = useRef(null);
+  const tableEndRef = useRef(null);
   
   const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
 
@@ -104,19 +104,17 @@ export default function ProfilePage() {
         setShowScrollButton(false);
       }
       
-      // Logic untuk menampilkan PROFILE text
-      // Hitung total height dari konten
-      const scrollPosition = window.scrollY;
-      const windowHeight = window.innerHeight;
-      const documentHeight = document.documentElement.scrollHeight;
-      
-      // Jika scroll sudah mencapai 70% dari halaman
-      const scrollPercentage = (scrollPosition + windowHeight) / documentHeight;
-      
-      if (scrollPercentage > 0.7) {
-        setShowProfileText(true);
-      } else {
-        setShowProfileText(false);
+      // Check if table end is visible
+      if (tableEndRef.current) {
+        const rect = tableEndRef.current.getBoundingClientRect();
+        const windowHeight = window.innerHeight;
+        
+        // Show footer when table end enters viewport from bottom
+        if (rect.top <= windowHeight) {
+          setShowProfileFooter(true);
+        } else {
+          setShowProfileFooter(false);
+        }
       }
     };
 
@@ -330,49 +328,10 @@ export default function ProfilePage() {
       fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
       paddingTop: '120px',
       paddingBottom: '80px',
-      position: 'relative',
-      overflowX: 'hidden'
+      position: 'relative'
     }}>
 
-      {/* PROFILE TEXT - Background Layer */}
-      <div
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          width: '100%',
-          height: '100vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          pointerEvents: 'none',
-          zIndex: 0,
-          overflow: 'hidden'
-        }}
-      >
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: showProfileText ? 0.05 : 0 }}
-          transition={{ duration: 0.4 }}
-          style={{
-            fontSize: '490px',
-            fontWeight: 'normal',
-            color: 'white',
-            whiteSpace: 'nowrap',
-            fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-            letterSpacing: '-0.02em',
-            lineHeight: 1,
-            textAlign: 'center',
-            transform: 'scale(1)'
-          }}
-        >
-          PROFILE
-        </motion.div>
-      </div>
-
-      {/* HEADER with Breadcrumb - Higher zIndex */}
+      {/* HEADER with Breadcrumb */}
       <div style={{
         position: 'fixed',
         top: 0,
@@ -954,14 +913,13 @@ export default function ProfilePage() {
         )}
       </AnimatePresence>
 
-      {/* MAIN CONTENT - Higher zIndex than background */}
+      {/* MAIN CONTENT */}
       <div style={{
         maxWidth: '1100px',
         margin: '0 auto',
         padding: isMobile ? '0 1.5rem' : '0 3rem',
         position: 'relative',
-        zIndex: 10,
-        backgroundColor: 'transparent'
+        zIndex: 1
       }}>
         <motion.div 
           style={{ marginBottom: '4rem' }}
@@ -1072,8 +1030,58 @@ export default function ProfilePage() {
               </svg>
             </motion.div>
           ))}
+          
+          {/* Reference element untuk mendeteksi akhir tabel */}
+          <div ref={tableEndRef} style={{ height: '1px' }} />
         </div>
       </div>
+
+      {/* PROFILE FOOTER - Muncul dari bawah ke atas */}
+      <AnimatePresence>
+        {showProfileFooter && (
+          <motion.div
+            initial={{ y: "100%", opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: "100%", opacity: 0 }}
+            transition={{ 
+              type: "spring", 
+              damping: 30, 
+              stiffness: 300,
+              duration: 0.5
+            }}
+            style={{
+              position: 'fixed',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              width: '100%',
+              backgroundColor: 'black',
+              zIndex: 50,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '2rem 0',
+              borderTop: '1px solid rgba(255,255,255,0.1)'
+            }}
+          >
+            <div style={{
+              fontSize: isMobile ? '120px' : '490px',
+              fontWeight: 'normal',
+              color: 'white',
+              fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+              letterSpacing: '-0.02em',
+              lineHeight: 1,
+              textAlign: 'center',
+              whiteSpace: 'nowrap',
+              overflowX: 'auto',
+              maxWidth: '100%',
+              padding: '0 1rem'
+            }}>
+              PROFILE
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Scroll to Top Button */}
       <motion.button
