@@ -81,7 +81,7 @@ export default function ProfilePage() {
   const [authName, setAuthName] = useState("");
   const [showProfileText, setShowProfileText] = useState(false);
   const chatEndRef = useRef(null);
-  const tableEndRef = useRef(null);
+  const scrollTriggerRef = useRef(null);
   
   const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
 
@@ -102,6 +102,21 @@ export default function ProfilePage() {
         setShowScrollButton(true);
       } else {
         setShowScrollButton(false);
+      }
+      
+      // Logic untuk menampilkan PROFILE text
+      // Hitung total height dari konten
+      const scrollPosition = window.scrollY;
+      const windowHeight = window.innerHeight;
+      const documentHeight = document.documentElement.scrollHeight;
+      
+      // Jika scroll sudah mencapai 70% dari halaman
+      const scrollPercentage = (scrollPosition + windowHeight) / documentHeight;
+      
+      if (scrollPercentage > 0.7) {
+        setShowProfileText(true);
+      } else {
+        setShowProfileText(false);
       }
     };
 
@@ -183,28 +198,6 @@ export default function ProfilePage() {
       chatEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages]);
-
-  // Effect to detect when scrolling near the end of table
-  useEffect(() => {
-    const handleTableScroll = () => {
-      if (tableEndRef.current) {
-        const rect = tableEndRef.current.getBoundingClientRect();
-        const windowHeight = window.innerHeight;
-        
-        // Show PROFILE text when user scrolls near the end of table (bottom 200px of viewport)
-        if (rect.top <= windowHeight - 100) {
-          setShowProfileText(true);
-        } else {
-          setShowProfileText(false);
-        }
-      }
-    };
-
-    window.addEventListener('scroll', handleTableScroll);
-    handleTableScroll(); // Initial check
-    
-    return () => window.removeEventListener('scroll', handleTableScroll);
-  }, []);
 
   const handleAuth = async () => {
     setAuthError("");
@@ -337,45 +330,56 @@ export default function ProfilePage() {
       fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
       paddingTop: '120px',
       paddingBottom: '80px',
-      position: 'relative'
+      position: 'relative',
+      overflowX: 'hidden'
     }}>
 
-      {/* PROFILE TEXT - Fixed position that appears when scrolling */}
-      <AnimatePresence>
-        {showProfileText && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            style={{
-              position: 'fixed',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              fontSize: '490px',
-              fontWeight: 'normal',
-              color: 'rgba(255, 255, 255, 0.03)',
-              whiteSpace: 'nowrap',
-              pointerEvents: 'none',
-              zIndex: 0,
-              fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-              letterSpacing: '-0.02em'
-            }}
-          >
-            PROFILE
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* PROFILE TEXT - Background Layer */}
+      <div
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          width: '100%',
+          height: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          pointerEvents: 'none',
+          zIndex: 0,
+          overflow: 'hidden'
+        }}
+      >
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: showProfileText ? 0.05 : 0 }}
+          transition={{ duration: 0.4 }}
+          style={{
+            fontSize: '490px',
+            fontWeight: 'normal',
+            color: 'white',
+            whiteSpace: 'nowrap',
+            fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+            letterSpacing: '-0.02em',
+            lineHeight: 1,
+            textAlign: 'center',
+            transform: 'scale(1)'
+          }}
+        >
+          PROFILE
+        </motion.div>
+      </div>
 
-      {/* HEADER with Breadcrumb */}
+      {/* HEADER with Breadcrumb - Higher zIndex */}
       <div style={{
         position: 'fixed',
         top: 0,
         left: 0,
         width: '100%',
         padding: isMobile ? '1.5rem' : '2rem',
-        zIndex: 10,
+        zIndex: 100,
         backgroundColor: 'rgba(0,0,0,0.8)',
         backdropFilter: 'blur(10px)'
       }}>
@@ -950,13 +954,14 @@ export default function ProfilePage() {
         )}
       </AnimatePresence>
 
-      {/* CONTENT */}
+      {/* MAIN CONTENT - Higher zIndex than background */}
       <div style={{
         maxWidth: '1100px',
         margin: '0 auto',
         padding: isMobile ? '0 1.5rem' : '0 3rem',
         position: 'relative',
-        zIndex: 1
+        zIndex: 10,
+        backgroundColor: 'transparent'
       }}>
         <motion.div 
           style={{ marginBottom: '4rem' }}
@@ -1067,8 +1072,6 @@ export default function ProfilePage() {
               </svg>
             </motion.div>
           ))}
-          {/* Reference div to detect end of table */}
-          <div ref={tableEndRef} style={{ height: '1px' }} />
         </div>
       </div>
 
