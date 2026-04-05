@@ -82,7 +82,6 @@ export default function ProfilePage() {
   const [authName, setAuthName] = useState("");
   const [showProfileOverlay, setShowProfileOverlay] = useState(false);
   const chatEndRef = useRef(null);
-  const heroRef = useRef(null);
   const overlayRef = useRef(null);
   
   const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
@@ -92,7 +91,7 @@ export default function ProfilePage() {
     return user?.email === ADMIN_EMAIL;
   };
 
-  // Initialize Lenis smooth scroll
+  // Initialize Lenis smooth scroll and GSAP
   useEffect(() => {
     const lenis = new Lenis({
       duration: 1.2,
@@ -123,72 +122,110 @@ export default function ProfilePage() {
 
     lenis.on('scroll', ScrollTrigger.update);
 
-    // GSAP animations
-    const ctx = gsap.context(() => {
-      // Hero text animation
-      gsap.fromTo('.hero-text',
-        { y: 100, opacity: 0 },
+    // Get the maximum scroll height
+    const getMaxScroll = () => {
+      return document.body.scrollHeight - window.innerHeight;
+    };
+
+    // Create scroll trigger for profile overlay
+    ScrollTrigger.create({
+      trigger: document.body,
+      start: "80% bottom",
+      end: "bottom bottom",
+      onEnter: () => {
+        // Show overlay when entering the last 20% of the page
+        setShowProfileOverlay(true);
+        gsap.fromTo(overlayRef.current,
+          { opacity: 0, y: 30, scale: 0.9 },
+          { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: "back.out(0.5)" }
+        );
+      },
+      onLeaveBack: () => {
+        // Hide overlay when scrolling back up
+        gsap.to(overlayRef.current, {
+          opacity: 0,
+          y: 30,
+          scale: 0.9,
+          duration: 0.3,
+          ease: "power2.in",
+          onComplete: () => setShowProfileOverlay(false)
+        });
+      },
+      onLeave: () => {
+        // Keep overlay visible at the very bottom
+        if (window.scrollY + window.innerHeight >= document.body.scrollHeight - 10) {
+          // At the very bottom, keep it visible
+        }
+      }
+    });
+
+    // Alternative: Use scroll event listener for more precise control
+    const handleScrollEvent = () => {
+      const scrollPosition = window.scrollY + window.innerHeight;
+      const maxScroll = document.body.scrollHeight;
+      const scrollPercentage = (scrollPosition / maxScroll) * 100;
+      
+      // Show overlay when scrolled to 85% or more
+      if (scrollPercentage >= 85 && !showProfileOverlay) {
+        setShowProfileOverlay(true);
+        gsap.fromTo(overlayRef.current,
+          { opacity: 0, y: 30, scale: 0.9 },
+          { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: "back.out(0.5)" }
+        );
+      } 
+      // Hide overlay when scrolling back up below 80%
+      else if (scrollPercentage < 80 && showProfileOverlay) {
+        gsap.to(overlayRef.current, {
+          opacity: 0,
+          y: 30,
+          scale: 0.9,
+          duration: 0.3,
+          ease: "power2.in",
+          onComplete: () => setShowProfileOverlay(false)
+        });
+      }
+    };
+
+    window.addEventListener('scroll', handleScrollEvent);
+
+    // Hero text animation
+    gsap.fromTo('.hero-text',
+      { y: 100, opacity: 0 },
+      {
+        y: 0,
+        opacity: 1,
+        duration: 1,
+        stagger: 0.2,
+        scrollTrigger: {
+          trigger: '.hero-section',
+          start: 'top 80%',
+          end: 'bottom 20%',
+          toggleActions: 'play none none reverse'
+        }
+      }
+    );
+
+    // Table rows animation
+    gsap.utils.toArray('.table-row').forEach((row, i) => {
+      gsap.fromTo(row,
+        { x: -50, opacity: 0 },
         {
-          y: 0,
+          x: 0,
           opacity: 1,
-          duration: 1,
-          stagger: 0.2,
+          duration: 0.6,
+          delay: i * 0.1,
           scrollTrigger: {
-            trigger: '.hero-section',
-            start: 'top 80%',
+            trigger: row,
+            start: 'top 90%',
             end: 'bottom 20%',
             toggleActions: 'play none none reverse'
           }
         }
       );
-
-      // Profile overlay animation - appears when scrolling down
-      ScrollTrigger.create({
-        trigger: document.body,
-        start: 'top top',
-        end: 'bottom bottom',
-        onUpdate: (self) => {
-          const progress = self.progress;
-          if (progress > 0.7 && !showProfileOverlay) {
-            setShowProfileOverlay(true);
-            gsap.fromTo(overlayRef.current,
-              { opacity: 0, y: 50 },
-              { opacity: 1, y: 0, duration: 0.6, ease: 'power2.out' }
-            );
-          } else if (progress <= 0.7 && showProfileOverlay) {
-            gsap.to(overlayRef.current, {
-              opacity: 0,
-              y: 50,
-              duration: 0.4,
-              ease: 'power2.in',
-              onComplete: () => setShowProfileOverlay(false)
-            });
-          }
-        }
-      });
-
-      // Table rows animation
-      gsap.utils.toArray('.table-row').forEach((row, i) => {
-        gsap.fromTo(row,
-          { x: -50, opacity: 0 },
-          {
-            x: 0,
-            opacity: 1,
-            duration: 0.6,
-            delay: i * 0.1,
-            scrollTrigger: {
-              trigger: row,
-              start: 'top 90%',
-              end: 'bottom 20%',
-              toggleActions: 'play none none reverse'
-            }
-          }
-        );
-      });
     });
 
     return () => {
-      ctx.revert();
+      window.removeEventListener('scroll', handleScrollEvent);
       lenis.destroy();
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
@@ -524,18 +561,18 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* PROFILE OVERLAY that appears when scrolling down */}
-      <AnimatePresence>
+      {/* PROFILE OVERLAY that appears when scrolling near the bottom */}
+      <AnimatePresence mode="wait">
         {showProfileOverlay && (
           <motion.div
             ref={overlayRef}
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 50 }}
-            transition={{ duration: 0.6, ease: "power2.out" }}
+            initial={{ opacity: 0, y: 30, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 30, scale: 0.9 }}
+            transition={{ duration: 0.5, ease: "back.out(0.5)" }}
             style={{
               position: 'fixed',
-              bottom: '2rem',
+              bottom: '6rem',
               right: '2rem',
               zIndex: 150,
               pointerEvents: 'none'
@@ -553,7 +590,8 @@ export default function ProfilePage() {
                 color: 'black',
                 fontSize: isMobile ? '0.9rem' : '1rem',
                 fontWeight: '500',
-                letterSpacing: '0.05em'
+                letterSpacing: '0.1em',
+                textTransform: 'uppercase'
               }}>
                 PROFILE
               </span>
