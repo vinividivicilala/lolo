@@ -80,9 +80,8 @@ export default function ProfilePage() {
   const [isLoginMode, setIsLoginMode] = useState(true);
   const [authError, setAuthError] = useState("");
   const [authName, setAuthName] = useState("");
-  const [showProfileText, setShowProfileText] = useState(false);
   const chatEndRef = useRef(null);
-  const profileTextRef = useRef(null);
+  const profileSectionRef = useRef(null);
   
   const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
 
@@ -122,46 +121,6 @@ export default function ProfilePage() {
 
     lenis.on('scroll', ScrollTrigger.update);
 
-    // Create scroll trigger for PROFILE text - muncul saat scroll ke bawah
-    ScrollTrigger.create({
-      trigger: document.body,
-      start: "top+=100 top",
-      end: "bottom bottom",
-      onUpdate: (self) => {
-        const progress = self.progress;
-        // Munculkan teks ketika scroll progress mencapai 70%
-        if (progress > 0.7 && !showProfileText) {
-          setShowProfileText(true);
-          // Animasi teks muncul dari bawah
-          gsap.fromTo(profileTextRef.current,
-            { 
-              opacity: 0, 
-              y: 100,
-              scale: 0.8
-            },
-            { 
-              opacity: 1, 
-              y: 0,
-              scale: 1,
-              duration: 0.8,
-              ease: "power2.out"
-            }
-          );
-        } 
-        // Sembunyikan teks ketika scroll ke atas
-        else if (progress <= 0.7 && showProfileText) {
-          gsap.to(profileTextRef.current, {
-            opacity: 0,
-            y: -100,
-            scale: 0.8,
-            duration: 0.5,
-            ease: "power2.in",
-            onComplete: () => setShowProfileText(false)
-          });
-        }
-      }
-    });
-
     // Hero text animation
     gsap.fromTo('.hero-text',
       { y: 100, opacity: 0 },
@@ -198,11 +157,54 @@ export default function ProfilePage() {
       );
     });
 
+    // Profile section animation - muncul saat scroll ke bawah, hilang saat scroll ke atas
+    gsap.fromTo('.profile-row',
+      { 
+        opacity: 0, 
+        y: 50,
+        display: 'none'
+      },
+      {
+        opacity: 1,
+        y: 0,
+        duration: 0.8,
+        ease: "power2.out",
+        scrollTrigger: {
+          trigger: document.body,
+          start: "top+=500 top",
+          end: "bottom bottom",
+          toggleActions: "play none none reverse",
+          onUpdate: (self) => {
+            const progress = self.progress;
+            if (progress > 0.6) {
+              gsap.to('.profile-row', {
+                opacity: 1,
+                y: 0,
+                display: 'flex',
+                duration: 0.5
+              });
+            } else {
+              gsap.to('.profile-row', {
+                opacity: 0,
+                y: 50,
+                duration: 0.5,
+                onComplete: () => {
+                  if (progress <= 0.6) {
+                    gsap.set('.profile-row', { display: 'none' });
+                  }
+                }
+              });
+            }
+          }
+        }
+      }
+    );
+
     return () => {
       lenis.destroy();
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
-  }, [showProfileText]);
+  }, []);
 
   useEffect(() => {
     // Check mobile
@@ -532,31 +534,6 @@ export default function ProfilePage() {
             </motion.div>
           </div>
         </div>
-      </div>
-
-      {/* BIG PROFILE TEXT that appears when scrolling */}
-      <div
-        ref={profileTextRef}
-        style={{
-          position: 'fixed',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          zIndex: 5,
-          pointerEvents: 'none',
-          opacity: 0,
-          whiteSpace: 'nowrap'
-        }}
-      >
-        <span style={{
-          color: 'rgba(255,255,255,0.15)',
-          fontSize: isMobile ? '120px' : '490px',
-          fontWeight: 'bold',
-          letterSpacing: '0.05em',
-          fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif'
-        }}>
-          PROFILE
-        </span>
       </div>
 
       {/* CHAT BUTTON */}
@@ -1100,6 +1077,56 @@ export default function ProfilePage() {
         }} />
 
         <div>
+          {/* PROFILE ROW - Muncul saat scroll ke bawah */}
+          <div className="profile-row" style={{
+            display: 'none',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: isMobile ? '1.5rem 0' : '2rem 0',
+            borderBottom: '1px solid rgba(255,255,255,0.2)',
+            opacity: 0,
+            transform: 'translateY(50px)'
+          }}>
+            <div style={{
+              minWidth: isMobile ? '160px' : '240px'
+            }}>
+              <span style={{
+                color: 'white',
+                fontSize: isMobile ? '1.1rem' : '1.4rem',
+                fontWeight: '500'
+              }}>
+                profile
+              </span>
+            </div>
+
+            <div style={{
+              flex: 1,
+              padding: '0 2rem'
+            }}>
+              <span style={{
+                color: 'white',
+                fontSize: isMobile ? '1.3rem' : '1.7rem',
+                fontWeight: 'normal'
+              }}>
+                PROFILE
+              </span>
+            </div>
+
+            <svg
+              width={isMobile ? "28" : "34"}
+              height={isMobile ? "28" : "34"}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="white"
+              strokeWidth="2.5"
+              style={{ flexShrink: 0 }}
+            >
+              <path d="M7 17L17 7" />
+              <path d="M7 7h10v10" />
+            </svg>
+          </div>
+
+          {/* TABLE ROWS */}
           {tableData.map((item, index) => (
             <motion.div
               key={index}
