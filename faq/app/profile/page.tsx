@@ -12,10 +12,16 @@ export default function ProfilePage() {
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState("");
   const [isAdminTyping, setIsAdminTyping] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [isAdminMode, setIsAdminMode] = useState(false);
+  const [adminPassword, setAdminPassword] = useState("");
+  const [showAdminLogin, setShowAdminLogin] = useState(false);
+  const [users, setUsers] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
   const chatEndRef = useRef(null);
   
-  // Admin email yang berhak menjawab
   const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
+  const ADMIN_PASSWORD = "admin123"; // Ganti dengan password yang lebih aman
 
   useEffect(() => {
     // Check mobile
@@ -23,18 +29,32 @@ export default function ProfilePage() {
     checkMobile();
     window.addEventListener('resize', checkMobile);
     
-    // Custom smooth scroll without Lenis
-    const handleWheel = (e) => {
-      if (window.innerWidth > 768) {
-        e.preventDefault();
-        const delta = e.deltaY;
-        const scrollAmount = delta * 0.8;
-        window.scrollBy({
-          top: scrollAmount,
-          behavior: 'smooth'
-        });
-      }
-    };
+    // Check if user is logged in
+    const loggedInUser = localStorage.getItem('chatUser');
+    if (loggedInUser) {
+      setCurrentUser(JSON.parse(loggedInUser));
+    } else {
+      // Auto login with guest name
+      const guestName = `Guest_${Math.floor(Math.random() * 1000)}`;
+      const newUser = {
+        id: Date.now(),
+        name: guestName,
+        email: null,
+        isAdmin: false
+      };
+      localStorage.setItem('chatUser', JSON.stringify(newUser));
+      setCurrentUser(newUser);
+    }
+
+    // Check if admin is logged in
+    const adminLoggedIn = localStorage.getItem('adminLoggedIn');
+    if (adminLoggedIn === 'true') {
+      setIsAdminMode(true);
+      loadAllUsers();
+    }
+
+    // Load messages
+    loadMessages();
 
     // Show scroll to top button
     const handleScroll = () => {
@@ -46,104 +66,155 @@ export default function ProfilePage() {
     };
 
     window.addEventListener('scroll', handleScroll);
-    // Only add wheel listener on desktop
-    if (window.innerWidth > 768) {
-      window.addEventListener('wheel', handleWheel, { passive: false });
-    }
-
-    // Load chat history from localStorage
-    const savedMessages = localStorage.getItem('chatMessages');
-    if (savedMessages) {
-      setMessages(JSON.parse(savedMessages));
-    } else {
-      // Welcome message
-      setMessages([
-        {
-          id: Date.now(),
-          text: "Hello! I'm Farid's support. Please leave your email and message, and I'll get back to you soon!",
-          sender: 'admin',
-          timestamp: new Date().toISOString()
-        }
-      ]);
-    }
 
     return () => {
       window.removeEventListener('resize', checkMobile);
       window.removeEventListener('scroll', handleScroll);
-      if (window.innerWidth > 768) {
-        window.removeEventListener('wheel', handleWheel);
-      }
     };
   }, []);
 
-  // Save messages to localStorage
-  useEffect(() => {
-    if (messages.length > 0) {
-      localStorage.setItem('chatMessages', JSON.stringify(messages));
+  const loadMessages = () => {
+    const savedMessages = localStorage.getItem('chatMessages');
+    if (savedMessages) {
+      setMessages(JSON.parse(savedMessages));
+    } else {
+      setMessages([
+        {
+          id: Date.now(),
+          text: "Welcome to live chat! Please login or continue as guest. Admin: faridardiansyah061@gmail.com",
+          sender: 'admin',
+          userId: 'system',
+          userName: 'System',
+          timestamp: new Date().toISOString()
+        }
+      ]);
     }
-    scrollToBottom();
-  }, [messages]);
-
-  const scrollToBottom = () => {
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
+  const loadAllUsers = () => {
+    const allUsers = JSON.parse(localStorage.getItem('allChatUsers') || '[]');
+    setUsers(allUsers);
+  };
+
+  const saveUser = (user) => {
+    const allUsers = JSON.parse(localStorage.getItem('allChatUsers') || '[]');
+    const existingUser = allUsers.find(u => u.id === user.id);
+    if (!existingUser) {
+      allUsers.push(user);
+      localStorage.setItem('allChatUsers', JSON.stringify(allUsers));
+    }
+  };
+
+  const handleAdminLogin = () => {
+    if (adminPassword === ADMIN_PASSWORD) {
+      setIsAdminMode(true);
+      setShowAdminLogin(false);
+      localStorage.setItem('adminLoggedIn', 'true');
+      loadAllUsers();
+      
+      // Set current user as admin
+      const adminUser = {
+        id: 'admin',
+        name: 'Farid Ardiansyah',
+        email: ADMIN_EMAIL,
+        isAdmin: true
+      };
+      setCurrentUser(adminUser);
+      localStorage.setItem('chatUser', JSON.stringify(adminUser));
+    } else {
+      alert("Wrong password!");
+    }
+  };
+
+  const handleUserLogin = (email, name) => {
+    const user = {
+      id: Date.now(),
+      name: name,
+      email: email,
+      isAdmin: email === ADMIN_EMAIL
+    };
+    
+    setCurrentUser(user);
+    localStorage.setItem('chatUser', JSON.stringify(user));
+    saveUser(user);
+    
+    // Add system message
+    const systemMessage = {
+      id: Date.now(),
+      text: `${name} has joined the chat`,
+      sender: 'system',
+      userId: 'system',
+      userName: 'System',
+      timestamp: new Date().toISOString()
+    };
+    
+    const updatedMessages = [...messages, systemMessage];
+    setMessages(updatedMessages);
+    localStorage.setItem('chatMessages', JSON.stringify(updatedMessages));
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('chatUser');
+    setCurrentUser(null);
+    setIsAdminMode(false);
+    localStorage.removeItem('adminLoggedIn');
+    window.location.reload();
   };
 
   const sendMessage = async () => {
     if (!inputMessage.trim()) return;
+    if (!currentUser) {
+      alert("Please login first!");
+      return;
+    }
 
     const newMessage = {
       id: Date.now(),
       text: inputMessage,
-      sender: 'user',
+      sender: currentUser.isAdmin ? 'admin' : 'user',
+      userId: currentUser.id,
+      userName: currentUser.name,
+      userEmail: currentUser.email,
       timestamp: new Date().toISOString()
     };
 
-    setMessages(prev => [...prev, newMessage]);
+    const updatedMessages = [...messages, newMessage];
+    setMessages(updatedMessages);
+    localStorage.setItem('chatMessages', JSON.stringify(updatedMessages));
     setInputMessage("");
 
-    // Simulate admin typing
-    setIsAdminTyping(true);
-
-    // Check if message contains email
-    const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/;
-    const hasEmail = emailRegex.test(inputMessage);
-    const hasTargetEmail = inputMessage.toLowerCase().includes('faridardiansyah061@gmail.com');
-    
-    // Simulate admin response after 1-2 seconds
-    setTimeout(() => {
-      let adminResponse = "";
+    // Auto response for non-admin users
+    if (!currentUser.isAdmin) {
+      setIsAdminTyping(true);
       
-      if (hasTargetEmail) {
-        adminResponse = "✅ Thank you! I've received your message at faridardiansyah061@gmail.com. I'll respond within 24 hours. Is there anything specific you'd like to discuss about the profile or projects?";
-      } else if (hasEmail) {
-        adminResponse = "📧 Thanks for sharing your email! Please note that priority responses are given to faridardiansyah061@gmail.com. Feel free to ask me anything about my portfolio!";
-      } else if (inputMessage.toLowerCase().includes('hello') || inputMessage.toLowerCase().includes('hi')) {
-        adminResponse = "👋 Hello there! How can I help you today? Feel free to ask about my projects, experience, or leave your email for a detailed response!";
-      } else if (inputMessage.toLowerCase().includes('project')) {
-        adminResponse = "🎨 Great question! You can check out my projects in the table above. Each one represents a unique collaboration. Would you like more details about any specific project?";
-      } else if (inputMessage.toLowerCase().includes('interview')) {
-        adminResponse = "💼 I'd love to discuss interview opportunities! Please leave your email (faridardiansyah061@gmail.com) and I'll get back to you promptly!";
-      } else {
-        adminResponse = "💬 Thanks for your message! For a quicker response, please use faridardiansyah061@gmail.com. Meanwhile, feel free to explore my portfolio above!";
-      }
-      
-      const adminMessage = {
-        id: Date.now() + 1,
-        text: adminResponse,
-        sender: 'admin',
-        timestamp: new Date().toISOString()
-      };
-      
-      setMessages(prev => [...prev, adminMessage]);
-      setIsAdminTyping(false);
-    }, 1500);
+      setTimeout(() => {
+        let adminResponse = "";
+        const hasTargetEmail = inputMessage.toLowerCase().includes('faridardiansyah061@gmail.com');
+        
+        if (hasTargetEmail) {
+          adminResponse = `✅ Hi ${currentUser.name}! Thanks for reaching out to faridardiansyah061@gmail.com. I'll respond within 24 hours.`;
+        } else if (inputMessage.toLowerCase().includes('hello') || inputMessage.toLowerCase().includes('hi')) {
+          adminResponse = `👋 Hello ${currentUser.name}! How can I help you today?`;
+        } else {
+          adminResponse = `💬 Thanks for your message ${currentUser.name}! For priority response, please email faridardiansyah061@gmail.com`;
+        }
+        
+        const adminMessage = {
+          id: Date.now() + 1,
+          text: adminResponse,
+          sender: 'admin',
+          userId: 'admin',
+          userName: 'Farid Ardiansyah',
+          userEmail: ADMIN_EMAIL,
+          timestamp: new Date().toISOString()
+        };
+        
+        const finalMessages = [...updatedMessages, adminMessage];
+        setMessages(finalMessages);
+        localStorage.setItem('chatMessages', JSON.stringify(finalMessages));
+        setIsAdminTyping(false);
+      }, 1500);
+    }
   };
 
   const handleKeyPress = (e) => {
@@ -156,6 +227,13 @@ export default function ProfilePage() {
   const formatTime = (timestamp) => {
     const date = new Date(timestamp);
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
   };
 
   const tableData = [
@@ -199,7 +277,6 @@ export default function ProfilePage() {
           margin: '0 auto',
           padding: isMobile ? '0 1.5rem' : '0 3rem'
         }}>
-          {/* Back button */}
           <motion.div
             onClick={() => router.back()}
             style={{
@@ -218,38 +295,61 @@ export default function ProfilePage() {
             <span style={{ color: 'white', fontWeight: 'normal' }}>Back</span>
           </motion.div>
 
-          {/* Breadcrumb: Home > Profile */}
-          <motion.div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              color: 'white',
-              fontSize: isMobile ? '0.9rem' : '1rem'
-            }}
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-          >
-            <motion.span
-              onClick={() => router.push('/')}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            {currentUser && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <span style={{ color: 'white', fontSize: '0.875rem' }}>
+                  👤 {currentUser.name}
+                </span>
+                <button
+                  onClick={handleLogout}
+                  style={{
+                    background: 'rgba(255,255,255,0.1)',
+                    border: 'none',
+                    color: 'white',
+                    padding: '0.25rem 0.75rem',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    fontSize: '0.75rem'
+                  }}
+                >
+                  Logout
+                </button>
+              </div>
+            )}
+            
+            <motion.div
               style={{
-                cursor: 'pointer',
-                color: 'rgba(255,255,255,0.6)',
-                fontWeight: 'normal',
-                transition: 'color 0.2s ease'
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                color: 'white',
+                fontSize: isMobile ? '0.9rem' : '1rem'
               }}
-              whileHover={{ color: 'white' }}
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
             >
-              Home
-            </motion.span>
-            <span style={{ color: 'rgba(255,255,255,0.4)' }}>/</span>
-            <span style={{ color: 'white', fontWeight: 'normal' }}>Profile</span>
-          </motion.div>
+              <motion.span
+                onClick={() => router.push('/')}
+                style={{
+                  cursor: 'pointer',
+                  color: 'rgba(255,255,255,0.6)',
+                  fontWeight: 'normal',
+                  transition: 'color 0.2s ease'
+                }}
+                whileHover={{ color: 'white' }}
+              >
+                Home
+              </motion.span>
+              <span style={{ color: 'rgba(255,255,255,0.4)' }}>/</span>
+              <span style={{ color: 'white', fontWeight: 'normal' }}>Profile</span>
+            </motion.div>
+          </div>
         </div>
       </div>
 
-      {/* CHAT BUTTON - Floating action button */}
+      {/* CHAT BUTTON */}
       <motion.button
         onClick={() => setIsChatOpen(!isChatOpen)}
         style={{
@@ -279,7 +379,7 @@ export default function ProfilePage() {
         </svg>
       </motion.button>
 
-      {/* CHAT WIDGET - Left side */}
+      {/* CHAT WIDGET */}
       <AnimatePresence>
         {isChatOpen && (
           <motion.div
@@ -291,8 +391,8 @@ export default function ProfilePage() {
               position: 'fixed',
               bottom: '6rem',
               left: '2rem',
-              width: isMobile ? 'calc(100% - 2rem)' : '380px',
-              height: '500px',
+              width: isMobile ? 'calc(100% - 2rem)' : '450px',
+              height: '600px',
               backgroundColor: '#1a1a1a',
               borderRadius: '12px',
               boxShadow: '0 10px 40px rgba(0,0,0,0.3)',
@@ -320,24 +420,140 @@ export default function ProfilePage() {
                   backgroundColor: '#4ade80',
                   animation: 'pulse 2s infinite'
                 }} />
-                <span style={{ color: 'white', fontWeight: '500' }}>Live Chat Support</span>
+                <span style={{ color: 'white', fontWeight: '500' }}>
+                  {isAdminMode ? 'Admin Panel' : 'Live Chat'}
+                </span>
+                {currentUser && !isAdminMode && (
+                  <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.6)' }}>
+                    ({currentUser.name})
+                  </span>
+                )}
               </div>
-              <motion.button
-                onClick={() => setIsChatOpen(false)}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  padding: '4px'
-                }}
-                whileHover={{ scale: 1.1 }}
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-                  <path d="M18 6L6 18" />
-                  <path d="M6 6l12 12" />
-                </svg>
-              </motion.button>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                {!currentUser && !isAdminMode && (
+                  <motion.button
+                    onClick={() => {
+                      const email = prompt("Enter your email (optional):");
+                      const name = prompt("Enter your name:");
+                      if (name) handleUserLogin(email, name);
+                    }}
+                    style={{
+                      background: 'rgba(255,255,255,0.1)',
+                      border: 'none',
+                      color: 'white',
+                      padding: '0.25rem 0.75rem',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontSize: '0.75rem'
+                    }}
+                    whileHover={{ scale: 1.05 }}
+                  >
+                    Login
+                  </motion.button>
+                )}
+                {!isAdminMode && currentUser?.email !== ADMIN_EMAIL && (
+                  <motion.button
+                    onClick={() => setShowAdminLogin(true)}
+                    style={{
+                      background: 'rgba(255,255,255,0.1)',
+                      border: 'none',
+                      color: 'white',
+                      padding: '0.25rem 0.75rem',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontSize: '0.75rem'
+                    }}
+                    whileHover={{ scale: 1.05 }}
+                  >
+                    Admin
+                  </motion.button>
+                )}
+                <motion.button
+                  onClick={() => setIsChatOpen(false)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    padding: '4px'
+                  }}
+                  whileHover={{ scale: 1.1 }}
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                    <path d="M18 6L6 18" />
+                    <path d="M6 6l12 12" />
+                  </svg>
+                </motion.button>
+              </div>
             </div>
+
+            {/* Admin Login Modal */}
+            {showAdminLogin && (
+              <div style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(0,0,0,0.9)',
+                zIndex: 300,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <div style={{
+                  backgroundColor: '#2a2a2a',
+                  padding: '2rem',
+                  borderRadius: '12px',
+                  width: '300px'
+                }}>
+                  <h3 style={{ color: 'white', marginBottom: '1rem' }}>Admin Login</h3>
+                  <input
+                    type="password"
+                    placeholder="Enter admin password"
+                    value={adminPassword}
+                    onChange={(e) => setAdminPassword(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '0.5rem',
+                      marginBottom: '1rem',
+                      borderRadius: '4px',
+                      border: '1px solid rgba(255,255,255,0.2)',
+                      backgroundColor: '#1a1a1a',
+                      color: 'white'
+                    }}
+                  />
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <button
+                      onClick={handleAdminLogin}
+                      style={{
+                        flex: 1,
+                        padding: '0.5rem',
+                        backgroundColor: '#fff',
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Login
+                    </button>
+                    <button
+                      onClick={() => setShowAdminLogin(false)}
+                      style={{
+                        flex: 1,
+                        padding: '0.5rem',
+                        backgroundColor: 'rgba(255,255,255,0.1)',
+                        border: 'none',
+                        borderRadius: '4px',
+                        color: 'white',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Chat Messages */}
             <div style={{
@@ -355,18 +571,20 @@ export default function ProfilePage() {
                   animate={{ opacity: 1, y: 0 }}
                   style={{
                     display: 'flex',
-                    justifyContent: msg.sender === 'user' ? 'flex-end' : 'flex-start'
+                    justifyContent: msg.sender === 'user' && msg.userId === currentUser?.id ? 'flex-end' : 'flex-start'
                   }}
                 >
                   <div style={{
                     maxWidth: '80%',
                     padding: '0.75rem 1rem',
                     borderRadius: '12px',
-                    backgroundColor: msg.sender === 'user' ? '#fff' : '#2a2a2a',
+                    backgroundColor: msg.sender === 'admin' ? '#2a2a2a' : 
+                                   msg.sender === 'system' ? 'rgba(255,255,255,0.1)' : '#fff',
                     color: msg.sender === 'user' ? '#000' : '#fff'
                   }}>
-                    <div style={{ fontSize: '0.875rem', marginBottom: '0.25rem' }}>
-                      {msg.sender === 'user' ? 'You' : 'Farid'}
+                    <div style={{ fontSize: '0.75rem', marginBottom: '0.25rem', opacity: 0.7 }}>
+                      {msg.userName}
+                      {msg.userEmail && ` (${msg.userEmail})`}
                     </div>
                     <div style={{ fontSize: '0.9rem', wordWrap: 'break-word' }}>
                       {msg.text}
@@ -395,7 +613,7 @@ export default function ProfilePage() {
                     backgroundColor: '#2a2a2a',
                     color: '#fff'
                   }}>
-                    <div style={{ fontSize: '0.875rem', marginBottom: '0.25rem' }}>Farid</div>
+                    <div style={{ fontSize: '0.75rem', marginBottom: '0.25rem' }}>Farid Ardiansyah</div>
                     <div style={{ display: 'flex', gap: '4px' }}>
                       <span className="typing-dot">•</span>
                       <span className="typing-dot">•</span>
@@ -408,57 +626,61 @@ export default function ProfilePage() {
             </div>
 
             {/* Chat Input */}
-            <div style={{
-              padding: '1rem',
-              borderTop: '1px solid rgba(255,255,255,0.1)',
-              backgroundColor: '#1a1a1a'
-            }}>
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <textarea
-                  value={inputMessage}
-                  onChange={(e) => setInputMessage(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  placeholder="Type your message... (include email for response)"
-                  style={{
-                    flex: 1,
-                    padding: '0.75rem',
-                    borderRadius: '8px',
-                    border: '1px solid rgba(255,255,255,0.2)',
-                    backgroundColor: '#2a2a2a',
-                    color: 'white',
-                    fontSize: '0.9rem',
-                    resize: 'none',
-                    fontFamily: 'inherit',
-                    outline: 'none'
-                  }}
-                  rows="2"
-                />
-                <motion.button
-                  onClick={sendMessage}
-                  style={{
-                    padding: '0 1rem',
-                    borderRadius: '8px',
-                    border: 'none',
-                    backgroundColor: '#fff',
-                    color: '#000',
-                    cursor: 'pointer',
-                    fontWeight: '500'
-                  }}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  Send
-                </motion.button>
-              </div>
+            {currentUser && (
               <div style={{
-                fontSize: '0.7rem',
-                color: 'rgba(255,255,255,0.5)',
-                marginTop: '0.5rem',
-                textAlign: 'center'
+                padding: '1rem',
+                borderTop: '1px solid rgba(255,255,255,0.1)',
+                backgroundColor: '#1a1a1a'
               }}>
-                Only messages to faridardiansyah061@gmail.com get priority response
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <textarea
+                    value={inputMessage}
+                    onChange={(e) => setInputMessage(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    placeholder={`Type your message as ${currentUser.name}...`}
+                    style={{
+                      flex: 1,
+                      padding: '0.75rem',
+                      borderRadius: '8px',
+                      border: '1px solid rgba(255,255,255,0.2)',
+                      backgroundColor: '#2a2a2a',
+                      color: 'white',
+                      fontSize: '0.9rem',
+                      resize: 'none',
+                      fontFamily: 'inherit',
+                      outline: 'none'
+                    }}
+                    rows="2"
+                  />
+                  <motion.button
+                    onClick={sendMessage}
+                    style={{
+                      padding: '0 1rem',
+                      borderRadius: '8px',
+                      border: 'none',
+                      backgroundColor: '#fff',
+                      color: '#000',
+                      cursor: 'pointer',
+                      fontWeight: '500'
+                    }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    Send
+                  </motion.button>
+                </div>
+                {currentUser.email !== ADMIN_EMAIL && (
+                  <div style={{
+                    fontSize: '0.7rem',
+                    color: 'rgba(255,255,255,0.5)',
+                    marginTop: '0.5rem',
+                    textAlign: 'center'
+                  }}>
+                    💬 Admin: faridardiansyah061@gmail.com
+                  </div>
+                )}
               </div>
-            </div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
@@ -469,8 +691,6 @@ export default function ProfilePage() {
         margin: '0 auto',
         padding: isMobile ? '0 1.5rem' : '0 3rem'
       }}>
-
-        {/* HERO */}
         <motion.div 
           style={{ marginBottom: '4rem' }}
           initial={{ opacity: 0, y: 30 }}
@@ -500,7 +720,6 @@ export default function ProfilePage() {
           </h1>
         </motion.div>
 
-        {/* DESC */}
         <motion.p 
           style={{
             color: 'rgba(255,255,255,0.7)',
@@ -516,14 +735,12 @@ export default function ProfilePage() {
           From concept to code, I work hand-in-hand with developers and designers—juxtaposing the intuitive with the curious to create delightful and engaging experiences for the world wide web
         </motion.p>
 
-        {/* LINE */}
         <div style={{
           height: '1px',
           backgroundColor: 'rgba(255,255,255,0.2)',
           marginBottom: '1rem'
         }} />
 
-        {/* TABLE */}
         <div>
           {tableData.map((item, index) => (
             <motion.div
@@ -629,12 +846,8 @@ export default function ProfilePage() {
 
       <style jsx>{`
         @keyframes pulse {
-          0%, 100% {
-            opacity: 1;
-          }
-          50% {
-            opacity: 0.5;
-          }
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.5; }
         }
         
         .typing-dot {
@@ -643,13 +856,8 @@ export default function ProfilePage() {
           font-size: 20px;
         }
         
-        .typing-dot:nth-child(2) {
-          animation-delay: 0.2s;
-        }
-        
-        .typing-dot:nth-child(3) {
-          animation-delay: 0.4s;
-        }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
         
         @keyframes typing {
           0%, 60%, 100% {
