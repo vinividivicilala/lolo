@@ -328,7 +328,8 @@ export default function ProfilePage() {
       fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
       paddingTop: '120px',
       paddingBottom: '80px',
-      position: 'relative'
+      position: 'relative',
+      overflowX: 'hidden'
     }}>
 
       {/* HEADER with Breadcrumb */}
@@ -1032,38 +1033,43 @@ export default function ProfilePage() {
           ))}
           
           {/* Trigger element untuk mendeteksi kapan menampilkan PROFILE text */}
-          <div ref={profileTriggerRef} style={{ height: '1px', marginTop: '2rem' }} />
+          <div ref={profileTriggerRef} style={{ height: '10px', marginTop: '2rem' }} />
           
-          {/* PROFILE TEXT sebagai bagian dari konten (footer) */}
+          {/* PROFILE TEXT dengan animasi dari bawah ke atas */}
           <AnimatePresence mode="wait">
             {showProfileText && (
               <motion.div
-                initial={{ opacity: 0, y: 50 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 50 }}
+                initial={{ y: "100%", opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: "100%", opacity: 0 }}
                 transition={{ 
-                  duration: 0.6,
-                  ease: "easeOut"
+                  type: "spring",
+                  damping: 30,
+                  stiffness: 300,
+                  duration: 0.6
                 }}
                 style={{
                   width: '100%',
-                  marginTop: '4rem',
+                  marginTop: '3rem',
                   marginBottom: '2rem',
                   padding: '2rem 0',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  borderTop: '1px solid rgba(255,255,255,0.2)'
+                  overflow: 'hidden',
+                  position: 'relative'
                 }}
               >
                 <div style={{
-                  fontSize: isMobile ? '80px' : '200px',
+                  fontSize: isMobile ? '120px' : '490px',
                   fontWeight: 'normal',
                   color: 'white',
                   fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
                   letterSpacing: '-0.02em',
                   lineHeight: 1,
-                  textAlign: 'center'
+                  textAlign: 'center',
+                  whiteSpace: 'nowrap',
+                  opacity: 1
                 }}>
                   PROFILE
                 </div>
