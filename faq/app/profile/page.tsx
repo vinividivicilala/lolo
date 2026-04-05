@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import Lenis from "@studio-freight/lenis";
 import { initializeApp, getApps } from "firebase/app";
 import { 
   getAuth, 
@@ -81,7 +80,6 @@ export default function ProfilePage() {
   const [authError, setAuthError] = useState("");
   const [authName, setAuthName] = useState("");
   const chatEndRef = useRef(null);
-  const profileSectionRef = useRef(null);
   
   const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
 
@@ -89,101 +87,6 @@ export default function ProfilePage() {
   const checkIsAdmin = (user) => {
     return user?.email === ADMIN_EMAIL;
   };
-
-  // Initialize Lenis smooth scroll and GSAP
-  useEffect(() => {
-    const lenis = new Lenis({
-      duration: 1.2,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      orientation: 'vertical',
-      gestureOrientation: 'vertical',
-      smoothWheel: true,
-      smoothTouch: false,
-      touchMultiplier: 2,
-    });
-
-    function raf(time) {
-      lenis.raf(time);
-      requestAnimationFrame(raf);
-    }
-
-    requestAnimationFrame(raf);
-
-    // GSAP ScrollTrigger with Lenis
-    ScrollTrigger.scrollerProxy(document.body, {
-      scrollTop(value) {
-        if (arguments.length) {
-          lenis.scrollTo(value);
-        }
-        return lenis.scroll;
-      },
-    });
-
-    lenis.on('scroll', ScrollTrigger.update);
-
-    // Hero text animation
-    gsap.fromTo('.hero-text',
-      { y: 100, opacity: 0 },
-      {
-        y: 0,
-        opacity: 1,
-        duration: 1,
-        stagger: 0.2,
-        scrollTrigger: {
-          trigger: '.hero-section',
-          start: 'top 80%',
-          end: 'bottom 20%',
-          toggleActions: 'play none none reverse'
-        }
-      }
-    );
-
-    // Profile section animation - seperti kartu donatur
-    gsap.fromTo('.profile-section',
-      { 
-        y: 50, 
-        opacity: 0,
-        scale: 0.95
-      },
-      {
-        y: 0,
-        opacity: 1,
-        scale: 1,
-        duration: 0.8,
-        ease: "power2.out",
-        scrollTrigger: {
-          trigger: '.profile-section',
-          start: 'top 85%',
-          end: 'bottom 20%',
-          toggleActions: 'play none none reverse'
-        }
-      }
-    );
-
-    // Table rows animation
-    gsap.utils.toArray('.table-row').forEach((row, i) => {
-      gsap.fromTo(row,
-        { x: -50, opacity: 0 },
-        {
-          x: 0,
-          opacity: 1,
-          duration: 0.6,
-          delay: i * 0.1,
-          scrollTrigger: {
-            trigger: row,
-            start: 'top 90%',
-            end: 'bottom 20%',
-            toggleActions: 'play none none reverse'
-          }
-        }
-      );
-    });
-
-    return () => {
-      lenis.destroy();
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
-    };
-  }, []);
 
   useEffect(() => {
     // Check mobile
@@ -409,8 +312,7 @@ export default function ProfilePage() {
       backgroundColor: 'black',
       fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
       paddingTop: '120px',
-      paddingBottom: '80px',
-      position: 'relative'
+      paddingBottom: '80px'
     }}>
 
       {/* HEADER with Breadcrumb */}
@@ -995,14 +897,11 @@ export default function ProfilePage() {
         )}
       </AnimatePresence>
 
-      {/* CONTENT - Teks PROFILE sebagai bagian dari konten utama seperti halaman donatur */}
-      <div className="hero-section" style={{
+      {/* CONTENT */}
+      <div style={{
         maxWidth: '1100px',
         margin: '0 auto',
-        padding: isMobile ? '0 1.5rem' : '0 3rem',
-        position: 'relative',
-        zIndex: 2,
-        backgroundColor: 'black'
+        padding: isMobile ? '0 1.5rem' : '0 3rem'
       }}>
         <motion.div 
           style={{ marginBottom: '4rem' }}
@@ -1010,7 +909,7 @@ export default function ProfilePage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <h1 className="hero-text" style={{
+          <h1 style={{
             color: 'white',
             fontSize: isMobile ? '2.5rem' : '80px',
             lineHeight: 1.1,
@@ -1021,7 +920,7 @@ export default function ProfilePage() {
             Tell Donate Record With All Your Heart
           </h1>
 
-          <h1 className="hero-text" style={{
+          <h1 style={{
             color: 'white',
             fontSize: isMobile ? '2.5rem' : '80px',
             lineHeight: 1.1,
@@ -1034,7 +933,6 @@ export default function ProfilePage() {
         </motion.div>
 
         <motion.p 
-          className="hero-text"
           style={{
             color: 'rgba(255,255,255,0.7)',
             fontSize: isMobile ? '1rem' : '24px',
@@ -1056,77 +954,11 @@ export default function ProfilePage() {
         }} />
 
         <div>
-          {/* PROFILE SECTION - seperti kartu donatur, menyatu dengan konten */}
-          <div className="profile-section" ref={profileSectionRef} style={{
-            marginBottom: '2rem',
-            opacity: 0,
-            transform: 'translateY(50px) scale(0.95)'
-          }}>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: isMobile ? '2rem 1.5rem' : '3rem 2rem',
-              background: 'linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)',
-              borderRadius: '20px',
-              border: '1px solid rgba(255,255,255,0.1)',
-              backdropFilter: 'blur(10px)'
-            }}>
-              <div>
-                <span style={{
-                  color: 'rgba(255,255,255,0.6)',
-                  fontSize: isMobile ? '0.9rem' : '1.1rem',
-                  fontWeight: '500',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.1em'
-                }}>
-                  featured
-                </span>
-                <h2 style={{
-                  color: 'white',
-                  fontSize: isMobile ? '2rem' : '4rem',
-                  fontWeight: 'bold',
-                  margin: '0.5rem 0 0 0',
-                  letterSpacing: '-0.02em'
-                }}>
-                  PROFILE
-                </h2>
-              </div>
-              
-              <motion.div
-                whileHover={{ x: 10 }}
-                style={{
-                  width: '50px',
-                  height: '50px',
-                  borderRadius: '50%',
-                  backgroundColor: 'rgba(255,255,255,0.1)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer'
-                }}
-              >
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="white"
-                  strokeWidth="2"
-                >
-                  <path d="M5 12h14M12 5l7 7-7 7" />
-                </svg>
-              </motion.div>
-            </div>
-          </div>
-
-          {/* TABLE ROWS */}
           {tableData.map((item, index) => (
             <motion.div
               key={index}
-              className="table-row"
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 + index * 0.05 }}
               style={{
                 display: 'flex',
