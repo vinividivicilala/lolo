@@ -81,7 +81,7 @@ export default function ProfilePage() {
   const [authError, setAuthError] = useState("");
   const [authName, setAuthName] = useState("");
   const chatEndRef = useRef(null);
-  const profileTextRef = useRef(null);
+  const profileSectionRef = useRef(null);
   
   const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
 
@@ -138,6 +138,28 @@ export default function ProfilePage() {
       }
     );
 
+    // Profile section animation - seperti kartu donatur
+    gsap.fromTo('.profile-section',
+      { 
+        y: 50, 
+        opacity: 0,
+        scale: 0.95
+      },
+      {
+        y: 0,
+        opacity: 1,
+        scale: 1,
+        duration: 0.8,
+        ease: "power2.out",
+        scrollTrigger: {
+          trigger: '.profile-section',
+          start: 'top 85%',
+          end: 'bottom 20%',
+          toggleActions: 'play none none reverse'
+        }
+      }
+    );
+
     // Table rows animation
     gsap.utils.toArray('.table-row').forEach((row, i) => {
       gsap.fromTo(row,
@@ -155,35 +177,6 @@ export default function ProfilePage() {
           }
         }
       );
-    });
-
-    // Profile text animation - muncul saat scroll ke bawah, menyatu dengan konten
-    ScrollTrigger.create({
-      trigger: document.body,
-      start: "top+=800 top",
-      end: "bottom bottom",
-      onUpdate: (self) => {
-        const progress = self.progress;
-        // Mulai efek saat progress 60%
-        if (progress > 0.6) {
-          const scaleProgress = (progress - 0.6) / 0.4;
-          const scale = 0.8 + (scaleProgress * 0.2);
-          const opacity = Math.min(scaleProgress * 2, 1);
-          
-          gsap.to(profileTextRef.current, {
-            scale: scale,
-            opacity: opacity,
-            duration: 0.1,
-            ease: "power2.out"
-          });
-        } else {
-          gsap.to(profileTextRef.current, {
-            scale: 0.8,
-            opacity: 0,
-            duration: 0.2
-          });
-        }
-      }
     });
 
     return () => {
@@ -1002,7 +995,7 @@ export default function ProfilePage() {
         )}
       </AnimatePresence>
 
-      {/* CONTENT - Teks PROFILE sebagai bagian dari konten utama */}
+      {/* CONTENT - Teks PROFILE sebagai bagian dari konten utama seperti halaman donatur */}
       <div className="hero-section" style={{
         maxWidth: '1100px',
         margin: '0 auto',
@@ -1063,61 +1056,69 @@ export default function ProfilePage() {
         }} />
 
         <div>
-          {/* PROFILE TEXT sebagai bagian dari konten utama */}
-          <motion.div
-            ref={profileTextRef}
-            className="profile-text"
-            initial={{ scale: 0.8, opacity: 0 }}
-            style={{
+          {/* PROFILE SECTION - seperti kartu donatur, menyatu dengan konten */}
+          <div className="profile-section" ref={profileSectionRef} style={{
+            marginBottom: '2rem',
+            opacity: 0,
+            transform: 'translateY(50px) scale(0.95)'
+          }}>
+            <div style={{
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              padding: isMobile ? '1.5rem 0' : '2rem 0',
-              borderBottom: '1px solid rgba(255,255,255,0.2)',
-              marginBottom: '1rem',
-              transformOrigin: 'center'
-            }}
-          >
-            <div style={{
-              minWidth: isMobile ? '160px' : '240px'
+              padding: isMobile ? '2rem 1.5rem' : '3rem 2rem',
+              background: 'linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)',
+              borderRadius: '20px',
+              border: '1px solid rgba(255,255,255,0.1)',
+              backdropFilter: 'blur(10px)'
             }}>
-              <span style={{
-                color: 'white',
-                fontSize: isMobile ? '1.1rem' : '1.4rem',
-                fontWeight: '500',
-                textTransform: 'uppercase'
-              }}>
-                profile
-              </span>
+              <div>
+                <span style={{
+                  color: 'rgba(255,255,255,0.6)',
+                  fontSize: isMobile ? '0.9rem' : '1.1rem',
+                  fontWeight: '500',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.1em'
+                }}>
+                  featured
+                </span>
+                <h2 style={{
+                  color: 'white',
+                  fontSize: isMobile ? '2rem' : '4rem',
+                  fontWeight: 'bold',
+                  margin: '0.5rem 0 0 0',
+                  letterSpacing: '-0.02em'
+                }}>
+                  PROFILE
+                </h2>
+              </div>
+              
+              <motion.div
+                whileHover={{ x: 10 }}
+                style={{
+                  width: '50px',
+                  height: '50px',
+                  borderRadius: '50%',
+                  backgroundColor: 'rgba(255,255,255,0.1)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer'
+                }}
+              >
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="white"
+                  strokeWidth="2"
+                >
+                  <path d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
+              </motion.div>
             </div>
-
-            <div style={{
-              flex: 1,
-              padding: '0 2rem'
-            }}>
-              <span style={{
-                color: 'white',
-                fontSize: isMobile ? '2rem' : '4rem',
-                fontWeight: 'bold',
-                letterSpacing: '-0.02em'
-              }}>
-                PROFILE
-              </span>
-            </div>
-
-            <svg
-              width={isMobile ? "28" : "34"}
-              height={isMobile ? "28" : "34"}
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="white"
-              strokeWidth="2.5"
-              style={{ flexShrink: 0 }}
-            >
-              <path d="M7 17L17 7" />
-              <path d="M7 7h10v10" />
-            </svg>
-          </motion.div>
+          </div>
 
           {/* TABLE ROWS */}
           {tableData.map((item, index) => (
