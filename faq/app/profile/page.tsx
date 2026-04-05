@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import Lenis from "@studio-freight/lenis";
 import { initializeApp, getApps } from "firebase/app";
 import { 
   getAuth, 
@@ -26,10 +25,8 @@ import {
   onSnapshot,
   serverTimestamp,
   doc,
-  getDoc,
   setDoc,
-  where,
-  getDocs
+  getDoc
 } from "firebase/firestore";
 
 // Register GSAP plugins
@@ -81,6 +78,7 @@ export default function ProfilePage() {
   const [authPassword, setAuthPassword] = useState("");
   const [isLoginMode, setIsLoginMode] = useState(true);
   const [authError, setAuthError] = useState("");
+  const [authName, setAuthName] = useState("");
   const chatEndRef = useRef(null);
   
   const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
@@ -122,12 +120,13 @@ export default function ProfilePage() {
         setCurrentUser(userData);
         setIsAdminMode(isAdmin);
         
-        // Save user to Firestore
-        await setDoc(doc(db, "users", user.uid), {
+        // Save user to Firestore in 'chat_users' collection
+        await setDoc(doc(db, "chat_users", user.uid), {
           name: userData.name,
           email: userData.email,
           isAdmin: isAdmin,
-          lastSeen: serverTimestamp()
+          lastSeen: serverTimestamp(),
+          createdAt: serverTimestamp()
         }, { merge: true });
       } else {
         // User is signed out
@@ -136,8 +135,8 @@ export default function ProfilePage() {
       }
     });
 
-    // Load messages from Firestore
-    const q = query(collection(db, "messages"), orderBy("timestamp", "asc"));
+    // Load messages from Firestore from 'chat_messages' collection
+    const q = query(collection(db, "chat_messages"), orderBy("timestamp", "asc"));
     const unsubscribeMessages = onSnapshot(q, (snapshot) => {
       const messagesData = [];
       snapshot.forEach((doc) => {
@@ -155,7 +154,7 @@ export default function ProfilePage() {
       
       if (messagesData.length === 0) {
         // Add welcome message if no messages
-        addDoc(collection(db, "messages"), {
+        addDoc(collection(db, "chat_messages"), {
           text: "Welcome to live chat! Please login to start chatting. Admin: faridardiansyah061@gmail.com",
           sender: 'system',
           userId: 'system',
@@ -192,13 +191,22 @@ export default function ProfilePage() {
         const userCredential = await signInWithEmailAndPassword(auth, authEmail, authPassword);
         console.log("User signed in:", userCredential.user.email);
       } else {
-        // Sign up
+        // Sign up with name
         const userCredential = await createUserWithEmailAndPassword(auth, authEmail, authPassword);
+        
+        // Update profile with name
+        if (authName) {
+          await userCredential.user.updateProfile({
+            displayName: authName
+          });
+        }
+        
         console.log("User created:", userCredential.user.email);
       }
       setShowAuthModal(false);
       setAuthEmail("");
       setAuthPassword("");
+      setAuthName("");
     } catch (error) {
       console.error("Auth error:", error);
       setAuthError(error.message);
@@ -234,7 +242,7 @@ export default function ProfilePage() {
     }
 
     try {
-      await addDoc(collection(db, "messages"), {
+      await addDoc(collection(db, "chat_messages"), {
         text: inputMessage,
         sender: currentUser.isAdmin ? 'admin' : 'user',
         userId: currentUser.uid,
@@ -359,7 +367,7 @@ export default function ProfilePage() {
                   />
                 )}
                 <span style={{ color: 'white', fontSize: '0.875rem' }}>
-                  👤 {currentUser.name}
+                  {currentUser.name}
                 </span>
                 <button
                   onClick={handleLogout}
@@ -563,6 +571,25 @@ export default function ProfilePage() {
                     </div>
                   )}
                   
+                  {!isLoginMode && (
+                    <input
+                      type="text"
+                      placeholder="Name"
+                      value={authName}
+                      onChange={(e) => setAuthName(e.target.value)}
+                      style={{
+                        width: '100%',
+                        padding: '0.75rem',
+                        marginBottom: '1rem',
+                        borderRadius: '4px',
+                        border: '1px solid rgba(255,255,255,0.2)',
+                        backgroundColor: '#1a1a1a',
+                        color: 'white',
+                        fontSize: '0.9rem'
+                      }}
+                    />
+                  )}
+                  
                   <input
                     type="email"
                     placeholder="Email"
@@ -651,6 +678,7 @@ export default function ProfilePage() {
                       onClick={() => {
                         setIsLoginMode(!isLoginMode);
                         setAuthError("");
+                        setAuthName("");
                       }}
                       style={{ color: 'white', cursor: 'pointer', textDecoration: 'underline' }}
                     >
@@ -835,7 +863,7 @@ export default function ProfilePage() {
                     marginTop: '0.5rem',
                     textAlign: 'center'
                   }}>
-                    💬 Admin: faridardiansyah061@gmail.com
+                    Admin: faridardiansyah061@gmail.com
                   </div>
                 )}
               </div>
