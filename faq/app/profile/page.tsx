@@ -81,7 +81,7 @@ export default function ProfilePage() {
   const [authName, setAuthName] = useState("");
   const [showProfileText, setShowProfileText] = useState(false);
   const chatEndRef = useRef(null);
-  const profileTriggerRef = useRef(null);
+  const profileRef = useRef(null);
   
   const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
 
@@ -104,13 +104,13 @@ export default function ProfilePage() {
         setShowScrollButton(false);
       }
       
-      // Check if profile trigger is visible
-      if (profileTriggerRef.current) {
-        const rect = profileTriggerRef.current.getBoundingClientRect();
+      // Check if profile element is visible
+      if (profileRef.current) {
+        const rect = profileRef.current.getBoundingClientRect();
         const windowHeight = window.innerHeight;
         
-        // Show PROFILE text when trigger enters viewport
-        if (rect.top <= windowHeight) {
+        // Show PROFILE text when element enters viewport
+        if (rect.top <= windowHeight - 100) {
           setShowProfileText(true);
         } else {
           setShowProfileText(false);
@@ -1032,50 +1032,55 @@ export default function ProfilePage() {
             </motion.div>
           ))}
           
-          {/* Trigger element untuk mendeteksi kapan menampilkan PROFILE text */}
-          <div ref={profileTriggerRef} style={{ height: '10px', marginTop: '2rem' }} />
-          
-          {/* PROFILE TEXT dengan animasi dari bawah ke atas */}
-          <AnimatePresence mode="wait">
-            {showProfileText && (
-              <motion.div
-                initial={{ y: "100%", opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                exit={{ y: "100%", opacity: 0 }}
-                transition={{ 
-                  type: "spring",
-                  damping: 30,
-                  stiffness: 300,
-                  duration: 0.6
-                }}
-                style={{
-                  width: '100%',
-                  marginTop: '3rem',
-                  marginBottom: '2rem',
-                  padding: '2rem 0',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  overflow: 'hidden',
-                  position: 'relative'
-                }}
-              >
-                <div style={{
-                  fontSize: isMobile ? '120px' : '490px',
-                  fontWeight: 'normal',
-                  color: 'white',
-                  fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-                  letterSpacing: '-0.02em',
-                  lineHeight: 1,
-                  textAlign: 'center',
-                  whiteSpace: 'nowrap',
-                  opacity: 1
-                }}>
-                  PROFILE
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {/* PROFILE TEXT SECTION - Full visibility with smooth animation */}
+          <div 
+            ref={profileRef}
+            style={{
+              marginTop: '100px',
+              marginBottom: '50px',
+              width: '100%',
+              overflow: 'visible',
+              position: 'relative'
+            }}
+          >
+            <AnimatePresence mode="wait">
+              {showProfileText && (
+                <motion.div
+                  initial={{ opacity: 0, y: 100 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 100 }}
+                  transition={{ 
+                    duration: 1.2,
+                    ease: [0.25, 0.1, 0.25, 1],
+                    type: "tween"
+                  }}
+                  style={{
+                    width: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '40px 20px'
+                  }}
+                >
+                  <div style={{
+                    fontSize: isMobile ? '80px' : '490px',
+                    fontWeight: 'normal',
+                    color: 'white',
+                    fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+                    letterSpacing: '-0.02em',
+                    lineHeight: 1,
+                    textAlign: 'center',
+                    whiteSpace: 'normal',
+                    wordBreak: 'break-word',
+                    opacity: 1,
+                    textShadow: 'none'
+                  }}>
+                    PROFILE
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
       </div>
 
