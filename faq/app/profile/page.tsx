@@ -81,7 +81,7 @@ export default function ProfilePage() {
   const [authError, setAuthError] = useState("");
   const [authName, setAuthName] = useState("");
   const chatEndRef = useRef(null);
-  const profileSectionRef = useRef(null);
+  const profileOverlayRef = useRef(null);
   
   const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
 
@@ -157,48 +157,34 @@ export default function ProfilePage() {
       );
     });
 
-    // Profile section animation - muncul saat scroll ke bawah, hilang saat scroll ke atas
-    gsap.fromTo('.profile-row',
-      { 
-        opacity: 0, 
-        y: 50,
-        display: 'none'
-      },
-      {
-        opacity: 1,
-        y: 0,
-        duration: 0.8,
-        ease: "power2.out",
-        scrollTrigger: {
-          trigger: document.body,
-          start: "top+=500 top",
-          end: "bottom bottom",
-          toggleActions: "play none none reverse",
-          onUpdate: (self) => {
-            const progress = self.progress;
-            if (progress > 0.6) {
-              gsap.to('.profile-row', {
-                opacity: 1,
-                y: 0,
-                display: 'flex',
-                duration: 0.5
-              });
-            } else {
-              gsap.to('.profile-row', {
-                opacity: 0,
-                y: 50,
-                duration: 0.5,
-                onComplete: () => {
-                  if (progress <= 0.6) {
-                    gsap.set('.profile-row', { display: 'none' });
-                  }
-                }
-              });
-            }
-          }
+    // Profile overlay animation - muncul dari bawah ke atas (style Awwwards)
+    ScrollTrigger.create({
+      trigger: document.body,
+      start: "top+=1200 top",
+      end: "bottom bottom",
+      onUpdate: (self) => {
+        const progress = self.progress;
+        // Mulai muncul di 70% scroll
+        if (progress > 0.7) {
+          const translateProgress = (progress - 0.7) / 0.3; // 0 to 1
+          const yOffset = 100 - (translateProgress * 100); // dari 100px ke 0px
+          const opacity = Math.min(translateProgress * 2, 1);
+          
+          gsap.to(profileOverlayRef.current, {
+            y: yOffset,
+            opacity: opacity,
+            duration: 0.1,
+            ease: "power2.out"
+          });
+        } else {
+          gsap.to(profileOverlayRef.current, {
+            y: 100,
+            opacity: 0,
+            duration: 0.2
+          });
         }
       }
-    );
+    });
 
     return () => {
       lenis.destroy();
@@ -533,6 +519,38 @@ export default function ProfilePage() {
               <span style={{ color: 'white', fontWeight: 'normal' }}>Profile</span>
             </motion.div>
           </div>
+        </div>
+      </div>
+
+      {/* PROFILE OVERLAY - Muncul dari bawah ke atas gaya Awwwards */}
+      <div
+        ref={profileOverlayRef}
+        style={{
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          zIndex: 50,
+          transform: 'translateY(100px)',
+          opacity: 0,
+          pointerEvents: 'none'
+        }}
+      >
+        <div style={{
+          backgroundColor: 'white',
+          padding: isMobile ? '2rem 1rem' : '4rem 2rem',
+          textAlign: 'center'
+        }}>
+          <h2 style={{
+            color: 'black',
+            fontSize: isMobile ? '3rem' : '8rem',
+            fontWeight: 'bold',
+            margin: 0,
+            letterSpacing: '-0.02em',
+            fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif'
+          }}>
+            PROFILE
+          </h2>
         </div>
       </div>
 
@@ -1077,56 +1095,6 @@ export default function ProfilePage() {
         }} />
 
         <div>
-          {/* PROFILE ROW - Muncul saat scroll ke bawah */}
-          <div className="profile-row" style={{
-            display: 'none',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: isMobile ? '1.5rem 0' : '2rem 0',
-            borderBottom: '1px solid rgba(255,255,255,0.2)',
-            opacity: 0,
-            transform: 'translateY(50px)'
-          }}>
-            <div style={{
-              minWidth: isMobile ? '160px' : '240px'
-            }}>
-              <span style={{
-                color: 'white',
-                fontSize: isMobile ? '1.1rem' : '1.4rem',
-                fontWeight: '500'
-              }}>
-                profile
-              </span>
-            </div>
-
-            <div style={{
-              flex: 1,
-              padding: '0 2rem'
-            }}>
-              <span style={{
-                color: 'white',
-                fontSize: isMobile ? '1.3rem' : '1.7rem',
-                fontWeight: 'normal'
-              }}>
-                PROFILE
-              </span>
-            </div>
-
-            <svg
-              width={isMobile ? "28" : "34"}
-              height={isMobile ? "28" : "34"}
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="white"
-              strokeWidth="2.5"
-              style={{ flexShrink: 0 }}
-            >
-              <path d="M7 17L17 7" />
-              <path d="M7 7h10v10" />
-            </svg>
-          </div>
-
-          {/* TABLE ROWS */}
           {tableData.map((item, index) => (
             <motion.div
               key={index}
