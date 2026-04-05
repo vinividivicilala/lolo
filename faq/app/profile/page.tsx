@@ -19,12 +19,10 @@ import {
   query, 
   orderBy, 
   onSnapshot,
-  where,
   doc,
-  getDoc,
   setDoc,
-  updateDoc,
-  getDocs
+  getDoc,
+  serverTimestamp
 } from "firebase/firestore";
 
 // Konfigurasi Firebase
@@ -40,19 +38,12 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-let app = null;
-let auth = null;
-let db = null;
-
-if (typeof window !== "undefined") {
-  if (!getApps().length) {
-    app = initializeApp(firebaseConfig);
-  } else {
-    app = getApps()[0];
-  }
-  auth = getAuth(app);
-  db = getFirestore(app);
+if (typeof window !== "undefined" && !getApps().length) {
+  initializeApp(firebaseConfig);
 }
+
+const auth = typeof window !== "undefined" ? getAuth() : null;
+const db = typeof window !== "undefined" ? getFirestore() : null;
 
 const googleProvider = new GoogleAuthProvider();
 const githubProvider = new GithubAuthProvider();
@@ -65,24 +56,24 @@ export default function ProfilePage() {
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState("");
   const [currentUser, setCurrentUser] = useState(null);
-  const [chatUsers, setChatUsers] = useState([]);
-  const [selectedChatUser, setSelectedChatUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [adminData, setAdminData] = useState(null);
+  const [users, setUsers] = useState([]);
+  const [selectedUserId, setSelectedUserId] = useState(null);
   const chatEndRef = useRef(null);
 
   const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
 
+  // Check mobile
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
     window.addEventListener('resize', checkMobile);
-
+    
     const handleScroll = () => {
       setShowScrollButton(window.scrollY > 300);
     };
     window.addEventListener('scroll', handleScroll);
-
+    
     return () => {
       window.removeEventListener('resize', checkMobile);
       window.removeEventListener('scroll', handleScroll);
@@ -105,28 +96,42 @@ export default function ProfilePage() {
           await setDoc(userRef, {
             uid: user.uid,
             email: user.email,
-            displayName: user.displayName || user.email?.split('@')[0] || 'Anonymous',
-            photoURL: user.photoURL || null,
+            name: user.displayName || user.email?.split('@')[0],
+            photo: user.photoURL || null,
             isAdmin: user.email === ADMIN_EMAIL,
-            createdAt: new Date().toISOString(),
-            lastSeen: new Date().toISOString()
+            createdAt: new Date().toISOString()
           });
         }
-
-        // If user is not admin, get admin data
-        if (user.email !== ADMIN_EMAIL) {
-          const usersQuery = query(collection(db, 'users'), where('isAdmin', '==', true));
-          const usersSnapshot = await getDocs(usersQuery);
-          if (!usersSnapshot.empty) {
-            const adminDoc = usersSnapshot.docs[0];
-            setAdminData({
-              id: adminDoc.id,
-              ...adminDoc.data()
+        
+        // Load all users for admin
+        if (user.email === ADMIN_EMAIL) {
+          const usersRef = collection(db, 'users');
+          const unsubscribeUsers = onSnapshot(usersRef, (snapshot) => {
+            const usersList = [];
+            snapshot.forEach((doc) => {
+              const data = doc.data();
+              if (data.uid !== user.uid) {
+                usersList.push({ id: doc.id, ...data });
+              }
             });
-          }
+            setUsers(usersList);
+            if (usersList.length > 0 && !selectedUserId) {
+              setSelectedUserId(usersList[0].uid);
+            }
+          });
+          return () => unsubscribeUsers();
         } else {
-          // If user is admin, load all users
-          loadAllUsers();
+          // For regular user, find admin
+          const usersRef = collection(db, 'users');
+          const unsubscribeUsers = onSnapshot(usersRef, (snapshot) => {
+            snapshot.forEach((doc) => {
+              const data = doc.data();
+              if (data.isAdmin === true) {
+                setSelectedUserId(data.uid);
+              }
+            });
+          });
+          return () => unsubscribeUsers();
         }
       }
       
@@ -136,78 +141,34 @@ export default function ProfilePage() {
     return () => unsubscribe();
   }, []);
 
-  const loadAllUsers = async () => {
-    if (!db) return;
+  // Load messages
+  useEffect(() => {
+    if (!db || !currentUser || !selectedUserId) return;
+
+    // Create chat ID
+    const chatId = [currentUser.uid, selectedUserId].sort().join('_');
     
-    const usersQuery = query(collection(db, 'users'));
-    const unsubscribe = onSnapshot(usersQuery, (snapshot) => {
-      const usersList = [];
+    const messagesRef = collection(db, 'chats', chatId, 'messages');
+    const q = query(messagesRef, orderBy('createdAt', 'asc'));
+    
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const messagesList = [];
       snapshot.forEach((doc) => {
-        const userData = doc.data();
-        if (userData.uid !== currentUser?.uid) {
-          usersList.push({
-            id: doc.id,
-            ...userData
-          });
-        }
+        messagesList.push({ id: doc.id, ...doc.data() });
       });
-      setChatUsers(usersList);
-      
-      if (usersList.length > 0 && !selectedChatUser) {
-        setSelectedChatUser(usersList[0]);
-      }
+      setMessages(messagesList);
+      setTimeout(() => {
+        chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
     });
     
     return () => unsubscribe();
-  };
-
-  // Load messages for selected chat
-  useEffect(() => {
-    if (!db || !currentUser) return;
-    
-    let chatId = null;
-    
-    // Determine chat ID
-    if (currentUser.email === ADMIN_EMAIL && selectedChatUser) {
-      // Admin chatting with regular user
-      chatId = [currentUser.uid, selectedChatUser.id].sort().join('_');
-    } else if (currentUser.email !== ADMIN_EMAIL && adminData) {
-      // Regular user chatting with admin
-      chatId = [currentUser.uid, adminData.id].sort().join('_');
-    }
-    
-    if (chatId) {
-      console.log("Loading messages for chat:", chatId);
-      
-      const messagesQuery = query(
-        collection(db, 'chats', chatId, 'messages'),
-        orderBy('createdAt', 'asc')
-      );
-      
-      const unsubscribe = onSnapshot(messagesQuery, (snapshot) => {
-        const messagesList = [];
-        snapshot.forEach((doc) => {
-          const data = doc.data();
-          messagesList.push({
-            id: doc.id,
-            ...data,
-          });
-        });
-        setMessages(messagesList);
-        setTimeout(() => {
-          chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-        }, 100);
-      });
-      
-      return () => unsubscribe();
-    }
-  }, [currentUser, selectedChatUser, adminData]);
+  }, [currentUser, selectedUserId]);
 
   const handleLogin = async (providerType) => {
     try {
       const provider = providerType === 'google' ? googleProvider : githubProvider;
-      const result = await signInWithPopup(auth, provider);
-      console.log("Login success:", result.user);
+      await signInWithPopup(auth, provider);
     } catch (error) {
       console.error("Login error:", error);
       alert("Login failed: " + error.message);
@@ -219,51 +180,29 @@ export default function ProfilePage() {
       await signOut(auth);
       setCurrentUser(null);
       setMessages([]);
-      setSelectedChatUser(null);
-      setAdminData(null);
-      setChatUsers([]);
+      setSelectedUserId(null);
     } catch (error) {
       console.error("Logout error:", error);
     }
   };
 
   const sendMessage = async () => {
-    if (!inputMessage.trim() || !currentUser || !db) {
-      console.log("Cannot send message:", { inputMessage, currentUser, db });
-      return;
-    }
+    if (!inputMessage.trim() || !currentUser || !selectedUserId) return;
     
-    let chatId = null;
-    
-    // Determine chat ID
-    if (currentUser.email === ADMIN_EMAIL && selectedChatUser) {
-      chatId = [currentUser.uid, selectedChatUser.id].sort().join('_');
-    } else if (currentUser.email !== ADMIN_EMAIL && adminData) {
-      chatId = [currentUser.uid, adminData.id].sort().join('_');
-    }
-    
-    if (!chatId) {
-      console.log("No chat ID found");
-      alert("Please wait, loading chat...");
-      return;
-    }
+    const chatId = [currentUser.uid, selectedUserId].sort().join('_');
     
     try {
-      console.log("Sending message to chat:", chatId);
-      
       await addDoc(collection(db, 'chats', chatId, 'messages'), {
         text: inputMessage,
         senderId: currentUser.uid,
         senderName: currentUser.displayName || currentUser.email?.split('@')[0],
         senderEmail: currentUser.email,
-        createdAt: new Date().toISOString(),
-        isAdmin: currentUser.email === ADMIN_EMAIL
+        createdAt: new Date().toISOString()
       });
-      
       setInputMessage("");
     } catch (error) {
       console.error("Error sending message:", error);
-      alert("Failed to send message: " + error.message);
+      alert("Failed to send message");
     }
   };
 
@@ -279,7 +218,7 @@ export default function ProfilePage() {
     try {
       const date = new Date(timestamp);
       return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    } catch (error) {
+    } catch {
       return "";
     }
   };
@@ -289,17 +228,9 @@ export default function ProfilePage() {
     try {
       const date = new Date(timestamp);
       const today = new Date();
-      const yesterday = new Date(today);
-      yesterday.setDate(yesterday.getDate() - 1);
-      
-      if (date.toDateString() === today.toDateString()) {
-        return "Today";
-      } else if (date.toDateString() === yesterday.toDateString()) {
-        return "Yesterday";
-      } else {
-        return date.toLocaleDateString();
-      }
-    } catch (error) {
+      if (date.toDateString() === today.toDateString()) return "Today";
+      return date.toLocaleDateString();
+    } catch {
       return "";
     }
   };
@@ -422,7 +353,7 @@ export default function ProfilePage() {
                     fontSize: '0.75rem'
                   }}
                 >
-                  Google Login
+                  Google
                 </button>
                 <button
                   onClick={() => handleLogin('github')}
@@ -436,7 +367,7 @@ export default function ProfilePage() {
                     fontSize: '0.75rem'
                   }}
                 >
-                  GitHub Login
+                  GitHub
                 </button>
               </div>
             )}
@@ -472,7 +403,7 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* CHAT BUTTON - Only show if user is logged in */}
+      {/* CHAT BUTTON */}
       {currentUser && (
         <motion.button
           onClick={() => setIsChatOpen(!isChatOpen)}
@@ -506,18 +437,18 @@ export default function ProfilePage() {
 
       {/* CHAT WIDGET */}
       <AnimatePresence>
-        {isChatOpen && currentUser && (
+        {isChatOpen && currentUser && selectedUserId && (
           <motion.div
-            initial={{ opacity: 0, x: -100, y: 0 }}
-            animate={{ opacity: 1, x: 0, y: 0 }}
-            exit={{ opacity: 0, x: -100, y: 0 }}
-            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            initial={{ opacity: 0, x: -100 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -100 }}
+            transition={{ type: "spring", damping: 25 }}
             style={{
               position: 'fixed',
               bottom: '6rem',
               left: '2rem',
-              width: isMobile ? 'calc(100% - 2rem)' : currentUser.email === ADMIN_EMAIL ? '800px' : '450px',
-              height: '600px',
+              width: isMobile ? 'calc(100% - 2rem)' : currentUser.email === ADMIN_EMAIL ? '700px' : '400px',
+              height: '500px',
               backgroundColor: '#1a1a1a',
               borderRadius: '12px',
               boxShadow: '0 10px 40px rgba(0,0,0,0.3)',
@@ -528,7 +459,7 @@ export default function ProfilePage() {
               border: '1px solid rgba(255,255,255,0.1)'
             }}
           >
-            {/* Chat Header */}
+            {/* Header */}
             <div style={{
               padding: '1rem',
               backgroundColor: '#2a2a2a',
@@ -537,27 +468,10 @@ export default function ProfilePage() {
               alignItems: 'center',
               justifyContent: 'space-between'
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                <div style={{
-                  width: '10px',
-                  height: '10px',
-                  borderRadius: '50%',
-                  backgroundColor: '#4ade80',
-                  animation: 'pulse 2s infinite'
-                }} />
+              <div>
                 <span style={{ color: 'white', fontWeight: '500' }}>
-                  {currentUser.email === ADMIN_EMAIL ? 'Admin Chat Panel' : 'Live Chat'}
+                  {currentUser.email === ADMIN_EMAIL ? 'Admin Chat' : 'Live Chat'}
                 </span>
-                {selectedChatUser && (
-                  <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.6)' }}>
-                    Chatting with: {selectedChatUser.displayName}
-                  </span>
-                )}
-                {!selectedChatUser && currentUser.email !== ADMIN_EMAIL && adminData && (
-                  <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.6)' }}>
-                    Chatting with: {adminData.displayName || 'Admin'}
-                  </span>
-                )}
               </div>
               <motion.button
                 onClick={() => setIsChatOpen(false)}
@@ -576,195 +490,130 @@ export default function ProfilePage() {
               </motion.button>
             </div>
 
-            {/* Chat Container */}
+            {/* User List for Admin */}
+            {currentUser.email === ADMIN_EMAIL && (
+              <div style={{
+                display: 'flex',
+                gap: '0.5rem',
+                padding: '0.5rem',
+                borderBottom: '1px solid rgba(255,255,255,0.1)',
+                overflowX: 'auto'
+              }}>
+                {users.map((user) => (
+                  <button
+                    key={user.id}
+                    onClick={() => setSelectedUserId(user.uid)}
+                    style={{
+                      padding: '0.5rem 1rem',
+                      borderRadius: '20px',
+                      border: 'none',
+                      backgroundColor: selectedUserId === user.uid ? '#fff' : 'rgba(255,255,255,0.1)',
+                      color: selectedUserId === user.uid ? '#000' : '#fff',
+                      cursor: 'pointer',
+                      fontSize: '0.875rem',
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
+                    {user.name}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Messages */}
             <div style={{
               flex: 1,
+              overflowY: 'auto',
+              padding: '1rem',
               display: 'flex',
-              flexDirection: currentUser.email === ADMIN_EMAIL ? 'row' : 'column'
+              flexDirection: 'column',
+              gap: '0.5rem'
             }}>
-              {/* Admin User List */}
-              {currentUser.email === ADMIN_EMAIL && (
+              {messages.length === 0 ? (
                 <div style={{
-                  width: '250px',
-                  borderRight: '1px solid rgba(255,255,255,0.1)',
-                  overflowY: 'auto',
-                  backgroundColor: '#151515'
+                  textAlign: 'center',
+                  color: 'rgba(255,255,255,0.5)',
+                  padding: '2rem'
                 }}>
-                  <div style={{ padding: '1rem', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                    <h4 style={{ color: 'white', margin: 0, fontSize: '0.875rem' }}>Users ({chatUsers.length})</h4>
-                  </div>
-                  {chatUsers.length === 0 ? (
-                    <div style={{ padding: '1rem', color: 'rgba(255,255,255,0.5)', textAlign: 'center' }}>
-                      No users yet
-                    </div>
-                  ) : (
-                    chatUsers.map((user) => (
-                      <motion.div
-                        key={user.id}
-                        onClick={() => setSelectedChatUser(user)}
-                        style={{
-                          padding: '1rem',
-                          cursor: 'pointer',
-                          backgroundColor: selectedChatUser?.id === user.id ? 'rgba(255,255,255,0.1)' : 'transparent',
-                          borderBottom: '1px solid rgba(255,255,255,0.05)'
-                        }}
-                        whileHover={{ backgroundColor: 'rgba(255,255,255,0.05)' }}
-                      >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                          {user.photoURL && (
-                            <img src={user.photoURL} alt="avatar" style={{
-                              width: '32px',
-                              height: '32px',
-                              borderRadius: '50%'
-                            }} />
-                          )}
-                          <div>
-                            <div style={{ color: 'white', fontSize: '0.875rem' }}>
-                              {user.displayName}
-                            </div>
-                            <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.75rem' }}>
-                              {user.email}
-                            </div>
-                          </div>
+                  Start chatting!
+                </div>
+              ) : (
+                messages.map((msg) => (
+                  <div
+                    key={msg.id}
+                    style={{
+                      display: 'flex',
+                      justifyContent: msg.senderId === currentUser.uid ? 'flex-end' : 'flex-start'
+                    }}
+                  >
+                    <div style={{
+                      maxWidth: '70%',
+                      padding: '0.5rem 0.75rem',
+                      borderRadius: '12px',
+                      backgroundColor: msg.senderId === currentUser.uid ? '#fff' : '#2a2a2a',
+                      color: msg.senderId === currentUser.uid ? '#000' : '#fff'
+                    }}>
+                      {msg.senderId !== currentUser.uid && (
+                        <div style={{ fontSize: '0.7rem', opacity: 0.7, marginBottom: '0.25rem' }}>
+                          {msg.senderName}
                         </div>
-                      </motion.div>
-                    ))
-                  )}
-                </div>
-              )}
-
-              {/* Messages Area */}
-              <div style={{
-                flex: 1,
-                display: 'flex',
-                flexDirection: 'column'
-              }}>
-                <div style={{
-                  flex: 1,
-                  overflowY: 'auto',
-                  padding: '1rem',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '0.75rem'
-                }}>
-                  {messages.length === 0 ? (
-                    <div style={{
-                      textAlign: 'center',
-                      color: 'rgba(255,255,255,0.5)',
-                      padding: '2rem'
-                    }}>
-                      No messages yet. Start the conversation!
+                      )}
+                      <div style={{ fontSize: '0.875rem' }}>{msg.text}</div>
+                      <div style={{
+                        fontSize: '0.6rem',
+                        opacity: 0.5,
+                        textAlign: 'right',
+                        marginTop: '0.25rem'
+                      }}>
+                        {formatTime(msg.createdAt)}
+                      </div>
                     </div>
-                  ) : (
-                    messages.map((msg, index) => {
-                      const showDate = index === 0 || formatDate(msg.createdAt) !== formatDate(messages[index - 1]?.createdAt);
-                      
-                      return (
-                        <React.Fragment key={msg.id}>
-                          {showDate && (
-                            <div style={{
-                              textAlign: 'center',
-                              margin: '0.5rem 0',
-                              fontSize: '0.7rem',
-                              color: 'rgba(255,255,255,0.4)'
-                            }}>
-                              {formatDate(msg.createdAt)}
-                            </div>
-                          )}
-                          <motion.div
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            style={{
-                              display: 'flex',
-                              justifyContent: msg.senderId === currentUser.uid ? 'flex-end' : 'flex-start'
-                            }}
-                          >
-                            <div style={{
-                              maxWidth: '70%',
-                              padding: '0.75rem 1rem',
-                              borderRadius: '12px',
-                              backgroundColor: msg.senderId === currentUser.uid ? '#fff' : '#2a2a2a',
-                              color: msg.senderId === currentUser.uid ? '#000' : '#fff'
-                            }}>
-                              {msg.senderId !== currentUser.uid && (
-                                <div style={{ fontSize: '0.7rem', marginBottom: '0.25rem', opacity: 0.7 }}>
-                                  {msg.senderName}
-                                </div>
-                              )}
-                              <div style={{ fontSize: '0.9rem', wordWrap: 'break-word' }}>
-                                {msg.text}
-                              </div>
-                              <div style={{
-                                fontSize: '0.65rem',
-                                marginTop: '0.25rem',
-                                opacity: 0.5,
-                                textAlign: 'right'
-                              }}>
-                                {formatTime(msg.createdAt)}
-                              </div>
-                            </div>
-                          </motion.div>
-                        </React.Fragment>
-                      );
-                    })
-                  )}
-                  <div ref={chatEndRef} />
-                </div>
-
-                {/* Chat Input */}
-                <div style={{
-                  padding: '1rem',
-                  borderTop: '1px solid rgba(255,255,255,0.1)',
-                  backgroundColor: '#1a1a1a'
-                }}>
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <textarea
-                      value={inputMessage}
-                      onChange={(e) => setInputMessage(e.target.value)}
-                      onKeyPress={handleKeyPress}
-                      placeholder={`Type your message as ${currentUser.displayName || currentUser.email?.split('@')[0]}...`}
-                      style={{
-                        flex: 1,
-                        padding: '0.75rem',
-                        borderRadius: '8px',
-                        border: '1px solid rgba(255,255,255,0.2)',
-                        backgroundColor: '#2a2a2a',
-                        color: 'white',
-                        fontSize: '0.9rem',
-                        resize: 'none',
-                        fontFamily: 'inherit',
-                        outline: 'none'
-                      }}
-                      rows="2"
-                    />
-                    <motion.button
-                      onClick={sendMessage}
-                      style={{
-                        padding: '0 1rem',
-                        borderRadius: '8px',
-                        border: 'none',
-                        backgroundColor: '#fff',
-                        color: '#000',
-                        cursor: 'pointer',
-                        fontWeight: '500'
-                      }}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      Send
-                    </motion.button>
                   </div>
-                  {currentUser.email !== ADMIN_EMAIL && (
-                    <div style={{
-                      fontSize: '0.7rem',
-                      color: 'rgba(255,255,255,0.5)',
-                      marginTop: '0.5rem',
-                      textAlign: 'center'
-                    }}>
-                      💬 Chat with admin: faridardiansyah061@gmail.com
-                    </div>
-                  )}
-                </div>
+                ))
+              )}
+              <div ref={chatEndRef} />
+            </div>
+
+            {/* Input */}
+            <div style={{
+              padding: '1rem',
+              borderTop: '1px solid rgba(255,255,255,0.1)',
+              backgroundColor: '#1a1a1a'
+            }}>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <textarea
+                  value={inputMessage}
+                  onChange={(e) => setInputMessage(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  placeholder="Type a message..."
+                  style={{
+                    flex: 1,
+                    padding: '0.5rem',
+                    borderRadius: '8px',
+                    border: '1px solid rgba(255,255,255,0.2)',
+                    backgroundColor: '#2a2a2a',
+                    color: 'white',
+                    fontSize: '0.875rem',
+                    resize: 'none',
+                    fontFamily: 'inherit',
+                    outline: 'none'
+                  }}
+                  rows="2"
+                />
+                <button
+                  onClick={sendMessage}
+                  style={{
+                    padding: '0 1rem',
+                    borderRadius: '8px',
+                    border: 'none',
+                    backgroundColor: '#fff',
+                    color: '#000',
+                    cursor: 'pointer',
+                    fontWeight: '500'
+                  }}
+                >
+                  Send
+                </button>
               </div>
             </div>
           </motion.div>
