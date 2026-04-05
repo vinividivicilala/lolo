@@ -80,9 +80,9 @@ export default function ProfilePage() {
   const [isLoginMode, setIsLoginMode] = useState(true);
   const [authError, setAuthError] = useState("");
   const [authName, setAuthName] = useState("");
-  const [showProfileOverlay, setShowProfileOverlay] = useState(false);
+  const [showProfileText, setShowProfileText] = useState(false);
   const chatEndRef = useRef(null);
-  const overlayRef = useRef(null);
+  const profileTextRef = useRef(null);
   
   const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
 
@@ -122,71 +122,45 @@ export default function ProfilePage() {
 
     lenis.on('scroll', ScrollTrigger.update);
 
-    // Get the maximum scroll height
-    const getMaxScroll = () => {
-      return document.body.scrollHeight - window.innerHeight;
-    };
-
-    // Create scroll trigger for profile overlay
+    // Create scroll trigger for PROFILE text - muncul saat scroll ke bawah
     ScrollTrigger.create({
       trigger: document.body,
-      start: "80% bottom",
+      start: "top+=100 top",
       end: "bottom bottom",
-      onEnter: () => {
-        // Show overlay when entering the last 20% of the page
-        setShowProfileOverlay(true);
-        gsap.fromTo(overlayRef.current,
-          { opacity: 0, y: 30, scale: 0.9 },
-          { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: "back.out(0.5)" }
-        );
-      },
-      onLeaveBack: () => {
-        // Hide overlay when scrolling back up
-        gsap.to(overlayRef.current, {
-          opacity: 0,
-          y: 30,
-          scale: 0.9,
-          duration: 0.3,
-          ease: "power2.in",
-          onComplete: () => setShowProfileOverlay(false)
-        });
-      },
-      onLeave: () => {
-        // Keep overlay visible at the very bottom
-        if (window.scrollY + window.innerHeight >= document.body.scrollHeight - 10) {
-          // At the very bottom, keep it visible
+      onUpdate: (self) => {
+        const progress = self.progress;
+        // Munculkan teks ketika scroll progress mencapai 70%
+        if (progress > 0.7 && !showProfileText) {
+          setShowProfileText(true);
+          // Animasi teks muncul dari bawah
+          gsap.fromTo(profileTextRef.current,
+            { 
+              opacity: 0, 
+              y: 100,
+              scale: 0.8
+            },
+            { 
+              opacity: 1, 
+              y: 0,
+              scale: 1,
+              duration: 0.8,
+              ease: "power2.out"
+            }
+          );
+        } 
+        // Sembunyikan teks ketika scroll ke atas
+        else if (progress <= 0.7 && showProfileText) {
+          gsap.to(profileTextRef.current, {
+            opacity: 0,
+            y: -100,
+            scale: 0.8,
+            duration: 0.5,
+            ease: "power2.in",
+            onComplete: () => setShowProfileText(false)
+          });
         }
       }
     });
-
-    // Alternative: Use scroll event listener for more precise control
-    const handleScrollEvent = () => {
-      const scrollPosition = window.scrollY + window.innerHeight;
-      const maxScroll = document.body.scrollHeight;
-      const scrollPercentage = (scrollPosition / maxScroll) * 100;
-      
-      // Show overlay when scrolled to 85% or more
-      if (scrollPercentage >= 85 && !showProfileOverlay) {
-        setShowProfileOverlay(true);
-        gsap.fromTo(overlayRef.current,
-          { opacity: 0, y: 30, scale: 0.9 },
-          { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: "back.out(0.5)" }
-        );
-      } 
-      // Hide overlay when scrolling back up below 80%
-      else if (scrollPercentage < 80 && showProfileOverlay) {
-        gsap.to(overlayRef.current, {
-          opacity: 0,
-          y: 30,
-          scale: 0.9,
-          duration: 0.3,
-          ease: "power2.in",
-          onComplete: () => setShowProfileOverlay(false)
-        });
-      }
-    };
-
-    window.addEventListener('scroll', handleScrollEvent);
 
     // Hero text animation
     gsap.fromTo('.hero-text',
@@ -225,11 +199,10 @@ export default function ProfilePage() {
     });
 
     return () => {
-      window.removeEventListener('scroll', handleScrollEvent);
       lenis.destroy();
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
-  }, [showProfileOverlay]);
+  }, [showProfileText]);
 
   useEffect(() => {
     // Check mobile
@@ -561,44 +534,30 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* PROFILE OVERLAY that appears when scrolling near the bottom */}
-      <AnimatePresence mode="wait">
-        {showProfileOverlay && (
-          <motion.div
-            ref={overlayRef}
-            initial={{ opacity: 0, y: 30, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 30, scale: 0.9 }}
-            transition={{ duration: 0.5, ease: "back.out(0.5)" }}
-            style={{
-              position: 'fixed',
-              bottom: '6rem',
-              right: '2rem',
-              zIndex: 150,
-              pointerEvents: 'none'
-            }}
-          >
-            <div style={{
-              backgroundColor: 'rgba(255,255,255,0.95)',
-              backdropFilter: 'blur(10px)',
-              padding: '0.75rem 1.5rem',
-              borderRadius: '40px',
-              boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-              border: '1px solid rgba(0,0,0,0.05)'
-            }}>
-              <span style={{
-                color: 'black',
-                fontSize: isMobile ? '0.9rem' : '1rem',
-                fontWeight: '500',
-                letterSpacing: '0.1em',
-                textTransform: 'uppercase'
-              }}>
-                PROFILE
-              </span>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* BIG PROFILE TEXT that appears when scrolling */}
+      <div
+        ref={profileTextRef}
+        style={{
+          position: 'fixed',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          zIndex: 5,
+          pointerEvents: 'none',
+          opacity: 0,
+          whiteSpace: 'nowrap'
+        }}
+      >
+        <span style={{
+          color: 'rgba(255,255,255,0.15)',
+          fontSize: isMobile ? '120px' : '490px',
+          fontWeight: 'bold',
+          letterSpacing: '0.05em',
+          fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif'
+        }}>
+          PROFILE
+        </span>
+      </div>
 
       {/* CHAT BUTTON */}
       <motion.button
@@ -1084,7 +1043,10 @@ export default function ProfilePage() {
       <div className="hero-section" style={{
         maxWidth: '1100px',
         margin: '0 auto',
-        padding: isMobile ? '0 1.5rem' : '0 3rem'
+        padding: isMobile ? '0 1.5rem' : '0 3rem',
+        position: 'relative',
+        zIndex: 2,
+        backgroundColor: 'black'
       }}>
         <motion.div 
           style={{ marginBottom: '4rem' }}
