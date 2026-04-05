@@ -79,9 +79,9 @@ export default function ProfilePage() {
   const [isLoginMode, setIsLoginMode] = useState(true);
   const [authError, setAuthError] = useState("");
   const [authName, setAuthName] = useState("");
-  const [showProfileFooter, setShowProfileFooter] = useState(false);
+  const [showProfileText, setShowProfileText] = useState(false);
   const chatEndRef = useRef(null);
-  const tableEndRef = useRef(null);
+  const profileTriggerRef = useRef(null);
   
   const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
 
@@ -104,16 +104,16 @@ export default function ProfilePage() {
         setShowScrollButton(false);
       }
       
-      // Check if table end is visible
-      if (tableEndRef.current) {
-        const rect = tableEndRef.current.getBoundingClientRect();
+      // Check if profile trigger is visible
+      if (profileTriggerRef.current) {
+        const rect = profileTriggerRef.current.getBoundingClientRect();
         const windowHeight = window.innerHeight;
         
-        // Show footer when table end enters viewport from bottom
+        // Show PROFILE text when trigger enters viewport
         if (rect.top <= windowHeight) {
-          setShowProfileFooter(true);
+          setShowProfileText(true);
         } else {
-          setShowProfileFooter(false);
+          setShowProfileText(false);
         }
       }
     };
@@ -1031,57 +1031,47 @@ export default function ProfilePage() {
             </motion.div>
           ))}
           
-          {/* Reference element untuk mendeteksi akhir tabel */}
-          <div ref={tableEndRef} style={{ height: '1px' }} />
+          {/* Trigger element untuk mendeteksi kapan menampilkan PROFILE text */}
+          <div ref={profileTriggerRef} style={{ height: '1px', marginTop: '2rem' }} />
+          
+          {/* PROFILE TEXT sebagai bagian dari konten (footer) */}
+          <AnimatePresence mode="wait">
+            {showProfileText && (
+              <motion.div
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 50 }}
+                transition={{ 
+                  duration: 0.6,
+                  ease: "easeOut"
+                }}
+                style={{
+                  width: '100%',
+                  marginTop: '4rem',
+                  marginBottom: '2rem',
+                  padding: '2rem 0',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderTop: '1px solid rgba(255,255,255,0.2)'
+                }}
+              >
+                <div style={{
+                  fontSize: isMobile ? '80px' : '200px',
+                  fontWeight: 'normal',
+                  color: 'white',
+                  fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+                  letterSpacing: '-0.02em',
+                  lineHeight: 1,
+                  textAlign: 'center'
+                }}>
+                  PROFILE
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
-
-      {/* PROFILE FOOTER - Muncul dari bawah ke atas */}
-      <AnimatePresence>
-        {showProfileFooter && (
-          <motion.div
-            initial={{ y: "100%", opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: "100%", opacity: 0 }}
-            transition={{ 
-              type: "spring", 
-              damping: 30, 
-              stiffness: 300,
-              duration: 0.5
-            }}
-            style={{
-              position: 'fixed',
-              bottom: 0,
-              left: 0,
-              right: 0,
-              width: '100%',
-              backgroundColor: 'black',
-              zIndex: 50,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: '2rem 0',
-              borderTop: '1px solid rgba(255,255,255,0.1)'
-            }}
-          >
-            <div style={{
-              fontSize: isMobile ? '120px' : '490px',
-              fontWeight: 'normal',
-              color: 'white',
-              fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-              letterSpacing: '-0.02em',
-              lineHeight: 1,
-              textAlign: 'center',
-              whiteSpace: 'nowrap',
-              overflowX: 'auto',
-              maxWidth: '100%',
-              padding: '0 1rem'
-            }}>
-              PROFILE
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Scroll to Top Button */}
       <motion.button
