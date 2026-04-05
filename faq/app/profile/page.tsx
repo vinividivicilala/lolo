@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import Lenis from "@studio-freight/lenis";
 import { initializeApp, getApps } from "firebase/app";
 import { 
   getAuth, 
@@ -79,7 +80,10 @@ export default function ProfilePage() {
   const [isLoginMode, setIsLoginMode] = useState(true);
   const [authError, setAuthError] = useState("");
   const [authName, setAuthName] = useState("");
+  const [showProfileOverlay, setShowProfileOverlay] = useState(false);
   const chatEndRef = useRef(null);
+  const heroRef = useRef(null);
+  const overlayRef = useRef(null);
   
   const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
 
@@ -87,6 +91,108 @@ export default function ProfilePage() {
   const checkIsAdmin = (user) => {
     return user?.email === ADMIN_EMAIL;
   };
+
+  // Initialize Lenis smooth scroll
+  useEffect(() => {
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      orientation: 'vertical',
+      gestureOrientation: 'vertical',
+      smoothWheel: true,
+      smoothTouch: false,
+      touchMultiplier: 2,
+    });
+
+    function raf(time) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+
+    requestAnimationFrame(raf);
+
+    // GSAP ScrollTrigger with Lenis
+    ScrollTrigger.scrollerProxy(document.body, {
+      scrollTop(value) {
+        if (arguments.length) {
+          lenis.scrollTo(value);
+        }
+        return lenis.scroll;
+      },
+    });
+
+    lenis.on('scroll', ScrollTrigger.update);
+
+    // GSAP animations
+    const ctx = gsap.context(() => {
+      // Hero text animation
+      gsap.fromTo('.hero-text',
+        { y: 100, opacity: 0 },
+        {
+          y: 0,
+          opacity: 1,
+          duration: 1,
+          stagger: 0.2,
+          scrollTrigger: {
+            trigger: '.hero-section',
+            start: 'top 80%',
+            end: 'bottom 20%',
+            toggleActions: 'play none none reverse'
+          }
+        }
+      );
+
+      // Profile overlay animation - appears when scrolling down
+      ScrollTrigger.create({
+        trigger: document.body,
+        start: 'top top',
+        end: 'bottom bottom',
+        onUpdate: (self) => {
+          const progress = self.progress;
+          if (progress > 0.7 && !showProfileOverlay) {
+            setShowProfileOverlay(true);
+            gsap.fromTo(overlayRef.current,
+              { opacity: 0, y: 50 },
+              { opacity: 1, y: 0, duration: 0.6, ease: 'power2.out' }
+            );
+          } else if (progress <= 0.7 && showProfileOverlay) {
+            gsap.to(overlayRef.current, {
+              opacity: 0,
+              y: 50,
+              duration: 0.4,
+              ease: 'power2.in',
+              onComplete: () => setShowProfileOverlay(false)
+            });
+          }
+        }
+      });
+
+      // Table rows animation
+      gsap.utils.toArray('.table-row').forEach((row, i) => {
+        gsap.fromTo(row,
+          { x: -50, opacity: 0 },
+          {
+            x: 0,
+            opacity: 1,
+            duration: 0.6,
+            delay: i * 0.1,
+            scrollTrigger: {
+              trigger: row,
+              start: 'top 90%',
+              end: 'bottom 20%',
+              toggleActions: 'play none none reverse'
+            }
+          }
+        );
+      });
+    });
+
+    return () => {
+      ctx.revert();
+      lenis.destroy();
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+    };
+  }, [showProfileOverlay]);
 
   useEffect(() => {
     // Check mobile
@@ -312,7 +418,8 @@ export default function ProfilePage() {
       backgroundColor: 'black',
       fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
       paddingTop: '120px',
-      paddingBottom: '80px'
+      paddingBottom: '80px',
+      position: 'relative'
     }}>
 
       {/* HEADER with Breadcrumb */}
@@ -416,6 +523,44 @@ export default function ProfilePage() {
           </div>
         </div>
       </div>
+
+      {/* PROFILE OVERLAY that appears when scrolling down */}
+      <AnimatePresence>
+        {showProfileOverlay && (
+          <motion.div
+            ref={overlayRef}
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 50 }}
+            transition={{ duration: 0.6, ease: "power2.out" }}
+            style={{
+              position: 'fixed',
+              bottom: '2rem',
+              right: '2rem',
+              zIndex: 150,
+              pointerEvents: 'none'
+            }}
+          >
+            <div style={{
+              backgroundColor: 'rgba(255,255,255,0.95)',
+              backdropFilter: 'blur(10px)',
+              padding: '0.75rem 1.5rem',
+              borderRadius: '40px',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+              border: '1px solid rgba(0,0,0,0.05)'
+            }}>
+              <span style={{
+                color: 'black',
+                fontSize: isMobile ? '0.9rem' : '1rem',
+                fontWeight: '500',
+                letterSpacing: '0.05em'
+              }}>
+                PROFILE
+              </span>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* CHAT BUTTON */}
       <motion.button
@@ -898,7 +1043,7 @@ export default function ProfilePage() {
       </AnimatePresence>
 
       {/* CONTENT */}
-      <div style={{
+      <div className="hero-section" style={{
         maxWidth: '1100px',
         margin: '0 auto',
         padding: isMobile ? '0 1.5rem' : '0 3rem'
@@ -909,7 +1054,7 @@ export default function ProfilePage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <h1 style={{
+          <h1 className="hero-text" style={{
             color: 'white',
             fontSize: isMobile ? '2.5rem' : '80px',
             lineHeight: 1.1,
@@ -920,7 +1065,7 @@ export default function ProfilePage() {
             Tell Donate Record With All Your Heart
           </h1>
 
-          <h1 style={{
+          <h1 className="hero-text" style={{
             color: 'white',
             fontSize: isMobile ? '2.5rem' : '80px',
             lineHeight: 1.1,
@@ -933,6 +1078,7 @@ export default function ProfilePage() {
         </motion.div>
 
         <motion.p 
+          className="hero-text"
           style={{
             color: 'rgba(255,255,255,0.7)',
             fontSize: isMobile ? '1rem' : '24px',
@@ -957,8 +1103,9 @@ export default function ProfilePage() {
           {tableData.map((item, index) => (
             <motion.div
               key={index}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
+              className="table-row"
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.3 + index * 0.05 }}
               style={{
                 display: 'flex',
