@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
-import Lenis from '@studio-freight/lenis';
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -14,7 +13,6 @@ export default function ProfilePage() {
   const [inputMessage, setInputMessage] = useState("");
   const [isAdminTyping, setIsAdminTyping] = useState(false);
   const chatEndRef = useRef(null);
-  const lenisRef = useRef(null);
   
   // Admin email yang berhak menjawab
   const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
@@ -25,34 +23,33 @@ export default function ProfilePage() {
     checkMobile();
     window.addEventListener('resize', checkMobile);
     
-    // Initialize Lenis smooth scroll
-    const lenis = new Lenis({
-      duration: 1.2,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      orientation: 'vertical',
-      gestureOrientation: 'vertical',
-      smoothWheel: true,
-      smoothTouch: false,
-      touchMultiplier: 2,
-    });
+    // Custom smooth scroll without Lenis
+    const handleWheel = (e) => {
+      if (window.innerWidth > 768) {
+        e.preventDefault();
+        const delta = e.deltaY;
+        const scrollAmount = delta * 0.8;
+        window.scrollBy({
+          top: scrollAmount,
+          behavior: 'smooth'
+        });
+      }
+    };
 
-    lenisRef.current = lenis;
-
-    function raf(time) {
-      lenis.raf(time);
-      requestAnimationFrame(raf);
-    }
-
-    requestAnimationFrame(raf);
-
-    // Show scroll to top button after scrolling
-    lenis.on('scroll', (e) => {
-      if (e.animatedScroll > 300) {
+    // Show scroll to top button
+    const handleScroll = () => {
+      if (window.scrollY > 300) {
         setShowScrollButton(true);
       } else {
         setShowScrollButton(false);
       }
-    });
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    // Only add wheel listener on desktop
+    if (window.innerWidth > 768) {
+      window.addEventListener('wheel', handleWheel, { passive: false });
+    }
 
     // Load chat history from localStorage
     const savedMessages = localStorage.getItem('chatMessages');
@@ -72,7 +69,10 @@ export default function ProfilePage() {
 
     return () => {
       window.removeEventListener('resize', checkMobile);
-      lenis.destroy();
+      window.removeEventListener('scroll', handleScroll);
+      if (window.innerWidth > 768) {
+        window.removeEventListener('wheel', handleWheel);
+      }
     };
   }, []);
 
@@ -86,6 +86,13 @@ export default function ProfilePage() {
 
   const scrollToBottom = () => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
   };
 
   const sendMessage = async () => {
@@ -107,23 +114,24 @@ export default function ProfilePage() {
     // Check if message contains email
     const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/;
     const hasEmail = emailRegex.test(inputMessage);
+    const hasTargetEmail = inputMessage.toLowerCase().includes('faridardiansyah061@gmail.com');
     
     // Simulate admin response after 1-2 seconds
     setTimeout(() => {
       let adminResponse = "";
       
-      if (hasEmail && inputMessage.toLowerCase().includes('faridardiansyah')) {
-        adminResponse = "Thank you for reaching out! I've received your email. I'll respond within 24 hours. Is there anything specific you'd like to discuss about the profile or projects?";
+      if (hasTargetEmail) {
+        adminResponse = "✅ Thank you! I've received your message at faridardiansyah061@gmail.com. I'll respond within 24 hours. Is there anything specific you'd like to discuss about the profile or projects?";
       } else if (hasEmail) {
-        adminResponse = "Thanks for sharing your email! Please note that priority responses are given to faridardiansyah061@gmail.com. Feel free to ask me anything about the portfolio!";
+        adminResponse = "📧 Thanks for sharing your email! Please note that priority responses are given to faridardiansyah061@gmail.com. Feel free to ask me anything about my portfolio!";
       } else if (inputMessage.toLowerCase().includes('hello') || inputMessage.toLowerCase().includes('hi')) {
-        adminResponse = "Hello there! How can I help you today? Feel free to ask about my projects, experience, or leave your email for a detailed response!";
+        adminResponse = "👋 Hello there! How can I help you today? Feel free to ask about my projects, experience, or leave your email for a detailed response!";
       } else if (inputMessage.toLowerCase().includes('project')) {
-        adminResponse = "Great question! You can check out my projects in the table above. Each one represents a unique collaboration. Would you like more details about any specific project?";
+        adminResponse = "🎨 Great question! You can check out my projects in the table above. Each one represents a unique collaboration. Would you like more details about any specific project?";
       } else if (inputMessage.toLowerCase().includes('interview')) {
-        adminResponse = "I'd love to discuss interview opportunities! Please leave your email (preferably faridardiansyah061@gmail.com) and I'll get back to you promptly!";
+        adminResponse = "💼 I'd love to discuss interview opportunities! Please leave your email (faridardiansyah061@gmail.com) and I'll get back to you promptly!";
       } else {
-        adminResponse = "Thanks for your message! For a quicker response, please use faridardiansyah061@gmail.com. Meanwhile, feel free to explore my portfolio above!";
+        adminResponse = "💬 Thanks for your message! For a quicker response, please use faridardiansyah061@gmail.com. Meanwhile, feel free to explore my portfolio above!";
       }
       
       const adminMessage = {
@@ -149,6 +157,19 @@ export default function ProfilePage() {
     const date = new Date(timestamp);
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
+
+  const tableData = [
+    { year: "interview 2023", title: "Top Interactive Agencies Interview" },
+    { year: "interview 2022", title: "Lovers Magazine Interview" },
+    { year: "publication 2020", title: "Centogene Solutions" },
+    { year: "talk 2020", title: "Creative collaboration at WeTransfer" },
+    { year: "publication 2020", title: "Madeleine Dalla Site of the Month Insight" },
+    { year: "talk 2020", title: "Rendering Illusions at Awwwards" },
+    { year: "publication 2019", title: "Real-time Multiside Refraction in Three Steps" },
+    { year: "publication 2019", title: "Making a connected flip-dot installation" },
+    { year: "publication 2019", title: "Bandito Immersive Experience" },
+    { year: "publication 2018", title: "Resn's Little Help AR" },
+  ];
 
   return (
     <div style={{
@@ -644,16 +665,3 @@ export default function ProfilePage() {
     </div>
   );
 }
-
-const tableData = [
-  { year: "interview 2023", title: "Top Interactive Agencies Interview" },
-  { year: "interview 2022", title: "Lovers Magazine Interview" },
-  { year: "publication 2020", title: "Centogene Solutions" },
-  { year: "talk 2020", title: "Creative collaboration at WeTransfer" },
-  { year: "publication 2020", title: "Madeleine Dalla Site of the Month Insight" },
-  { year: "talk 2020", title: "Rendering Illusions at Awwwards" },
-  { year: "publication 2019", title: "Real-time Multiside Refraction in Three Steps" },
-  { year: "publication 2019", title: "Making a connected flip-dot installation" },
-  { year: "publication 2019", title: "Bandito Immersive Experience" },
-  { year: "publication 2018", title: "Resn’s Little Help AR" },
-];
