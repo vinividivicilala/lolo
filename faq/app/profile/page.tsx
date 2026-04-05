@@ -19,10 +19,13 @@ import {
   query, 
   orderBy, 
   onSnapshot,
+  where,
   doc,
-  setDoc,
   getDoc,
-  serverTimestamp
+  setDoc,
+  updateDoc,
+  getDocs,
+  limit
 } from "firebase/firestore";
 
 // Konfigurasi Firebase
@@ -56,24 +59,24 @@ export default function ProfilePage() {
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState("");
   const [currentUser, setCurrentUser] = useState(null);
+  const [chatUsers, setChatUsers] = useState([]);
+  const [selectedChatUser, setSelectedChatUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [users, setUsers] = useState([]);
-  const [selectedUserId, setSelectedUserId] = useState(null);
+  const [chatId, setChatId] = useState(null);
   const chatEndRef = useRef(null);
 
   const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
 
-  // Check mobile
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
     window.addEventListener('resize', checkMobile);
-    
+
     const handleScroll = () => {
       setShowScrollButton(window.scrollY > 300);
     };
     window.addEventListener('scroll', handleScroll);
-    
+
     return () => {
       window.removeEventListener('resize', checkMobile);
       window.removeEventListener('scroll', handleScroll);
@@ -96,43 +99,16 @@ export default function ProfilePage() {
           await setDoc(userRef, {
             uid: user.uid,
             email: user.email,
-            name: user.displayName || user.email?.split('@')[0],
-            photo: user.photoURL || null,
+            displayName: user.displayName || user.email?.split('@')[0] || 'Anonymous',
+            photoURL: user.photoURL || null,
             isAdmin: user.email === ADMIN_EMAIL,
-            createdAt: new Date().toISOString()
+            createdAt: new Date().toISOString(),
+            lastSeen: new Date().toISOString()
           });
         }
-        
-        // Load all users for admin
-        if (user.email === ADMIN_EMAIL) {
-          const usersRef = collection(db, 'users');
-          const unsubscribeUsers = onSnapshot(usersRef, (snapshot) => {
-            const usersList = [];
-            snapshot.forEach((doc) => {
-              const data = doc.data();
-              if (data.uid !== user.uid) {
-                usersList.push({ id: doc.id, ...data });
-              }
-            });
-            setUsers(usersList);
-            if (usersList.length > 0 && !selectedUserId) {
-              setSelectedUserId(usersList[0].uid);
-            }
-          });
-          return () => unsubscribeUsers();
-        } else {
-          // For regular user, find admin
-          const usersRef = collection(db, 'users');
-          const unsubscribeUsers = onSnapshot(usersRef, (snapshot) => {
-            snapshot.forEach((doc) => {
-              const data = doc.data();
-              if (data.isAdmin === true) {
-                setSelectedUserId(data.uid);
-              }
-            });
-          });
-          return () => unsubscribeUsers();
-        }
+
+        // Setup chat ID immediately
+        await setupChatId(user);
       }
       
       setIsLoading(false);
@@ -141,34 +117,93 @@ export default function ProfilePage() {
     return () => unsubscribe();
   }, []);
 
-  // Load messages
-  useEffect(() => {
-    if (!db || !currentUser || !selectedUserId) return;
+  // Setup chat ID for user
+  const setupChatId = async (user) => {
+    if (!db || !user) return;
 
-    // Create chat ID
-    const chatId = [currentUser.uid, selectedUserId].sort().join('_');
+    if (user.email === ADMIN_EMAIL) {
+      // Load all users for admin
+      const usersQuery = query(collection(db, 'users'), where('isAdmin', '==', false));
+      const unsubscribe = onSnapshot(usersQuery, (snapshot) => {
+        const usersList = [];
+        snapshot.forEach((doc) => {
+          const userData = doc.data();
+          usersList.push({
+            id: doc.id,
+            ...userData
+          });
+        });
+        setChatUsers(usersList);
+        
+        if (usersList.length > 0 && !selectedChatUser) {
+          setSelectedChatUser(usersList[0]);
+          const newChatId = [user.uid, usersList[0].id].sort().join('_');
+          setChatId(newChatId);
+        }
+      });
+      
+      return () => unsubscribe();
+    } else {
+      // Find admin and create chat ID for regular user
+      const usersQuery = query(collection(db, 'users'), where('isAdmin', '==', true), limit(1));
+      const usersSnapshot = await getDocs(usersQuery);
+      
+      if (!usersSnapshot.empty) {
+        const adminDoc = usersSnapshot.docs[0];
+        const adminData = adminDoc.data();
+        const newChatId = [user.uid, adminDoc.id].sort().join('_');
+        setChatId(newChatId);
+        setSelectedChatUser({
+          id: adminDoc.id,
+          ...adminData
+        });
+      }
+    }
+  };
+
+  // Load messages when chatId changes
+  useEffect(() => {
+    if (!db || !chatId) return;
+
+    console.log("Loading messages for chatId:", chatId);
     
-    const messagesRef = collection(db, 'chats', chatId, 'messages');
-    const q = query(messagesRef, orderBy('createdAt', 'asc'));
+    const messagesQuery = query(
+      collection(db, 'chats', chatId, 'messages'),
+      orderBy('createdAt', 'asc')
+    );
     
-    const unsubscribe = onSnapshot(q, (snapshot) => {
+    const unsubscribe = onSnapshot(messagesQuery, (snapshot) => {
       const messagesList = [];
       snapshot.forEach((doc) => {
-        messagesList.push({ id: doc.id, ...doc.data() });
+        const data = doc.data();
+        messagesList.push({
+          id: doc.id,
+          ...data,
+        });
       });
       setMessages(messagesList);
       setTimeout(() => {
-        chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+        chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
       }, 100);
     });
     
     return () => unsubscribe();
-  }, [currentUser, selectedUserId]);
+  }, [chatId]);
+
+  // Handle admin selecting different user
+  const handleSelectUser = async (user) => {
+    setSelectedChatUser(user);
+    if (currentUser && user) {
+      const newChatId = [currentUser.uid, user.id].sort().join('_');
+      setChatId(newChatId);
+    }
+  };
 
   const handleLogin = async (providerType) => {
     try {
       const provider = providerType === 'google' ? googleProvider : githubProvider;
-      await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(auth, provider);
+      console.log("Login success:", result.user);
     } catch (error) {
       console.error("Login error:", error);
       alert("Login failed: " + error.message);
@@ -180,29 +215,36 @@ export default function ProfilePage() {
       await signOut(auth);
       setCurrentUser(null);
       setMessages([]);
-      setSelectedUserId(null);
+      setSelectedChatUser(null);
+      setChatUsers([]);
+      setChatId(null);
     } catch (error) {
       console.error("Logout error:", error);
     }
   };
 
   const sendMessage = async () => {
-    if (!inputMessage.trim() || !currentUser || !selectedUserId) return;
-    
-    const chatId = [currentUser.uid, selectedUserId].sort().join('_');
+    if (!inputMessage.trim() || !currentUser || !db || !chatId) {
+      console.log("Cannot send message:", { inputMessage, currentUser, chatId });
+      return;
+    }
     
     try {
+      console.log("Sending message to chatId:", chatId);
+      
       await addDoc(collection(db, 'chats', chatId, 'messages'), {
         text: inputMessage,
         senderId: currentUser.uid,
         senderName: currentUser.displayName || currentUser.email?.split('@')[0],
         senderEmail: currentUser.email,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        isAdmin: currentUser.email === ADMIN_EMAIL
       });
+      
       setInputMessage("");
     } catch (error) {
       console.error("Error sending message:", error);
-      alert("Failed to send message");
+      alert("Failed to send message: " + error.message);
     }
   };
 
@@ -218,7 +260,7 @@ export default function ProfilePage() {
     try {
       const date = new Date(timestamp);
       return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    } catch {
+    } catch (error) {
       return "";
     }
   };
@@ -228,9 +270,17 @@ export default function ProfilePage() {
     try {
       const date = new Date(timestamp);
       const today = new Date();
-      if (date.toDateString() === today.toDateString()) return "Today";
-      return date.toLocaleDateString();
-    } catch {
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+      
+      if (date.toDateString() === today.toDateString()) {
+        return "Today";
+      } else if (date.toDateString() === yesterday.toDateString()) {
+        return "Yesterday";
+      } else {
+        return date.toLocaleDateString();
+      }
+    } catch (error) {
       return "";
     }
   };
@@ -353,7 +403,7 @@ export default function ProfilePage() {
                     fontSize: '0.75rem'
                   }}
                 >
-                  Google
+                  Google Login
                 </button>
                 <button
                   onClick={() => handleLogin('github')}
@@ -367,7 +417,7 @@ export default function ProfilePage() {
                     fontSize: '0.75rem'
                   }}
                 >
-                  GitHub
+                  GitHub Login
                 </button>
               </div>
             )}
@@ -437,18 +487,18 @@ export default function ProfilePage() {
 
       {/* CHAT WIDGET */}
       <AnimatePresence>
-        {isChatOpen && currentUser && selectedUserId && (
+        {isChatOpen && currentUser && chatId && (
           <motion.div
-            initial={{ opacity: 0, x: -100 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -100 }}
-            transition={{ type: "spring", damping: 25 }}
+            initial={{ opacity: 0, x: -100, y: 0 }}
+            animate={{ opacity: 1, x: 0, y: 0 }}
+            exit={{ opacity: 0, x: -100, y: 0 }}
+            transition={{ type: "spring", damping: 25, stiffness: 200 }}
             style={{
               position: 'fixed',
               bottom: '6rem',
               left: '2rem',
-              width: isMobile ? 'calc(100% - 2rem)' : currentUser.email === ADMIN_EMAIL ? '700px' : '400px',
-              height: '500px',
+              width: isMobile ? 'calc(100% - 2rem)' : currentUser.email === ADMIN_EMAIL ? '800px' : '450px',
+              height: '600px',
               backgroundColor: '#1a1a1a',
               borderRadius: '12px',
               boxShadow: '0 10px 40px rgba(0,0,0,0.3)',
@@ -459,7 +509,7 @@ export default function ProfilePage() {
               border: '1px solid rgba(255,255,255,0.1)'
             }}
           >
-            {/* Header */}
+            {/* Chat Header */}
             <div style={{
               padding: '1rem',
               backgroundColor: '#2a2a2a',
@@ -468,10 +518,22 @@ export default function ProfilePage() {
               alignItems: 'center',
               justifyContent: 'space-between'
             }}>
-              <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <div style={{
+                  width: '10px',
+                  height: '10px',
+                  borderRadius: '50%',
+                  backgroundColor: '#4ade80',
+                  animation: 'pulse 2s infinite'
+                }} />
                 <span style={{ color: 'white', fontWeight: '500' }}>
                   {currentUser.email === ADMIN_EMAIL ? 'Admin Chat' : 'Live Chat'}
                 </span>
+                {selectedChatUser && (
+                  <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.6)' }}>
+                    {selectedChatUser.displayName}
+                  </span>
+                )}
               </div>
               <motion.button
                 onClick={() => setIsChatOpen(false)}
@@ -490,137 +552,202 @@ export default function ProfilePage() {
               </motion.button>
             </div>
 
-            {/* User List for Admin */}
-            {currentUser.email === ADMIN_EMAIL && (
-              <div style={{
-                display: 'flex',
-                gap: '0.5rem',
-                padding: '0.5rem',
-                borderBottom: '1px solid rgba(255,255,255,0.1)',
-                overflowX: 'auto'
-              }}>
-                {users.map((user) => (
-                  <button
-                    key={user.id}
-                    onClick={() => setSelectedUserId(user.uid)}
-                    style={{
-                      padding: '0.5rem 1rem',
-                      borderRadius: '20px',
-                      border: 'none',
-                      backgroundColor: selectedUserId === user.uid ? '#fff' : 'rgba(255,255,255,0.1)',
-                      color: selectedUserId === user.uid ? '#000' : '#fff',
-                      cursor: 'pointer',
-                      fontSize: '0.875rem',
-                      whiteSpace: 'nowrap'
-                    }}
-                  >
-                    {user.name}
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {/* Messages */}
+            {/* Chat Container */}
             <div style={{
               flex: 1,
-              overflowY: 'auto',
-              padding: '1rem',
               display: 'flex',
-              flexDirection: 'column',
-              gap: '0.5rem'
+              flexDirection: currentUser.email === ADMIN_EMAIL ? 'row' : 'column'
             }}>
-              {messages.length === 0 ? (
+              {/* Admin User List */}
+              {currentUser.email === ADMIN_EMAIL && (
                 <div style={{
-                  textAlign: 'center',
-                  color: 'rgba(255,255,255,0.5)',
-                  padding: '2rem'
+                  width: '250px',
+                  borderRight: '1px solid rgba(255,255,255,0.1)',
+                  overflowY: 'auto',
+                  backgroundColor: '#151515'
                 }}>
-                  Start chatting!
-                </div>
-              ) : (
-                messages.map((msg) => (
-                  <div
-                    key={msg.id}
-                    style={{
-                      display: 'flex',
-                      justifyContent: msg.senderId === currentUser.uid ? 'flex-end' : 'flex-start'
-                    }}
-                  >
-                    <div style={{
-                      maxWidth: '70%',
-                      padding: '0.5rem 0.75rem',
-                      borderRadius: '12px',
-                      backgroundColor: msg.senderId === currentUser.uid ? '#fff' : '#2a2a2a',
-                      color: msg.senderId === currentUser.uid ? '#000' : '#fff'
-                    }}>
-                      {msg.senderId !== currentUser.uid && (
-                        <div style={{ fontSize: '0.7rem', opacity: 0.7, marginBottom: '0.25rem' }}>
-                          {msg.senderName}
-                        </div>
-                      )}
-                      <div style={{ fontSize: '0.875rem' }}>{msg.text}</div>
-                      <div style={{
-                        fontSize: '0.6rem',
-                        opacity: 0.5,
-                        textAlign: 'right',
-                        marginTop: '0.25rem'
-                      }}>
-                        {formatTime(msg.createdAt)}
-                      </div>
-                    </div>
+                  <div style={{ padding: '1rem', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                    <h4 style={{ color: 'white', margin: 0, fontSize: '0.875rem' }}>Users ({chatUsers.length})</h4>
                   </div>
-                ))
+                  {chatUsers.length === 0 ? (
+                    <div style={{ padding: '1rem', color: 'rgba(255,255,255,0.5)', textAlign: 'center' }}>
+                      No users yet
+                    </div>
+                  ) : (
+                    chatUsers.map((user) => (
+                      <motion.div
+                        key={user.id}
+                        onClick={() => handleSelectUser(user)}
+                        style={{
+                          padding: '1rem',
+                          cursor: 'pointer',
+                          backgroundColor: selectedChatUser?.id === user.id ? 'rgba(255,255,255,0.1)' : 'transparent',
+                          borderBottom: '1px solid rgba(255,255,255,0.05)'
+                        }}
+                        whileHover={{ backgroundColor: 'rgba(255,255,255,0.05)' }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                          {user.photoURL && (
+                            <img src={user.photoURL} alt="avatar" style={{
+                              width: '32px',
+                              height: '32px',
+                              borderRadius: '50%'
+                            }} />
+                          )}
+                          <div>
+                            <div style={{ color: 'white', fontSize: '0.875rem' }}>
+                              {user.displayName}
+                            </div>
+                            <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.75rem' }}>
+                              {user.email}
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    ))
+                  )}
+                </div>
               )}
-              <div ref={chatEndRef} />
-            </div>
 
-            {/* Input */}
-            <div style={{
-              padding: '1rem',
-              borderTop: '1px solid rgba(255,255,255,0.1)',
-              backgroundColor: '#1a1a1a'
-            }}>
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <textarea
-                  value={inputMessage}
-                  onChange={(e) => setInputMessage(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  placeholder="Type a message..."
-                  style={{
-                    flex: 1,
-                    padding: '0.5rem',
-                    borderRadius: '8px',
-                    border: '1px solid rgba(255,255,255,0.2)',
-                    backgroundColor: '#2a2a2a',
-                    color: 'white',
-                    fontSize: '0.875rem',
-                    resize: 'none',
-                    fontFamily: 'inherit',
-                    outline: 'none'
-                  }}
-                  rows="2"
-                />
-                <button
-                  onClick={sendMessage}
-                  style={{
-                    padding: '0 1rem',
-                    borderRadius: '8px',
-                    border: 'none',
-                    backgroundColor: '#fff',
-                    color: '#000',
-                    cursor: 'pointer',
-                    fontWeight: '500'
-                  }}
-                >
-                  Send
-                </button>
+              {/* Messages Area */}
+              <div style={{
+                flex: 1,
+                display: 'flex',
+                flexDirection: 'column'
+              }}>
+                <div style={{
+                  flex: 1,
+                  overflowY: 'auto',
+                  padding: '1rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.75rem'
+                }}>
+                  {messages.length === 0 ? (
+                    <div style={{
+                      textAlign: 'center',
+                      color: 'rgba(255,255,255,0.5)',
+                      padding: '2rem'
+                    }}>
+                      No messages yet. Start the conversation!
+                    </div>
+                  ) : (
+                    messages.map((msg, index) => {
+                      const showDate = index === 0 || formatDate(msg.createdAt) !== formatDate(messages[index - 1]?.createdAt);
+                      
+                      return (
+                        <React.Fragment key={msg.id}>
+                          {showDate && (
+                            <div style={{
+                              textAlign: 'center',
+                              margin: '0.5rem 0',
+                              fontSize: '0.7rem',
+                              color: 'rgba(255,255,255,0.4)'
+                            }}>
+                              {formatDate(msg.createdAt)}
+                            </div>
+                          )}
+                          <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            style={{
+                              display: 'flex',
+                              justifyContent: msg.senderId === currentUser.uid ? 'flex-end' : 'flex-start'
+                            }}
+                          >
+                            <div style={{
+                              maxWidth: '70%',
+                              padding: '0.75rem 1rem',
+                              borderRadius: '12px',
+                              backgroundColor: msg.senderId === currentUser.uid ? '#fff' : '#2a2a2a',
+                              color: msg.senderId === currentUser.uid ? '#000' : '#fff'
+                            }}>
+                              {msg.senderId !== currentUser.uid && (
+                                <div style={{ fontSize: '0.7rem', marginBottom: '0.25rem', opacity: 0.7 }}>
+                                  {msg.senderName}
+                                </div>
+                              )}
+                              <div style={{ fontSize: '0.9rem', wordWrap: 'break-word' }}>
+                                {msg.text}
+                              </div>
+                              <div style={{
+                                fontSize: '0.65rem',
+                                marginTop: '0.25rem',
+                                opacity: 0.5,
+                                textAlign: 'right'
+                              }}>
+                                {formatTime(msg.createdAt)}
+                              </div>
+                            </div>
+                          </motion.div>
+                        </React.Fragment>
+                      );
+                    })
+                  )}
+                  <div ref={chatEndRef} />
+                </div>
+
+                {/* Chat Input */}
+                <div style={{
+                  padding: '1rem',
+                  borderTop: '1px solid rgba(255,255,255,0.1)',
+                  backgroundColor: '#1a1a1a'
+                }}>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <textarea
+                      value={inputMessage}
+                      onChange={(e) => setInputMessage(e.target.value)}
+                      onKeyPress={handleKeyPress}
+                      placeholder={`Type your message...`}
+                      style={{
+                        flex: 1,
+                        padding: '0.75rem',
+                        borderRadius: '8px',
+                        border: '1px solid rgba(255,255,255,0.2)',
+                        backgroundColor: '#2a2a2a',
+                        color: 'white',
+                        fontSize: '0.9rem',
+                        resize: 'none',
+                        fontFamily: 'inherit',
+                        outline: 'none'
+                      }}
+                      rows="2"
+                    />
+                    <motion.button
+                      onClick={sendMessage}
+                      style={{
+                        padding: '0 1rem',
+                        borderRadius: '8px',
+                        border: 'none',
+                        backgroundColor: '#fff',
+                        color: '#000',
+                        cursor: 'pointer',
+                        fontWeight: '500'
+                      }}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      Send
+                    </motion.button>
+                  </div>
+                  {currentUser.email !== ADMIN_EMAIL && (
+                    <div style={{
+                      fontSize: '0.7rem',
+                      color: 'rgba(255,255,255,0.5)',
+                      marginTop: '0.5rem',
+                      textAlign: 'center'
+                    }}>
+                      💬 Chat with admin: faridardiansyah061@gmail.com
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* MAIN CONTENT */}
+      {/* MAIN CONTENT - Same as before */}
       <div style={{
         maxWidth: '1100px',
         margin: '0 auto',
