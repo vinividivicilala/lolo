@@ -3,12 +3,17 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import Lenis from "@studio-freight/lenis";
 import { initializeApp, getApps } from "firebase/app";
 import { 
   getAuth, 
   onAuthStateChanged, 
-  signInWithPopup,
   signOut,
+  signInWithPopup,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
   GoogleAuthProvider,
   GithubAuthProvider
 } from "firebase/auth";
@@ -19,14 +24,18 @@ import {
   query, 
   orderBy, 
   onSnapshot,
-  where,
+  serverTimestamp,
   doc,
   getDoc,
   setDoc,
-  updateDoc,
-  getDocs,
-  limit
+  where,
+  getDocs
 } from "firebase/firestore";
+
+// Register GSAP plugins
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
 // Konfigurasi Firebase
 const firebaseConfig = {
@@ -40,14 +49,20 @@ const firebaseConfig = {
   measurementId: "G-8LMP7F4BE9"
 };
 
-// Initialize Firebase
-if (typeof window !== "undefined" && !getApps().length) {
-  initializeApp(firebaseConfig);
+let app = null;
+let auth = null;
+let db = null;
+
+if (typeof window !== "undefined") {
+  app = getApps().length === 0
+    ? initializeApp(firebaseConfig)
+    : getApps()[0];
+
+  auth = getAuth(app);
+  db = getFirestore(app);
 }
 
-const auth = typeof window !== "undefined" ? getAuth() : null;
-const db = typeof window !== "undefined" ? getFirestore() : null;
-
+// Providers untuk login
 const googleProvider = new GoogleAuthProvider();
 const githubProvider = new GithubAuthProvider();
 
@@ -58,155 +73,146 @@ export default function ProfilePage() {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
-  const [chatUsers, setChatUsers] = useState([]);
-  const [selectedChatUser, setSelectedChatUser] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [chatId, setChatId] = useState(null);
+  const [isAdminMode, setIsAdminMode] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authEmail, setAuthEmail] = useState("");
+  const [authPassword, setAuthPassword] = useState("");
+  const [isLoginMode, setIsLoginMode] = useState(true);
+  const [authError, setAuthError] = useState("");
   const chatEndRef = useRef(null);
-
+  
   const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
 
+  // Check if user is admin
+  const checkIsAdmin = (user) => {
+    return user?.email === ADMIN_EMAIL;
+  };
+
   useEffect(() => {
+    // Check mobile
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
     window.addEventListener('resize', checkMobile);
-
+    
+    // Show scroll to top button
     const handleScroll = () => {
-      setShowScrollButton(window.scrollY > 300);
+      if (window.scrollY > 300) {
+        setShowScrollButton(true);
+      } else {
+        setShowScrollButton(false);
+      }
     };
+
     window.addEventListener('scroll', handleScroll);
+
+    // Firebase Auth State Listener
+    const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        // User is signed in
+        const isAdmin = checkIsAdmin(user);
+        const userData = {
+          uid: user.uid,
+          name: user.displayName || user.email.split('@')[0],
+          email: user.email,
+          isAdmin: isAdmin,
+          photoURL: user.photoURL
+        };
+        setCurrentUser(userData);
+        setIsAdminMode(isAdmin);
+        
+        // Save user to Firestore
+        await setDoc(doc(db, "users", user.uid), {
+          name: userData.name,
+          email: userData.email,
+          isAdmin: isAdmin,
+          lastSeen: serverTimestamp()
+        }, { merge: true });
+      } else {
+        // User is signed out
+        setCurrentUser(null);
+        setIsAdminMode(false);
+      }
+    });
+
+    // Load messages from Firestore
+    const q = query(collection(db, "messages"), orderBy("timestamp", "asc"));
+    const unsubscribeMessages = onSnapshot(q, (snapshot) => {
+      const messagesData = [];
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        messagesData.push({
+          id: doc.id,
+          text: data.text,
+          sender: data.sender,
+          userId: data.userId,
+          userName: data.userName,
+          userEmail: data.userEmail,
+          timestamp: data.timestamp?.toDate() || new Date()
+        });
+      });
+      
+      if (messagesData.length === 0) {
+        // Add welcome message if no messages
+        addDoc(collection(db, "messages"), {
+          text: "Welcome to live chat! Please login to start chatting. Admin: faridardiansyah061@gmail.com",
+          sender: 'system',
+          userId: 'system',
+          userName: 'System',
+          userEmail: null,
+          timestamp: serverTimestamp()
+        });
+      } else {
+        setMessages(messagesData);
+      }
+    });
 
     return () => {
       window.removeEventListener('resize', checkMobile);
       window.removeEventListener('scroll', handleScroll);
+      unsubscribeAuth();
+      unsubscribeMessages();
     };
   }, []);
 
-  // Auth state listener
   useEffect(() => {
-    if (!auth) return;
-
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setCurrentUser(user);
-      
-      if (user) {
-        // Save user to Firestore
-        const userRef = doc(db, 'users', user.uid);
-        const userDoc = await getDoc(userRef);
-        
-        if (!userDoc.exists()) {
-          await setDoc(userRef, {
-            uid: user.uid,
-            email: user.email,
-            displayName: user.displayName || user.email?.split('@')[0] || 'Anonymous',
-            photoURL: user.photoURL || null,
-            isAdmin: user.email === ADMIN_EMAIL,
-            createdAt: new Date().toISOString(),
-            lastSeen: new Date().toISOString()
-          });
-        }
-
-        // Setup chat ID immediately
-        await setupChatId(user);
-      }
-      
-      setIsLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  // Setup chat ID for user
-  const setupChatId = async (user) => {
-    if (!db || !user) return;
-
-    if (user.email === ADMIN_EMAIL) {
-      // Load all users for admin
-      const usersQuery = query(collection(db, 'users'), where('isAdmin', '==', false));
-      const unsubscribe = onSnapshot(usersQuery, (snapshot) => {
-        const usersList = [];
-        snapshot.forEach((doc) => {
-          const userData = doc.data();
-          usersList.push({
-            id: doc.id,
-            ...userData
-          });
-        });
-        setChatUsers(usersList);
-        
-        if (usersList.length > 0 && !selectedChatUser) {
-          setSelectedChatUser(usersList[0]);
-          const newChatId = [user.uid, usersList[0].id].sort().join('_');
-          setChatId(newChatId);
-        }
-      });
-      
-      return () => unsubscribe();
-    } else {
-      // Find admin and create chat ID for regular user
-      const usersQuery = query(collection(db, 'users'), where('isAdmin', '==', true), limit(1));
-      const usersSnapshot = await getDocs(usersQuery);
-      
-      if (!usersSnapshot.empty) {
-        const adminDoc = usersSnapshot.docs[0];
-        const adminData = adminDoc.data();
-        const newChatId = [user.uid, adminDoc.id].sort().join('_');
-        setChatId(newChatId);
-        setSelectedChatUser({
-          id: adminDoc.id,
-          ...adminData
-        });
-      }
+    // Scroll to bottom when messages change
+    if (chatEndRef.current) {
+      chatEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
-  };
+  }, [messages]);
 
-  // Load messages when chatId changes
-  useEffect(() => {
-    if (!db || !chatId) return;
-
-    console.log("Loading messages for chatId:", chatId);
+  const handleAuth = async () => {
+    setAuthError("");
     
-    const messagesQuery = query(
-      collection(db, 'chats', chatId, 'messages'),
-      orderBy('createdAt', 'asc')
-    );
-    
-    const unsubscribe = onSnapshot(messagesQuery, (snapshot) => {
-      const messagesList = [];
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        messagesList.push({
-          id: doc.id,
-          ...data,
-        });
-      });
-      setMessages(messagesList);
-      setTimeout(() => {
-        chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-      }, 100);
-    });
-    
-    return () => unsubscribe();
-  }, [chatId]);
-
-  // Handle admin selecting different user
-  const handleSelectUser = async (user) => {
-    setSelectedChatUser(user);
-    if (currentUser && user) {
-      const newChatId = [currentUser.uid, user.id].sort().join('_');
-      setChatId(newChatId);
-    }
-  };
-
-  const handleLogin = async (providerType) => {
     try {
-      const provider = providerType === 'google' ? googleProvider : githubProvider;
-      const result = await signInWithPopup(auth, provider);
-      console.log("Login success:", result.user);
+      if (isLoginMode) {
+        // Sign in
+        const userCredential = await signInWithEmailAndPassword(auth, authEmail, authPassword);
+        console.log("User signed in:", userCredential.user.email);
+      } else {
+        // Sign up
+        const userCredential = await createUserWithEmailAndPassword(auth, authEmail, authPassword);
+        console.log("User created:", userCredential.user.email);
+      }
+      setShowAuthModal(false);
+      setAuthEmail("");
+      setAuthPassword("");
     } catch (error) {
-      console.error("Login error:", error);
-      alert("Login failed: " + error.message);
+      console.error("Auth error:", error);
+      setAuthError(error.message);
+    }
+  };
+
+  const handleSocialLogin = async (provider) => {
+    setAuthError("");
+    try {
+      await signInWithPopup(auth, provider);
+      setShowAuthModal(false);
+    } catch (error) {
+      console.error("Social login error:", error);
+      setAuthError(error.message);
     }
   };
 
@@ -214,37 +220,32 @@ export default function ProfilePage() {
     try {
       await signOut(auth);
       setCurrentUser(null);
-      setMessages([]);
-      setSelectedChatUser(null);
-      setChatUsers([]);
-      setChatId(null);
+      setIsAdminMode(false);
     } catch (error) {
       console.error("Logout error:", error);
     }
   };
 
   const sendMessage = async () => {
-    if (!inputMessage.trim() || !currentUser || !db || !chatId) {
-      console.log("Cannot send message:", { inputMessage, currentUser, chatId });
+    if (!inputMessage.trim()) return;
+    if (!currentUser) {
+      alert("Please login first!");
       return;
     }
-    
+
     try {
-      console.log("Sending message to chatId:", chatId);
-      
-      await addDoc(collection(db, 'chats', chatId, 'messages'), {
+      await addDoc(collection(db, "messages"), {
         text: inputMessage,
-        senderId: currentUser.uid,
-        senderName: currentUser.displayName || currentUser.email?.split('@')[0],
-        senderEmail: currentUser.email,
-        createdAt: new Date().toISOString(),
-        isAdmin: currentUser.email === ADMIN_EMAIL
+        sender: currentUser.isAdmin ? 'admin' : 'user',
+        userId: currentUser.uid,
+        userName: currentUser.name,
+        userEmail: currentUser.email,
+        timestamp: serverTimestamp()
       });
-      
       setInputMessage("");
     } catch (error) {
       console.error("Error sending message:", error);
-      alert("Failed to send message: " + error.message);
+      alert("Failed to send message");
     }
   };
 
@@ -257,36 +258,31 @@ export default function ProfilePage() {
 
   const formatTime = (timestamp) => {
     if (!timestamp) return "";
-    try {
-      const date = new Date(timestamp);
-      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    } catch (error) {
-      return "";
-    }
+    const date = new Date(timestamp);
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
   const formatDate = (timestamp) => {
     if (!timestamp) return "";
-    try {
-      const date = new Date(timestamp);
-      const today = new Date();
-      const yesterday = new Date(today);
-      yesterday.setDate(yesterday.getDate() - 1);
-      
-      if (date.toDateString() === today.toDateString()) {
-        return "Today";
-      } else if (date.toDateString() === yesterday.toDateString()) {
-        return "Yesterday";
-      } else {
-        return date.toLocaleDateString();
-      }
-    } catch (error) {
-      return "";
+    const date = new Date(timestamp);
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    
+    if (date.toDateString() === today.toDateString()) {
+      return `Today at ${formatTime(timestamp)}`;
+    } else if (date.toDateString() === yesterday.toDateString()) {
+      return `Yesterday at ${formatTime(timestamp)}`;
+    } else {
+      return `${date.toLocaleDateString()} at ${formatTime(timestamp)}`;
     }
   };
 
   const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
   };
 
   const tableData = [
@@ -302,20 +298,6 @@ export default function ProfilePage() {
     { year: "publication 2018", title: "Resn's Little Help AR" },
   ];
 
-  if (isLoading) {
-    return (
-      <div style={{
-        minHeight: '100vh',
-        backgroundColor: 'black',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
-      }}>
-        <div style={{ color: 'white' }}>Loading...</div>
-      </div>
-    );
-  }
-
   return (
     <div style={{
       minHeight: '100vh',
@@ -324,7 +306,8 @@ export default function ProfilePage() {
       paddingTop: '120px',
       paddingBottom: '80px'
     }}>
-      {/* HEADER */}
+
+      {/* HEADER with Breadcrumb */}
       <div style={{
         position: 'fixed',
         top: 0,
@@ -362,17 +345,21 @@ export default function ProfilePage() {
           </motion.div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            {currentUser ? (
+            {currentUser && (
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 {currentUser.photoURL && (
-                  <img src={currentUser.photoURL} alt="avatar" style={{
-                    width: '32px',
-                    height: '32px',
-                    borderRadius: '50%'
-                  }} />
+                  <img 
+                    src={currentUser.photoURL} 
+                    alt={currentUser.name}
+                    style={{
+                      width: '28px',
+                      height: '28px',
+                      borderRadius: '50%'
+                    }}
+                  />
                 )}
                 <span style={{ color: 'white', fontSize: '0.875rem' }}>
-                  {currentUser.displayName || currentUser.email?.split('@')[0]}
+                  👤 {currentUser.name}
                 </span>
                 <button
                   onClick={handleLogout}
@@ -387,37 +374,6 @@ export default function ProfilePage() {
                   }}
                 >
                   Logout
-                </button>
-              </div>
-            ) : (
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <button
-                  onClick={() => handleLogin('google')}
-                  style={{
-                    background: 'rgba(255,255,255,0.1)',
-                    border: 'none',
-                    color: 'white',
-                    padding: '0.25rem 0.75rem',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    fontSize: '0.75rem'
-                  }}
-                >
-                  Google Login
-                </button>
-                <button
-                  onClick={() => handleLogin('github')}
-                  style={{
-                    background: 'rgba(255,255,255,0.1)',
-                    border: 'none',
-                    color: 'white',
-                    padding: '0.25rem 0.75rem',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    fontSize: '0.75rem'
-                  }}
-                >
-                  GitHub Login
                 </button>
               </div>
             )}
@@ -454,40 +410,38 @@ export default function ProfilePage() {
       </div>
 
       {/* CHAT BUTTON */}
-      {currentUser && (
-        <motion.button
-          onClick={() => setIsChatOpen(!isChatOpen)}
-          style={{
-            position: 'fixed',
-            bottom: '2rem',
-            left: '2rem',
-            width: '60px',
-            height: '60px',
-            borderRadius: '50%',
-            backgroundColor: '#fff',
-            border: 'none',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 200,
-            boxShadow: '0 4px 20px rgba(0,0,0,0.3)'
-          }}
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.95 }}
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ delay: 0.5 }}
-        >
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2">
-            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-          </svg>
-        </motion.button>
-      )}
+      <motion.button
+        onClick={() => setIsChatOpen(!isChatOpen)}
+        style={{
+          position: 'fixed',
+          bottom: '2rem',
+          left: '2rem',
+          width: '60px',
+          height: '60px',
+          borderRadius: '50%',
+          backgroundColor: '#fff',
+          border: 'none',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 200,
+          boxShadow: '0 4px 20px rgba(0,0,0,0.3)'
+        }}
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.95 }}
+        initial={{ scale: 0 }}
+        animate={{ scale: 1 }}
+        transition={{ delay: 0.5 }}
+      >
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+      </motion.button>
 
       {/* CHAT WIDGET */}
       <AnimatePresence>
-        {isChatOpen && currentUser && chatId && (
+        {isChatOpen && (
           <motion.div
             initial={{ opacity: 0, x: -100, y: 0 }}
             animate={{ opacity: 1, x: 0, y: 0 }}
@@ -497,7 +451,7 @@ export default function ProfilePage() {
               position: 'fixed',
               bottom: '6rem',
               left: '2rem',
-              width: isMobile ? 'calc(100% - 2rem)' : currentUser.email === ADMIN_EMAIL ? '800px' : '450px',
+              width: isMobile ? 'calc(100% - 2rem)' : '450px',
               height: '600px',
               backgroundColor: '#1a1a1a',
               borderRadius: '12px',
@@ -527,227 +481,395 @@ export default function ProfilePage() {
                   animation: 'pulse 2s infinite'
                 }} />
                 <span style={{ color: 'white', fontWeight: '500' }}>
-                  {currentUser.email === ADMIN_EMAIL ? 'Admin Chat' : 'Live Chat'}
+                  {isAdminMode ? 'Admin Panel' : 'Live Chat'}
                 </span>
-                {selectedChatUser && (
+                {currentUser && (
                   <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.6)' }}>
-                    {selectedChatUser.displayName}
+                    ({currentUser.name})
                   </span>
                 )}
               </div>
-              <motion.button
-                onClick={() => setIsChatOpen(false)}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  padding: '4px'
-                }}
-                whileHover={{ scale: 1.1 }}
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-                  <path d="M18 6L6 18" />
-                  <path d="M6 6l12 12" />
-                </svg>
-              </motion.button>
-            </div>
-
-            {/* Chat Container */}
-            <div style={{
-              flex: 1,
-              display: 'flex',
-              flexDirection: currentUser.email === ADMIN_EMAIL ? 'row' : 'column'
-            }}>
-              {/* Admin User List */}
-              {currentUser.email === ADMIN_EMAIL && (
-                <div style={{
-                  width: '250px',
-                  borderRight: '1px solid rgba(255,255,255,0.1)',
-                  overflowY: 'auto',
-                  backgroundColor: '#151515'
-                }}>
-                  <div style={{ padding: '1rem', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                    <h4 style={{ color: 'white', margin: 0, fontSize: '0.875rem' }}>Users ({chatUsers.length})</h4>
-                  </div>
-                  {chatUsers.length === 0 ? (
-                    <div style={{ padding: '1rem', color: 'rgba(255,255,255,0.5)', textAlign: 'center' }}>
-                      No users yet
-                    </div>
-                  ) : (
-                    chatUsers.map((user) => (
-                      <motion.div
-                        key={user.id}
-                        onClick={() => handleSelectUser(user)}
-                        style={{
-                          padding: '1rem',
-                          cursor: 'pointer',
-                          backgroundColor: selectedChatUser?.id === user.id ? 'rgba(255,255,255,0.1)' : 'transparent',
-                          borderBottom: '1px solid rgba(255,255,255,0.05)'
-                        }}
-                        whileHover={{ backgroundColor: 'rgba(255,255,255,0.05)' }}
-                      >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                          {user.photoURL && (
-                            <img src={user.photoURL} alt="avatar" style={{
-                              width: '32px',
-                              height: '32px',
-                              borderRadius: '50%'
-                            }} />
-                          )}
-                          <div>
-                            <div style={{ color: 'white', fontSize: '0.875rem' }}>
-                              {user.displayName}
-                            </div>
-                            <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.75rem' }}>
-                              {user.email}
-                            </div>
-                          </div>
-                        </div>
-                      </motion.div>
-                    ))
-                  )}
-                </div>
-              )}
-
-              {/* Messages Area */}
-              <div style={{
-                flex: 1,
-                display: 'flex',
-                flexDirection: 'column'
-              }}>
-                <div style={{
-                  flex: 1,
-                  overflowY: 'auto',
-                  padding: '1rem',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '0.75rem'
-                }}>
-                  {messages.length === 0 ? (
-                    <div style={{
-                      textAlign: 'center',
-                      color: 'rgba(255,255,255,0.5)',
-                      padding: '2rem'
-                    }}>
-                      No messages yet. Start the conversation!
-                    </div>
-                  ) : (
-                    messages.map((msg, index) => {
-                      const showDate = index === 0 || formatDate(msg.createdAt) !== formatDate(messages[index - 1]?.createdAt);
-                      
-                      return (
-                        <React.Fragment key={msg.id}>
-                          {showDate && (
-                            <div style={{
-                              textAlign: 'center',
-                              margin: '0.5rem 0',
-                              fontSize: '0.7rem',
-                              color: 'rgba(255,255,255,0.4)'
-                            }}>
-                              {formatDate(msg.createdAt)}
-                            </div>
-                          )}
-                          <motion.div
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            style={{
-                              display: 'flex',
-                              justifyContent: msg.senderId === currentUser.uid ? 'flex-end' : 'flex-start'
-                            }}
-                          >
-                            <div style={{
-                              maxWidth: '70%',
-                              padding: '0.75rem 1rem',
-                              borderRadius: '12px',
-                              backgroundColor: msg.senderId === currentUser.uid ? '#fff' : '#2a2a2a',
-                              color: msg.senderId === currentUser.uid ? '#000' : '#fff'
-                            }}>
-                              {msg.senderId !== currentUser.uid && (
-                                <div style={{ fontSize: '0.7rem', marginBottom: '0.25rem', opacity: 0.7 }}>
-                                  {msg.senderName}
-                                </div>
-                              )}
-                              <div style={{ fontSize: '0.9rem', wordWrap: 'break-word' }}>
-                                {msg.text}
-                              </div>
-                              <div style={{
-                                fontSize: '0.65rem',
-                                marginTop: '0.25rem',
-                                opacity: 0.5,
-                                textAlign: 'right'
-                              }}>
-                                {formatTime(msg.createdAt)}
-                              </div>
-                            </div>
-                          </motion.div>
-                        </React.Fragment>
-                      );
-                    })
-                  )}
-                  <div ref={chatEndRef} />
-                </div>
-
-                {/* Chat Input */}
-                <div style={{
-                  padding: '1rem',
-                  borderTop: '1px solid rgba(255,255,255,0.1)',
-                  backgroundColor: '#1a1a1a'
-                }}>
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <textarea
-                      value={inputMessage}
-                      onChange={(e) => setInputMessage(e.target.value)}
-                      onKeyPress={handleKeyPress}
-                      placeholder={`Type your message...`}
-                      style={{
-                        flex: 1,
-                        padding: '0.75rem',
-                        borderRadius: '8px',
-                        border: '1px solid rgba(255,255,255,0.2)',
-                        backgroundColor: '#2a2a2a',
-                        color: 'white',
-                        fontSize: '0.9rem',
-                        resize: 'none',
-                        fontFamily: 'inherit',
-                        outline: 'none'
-                      }}
-                      rows="2"
-                    />
-                    <motion.button
-                      onClick={sendMessage}
-                      style={{
-                        padding: '0 1rem',
-                        borderRadius: '8px',
-                        border: 'none',
-                        backgroundColor: '#fff',
-                        color: '#000',
-                        cursor: 'pointer',
-                        fontWeight: '500'
-                      }}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      Send
-                    </motion.button>
-                  </div>
-                  {currentUser.email !== ADMIN_EMAIL && (
-                    <div style={{
-                      fontSize: '0.7rem',
-                      color: 'rgba(255,255,255,0.5)',
-                      marginTop: '0.5rem',
-                      textAlign: 'center'
-                    }}>
-                      💬 Chat with admin: faridardiansyah061@gmail.com
-                    </div>
-                  )}
-                </div>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                {!currentUser && (
+                  <motion.button
+                    onClick={() => setShowAuthModal(true)}
+                    style={{
+                      background: 'rgba(255,255,255,0.1)',
+                      border: 'none',
+                      color: 'white',
+                      padding: '0.25rem 0.75rem',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontSize: '0.75rem'
+                    }}
+                    whileHover={{ scale: 1.05 }}
+                  >
+                    Login / Sign Up
+                  </motion.button>
+                )}
+                <motion.button
+                  onClick={() => setIsChatOpen(false)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    padding: '4px'
+                  }}
+                  whileHover={{ scale: 1.1 }}
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                    <path d="M18 6L6 18" />
+                    <path d="M6 6l12 12" />
+                  </svg>
+                </motion.button>
               </div>
             </div>
+
+            {/* Auth Modal */}
+            {showAuthModal && (
+              <div style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(0,0,0,0.95)',
+                zIndex: 300,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <div style={{
+                  backgroundColor: '#2a2a2a',
+                  padding: '2rem',
+                  borderRadius: '12px',
+                  width: '320px',
+                  maxWidth: '90%'
+                }}>
+                  <h3 style={{ color: 'white', marginBottom: '1rem' }}>
+                    {isLoginMode ? 'Login' : 'Sign Up'}
+                  </h3>
+                  
+                  {authError && (
+                    <div style={{
+                      backgroundColor: 'rgba(255,0,0,0.1)',
+                      color: '#ff6b6b',
+                      padding: '0.5rem',
+                      borderRadius: '4px',
+                      marginBottom: '1rem',
+                      fontSize: '0.875rem'
+                    }}>
+                      {authError}
+                    </div>
+                  )}
+                  
+                  <input
+                    type="email"
+                    placeholder="Email"
+                    value={authEmail}
+                    onChange={(e) => setAuthEmail(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '0.75rem',
+                      marginBottom: '1rem',
+                      borderRadius: '4px',
+                      border: '1px solid rgba(255,255,255,0.2)',
+                      backgroundColor: '#1a1a1a',
+                      color: 'white',
+                      fontSize: '0.9rem'
+                    }}
+                  />
+                  
+                  <input
+                    type="password"
+                    placeholder="Password"
+                    value={authPassword}
+                    onChange={(e) => setAuthPassword(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '0.75rem',
+                      marginBottom: '1rem',
+                      borderRadius: '4px',
+                      border: '1px solid rgba(255,255,255,0.2)',
+                      backgroundColor: '#1a1a1a',
+                      color: 'white',
+                      fontSize: '0.9rem'
+                    }}
+                  />
+                  
+                  <button
+                    onClick={handleAuth}
+                    style={{
+                      width: '100%',
+                      padding: '0.75rem',
+                      backgroundColor: '#fff',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontSize: '0.9rem',
+                      fontWeight: '500',
+                      marginBottom: '1rem'
+                    }}
+                  >
+                    {isLoginMode ? 'Login' : 'Sign Up'}
+                  </button>
+                  
+                  <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+                    <button
+                      onClick={() => handleSocialLogin(googleProvider)}
+                      style={{
+                        flex: 1,
+                        padding: '0.5rem',
+                        backgroundColor: 'rgba(255,255,255,0.1)',
+                        border: 'none',
+                        borderRadius: '4px',
+                        color: 'white',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Google
+                    </button>
+                    <button
+                      onClick={() => handleSocialLogin(githubProvider)}
+                      style={{
+                        flex: 1,
+                        padding: '0.5rem',
+                        backgroundColor: 'rgba(255,255,255,0.1)',
+                        border: 'none',
+                        borderRadius: '4px',
+                        color: 'white',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      GitHub
+                    </button>
+                  </div>
+                  
+                  <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.875rem', textAlign: 'center' }}>
+                    {isLoginMode ? "Don't have an account? " : "Already have an account? "}
+                    <span
+                      onClick={() => {
+                        setIsLoginMode(!isLoginMode);
+                        setAuthError("");
+                      }}
+                      style={{ color: 'white', cursor: 'pointer', textDecoration: 'underline' }}
+                    >
+                      {isLoginMode ? 'Sign Up' : 'Login'}
+                    </span>
+                  </p>
+                  
+                  <button
+                    onClick={() => setShowAuthModal(false)}
+                    style={{
+                      width: '100%',
+                      padding: '0.5rem',
+                      backgroundColor: 'transparent',
+                      border: '1px solid rgba(255,255,255,0.2)',
+                      borderRadius: '4px',
+                      color: 'white',
+                      cursor: 'pointer',
+                      marginTop: '0.5rem'
+                    }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Chat Messages */}
+            <div style={{
+              flex: 1,
+              overflowY: 'auto',
+              padding: '1rem',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.75rem'
+            }}>
+              {messages.map((msg, index) => {
+                const isCurrentUser = currentUser && msg.userId === currentUser.uid;
+                const showDate = index === 0 || (messages[index - 1] && 
+                  new Date(msg.timestamp).toDateString() !== new Date(messages[index - 1].timestamp).toDateString());
+                
+                return (
+                  <React.Fragment key={msg.id}>
+                    {showDate && (
+                      <div style={{
+                        textAlign: 'center',
+                        margin: '0.5rem 0',
+                        fontSize: '0.7rem',
+                        color: 'rgba(255,255,255,0.5)'
+                      }}>
+                        {formatDate(msg.timestamp).split(' at ')[0]}
+                      </div>
+                    )}
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      style={{
+                        display: 'flex',
+                        justifyContent: msg.sender === 'system' ? 'center' : (isCurrentUser ? 'flex-end' : 'flex-start')
+                      }}
+                    >
+                      <div style={{
+                        maxWidth: msg.sender === 'system' ? '90%' : '80%',
+                        padding: msg.sender === 'system' ? '0.5rem 1rem' : '0.75rem 1rem',
+                        borderRadius: msg.sender === 'system' ? '8px' : '12px',
+                        backgroundColor: msg.sender === 'system' ? 'rgba(255,255,255,0.1)' :
+                                       msg.sender === 'admin' ? '#2a2a2a' : 
+                                       isCurrentUser ? '#fff' : '#2a2a2a',
+                        color: msg.sender === 'system' ? 'rgba(255,255,255,0.7)' :
+                              (msg.sender === 'user' && isCurrentUser) ? '#000' : '#fff'
+                      }}>
+                        {msg.sender !== 'system' && (
+                          <div style={{ 
+                            fontSize: '0.7rem', 
+                            marginBottom: '0.25rem', 
+                            opacity: 0.7,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.25rem'
+                          }}>
+                            {msg.userName}
+                            {msg.userEmail === ADMIN_EMAIL && (
+                              <span style={{ 
+                                fontSize: '0.6rem', 
+                                backgroundColor: 'rgba(255,255,255,0.2)',
+                                padding: '0.1rem 0.3rem',
+                                borderRadius: '3px'
+                              }}>
+                                Admin
+                              </span>
+                            )}
+                          </div>
+                        )}
+                        <div style={{ fontSize: '0.85rem', wordWrap: 'break-word', lineHeight: 1.4 }}>
+                          {msg.text}
+                        </div>
+                        <div style={{
+                          fontSize: '0.6rem',
+                          marginTop: '0.25rem',
+                          opacity: 0.5,
+                          textAlign: 'right'
+                        }}>
+                          {formatTime(msg.timestamp)}
+                        </div>
+                      </div>
+                    </motion.div>
+                  </React.Fragment>
+                );
+              })}
+              
+              {isTyping && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  style={{ display: 'flex', justifyContent: 'flex-start' }}
+                >
+                  <div style={{
+                    padding: '0.75rem 1rem',
+                    borderRadius: '12px',
+                    backgroundColor: '#2a2a2a',
+                    color: '#fff'
+                  }}>
+                    <div style={{ fontSize: '0.7rem', marginBottom: '0.25rem' }}>Someone is typing</div>
+                    <div style={{ display: 'flex', gap: '4px' }}>
+                      <span className="typing-dot">•</span>
+                      <span className="typing-dot">•</span>
+                      <span className="typing-dot">•</span>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+              <div ref={chatEndRef} />
+            </div>
+
+            {/* Chat Input */}
+            {currentUser && (
+              <div style={{
+                padding: '1rem',
+                borderTop: '1px solid rgba(255,255,255,0.1)',
+                backgroundColor: '#1a1a1a'
+              }}>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <textarea
+                    value={inputMessage}
+                    onChange={(e) => setInputMessage(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    placeholder={`Type your message as ${currentUser.name}...`}
+                    style={{
+                      flex: 1,
+                      padding: '0.75rem',
+                      borderRadius: '8px',
+                      border: '1px solid rgba(255,255,255,0.2)',
+                      backgroundColor: '#2a2a2a',
+                      color: 'white',
+                      fontSize: '0.85rem',
+                      resize: 'none',
+                      fontFamily: 'inherit',
+                      outline: 'none'
+                    }}
+                    rows="2"
+                  />
+                  <motion.button
+                    onClick={sendMessage}
+                    style={{
+                      padding: '0 1rem',
+                      borderRadius: '8px',
+                      border: 'none',
+                      backgroundColor: '#fff',
+                      color: '#000',
+                      cursor: 'pointer',
+                      fontWeight: '500'
+                    }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    Send
+                  </motion.button>
+                </div>
+                {currentUser.email !== ADMIN_EMAIL && (
+                  <div style={{
+                    fontSize: '0.65rem',
+                    color: 'rgba(255,255,255,0.5)',
+                    marginTop: '0.5rem',
+                    textAlign: 'center'
+                  }}>
+                    💬 Admin: faridardiansyah061@gmail.com
+                  </div>
+                )}
+              </div>
+            )}
+            
+            {!currentUser && (
+              <div style={{
+                padding: '2rem',
+                textAlign: 'center',
+                color: 'rgba(255,255,255,0.6)',
+                fontSize: '0.9rem'
+              }}>
+                Please login to start chatting
+                <button
+                  onClick={() => setShowAuthModal(true)}
+                  style={{
+                    display: 'block',
+                    margin: '1rem auto 0',
+                    padding: '0.5rem 1rem',
+                    backgroundColor: '#fff',
+                    border: 'none',
+                    borderRadius: '4px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Login / Sign Up
+                </button>
+              </div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* MAIN CONTENT - Same as before */}
+      {/* CONTENT */}
       <div style={{
         maxWidth: '1100px',
         margin: '0 auto',
@@ -769,6 +891,7 @@ export default function ProfilePage() {
           }}>
             Tell Donate Record With All Your Heart
           </h1>
+
           <h1 style={{
             color: 'white',
             fontSize: isMobile ? '2.5rem' : '80px',
@@ -833,6 +956,7 @@ export default function ProfilePage() {
                   {item.year}
                 </span>
               </div>
+
               <div style={{
                 flex: 1,
                 padding: '0 2rem'
@@ -845,6 +969,7 @@ export default function ProfilePage() {
                   {item.title}
                 </span>
               </div>
+
               <svg
                 width={isMobile ? "28" : "34"}
                 height={isMobile ? "28" : "34"}
@@ -907,6 +1032,26 @@ export default function ProfilePage() {
         @keyframes pulse {
           0%, 100% { opacity: 1; }
           50% { opacity: 0.5; }
+        }
+        
+        .typing-dot {
+          animation: typing 1.4s infinite;
+          animation-fill-mode: both;
+          font-size: 20px;
+        }
+        
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+        
+        @keyframes typing {
+          0%, 60%, 100% {
+            opacity: 0.3;
+            transform: translateY(0);
+          }
+          30% {
+            opacity: 1;
+            transform: translateY(-4px);
+          }
         }
       `}</style>
     </div>
