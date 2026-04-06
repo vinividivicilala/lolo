@@ -345,6 +345,9 @@ export default function ProfilePage() {
     });
   };
 
+  // Empty table data - structure preserved but no content
+  const tableData = [];
+
   return (
     <div style={{
       minHeight: '100vh',
@@ -990,38 +993,122 @@ export default function ProfilePage() {
           From concept to code, I work hand-in-hand with developers and designers—juxtaposing the intuitive with the curious to create delightful and engaging experiences for the world wide web
         </motion.p>
 
-        {/* PROFILE TEXT - Enhanced GSAP Animation */}
-        <div 
-          ref={profileContainerRef}
-          style={{
-            width: '100%',
-            marginTop: '100px',
-            marginBottom: '100px',
-            padding: '50px 0',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            overflow: 'visible',
-            perspective: '1000px'
-          }}
-        >
-          <div
-            ref={profileTextRef}
+        <div style={{
+          height: '1px',
+          backgroundColor: 'rgba(255,255,255,0.2)',
+          marginBottom: '1rem'
+        }} />
+
+        {/* TABLE STRUCTURE PRESERVED - EMPTY DATA */}
+        <div>
+          {tableData.length === 0 ? (
+            // Empty state with preserved table structure
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '4rem 2rem',
+              borderBottom: '1px solid rgba(255,255,255,0.2)',
+              color: 'rgba(255,255,255,0.4)',
+              fontSize: '1.2rem',
+              textAlign: 'center'
+            }}>
+              No data available
+            </div>
+          ) : (
+            tableData.map((item, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 + index * 0.05 }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: isMobile ? '1.5rem 0' : '2rem 0',
+                  borderBottom: '1px solid rgba(255,255,255,0.2)',
+                  cursor: 'pointer',
+                  transition: 'background-color 0.2s ease'
+                }}
+                whileHover={{
+                  backgroundColor: 'rgba(255,255,255,0.05)'
+                }}
+              >
+                <div style={{
+                  minWidth: isMobile ? '160px' : '240px'
+                }}>
+                  <span style={{
+                    color: 'white',
+                    fontSize: isMobile ? '1.1rem' : '1.4rem',
+                    fontWeight: '500'
+                  }}>
+                    {item.year}
+                  </span>
+                </div>
+
+                <div style={{
+                  flex: 1,
+                  padding: '0 2rem'
+                }}>
+                  <span style={{
+                    color: 'white',
+                    fontSize: isMobile ? '1.3rem' : '1.7rem',
+                    fontWeight: 'normal'
+                  }}>
+                    {item.title}
+                  </span>
+                </div>
+
+                <svg
+                  width={isMobile ? "28" : "34"}
+                  height={isMobile ? "28" : "34"}
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="white"
+                  strokeWidth="2.5"
+                  style={{ flexShrink: 0 }}
+                >
+                  <path d="M7 17L17 7" />
+                  <path d="M7 7h10v10" />
+                </svg>
+              </motion.div>
+            ))
+          )}
+          
+          {/* PROFILE TEXT - Enhanced GSAP Animation */}
+          <div 
+            ref={profileContainerRef}
             style={{
-              fontSize: isMobile ? '80px' : '490px',
-              fontWeight: 'normal',
-              color: 'white',
-              fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-              letterSpacing: '-0.02em',
-              lineHeight: '0.9',
-              textAlign: 'center',
-              whiteSpace: 'nowrap',
-              opacity: 0,
-              transformStyle: 'preserve-3d',
-              willChange: 'transform, opacity'
+              width: '100%',
+              marginTop: '100px',
+              marginBottom: '100px',
+              padding: '50px 0',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              overflow: 'visible',
+              perspective: '1000px'
             }}
           >
-            PROFILE
+            <div
+              ref={profileTextRef}
+              style={{
+                fontSize: isMobile ? '80px' : '490px',
+                fontWeight: 'normal',
+                color: 'white',
+                fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+                letterSpacing: '-0.02em',
+                lineHeight: '0.9',
+                textAlign: 'center',
+                whiteSpace: 'nowrap',
+                opacity: 0,
+                transformStyle: 'preserve-3d',
+                willChange: 'transform, opacity'
+              }}
+            >
+              PROFILE
+            </div>
           </div>
         </div>
       </div>
