@@ -79,9 +79,9 @@ export default function ProfilePage() {
   const [isLoginMode, setIsLoginMode] = useState(true);
   const [authError, setAuthError] = useState("");
   const [authName, setAuthName] = useState("");
-  const [showProfileText, setShowProfileText] = useState(false);
   const chatEndRef = useRef(null);
-  const profileTriggerRef = useRef(null);
+  const profileTextRef = useRef(null);
+  const profileContainerRef = useRef(null);
   
   const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
 
@@ -102,19 +102,6 @@ export default function ProfilePage() {
         setShowScrollButton(true);
       } else {
         setShowScrollButton(false);
-      }
-      
-      // Check if profile trigger is visible
-      if (profileTriggerRef.current) {
-        const rect = profileTriggerRef.current.getBoundingClientRect();
-        const windowHeight = window.innerHeight;
-        
-        // Show PROFILE text when trigger enters viewport
-        if (rect.top <= windowHeight) {
-          setShowProfileText(true);
-        } else {
-          setShowProfileText(false);
-        }
       }
     };
 
@@ -190,12 +177,62 @@ export default function ProfilePage() {
     };
   }, []);
 
+  // GSAP Animation for PROFILE text
   useEffect(() => {
-    // Scroll to bottom when messages change
-    if (chatEndRef.current) {
-      chatEndRef.current.scrollIntoView({ behavior: "smooth" });
+    if (typeof window === 'undefined') return;
+    
+    // Refresh ScrollTrigger after component mounts
+    ScrollTrigger.refresh();
+    
+    // Create GSAP timeline for PROFILE text animation
+    if (profileTextRef.current && profileContainerRef.current) {
+      // Set initial state
+      gsap.set(profileTextRef.current, {
+        opacity: 0,
+        y: 200,
+        scale: 0.8,
+        rotationX: 45,
+        transformOrigin: "center center"
+      });
+      
+      // Create scroll-triggered animation
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: profileContainerRef.current,
+          start: "top 80%",
+          end: "top 30%",
+          scrub: 1.2,
+          toggleActions: "play none none reverse",
+          onEnter: () => console.log("PROFILE entered viewport"),
+          onLeaveBack: () => console.log("PROFILE left viewport")
+        }
+      });
+      
+      tl.to(profileTextRef.current, {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        rotationX: 0,
+        duration: 1.5,
+        ease: "power2.out"
+      });
+      
+      // Add a subtle floating animation after reveal
+      gsap.to(profileTextRef.current, {
+        y: -15,
+        duration: 3,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut",
+        delay: 1.5
+      });
     }
-  }, [messages]);
+    
+    return () => {
+      // Clean up ScrollTrigger instances
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+    };
+  }, []);
 
   const handleAuth = async () => {
     setAuthError("");
@@ -307,19 +344,6 @@ export default function ProfilePage() {
       behavior: 'smooth'
     });
   };
-
-  const tableData = [
-    { year: "interview 2023", title: "Top Interactive Agencies Interview" },
-    { year: "interview 2022", title: "Lovers Magazine Interview" },
-    { year: "publication 2020", title: "Centogene Solutions" },
-    { year: "talk 2020", title: "Creative collaboration at WeTransfer" },
-    { year: "publication 2020", title: "Madeleine Dalla Site of the Month Insight" },
-    { year: "talk 2020", title: "Rendering Illusions at Awwwards" },
-    { year: "publication 2019", title: "Real-time Multiside Refraction in Three Steps" },
-    { year: "publication 2019", title: "Making a connected flip-dot installation" },
-    { year: "publication 2019", title: "Bandito Immersive Experience" },
-    { year: "publication 2018", title: "Resn's Little Help AR" },
-  ];
 
   return (
     <div style={{
@@ -966,114 +990,39 @@ export default function ProfilePage() {
           From concept to code, I work hand-in-hand with developers and designers—juxtaposing the intuitive with the curious to create delightful and engaging experiences for the world wide web
         </motion.p>
 
-        <div style={{
-          height: '1px',
-          backgroundColor: 'rgba(255,255,255,0.2)',
-          marginBottom: '1rem'
-        }} />
-
-        <div>
-          {tableData.map((item, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 + index * 0.05 }}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: isMobile ? '1.5rem 0' : '2rem 0',
-                borderBottom: '1px solid rgba(255,255,255,0.2)',
-                cursor: 'pointer',
-                transition: 'background-color 0.2s ease'
-              }}
-              whileHover={{
-                backgroundColor: 'rgba(255,255,255,0.05)'
-              }}
-            >
-              <div style={{
-                minWidth: isMobile ? '160px' : '240px'
-              }}>
-                <span style={{
-                  color: 'white',
-                  fontSize: isMobile ? '1.1rem' : '1.4rem',
-                  fontWeight: '500'
-                }}>
-                  {item.year}
-                </span>
-              </div>
-
-              <div style={{
-                flex: 1,
-                padding: '0 2rem'
-              }}>
-                <span style={{
-                  color: 'white',
-                  fontSize: isMobile ? '1.3rem' : '1.7rem',
-                  fontWeight: 'normal'
-                }}>
-                  {item.title}
-                </span>
-              </div>
-
-              <svg
-                width={isMobile ? "28" : "34"}
-                height={isMobile ? "28" : "34"}
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="white"
-                strokeWidth="2.5"
-                style={{ flexShrink: 0 }}
-              >
-                <path d="M7 17L17 7" />
-                <path d="M7 7h10v10" />
-              </svg>
-            </motion.div>
-          ))}
-          
-          {/* Trigger element for PROFILE text */}
-          <div ref={profileTriggerRef} style={{ height: '10px', marginTop: '50px' }} />
-          
-          {/* PROFILE TEXT - Full size 490px */}
-          <AnimatePresence mode="wait">
-            {showProfileText && (
-              <motion.div
-                initial={{ opacity: 0, y: 100 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 100 }}
-                transition={{ 
-                  duration: 0.8,
-                  ease: [0.25, 0.1, 0.25, 1]
-                }}
-                style={{
-                  width: '100%',
-                  marginTop: '50px',
-                  marginBottom: '50px',
-                  padding: '20px 0',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  overflow: 'visible'
-                }}
-              >
-                <div style={{
-                  fontSize: isMobile ? '80px' : '490px',
-                  fontWeight: 'normal',
-                  color: 'white',
-                  fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-                  letterSpacing: '-0.02em',
-                  lineHeight: '0.9',
-                  textAlign: 'center',
-                  whiteSpace: 'nowrap',
-                  opacity: 1,
-                  transform: 'scale(1)'
-                }}>
-                  PROFILE
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+        {/* PROFILE TEXT - Enhanced GSAP Animation */}
+        <div 
+          ref={profileContainerRef}
+          style={{
+            width: '100%',
+            marginTop: '100px',
+            marginBottom: '100px',
+            padding: '50px 0',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            overflow: 'visible',
+            perspective: '1000px'
+          }}
+        >
+          <div
+            ref={profileTextRef}
+            style={{
+              fontSize: isMobile ? '80px' : '490px',
+              fontWeight: 'normal',
+              color: 'white',
+              fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+              letterSpacing: '-0.02em',
+              lineHeight: '0.9',
+              textAlign: 'center',
+              whiteSpace: 'nowrap',
+              opacity: 0,
+              transformStyle: 'preserve-3d',
+              willChange: 'transform, opacity'
+            }}
+          >
+            PROFILE
+          </div>
         </div>
       </div>
 
