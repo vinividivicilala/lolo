@@ -80,8 +80,9 @@ export default function ProfilePage() {
   const [authError, setAuthError] = useState("");
   const [authName, setAuthName] = useState("");
   const chatEndRef = useRef(null);
-  const menuruTextRef = useRef(null);
-  const menuruContainerRef = useRef(null);
+  const profileTextRef = useRef(null);
+  const profileContainerRef = useRef(null);
+  const [profileAnimationCompleted, setProfileAnimationCompleted] = useState(false);
   
   const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
 
@@ -177,67 +178,49 @@ export default function ProfilePage() {
     };
   }, []);
 
-  // GSAP Animation for MENURU text - Improved with better scroll trigger
+  // GSAP Animation for MENURU text
   useEffect(() => {
     if (typeof window === 'undefined') return;
     
-    // Kill any existing ScrollTriggers to avoid conflicts
-    ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+    // Refresh ScrollTrigger after component mounts
+    ScrollTrigger.refresh();
     
-    // Small delay to ensure DOM is ready
-    setTimeout(() => {
-      if (menuruTextRef.current && menuruContainerRef.current) {
-        // Set initial state - hidden and transformed
-        gsap.set(menuruTextRef.current, {
-          opacity: 0,
-          y: 150,
-          scale: 0.7,
-          rotationX: 45,
-          transformOrigin: "center center",
-          filter: "blur(20px)"
-        });
-        
-        // Create scroll-triggered animation with scrub for smooth progress
-        const tl = gsap.timeline({
-          scrollTrigger: {
-            trigger: menuruContainerRef.current,
-            start: "top 85%",
-            end: "top 35%",
-            scrub: 0.8,
-            toggleActions: "play none none reverse",
-            invalidateOnRefresh: true,
-            onUpdate: (self) => {
-              console.log("Scroll progress:", self.progress);
-            }
-          }
-        });
-        
-        tl.to(menuruTextRef.current, {
-          opacity: 1,
-          y: 0,
-          scale: 1,
-          rotationX: 0,
-          filter: "blur(0px)",
-          duration: 1.5,
-          ease: "power2.out"
-        });
-        
-        // Add a subtle floating animation after reveal
-        gsap.to(menuruTextRef.current, {
-          y: -20,
-          duration: 2.5,
-          repeat: -1,
-          yoyo: true,
-          ease: "sine.inOut",
-          delay: 1
-        });
-      }
+    // Create GSAP timeline for MENURU text animation
+    if (profileTextRef.current && profileContainerRef.current) {
+      // Set initial state - hidden and transformed
+      gsap.set(profileTextRef.current, {
+        opacity: 0,
+        y: 150,
+        scale: 0.7,
+        rotationX: 30,
+        transformOrigin: "center center"
+      });
       
-      // Refresh ScrollTrigger to ensure proper calculation
-      ScrollTrigger.refresh();
-    }, 100);
+      // Create scroll-triggered animation
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: profileContainerRef.current,
+          start: "top 85%",
+          end: "top 40%",
+          scrub: 1,
+          toggleActions: "play none none reverse",
+          onComplete: () => setProfileAnimationCompleted(true),
+          onReverseComplete: () => setProfileAnimationCompleted(false)
+        }
+      });
+      
+      tl.to(profileTextRef.current, {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        rotationX: 0,
+        duration: 1.2,
+        ease: "power2.out"
+      });
+    }
     
     return () => {
+      // Clean up ScrollTrigger instances
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
   }, []);
@@ -463,7 +446,7 @@ export default function ProfilePage() {
                 Home
               </motion.span>
               <span style={{ color: 'rgba(255,255,255,0.4)' }}>/</span>
-              <span style={{ color: 'white', fontWeight: 'normal' }}>Profile</span>
+              <span style={{ color: 'white', fontWeight: 'normal' }}>MENURU</span>
             </motion.div>
           </div>
         </div>
@@ -958,38 +941,37 @@ export default function ProfilePage() {
         zIndex: 1
       }}>
         <motion.div 
-          style={{ marginBottom: '2rem' }}
+          style={{ marginBottom: '4rem' }}
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
           <h1 style={{
             color: 'white',
-            fontSize: isMobile ? '1.8rem' : '48px',
+            fontSize: isMobile ? '2rem' : '60px',
             lineHeight: 1.2,
             margin: 0,
             fontWeight: 'normal',
-            textAlign: 'center'
+            maxWidth: '800px'
           }}>
-            Kamu Bisa Mencatat, Menemukan Ide, dan Mendonasikan Uang Kamu Yang Membutuhkan
+            You can take notes, find ideas, and donate money to those in need
           </h1>
         </motion.div>
 
         <motion.p 
           style={{
             color: 'rgba(255,255,255,0.7)',
-            fontSize: isMobile ? '0.9rem' : '18px',
-            maxWidth: '800px',
-            margin: '0 auto 4rem auto',
+            fontSize: isMobile ? '1rem' : '20px',
+            maxWidth: '700px',
+            marginBottom: '4rem',
             fontWeight: 'normal',
-            textAlign: 'center',
-            lineHeight: 1.6
+            lineHeight: 1.5
           }}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
         >
-          From concept to brand menuru, I work and think watch to watch with expert developers and designers to media social — perseverance the intuitive with the curious to create delightful and engaging experiences for the world wide web
+          From concept to brand, I work and think watch to watch with expert developers and designers to media social — perseverance the intuitive with the curious to create delightful and engaging experiences for the world wide web
         </motion.p>
 
         <div style={{
@@ -1075,36 +1057,38 @@ export default function ProfilePage() {
             ))
           )}
           
-          {/* MENURU TEXT - Enhanced GSAP Animation with Scroll Trigger */}
+          {/* MENURU TEXT - Enhanced GSAP Animation, static after completion */}
           <div 
-            ref={menuruContainerRef}
+            ref={profileContainerRef}
             style={{
               width: '100%',
               marginTop: '100px',
               marginBottom: '100px',
-              padding: '80px 0',
+              padding: '50px 0',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               overflow: 'visible',
               perspective: '1000px',
-              minHeight: '400px'
+              minHeight: isMobile ? '200px' : '600px'
             }}
           >
             <div
-              ref={menuruTextRef}
+              ref={profileTextRef}
               style={{
-                fontSize: isMobile ? '80px' : '350px',
-                fontWeight: 'bold',
+                fontSize: isMobile ? '80px' : '490px',
+                fontWeight: 'normal',
                 color: 'white',
                 fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
                 letterSpacing: '-0.02em',
                 lineHeight: '0.9',
                 textAlign: 'center',
                 whiteSpace: 'nowrap',
-                opacity: 0,
+                opacity: profileAnimationCompleted ? 1 : 0,
+                transform: profileAnimationCompleted ? 'translateY(0) scale(1) rotateX(0deg)' : 'translateY(150px) scale(0.7) rotateX(30deg)',
                 transformStyle: 'preserve-3d',
-                willChange: 'transform, opacity, filter'
+                willChange: 'transform, opacity',
+                transition: profileAnimationCompleted ? 'none' : 'all 0s'
               }}
             >
               MENURU
