@@ -940,6 +940,7 @@ export default function ProfilePage() {
         position: 'relative',
         zIndex: 1
       }}>
+        {/* TWO-LINE TITLE - Fixed to span to the right side */}
         <motion.div 
           style={{ marginBottom: '4rem' }}
           initial={{ opacity: 0, y: 30 }}
@@ -952,9 +953,10 @@ export default function ProfilePage() {
             lineHeight: 1.2,
             margin: 0,
             fontWeight: 'normal',
-            maxWidth: '800px'
+            width: '100%'
           }}>
-            You can take notes, find ideas, and donate money to those in need
+            <div>You can take notes,</div>
+            <div>find ideas, and donate money to those in need</div>
           </h1>
         </motion.div>
 
