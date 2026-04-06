@@ -941,24 +941,34 @@ export default function ProfilePage() {
         zIndex: 1
       }}>
         <motion.div 
-          style={{ marginBottom: '4rem' }}
+          style={{ marginBottom: '3rem' }}
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
           <h1 style={{
             color: 'white',
-            fontSize: isMobile ? '2rem' : '60px',
+            fontSize: isMobile ? '2rem' : '70px',
             lineHeight: 1.2,
             margin: 0,
             fontWeight: 'normal',
-            maxWidth: '800px'
+            maxWidth: '900px'
           }}>
-            You can take notes, find ideas, and donate money to those in need
+            You can take notes, find ideas,
+          </h1>
+          <h1 style={{
+            color: 'white',
+            fontSize: isMobile ? '2rem' : '70px',
+            lineHeight: 1.2,
+            margin: 0,
+            fontWeight: 'normal',
+            maxWidth: '900px'
+          }}>
+            and donate money to those in need
           </h1>
         </motion.div>
 
-        <motion.p 
+        <motion.div 
           style={{
             color: 'rgba(255,255,255,0.7)',
             fontSize: isMobile ? '1rem' : '20px',
@@ -971,8 +981,11 @@ export default function ProfilePage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
         >
-          From concept to brand, I work and think watch to watch with expert developers and designers to media social — perseverance the intuitive with the curious to create delightful and engaging experiences for the world wide web
-        </motion.p>
+          <p style={{ margin: 0 }}>From concept to brand, I work and think watch to watch</p>
+          <p style={{ margin: 0 }}>with expert developers and designers to media social —</p>
+          <p style={{ margin: 0 }}>perseverance the intuitive with the curious to create</p>
+          <p style={{ margin: 0 }}>delightful and engaging experiences for the world wide web</p>
+        </motion.div>
 
         <div style={{
           height: '1px',
@@ -1057,27 +1070,27 @@ export default function ProfilePage() {
             ))
           )}
           
-          {/* MENURU TEXT - Enhanced GSAP Animation, static after completion */}
+          {/* MENURU TEXT - Large and bold */}
           <div 
             ref={profileContainerRef}
             style={{
               width: '100%',
-              marginTop: '100px',
-              marginBottom: '100px',
-              padding: '50px 0',
+              marginTop: '80px',
+              marginBottom: '80px',
+              padding: '40px 0',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               overflow: 'visible',
               perspective: '1000px',
-              minHeight: isMobile ? '200px' : '600px'
+              minHeight: isMobile ? '200px' : '500px'
             }}
           >
             <div
               ref={profileTextRef}
               style={{
-                fontSize: isMobile ? '80px' : '490px',
-                fontWeight: 'normal',
+                fontSize: isMobile ? '100px' : '420px',
+                fontWeight: 'bold',
                 color: 'white',
                 fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
                 letterSpacing: '-0.02em',
