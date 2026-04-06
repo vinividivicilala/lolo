@@ -86,6 +86,34 @@ export default function ProfilePage() {
   
   const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
 
+  // Table data
+  const tableData = [
+    {
+      id: 1,
+      title: "Catatan",
+      description: "Buat dan kelola catatan penting Anda dengan mudah",
+      link: "/notes"
+    },
+    {
+      id: 2,
+      title: "Donasi",
+      description: "Bantu mereka yang membutuhkan melalui donasi Anda",
+      link: "/donation"
+    },
+    {
+      id: 3,
+      title: "Komunitas",
+      description: "Bergabung dengan komunitas dan berbagi ide",
+      link: "/community"
+    },
+    {
+      id: 4,
+      title: "Calendar",
+      description: "Atur jadwal dan rencana kegiatan Anda",
+      link: "/calendar"
+    }
+  ];
+
   // Check if user is admin
   const checkIsAdmin = (user) => {
     return user?.email === ADMIN_EMAIL;
@@ -336,8 +364,9 @@ export default function ProfilePage() {
     });
   };
 
-  // Empty table data - structure preserved but no content
-  const tableData = [];
+  const handleRowClick = (link) => {
+    router.push(link);
+  };
 
   return (
     <div style={{
@@ -940,7 +969,7 @@ export default function ProfilePage() {
         position: 'relative',
         zIndex: 1
       }}>
-        {/* TWO-LINE TITLE - Fixed to span to the right side */}
+        {/* TWO-LINE TITLE */}
         <motion.div 
           style={{ marginBottom: '4rem' }}
           initial={{ opacity: 0, y: 30 }}
@@ -979,85 +1008,101 @@ export default function ProfilePage() {
         <div style={{
           height: '1px',
           backgroundColor: 'rgba(255,255,255,0.2)',
-          marginBottom: '1rem'
+          marginBottom: '2rem'
         }} />
 
-        {/* TABLE STRUCTURE PRESERVED - EMPTY DATA */}
+        {/* TABLE WITH 4 ROWS */}
         <div>
-          {tableData.length === 0 ? (
-            // Empty state with preserved table structure
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: '4rem 2rem',
-              borderBottom: '1px solid rgba(255,255,255,0.2)',
-              color: 'rgba(255,255,255,0.4)',
-              fontSize: '1.2rem',
-              textAlign: 'center'
-            }}>
-              No data available
-            </div>
-          ) : (
-            tableData.map((item, index) => (
+          {tableData.map((item, index) => (
+            <motion.div
+              key={item.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 + index * 0.1 }}
+              onClick={() => handleRowClick(item.link)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: isMobile ? '1.5rem 0' : '2rem 0',
+                borderBottom: index === tableData.length - 1 ? 'none' : '1px solid rgba(255,255,255,0.2)',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                gap: isMobile ? '1rem' : '2rem'
+              }}
+              whileHover={{
+                backgroundColor: 'rgba(255,255,255,0.05)',
+                paddingLeft: '1rem',
+                paddingRight: '1rem',
+                marginLeft: '-1rem',
+                marginRight: '-1rem',
+                borderRadius: '8px'
+              }}
+            >
+              {/* Left Column - Title */}
+              <div style={{
+                minWidth: isMobile ? '100px' : '180px',
+                flexShrink: 0
+              }}>
+                <span style={{
+                  color: 'white',
+                  fontSize: isMobile ? '1.3rem' : '1.8rem',
+                  fontWeight: '500',
+                  letterSpacing: '-0.02em'
+                }}>
+                  {item.title}
+                </span>
+              </div>
+
+              {/* Middle Column - Description */}
+              <div style={{
+                flex: 1,
+                paddingRight: isMobile ? '1rem' : '2rem'
+              }}>
+                <span style={{
+                  color: 'rgba(255,255,255,0.7)',
+                  fontSize: isMobile ? '0.9rem' : '1.1rem',
+                  fontWeight: 'normal',
+                  lineHeight: 1.4
+                }}>
+                  {item.description}
+                </span>
+              </div>
+
+              {/* Right Column - Arrow SVG */}
               <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 + index * 0.05 }}
                 style={{
+                  flexShrink: 0,
                   display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: isMobile ? '1.5rem 0' : '2rem 0',
-                  borderBottom: '1px solid rgba(255,255,255,0.2)',
-                  cursor: 'pointer',
-                  transition: 'background-color 0.2s ease'
+                  alignItems: 'center'
                 }}
-                whileHover={{
-                  backgroundColor: 'rgba(255,255,255,0.05)'
-                }}
+                whileHover={{ x: 5 }}
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
               >
-                <div style={{
-                  minWidth: isMobile ? '160px' : '240px'
-                }}>
-                  <span style={{
-                    color: 'white',
-                    fontSize: isMobile ? '1.1rem' : '1.4rem',
-                    fontWeight: '500'
-                  }}>
-                    {item.year}
-                  </span>
-                </div>
-
-                <div style={{
-                  flex: 1,
-                  padding: '0 2rem'
-                }}>
-                  <span style={{
-                    color: 'white',
-                    fontSize: isMobile ? '1.3rem' : '1.7rem',
-                    fontWeight: 'normal'
-                  }}>
-                    {item.title}
-                  </span>
-                </div>
-
                 <svg
-                  width={isMobile ? "28" : "34"}
-                  height={isMobile ? "28" : "34"}
+                  width={isMobile ? "24" : "32"}
+                  height={isMobile ? "24" : "32"}
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="white"
-                  strokeWidth="2.5"
-                  style={{ flexShrink: 0 }}
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 >
-                  <path d="M7 17L17 7" />
-                  <path d="M7 7h10v10" />
+                  <path d="M5 12h14" />
+                  <path d="m12 5 7 7-7 7" />
                 </svg>
               </motion.div>
-            ))
-          )}
+            </motion.div>
+          ))}
+        </div>
+
+        <div style={{
+          height: '1px',
+          backgroundColor: 'rgba(255,255,255,0.2)',
+          marginTop: '2rem',
+          marginBottom: '2rem'
+        }} />
           
           {/* MENURU TEXT - Enhanced GSAP Animation, static after completion */}
           <div 
@@ -1097,7 +1142,7 @@ export default function ProfilePage() {
             </div>
           </div>
         </div>
-      </div>
+      
 
       {/* Scroll to Top Button */}
       <motion.button
