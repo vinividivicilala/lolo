@@ -79,7 +79,7 @@ export default function ProfilePage() {
   const [isLoginMode, setIsLoginMode] = useState(true);
   const [authError, setAuthError] = useState("");
   const [authName, setAuthName] = useState("");
-  const [selectedOverlay, setSelectedOverlay] = useState(null);
+  const [expandedItem, setExpandedItem] = useState(null);
   const chatEndRef = useRef(null);
   const profileTextRef = useRef(null);
   const profileContainerRef = useRef(null);
@@ -87,25 +87,28 @@ export default function ProfilePage() {
   
   const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
 
-  // Table data
+  // Table data with detailed content
   const tableData = [
     {
       id: 1,
       title: "Catatan",
       description: "Buat dan kelola catatan penting Anda dengan mudah",
       link: "/notes",
-      content: {
-        title: "📝 Catatan",
-        description: "Fitur Catatan memungkinkan Anda untuk:",
+      detailedContent: {
+        overview: "Fitur Catatan adalah solusi lengkap untuk mengorganisir semua ide, tugas, dan informasi penting Anda dalam satu tempat yang rapi dan mudah diakses.",
         features: [
-          "Membuat catatan baru dengan mudah",
-          "Menyunting dan menghapus catatan",
-          "Mengatur catatan berdasarkan kategori",
-          "Mencari catatan dengan cepat",
-          "Menyimpan catatan penting",
-          "Berbagi catatan dengan teman"
+          "Membuat catatan baru dengan antarmuka yang intuitif",
+          "Menyunting dan menghapus catatan dengan mudah",
+          "Mengatur catatan berdasarkan kategori dan tag",
+          "Mencari catatan dengan cepat menggunakan fitur search",
+          "Menyimpan catatan penting ke folder favorit",
+          "Berbagi catatan dengan teman atau kolega",
+          "Sinkronisasi otomatis ke semua perangkat",
+          "Mode offline untuk akses tanpa internet"
         ],
-        benefits: "Dengan fitur Catatan, Anda dapat mengorganisir ide, tugas, dan informasi penting dalam satu tempat yang rapi dan mudah diakses."
+        benefits: "Dengan fitur Catatan, produktivitas Anda akan meningkat drastis. Tidak perlu lagi khawatir kehilangan ide-ide brilian atau lupa dengan tugas penting. Semua tersimpan rapi dan dapat diakses kapan saja, di mana saja.",
+        image: "📝",
+        stats: "Aktif digunakan oleh 10,000+ pengguna"
       }
     },
     {
@@ -113,18 +116,21 @@ export default function ProfilePage() {
       title: "Donasi",
       description: "Bantu mereka yang membutuhkan melalui donasi Anda",
       link: "/donation",
-      content: {
-        title: "💝 Donasi",
-        description: "Melalui fitur Donasi, Anda dapat:",
+      detailedContent: {
+        overview: "Fitur Donasi memungkinkan Anda untuk berkontribusi dalam berbagai program sosial dan kemanusiaan dengan mudah, aman, dan transparan.",
         features: [
           "Mendonasikan dana untuk berbagai program sosial",
-          "Melacak riwayat donasi Anda",
-          "Melihat dampak dari donasi yang diberikan",
-          "Berpartisipasi dalam kampanye donasi",
-          "Membantu pendidikan anak-anak",
-          "Mendukung kesehatan masyarakat"
+          "Melacak riwayat donasi Anda secara real-time",
+          "Melihat dampak langsung dari donasi yang diberikan",
+          "Berpartisipasi dalam kampanye donasi bulanan",
+          "Membantu pendidikan anak-anak kurang mampu",
+          "Mendukung program kesehatan masyarakat",
+          "Donasi untuk bencana alam dan darurat",
+          "Laporan keuangan yang transparan"
         ],
-        benefits: "Setiap donasi yang Anda berikan akan membantu meningkatkan kualitas hidup mereka yang membutuhkan dan menciptakan perubahan positif."
+        benefits: "Setiap donasi yang Anda berikan akan membantu meningkatkan kualitas hidup mereka yang membutuhkan. Anda bisa melihat langsung perubahan positif yang terjadi berkat kontribusi Anda. Donasi Anda, masa depan mereka.",
+        image: "💝",
+        stats: "Telah menyalurkan Rp 5M+ donasi"
       }
     },
     {
@@ -132,18 +138,21 @@ export default function ProfilePage() {
       title: "Komunitas",
       description: "Bergabung dengan komunitas dan berbagi ide",
       link: "/community",
-      content: {
-        title: "👥 Komunitas",
-        description: "Fitur Komunitas menghadirkan:",
+      detailedContent: {
+        overview: "Komunitas adalah wadah bagi Anda untuk terhubung dengan ribuan anggota lainnya, berbagi pengetahuan, dan berkolaborasi dalam berbagai proyek menarik.",
         features: [
-          "Forum diskusi interaktif",
-          "Berbagi pengetahuan dan pengalaman",
-          "Kolaborasi proyek bersama",
-          "Event dan meetup komunitas",
-          "Mentoring antar anggota",
-          "Networking dengan profesional"
+          "Forum diskusi interaktif dengan berbagai topik",
+          "Berbagi pengetahuan dan pengalaman dengan sesama",
+          "Kolaborasi proyek bersama anggota lain",
+          "Event dan meetup komunitas rutin",
+          "Program mentoring dari para ahli",
+          "Networking dengan profesional berbagai bidang",
+          "Grup diskusi berdasarkan minat",
+          "Challenge dan kompetisi menarik"
         ],
-        benefits: "Bergabunglah dengan ribuan anggota lainnya untuk bertukar ide, belajar hal baru, dan membangun koneksi berharga."
+        benefits: "Bergabunglah dengan komunitas kami dan rasakan pengalaman belajar dan berkembang bersama. Dapatkan inspirasi baru, temukan teman sevisi, dan bangun koneksi yang berharga untuk masa depan Anda.",
+        image: "👥",
+        stats: "50,000+ anggota aktif"
       }
     },
     {
@@ -151,18 +160,21 @@ export default function ProfilePage() {
       title: "Calendar",
       description: "Atur jadwal dan rencana kegiatan Anda",
       link: "/calendar",
-      content: {
-        title: "📅 Calendar",
-        description: "Fitur Calendar membantu Anda:",
+      detailedContent: {
+        overview: "Calendar adalah alat manajemen waktu yang powerful untuk membantu Anda mengatur jadwal, meeting, dan deadline dengan efisien.",
         features: [
           "Mengelola jadwal harian, mingguan, dan bulanan",
-          "Membuat pengingat untuk event penting",
-          "Sinkronisasi dengan Google Calendar",
-          "Berbagi jadwal dengan tim",
-          "Melacak deadline proyek",
-          "Merencanakan kegiatan masa depan"
+          "Membuat pengingat untuk event-event penting",
+          "Sinkronisasi dengan Google Calendar dan iCal",
+          "Berbagi jadwal dengan tim atau keluarga",
+          "Melacak deadline proyek dengan visual timeline",
+          "Merencanakan kegiatan masa depan dengan mudah",
+          "Notifikasi real-time untuk jadwal mendatang",
+          "Export dan import jadwal dalam berbagai format"
         ],
-        benefits: "Dengan Calendar, Anda dapat mengatur waktu dengan lebih efisien dan tidak pernah melewatkan event penting lagi."
+        benefits: "Dengan Calendar, Anda dapat mengatur waktu dengan lebih efisien dan tidak pernah melewatkan event penting lagi. Tingkatkan produktivitas dan work-life balance Anda dengan perencanaan yang matang.",
+        image: "📅",
+        stats: "Mengatur 1M+ event setiap bulan"
       }
     }
   ];
@@ -417,15 +429,12 @@ export default function ProfilePage() {
     });
   };
 
-  const handleRowClick = (item) => {
-    setSelectedOverlay(item);
-    // Prevent body scroll when overlay is open
-    document.body.style.overflow = 'hidden';
-  };
-
-  const closeOverlay = () => {
-    setSelectedOverlay(null);
-    document.body.style.overflow = 'auto';
+  const toggleExpand = (itemId) => {
+    if (expandedItem === itemId) {
+      setExpandedItem(null);
+    } else {
+      setExpandedItem(itemId);
+    }
   };
 
   return (
@@ -1021,189 +1030,6 @@ export default function ProfilePage() {
         )}
       </AnimatePresence>
 
-      {/* OVERLAY MODAL */}
-      <AnimatePresence>
-        {selectedOverlay && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              backgroundColor: 'rgba(0,0,0,0.95)',
-              zIndex: 1000,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: '2rem',
-              overflowY: 'auto'
-            }}
-            onClick={closeOverlay}
-          >
-            <motion.div
-              initial={{ scale: 0.9, y: 50 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.9, y: 50 }}
-              style={{
-                maxWidth: '800px',
-                width: '100%',
-                backgroundColor: '#1a1a1a',
-                borderRadius: '20px',
-                padding: isMobile ? '2rem' : '3rem',
-                position: 'relative',
-                border: '1px solid rgba(255,255,255,0.1)'
-              }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Close Button */}
-              <motion.button
-                onClick={closeOverlay}
-                style={{
-                  position: 'absolute',
-                  top: '1rem',
-                  right: '1rem',
-                  background: 'rgba(255,255,255,0.1)',
-                  border: 'none',
-                  borderRadius: '50%',
-                  width: '40px',
-                  height: '40px',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'white'
-                }}
-                whileHover={{ scale: 1.1, backgroundColor: 'rgba(255,255,255,0.2)' }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M18 6L6 18" />
-                  <path d="M6 6l12 12" />
-                </svg>
-              </motion.button>
-
-              {/* Content */}
-              <div>
-                <motion.h2
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 }}
-                  style={{
-                    fontSize: isMobile ? '2rem' : '3rem',
-                    color: 'white',
-                    marginBottom: '1rem',
-                    fontWeight: '500'
-                  }}
-                >
-                  {selectedOverlay.content.title}
-                </motion.h2>
-                
-                <motion.p
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                  style={{
-                    fontSize: '1.1rem',
-                    color: 'rgba(255,255,255,0.8)',
-                    marginBottom: '2rem',
-                    lineHeight: 1.6
-                  }}
-                >
-                  {selectedOverlay.content.description}
-                </motion.p>
-
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.3 }}
-                >
-                  <div style={{
-                    display: 'grid',
-                    gap: '1rem',
-                    marginBottom: '2rem'
-                  }}>
-                    {selectedOverlay.content.features.map((feature, idx) => (
-                      <motion.div
-                        key={idx}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.4 + idx * 0.1 }}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '1rem',
-                          padding: '0.75rem',
-                          backgroundColor: 'rgba(255,255,255,0.05)',
-                          borderRadius: '8px',
-                          borderLeft: '3px solid white'
-                        }}
-                      >
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-                          <path d="M20 6L9 17l-5-5" />
-                        </svg>
-                        <span style={{ color: 'white', fontSize: '1rem' }}>{feature}</span>
-                      </motion.div>
-                    ))}
-                  </div>
-                </motion.div>
-
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.8 }}
-                  style={{
-                    padding: '1.5rem',
-                    backgroundColor: 'rgba(255,255,255,0.05)',
-                    borderRadius: '12px',
-                    marginTop: '1rem'
-                  }}
-                >
-                  <p style={{
-                    color: 'rgba(255,255,255,0.9)',
-                    fontSize: '1rem',
-                    lineHeight: 1.6,
-                    margin: 0
-                  }}>
-                    <strong style={{ color: 'white' }}>✨ Manfaat: </strong>
-                    {selectedOverlay.content.benefits}
-                  </p>
-                </motion.div>
-
-                <motion.button
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.9 }}
-                  onClick={() => {
-                    router.push(selectedOverlay.link);
-                    closeOverlay();
-                  }}
-                  style={{
-                    width: '100%',
-                    padding: '1rem',
-                    marginTop: '2rem',
-                    backgroundColor: 'white',
-                    color: 'black',
-                    border: 'none',
-                    borderRadius: '8px',
-                    fontSize: '1rem',
-                    fontWeight: '500',
-                    cursor: 'pointer'
-                  }}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  Explore {selectedOverlay.title} →
-                </motion.button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* MAIN CONTENT */}
       <div style={{
         maxWidth: '1100px',
@@ -1251,96 +1077,264 @@ export default function ProfilePage() {
         <div style={{
           height: '1px',
           backgroundColor: 'rgba(255,255,255,0.2)',
-          marginBottom: '1.5rem'
+          marginBottom: '1rem'
         }} />
 
-        {/* TABLE WITH CLOSER SPACING AND NORTH EAST ARROW */}
+        {/* TABLE WITH CLOSER SPACING AND INLINE EXPANDABLE CONTENT */}
         <div>
           {tableData.map((item, index) => (
-            <motion.div
-              key={item.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 + index * 0.1 }}
-              onClick={() => handleRowClick(item)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: isMobile ? '0.75rem 0' : '0.8rem 0',
-                borderBottom: '1px solid rgba(255,255,255,0.15)',
-                cursor: 'pointer',
-                transition: 'all 0.3s ease',
-                gap: isMobile ? '1rem' : '2rem'
-              }}
-              whileHover={{
-                backgroundColor: 'rgba(255,255,255,0.03)',
-                paddingLeft: '0.5rem',
-                paddingRight: '0.5rem'
-              }}
-            >
-              {/* Left Column - Title */}
-              <div style={{
-                minWidth: isMobile ? '100px' : '150px',
-                flexShrink: 0
-              }}>
-                <span style={{
-                  color: 'white',
-                  fontSize: isMobile ? '1.2rem' : '1.5rem',
-                  fontWeight: '500',
-                  letterSpacing: '-0.02em'
-                }}>
-                  {item.title}
-                </span>
-              </div>
-
-              {/* Middle Column - Description */}
-              <div style={{
-                flex: 1,
-                paddingRight: isMobile ? '1rem' : '2rem'
-              }}>
-                <span style={{
-                  color: 'rgba(255,255,255,0.6)',
-                  fontSize: isMobile ? '0.85rem' : '1rem',
-                  fontWeight: 'normal',
-                  lineHeight: 1.4
-                }}>
-                  {item.description}
-                </span>
-              </div>
-
-              {/* Right Column - North East Arrow SVG */}
+            <React.Fragment key={item.id}>
               <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 + index * 0.1 }}
+                onClick={() => toggleExpand(item.id)}
                 style={{
-                  flexShrink: 0,
                   display: 'flex',
-                  alignItems: 'center'
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: isMobile ? '0.6rem 0' : '0.7rem 0',
+                  borderBottom: expandedItem === item.id ? 'none' : '1px solid rgba(255,255,255,0.15)',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  gap: isMobile ? '1rem' : '2rem'
                 }}
-                whileHover={{ x: 5, y: -5 }}
-                transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                whileHover={{
+                  backgroundColor: 'rgba(255,255,255,0.03)',
+                  paddingLeft: '0.5rem',
+                  paddingRight: '0.5rem'
+                }}
               >
-                <svg
-                  width={isMobile ? "20" : "24"}
-                  height={isMobile ? "20" : "24"}
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="white"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
+                {/* Left Column - Title */}
+                <div style={{
+                  minWidth: isMobile ? '100px' : '150px',
+                  flexShrink: 0
+                }}>
+                  <span style={{
+                    color: 'white',
+                    fontSize: isMobile ? '1.2rem' : '1.5rem',
+                    fontWeight: '500',
+                    letterSpacing: '-0.02em'
+                  }}>
+                    {item.title}
+                  </span>
+                </div>
+
+                {/* Middle Column - Description */}
+                <div style={{
+                  flex: 1,
+                  paddingRight: isMobile ? '1rem' : '2rem'
+                }}>
+                  <span style={{
+                    color: 'rgba(255,255,255,0.6)',
+                    fontSize: isMobile ? '0.85rem' : '1rem',
+                    fontWeight: 'normal',
+                    lineHeight: 1.4
+                  }}>
+                    {item.description}
+                  </span>
+                </div>
+
+                {/* Right Column - North East Arrow SVG */}
+                <motion.div
+                  style={{
+                    flexShrink: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    transform: expandedItem === item.id ? 'rotate(45deg)' : 'rotate(0deg)'
+                  }}
+                  animate={{ rotate: expandedItem === item.id ? 45 : 0 }}
+                  transition={{ duration: 0.3 }}
                 >
-                  <path d="M7 7h10v10" />
-                  <path d="M7 17 17 7" />
-                </svg>
+                  <svg
+                    width={isMobile ? "20" : "24"}
+                    height={isMobile ? "20" : "24"}
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="white"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M7 7h10v10" />
+                    <path d="M7 17 17 7" />
+                  </svg>
+                </motion.div>
               </motion.div>
-            </motion.div>
+
+              {/* Expanded Content - Inline with main page */}
+              <AnimatePresence>
+                {expandedItem === item.id && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.4, ease: "easeInOut" }}
+                    style={{
+                      overflow: 'hidden',
+                      borderBottom: '1px solid rgba(255,255,255,0.15)'
+                    }}
+                  >
+                    <div style={{
+                      padding: isMobile ? '1.5rem 0.5rem' : '2rem 1rem',
+                      backgroundColor: 'rgba(255,255,255,0.02)',
+                      borderRadius: '8px',
+                      marginBottom: '0.5rem'
+                    }}>
+                      {/* Header with icon and title */}
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '1rem',
+                        marginBottom: '1.5rem'
+                      }}>
+                        <span style={{ fontSize: '2.5rem' }}>{item.detailedContent.image}</span>
+                        <h3 style={{
+                          color: 'white',
+                          fontSize: isMobile ? '1.5rem' : '2rem',
+                          margin: 0,
+                          fontWeight: '500'
+                        }}>
+                          {item.title}
+                        </h3>
+                      </div>
+
+                      {/* Overview */}
+                      <div style={{
+                        marginBottom: '1.5rem',
+                        padding: '1rem',
+                        backgroundColor: 'rgba(255,255,255,0.05)',
+                        borderRadius: '8px',
+                        borderLeft: '3px solid white'
+                      }}>
+                        <p style={{
+                          color: 'rgba(255,255,255,0.9)',
+                          fontSize: '1rem',
+                          lineHeight: 1.6,
+                          margin: 0
+                        }}>
+                          {item.detailedContent.overview}
+                        </p>
+                      </div>
+
+                      {/* Features Grid */}
+                      <div style={{ marginBottom: '1.5rem' }}>
+                        <h4 style={{
+                          color: 'white',
+                          fontSize: '1.2rem',
+                          marginBottom: '1rem',
+                          fontWeight: '500'
+                        }}>
+                          ✨ Fitur Unggulan:
+                        </h4>
+                        <div style={{
+                          display: 'grid',
+                          gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)',
+                          gap: '0.75rem'
+                        }}>
+                          {item.detailedContent.features.map((feature, idx) => (
+                            <motion.div
+                              key={idx}
+                              initial={{ opacity: 0, x: -20 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ delay: idx * 0.05 }}
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.75rem',
+                                padding: '0.6rem',
+                                backgroundColor: 'rgba(255,255,255,0.03)',
+                                borderRadius: '6px'
+                              }}
+                            >
+                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4ade80" strokeWidth="2">
+                                <path d="M20 6L9 17l-5-5" />
+                              </svg>
+                              <span style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.9rem' }}>
+                                {feature}
+                              </span>
+                            </motion.div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Benefits */}
+                      <div style={{
+                        marginBottom: '1.5rem',
+                        padding: '1rem',
+                        background: 'linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)',
+                        borderRadius: '8px'
+                      }}>
+                        <h4 style={{
+                          color: 'white',
+                          fontSize: '1.1rem',
+                          marginBottom: '0.75rem',
+                          fontWeight: '500'
+                        }}>
+                          🎯 Manfaat:
+                        </h4>
+                        <p style={{
+                          color: 'rgba(255,255,255,0.85)',
+                          fontSize: '0.95rem',
+                          lineHeight: 1.6,
+                          margin: 0
+                        }}>
+                          {item.detailedContent.benefits}
+                        </p>
+                      </div>
+
+                      {/* Stats */}
+                      <div style={{
+                        display: 'inline-block',
+                        padding: '0.5rem 1rem',
+                        backgroundColor: 'rgba(255,255,255,0.1)',
+                        borderRadius: '20px',
+                        marginBottom: '1rem'
+                      }}>
+                        <span style={{
+                          color: '#4ade80',
+                          fontSize: '0.85rem',
+                          fontWeight: '500'
+                        }}>
+                          📊 {item.detailedContent.stats}
+                        </span>
+                      </div>
+
+                      {/* Action Button */}
+                      <motion.button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          router.push(item.link);
+                        }}
+                        style={{
+                          width: '100%',
+                          padding: '0.8rem',
+                          backgroundColor: 'white',
+                          color: 'black',
+                          border: 'none',
+                          borderRadius: '8px',
+                          fontSize: '1rem',
+                          fontWeight: '500',
+                          cursor: 'pointer',
+                          marginTop: '1rem'
+                        }}
+                        whileHover={{ scale: 1.02, backgroundColor: '#f0f0f0' }}
+                        whileTap={{ scale: 0.98 }}
+                      >
+                        Explore {item.title} →
+                      </motion.button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </React.Fragment>
           ))}
         </div>
 
         <div style={{
           height: '1px',
           backgroundColor: 'rgba(255,255,255,0.2)',
-          marginTop: '1.5rem',
+          marginTop: '1rem',
           marginBottom: '2rem'
         }} />
           
