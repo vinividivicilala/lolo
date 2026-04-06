@@ -79,6 +79,7 @@ export default function ProfilePage() {
   const [isLoginMode, setIsLoginMode] = useState(true);
   const [authError, setAuthError] = useState("");
   const [authName, setAuthName] = useState("");
+  const [selectedOverlay, setSelectedOverlay] = useState(null);
   const chatEndRef = useRef(null);
   const profileTextRef = useRef(null);
   const profileContainerRef = useRef(null);
@@ -92,25 +93,77 @@ export default function ProfilePage() {
       id: 1,
       title: "Catatan",
       description: "Buat dan kelola catatan penting Anda dengan mudah",
-      link: "/notes"
+      link: "/notes",
+      content: {
+        title: "📝 Catatan",
+        description: "Fitur Catatan memungkinkan Anda untuk:",
+        features: [
+          "Membuat catatan baru dengan mudah",
+          "Menyunting dan menghapus catatan",
+          "Mengatur catatan berdasarkan kategori",
+          "Mencari catatan dengan cepat",
+          "Menyimpan catatan penting",
+          "Berbagi catatan dengan teman"
+        ],
+        benefits: "Dengan fitur Catatan, Anda dapat mengorganisir ide, tugas, dan informasi penting dalam satu tempat yang rapi dan mudah diakses."
+      }
     },
     {
       id: 2,
       title: "Donasi",
       description: "Bantu mereka yang membutuhkan melalui donasi Anda",
-      link: "/donation"
+      link: "/donation",
+      content: {
+        title: "💝 Donasi",
+        description: "Melalui fitur Donasi, Anda dapat:",
+        features: [
+          "Mendonasikan dana untuk berbagai program sosial",
+          "Melacak riwayat donasi Anda",
+          "Melihat dampak dari donasi yang diberikan",
+          "Berpartisipasi dalam kampanye donasi",
+          "Membantu pendidikan anak-anak",
+          "Mendukung kesehatan masyarakat"
+        ],
+        benefits: "Setiap donasi yang Anda berikan akan membantu meningkatkan kualitas hidup mereka yang membutuhkan dan menciptakan perubahan positif."
+      }
     },
     {
       id: 3,
       title: "Komunitas",
       description: "Bergabung dengan komunitas dan berbagi ide",
-      link: "/community"
+      link: "/community",
+      content: {
+        title: "👥 Komunitas",
+        description: "Fitur Komunitas menghadirkan:",
+        features: [
+          "Forum diskusi interaktif",
+          "Berbagi pengetahuan dan pengalaman",
+          "Kolaborasi proyek bersama",
+          "Event dan meetup komunitas",
+          "Mentoring antar anggota",
+          "Networking dengan profesional"
+        ],
+        benefits: "Bergabunglah dengan ribuan anggota lainnya untuk bertukar ide, belajar hal baru, dan membangun koneksi berharga."
+      }
     },
     {
       id: 4,
       title: "Calendar",
       description: "Atur jadwal dan rencana kegiatan Anda",
-      link: "/calendar"
+      link: "/calendar",
+      content: {
+        title: "📅 Calendar",
+        description: "Fitur Calendar membantu Anda:",
+        features: [
+          "Mengelola jadwal harian, mingguan, dan bulanan",
+          "Membuat pengingat untuk event penting",
+          "Sinkronisasi dengan Google Calendar",
+          "Berbagi jadwal dengan tim",
+          "Melacak deadline proyek",
+          "Merencanakan kegiatan masa depan"
+        ],
+        benefits: "Dengan Calendar, Anda dapat mengatur waktu dengan lebih efisien dan tidak pernah melewatkan event penting lagi."
+      }
     }
   ];
 
@@ -364,8 +417,15 @@ export default function ProfilePage() {
     });
   };
 
-  const handleRowClick = (link) => {
-    router.push(link);
+  const handleRowClick = (item) => {
+    setSelectedOverlay(item);
+    // Prevent body scroll when overlay is open
+    document.body.style.overflow = 'hidden';
+  };
+
+  const closeOverlay = () => {
+    setSelectedOverlay(null);
+    document.body.style.overflow = 'auto';
   };
 
   return (
@@ -961,6 +1021,189 @@ export default function ProfilePage() {
         )}
       </AnimatePresence>
 
+      {/* OVERLAY MODAL */}
+      <AnimatePresence>
+        {selectedOverlay && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0,0,0,0.95)',
+              zIndex: 1000,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '2rem',
+              overflowY: 'auto'
+            }}
+            onClick={closeOverlay}
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 50 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 50 }}
+              style={{
+                maxWidth: '800px',
+                width: '100%',
+                backgroundColor: '#1a1a1a',
+                borderRadius: '20px',
+                padding: isMobile ? '2rem' : '3rem',
+                position: 'relative',
+                border: '1px solid rgba(255,255,255,0.1)'
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Close Button */}
+              <motion.button
+                onClick={closeOverlay}
+                style={{
+                  position: 'absolute',
+                  top: '1rem',
+                  right: '1rem',
+                  background: 'rgba(255,255,255,0.1)',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '40px',
+                  height: '40px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'white'
+                }}
+                whileHover={{ scale: 1.1, backgroundColor: 'rgba(255,255,255,0.2)' }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M18 6L6 18" />
+                  <path d="M6 6l12 12" />
+                </svg>
+              </motion.button>
+
+              {/* Content */}
+              <div>
+                <motion.h2
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 }}
+                  style={{
+                    fontSize: isMobile ? '2rem' : '3rem',
+                    color: 'white',
+                    marginBottom: '1rem',
+                    fontWeight: '500'
+                  }}
+                >
+                  {selectedOverlay.content.title}
+                </motion.h2>
+                
+                <motion.p
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  style={{
+                    fontSize: '1.1rem',
+                    color: 'rgba(255,255,255,0.8)',
+                    marginBottom: '2rem',
+                    lineHeight: 1.6
+                  }}
+                >
+                  {selectedOverlay.content.description}
+                </motion.p>
+
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.3 }}
+                >
+                  <div style={{
+                    display: 'grid',
+                    gap: '1rem',
+                    marginBottom: '2rem'
+                  }}>
+                    {selectedOverlay.content.features.map((feature, idx) => (
+                      <motion.div
+                        key={idx}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.4 + idx * 0.1 }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '1rem',
+                          padding: '0.75rem',
+                          backgroundColor: 'rgba(255,255,255,0.05)',
+                          borderRadius: '8px',
+                          borderLeft: '3px solid white'
+                        }}
+                      >
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                          <path d="M20 6L9 17l-5-5" />
+                        </svg>
+                        <span style={{ color: 'white', fontSize: '1rem' }}>{feature}</span>
+                      </motion.div>
+                    ))}
+                  </div>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.8 }}
+                  style={{
+                    padding: '1.5rem',
+                    backgroundColor: 'rgba(255,255,255,0.05)',
+                    borderRadius: '12px',
+                    marginTop: '1rem'
+                  }}
+                >
+                  <p style={{
+                    color: 'rgba(255,255,255,0.9)',
+                    fontSize: '1rem',
+                    lineHeight: 1.6,
+                    margin: 0
+                  }}>
+                    <strong style={{ color: 'white' }}>✨ Manfaat: </strong>
+                    {selectedOverlay.content.benefits}
+                  </p>
+                </motion.div>
+
+                <motion.button
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.9 }}
+                  onClick={() => {
+                    router.push(selectedOverlay.link);
+                    closeOverlay();
+                  }}
+                  style={{
+                    width: '100%',
+                    padding: '1rem',
+                    marginTop: '2rem',
+                    backgroundColor: 'white',
+                    color: 'black',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontSize: '1rem',
+                    fontWeight: '500',
+                    cursor: 'pointer'
+                  }}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  Explore {selectedOverlay.title} →
+                </motion.button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* MAIN CONTENT */}
       <div style={{
         maxWidth: '1100px',
@@ -1008,10 +1251,10 @@ export default function ProfilePage() {
         <div style={{
           height: '1px',
           backgroundColor: 'rgba(255,255,255,0.2)',
-          marginBottom: '2rem'
+          marginBottom: '1.5rem'
         }} />
 
-        {/* TABLE WITH 4 ROWS */}
+        {/* TABLE WITH CLOSER SPACING AND NORTH EAST ARROW */}
         <div>
           {tableData.map((item, index) => (
             <motion.div
@@ -1019,34 +1262,31 @@ export default function ProfilePage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 + index * 0.1 }}
-              onClick={() => handleRowClick(item.link)}
+              onClick={() => handleRowClick(item)}
               style={{
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                padding: isMobile ? '1.5rem 0' : '2rem 0',
-                borderBottom: index === tableData.length - 1 ? 'none' : '1px solid rgba(255,255,255,0.2)',
+                padding: isMobile ? '0.75rem 0' : '0.8rem 0',
+                borderBottom: '1px solid rgba(255,255,255,0.15)',
                 cursor: 'pointer',
                 transition: 'all 0.3s ease',
                 gap: isMobile ? '1rem' : '2rem'
               }}
               whileHover={{
-                backgroundColor: 'rgba(255,255,255,0.05)',
-                paddingLeft: '1rem',
-                paddingRight: '1rem',
-                marginLeft: '-1rem',
-                marginRight: '-1rem',
-                borderRadius: '8px'
+                backgroundColor: 'rgba(255,255,255,0.03)',
+                paddingLeft: '0.5rem',
+                paddingRight: '0.5rem'
               }}
             >
               {/* Left Column - Title */}
               <div style={{
-                minWidth: isMobile ? '100px' : '180px',
+                minWidth: isMobile ? '100px' : '150px',
                 flexShrink: 0
               }}>
                 <span style={{
                   color: 'white',
-                  fontSize: isMobile ? '1.3rem' : '1.8rem',
+                  fontSize: isMobile ? '1.2rem' : '1.5rem',
                   fontWeight: '500',
                   letterSpacing: '-0.02em'
                 }}>
@@ -1060,8 +1300,8 @@ export default function ProfilePage() {
                 paddingRight: isMobile ? '1rem' : '2rem'
               }}>
                 <span style={{
-                  color: 'rgba(255,255,255,0.7)',
-                  fontSize: isMobile ? '0.9rem' : '1.1rem',
+                  color: 'rgba(255,255,255,0.6)',
+                  fontSize: isMobile ? '0.85rem' : '1rem',
                   fontWeight: 'normal',
                   lineHeight: 1.4
                 }}>
@@ -1069,19 +1309,19 @@ export default function ProfilePage() {
                 </span>
               </div>
 
-              {/* Right Column - Arrow SVG */}
+              {/* Right Column - North East Arrow SVG */}
               <motion.div
                 style={{
                   flexShrink: 0,
                   display: 'flex',
                   alignItems: 'center'
                 }}
-                whileHover={{ x: 5 }}
+                whileHover={{ x: 5, y: -5 }}
                 transition={{ type: "spring", stiffness: 400, damping: 17 }}
               >
                 <svg
-                  width={isMobile ? "24" : "32"}
-                  height={isMobile ? "24" : "32"}
+                  width={isMobile ? "20" : "24"}
+                  height={isMobile ? "20" : "24"}
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="white"
@@ -1089,8 +1329,8 @@ export default function ProfilePage() {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 >
-                  <path d="M5 12h14" />
-                  <path d="m12 5 7 7-7 7" />
+                  <path d="M7 7h10v10" />
+                  <path d="M7 17 17 7" />
                 </svg>
               </motion.div>
             </motion.div>
@@ -1100,49 +1340,48 @@ export default function ProfilePage() {
         <div style={{
           height: '1px',
           backgroundColor: 'rgba(255,255,255,0.2)',
-          marginTop: '2rem',
+          marginTop: '1.5rem',
           marginBottom: '2rem'
         }} />
           
-          {/* MENURU TEXT - Enhanced GSAP Animation, static after completion */}
-          <div 
-            ref={profileContainerRef}
+        {/* MENURU TEXT - Enhanced GSAP Animation, static after completion */}
+        <div 
+          ref={profileContainerRef}
+          style={{
+            width: '100%',
+            marginTop: '100px',
+            marginBottom: '100px',
+            padding: '50px 0',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            overflow: 'visible',
+            perspective: '1000px',
+            minHeight: isMobile ? '200px' : '600px'
+          }}
+        >
+          <div
+            ref={profileTextRef}
             style={{
-              width: '100%',
-              marginTop: '100px',
-              marginBottom: '100px',
-              padding: '50px 0',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              overflow: 'visible',
-              perspective: '1000px',
-              minHeight: isMobile ? '200px' : '600px'
+              fontSize: isMobile ? '80px' : '490px',
+              fontWeight: 'normal',
+              color: 'white',
+              fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+              letterSpacing: '-0.02em',
+              lineHeight: '0.9',
+              textAlign: 'center',
+              whiteSpace: 'nowrap',
+              opacity: profileAnimationCompleted ? 1 : 0,
+              transform: profileAnimationCompleted ? 'translateY(0) scale(1) rotateX(0deg)' : 'translateY(150px) scale(0.7) rotateX(30deg)',
+              transformStyle: 'preserve-3d',
+              willChange: 'transform, opacity',
+              transition: profileAnimationCompleted ? 'none' : 'all 0s'
             }}
           >
-            <div
-              ref={profileTextRef}
-              style={{
-                fontSize: isMobile ? '80px' : '490px',
-                fontWeight: 'normal',
-                color: 'white',
-                fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-                letterSpacing: '-0.02em',
-                lineHeight: '0.9',
-                textAlign: 'center',
-                whiteSpace: 'nowrap',
-                opacity: profileAnimationCompleted ? 1 : 0,
-                transform: profileAnimationCompleted ? 'translateY(0) scale(1) rotateX(0deg)' : 'translateY(150px) scale(0.7) rotateX(30deg)',
-                transformStyle: 'preserve-3d',
-                willChange: 'transform, opacity',
-                transition: profileAnimationCompleted ? 'none' : 'all 0s'
-              }}
-            >
-              MENURU
-            </div>
+            MENURU
           </div>
         </div>
-      
+      </div>
 
       {/* Scroll to Top Button */}
       <motion.button
