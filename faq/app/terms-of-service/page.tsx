@@ -67,10 +67,7 @@ export default function TermsOfServicePage() {
       container.style.cursor = "grab";
     };
 
-    // Wheel event for horizontal scroll
     window.addEventListener("wheel", handleWheel, { passive: false });
-    
-    // Drag events
     container.addEventListener("mousedown", handleMouseDown);
     window.addEventListener("mousemove", handleMouseMove);
     window.addEventListener("mouseup", handleMouseUp);
@@ -95,33 +92,33 @@ export default function TermsOfServicePage() {
         position: "relative",
       }}
     >
-      {/* Section title - normal text, not bold */}
-      <div
-        style={{
-          position: "absolute",
-          top: "2rem",
-          left: "2rem",
-          zIndex: 10,
-          fontSize: "1rem",
-          fontWeight: "normal",
-          color: "#ffffff",
-          opacity: 0.7,
-          letterSpacing: "0.5px",
-        }}
-      >
-        1. Introduction, acceptance and general conditions
-      </div>
-
       <div
         ref={containerRef}
         style={{
           height: "100vh",
           display: "flex",
+          flexDirection: "column",
           alignItems: "center",
+          justifyContent: "center",
           whiteSpace: "nowrap",
           willChange: "transform",
         }}
       >
+        {/* Section title - normal text, not bold, positioned above */}
+        <div
+          style={{
+            fontWeight: "normal",
+            fontSize: "1rem",
+            color: "#ffffff",
+            textAlign: "center",
+            marginBottom: "2rem",
+            opacity: 0.8,
+            letterSpacing: "1px",
+          }}
+        >
+          1. Introduction, acceptance and general conditions
+        </div>
+
         <div
           ref={textRef}
           style={{
