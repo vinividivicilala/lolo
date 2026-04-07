@@ -1167,27 +1167,41 @@ export default function ProfilePage() {
 
                       {/* Clean Awwwards Style Button - No hover effects, no animations, no border */}
                       <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          router.push(item.link);
-                        }}
-                        style={{
-                          width: 'auto',
-                          padding: '12px 24px',
-                          backgroundColor: '#0080ff',
-                          color: 'white',
-                          border: 'none',
-                          fontSize: '13px',
-                          fontWeight: '500',
-                          letterSpacing: '1px',
-                          cursor: 'pointer',
-                          marginTop: '32px',
-                          display: 'inline-block',
-                          fontFamily: 'inherit'
-                        }}
-                      >
-                        EXPLORE {item.title}
-                      </button>
+  onClick={(e) => {
+    e.stopPropagation();
+    router.push(item.link);
+  }}
+  style={{
+    padding: '14px 28px',
+    backgroundColor: '#1e5bb8', // biru elegan (bisa kamu ganti)
+    color: '#ffffff',
+    border: 'none',
+    borderRadius: '14px', // rounded seperti gambar
+    fontSize: '15px',
+    fontWeight: '500',
+    cursor: 'pointer',
+    marginTop: '32px',
+    display: 'inline-block',
+    fontFamily: 'inherit',
+    
+    // subtle modern shadow
+    boxShadow: '0 4px 14px rgba(0, 0, 0, 0.25)',
+    
+    // smooth transition (biar modern)
+    transition: 'all 0.25s ease'
+  }}
+  onMouseEnter={(e) => {
+    e.currentTarget.style.transform = 'translateY(-2px)';
+    e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.35)';
+  }}
+  onMouseLeave={(e) => {
+    e.currentTarget.style.transform = 'translateY(0)';
+    e.currentTarget.style.boxShadow = '0 4px 14px rgba(0,0,0,0.25)';
+  }}
+>
+  EXPLORE {item.title}
+</button>
+
                     </div>
                   </motion.div>
                 )}
