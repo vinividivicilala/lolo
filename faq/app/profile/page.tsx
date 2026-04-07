@@ -87,94 +87,94 @@ export default function ProfilePage() {
   
   const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
 
-  // Table data with detailed content
+  // Table data with detailed content - Awwwards inspired, no emojis
   const tableData = [
     {
       id: 1,
-      title: "Catatan",
+      title: "NOTES",
+      subtitle: "Capture & Organize",
       description: "Buat dan kelola catatan penting Anda dengan mudah",
       link: "/notes",
       detailedContent: {
-        overview: "Fitur Catatan adalah solusi lengkap untuk mengorganisir semua ide, tugas, dan informasi penting Anda dalam satu tempat yang rapi dan mudah diakses.",
+        overview: "A comprehensive note-taking system designed for seamless ideation and information management. Transform your thoughts into structured, searchable knowledge.",
         features: [
-          "Membuat catatan baru dengan antarmuka yang intuitif",
-          "Menyunting dan menghapus catatan dengan mudah",
-          "Mengatur catatan berdasarkan kategori dan tag",
-          "Mencari catatan dengan cepat menggunakan fitur search",
-          "Menyimpan catatan penting ke folder favorit",
-          "Berbagi catatan dengan teman atau kolega",
-          "Sinkronisasi otomatis ke semua perangkat",
-          "Mode offline untuk akses tanpa internet"
+          "Real-time sync across all devices",
+          "Advanced search with natural language processing",
+          "Rich text formatting with markdown support",
+          "Voice-to-text transcription",
+          "Image and file attachment system",
+          "Collaborative editing capabilities",
+          "Version history and restore points",
+          "Smart tags and category organization"
         ],
-        benefits: "Dengan fitur Catatan, produktivitas Anda akan meningkat drastis. Tidak perlu lagi khawatir kehilangan ide-ide brilian atau lupa dengan tugas penting. Semua tersimpan rapi dan dapat diakses kapan saja, di mana saja.",
-        image: "📝",
-        stats: "Aktif digunakan oleh 10,000+ pengguna"
+        benefits: "Elevate your productivity with a note-taking ecosystem that adapts to your workflow. Never lose an idea again with intelligent organization and instant retrieval.",
+        stats: "10,000+ active users"
       }
     },
     {
       id: 2,
-      title: "Donasi",
+      title: "DONATION",
+      subtitle: "Support Causes",
       description: "Bantu mereka yang membutuhkan melalui donasi Anda",
       link: "/donation",
       detailedContent: {
-        overview: "Fitur Donasi memungkinkan Anda untuk berkontribusi dalam berbagai program sosial dan kemanusiaan dengan mudah, aman, dan transparan.",
+        overview: "A transparent and secure platform for charitable giving. Connect with verified causes and track the impact of your contributions in real-time.",
         features: [
-          "Mendonasikan dana untuk berbagai program sosial",
-          "Melacak riwayat donasi Anda secara real-time",
-          "Melihat dampak langsung dari donasi yang diberikan",
-          "Berpartisipasi dalam kampanye donasi bulanan",
-          "Membantu pendidikan anak-anak kurang mampu",
-          "Mendukung program kesehatan masyarakat",
-          "Donasi untuk bencana alam dan darurat",
-          "Laporan keuangan yang transparan"
+          "Blockchain-verified transactions",
+          "Real-time impact tracking",
+          "Monthly subscription options",
+          "Tax-deductible receipts",
+          "Cause verification system",
+          "Anonymous giving available",
+          "Corporate matching programs",
+          "Disaster response fund"
         ],
-        benefits: "Setiap donasi yang Anda berikan akan membantu meningkatkan kualitas hidup mereka yang membutuhkan. Anda bisa melihat langsung perubahan positif yang terjadi berkat kontribusi Anda. Donasi Anda, masa depan mereka.",
-        image: "💝",
-        stats: "Telah menyalurkan Rp 5M+ donasi"
+        benefits: "Transform generosity into measurable change. Every contribution creates a ripple effect of positive impact in communities worldwide.",
+        stats: "Rp 5B+ funds distributed"
       }
     },
     {
       id: 3,
-      title: "Komunitas",
+      title: "COMMUNITY",
+      subtitle: "Connect & Share",
       description: "Bergabung dengan komunitas dan berbagi ide",
       link: "/community",
       detailedContent: {
-        overview: "Komunitas adalah wadah bagi Anda untuk terhubung dengan ribuan anggota lainnya, berbagi pengetahuan, dan berkolaborasi dalam berbagai proyek menarik.",
+        overview: "A vibrant ecosystem of creators, thinkers, and innovators. Engage in meaningful discussions and collaborative projects that shape the future.",
         features: [
-          "Forum diskusi interaktif dengan berbagai topik",
-          "Berbagi pengetahuan dan pengalaman dengan sesama",
-          "Kolaborasi proyek bersama anggota lain",
-          "Event dan meetup komunitas rutin",
-          "Program mentoring dari para ahli",
-          "Networking dengan profesional berbagai bidang",
-          "Grup diskusi berdasarkan minat",
-          "Challenge dan kompetisi menarik"
+          "Topic-based discussion forums",
+          "Live video events and workshops",
+          "Peer-to-peer mentorship program",
+          "Project collaboration tools",
+          "Resource library and knowledge base",
+          "Badge and achievement system",
+          "Weekly challenges and hackathons",
+          "Industry expert AMAs"
         ],
-        benefits: "Bergabunglah dengan komunitas kami dan rasakan pengalaman belajar dan berkembang bersama. Dapatkan inspirasi baru, temukan teman sevisi, dan bangun koneksi yang berharga untuk masa depan Anda.",
-        image: "👥",
-        stats: "50,000+ anggota aktif"
+        benefits: "Join a network of forward-thinking individuals. Accelerate your growth through shared knowledge and collective intelligence.",
+        stats: "50,000+ community members"
       }
     },
     {
       id: 4,
-      title: "Calendar",
+      title: "CALENDAR",
+      subtitle: "Schedule & Plan",
       description: "Atur jadwal dan rencana kegiatan Anda",
       link: "/calendar",
       detailedContent: {
-        overview: "Calendar adalah alat manajemen waktu yang powerful untuk membantu Anda mengatur jadwal, meeting, dan deadline dengan efisien.",
+        overview: "Intelligent time management solution that adapts to your rhythm. Seamlessly coordinate personal and professional commitments.",
         features: [
-          "Mengelola jadwal harian, mingguan, dan bulanan",
-          "Membuat pengingat untuk event-event penting",
-          "Sinkronisasi dengan Google Calendar dan iCal",
-          "Berbagi jadwal dengan tim atau keluarga",
-          "Melacak deadline proyek dengan visual timeline",
-          "Merencanakan kegiatan masa depan dengan mudah",
-          "Notifikasi real-time untuk jadwal mendatang",
-          "Export dan import jadwal dalam berbagai format"
+          "Smart scheduling assistant",
+          "Multi-calendar integration",
+          "Time-blocking optimization",
+          "Recurring event automation",
+          "Custom reminder workflows",
+          "Team availability sharing",
+          "Analytics and time tracking",
+          "API for custom integrations"
         ],
-        benefits: "Dengan Calendar, Anda dapat mengatur waktu dengan lebih efisien dan tidak pernah melewatkan event penting lagi. Tingkatkan produktivitas dan work-life balance Anda dengan perencanaan yang matang.",
-        image: "📅",
-        stats: "Mengatur 1M+ event setiap bulan"
+        benefits: "Master your time with predictive scheduling and intelligent reminders. Focus on what matters while we handle the logistics.",
+        stats: "1M+ events managed monthly"
       }
     }
   ];
@@ -185,12 +185,10 @@ export default function ProfilePage() {
   };
 
   useEffect(() => {
-    // Check mobile
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
     window.addEventListener('resize', checkMobile);
     
-    // Show scroll to top button
     const handleScroll = () => {
       if (window.scrollY > 300) {
         setShowScrollButton(true);
@@ -201,10 +199,8 @@ export default function ProfilePage() {
 
     window.addEventListener('scroll', handleScroll);
 
-    // Firebase Auth State Listener
     const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        // User is signed in
         const isAdmin = checkIsAdmin(user);
         const userData = {
           uid: user.uid,
@@ -216,7 +212,6 @@ export default function ProfilePage() {
         setCurrentUser(userData);
         setIsAdminMode(isAdmin);
         
-        // Save user to Firestore in 'chat_users' collection
         await setDoc(doc(db, "chat_users", user.uid), {
           name: userData.name,
           email: userData.email,
@@ -225,13 +220,11 @@ export default function ProfilePage() {
           createdAt: serverTimestamp()
         }, { merge: true });
       } else {
-        // User is signed out
         setCurrentUser(null);
         setIsAdminMode(false);
       }
     });
 
-    // Load messages from Firestore from 'chat_messages' collection
     const q = query(collection(db, "chat_messages"), orderBy("timestamp", "asc"));
     const unsubscribeMessages = onSnapshot(q, (snapshot) => {
       const messagesData = [];
@@ -249,7 +242,6 @@ export default function ProfilePage() {
       });
       
       if (messagesData.length === 0) {
-        // Add welcome message if no messages
         addDoc(collection(db, "chat_messages"), {
           text: "Welcome to live chat! Please login to start chatting. Admin: faridardiansyah061@gmail.com",
           sender: 'system',
@@ -275,12 +267,9 @@ export default function ProfilePage() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
     
-    // Refresh ScrollTrigger after component mounts
     ScrollTrigger.refresh();
     
-    // Create GSAP timeline for MENURU text animation
     if (profileTextRef.current && profileContainerRef.current) {
-      // Set initial state - hidden and transformed
       gsap.set(profileTextRef.current, {
         opacity: 0,
         y: 150,
@@ -289,7 +278,6 @@ export default function ProfilePage() {
         transformOrigin: "center center"
       });
       
-      // Create scroll-triggered animation
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: profileContainerRef.current,
@@ -313,7 +301,6 @@ export default function ProfilePage() {
     }
     
     return () => {
-      // Clean up ScrollTrigger instances
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
   }, []);
@@ -323,14 +310,11 @@ export default function ProfilePage() {
     
     try {
       if (isLoginMode) {
-        // Sign in
         const userCredential = await signInWithEmailAndPassword(auth, authEmail, authPassword);
         console.log("User signed in:", userCredential.user.email);
       } else {
-        // Sign up with name
         const userCredential = await createUserWithEmailAndPassword(auth, authEmail, authPassword);
         
-        // Update profile with name
         if (authName) {
           await userCredential.user.updateProfile({
             displayName: authName
@@ -440,8 +424,8 @@ export default function ProfilePage() {
   return (
     <div style={{
       minHeight: '100vh',
-      backgroundColor: 'black',
-      fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+      backgroundColor: '#000000',
+      fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
       paddingTop: '120px',
       paddingBottom: '80px',
       position: 'relative',
@@ -456,16 +440,17 @@ export default function ProfilePage() {
         width: '100%',
         padding: isMobile ? '1.5rem' : '2rem',
         zIndex: 100,
-        backgroundColor: 'rgba(0,0,0,0.8)',
-        backdropFilter: 'blur(10px)'
+        backgroundColor: 'rgba(0,0,0,0.95)',
+        backdropFilter: 'blur(10px)',
+        borderBottom: '1px solid rgba(255,255,255,0.05)'
       }}>
         <div style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          maxWidth: '1100px',
+          maxWidth: '1400px',
           margin: '0 auto',
-          padding: isMobile ? '0 1.5rem' : '0 3rem'
+          padding: isMobile ? '0 1rem' : '0 2rem'
         }}>
           <motion.div
             onClick={() => router.back()}
@@ -478,11 +463,11 @@ export default function ProfilePage() {
             }}
             whileHover={{ x: -3 }}
           >
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5">
               <path d="M17 7L7 17" />
               <path d="M7 7h10v10" />
             </svg>
-            <span style={{ color: 'white', fontWeight: 'normal' }}>Back</span>
+            <span style={{ color: 'white', fontWeight: '400', letterSpacing: '0.5px' }}>Back</span>
           </motion.div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -499,7 +484,7 @@ export default function ProfilePage() {
                     }}
                   />
                 )}
-                <span style={{ color: 'white', fontSize: '0.875rem' }}>
+                <span style={{ color: 'white', fontSize: '0.875rem', fontWeight: '400' }}>
                   {currentUser.name}
                 </span>
                 <button
@@ -511,7 +496,8 @@ export default function ProfilePage() {
                     padding: '0.25rem 0.75rem',
                     borderRadius: '4px',
                     cursor: 'pointer',
-                    fontSize: '0.75rem'
+                    fontSize: '0.75rem',
+                    fontWeight: '400'
                   }}
                 >
                   Logout
@@ -525,7 +511,8 @@ export default function ProfilePage() {
                 alignItems: 'center',
                 gap: '0.5rem',
                 color: 'white',
-                fontSize: isMobile ? '0.9rem' : '1rem'
+                fontSize: isMobile ? '0.9rem' : '1rem',
+                fontWeight: '400'
               }}
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -535,16 +522,16 @@ export default function ProfilePage() {
                 onClick={() => router.push('/')}
                 style={{
                   cursor: 'pointer',
-                  color: 'rgba(255,255,255,0.6)',
-                  fontWeight: 'normal',
+                  color: 'rgba(255,255,255,0.5)',
+                  fontWeight: '400',
                   transition: 'color 0.2s ease'
                 }}
                 whileHover={{ color: 'white' }}
               >
                 Home
               </motion.span>
-              <span style={{ color: 'rgba(255,255,255,0.4)' }}>/</span>
-              <span style={{ color: 'white', fontWeight: 'normal' }}>MENURU</span>
+              <span style={{ color: 'rgba(255,255,255,0.3)' }}>/</span>
+              <span style={{ color: 'white', fontWeight: '400' }}>MENURU</span>
             </motion.div>
           </div>
         </div>
@@ -560,7 +547,7 @@ export default function ProfilePage() {
           width: '60px',
           height: '60px',
           borderRadius: '50%',
-          backgroundColor: '#fff',
+          backgroundColor: '#ffffff',
           border: 'none',
           cursor: 'pointer',
           display: 'flex',
@@ -575,7 +562,7 @@ export default function ProfilePage() {
         animate={{ scale: 1 }}
         transition={{ delay: 0.5 }}
       >
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="1.5">
           <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
         </svg>
       </motion.button>
@@ -594,9 +581,9 @@ export default function ProfilePage() {
               left: '2rem',
               width: isMobile ? 'calc(100% - 2rem)' : '450px',
               height: '600px',
-              backgroundColor: '#1a1a1a',
+              backgroundColor: '#111111',
               borderRadius: '12px',
-              boxShadow: '0 10px 40px rgba(0,0,0,0.3)',
+              boxShadow: '0 10px 40px rgba(0,0,0,0.5)',
               display: 'flex',
               flexDirection: 'column',
               zIndex: 199,
@@ -604,10 +591,9 @@ export default function ProfilePage() {
               border: '1px solid rgba(255,255,255,0.1)'
             }}
           >
-            {/* Chat Header */}
             <div style={{
               padding: '1rem',
-              backgroundColor: '#2a2a2a',
+              backgroundColor: '#1a1a1a',
               borderBottom: '1px solid rgba(255,255,255,0.1)',
               display: 'flex',
               alignItems: 'center',
@@ -658,7 +644,7 @@ export default function ProfilePage() {
                   }}
                   whileHover={{ scale: 1.1 }}
                 >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5">
                     <path d="M18 6L6 18" />
                     <path d="M6 6l12 12" />
                   </svg>
@@ -666,7 +652,6 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            {/* Auth Modal */}
             {showAuthModal && (
               <div style={{
                 position: 'absolute',
@@ -681,13 +666,13 @@ export default function ProfilePage() {
                 justifyContent: 'center'
               }}>
                 <div style={{
-                  backgroundColor: '#2a2a2a',
+                  backgroundColor: '#1a1a1a',
                   padding: '2rem',
                   borderRadius: '12px',
                   width: '320px',
                   maxWidth: '90%'
                 }}>
-                  <h3 style={{ color: 'white', marginBottom: '1rem' }}>
+                  <h3 style={{ color: 'white', marginBottom: '1rem', fontWeight: '500' }}>
                     {isLoginMode ? 'Login' : 'Sign Up'}
                   </h3>
                   
@@ -716,7 +701,7 @@ export default function ProfilePage() {
                         marginBottom: '1rem',
                         borderRadius: '4px',
                         border: '1px solid rgba(255,255,255,0.2)',
-                        backgroundColor: '#1a1a1a',
+                        backgroundColor: '#111111',
                         color: 'white',
                         fontSize: '0.9rem'
                       }}
@@ -734,7 +719,7 @@ export default function ProfilePage() {
                       marginBottom: '1rem',
                       borderRadius: '4px',
                       border: '1px solid rgba(255,255,255,0.2)',
-                      backgroundColor: '#1a1a1a',
+                      backgroundColor: '#111111',
                       color: 'white',
                       fontSize: '0.9rem'
                     }}
@@ -751,7 +736,7 @@ export default function ProfilePage() {
                       marginBottom: '1rem',
                       borderRadius: '4px',
                       border: '1px solid rgba(255,255,255,0.2)',
-                      backgroundColor: '#1a1a1a',
+                      backgroundColor: '#111111',
                       color: 'white',
                       fontSize: '0.9rem'
                     }}
@@ -838,7 +823,6 @@ export default function ProfilePage() {
               </div>
             )}
 
-            {/* Chat Messages */}
             <div style={{
               flex: 1,
               overflowY: 'auto',
@@ -945,12 +929,11 @@ export default function ProfilePage() {
               <div ref={chatEndRef} />
             </div>
 
-            {/* Chat Input */}
             {currentUser && (
               <div style={{
                 padding: '1rem',
                 borderTop: '1px solid rgba(255,255,255,0.1)',
-                backgroundColor: '#1a1a1a'
+                backgroundColor: '#111111'
               }}>
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
                   <textarea
@@ -963,7 +946,7 @@ export default function ProfilePage() {
                       padding: '0.75rem',
                       borderRadius: '8px',
                       border: '1px solid rgba(255,255,255,0.2)',
-                      backgroundColor: '#2a2a2a',
+                      backgroundColor: '#1a1a1a',
                       color: 'white',
                       fontSize: '0.85rem',
                       resize: 'none',
@@ -1030,11 +1013,11 @@ export default function ProfilePage() {
         )}
       </AnimatePresence>
 
-      {/* MAIN CONTENT */}
+      {/* MAIN CONTENT - AWWARDS INSPIRED LARGE TABLE */}
       <div style={{
-        maxWidth: '1100px',
+        maxWidth: '1400px',
         margin: '0 auto',
-        padding: isMobile ? '0 1.5rem' : '0 3rem',
+        padding: isMobile ? '0 1rem' : '0 2rem',
         position: 'relative',
         zIndex: 1
       }}>
@@ -1047,11 +1030,12 @@ export default function ProfilePage() {
         >
           <h1 style={{
             color: 'white',
-            fontSize: isMobile ? '2rem' : '60px',
-            lineHeight: 1.2,
+            fontSize: isMobile ? '2rem' : '72px',
+            lineHeight: 1.1,
             margin: 0,
-            fontWeight: 'normal',
-            width: '100%'
+            fontWeight: '400',
+            width: '100%',
+            letterSpacing: '-0.02em'
           }}>
             <div>You can take notes,</div>
             <div>find ideas, and donate money to those in need</div>
@@ -1060,11 +1044,11 @@ export default function ProfilePage() {
 
         <motion.p 
           style={{
-            color: 'rgba(255,255,255,0.7)',
+            color: 'rgba(255,255,255,0.5)',
             fontSize: isMobile ? '1rem' : '20px',
             maxWidth: '700px',
-            marginBottom: '4rem',
-            fontWeight: 'normal',
+            marginBottom: '6rem',
+            fontWeight: '400',
             lineHeight: 1.5
           }}
           initial={{ opacity: 0, y: 20 }}
@@ -1074,72 +1058,78 @@ export default function ProfilePage() {
           From concept to brand, I work and think watch to watch with expert developers and designers to media social — perseverance the intuitive with the curious to create delightful and engaging experiences for the world wide web
         </motion.p>
 
-        <div style={{
-          height: '1px',
-          backgroundColor: 'rgba(255,255,255,0.2)',
-          marginBottom: '1rem'
-        }} />
-
-        {/* TABLE WITH CLOSER SPACING AND INLINE EXPANDABLE CONTENT */}
+        {/* AWWARDS STYLE LARGE TABLE */}
         <div>
           {tableData.map((item, index) => (
             <React.Fragment key={item.id}>
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 + index * 0.1 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.1 * index }}
                 onClick={() => toggleExpand(item.id)}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  padding: isMobile ? '0.6rem 0' : '0.7rem 0',
-                  borderBottom: expandedItem === item.id ? 'none' : '1px solid rgba(255,255,255,0.15)',
+                  padding: isMobile ? '1.5rem 0' : '2rem 0',
+                  borderTop: index === 0 ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(255,255,255,0.08)',
                   cursor: 'pointer',
-                  transition: 'all 0.3s ease',
-                  gap: isMobile ? '1rem' : '2rem'
+                  transition: 'all 0.3s ease'
                 }}
                 whileHover={{
-                  backgroundColor: 'rgba(255,255,255,0.03)',
-                  paddingLeft: '0.5rem',
-                  paddingRight: '0.5rem'
+                  backgroundColor: 'rgba(255,255,255,0.02)',
+                  paddingLeft: '1rem',
+                  paddingRight: '1rem',
+                  marginLeft: '-1rem',
+                  marginRight: '-1rem'
                 }}
               >
-                {/* Left Column - Title */}
+                {/* Left Column - Large Title */}
                 <div style={{
-                  minWidth: isMobile ? '100px' : '150px',
+                  width: '25%',
                   flexShrink: 0
                 }}>
-                  <span style={{
+                  <div style={{
                     color: 'white',
-                    fontSize: isMobile ? '1.2rem' : '1.5rem',
-                    fontWeight: '500',
-                    letterSpacing: '-0.02em'
+                    fontSize: isMobile ? '1.5rem' : '2.5rem',
+                    fontWeight: '400',
+                    letterSpacing: '-0.02em',
+                    lineHeight: 1.2
                   }}>
                     {item.title}
-                  </span>
+                  </div>
+                  <div style={{
+                    color: 'rgba(255,255,255,0.3)',
+                    fontSize: isMobile ? '0.75rem' : '0.875rem',
+                    fontWeight: '400',
+                    marginTop: '0.5rem',
+                    letterSpacing: '0.5px'
+                  }}>
+                    {item.subtitle}
+                  </div>
                 </div>
 
                 {/* Middle Column - Description */}
                 <div style={{
-                  flex: 1,
-                  paddingRight: isMobile ? '1rem' : '2rem'
+                  width: '50%',
+                  paddingRight: '2rem'
                 }}>
-                  <span style={{
+                  <div style={{
                     color: 'rgba(255,255,255,0.6)',
-                    fontSize: isMobile ? '0.85rem' : '1rem',
-                    fontWeight: 'normal',
-                    lineHeight: 1.4
+                    fontSize: isMobile ? '1rem' : '1.125rem',
+                    fontWeight: '400',
+                    lineHeight: 1.5
                   }}>
                     {item.description}
-                  </span>
+                  </div>
                 </div>
 
-                {/* Right Column - North East Arrow SVG */}
+                {/* Right Column - Arrow */}
                 <motion.div
                   style={{
-                    flexShrink: 0,
+                    width: '25%',
                     display: 'flex',
+                    justifyContent: 'flex-end',
                     alignItems: 'center',
                     transform: expandedItem === item.id ? 'rotate(45deg)' : 'rotate(0deg)'
                   }}
@@ -1147,12 +1137,12 @@ export default function ProfilePage() {
                   transition={{ duration: 0.3 }}
                 >
                   <svg
-                    width={isMobile ? "20" : "24"}
-                    height={isMobile ? "20" : "24"}
+                    width={isMobile ? "28" : "36"}
+                    height={isMobile ? "28" : "36"}
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="white"
-                    strokeWidth="2"
+                    strokeWidth="1.5"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   >
@@ -1162,7 +1152,7 @@ export default function ProfilePage() {
                 </motion.div>
               </motion.div>
 
-              {/* Expanded Content - Inline with main page */}
+              {/* Expanded Content - Clean typography, no emojis */}
               <AnimatePresence>
                 {expandedItem === item.id && (
                   <motion.div
@@ -1170,67 +1160,53 @@ export default function ProfilePage() {
                     animate={{ opacity: 1, height: "auto" }}
                     exit={{ opacity: 0, height: 0 }}
                     transition={{ duration: 0.4, ease: "easeInOut" }}
-                    style={{
-                      overflow: 'hidden',
-                      borderBottom: '1px solid rgba(255,255,255,0.15)'
-                    }}
                   >
                     <div style={{
-                      padding: isMobile ? '1.5rem 0.5rem' : '2rem 1rem',
-                      backgroundColor: 'rgba(255,255,255,0.02)',
-                      borderRadius: '8px',
-                      marginBottom: '0.5rem'
+                      padding: isMobile ? '2rem 0' : '3rem 0 4rem 0',
+                      borderBottom: '1px solid rgba(255,255,255,0.08)'
                     }}>
-                      {/* Header with icon and title */}
-                      <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '1rem',
-                        marginBottom: '1.5rem'
-                      }}>
-                        <span style={{ fontSize: '2.5rem' }}>{item.detailedContent.image}</span>
-                        <h3 style={{
-                          color: 'white',
-                          fontSize: isMobile ? '1.5rem' : '2rem',
-                          margin: 0,
-                          fontWeight: '500'
-                        }}>
-                          {item.title}
-                        </h3>
-                      </div>
-
                       {/* Overview */}
                       <div style={{
-                        marginBottom: '1.5rem',
-                        padding: '1rem',
-                        backgroundColor: 'rgba(255,255,255,0.05)',
-                        borderRadius: '8px',
-                        borderLeft: '3px solid white'
+                        marginBottom: '3rem',
+                        maxWidth: '800px'
                       }}>
+                        <div style={{
+                          color: 'rgba(255,255,255,0.4)',
+                          fontSize: '0.75rem',
+                          fontWeight: '400',
+                          letterSpacing: '2px',
+                          textTransform: 'uppercase',
+                          marginBottom: '1rem'
+                        }}>
+                          Overview
+                        </div>
                         <p style={{
-                          color: 'rgba(255,255,255,0.9)',
-                          fontSize: '1rem',
+                          color: 'rgba(255,255,255,0.85)',
+                          fontSize: isMobile ? '1rem' : '1.25rem',
                           lineHeight: 1.6,
-                          margin: 0
+                          margin: 0,
+                          fontWeight: '400'
                         }}>
                           {item.detailedContent.overview}
                         </p>
                       </div>
 
-                      {/* Features Grid */}
-                      <div style={{ marginBottom: '1.5rem' }}>
-                        <h4 style={{
-                          color: 'white',
-                          fontSize: '1.2rem',
-                          marginBottom: '1rem',
-                          fontWeight: '500'
+                      {/* Features Grid - Clean layout */}
+                      <div style={{ marginBottom: '3rem' }}>
+                        <div style={{
+                          color: 'rgba(255,255,255,0.4)',
+                          fontSize: '0.75rem',
+                          fontWeight: '400',
+                          letterSpacing: '2px',
+                          textTransform: 'uppercase',
+                          marginBottom: '1.5rem'
                         }}>
-                          ✨ Fitur Unggulan:
-                        </h4>
+                          Key Features
+                        </div>
                         <div style={{
                           display: 'grid',
                           gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)',
-                          gap: '0.75rem'
+                          gap: '1rem'
                         }}>
                           {item.detailedContent.features.map((feature, idx) => (
                             <motion.div
@@ -1241,16 +1217,15 @@ export default function ProfilePage() {
                               style={{
                                 display: 'flex',
                                 alignItems: 'center',
-                                gap: '0.75rem',
-                                padding: '0.6rem',
-                                backgroundColor: 'rgba(255,255,255,0.03)',
-                                borderRadius: '6px'
+                                gap: '1rem',
+                                padding: '0.75rem 0',
+                                borderBottom: '1px solid rgba(255,255,255,0.05)'
                               }}
                             >
-                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4ade80" strokeWidth="2">
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5">
                                 <path d="M20 6L9 17l-5-5" />
                               </svg>
-                              <span style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.9rem' }}>
+                              <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.95rem', fontWeight: '400' }}>
                                 {feature}
                               </span>
                             </motion.div>
@@ -1260,24 +1235,27 @@ export default function ProfilePage() {
 
                       {/* Benefits */}
                       <div style={{
-                        marginBottom: '1.5rem',
-                        padding: '1rem',
-                        background: 'linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)',
-                        borderRadius: '8px'
+                        marginBottom: '3rem',
+                        padding: '2rem',
+                        backgroundColor: 'rgba(255,255,255,0.02)',
+                        borderLeft: '1px solid rgba(255,255,255,0.1)'
                       }}>
-                        <h4 style={{
-                          color: 'white',
-                          fontSize: '1.1rem',
-                          marginBottom: '0.75rem',
-                          fontWeight: '500'
+                        <div style={{
+                          color: 'rgba(255,255,255,0.4)',
+                          fontSize: '0.75rem',
+                          fontWeight: '400',
+                          letterSpacing: '2px',
+                          textTransform: 'uppercase',
+                          marginBottom: '1rem'
                         }}>
-                          🎯 Manfaat:
-                        </h4>
+                          Why Choose This
+                        </div>
                         <p style={{
                           color: 'rgba(255,255,255,0.85)',
-                          fontSize: '0.95rem',
+                          fontSize: isMobile ? '0.95rem' : '1.125rem',
                           lineHeight: 1.6,
-                          margin: 0
+                          margin: 0,
+                          fontWeight: '400'
                         }}>
                           {item.detailedContent.benefits}
                         </p>
@@ -1287,16 +1265,16 @@ export default function ProfilePage() {
                       <div style={{
                         display: 'inline-block',
                         padding: '0.5rem 1rem',
-                        backgroundColor: 'rgba(255,255,255,0.1)',
-                        borderRadius: '20px',
-                        marginBottom: '1rem'
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        marginBottom: '2rem'
                       }}>
                         <span style={{
-                          color: '#4ade80',
-                          fontSize: '0.85rem',
-                          fontWeight: '500'
+                          color: 'rgba(255,255,255,0.5)',
+                          fontSize: '0.75rem',
+                          fontWeight: '400',
+                          letterSpacing: '0.5px'
                         }}>
-                          📊 {item.detailedContent.stats}
+                          {item.detailedContent.stats}
                         </span>
                       </div>
 
@@ -1307,21 +1285,26 @@ export default function ProfilePage() {
                           router.push(item.link);
                         }}
                         style={{
-                          width: '100%',
-                          padding: '0.8rem',
+                          width: 'auto',
+                          padding: '1rem 2rem',
+                          backgroundColor: 'transparent',
+                          color: 'white',
+                          border: '1px solid rgba(255,255,255,0.2)',
+                          borderRadius: '0',
+                          fontSize: '0.875rem',
+                          fontWeight: '400',
+                          cursor: 'pointer',
+                          letterSpacing: '1px',
+                          transition: 'all 0.3s ease'
+                        }}
+                        whileHover={{ 
                           backgroundColor: 'white',
                           color: 'black',
-                          border: 'none',
-                          borderRadius: '8px',
-                          fontSize: '1rem',
-                          fontWeight: '500',
-                          cursor: 'pointer',
-                          marginTop: '1rem'
+                          borderColor: 'white'
                         }}
-                        whileHover={{ scale: 1.02, backgroundColor: '#f0f0f0' }}
                         whileTap={{ scale: 0.98 }}
                       >
-                        Explore {item.title} →
+                        EXPLORE {item.title}
                       </motion.button>
                     </div>
                   </motion.div>
@@ -1330,22 +1313,15 @@ export default function ProfilePage() {
             </React.Fragment>
           ))}
         </div>
-
-        <div style={{
-          height: '1px',
-          backgroundColor: 'rgba(255,255,255,0.2)',
-          marginTop: '1rem',
-          marginBottom: '2rem'
-        }} />
           
-        {/* MENURU TEXT - Enhanced GSAP Animation, static after completion */}
+        {/* MENURU TEXT - Large typography */}
         <div 
           ref={profileContainerRef}
           style={{
             width: '100%',
-            marginTop: '100px',
+            marginTop: '120px',
             marginBottom: '100px',
-            padding: '50px 0',
+            padding: '80px 0',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -1358,9 +1334,9 @@ export default function ProfilePage() {
             ref={profileTextRef}
             style={{
               fontSize: isMobile ? '80px' : '490px',
-              fontWeight: 'normal',
+              fontWeight: '400',
               color: 'white',
-              fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+              fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
               letterSpacing: '-0.02em',
               lineHeight: '0.9',
               textAlign: 'center',
@@ -1412,7 +1388,7 @@ export default function ProfilePage() {
           viewBox="0 0 24 24" 
           fill="none" 
           stroke="black" 
-          strokeWidth="2.5"
+          strokeWidth="1.5"
         >
           <path d="M12 19V5M5 12L12 5L19 12" />
         </svg>
