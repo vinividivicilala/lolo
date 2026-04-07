@@ -83,64 +83,44 @@ export default function TermsOfServicePage() {
 
   const sections = [
     {
-      number: "01",
       title: "Introduction",
-      description: "Welcome to my platform. By accessing or using my services, you agree to be bound by these Terms of Service. If you disagree with any part of the terms, you may not access the services.",
-      details: "These Terms apply to all visitors, users, and others who access or use the Service."
+      description: "Welcome to my platform. By accessing or using my services, you agree to be bound by these Terms of Service. If you disagree with any part of the terms, you may not access the services. These Terms apply to all visitors, users, and others who access or use the Service."
     },
     {
-      number: "02",
       title: "User Accounts",
-      description: "When you create an account with me, you must provide accurate, complete, and current information. You are solely responsible for safeguarding the password and for any activities under your account.",
-      details: "You agree to notify me immediately of any breach of security or unauthorized use of your account."
+      description: "When you create an account with me, you must provide accurate, complete, and current information. You are solely responsible for safeguarding the password and for any activities under your account. You agree to notify me immediately of any breach of security or unauthorized use of your account."
     },
     {
-      number: "03",
       title: "Intellectual Property",
-      description: "The Service and its original content, features, and functionality are and will remain my exclusive property. The Service is protected by copyright, trademark, and other laws.",
-      details: "My trademarks and trade dress may not be used in connection with any product or service without prior written consent."
+      description: "The Service and its original content, features, and functionality are and will remain my exclusive property. The Service is protected by copyright, trademark, and other laws. My trademarks and trade dress may not be used in connection with any product or service without prior written consent."
     },
     {
-      number: "04",
       title: "User Content",
-      description: "You retain any and all of your rights to any content you submit, post or display on or through the Service. You are responsible for protecting those rights.",
-      details: "By posting content, you grant me a worldwide, non-exclusive, royalty-free license to use, reproduce, and distribute your content."
+      description: "You retain any and all of your rights to any content you submit, post or display on or through the Service. You are responsible for protecting those rights. By posting content, you grant me a worldwide, non-exclusive, royalty-free license to use, reproduce, and distribute your content."
     },
     {
-      number: "05",
       title: "Prohibited Uses",
-      description: "You agree not to use the Service for any unlawful purpose or in any way that could damage, disable, overburden, or impair the Service.",
-      details: "Prohibited activities include: violating laws, infringing intellectual property, distributing malware, harassing others, or interfering with security features."
+      description: "You agree not to use the Service for any unlawful purpose or in any way that could damage, disable, overburden, or impair the Service. Prohibited activities include: violating laws, infringing intellectual property, distributing malware, harassing others, or interfering with security features."
     },
     {
-      number: "06",
       title: "Termination",
-      description: "I may terminate or suspend your account immediately, without prior notice or liability, for any reason whatsoever, including without limitation if you breach the Terms.",
-      details: "Upon termination, your right to use the Service will immediately cease. Provisions that by their nature should survive termination shall survive."
+      description: "I may terminate or suspend your account immediately, without prior notice or liability, for any reason whatsoever, including without limitation if you breach the Terms. Upon termination, your right to use the Service will immediately cease. Provisions that by their nature should survive termination shall survive."
     },
     {
-      number: "07",
       title: "Limitation of Liability",
-      description: "In no event shall I be liable for any indirect, incidental, special, consequential or punitive damages, including without limitation, loss of profits, data, or goodwill.",
-      details: "My liability is limited to the fullest extent permitted by applicable law. The Service is provided 'AS IS' without warranties of any kind."
+      description: "In no event shall I be liable for any indirect, incidental, special, consequential or punitive damages, including without limitation, loss of profits, data, or goodwill. My liability is limited to the fullest extent permitted by applicable law. The Service is provided 'AS IS' without warranties of any kind."
     },
     {
-      number: "08",
       title: "Changes to Terms",
-      description: "I reserve the right to modify or replace these Terms at any time. If a revision is material, I will provide at least 30 days' notice prior to any new terms taking effect.",
-      details: "By continuing to access or use my Service after those revisions become effective, you agree to be bound by the revised terms."
+      description: "I reserve the right to modify or replace these Terms at any time. If a revision is material, I will provide at least 30 days' notice prior to any new terms taking effect. By continuing to access or use my Service after those revisions become effective, you agree to be bound by the revised terms."
     },
     {
-      number: "09",
       title: "Governing Law",
-      description: "These Terms shall be governed and construed in accordance with applicable laws, without regard to its conflict of law provisions.",
-      details: "Any disputes arising under these Terms shall be resolved exclusively through binding arbitration or in competent courts."
+      description: "These Terms shall be governed and construed in accordance with applicable laws, without regard to its conflict of law provisions. Any disputes arising under these Terms shall be resolved exclusively through binding arbitration or in competent courts."
     },
     {
-      number: "10",
       title: "Contact",
-      description: "If you have any questions about these Terms, please contact me. I will respond to your inquiries as quickly as possible.",
-      details: "Email: hello@terms.io | Response time: within 3 business days."
+      description: "If you have any questions about these Terms, please contact me. I will respond to your inquiries as quickly as possible. Email: hello@terms.io | Response time: within 3 business days."
     }
   ];
 
@@ -178,7 +158,7 @@ export default function TermsOfServicePage() {
           <div
             style={{
               flexShrink: 0,
-              width: "600px",
+              width: "500px",
               display: "flex",
               flexDirection: "column",
               justifyContent: "center",
@@ -186,7 +166,7 @@ export default function TermsOfServicePage() {
           >
             <div
               style={{
-                fontSize: "120px",
+                fontSize: "100px",
                 fontWeight: "700",
                 color: "#ffffff",
                 lineHeight: "1",
@@ -198,8 +178,8 @@ export default function TermsOfServicePage() {
             </div>
             <div
               style={{
-                fontSize: "20px",
-                color: "#888888",
+                fontSize: "16px",
+                color: "#666666",
                 lineHeight: "1.5",
                 borderLeft: "2px solid #333333",
                 paddingLeft: "1.5rem",
@@ -210,12 +190,12 @@ export default function TermsOfServicePage() {
           </div>
 
           {/* Sections */}
-          {sections.map((section) => (
+          {sections.map((section, index) => (
             <div
-              key={section.number}
+              key={index}
               style={{
                 flexShrink: 0,
-                width: "480px",
+                width: "400px",
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "center",
@@ -223,47 +203,24 @@ export default function TermsOfServicePage() {
             >
               <div
                 style={{
-                  fontSize: "14px",
-                  fontWeight: "400",
-                  color: "#666666",
-                  letterSpacing: "0.1em",
-                  marginBottom: "1rem",
-                }}
-              >
-                {section.number}
-              </div>
-              <div
-                style={{
-                  fontSize: "36px",
-                  fontWeight: "600",
+                  fontSize: "28px",
+                  fontWeight: "normal",
                   color: "#ffffff",
                   marginBottom: "1.5rem",
-                  lineHeight: "1.2",
-                  letterSpacing: "-0.01em",
+                  lineHeight: "1.3",
                 }}
               >
                 {section.title}
               </div>
               <div
                 style={{
-                  fontSize: "18px",
-                  color: "#cccccc",
+                  fontSize: "16px",
+                  fontWeight: "normal",
+                  color: "#aaaaaa",
                   lineHeight: "1.6",
-                  marginBottom: "1.5rem",
                 }}
               >
                 {section.description}
-              </div>
-              <div
-                style={{
-                  fontSize: "15px",
-                  color: "#666666",
-                  lineHeight: "1.5",
-                  borderTop: "1px solid #222222",
-                  paddingTop: "1rem",
-                }}
-              >
-                {section.details}
               </div>
             </div>
           ))}
