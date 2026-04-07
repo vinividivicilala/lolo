@@ -1126,7 +1126,7 @@ export default function ProfilePage() {
                 </motion.div>
               </motion.div>
 
-              {/* Expanded Content - With Blue #0080ff Button */}
+              {/* Expanded Content - Clean Awwwards Style Button No Effects */}
               <AnimatePresence>
                 {expandedItem === item.id && (
                   <motion.div
@@ -1165,34 +1165,29 @@ export default function ProfilePage() {
                         </p>
                       </div>
 
-                      {/* Action Button with #0080ff color */}
-                      <motion.button
+                      {/* Clean Awwwards Style Button - No hover effects, no animations, no border */}
+                      <button
                         onClick={(e) => {
                           e.stopPropagation();
                           router.push(item.link);
                         }}
                         style={{
                           width: 'auto',
-                          padding: '1rem 2rem',
+                          padding: '12px 24px',
                           backgroundColor: '#0080ff',
                           color: 'white',
                           border: 'none',
-                          borderRadius: '0',
-                          fontSize: '0.875rem',
+                          fontSize: '13px',
                           fontWeight: '500',
-                          cursor: 'pointer',
                           letterSpacing: '1px',
-                          transition: 'all 0.3s ease',
-                          marginTop: '2rem'
+                          cursor: 'pointer',
+                          marginTop: '32px',
+                          display: 'inline-block',
+                          fontFamily: 'inherit'
                         }}
-                        whileHover={{ 
-                          backgroundColor: '#0066cc',
-                          scale: 1.02
-                        }}
-                        whileTap={{ scale: 0.98 }}
                       >
                         EXPLORE {item.title}
-                      </motion.button>
+                      </button>
                     </div>
                   </motion.div>
                 )}
