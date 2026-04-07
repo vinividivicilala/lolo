@@ -81,9 +81,8 @@ export default function ProfilePage() {
   const [authName, setAuthName] = useState("");
   const [expandedItem, setExpandedItem] = useState(null);
   const chatEndRef = useRef(null);
-  const profileTextRef = useRef(null);
-  const profileContainerRef = useRef(null);
-  const [profileAnimationCompleted, setProfileAnimationCompleted] = useState(false);
+  const menuruTextRef = useRef(null);
+  const menuruContainerRef = useRef(null);
   
   const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
 
@@ -263,45 +262,74 @@ export default function ProfilePage() {
     };
   }, []);
 
-  // GSAP Animation for MENURU text
+  // Modern GSAP Scroll Animation for MENURU text
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    if (!menuruTextRef.current || !menuruContainerRef.current) return;
     
+    // Refresh ScrollTrigger to ensure proper initialization
     ScrollTrigger.refresh();
     
-    if (profileTextRef.current && profileContainerRef.current) {
-      gsap.set(profileTextRef.current, {
-        opacity: 0,
-        y: 150,
-        scale: 0.7,
-        rotationX: 30,
-        transformOrigin: "center center"
-      });
-      
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: profileContainerRef.current,
-          start: "top 85%",
-          end: "top 40%",
-          scrub: 1,
-          toggleActions: "play none none reverse",
-          onComplete: () => setProfileAnimationCompleted(true),
-          onReverseComplete: () => setProfileAnimationCompleted(false)
+    // Set initial state - completely hidden at bottom with blur
+    gsap.set(menuruTextRef.current, {
+      opacity: 0,
+      y: 200,
+      scale: 0.8,
+      rotationX: 45,
+      filter: "blur(20px)",
+      transformOrigin: "center center",
+      transformStyle: "preserve-3d"
+    });
+    
+    // Create the scroll-triggered animation timeline
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: menuruContainerRef.current,
+        start: "top 90%",
+        end: "top 30%",
+        scrub: 1.2,
+        toggleActions: "play reverse play reverse",
+        markers: false,
+        invalidateOnRefresh: true
+      }
+    });
+    
+    // Animate to final position with smooth easing
+    tl.to(menuruTextRef.current, {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      rotationX: 0,
+      filter: "blur(0px)",
+      duration: 1.5,
+      ease: "power2.out",
+      stagger: 0.1
+    });
+    
+    // Add a subtle scale pulse when fully visible
+    ScrollTrigger.create({
+      trigger: menuruContainerRef.current,
+      start: "top 20%",
+      end: "top 0%",
+      scrub: 0.5,
+      onUpdate: (self) => {
+        if (self.progress > 0.8 && menuruTextRef.current) {
+          gsap.to(menuruTextRef.current, {
+            scale: 1.02,
+            duration: 0.3,
+            ease: "power1.out"
+          });
         }
-      });
-      
-      tl.to(profileTextRef.current, {
-        opacity: 1,
-        y: 0,
-        scale: 1,
-        rotationX: 0,
-        duration: 1.2,
-        ease: "power2.out"
-      });
-    }
+      }
+    });
     
     return () => {
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+      // Clean up all ScrollTrigger instances
+      ScrollTrigger.getAll().forEach(trigger => {
+        if (trigger.vars.trigger === menuruContainerRef.current) {
+          trigger.kill();
+        }
+      });
     };
   }, []);
 
@@ -1152,7 +1180,7 @@ export default function ProfilePage() {
                 </motion.div>
               </motion.div>
 
-              {/* Expanded Content - Clean typography, no emojis */}
+              {/* Expanded Content */}
               <AnimatePresence>
                 {expandedItem === item.id && (
                   <motion.div
@@ -1191,7 +1219,7 @@ export default function ProfilePage() {
                         </p>
                       </div>
 
-                      {/* Features Grid - Clean layout */}
+                      {/* Features Grid */}
                       <div style={{ marginBottom: '3rem' }}>
                         <div style={{
                           color: 'rgba(255,255,255,0.4)',
@@ -1314,9 +1342,9 @@ export default function ProfilePage() {
           ))}
         </div>
           
-        {/* MENURU TEXT - Large typography */}
+        {/* MENURU TEXT WITH MODERN GSAP SCROLL ANIMATION */}
         <div 
-          ref={profileContainerRef}
+          ref={menuruContainerRef}
           style={{
             width: '100%',
             marginTop: '120px',
@@ -1327,11 +1355,12 @@ export default function ProfilePage() {
             justifyContent: 'center',
             overflow: 'visible',
             perspective: '1000px',
-            minHeight: isMobile ? '200px' : '600px'
+            minHeight: isMobile ? '300px' : '700px',
+            position: 'relative'
           }}
         >
           <div
-            ref={profileTextRef}
+            ref={menuruTextRef}
             style={{
               fontSize: isMobile ? '80px' : '490px',
               fontWeight: '400',
@@ -1341,11 +1370,7 @@ export default function ProfilePage() {
               lineHeight: '0.9',
               textAlign: 'center',
               whiteSpace: 'nowrap',
-              opacity: profileAnimationCompleted ? 1 : 0,
-              transform: profileAnimationCompleted ? 'translateY(0) scale(1) rotateX(0deg)' : 'translateY(150px) scale(0.7) rotateX(30deg)',
-              transformStyle: 'preserve-3d',
-              willChange: 'transform, opacity',
-              transition: profileAnimationCompleted ? 'none' : 'all 0s'
+              willChange: 'transform, opacity, filter'
             }}
           >
             MENURU
