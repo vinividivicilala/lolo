@@ -86,7 +86,7 @@ export default function ProfilePage() {
   
   const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
 
-  // Table data with user stats - no key features
+  // Table data with detailed content - No key features, no stats
   const tableData = [
     {
       id: 1,
@@ -94,10 +94,8 @@ export default function ProfilePage() {
       subtitle: "Capture & Organize",
       description: "Buat dan kelola catatan penting Anda dengan mudah",
       link: "/notes",
-      totalUsers: "24,500+ active users",
       detailedContent: {
-        overview: "A comprehensive note-taking system designed for seamless ideation and information management. Transform your thoughts into structured, searchable knowledge.",
-        benefits: "Elevate your productivity with a note-taking ecosystem that adapts to your workflow. Never lose an idea again with intelligent organization and instant retrieval."
+        overview: "A comprehensive note-taking system designed for seamless ideation and information management. Transform your thoughts into structured, searchable knowledge. Elevate your productivity with a note-taking ecosystem that adapts to your workflow. Never lose an idea again with intelligent organization and instant retrieval."
       }
     },
     {
@@ -106,10 +104,8 @@ export default function ProfilePage() {
       subtitle: "Support Causes",
       description: "Bantu mereka yang membutuhkan melalui donasi Anda",
       link: "/donation",
-      totalUsers: "15,200+ donors",
       detailedContent: {
-        overview: "A transparent and secure platform for charitable giving. Connect with verified causes and track the impact of your contributions in real-time.",
-        benefits: "Transform generosity into measurable change. Every contribution creates a ripple effect of positive impact in communities worldwide."
+        overview: "A transparent and secure platform for charitable giving. Connect with verified causes and track the impact of your contributions in real-time. Transform generosity into measurable change. Every contribution creates a ripple effect of positive impact in communities worldwide."
       }
     },
     {
@@ -118,10 +114,8 @@ export default function ProfilePage() {
       subtitle: "Connect & Share",
       description: "Bergabung dengan komunitas dan berbagi ide",
       link: "/community",
-      totalUsers: "50,000+ members",
       detailedContent: {
-        overview: "A vibrant ecosystem of creators, thinkers, and innovators. Engage in meaningful discussions and collaborative projects that shape the future.",
-        benefits: "Join a network of forward-thinking individuals. Accelerate your growth through shared knowledge and collective intelligence."
+        overview: "A vibrant ecosystem of creators, thinkers, and innovators. Engage in meaningful discussions and collaborative projects that shape the future. Join a network of forward-thinking individuals. Accelerate your growth through shared knowledge and collective intelligence."
       }
     },
     {
@@ -130,10 +124,8 @@ export default function ProfilePage() {
       subtitle: "Schedule & Plan",
       description: "Atur jadwal dan rencana kegiatan Anda",
       link: "/calendar",
-      totalUsers: "35,000+ active users",
       detailedContent: {
-        overview: "Intelligent time management solution that adapts to your rhythm. Seamlessly coordinate personal and professional commitments.",
-        benefits: "Master your time with predictive scheduling and intelligent reminders. Focus on what matters while we handle the logistics."
+        overview: "Intelligent time management solution that adapts to your rhythm. Seamlessly coordinate personal and professional commitments. Master your time with predictive scheduling and intelligent reminders. Focus on what matters while we handle the logistics."
       }
     }
   ];
@@ -227,8 +219,10 @@ export default function ProfilePage() {
     if (typeof window === 'undefined') return;
     if (!menuruTextRef.current || !menuruContainerRef.current) return;
     
+    // Refresh ScrollTrigger to ensure proper initialization
     ScrollTrigger.refresh();
     
+    // Set initial state - completely hidden at bottom with blur
     gsap.set(menuruTextRef.current, {
       opacity: 0,
       y: 200,
@@ -239,6 +233,7 @@ export default function ProfilePage() {
       transformStyle: "preserve-3d"
     });
     
+    // Create the scroll-triggered animation timeline
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: menuruContainerRef.current,
@@ -251,6 +246,7 @@ export default function ProfilePage() {
       }
     });
     
+    // Animate to final position with smooth easing
     tl.to(menuruTextRef.current, {
       opacity: 1,
       y: 0,
@@ -262,6 +258,7 @@ export default function ProfilePage() {
       stagger: 0.1
     });
     
+    // Add a subtle scale pulse when fully visible
     ScrollTrigger.create({
       trigger: menuruContainerRef.current,
       start: "top 20%",
@@ -279,6 +276,7 @@ export default function ProfilePage() {
     });
     
     return () => {
+      // Clean up all ScrollTrigger instances
       ScrollTrigger.getAll().forEach(trigger => {
         if (trigger.vars.trigger === menuruContainerRef.current) {
           trigger.kill();
@@ -529,22 +527,22 @@ export default function ProfilePage() {
           width: '60px',
           height: '60px',
           borderRadius: '50%',
-          backgroundColor: '#0066FF',
+          backgroundColor: '#ffffff',
           border: 'none',
           cursor: 'pointer',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           zIndex: 200,
-          boxShadow: '0 4px 20px rgba(0,102,255,0.3)'
+          boxShadow: '0 4px 20px rgba(0,0,0,0.3)'
         }}
-        whileHover={{ scale: 1.1, backgroundColor: '#0052cc' }}
+        whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.95 }}
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={{ delay: 0.5 }}
       >
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="1.5">
           <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
         </svg>
       </motion.button>
@@ -729,14 +727,13 @@ export default function ProfilePage() {
                     style={{
                       width: '100%',
                       padding: '0.75rem',
-                      backgroundColor: '#0066FF',
+                      backgroundColor: '#fff',
                       border: 'none',
                       borderRadius: '4px',
                       cursor: 'pointer',
                       fontSize: '0.9rem',
                       fontWeight: '500',
-                      marginBottom: '1rem',
-                      color: 'white'
+                      marginBottom: '1rem'
                     }}
                   >
                     {isLoginMode ? 'Login' : 'Sign Up'}
@@ -781,7 +778,7 @@ export default function ProfilePage() {
                         setAuthError("");
                         setAuthName("");
                       }}
-                      style={{ color: '#0066FF', cursor: 'pointer', textDecoration: 'underline' }}
+                      style={{ color: 'white', cursor: 'pointer', textDecoration: 'underline' }}
                     >
                       {isLoginMode ? 'Sign Up' : 'Login'}
                     </span>
@@ -944,12 +941,12 @@ export default function ProfilePage() {
                       padding: '0 1rem',
                       borderRadius: '8px',
                       border: 'none',
-                      backgroundColor: '#0066FF',
-                      color: 'white',
+                      backgroundColor: '#fff',
+                      color: '#000',
                       cursor: 'pointer',
                       fontWeight: '500'
                     }}
-                    whileHover={{ scale: 1.05, backgroundColor: '#0052cc' }}
+                    whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
                     Send
@@ -982,11 +979,10 @@ export default function ProfilePage() {
                     display: 'block',
                     margin: '1rem auto 0',
                     padding: '0.5rem 1rem',
-                    backgroundColor: '#0066FF',
+                    backgroundColor: '#fff',
                     border: 'none',
                     borderRadius: '4px',
-                    cursor: 'pointer',
-                    color: 'white'
+                    cursor: 'pointer'
                   }}
                 >
                   Login / Sign Up
@@ -997,7 +993,7 @@ export default function ProfilePage() {
         )}
       </AnimatePresence>
 
-      {/* MAIN CONTENT */}
+      {/* MAIN CONTENT - AWWARDS INSPIRED LARGE TABLE */}
       <div style={{
         maxWidth: '1400px',
         margin: '0 auto',
@@ -1042,7 +1038,7 @@ export default function ProfilePage() {
           From concept to brand, I work and think watch to watch with expert developers and designers to media social — perseverance the intuitive with the curious to create delightful and engaging experiences for the world wide web
         </motion.p>
 
-        {/* LARGE TABLE */}
+        {/* AWWARDS STYLE LARGE TABLE */}
         <div>
           {tableData.map((item, index) => (
             <React.Fragment key={item.id}>
@@ -1106,15 +1102,6 @@ export default function ProfilePage() {
                   }}>
                     {item.description}
                   </div>
-                  <div style={{
-                    color: '#0066FF',
-                    fontSize: isMobile ? '0.75rem' : '0.875rem',
-                    fontWeight: '400',
-                    marginTop: '0.5rem',
-                    letterSpacing: '0.5px'
-                  }}>
-                    {item.totalUsers}
-                  </div>
                 </div>
 
                 {/* Right Column - Arrow */}
@@ -1145,7 +1132,7 @@ export default function ProfilePage() {
                 </motion.div>
               </motion.div>
 
-              {/* Expanded Content - No key features, just overview and benefits */}
+              {/* Expanded Content - Only overview, no features or stats */}
               <AnimatePresence>
                 {expandedItem === item.id && (
                   <motion.div
@@ -1158,10 +1145,10 @@ export default function ProfilePage() {
                       padding: isMobile ? '2rem 0' : '3rem 0 4rem 0',
                       borderBottom: '1px solid rgba(255,255,255,0.08)'
                     }}>
-                      {/* Overview */}
+                      {/* Overview only - Clean and minimal */}
                       <div style={{
-                        marginBottom: '3rem',
-                        maxWidth: '800px'
+                        marginBottom: '0',
+                        maxWidth: '900px'
                       }}>
                         <div style={{
                           color: 'rgba(255,255,255,0.4)',
@@ -1176,7 +1163,7 @@ export default function ProfilePage() {
                         <p style={{
                           color: 'rgba(255,255,255,0.85)',
                           fontSize: isMobile ? '1rem' : '1.25rem',
-                          lineHeight: 1.6,
+                          lineHeight: 1.7,
                           margin: 0,
                           fontWeight: '400'
                         }}>
@@ -1184,52 +1171,7 @@ export default function ProfilePage() {
                         </p>
                       </div>
 
-                      {/* Benefits */}
-                      <div style={{
-                        marginBottom: '3rem',
-                        padding: '2rem',
-                        backgroundColor: 'rgba(255,255,255,0.02)',
-                        borderLeft: '1px solid #0066FF'
-                      }}>
-                        <div style={{
-                          color: 'rgba(255,255,255,0.4)',
-                          fontSize: '0.75rem',
-                          fontWeight: '400',
-                          letterSpacing: '2px',
-                          textTransform: 'uppercase',
-                          marginBottom: '1rem'
-                        }}>
-                          Why Choose This
-                        </div>
-                        <p style={{
-                          color: 'rgba(255,255,255,0.85)',
-                          fontSize: isMobile ? '0.95rem' : '1.125rem',
-                          lineHeight: 1.6,
-                          margin: 0,
-                          fontWeight: '400'
-                        }}>
-                          {item.detailedContent.benefits}
-                        </p>
-                      </div>
-
-                      {/* Stats / Total Users */}
-                      <div style={{
-                        display: 'inline-block',
-                        padding: '0.5rem 1rem',
-                        border: '1px solid rgba(255,255,255,0.1)',
-                        marginBottom: '2rem'
-                      }}>
-                        <span style={{
-                          color: '#0066FF',
-                          fontSize: '0.75rem',
-                          fontWeight: '400',
-                          letterSpacing: '0.5px'
-                        }}>
-                          {item.totalUsers}
-                        </span>
-                      </div>
-
-                      {/* Action Button - #0066FF */}
+                      {/* Action Button */}
                       <motion.button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -1238,18 +1180,21 @@ export default function ProfilePage() {
                         style={{
                           width: 'auto',
                           padding: '1rem 2rem',
-                          backgroundColor: '#0066FF',
+                          backgroundColor: 'transparent',
                           color: 'white',
-                          border: 'none',
+                          border: '1px solid rgba(255,255,255,0.2)',
                           borderRadius: '0',
                           fontSize: '0.875rem',
                           fontWeight: '400',
                           cursor: 'pointer',
                           letterSpacing: '1px',
-                          transition: 'all 0.3s ease'
+                          transition: 'all 0.3s ease',
+                          marginTop: '2rem'
                         }}
                         whileHover={{ 
-                          backgroundColor: '#0052cc'
+                          backgroundColor: 'white',
+                          color: 'black',
+                          borderColor: 'white'
                         }}
                         whileTap={{ scale: 0.98 }}
                       >
@@ -1299,7 +1244,7 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* Scroll to Top Button - #0066FF */}
+      {/* Scroll to Top Button */}
       <motion.button
         onClick={scrollToTop}
         style={{
@@ -1309,14 +1254,14 @@ export default function ProfilePage() {
           width: '50px',
           height: '50px',
           borderRadius: '50%',
-          backgroundColor: '#0066FF',
+          backgroundColor: 'white',
           border: 'none',
           cursor: 'pointer',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           zIndex: 100,
-          boxShadow: '0 4px 12px rgba(0,102,255,0.3)'
+          boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
         }}
         initial={{ opacity: 0, scale: 0 }}
         animate={{ 
@@ -1325,7 +1270,7 @@ export default function ProfilePage() {
           pointerEvents: showScrollButton ? 'auto' : 'none'
         }}
         transition={{ duration: 0.3 }}
-        whileHover={{ scale: 1.1, backgroundColor: '#0052cc' }}
+        whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.95 }}
       >
         <svg 
@@ -1333,7 +1278,7 @@ export default function ProfilePage() {
           height="24" 
           viewBox="0 0 24 24" 
           fill="none" 
-          stroke="white" 
+          stroke="black" 
           strokeWidth="1.5"
         >
           <path d="M12 19V5M5 12L12 5L19 12" />
