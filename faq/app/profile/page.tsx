@@ -86,7 +86,7 @@ export default function ProfilePage() {
   
   const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
 
-  // Table data with detailed content - No key features, no stats
+  // Table data with detailed content
   const tableData = [
     {
       id: 1,
@@ -219,10 +219,8 @@ export default function ProfilePage() {
     if (typeof window === 'undefined') return;
     if (!menuruTextRef.current || !menuruContainerRef.current) return;
     
-    // Refresh ScrollTrigger to ensure proper initialization
     ScrollTrigger.refresh();
     
-    // Set initial state - completely hidden at bottom with blur
     gsap.set(menuruTextRef.current, {
       opacity: 0,
       y: 200,
@@ -233,7 +231,6 @@ export default function ProfilePage() {
       transformStyle: "preserve-3d"
     });
     
-    // Create the scroll-triggered animation timeline
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: menuruContainerRef.current,
@@ -246,7 +243,6 @@ export default function ProfilePage() {
       }
     });
     
-    // Animate to final position with smooth easing
     tl.to(menuruTextRef.current, {
       opacity: 1,
       y: 0,
@@ -258,7 +254,6 @@ export default function ProfilePage() {
       stagger: 0.1
     });
     
-    // Add a subtle scale pulse when fully visible
     ScrollTrigger.create({
       trigger: menuruContainerRef.current,
       start: "top 20%",
@@ -276,7 +271,6 @@ export default function ProfilePage() {
     });
     
     return () => {
-      // Clean up all ScrollTrigger instances
       ScrollTrigger.getAll().forEach(trigger => {
         if (trigger.vars.trigger === menuruContainerRef.current) {
           trigger.kill();
@@ -993,7 +987,7 @@ export default function ProfilePage() {
         )}
       </AnimatePresence>
 
-      {/* MAIN CONTENT - AWWARDS INSPIRED LARGE TABLE */}
+      {/* MAIN CONTENT */}
       <div style={{
         maxWidth: '1400px',
         margin: '0 auto',
@@ -1038,7 +1032,7 @@ export default function ProfilePage() {
           From concept to brand, I work and think watch to watch with expert developers and designers to media social — perseverance the intuitive with the curious to create delightful and engaging experiences for the world wide web
         </motion.p>
 
-        {/* AWWARDS STYLE LARGE TABLE */}
+        {/* LARGE TABLE */}
         <div>
           {tableData.map((item, index) => (
             <React.Fragment key={item.id}>
@@ -1132,7 +1126,7 @@ export default function ProfilePage() {
                 </motion.div>
               </motion.div>
 
-              {/* Expanded Content - Only overview, no features or stats */}
+              {/* Expanded Content - With Blue #0080ff Button */}
               <AnimatePresence>
                 {expandedItem === item.id && (
                   <motion.div
@@ -1145,7 +1139,7 @@ export default function ProfilePage() {
                       padding: isMobile ? '2rem 0' : '3rem 0 4rem 0',
                       borderBottom: '1px solid rgba(255,255,255,0.08)'
                     }}>
-                      {/* Overview only - Clean and minimal */}
+                      {/* Overview only */}
                       <div style={{
                         marginBottom: '0',
                         maxWidth: '900px'
@@ -1171,7 +1165,7 @@ export default function ProfilePage() {
                         </p>
                       </div>
 
-                      {/* Action Button */}
+                      {/* Action Button with #0080ff color */}
                       <motion.button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -1180,21 +1174,20 @@ export default function ProfilePage() {
                         style={{
                           width: 'auto',
                           padding: '1rem 2rem',
-                          backgroundColor: 'transparent',
+                          backgroundColor: '#0080ff',
                           color: 'white',
-                          border: '1px solid rgba(255,255,255,0.2)',
+                          border: 'none',
                           borderRadius: '0',
                           fontSize: '0.875rem',
-                          fontWeight: '400',
+                          fontWeight: '500',
                           cursor: 'pointer',
                           letterSpacing: '1px',
                           transition: 'all 0.3s ease',
                           marginTop: '2rem'
                         }}
                         whileHover={{ 
-                          backgroundColor: 'white',
-                          color: 'black',
-                          borderColor: 'white'
+                          backgroundColor: '#0066cc',
+                          scale: 1.02
                         }}
                         whileTap={{ scale: 0.98 }}
                       >
