@@ -97,39 +97,45 @@ export default function TermsOfServicePage() {
         style={{
           height: "100vh",
           display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
+          alignItems: "flex-start",
           whiteSpace: "nowrap",
           willChange: "transform",
+          position: "relative",
         }}
       >
-        {/* Section title - normal text, not bold, positioned above */}
-        <div
-          style={{
-            fontWeight: "normal",
-            fontSize: "1rem",
-            color: "#ffffff",
-            textAlign: "center",
-            marginBottom: "2rem",
-            opacity: 0.8,
-            letterSpacing: "1px",
-          }}
-        >
-          1. Introduction, acceptance and general conditions
-        </div>
-
         <div
           ref={textRef}
           style={{
-            fontWeight: "700",
-            fontSize: "700px",
-            lineHeight: "1",
-            padding: "0 2rem",
-            color: "#ffffff",
+            display: "flex",
+            alignItems: "flex-start",
+            gap: "2rem",
+            padding: "2rem",
           }}
         >
-          TERMS OF SERVICES
+          {/* Section title - normal text, not bold, positioned at the top */}
+          <div
+            style={{
+              fontWeight: "normal",
+              fontSize: "1rem",
+              color: "#ffffff",
+              opacity: 0.7,
+              paddingTop: "0.5rem",
+            }}
+          >
+            1. Introduction, acceptance and general conditions
+          </div>
+
+          {/* Main large text */}
+          <div
+            style={{
+              fontWeight: "700",
+              fontSize: "700px",
+              lineHeight: "1",
+              color: "#ffffff",
+            }}
+          >
+            TERMS OF SERVICES
+          </div>
         </div>
       </div>
     </div>
