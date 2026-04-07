@@ -83,54 +83,40 @@ export default function TermsOfServicePage() {
 
   const sections = [
     {
-      number: "01",
-      title: "Introduction",
-      content: "Welcome to my notification platform. By accessing or using my services, you agree to be bound by these Terms of Service. I provide a platform for sending and receiving notifications, interacting through comments and reactions, and managing digital communication."
+      title: "PENDAHULUAN",
+      content: "Dengan mengakses dan menggunakan layanan ini, Anda menyetujui untuk terikat dengan Ketentuan Layanan ini. Jika Anda tidak setuju dengan bagian mana pun dari ketentuan ini, mohon untuk tidak menggunakan layanan kami."
     },
     {
-      number: "02",
-      title: "User Accounts",
-      content: "To access certain features, you may need to register an account. You agree to provide accurate and complete information. You are responsible for maintaining the confidentiality of your password and for all activities that occur under your account."
+      title: "PENGGUNAAN LAYANAN",
+      content: "Anda setuju untuk menggunakan layanan ini hanya untuk tujuan yang sah dan sesuai dengan ketentuan ini. Anda dilarang menyalahgunakan layanan, mencoba mengakses area yang tidak diizinkan, atau mengganggu layanan pihak lain."
     },
     {
-      number: "03",
-      title: "Service Usage",
-      content: "You agree not to use the service for illegal purposes, send spam or disruptive content, spread malware or malicious code, violate intellectual property rights, attempt to access other users' accounts, or use the service in any way that may damage or burden my infrastructure."
+      title: "AKUN PENGGUNA",
+      content: "Anda bertanggung jawab penuh atas kerahasiaan akun dan kata sandi Anda serta segala aktivitas yang terjadi di dalam akun Anda. Harap segera beri tahu kami jika terjadi akses tidak sah ke akun Anda."
     },
     {
-      number: "04",
-      title: "User Content",
-      content: "You retain ownership of the content you post on my service. By posting content, you grant me a non-exclusive, royalty-free, worldwide license to use, display, and distribute your content in connection with providing the service. You are solely responsible for the content you post."
+      title: "KONTEN PENGGUNA",
+      content: "Anda tetap memiliki hak atas konten yang Anda unggah. Namun, dengan mengunggah konten, Anda memberi kami lisensi untuk menampilkan, mendistribusikan, dan mempromosikan konten tersebut dalam layanan kami."
     },
     {
-      number: "05",
-      title: "Intellectual Property",
-      content: "The service and its original content, features, and functionality are and will remain my exclusive property. The service is protected by copyright, trademark, and other laws. You may not use my logos, trademarks, or design elements without prior written permission."
+      title: "HAK KEKAYAAN INTELEKTUAL",
+      content: "Seluruh konten, fitur, dan fungsionalitas layanan ini adalah milik kami dan dilindungi oleh hak cipta, merek dagang, dan undang-undang kekayaan intelektual lainnya. Anda tidak diperbolehkan menyalin atau menggunakan ulang tanpa izin."
     },
     {
-      number: "06",
-      title: "Limitation of Liability",
-      content: "To the maximum extent permitted by applicable law, I shall not be liable for any indirect, incidental, special, consequential, or punitive damages, including without limitation loss of profits, data, use, goodwill, or other intangible losses. My services are provided 'as is' and 'as available' without any warranties."
+      title: "BATASAN TANGGUNG JAWAB",
+      content: "Kami tidak bertanggung jawab atas kerugian langsung, tidak langsung, insidental, atau konsekuensial yang timbul dari penggunaan atau ketidakmampuan menggunakan layanan ini. Layanan disediakan 'sebagaimana adanya' tanpa jaminan apapun."
     },
     {
-      number: "07",
-      title: "Termination",
-      content: "I may terminate or suspend your access to my service immediately, without notice or liability, for any reason, including if you breach these Terms. Upon termination, your right to use the service will immediately cease."
+      title: "PERUBAHAN KETENTUAN",
+      content: "Kami berhak untuk mengubah ketentuan ini sewaktu-waktu. Perubahan akan berlaku setelah dipublikasikan di halaman ini. Penggunaan layanan yang berkelanjutan menunjukkan penerimaan Anda terhadap ketentuan yang telah diubah."
     },
     {
-      number: "08",
-      title: "Governing Law",
-      content: "These Terms shall be governed by and construed in accordance with the laws of Indonesia, without regard to its conflict of law provisions."
+      title: "HUKUM YANG BERLAKU",
+      content: "Ketentuan ini diatur oleh hukum yang berlaku di wilayah Indonesia. Setiap sengketa yang timbul akan diselesaikan secara musyawarah atau melalui jalur hukum yang berlaku."
     },
     {
-      number: "09",
-      title: "Changes to Terms",
-      content: "I reserve the right to modify or replace these Terms at any time. If a revision is material, I will provide at least 30 days' notice before new terms take effect. By continuing to access or use my service after revisions become effective, you agree to be bound by the revised terms."
-    },
-    {
-      number: "10",
-      title: "Contact Me",
-      content: "If you have any questions about these Terms of Service, please contact me at: hello@wawa44.com"
+      title: "HUBUNGI KAMI",
+      content: "Jika Anda memiliki pertanyaan tentang Ketentuan Layanan ini, silakan hubungi melalui email: hello@terms.com"
     }
   ];
 
@@ -149,20 +135,21 @@ export default function TermsOfServicePage() {
         ref={containerRef}
         style={{
           height: "100vh",
-          display: "inline-flex",
+          display: "flex",
           alignItems: "center",
+          whiteSpace: "nowrap",
           willChange: "transform",
-          padding: "4rem",
-          gap: "6rem",
+          paddingLeft: "4rem",
         }}
       >
-        {/* Title Section - Big 700px */}
+        {/* Main Title */}
         <div
+          ref={contentRef}
           style={{
-            display: "inline-flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            height: "100vh",
+            display: "flex",
+            alignItems: "center",
+            gap: "6rem",
+            paddingRight: "4rem",
           }}
         >
           <div
@@ -171,58 +158,41 @@ export default function TermsOfServicePage() {
               fontSize: "700px",
               lineHeight: "1",
               color: "#ffffff",
-              whiteSpace: "nowrap",
+              flexShrink: 0,
             }}
           >
-            TERMS OF<br />SERVICES
+            TERMS OF SERVICES
           </div>
-        </div>
 
-        {/* Content Sections */}
-        <div
-          ref={contentRef}
-          style={{
-            display: "inline-flex",
-            gap: "6rem",
-            alignItems: "center",
-          }}
-        >
-          {sections.map((section) => (
+          {/* Sections */}
+          {sections.map((section, index) => (
             <div
-              key={section.number}
+              key={index}
               style={{
+                flexShrink: 0,
                 width: "500px",
                 whiteSpace: "normal",
-                display: "flex",
-                flexDirection: "column",
               }}
             >
               <div
                 style={{
-                  fontSize: "1rem",
-                  color: "#888888",
-                  marginBottom: "1rem",
-                  letterSpacing: "2px",
-                }}
-              >
-                {section.number}
-              </div>
-              <div
-                style={{
-                  fontSize: "3rem",
+                  fontSize: "48px",
                   fontWeight: "700",
                   color: "#ffffff",
-                  marginBottom: "2rem",
-                  lineHeight: "1.2",
+                  marginBottom: "24px",
+                  borderLeft: "4px solid #ffffff",
+                  paddingLeft: "20px",
                 }}
               >
                 {section.title}
               </div>
               <div
                 style={{
-                  fontSize: "1.1rem",
+                  fontSize: "18px",
                   lineHeight: "1.6",
                   color: "#cccccc",
+                  whiteSpace: "normal",
+                  paddingLeft: "24px",
                 }}
               >
                 {section.content}
