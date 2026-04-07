@@ -81,6 +81,59 @@ export default function TermsOfServicePage() {
     };
   }, []);
 
+  const sections = [
+    {
+      number: "01",
+      title: "Introduction",
+      content: "Welcome to my notification platform. By accessing or using my services, you agree to be bound by these Terms of Service. I provide a platform for sending and receiving notifications, interacting through comments and reactions, and managing digital communication."
+    },
+    {
+      number: "02",
+      title: "User Accounts",
+      content: "To access certain features, you may need to register an account. You agree to provide accurate and complete information. You are responsible for maintaining the confidentiality of your password and for all activities that occur under your account."
+    },
+    {
+      number: "03",
+      title: "Service Usage",
+      content: "You agree not to use the service for illegal purposes, send spam or disruptive content, spread malware or malicious code, violate intellectual property rights, attempt to access other users' accounts, or use the service in any way that may damage or burden my infrastructure."
+    },
+    {
+      number: "04",
+      title: "User Content",
+      content: "You retain ownership of the content you post on my service. By posting content, you grant me a non-exclusive, royalty-free, worldwide license to use, display, and distribute your content in connection with providing the service. You are solely responsible for the content you post."
+    },
+    {
+      number: "05",
+      title: "Intellectual Property",
+      content: "The service and its original content, features, and functionality are and will remain my exclusive property. The service is protected by copyright, trademark, and other laws. You may not use my logos, trademarks, or design elements without prior written permission."
+    },
+    {
+      number: "06",
+      title: "Limitation of Liability",
+      content: "To the maximum extent permitted by applicable law, I shall not be liable for any indirect, incidental, special, consequential, or punitive damages, including without limitation loss of profits, data, use, goodwill, or other intangible losses. My services are provided 'as is' and 'as available' without any warranties."
+    },
+    {
+      number: "07",
+      title: "Termination",
+      content: "I may terminate or suspend your access to my service immediately, without notice or liability, for any reason, including if you breach these Terms. Upon termination, your right to use the service will immediately cease."
+    },
+    {
+      number: "08",
+      title: "Governing Law",
+      content: "These Terms shall be governed by and construed in accordance with the laws of Indonesia, without regard to its conflict of law provisions."
+    },
+    {
+      number: "09",
+      title: "Changes to Terms",
+      content: "I reserve the right to modify or replace these Terms at any time. If a revision is material, I will provide at least 30 days' notice before new terms take effect. By continuing to access or use my service after revisions become effective, you agree to be bound by the revised terms."
+    },
+    {
+      number: "10",
+      title: "Contact Me",
+      content: "If you have any questions about these Terms of Service, please contact me at: hello@wawa44.com"
+    }
+  ];
+
   return (
     <div
       style={{
@@ -97,13 +150,13 @@ export default function TermsOfServicePage() {
         style={{
           height: "100vh",
           display: "inline-flex",
-          alignItems: "flex-start",
+          alignItems: "center",
           willChange: "transform",
           padding: "4rem",
           gap: "6rem",
         }}
       >
-        {/* Title Section */}
+        {/* Title Section - Big 700px */}
         <div
           style={{
             display: "inline-flex",
@@ -131,140 +184,51 @@ export default function TermsOfServicePage() {
           style={{
             display: "inline-flex",
             gap: "6rem",
-            alignItems: "flex-start",
-            paddingTop: "8rem",
+            alignItems: "center",
           }}
         >
-          {/* Section 1 - Introduction */}
-          <div style={{ width: "400px", whiteSpace: "normal" }}>
-            <h2 style={{ fontSize: "2rem", fontWeight: "700", color: "#ffffff", marginBottom: "1.5rem" }}>
-              01. Introduction
-            </h2>
-            <p style={{ fontSize: "1rem", lineHeight: "1.6", color: "#cccccc", marginBottom: "1rem" }}>
-              Welcome to my notification platform. By accessing or using my services, you agree to be bound by these Terms of Service.
-            </p>
-            <p style={{ fontSize: "1rem", lineHeight: "1.6", color: "#cccccc" }}>
-              I provide a platform for sending and receiving notifications, interacting through comments and reactions, and managing digital communication.
-            </p>
-          </div>
-
-          {/* Section 2 - User Accounts */}
-          <div style={{ width: "400px", whiteSpace: "normal" }}>
-            <h2 style={{ fontSize: "2rem", fontWeight: "700", color: "#ffffff", marginBottom: "1.5rem" }}>
-              02. User Accounts
-            </h2>
-            <p style={{ fontSize: "1rem", lineHeight: "1.6", color: "#cccccc", marginBottom: "1rem" }}>
-              To access certain features, you may need to register an account. You agree to provide accurate and complete information.
-            </p>
-            <p style={{ fontSize: "1rem", lineHeight: "1.6", color: "#cccccc" }}>
-              You are responsible for maintaining the confidentiality of your password and for all activities that occur under your account.
-            </p>
-          </div>
-
-          {/* Section 3 - Service Usage */}
-          <div style={{ width: "400px", whiteSpace: "normal" }}>
-            <h2 style={{ fontSize: "2rem", fontWeight: "700", color: "#ffffff", marginBottom: "1.5rem" }}>
-              03. Service Usage
-            </h2>
-            <p style={{ fontSize: "1rem", lineHeight: "1.6", color: "#cccccc", marginBottom: "1rem" }}>
-              You agree not to:
-            </p>
-            <ul style={{ fontSize: "1rem", lineHeight: "1.6", color: "#cccccc", paddingLeft: "1.5rem" }}>
-              <li>Use the service for illegal purposes</li>
-              <li>Send spam or disruptive content</li>
-              <li>Spread malware or malicious code</li>
-              <li>Violate intellectual property rights</li>
-              <li>Attempt to access other users' accounts</li>
-            </ul>
-          </div>
-
-          {/* Section 4 - User Content */}
-          <div style={{ width: "400px", whiteSpace: "normal" }}>
-            <h2 style={{ fontSize: "2rem", fontWeight: "700", color: "#ffffff", marginBottom: "1.5rem" }}>
-              04. User Content
-            </h2>
-            <p style={{ fontSize: "1rem", lineHeight: "1.6", color: "#cccccc", marginBottom: "1rem" }}>
-              You retain ownership of the content you post. By posting content, you grant me a non-exclusive, royalty-free license to use and display your content.
-            </p>
-            <p style={{ fontSize: "1rem", lineHeight: "1.6", color: "#cccccc" }}>
-              You are solely responsible for the content you post. I reserve the right to remove content that violates these terms.
-            </p>
-          </div>
-
-          {/* Section 5 - Intellectual Property */}
-          <div style={{ width: "400px", whiteSpace: "normal" }}>
-            <h2 style={{ fontSize: "2rem", fontWeight: "700", color: "#ffffff", marginBottom: "1.5rem" }}>
-              05. Intellectual Property
-            </h2>
-            <p style={{ fontSize: "1rem", lineHeight: "1.6", color: "#cccccc", marginBottom: "1rem" }}>
-              The service and its original content, features, and functionality are and will remain my exclusive property.
-            </p>
-            <p style={{ fontSize: "1rem", lineHeight: "1.6", color: "#cccccc" }}>
-              You may not use my logos, trademarks, or design elements without prior written permission.
-            </p>
-          </div>
-
-          {/* Section 6 - Limitation of Liability */}
-          <div style={{ width: "400px", whiteSpace: "normal" }}>
-            <h2 style={{ fontSize: "2rem", fontWeight: "700", color: "#ffffff", marginBottom: "1.5rem" }}>
-              06. Limitation of Liability
-            </h2>
-            <p style={{ fontSize: "1rem", lineHeight: "1.6", color: "#cccccc", marginBottom: "1rem" }}>
-              To the maximum extent permitted by law, I shall not be liable for any indirect, incidental, special, consequential, or punitive damages.
-            </p>
-            <p style={{ fontSize: "1rem", lineHeight: "1.6", color: "#cccccc" }}>
-              My services are provided "as is" and "as available" without any warranties.
-            </p>
-          </div>
-
-          {/* Section 7 - Termination */}
-          <div style={{ width: "400px", whiteSpace: "normal" }}>
-            <h2 style={{ fontSize: "2rem", fontWeight: "700", color: "#ffffff", marginBottom: "1.5rem" }}>
-              07. Termination
-            </h2>
-            <p style={{ fontSize: "1rem", lineHeight: "1.6", color: "#cccccc", marginBottom: "1rem" }}>
-              I may terminate or suspend your access immediately, without notice, for any reason, including if you breach these Terms.
-            </p>
-            <p style={{ fontSize: "1rem", lineHeight: "1.6", color: "#cccccc" }}>
-              Upon termination, your right to use the service will immediately cease.
-            </p>
-          </div>
-
-          {/* Section 8 - Governing Law */}
-          <div style={{ width: "400px", whiteSpace: "normal" }}>
-            <h2 style={{ fontSize: "2rem", fontWeight: "700", color: "#ffffff", marginBottom: "1.5rem" }}>
-              08. Governing Law
-            </h2>
-            <p style={{ fontSize: "1rem", lineHeight: "1.6", color: "#cccccc" }}>
-              These Terms shall be governed by and construed in accordance with the laws of Indonesia.
-            </p>
-          </div>
-
-          {/* Section 9 - Changes to Terms */}
-          <div style={{ width: "400px", whiteSpace: "normal" }}>
-            <h2 style={{ fontSize: "2rem", fontWeight: "700", color: "#ffffff", marginBottom: "1.5rem" }}>
-              09. Changes to Terms
-            </h2>
-            <p style={{ fontSize: "1rem", lineHeight: "1.6", color: "#cccccc", marginBottom: "1rem" }}>
-              I reserve the right to modify or replace these Terms at any time.
-            </p>
-            <p style={{ fontSize: "1rem", lineHeight: "1.6", color: "#cccccc" }}>
-              By continuing to access or use my service after revisions become effective, you agree to be bound by the revised terms.
-            </p>
-          </div>
-
-          {/* Section 10 - Contact */}
-          <div style={{ width: "400px", whiteSpace: "normal" }}>
-            <h2 style={{ fontSize: "2rem", fontWeight: "700", color: "#ffffff", marginBottom: "1.5rem" }}>
-              10. Contact Me
-            </h2>
-            <p style={{ fontSize: "1rem", lineHeight: "1.6", color: "#cccccc", marginBottom: "1rem" }}>
-              If you have any questions about these Terms, please contact me:
-            </p>
-            <div style={{ fontSize: "1rem", lineHeight: "1.8", color: "#ffffff" }}>
-              <div>Email: hello@wawa44.com</div>
+          {sections.map((section) => (
+            <div
+              key={section.number}
+              style={{
+                width: "500px",
+                whiteSpace: "normal",
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
+              <div
+                style={{
+                  fontSize: "1rem",
+                  color: "#888888",
+                  marginBottom: "1rem",
+                  letterSpacing: "2px",
+                }}
+              >
+                {section.number}
+              </div>
+              <div
+                style={{
+                  fontSize: "3rem",
+                  fontWeight: "700",
+                  color: "#ffffff",
+                  marginBottom: "2rem",
+                  lineHeight: "1.2",
+                }}
+              >
+                {section.title}
+              </div>
+              <div
+                style={{
+                  fontSize: "1.1rem",
+                  lineHeight: "1.6",
+                  color: "#cccccc",
+                }}
+              >
+                {section.content}
+              </div>
             </div>
-          </div>
+          ))}
         </div>
       </div>
     </div>
