@@ -95,6 +95,23 @@ export default function TermsOfServicePage() {
         position: "relative",
       }}
     >
+      {/* Section title - normal text, not bold */}
+      <div
+        style={{
+          position: "absolute",
+          top: "2rem",
+          left: "2rem",
+          zIndex: 10,
+          fontSize: "1rem",
+          fontWeight: "normal",
+          color: "#ffffff",
+          opacity: 0.7,
+          letterSpacing: "0.5px",
+        }}
+      >
+        1. Introduction, acceptance and general conditions
+      </div>
+
       <div
         ref={containerRef}
         style={{
@@ -120,4 +137,4 @@ export default function TermsOfServicePage() {
       </div>
     </div>
   );
-} 
+}
