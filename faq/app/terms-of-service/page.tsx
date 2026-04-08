@@ -100,7 +100,6 @@ export default function TermsOfServicePage() {
           alignItems: "flex-start",
           whiteSpace: "nowrap",
           willChange: "transform",
-          position: "relative",
         }}
       >
         <div
@@ -108,18 +107,19 @@ export default function TermsOfServicePage() {
           style={{
             display: "flex",
             alignItems: "flex-start",
-            gap: "2rem",
-            padding: "2rem",
+            gap: "4rem",
+            paddingLeft: "2rem",
+            paddingRight: "2rem",
           }}
         >
-          {/* Section title - normal text, not bold, positioned at the top */}
+          {/* Section title - normal text, not bold, aligns at top, scrolls horizontally */}
           <div
             style={{
               fontWeight: "normal",
               fontSize: "1rem",
               color: "#ffffff",
-              opacity: 0.7,
-              paddingTop: "0.5rem",
+              opacity: 0.8,
+              paddingTop: "1rem",
             }}
           >
             1. Introduction, acceptance and general conditions
