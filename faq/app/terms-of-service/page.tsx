@@ -67,7 +67,10 @@ export default function TermsOfServicePage() {
       container.style.cursor = "grab";
     };
 
+    // Wheel event for horizontal scroll
     window.addEventListener("wheel", handleWheel, { passive: false });
+    
+    // Drag events
     container.addEventListener("mousedown", handleMouseDown);
     window.addEventListener("mousemove", handleMouseMove);
     window.addEventListener("mouseup", handleMouseUp);
@@ -92,12 +95,49 @@ export default function TermsOfServicePage() {
         position: "relative",
       }}
     >
+      {/* Section Title */}
+      <div
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 10,
+          padding: "2rem 3rem",
+        }}
+      >
+        <div
+          style={{
+            fontWeight: "400",
+            fontSize: "14px",
+            lineHeight: "1.5",
+            color: "#ffffff",
+            letterSpacing: "0.05em",
+            marginBottom: "0.5rem",
+          }}
+        >
+          1. INTRODUCTION, ACCEPTANCE AND GENERAL CONDITIONS
+        </div>
+        <div
+          style={{
+            fontWeight: "400",
+            fontSize: "13px",
+            lineHeight: "1.6",
+            color: "rgba(255, 255, 255, 0.7)",
+            maxWidth: "600px",
+          }}
+        >
+          By accessing or using our services, you agree to be bound by these Terms of Service and all applicable laws and regulations. If you do not agree with any part of these terms, you may not use our services. These terms constitute a legally binding agreement between you and the company.
+        </div>
+      </div>
+
+      {/* Horizontal Scrolling Text */}
       <div
         ref={containerRef}
         style={{
           height: "100vh",
           display: "flex",
-          alignItems: "flex-start",
+          alignItems: "center",
           whiteSpace: "nowrap",
           willChange: "transform",
         }}
@@ -105,37 +145,14 @@ export default function TermsOfServicePage() {
         <div
           ref={textRef}
           style={{
-            display: "flex",
-            alignItems: "flex-start",
-            gap: "4rem",
-            paddingLeft: "2rem",
-            paddingRight: "2rem",
+            fontWeight: "700",
+            fontSize: "700px",
+            lineHeight: "1",
+            padding: "0 2rem",
+            color: "#ffffff",
           }}
         >
-          {/* Section title - normal text, not bold, aligns at top, scrolls horizontally */}
-          <div
-            style={{
-              fontWeight: "normal",
-              fontSize: "1rem",
-              color: "#ffffff",
-              opacity: 0.8,
-              paddingTop: "1rem",
-            }}
-          >
-            1. Introduction, acceptance and general conditions
-          </div>
-
-          {/* Main large text */}
-          <div
-            style={{
-              fontWeight: "700",
-              fontSize: "700px",
-              lineHeight: "1",
-              color: "#ffffff",
-            }}
-          >
-            TERMS OF SERVICES
-          </div>
+          TERMS OF SERVICES
         </div>
       </div>
     </div>
