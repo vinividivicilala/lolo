@@ -2,7 +2,6 @@
 
 import { useRef, useEffect } from "react";
 import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 export default function TermsOfServicePage() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -10,8 +9,6 @@ export default function TermsOfServicePage() {
   const homeButtonRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
-
     const container = containerRef.current;
     const content = contentRef.current;
     const homeButton = homeButtonRef.current;
@@ -21,11 +18,38 @@ export default function TermsOfServicePage() {
     let isDragging = false;
     let startX = 0;
     let scrollLeft = 0;
+    let currentMoveX = 0;
 
     const getMaxScroll = () => {
       return content.scrollWidth - window.innerWidth;
     };
 
+    const updateHomeButtonPosition = (newScrollLeft: number, isScrollingRight: boolean) => {
+      // Jika scroll ke kanan, home button DIAM (tidak bergerak)
+      if (isScrollingRight) {
+        // Tidak melakukan apa-apa, posisi tetap
+        return;
+      }
+      
+      // Jika scroll ke kiri, home button bergerak mengikuti scroll ke kanan
+      // Maksimal bergerak 200px
+      const maxMove = 200;
+      let targetMoveX = Math.min(newScrollLeft, maxMove);
+      
+      // Pastikan hanya bergerak maju (tidak mundur)
+      if (targetMoveX > currentMoveX) {
+        currentMoveX = targetMoveX;
+      }
+      
+      gsap.to(homeButton, {
+        x: -currentMoveX,
+        duration: 0.3,
+        ease: "power2.out",
+      });
+    };
+
+    let lastScrollLeft = 0;
+    
     const handleWheel = (e: WheelEvent) => {
       e.preventDefault();
       const maxScroll = getMaxScroll();
@@ -34,15 +58,19 @@ export default function TermsOfServicePage() {
       if (newScrollLeft < 0) newScrollLeft = 0;
       if (newScrollLeft > maxScroll) newScrollLeft = maxScroll;
       
+      // Tentukan arah scroll
+      const isScrollingRight = newScrollLeft > scrollLeft;
+      
       scrollLeft = newScrollLeft;
-
-      // ❌ DIHAPUS: moveX (biar gak ikut geser)
-
+      updateHomeButtonPosition(scrollLeft, isScrollingRight);
+      
       gsap.to(container, {
         x: -scrollLeft,
         duration: 0.5,
         ease: "power2.out",
       });
+      
+      lastScrollLeft = scrollLeft;
     };
 
     const handleMouseDown = (e: MouseEvent) => {
@@ -62,10 +90,12 @@ export default function TermsOfServicePage() {
       if (newScrollLeft < 0) newScrollLeft = 0;
       if (newScrollLeft > maxScroll) newScrollLeft = maxScroll;
       
+      // Tentukan arah scroll
+      const isScrollingRight = newScrollLeft > scrollLeft;
+      
       scrollLeft = newScrollLeft;
-
-      // ❌ DIHAPUS: moveX
-
+      updateHomeButtonPosition(scrollLeft, isScrollingRight);
+      
       gsap.to(container, {
         x: -scrollLeft,
         duration: 0,
@@ -84,45 +114,53 @@ export default function TermsOfServicePage() {
     window.addEventListener("mouseup", handleMouseUp);
     container.style.cursor = "grab";
 
-    // 🔥 PIN HALAMAN UTAMA (INI KUNCI UTAMA)
-    ScrollTrigger.create({
-      trigger: container,
-      start: "left left",
-      end: () => "+=" + (content.scrollWidth - window.innerWidth),
-      horizontal: true,
-      scrub: true,
-      pin: homeButton,
-      pinSpacing: false,
-    });
-
-    // posisi awal fix
-    gsap.set(homeButton, { x: 0 });
-
     return () => {
       window.removeEventListener("wheel", handleWheel);
       container.removeEventListener("mousedown", handleMouseDown);
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
-
-      // cleanup ScrollTrigger
-      ScrollTrigger.getAll().forEach(t => t.kill());
     };
   }, []);
 
   // SVG Arrow Components
   const NorthEastArrow = () => (
-    <svg width="80" height="80" viewBox="0 0 24 24" fill="none">
-      <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2"/>
+    <svg
+      width="80"
+      height="80"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      style={{ flexShrink: 0 }}
+    >
+      <path
+        d="M7 17L17 7M17 7H7M17 7V17"
+        stroke="#ffffff"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 
   const NorthWestArrow = () => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-      <path d="M17 17L7 7M7 7H17M7 7V17" stroke="#ffffff" strokeWidth="2"/>
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      style={{ marginRight: "8px" }}
+    >
+      <path
+        d="M17 17L7 7M7 7H17M7 7V17"
+        stroke="#ffffff"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 
-  
   return (
     <div
       style={{
