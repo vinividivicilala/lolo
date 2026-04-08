@@ -7,13 +7,15 @@ export default function TermsOfServicePage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const homeButtonRef = useRef<HTMLDivElement>(null);
+  const lastLetterRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
     const container = containerRef.current;
     const content = contentRef.current;
     const homeButton = homeButtonRef.current;
+    const lastLetter = lastLetterRef.current;
 
-    if (!container || !content || !homeButton) return;
+    if (!container || !content || !homeButton || !lastLetter) return;
 
     let isDragging = false;
     let startX = 0;
@@ -24,8 +26,8 @@ export default function TermsOfServicePage() {
     };
 
     const updateHomeButtonPosition = (currentScrollLeft: number) => {
-      // Teks akan bergerak ke kiri mengikuti scroll, maksimal 100px
-      const maxMove = 150;
+      // Teks akan bergerak ke kiri mengikuti scroll, maksimal 200px
+      const maxMove = 200;
       let moveX = Math.min(currentScrollLeft, maxMove);
       
       // Jika scroll ke kiri (kembali), moveX akan berkurang
@@ -177,13 +179,37 @@ export default function TermsOfServicePage() {
               display: "inline-block",
             }}
           >
-            {/* Teks Halaman Utama di atas TERMS OF SERVICES */}
+            {/* Teks TERMS OF SERVICES yang besar dengan span terpisah untuk huruf terakhir */}
+            <div
+              style={{
+                fontWeight: "700",
+                fontSize: "700px",
+                lineHeight: "1",
+                color: "#ffffff",
+                whiteSpace: "nowrap",
+                position: "relative",
+              }}
+            >
+              TERMS OF SERVICE
+              <span
+                ref={lastLetterRef}
+                style={{
+                  position: "relative",
+                  display: "inline-block",
+                }}
+              >
+                S
+              </span>
+            </div>
+
+            {/* Teks Halaman Utama di atas huruf S terakhir */}
             <div
               ref={homeButtonRef}
               style={{
                 position: "absolute",
-                top: "-80px",
-                left: "0",
+                bottom: "100%",
+                right: "0",
+                marginBottom: "20px",
                 display: "flex",
                 alignItems: "center",
                 color: "#ffffff",
@@ -217,19 +243,6 @@ export default function TermsOfServicePage() {
             >
               <NorthWestArrow />
               <span>Halaman Utama</span>
-            </div>
-
-            {/* Teks TERMS OF SERVICES yang besar */}
-            <div
-              style={{
-                fontWeight: "700",
-                fontSize: "700px",
-                lineHeight: "1",
-                color: "#ffffff",
-                whiteSpace: "nowrap",
-              }}
-            >
-              TERMS OF SERVICES
             </div>
           </div>
 
