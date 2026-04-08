@@ -8,6 +8,7 @@ export default function PrivacyPolicyPage() {
   const contentRef = useRef<HTMLDivElement>(null);
   const homeButtonRef = useRef<HTMLDivElement>(null);
   const privacyWrapperRef = useRef<HTMLDivElement>(null);
+  const popupRef = useRef<HTMLDivElement>(null);
   
   // State untuk cookie consent
   const [showCookiePopup, setShowCookiePopup] = useState(false);
@@ -20,10 +21,44 @@ export default function PrivacyPolicyPage() {
     }
   }, []);
 
+  // Animasi popup saat muncul
+  useEffect(() => {
+    if (showCookiePopup && popupRef.current) {
+      gsap.fromTo(popupRef.current,
+        {
+          opacity: 0,
+          y: 100,
+          scale: 0.9,
+        },
+        {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          duration: 0.6,
+          ease: "back.out(0.3)",
+        }
+      );
+    }
+  }, [showCookiePopup]);
+
   const handleCookieAccept = () => {
-    // Simpan consent ke localStorage
-    localStorage.setItem("cookie-consent", "accepted");
-    setShowCookiePopup(false);
+    // Animasi keluar
+    if (popupRef.current) {
+      gsap.to(popupRef.current, {
+        opacity: 0,
+        y: 50,
+        scale: 0.8,
+        duration: 0.4,
+        ease: "power2.in",
+        onComplete: () => {
+          localStorage.setItem("cookie-consent", "accepted");
+          setShowCookiePopup(false);
+        }
+      });
+    } else {
+      localStorage.setItem("cookie-consent", "accepted");
+      setShowCookiePopup(false);
+    }
   };
 
   useEffect(() => {
@@ -45,18 +80,14 @@ export default function PrivacyPolicyPage() {
     const updateHomeButtonPosition = (currentScroll: number) => {
       const maxScroll = getMaxScroll();
       
-      // Jika scroll sudah mencapai akhir (atau mendekati akhir)
       if (currentScroll >= maxScroll - 100) {
-        // Home button tetap di posisi kiri layar
         gsap.to(homeButton, {
           x: currentScroll,
           duration: 0.3,
           ease: "power2.out",
         });
       } 
-      // Jika scroll balik ke kiri (mendekati posisi awal)
       else if (currentScroll < 200) {
-        // Home button kembali ke posisi aslinya (di atas PRIVACY POLICY)
         gsap.to(homeButton, {
           x: 0,
           duration: 0.3,
@@ -64,7 +95,6 @@ export default function PrivacyPolicyPage() {
         });
       }
       else {
-        // Di area tengah, home button mengikuti scroll normal
         gsap.to(homeButton, {
           x: 0,
           duration: 0.3,
@@ -82,8 +112,6 @@ export default function PrivacyPolicyPage() {
       if (newScrollLeft > maxScroll) newScrollLeft = maxScroll;
       
       scrollLeft = newScrollLeft;
-      
-      // Update posisi home button
       updateHomeButtonPosition(scrollLeft);
       
       gsap.to(container, {
@@ -111,8 +139,6 @@ export default function PrivacyPolicyPage() {
       if (newScrollLeft > maxScroll) newScrollLeft = maxScroll;
       
       scrollLeft = newScrollLeft;
-      
-      // Update posisi home button untuk drag
       updateHomeButtonPosition(scrollLeft);
       
       gsap.to(container, {
@@ -180,26 +206,44 @@ export default function PrivacyPolicyPage() {
     </svg>
   );
 
-  // Cookie SVG Icon
-  const CookieIcon = () => (
+  // Modern Cookie 3D Icon with bite effect
+  const ModernCookieIcon = () => (
     <svg
-      width="40"
-      height="40"
-      viewBox="0 0 24 24"
+      width="56"
+      height="56"
+      viewBox="0 0 32 32"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      style={{ flexShrink: 0 }}
+      style={{ flexShrink: 0, filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.3))" }}
     >
+      <defs>
+        <linearGradient id="cookieGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#F5E6D3" />
+          <stop offset="100%" stopColor="#E8D5B7" />
+        </linearGradient>
+        <linearGradient id="chipGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#5C3A1E" />
+          <stop offset="100%" stopColor="#3E2510" />
+        </linearGradient>
+      </defs>
+      {/* Cookie body */}
+      <circle cx="16" cy="16" r="14" fill="url(#cookieGrad)" stroke="#D4B896" strokeWidth="1.5"/>
+      {/* Cookie edge detail */}
+      <circle cx="16" cy="16" r="13" fill="none" stroke="#D4B896" strokeWidth="0.5" strokeDasharray="3 3"/>
+      {/* Chocolate chips */}
+      <circle cx="10" cy="11" r="2.5" fill="url(#chipGrad)" />
+      <circle cx="20" cy="10" r="2" fill="url(#chipGrad)" />
+      <circle cx="13" cy="20" r="2" fill="url(#chipGrad)" />
+      <circle cx="22" cy="19" r="2.2" fill="url(#chipGrad)" />
+      <circle cx="8" cy="18" r="1.8" fill="url(#chipGrad)" />
+      <circle cx="18" cy="23" r="1.5" fill="url(#chipGrad)" />
+      {/* Bite mark */}
       <path
-        d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM12 20c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"
-        fill="#ffffff"
+        d="M24 8C25.5 9.5 26 11.5 25.5 13.5C24.5 13 23 13 22 14C21 15 21 16.5 21.5 18C19.5 18.5 17.5 18 16 17C17 15 17.5 13 17 11C16.5 9 15 7.5 13 7C14 5.5 16 4.5 18 5C19 5.5 20 6.5 20.5 8C21.5 7.5 22.5 7.5 24 8Z"
+        fill="#D4B896"
+        stroke="#C4A87A"
+        strokeWidth="0.5"
       />
-      <circle cx="8" cy="10" r="1.5" fill="#000000" />
-      <circle cx="12" cy="8" r="1.5" fill="#000000" />
-      <circle cx="16" cy="10" r="1.5" fill="#000000" />
-      <circle cx="10" cy="14" r="1.5" fill="#000000" />
-      <circle cx="14" cy="14" r="1.5" fill="#000000" />
-      <circle cx="12" cy="18" r="1.5" fill="#000000" />
     </svg>
   );
 
@@ -214,100 +258,206 @@ export default function PrivacyPolicyPage() {
         position: "relative",
       }}
     >
-      {/* Cookie Popup */}
+      {/* Modern Cookie Popup - Awwwards Style */}
       {showCookiePopup && (
         <div
+          ref={popupRef}
           style={{
             position: "fixed",
-            bottom: "100px",
-            right: "30px",
+            bottom: "40px",
+            right: "40px",
             zIndex: 2000,
-            animation: "slideIn 0.5s ease-out",
           }}
         >
           <div
             style={{
-              backgroundColor: "rgba(30, 30, 30, 0.95)",
-              backdropFilter: "blur(10px)",
-              borderRadius: "16px",
-              padding: "20px 25px",
-              maxWidth: "380px",
-              boxShadow: "0 10px 40px rgba(0, 0, 0, 0.3)",
-              border: "1px solid rgba(255, 255, 255, 0.1)",
+              position: "relative",
+              background: "rgba(20, 20, 25, 0.85)",
+              backdropFilter: "blur(20px)",
+              borderRadius: "28px",
+              padding: "24px 28px",
+              width: "420px",
+              boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.08)",
+              border: "1px solid rgba(255, 255, 255, 0.12)",
+              transition: "all 0.3s ease",
             }}
           >
+            {/* Decorative gradient line */}
+            <div
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 20,
+                right: 20,
+                height: "3px",
+                background: "linear-gradient(90deg, #FFB347, #FF8C42, #FF6B35)",
+                borderRadius: "3px",
+              }}
+            />
+            
             <div
               style={{
                 display: "flex",
-                alignItems: "center",
-                gap: "15px",
-                marginBottom: "15px",
-              }}
-            >
-              <CookieIcon />
-              <h3
-                style={{
-                  color: "#ffffff",
-                  fontSize: "20px",
-                  fontWeight: "600",
-                  margin: 0,
-                }}
-              >
-                Cookie Settings
-              </h3>
-            </div>
-            <p
-              style={{
-                color: "rgba(255, 255, 255, 0.8)",
-                fontSize: "14px",
-                lineHeight: "1.6",
+                alignItems: "flex-start",
+                gap: "18px",
                 marginBottom: "20px",
               }}
             >
-              We use cookies to enhance your browsing experience, serve personalized content, and analyze our traffic. By clicking "OK", you consent to our use of cookies.
-            </p>
+              {/* Animated cookie icon */}
+              <div
+                style={{
+                  animation: "float 3s ease-in-out infinite",
+                  transformOrigin: "center",
+                }}
+              >
+                <ModernCookieIcon />
+              </div>
+              
+              <div style={{ flex: 1 }}>
+                <h3
+                  style={{
+                    color: "#ffffff",
+                    fontSize: "22px",
+                    fontWeight: "600",
+                    margin: 0,
+                    marginBottom: "6px",
+                    letterSpacing: "-0.3px",
+                    background: "linear-gradient(135deg, #fff 0%, #e0e0e0 100%)",
+                    backgroundClip: "text",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                  }}
+                >
+                  Cookie Preferences
+                </h3>
+                <p
+                  style={{
+                    color: "rgba(255, 255, 255, 0.65)",
+                    fontSize: "13.5px",
+                    lineHeight: "1.55",
+                    margin: 0,
+                    letterSpacing: "-0.2px",
+                  }}
+                >
+                  We use cookies to enhance your experience. By continuing to visit this site you agree to our use of cookies.
+                </p>
+              </div>
+            </div>
+
             <div
               style={{
                 display: "flex",
+                gap: "12px",
                 justifyContent: "flex-end",
+                marginTop: "8px",
               }}
             >
               <button
-                onClick={handleCookieAccept}
+                onClick={() => {
+                  if (popupRef.current) {
+                    gsap.to(popupRef.current, {
+                      opacity: 0,
+                      y: 50,
+                      scale: 0.8,
+                      duration: 0.3,
+                      ease: "power2.in",
+                      onComplete: () => setShowCookiePopup(false)
+                    });
+                  } else {
+                    setShowCookiePopup(false);
+                  }
+                }}
                 style={{
-                  backgroundColor: "#ffffff",
-                  color: "#000000",
-                  border: "none",
-                  padding: "10px 30px",
-                  borderRadius: "30px",
-                  fontSize: "16px",
-                  fontWeight: "600",
+                  background: "transparent",
+                  border: "1px solid rgba(255, 255, 255, 0.2)",
+                  color: "rgba(255, 255, 255, 0.7)",
+                  padding: "10px 22px",
+                  borderRadius: "40px",
+                  fontSize: "14px",
+                  fontWeight: "500",
                   cursor: "pointer",
-                  transition: "all 0.3s ease",
+                  transition: "all 0.25s ease",
                   fontFamily: "inherit",
+                  letterSpacing: "-0.2px",
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = "#dddddd";
-                  e.currentTarget.style.transform = "scale(1.02)";
+                  e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.4)";
+                  e.currentTarget.style.color = "#ffffff";
+                  e.currentTarget.style.background = "rgba(255, 255, 255, 0.05)";
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = "#ffffff";
-                  e.currentTarget.style.transform = "scale(1)";
+                  e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.2)";
+                  e.currentTarget.style.color = "rgba(255, 255, 255, 0.7)";
+                  e.currentTarget.style.background = "transparent";
                 }}
               >
-                OK
+                Decline
+              </button>
+              <button
+                onClick={handleCookieAccept}
+                style={{
+                  background: "linear-gradient(135deg, #FFB347 0%, #FF8C42 100%)",
+                  border: "none",
+                  color: "#ffffff",
+                  padding: "10px 28px",
+                  borderRadius: "40px",
+                  fontSize: "14px",
+                  fontWeight: "600",
+                  cursor: "pointer",
+                  transition: "all 0.25s ease",
+                  fontFamily: "inherit",
+                  letterSpacing: "-0.2px",
+                  boxShadow: "0 4px 15px rgba(255, 140, 66, 0.3)",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = "translateY(-2px)";
+                  e.currentTarget.style.boxShadow = "0 8px 25px rgba(255, 140, 66, 0.4)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.boxShadow = "0 4px 15px rgba(255, 140, 66, 0.3)";
+                }}
+              >
+                Accept Cookies
               </button>
             </div>
+
+            {/* Floating particles decoration */}
+            <div
+              style={{
+                position: "absolute",
+                bottom: -10,
+                left: 20,
+                width: "60px",
+                height: "60px",
+                background: "radial-gradient(circle, rgba(255,140,66,0.15) 0%, transparent 70%)",
+                borderRadius: "50%",
+                pointerEvents: "none",
+                zIndex: -1,
+              }}
+            />
+            <div
+              style={{
+                position: "absolute",
+                top: -10,
+                right: 30,
+                width: "40px",
+                height: "40px",
+                background: "radial-gradient(circle, rgba(255,179,71,0.12) 0%, transparent 70%)",
+                borderRadius: "50%",
+                pointerEvents: "none",
+                zIndex: -1,
+              }}
+            />
           </div>
+
           <style jsx>{`
-            @keyframes slideIn {
-              from {
-                opacity: 0;
-                transform: translateX(50px);
+            @keyframes float {
+              0%, 100% {
+                transform: translateY(0px);
               }
-              to {
-                opacity: 1;
-                transform: translateX(0);
+              50% {
+                transform: translateY(-4px);
               }
             }
           `}</style>
@@ -358,7 +508,6 @@ export default function PrivacyPolicyPage() {
                 justifyContent: "flex-end",
               }}
               onClick={() => {
-                // Scroll back to start
                 const container = containerRef.current;
                 const homeButton = homeButtonRef.current;
                 if (container && homeButton) {
@@ -393,6 +542,7 @@ export default function PrivacyPolicyPage() {
             </div>
           </div>
 
+          {/* Rest of the content sections remain the same */}
           {/* Section 1 - Pendahuluan */}
           <div
             style={{
