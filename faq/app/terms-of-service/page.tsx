@@ -7,89 +7,85 @@ export default function TermsOfServicePage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const homeButtonRef = useRef<HTMLDivElement>(null);
-  const originalPositionRef = useRef<{ right: number; bottom: number } | null>(null);
+  const termsTextRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const container = containerRef.current;
     const content = contentRef.current;
     const homeButton = homeButtonRef.current;
+    const termsText = termsTextRef.current;
 
-    if (!container || !content || !homeButton) return;
+    if (!container || !content || !homeButton || !termsText) return;
 
     let isDragging = false;
     let startX = 0;
     let scrollLeft = 0;
-    let isSticky = false;
-    let originalStyles: { position: string; right: string; bottom: string; left: string; top: string } | null = null;
+    let isPinned = false;
+    let pinPosition = 0;
 
     const getMaxScroll = () => {
       return content.scrollWidth - window.innerWidth;
     };
 
-    // Simpan posisi original
-    const saveOriginalPosition = () => {
-      const rect = homeButton.getBoundingClientRect();
-      const parentRect = homeButton.parentElement?.getBoundingClientRect();
-      if (parentRect) {
-        originalStyles = {
-          position: homeButton.style.position,
-          right: homeButton.style.right,
-          bottom: homeButton.style.bottom,
-          left: homeButton.style.left,
-          top: homeButton.style.top,
-        };
-      }
+    // Dapatkan posisi saat teks mencapai pojok kiri
+    const getPinThreshold = () => {
+      const termsRect = termsText.getBoundingClientRect();
+      const containerRect = container.getBoundingClientRect();
+      // Hitung kapan huruf S mencapai pojok kiri
+      return termsRect.width - window.innerWidth + 100;
     };
 
     const updateHomeButtonPosition = (newScrollLeft: number) => {
-      const maxScroll = getMaxScroll();
-      const scrollProgress = newScrollLeft / maxScroll;
+      const threshold = 400; // Batas scroll untuk pin (setelah scroll 400px)
       
-      // Batas untuk menjadi sticky (setelah scroll 30%)
-      const stickyThreshold = 0.3;
-      
-      if (newScrollLeft > 300 && !isSticky) {
-        // Jadikan STICKY di pojok kiri
-        isSticky = true;
-        saveOriginalPosition();
+      if (newScrollLeft >= threshold && !isPinned) {
+        // PIN: teks menjadi fixed di pojok kiri
+        isPinned = true;
+        pinPosition = newScrollLeft;
         
-        gsap.to(homeButton, {
+        // Simpan posisi relative saat ini
+        const currentRect = homeButton.getBoundingClientRect();
+        
+        gsap.set(homeButton, {
           position: "fixed",
           left: "20px",
-          top: "20px",
+          top: currentRect.top + "px",
           right: "auto",
           bottom: "auto",
-          duration: 0.3,
-          ease: "power2.out",
-          overwrite: true,
+          zIndex: 200,
         });
-      } else if (newScrollLeft <= 300 && isSticky) {
-        // Lepas STICKY, kembali ke posisi original
-        isSticky = false;
         
         gsap.to(homeButton, {
+          x: 0,
+          duration: 0.3,
+          ease: "power2.out",
+        });
+      } 
+      else if (newScrollLeft < threshold && isPinned) {
+        // UNPIN: kembali ke posisi semula
+        isPinned = false;
+        
+        // Kembalikan ke posisi absolute
+        gsap.set(homeButton, {
           position: "absolute",
           right: "0",
           bottom: "calc(100% + 20px)",
           left: "auto",
           top: "auto",
+        });
+        
+        // Kembalikan ke posisi scroll yang sesuai
+        gsap.to(homeButton, {
+          x: -newScrollLeft,
           duration: 0.3,
           ease: "power2.out",
-          overwrite: true,
         });
       }
       
-      // Jika tidak sticky, ikut scroll horizontal
-      if (!isSticky) {
+      // Jika tidak pinned, ikut scroll
+      if (!isPinned) {
         gsap.to(homeButton, {
           x: -newScrollLeft,
-          duration: 0.1,
-          ease: "none",
-        });
-      } else {
-        // Jika sticky, posisi fixed tidak perlu ikut scroll
-        gsap.to(homeButton, {
-          x: 0,
           duration: 0.1,
           ease: "none",
         });
@@ -283,6 +279,7 @@ export default function TermsOfServicePage() {
 
             {/* Teks TERMS OF SERVICES yang besar */}
             <div
+              ref={termsTextRef}
               style={{
                 fontWeight: "700",
                 fontSize: "700px",
