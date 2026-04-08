@@ -2,73 +2,98 @@
 
 import { useRef, useEffect } from "react";
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 export default function TermsOfServicePage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const homeButtonRef = useRef<HTMLDivElement>(null);
-  const lastLetterRef = useRef<HTMLSpanElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
+
     const container = containerRef.current;
     const content = contentRef.current;
     const homeButton = homeButtonRef.current;
-    const lastLetter = lastLetterRef.current;
+    const wrapper = wrapperRef.current;
 
-    if (!container || !content || !homeButton || !lastLetter) return;
+    if (!container || !content || !homeButton || !wrapper) return;
 
     let isDragging = false;
     let startX = 0;
     let scrollLeft = 0;
-    let currentMoveX = 0;
 
     const getMaxScroll = () => {
       return content.scrollWidth - window.innerWidth;
     };
 
-    const updateHomeButtonPosition = (currentScrollLeft: number, isScrollingRight: boolean) => {
-      const maxMove = 200;
-      
-      // Hanya bergerak saat scroll ke kanan
-      if (isScrollingRight) {
-        // Gerakkan ke kiri mengikuti scroll, tapi tidak melebihi maxMove
-        let newMoveX = Math.min(currentScrollLeft, maxMove);
-        // Pastikan tidak bergerak mundur
-        if (newMoveX > currentMoveX) {
-          currentMoveX = newMoveX;
-        }
-        gsap.to(homeButton, {
-          x: -currentMoveX,
-          duration: 0.1,
+    // Setup ScrollTrigger untuk horizontal scroll
+    const horizontalScroll = ScrollTrigger.create({
+      trigger: content,
+      start: "top top",
+      end: () => `+=${content.scrollWidth - window.innerWidth}`,
+      pin: false,
+      scrub: 1,
+      invalidateOnRefresh: true,
+      onUpdate: (self) => {
+        const progress = self.progress;
+        const scrollAmount = progress * (content.scrollWidth - window.innerWidth);
+        
+        gsap.to(container, {
+          x: -scrollAmount,
+          duration: 0,
           ease: "none",
         });
-      }
-      // Saat scroll ke kiri, tidak melakukan apa-apa (posisi tetap)
-    };
+        
+        scrollLeft = scrollAmount;
+      },
+    });
 
-    let lastScrollLeft = 0;
-    
+    // Animasi untuk home button dengan ScrollTrigger
+    const homeButtonAnimation = gsap.fromTo(homeButton,
+      {
+        x: 0,
+        opacity: 1,
+      },
+      {
+        x: -300,
+        opacity: 0,
+        scrollTrigger: {
+          trigger: wrapper,
+          start: "left 80%",
+          end: "left 20%",
+          scrub: 1,
+          invalidateOnRefresh: true,
+        },
+      }
+    );
+
     const handleWheel = (e: WheelEvent) => {
       e.preventDefault();
+      const delta = e.deltaY;
+      const currentScroll = scrollLeft;
+      let newScroll = currentScroll + delta;
       const maxScroll = getMaxScroll();
-      let newScrollLeft = scrollLeft + e.deltaY;
       
-      if (newScrollLeft < 0) newScrollLeft = 0;
-      if (newScrollLeft > maxScroll) newScrollLeft = maxScroll;
+      newScroll = Math.min(Math.max(newScroll, 0), maxScroll);
       
-      // Tentukan arah scroll
-      const isScrollingRight = newScrollLeft > scrollLeft;
-      
-      scrollLeft = newScrollLeft;
-      updateHomeButtonPosition(scrollLeft, isScrollingRight);
-      
-      gsap.to(container, {
-        x: -scrollLeft,
-        duration: 0.5,
-        ease: "power2.out",
+      // Update ScrollTrigger
+      const progress = newScroll / maxScroll;
+      ScrollTrigger.getAll().forEach(st => {
+        if (st.vars.id !== "homeButton") {
+          st.progress = progress;
+        }
       });
       
-      lastScrollLeft = scrollLeft;
+      gsap.to(container, {
+        x: -newScroll,
+        duration: 0.5,
+        ease: "power2.out",
+        onUpdate: () => {
+          scrollLeft = newScroll;
+        },
+      });
     };
 
     const handleMouseDown = (e: MouseEvent) => {
@@ -85,15 +110,17 @@ export default function TermsOfServicePage() {
       let newScrollLeft = scrollLeft - walk;
       const maxScroll = getMaxScroll();
       
-      if (newScrollLeft < 0) newScrollLeft = 0;
-      if (newScrollLeft > maxScroll) newScrollLeft = maxScroll;
+      newScrollLeft = Math.min(Math.max(newScrollLeft, 0), maxScroll);
       
-      // Tentukan arah scroll
-      const isScrollingRight = newScrollLeft > scrollLeft;
+      // Update ScrollTrigger
+      const progress = newScrollLeft / maxScroll;
+      ScrollTrigger.getAll().forEach(st => {
+        if (st.vars.id !== "homeButton") {
+          st.progress = progress;
+        }
+      });
       
       scrollLeft = newScrollLeft;
-      updateHomeButtonPosition(scrollLeft, isScrollingRight);
-      
       gsap.to(container, {
         x: -scrollLeft,
         duration: 0,
@@ -106,6 +133,7 @@ export default function TermsOfServicePage() {
       container.style.cursor = "grab";
     };
 
+    // Custom scroll handler untuk menghindari konflik dengan ScrollTrigger
     window.addEventListener("wheel", handleWheel, { passive: false });
     container.addEventListener("mousedown", handleMouseDown);
     window.addEventListener("mousemove", handleMouseMove);
@@ -117,6 +145,7 @@ export default function TermsOfServicePage() {
       container.removeEventListener("mousedown", handleMouseDown);
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
+      ScrollTrigger.getAll().forEach(st => st.kill());
     };
   }, []);
 
@@ -190,42 +219,19 @@ export default function TermsOfServicePage() {
         >
           {/* Wrapper untuk TERMS OF SERVICES dan Halaman Utama */}
           <div
+            ref={wrapperRef}
             style={{
               position: "relative",
               display: "inline-block",
             }}
           >
-            {/* Teks TERMS OF SERVICES yang besar dengan span terpisah untuk huruf terakhir */}
-            <div
-              style={{
-                fontWeight: "700",
-                fontSize: "700px",
-                lineHeight: "1",
-                color: "#ffffff",
-                whiteSpace: "nowrap",
-                position: "relative",
-              }}
-            >
-              TERMS OF SERVICE
-              <span
-                ref={lastLetterRef}
-                style={{
-                  position: "relative",
-                  display: "inline-block",
-                }}
-              >
-                S
-              </span>
-            </div>
-
-            {/* Teks Halaman Utama di atas huruf S terakhir */}
+            {/* Teks Halaman Utama di atas TERMS OF SERVICES */}
             <div
               ref={homeButtonRef}
               style={{
                 position: "absolute",
-                bottom: "100%",
+                bottom: "calc(100% + 20px)",
                 right: "0",
-                marginBottom: "20px",
                 display: "flex",
                 alignItems: "center",
                 color: "#ffffff",
@@ -235,29 +241,45 @@ export default function TermsOfServicePage() {
                 whiteSpace: "nowrap",
                 cursor: "pointer",
                 zIndex: 10,
+                background: "rgba(0,0,0,0.5)",
+                padding: "8px 16px",
+                borderRadius: "50px",
+                backdropFilter: "blur(10px)",
+                border: "1px solid rgba(255,255,255,0.2)",
               }}
               onClick={() => {
                 // Scroll back to start
                 const container = containerRef.current;
-                const homeButton = homeButtonRef.current;
-                if (container && homeButton) {
-                  // Reset scroll position
+                if (container) {
                   gsap.to(container, {
                     x: 0,
                     duration: 0.8,
                     ease: "power2.out",
                   });
-                  // Reset button position
-                  gsap.to(homeButton, {
-                    x: 0,
-                    duration: 0.8,
-                    ease: "power2.out",
+                  // Reset ScrollTrigger progress
+                  ScrollTrigger.getAll().forEach(st => {
+                    if (st.vars.id !== "homeButton") {
+                      st.progress = 0;
+                    }
                   });
                 }
               }}
             >
               <NorthWestArrow />
               <span>Halaman Utama</span>
+            </div>
+
+            {/* Teks TERMS OF SERVICES yang besar */}
+            <div
+              style={{
+                fontWeight: "700",
+                fontSize: "700px",
+                lineHeight: "1",
+                color: "#ffffff",
+                whiteSpace: "nowrap",
+              }}
+            >
+              TERMS OF SERVICES
             </div>
           </div>
 
