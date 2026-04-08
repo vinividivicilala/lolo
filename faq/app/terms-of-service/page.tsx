@@ -81,6 +81,26 @@ export default function TermsOfServicePage() {
     };
   }, []);
 
+  // SVG Arrow Component
+  const NorthEastArrow = () => (
+    <svg
+      width="80"
+      height="80"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      style={{ flexShrink: 0 }}
+    >
+      <path
+        d="M7 17L17 7M17 7H7M17 7V17"
+        stroke="#ffffff"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+
   return (
     <div
       style={{
@@ -121,32 +141,6 @@ export default function TermsOfServicePage() {
             }}
           >
             TERMS OF SERVICES
-          </div>
-
-          {/* Teks COOKIES POLICY */}
-          <div
-            style={{
-              fontWeight: "700",
-              fontSize: "400px",
-              lineHeight: "1",
-              color: "#ffffff",
-              whiteSpace: "nowrap",
-            }}
-          >
-            COOKIES POLICY
-          </div>
-
-          {/* Teks PRIVACY POLICY */}
-          <div
-            style={{
-              fontWeight: "700",
-              fontSize: "400px",
-              lineHeight: "1",
-              color: "#ffffff",
-              whiteSpace: "nowrap",
-            }}
-          >
-            PRIVACY POLICY
           </div>
 
           {/* Section 1 - Introduction */}
@@ -794,6 +788,62 @@ export default function TermsOfServicePage() {
             }}>
               <strong>Address:</strong> 123 Business Avenue, Suite 100, New York, NY 10001, United States
             </p>
+          </div>
+
+          {/* Arrow dan 3 Teks Policy */}
+          <NorthEastArrow />
+          
+          <div
+            style={{
+              fontWeight: "700",
+              fontSize: "200px",
+              lineHeight: "1",
+              color: "#ffffff",
+              whiteSpace: "nowrap",
+            }}
+          >
+            COOKIES POLICY
+          </div>
+
+          <NorthEastArrow />
+          
+          <div
+            style={{
+              fontWeight: "700",
+              fontSize: "200px",
+              lineHeight: "1",
+              color: "#ffffff",
+              whiteSpace: "nowrap",
+            }}
+          >
+            TERMS OF SERVICE
+          </div>
+
+          <NorthEastArrow />
+          
+          <div
+            style={{
+              fontWeight: "700",
+              fontSize: "200px",
+              lineHeight: "1",
+              color: "#ffffff",
+              whiteSpace: "nowrap",
+            }}
+          >
+            PRIVACY POLICY
+          </div>
+
+          {/* Teks MENURU di akhir */}
+          <div
+            style={{
+              fontWeight: "700",
+              fontSize: "700px",
+              lineHeight: "1",
+              color: "#ffffff",
+              whiteSpace: "nowrap",
+            }}
+          >
+            MENURU
           </div>
         </div>
       </div>
