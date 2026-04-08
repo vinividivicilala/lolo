@@ -7,6 +7,7 @@ export default function TermsOfServicePage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const homeButtonRef = useRef<HTMLDivElement>(null);
+  const originalPositionRef = useRef<{ right: number; bottom: number } | null>(null);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -18,9 +19,81 @@ export default function TermsOfServicePage() {
     let isDragging = false;
     let startX = 0;
     let scrollLeft = 0;
+    let isSticky = false;
+    let originalStyles: { position: string; right: string; bottom: string; left: string; top: string } | null = null;
 
     const getMaxScroll = () => {
       return content.scrollWidth - window.innerWidth;
+    };
+
+    // Simpan posisi original
+    const saveOriginalPosition = () => {
+      const rect = homeButton.getBoundingClientRect();
+      const parentRect = homeButton.parentElement?.getBoundingClientRect();
+      if (parentRect) {
+        originalStyles = {
+          position: homeButton.style.position,
+          right: homeButton.style.right,
+          bottom: homeButton.style.bottom,
+          left: homeButton.style.left,
+          top: homeButton.style.top,
+        };
+      }
+    };
+
+    const updateHomeButtonPosition = (newScrollLeft: number) => {
+      const maxScroll = getMaxScroll();
+      const scrollProgress = newScrollLeft / maxScroll;
+      
+      // Batas untuk menjadi sticky (setelah scroll 30%)
+      const stickyThreshold = 0.3;
+      
+      if (newScrollLeft > 300 && !isSticky) {
+        // Jadikan STICKY di pojok kiri
+        isSticky = true;
+        saveOriginalPosition();
+        
+        gsap.to(homeButton, {
+          position: "fixed",
+          left: "20px",
+          top: "20px",
+          right: "auto",
+          bottom: "auto",
+          duration: 0.3,
+          ease: "power2.out",
+          overwrite: true,
+        });
+      } else if (newScrollLeft <= 300 && isSticky) {
+        // Lepas STICKY, kembali ke posisi original
+        isSticky = false;
+        
+        gsap.to(homeButton, {
+          position: "absolute",
+          right: "0",
+          bottom: "calc(100% + 20px)",
+          left: "auto",
+          top: "auto",
+          duration: 0.3,
+          ease: "power2.out",
+          overwrite: true,
+        });
+      }
+      
+      // Jika tidak sticky, ikut scroll horizontal
+      if (!isSticky) {
+        gsap.to(homeButton, {
+          x: -newScrollLeft,
+          duration: 0.1,
+          ease: "none",
+        });
+      } else {
+        // Jika sticky, posisi fixed tidak perlu ikut scroll
+        gsap.to(homeButton, {
+          x: 0,
+          duration: 0.1,
+          ease: "none",
+        });
+      }
     };
 
     const handleWheel = (e: WheelEvent) => {
@@ -32,13 +105,7 @@ export default function TermsOfServicePage() {
       if (newScrollLeft > maxScroll) newScrollLeft = maxScroll;
       
       scrollLeft = newScrollLeft;
-      
-      // Home button ikut scroll horizontal (bergeser ke kiri/kanan)
-      gsap.to(homeButton, {
-        x: -scrollLeft,
-        duration: 0.5,
-        ease: "power2.out",
-      });
+      updateHomeButtonPosition(scrollLeft);
       
       gsap.to(container, {
         x: -scrollLeft,
@@ -65,13 +132,7 @@ export default function TermsOfServicePage() {
       if (newScrollLeft > maxScroll) newScrollLeft = maxScroll;
       
       scrollLeft = newScrollLeft;
-      
-      // Home button ikut scroll horizontal (bergeser ke kiri/kanan)
-      gsap.to(homeButton, {
-        x: -scrollLeft,
-        duration: 0,
-        ease: "none",
-      });
+      updateHomeButtonPosition(scrollLeft);
       
       gsap.to(container, {
         x: -scrollLeft,
@@ -189,19 +250,26 @@ export default function TermsOfServicePage() {
                 letterSpacing: "0.05em",
                 whiteSpace: "nowrap",
                 cursor: "pointer",
-                zIndex: 10,
+                zIndex: 100,
               }}
               onClick={() => {
                 // Scroll back to start
                 const container = containerRef.current;
                 const homeButton = homeButtonRef.current;
                 if (container && homeButton) {
+                  // Reset scroll
                   gsap.to(container, {
                     x: 0,
                     duration: 0.8,
                     ease: "power2.out",
                   });
+                  // Reset button position
                   gsap.to(homeButton, {
+                    position: "absolute",
+                    right: "0",
+                    bottom: "calc(100% + 20px)",
+                    left: "auto",
+                    top: "auto",
                     x: 0,
                     duration: 0.8,
                     ease: "power2.out",
