@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect } from "react";
 import gsap from "gsap";
 
 export default function PrivacyPolicyPage() {
@@ -8,7 +8,6 @@ export default function PrivacyPolicyPage() {
   const contentRef = useRef<HTMLDivElement>(null);
   const homeButtonRef = useRef<HTMLDivElement>(null);
   const privacyWrapperRef = useRef<HTMLDivElement>(null);
-  const [isBlinking, setIsBlinking] = useState(true);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -27,27 +26,32 @@ export default function PrivacyPolicyPage() {
     };
 
     const updateHomeButtonPosition = (currentScroll: number) => {
-      // Jika scroll sudah melewati 100px
-      if (currentScroll > 100) {
-        // Home button tetap di posisi kiri layar (fixed)
-        gsap.set(homeButton, {
-          position: "fixed",
-          left: "100px",
-          top: "50%",
-          y: "-50%",
-          x: 0,
-          zIndex: 1000,
+      const maxScroll = getMaxScroll();
+      
+      // Jika scroll sudah mencapai akhir (atau mendekati akhir)
+      if (currentScroll >= maxScroll - 100) {
+        // Home button tetap di posisi kiri layar
+        gsap.to(homeButton, {
+          x: currentScroll,
+          duration: 0.3,
+          ease: "power2.out",
         });
-      } else {
-        // Home button kembali ke posisi asli
-        gsap.set(homeButton, {
-          position: "absolute",
-          left: "auto",
-          right: "0",
-          top: "auto",
-          bottom: "calc(100% + 20px)",
-          y: 0,
+      } 
+      // Jika scroll balik ke kiri (mendekati posisi awal)
+      else if (currentScroll < 200) {
+        // Home button kembali ke posisi aslinya (di atas PRIVACY POLICY)
+        gsap.to(homeButton, {
           x: 0,
+          duration: 0.3,
+          ease: "power2.out",
+        });
+      }
+      else {
+        // Di area tengah, home button mengikuti scroll normal
+        gsap.to(homeButton, {
+          x: 0,
+          duration: 0.3,
+          ease: "power2.out",
         });
       }
     };
@@ -62,6 +66,7 @@ export default function PrivacyPolicyPage() {
       
       scrollLeft = newScrollLeft;
       
+      // Update posisi home button
       updateHomeButtonPosition(scrollLeft);
       
       gsap.to(container, {
@@ -90,6 +95,7 @@ export default function PrivacyPolicyPage() {
       
       scrollLeft = newScrollLeft;
       
+      // Update posisi home button untuk drag
       updateHomeButtonPosition(scrollLeft);
       
       gsap.to(container, {
@@ -116,14 +122,6 @@ export default function PrivacyPolicyPage() {
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
     };
-  }, []);
-
-  // Blinking effect untuk pemancar
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setIsBlinking(prev => !prev);
-    }, 800);
-    return () => clearInterval(interval);
   }, []);
 
   // SVG Arrow Components
@@ -176,122 +174,6 @@ export default function PrivacyPolicyPage() {
         position: "relative",
       }}
     >
-      {/* Blok warna dengan teks BERADA DISINI dan kedap kedip pemancar */}
-      <div
-        style={{
-          position: "fixed",
-          top: "20px",
-          left: "50%",
-          transform: "translateX(-50%)",
-          zIndex: 1001,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: "12px",
-        }}
-      >
-        {/* Blok warna dengan teks */}
-        <div
-          style={{
-            backgroundColor: isBlinking ? "#ff4444" : "#00ff44",
-            padding: "10px 20px",
-            borderRadius: "8px",
-            transition: "background-color 0.3s ease",
-            boxShadow: isBlinking 
-              ? "0 0 15px rgba(255, 68, 68, 0.6)" 
-              : "0 0 15px rgba(0, 255, 68, 0.6)",
-          }}
-        >
-          <span
-            style={{
-              color: "#000000",
-              fontSize: "16px",
-              fontWeight: "bold",
-              letterSpacing: "2px",
-            }}
-          >
-            BERADA DISINI
-          </span>
-        </div>
-        
-        {/* Kedap kedip pemancar - titik bulat */}
-        <div
-          style={{
-            display: "flex",
-            gap: "10px",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <div
-            style={{
-              width: "10px",
-              height: "10px",
-              borderRadius: "50%",
-              backgroundColor: isBlinking ? "#ff4444" : "#00ff44",
-              opacity: isBlinking ? 1 : 0.4,
-              transition: "all 0.3s ease",
-              animation: "pulse1 0.8s ease-in-out infinite",
-            }}
-          />
-          <div
-            style={{
-              width: "10px",
-              height: "10px",
-              borderRadius: "50%",
-              backgroundColor: isBlinking ? "#ff4444" : "#00ff44",
-              opacity: isBlinking ? 1 : 0.4,
-              transition: "all 0.3s ease",
-              animation: "pulse2 0.8s ease-in-out 0.2s infinite",
-            }}
-          />
-          <div
-            style={{
-              width: "10px",
-              height: "10px",
-              borderRadius: "50%",
-              backgroundColor: isBlinking ? "#ff4444" : "#00ff44",
-              opacity: isBlinking ? 1 : 0.4,
-              transition: "all 0.3s ease",
-              animation: "pulse3 0.8s ease-in-out 0.4s infinite",
-            }}
-          />
-        </div>
-      </div>
-
-      <style jsx>{`
-        @keyframes pulse1 {
-          0%, 100% {
-            transform: scale(1);
-            opacity: 0.3;
-          }
-          50% {
-            transform: scale(1.5);
-            opacity: 1;
-          }
-        }
-        @keyframes pulse2 {
-          0%, 100% {
-            transform: scale(1);
-            opacity: 0.3;
-          }
-          50% {
-            transform: scale(1.5);
-            opacity: 1;
-          }
-        }
-        @keyframes pulse3 {
-          0%, 100% {
-            transform: scale(1);
-            opacity: 0.3;
-          }
-          50% {
-            transform: scale(1.5);
-            opacity: 1;
-          }
-        }
-      `}</style>
-
       <div
         ref={containerRef}
         style={{
@@ -318,13 +200,11 @@ export default function PrivacyPolicyPage() {
               display: "inline-block",
             }}
           >
-            {/* Teks Halaman Utama di atas PRIVACY POLICY - tanpa bg dan border */}
+            {/* Teks Halaman Utama di atas PRIVACY POLICY */}
             <div
               ref={homeButtonRef}
               style={{
-                position: "absolute",
-                bottom: "calc(100% + 20px)",
-                right: "0",
+                position: "relative",
                 display: "flex",
                 alignItems: "center",
                 color: "#ffffff",
@@ -334,21 +214,20 @@ export default function PrivacyPolicyPage() {
                 whiteSpace: "nowrap",
                 cursor: "pointer",
                 zIndex: 10,
+                marginBottom: "20px",
+                justifyContent: "flex-end",
               }}
               onClick={() => {
+                // Scroll back to start
                 const container = containerRef.current;
                 const homeButton = homeButtonRef.current;
                 if (container && homeButton) {
-                  gsap.set(homeButton, {
-                    position: "absolute",
-                    left: "auto",
-                    right: "0",
-                    top: "auto",
-                    bottom: "calc(100% + 20px)",
-                    y: 0,
-                    x: 0,
-                  });
                   gsap.to(container, {
+                    x: 0,
+                    duration: 0.8,
+                    ease: "power2.out",
+                  });
+                  gsap.to(homeButton, {
                     x: 0,
                     duration: 0.8,
                     ease: "power2.out",
