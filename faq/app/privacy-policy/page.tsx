@@ -1,452 +1,697 @@
 'use client';
 
-import React from "react";
-import { useRouter } from "next/navigation";
+import { useRef, useEffect } from "react";
+import gsap from "gsap";
 
-export default function PrivacyPolicyPage(): React.JSX.Element {
-  const router = useRouter();
+export default function PrivacyPolicyPage() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const homeButtonRef = useRef<HTMLDivElement>(null);
+  const privacyWrapperRef = useRef<HTMLDivElement>(null);
 
-  // SVG North East Arrow
+  useEffect(() => {
+    const container = containerRef.current;
+    const content = contentRef.current;
+    const homeButton = homeButtonRef.current;
+    const privacyWrapper = privacyWrapperRef.current;
+
+    if (!container || !content || !homeButton || !privacyWrapper) return;
+
+    let isDragging = false;
+    let startX = 0;
+    let scrollLeft = 0;
+
+    const getMaxScroll = () => {
+      return content.scrollWidth - window.innerWidth;
+    };
+
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      const maxScroll = getMaxScroll();
+      let newScrollLeft = scrollLeft + e.deltaY;
+      
+      if (newScrollLeft < 0) newScrollLeft = 0;
+      if (newScrollLeft > maxScroll) newScrollLeft = maxScroll;
+      
+      scrollLeft = newScrollLeft;
+      
+      // Logika untuk home button
+      if (scrollLeft > 200) {
+        if (homeButton.style.position !== "fixed") {
+          gsap.set(homeButton, {
+            position: "fixed",
+            left: "100px",
+            top: "50%",
+            y: "-50%",
+            x: 0,
+            zIndex: 1000,
+          });
+        }
+      } else {
+        if (homeButton.style.position === "fixed") {
+          gsap.set(homeButton, {
+            position: "absolute",
+            left: "auto",
+            right: "0",
+            top: "auto",
+            bottom: "calc(100% + 20px)",
+            y: 0,
+            x: 0,
+          });
+        }
+      }
+      
+      gsap.to(container, {
+        x: -scrollLeft,
+        duration: 0.5,
+        ease: "power2.out",
+      });
+    };
+
+    const handleMouseDown = (e: MouseEvent) => {
+      isDragging = true;
+      startX = e.pageX - (container.getBoundingClientRect().left + scrollLeft);
+      container.style.cursor = "grabbing";
+    };
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isDragging) return;
+      e.preventDefault();
+      const x = e.pageX - container.getBoundingClientRect().left;
+      const walk = (x - startX) * 1.5;
+      let newScrollLeft = scrollLeft - walk;
+      const maxScroll = getMaxScroll();
+      
+      if (newScrollLeft < 0) newScrollLeft = 0;
+      if (newScrollLeft > maxScroll) newScrollLeft = maxScroll;
+      
+      scrollLeft = newScrollLeft;
+      
+      // Logika untuk home button saat drag
+      if (scrollLeft > 200) {
+        if (homeButton.style.position !== "fixed") {
+          gsap.set(homeButton, {
+            position: "fixed",
+            left: "100px",
+            top: "50%",
+            y: "-50%",
+            x: 0,
+            zIndex: 1000,
+          });
+        }
+      } else {
+        if (homeButton.style.position === "fixed") {
+          gsap.set(homeButton, {
+            position: "absolute",
+            left: "auto",
+            right: "0",
+            top: "auto",
+            bottom: "calc(100% + 20px)",
+            y: 0,
+            x: 0,
+          });
+        }
+      }
+      
+      gsap.to(container, {
+        x: -scrollLeft,
+        duration: 0,
+        ease: "none",
+      });
+    };
+
+    const handleMouseUp = () => {
+      isDragging = false;
+      container.style.cursor = "grab";
+    };
+
+    window.addEventListener("wheel", handleWheel, { passive: false });
+    container.addEventListener("mousedown", handleMouseDown);
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+    container.style.cursor = "grab";
+
+    return () => {
+      window.removeEventListener("wheel", handleWheel);
+      container.removeEventListener("mousedown", handleMouseDown);
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, []);
+
+  // SVG Arrow Components
   const NorthEastArrow = () => (
-    <svg 
-      width="64" 
-      height="64" 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      stroke="currentColor" 
-      strokeWidth="1"
-      strokeLinecap="round"
-      strokeLinejoin="round"
+    <svg
+      width="80"
+      height="80"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      style={{ flexShrink: 0 }}
     >
-      <path d="M7 7L17 17" />
-      <path d="M17 7H7" />
-      <path d="M7 17V7" />
+      <path
+        d="M7 17L17 7M17 7H7M17 7V17"
+        stroke="#ffffff"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 
-  // SVG South East Arrow untuk footer
-  const SouthEastArrow = () => (
-    <svg 
-      width="32" 
-      height="32" 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      stroke="currentColor" 
-      strokeWidth="1"
-      strokeLinecap="round"
-      strokeLinejoin="round"
+  const NorthWestArrow = () => (
+    <svg
+      width="50"
+      height="50"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      style={{ marginRight: "15px" }}
     >
-      <path d="M5 5L19 19" />
-      <path d="M19 5H5" />
-      <path d="M5 19V5" />
+      <path
+        d="M17 17L7 7M7 7H17M7 7V17"
+        stroke="#ffffff"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      backgroundColor: '#000000',
-      fontFamily: 'Helvetica, Arial, sans-serif',
-      color: '#ffffff',
-      padding: '3rem'
-    }}>
-      {/* Header */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: '4rem'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
-          <button
-            onClick={() => router.push('/')}
+    <div
+      style={{
+        height: "100vh",
+        width: "100vw",
+        overflow: "hidden",
+        backgroundColor: "#000000",
+        fontFamily: "Helvetica, Arial, sans-serif",
+        position: "relative",
+      }}
+    >
+      <div
+        ref={containerRef}
+        style={{
+          height: "100vh",
+          display: "flex",
+          alignItems: "center",
+          willChange: "transform",
+        }}
+      >
+        <div
+          ref={contentRef}
+          style={{
+            display: "flex",
+            gap: "100px",
+            alignItems: "center",
+            padding: "0 100px",
+          }}
+        >
+          {/* Wrapper untuk PRIVACY POLICY dan Halaman Utama */}
+          <div
+            ref={privacyWrapperRef}
             style={{
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              color: '#ffffff',
-              padding: 0
+              position: "relative",
+              display: "inline-block",
             }}
           >
-            <NorthEastArrow />
-          </button>
-          <span style={{ fontSize: '3rem' }}>KEBIJAKAN PRIVASI</span>
-        </div>
-        
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <span style={{ fontSize: '1.5rem' }}>PT. Wawa Digital</span>
-        </div>
-      </div>
+            {/* Teks Halaman Utama di atas PRIVACY POLICY */}
+            <div
+              ref={homeButtonRef}
+              style={{
+                position: "absolute",
+                bottom: "calc(100% + 20px)",
+                right: "0",
+                display: "flex",
+                alignItems: "center",
+                color: "#ffffff",
+                fontSize: "50px",
+                fontWeight: "400",
+                letterSpacing: "0.05em",
+                whiteSpace: "nowrap",
+                cursor: "pointer",
+                zIndex: 10,
+              }}
+              onClick={() => {
+                const container = containerRef.current;
+                const homeButton = homeButtonRef.current;
+                if (container && homeButton) {
+                  gsap.set(homeButton, {
+                    position: "absolute",
+                    left: "auto",
+                    right: "0",
+                    top: "auto",
+                    bottom: "calc(100% + 20px)",
+                    y: 0,
+                    x: 0,
+                  });
+                  gsap.to(container, {
+                    x: 0,
+                    duration: 0.8,
+                    ease: "power2.out",
+                  });
+                }
+              }}
+            >
+              <NorthWestArrow />
+              <span>Halaman Utama</span>
+            </div>
 
-      {/* Content */}
-      <div style={{ 
-        maxWidth: '900px', 
-        margin: '0 auto',
-        padding: '2rem 0'
-      }}>
-        {/* Last Updated */}
-        <div style={{
-          marginBottom: '3rem',
-          padding: '1rem 0',
-          borderBottom: '1px solid #333333',
-          fontSize: '1.2rem',
-          color: '#888888'
-        }}>
-          Terakhir diperbarui: 17 Februari 2026
-        </div>
-
-        {/* Pendahuluan */}
-        <div style={{ marginBottom: '4rem' }}>
-          <h2 style={{
-            fontSize: '2rem',
-            fontWeight: 'normal',
-            marginBottom: '2rem',
-            color: '#ffffff'
-          }}>
-            Pendahuluan
-          </h2>
-          <p style={{
-            fontSize: '1.3rem',
-            lineHeight: '1.8',
-            color: '#cccccc',
-            marginBottom: '1.5rem'
-          }}>
-            Kebijakan Privasi ini menjelaskan bagaimana PT. Wawa Digital ("kami", "kita", atau "milik kami") mengumpulkan, menggunakan, mengungkapkan, dan melindungi informasi pribadi Anda saat menggunakan layanan, situs web, dan aplikasi kami.
-          </p>
-          <p style={{
-            fontSize: '1.3rem',
-            lineHeight: '1.8',
-            color: '#cccccc'
-          }}>
-            Dengan mengakses atau menggunakan Layanan kami, Anda menyetujui pengumpulan dan penggunaan informasi sesuai dengan Kebijakan Privasi ini. Jika Anda tidak setuju dengan bagian mana pun, Anda tidak boleh mengakses layanan.
-          </p>
-        </div>
-
-        {/* Informasi yang Kami Kumpulkan */}
-        <div style={{ marginBottom: '4rem' }}>
-          <h2 style={{
-            fontSize: '2rem',
-            fontWeight: 'normal',
-            marginBottom: '2rem',
-            color: '#ffffff'
-          }}>
-            Informasi yang Kami Kumpulkan
-          </h2>
-          
-          <div style={{ marginBottom: '2rem' }}>
-            <h3 style={{
-              fontSize: '1.6rem',
-              fontWeight: 'normal',
-              marginBottom: '1rem',
-              color: '#ffffff'
-            }}>
-              Informasi yang Anda Berikan
-            </h3>
-            <p style={{
-              fontSize: '1.3rem',
-              lineHeight: '1.8',
-              color: '#cccccc',
-              marginBottom: '1rem'
-            }}>
-              Kami mengumpulkan informasi yang Anda berikan langsung kepada kami, termasuk:
-            </p>
-            <ul style={{
-              fontSize: '1.3rem',
-              lineHeight: '1.8',
-              color: '#cccccc',
-              paddingLeft: '2rem'
-            }}>
-              <li style={{ marginBottom: '0.8rem' }}>Informasi akun (nama, email, kata sandi)</li>
-              <li style={{ marginBottom: '0.8rem' }}>Profil dan foto profil</li>
-              <li style={{ marginBottom: '0.8rem' }}>Komentar dan interaksi dalam notifikasi</li>
-              <li style={{ marginBottom: '0.8rem' }}>Reaksi dan like pada konten</li>
-              <li>Komunikasi dengan tim dukungan</li>
-            </ul>
+            {/* Teks PRIVACY POLICY yang besar */}
+            <div
+              style={{
+                fontWeight: "700",
+                fontSize: "700px",
+                lineHeight: "1",
+                color: "#ffffff",
+                whiteSpace: "nowrap",
+              }}
+            >
+              PRIVACY POLICY
+            </div>
           </div>
 
-          <div style={{ marginBottom: '2rem' }}>
-            <h3 style={{
-              fontSize: '1.6rem',
-              fontWeight: 'normal',
-              marginBottom: '1rem',
-              color: '#ffffff'
+          {/* Section 1 - Pendahuluan */}
+          <div
+            style={{
+              width: "650px",
+              flexShrink: 0,
+            }}
+          >
+            <h2 style={{ 
+              fontWeight: "600", 
+              fontSize: "64px", 
+              margin: "0 0 2rem 0",
+              color: "#ffffff",
             }}>
-              Informasi yang Dikumpulkan Secara Otomatis
-            </h3>
-            <p style={{
-              fontSize: '1.3rem',
-              lineHeight: '1.8',
-              color: '#cccccc',
-              marginBottom: '1rem'
+              1. Pendahuluan
+            </h2>
+            <p style={{ 
+              fontWeight: "400",
+              fontSize: "18px",
+              lineHeight: "1.7",
+              color: "rgba(255, 255, 255, 0.85)",
+              marginBottom: "1.5rem",
             }}>
-              Saat Anda menggunakan Layanan kami, kami dapat mengumpulkan informasi secara otomatis, termasuk:
+              Kebijakan Privasi ini menjelaskan bagaimana PT. Wawa Digital ("kami", "kita", atau "milik kami") mengumpulkan, menggunakan, mengungkapkan, dan melindungi informasi pribadi Anda saat menggunakan layanan, situs web, dan aplikasi kami.
             </p>
-            <ul style={{
-              fontSize: '1.3rem',
-              lineHeight: '1.8',
-              color: '#cccccc',
-              paddingLeft: '2rem'
+            <p style={{ 
+              fontWeight: "400",
+              fontSize: "18px",
+              lineHeight: "1.7",
+              color: "rgba(255, 255, 255, 0.85)",
+              marginBottom: 0,
             }}>
-              <li style={{ marginBottom: '0.8rem' }}>Data penggunaan (waktu akses, fitur yang digunakan)</li>
-              <li style={{ marginBottom: '0.8rem' }}>Informasi perangkat (tipe perangkat, sistem operasi)</li>
-              <li style={{ marginBottom: '0.8rem' }}>Alamat IP dan data lokasi umum</li>
+              Dengan mengakses atau menggunakan Layanan kami, Anda menyetujui pengumpulan dan penggunaan informasi sesuai dengan Kebijakan Privasi ini. Jika Anda tidak setuju dengan bagian mana pun, Anda tidak boleh mengakses layanan.
+            </p>
+          </div>
+
+          {/* Section 2 - Informasi yang Dikumpulkan */}
+          <div
+            style={{
+              width: "650px",
+              flexShrink: 0,
+            }}
+          >
+            <h2 style={{ 
+              fontWeight: "600", 
+              fontSize: "64px", 
+              margin: "0 0 2rem 0",
+              color: "#ffffff",
+            }}>
+              2. Informasi yang Kami Kumpulkan
+            </h2>
+            <p style={{ 
+              fontWeight: "400",
+              fontSize: "18px",
+              lineHeight: "1.7",
+              color: "rgba(255, 255, 255, 0.85)",
+              marginBottom: "1rem",
+            }}>
+              <strong style={{ color: "#ffffff" }}>Informasi yang Anda Berikan:</strong>
+            </p>
+            <ul style={{ 
+              fontWeight: "400",
+              fontSize: "18px",
+              lineHeight: "1.7",
+              color: "rgba(255, 255, 255, 0.85)",
+              marginBottom: "1.5rem",
+              paddingLeft: "2rem",
+            }}>
+              <li>Informasi akun (nama, email, kata sandi)</li>
+              <li>Profil dan foto profil</li>
+              <li>Komentar dan interaksi dalam notifikasi</li>
+              <li>Reaksi dan like pada konten</li>
+              <li>Komunikasi dengan tim dukungan</li>
+            </ul>
+            <p style={{ 
+              fontWeight: "400",
+              fontSize: "18px",
+              lineHeight: "1.7",
+              color: "rgba(255, 255, 255, 0.85)",
+              marginBottom: "1rem",
+            }}>
+              <strong style={{ color: "#ffffff" }}>Informasi yang Dikumpulkan Secara Otomatis:</strong>
+            </p>
+            <ul style={{ 
+              fontWeight: "400",
+              fontSize: "18px",
+              lineHeight: "1.7",
+              color: "rgba(255, 255, 255, 0.85)",
+              marginBottom: 0,
+              paddingLeft: "2rem",
+            }}>
+              <li>Data penggunaan (waktu akses, fitur yang digunakan)</li>
+              <li>Informasi perangkat (tipe perangkat, sistem operasi)</li>
+              <li>Alamat IP dan data lokasi umum</li>
               <li>Cookie dan teknologi pelacakan serupa</li>
             </ul>
           </div>
-        </div>
 
-        {/* Penggunaan Informasi */}
-        <div style={{ marginBottom: '4rem' }}>
-          <h2 style={{
-            fontSize: '2rem',
-            fontWeight: 'normal',
-            marginBottom: '2rem',
-            color: '#ffffff'
-          }}>
-            Bagaimana Kami Menggunakan Informasi Anda
-          </h2>
-          <p style={{
-            fontSize: '1.3rem',
-            lineHeight: '1.8',
-            color: '#cccccc',
-            marginBottom: '1.5rem'
-          }}>
-            Kami menggunakan informasi yang dikumpulkan untuk:
-          </p>
-          <ul style={{
-            fontSize: '1.3rem',
-            lineHeight: '1.8',
-            color: '#cccccc',
-            paddingLeft: '2rem'
-          }}>
-            <li style={{ marginBottom: '0.8rem' }}>Menyediakan, memelihara, dan meningkatkan Layanan</li>
-            <li style={{ marginBottom: '0.8rem' }}>Mengirimkan notifikasi dan pembaruan penting</li>
-            <li style={{ marginBottom: '0.8rem' }}>Menanggapi komentar, pertanyaan, dan permintaan Anda</li>
-            <li style={{ marginBottom: '0.8rem' }}>Memantau dan menganalisis tren, penggunaan, dan aktivitas</li>
-            <li style={{ marginBottom: '0.8rem' }}>Mendeteksi, mencegah, dan mengatasi masalah teknis atau keamanan</li>
-            <li>Mematuhi kewajiban hukum</li>
-          </ul>
-        </div>
-
-        {/* Penyimpanan dan Keamanan */}
-        <div style={{ marginBottom: '4rem' }}>
-          <h2 style={{
-            fontSize: '2rem',
-            fontWeight: 'normal',
-            marginBottom: '2rem',
-            color: '#ffffff'
-          }}>
-            Penyimpanan dan Keamanan Data
-          </h2>
-          <p style={{
-            fontSize: '1.3rem',
-            lineHeight: '1.8',
-            color: '#cccccc',
-            marginBottom: '1.5rem'
-          }}>
-            Kami menggunakan layanan Firebase dari Google untuk menyimpan data Anda. Data disimpan di server yang aman dengan enkripsi dan protokol keamanan industri standar. Namun, tidak ada metode transmisi melalui internet atau metode penyimpanan elektronik yang 100% aman.
-          </p>
-          <p style={{
-            fontSize: '1.3rem',
-            lineHeight: '1.8',
-            color: '#cccccc'
-          }}>
-            Kami akan menyimpan informasi pribadi Anda selama diperlukan untuk memenuhi tujuan yang diuraikan dalam Kebijakan Privasi ini, kecuali periode penyimpanan yang lebih lama diperlukan atau diizinkan oleh hukum.
-          </p>
-        </div>
-
-        {/* Berbagi Informasi */}
-        <div style={{ marginBottom: '4rem' }}>
-          <h2 style={{
-            fontSize: '2rem',
-            fontWeight: 'normal',
-            marginBottom: '2rem',
-            color: '#ffffff'
-          }}>
-            Berbagi Informasi
-          </h2>
-          <p style={{
-            fontSize: '1.3rem',
-            lineHeight: '1.8',
-            color: '#cccccc',
-            marginBottom: '1.5rem'
-          }}>
-            Kami tidak menjual, memperdagangkan, atau menyewakan informasi pribadi Anda kepada pihak ketiga. Kami dapat berbagi informasi dalam situasi berikut:
-          </p>
-          <ul style={{
-            fontSize: '1.3rem',
-            lineHeight: '1.8',
-            color: '#cccccc',
-            paddingLeft: '2rem'
-          }}>
-            <li style={{ marginBottom: '0.8rem' }}>Dengan penyedia layanan pihak ketiga yang membantu kami mengoperasikan Layanan</li>
-            <li style={{ marginBottom: '0.8rem' }}>Jika diwajibkan oleh hukum atau untuk merespons proses hukum</li>
-            <li style={{ marginBottom: '0.8rem' }}>Untuk melindungi hak, properti, atau keselamatan kami atau orang lain</li>
-            <li>Dengan persetujuan Anda</li>
-          </ul>
-        </div>
-
-        {/* Hak Anda */}
-        <div style={{ marginBottom: '4rem' }}>
-          <h2 style={{
-            fontSize: '2rem',
-            fontWeight: 'normal',
-            marginBottom: '2rem',
-            color: '#ffffff'
-          }}>
-            Hak Privasi Anda
-          </h2>
-          <p style={{
-            fontSize: '1.3rem',
-            lineHeight: '1.8',
-            color: '#cccccc',
-            marginBottom: '1.5rem'
-          }}>
-            Tergantung pada lokasi Anda, Anda mungkin memiliki hak tertentu terkait informasi pribadi Anda, termasuk:
-          </p>
-          <ul style={{
-            fontSize: '1.3rem',
-            lineHeight: '1.8',
-            color: '#cccccc',
-            paddingLeft: '2rem'
-          }}>
-            <li style={{ marginBottom: '0.8rem' }}>Hak untuk mengakses informasi pribadi Anda</li>
-            <li style={{ marginBottom: '0.8rem' }}>Hak untuk memperbaiki informasi yang tidak akurat</li>
-            <li style={{ marginBottom: '0.8rem' }}>Hak untuk menghapus informasi pribadi Anda</li>
-            <li style={{ marginBottom: '0.8rem' }}>Hak untuk membatasi atau menolak pemrosesan</li>
-            <li>Hak untuk portabilitas data</li>
-          </ul>
-          <p style={{
-            fontSize: '1.3rem',
-            lineHeight: '1.8',
-            color: '#cccccc',
-            marginTop: '1.5rem'
-          }}>
-            Untuk menggunakan hak-hak ini, silakan hubungi kami di privacy@wawa44.com
-          </p>
-        </div>
-
-        {/* Cookie */}
-        <div style={{ marginBottom: '4rem' }}>
-          <h2 style={{
-            fontSize: '2rem',
-            fontWeight: 'normal',
-            marginBottom: '2rem',
-            color: '#ffffff'
-          }}>
-            Cookie dan Teknologi Pelacakan
-          </h2>
-          <p style={{
-            fontSize: '1.3rem',
-            lineHeight: '1.8',
-            color: '#cccccc'
-          }}>
-            Kami menggunakan cookie dan teknologi serupa untuk melacak aktivitas di Layanan kami dan menyimpan informasi tertentu. Anda dapat menginstruksikan browser Anda untuk menolak semua cookie atau untuk menunjukkan kapan cookie dikirim. Namun, jika Anda tidak menerima cookie, beberapa bagian dari Layanan kami mungkin tidak berfungsi dengan baik.
-          </p>
-        </div>
-
-        {/* Perubahan Kebijakan */}
-        <div style={{ marginBottom: '4rem' }}>
-          <h2 style={{
-            fontSize: '2rem',
-            fontWeight: 'normal',
-            marginBottom: '2rem',
-            color: '#ffffff'
-          }}>
-            Perubahan pada Kebijakan Privasi Ini
-          </h2>
-          <p style={{
-            fontSize: '1.3rem',
-            lineHeight: '1.8',
-            color: '#cccccc'
-          }}>
-            Kami dapat memperbarui Kebijakan Privasi kami dari waktu ke waktu. Kami akan memberi tahu Anda tentang perubahan dengan memposting Kebijakan Privasi baru di halaman ini dan memperbarui tanggal "Terakhir diperbarui" di bagian atas. Anda disarankan untuk meninjau Kebijakan Privasi ini secara berkala untuk setiap perubahan.
-          </p>
-        </div>
-
-        {/* Kontak */}
-        <div style={{ 
-          marginBottom: '4rem',
-          padding: '3rem',
-          border: '1px solid #333333',
-          borderRadius: '16px'
-        }}>
-          <h2 style={{
-            fontSize: '2rem',
-            fontWeight: 'normal',
-            marginBottom: '2rem',
-            color: '#ffffff'
-          }}>
-            Hubungi Kami
-          </h2>
-          <p style={{
-            fontSize: '1.3rem',
-            lineHeight: '1.8',
-            color: '#cccccc',
-            marginBottom: '1.5rem'
-          }}>
-            Jika Anda memiliki pertanyaan tentang Kebijakan Privasi ini, silakan hubungi kami:
-          </p>
-          <div style={{
-            fontSize: '1.3rem',
-            lineHeight: '2',
-            color: '#ffffff'
-          }}>
-            <div style={{ marginBottom: '0.8rem' }}>
-              <strong>Email:</strong> privacy@wawa44.com
-            </div>
-            <div style={{ marginBottom: '0.8rem' }}>
-              <strong>Alamat:</strong> Jl. Contoh No. 123, Jakarta, Indonesia
-            </div>
-            <div>
-              <strong>Telepon:</strong> +62 21 1234 5678
-            </div>
+          {/* Section 3 - Penggunaan Informasi */}
+          <div
+            style={{
+              width: "650px",
+              flexShrink: 0,
+            }}
+          >
+            <h2 style={{ 
+              fontWeight: "600", 
+              fontSize: "64px", 
+              margin: "0 0 2rem 0",
+              color: "#ffffff",
+            }}>
+              3. Penggunaan Informasi
+            </h2>
+            <p style={{ 
+              fontWeight: "400",
+              fontSize: "18px",
+              lineHeight: "1.7",
+              color: "rgba(255, 255, 255, 0.85)",
+              marginBottom: "1rem",
+            }}>
+              Kami menggunakan informasi yang dikumpulkan untuk:
+            </p>
+            <ul style={{ 
+              fontWeight: "400",
+              fontSize: "18px",
+              lineHeight: "1.7",
+              color: "rgba(255, 255, 255, 0.85)",
+              marginBottom: 0,
+              paddingLeft: "2rem",
+            }}>
+              <li>Menyediakan, memelihara, dan meningkatkan Layanan</li>
+              <li>Mengirimkan notifikasi dan pembaruan penting</li>
+              <li>Menanggapi komentar, pertanyaan, dan permintaan Anda</li>
+              <li>Memantau dan menganalisis tren, penggunaan, dan aktivitas</li>
+              <li>Mendeteksi, mencegah, dan mengatasi masalah teknis atau keamanan</li>
+              <li>Mematuhi kewajiban hukum</li>
+            </ul>
           </div>
-        </div>
 
-        {/* Footer Navigation */}
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          paddingTop: '2rem',
-          borderTop: '1px solid #333333'
-        }}>
-          <button
-            onClick={() => router.push('/')}
+          {/* Section 4 - Penyimpanan dan Keamanan */}
+          <div
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '1rem',
-              background: 'none',
-              border: 'none',
-              color: '#888888',
-              fontSize: '1.2rem',
-              cursor: 'pointer',
-              padding: 0
+              width: "650px",
+              flexShrink: 0,
             }}
           >
-            <NorthEastArrow />
-            <span>Kembali ke Beranda</span>
-          </button>
+            <h2 style={{ 
+              fontWeight: "600", 
+              fontSize: "64px", 
+              margin: "0 0 2rem 0",
+              color: "#ffffff",
+            }}>
+              4. Penyimpanan dan Keamanan Data
+            </h2>
+            <p style={{ 
+              fontWeight: "400",
+              fontSize: "18px",
+              lineHeight: "1.7",
+              color: "rgba(255, 255, 255, 0.85)",
+              marginBottom: "1.5rem",
+            }}>
+              Kami menggunakan layanan Firebase dari Google untuk menyimpan data Anda. Data disimpan di server yang aman dengan enkripsi dan protokol keamanan industri standar. Namun, tidak ada metode transmisi melalui internet atau metode penyimpanan elektronik yang 100% aman.
+            </p>
+            <p style={{ 
+              fontWeight: "400",
+              fontSize: "18px",
+              lineHeight: "1.7",
+              color: "rgba(255, 255, 255, 0.85)",
+              marginBottom: 0,
+            }}>
+              Kami akan menyimpan informasi pribadi Anda selama diperlukan untuk memenuhi tujuan yang diuraikan dalam Kebijakan Privasi ini, kecuali periode penyimpanan yang lebih lama diperlukan atau diizinkan oleh hukum.
+            </p>
+          </div>
 
-          <button
-            onClick={() => router.push('/terms-of-service')}
+          {/* Section 5 - Berbagi Informasi */}
+          <div
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '1rem',
-              background: 'none',
-              border: 'none',
-              color: '#888888',
-              fontSize: '1.2rem',
-              cursor: 'pointer',
-              padding: 0
+              width: "650px",
+              flexShrink: 0,
             }}
           >
-            <span>Baca Ketentuan Layanan</span>
-            <SouthEastArrow />
-          </button>
+            <h2 style={{ 
+              fontWeight: "600", 
+              fontSize: "64px", 
+              margin: "0 0 2rem 0",
+              color: "#ffffff",
+            }}>
+              5. Berbagi Informasi
+            </h2>
+            <p style={{ 
+              fontWeight: "400",
+              fontSize: "18px",
+              lineHeight: "1.7",
+              color: "rgba(255, 255, 255, 0.85)",
+              marginBottom: "1rem",
+            }}>
+              Kami tidak menjual, memperdagangkan, atau menyewakan informasi pribadi Anda kepada pihak ketiga. Kami dapat berbagi informasi dalam situasi berikut:
+            </p>
+            <ul style={{ 
+              fontWeight: "400",
+              fontSize: "18px",
+              lineHeight: "1.7",
+              color: "rgba(255, 255, 255, 0.85)",
+              marginBottom: 0,
+              paddingLeft: "2rem",
+            }}>
+              <li>Dengan penyedia layanan pihak ketiga yang membantu kami mengoperasikan Layanan</li>
+              <li>Jika diwajibkan oleh hukum atau untuk merespons proses hukum</li>
+              <li>Untuk melindungi hak, properti, atau keselamatan kami atau orang lain</li>
+              <li>Dengan persetujuan Anda</li>
+            </ul>
+          </div>
+
+          {/* Section 6 - Hak Privasi */}
+          <div
+            style={{
+              width: "650px",
+              flexShrink: 0,
+            }}
+          >
+            <h2 style={{ 
+              fontWeight: "600", 
+              fontSize: "64px", 
+              margin: "0 0 2rem 0",
+              color: "#ffffff",
+            }}>
+              6. Hak Privasi Anda
+            </h2>
+            <p style={{ 
+              fontWeight: "400",
+              fontSize: "18px",
+              lineHeight: "1.7",
+              color: "rgba(255, 255, 255, 0.85)",
+              marginBottom: "1rem",
+            }}>
+              Tergantung pada lokasi Anda, Anda mungkin memiliki hak tertentu terkait informasi pribadi Anda, termasuk:
+            </p>
+            <ul style={{ 
+              fontWeight: "400",
+              fontSize: "18px",
+              lineHeight: "1.7",
+              color: "rgba(255, 255, 255, 0.85)",
+              marginBottom: "1.5rem",
+              paddingLeft: "2rem",
+            }}>
+              <li>Hak untuk mengakses informasi pribadi Anda</li>
+              <li>Hak untuk memperbaiki informasi yang tidak akurat</li>
+              <li>Hak untuk menghapus informasi pribadi Anda</li>
+              <li>Hak untuk membatasi atau menolak pemrosesan</li>
+              <li>Hak untuk portabilitas data</li>
+            </ul>
+            <p style={{ 
+              fontWeight: "400",
+              fontSize: "18px",
+              lineHeight: "1.7",
+              color: "rgba(255, 255, 255, 0.85)",
+              marginBottom: 0,
+            }}>
+              Untuk menggunakan hak-hak ini, silakan hubungi kami di privacy@wawa44.com
+            </p>
+          </div>
+
+          {/* Section 7 - Cookie */}
+          <div
+            style={{
+              width: "650px",
+              flexShrink: 0,
+            }}
+          >
+            <h2 style={{ 
+              fontWeight: "600", 
+              fontSize: "64px", 
+              margin: "0 0 2rem 0",
+              color: "#ffffff",
+            }}>
+              7. Cookie dan Teknologi Pelacakan
+            </h2>
+            <p style={{ 
+              fontWeight: "400",
+              fontSize: "18px",
+              lineHeight: "1.7",
+              color: "rgba(255, 255, 255, 0.85)",
+              marginBottom: 0,
+            }}>
+              Kami menggunakan cookie dan teknologi serupa untuk melacak aktivitas di Layanan kami dan menyimpan informasi tertentu. Anda dapat menginstruksikan browser Anda untuk menolak semua cookie atau untuk menunjukkan kapan cookie dikirim. Namun, jika Anda tidak menerima cookie, beberapa bagian dari Layanan kami mungkin tidak berfungsi dengan baik.
+            </p>
+          </div>
+
+          {/* Section 8 - Perubahan Kebijakan */}
+          <div
+            style={{
+              width: "650px",
+              flexShrink: 0,
+            }}
+          >
+            <h2 style={{ 
+              fontWeight: "600", 
+              fontSize: "64px", 
+              margin: "0 0 2rem 0",
+              color: "#ffffff",
+            }}>
+              8. Perubahan Kebijakan
+            </h2>
+            <p style={{ 
+              fontWeight: "400",
+              fontSize: "18px",
+              lineHeight: "1.7",
+              color: "rgba(255, 255, 255, 0.85)",
+              marginBottom: 0,
+            }}>
+              Kami dapat memperbarui Kebijakan Privasi kami dari waktu ke waktu. Kami akan memberi tahu Anda tentang perubahan dengan memposting Kebijakan Privasi baru di halaman ini dan memperbarui tanggal "Terakhir diperbarui". Anda disarankan untuk meninjau Kebijakan Privasi ini secara berkala untuk setiap perubahan.
+            </p>
+          </div>
+
+          {/* Section 9 - Kontak */}
+          <div
+            style={{
+              width: "650px",
+              flexShrink: 0,
+            }}
+          >
+            <h2 style={{ 
+              fontWeight: "600", 
+              fontSize: "64px", 
+              margin: "0 0 2rem 0",
+              color: "#ffffff",
+            }}>
+              9. Hubungi Kami
+            </h2>
+            <p style={{ 
+              fontWeight: "400",
+              fontSize: "18px",
+              lineHeight: "1.7",
+              color: "rgba(255, 255, 255, 0.85)",
+              marginBottom: "1rem",
+            }}>
+              Jika Anda memiliki pertanyaan tentang Kebijakan Privasi ini, silakan hubungi kami:
+            </p>
+            <p style={{ 
+              fontWeight: "400",
+              fontSize: "18px",
+              lineHeight: "1.7",
+              color: "rgba(255, 255, 255, 0.85)",
+              marginBottom: "0.5rem",
+            }}>
+              <strong>Email:</strong> privacy@wawa44.com
+            </p>
+            <p style={{ 
+              fontWeight: "400",
+              fontSize: "18px",
+              lineHeight: "1.7",
+              color: "rgba(255, 255, 255, 0.85)",
+              marginBottom: "0.5rem",
+            }}>
+              <strong>Alamat:</strong> Jl. Contoh No. 123, Jakarta, Indonesia
+            </p>
+            <p style={{ 
+              fontWeight: "400",
+              fontSize: "18px",
+              lineHeight: "1.7",
+              color: "rgba(255, 255, 255, 0.85)",
+              marginBottom: 0,
+            }}>
+              <strong>Telepon:</strong> +62 21 1234 5678
+            </p>
+          </div>
+
+          {/* Arrow dan Teks Policy Lainnya */}
+          <NorthEastArrow />
+          
+          <div
+            style={{
+              fontWeight: "700",
+              fontSize: "200px",
+              lineHeight: "1",
+              color: "#ffffff",
+              whiteSpace: "nowrap",
+            }}
+          >
+            COOKIES POLICY
+          </div>
+
+          <NorthEastArrow />
+          
+          <div
+            style={{
+              fontWeight: "700",
+              fontSize: "200px",
+              lineHeight: "1",
+              color: "#ffffff",
+              whiteSpace: "nowrap",
+            }}
+          >
+            TERMS OF SERVICE
+          </div>
+
+          <NorthEastArrow />
+          
+          <div
+            style={{
+              fontWeight: "700",
+              fontSize: "200px",
+              lineHeight: "1",
+              color: "#ffffff",
+              whiteSpace: "nowrap",
+            }}
+          >
+            PRIVACY POLICY
+          </div>
+
+          {/* Teks PENUTUP di akhir */}
+          <div
+            style={{
+              fontWeight: "700",
+              fontSize: "700px",
+              lineHeight: "1",
+              color: "#ffffff",
+              whiteSpace: "nowrap",
+            }}
+          >
+            PENUTUP
+          </div>
         </div>
       </div>
     </div>
