@@ -2,6 +2,7 @@
 
 import { useRef, useEffect } from "react";
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 export default function TermsOfServicePage() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -9,6 +10,8 @@ export default function TermsOfServicePage() {
   const homeButtonRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
+
     const container = containerRef.current;
     const content = contentRef.current;
     const homeButton = homeButtonRef.current;
@@ -32,17 +35,9 @@ export default function TermsOfServicePage() {
       if (newScrollLeft > maxScroll) newScrollLeft = maxScroll;
       
       scrollLeft = newScrollLeft;
-      
-      // Kontrol posisi home button
-      // Home button akan bergerak ke kiri saat scroll ke kanan
-      // Maksimal bergerak 200px
-      const moveX = Math.min(scrollLeft, 200);
-      gsap.to(homeButton, {
-        x: -moveX,
-        duration: 0.3,
-        ease: "power2.out",
-      });
-      
+
+      // ❌ DIHAPUS: moveX (biar gak ikut geser)
+
       gsap.to(container, {
         x: -scrollLeft,
         duration: 0.5,
@@ -68,15 +63,9 @@ export default function TermsOfServicePage() {
       if (newScrollLeft > maxScroll) newScrollLeft = maxScroll;
       
       scrollLeft = newScrollLeft;
-      
-      // Kontrol posisi home button
-      const moveX = Math.min(scrollLeft, 200);
-      gsap.to(homeButton, {
-        x: -moveX,
-        duration: 0,
-        ease: "none",
-      });
-      
+
+      // ❌ DIHAPUS: moveX
+
       gsap.to(container, {
         x: -scrollLeft,
         duration: 0,
@@ -95,53 +84,45 @@ export default function TermsOfServicePage() {
     window.addEventListener("mouseup", handleMouseUp);
     container.style.cursor = "grab";
 
+    // 🔥 PIN HALAMAN UTAMA (INI KUNCI UTAMA)
+    ScrollTrigger.create({
+      trigger: container,
+      start: "left left",
+      end: () => "+=" + (content.scrollWidth - window.innerWidth),
+      horizontal: true,
+      scrub: true,
+      pin: homeButton,
+      pinSpacing: false,
+    });
+
+    // posisi awal fix
+    gsap.set(homeButton, { x: 0 });
+
     return () => {
       window.removeEventListener("wheel", handleWheel);
       container.removeEventListener("mousedown", handleMouseDown);
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
+
+      // cleanup ScrollTrigger
+      ScrollTrigger.getAll().forEach(t => t.kill());
     };
   }, []);
 
   // SVG Arrow Components
   const NorthEastArrow = () => (
-    <svg
-      width="80"
-      height="80"
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      style={{ flexShrink: 0 }}
-    >
-      <path
-        d="M7 17L17 7M17 7H7M17 7V17"
-        stroke="#ffffff"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+    <svg width="80" height="80" viewBox="0 0 24 24" fill="none">
+      <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2"/>
     </svg>
   );
 
   const NorthWestArrow = () => (
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      style={{ marginRight: "8px" }}
-    >
-      <path
-        d="M17 17L7 7M7 7H17M7 7V17"
-        stroke="#ffffff"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+      <path d="M17 17L7 7M7 7H17M7 7V17" stroke="#ffffff" strokeWidth="2"/>
     </svg>
   );
 
+  
   return (
     <div
       style={{
