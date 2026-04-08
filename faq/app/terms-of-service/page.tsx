@@ -343,7 +343,7 @@ export default function TermsOfServicePage() {
             </p>
           </div>
 
-          {/* Section 5 - Privacy and Data Protection */}
+          {/* Section 5 - Privacy */}
           <div
             style={{
               width: "650px",
@@ -475,7 +475,7 @@ export default function TermsOfServicePage() {
             </p>
           </div>
 
-          {/* Section 8 - Disclaimer of Warranties */}
+          {/* Section 8 - Disclaimer */}
           <div
             style={{
               width: "650px",
@@ -541,7 +541,7 @@ export default function TermsOfServicePage() {
               color: "rgba(255, 255, 255, 0.85)",
               marginBottom: "1.5rem",
             }}>
-              You agree to defend, indemnify, and hold harmless the company, its affiliates, directors, employees, agents, and licensors from and against any and all claims, damages, obligations, losses, liabilities, costs, or debt, and expenses (including but not limited to attorney's fees) arising from:
+              You agree to defend, indemnify, and hold harmless the company, its affiliates, directors, employees, agents, and licensors from and against any and all claims, damages, obligations, losses, liabilities, costs, or debt, and expenses (including but not limited to attorney&apos;s fees) arising from:
             </p>
             <ul style={{ 
               fontWeight: "400",
@@ -641,8 +641,8 @@ export default function TermsOfServicePage() {
               lineHeight: "1.7",
               color: "rgba(255, 255, 255, 0.85)",
               marginBottom: "1.5rem",
-            }}">
-              Any dispute arising out of or relating to these Terms or the Services shall be resolved through binding arbitration in accordance with the rules of a recognized arbitration association. The arbitration shall take place in the company's jurisdiction, and the language of arbitration shall be English.
+            }}>
+              Any dispute arising out of or relating to these Terms or the Services shall be resolved through binding arbitration in accordance with the rules of a recognized arbitration association. The arbitration shall take place in the company&apos;s jurisdiction, and the language of arbitration shall be English.
             </p>
             <p style={{ 
               fontWeight: "400",
@@ -717,7 +717,7 @@ export default function TermsOfServicePage() {
             </p>
           </div>
 
-          {/* Section 13 - Contact Information */}
+          {/* Section 13 - Contact */}
           <div
             style={{
               width: "650px",
