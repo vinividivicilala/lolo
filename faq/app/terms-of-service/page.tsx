@@ -7,15 +7,13 @@ export default function TermsOfServicePage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const homeButtonRef = useRef<HTMLDivElement>(null);
-  const boundaryRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const container = containerRef.current;
     const content = contentRef.current;
     const homeButton = homeButtonRef.current;
-    const boundary = boundaryRef.current;
 
-    if (!container || !content || !homeButton || !boundary) return;
+    if (!container || !content || !homeButton) return;
 
     let isDragging = false;
     let startX = 0;
@@ -26,38 +24,15 @@ export default function TermsOfServicePage() {
     };
 
     const updateHomeButtonPosition = (currentScrollLeft: number) => {
-      // Dapatkan posisi boundary (batas antara teks judul dan section pertama)
-      const boundaryRect = boundary.getBoundingClientRect();
-      const buttonWidth = homeButton.offsetWidth;
+      // Teks akan bergerak ke kiri mengikuti scroll, maksimal 100px
+      const maxMove = 150;
+      let moveX = Math.min(currentScrollLeft, maxMove);
       
-      // Posisi awal button (di boundary)
-      const initialLeft = boundaryRect.left;
-      
-      // Hitung posisi button berdasarkan scroll
-      // Button akan bergerak ke kiri mengikuti scroll, tapi tetap di sisi kiri layar
-      let buttonX = currentScrollLeft;
-      
-      // Batasi agar tidak melebihi sisi kiri layar
-      if (buttonX > initialLeft - 20) {
-        buttonX = initialLeft - 20;
-      }
-      
-      // Jika scroll ke kiri (nilai negatif atau kecil), button kembali ke posisi awal
-      if (currentScrollLeft < 100) {
-        buttonX = 0;
-      }
-      
-      // Opacity: hilang saat scroll ke kiri melewati batas tertentu
-      let opacity = 1;
-      if (currentScrollLeft < 50) {
-        opacity = currentScrollLeft / 50;
-      } else if (currentScrollLeft > initialLeft - 100) {
-        opacity = Math.max(0, 1 - (currentScrollLeft - (initialLeft - 100)) / 100);
-      }
+      // Jika scroll ke kiri (kembali), moveX akan berkurang
+      if (currentScrollLeft < 0) moveX = 0;
       
       gsap.to(homeButton, {
-        x: -buttonX,
-        opacity: opacity,
+        x: -moveX,
         duration: 0.1,
         ease: "none",
       });
@@ -119,9 +94,6 @@ export default function TermsOfServicePage() {
     window.addEventListener("mouseup", handleMouseUp);
     container.style.cursor = "grab";
 
-    // Initial position
-    updateHomeButtonPosition(0);
-
     return () => {
       window.removeEventListener("wheel", handleWheel);
       container.removeEventListener("mousedown", handleMouseDown);
@@ -152,11 +124,12 @@ export default function TermsOfServicePage() {
 
   const NorthWestArrow = () => (
     <svg
-      width="24"
-      height="24"
+      width="20"
+      height="20"
       viewBox="0 0 24 24"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
+      style={{ marginRight: "8px" }}
     >
       <path
         d="M17 17L7 7M7 7H17M7 7V17"
@@ -197,29 +170,68 @@ export default function TermsOfServicePage() {
             padding: "0 100px",
           }}
         >
-          {/* Teks TERMS OF SERVICES yang besar */}
+          {/* Wrapper untuk TERMS OF SERVICES dan Halaman Utama */}
           <div
-            style={{
-              fontWeight: "700",
-              fontSize: "700px",
-              lineHeight: "1",
-              color: "#ffffff",
-              whiteSpace: "nowrap",
-            }}
-          >
-            TERMS OF SERVICES
-          </div>
-
-          {/* Boundary div - penanda antara judul dan section pertama */}
-          <div
-            ref={boundaryRef}
             style={{
               position: "relative",
-              width: "1px",
-              height: "100vh",
-              flexShrink: 0,
+              display: "inline-block",
             }}
-          />
+          >
+            {/* Teks Halaman Utama di atas TERMS OF SERVICES */}
+            <div
+              ref={homeButtonRef}
+              style={{
+                position: "absolute",
+                top: "-80px",
+                left: "0",
+                display: "flex",
+                alignItems: "center",
+                color: "#ffffff",
+                fontSize: "16px",
+                fontWeight: "400",
+                letterSpacing: "0.05em",
+                whiteSpace: "nowrap",
+                cursor: "pointer",
+                zIndex: 10,
+              }}
+              onClick={() => {
+                // Scroll back to start
+                const container = containerRef.current;
+                if (container) {
+                  gsap.to(container, {
+                    x: 0,
+                    duration: 0.8,
+                    ease: "power2.out",
+                    onUpdate: () => {
+                      if (homeButtonRef.current) {
+                        gsap.to(homeButtonRef.current, {
+                          x: 0,
+                          duration: 0.8,
+                          ease: "power2.out",
+                        });
+                      }
+                    },
+                  });
+                }
+              }}
+            >
+              <NorthWestArrow />
+              <span>Halaman Utama</span>
+            </div>
+
+            {/* Teks TERMS OF SERVICES yang besar */}
+            <div
+              style={{
+                fontWeight: "700",
+                fontSize: "700px",
+                lineHeight: "1",
+                color: "#ffffff",
+                whiteSpace: "nowrap",
+              }}
+            >
+              TERMS OF SERVICES
+            </div>
+          </div>
 
           {/* Section 1 - Introduction */}
           <div
@@ -924,45 +936,6 @@ export default function TermsOfServicePage() {
             MENURU
           </div>
         </div>
-      </div>
-
-      {/* Home Button dengan North West Arrow */}
-      <div
-        ref={homeButtonRef}
-        style={{
-          position: "fixed",
-          top: "50%",
-          transform: "translateY(-50%)",
-          left: "20px",
-          zIndex: 100,
-          display: "flex",
-          alignItems: "center",
-          gap: "10px",
-          cursor: "pointer",
-          color: "#ffffff",
-          fontSize: "16px",
-          fontWeight: "400",
-          background: "rgba(0,0,0,0.6)",
-          padding: "12px 20px",
-          borderRadius: "50px",
-          backdropFilter: "blur(10px)",
-          border: "1px solid rgba(255,255,255,0.2)",
-          whiteSpace: "nowrap",
-        }}
-        onClick={() => {
-          // Scroll back to start
-          const container = containerRef.current;
-          if (container) {
-            gsap.to(container, {
-              x: 0,
-              duration: 0.8,
-              ease: "power2.out",
-            });
-          }
-        }}
-      >
-        <NorthWestArrow />
-        <span>Halaman Utama</span>
       </div>
     </div>
   );
