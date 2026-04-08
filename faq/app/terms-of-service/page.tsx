@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import gsap from "gsap";
 
 export default function TermsOfServicePage() {
@@ -8,6 +8,51 @@ export default function TermsOfServicePage() {
   const contentRef = useRef<HTMLDivElement>(null);
   const homeButtonRef = useRef<HTMLDivElement>(null);
   const termsWrapperRef = useRef<HTMLDivElement>(null);
+  const popupRef = useRef<HTMLDivElement>(null);
+  
+  const [showCookiePopup, setShowCookiePopup] = useState(false);
+
+  useEffect(() => {
+    const cookieConsent = localStorage.getItem("cookie-consent");
+    if (!cookieConsent) {
+      setShowCookiePopup(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (showCookiePopup && popupRef.current) {
+      gsap.fromTo(popupRef.current,
+        {
+          opacity: 0,
+          y: 30,
+        },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.4,
+          ease: "power2.out",
+        }
+      );
+    }
+  }, [showCookiePopup]);
+
+  const handleCookieAccept = () => {
+    if (popupRef.current) {
+      gsap.to(popupRef.current, {
+        opacity: 0,
+        y: 20,
+        duration: 0.3,
+        ease: "power2.in",
+        onComplete: () => {
+          localStorage.setItem("cookie-consent", "accepted");
+          setShowCookiePopup(false);
+        }
+      });
+    } else {
+      localStorage.setItem("cookie-consent", "accepted");
+      setShowCookiePopup(false);
+    }
+  };
 
   useEffect(() => {
     const container = containerRef.current;
@@ -28,18 +73,14 @@ export default function TermsOfServicePage() {
     const updateHomeButtonPosition = (currentScroll: number) => {
       const maxScroll = getMaxScroll();
       
-      // Jika scroll sudah mencapai akhir (atau mendekati akhir)
       if (currentScroll >= maxScroll - 100) {
-        // Home button tetap di posisi kiri layar
         gsap.to(homeButton, {
           x: currentScroll,
           duration: 0.3,
           ease: "power2.out",
         });
       } 
-      // Jika scroll balik ke kiri (mendekati posisi awal)
       else if (currentScroll < 200) {
-        // Home button kembali ke posisi aslinya (di atas TERMS OF SERVICES)
         gsap.to(homeButton, {
           x: 0,
           duration: 0.3,
@@ -47,7 +88,6 @@ export default function TermsOfServicePage() {
         });
       }
       else {
-        // Di area tengah, home button mengikuti scroll normal
         gsap.to(homeButton, {
           x: 0,
           duration: 0.3,
@@ -65,8 +105,6 @@ export default function TermsOfServicePage() {
       if (newScrollLeft > maxScroll) newScrollLeft = maxScroll;
       
       scrollLeft = newScrollLeft;
-      
-      // Update posisi home button
       updateHomeButtonPosition(scrollLeft);
       
       gsap.to(container, {
@@ -94,8 +132,6 @@ export default function TermsOfServicePage() {
       if (newScrollLeft > maxScroll) newScrollLeft = maxScroll;
       
       scrollLeft = newScrollLeft;
-      
-      // Update posisi home button untuk drag
       updateHomeButtonPosition(scrollLeft);
       
       gsap.to(container, {
@@ -163,6 +199,25 @@ export default function TermsOfServicePage() {
     </svg>
   );
 
+  // Minimalist Cookie SVG Icon
+  const MinimalCookieIcon = () => (
+    <svg
+      width="32"
+      height="32"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      style={{ flexShrink: 0 }}
+    >
+      <circle cx="12" cy="12" r="10" stroke="#ffffff" strokeWidth="1.5" fill="none"/>
+      <circle cx="8.5" cy="9.5" r="1" fill="#ffffff" />
+      <circle cx="14.5" cy="8.5" r="1" fill="#ffffff" />
+      <circle cx="10.5" cy="14.5" r="1" fill="#ffffff" />
+      <circle cx="15.5" cy="13.5" r="1" fill="#ffffff" />
+      <path d="M18 8L20 6" stroke="#ffffff" strokeWidth="1.5" strokeLinecap="round"/>
+    </svg>
+  );
+
   return (
     <div
       style={{
@@ -174,6 +229,107 @@ export default function TermsOfServicePage() {
         position: "relative",
       }}
     >
+      {/* Minimalist Cookie Popup */}
+      {showCookiePopup && (
+        <div
+          ref={popupRef}
+          style={{
+            position: "fixed",
+            bottom: "30px",
+            right: "30px",
+            zIndex: 2000,
+          }}
+        >
+          <div
+            style={{
+              background: "#1a1a1a",
+              borderRadius: "12px",
+              padding: "16px 20px",
+              width: "320px",
+              border: "1px solid #333333",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+                marginBottom: "12px",
+              }}
+            >
+              <MinimalCookieIcon />
+              <span
+                style={{
+                  color: "#ffffff",
+                  fontSize: "14px",
+                  fontWeight: "500",
+                  letterSpacing: "0.3px",
+                }}
+              >
+                Cookie settings
+              </span>
+            </div>
+            
+            <p
+              style={{
+                color: "#999999",
+                fontSize: "13px",
+                lineHeight: "1.5",
+                margin: "0 0 16px 0",
+              }}
+            >
+              This website uses cookies to ensure you get the best experience.
+            </p>
+
+            <div
+              style={{
+                display: "flex",
+                gap: "12px",
+                justifyContent: "flex-end",
+              }}
+            >
+              <button
+                onClick={() => setShowCookiePopup(false)}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  color: "#666666",
+                  fontSize: "13px",
+                  fontWeight: "400",
+                  cursor: "pointer",
+                  padding: "6px 12px",
+                  fontFamily: "inherit",
+                  transition: "color 0.2s ease",
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.color = "#999999"}
+                onMouseLeave={(e) => e.currentTarget.style.color = "#666666"}
+              >
+                Decline
+              </button>
+              <button
+                onClick={handleCookieAccept}
+                style={{
+                  background: "#ffffff",
+                  border: "none",
+                  color: "#000000",
+                  fontSize: "13px",
+                  fontWeight: "500",
+                  cursor: "pointer",
+                  padding: "6px 16px",
+                  borderRadius: "6px",
+                  fontFamily: "inherit",
+                  transition: "opacity 0.2s ease",
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.opacity = "0.8"}
+                onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}
+              >
+                Accept
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div
         ref={containerRef}
         style={{
@@ -218,7 +374,6 @@ export default function TermsOfServicePage() {
                 justifyContent: "flex-end",
               }}
               onClick={() => {
-                // Scroll back to start
                 const container = containerRef.current;
                 const homeButton = homeButtonRef.current;
                 if (container && homeButton) {
