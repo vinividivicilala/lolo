@@ -293,7 +293,7 @@ export default function PrivacyPolicyPage() {
               color: "rgba(255, 255, 255, 0.85)",
               marginBottom: "1.5rem",
             }}>
-              Kebijakan Privasi ini menjelaskan bagaimana PT. Wawa Digital ("kami", "kita", atau "milik kami") mengumpulkan, menggunakan, mengungkapkan, dan melindungi informasi pribadi Anda saat menggunakan layanan, situs web, dan aplikasi kami.
+              Kebijakan Privasi ini menjelaskan bagaimana kami mengumpulkan, menggunakan, mengungkapkan, dan melindungi informasi pribadi Anda saat menggunakan layanan, situs web, dan aplikasi kami.
             </p>
             <p style={{ 
               fontWeight: "400",
@@ -680,7 +680,7 @@ export default function PrivacyPolicyPage() {
             PRIVACY POLICY
           </div>
 
-          {/* Teks PENUTUP di akhir */}
+          {/* Teks MENURU di akhir */}
           <div
             style={{
               fontWeight: "700",
@@ -690,7 +690,7 @@ export default function PrivacyPolicyPage() {
               whiteSpace: "nowrap",
             }}
           >
-            PENUTUP
+            MENURU
           </div>
         </div>
       </div>
