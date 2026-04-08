@@ -5,61 +5,54 @@ import gsap from "gsap";
 
 export default function TermsOfServicePage() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const sectionsRef = useRef<(HTMLDivElement | null)[]>([]);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const container = containerRef.current;
-    if (!container) return;
+    const content = contentRef.current;
+
+    if (!container || !content) return;
 
     let isDragging = false;
     let startX = 0;
     let scrollLeft = 0;
-    let currentIndex = 0;
-    const sections = sectionsRef.current.filter(Boolean);
-    
-    const sectionWidth = window.innerWidth;
-    
-    // Set container width
-    container.style.width = `${sectionWidth * sections.length}px`;
 
-    const snapToSection = (index: number) => {
-      if (index < 0) index = 0;
-      if (index >= sections.length) index = sections.length - 1;
-      currentIndex = index;
-      const targetX = currentIndex * sectionWidth;
-      scrollLeft = targetX;
-      gsap.to(container, {
-        x: -targetX,
-        duration: 0.6,
-        ease: "power2.out",
-      });
+    const getMaxScroll = () => {
+      return content.scrollWidth - window.innerWidth;
     };
 
     const handleWheel = (e: WheelEvent) => {
       e.preventDefault();
-      if (e.deltaY > 0 && currentIndex < sections.length - 1) {
-        snapToSection(currentIndex + 1);
-      } else if (e.deltaY < 0 && currentIndex > 0) {
-        snapToSection(currentIndex - 1);
-      }
+      const maxScroll = getMaxScroll();
+      let newScrollLeft = scrollLeft + e.deltaY;
+      
+      if (newScrollLeft < 0) newScrollLeft = 0;
+      if (newScrollLeft > maxScroll) newScrollLeft = maxScroll;
+      
+      scrollLeft = newScrollLeft;
+      gsap.to(container, {
+        x: -scrollLeft,
+        duration: 0.5,
+        ease: "power2.out",
+      });
     };
 
     const handleMouseDown = (e: MouseEvent) => {
       isDragging = true;
-      startX = e.pageX - scrollLeft;
+      startX = e.pageX - (container.getBoundingClientRect().left + scrollLeft);
       container.style.cursor = "grabbing";
     };
 
     const handleMouseMove = (e: MouseEvent) => {
       if (!isDragging) return;
       e.preventDefault();
-      const x = e.pageX - startX;
-      let newScrollLeft = x;
+      const x = e.pageX - container.getBoundingClientRect().left;
+      const walk = (x - startX) * 1.5;
+      let newScrollLeft = scrollLeft - walk;
+      const maxScroll = getMaxScroll();
       
       if (newScrollLeft < 0) newScrollLeft = 0;
-      if (newScrollLeft > (sections.length - 1) * sectionWidth) {
-        newScrollLeft = (sections.length - 1) * sectionWidth;
-      }
+      if (newScrollLeft > maxScroll) newScrollLeft = maxScroll;
       
       scrollLeft = newScrollLeft;
       gsap.to(container, {
@@ -70,11 +63,7 @@ export default function TermsOfServicePage() {
     };
 
     const handleMouseUp = () => {
-      if (isDragging) {
-        isDragging = false;
-        const newIndex = Math.round(scrollLeft / sectionWidth);
-        snapToSection(newIndex);
-      }
+      isDragging = false;
       container.style.cursor = "grab";
     };
 
@@ -108,57 +97,42 @@ export default function TermsOfServicePage() {
         style={{
           height: "100vh",
           display: "flex",
+          alignItems: "center",
           willChange: "transform",
         }}
       >
-        {/* Section 0 - Title */}
         <div
-          ref={el => sectionsRef.current[0] = el}
+          ref={contentRef}
           style={{
-            width: "100vw",
-            height: "100vh",
-            flexShrink: 0,
             display: "flex",
+            gap: "100px",
             alignItems: "center",
-            justifyContent: "center",
+            padding: "0 100px",
           }}
         >
+          {/* Teks TERMS OF SERVICES yang besar */}
           <div
             style={{
               fontWeight: "700",
-              fontSize: "clamp(100px, 15vw, 700px)",
+              fontSize: "700px",
               lineHeight: "1",
               color: "#ffffff",
-              textAlign: "center",
-              padding: "0 2rem",
+              whiteSpace: "nowrap",
             }}
           >
             TERMS OF SERVICES
           </div>
-        </div>
 
-        {/* Section 1 - Introduction */}
-        <div
-          ref={el => sectionsRef.current[1] = el}
-          style={{
-            width: "100vw",
-            height: "100vh",
-            flexShrink: 0,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "4rem",
-          }}
-        >
+          {/* Section 1 - Introduction */}
           <div
             style={{
-              maxWidth: "800px",
-              width: "100%",
+              width: "600px",
+              flexShrink: 0,
             }}
           >
             <h2 style={{ 
               fontWeight: "600", 
-              fontSize: "clamp(40px, 6vw, 64px)", 
+              fontSize: "64px", 
               margin: "0 0 2rem 0",
               color: "#ffffff",
             }}>
@@ -166,7 +140,7 @@ export default function TermsOfServicePage() {
             </h2>
             <p style={{ 
               fontWeight: "400",
-              fontSize: "clamp(16px, 2vw, 20px)",
+              fontSize: "20px",
               lineHeight: "1.6",
               color: "rgba(255, 255, 255, 0.8)",
               margin: 0,
@@ -176,30 +150,17 @@ export default function TermsOfServicePage() {
               agreement between you and the company.
             </p>
           </div>
-        </div>
 
-        {/* Section 2 - Use of Services */}
-        <div
-          ref={el => sectionsRef.current[2] = el}
-          style={{
-            width: "100vw",
-            height: "100vh",
-            flexShrink: 0,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "4rem",
-          }}
-        >
+          {/* Section 2 - Use of Services */}
           <div
             style={{
-              maxWidth: "800px",
-              width: "100%",
+              width: "600px",
+              flexShrink: 0,
             }}
           >
             <h2 style={{ 
               fontWeight: "600", 
-              fontSize: "clamp(40px, 6vw, 64px)", 
+              fontSize: "64px", 
               margin: "0 0 2rem 0",
               color: "#ffffff",
             }}>
@@ -207,7 +168,7 @@ export default function TermsOfServicePage() {
             </h2>
             <p style={{ 
               fontWeight: "400",
-              fontSize: "clamp(16px, 2vw, 20px)",
+              fontSize: "20px",
               lineHeight: "1.6",
               color: "rgba(255, 255, 255, 0.8)",
               margin: 0,
@@ -217,30 +178,17 @@ export default function TermsOfServicePage() {
               our services for any illegal or unauthorized purpose.
             </p>
           </div>
-        </div>
 
-        {/* Section 3 - Intellectual Property */}
-        <div
-          ref={el => sectionsRef.current[3] = el}
-          style={{
-            width: "100vw",
-            height: "100vh",
-            flexShrink: 0,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "4rem",
-          }}
-        >
+          {/* Section 3 - Intellectual Property */}
           <div
             style={{
-              maxWidth: "800px",
-              width: "100%",
+              width: "600px",
+              flexShrink: 0,
             }}
           >
             <h2 style={{ 
               fontWeight: "600", 
-              fontSize: "clamp(40px, 6vw, 64px)", 
+              fontSize: "64px", 
               margin: "0 0 2rem 0",
               color: "#ffffff",
             }}>
@@ -248,7 +196,7 @@ export default function TermsOfServicePage() {
             </h2>
             <p style={{ 
               fontWeight: "400",
-              fontSize: "clamp(16px, 2vw, 20px)",
+              fontSize: "20px",
               lineHeight: "1.6",
               color: "rgba(255, 255, 255, 0.8)",
               margin: 0,
@@ -258,30 +206,17 @@ export default function TermsOfServicePage() {
               modify, or create derivative works of any content without our express written permission.
             </p>
           </div>
-        </div>
 
-        {/* Section 4 - Limitation of Liability */}
-        <div
-          ref={el => sectionsRef.current[4] = el}
-          style={{
-            width: "100vw",
-            height: "100vh",
-            flexShrink: 0,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "4rem",
-          }}
-        >
+          {/* Section 4 - Limitation of Liability */}
           <div
             style={{
-              maxWidth: "800px",
-              width: "100%",
+              width: "600px",
+              flexShrink: 0,
             }}
           >
             <h2 style={{ 
               fontWeight: "600", 
-              fontSize: "clamp(40px, 6vw, 64px)", 
+              fontSize: "64px", 
               margin: "0 0 2rem 0",
               color: "#ffffff",
             }}>
@@ -289,7 +224,7 @@ export default function TermsOfServicePage() {
             </h2>
             <p style={{ 
               fontWeight: "400",
-              fontSize: "clamp(16px, 2vw, 20px)",
+              fontSize: "20px",
               lineHeight: "1.6",
               color: "rgba(255, 255, 255, 0.8)",
               margin: 0,
@@ -299,30 +234,17 @@ export default function TermsOfServicePage() {
               shall not exceed the amount you paid us, if any, for using our services.
             </p>
           </div>
-        </div>
 
-        {/* Section 5 - Changes to Terms */}
-        <div
-          ref={el => sectionsRef.current[5] = el}
-          style={{
-            width: "100vw",
-            height: "100vh",
-            flexShrink: 0,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "4rem",
-          }}
-        >
+          {/* Section 5 - Changes to Terms */}
           <div
             style={{
-              maxWidth: "800px",
-              width: "100%",
+              width: "600px",
+              flexShrink: 0,
             }}
           >
             <h2 style={{ 
               fontWeight: "600", 
-              fontSize: "clamp(40px, 6vw, 64px)", 
+              fontSize: "64px", 
               margin: "0 0 2rem 0",
               color: "#ffffff",
             }}>
@@ -330,7 +252,7 @@ export default function TermsOfServicePage() {
             </h2>
             <p style={{ 
               fontWeight: "400",
-              fontSize: "clamp(16px, 2vw, 20px)",
+              fontSize: "20px",
               lineHeight: "1.6",
               color: "rgba(255, 255, 255, 0.8)",
               margin: 0,
@@ -339,30 +261,17 @@ export default function TermsOfServicePage() {
               on this page. Your continued use of the services after such modifications constitutes your acceptance of the new Terms.
             </p>
           </div>
-        </div>
 
-        {/* Section 6 - Contact Information */}
-        <div
-          ref={el => sectionsRef.current[6] = el}
-          style={{
-            width: "100vw",
-            height: "100vh",
-            flexShrink: 0,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "4rem",
-          }}
-        >
+          {/* Section 6 - Contact Information */}
           <div
             style={{
-              maxWidth: "800px",
-              width: "100%",
+              width: "600px",
+              flexShrink: 0,
             }}
           >
             <h2 style={{ 
               fontWeight: "600", 
-              fontSize: "clamp(40px, 6vw, 64px)", 
+              fontSize: "64px", 
               margin: "0 0 2rem 0",
               color: "#ffffff",
             }}>
@@ -370,7 +279,7 @@ export default function TermsOfServicePage() {
             </h2>
             <p style={{ 
               fontWeight: "400",
-              fontSize: "clamp(16px, 2vw, 20px)",
+              fontSize: "20px",
               lineHeight: "1.6",
               color: "rgba(255, 255, 255, 0.8)",
               margin: 0,
