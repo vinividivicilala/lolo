@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import gsap from "gsap";
 
 export default function PrivacyPolicyPage() {
@@ -8,6 +8,23 @@ export default function PrivacyPolicyPage() {
   const contentRef = useRef<HTMLDivElement>(null);
   const homeButtonRef = useRef<HTMLDivElement>(null);
   const privacyWrapperRef = useRef<HTMLDivElement>(null);
+  
+  // State untuk cookie consent
+  const [showCookiePopup, setShowCookiePopup] = useState(false);
+
+  useEffect(() => {
+    // Cek apakah user sudah memberikan consent
+    const cookieConsent = localStorage.getItem("cookie-consent");
+    if (!cookieConsent) {
+      setShowCookiePopup(true);
+    }
+  }, []);
+
+  const handleCookieAccept = () => {
+    // Simpan consent ke localStorage
+    localStorage.setItem("cookie-consent", "accepted");
+    setShowCookiePopup(false);
+  };
 
   useEffect(() => {
     const container = containerRef.current;
@@ -163,6 +180,29 @@ export default function PrivacyPolicyPage() {
     </svg>
   );
 
+  // Cookie SVG Icon
+  const CookieIcon = () => (
+    <svg
+      width="40"
+      height="40"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      style={{ flexShrink: 0 }}
+    >
+      <path
+        d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM12 20c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"
+        fill="#ffffff"
+      />
+      <circle cx="8" cy="10" r="1.5" fill="#000000" />
+      <circle cx="12" cy="8" r="1.5" fill="#000000" />
+      <circle cx="16" cy="10" r="1.5" fill="#000000" />
+      <circle cx="10" cy="14" r="1.5" fill="#000000" />
+      <circle cx="14" cy="14" r="1.5" fill="#000000" />
+      <circle cx="12" cy="18" r="1.5" fill="#000000" />
+    </svg>
+  );
+
   return (
     <div
       style={{
@@ -174,6 +214,106 @@ export default function PrivacyPolicyPage() {
         position: "relative",
       }}
     >
+      {/* Cookie Popup */}
+      {showCookiePopup && (
+        <div
+          style={{
+            position: "fixed",
+            bottom: "100px",
+            right: "30px",
+            zIndex: 2000,
+            animation: "slideIn 0.5s ease-out",
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: "rgba(30, 30, 30, 0.95)",
+              backdropFilter: "blur(10px)",
+              borderRadius: "16px",
+              padding: "20px 25px",
+              maxWidth: "380px",
+              boxShadow: "0 10px 40px rgba(0, 0, 0, 0.3)",
+              border: "1px solid rgba(255, 255, 255, 0.1)",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "15px",
+                marginBottom: "15px",
+              }}
+            >
+              <CookieIcon />
+              <h3
+                style={{
+                  color: "#ffffff",
+                  fontSize: "20px",
+                  fontWeight: "600",
+                  margin: 0,
+                }}
+              >
+                Cookie Settings
+              </h3>
+            </div>
+            <p
+              style={{
+                color: "rgba(255, 255, 255, 0.8)",
+                fontSize: "14px",
+                lineHeight: "1.6",
+                marginBottom: "20px",
+              }}
+            >
+              We use cookies to enhance your browsing experience, serve personalized content, and analyze our traffic. By clicking "OK", you consent to our use of cookies.
+            </p>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+              }}
+            >
+              <button
+                onClick={handleCookieAccept}
+                style={{
+                  backgroundColor: "#ffffff",
+                  color: "#000000",
+                  border: "none",
+                  padding: "10px 30px",
+                  borderRadius: "30px",
+                  fontSize: "16px",
+                  fontWeight: "600",
+                  cursor: "pointer",
+                  transition: "all 0.3s ease",
+                  fontFamily: "inherit",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = "#dddddd";
+                  e.currentTarget.style.transform = "scale(1.02)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "#ffffff";
+                  e.currentTarget.style.transform = "scale(1)";
+                }}
+              >
+                OK
+              </button>
+            </div>
+          </div>
+          <style jsx>{`
+            @keyframes slideIn {
+              from {
+                opacity: 0;
+                transform: translateX(50px);
+              }
+              to {
+                opacity: 1;
+                transform: translateX(0);
+              }
+            }
+          `}</style>
+        </div>
+      )}
+
       <div
         ref={containerRef}
         style={{
