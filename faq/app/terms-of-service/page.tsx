@@ -7,85 +7,53 @@ export default function TermsOfServicePage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const homeButtonRef = useRef<HTMLDivElement>(null);
-  const termsWrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const container = containerRef.current;
     const content = contentRef.current;
     const homeButton = homeButtonRef.current;
-    const termsWrapper = termsWrapperRef.current;
 
-    if (!container || !content || !homeButton || !termsWrapper) return;
+    if (!container || !content || !homeButton) return;
 
     let isDragging = false;
     let startX = 0;
     let scrollLeft = 0;
-    let isPinned = false;
 
     const getMaxScroll = () => {
       return content.scrollWidth - window.innerWidth;
     };
 
-    // Dapatkan posisi relative home button terhadap wrapper
-    const getHomeButtonRect = () => {
-      const wrapperRect = termsWrapper.getBoundingClientRect();
-      const buttonRect = homeButton.getBoundingClientRect();
-      return {
-        top: buttonRect.top,
-        left: buttonRect.left,
-        right: buttonRect.right,
-        bottom: buttonRect.bottom,
-      };
-    };
-
-    const updateHomeButtonPosition = (newScrollLeft: number) => {
-      const threshold = 350; // Batas scroll untuk pin
+    const updateHomeButtonPosition = (currentScroll: number) => {
+      const maxScroll = getMaxScroll();
+      const termsSection = document.querySelector('.terms-section');
       
-      if (newScrollLeft >= threshold && !isPinned) {
-        // PIN: teks menjadi fixed di pojok kiri
-        isPinned = true;
-        const rect = getHomeButtonRect();
-        
-        gsap.set(homeButton, {
-          position: "fixed",
-          left: "20px",
-          top: rect.top + "px",
-          right: "auto",
-          bottom: "auto",
-          zIndex: 999,
-        });
-        
+      if (!termsSection) return;
+      
+      const termsRect = termsSection.getBoundingClientRect();
+      const containerRect = container.getBoundingClientRect();
+      
+      // Posisi awal home button (relatif terhadap container)
+      const initialHomeX = 0;
+      
+      // Kondisi: ketika home button mendekati atau melewati teks TERMS OF SERVICES
+      // Kita perlu mendeteksi apakah home button sudah melewati batas tertentu
+      // Menggunakan scroll progress untuk menentukan kapan home button kembali ke awal
+      
+      // Jika scroll sudah melewati titik tertentu (misalnya 100px dari max scroll)
+      // Atau jika home button secara visual berada di atas teks TERMS OF SERVICES
+      if (currentScroll > maxScroll - 100) {
+        // Di akhir scroll, home button tetap di kiri
         gsap.to(homeButton, {
-          x: 0,
+          x: -initialHomeX,
           duration: 0.3,
           ease: "power2.out",
         });
-      } 
-      else if (newScrollLeft < threshold && isPinned) {
-        // UNPIN: kembali ke posisi semula
-        isPinned = false;
-        
-        gsap.set(homeButton, {
-          position: "absolute",
-          right: "0",
-          bottom: "calc(100% + 20px)",
-          left: "auto",
-          top: "auto",
-        });
-        
+      } else {
+        // Home button tetap di posisi awal (tidak bergerak)
         gsap.to(homeButton, {
-          x: -newScrollLeft,
+          x: -initialHomeX,
           duration: 0.3,
           ease: "power2.out",
-        });
-      }
-      
-      // Jika tidak pinned, ikut scroll
-      if (!isPinned) {
-        gsap.to(homeButton, {
-          x: -newScrollLeft,
-          duration: 0.1,
-          ease: "none",
         });
       }
     };
@@ -99,6 +67,8 @@ export default function TermsOfServicePage() {
       if (newScrollLeft > maxScroll) newScrollLeft = maxScroll;
       
       scrollLeft = newScrollLeft;
+      
+      // Update posisi home button
       updateHomeButtonPosition(scrollLeft);
       
       gsap.to(container, {
@@ -126,6 +96,8 @@ export default function TermsOfServicePage() {
       if (newScrollLeft > maxScroll) newScrollLeft = maxScroll;
       
       scrollLeft = newScrollLeft;
+      
+      // Update posisi home button
       updateHomeButtonPosition(scrollLeft);
       
       gsap.to(container, {
@@ -176,12 +148,12 @@ export default function TermsOfServicePage() {
 
   const NorthWestArrow = () => (
     <svg
-      width="20"
-      height="20"
+      width="50"
+      height="50"
       viewBox="0 0 24 24"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      style={{ marginRight: "8px" }}
+      style={{ marginRight: "15px" }}
     >
       <path
         d="M17 17L7 7M7 7H17M7 7V17"
@@ -204,39 +176,47 @@ export default function TermsOfServicePage() {
         position: "relative",
       }}
     >
-      {/* Teks Halaman Utama - dipisahkan dari container agar lebih mudah diatur */}
+      {/* Home Button - Fixed Position di kiri layar */}
       <div
         ref={homeButtonRef}
         style={{
           position: "fixed",
-          top: "20px",
-          left: "20px",
+          left: "100px",
+          top: "50%",
+          transform: "translateY(-50%)",
           display: "flex",
           alignItems: "center",
           color: "#ffffff",
-          fontSize: "16px",
+          fontSize: "50px",
           fontWeight: "400",
           letterSpacing: "0.05em",
           whiteSpace: "nowrap",
           cursor: "pointer",
           zIndex: 100,
-          background: "rgba(0,0,0,0.6)",
-          padding: "10px 18px",
-          borderRadius: "50px",
-          backdropFilter: "blur(10px)",
-          border: "1px solid rgba(255,255,255,0.2)",
-          opacity: 0,
-          pointerEvents: "none",
+          backgroundColor: "rgba(0,0,0,0.5)",
+          padding: "10px 20px",
+          borderRadius: "10px",
         }}
         onClick={() => {
           // Scroll back to start
           const container = containerRef.current;
-          if (container) {
-            gsap.to(container, {
-              x: 0,
-              duration: 0.8,
-              ease: "power2.out",
-            });
+          const homeButton = homeButtonRef.current;
+          if (container && homeButton) {
+            // Reset scroll position
+            const content = contentRef.current;
+            if (content) {
+              const containerRect = container.getBoundingClientRect();
+              gsap.to(container, {
+                x: 0,
+                duration: 0.8,
+                ease: "power2.out",
+              });
+              gsap.to(homeButton, {
+                x: 0,
+                duration: 0.8,
+                ease: "power2.out",
+              });
+            }
           }
         }}
       >
@@ -264,7 +244,7 @@ export default function TermsOfServicePage() {
         >
           {/* Wrapper untuk TERMS OF SERVICES */}
           <div
-            ref={termsWrapperRef}
+            className="terms-section"
             style={{
               position: "relative",
               display: "inline-block",
@@ -932,73 +912,59 @@ export default function TermsOfServicePage() {
           </div>
 
           {/* Arrow dan 3 Teks Policy */}
-          <div style={{ flexShrink: 0 }}>
-            <NorthEastArrow />
-          </div>
+          <NorthEastArrow />
           
-          <div style={{ flexShrink: 0 }}>
-            <div
-              style={{
-                fontWeight: "700",
-                fontSize: "200px",
-                lineHeight: "1",
-                color: "#ffffff",
-                whiteSpace: "nowrap",
-              }}
-            >
-              COOKIES POLICY
-            </div>
+          <div
+            style={{
+              fontWeight: "700",
+              fontSize: "200px",
+              lineHeight: "1",
+              color: "#ffffff",
+              whiteSpace: "nowrap",
+            }}
+          >
+            COOKIES POLICY
           </div>
 
-          <div style={{ flexShrink: 0 }}>
-            <NorthEastArrow />
-          </div>
+          <NorthEastArrow />
           
-          <div style={{ flexShrink: 0 }}>
-            <div
-              style={{
-                fontWeight: "700",
-                fontSize: "200px",
-                lineHeight: "1",
-                color: "#ffffff",
-                whiteSpace: "nowrap",
-              }}
-            >
-              TERMS OF SERVICE
-            </div>
+          <div
+            style={{
+              fontWeight: "700",
+              fontSize: "200px",
+              lineHeight: "1",
+              color: "#ffffff",
+              whiteSpace: "nowrap",
+            }}
+          >
+            TERMS OF SERVICE
           </div>
 
-          <div style={{ flexShrink: 0 }}>
-            <NorthEastArrow />
-          </div>
+          <NorthEastArrow />
           
-          <div style={{ flexShrink: 0 }}>
-            <div
-              style={{
-                fontWeight: "700",
-                fontSize: "200px",
-                lineHeight: "1",
-                color: "#ffffff",
-                whiteSpace: "nowrap",
-              }}
-            >
-              PRIVACY POLICY
-            </div>
+          <div
+            style={{
+              fontWeight: "700",
+              fontSize: "200px",
+              lineHeight: "1",
+              color: "#ffffff",
+              whiteSpace: "nowrap",
+            }}
+          >
+            PRIVACY POLICY
           </div>
 
           {/* Teks MENURU di akhir */}
-          <div style={{ flexShrink: 0 }}>
-            <div
-              style={{
-                fontWeight: "700",
-                fontSize: "700px",
-                lineHeight: "1",
-                color: "#ffffff",
-                whiteSpace: "nowrap",
-              }}
-            >
-              MENURU
-            </div>
+          <div
+            style={{
+              fontWeight: "700",
+              fontSize: "700px",
+              lineHeight: "1",
+              color: "#ffffff",
+              whiteSpace: "nowrap",
+            }}
+          >
+            MENURU
           </div>
         </div>
       </div>
