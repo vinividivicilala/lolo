@@ -20,59 +20,9 @@ export default function TermsOfServicePage() {
     let isDragging = false;
     let startX = 0;
     let scrollLeft = 0;
-    let isHomeButtonAtOriginalPosition = true;
 
     const getMaxScroll = () => {
       return content.scrollWidth - window.innerWidth;
-    };
-
-    const getOriginalHomeButtonPosition = () => {
-      // Mendapatkan posisi asli home button relatif terhadap container
-      const termsRect = termsWrapper.getBoundingClientRect();
-      const containerRect = container.getBoundingClientRect();
-      // Posisi asli: di atas teks TERMS OF SERVICES
-      return termsRect.left - containerRect.left - 100; // offset 100px dari kiri
-    };
-
-    const updateHomeButtonPosition = (currentScroll: number) => {
-      const maxScroll = getMaxScroll();
-      const originalX = getOriginalHomeButtonPosition();
-      
-      // Hitung seberapa jauh scroll dari akhir
-      const scrollFromEnd = maxScroll - currentScroll;
-      
-      // Kondisi: jika scroll sudah mencapai akhir (atau sangat dekat dengan akhir)
-      if (currentScroll >= maxScroll - 50) {
-        // Home button tetap diam di posisi kiri layar
-        if (!isHomeButtonAtOriginalPosition) {
-          gsap.to(homeButton, {
-            x: -currentScroll,
-            duration: 0.3,
-            ease: "power2.out",
-          });
-          isHomeButtonAtOriginalPosition = false;
-        }
-      } 
-      // Kondisi: jika scroll sudah mendekati teks TERMS OF SERVICES (scroll balik ke kiri)
-      else if (currentScroll < 200) {
-        // Home button kembali ke posisi aslinya (di atas TERMS OF SERVICES)
-        gsap.to(homeButton, {
-          x: 0,
-          duration: 0.5,
-          ease: "power2.out",
-        });
-        isHomeButtonAtOriginalPosition = true;
-      }
-      else {
-        // Di area tengah, home button ikut scroll tapi tetap di kiri layar
-        if (!isHomeButtonAtOriginalPosition) {
-          gsap.to(homeButton, {
-            x: -currentScroll,
-            duration: 0.3,
-            ease: "power2.out",
-          });
-        }
-      }
     };
 
     const handleWheel = (e: WheelEvent) => {
@@ -85,8 +35,30 @@ export default function TermsOfServicePage() {
       
       scrollLeft = newScrollLeft;
       
-      // Update posisi home button
-      updateHomeButtonPosition(scrollLeft);
+      // Hitung posisi home button
+      // Home button akan bergerak seperti teks lain sampai batas tertentu
+      // Batas: ketika scroll sudah melebihi lebar teks TERMS OF SERVICES
+      const termsText = termsWrapper.querySelector('div:last-child') as HTMLElement;
+      if (termsText) {
+        const termsWidth = termsText.offsetWidth;
+        // Jika scroll sudah melewati lebar teks TERMS OF SERVICES (sekitar 800px)
+        // Maka home button akan tetap di kiri layar
+        if (scrollLeft > termsWidth - 400) {
+          // Home button tetap di posisi kiri layar
+          gsap.to(homeButton, {
+            x: -(scrollLeft),
+            duration: 0.5,
+            ease: "power2.out",
+          });
+        } else {
+          // Home button ikut scroll seperti biasa
+          gsap.to(homeButton, {
+            x: 0,
+            duration: 0.5,
+            ease: "power2.out",
+          });
+        }
+      }
       
       gsap.to(container, {
         x: -scrollLeft,
@@ -114,8 +86,24 @@ export default function TermsOfServicePage() {
       
       scrollLeft = newScrollLeft;
       
-      // Update posisi home button
-      updateHomeButtonPosition(scrollLeft);
+      // Hitung posisi home button untuk drag
+      const termsText = termsWrapper.querySelector('div:last-child') as HTMLElement;
+      if (termsText) {
+        const termsWidth = termsText.offsetWidth;
+        if (scrollLeft > termsWidth - 400) {
+          gsap.to(homeButton, {
+            x: -(scrollLeft),
+            duration: 0,
+            ease: "none",
+          });
+        } else {
+          gsap.to(homeButton, {
+            x: 0,
+            duration: 0,
+            ease: "none",
+          });
+        }
+      }
       
       gsap.to(container, {
         x: -scrollLeft,
