@@ -25,6 +25,37 @@ export default function TermsOfServicePage() {
       return content.scrollWidth - window.innerWidth;
     };
 
+    const updateHomeButtonPosition = (currentScroll: number) => {
+      const maxScroll = getMaxScroll();
+      
+      // Jika scroll sudah mencapai akhir (atau mendekati akhir)
+      if (currentScroll >= maxScroll - 100) {
+        // Home button tetap di posisi kiri layar
+        gsap.to(homeButton, {
+          x: currentScroll,
+          duration: 0.3,
+          ease: "power2.out",
+        });
+      } 
+      // Jika scroll balik ke kiri (mendekati posisi awal)
+      else if (currentScroll < 200) {
+        // Home button kembali ke posisi aslinya (di atas TERMS OF SERVICES)
+        gsap.to(homeButton, {
+          x: 0,
+          duration: 0.3,
+          ease: "power2.out",
+        });
+      }
+      else {
+        // Di area tengah, home button mengikuti scroll normal
+        gsap.to(homeButton, {
+          x: 0,
+          duration: 0.3,
+          ease: "power2.out",
+        });
+      }
+    };
+
     const handleWheel = (e: WheelEvent) => {
       e.preventDefault();
       const maxScroll = getMaxScroll();
@@ -35,30 +66,8 @@ export default function TermsOfServicePage() {
       
       scrollLeft = newScrollLeft;
       
-      // Hitung posisi home button
-      // Home button akan bergerak seperti teks lain sampai batas tertentu
-      // Batas: ketika scroll sudah melebihi lebar teks TERMS OF SERVICES
-      const termsText = termsWrapper.querySelector('div:last-child') as HTMLElement;
-      if (termsText) {
-        const termsWidth = termsText.offsetWidth;
-        // Jika scroll sudah melewati lebar teks TERMS OF SERVICES (sekitar 800px)
-        // Maka home button akan tetap di kiri layar
-        if (scrollLeft > termsWidth - 400) {
-          // Home button tetap di posisi kiri layar
-          gsap.to(homeButton, {
-            x: -(scrollLeft),
-            duration: 0.5,
-            ease: "power2.out",
-          });
-        } else {
-          // Home button ikut scroll seperti biasa
-          gsap.to(homeButton, {
-            x: 0,
-            duration: 0.5,
-            ease: "power2.out",
-          });
-        }
-      }
+      // Update posisi home button
+      updateHomeButtonPosition(scrollLeft);
       
       gsap.to(container, {
         x: -scrollLeft,
@@ -86,24 +95,8 @@ export default function TermsOfServicePage() {
       
       scrollLeft = newScrollLeft;
       
-      // Hitung posisi home button untuk drag
-      const termsText = termsWrapper.querySelector('div:last-child') as HTMLElement;
-      if (termsText) {
-        const termsWidth = termsText.offsetWidth;
-        if (scrollLeft > termsWidth - 400) {
-          gsap.to(homeButton, {
-            x: -(scrollLeft),
-            duration: 0,
-            ease: "none",
-          });
-        } else {
-          gsap.to(homeButton, {
-            x: 0,
-            duration: 0,
-            ease: "none",
-          });
-        }
-      }
+      // Update posisi home button untuk drag
+      updateHomeButtonPosition(scrollLeft);
       
       gsap.to(container, {
         x: -scrollLeft,
@@ -211,9 +204,7 @@ export default function TermsOfServicePage() {
             <div
               ref={homeButtonRef}
               style={{
-                position: "absolute",
-                bottom: "calc(100% + 20px)",
-                right: "0",
+                position: "relative",
                 display: "flex",
                 alignItems: "center",
                 color: "#ffffff",
@@ -223,6 +214,8 @@ export default function TermsOfServicePage() {
                 whiteSpace: "nowrap",
                 cursor: "pointer",
                 zIndex: 10,
+                marginBottom: "20px",
+                justifyContent: "flex-end",
               }}
               onClick={() => {
                 // Scroll back to start
