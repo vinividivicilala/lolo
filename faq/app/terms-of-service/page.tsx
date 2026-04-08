@@ -7,54 +7,71 @@ export default function TermsOfServicePage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const homeButtonRef = useRef<HTMLDivElement>(null);
+  const termsWrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const container = containerRef.current;
     const content = contentRef.current;
     const homeButton = homeButtonRef.current;
+    const termsWrapper = termsWrapperRef.current;
 
-    if (!container || !content || !homeButton) return;
+    if (!container || !content || !homeButton || !termsWrapper) return;
 
     let isDragging = false;
     let startX = 0;
     let scrollLeft = 0;
+    let isHomeButtonAtOriginalPosition = true;
 
     const getMaxScroll = () => {
       return content.scrollWidth - window.innerWidth;
     };
 
+    const getOriginalHomeButtonPosition = () => {
+      // Mendapatkan posisi asli home button relatif terhadap container
+      const termsRect = termsWrapper.getBoundingClientRect();
+      const containerRect = container.getBoundingClientRect();
+      // Posisi asli: di atas teks TERMS OF SERVICES
+      return termsRect.left - containerRect.left - 100; // offset 100px dari kiri
+    };
+
     const updateHomeButtonPosition = (currentScroll: number) => {
       const maxScroll = getMaxScroll();
-      const termsSection = document.querySelector('.terms-section');
+      const originalX = getOriginalHomeButtonPosition();
       
-      if (!termsSection) return;
+      // Hitung seberapa jauh scroll dari akhir
+      const scrollFromEnd = maxScroll - currentScroll;
       
-      const termsRect = termsSection.getBoundingClientRect();
-      const containerRect = container.getBoundingClientRect();
-      
-      // Posisi awal home button (relatif terhadap container)
-      const initialHomeX = 0;
-      
-      // Kondisi: ketika home button mendekati atau melewati teks TERMS OF SERVICES
-      // Kita perlu mendeteksi apakah home button sudah melewati batas tertentu
-      // Menggunakan scroll progress untuk menentukan kapan home button kembali ke awal
-      
-      // Jika scroll sudah melewati titik tertentu (misalnya 100px dari max scroll)
-      // Atau jika home button secara visual berada di atas teks TERMS OF SERVICES
-      if (currentScroll > maxScroll - 100) {
-        // Di akhir scroll, home button tetap di kiri
+      // Kondisi: jika scroll sudah mencapai akhir (atau sangat dekat dengan akhir)
+      if (currentScroll >= maxScroll - 50) {
+        // Home button tetap diam di posisi kiri layar
+        if (!isHomeButtonAtOriginalPosition) {
+          gsap.to(homeButton, {
+            x: -currentScroll,
+            duration: 0.3,
+            ease: "power2.out",
+          });
+          isHomeButtonAtOriginalPosition = false;
+        }
+      } 
+      // Kondisi: jika scroll sudah mendekati teks TERMS OF SERVICES (scroll balik ke kiri)
+      else if (currentScroll < 200) {
+        // Home button kembali ke posisi aslinya (di atas TERMS OF SERVICES)
         gsap.to(homeButton, {
-          x: -initialHomeX,
-          duration: 0.3,
+          x: 0,
+          duration: 0.5,
           ease: "power2.out",
         });
-      } else {
-        // Home button tetap di posisi awal (tidak bergerak)
-        gsap.to(homeButton, {
-          x: -initialHomeX,
-          duration: 0.3,
-          ease: "power2.out",
-        });
+        isHomeButtonAtOriginalPosition = true;
+      }
+      else {
+        // Di area tengah, home button ikut scroll tapi tetap di kiri layar
+        if (!isHomeButtonAtOriginalPosition) {
+          gsap.to(homeButton, {
+            x: -currentScroll,
+            duration: 0.3,
+            ease: "power2.out",
+          });
+        }
       }
     };
 
@@ -176,54 +193,6 @@ export default function TermsOfServicePage() {
         position: "relative",
       }}
     >
-      {/* Home Button - Fixed Position di kiri layar */}
-      <div
-        ref={homeButtonRef}
-        style={{
-          position: "fixed",
-          left: "100px",
-          top: "50%",
-          transform: "translateY(-50%)",
-          display: "flex",
-          alignItems: "center",
-          color: "#ffffff",
-          fontSize: "50px",
-          fontWeight: "400",
-          letterSpacing: "0.05em",
-          whiteSpace: "nowrap",
-          cursor: "pointer",
-          zIndex: 100,
-          backgroundColor: "rgba(0,0,0,0.5)",
-          padding: "10px 20px",
-          borderRadius: "10px",
-        }}
-        onClick={() => {
-          // Scroll back to start
-          const container = containerRef.current;
-          const homeButton = homeButtonRef.current;
-          if (container && homeButton) {
-            // Reset scroll position
-            const content = contentRef.current;
-            if (content) {
-              const containerRect = container.getBoundingClientRect();
-              gsap.to(container, {
-                x: 0,
-                duration: 0.8,
-                ease: "power2.out",
-              });
-              gsap.to(homeButton, {
-                x: 0,
-                duration: 0.8,
-                ease: "power2.out",
-              });
-            }
-          }
-        }}
-      >
-        <NorthWestArrow />
-        <span>Halaman Utama</span>
-      </div>
-
       <div
         ref={containerRef}
         style={{
@@ -242,14 +211,53 @@ export default function TermsOfServicePage() {
             padding: "0 100px",
           }}
         >
-          {/* Wrapper untuk TERMS OF SERVICES */}
+          {/* Wrapper untuk TERMS OF SERVICES dan Halaman Utama */}
           <div
-            className="terms-section"
+            ref={termsWrapperRef}
             style={{
               position: "relative",
               display: "inline-block",
             }}
           >
+            {/* Teks Halaman Utama di atas TERMS OF SERVICES */}
+            <div
+              ref={homeButtonRef}
+              style={{
+                position: "absolute",
+                bottom: "calc(100% + 20px)",
+                right: "0",
+                display: "flex",
+                alignItems: "center",
+                color: "#ffffff",
+                fontSize: "50px",
+                fontWeight: "400",
+                letterSpacing: "0.05em",
+                whiteSpace: "nowrap",
+                cursor: "pointer",
+                zIndex: 10,
+              }}
+              onClick={() => {
+                // Scroll back to start
+                const container = containerRef.current;
+                const homeButton = homeButtonRef.current;
+                if (container && homeButton) {
+                  gsap.to(container, {
+                    x: 0,
+                    duration: 0.8,
+                    ease: "power2.out",
+                  });
+                  gsap.to(homeButton, {
+                    x: 0,
+                    duration: 0.8,
+                    ease: "power2.out",
+                  });
+                }
+              }}
+            >
+              <NorthWestArrow />
+              <span>Halaman Utama</span>
+            </div>
+
             {/* Teks TERMS OF SERVICES yang besar */}
             <div
               style={{
