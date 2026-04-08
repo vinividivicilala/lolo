@@ -8,7 +8,7 @@ export default function TermsOfServicePage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const homeButtonRef = useRef<HTMLDivElement>(null);
-  const sectionRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const pinContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
@@ -16,18 +16,19 @@ export default function TermsOfServicePage() {
     const container = containerRef.current;
     const content = contentRef.current;
     const homeButton = homeButtonRef.current;
+    const pinContainer = pinContainerRef.current;
 
-    if (!container || !content || !homeButton) return;
+    if (!container || !content || !homeButton || !pinContainer) return;
 
-    // Scroll horizontal dengan ScrollTrigger
-    const sections = sectionRefs.current.filter(Boolean);
+    // Hitung total width untuk horizontal scroll
+    const sections = gsap.utils.toArray<HTMLElement>(".section");
     const totalWidth = sections.reduce((acc, section) => {
-      return acc + (section?.offsetWidth || 0) + 100; // +100 untuk gap
-    }, 0) + 200; // +200 untuk padding
-    
+      return acc + section.offsetWidth + 100;
+    }, 0);
+
     // Set container width
     gsap.set(container, { width: totalWidth });
-    
+
     // Horizontal scroll animation
     const horizontalScroll = gsap.to(container, {
       x: () => -(totalWidth - window.innerWidth),
@@ -36,39 +37,27 @@ export default function TermsOfServicePage() {
       scrollTrigger: {
         trigger: content,
         start: "top top",
-        end: () => `+=${totalWidth - window.innerWidth}`,
+        end: () => `+=${totalWidth}`,
         scrub: 1,
-        pin: true,
+        pin: pinContainer,
         invalidateOnRefresh: true,
-        onUpdate: (self) => {
-          const progress = self.progress;
-          const scrollAmount = progress * (totalWidth - window.innerWidth);
-          
-          // Kontrol home button berdasarkan progress scroll
-          // Home button akan bergerak dari 0 ke -200px saat scroll dari 0 ke 0.3 (30% pertama)
-          let moveX = 0;
-          if (progress <= 0.3) {
-            // Bergerak dari 0 ke -200 selama 30% scroll pertama
-            moveX = (progress / 0.3) * -200;
-          } else {
-            // Setelah 30%, tetap di -200
-            moveX = -200;
-          }
-          
-          gsap.to(homeButton, {
-            x: moveX,
-            opacity: progress <= 0.3 ? 1 - (progress / 0.3) : 0,
-            duration: 0.1,
-            ease: "none",
-          });
-        },
       },
+    });
+
+    // Sticky/Pinned effect untuk home button
+    // Home button akan tetap di posisinya saat scroll
+    ScrollTrigger.create({
+      trigger: homeButton,
+      start: "top bottom",
+      end: "bottom top",
+      pin: true,
+      pinSpacing: false,
+      scrub: 0.5,
     });
 
     // Mouse drag handler untuk horizontal scroll
     let isDragging = false;
     let startX = 0;
-    let scrollLeft = 0;
     let startProgress = 0;
 
     const handleMouseDown = (e: MouseEvent) => {
@@ -87,7 +76,9 @@ export default function TermsOfServicePage() {
       newProgress = Math.min(Math.max(newProgress, 0), 1);
       
       ScrollTrigger.getAll().forEach(st => {
-        st.progress = newProgress;
+        if (st.vars.trigger === content) {
+          st.progress = newProgress;
+        }
       });
     };
 
@@ -151,6 +142,7 @@ export default function TermsOfServicePage() {
 
   return (
     <div
+      ref={pinContainerRef}
       style={{
         height: "100vh",
         width: "100vw",
@@ -160,6 +152,41 @@ export default function TermsOfServicePage() {
         position: "relative",
       }}
     >
+      {/* Sticky Home Button */}
+      <div
+        ref={homeButtonRef}
+        style={{
+          position: "fixed",
+          top: "20px",
+          left: "20px",
+          display: "flex",
+          alignItems: "center",
+          color: "#ffffff",
+          fontSize: "16px",
+          fontWeight: "400",
+          letterSpacing: "0.05em",
+          whiteSpace: "nowrap",
+          cursor: "pointer",
+          zIndex: 100,
+          background: "rgba(0,0,0,0.5)",
+          padding: "10px 18px",
+          borderRadius: "50px",
+          backdropFilter: "blur(10px)",
+          border: "1px solid rgba(255,255,255,0.2)",
+        }}
+        onClick={() => {
+          // Scroll back to start
+          ScrollTrigger.getAll().forEach(st => {
+            if (st.vars.trigger === document.querySelector('[data-content]')) {
+              st.progress = 0;
+            }
+          });
+        }}
+      >
+        <NorthWestArrow />
+        <span>Halaman Utama</span>
+      </div>
+
       <div
         ref={containerRef}
         style={{
@@ -171,43 +198,15 @@ export default function TermsOfServicePage() {
           padding: "0 100px",
         }}
       >
-        {/* Wrapper untuk TERMS OF SERVICES dan Halaman Utama */}
+        {/* Wrapper untuk TERMS OF SERVICES */}
         <div
-          ref={el => sectionRefs.current[0] = el}
+          className="section"
           style={{
             position: "relative",
             display: "inline-block",
             flexShrink: 0,
           }}
         >
-          {/* Teks Halaman Utama di atas TERMS OF SERVICES */}
-          <div
-            ref={homeButtonRef}
-            style={{
-              position: "absolute",
-              bottom: "calc(100% + 20px)",
-              right: "0",
-              display: "flex",
-              alignItems: "center",
-              color: "#ffffff",
-              fontSize: "16px",
-              fontWeight: "400",
-              letterSpacing: "0.05em",
-              whiteSpace: "nowrap",
-              cursor: "pointer",
-              zIndex: 10,
-            }}
-            onClick={() => {
-              // Scroll back to start
-              ScrollTrigger.getAll().forEach(st => {
-                st.progress = 0;
-              });
-            }}
-          >
-            <NorthWestArrow />
-            <span>Halaman Utama</span>
-          </div>
-
           {/* Teks TERMS OF SERVICES yang besar */}
           <div
             style={{
@@ -224,7 +223,7 @@ export default function TermsOfServicePage() {
 
         {/* Section 1 - Introduction */}
         <div
-          ref={el => sectionRefs.current[1] = el}
+          className="section"
           style={{
             width: "650px",
             flexShrink: 0,
@@ -278,7 +277,7 @@ export default function TermsOfServicePage() {
 
         {/* Section 2 - Use of Services */}
         <div
-          ref={el => sectionRefs.current[2] = el}
+          className="section"
           style={{
             width: "650px",
             flexShrink: 0,
@@ -340,7 +339,7 @@ export default function TermsOfServicePage() {
 
         {/* Section 3 - Intellectual Property */}
         <div
-          ref={el => sectionRefs.current[3] = el}
+          className="section"
           style={{
             width: "650px",
             flexShrink: 0,
@@ -394,7 +393,7 @@ export default function TermsOfServicePage() {
 
         {/* Section 4 - User Content */}
         <div
-          ref={el => sectionRefs.current[4] = el}
+          className="section"
           style={{
             width: "650px",
             flexShrink: 0,
@@ -448,7 +447,7 @@ export default function TermsOfServicePage() {
 
         {/* Section 5 - Privacy */}
         <div
-          ref={el => sectionRefs.current[5] = el}
+          className="section"
           style={{
             width: "650px",
             flexShrink: 0,
@@ -493,7 +492,7 @@ export default function TermsOfServicePage() {
 
         {/* Section 6 - Third-Party Links */}
         <div
-          ref={el => sectionRefs.current[6] = el}
+          className="section"
           style={{
             width: "650px",
             flexShrink: 0,
@@ -538,7 +537,7 @@ export default function TermsOfServicePage() {
 
         {/* Section 7 - Limitation of Liability */}
         <div
-          ref={el => sectionRefs.current[7] = el}
+          className="section"
           style={{
             width: "650px",
             flexShrink: 0,
@@ -583,7 +582,7 @@ export default function TermsOfServicePage() {
 
         {/* Section 8 - Disclaimer */}
         <div
-          ref={el => sectionRefs.current[8] = el}
+          className="section"
           style={{
             width: "650px",
             flexShrink: 0,
@@ -628,7 +627,7 @@ export default function TermsOfServicePage() {
 
         {/* Section 9 - Indemnification */}
         <div
-          ref={el => sectionRefs.current[9] = el}
+          className="section"
           style={{
             width: "650px",
             flexShrink: 0,
@@ -677,7 +676,7 @@ export default function TermsOfServicePage() {
 
         {/* Section 10 - Termination */}
         <div
-          ref={el => sectionRefs.current[10] = el}
+          className="section"
           style={{
             width: "650px",
             flexShrink: 0,
@@ -722,7 +721,7 @@ export default function TermsOfServicePage() {
 
         {/* Section 11 - Governing Law */}
         <div
-          ref={el => sectionRefs.current[11] = el}
+          className="section"
           style={{
             width: "650px",
             flexShrink: 0,
@@ -767,7 +766,7 @@ export default function TermsOfServicePage() {
 
         {/* Section 12 - Miscellaneous */}
         <div
-          ref={el => sectionRefs.current[12] = el}
+          className="section"
           style={{
             width: "650px",
             flexShrink: 0,
@@ -830,7 +829,7 @@ export default function TermsOfServicePage() {
 
         {/* Section 13 - Contact */}
         <div
-          ref={el => sectionRefs.current[13] = el}
+          className="section"
           style={{
             width: "650px",
             flexShrink: 0,
@@ -883,11 +882,11 @@ export default function TermsOfServicePage() {
         </div>
 
         {/* Arrow dan 3 Teks Policy */}
-        <div ref={el => sectionRefs.current[14] = el} style={{ flexShrink: 0 }}>
+        <div className="section" style={{ flexShrink: 0 }}>
           <NorthEastArrow />
         </div>
         
-        <div ref={el => sectionRefs.current[15] = el} style={{ flexShrink: 0 }}>
+        <div className="section" style={{ flexShrink: 0 }}>
           <div
             style={{
               fontWeight: "700",
@@ -901,11 +900,11 @@ export default function TermsOfServicePage() {
           </div>
         </div>
 
-        <div ref={el => sectionRefs.current[16] = el} style={{ flexShrink: 0 }}>
+        <div className="section" style={{ flexShrink: 0 }}>
           <NorthEastArrow />
         </div>
         
-        <div ref={el => sectionRefs.current[17] = el} style={{ flexShrink: 0 }}>
+        <div className="section" style={{ flexShrink: 0 }}>
           <div
             style={{
               fontWeight: "700",
@@ -919,11 +918,11 @@ export default function TermsOfServicePage() {
           </div>
         </div>
 
-        <div ref={el => sectionRefs.current[18] = el} style={{ flexShrink: 0 }}>
+        <div className="section" style={{ flexShrink: 0 }}>
           <NorthEastArrow />
         </div>
         
-        <div ref={el => sectionRefs.current[19] = el} style={{ flexShrink: 0 }}>
+        <div className="section" style={{ flexShrink: 0 }}>
           <div
             style={{
               fontWeight: "700",
@@ -938,7 +937,7 @@ export default function TermsOfServicePage() {
         </div>
 
         {/* Teks MENURU di akhir */}
-        <div ref={el => sectionRefs.current[20] = el} style={{ flexShrink: 0 }}>
+        <div className="section" style={{ flexShrink: 0 }}>
           <div
             style={{
               fontWeight: "700",
