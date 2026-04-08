@@ -2,23 +2,18 @@
 
 import { useRef, useEffect } from "react";
 import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 export default function TermsOfServicePage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const homeButtonRef = useRef<HTMLDivElement>(null);
-  const wrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
-
     const container = containerRef.current;
     const content = contentRef.current;
     const homeButton = homeButtonRef.current;
-    const wrapper = wrapperRef.current;
 
-    if (!container || !content || !homeButton || !wrapper) return;
+    if (!container || !content || !homeButton) return;
 
     let isDragging = false;
     let startX = 0;
@@ -28,71 +23,30 @@ export default function TermsOfServicePage() {
       return content.scrollWidth - window.innerWidth;
     };
 
-    // Setup ScrollTrigger untuk horizontal scroll
-    const horizontalScroll = ScrollTrigger.create({
-      trigger: content,
-      start: "top top",
-      end: () => `+=${content.scrollWidth - window.innerWidth}`,
-      pin: false,
-      scrub: 1,
-      invalidateOnRefresh: true,
-      onUpdate: (self) => {
-        const progress = self.progress;
-        const scrollAmount = progress * (content.scrollWidth - window.innerWidth);
-        
-        gsap.to(container, {
-          x: -scrollAmount,
-          duration: 0,
-          ease: "none",
-        });
-        
-        scrollLeft = scrollAmount;
-      },
-    });
-
-    // Animasi untuk home button dengan ScrollTrigger
-    const homeButtonAnimation = gsap.fromTo(homeButton,
-      {
-        x: 0,
-        opacity: 1,
-      },
-      {
-        x: -300,
-        opacity: 0,
-        scrollTrigger: {
-          trigger: wrapper,
-          start: "left 80%",
-          end: "left 20%",
-          scrub: 1,
-          invalidateOnRefresh: true,
-        },
-      }
-    );
-
     const handleWheel = (e: WheelEvent) => {
       e.preventDefault();
-      const delta = e.deltaY;
-      const currentScroll = scrollLeft;
-      let newScroll = currentScroll + delta;
       const maxScroll = getMaxScroll();
+      let newScrollLeft = scrollLeft + e.deltaY;
       
-      newScroll = Math.min(Math.max(newScroll, 0), maxScroll);
+      if (newScrollLeft < 0) newScrollLeft = 0;
+      if (newScrollLeft > maxScroll) newScrollLeft = maxScroll;
       
-      // Update ScrollTrigger
-      const progress = newScroll / maxScroll;
-      ScrollTrigger.getAll().forEach(st => {
-        if (st.vars.id !== "homeButton") {
-          st.progress = progress;
-        }
+      scrollLeft = newScrollLeft;
+      
+      // Kontrol posisi home button
+      // Home button akan bergerak ke kiri saat scroll ke kanan
+      // Maksimal bergerak 200px
+      const moveX = Math.min(scrollLeft, 200);
+      gsap.to(homeButton, {
+        x: -moveX,
+        duration: 0.3,
+        ease: "power2.out",
       });
       
       gsap.to(container, {
-        x: -newScroll,
+        x: -scrollLeft,
         duration: 0.5,
         ease: "power2.out",
-        onUpdate: () => {
-          scrollLeft = newScroll;
-        },
       });
     };
 
@@ -110,17 +64,19 @@ export default function TermsOfServicePage() {
       let newScrollLeft = scrollLeft - walk;
       const maxScroll = getMaxScroll();
       
-      newScrollLeft = Math.min(Math.max(newScrollLeft, 0), maxScroll);
-      
-      // Update ScrollTrigger
-      const progress = newScrollLeft / maxScroll;
-      ScrollTrigger.getAll().forEach(st => {
-        if (st.vars.id !== "homeButton") {
-          st.progress = progress;
-        }
-      });
+      if (newScrollLeft < 0) newScrollLeft = 0;
+      if (newScrollLeft > maxScroll) newScrollLeft = maxScroll;
       
       scrollLeft = newScrollLeft;
+      
+      // Kontrol posisi home button
+      const moveX = Math.min(scrollLeft, 200);
+      gsap.to(homeButton, {
+        x: -moveX,
+        duration: 0,
+        ease: "none",
+      });
+      
       gsap.to(container, {
         x: -scrollLeft,
         duration: 0,
@@ -133,7 +89,6 @@ export default function TermsOfServicePage() {
       container.style.cursor = "grab";
     };
 
-    // Custom scroll handler untuk menghindari konflik dengan ScrollTrigger
     window.addEventListener("wheel", handleWheel, { passive: false });
     container.addEventListener("mousedown", handleMouseDown);
     window.addEventListener("mousemove", handleMouseMove);
@@ -145,7 +100,6 @@ export default function TermsOfServicePage() {
       container.removeEventListener("mousedown", handleMouseDown);
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
-      ScrollTrigger.getAll().forEach(st => st.kill());
     };
   }, []);
 
@@ -219,7 +173,6 @@ export default function TermsOfServicePage() {
         >
           {/* Wrapper untuk TERMS OF SERVICES dan Halaman Utama */}
           <div
-            ref={wrapperRef}
             style={{
               position: "relative",
               display: "inline-block",
@@ -241,26 +194,21 @@ export default function TermsOfServicePage() {
                 whiteSpace: "nowrap",
                 cursor: "pointer",
                 zIndex: 10,
-                background: "rgba(0,0,0,0.5)",
-                padding: "8px 16px",
-                borderRadius: "50px",
-                backdropFilter: "blur(10px)",
-                border: "1px solid rgba(255,255,255,0.2)",
               }}
               onClick={() => {
                 // Scroll back to start
                 const container = containerRef.current;
-                if (container) {
+                const homeButton = homeButtonRef.current;
+                if (container && homeButton) {
                   gsap.to(container, {
                     x: 0,
                     duration: 0.8,
                     ease: "power2.out",
                   });
-                  // Reset ScrollTrigger progress
-                  ScrollTrigger.getAll().forEach(st => {
-                    if (st.vars.id !== "homeButton") {
-                      st.progress = 0;
-                    }
+                  gsap.to(homeButton, {
+                    x: 0,
+                    duration: 0.8,
+                    ease: "power2.out",
                   });
                 }
               }}
