@@ -123,6 +123,32 @@ export default function TermsOfServicePage() {
             TERMS OF SERVICES
           </div>
 
+          {/* Teks COOKIES POLICY */}
+          <div
+            style={{
+              fontWeight: "700",
+              fontSize: "400px",
+              lineHeight: "1",
+              color: "#ffffff",
+              whiteSpace: "nowrap",
+            }}
+          >
+            COOKIES POLICY
+          </div>
+
+          {/* Teks PRIVACY POLICY */}
+          <div
+            style={{
+              fontWeight: "700",
+              fontSize: "400px",
+              lineHeight: "1",
+              color: "#ffffff",
+              whiteSpace: "nowrap",
+            }}
+          >
+            PRIVACY POLICY
+          </div>
+
           {/* Section 1 - Introduction */}
           <div
             style={{
