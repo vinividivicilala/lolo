@@ -105,68 +105,85 @@ export default function TermsOfServicePage() {
         <div
           ref={textRef}
           style={{
-            fontWeight: "400",
-            fontSize: "20px",
-            lineHeight: "1.6",
+            display: "flex",
+            gap: "100px",
+            alignItems: "center",
             padding: "0 2rem",
-            color: "#ffffff",
-            whiteSpace: "normal",
-            display: "inline-block",
-            width: "800px",
-            maxWidth: "80vw",
           }}
         >
-          <h1 style={{ fontWeight: "700", fontSize: "700px", margin: "0 0 100px 0", lineHeight: "1" }}>
+          {/* Teks TERMS OF SERVICES yang besar */}
+          <div
+            style={{
+              fontWeight: "700",
+              fontSize: "700px",
+              lineHeight: "1",
+              color: "#ffffff",
+              whiteSpace: "nowrap",
+            }}
+          >
             TERMS OF SERVICES
-          </h1>
-          
-          <h2 style={{ fontWeight: "600", fontSize: "32px", margin: "60px 0 20px 0" }}>
-            1. Introduction, Acceptance and General Conditions
-          </h2>
-          <p style={{ marginBottom: "30px" }}>
-            By accessing or using our services, you agree to be bound by these Terms of Service and all applicable laws and regulations. 
-            If you do not agree with any part of these terms, you may not use our services. These terms constitute a legally binding 
-            agreement between you and the company.
-          </p>
+          </div>
 
-          <h2 style={{ fontWeight: "600", fontSize: "32px", margin: "60px 0 20px 0" }}>
-            2. Use of Services
-          </h2>
-          <p style={{ marginBottom: "30px" }}>
-            You agree to use our services only for lawful purposes and in accordance with these Terms. You are responsible for 
-            maintaining the confidentiality of your account and for all activities that occur under your account.
-          </p>
+          {/* Konten isi Terms & Conditions yang muncul setelah SERVICES */}
+          <div
+            style={{
+              fontWeight: "400",
+              fontSize: "20px",
+              lineHeight: "1.6",
+              color: "#ffffff",
+              whiteSpace: "normal",
+              width: "600px",
+              marginRight: "100px",
+            }}
+          >
+            <h2 style={{ fontWeight: "600", fontSize: "32px", margin: "0 0 20px 0" }}>
+              1. Introduction, Acceptance and General Conditions
+            </h2>
+            <p style={{ marginBottom: "40px" }}>
+              By accessing or using our services, you agree to be bound by these Terms of Service and all applicable laws and regulations. 
+              If you do not agree with any part of these terms, you may not use our services. These terms constitute a legally binding 
+              agreement between you and the company.
+            </p>
 
-          <h2 style={{ fontWeight: "600", fontSize: "32px", margin: "60px 0 20px 0" }}>
-            3. Intellectual Property
-          </h2>
-          <p style={{ marginBottom: "30px" }}>
-            All content, features, and functionality of our services are owned by the company and are protected by international 
-            copyright, trademark, patent, trade secret, and other intellectual property laws.
-          </p>
+            <h2 style={{ fontWeight: "600", fontSize: "32px", margin: "40px 0 20px 0" }}>
+              2. Use of Services
+            </h2>
+            <p style={{ marginBottom: "40px" }}>
+              You agree to use our services only for lawful purposes and in accordance with these Terms. You are responsible for 
+              maintaining the confidentiality of your account and for all activities that occur under your account.
+            </p>
 
-          <h2 style={{ fontWeight: "600", fontSize: "32px", margin: "60px 0 20px 0" }}>
-            4. Limitation of Liability
-          </h2>
-          <p style={{ marginBottom: "30px" }}>
-            To the fullest extent permitted by law, the company shall not be liable for any indirect, incidental, special, 
-            consequential, or punitive damages arising out of or relating to your use of our services.
-          </p>
+            <h2 style={{ fontWeight: "600", fontSize: "32px", margin: "40px 0 20px 0" }}>
+              3. Intellectual Property
+            </h2>
+            <p style={{ marginBottom: "40px" }}>
+              All content, features, and functionality of our services are owned by the company and are protected by international 
+              copyright, trademark, patent, trade secret, and other intellectual property laws.
+            </p>
 
-          <h2 style={{ fontWeight: "600", fontSize: "32px", margin: "60px 0 20px 0" }}>
-            5. Changes to Terms
-          </h2>
-          <p style={{ marginBottom: "30px" }}>
-            We reserve the right to modify these Terms at any time. We will notify you of any changes by posting the new Terms 
-            on this page. Your continued use of the services after such modifications constitutes your acceptance of the new Terms.
-          </p>
+            <h2 style={{ fontWeight: "600", fontSize: "32px", margin: "40px 0 20px 0" }}>
+              4. Limitation of Liability
+            </h2>
+            <p style={{ marginBottom: "40px" }}>
+              To the fullest extent permitted by law, the company shall not be liable for any indirect, incidental, special, 
+              consequential, or punitive damages arising out of or relating to your use of our services.
+            </p>
 
-          <h2 style={{ fontWeight: "600", fontSize: "32px", margin: "60px 0 20px 0" }}>
-            6. Contact Information
-          </h2>
-          <p style={{ marginBottom: "100px" }}>
-            If you have any questions about these Terms, please contact us at legal@company.com.
-          </p>
+            <h2 style={{ fontWeight: "600", fontSize: "32px", margin: "40px 0 20px 0" }}>
+              5. Changes to Terms
+            </h2>
+            <p style={{ marginBottom: "40px" }}>
+              We reserve the right to modify these Terms at any time. We will notify you of any changes by posting the new Terms 
+              on this page. Your continued use of the services after such modifications constitutes your acceptance of the new Terms.
+            </p>
+
+            <h2 style={{ fontWeight: "600", fontSize: "32px", margin: "40px 0 20px 0" }}>
+              6. Contact Information
+            </h2>
+            <p style={{ marginBottom: "0px" }}>
+              If you have any questions about these Terms, please contact us at legal@company.com.
+            </p>
+          </div>
         </div>
       </div>
     </div>
