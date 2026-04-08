@@ -6,12 +6,14 @@ import gsap from "gsap";
 export default function TermsOfServicePage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  const backButtonRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const container = containerRef.current;
     const content = contentRef.current;
+    const backButton = backButtonRef.current;
 
-    if (!container || !content) return;
+    if (!container || !content || !backButton) return;
 
     let isDragging = false;
     let startX = 0;
@@ -19,6 +21,28 @@ export default function TermsOfServicePage() {
 
     const getMaxScroll = () => {
       return content.scrollWidth - window.innerWidth;
+    };
+
+    const updateBackButtonPosition = (currentScrollLeft: number) => {
+      // Hitung progress scroll dari awal hingga melewati teks TERMS OF SERVICES
+      const termsOfServiceWidth = 700; // Approximate width of TERMS OF SERVICES text
+      const progress = currentScrollLeft / termsOfServiceWidth;
+      
+      // Back button akan bergerak lebih lambat (parallax)
+      const backButtonX = currentScrollLeft * 0.3;
+      
+      // Opacity berdasarkan progress - hilang setelah melewati TERMS OF SERVICES
+      let opacity = 1;
+      if (progress > 0.8) {
+        opacity = Math.max(0, 1 - (progress - 0.8) * 5);
+      }
+      
+      gsap.to(backButton, {
+        x: backButtonX,
+        opacity: opacity,
+        duration: 0.1,
+        ease: "none",
+      });
     };
 
     const handleWheel = (e: WheelEvent) => {
@@ -30,6 +54,8 @@ export default function TermsOfServicePage() {
       if (newScrollLeft > maxScroll) newScrollLeft = maxScroll;
       
       scrollLeft = newScrollLeft;
+      updateBackButtonPosition(scrollLeft);
+      
       gsap.to(container, {
         x: -scrollLeft,
         duration: 0.5,
@@ -55,6 +81,8 @@ export default function TermsOfServicePage() {
       if (newScrollLeft > maxScroll) newScrollLeft = maxScroll;
       
       scrollLeft = newScrollLeft;
+      updateBackButtonPosition(scrollLeft);
+      
       gsap.to(container, {
         x: -scrollLeft,
         duration: 0,
@@ -101,6 +129,24 @@ export default function TermsOfServicePage() {
     </svg>
   );
 
+  const LeftArrow = () => (
+    <svg
+      width="40"
+      height="40"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M15 18L9 12L15 6"
+        stroke="#ffffff"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+
   return (
     <div
       style={{
@@ -112,6 +158,44 @@ export default function TermsOfServicePage() {
         position: "relative",
       }}
     >
+      {/* Back Button dengan efek parallax */}
+      <div
+        ref={backButtonRef}
+        style={{
+          position: "fixed",
+          top: "40px",
+          left: "40px",
+          zIndex: 100,
+          display: "flex",
+          alignItems: "center",
+          gap: "10px",
+          cursor: "pointer",
+          color: "#ffffff",
+          fontSize: "18px",
+          fontWeight: "500",
+          letterSpacing: "0.05em",
+          background: "rgba(0,0,0,0.5)",
+          padding: "10px 20px",
+          borderRadius: "50px",
+          backdropFilter: "blur(10px)",
+          border: "1px solid rgba(255,255,255,0.2)",
+        }}
+        onClick={() => {
+          // Scroll back to start
+          const container = containerRef.current;
+          if (container) {
+            gsap.to(container, {
+              x: 0,
+              duration: 0.8,
+              ease: "power2.out",
+            });
+          }
+        }}
+      >
+        <LeftArrow />
+        <span>Halaman utama</span>
+      </div>
+
       <div
         ref={containerRef}
         style={{
