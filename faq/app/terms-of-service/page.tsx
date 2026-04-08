@@ -6,14 +6,16 @@ import gsap from "gsap";
 export default function TermsOfServicePage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
-  const backButtonRef = useRef<HTMLDivElement>(null);
+  const homeButtonRef = useRef<HTMLDivElement>(null);
+  const boundaryRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const container = containerRef.current;
     const content = contentRef.current;
-    const backButton = backButtonRef.current;
+    const homeButton = homeButtonRef.current;
+    const boundary = boundaryRef.current;
 
-    if (!container || !content || !backButton) return;
+    if (!container || !content || !homeButton || !boundary) return;
 
     let isDragging = false;
     let startX = 0;
@@ -23,22 +25,38 @@ export default function TermsOfServicePage() {
       return content.scrollWidth - window.innerWidth;
     };
 
-    const updateBackButtonPosition = (currentScrollLeft: number) => {
-      // Hitung progress scroll dari awal hingga melewati teks TERMS OF SERVICES
-      const termsOfServiceWidth = 700; // Approximate width of TERMS OF SERVICES text
-      const progress = currentScrollLeft / termsOfServiceWidth;
+    const updateHomeButtonPosition = (currentScrollLeft: number) => {
+      // Dapatkan posisi boundary (batas antara teks judul dan section pertama)
+      const boundaryRect = boundary.getBoundingClientRect();
+      const buttonWidth = homeButton.offsetWidth;
       
-      // Back button akan bergerak lebih lambat (parallax)
-      const backButtonX = currentScrollLeft * 0.3;
+      // Posisi awal button (di boundary)
+      const initialLeft = boundaryRect.left;
       
-      // Opacity berdasarkan progress - hilang setelah melewati TERMS OF SERVICES
-      let opacity = 1;
-      if (progress > 0.8) {
-        opacity = Math.max(0, 1 - (progress - 0.8) * 5);
+      // Hitung posisi button berdasarkan scroll
+      // Button akan bergerak ke kiri mengikuti scroll, tapi tetap di sisi kiri layar
+      let buttonX = currentScrollLeft;
+      
+      // Batasi agar tidak melebihi sisi kiri layar
+      if (buttonX > initialLeft - 20) {
+        buttonX = initialLeft - 20;
       }
       
-      gsap.to(backButton, {
-        x: backButtonX,
+      // Jika scroll ke kiri (nilai negatif atau kecil), button kembali ke posisi awal
+      if (currentScrollLeft < 100) {
+        buttonX = 0;
+      }
+      
+      // Opacity: hilang saat scroll ke kiri melewati batas tertentu
+      let opacity = 1;
+      if (currentScrollLeft < 50) {
+        opacity = currentScrollLeft / 50;
+      } else if (currentScrollLeft > initialLeft - 100) {
+        opacity = Math.max(0, 1 - (currentScrollLeft - (initialLeft - 100)) / 100);
+      }
+      
+      gsap.to(homeButton, {
+        x: -buttonX,
         opacity: opacity,
         duration: 0.1,
         ease: "none",
@@ -54,7 +72,7 @@ export default function TermsOfServicePage() {
       if (newScrollLeft > maxScroll) newScrollLeft = maxScroll;
       
       scrollLeft = newScrollLeft;
-      updateBackButtonPosition(scrollLeft);
+      updateHomeButtonPosition(scrollLeft);
       
       gsap.to(container, {
         x: -scrollLeft,
@@ -81,7 +99,7 @@ export default function TermsOfServicePage() {
       if (newScrollLeft > maxScroll) newScrollLeft = maxScroll;
       
       scrollLeft = newScrollLeft;
-      updateBackButtonPosition(scrollLeft);
+      updateHomeButtonPosition(scrollLeft);
       
       gsap.to(container, {
         x: -scrollLeft,
@@ -101,6 +119,9 @@ export default function TermsOfServicePage() {
     window.addEventListener("mouseup", handleMouseUp);
     container.style.cursor = "grab";
 
+    // Initial position
+    updateHomeButtonPosition(0);
+
     return () => {
       window.removeEventListener("wheel", handleWheel);
       container.removeEventListener("mousedown", handleMouseDown);
@@ -109,7 +130,7 @@ export default function TermsOfServicePage() {
     };
   }, []);
 
-  // SVG Arrow Component
+  // SVG Arrow Components
   const NorthEastArrow = () => (
     <svg
       width="80"
@@ -129,16 +150,16 @@ export default function TermsOfServicePage() {
     </svg>
   );
 
-  const LeftArrow = () => (
+  const NorthWestArrow = () => (
     <svg
-      width="40"
-      height="40"
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
       <path
-        d="M15 18L9 12L15 6"
+        d="M17 17L7 7M7 7H17M7 7V17"
         stroke="#ffffff"
         strokeWidth="2"
         strokeLinecap="round"
@@ -158,44 +179,6 @@ export default function TermsOfServicePage() {
         position: "relative",
       }}
     >
-      {/* Back Button dengan efek parallax */}
-      <div
-        ref={backButtonRef}
-        style={{
-          position: "fixed",
-          top: "40px",
-          left: "40px",
-          zIndex: 100,
-          display: "flex",
-          alignItems: "center",
-          gap: "10px",
-          cursor: "pointer",
-          color: "#ffffff",
-          fontSize: "18px",
-          fontWeight: "500",
-          letterSpacing: "0.05em",
-          background: "rgba(0,0,0,0.5)",
-          padding: "10px 20px",
-          borderRadius: "50px",
-          backdropFilter: "blur(10px)",
-          border: "1px solid rgba(255,255,255,0.2)",
-        }}
-        onClick={() => {
-          // Scroll back to start
-          const container = containerRef.current;
-          if (container) {
-            gsap.to(container, {
-              x: 0,
-              duration: 0.8,
-              ease: "power2.out",
-            });
-          }
-        }}
-      >
-        <LeftArrow />
-        <span>Halaman utama</span>
-      </div>
-
       <div
         ref={containerRef}
         style={{
@@ -226,6 +209,17 @@ export default function TermsOfServicePage() {
           >
             TERMS OF SERVICES
           </div>
+
+          {/* Boundary div - penanda antara judul dan section pertama */}
+          <div
+            ref={boundaryRef}
+            style={{
+              position: "relative",
+              width: "1px",
+              height: "100vh",
+              flexShrink: 0,
+            }}
+          />
 
           {/* Section 1 - Introduction */}
           <div
@@ -930,6 +924,45 @@ export default function TermsOfServicePage() {
             MENURU
           </div>
         </div>
+      </div>
+
+      {/* Home Button dengan North West Arrow */}
+      <div
+        ref={homeButtonRef}
+        style={{
+          position: "fixed",
+          top: "50%",
+          transform: "translateY(-50%)",
+          left: "20px",
+          zIndex: 100,
+          display: "flex",
+          alignItems: "center",
+          gap: "10px",
+          cursor: "pointer",
+          color: "#ffffff",
+          fontSize: "16px",
+          fontWeight: "400",
+          background: "rgba(0,0,0,0.6)",
+          padding: "12px 20px",
+          borderRadius: "50px",
+          backdropFilter: "blur(10px)",
+          border: "1px solid rgba(255,255,255,0.2)",
+          whiteSpace: "nowrap",
+        }}
+        onClick={() => {
+          // Scroll back to start
+          const container = containerRef.current;
+          if (container) {
+            gsap.to(container, {
+              x: 0,
+              duration: 0.8,
+              ease: "power2.out",
+            });
+          }
+        }}
+      >
+        <NorthWestArrow />
+        <span>Halaman Utama</span>
       </div>
     </div>
   );
