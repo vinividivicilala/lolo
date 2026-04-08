@@ -20,26 +20,34 @@ export default function TermsOfServicePage() {
     let isDragging = false;
     let startX = 0;
     let scrollLeft = 0;
+    let currentMoveX = 0;
 
     const getMaxScroll = () => {
       return content.scrollWidth - window.innerWidth;
     };
 
-    const updateHomeButtonPosition = (currentScrollLeft: number) => {
-      // Teks akan bergerak ke kiri mengikuti scroll, maksimal 200px
+    const updateHomeButtonPosition = (currentScrollLeft: number, isScrollingRight: boolean) => {
       const maxMove = 200;
-      let moveX = Math.min(currentScrollLeft, maxMove);
       
-      // Jika scroll ke kiri (kembali), moveX akan berkurang
-      if (currentScrollLeft < 0) moveX = 0;
-      
-      gsap.to(homeButton, {
-        x: -moveX,
-        duration: 0.1,
-        ease: "none",
-      });
+      // Hanya bergerak saat scroll ke kanan
+      if (isScrollingRight) {
+        // Gerakkan ke kiri mengikuti scroll, tapi tidak melebihi maxMove
+        let newMoveX = Math.min(currentScrollLeft, maxMove);
+        // Pastikan tidak bergerak mundur
+        if (newMoveX > currentMoveX) {
+          currentMoveX = newMoveX;
+        }
+        gsap.to(homeButton, {
+          x: -currentMoveX,
+          duration: 0.1,
+          ease: "none",
+        });
+      }
+      // Saat scroll ke kiri, tidak melakukan apa-apa (posisi tetap)
     };
 
+    let lastScrollLeft = 0;
+    
     const handleWheel = (e: WheelEvent) => {
       e.preventDefault();
       const maxScroll = getMaxScroll();
@@ -48,14 +56,19 @@ export default function TermsOfServicePage() {
       if (newScrollLeft < 0) newScrollLeft = 0;
       if (newScrollLeft > maxScroll) newScrollLeft = maxScroll;
       
+      // Tentukan arah scroll
+      const isScrollingRight = newScrollLeft > scrollLeft;
+      
       scrollLeft = newScrollLeft;
-      updateHomeButtonPosition(scrollLeft);
+      updateHomeButtonPosition(scrollLeft, isScrollingRight);
       
       gsap.to(container, {
         x: -scrollLeft,
         duration: 0.5,
         ease: "power2.out",
       });
+      
+      lastScrollLeft = scrollLeft;
     };
 
     const handleMouseDown = (e: MouseEvent) => {
@@ -75,8 +88,11 @@ export default function TermsOfServicePage() {
       if (newScrollLeft < 0) newScrollLeft = 0;
       if (newScrollLeft > maxScroll) newScrollLeft = maxScroll;
       
+      // Tentukan arah scroll
+      const isScrollingRight = newScrollLeft > scrollLeft;
+      
       scrollLeft = newScrollLeft;
-      updateHomeButtonPosition(scrollLeft);
+      updateHomeButtonPosition(scrollLeft, isScrollingRight);
       
       gsap.to(container, {
         x: -scrollLeft,
@@ -223,20 +239,19 @@ export default function TermsOfServicePage() {
               onClick={() => {
                 // Scroll back to start
                 const container = containerRef.current;
-                if (container) {
+                const homeButton = homeButtonRef.current;
+                if (container && homeButton) {
+                  // Reset scroll position
                   gsap.to(container, {
                     x: 0,
                     duration: 0.8,
                     ease: "power2.out",
-                    onUpdate: () => {
-                      if (homeButtonRef.current) {
-                        gsap.to(homeButtonRef.current, {
-                          x: 0,
-                          duration: 0.8,
-                          ease: "power2.out",
-                        });
-                      }
-                    },
+                  });
+                  // Reset button position
+                  gsap.to(homeButton, {
+                    x: 0,
+                    duration: 0.8,
+                    ease: "power2.out",
                   });
                 }
               }}
