@@ -44,11 +44,9 @@ if (typeof window !== "undefined") {
 }
 
 export default function HomePage(): React.JSX.Element {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const menuruBigRef = useRef<HTMLSpanElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
   const [isMobile, setIsMobile] = useState(false);
-  const [scrollY, setScrollY] = useState(0);
-  const [isAnimating, setIsAnimating] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -65,42 +63,25 @@ export default function HomePage(): React.JSX.Element {
     };
   }, []);
 
-  // Animasi scroll ke bawah tanpa scrollbar
+  // Animasi scroll konten
   useEffect(() => {
+    if (!contentRef.current) return;
+
     const handleWheel = (e: WheelEvent) => {
       e.preventDefault();
       
-      if (isAnimating) return;
+      const delta = e.deltaY > 0 ? 0.05 : -0.05;
+      let newProgress = scrollProgress + delta;
+      newProgress = Math.max(0, Math.min(1, newProgress));
       
-      const delta = e.deltaY > 0 ? 1 : -1;
-      let newScrollY = scrollY + delta;
+      setScrollProgress(newProgress);
       
-      // Batasan scroll (max 100)
-      newScrollY = Math.max(0, Math.min(100, newScrollY));
-      
-      if (newScrollY === scrollY) return;
-      
-      setIsAnimating(true);
-      setScrollY(newScrollY);
-      
-      // Animasi GSAP untuk teks MENURU
-      if (menuruBigRef.current) {
-        const progress = newScrollY / 100;
-        
-        gsap.to(menuruBigRef.current, {
-          x: -800 * progress,
-          opacity: 1 - progress,
-          scale: 1 - (progress * 0.7),
-          rotate: -10 * progress,
-          duration: 0.8,
-          ease: "power2.out",
-          onComplete: () => {
-            setIsAnimating(false);
-          }
-        });
-      } else {
-        setTimeout(() => setIsAnimating(false), 800);
-      }
+      // Animasi konten bergerak ke atas
+      gsap.to(contentRef.current, {
+        y: -newProgress * 500,
+        duration: 0.5,
+        ease: "power2.out"
+      });
     };
 
     window.addEventListener('wheel', handleWheel, { passive: false });
@@ -108,27 +89,25 @@ export default function HomePage(): React.JSX.Element {
     return () => {
       window.removeEventListener('wheel', handleWheel);
     };
-  }, [scrollY, isAnimating]);
+  }, [scrollProgress]);
 
   return (
-    <div 
-      ref={containerRef}
-      style={{
-        minHeight: '100vh',
-        backgroundColor: 'black',
-        margin: 0,
-        padding: 0,
-        width: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'flex-start',
-        alignItems: 'flex-start',
-        fontFamily: 'ev-light, sans-serif',
-        WebkitFontSmoothing: 'antialiased',
-        MozOsxFontSmoothing: 'grayscale',
-        overflow: 'hidden',
-        position: 'relative'
-      }}>
+    <div style={{
+      minHeight: '100vh',
+      backgroundColor: 'black',
+      margin: 0,
+      padding: 0,
+      width: '100%',
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'flex-start',
+      alignItems: 'flex-start',
+      fontFamily: 'ev-light, sans-serif',
+      WebkitFontSmoothing: 'antialiased',
+      MozOsxFontSmoothing: 'grayscale',
+      overflow: 'hidden',
+      position: 'relative'
+    }}>
       
       {/* Framed Layout */}
       <div style={{
@@ -163,35 +142,90 @@ export default function HomePage(): React.JSX.Element {
         </span>
       </div>
       
-      {/* Teks MENURU besar dengan animasi scroll */}
+      {/* Teks MENURU besar - TIDAK BERGERAK */}
       <div style={{
-        position: 'relative',
+        position: 'fixed',
+        top: 'calc(2rem + 80px)',
+        left: 'calc(2rem + 20px)',
         zIndex: 2,
-        padding: '2rem',
-        paddingTop: 'calc(2rem + 80px)',
-        boxSizing: 'border-box',
-        width: '100%',
-        overflow: 'hidden'
+        pointerEvents: 'none'
       }}>
-        <span 
-          ref={menuruBigRef}
-          style={{
-            fontFamily: "'Impact', 'Arial Black', 'Helvetica Black', 'Franklin Gothic Heavy', 'a2g', monospace, sans-serif",
-            fontWeight: 900,
-            fontStyle: 'normal',
-            color: 'rgb(140, 0, 0)',
-            fontSize: isMobile ? '180px' : '900px',
-            lineHeight: '0.8',
-            textAlign: 'left',
-            display: 'inline-block',
-            whiteSpace: 'nowrap',
-            letterSpacing: '-15px',
-            textTransform: 'uppercase',
-            textShadow: '8px 8px 0px rgba(0,0,0,0.3)',
-            WebkitTextStroke: '2px rgba(140,0,0,0.3)'
-          }}>
+        <span style={{
+          fontFamily: 'a2g, monospace, sans-serif',
+          fontWeight: 400,
+          fontStyle: 'normal',
+          color: 'rgb(140, 0, 0)',
+          fontSize: isMobile ? '100px' : '337px',
+          lineHeight: isMobile ? '120px' : '412px',
+          textAlign: 'left'
+        }}>
           MENURU
         </span>
+      </div>
+      
+      {/* Konten yang BISA DISCROLL */}
+      <div 
+        ref={contentRef}
+        style={{
+          position: 'relative',
+          zIndex: 3,
+          width: '100%',
+          marginTop: isMobile ? '400px' : '600px',
+          padding: '2rem',
+          boxSizing: 'border-box',
+          transform: 'translateY(0)'
+        }}
+      >
+        <div style={{
+          maxWidth: '800px',
+          margin: '0 auto',
+          color: 'rgb(0, 20, 70)'
+        }}>
+          <h2 style={{
+            fontFamily: 'ev-light, sans-serif',
+            fontSize: '2rem',
+            marginBottom: '2rem'
+          }}>
+            Welcome to MENURU
+          </h2>
+          
+          <p style={{
+            fontFamily: 'ev-light, sans-serif',
+            fontSize: '1.2rem',
+            lineHeight: '1.8',
+            marginBottom: '2rem'
+          }}>
+            This is a scrolling content area. Scroll down to see more content.
+          </p>
+          
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '2rem'
+          }}>
+            {[1, 2, 3, 4, 5].map((item) => (
+              <div key={item} style={{
+                padding: '2rem',
+                backgroundColor: 'rgba(0, 20, 70, 0.05)',
+                borderRadius: '12px',
+                border: '1px solid rgba(0, 20, 70, 0.1)'
+              }}>
+                <h3 style={{
+                  fontSize: '1.5rem',
+                  marginBottom: '1rem'
+                }}>
+                  Section {item}
+                </h3>
+                <p style={{
+                  lineHeight: '1.6'
+                }}>
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
+                  Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
       
       {/* Scroll indicator */}
@@ -205,8 +239,9 @@ export default function HomePage(): React.JSX.Element {
         flexDirection: 'column',
         alignItems: 'center',
         gap: '0.5rem',
-        opacity: 1 - (scrollY / 100),
-        transition: 'opacity 0.3s ease'
+        opacity: 1 - scrollProgress,
+        transition: 'opacity 0.3s ease',
+        pointerEvents: 'none'
       }}>
         <span style={{
           fontFamily: 'ev-light, sans-serif',
