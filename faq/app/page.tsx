@@ -67,7 +67,7 @@ export default function HomePage(): React.JSX.Element {
   useEffect(() => {
     if (!scrollContainerRef.current) return;
 
-    const maxScroll = 800; // Maksimum scroll dalam px
+    const maxScroll = 1200; // Maksimum scroll dalam px
     let targetScroll = 0;
     let currentScroll = 0;
     let animationFrame: number;
@@ -118,7 +118,7 @@ export default function HomePage(): React.JSX.Element {
       position: 'relative'
     }}>
       
-      {/* Framed Layout */}
+      {/* Framed Layout - Background utama */}
       <div style={{
         position: 'fixed',
         top: '2rem',
@@ -136,7 +136,7 @@ export default function HomePage(): React.JSX.Element {
         position: 'fixed',
         top: 'calc(2rem + 16px)',
         left: 'calc(2rem + 20px)',
-        zIndex: 2,
+        zIndex: 3,
         pointerEvents: 'none'
       }}>
         <span style={{
@@ -151,7 +151,7 @@ export default function HomePage(): React.JSX.Element {
         </span>
       </div>
       
-      {/* Scroll Container - Semua konten di dalam sini bisa scroll */}
+      {/* Scroll Container - Semua konten di dalam sini bisa scroll, termasuk teks besar */}
       <div 
         ref={scrollContainerRef}
         style={{
@@ -164,20 +164,21 @@ export default function HomePage(): React.JSX.Element {
           transition: 'transform 0.1s ease-out'
         }}
       >
-        {/* Teks MENURU besar - GENDUT, jarak dekat dengan judul web */}
+        {/* Teks MENURU besar - Ukuran 650px, bisa scroll melewati frame */}
         <div style={{
           position: 'relative',
-          paddingTop: 'calc(2rem + 50px)',
+          paddingTop: 'calc(2rem + 40px)',
           paddingLeft: 'calc(2rem + 20px)',
           paddingRight: '2rem',
-          boxSizing: 'border-box'
+          boxSizing: 'border-box',
+          backgroundColor: 'transparent'
         }}>
           <span style={{
             fontFamily: "'Impact', 'Arial Black', 'Helvetica Black', 'Franklin Gothic Heavy', 'a2g', monospace, sans-serif",
             fontWeight: 900,
             fontStyle: 'normal',
             color: 'rgb(140, 0, 0)',
-            fontSize: isMobile ? '200px' : '700px',
+            fontSize: isMobile ? '180px' : '650px',
             lineHeight: '0.85',
             textAlign: 'left',
             display: 'inline-block',
