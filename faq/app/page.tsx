@@ -8886,7 +8886,7 @@ useEffect(() => {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.5 }}
             />
-          )}
+          )
         </AnimatePresence>
       </div>
     </div>
