@@ -30,17 +30,16 @@ export default function HomePage(): React.JSX.Element {
         pointerEvents: 'none'
       }} />
       
-      {/* Teks MENURU di pojok kiri atas frame */}
+      {/* Teks MENURU di pojok kiri atas - di dalam area frame */}
       <div style={{
         position: 'fixed',
-        top: '2rem',
-        left: '2rem',
-        padding: '0.5rem 0',
+        top: 'calc(2rem + 20px)',
+        left: 'calc(2rem + 20px)',
         zIndex: 2,
         pointerEvents: 'none'
       }}>
         <span style={{
-          fontFamily: 'ev-light, sans-serif',
+          fontFamily: 'ev-light',
           fontWeight: 400,
           color: 'rgb(0, 20, 70)',
           fontSize: '13px',
@@ -50,7 +49,7 @@ export default function HomePage(): React.JSX.Element {
         </span>
       </div>
       
-      {/* Area konten utama dengan padding yang sama agar konten berada di dalam frame */}
+      {/* Area konten utama */}
       <div style={{
         position: 'relative',
         zIndex: 2,
@@ -58,9 +57,7 @@ export default function HomePage(): React.JSX.Element {
         height: '100vh',
         padding: '2rem',
         boxSizing: 'border-box'
-      }}>
-        {/* Konten dapat ditambahkan di sini nanti */}
-      </div>
+      }} />
     </div>
   );
 }
