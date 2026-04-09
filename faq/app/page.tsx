@@ -39,7 +39,7 @@ export default function HomePage(): React.JSX.Element {
         pointerEvents: 'none'
       }}>
         <span style={{
-          fontFamily: 'Helvetica, sans-serif',
+          fontFamily: 'Helvetica, Arial, sans-serif',
           fontWeight: 400,
           fontStyle: 'normal',
           color: 'rgb(0, 20, 70)',
