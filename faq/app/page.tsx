@@ -1,7 +1,9 @@
 'use client';
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { 
   getFirestore, 
   collection, 
@@ -17,6 +19,11 @@ import {
 } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { initializeApp, getApps } from "firebase/app";
+
+// Register GSAP plugin
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
 // Konfigurasi Firebase
 const firebaseConfig = {
@@ -43,9 +50,45 @@ if (typeof window !== "undefined") {
 }
 
 export default function HomePage(): React.JSX.Element {
+  const menuruBigRef = useRef<HTMLSpanElement>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+
+    // Animasi GSAP Scroll untuk teks MENURU besar
+    if (menuruBigRef.current) {
+      gsap.fromTo(menuruBigRef.current,
+        {
+          x: 0,
+          opacity: 1
+        },
+        {
+          x: -500,
+          opacity: 0,
+          duration: 1.5,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: menuruBigRef.current,
+            start: "top top",
+            end: "bottom top",
+            scrub: 1.5,
+            pin: false
+          }
+        }
+      );
+    }
+
+    return () => {
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+    };
+  }, []);
+
   return (
     <div style={{
-      minHeight: '100vh',
+      minHeight: '200vh',
       backgroundColor: 'black',
       margin: 0,
       padding: 0,
@@ -91,35 +134,41 @@ export default function HomePage(): React.JSX.Element {
         </span>
       </div>
       
-      {/* Teks MENURU besar di bawah judul web (pojok kiri atas, di bawah teks kecil) */}
+      {/* Teks MENURU besar dengan animasi GSAP Scroll */}
       <div style={{
-        position: 'fixed',
-        top: 'calc(2rem + 60px)',
-        left: 'calc(2rem + 20px)',
+        position: 'relative',
         zIndex: 2,
-        pointerEvents: 'none'
+        padding: '2rem',
+        paddingTop: 'calc(2rem + 80px)',
+        boxSizing: 'border-box',
+        width: '100%'
       }}>
-        <span style={{
-          fontFamily: 'a2g, monospace, sans-serif',
-          fontWeight: 900,
-          fontStyle: 'normal',
-          color: 'rgb(140, 0, 0)',
-          fontSize: '950px',
-          lineHeight: '0.9',
-          textAlign: 'left'
-        }}>
+        <span 
+          ref={menuruBigRef}
+          style={{
+            fontFamily: 'a2g, monospace, sans-serif',
+            fontWeight: 900,
+            fontStyle: 'normal',
+            color: 'rgb(140, 0, 0)',
+            fontSize: isMobile ? '200px' : '950px',
+            lineHeight: '0.9',
+            textAlign: 'left',
+            display: 'inline-block',
+            whiteSpace: 'nowrap'
+          }}>
           MENURU
         </span>
       </div>
       
-      {/* Area konten */}
+      {/* Area konten tambahan untuk scroll */}
       <div style={{
         position: 'relative',
         zIndex: 2,
         width: '100%',
         height: '100vh',
         padding: '2rem',
-        boxSizing: 'border-box'
+        boxSizing: 'border-box',
+        marginTop: '50vh'
       }} />
     </div>
   );
