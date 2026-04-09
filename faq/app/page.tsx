@@ -17,7 +17,7 @@ export default function HomePage(): React.JSX.Element {
       WebkitFontSmoothing: 'antialiased',
       MozOsxFontSmoothing: 'grayscale'
     }}>
-      {/* Framed Layout - Membingkai area dengan space dari tepi */}
+      {/* Framed Layout */}
       <div style={{
         position: 'fixed',
         top: '2rem',
@@ -30,16 +30,16 @@ export default function HomePage(): React.JSX.Element {
         pointerEvents: 'none'
       }} />
       
-      {/* Teks MENURU di pojok kiri atas - di dalam area frame */}
+      {/* Teks MENURU */}
       <div style={{
         position: 'fixed',
-        top: 'calc(2rem + 20px)',
+        top: 'calc(2rem + 16px)',
         left: 'calc(2rem + 20px)',
         zIndex: 2,
         pointerEvents: 'none'
       }}>
         <span style={{
-          fontFamily: 'ev-light',
+          fontFamily: 'ev-light, sans-serif',
           fontWeight: 400,
           color: 'rgb(0, 20, 70)',
           fontSize: '13px',
@@ -49,7 +49,7 @@ export default function HomePage(): React.JSX.Element {
         </span>
       </div>
       
-      {/* Area konten utama */}
+      {/* Area konten */}
       <div style={{
         position: 'relative',
         zIndex: 2,
