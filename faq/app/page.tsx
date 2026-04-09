@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useRef } from "react";
@@ -233,11 +232,6 @@ const [currentWordIndex, setCurrentWordIndex] = useState(0);
 // State untuk MENURU Overlay setelah loading
 const [showMenuruOverlay, setShowMenuruOverlay] = useState(true);
 const [hasScrolled, setHasScrolled] = useState(false);
-
-
-
-
-  
 
   // State untuk kalender
   const [showCalendarModal, setShowCalendarModal] = useState(false);
@@ -1609,15 +1603,6 @@ useEffect(() => {
   };
 }, [showMenuruOverlay]);
 
-
-
-
-
-
-
-
-  
-
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
@@ -1957,7 +1942,7 @@ useEffect(() => {
   return (
     <div style={{
       minHeight: '100vh',
-      backgroundColor: 'black',
+      backgroundColor: '#0a0a0a',
       margin: 0,
       padding: 0,
       width: '100%',
@@ -1971,6 +1956,29 @@ useEffect(() => {
       WebkitFontSmoothing: 'antialiased',
       MozOsxFontSmoothing: 'grayscale'
     }}>
+
+{/* FRAMED LAYOUT (INSET LAYOUT) - Background utama #dbd6c9 dengan border radius */}
+<div style={{
+  position: 'relative',
+  width: '100%',
+  minHeight: '100vh',
+  backgroundColor: '#dbd6c9',
+  borderRadius: isMobile ? '0' : '40px',
+  margin: isMobile ? '0' : '20px',
+  width: isMobile ? 'calc(100% - 0px)' : 'calc(100% - 40px)',
+  boxSizing: 'border-box',
+  overflow: 'hidden',
+  boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
+}}>
+  {/* Inner content container dengan padding */}
+  <div style={{
+    width: '100%',
+    minHeight: '100vh',
+    backgroundColor: '#dbd6c9',
+    position: 'relative',
+    padding: isMobile ? '0' : '0',
+    borderRadius: isMobile ? '0' : '40px'
+  }}>
 
 {/* MENURU OVERLAY - Setelah Loading Selesai */}
 <AnimatePresence>
@@ -1987,10 +1995,11 @@ useEffect(() => {
         left: 0,
         width: '100%',
         height: '100%',
-        backgroundColor: 'black',
+        backgroundColor: '#dbd6c9',
         zIndex: 99998,
         overflow: 'hidden',
-        pointerEvents: 'auto'
+        pointerEvents: 'auto',
+        borderRadius: isMobile ? '0' : '40px'
       }}
     >
       {/* Teks MENURU besar di kiri atas */}
@@ -1999,7 +2008,7 @@ useEffect(() => {
           position: 'absolute',
           top: isMobile ? '1rem' : '2rem',
           left: isMobile ? '1rem' : '2rem',
-          color: '#FFFFFF',
+          color: '#000000',
           fontSize: isMobile ? '200px' : '490px',
           fontWeight: '300',
           fontFamily: 'Helvetica, Arial, sans-serif',
@@ -2033,7 +2042,7 @@ useEffect(() => {
         <div style={{ display: 'flex', alignItems: 'baseline', gap: '1rem' }}>
           {/* Angka 01 gaya Awwards */}
           <span style={{
-            color: 'rgba(255,255,255,0.4)',
+            color: 'rgba(0,0,0,0.4)',
             fontSize: isMobile ? '1.2rem' : '1.5rem',
             fontWeight: '300',
             fontFamily: 'monospace',
@@ -2044,7 +2053,7 @@ useEffect(() => {
           
           {/* Teks Profile - tanpa underline, tidak tebal */}
           <span style={{
-            color: '#FFFFFF',
+            color: '#000000',
             fontSize: isMobile ? '2.5rem' : '4rem',
             fontWeight: '300',
             fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
@@ -2074,18 +2083,19 @@ useEffect(() => {
               left: 0,
               width: '100%',
               height: '100%',
-              backgroundColor: 'black',
+              backgroundColor: '#dbd6c9',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               zIndex: 99999,
-              cursor: 'default'
+              cursor: 'default',
+              borderRadius: isMobile ? '0' : '40px'
             }}
           >
             <div
               ref={gsapLoadingRef}
               style={{
-                color: 'white',
+                color: '#000000',
                 textAlign: 'center',
                 userSelect: 'none',
                 WebkitUserSelect: 'none',
@@ -2126,8 +2136,8 @@ useEffect(() => {
               top: '6rem',
               left: '50%',
               transform: 'translateX(-50%)',
-              backgroundColor: 'rgba(255,255,255,0.1)',
-              color: 'white',
+              backgroundColor: 'rgba(0,0,0,0.8)',
+              color: '#dbd6c9',
               padding: '1rem 2rem',
               borderRadius: '50px',
               zIndex: 10002,
@@ -2135,14 +2145,14 @@ useEffect(() => {
               display: 'flex',
               alignItems: 'center',
               gap: '1rem',
-              border: '1px solid rgba(255,255,255,0.2)'
+              border: '1px solid rgba(0,0,0,0.2)'
             }}
           >
             <motion.div
               animate={{ scale: [1, 1.2, 1] }}
               transition={{ repeat: Infinity, duration: 1 }}
             >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#dbd6c9" strokeWidth="2">
                 <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
                 <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
               </svg>
@@ -2168,25 +2178,25 @@ useEffect(() => {
               width: '100%',
               height: 'auto',
               maxHeight: '80vh',
-              backgroundColor: 'rgba(0, 0, 0, 0.98)',
+              backgroundColor: '#dbd6c9',
               zIndex: 10004,
               display: 'flex',
               flexDirection: 'column',
               overflow: 'hidden',
-              borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+              borderBottom: '1px solid rgba(0, 0, 0, 0.2)',
               boxShadow: '0 10px 30px rgba(0,0,0,0.5)'
             }}
           >
             <div style={{
               padding: isMobile ? '1.5rem' : '2rem',
-              borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+              borderBottom: '1px solid rgba(0, 0, 0, 0.2)',
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
               flexShrink: 0
             }}>
               <h2 style={{
-                color: 'white',
+                color: '#000000',
                 fontSize: isMobile ? '1.8rem' : '2.5rem',
                 fontWeight: '300',
                 margin: 0,
@@ -2200,8 +2210,8 @@ useEffect(() => {
                 onClick={handleCloseCommunityOverlay}
                 style={{
                   backgroundColor: 'transparent',
-                  border: '1px solid rgba(255, 255, 255, 0.3)',
-                  color: 'white',
+                  border: '1px solid rgba(0, 0, 0, 0.3)',
+                  color: '#000000',
                   width: '40px',
                   height: '40px',
                   borderRadius: '50%',
@@ -2212,7 +2222,7 @@ useEffect(() => {
                   fontSize: '1.5rem',
                   fontFamily: 'Helvetica, Arial, sans-serif'
                 }}
-                whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+                whileHover={{ backgroundColor: 'rgba(0, 0, 0, 0.1)' }}
               >
                 ×
               </motion.button>
@@ -2253,7 +2263,7 @@ useEffect(() => {
                         height="24"
                         viewBox="0 0 24 24"
                         fill="none"
-                        stroke="white"
+                        stroke="#000000"
                         strokeWidth="1.5"
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -2267,7 +2277,7 @@ useEffect(() => {
                       </svg>
                       
                       <span style={{
-                        color: 'white',
+                        color: '#000000',
                         fontSize: isMobile ? '1.5rem' : '2.2rem',
                         fontWeight: '300',
                         fontFamily: 'Helvetica, Arial, sans-serif',
@@ -2304,7 +2314,7 @@ useEffect(() => {
                         height="24"
                         viewBox="0 0 24 24"
                         fill="none"
-                        stroke="white"
+                        stroke="#000000"
                         strokeWidth="1.5"
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -2318,7 +2328,7 @@ useEffect(() => {
                       </svg>
                       
                       <span style={{
-                        color: 'white',
+                        color: '#000000',
                         fontSize: isMobile ? '1.5rem' : '2.2rem',
                         fontWeight: '300',
                         fontFamily: 'Helvetica, Arial, sans-serif',
@@ -2350,12 +2360,12 @@ useEffect(() => {
               left: 0,
               width: '100%',
               height: '100%',
-              backgroundColor: '#0A0A0A',
+              backgroundColor: '#dbd6c9',
               zIndex: 10010,
               display: 'flex',
               flexDirection: 'column',
               overflowY: 'auto',
-              color: 'white',
+              color: '#000000',
               fontFamily: 'Helvetica, Arial, sans-serif'
             }}
           >
@@ -2366,9 +2376,9 @@ useEffect(() => {
               width: '100%',
               height: '100%',
               backgroundImage: `
-                radial-gradient(circle at 20% 30%, rgba(255,255,255,0.02) 0%, transparent 30%),
-                radial-gradient(circle at 80% 70%, rgba(255,255,255,0.02) 0%, transparent 30%),
-                repeating-linear-gradient(45deg, rgba(255,255,255,0.005) 0px, rgba(255,255,255,0.005) 1px, transparent 1px, transparent 20px)
+                radial-gradient(circle at 20% 30%, rgba(0,0,0,0.02) 0%, transparent 30%),
+                radial-gradient(circle at 80% 70%, rgba(0,0,0,0.02) 0%, transparent 30%),
+                repeating-linear-gradient(45deg, rgba(0,0,0,0.005) 0px, rgba(0,0,0,0.005) 1px, transparent 1px, transparent 20px)
               `,
               pointerEvents: 'none',
               zIndex: 1
@@ -2386,21 +2396,21 @@ useEffect(() => {
                 width: '60px',
                 height: '60px',
                 borderRadius: '50%',
-                border: '1px solid rgba(255,255,255,0.2)',
+                border: '1px solid rgba(0,0,0,0.2)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 cursor: 'pointer',
                 zIndex: 10020,
-                backgroundColor: 'rgba(0,0,0,0.5)',
+                backgroundColor: 'rgba(255,255,255,0.5)',
                 backdropFilter: 'blur(10px)',
                 fontSize: '2rem',
-                color: 'white'
+                color: '#000000'
               }}
               whileHover={{ 
                 scale: 1.1,
-                borderColor: 'rgba(255,255,255,0.5)',
-                backgroundColor: 'rgba(255,255,255,0.1)'
+                borderColor: 'rgba(0,0,0,0.5)',
+                backgroundColor: 'rgba(255,255,255,0.8)'
               }}
               whileTap={{ scale: 0.95 }}
             >
@@ -2422,7 +2432,7 @@ useEffect(() => {
                 style={{ marginBottom: '4rem' }}
               >
                 <span style={{
-                  color: 'rgba(255,255,255,0.5)',
+                  color: 'rgba(0,0,0,0.5)',
                   fontSize: '1rem',
                   letterSpacing: '4px',
                   textTransform: 'uppercase',
@@ -2436,14 +2446,15 @@ useEffect(() => {
                   fontWeight: '300',
                   margin: 0,
                   lineHeight: 1,
-                  letterSpacing: '-2px'
+                  letterSpacing: '-2px',
+                  color: '#000000'
                 }}>
                   SHOP
                 </h1>
                 <div style={{
                   width: '100px',
                   height: '2px',
-                  backgroundColor: 'rgba(255,255,255,0.3)',
+                  backgroundColor: 'rgba(0,0,0,0.3)',
                   marginTop: '2rem'
                 }} />
               </motion.div>
@@ -2463,14 +2474,14 @@ useEffect(() => {
                     fontSize: '2rem',
                     fontWeight: '300',
                     margin: '0 0 2rem 0',
-                    color: 'rgba(255,255,255,0.9)'
+                    color: '#000000'
                   }}>
                     Digital Products & Merchandise
                   </h2>
                   <p style={{
                     fontSize: '1.2rem',
                     lineHeight: 1.8,
-                    color: 'rgba(255,255,255,0.7)',
+                    color: 'rgba(0,0,0,0.7)',
                     marginBottom: '2rem'
                   }}>
                     Explore our collection of digital products, exclusive merchandise, 
@@ -2496,11 +2507,11 @@ useEffect(() => {
                           justifyContent: 'space-between',
                           alignItems: 'center',
                           padding: '1rem 0',
-                          borderBottom: '1px solid rgba(255,255,255,0.1)'
+                          borderBottom: '1px solid rgba(0,0,0,0.1)'
                         }}
                       >
-                        <span style={{ color: 'rgba(255,255,255,0.6)' }}>{item.label}</span>
-                        <span style={{ color: 'white', fontSize: '1.2rem' }}>{item.value}</span>
+                        <span style={{ color: 'rgba(0,0,0,0.6)' }}>{item.label}</span>
+                        <span style={{ color: '#000000', fontSize: '1.2rem' }}>{item.value}</span>
                       </motion.div>
                     ))}
                   </div>
@@ -2512,15 +2523,16 @@ useEffect(() => {
                   transition={{ delay: 0.5, duration: 0.8 }}
                 >
                   <div style={{
-                    backgroundColor: 'rgba(255,255,255,0.03)',
+                    backgroundColor: 'rgba(0,0,0,0.03)',
                     padding: '2rem',
                     borderRadius: '20px',
-                    border: '1px solid rgba(255,255,255,0.1)'
+                    border: '1px solid rgba(0,0,0,0.1)'
                   }}>
                     <h3 style={{
                       fontSize: '1.5rem',
                       fontWeight: '300',
-                      margin: '0 0 2rem 0'
+                      margin: '0 0 2rem 0',
+                      color: '#000000'
                     }}>
                       Featured Products
                     </h3>
@@ -2535,30 +2547,30 @@ useEffect(() => {
                           alignItems: 'center',
                           gap: '1rem',
                           padding: '1rem 0',
-                          borderBottom: item < 3 ? '1px solid rgba(255,255,255,0.1)' : 'none',
+                          borderBottom: item < 3 ? '1px solid rgba(0,0,0,0.1)' : 'none',
                           cursor: 'pointer'
                         }}
-                        whileHover={{ backgroundColor: 'rgba(255,255,255,0.03)' }}
+                        whileHover={{ backgroundColor: 'rgba(0,0,0,0.03)' }}
                       >
                         <div style={{
                           width: '60px',
                           height: '60px',
-                          backgroundColor: 'rgba(255,255,255,0.1)',
+                          backgroundColor: 'rgba(0,0,0,0.1)',
                           borderRadius: '10px',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center'
                         }}>
-                          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5">
+                          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="1.5">
                             <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
                             <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
                           </svg>
                         </div>
                         <div style={{ flex: 1 }}>
-                          <div style={{ fontSize: '1.1rem', marginBottom: '0.3rem' }}>Product {item}</div>
-                          <div style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.5)' }}>$49.99</div>
+                          <div style={{ fontSize: '1.1rem', marginBottom: '0.3rem', color: '#000000' }}>Product {item}</div>
+                          <div style={{ fontSize: '0.9rem', color: 'rgba(0,0,0,0.5)' }}>$49.99</div>
                         </div>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2">
                           <path d="M7 7h10v10"/>
                           <path d="M17 7L7 17"/>
                         </svg>
@@ -2575,7 +2587,7 @@ useEffect(() => {
                 style={{
                   marginTop: '4rem',
                   padding: '2rem 0',
-                  borderTop: '1px solid rgba(255,255,255,0.1)',
+                  borderTop: '1px solid rgba(0,0,0,0.1)',
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
@@ -2583,12 +2595,12 @@ useEffect(() => {
                   gap: '2rem'
                 }}
               >
-                <div style={{ color: 'rgba(255,255,255,0.5)' }}>
+                <div style={{ color: 'rgba(0,0,0,0.5)' }}>
                   © 2024 MENURU SHOP
                 </div>
                 <div style={{ display: 'flex', gap: '2rem' }}>
                   {['Shop All', 'New Arrivals', 'Best Sellers'].map((item) => (
-                    <span key={item} style={{ cursor: 'pointer', color: 'rgba(255,255,255,0.8)' }}>
+                    <span key={item} style={{ cursor: 'pointer', color: 'rgba(0,0,0,0.8)' }}>
                       {item}
                     </span>
                   ))}
@@ -2614,12 +2626,12 @@ useEffect(() => {
               left: 0,
               width: '100%',
               height: '100%',
-              backgroundColor: '#050505',
+              backgroundColor: '#dbd6c9',
               zIndex: 10011,
               display: 'flex',
               flexDirection: 'column',
               overflowY: 'auto',
-              color: 'white',
+              color: '#000000',
               fontFamily: 'Helvetica, Arial, sans-serif'
             }}
           >
@@ -2630,9 +2642,9 @@ useEffect(() => {
               width: '100%',
               height: '100%',
               backgroundImage: `
-                radial-gradient(circle at 30% 40%, rgba(255,255,255,0.02) 0%, transparent 40%),
-                radial-gradient(circle at 70% 60%, rgba(255,255,255,0.02) 0%, transparent 40%),
-                repeating-linear-gradient(45deg, rgba(255,255,255,0.005) 0px, rgba(255,255,255,0.005) 2px, transparent 2px, transparent 12px)
+                radial-gradient(circle at 30% 40%, rgba(0,0,0,0.02) 0%, transparent 40%),
+                radial-gradient(circle at 70% 60%, rgba(0,0,0,0.02) 0%, transparent 40%),
+                repeating-linear-gradient(45deg, rgba(0,0,0,0.005) 0px, rgba(0,0,0,0.005) 2px, transparent 2px, transparent 12px)
               `,
               pointerEvents: 'none',
               zIndex: 1
@@ -2652,7 +2664,7 @@ useEffect(() => {
                 justifyContent: 'center',
                 cursor: 'pointer',
                 zIndex: 10020,
-                color: 'white',
+                color: '#000000',
                 fontSize: '2rem',
                 fontWeight: '300',
                 fontFamily: 'Helvetica, Arial, sans-serif',
@@ -2689,7 +2701,7 @@ useEffect(() => {
                   gap: '1.5rem'
                 }}>
                   <span style={{
-                    color: 'rgba(255,255,255,0.3)',
+                    color: 'rgba(0,0,0,0.3)',
                     fontSize: '1.2rem',
                     fontWeight: '300',
                     letterSpacing: '2px',
@@ -2703,7 +2715,7 @@ useEffect(() => {
                     height="40"
                     viewBox="0 0 24 24"
                     fill="none"
-                    stroke="rgba(255,255,255,0.5)"
+                    stroke="rgba(0,0,0,0.5)"
                     strokeWidth="1.5"
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -2718,7 +2730,7 @@ useEffect(() => {
                     margin: 0,
                     lineHeight: 1,
                     letterSpacing: '-2px',
-                    color: 'white'
+                    color: '#000000'
                   }}>
                     VISUAL DESIGNER
                   </h1>
@@ -2739,14 +2751,14 @@ useEffect(() => {
                     fontSize: '2rem',
                     fontWeight: '300',
                     margin: '0 0 2rem 0',
-                    color: 'white'
+                    color: '#000000'
                   }}>
                     Visual Designer
                   </h2>
                   <p style={{
                     fontSize: '1.2rem',
                     lineHeight: 1.8,
-                    color: 'rgba(255,255,255,0.7)',
+                    color: 'rgba(0,0,0,0.7)',
                     marginBottom: '2rem'
                   }}>
                     Crafting digital experiences with minimalist aesthetics and functional design. 
@@ -2758,8 +2770,8 @@ useEffect(() => {
                       fontSize: '1.5rem',
                       fontWeight: '300',
                       margin: '0 0 1.5rem 0',
-                      color: 'white',
-                      borderBottom: '1px solid rgba(255,255,255,0.1)',
+                      color: '#000000',
+                      borderBottom: '1px solid rgba(0,0,0,0.1)',
                       paddingBottom: '0.5rem'
                     }}>
                       Design Philosophy
@@ -2785,20 +2797,20 @@ useEffect(() => {
                             alignItems: 'center',
                             gap: '1rem',
                             padding: '0.5rem 0',
-                            borderBottom: '1px solid rgba(255,255,255,0.05)'
+                            borderBottom: '1px solid rgba(0,0,0,0.05)'
                           }}
                         >
                           <div style={{
                             width: '8px',
                             height: '8px',
                             borderRadius: '50%',
-                            backgroundColor: 'rgba(255,255,255,0.3)'
+                            backgroundColor: 'rgba(0,0,0,0.3)'
                           }} />
                           <div>
-                            <span style={{ color: 'white', fontSize: '1.1rem', marginRight: '1rem' }}>
+                            <span style={{ color: '#000000', fontSize: '1.1rem', marginRight: '1rem' }}>
                               {item.label}
                             </span>
-                            <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.9rem' }}>
+                            <span style={{ color: 'rgba(0,0,0,0.5)', fontSize: '0.9rem' }}>
                               {item.desc}
                             </span>
                           </div>
@@ -2834,12 +2846,12 @@ useEffect(() => {
               left: 0,
               width: '100%',
               height: '100%',
-              backgroundColor: '#0A0F0A',
+              backgroundColor: '#dbd6c9',
               zIndex: 10012,
               display: 'flex',
               flexDirection: 'column',
               overflowY: 'auto',
-              color: 'white',
+              color: '#000000',
               fontFamily: 'Helvetica, Arial, sans-serif'
             }}
           >
@@ -2850,9 +2862,9 @@ useEffect(() => {
               width: '100%',
               height: '100%',
               backgroundImage: `
-                radial-gradient(circle at 20% 30%, rgba(0,255,0,0.02) 0%, transparent 30%),
-                radial-gradient(circle at 80% 70%, rgba(0,255,0,0.02) 0%, transparent 30%),
-                repeating-linear-gradient(45deg, rgba(255,255,255,0.01) 0px, rgba(255,255,255,0.01) 2px, transparent 2px, transparent 30px)
+                radial-gradient(circle at 20% 30%, rgba(0,100,0,0.02) 0%, transparent 30%),
+                radial-gradient(circle at 80% 70%, rgba(0,100,0,0.02) 0%, transparent 30%),
+                repeating-linear-gradient(45deg, rgba(0,0,0,0.01) 0px, rgba(0,0,0,0.01) 2px, transparent 2px, transparent 30px)
               `,
               pointerEvents: 'none',
               zIndex: 1
@@ -2872,7 +2884,7 @@ useEffect(() => {
                 justifyContent: 'center',
                 cursor: 'pointer',
                 zIndex: 10020,
-                color: 'white',
+                color: '#000000',
                 fontSize: '2rem',
                 fontWeight: '300',
                 fontFamily: 'Helvetica, Arial, sans-serif',
@@ -2909,7 +2921,7 @@ useEffect(() => {
                   gap: '1.5rem'
                 }}>
                   <span style={{
-                    color: 'rgba(255,255,255,0.3)',
+                    color: 'rgba(0,0,0,0.3)',
                     fontSize: '1.2rem',
                     fontWeight: '300',
                     letterSpacing: '2px',
@@ -2923,7 +2935,7 @@ useEffect(() => {
                     height="40"
                     viewBox="0 0 24 24"
                     fill="none"
-                    stroke="rgba(255,255,255,0.5)"
+                    stroke="rgba(0,0,0,0.5)"
                     strokeWidth="1.5"
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -2938,7 +2950,7 @@ useEffect(() => {
                     margin: 0,
                     lineHeight: 1,
                     letterSpacing: '-2px',
-                    color: 'white'
+                    color: '#000000'
                   }}>
                     INDONESIA
                   </h1>
@@ -2958,8 +2970,8 @@ useEffect(() => {
                   <div style={{
                     width: '100%',
                     height: isMobile ? '300px' : '400px',
-                    backgroundColor: '#1A1A1A',
-                    border: '1px solid rgba(255,255,255,0.1)',
+                    backgroundColor: '#f0ebe0',
+                    border: '1px solid rgba(0,0,0,0.1)',
                     overflow: 'hidden'
                   }}>
                     <iframe
@@ -2984,14 +2996,14 @@ useEffect(() => {
                     fontSize: '2rem',
                     fontWeight: '300',
                     margin: '0 0 2rem 0',
-                    color: 'white'
+                    color: '#000000'
                   }}>
                     Based in Jakarta
                   </h2>
                   <p style={{
                     fontSize: '1.2rem',
                     lineHeight: 1.8,
-                    color: 'rgba(255,255,255,0.7)',
+                    color: 'rgba(0,0,0,0.7)',
                     marginBottom: '2rem'
                   }}>
                     Operating from the heart of Southeast Asia's most dynamic city, 
@@ -3019,7 +3031,7 @@ useEffect(() => {
               left: 0,
               width: '100%',
               height: '100%',
-              backgroundColor: 'rgba(0, 0, 0, 0.98)',
+              backgroundColor: 'rgba(219, 214, 201, 0.98)',
               zIndex: 10013,
               display: 'flex',
               alignItems: 'center',
@@ -3034,7 +3046,7 @@ useEffect(() => {
               exit={{ scale: 0.9, opacity: 0, y: 20 }}
               transition={{ duration: 0.4 }}
               style={{
-                backgroundColor: 'transparent',
+                backgroundColor: '#dbd6c9',
                 borderRadius: '20px',
                 width: '95%',
                 maxWidth: '800px',
@@ -3043,14 +3055,14 @@ useEffect(() => {
                 display: 'flex',
                 flexDirection: 'column',
                 overflow: 'hidden',
-                border: '1px solid rgba(255, 255, 255, 0.2)'
+                border: '1px solid rgba(0, 0, 0, 0.2)'
               }}
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header */}
               <div style={{
                 padding: isMobile ? '1.5rem' : '2rem',
-                borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+                borderBottom: '1px solid rgba(0, 0, 0, 0.2)',
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
@@ -3058,7 +3070,7 @@ useEffect(() => {
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                   <h2 style={{
-                    color: 'white',
+                    color: '#000000',
                     fontSize: isMobile ? '1.8rem' : '2.5rem',
                     fontWeight: '300',
                     margin: 0,
@@ -3069,11 +3081,11 @@ useEffect(() => {
                   </h2>
                   <div style={{
                     backgroundColor: 'transparent',
-                    color: 'rgba(255,255,255,0.8)',
+                    color: 'rgba(0,0,0,0.8)',
                     fontSize: '0.9rem',
                     padding: '0.3rem 0.8rem',
                     borderRadius: '20px',
-                    border: '1px solid rgba(255,255,255,0.3)'
+                    border: '1px solid rgba(0,0,0,0.3)'
                   }}>
                     Total: {formatRupiah(totalDonasiUser)}
                   </div>
@@ -3083,8 +3095,8 @@ useEffect(() => {
                   onClick={handleCloseDonasiTracking}
                   style={{
                     backgroundColor: 'transparent',
-                    border: '1px solid rgba(255, 255, 255, 0.3)',
-                    color: 'white',
+                    border: '1px solid rgba(0, 0, 0, 0.3)',
+                    color: '#000000',
                     width: '40px',
                     height: '40px',
                     borderRadius: '50%',
@@ -3095,7 +3107,7 @@ useEffect(() => {
                     fontSize: '1.5rem',
                     fontFamily: 'Helvetica, Arial, sans-serif'
                   }}
-                  whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+                  whileHover={{ backgroundColor: 'rgba(0, 0, 0, 0.1)' }}
                 >
                   ×
                 </motion.button>
@@ -3104,7 +3116,7 @@ useEffect(() => {
               {/* Info User */}
               <div style={{
                 padding: isMobile ? '1rem 1.5rem' : '1.5rem 2rem',
-                borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+                borderBottom: '1px solid rgba(0, 0, 0, 0.1)',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '1rem',
@@ -3115,21 +3127,21 @@ useEffect(() => {
                   height: '50px',
                   borderRadius: '50%',
                   backgroundColor: 'transparent',
-                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                  border: '1px solid rgba(0, 0, 0, 0.3)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   fontSize: '1.2rem',
                   fontWeight: '600',
-                  color: 'white'
+                  color: '#000000'
                 }}>
                   {userDisplayName.charAt(0).toUpperCase()}
                 </div>
                 <div>
-                  <div style={{ color: 'white', fontSize: '1.2rem', fontWeight: '500' }}>
+                  <div style={{ color: '#000000', fontSize: '1.2rem', fontWeight: '500' }}>
                     {userDisplayName}
                   </div>
-                  <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem' }}>
+                  <div style={{ color: 'rgba(0,0,0,0.6)', fontSize: '0.9rem' }}>
                     {user.email}
                   </div>
                 </div>
@@ -3150,10 +3162,10 @@ useEffect(() => {
                   <div style={{
                     flex: 1,
                     height: '2px',
-                    backgroundColor: 'rgba(255,255,255,0.1)'
+                    backgroundColor: 'rgba(0,0,0,0.1)'
                   }} />
                   <span style={{
-                    color: 'rgba(255,255,255,0.6)',
+                    color: 'rgba(0,0,0,0.6)',
                     fontSize: '0.9rem',
                     letterSpacing: '1px'
                   }}>
@@ -3162,7 +3174,7 @@ useEffect(() => {
                   <div style={{
                     flex: 1,
                     height: '2px',
-                    backgroundColor: 'rgba(255,255,255,0.1)'
+                    backgroundColor: 'rgba(0,0,0,0.1)'
                   }} />
                 </div>
 
@@ -3179,8 +3191,8 @@ useEffect(() => {
                       style={{
                         width: '30px',
                         height: '30px',
-                        border: '2px solid rgba(255,255,255,0.2)',
-                        borderTopColor: 'white',
+                        border: '2px solid rgba(0,0,0,0.2)',
+                        borderTopColor: '#000000',
                         borderRadius: '50%'
                       }}
                     />
@@ -3189,8 +3201,8 @@ useEffect(() => {
                   <div style={{
                     textAlign: 'center',
                     padding: '4rem 2rem',
-                    color: 'rgba(255,255,255,0.6)',
-                    border: '1px solid rgba(255,255,255,0.1)',
+                    color: 'rgba(0,0,0,0.6)',
+                    border: '1px solid rgba(0,0,0,0.1)',
                     borderRadius: '12px'
                   }}>
                     <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ opacity: 0.5, marginBottom: '1rem' }}>
@@ -3207,12 +3219,12 @@ useEffect(() => {
                         marginTop: '1.5rem',
                         padding: '0.8rem 2rem',
                         backgroundColor: 'transparent',
-                        border: '1px solid rgba(255,255,255,0.3)',
-                        color: 'white',
+                        border: '1px solid rgba(0,0,0,0.3)',
+                        color: '#000000',
                         cursor: 'pointer',
                         fontSize: '0.9rem'
                       }}
-                      whileHover={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
+                      whileHover={{ backgroundColor: 'rgba(0,0,0,0.1)' }}
                     >
                       Mulai Donasi
                     </motion.button>
@@ -3227,8 +3239,8 @@ useEffect(() => {
                         transition={{ delay: index * 0.05 }}
                         style={{
                           padding: '1.2rem',
-                          backgroundColor: 'rgba(255,255,255,0.02)',
-                          border: '1px solid rgba(255,255,255,0.1)',
+                          backgroundColor: 'rgba(0,0,0,0.02)',
+                          border: '1px solid rgba(0,0,0,0.1)',
                           borderRadius: '12px'
                         }}
                       >
@@ -3240,7 +3252,7 @@ useEffect(() => {
                         }}>
                           <div>
                             <h3 style={{
-                              color: 'white',
+                              color: '#000000',
                               fontSize: '1.1rem',
                               fontWeight: '500',
                               margin: 0
@@ -3248,7 +3260,7 @@ useEffect(() => {
                               {donation.eventTitle}
                             </h3>
                             <p style={{
-                              color: 'rgba(255,255,255,0.6)',
+                              color: 'rgba(0,0,0,0.6)',
                               fontSize: '0.8rem',
                               margin: '0.3rem 0 0 0',
                               display: 'flex',
@@ -3265,7 +3277,7 @@ useEffect(() => {
                           <span style={{
                             fontSize: '1.2rem',
                             fontWeight: '600',
-                            color: 'rgba(255,255,255,0.9)'
+                            color: '#000000'
                           }}>
                             {formatRupiah(donation.amount)}
                           </span>
@@ -3274,10 +3286,10 @@ useEffect(() => {
                           <div style={{
                             marginTop: '0.8rem',
                             padding: '0.8rem',
-                            backgroundColor: 'rgba(255,255,255,0.05)',
+                            backgroundColor: 'rgba(0,0,0,0.05)',
                             borderRadius: '8px',
                             fontStyle: 'italic',
-                            color: 'rgba(255,255,255,0.8)',
+                            color: 'rgba(0,0,0,0.8)',
                             fontSize: '0.9rem'
                           }}>
                             "{donation.message}"
@@ -3292,7 +3304,7 @@ useEffect(() => {
               {/* Footer dengan tombol ke halaman donasi */}
               <div style={{
                 padding: isMobile ? '1rem 1.5rem' : '1.5rem 2rem',
-                borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+                borderTop: '1px solid rgba(0, 0, 0, 0.1)',
                 display: 'flex',
                 justifyContent: 'center',
                 flexShrink: 0
@@ -3308,14 +3320,14 @@ useEffect(() => {
                     gap: '1rem',
                     padding: '0.8rem 2rem',
                     backgroundColor: 'transparent',
-                    border: '1px solid rgba(255,255,255,0.3)',
+                    border: '1px solid rgba(0,0,0,0.3)',
                     borderRadius: '30px',
-                    color: 'white',
+                    color: '#000000',
                     cursor: 'pointer',
                     fontSize: '1rem'
                   }}
                   whileHover={{ 
-                    backgroundColor: 'rgba(255,255,255,0.1)',
+                    backgroundColor: 'rgba(0,0,0,0.1)',
                     gap: '1.2rem'
                   }}
                 >
@@ -3353,17 +3365,17 @@ useEffect(() => {
               left: 0,
               width: '100%',
               height: '100%',
-              backgroundColor: '#000000',
+              backgroundColor: '#dbd6c9',
               zIndex: 10003,
               display: 'flex',
               flexDirection: 'column',
               overflow: 'hidden',
-              borderRight: '1px solid rgba(255, 255, 255, 0.1)'
+              borderRight: '1px solid rgba(0, 0, 0, 0.1)'
             }}
           >
             <div style={{
               padding: isMobile ? '1.5rem' : '2rem',
-              borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+              borderBottom: '1px solid rgba(0, 0, 0, 0.1)',
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
@@ -3371,7 +3383,7 @@ useEffect(() => {
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                 <h2 style={{
-                  color: 'white',
+                  color: '#000000',
                   fontSize: isMobile ? '1.8rem' : '2.5rem',
                   fontWeight: '300',
                   margin: 0,
@@ -3382,10 +3394,10 @@ useEffect(() => {
                 </h2>
                 {user && (
                   <span style={{
-                    color: 'rgba(255,255,255,0.5)',
+                    color: 'rgba(0,0,0,0.5)',
                     fontSize: '0.9rem',
                     padding: '0.2rem 0.8rem',
-                    border: '1px solid rgba(255,255,255,0.2)',
+                    border: '1px solid rgba(0,0,0,0.2)',
                     borderRadius: '20px'
                   }}>
                     {totalNotesCount} notes
@@ -3397,8 +3409,8 @@ useEffect(() => {
                 onClick={handleCloseNoteOverlay}
                 style={{
                   backgroundColor: 'transparent',
-                  border: '1px solid rgba(255, 255, 255, 0.3)',
-                  color: 'white',
+                  border: '1px solid rgba(0, 0, 0, 0.3)',
+                  color: '#000000',
                   width: '40px',
                   height: '40px',
                   borderRadius: '50%',
@@ -3409,7 +3421,7 @@ useEffect(() => {
                   fontSize: '1.5rem',
                   fontFamily: 'Helvetica, Arial, sans-serif'
                 }}
-                whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+                whileHover={{ backgroundColor: 'rgba(0, 0, 0, 0.1)' }}
               >
                 ×
               </motion.button>
@@ -3427,7 +3439,7 @@ useEffect(() => {
                   alignItems: 'center',
                   justifyContent: 'center',
                   height: '100%',
-                  color: 'rgba(255,255,255,0.7)',
+                  color: 'rgba(0,0,0,0.7)',
                   gap: '2rem'
                 }}>
                   <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -3442,12 +3454,12 @@ useEffect(() => {
                     style={{
                       padding: '0.8rem 2rem',
                       backgroundColor: 'transparent',
-                      border: '1px solid rgba(255,255,255,0.3)',
-                      color: 'white',
+                      border: '1px solid rgba(0,0,0,0.3)',
+                      color: '#000000',
                       cursor: 'pointer',
                       fontSize: '1rem'
                     }}
-                    whileHover={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
+                    whileHover={{ backgroundColor: 'rgba(0,0,0,0.1)' }}
                   >
                     SIGN IN
                   </motion.button>
@@ -3465,8 +3477,8 @@ useEffect(() => {
                     style={{
                       width: '40px',
                       height: '40px',
-                      border: '2px solid rgba(255,255,255,0.1)',
-                      borderTopColor: 'white',
+                      border: '2px solid rgba(0,0,0,0.1)',
+                      borderTopColor: '#000000',
                       borderRadius: '50%'
                     }}
                   />
@@ -3478,7 +3490,7 @@ useEffect(() => {
                   alignItems: 'center',
                   justifyContent: 'center',
                   height: '100%',
-                  color: 'rgba(255,255,255,0.7)',
+                  color: 'rgba(0,0,0,0.7)',
                   gap: '2rem'
                 }}>
                   <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -3493,19 +3505,19 @@ useEffect(() => {
                     style={{
                       padding: '0.8rem 2rem',
                       backgroundColor: 'transparent',
-                      border: '1px solid rgba(255,255,255,0.3)',
-                      color: 'white',
+                      border: '1px solid rgba(0,0,0,0.3)',
+                      color: '#000000',
                       cursor: 'pointer',
                       fontSize: '1rem'
                     }}
-                    whileHover={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
+                    whileHover={{ backgroundColor: 'rgba(0,0,0,0.1)' }}
                   >
                     BUAT CATATAN
                   </motion.button>
                 </div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
-                  <div style={{ color: 'white', marginBottom: '1rem', fontSize: '0.8rem', opacity: 0.5 }}>
+                  <div style={{ color: '#000000', marginBottom: '1rem', fontSize: '0.8rem', opacity: 0.5 }}>
                     Total notes: {userNotes.length}
                   </div>
 
@@ -3519,7 +3531,7 @@ useEffect(() => {
                         marginBottom: '2rem'
                       }}>
                         <span style={{
-                          color: 'white',
+                          color: '#000000',
                           fontSize: '1.2rem',
                           fontWeight: '300',
                           textTransform: 'uppercase',
@@ -3527,8 +3539,8 @@ useEffect(() => {
                         }}>
                           PERSONAL
                         </span>
-                        <div style={{ flex: 1, height: '1px', backgroundColor: 'rgba(255,255,255,0.1)' }} />
-                        <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem' }}>
+                        <div style={{ flex: 1, height: '1px', backgroundColor: 'rgba(0,0,0,0.1)' }} />
+                        <span style={{ color: 'rgba(0,0,0,0.5)', fontSize: '0.8rem' }}>
                           {userNotes.filter(n => n.category?.toLowerCase() === 'personal').length} notes
                         </span>
                       </div>
@@ -3563,9 +3575,9 @@ useEffect(() => {
                               marginBottom: '1rem',
                               marginLeft: '1rem'
                             }}>
-                              <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.9rem' }}>{year}</span>
-                              <div style={{ width: '20px', height: '1px', backgroundColor: 'rgba(255,255,255,0.1)' }} />
-                              <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: '0.8rem' }}>
+                              <span style={{ color: 'rgba(0,0,0,0.3)', fontSize: '0.9rem' }}>{year}</span>
+                              <div style={{ width: '20px', height: '1px', backgroundColor: 'rgba(0,0,0,0.1)' }} />
+                              <span style={{ color: 'rgba(0,0,0,0.2)', fontSize: '0.8rem' }}>
                                 {notes.length} note{notes.length > 1 ? 's' : ''}
                               </span>
                             </div>
@@ -3593,21 +3605,21 @@ useEffect(() => {
                                     style={{
                                       padding: '1rem 1.5rem',
                                       backgroundColor: 'transparent',
-                                      border: '1px solid rgba(255,255,255,0.1)',
+                                      border: '1px solid rgba(0,0,0,0.1)',
                                       cursor: 'pointer',
                                       display: 'flex',
                                       justifyContent: 'space-between',
                                       alignItems: 'center'
                                     }}
                                     whileHover={{
-                                      backgroundColor: 'rgba(255,255,255,0.02)',
-                                      borderColor: 'rgba(255,255,255,0.3)',
+                                      backgroundColor: 'rgba(0,0,0,0.02)',
+                                      borderColor: 'rgba(0,0,0,0.3)',
                                       x: 5
                                     }}
                                   >
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1 }}>
                                       <span style={{ 
-                                        color: 'rgba(255,255,255,0.3)', 
+                                        color: 'rgba(0,0,0,0.3)', 
                                         fontSize: '0.8rem', 
                                         minWidth: '45px',
                                         fontFamily: 'monospace'
@@ -3615,12 +3627,12 @@ useEffect(() => {
                                         {dateStr}
                                       </span>
                                       <div style={{ flex: 1 }}>
-                                        <div style={{ color: 'white', fontSize: '1rem' }}>
+                                        <div style={{ color: '#000000', fontSize: '1rem' }}>
                                           {note.title || 'Untitled Note'}
                                         </div>
                                         {note.content && (
                                           <div style={{ 
-                                            color: 'rgba(255,255,255,0.5)', 
+                                            color: 'rgba(0,0,0,0.5)', 
                                             fontSize: '0.8rem',
                                             marginTop: '0.2rem',
                                             overflow: 'hidden',
@@ -3633,7 +3645,7 @@ useEffect(() => {
                                         )}
                                       </div>
                                     </div>
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(0,0,0,0.3)" strokeWidth="1.5">
                                       <path d="M7 7h10v10" />
                                       <path d="M17 7L7 17" />
                                     </svg>
@@ -3656,7 +3668,7 @@ useEffect(() => {
                         marginBottom: '2rem'
                       }}>
                         <span style={{
-                          color: 'white',
+                          color: '#000000',
                           fontSize: '1.2rem',
                           fontWeight: '300',
                           textTransform: 'uppercase',
@@ -3664,8 +3676,8 @@ useEffect(() => {
                         }}>
                           COLLABORATE
                         </span>
-                        <div style={{ flex: 1, height: '1px', backgroundColor: 'rgba(255,255,255,0.1)' }} />
-                        <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem' }}>
+                        <div style={{ flex: 1, height: '1px', backgroundColor: 'rgba(0,0,0,0.1)' }} />
+                        <span style={{ color: 'rgba(0,0,0,0.5)', fontSize: '0.8rem' }}>
                           {userNotes.filter(n => n.category?.toLowerCase() === 'collaborate').length} notes
                         </span>
                       </div>
@@ -3700,9 +3712,9 @@ useEffect(() => {
                               marginBottom: '1rem',
                               marginLeft: '1rem'
                             }}>
-                              <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.9rem' }}>{year}</span>
-                              <div style={{ width: '20px', height: '1px', backgroundColor: 'rgba(255,255,255,0.1)' }} />
-                              <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: '0.8rem' }}>
+                              <span style={{ color: 'rgba(0,0,0,0.3)', fontSize: '0.9rem' }}>{year}</span>
+                              <div style={{ width: '20px', height: '1px', backgroundColor: 'rgba(0,0,0,0.1)' }} />
+                              <span style={{ color: 'rgba(0,0,0,0.2)', fontSize: '0.8rem' }}>
                                 {notes.length} note{notes.length > 1 ? 's' : ''}
                               </span>
                             </div>
@@ -3730,21 +3742,21 @@ useEffect(() => {
                                     style={{
                                       padding: '1rem 1.5rem',
                                       backgroundColor: 'transparent',
-                                      border: '1px solid rgba(255,255,255,0.1)',
+                                      border: '1px solid rgba(0,0,0,0.1)',
                                       cursor: 'pointer',
                                       display: 'flex',
                                       justifyContent: 'space-between',
                                       alignItems: 'center'
                                     }}
                                     whileHover={{
-                                      backgroundColor: 'rgba(255,255,255,0.02)',
-                                      borderColor: 'rgba(255,255,255,0.3)',
+                                      backgroundColor: 'rgba(0,0,0,0.02)',
+                                      borderColor: 'rgba(0,0,0,0.3)',
                                       x: 5
                                     }}
                                   >
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1 }}>
                                       <span style={{ 
-                                        color: 'rgba(255,255,255,0.3)', 
+                                        color: 'rgba(0,0,0,0.3)', 
                                         fontSize: '0.8rem', 
                                         minWidth: '45px',
                                         fontFamily: 'monospace'
@@ -3752,12 +3764,12 @@ useEffect(() => {
                                         {dateStr}
                                       </span>
                                       <div style={{ flex: 1 }}>
-                                        <div style={{ color: 'white', fontSize: '1rem' }}>
+                                        <div style={{ color: '#000000', fontSize: '1rem' }}>
                                           {note.title || 'Untitled Note'}
                                         </div>
                                         {note.content && (
                                           <div style={{ 
-                                            color: 'rgba(255,255,255,0.5)', 
+                                            color: 'rgba(0,0,0,0.5)', 
                                             fontSize: '0.8rem',
                                             marginTop: '0.2rem',
                                             overflow: 'hidden',
@@ -3770,7 +3782,7 @@ useEffect(() => {
                                         )}
                                       </div>
                                     </div>
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(0,0,0,0.3)" strokeWidth="1.5">
                                       <path d="M7 7h10v10" />
                                       <path d="M17 7L7 17" />
                                     </svg>
@@ -3796,7 +3808,7 @@ useEffect(() => {
                         marginBottom: '2rem'
                       }}>
                         <span style={{
-                          color: 'white',
+                          color: '#000000',
                           fontSize: '1.2rem',
                           fontWeight: '300',
                           textTransform: 'uppercase',
@@ -3804,8 +3816,8 @@ useEffect(() => {
                         }}>
                           LAINNYA
                         </span>
-                        <div style={{ flex: 1, height: '1px', backgroundColor: 'rgba(255,255,255,0.1)' }} />
-                        <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem' }}>
+                        <div style={{ flex: 1, height: '1px', backgroundColor: 'rgba(0,0,0,0.1)' }} />
+                        <span style={{ color: 'rgba(0,0,0,0.5)', fontSize: '0.8rem' }}>
                           {userNotes.filter(n => {
                             const cat = n.category?.toLowerCase() || '';
                             return cat !== 'personal' && cat !== 'collaborate';
@@ -3846,9 +3858,9 @@ useEffect(() => {
                               marginBottom: '1rem',
                               marginLeft: '1rem'
                             }}>
-                              <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.9rem' }}>{year}</span>
-                              <div style={{ width: '20px', height: '1px', backgroundColor: 'rgba(255,255,255,0.1)' }} />
-                              <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: '0.8rem' }}>
+                              <span style={{ color: 'rgba(0,0,0,0.3)', fontSize: '0.9rem' }}>{year}</span>
+                              <div style={{ width: '20px', height: '1px', backgroundColor: 'rgba(0,0,0,0.1)' }} />
+                              <span style={{ color: 'rgba(0,0,0,0.2)', fontSize: '0.8rem' }}>
                                 {notes.length} note{notes.length > 1 ? 's' : ''}
                               </span>
                             </div>
@@ -3876,21 +3888,21 @@ useEffect(() => {
                                     style={{
                                       padding: '1rem 1.5rem',
                                       backgroundColor: 'transparent',
-                                      border: '1px solid rgba(255,255,255,0.1)',
+                                      border: '1px solid rgba(0,0,0,0.1)',
                                       cursor: 'pointer',
                                       display: 'flex',
                                       justifyContent: 'space-between',
                                       alignItems: 'center'
                                     }}
                                     whileHover={{
-                                      backgroundColor: 'rgba(255,255,255,0.02)',
-                                      borderColor: 'rgba(255,255,255,0.3)',
+                                      backgroundColor: 'rgba(0,0,0,0.02)',
+                                      borderColor: 'rgba(0,0,0,0.3)',
                                       x: 5
                                     }}
                                   >
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1 }}>
                                       <span style={{ 
-                                        color: 'rgba(255,255,255,0.3)', 
+                                        color: 'rgba(0,0,0,0.3)', 
                                         fontSize: '0.8rem', 
                                         minWidth: '45px',
                                         fontFamily: 'monospace'
@@ -3898,12 +3910,12 @@ useEffect(() => {
                                         {dateStr}
                                       </span>
                                       <div style={{ flex: 1 }}>
-                                        <div style={{ color: 'white', fontSize: '1rem' }}>
+                                        <div style={{ color: '#000000', fontSize: '1rem' }}>
                                           {note.title || 'Untitled Note'}
                                         </div>
                                         {note.content && (
                                           <div style={{ 
-                                            color: 'rgba(255,255,255,0.5)', 
+                                            color: 'rgba(0,0,0,0.5)', 
                                             fontSize: '0.8rem',
                                             marginTop: '0.2rem',
                                             overflow: 'hidden',
@@ -3916,7 +3928,7 @@ useEffect(() => {
                                         )}
                                       </div>
                                     </div>
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(0,0,0,0.3)" strokeWidth="1.5">
                                       <path d="M7 7h10v10" />
                                       <path d="M17 7L7 17" />
                                     </svg>
@@ -3949,7 +3961,7 @@ useEffect(() => {
               left: 0,
               width: '100%',
               height: '100%',
-              backgroundColor: 'rgba(0, 0, 0, 0.98)',
+              backgroundColor: 'rgba(219, 214, 201, 0.98)',
               zIndex: 10002,
               display: 'flex',
               alignItems: 'center',
@@ -3966,7 +3978,7 @@ useEffect(() => {
               exit={{ scale: 0.95, opacity: 0, y: 20 }}
               transition={{ duration: 0.4 }}
               style={{
-                backgroundColor: 'transparent',
+                backgroundColor: '#dbd6c9',
                 borderRadius: '20px',
                 width: '100%',
                 maxWidth: '1200px',
@@ -3974,12 +3986,12 @@ useEffect(() => {
                 display: 'flex',
                 flexDirection: 'column',
                 overflow: 'hidden',
-                border: '1px solid rgba(255, 255, 255, 0.2)'
+                border: '1px solid rgba(0, 0, 0, 0.2)'
               }}
             >
               <div style={{
                 padding: isMobile ? '1.5rem' : '2rem',
-                borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+                borderBottom: '1px solid rgba(0, 0, 0, 0.2)',
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
@@ -3987,7 +3999,7 @@ useEffect(() => {
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                   <h2 style={{
-                    color: 'white',
+                    color: '#000000',
                     fontSize: isMobile ? '1.8rem' : '2.5rem',
                     fontWeight: '300',
                     margin: 0,
@@ -3998,11 +4010,11 @@ useEffect(() => {
                   </h2>
                   <div style={{
                     backgroundColor: 'transparent',
-                    color: 'white',
+                    color: '#000000',
                     fontSize: '0.9rem',
                     padding: '0.3rem 0.8rem',
                     borderRadius: '20px',
-                    border: '1px solid rgba(255, 255, 255, 0.3)'
+                    border: '1px solid rgba(0, 0, 0, 0.3)'
                   }}>
                     {calendarEvents.length} Events
                   </div>
@@ -4014,8 +4026,8 @@ useEffect(() => {
                   }}
                   style={{
                     backgroundColor: 'transparent',
-                    border: '1px solid rgba(255, 255, 255, 0.3)',
-                    color: 'white',
+                    border: '1px solid rgba(0, 0, 0, 0.3)',
+                    color: '#000000',
                     width: '40px',
                     height: '40px',
                     borderRadius: '50%',
@@ -4026,7 +4038,7 @@ useEffect(() => {
                     fontSize: '1.5rem',
                     fontFamily: 'Helvetica, Arial, sans-serif'
                   }}
-                  whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+                  whileHover={{ backgroundColor: 'rgba(0, 0, 0, 0.1)' }}
                 >
                   ×
                 </motion.button>
@@ -4046,13 +4058,13 @@ useEffect(() => {
                   transition={{ delay: 0.2 }}
                   style={{
                     padding: '1.5rem',
-                    backgroundColor: 'rgba(255,255,255,0.02)',
-                    border: '1px solid rgba(255,255,255,0.1)',
+                    backgroundColor: 'rgba(0,0,0,0.02)',
+                    border: '1px solid rgba(0,0,0,0.1)',
                     borderRadius: '10px'
                   }}
                 >
                   <p style={{
-                    color: 'rgba(255,255,255,0.8)',
+                    color: 'rgba(0,0,0,0.8)',
                     fontSize: '1rem',
                     lineHeight: 1.6,
                     margin: 0,
@@ -4071,9 +4083,9 @@ useEffect(() => {
                         key={index}
                         style={{
                           padding: '0.3rem 1rem',
-                          backgroundColor: 'rgba(255,255,255,0.05)',
+                          backgroundColor: 'rgba(0,0,0,0.05)',
                           borderRadius: '20px',
-                          color: 'rgba(255,255,255,0.7)',
+                          color: 'rgba(0,0,0,0.7)',
                           fontSize: '0.8rem'
                         }}
                       >
@@ -4095,8 +4107,8 @@ useEffect(() => {
                       onClick={() => navigateMonth('prev')}
                       style={{
                         backgroundColor: 'transparent',
-                        border: '1px solid rgba(255, 255, 255, 0.3)',
-                        color: 'white',
+                        border: '1px solid rgba(0, 0, 0, 0.3)',
+                        color: '#000000',
                         width: '40px',
                         height: '40px',
                         borderRadius: '50%',
@@ -4105,14 +4117,14 @@ useEffect(() => {
                         alignItems: 'center',
                         justifyContent: 'center'
                       }}
-                      whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+                      whileHover={{ backgroundColor: 'rgba(0, 0, 0, 0.1)' }}
                     >
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <path d="M15 18l-6-6 6-6"/>
                       </svg>
                     </motion.button>
                     <div style={{
-                      color: 'white',
+                      color: '#000000',
                       fontSize: isMobile ? '1.5rem' : '2rem',
                       fontWeight: '400',
                       fontFamily: 'Helvetica, Arial, sans-serif',
@@ -4125,8 +4137,8 @@ useEffect(() => {
                       onClick={() => navigateMonth('next')}
                       style={{
                         backgroundColor: 'transparent',
-                        border: '1px solid rgba(255, 255, 255, 0.3)',
-                        color: 'white',
+                        border: '1px solid rgba(0, 0, 0, 0.3)',
+                        color: '#000000',
                         width: '40px',
                         height: '40px',
                         borderRadius: '50%',
@@ -4135,7 +4147,7 @@ useEffect(() => {
                         alignItems: 'center',
                         justifyContent: 'center'
                       }}
-                      whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+                      whileHover={{ backgroundColor: 'rgba(0, 0, 0, 0.1)' }}
                     >
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <path d="M9 18l6-6-6-6"/>
@@ -4149,9 +4161,9 @@ useEffect(() => {
                         key={year}
                         onClick={() => handleYearSelect(year)}
                         style={{
-                          backgroundColor: currentYear === year ? 'rgba(255, 255, 255, 0.2)' : 'transparent',
-                          border: '1px solid rgba(255, 255, 255, 0.3)',
-                          color: 'white',
+                          backgroundColor: currentYear === year ? 'rgba(0, 0, 0, 0.1)' : 'transparent',
+                          border: '1px solid rgba(0, 0, 0, 0.3)',
+                          color: '#000000',
                           padding: '0.5rem 1rem',
                           borderRadius: '20px',
                           cursor: 'pointer',
@@ -4159,7 +4171,7 @@ useEffect(() => {
                           fontFamily: 'Helvetica, Arial, sans-serif',
                           whiteSpace: 'nowrap'
                         }}
-                        whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+                        whileHover={{ backgroundColor: 'rgba(0, 0, 0, 0.1)' }}
                       >
                         {year}
                       </motion.button>
@@ -4172,9 +4184,9 @@ useEffect(() => {
                         key={month}
                         onClick={() => handleMonthSelect(index)}
                         style={{
-                          backgroundColor: currentMonth === index ? 'rgba(255, 255, 255, 0.2)' : 'transparent',
-                          border: '1px solid rgba(255, 255, 255, 0.3)',
-                          color: 'white',
+                          backgroundColor: currentMonth === index ? 'rgba(0, 0, 0, 0.1)' : 'transparent',
+                          border: '1px solid rgba(0, 0, 0, 0.3)',
+                          color: '#000000',
                           padding: '0.4rem 0.8rem',
                           borderRadius: '15px',
                           cursor: 'pointer',
@@ -4182,7 +4194,7 @@ useEffect(() => {
                           fontFamily: 'Helvetica, Arial, sans-serif',
                           minWidth: '40px'
                         }}
-                        whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+                        whileHover={{ backgroundColor: 'rgba(0, 0, 0, 0.1)' }}
                       >
                         {month}
                       </motion.button>
@@ -4199,7 +4211,7 @@ useEffect(() => {
                   }}>
                     {['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'].map(day => (
                       <div key={day} style={{
-                        color: 'rgba(255, 255, 255, 0.7)',
+                        color: 'rgba(0, 0, 0, 0.7)',
                         fontSize: isMobile ? '0.8rem' : '0.9rem',
                         fontWeight: '600',
                         textAlign: 'center',
@@ -4230,7 +4242,7 @@ useEffect(() => {
                           onClick={() => setSelectedDate(day.fullDate)}
                           style={{
                             backgroundColor: 'transparent',
-                            border: '1px solid rgba(255, 255, 255, 0.2)',
+                            border: '1px solid rgba(0, 0, 0, 0.2)',
                             borderRadius: '10px',
                             padding: '0.8rem',
                             minHeight: '100px',
@@ -4239,12 +4251,12 @@ useEffect(() => {
                             transition: 'all 0.3s ease'
                           }}
                           whileHover={{ 
-                            backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                            borderColor: 'rgba(255, 255, 255, 0.4)'
+                            backgroundColor: 'rgba(0, 0, 0, 0.03)',
+                            borderColor: 'rgba(0, 0, 0, 0.4)'
                           }}
                         >
                           <div style={{
-                            color: day.isToday ? '#3B82F6' : 'white',
+                            color: day.isToday ? '#3B82F6' : '#000000',
                             fontSize: isMobile ? '0.9rem' : '1rem',
                             fontWeight: day.isToday ? '700' : '400',
                             marginBottom: '0.5rem',
@@ -4286,7 +4298,7 @@ useEffect(() => {
                                   }}
                                 >
                                   <div style={{
-                                    color: 'white',
+                                    color: '#000000',
                                     fontSize: '0.7rem',
                                     fontWeight: '600',
                                     whiteSpace: 'nowrap',
@@ -4296,7 +4308,7 @@ useEffect(() => {
                                     {event.title}
                                   </div>
                                   <div style={{
-                                    color: 'rgba(255, 255, 255, 0.7)',
+                                    color: 'rgba(0, 0, 0, 0.7)',
                                     fontSize: '0.6rem',
                                     display: 'flex',
                                     alignItems: 'center',
@@ -4314,7 +4326,7 @@ useEffect(() => {
                               ))}
                               {day.events.length > 3 && (
                                 <div style={{
-                                  color: 'rgba(255, 255, 255, 0.5)',
+                                  color: 'rgba(0, 0, 0, 0.5)',
                                   fontSize: '0.6rem',
                                   textAlign: 'center'
                                 }}>
@@ -4334,8 +4346,8 @@ useEffect(() => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     style={{
-                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                      border: '1px solid rgba(255, 255, 255, 0.2)',
+                      backgroundColor: 'rgba(0, 0, 0, 0.05)',
+                      border: '1px solid rgba(0, 0, 0, 0.2)',
                       borderRadius: '15px',
                       padding: '1.5rem',
                       marginTop: '1rem'
@@ -4348,7 +4360,7 @@ useEffect(() => {
                       marginBottom: '1.5rem'
                     }}>
                       <h3 style={{
-                        color: 'white',
+                        color: '#000000',
                         fontSize: '1.3rem',
                         fontWeight: '400',
                         margin: 0,
@@ -4360,8 +4372,8 @@ useEffect(() => {
                         onClick={() => setSelectedDate(null)}
                         style={{
                           backgroundColor: 'transparent',
-                          border: '1px solid rgba(255, 255, 255, 0.3)',
-                          color: 'white',
+                          border: '1px solid rgba(0, 0, 0, 0.3)',
+                          color: '#000000',
                           width: '30px',
                           height: '30px',
                           borderRadius: '50%',
@@ -4371,7 +4383,7 @@ useEffect(() => {
                           justifyContent: 'center',
                           fontSize: '1rem'
                         }}
-                        whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+                        whileHover={{ backgroundColor: 'rgba(0, 0, 0, 0.1)' }}
                       >
                         ×
                       </motion.button>
@@ -4389,7 +4401,7 @@ useEffect(() => {
                           <div style={{
                             padding: '2rem',
                             textAlign: 'center',
-                            color: 'rgba(255, 255, 255, 0.5)',
+                            color: 'rgba(0, 0, 0, 0.5)',
                             fontFamily: 'Helvetica, Arial, sans-serif'
                           }}>
                             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ opacity: 0.5 }}>
@@ -4439,7 +4451,7 @@ useEffect(() => {
                                     flexWrap: 'wrap'
                                   }}>
                                     <h4 style={{
-                                      color: 'white',
+                                      color: '#000000',
                                       fontSize: '1.1rem',
                                       fontWeight: '600',
                                       margin: 0,
@@ -4462,7 +4474,7 @@ useEffect(() => {
                                     </div>
                                   </div>
                                   <div style={{
-                                    color: 'rgba(255, 255, 255, 0.6)',
+                                    color: 'rgba(0, 0, 0, 0.6)',
                                     fontSize: '0.8rem',
                                     display: 'flex',
                                     alignItems: 'center',
@@ -4476,7 +4488,7 @@ useEffect(() => {
                                   </div>
                                 </div>
                                 <p style={{
-                                  color: 'rgba(255, 255, 255, 0.8)',
+                                  color: 'rgba(0, 0, 0, 0.8)',
                                   fontSize: '0.9rem',
                                   margin: '0 0 0.8rem 0',
                                   lineHeight: 1.5,
@@ -4499,18 +4511,18 @@ useEffect(() => {
                                       width: '24px',
                                       height: '24px',
                                       borderRadius: '50%',
-                                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                      backgroundColor: 'rgba(0, 0, 0, 0.1)',
                                       display: 'flex',
                                       alignItems: 'center',
                                       justifyContent: 'center',
                                       fontSize: '0.8rem',
                                       fontWeight: '600',
-                                      color: 'white'
+                                      color: '#000000'
                                     }}>
                                       {event.createdBy.charAt(0)}
                                     </div>
                                     <span style={{
-                                      color: 'rgba(255, 255, 255, 0.7)',
+                                      color: 'rgba(0, 0, 0, 0.7)',
                                       fontSize: '0.8rem'
                                     }}>
                                       {event.createdBy}
@@ -4519,10 +4531,10 @@ useEffect(() => {
                                           marginLeft: '0.3rem',
                                           fontSize: '0.7rem',
                                           backgroundColor: 'transparent',
-                                          color: 'white',
+                                          color: '#000000',
                                           padding: '0.1rem 0.4rem',
                                           borderRadius: '4px',
-                                          border: '1px solid rgba(255, 255, 255, 0.3)'
+                                          border: '1px solid rgba(0, 0, 0, 0.3)'
                                         }}>
                                           ADMIN
                                         </span>
@@ -4558,7 +4570,7 @@ useEffect(() => {
               left: 0,
               width: '100%',
               height: '100%',
-              backgroundColor: 'rgba(0, 0, 0, 0.98)',
+              backgroundColor: 'rgba(219, 214, 201, 0.98)',
               zIndex: 10000,
               display: 'flex',
               alignItems: 'center',
@@ -4574,7 +4586,7 @@ useEffect(() => {
               exit={{ scale: 0.9, opacity: 0, y: 20 }}
               transition={{ duration: 0.4 }}
               style={{
-                backgroundColor: 'transparent',
+                backgroundColor: '#dbd6c9',
                 borderRadius: '0',
                 width: '95%',
                 maxWidth: '1200px',
@@ -4597,7 +4609,7 @@ useEffect(() => {
               }}>
                 <div style={{ padding: '0 2rem', marginBottom: '3rem' }}>
                   <h3 style={{
-                    color: 'white',
+                    color: '#000000',
                     fontSize: '2.5rem',
                     fontWeight: '300',
                     fontFamily: 'Helvetica, Arial, sans-serif',
@@ -4607,7 +4619,7 @@ useEffect(() => {
                     {userDisplayName}
                   </h3>
                   <p style={{
-                    color: 'white',
+                    color: '#000000',
                     fontSize: '1rem',
                     margin: '0.5rem 0 0 0',
                     fontFamily: 'Helvetica, Arial, sans-serif',
@@ -4630,7 +4642,7 @@ useEffect(() => {
                         padding: '1.5rem 2rem',
                         backgroundColor: 'transparent',
                         border: 'none',
-                        color: activeTab === tab ? 'white' : 'rgba(255, 255, 255, 0.7)',
+                        color: activeTab === tab ? '#000000' : 'rgba(0, 0, 0, 0.7)',
                         fontSize: '1.3rem',
                         fontWeight: '300',
                         fontFamily: 'Helvetica, Arial, sans-serif',
@@ -4661,7 +4673,7 @@ useEffect(() => {
                             justifyContent: 'center'
                           }}
                         >
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2">
                             <path d="M6 18L18 6"/>
                             <path d="M8 6h10v10"/>
                           </svg>
@@ -4678,9 +4690,9 @@ useEffect(() => {
                       width: '100%',
                       padding: '1.2rem',
                       backgroundColor: 'transparent',
-                      border: '1px solid rgba(255, 255, 255, 0.3)',
+                      border: '1px solid rgba(0, 0, 0, 0.3)',
                       borderRadius: '0',
-                      color: 'white',
+                      color: '#000000',
                       fontSize: '1.1rem',
                       fontWeight: '300',
                       fontFamily: 'Helvetica, Arial, sans-serif',
@@ -4714,7 +4726,7 @@ useEffect(() => {
                     style={{
                       backgroundColor: 'transparent',
                       border: 'none',
-                      color: 'white',
+                      color: '#000000',
                       fontSize: '2rem',
                       cursor: 'pointer',
                       width: '40px',
@@ -4739,7 +4751,7 @@ useEffect(() => {
                       marginBottom: '3rem'
                     }}>
                       <h4 style={{
-                        color: 'white',
+                        color: '#000000',
                         fontSize: '3rem',
                         fontWeight: '300',
                         margin: 0,
@@ -4754,9 +4766,9 @@ useEffect(() => {
                           style={{
                             padding: '0.8rem 1.5rem',
                             backgroundColor: 'transparent',
-                            border: '1px solid rgba(255, 255, 255, 0.3)',
+                            border: '1px solid rgba(0, 0, 0, 0.3)',
                             borderRadius: '0',
-                            color: 'white',
+                            color: '#000000',
                             fontSize: '1rem',
                             fontWeight: '300',
                             cursor: 'pointer',
@@ -4772,7 +4784,7 @@ useEffect(() => {
                             <path d="M7 17l9.2-9.2M17 17V7H7"/>
                           </svg>
                         </motion.button>
-                        <div style={{ color: 'rgba(255, 255, 255, 0.5)', fontSize: '0.9rem' }}>
+                        <div style={{ color: 'rgba(0, 0, 0, 0.5)', fontSize: '0.9rem' }}>
                           Total: {totalNotesCount}
                         </div>
                       </div>
@@ -4782,7 +4794,7 @@ useEffect(() => {
                       <div style={{
                         padding: '4rem 0',
                         textAlign: 'center',
-                        color: 'rgba(255, 255, 255, 0.7)',
+                        color: 'rgba(0, 0, 0, 0.7)',
                         fontFamily: 'Helvetica, Arial, sans-serif'
                       }}>
                         <motion.div
@@ -4790,7 +4802,7 @@ useEffect(() => {
                           transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                           style={{ marginBottom: '1rem' }}
                         >
-                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5">
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="1.5">
                             <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
                           </svg>
                         </motion.div>
@@ -4800,7 +4812,7 @@ useEffect(() => {
                       <div style={{
                         padding: '6rem 0',
                         textAlign: 'center',
-                        color: 'rgba(255, 255, 255, 0.7)',
+                        color: 'rgba(0, 0, 0, 0.7)',
                         fontFamily: 'Helvetica, Arial, sans-serif'
                       }}>
                         <div style={{ fontSize: '3rem', marginBottom: '1.5rem', opacity: 0.5 }}>
@@ -4816,8 +4828,8 @@ useEffect(() => {
                           onClick={() => router.push('/notes')}
                           style={{
                             backgroundColor: 'transparent',
-                            color: 'white',
-                            border: '1px solid rgba(255, 255, 255, 0.3)',
+                            color: '#000000',
+                            border: '1px solid rgba(0, 0, 0, 0.3)',
                             padding: '1.2rem 2.5rem',
                             borderRadius: '0',
                             cursor: 'pointer',
@@ -4885,7 +4897,7 @@ useEffect(() => {
                                 <div style={{
                                   fontSize: '1.2rem',
                                   fontFamily: 'Helvetica, Arial, sans-serif',
-                                  color: 'rgba(255, 255, 255, 0.6)',
+                                  color: 'rgba(0, 0, 0, 0.6)',
                                   marginBottom: '0.5rem',
                                   textTransform: 'uppercase',
                                   letterSpacing: '0.5px'
@@ -4897,7 +4909,7 @@ useEffect(() => {
                                 fontSize: '2.5rem',
                                 fontFamily: 'Helvetica, Arial, sans-serif',
                                 lineHeight: '1.3',
-                                color: 'white',
+                                color: '#000000',
                                 fontWeight: '400'
                               }}>
                                 {note.title || 'Untitled Note'}
@@ -4907,7 +4919,7 @@ useEffect(() => {
                                   fontSize: '1.3rem',
                                   fontFamily: 'Helvetica, Arial, sans-serif',
                                   lineHeight: '1.6',
-                                  color: 'rgba(255, 255, 255, 0.8)',
+                                  color: 'rgba(0, 0, 0, 0.8)',
                                   marginTop: '1rem',
                                   whiteSpace: 'pre-wrap'
                                 }}>
@@ -4922,7 +4934,7 @@ useEffect(() => {
                                       paddingBottom: '56.25%',
                                       height: 0,
                                       overflow: 'hidden',
-                                      backgroundColor: '#000',
+                                      backgroundColor: '#f0ebe0',
                                       borderRadius: '4px'
                                     }}>
                                       <iframe
@@ -4943,7 +4955,7 @@ useEffect(() => {
                                   ) : videoEmbedUrl.match(/\.(mp4|webm|ogg|mov|avi|wmv|flv|mkv)$/i) ? (
                                     <div style={{
                                       position: 'relative',
-                                      backgroundColor: '#000',
+                                      backgroundColor: '#f0ebe0',
                                       borderRadius: '4px',
                                       overflow: 'hidden',
                                       maxWidth: '560px'
@@ -4954,7 +4966,7 @@ useEffect(() => {
                                           width: '100%',
                                           height: 'auto',
                                           aspectRatio: '16/9',
-                                          backgroundColor: '#000'
+                                          backgroundColor: '#f0ebe0'
                                         }}
                                         controls
                                         poster={videoThumbnail || undefined}
@@ -4963,9 +4975,9 @@ useEffect(() => {
                                   ) : (
                                     <div style={{
                                       padding: '1rem',
-                                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                      backgroundColor: 'rgba(0, 0, 0, 0.05)',
                                       borderRadius: '4px',
-                                      border: '1px solid rgba(255, 255, 255, 0.2)'
+                                      border: '1px solid rgba(0, 0, 0, 0.2)'
                                     }}>
                                       <a
                                         href={note.link}
@@ -4973,7 +4985,7 @@ useEffect(() => {
                                         rel="noopener noreferrer"
                                         onClick={(e) => e.stopPropagation()}
                                         style={{
-                                          color: 'white',
+                                          color: '#000000',
                                           textDecoration: 'none',
                                           display: 'flex',
                                           alignItems: 'center',
@@ -5003,7 +5015,7 @@ useEffect(() => {
                                 <span style={{
                                   fontSize: '1rem',
                                   fontFamily: 'Helvetica, Arial, sans-serif',
-                                  color: 'rgba(255, 255, 255, 0.5)'
+                                  color: 'rgba(0, 0, 0, 0.5)'
                                 }}>
                                   {note.updatedAt ? calculateTimeAgo(note.updatedAt) : 'Recently'}
                                 </span>
@@ -5014,7 +5026,7 @@ useEffect(() => {
                                     rel="noopener noreferrer"
                                     onClick={(e) => e.stopPropagation()}
                                     style={{
-                                      color: 'white',
+                                      color: '#000000',
                                       textDecoration: 'none',
                                       display: 'flex',
                                       alignItems: 'center',
@@ -5045,12 +5057,12 @@ useEffect(() => {
                               alignItems: 'center',
                               justifyContent: 'center',
                               gap: '0.5rem',
-                              borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+                              borderTop: '1px solid rgba(0, 0, 0, 0.1)',
                               marginTop: '1rem'
                             }}
                           >
                             <div style={{
-                              color: 'white',
+                              color: '#000000',
                               fontSize: '1.2rem',
                               fontWeight: '300',
                               fontFamily: 'Helvetica, Arial, sans-serif'
@@ -5058,7 +5070,7 @@ useEffect(() => {
                               View all {userNotes.length} notes in Notes Page
                             </div>
                             <div style={{
-                              color: 'rgba(255, 255, 255, 0.5)',
+                              color: 'rgba(0, 0, 0, 0.5)',
                               fontSize: '0.9rem',
                               fontFamily: 'Helvetica, Arial, sans-serif'
                             }}>
@@ -5069,7 +5081,7 @@ useEffect(() => {
                               height="20"
                               viewBox="0 0 24 24"
                               fill="none"
-                              stroke="white"
+                              stroke="#000000"
                               strokeWidth="2"
                               animate={{ x: [0, 5, 0] }}
                               transition={{ repeat: Infinity, duration: 1.5 }}
@@ -5087,7 +5099,7 @@ useEffect(() => {
                 {activeTab === 'settings' && (
                   <div>
                     <h4 style={{
-                      color: 'white',
+                      color: '#000000',
                       fontSize: '3rem',
                       fontWeight: '300',
                       margin: '0 0 3rem 0',
@@ -5101,7 +5113,7 @@ useEffect(() => {
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem', maxWidth: '600px' }}>
                         <div>
                           <label style={{
-                            color: 'rgba(255, 255, 255, 0.8)',
+                            color: 'rgba(0, 0, 0, 0.8)',
                             fontSize: '1.1rem',
                             marginBottom: '1rem',
                             display: 'block',
@@ -5118,9 +5130,9 @@ useEffect(() => {
                               width: '100%',
                               padding: '1.2rem',
                               backgroundColor: 'transparent',
-                              border: '1px solid rgba(255, 255, 255, 0.3)',
+                              border: '1px solid rgba(0, 0, 0, 0.3)',
                               borderRadius: '0',
-                              color: 'white',
+                              color: '#000000',
                               fontSize: '1.2rem',
                               fontFamily: 'Helvetica, Arial, sans-serif',
                               outline: 'none'
@@ -5129,7 +5141,7 @@ useEffect(() => {
                         </div>
                         <div>
                           <label style={{
-                            color: 'rgba(255, 255, 255, 0.8)',
+                            color: 'rgba(0, 0, 0, 0.8)',
                             fontSize: '1.1rem',
                             marginBottom: '1rem',
                             display: 'block',
@@ -5146,9 +5158,9 @@ useEffect(() => {
                               width: '100%',
                               padding: '1.2rem',
                               backgroundColor: 'transparent',
-                              border: '1px solid rgba(255, 255, 255, 0.3)',
+                              border: '1px solid rgba(0, 0, 0, 0.3)',
                               borderRadius: '0',
-                              color: 'white',
+                              color: '#000000',
                               fontSize: '1.2rem',
                               fontFamily: 'Helvetica, Arial, sans-serif',
                               outline: 'none'
@@ -5166,9 +5178,9 @@ useEffect(() => {
                             style={{
                               padding: '1.2rem 2.5rem',
                               backgroundColor: 'transparent',
-                              border: '1px solid rgba(255, 255, 255, 0.3)',
+                              border: '1px solid rgba(0, 0, 0, 0.3)',
                               borderRadius: '0',
-                              color: 'white',
+                              color: '#000000',
                               fontSize: '1.1rem',
                               fontWeight: '300',
                               cursor: 'pointer',
@@ -5184,9 +5196,9 @@ useEffect(() => {
                             style={{
                               padding: '1.2rem 2.5rem',
                               backgroundColor: 'transparent',
-                              border: '1px solid white',
+                              border: '1px solid #000000',
                               borderRadius: '0',
-                              color: 'white',
+                              color: '#000000',
                               fontSize: '1.1rem',
                               fontWeight: '300',
                               cursor: 'pointer',
@@ -5212,7 +5224,7 @@ useEffect(() => {
                           onClick={() => setIsEditingProfile(true)}
                         >
                           <div style={{
-                            color: 'rgba(255, 255, 255, 0.8)',
+                            color: 'rgba(0, 0, 0, 0.8)',
                             fontSize: '1rem',
                             fontFamily: 'Helvetica, Arial, sans-serif',
                             letterSpacing: '0.5px',
@@ -5221,7 +5233,7 @@ useEffect(() => {
                             Display name
                           </div>
                           <div style={{
-                            color: 'white',
+                            color: '#000000',
                             fontSize: '1.5rem',
                             fontWeight: '300',
                             fontFamily: 'Helvetica, Arial, sans-serif',
@@ -5249,7 +5261,7 @@ useEffect(() => {
                           onClick={() => setIsEditingProfile(true)}
                         >
                           <div style={{
-                            color: 'rgba(255, 255, 255, 0.8)',
+                            color: 'rgba(0, 0, 0, 0.8)',
                             fontSize: '1rem',
                             fontFamily: 'Helvetica, Arial, sans-serif',
                             letterSpacing: '0.5px',
@@ -5258,7 +5270,7 @@ useEffect(() => {
                             Email address
                           </div>
                           <div style={{
-                            color: 'white',
+                            color: '#000000',
                             fontSize: '1.5rem',
                             fontWeight: '300',
                             fontFamily: 'Helvetica, Arial, sans-serif',
@@ -5282,7 +5294,7 @@ useEffect(() => {
                           border: 'none'
                         }}>
                           <div style={{
-                            color: 'rgba(255, 255, 255, 0.8)',
+                            color: 'rgba(0, 0, 0, 0.8)',
                             fontSize: '1rem',
                             fontFamily: 'Helvetica, Arial, sans-serif',
                             letterSpacing: '0.5px',
@@ -5291,7 +5303,7 @@ useEffect(() => {
                             Login method
                           </div>
                           <div style={{
-                            color: 'white',
+                            color: '#000000',
                             fontSize: '1.5rem',
                             fontWeight: '300',
                             fontFamily: 'Helvetica, Arial, sans-serif',
@@ -5308,7 +5320,7 @@ useEffect(() => {
                           border: 'none'
                         }}>
                           <div style={{
-                            color: 'rgba(255, 255, 255, 0.8)',
+                            color: 'rgba(0, 0, 0, 0.8)',
                             fontSize: '1rem',
                             fontFamily: 'Helvetica, Arial, sans-serif',
                             letterSpacing: '0.5px',
@@ -5317,7 +5329,7 @@ useEffect(() => {
                             User ID
                           </div>
                           <div style={{
-                            color: 'rgba(255, 255, 255, 0.7)',
+                            color: 'rgba(0, 0, 0, 0.7)',
                             fontSize: '0.9rem',
                             fontFamily: 'Helvetica, Arial, sans-serif',
                             letterSpacing: '0.5px',
@@ -5334,9 +5346,9 @@ useEffect(() => {
                               width: '100%',
                               padding: '1.5rem',
                               backgroundColor: 'transparent',
-                              border: '1px solid rgba(255, 255, 255, 0.3)',
+                              border: '1px solid rgba(0, 0, 0, 0.3)',
                               borderRadius: '0',
-                              color: 'white',
+                              color: '#000000',
                               fontSize: '1.2rem',
                               fontWeight: '300',
                               cursor: 'pointer',
@@ -5363,7 +5375,7 @@ useEffect(() => {
                 {activeTab === 'help' && (
                   <div>
                     <h4 style={{
-                      color: 'white',
+                      color: '#000000',
                       fontSize: '3rem',
                       fontWeight: '300',
                       margin: '0 0 3rem 0',
@@ -5375,7 +5387,7 @@ useEffect(() => {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem', maxWidth: '800px' }}>
                       <div style={{ padding: '2.5rem', backgroundColor: 'transparent', borderRadius: '0', border: 'none' }}>
                         <h5 style={{
-                          color: 'white',
+                          color: '#000000',
                           fontSize: '1.5rem',
                           fontWeight: '300',
                           margin: '0 0 1.5rem 0',
@@ -5385,7 +5397,7 @@ useEffect(() => {
                           Getting started
                         </h5>
                         <p style={{
-                          color: 'rgba(255, 255, 255, 0.8)',
+                          color: 'rgba(0, 0, 0, 0.8)',
                           fontSize: '1.1rem',
                           lineHeight: 1.6,
                           fontFamily: 'Helvetica, Arial, sans-serif'
@@ -5395,7 +5407,7 @@ useEffect(() => {
                       </div>
                       <div style={{ padding: '2.5rem', backgroundColor: 'transparent', borderRadius: '0', border: 'none' }}>
                         <h5 style={{
-                          color: 'white',
+                          color: '#000000',
                           fontSize: '1.5rem',
                           fontWeight: '300',
                           margin: '0 0 1.5rem 0',
@@ -5405,7 +5417,7 @@ useEffect(() => {
                           Features guide
                         </h5>
                         <p style={{
-                          color: 'rgba(255, 255, 255, 0.8)',
+                          color: 'rgba(0, 0, 0, 0.8)',
                           fontSize: '1.1rem',
                           lineHeight: 1.6,
                           fontFamily: 'Helvetica, Arial, sans-serif'
@@ -5422,9 +5434,9 @@ useEffect(() => {
                         style={{
                           padding: '1.5rem 3rem',
                           backgroundColor: 'transparent',
-                          border: '1px solid rgba(255, 255, 255, 0.3)',
+                          border: '1px solid rgba(0, 0, 0, 0.3)',
                           borderRadius: '0',
-                          color: 'white',
+                          color: '#000000',
                           fontSize: '1.2rem',
                           fontWeight: '300',
                           cursor: 'pointer',
@@ -5449,7 +5461,7 @@ useEffect(() => {
                 {activeTab === 'feedback' && (
                   <div>
                     <h4 style={{
-                      color: 'white',
+                      color: '#000000',
                       fontSize: '3rem',
                       fontWeight: '300',
                       margin: '0 0 3rem 0',
@@ -5461,7 +5473,7 @@ useEffect(() => {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem', maxWidth: '800px' }}>
                       <div style={{ padding: '2.5rem', backgroundColor: 'transparent', borderRadius: '0', border: 'none' }}>
                         <h5 style={{
-                          color: 'white',
+                          color: '#000000',
                           fontSize: '1.5rem',
                           fontWeight: '300',
                           margin: '0 0 1.5rem 0',
@@ -5471,7 +5483,7 @@ useEffect(() => {
                           Share your thoughts
                         </h5>
                         <p style={{
-                          color: 'rgba(255, 255, 255, 0.8)',
+                          color: 'rgba(0, 0, 0, 0.8)',
                           fontSize: '1.1rem',
                           lineHeight: 1.6,
                           fontFamily: 'Helvetica, Arial, sans-serif'
@@ -5484,9 +5496,9 @@ useEffect(() => {
                         style={{
                           padding: '1.5rem 3rem',
                           backgroundColor: 'transparent',
-                          border: '1px solid rgba(255, 255, 255, 0.3)',
+                          border: '1px solid rgba(0, 0, 0, 0.3)',
                           borderRadius: '0',
-                          color: 'white',
+                          color: '#000000',
                           fontSize: '1.2rem',
                           fontWeight: '300',
                           cursor: 'pointer',
@@ -5505,7 +5517,7 @@ useEffect(() => {
                       </motion.button>
                       <div style={{ padding: '2.5rem', backgroundColor: 'transparent', borderRadius: '0', border: 'none', marginTop: '1rem' }}>
                         <h5 style={{
-                          color: 'white',
+                          color: '#000000',
                           fontSize: '1.5rem',
                           fontWeight: '300',
                           margin: '0 0 1.5rem 0',
@@ -5515,7 +5527,7 @@ useEffect(() => {
                           Contact support
                         </h5>
                         <p style={{
-                          color: 'rgba(255, 255, 255, 0.8)',
+                          color: 'rgba(0, 0, 0, 0.8)',
                           fontSize: '1.1rem',
                           lineHeight: 1.6,
                           fontFamily: 'Helvetica, Arial, sans-serif'
@@ -5527,9 +5539,9 @@ useEffect(() => {
                           style={{
                             padding: '1.2rem 2rem',
                             backgroundColor: 'transparent',
-                            border: '1px solid rgba(255, 255, 255, 0.3)',
+                            border: '1px solid rgba(0, 0, 0, 0.3)',
                             borderRadius: '0',
-                            color: 'white',
+                            color: '#000000',
                             fontSize: '1rem',
                             fontWeight: '300',
                             cursor: 'pointer',
@@ -5571,7 +5583,7 @@ useEffect(() => {
               left: 0,
               width: '100%',
               height: '100%',
-              backgroundColor: 'rgba(0, 0, 0, 0.98)',
+              backgroundColor: 'rgba(219, 214, 201, 0.98)',
               zIndex: 10001,
               display: 'flex',
               alignItems: 'center',
@@ -5586,17 +5598,17 @@ useEffect(() => {
               exit={{ scale: 0.95, opacity: 0 }}
               transition={{ duration: 0.3 }}
               style={{
-                backgroundColor: 'transparent',
+                backgroundColor: '#dbd6c9',
                 borderRadius: '0',
                 padding: '2.5rem',
                 width: isMobile ? '90%' : '500px',
                 maxWidth: '600px',
-                border: '1px solid rgba(255, 255, 255, 0.2)'
+                border: '1px solid rgba(0, 0, 0, 0.2)'
               }}
               onClick={(e) => e.stopPropagation()}
             >
               <h4 style={{
-                color: 'white',
+                color: '#000000',
                 fontSize: '1.3rem',
                 fontWeight: '300',
                 margin: '0 0 1.5rem 0',
@@ -5606,7 +5618,7 @@ useEffect(() => {
                 Delete account
               </h4>
               <p style={{
-                color: 'rgba(255, 255, 255, 0.8)',
+                color: 'rgba(0, 0, 0, 0.8)',
                 fontSize: '1rem',
                 lineHeight: 1.6,
                 margin: '0 0 2rem 0',
@@ -5621,9 +5633,9 @@ useEffect(() => {
                   style={{
                     padding: '1rem 2rem',
                     backgroundColor: 'transparent',
-                    border: '1px solid rgba(255, 255, 255, 0.3)',
+                    border: '1px solid rgba(0, 0, 0, 0.3)',
                     borderRadius: '0',
-                    color: 'white',
+                    color: '#000000',
                     fontSize: '1rem',
                     fontWeight: '300',
                     cursor: 'pointer',
@@ -5637,9 +5649,9 @@ useEffect(() => {
                   style={{
                     padding: '1rem 2rem',
                     backgroundColor: 'transparent',
-                    border: '1px solid rgba(255, 255, 255, 0.3)',
+                    border: '1px solid rgba(0, 0, 0, 0.3)',
                     borderRadius: '0',
-                    color: 'white',
+                    color: '#000000',
                     fontSize: '1rem',
                     fontWeight: '300',
                     cursor: 'pointer',
@@ -5668,7 +5680,7 @@ useEffect(() => {
               left: 0,
               width: '100%',
               height: '100%',
-              backgroundColor: 'rgba(0, 0, 0, 0.98)',
+              backgroundColor: 'rgba(219, 214, 201, 0.98)',
               zIndex: 10001,
               display: 'flex',
               alignItems: 'center',
@@ -5683,7 +5695,7 @@ useEffect(() => {
               exit={{ scale: 0.95, opacity: 0 }}
               transition={{ duration: 0.3 }}
               style={{
-                backgroundColor: 'transparent',
+                backgroundColor: '#dbd6c9',
                 borderRadius: '0',
                 padding: isMobile ? '1.5rem' : '2.5rem',
                 width: isMobile ? '90%' : '500px',
@@ -5696,7 +5708,7 @@ useEffect(() => {
             >
               <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <h3 style={{
-                  color: 'white',
+                  color: '#000000',
                   fontSize: isMobile ? '2rem' : '2.5rem',
                   fontWeight: '400',
                   margin: 0,
@@ -5706,7 +5718,7 @@ useEffect(() => {
                   Logout
                 </h3>
                 <p style={{
-                  color: 'rgba(255, 255, 255, 0.8)',
+                  color: 'rgba(0, 0, 0, 0.8)',
                   fontSize: '1.1rem',
                   margin: 0,
                   lineHeight: 1.6,
@@ -5722,7 +5734,7 @@ useEffect(() => {
                     padding: '1rem 2rem',
                     backgroundColor: 'transparent',
                     border: 'none',
-                    color: 'white',
+                    color: '#000000',
                     fontSize: '1.1rem',
                     fontWeight: '300',
                     cursor: 'pointer',
@@ -5748,14 +5760,14 @@ useEffect(() => {
                     <path d="M7 17l9.2-9.2M17 17V7H7"/>
                   </svg>
                 </motion.button>
-                <div style={{ width: '1px', height: '20px', backgroundColor: 'rgba(255, 255, 255, 0.2)' }} />
+                <div style={{ width: '1px', height: '20px', backgroundColor: 'rgba(0, 0, 0, 0.2)' }} />
                 <motion.button
                   onClick={handleConfirmLogout}
                   style={{
                     padding: '1rem 2rem',
                     backgroundColor: 'transparent',
                     border: 'none',
-                    color: 'white',
+                    color: '#000000',
                     fontSize: '1.1rem',
                     fontWeight: '300',
                     cursor: 'pointer',
@@ -5783,7 +5795,7 @@ useEffect(() => {
               </div>
               <div style={{ textAlign: 'center', marginTop: '0.5rem' }}>
                 <p style={{
-                  color: 'rgba(255, 255, 255, 0.5)',
+                  color: 'rgba(0, 0, 0, 0.5)',
                   fontSize: '0.9rem',
                   margin: 0,
                   fontFamily: 'Helvetica, Arial, sans-serif'
@@ -5812,7 +5824,7 @@ useEffect(() => {
               left: 0,
               width: '100%',
               height: '100%',
-              backgroundColor: 'black',
+              backgroundColor: '#dbd6c9',
               zIndex: 9995,
               display: 'flex',
               flexDirection: 'column',
@@ -5828,9 +5840,9 @@ useEffect(() => {
               left: 0,
               width: '100%',
               height: '100%',
-              backgroundImage: `radial-gradient(circle at 30% 40%, rgba(255,255,255,0.02) 0%, transparent 40%),
-                                radial-gradient(circle at 70% 60%, rgba(255,255,255,0.02) 0%, transparent 40%),
-                                repeating-linear-gradient(45deg, rgba(255,255,255,0.005) 0px, rgba(255,255,255,0.005) 2px, transparent 2px, transparent 12px)`,
+              backgroundImage: `radial-gradient(circle at 30% 40%, rgba(0,0,0,0.02) 0%, transparent 40%),
+                                radial-gradient(circle at 70% 60%, rgba(0,0,0,0.02) 0%, transparent 40%),
+                                repeating-linear-gradient(45deg, rgba(0,0,0,0.005) 0px, rgba(0,0,0,0.005) 2px, transparent 2px, transparent 12px)`,
               pointerEvents: 'none',
               zIndex: 1
             }} />
@@ -5850,13 +5862,13 @@ useEffect(() => {
               pointerEvents: 'none'
             }}>
               <div style={{
-                color: '#FFFFFF',
+                color: '#000000',
                 fontSize: isMobile ? '1.2rem' : '1.8rem',
                 fontWeight: '300',
                 fontFamily: 'Helvetica, Arial, sans-serif',
                 letterSpacing: '1px',
                 opacity: 0.9,
-                textShadow: '0 0 10px rgba(255,255,255,0.3)',
+                textShadow: '0 0 10px rgba(0,0,0,0.3)',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'flex-start',
@@ -5867,14 +5879,14 @@ useEffect(() => {
               </div>
 
               <div style={{
-                color: '#FFFFFF',
+                color: '#000000',
                 fontSize: isMobile ? '2rem' : '3rem',
                 fontWeight: '300',
                 fontFamily: 'Helvetica, Arial, sans-serif',
                 letterSpacing: '4px',
                 textTransform: 'uppercase',
                 opacity: 0.9,
-                textShadow: '0 0 20px rgba(255,255,255,0.5)',
+                textShadow: '0 0 20px rgba(0,0,0,0.5)',
                 justifySelf: 'center'
               }}>
                 MENURU
@@ -5900,23 +5912,23 @@ useEffect(() => {
                   whiteSpace: 'nowrap',
                   fontSize: isMobile ? '6rem' : '12rem',
                   fontWeight: '300',
-                  color: '#FFFFFF',
+                  color: '#000000',
                   fontFamily: 'Helvetica, Arial, sans-serif',
                   textTransform: 'uppercase',
                   letterSpacing: '8px',
                   lineHeight: 1,
                   opacity: 0.7,
-                  textShadow: '0 0 20px rgba(255,255,255,0.5), 0 0 40px rgba(255,255,255,0.3)',
+                  textShadow: '0 0 20px rgba(0,0,0,0.5), 0 0 40px rgba(0,0,0,0.3)',
                   filter: 'brightness(1.3)'
                 }}
               >
-                MENU <svg width="180" height="180" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="3" strokeLinecap="round" style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 2rem', filter: 'drop-shadow(0 0 10px rgba(255,255,255,0.8)) drop-shadow(0 0 20px rgba(255,255,255,0.5))' }}>
+                MENU <svg width="180" height="180" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="3" strokeLinecap="round" style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 2rem', filter: 'drop-shadow(0 0 10px rgba(0,0,0,0.8)) drop-shadow(0 0 20px rgba(0,0,0,0.5))' }}>
                   <path d="M7 7h10v10" />
                   <path d="M17 7L7 17" />
-                </svg> MENU <svg width="180" height="180" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="3" strokeLinecap="round" style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 2rem', filter: 'drop-shadow(0 0 10px rgba(255,255,255,0.8)) drop-shadow(0 0 20px rgba(255,255,255,0.5))' }}>
+                </svg> MENU <svg width="180" height="180" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="3" strokeLinecap="round" style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 2rem', filter: 'drop-shadow(0 0 10px rgba(0,0,0,0.8)) drop-shadow(0 0 20px rgba(0,0,0,0.5))' }}>
                   <path d="M7 7h10v10" />
                   <path d="M17 7L7 17" />
-                </svg> MENU <svg width="180" height="180" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="3" strokeLinecap="round" style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 2rem', filter: 'drop-shadow(0 0 10px rgba(255,255,255,0.8)) drop-shadow(0 0 20px rgba(255,255,255,0.5))' }}>
+                </svg> MENU <svg width="180" height="180" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="3" strokeLinecap="round" style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 2rem', filter: 'drop-shadow(0 0 10px rgba(0,0,0,0.8)) drop-shadow(0 0 20px rgba(0,0,0,0.5))' }}>
                   <path d="M7 7h10v10" />
                   <path d="M17 7L7 17" />
                 </svg>
@@ -5958,7 +5970,7 @@ useEffect(() => {
                   paddingTop: '0.5rem',
                   paddingBottom: '2rem'
                 }}>
-                  <div style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.2)' }}>
+                  <div style={{ borderBottom: '1px solid rgba(0, 0, 0, 0.2)' }}>
                     <div
                       onClick={() => handleToggleSection('catatan')}
                       style={{
@@ -5971,7 +5983,7 @@ useEffect(() => {
                     >
                       <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
                         <span style={{
-                          color: 'rgba(255, 255, 255, 0.5)',
+                          color: 'rgba(0, 0, 0, 0.5)',
                           fontSize: '2rem',
                           fontWeight: '300',
                           fontFamily: 'monospace'
@@ -5982,11 +5994,11 @@ useEffect(() => {
                             router.push('/catatan');
                           }}
                           style={{
-                            color: '#FFFFFF',
+                            color: '#000000',
                             fontSize: isMobile ? '3rem' : '4.5rem',
                             fontWeight: '300',
                             fontFamily: 'Helvetica, Arial, sans-serif',
-                            textShadow: '0 0 10px rgba(255,255,255,0.3)',
+                            textShadow: '0 0 10px rgba(0,0,0,0.3)',
                             cursor: 'pointer',
                           }}
                         >
@@ -6002,10 +6014,10 @@ useEffect(() => {
                           height="50"
                           viewBox="0 0 24 24"
                           fill="none"
-                          stroke="#FFFFFF"
+                          stroke="#000000"
                           strokeWidth="2.5"
                           strokeLinecap="round"
-                          style={{ filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.5))' }}
+                          style={{ filter: 'drop-shadow(0 0 8px rgba(0,0,0,0.5))' }}
                         >
                           <path d="M7 7h10v10" />
                           <path d="M17 7L7 17" />
@@ -6037,16 +6049,16 @@ useEffect(() => {
                               gap: '1.5rem',
                               padding: '0.5rem 0',
                               cursor: 'pointer',
-                              borderBottom: idx < 3 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none'
+                              borderBottom: idx < 3 ? '1px solid rgba(0, 0, 0, 0.1)' : 'none'
                             }}
                           >
-                            <span style={{ color: 'rgba(255, 255, 255, 0.3)', fontSize: '0.9rem', fontFamily: 'monospace', width: '30px' }}>
+                            <span style={{ color: 'rgba(0, 0, 0, 0.3)', fontSize: '0.9rem', fontFamily: 'monospace', width: '30px' }}>
                               {item.number}
                             </span>
-                            <span style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '1.2rem', flex: 1, fontWeight: '300', fontFamily: 'Helvetica, Arial, sans-serif' }}>
+                            <span style={{ color: 'rgba(0, 0, 0, 0.8)', fontSize: '1.2rem', flex: 1, fontWeight: '300', fontFamily: 'Helvetica, Arial, sans-serif' }}>
                               {item.title}
                             </span>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(0,0,0,0.5)" strokeWidth="2">
                               <path d="M7 7h10v10" />
                               <path d="M17 7L7 17" />
                             </svg>
@@ -6056,7 +6068,7 @@ useEffect(() => {
                     )}
                   </div>
 
-                  <div style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.2)' }}>
+                  <div style={{ borderBottom: '1px solid rgba(0, 0, 0, 0.2)' }}>
                     <div
                       onClick={() => handleToggleSection('community')}
                       style={{
@@ -6069,7 +6081,7 @@ useEffect(() => {
                     >
                       <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
                         <span style={{
-                          color: 'rgba(255, 255, 255, 0.5)',
+                          color: 'rgba(0, 0, 0, 0.5)',
                           fontSize: '2rem',
                           fontWeight: '300',
                           fontFamily: 'monospace'
@@ -6080,11 +6092,11 @@ useEffect(() => {
                             router.push('/community');
                           }}
                           style={{
-                            color: '#FFFFFF',
+                            color: '#000000',
                             fontSize: isMobile ? '3rem' : '4.5rem',
                             fontWeight: '300',
                             fontFamily: 'Helvetica, Arial, sans-serif',
-                            textShadow: '0 0 10px rgba(255,255,255,0.3)',
+                            textShadow: '0 0 10px rgba(0,0,0,0.3)',
                             cursor: 'pointer',
                           }}
                         >
@@ -6095,7 +6107,7 @@ useEffect(() => {
                         transform: openSection === 'community' ? 'rotate(90deg)' : 'rotate(0deg)',
                         transition: 'transform 0.3s ease'
                       }}>
-                        <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" style={{ filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.5))' }}>
+                        <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2.5" strokeLinecap="round" style={{ filter: 'drop-shadow(0 0 8px rgba(0,0,0,0.5))' }}>
                           <path d="M7 7h10v10" />
                           <path d="M17 7L7 17" />
                         </svg>
@@ -6126,12 +6138,12 @@ useEffect(() => {
                               gap: '1.5rem',
                               padding: '0.5rem 0',
                               cursor: 'pointer',
-                              borderBottom: idx < 3 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none'
+                              borderBottom: idx < 3 ? '1px solid rgba(0, 0, 0, 0.1)' : 'none'
                             }}
                           >
-                            <span style={{ color: 'rgba(255, 255, 255, 0.3)', fontSize: '0.9rem', fontFamily: 'monospace', width: '30px' }}>{item.number}</span>
-                            <span style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '1.2rem', flex: 1, fontWeight: '300', fontFamily: 'Helvetica, Arial, sans-serif' }}>{item.title}</span>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2">
+                            <span style={{ color: 'rgba(0, 0, 0, 0.3)', fontSize: '0.9rem', fontFamily: 'monospace', width: '30px' }}>{item.number}</span>
+                            <span style={{ color: 'rgba(0, 0, 0, 0.8)', fontSize: '1.2rem', flex: 1, fontWeight: '300', fontFamily: 'Helvetica, Arial, sans-serif' }}>{item.title}</span>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(0,0,0,0.5)" strokeWidth="2">
                               <path d="M7 7h10v10" />
                               <path d="M17 7L7 17" />
                             </svg>
@@ -6141,7 +6153,7 @@ useEffect(() => {
                     )}
                   </div>
 
-                  <div style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.2)' }}>
+                  <div style={{ borderBottom: '1px solid rgba(0, 0, 0, 0.2)' }}>
                     <div
                       onClick={() => handleToggleSection('calendar')}
                       style={{
@@ -6154,7 +6166,7 @@ useEffect(() => {
                     >
                       <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
                         <span style={{
-                          color: 'rgba(255, 255, 255, 0.5)',
+                          color: 'rgba(0, 0, 0, 0.5)',
                           fontSize: '2rem',
                           fontWeight: '300',
                           fontFamily: 'monospace'
@@ -6165,11 +6177,11 @@ useEffect(() => {
                             router.push('/calendar');
                           }}
                           style={{
-                            color: '#FFFFFF',
+                            color: '#000000',
                             fontSize: isMobile ? '3rem' : '4.5rem',
                             fontWeight: '300',
                             fontFamily: 'Helvetica, Arial, sans-serif',
-                            textShadow: '0 0 10px rgba(255,255,255,0.3)',
+                            textShadow: '0 0 10px rgba(0,0,0,0.3)',
                             cursor: 'pointer',
                           }}
                         >
@@ -6180,7 +6192,7 @@ useEffect(() => {
                         transform: openSection === 'calendar' ? 'rotate(90deg)' : 'rotate(0deg)',
                         transition: 'transform 0.3s ease'
                       }}>
-                        <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" style={{ filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.5))' }}>
+                        <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2.5" strokeLinecap="round" style={{ filter: 'drop-shadow(0 0 8px rgba(0,0,0,0.5))' }}>
                           <path d="M7 7h10v10" />
                           <path d="M17 7L7 17" />
                         </svg>
@@ -6211,12 +6223,12 @@ useEffect(() => {
                               gap: '1.5rem',
                               padding: '0.5rem 0',
                               cursor: 'pointer',
-                              borderBottom: idx < 3 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none'
+                              borderBottom: idx < 3 ? '1px solid rgba(0, 0, 0, 0.1)' : 'none'
                             }}
                           >
-                            <span style={{ color: 'rgba(255, 255, 255, 0.3)', fontSize: '0.9rem', fontFamily: 'monospace', width: '30px' }}>{item.number}</span>
-                            <span style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '1.2rem', flex: 1, fontWeight: '300', fontFamily: 'Helvetica, Arial, sans-serif' }}>{item.title}</span>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2">
+                            <span style={{ color: 'rgba(0, 0, 0, 0.3)', fontSize: '0.9rem', fontFamily: 'monospace', width: '30px' }}>{item.number}</span>
+                            <span style={{ color: 'rgba(0, 0, 0, 0.8)', fontSize: '1.2rem', flex: 1, fontWeight: '300', fontFamily: 'Helvetica, Arial, sans-serif' }}>{item.title}</span>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(0,0,0,0.5)" strokeWidth="2">
                               <path d="M7 7h10v10" />
                               <path d="M17 7L7 17" />
                             </svg>
@@ -6226,7 +6238,7 @@ useEffect(() => {
                     )}
                   </div>
 
-                  <div style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.2)' }}>
+                  <div style={{ borderBottom: '1px solid rgba(0, 0, 0, 0.2)' }}>
                     <div
                       onClick={() => handleToggleSection('blog')}
                       style={{
@@ -6239,7 +6251,7 @@ useEffect(() => {
                     >
                       <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
                         <span style={{
-                          color: 'rgba(255, 255, 255, 0.5)',
+                          color: 'rgba(0, 0, 0, 0.5)',
                           fontSize: '2rem',
                           fontWeight: '300',
                           fontFamily: 'monospace'
@@ -6250,11 +6262,11 @@ useEffect(() => {
                             router.push('/blog');
                           }}
                           style={{
-                            color: '#FFFFFF',
+                            color: '#000000',
                             fontSize: isMobile ? '3rem' : '4.5rem',
                             fontWeight: '300',
                             fontFamily: 'Helvetica, Arial, sans-serif',
-                            textShadow: '0 0 10px rgba(255,255,255,0.3)',
+                            textShadow: '0 0 10px rgba(0,0,0,0.3)',
                             cursor: 'pointer',
                           }}
                         >
@@ -6265,7 +6277,7 @@ useEffect(() => {
                         transform: openSection === 'blog' ? 'rotate(90deg)' : 'rotate(0deg)',
                         transition: 'transform 0.3s ease'
                       }}>
-                        <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" style={{ filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.5))' }}>
+                        <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2.5" strokeLinecap="round" style={{ filter: 'drop-shadow(0 0 8px rgba(0,0,0,0.5))' }}>
                           <path d="M7 7h10v10" />
                           <path d="M17 7L7 17" />
                         </svg>
@@ -6296,12 +6308,12 @@ useEffect(() => {
                               gap: '1.5rem',
                               padding: '0.5rem 0',
                               cursor: 'pointer',
-                              borderBottom: idx < 3 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none'
+                              borderBottom: idx < 3 ? '1px solid rgba(0, 0, 0, 0.1)' : 'none'
                             }}
                           >
-                            <span style={{ color: 'rgba(255, 255, 255, 0.3)', fontSize: '0.9rem', fontFamily: 'monospace', width: '30px' }}>{item.number}</span>
-                            <span style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '1.2rem', flex: 1, fontWeight: '300', fontFamily: 'Helvetica, Arial, sans-serif' }}>{item.title}</span>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2">
+                            <span style={{ color: 'rgba(0, 0, 0, 0.3)', fontSize: '0.9rem', fontFamily: 'monospace', width: '30px' }}>{item.number}</span>
+                            <span style={{ color: 'rgba(0, 0, 0, 0.8)', fontSize: '1.2rem', flex: 1, fontWeight: '300', fontFamily: 'Helvetica, Arial, sans-serif' }}>{item.title}</span>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(0,0,0,0.5)" strokeWidth="2">
                               <path d="M7 7h10v10" />
                               <path d="M17 7L7 17" />
                             </svg>
@@ -6312,7 +6324,7 @@ useEffect(() => {
                   </div>
 
                   <div style={{
-                    borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+                    borderBottom: '1px solid rgba(0, 0, 0, 0.2)',
                     paddingBottom: '1rem'
                   }}>
                     <div
@@ -6327,7 +6339,7 @@ useEffect(() => {
                     >
                       <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
                         <span style={{
-                          color: 'rgba(255, 255, 255, 0.5)',
+                          color: 'rgba(0, 0, 0, 0.5)',
                           fontSize: '2rem',
                           fontWeight: '300',
                           fontFamily: 'monospace'
@@ -6335,11 +6347,11 @@ useEffect(() => {
                         <span
                           onClick={(e) => e.stopPropagation()}
                           style={{
-                            color: '#FFFFFF',
+                            color: '#000000',
                             fontSize: isMobile ? '3rem' : '4.5rem',
                             fontWeight: '300',
                             fontFamily: 'Helvetica, Arial, sans-serif',
-                            textShadow: '0 0 10px rgba(255,255,255,0.3)',
+                            textShadow: '0 0 10px rgba(0,0,0,0.3)',
                             cursor: 'pointer',
                             display: 'flex',
                             alignItems: 'center',
@@ -6353,7 +6365,7 @@ useEffect(() => {
                         transform: openSection === 'spotify' ? 'rotate(90deg)' : 'rotate(0deg)',
                         transition: 'transform 0.3s ease'
                       }}>
-                        <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" style={{ filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.5))' }}>
+                        <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2.5" strokeLinecap="round" style={{ filter: 'drop-shadow(0 0 8px rgba(0,0,0,0.5))' }}>
                           <path d="M7 7h10v10" />
                           <path d="M17 7L7 17" />
                         </svg>
@@ -6392,13 +6404,13 @@ useEffect(() => {
                             width: isMobile ? '80px' : '100px',
                             height: isMobile ? '80px' : '100px',
                             borderRadius: '8px',
-                            backgroundColor: 'rgba(255,255,255,0.1)',
+                            backgroundColor: 'rgba(0,0,0,0.05)',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            border: '1px solid rgba(255,255,255,0.2)'
+                            border: '1px solid rgba(0,0,0,0.2)'
                           }}>
-                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="1.5">
                               <circle cx="12" cy="12" r="10"/>
                               <path d="M8 11L12 8L16 11" strokeLinecap="round"/>
                               <path d="M8 15L12 12L16 15" strokeLinecap="round"/>
@@ -6406,7 +6418,7 @@ useEffect(() => {
                           </div>
                           <div>
                             <div style={{
-                              color: 'rgba(255,255,255,0.6)',
+                              color: 'rgba(0,0,0,0.6)',
                               fontSize: '0.9rem',
                               marginBottom: '0.3rem',
                               letterSpacing: '1px'
@@ -6414,7 +6426,7 @@ useEffect(() => {
                               PLAYLIST • 5 LAGU
                             </div>
                             <div style={{
-                              color: '#FFFFFF',
+                              color: '#000000',
                               fontSize: isMobile ? '2rem' : '2.5rem',
                               fontWeight: '300',
                               fontFamily: 'Helvetica, Arial, sans-serif'
@@ -6422,7 +6434,7 @@ useEffect(() => {
                               Lagu Kesukaan
                             </div>
                             <div style={{
-                              color: 'rgba(255,255,255,0.6)',
+                              color: 'rgba(0,0,0,0.6)',
                               fontSize: '0.9rem',
                               marginTop: '0.3rem'
                             }}>
@@ -6434,12 +6446,12 @@ useEffect(() => {
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                           <div style={{ marginBottom: '1rem' }}>
                             <div style={{
-                              color: 'rgba(255,255,255,0.8)',
+                              color: 'rgba(0,0,0,0.8)',
                               fontSize: '1.2rem',
                               fontWeight: '300',
                               marginBottom: '1rem',
                               paddingBottom: '0.5rem',
-                              borderBottom: '1px solid rgba(255,255,255,0.1)'
+                              borderBottom: '1px solid rgba(0,0,0,0.1)'
                             }}>
                               Hanin Dhiya
                             </div>
@@ -6453,13 +6465,13 @@ useEffect(() => {
                                   gap: '1.5rem',
                                   padding: '1rem 0',
                                   cursor: 'pointer',
-                                  borderBottom: idx < 1 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none',
-                                  backgroundColor: currentTrack === track.id ? 'rgba(255,255,255,0.05)' : 'transparent',
+                                  borderBottom: idx < 1 ? '1px solid rgba(0, 0, 0, 0.1)' : 'none',
+                                  backgroundColor: currentTrack === track.id ? 'rgba(0,0,0,0.03)' : 'transparent',
                                   transition: 'all 0.2s ease'
                                 }}
                               >
                                 <span style={{
-                                  color: 'rgba(255, 255, 255, 0.3)',
+                                  color: 'rgba(0, 0, 0, 0.3)',
                                   fontSize: '1.2rem',
                                   fontWeight: '300',
                                   fontFamily: 'monospace',
@@ -6472,7 +6484,7 @@ useEffect(() => {
                                   height: '50px',
                                   borderRadius: '4px',
                                   overflow: 'hidden',
-                                  backgroundColor: 'rgba(255,255,255,0.1)',
+                                  backgroundColor: 'rgba(0,0,0,0.05)',
                                   flexShrink: 0
                                 }}>
                                   <div style={{
@@ -6481,7 +6493,7 @@ useEffect(() => {
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
-                                    color: 'rgba(255,255,255,0.5)',
+                                    color: 'rgba(0,0,0,0.5)',
                                     fontSize: '1.5rem'
                                   }}>
                                     ♪
@@ -6489,7 +6501,7 @@ useEffect(() => {
                                 </div>
                                 <div style={{ flex: 1 }}>
                                   <div style={{
-                                    color: '#FFFFFF',
+                                    color: '#000000',
                                     fontSize: '1.5rem',
                                     fontWeight: '300',
                                     fontFamily: 'Helvetica, Arial, sans-serif',
@@ -6498,7 +6510,7 @@ useEffect(() => {
                                     {track.title}
                                   </div>
                                   <div style={{
-                                    color: 'rgba(255, 255, 255, 0.6)',
+                                    color: 'rgba(0, 0, 0, 0.6)',
                                     fontSize: '1rem',
                                     fontWeight: '300'
                                   }}>
@@ -6510,7 +6522,7 @@ useEffect(() => {
                                     width: '8px',
                                     height: '8px',
                                     borderRadius: '50%',
-                                    backgroundColor: 'white',
+                                    backgroundColor: '#000000',
                                     marginRight: '0.5rem'
                                   }} />
                                 )}
@@ -6522,7 +6534,7 @@ useEffect(() => {
                                   justifyContent: 'center',
                                   flexShrink: 0
                                 }}>
-                                  <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                                  <svg width="24" height="24" viewBox="0 0 24 24" fill="#000000">
                                     <polygon points="5 3 19 12 5 21 5 3" />
                                   </svg>
                                 </div>
@@ -6532,12 +6544,12 @@ useEffect(() => {
 
                           <div>
                             <div style={{
-                              color: 'rgba(255,255,255,0.8)',
+                              color: 'rgba(0,0,0,0.8)',
                               fontSize: '1.2rem',
                               fontWeight: '300',
                               marginBottom: '1rem',
                               paddingBottom: '0.5rem',
-                              borderBottom: '1px solid rgba(255,255,255,0.1)'
+                              borderBottom: '1px solid rgba(0,0,0,0.1)'
                             }}>
                               Stand Here Alone
                             </div>
@@ -6551,13 +6563,13 @@ useEffect(() => {
                                   gap: '1.5rem',
                                   padding: '1rem 0',
                                   cursor: 'pointer',
-                                  borderBottom: idx < 2 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none',
-                                  backgroundColor: currentTrack === track.id ? 'rgba(255,255,255,0.05)' : 'transparent',
+                                  borderBottom: idx < 2 ? '1px solid rgba(0, 0, 0, 0.1)' : 'none',
+                                  backgroundColor: currentTrack === track.id ? 'rgba(0,0,0,0.03)' : 'transparent',
                                   transition: 'all 0.2s ease'
                                 }}
                               >
                                 <span style={{
-                                  color: 'rgba(255, 255, 255, 0.3)',
+                                  color: 'rgba(0, 0, 0, 0.3)',
                                   fontSize: '1.2rem',
                                   fontWeight: '300',
                                   fontFamily: 'monospace',
@@ -6570,7 +6582,7 @@ useEffect(() => {
                                   height: '50px',
                                   borderRadius: '4px',
                                   overflow: 'hidden',
-                                  backgroundColor: 'rgba(255,255,255,0.1)',
+                                  backgroundColor: 'rgba(0,0,0,0.05)',
                                   flexShrink: 0
                                 }}>
                                   <div style={{
@@ -6579,7 +6591,7 @@ useEffect(() => {
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
-                                    color: 'rgba(255,255,255,0.5)',
+                                    color: 'rgba(0,0,0,0.5)',
                                     fontSize: '1.5rem'
                                   }}>
                                     ♪
@@ -6587,7 +6599,7 @@ useEffect(() => {
                                 </div>
                                 <div style={{ flex: 1 }}>
                                   <div style={{
-                                    color: '#FFFFFF',
+                                    color: '#000000',
                                     fontSize: '1.5rem',
                                     fontWeight: '300',
                                     fontFamily: 'Helvetica, Arial, sans-serif',
@@ -6596,7 +6608,7 @@ useEffect(() => {
                                     {track.title}
                                   </div>
                                   <div style={{
-                                    color: 'rgba(255, 255, 255, 0.6)',
+                                    color: 'rgba(0, 0, 0, 0.6)',
                                     fontSize: '1rem',
                                     fontWeight: '300'
                                   }}>
@@ -6608,7 +6620,7 @@ useEffect(() => {
                                     width: '8px',
                                     height: '8px',
                                     borderRadius: '50%',
-                                    backgroundColor: 'white',
+                                    backgroundColor: '#000000',
                                     marginRight: '0.5rem'
                                   }} />
                                 )}
@@ -6620,7 +6632,7 @@ useEffect(() => {
                                   justifyContent: 'center',
                                   flexShrink: 0
                                 }}>
-                                  <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                                  <svg width="24" height="24" viewBox="0 0 24 24" fill="#000000">
                                     <polygon points="5 3 19 12 5 21 5 3" />
                                   </svg>
                                 </div>
@@ -6633,9 +6645,9 @@ useEffect(() => {
                           <div style={{
                             textAlign: 'center',
                             padding: '2rem',
-                            color: 'rgba(255,255,255,0.5)',
+                            color: 'rgba(0,0,0,0.5)',
                             fontSize: '1rem',
-                            border: '1px dashed rgba(255,255,255,0.2)',
+                            border: '1px dashed rgba(0,0,0,0.2)',
                             borderRadius: '8px'
                           }}>
                             Pilih lagu di atas untuk memutar
@@ -6647,14 +6659,14 @@ useEffect(() => {
                           justifyContent: 'flex-end',
                           marginTop: '2rem',
                           paddingTop: '1rem',
-                          borderTop: '1px solid rgba(255,255,255,0.1)'
+                          borderTop: '1px solid rgba(0,0,0,0.1)'
                         }}>
                           <a
                             href="https://open.spotify.com"
                             target="_blank"
                             rel="noopener noreferrer"
                             style={{
-                              color: 'rgba(255,255,255,0.8)',
+                              color: 'rgba(0,0,0,0.8)',
                               textDecoration: 'none',
                               fontSize: '0.9rem',
                               display: 'flex',
@@ -6688,7 +6700,7 @@ useEffect(() => {
               justifyContent: 'space-between',
               padding: isMobile ? '0 2rem' : '0 4rem',
               boxSizing: 'border-box',
-              color: 'rgba(255, 255, 255, 0.9)',
+              color: 'rgba(0, 0, 0, 0.9)',
               fontSize: isMobile ? '0.9rem' : '1rem',
               fontWeight: '300',
               fontFamily: 'Helvetica, Arial, sans-serif',
@@ -6711,7 +6723,7 @@ useEffect(() => {
                 position: 'absolute',
                 top: isMobile ? '1.5rem' : '2rem',
                 right: isMobile ? '1.5rem' : '2rem',
-                color: '#FFFFFF',
+                color: '#000000',
                 fontSize: isMobile ? '2.5rem' : '3rem',
                 fontWeight: '300',
                 cursor: 'pointer',
@@ -6725,10 +6737,10 @@ useEffect(() => {
                 width: '60px',
                 height: '60px',
                 borderRadius: '50%',
-                border: '1px solid rgba(255, 255, 255, 0.4)',
+                border: '1px solid rgba(0, 0, 0, 0.4)',
                 backgroundColor: 'rgba(255, 255, 255, 0.03)',
-                textShadow: '0 0 15px rgba(255,255,255,0.5)',
-                boxShadow: '0 0 20px rgba(255,255,255,0.1)'
+                textShadow: '0 0 15px rgba(0,0,0,0.5)',
+                boxShadow: '0 0 20px rgba(0,0,0,0.1)'
               }}
             >
               ×
@@ -6752,7 +6764,7 @@ useEffect(() => {
               left: 0,
               width: '100%',
               height: '100%',
-              backgroundColor: 'black',
+              backgroundColor: '#dbd6c9',
               zIndex: 9998,
               display: 'flex',
               flexDirection: 'column',
@@ -6772,7 +6784,7 @@ useEffect(() => {
               justifyContent: 'space-between',
               alignItems: 'flex-start',
               boxSizing: 'border-box',
-              backgroundColor: 'black',
+              backgroundColor: '#dbd6c9',
               zIndex: 10
             }}>
               <div style={{
@@ -6786,7 +6798,7 @@ useEffect(() => {
                   animate={{ x: 0, opacity: 1 }}
                   transition={{ duration: 0.6, delay: 0.1 }}
                   style={{
-                    color: 'white',
+                    color: '#000000',
                     fontSize: isMobile ? '2.5rem' : '4rem',
                     fontWeight: '300',
                     fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
@@ -6804,7 +6816,7 @@ useEffect(() => {
                   animate={{ x: 0, opacity: 1 }}
                   transition={{ duration: 0.6, delay: 0.2 }}
                   style={{
-                    color: 'white',
+                    color: '#000000',
                     fontSize: isMobile ? '2rem' : '3rem',
                     fontWeight: '400',
                     fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
@@ -6834,7 +6846,7 @@ useEffect(() => {
                       style={{ display: 'flex', flexDirection: 'column' }}
                     >
                       <div style={{
-                        color: 'white',
+                        color: '#000000',
                         fontSize: isMobile ? '1.2rem' : '1.8rem',
                         fontWeight: '500',
                         fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
@@ -6844,7 +6856,7 @@ useEffect(() => {
                         {role.title}
                       </div>
                       <div style={{
-                        color: 'white',
+                        color: '#000000',
                         fontSize: isMobile ? '1rem' : '1.3rem',
                         fontWeight: '400',
                         fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
@@ -6873,7 +6885,7 @@ useEffect(() => {
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ duration: 0.6, delay: 0.3 }}
                   style={{
-                    color: 'white',
+                    color: '#000000',
                     fontSize: isMobile ? '1.5rem' : '2.2rem',
                     fontWeight: '700',
                     fontFamily: '"Formula Condensed", sans-serif',
@@ -6896,7 +6908,7 @@ useEffect(() => {
                     height: isMobile ? '350px' : '600px',
                     overflow: 'hidden',
                     borderRadius: '20px',
-                    border: '1px solid rgba(255,255,255,0.2)',
+                    border: '1px solid rgba(0,0,0,0.2)',
                     marginBottom: isMobile ? '3rem' : '4rem',
                     alignSelf: 'flex-start'
                   }}
@@ -6911,11 +6923,11 @@ useEffect(() => {
                       objectFit: 'cover'
                     }}
                     onError={(e) => {
-                      e.currentTarget.style.backgroundColor = '#333';
+                      e.currentTarget.style.backgroundColor = '#ddd';
                       e.currentTarget.style.display = 'flex';
                       e.currentTarget.style.alignItems = 'center';
                       e.currentTarget.style.justifyContent = 'center';
-                      e.currentTarget.style.color = 'white';
+                      e.currentTarget.style.color = '#000';
                       e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">Menuru Image</div>';
                     }}
                   />
@@ -6926,7 +6938,7 @@ useEffect(() => {
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ duration: 0.6, delay: 0.5 }}
                   style={{
-                    color: 'white',
+                    color: '#000000',
                     fontSize: isMobile ? '1rem' : '1.2rem',
                     fontWeight: '500',
                     fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
@@ -6950,7 +6962,7 @@ useEffect(() => {
                   <motion.a
                     href="/explore"
                     style={{
-                      color: 'white',
+                      color: '#000000',
                       fontSize: isMobile ? '1.8rem' : '2.5rem',
                       fontWeight: '600',
                       fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
@@ -6989,7 +7001,7 @@ useEffect(() => {
                   }}
                 >
                   <div style={{
-                    color: 'white',
+                    color: '#000000',
                     fontSize: isMobile ? '1.1rem' : '1.4rem',
                     fontWeight: '300',
                     fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
@@ -7019,7 +7031,7 @@ useEffect(() => {
                   backgroundColor: 'transparent',
                   borderRadius: '50%',
                   zIndex: 9999,
-                  border: '1px solid rgba(255, 255, 255, 0.3)'
+                  border: '1px solid rgba(0, 0, 0, 0.3)'
                 }}
               >
                 <div 
@@ -7028,7 +7040,7 @@ useEffect(() => {
                     position: 'absolute',
                     width: isMobile ? '30px' : '35px',
                     height: '4px',
-                    backgroundColor: 'white',
+                    backgroundColor: '#000000',
                     borderRadius: '2px',
                     transform: 'rotate(45deg)',
                     transformOrigin: 'center'
@@ -7043,7 +7055,7 @@ useEffect(() => {
                 animate={{ opacity: 0.5 }}
                 transition={{ delay: 1, duration: 1 }}
                 style={{
-                  color: 'white',
+                  color: '#000000',
                   fontSize: isMobile ? '1rem' : '1.2rem',
                   fontWeight: '300',
                   fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
@@ -7073,7 +7085,7 @@ useEffect(() => {
               left: 0,
               width: '100%',
               height: '100%',
-              backgroundColor: 'black',
+              backgroundColor: '#dbd6c9',
               zIndex: 9997,
               display: 'flex',
               flexDirection: 'column',
@@ -7090,15 +7102,15 @@ useEffect(() => {
               justifyContent: 'space-between',
               alignItems: 'center',
               zIndex: 100,
-              backgroundColor: 'black',
-              borderBottom: '1px solid rgba(255,255,255,0.1)'
+              backgroundColor: '#dbd6c9',
+              borderBottom: '1px solid rgba(0,0,0,0.1)'
             }}>
               <motion.button
                 onClick={handleClosePhotoFullPage}
                 style={{
                   backgroundColor: 'transparent',
                   border: 'none',
-                  color: 'white',
+                  color: '#000000',
                   fontSize: isMobile ? '1.8rem' : '2.2rem',
                   cursor: 'pointer',
                   display: 'flex',
@@ -7115,7 +7127,7 @@ useEffect(() => {
               </motion.button>
 
               <div style={{
-                color: 'white',
+                color: '#000000',
                 fontSize: isMobile ? '1.5rem' : '2rem',
                 fontWeight: '600',
                 display: 'flex',
@@ -7160,7 +7172,7 @@ useEffect(() => {
                         position: 'relative',
                         borderRadius: '15px',
                         overflow: 'hidden',
-                        border: '1px solid rgba(255,255,255,0.2)',
+                        border: '1px solid rgba(0,0,0,0.2)',
                         cursor: 'pointer'
                       }}
                       onClick={(e) => {
@@ -7185,11 +7197,11 @@ useEffect(() => {
                           display: 'block'
                         }}
                         onError={(e) => {
-                          e.currentTarget.style.backgroundColor = '#222';
+                          e.currentTarget.style.backgroundColor = '#ddd';
                           e.currentTarget.style.display = 'flex';
                           e.currentTarget.style.alignItems = 'center';
                           e.currentTarget.style.justifyContent = 'center';
-                          e.currentTarget.style.color = '#fff';
+                          e.currentTarget.style.color = '#000';
                           e.currentTarget.innerHTML = `<div style="padding: 2rem; text-align: center;">Photo ${currentPhotoIndex + 1}</div>`;
                         }}
                       />
@@ -7213,7 +7225,7 @@ useEffect(() => {
                     style={{
                       flex: 1,
                       height: '4px',
-                      backgroundColor: index === currentPhotoIndex ? 'white' : 'rgba(255,255,255,0.2)',
+                      backgroundColor: index === currentPhotoIndex ? '#000000' : 'rgba(0,0,0,0.2)',
                       borderRadius: '2px',
                       transition: 'background-color 0.3s ease'
                     }}
@@ -7229,7 +7241,7 @@ useEffect(() => {
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.5rem',
-                color: 'rgba(255,255,255,0.7)',
+                color: 'rgba(0,0,0,0.7)',
                 fontSize: '0.9rem'
               }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -7252,7 +7264,7 @@ useEffect(() => {
                   borderRadius: '12px',
                   padding: '1.5rem',
                   marginBottom: '2rem',
-                  border: '1px solid rgba(255,255,255,0.2)'
+                  border: '1px solid rgba(0,0,0,0.2)'
                 }}>
                   <div style={{
                     display: 'flex',
@@ -7273,9 +7285,9 @@ useEffect(() => {
                           padding: '0.8rem 1rem',
                           paddingRight: '3rem',
                           backgroundColor: 'transparent',
-                          border: '1px solid rgba(255,255,255,0.2)',
+                          border: '1px solid rgba(0,0,0,0.2)',
                           borderRadius: '20px',
-                          color: 'white',
+                          color: '#000000',
                           fontSize: '0.9rem',
                           fontFamily: 'Helvetica, Arial, sans-serif',
                           outline: 'none',
@@ -7287,7 +7299,7 @@ useEffect(() => {
                         right: '1rem',
                         top: '50%',
                         transform: 'translateY(-50%)',
-                        color: 'rgba(255,255,255,0.3)',
+                        color: 'rgba(0,0,0,0.3)',
                         fontSize: '0.75rem'
                       }}>
                         Enter
@@ -7300,7 +7312,7 @@ useEffect(() => {
                         width: '40px',
                         height: '40px',
                         backgroundColor: 'transparent',
-                        border: '1px solid rgba(255, 255, 255, 0.3)',
+                        border: '1px solid rgba(0, 0, 0, 0.3)',
                         borderRadius: '50%',
                         cursor: message.trim() === "" ? 'not-allowed' : 'pointer',
                         display: 'flex',
@@ -7315,7 +7327,7 @@ useEffect(() => {
                         height="18" 
                         viewBox="0 0 24 24" 
                         fill="none" 
-                        stroke="white" 
+                        stroke="#000000" 
                         strokeWidth="2"
                       >
                         <line x1="22" y1="2" x2="11" y2="13"/>
@@ -7325,7 +7337,7 @@ useEffect(() => {
                   </div>
                   <div style={{ textAlign: 'center' }}>
                     <span style={{
-                      color: 'rgba(255,255,255,0.5)',
+                      color: 'rgba(0,0,0,0.5)',
                       fontSize: '0.75rem'
                     }}>
                       {user ? `Login sebagai: ${userDisplayName}` : 'Komentar sebagai: Anonymous'}
@@ -7335,7 +7347,7 @@ useEffect(() => {
 
                 <div style={{
                   marginBottom: '1.5rem',
-                  color: 'white',
+                  color: '#000000',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between'
@@ -7358,7 +7370,7 @@ useEffect(() => {
                 }}>
                   {isLoadingComments ? (
                     <div style={{
-                      color: 'rgba(255,255,255,0.5)',
+                      color: 'rgba(0,0,0,0.5)',
                       textAlign: 'center',
                       padding: '2rem',
                       fontSize: '0.9rem'
@@ -7367,7 +7379,7 @@ useEffect(() => {
                     </div>
                   ) : currentPhotoComments.length === 0 ? (
                     <div style={{
-                      color: 'rgba(255,255,255,0.5)',
+                      color: 'rgba(0,0,0,0.5)',
                       textAlign: 'center',
                       padding: '2rem',
                       fontSize: '0.9rem'
@@ -7388,7 +7400,7 @@ useEffect(() => {
                           backgroundColor: 'transparent',
                           padding: '1rem',
                           borderRadius: '8px',
-                          border: '1px solid rgba(255, 255, 255, 0.2)'
+                          border: '1px solid rgba(0, 0, 0, 0.2)'
                         }}
                       >
                         <div style={{
@@ -7403,13 +7415,13 @@ useEffect(() => {
                             minWidth: '32px',
                             borderRadius: '50%',
                             backgroundColor: 'transparent',
-                            border: '1px solid rgba(255, 255, 255, 0.3)',
+                            border: '1px solid rgba(0, 0, 0, 0.3)',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
                             fontSize: '0.9rem',
                             fontWeight: '600',
-                            color: 'white'
+                            color: '#000000'
                           }}>
                             {comment.userAvatar || comment.user.charAt(0).toUpperCase()}
                           </div>
@@ -7421,7 +7433,7 @@ useEffect(() => {
                               marginBottom: '0.3rem'
                             }}>
                               <span style={{
-                                color: 'rgba(255,255,255,0.9)',
+                                color: 'rgba(0,0,0,0.9)',
                                 fontSize: '0.9rem',
                                 fontWeight: '600'
                               }}>
@@ -7431,17 +7443,17 @@ useEffect(() => {
                                     marginLeft: '0.5rem',
                                     fontSize: '0.7rem',
                                     backgroundColor: 'transparent',
-                                    color: 'white',
+                                    color: '#000000',
                                     padding: '0.1rem 0.4rem',
                                     borderRadius: '4px',
-                                    border: '1px solid rgba(255, 255, 255, 0.3)'
+                                    border: '1px solid rgba(0, 0, 0, 0.3)'
                                   }}>
                                     Anda
                                   </span>
                                 )}
                               </span>
                               <span style={{
-                                color: 'rgba(255,255,255,0.5)',
+                                color: 'rgba(0,0,0,0.5)',
                                 fontSize: '0.75rem',
                                 whiteSpace: 'nowrap'
                               }}>
@@ -7449,7 +7461,7 @@ useEffect(() => {
                               </span>
                             </div>
                             <p style={{
-                              color: 'white',
+                              color: '#000000',
                               margin: 0,
                               fontSize: '0.9rem',
                               lineHeight: 1.4
@@ -7481,7 +7493,7 @@ useEffect(() => {
               position: 'fixed',
               top: isMobile ? '6rem' : '7.5rem',
               right: isMobile ? '1rem' : '2rem',
-              backgroundColor: 'rgba(20, 20, 20, 0.98)',
+              backgroundColor: '#dbd6c9',
               backdropFilter: 'blur(20px)',
               borderRadius: '15px',
               padding: '1rem 0',
@@ -7489,7 +7501,7 @@ useEffect(() => {
               maxWidth: '90vw',
               maxHeight: '80vh',
               zIndex: 1001,
-              border: '1px solid rgba(255, 255, 255, 0.2)',
+              border: '1px solid rgba(0, 0, 0, 0.2)',
               display: 'flex',
               flexDirection: 'column',
               overflow: 'hidden'
@@ -7497,14 +7509,14 @@ useEffect(() => {
           >
             <div style={{
               padding: '0 1.5rem 1rem 1.5rem',
-              borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+              borderBottom: '1px solid rgba(0, 0, 0, 0.1)',
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
               flexShrink: 0
             }}>
               <h3 style={{
-                color: 'white',
+                color: '#000000',
                 fontSize: '1.3rem',
                 fontWeight: '600',
                 margin: 0,
@@ -7513,7 +7525,7 @@ useEffect(() => {
                 alignItems: 'center',
                 gap: '0.5rem'
               }}>
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2">
                   <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
                   <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
                 </svg>
@@ -7526,13 +7538,13 @@ useEffect(() => {
                     transition={{ type: "spring", stiffness: 500, damping: 15 }}
                     style={{
                       backgroundColor: 'transparent',
-                      color: 'white',
+                      color: '#000000',
                       fontSize: '0.8rem',
                       fontWeight: '700',
                       padding: '0.1rem 0.6rem',
                       borderRadius: '10px',
                       marginLeft: '0.5rem',
-                      border: '1px solid rgba(255, 255, 255, 0.3)'
+                      border: '1px solid rgba(0, 0, 0, 0.3)'
                     }}
                   >
                     {notificationCount > 9 ? '9+' : notificationCount}
@@ -7546,8 +7558,8 @@ useEffect(() => {
                     onClick={handleClearNotification}
                     style={{
                       backgroundColor: 'transparent',
-                      border: '1px solid rgba(255, 255, 255, 0.3)',
-                      color: 'white',
+                      border: '1px solid rgba(0, 0, 0, 0.3)',
+                      color: '#000000',
                       fontSize: '0.8rem',
                       fontWeight: '600',
                       padding: '0.3rem 0.8rem',
@@ -7566,8 +7578,8 @@ useEffect(() => {
                   }}
                   style={{
                     backgroundColor: 'transparent',
-                    border: '1px solid rgba(255, 255, 255, 0.3)',
-                    color: 'white',
+                    border: '1px solid rgba(0, 0, 0, 0.3)',
+                    color: '#000000',
                     fontSize: '0.8rem',
                     fontWeight: '600',
                     padding: '0.3rem 0.8rem',
@@ -7591,7 +7603,7 @@ useEffect(() => {
                 <div style={{
                   padding: '3rem 1rem',
                   textAlign: 'center',
-                  color: 'rgba(255, 255, 255, 0.7)',
+                  color: 'rgba(0, 0, 0, 0.7)',
                   fontFamily: 'Helvetica, Arial, sans-serif'
                 }}>
                   <motion.div
@@ -7609,14 +7621,14 @@ useEffect(() => {
                 <div style={{
                   padding: '3rem 1.5rem',
                   textAlign: 'center',
-                  color: 'rgba(255, 255, 255, 0.7)',
+                  color: 'rgba(0, 0, 0, 0.7)',
                   fontFamily: 'Helvetica, Arial, sans-serif'
                 }}>
                   <div style={{ fontSize: '3rem', marginBottom: '1rem', opacity: 0.5 }}>
                     🔔
                   </div>
                   <h4 style={{
-                    color: 'rgba(255, 255, 255, 0.9)',
+                    color: 'rgba(0, 0, 0, 0.9)',
                     fontSize: '1.2rem',
                     margin: '0 0 0.5rem 0'
                   }}>
@@ -7625,7 +7637,7 @@ useEffect(() => {
                   <p style={{
                     fontSize: '0.9rem',
                     margin: '0 0 1.5rem 0',
-                    color: 'rgba(255, 255, 255, 0.6)'
+                    color: 'rgba(0, 0, 0, 0.6)'
                   }}>
                     Check back later for updates
                   </p>
@@ -7648,14 +7660,14 @@ useEffect(() => {
                         transition={{ delay: index * 0.05 }}
                         style={{
                           padding: '1rem 1.5rem',
-                          borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+                          borderBottom: '1px solid rgba(0, 0, 0, 0.1)',
                           cursor: 'pointer',
                           transition: 'all 0.2s ease',
-                          backgroundColor: isReadByUser ? 'transparent' : 'rgba(255, 255, 255, 0.02)',
+                          backgroundColor: isReadByUser ? 'transparent' : 'rgba(0, 0, 0, 0.02)',
                           position: 'relative'
                         }}
                         onClick={() => handleNotificationClick(notification)}
-                        whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.05)' }}
+                        whileHover={{ backgroundColor: 'rgba(0, 0, 0, 0.03)' }}
                       >
                         {!isReadByUser && (
                           <motion.div
@@ -7669,7 +7681,7 @@ useEffect(() => {
                               transform: 'translateY(-50%)',
                               width: '8px',
                               height: '8px',
-                              backgroundColor: 'rgba(255,255,255,0.5)',
+                              backgroundColor: 'rgba(0,0,0,0.5)',
                               borderRadius: '50%'
                             }}
                           />
@@ -7682,12 +7694,12 @@ useEffect(() => {
                             minWidth: '40px',
                             borderRadius: '10px',
                             backgroundColor: 'transparent',
-                            border: '1px solid rgba(255, 255, 255, 0.3)',
+                            border: '1px solid rgba(0, 0, 0, 0.3)',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
                             fontSize: '1.2rem',
-                            color: 'white'
+                            color: '#000000'
                           }}>
                             {getIconByType(notification.type)}
                           </div>
@@ -7703,7 +7715,7 @@ useEffect(() => {
                             }}>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
                                 <h4 style={{
-                                  color: 'white',
+                                  color: '#000000',
                                   fontSize: '1rem',
                                   fontWeight: '600',
                                   margin: 0,
@@ -7713,19 +7725,19 @@ useEffect(() => {
                                 </h4>
                                 <span style={{
                                   backgroundColor: 'transparent',
-                                  color: 'white',
+                                  color: '#000000',
                                   fontSize: '0.7rem',
                                   fontWeight: '600',
                                   padding: '0.1rem 0.5rem',
                                   borderRadius: '4px',
                                   textTransform: 'uppercase',
-                                  border: '1px solid rgba(255, 255, 255, 0.3)'
+                                  border: '1px solid rgba(0, 0, 0, 0.3)'
                                 }}>
                                   {notification.type}
                                 </span>
                               </div>
                               <span style={{
-                                color: 'rgba(255, 255, 255, 0.6)',
+                                color: 'rgba(0, 0, 0, 0.6)',
                                 fontSize: '0.75rem',
                                 whiteSpace: 'nowrap'
                               }}>
@@ -7734,7 +7746,7 @@ useEffect(() => {
                             </div>
                             
                             <p style={{
-                              color: isReadByUser ? 'rgba(255, 255, 255, 0.8)' : 'white',
+                              color: isReadByUser ? 'rgba(0, 0, 0, 0.8)' : '#000000',
                               fontSize: '0.9rem',
                               margin: '0 0 0.5rem 0',
                               lineHeight: 1.4,
@@ -7754,7 +7766,7 @@ useEffect(() => {
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: '0.3rem',
-                                color: 'rgba(255, 255, 255, 0.5)',
+                                color: 'rgba(0, 0, 0, 0.5)',
                                 fontSize: '0.75rem'
                               }}>
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -7767,7 +7779,7 @@ useEffect(() => {
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: '0.3rem',
-                                color: 'rgba(255, 255, 255, 0.5)',
+                                color: 'rgba(0, 0, 0, 0.5)',
                                 fontSize: '0.75rem'
                               }}>
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -7780,7 +7792,7 @@ useEffect(() => {
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: '0.3rem',
-                                color: 'rgba(255, 255, 255, 0.5)',
+                                color: 'rgba(0, 0, 0, 0.5)',
                                 fontSize: '0.75rem'
                               }}>
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -7792,7 +7804,7 @@ useEffect(() => {
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: '0.3rem',
-                                color: 'rgba(255, 255, 255, 0.5)',
+                                color: 'rgba(0, 0, 0, 0.5)',
                                 fontSize: '0.75rem'
                               }}>
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -7808,7 +7820,7 @@ useEffect(() => {
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: '0.3rem',
-                                color: 'rgba(255,255,255,0.5)',
+                                color: 'rgba(0,0,0,0.5)',
                                 fontSize: '0.7rem'
                               }}>
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -7829,7 +7841,7 @@ useEffect(() => {
             
             <div style={{
               padding: '1rem 1.5rem',
-              borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+              borderTop: '1px solid rgba(0, 0, 0, 0.1)',
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
@@ -7837,7 +7849,7 @@ useEffect(() => {
               backgroundColor: 'transparent'
             }}>
               <div style={{
-                color: 'rgba(255, 255, 255, 0.6)',
+                color: 'rgba(0, 0, 0, 0.6)',
                 fontSize: '0.8rem',
                 fontFamily: 'Helvetica, Arial, sans-serif'
               }}>
@@ -7847,7 +7859,7 @@ useEffect(() => {
               <motion.a
                 href="/notifications"
                 style={{
-                  color: 'white',
+                  color: '#000000',
                   fontSize: '0.9rem',
                   fontWeight: '600',
                   textDecoration: 'none',
@@ -7882,20 +7894,20 @@ useEffect(() => {
               position: 'fixed',
               top: isMobile ? '6rem' : '7.5rem',
               right: isMobile ? '1rem' : '2rem',
-              backgroundColor: 'rgba(30, 30, 30, 0.95)',
+              backgroundColor: '#dbd6c9',
               backdropFilter: 'blur(10px)',
               borderRadius: '12px',
               padding: '0.8rem 0',
               minWidth: '200px',
               zIndex: 1001,
-              border: '1px solid rgba(255, 255, 255, 0.2)',
+              border: '1px solid rgba(0, 0, 0, 0.2)',
               display: 'flex',
               flexDirection: 'column'
             }}
           >
             <div style={{
               padding: '0.8rem 1rem',
-              borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+              borderBottom: '1px solid rgba(0, 0, 0, 0.1)',
               display: 'flex',
               alignItems: 'center',
               gap: '0.8rem'
@@ -7905,20 +7917,20 @@ useEffect(() => {
                 height: '40px',
                 borderRadius: '50%',
                 backgroundColor: 'transparent',
-                border: '1px solid rgba(255, 255, 255, 0.3)',
+                border: '1px solid rgba(0, 0, 0, 0.3)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontSize: '1rem',
                 fontWeight: '600',
-                color: 'white',
+                color: '#000000',
                 flexShrink: 0
               }}>
                 {userDisplayName.charAt(0).toUpperCase()}
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{
-                  color: 'white',
+                  color: '#000000',
                   fontSize: '0.9rem',
                   fontWeight: '600',
                   whiteSpace: 'nowrap',
@@ -7928,7 +7940,7 @@ useEffect(() => {
                   {userDisplayName}
                 </div>
                 <div style={{
-                  color: 'rgba(255, 255, 255, 0.7)',
+                  color: 'rgba(0, 0, 0, 0.7)',
                   fontSize: '0.75rem',
                   marginTop: '0.2rem'
                 }}>
@@ -7944,7 +7956,7 @@ useEffect(() => {
                   padding: '0.8rem 1rem',
                   backgroundColor: 'transparent',
                   border: 'none',
-                  color: 'rgba(255, 255, 255, 0.9)',
+                  color: 'rgba(0, 0, 0, 0.9)',
                   fontSize: '0.9rem',
                   fontWeight: '500',
                   textAlign: 'left',
@@ -7972,7 +7984,7 @@ useEffect(() => {
                   padding: '0.8rem 1rem',
                   backgroundColor: 'transparent',
                   border: 'none',
-                  color: 'white',
+                  color: '#000000',
                   fontSize: '0.9rem',
                   fontWeight: '500',
                   textAlign: 'left',
@@ -8024,7 +8036,7 @@ useEffect(() => {
               fontWeight: '300',
               fontFamily: 'Helvetica, Arial, sans-serif',
               letterSpacing: '2px',
-              color: 'white',
+              color: '#000000',
               display: 'flex',
               alignItems: 'center'
             }}>
@@ -8059,7 +8071,7 @@ useEffect(() => {
             <motion.span
               onClick={() => router.push('/docs')}
               style={{
-                color: 'white',
+                color: '#000000',
                 fontSize: isMobile ? '1rem' : '1.2rem',
                 fontWeight: '300',
                 fontFamily: 'Helvetica, Arial, sans-serif',
@@ -8078,7 +8090,7 @@ useEffect(() => {
             <motion.span
               onClick={() => router.push('/update')}
               style={{
-                color: 'white',
+                color: '#000000',
                 fontSize: isMobile ? '1rem' : '1.2rem',
                 fontWeight: '300',
                 fontFamily: 'Helvetica, Arial, sans-serif',
@@ -8097,7 +8109,7 @@ useEffect(() => {
             <motion.span
               onClick={() => router.push('/timeline')}
               style={{
-                color: 'white',
+                color: '#000000',
                 fontSize: isMobile ? '1rem' : '1.2rem',
                 fontWeight: '300',
                 fontFamily: 'Helvetica, Arial, sans-serif',
@@ -8116,7 +8128,7 @@ useEffect(() => {
             <motion.span
               onClick={() => router.push('/chatbot')}
               style={{
-                color: 'white',
+                color: '#000000',
                 fontSize: isMobile ? '1rem' : '1.2rem',
                 fontWeight: '300',
                 fontFamily: 'Helvetica, Arial, sans-serif',
@@ -8135,7 +8147,7 @@ useEffect(() => {
             <motion.span
               onClick={handleCommunityClick}
               style={{
-                color: 'white',
+                color: '#000000',
                 fontSize: isMobile ? '1rem' : '1.2rem',
                 fontWeight: '300',
                 fontFamily: 'Helvetica, Arial, sans-serif',
@@ -8154,7 +8166,7 @@ useEffect(() => {
             <motion.span
               onClick={handleNewsClick}
               style={{
-                color: 'white',
+                color: '#000000',
                 fontSize: isMobile ? '1rem' : '1.2rem',
                 fontWeight: '300',
                 fontFamily: 'Helvetica, Arial, sans-serif',
@@ -8173,7 +8185,7 @@ useEffect(() => {
             <motion.span
               onClick={handleStoriesClick}
               style={{
-                color: 'white',
+                color: '#000000',
                 fontSize: isMobile ? '1rem' : '1.2rem',
                 fontWeight: '300',
                 fontFamily: 'Helvetica, Arial, sans-serif',
@@ -8192,7 +8204,7 @@ useEffect(() => {
             <motion.span
               onClick={handleNoteClick}
               style={{
-                color: 'white',
+                color: '#000000',
                 fontSize: isMobile ? '1rem' : '1.2rem',
                 fontWeight: '300',
                 fontFamily: 'Helvetica, Arial, sans-serif',
@@ -8211,7 +8223,7 @@ useEffect(() => {
             <motion.span
               onClick={() => setShowCalendarModal(true)}
               style={{
-                color: 'white',
+                color: '#000000',
                 fontSize: isMobile ? '1rem' : '1.2rem',
                 fontWeight: '300',
                 fontFamily: 'Helvetica, Arial, sans-serif',
@@ -8230,7 +8242,7 @@ useEffect(() => {
             <motion.span
               onClick={handleOpenMenu}
               style={{
-                color: 'white',
+                color: '#000000',
                 fontSize: isMobile ? '1rem' : '1.2rem',
                 fontWeight: '300',
                 fontFamily: 'Helvetica, Arial, sans-serif',
@@ -8261,7 +8273,7 @@ useEffect(() => {
               height: '40px',
               borderRadius: '50%',
               backgroundColor: 'transparent',
-              border: '1px solid rgba(255,255,255,0.3)',
+              border: '1px solid rgba(0,0,0,0.3)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -8271,8 +8283,8 @@ useEffect(() => {
             onClick={() => setShowNotification(!showNotification)}
             whileHover={{ 
               scale: 1.1,
-              borderColor: 'rgba(255,255,255,0.6)',
-              backgroundColor: 'rgba(255,255,255,0.05)'
+              borderColor: 'rgba(0,0,0,0.6)',
+              backgroundColor: 'rgba(0,0,0,0.03)'
             }}
             whileTap={{ scale: 0.95 }}
           >
@@ -8281,7 +8293,7 @@ useEffect(() => {
               height="20" 
               viewBox="0 0 24 24" 
               fill="none" 
-              stroke="white"
+              stroke="#000000"
               strokeWidth="2"
             >
               <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
@@ -8299,16 +8311,16 @@ useEffect(() => {
                   right: '-2px',
                   minWidth: '18px',
                   height: '18px',
-                  backgroundColor: 'rgba(255,255,255,0.8)',
+                  backgroundColor: 'rgba(0,0,0,0.8)',
                   borderRadius: '50%',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  border: '1px solid white'
+                  border: '1px solid #dbd6c9'
                 }}
               >
                 <span style={{
-                  color: 'black',
+                  color: '#dbd6c9',
                   fontSize: '0.65rem',
                   fontWeight: '700',
                   fontFamily: 'Helvetica, Arial, sans-serif',
@@ -8328,7 +8340,7 @@ useEffect(() => {
               alignItems: 'center',
               gap: '0.5rem',
               backgroundColor: 'transparent',
-              border: '1px solid rgba(255,255,255,0.3)',
+              border: '1px solid rgba(0,0,0,0.3)',
               padding: '0.5rem 1rem',
               borderRadius: '30px',
               cursor: 'pointer',
@@ -8339,13 +8351,13 @@ useEffect(() => {
             transition={{ delay: 1.3, duration: 0.5 }}
             whileHover={{ 
               scale: 1.05,
-              backgroundColor: 'rgba(255,255,255,0.05)',
-              borderColor: 'rgba(255,255,255,0.6)'
+              backgroundColor: 'rgba(0,0,0,0.03)',
+              borderColor: 'rgba(0,0,0,0.6)'
             }}
             whileTap={{ scale: 0.95 }}
           >
             <span style={{
-              color: 'white',
+              color: '#000000',
               fontSize: isMobile ? '0.9rem' : '1rem',
               fontWeight: '400',
               fontFamily: 'Helvetica, Arial, sans-serif'
@@ -8357,7 +8369,7 @@ useEffect(() => {
               height="16"
               viewBox="0 0 24 24"
               fill="none"
-              stroke="white"
+              stroke="#000000"
               strokeWidth="2"
             >
               <path d="M7 17L17 7"/>
@@ -8407,7 +8419,7 @@ useEffect(() => {
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
                 <h2 style={{
-                  color: 'white',
+                  color: '#000000',
                   fontSize: isMobile ? '5rem' : '7rem',
                   fontWeight: '900',
                   textTransform: 'uppercase',
@@ -8436,11 +8448,11 @@ useEffect(() => {
                     height={isMobile ? "45" : "60"}
                     viewBox="0 0 24 24"
                     fill="none"
-                    stroke="white"
+                    stroke="#000000"
                     strokeWidth="2.5"
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    style={{ filter: 'drop-shadow(0 0 10px rgba(255,255,255,0.5))' }}
+                    style={{ filter: 'drop-shadow(0 0 10px rgba(0,0,0,0.5))' }}
                   >
                     <path d="M7 7L21 21" />
                     <path d="M21 7v14H7" />
@@ -8475,14 +8487,14 @@ useEffect(() => {
                         }}
                       >
                         <h2 style={{
-                          color: 'white',
+                          color: '#000000',
                           fontSize: isMobile ? '3.5rem' : '4.5rem',
                           fontWeight: '400',
                           fontFamily: 'Helvetica, Arial, sans-serif',
                           letterSpacing: '1px',
                           margin: 0,
                           lineHeight: 1,
-                          textShadow: '0 0 20px rgba(255,255,255,0.5)',
+                          textShadow: '0 0 20px rgba(0,0,0,0.5)',
                           whiteSpace: 'nowrap'
                         }}>
                           {rotatingWordsList[currentRotatingWordIndex]}
@@ -8502,7 +8514,7 @@ useEffect(() => {
                   bottom: '-10px',
                   left: 0,
                   height: '2px',
-                  backgroundColor: 'rgba(255,255,255,0.5)',
+                  backgroundColor: 'rgba(0,0,0,0.5)',
                   width: '30px'
                 }}
               />
@@ -8516,7 +8528,7 @@ useEffect(() => {
                 alignItems: 'center'
               }}>
                 <h2 style={{
-                  color: 'white',
+                  color: '#000000',
                   fontSize: isMobile ? '5rem' : '7rem',
                   fontWeight: '900',
                   textTransform: 'uppercase',
@@ -8536,8 +8548,8 @@ useEffect(() => {
                   height: isMobile ? '5rem' : '7rem',
                   borderRadius: '10px',
                   overflow: 'hidden',
-                  border: '1px solid rgba(255, 255, 255, 0.3)',
-                  backgroundColor: '#222'
+                  border: '1px solid rgba(0, 0, 0, 0.3)',
+                  backgroundColor: '#ddd'
                 }}>
                   <img 
                     src="images/5.jpg" 
@@ -8554,7 +8566,7 @@ useEffect(() => {
                   position: 'absolute',
                   bottom: '-0.8rem',
                   right: '-1.5rem',
-                  color: 'rgba(255, 255, 255, 0.7)',
+                  color: 'rgba(0, 0, 0, 0.7)',
                   fontSize: isMobile ? '1rem' : '1.2rem',
                   fontWeight: '400',
                   fontFamily: 'Helvetica, Arial, sans-serif',
@@ -8580,8 +8592,8 @@ useEffect(() => {
                 height: isMobile ? '5rem' : '7rem',
                 borderRadius: '10px',
                 overflow: 'hidden',
-                border: '1px solid rgba(255, 255, 255, 0.3)',
-                backgroundColor: '#222'
+                border: '1px solid rgba(0, 0, 0, 0.3)',
+                backgroundColor: '#ddd'
               }}>
                 <img 
                   src="images/5.jpg" 
@@ -8598,7 +8610,7 @@ useEffect(() => {
                 position: 'absolute',
                 bottom: '-0.8rem',
                 right: '-1.5rem',
-                color: 'rgba(255, 255, 255, 0.7)',
+                color: 'rgba(0, 0, 0, 0.7)',
                 fontSize: isMobile ? '1rem' : '1.2rem',
                 fontWeight: '400',
                 fontFamily: 'Helvetica, Arial, sans-serif',
@@ -8620,7 +8632,7 @@ useEffect(() => {
               }}
             >
               <h2 style={{
-                color: 'white',
+                color: '#000000',
                 fontSize: isMobile ? '5rem' : '7rem',
                 fontWeight: '900',
                 textTransform: 'uppercase',
@@ -8658,7 +8670,7 @@ useEffect(() => {
               alignItems: 'center'
             }}>
               <h2 style={{
-                color: 'white',
+                color: '#000000',
                 fontSize: isMobile ? '5rem' : '7rem',
                 fontWeight: '900',
                 textTransform: 'uppercase',
@@ -8677,8 +8689,8 @@ useEffect(() => {
                 height: isMobile ? '5rem' : '7rem',
                 borderRadius: '10px',
                 overflow: 'hidden',
-                border: '1px solid rgba(255, 255, 255, 0.3)',
-                backgroundColor: '#222'
+                border: '1px solid rgba(0, 0, 0, 0.3)',
+                backgroundColor: '#ddd'
               }}>
                 <img 
                   src="images/5.jpg" 
@@ -8695,7 +8707,7 @@ useEffect(() => {
                 position: 'absolute',
                 bottom: '-0.8rem',
                 right: '-1.5rem',
-                color: 'rgba(255, 255, 255, 0.7)',
+                color: 'rgba(0, 0, 0, 0.7)',
                 fontSize: isMobile ? '1rem' : '1.2rem',
                 fontWeight: '400',
                 fontFamily: 'Helvetica, Arial, sans-serif',
@@ -8717,7 +8729,7 @@ useEffect(() => {
                 alignItems: 'center'
               }}>
                 <h2 style={{
-                  color: 'white',
+                  color: '#000000',
                   fontSize: isMobile ? '5rem' : '7rem',
                   fontWeight: '900',
                   textTransform: 'uppercase',
@@ -8750,7 +8762,7 @@ useEffect(() => {
                 whileTap={{ scale: 0.98 }}
               >
                 <span style={{
-                  color: 'white',
+                  color: '#000000',
                   fontSize: isMobile ? '1.2rem' : '1.5rem',
                   fontWeight: '400',
                   fontFamily: 'Helvetica, Arial, sans-serif',
@@ -8764,7 +8776,7 @@ useEffect(() => {
                   height={isMobile ? "24" : "28"}
                   viewBox="0 0 24 24"
                   fill="none"
-                  stroke="white"
+                  stroke="#000000"
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -8773,7 +8785,7 @@ useEffect(() => {
                   <path d="M7 7h10v10" />
                 </svg>
                 <span style={{
-                  color: 'rgba(255,255,255,0.7)',
+                  color: 'rgba(0,0,0,0.7)',
                   fontSize: isMobile ? '1rem' : '1.2rem',
                   fontWeight: '400',
                   fontFamily: 'Helvetica, Arial, sans-serif',
@@ -8799,8 +8811,8 @@ useEffect(() => {
                 height: isMobile ? '5rem' : '7rem',
                 borderRadius: '10px',
                 overflow: 'hidden',
-                border: '1px solid rgba(255, 255, 255, 0.3)',
-                backgroundColor: '#222'
+                border: '1px solid rgba(0, 0, 0, 0.3)',
+                backgroundColor: '#ddd'
               }}>
                 <img 
                   src="images/5.jpg" 
@@ -8817,7 +8829,7 @@ useEffect(() => {
                 position: 'absolute',
                 bottom: '-0.8rem',
                 right: '-1.5rem',
-                color: 'rgba(255, 255, 255, 0.7)',
+                color: 'rgba(0, 0, 0, 0.7)',
                 fontSize: isMobile ? '1rem' : '1.2rem',
                 fontWeight: '400',
                 fontFamily: 'Helvetica, Arial, sans-serif',
@@ -8839,7 +8851,7 @@ useEffect(() => {
               }}
             >
               <h2 style={{
-                color: 'white',
+                color: '#000000',
                 fontSize: isMobile ? '5rem' : '7rem',
                 fontWeight: '900',
                 textTransform: 'uppercase',
@@ -8878,5 +8890,9 @@ useEffect(() => {
         </AnimatePresence>
       </div>
     </div>
+  )}
+</div>
+</div>
+</div>
   );
 }
