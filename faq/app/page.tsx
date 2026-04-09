@@ -31,6 +31,27 @@ export default function HomePage(): React.JSX.Element {
         pointerEvents: 'none'
       }} />
       
+      {/* Teks MENURU di pojok kanan atas frame */}
+      <div style={{
+        position: 'fixed',
+        top: '2rem',
+        right: '2rem',
+        padding: '0.5rem 0',
+        zIndex: 2,
+        pointerEvents: 'none'
+      }}>
+        <span style={{
+          fontFamily: 'ev-light, sans-serif',
+          fontWeight: 400,
+          color: 'rgb(0, 20, 70)',
+          fontSize: '13px',
+          lineHeight: '13px',
+          letterSpacing: 'normal'
+        }}>
+          MENURU
+        </span>
+      </div>
+      
       {/* Area konten utama dengan padding yang sama agar konten berada di dalam frame */}
       <div style={{
         position: 'relative',
