@@ -144,20 +144,22 @@ export default function HomePage(): React.JSX.Element {
         width: '100%'
       }}>
         <span 
-          ref={menuruBigRef}
-          style={{
-            fontFamily: 'a2g, monospace, sans-serif',
-            fontWeight: 900,
-            fontStyle: 'normal',
-            color: 'rgb(140, 0, 0)',
-            fontSize: isMobile ? '200px' : '950px',
-            lineHeight: '0.9',
-            textAlign: 'left',
-            display: 'inline-block',
-            whiteSpace: 'nowrap'
-          }}>
-          MENURU
-        </span>
+  ref={menuruBigRef}
+  style={{
+    fontFamily: "'Bebas Neue', sans-serif",
+    fontWeight: 400,
+    fontStyle: 'normal',
+    color: 'rgb(140, 0, 0)',
+    fontSize: isMobile ? '200px' : '950px',
+    lineHeight: '0.8',
+    letterSpacing: '-10px',
+    transform: 'scaleY(1.15)',
+    textAlign: 'left',
+    display: 'inline-block',
+    whiteSpace: 'nowrap'
+  }}>
+  MENURU
+</span>
       </div>
       
       {/* Area konten tambahan untuk scroll */}
