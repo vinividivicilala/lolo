@@ -54,7 +54,7 @@ export default function HomePage(): React.JSX.Element {
       flexDirection: 'column',
       justifyContent: 'center',
       alignItems: 'center',
-      fontFamily: 'Helvetica, Arial, sans-serif',
+      fontFamily: 'ev-light, sans-serif',
       WebkitFontSmoothing: 'antialiased',
       MozOsxFontSmoothing: 'grayscale'
     }}>
@@ -71,7 +71,7 @@ export default function HomePage(): React.JSX.Element {
         pointerEvents: 'none'
       }} />
       
-      {/* Teks MENURU - dengan font override */}
+      {/* Teks MENURU */}
       <div style={{
         position: 'fixed',
         top: 'calc(2rem + 16px)',
@@ -80,7 +80,7 @@ export default function HomePage(): React.JSX.Element {
         pointerEvents: 'none'
       }}>
         <span style={{
-          fontFamily: 'Helvetica, Arial, sans-serif',
+          fontFamily: 'ev-light, sans-serif',
           fontWeight: 400,
           fontStyle: 'normal',
           color: 'rgb(0, 20, 70)',
