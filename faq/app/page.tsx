@@ -58,22 +58,26 @@ export default function HomePage(): React.JSX.Element {
     checkMobile();
     window.addEventListener('resize', checkMobile);
 
-    // Animasi GSAP Scroll untuk teks MENURU besar
+    // Animasi GSAP Scroll untuk teks MENURU besar - efek brutal
     if (menuruBigRef.current) {
       gsap.fromTo(menuruBigRef.current,
         {
           x: 0,
-          opacity: 1
+          opacity: 1,
+          scale: 1,
+          rotate: 0
         },
         {
-          x: -500,
+          x: -800,
           opacity: 0,
-          duration: 1.5,
-          ease: "power2.out",
+          scale: 0.5,
+          rotate: -10,
+          duration: 2,
+          ease: "power4.inOut",
           scrollTrigger: {
             trigger: menuruBigRef.current,
             start: "top top",
-            end: "bottom top",
+            end: "bottom center",
             scrub: 1.5,
             pin: false
           }
@@ -134,30 +138,35 @@ export default function HomePage(): React.JSX.Element {
         </span>
       </div>
       
-      {/* Teks MENURU besar dengan animasi GSAP Scroll */}
+      {/* Teks MENURU besar dengan gaya BRUTAL */}
       <div style={{
         position: 'relative',
         zIndex: 2,
         padding: '2rem',
         paddingTop: 'calc(2rem + 80px)',
         boxSizing: 'border-box',
-        width: '100%'
+        width: '100%',
+        overflow: 'hidden'
       }}>
-    <span 
-  ref={menuruBigRef}
-  style={{
-    fontFamily: "'Anton', sans-serif",
-    fontWeight: 400,
-    color: 'rgb(140, 0, 0)',
-    fontSize: isMobile ? '200px' : '950px',
-    letterSpacing: '-15px',
-    lineHeight: '0.75',
-    transform: 'scaleX(0.75) scaleY(1.2)',
-    display: 'inline-block',
-    whiteSpace: 'nowrap'
-  }}>
-  MENURU
-</span>
+        <span 
+          ref={menuruBigRef}
+          style={{
+            fontFamily: "'Impact', 'Arial Black', 'Helvetica Black', 'Franklin Gothic Heavy', 'a2g', monospace, sans-serif",
+            fontWeight: 900,
+            fontStyle: 'normal',
+            color: 'rgb(140, 0, 0)',
+            fontSize: isMobile ? '180px' : '900px',
+            lineHeight: '0.8',
+            textAlign: 'left',
+            display: 'inline-block',
+            whiteSpace: 'nowrap',
+            letterSpacing: '-15px',
+            textTransform: 'uppercase',
+            textShadow: '8px 8px 0px rgba(0,0,0,0.3)',
+            WebkitTextStroke: '2px rgba(140,0,0,0.3)'
+          }}>
+          MENURU
+        </span>
       </div>
       
       {/* Area konten tambahan untuk scroll */}
