@@ -42,64 +42,2004 @@ if (typeof window !== "undefined") {
   auth = getAuth(app);
 }
 
-export default function HomePage(): React.JSX.Element {
+// Emoticon List untuk Reactions
+const EMOTICONS = [
+  { id: 'like', emoji: '👍', label: 'Suka' },
+  { id: 'heart', emoji: '❤️', label: 'Cinta' },
+  { id: 'laugh', emoji: '😂', label: 'Lucu' },
+  { id: 'wow', emoji: '😮', label: 'Kagum' },
+  { id: 'sad', emoji: '😢', label: 'Sedih' },
+  { id: 'angry', emoji: '😠', label: 'Marah' }
+];
+
+interface Reply {
+  id: string;
+  userId: string;
+  userName: string;
+  userEmail?: string;
+  userPhoto?: string;
+  text: string;
+  createdAt: Timestamp;
+  likes: number;
+  likedBy: string[];
+}
+
+interface Comment {
+  id: string;
+  userId: string;
+  userName: string;
+  userEmail?: string;
+  userPhoto?: string;
+  text: string;
+  createdAt: Timestamp;
+  likes: number;
+  likedBy: string[];
+  replies: Reply[];
+}
+
+interface Notification {
+  id: string;
+  title: string;
+  message: string;
+  type: string;
+  senderId: string;
+  senderName: string;
+  senderEmail?: string;
+  recipientType: 'all' | 'specific' | 'email';
+  recipientIds?: string[];
+  recipientEmails?: string[];
+  createdAt: Timestamp;
+  userReads: Record<string, boolean>;
+  views: number;
+  likes: string[];
+  comments: Comment[];
+  status?: string;
+  reactions?: Record<string, number>;
+  links: {
+    youtube: string[];
+    pdf: string[];
+    images: string[];
+    videos: string[];
+    websites: string[];
+  };
+  hasLinks: boolean;
+  linkCount: number;
+}
+
+export default function NotificationsPage(): React.JSX.Element {
+  const router = useRouter();
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const [user, setUser] = useState<any>(null);
+  const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
+  const [currentTime, setCurrentTime] = useState<string>('');
+  
+  // Comment states
+  const [commentText, setCommentText] = useState('');
+  const [replyText, setReplyText] = useState('');
+  const [replyingTo, setReplyingTo] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showCommentForm, setShowCommentForm] = useState(false);
+  
+  // Reaction states
+  const [showEmoticonPicker, setShowEmoticonPicker] = useState(false);
+  const [notificationReactions, setNotificationReactions] = useState<Record<string, number>>({});
+  const [userReactions, setUserReactions] = useState<string[]>([]);
+
+  // YouTube player states
+  const [playingVideo, setPlayingVideo] = useState<string | null>(null);
+
+  // Update current time
+  useEffect(() => {
+    const updateTime = () => {
+      const now = new Date();
+      setCurrentTime(now.toLocaleString('id-ID', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      }));
+    };
+    
+    updateTime();
+    const timer = setInterval(updateTime, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // Check authentication
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // Get current user ID
+  const getCurrentUserId = () => {
+    if (user) return user.uid;
+    let anonymousId = localStorage.getItem('anonymous_id');
+    if (!anonymousId) {
+      anonymousId = 'anon_' + Date.now();
+      localStorage.setItem('anonymous_id', anonymousId);
+    }
+    return anonymousId;
+  };
+
+  // Get current user name
+  const getCurrentUserName = () => {
+    if (user) {
+      return user.displayName || user.email?.split('@')[0] || 'User';
+    }
+    let anonymousName = localStorage.getItem('anonymous_name');
+    if (!anonymousName) {
+      anonymousName = 'Anonymous ' + Math.floor(Math.random() * 1000);
+      localStorage.setItem('anonymous_name', anonymousName);
+    }
+    return anonymousName;
+  };
+
+  // Get current user photo
+  const getCurrentUserPhoto = () => {
+    if (user?.photoURL) return user.photoURL;
+    return `https://ui-avatars.com/api/?name=${getCurrentUserName()}&background=random&color=fff`;
+  };
+
+  // Load notifications - FILTERED BY USER
+  useEffect(() => {
+    if (!db) return;
+
+    setIsLoading(true);
+    const notificationsRef = collection(db, 'notifications');
+    const q = query(notificationsRef, orderBy('createdAt', 'desc'));
+    
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const notificationsData: Notification[] = [];
+      let unread = 0;
+      const currentUserId = getCurrentUserId();
+      const currentUserEmail = user?.email;
+      
+      querySnapshot.docs.forEach((doc) => {
+        const data = doc.data();
+        if (data.isDeleted) return;
+        
+        // Determine if this notification should be shown to current user
+        let shouldShow = false;
+        
+        switch (data.recipientType) {
+          case 'all':
+            shouldShow = true;
+            break;
+            
+          case 'specific':
+            const recipientIds = data.recipientIds || [];
+            if (recipientIds.includes(currentUserId) || 
+                (user && recipientIds.includes(user.uid))) {
+              shouldShow = true;
+            }
+            break;
+            
+          case 'email':
+            const recipientEmails = data.recipientEmails || [];
+            if (currentUserEmail && recipientEmails.includes(currentUserEmail)) {
+              shouldShow = true;
+            }
+            break;
+            
+          default:
+            shouldShow = false;
+        }
+        
+        if (shouldShow) {
+          const linksData = data.links || {};
+          
+          const notification: Notification = {
+            id: doc.id,
+            title: data.title || '',
+            message: data.message || '',
+            type: data.type || 'info',
+            senderId: data.senderId || '',
+            senderName: data.senderName || 'System',
+            senderEmail: data.senderEmail,
+            recipientType: data.recipientType || 'all',
+            recipientIds: data.recipientIds || [],
+            recipientEmails: data.recipientEmails || [],
+            createdAt: data.createdAt || Timestamp.now(),
+            userReads: data.userReads || {},
+            views: data.views || 0,
+            likes: data.likes || [],
+            comments: data.comments || [],
+            status: data.status || 'sent',
+            reactions: data.reactions || {},
+            links: {
+              youtube: Array.isArray(linksData.youtube) ? linksData.youtube : [],
+              pdf: Array.isArray(linksData.pdf) ? linksData.pdf : [],
+              images: Array.isArray(linksData.images) ? linksData.images : [],
+              videos: Array.isArray(linksData.videos) ? linksData.videos : [],
+              websites: Array.isArray(linksData.websites) ? linksData.websites : []
+            },
+            hasLinks: data.hasLinks === true || 
+                      (linksData && Object.values(linksData).some(arr => arr && arr.length > 0)),
+            linkCount: data.linkCount || 0
+          };
+          
+          if (!notification.userReads[currentUserId]) {
+            unread++;
+          }
+          
+          notificationsData.push(notification);
+        }
+      });
+      
+      setNotifications(notificationsData);
+      setUnreadCount(unread);
+      setIsLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, [db, user]);
+
+  // Load user reactions for selected notification
+  useEffect(() => {
+    if (!selectedNotification || !user) return;
+    
+    const loadUserReactions = async () => {
+      try {
+        const reactionKey = `user_${user.uid}_${selectedNotification.id}`;
+        const saved = localStorage.getItem(reactionKey);
+        if (saved) {
+          setUserReactions(JSON.parse(saved));
+        } else {
+          setUserReactions([]);
+        }
+      } catch (error) {
+        console.error("Error loading user reactions:", error);
+      }
+    };
+    
+    loadUserReactions();
+  }, [selectedNotification, user]);
+
+  // Set notification reactions when selected notification changes
+  useEffect(() => {
+    if (selectedNotification?.reactions) {
+      setNotificationReactions(selectedNotification.reactions);
+    } else {
+      setNotificationReactions({});
+    }
+  }, [selectedNotification]);
+
+  // Mark as read
+  const markAsRead = async (notificationId: string) => {
+    if (!db) return;
+    
+    try {
+      const currentUserId = getCurrentUserId();
+      const notificationRef = doc(db, 'notifications', notificationId);
+      
+      await updateDoc(notificationRef, {
+        [`userReads.${currentUserId}`]: true,
+        views: firestoreIncrement(1)
+      });
+      
+      setUnreadCount(prev => Math.max(0, prev - 1));
+    } catch (error) {
+      console.error("Error marking as read:", error);
+    }
+  };
+
+  // Toggle like on notification
+  const toggleNotificationLike = async (notificationId: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!db) return;
+    if (!user) {
+      alert('Silakan login untuk menyukai notifikasi');
+      return;
+    }
+    
+    try {
+      const currentUserId = getCurrentUserId();
+      const notificationRef = doc(db, 'notifications', notificationId);
+      const notification = notifications.find(n => n.id === notificationId);
+      
+      if (!notification) return;
+      
+      if (notification.likes.includes(currentUserId)) {
+        // Unlike
+        await updateDoc(notificationRef, {
+          likes: arrayRemove(currentUserId)
+        });
+      } else {
+        // Like
+        await updateDoc(notificationRef, {
+          likes: arrayUnion(currentUserId)
+        });
+      }
+    } catch (error) {
+      console.error("Error toggling like:", error);
+    }
+  };
+
+  // Handle reaction (emoticon)
+  const handleReaction = async (emoticonId: string) => {
+    if (!db || !selectedNotification) return;
+    if (!user) {
+      alert('Silakan login untuk memberikan reaksi');
+      return;
+    }
+    
+    try {
+      const notificationRef = doc(db, 'notifications', selectedNotification.id);
+      const reactionKey = `reactions.${emoticonId}`;
+      const currentCount = notificationReactions[emoticonId] || 0;
+      
+      if (userReactions.includes(emoticonId)) {
+        // Remove reaction
+        await updateDoc(notificationRef, {
+          [reactionKey]: currentCount - 1
+        });
+        
+        const newUserReactions = userReactions.filter(id => id !== emoticonId);
+        setUserReactions(newUserReactions);
+        localStorage.setItem(`user_${user.uid}_${selectedNotification.id}`, JSON.stringify(newUserReactions));
+        
+        setNotificationReactions(prev => ({
+          ...prev,
+          [emoticonId]: currentCount - 1
+        }));
+      } else {
+        // Add reaction
+        await updateDoc(notificationRef, {
+          [reactionKey]: currentCount + 1
+        });
+        
+        const newUserReactions = [...userReactions, emoticonId];
+        setUserReactions(newUserReactions);
+        localStorage.setItem(`user_${user.uid}_${selectedNotification.id}`, JSON.stringify(newUserReactions));
+        
+        setNotificationReactions(prev => ({
+          ...prev,
+          [emoticonId]: currentCount + 1
+        }));
+      }
+    } catch (error) {
+      console.error("Error handling reaction:", error);
+    }
+  };
+
+  // Add comment
+  const addComment = async (notificationId: string) => {
+    if (!db || !commentText.trim()) return;
+    if (!user) {
+      alert('Silakan login untuk berkomentar');
+      return;
+    }
+    
+    setIsSubmitting(true);
+    
+    try {
+      const currentUserId = getCurrentUserId();
+      const currentUserName = getCurrentUserName();
+      const notificationRef = doc(db, 'notifications', notificationId);
+      
+      const newComment = {
+        id: Date.now().toString(),
+        userId: currentUserId,
+        userName: currentUserName,
+        userEmail: user?.email,
+        userPhoto: getCurrentUserPhoto(),
+        text: commentText.trim(),
+        createdAt: Timestamp.now(),
+        likes: 0,
+        likedBy: [],
+        replies: []
+      };
+      
+      await updateDoc(notificationRef, {
+        comments: arrayUnion(newComment)
+      });
+      
+      setCommentText('');
+      setShowCommentForm(false);
+    } catch (error) {
+      console.error("Error adding comment:", error);
+      alert('Failed to add comment');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Add reply
+  const addReply = async (notificationId: string, commentId: string) => {
+    if (!db || !replyText.trim()) return;
+    if (!user) {
+      alert('Silakan login untuk membalas');
+      return;
+    }
+    
+    setIsSubmitting(true);
+    
+    try {
+      const currentUserId = getCurrentUserId();
+      const currentUserName = getCurrentUserName();
+      const notificationRef = doc(db, 'notifications', notificationId);
+      const notification = notifications.find(n => n.id === notificationId);
+      
+      if (notification) {
+        const updatedComments = notification.comments.map(comment => {
+          if (comment.id === commentId) {
+            const newReply = {
+              id: Date.now().toString(),
+              userId: currentUserId,
+              userName: currentUserName,
+              userEmail: user?.email,
+              userPhoto: getCurrentUserPhoto(),
+              text: replyText.trim(),
+              createdAt: Timestamp.now(),
+              likes: 0,
+              likedBy: []
+            };
+            return {
+              ...comment,
+              replies: [...(comment.replies || []), newReply]
+            };
+          }
+          return comment;
+        });
+        
+        await updateDoc(notificationRef, {
+          comments: updatedComments
+        });
+      }
+      
+      setReplyText('');
+      setReplyingTo(null);
+    } catch (error) {
+      console.error("Error adding reply:", error);
+      alert('Failed to add reply');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Toggle like on comment or reply
+  const toggleLike = async (
+    notificationId: string, 
+    commentId: string, 
+    e: React.MouseEvent,
+    replyId?: string
+  ) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!db) return;
+    if (!user) {
+      alert('Silakan login untuk menyukai');
+      return;
+    }
+    
+    try {
+      const currentUserId = getCurrentUserId();
+      const notificationRef = doc(db, 'notifications', notificationId);
+      const notification = notifications.find(n => n.id === notificationId);
+      
+      if (!notification) return;
+      
+      const updatedComments = notification.comments.map(comment => {
+        if (comment.id === commentId) {
+          if (replyId) {
+            // Toggle like on reply
+            const updatedReplies = comment.replies.map(reply => {
+              if (reply.id === replyId) {
+                const likedBy = reply.likedBy || [];
+                const likes = reply.likes || 0;
+                
+                if (likedBy.includes(currentUserId)) {
+                  return { 
+                    ...reply, 
+                    likes: likes - 1,
+                    likedBy: likedBy.filter(id => id !== currentUserId)
+                  };
+                } else {
+                  return { 
+                    ...reply, 
+                    likes: likes + 1,
+                    likedBy: [...likedBy, currentUserId]
+                  };
+                }
+              }
+              return reply;
+            });
+            return { ...comment, replies: updatedReplies };
+          } else {
+            // Toggle like on comment
+            const likedBy = comment.likedBy || [];
+            const likes = comment.likes || 0;
+            
+            if (likedBy.includes(currentUserId)) {
+              return { 
+                ...comment, 
+                likes: likes - 1,
+                likedBy: likedBy.filter(id => id !== currentUserId)
+              };
+            } else {
+              return { 
+                ...comment, 
+                likes: likes + 1,
+                likedBy: [...likedBy, currentUserId]
+              };
+            }
+          }
+        }
+        return comment;
+      });
+      
+      await updateDoc(notificationRef, {
+        comments: updatedComments
+      });
+    } catch (error) {
+      console.error("Error toggling like:", error);
+    }
+  };
+
+  // Format time ago
+  const timeAgo = (timestamp: Timestamp) => {
+    if (!timestamp) return '';
+    
+    const date = timestamp.toDate();
+    const now = new Date();
+    const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+    
+    if (seconds < 60) return `${seconds} detik yang lalu`;
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes} menit yang lalu`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours} jam yang lalu`;
+    const days = Math.floor(hours / 24);
+    if (days < 7) return `${days} hari yang lalu`;
+    
+    return date.toLocaleDateString('id-ID', { 
+      day: 'numeric', 
+      month: 'short',
+      year: 'numeric'
+    });
+  };
+
+  // Get YouTube video ID from URL
+  const getYouTubeVideoId = (url: string): string | null => {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
+  };
+
+  // Get YouTube thumbnail URL
+  const getYouTubeThumbnail = (url: string): string | null => {
+    const videoId = getYouTubeVideoId(url);
+    return videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : null;
+  };
+
+  // Get YouTube embed URL
+  const getYouTubeEmbedUrl = (url: string): string | null => {
+    const videoId = getYouTubeVideoId(url);
+    return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
+  };
+
+  // Play YouTube video
+  const playYouTubeVideo = (videoUrl: string) => {
+    setPlayingVideo(videoUrl);
+  };
+
+  // Close video player
+  const closeVideoPlayer = () => {
+    setPlayingVideo(null);
+  };
+
+  // SVG Components
+  const NorthEastArrow = () => (
+    <svg 
+      width="64" 
+      height="64" 
+      viewBox="0 0 24 24" 
+      fill="none" 
+      stroke="currentColor" 
+      strokeWidth="1"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M7 7L17 17" />
+      <path d="M17 7H7" />
+      <path d="M7 17V7" />
+    </svg>
+  );
+
+  const SouthEastArrow = () => (
+    <svg 
+      width="64" 
+      height="64" 
+      viewBox="0 0 24 24" 
+      fill="none" 
+      stroke="currentColor" 
+      strokeWidth="1"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M5 5L19 19" />
+      <path d="M19 5H5" />
+      <path d="M5 19V5" />
+    </svg>
+  );
+
+  // Like Icon
+  const LikeIcon = ({ filled = false }: { filled?: boolean }) => (
+    <svg 
+      width="20" 
+      height="20" 
+      viewBox="0 0 24 24" 
+      fill={filled ? "currentColor" : "none"} 
+      stroke="currentColor" 
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>
+    </svg>
+  );
+
+  const CommentIcon = () => (
+    <svg 
+      width="20" 
+      height="20" 
+      viewBox="0 0 24 24" 
+      fill="none" 
+      stroke="currentColor" 
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+    </svg>
+  );
+
+  const ReplyIcon = () => (
+    <svg 
+      width="16" 
+      height="16" 
+      viewBox="0 0 24 24" 
+      fill="none" 
+      stroke="currentColor" 
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+      <polyline points="10 11 13 14 10 17"/>
+    </svg>
+  );
+
+  const SendIcon = () => (
+    <svg 
+      width="16" 
+      height="16" 
+      viewBox="0 0 24 24" 
+      fill="none" 
+      stroke="currentColor" 
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <line x1="22" y1="2" x2="11" y2="13"/>
+      <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+    </svg>
+  );
+
+  // Link Icons
+  const YoutubeIcon = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+    </svg>
+  );
+
+  const PdfIcon = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+      <polyline points="14 2 14 8 20 8"/>
+      <path d="M9 15h6"/>
+      <path d="M9 18h6"/>
+      <path d="M9 12h6"/>
+    </svg>
+  );
+
+  const ImageIcon = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <rect x="2" y="2" width="20" height="20" rx="2" ry="2"/>
+      <circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"/>
+      <polyline points="21 15 16 10 5 21"/>
+    </svg>
+  );
+
+  const VideoIcon = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <rect x="2" y="4" width="20" height="16" rx="2"/>
+      <path d="M9 8l6 4-6 4V8z"/>
+    </svg>
+  );
+
+  const WebsiteIcon = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <circle cx="12" cy="12" r="10"/>
+      <line x1="2" y1="12" x2="22" y2="12"/>
+      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+    </svg>
+  );
+
+  const PlayIcon = () => (
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
+      <circle cx="12" cy="12" r="10" fill="rgba(0,0,0,0.5)" stroke="none"/>
+      <polygon points="10,8 16,12 10,16" fill="white"/>
+    </svg>
+  );
+
+  // YouTube Thumbnail Component
+  const YouTubeThumbnail = ({ url, onClick }: { url: string; onClick: () => void }) => {
+    const thumbnailUrl = getYouTubeThumbnail(url);
+    const videoId = getYouTubeVideoId(url);
+    
+    if (!thumbnailUrl || !videoId) {
+      return (
+        <a 
+          href={url} 
+          target="_blank" 
+          rel="noopener noreferrer"
+          style={{
+            display: 'block',
+            padding: '15px',
+            background: 'rgba(255,0,0,0.1)',
+            borderRadius: '8px',
+            color: '#ff0000',
+            textDecoration: 'none',
+            border: '1px solid rgba(255,0,0,0.3)'
+          }}
+        >
+          <YoutubeIcon />
+          <span style={{ marginLeft: '10px' }}>Watch on YouTube</span>
+        </a>
+      );
+    }
+
+    return (
+      <div 
+        onClick={onClick}
+        style={{
+          position: 'relative',
+          width: '100%',
+          cursor: 'pointer',
+          borderRadius: '12px',
+          overflow: 'hidden',
+          aspectRatio: '16/9',
+          background: '#000'
+        }}
+      >
+        <img 
+          src={thumbnailUrl}
+          alt="YouTube thumbnail"
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover'
+          }}
+          onError={(e) => {
+            e.currentTarget.src = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+          }}
+        />
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: 'rgba(0,0,0,0.3)',
+          transition: 'background 0.3s'
+        }}>
+          <PlayIcon />
+        </div>
+      </div>
+    );
+  };
+
+  // Link Preview Component - LANGSUNG DITAMPILKAN TANPA TOMBOL
+  const LinkPreview = ({ notification }: { notification: Notification }) => {
+    const links = notification.links || {
+      youtube: [],
+      pdf: [],
+      images: [],
+      videos: [],
+      websites: []
+    };
+    
+    const hasLinks = notification.hasLinks || 
+                     links.youtube.length > 0 ||
+                     links.pdf.length > 0 ||
+                     links.images.length > 0 ||
+                     links.videos.length > 0 ||
+                     links.websites.length > 0;
+    
+    if (!hasLinks) return null;
+    
+    return (
+      <div style={{ marginTop: '30px', marginBottom: '20px' }}>
+        {/* YouTube Links */}
+        {links.youtube && links.youtube.length > 0 && (
+          <div style={{ marginBottom: '30px' }}>
+            <h4 style={{ 
+              fontSize: '1.2rem', 
+              marginBottom: '15px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              color: '#ff0000'
+            }}>
+              <YoutubeIcon /> YouTube Videos ({links.youtube.length})
+            </h4>
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+              gap: '15px'
+            }}>
+              {links.youtube.map((url, index) => (
+                <YouTubeThumbnail 
+                  key={index} 
+                  url={url} 
+                  onClick={() => {
+                    if (selectedNotification) {
+                      setPlayingVideo(url);
+                    }
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Image Links */}
+        {links.images && links.images.length > 0 && (
+          <div style={{ marginBottom: '30px' }}>
+            <h4 style={{ 
+              fontSize: '1.2rem', 
+              marginBottom: '15px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              color: '#4ecdc4'
+            }}>
+              <ImageIcon /> Images ({links.images.length})
+            </h4>
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+              gap: '15px'
+            }}>
+              {links.images.map((url, index) => (
+                <a
+                  key={index}
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ textDecoration: 'none' }}
+                >
+                  <img
+                    src={url}
+                    alt={`Image ${index + 1}`}
+                    style={{
+                      width: '100%',
+                      height: '150px',
+                      objectFit: 'cover',
+                      borderRadius: '12px',
+                      border: '1px solid rgba(255,255,255,0.1)'
+                    }}
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* PDF Links */}
+        {links.pdf && links.pdf.length > 0 && (
+          <div style={{ marginBottom: '20px' }}>
+            <h4 style={{ 
+              fontSize: '1.2rem', 
+              marginBottom: '15px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              color: '#ff6b6b'
+            }}>
+              <PdfIcon /> PDF Documents ({links.pdf.length})
+            </h4>
+            <div style={{ display: 'grid', gap: '10px' }}>
+              {links.pdf.map((url, index) => (
+                <a
+                  key={index}
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    color: '#3b82f6',
+                    textDecoration: 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    padding: '15px',
+                    background: 'rgba(59,130,246,0.1)',
+                    borderRadius: '8px',
+                    wordBreak: 'break-all'
+                  }}
+                >
+                  <PdfIcon />
+                  <span>{url.split('/').pop() || url}</span>
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Video Links */}
+        {links.videos && links.videos.length > 0 && (
+          <div style={{ marginBottom: '20px' }}>
+            <h4 style={{ 
+              fontSize: '1.2rem', 
+              marginBottom: '15px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              color: '#45b7d1'
+            }}>
+              <VideoIcon /> Videos ({links.videos.length})
+            </h4>
+            <div style={{ display: 'grid', gap: '15px' }}>
+              {links.videos.map((url, index) => (
+                <video
+                  key={index}
+                  controls
+                  style={{
+                    width: '100%',
+                    borderRadius: '12px',
+                    border: '1px solid rgba(255,255,255,0.1)'
+                  }}
+                >
+                  <source src={url} />
+                  Your browser does not support the video tag.
+                </video>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Website Links */}
+        {links.websites && links.websites.length > 0 && (
+          <div style={{ marginBottom: '20px' }}>
+            <h4 style={{ 
+              fontSize: '1.2rem', 
+              marginBottom: '15px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              color: '#96ceb4'
+            }}>
+              <WebsiteIcon /> Websites ({links.websites.length})
+            </h4>
+            <div style={{ display: 'grid', gap: '10px' }}>
+              {links.websites.map((url, index) => (
+                <a
+                  key={index}
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    color: '#3b82f6',
+                    textDecoration: 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    padding: '15px',
+                    background: 'rgba(59,130,246,0.1)',
+                    borderRadius: '8px',
+                    wordBreak: 'break-all'
+                  }}
+                >
+                  <WebsiteIcon />
+                  <span>{url}</span>
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Total Links */}
+        <div style={{
+          marginTop: '10px',
+          fontSize: '0.9rem',
+          color: '#888'
+        }}>
+          Total Links: {notification.linkCount || 0}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div style={{
       minHeight: '100vh',
-      backgroundColor: 'black',
-      margin: 0,
-      padding: 0,
-      width: '100%',
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'center',
-      alignItems: 'center',
+      backgroundColor: '#000000',
       fontFamily: 'Helvetica, Arial, sans-serif',
-      WebkitFontSmoothing: 'antialiased',
-      MozOsxFontSmoothing: 'grayscale'
+      color: '#ffffff',
+      padding: '3rem'
     }}>
-      {/* Framed Layout */}
+      {/* Header */}
       <div style={{
-        position: 'fixed',
-        top: '2rem',
-        left: '2rem',
-        right: '2rem',
-        bottom: '2rem',
-        backgroundColor: '#dbd6c9',
-        borderRadius: '20px',
-        zIndex: 1,
-        pointerEvents: 'none'
-      }} />
-      
-      {/* Teks MENURU - dengan font override */}
-      <div style={{
-        position: 'fixed',
-        top: 'calc(2rem + 16px)',
-        left: 'calc(2rem + 20px)',
-        zIndex: 2,
-        pointerEvents: 'none'
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: '4rem'
       }}>
-        <span style={{
-          fontFamily: 'Helvetica, Arial, sans-serif',
-          fontWeight: 400,
-          fontStyle: 'normal',
-          color: 'rgb(0, 20, 70)',
-          fontSize: '13px',
-          lineHeight: '13px'
-        }}>
-          MENURU
-        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+          <button
+            onClick={() => router.push('/')}
+            style={{
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              color: '#ffffff',
+              padding: 0
+            }}
+          >
+            <NorthEastArrow />
+          </button>
+          <span style={{ fontSize: '3rem' }}>Notifications</span>
+          {unreadCount > 0 && (
+            <span style={{ fontSize: '1.5rem' }}>({unreadCount})</span>
+          )}
+        </div>
+        
+        <div style={{ display: 'flex', alignItems: 'center', gap: '3rem' }}>
+          <span style={{ fontSize: '1.8rem' }}>{currentTime}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <span style={{ fontSize: '2rem' }}>
+              {user?.displayName || user?.email || 'Visitor'}
+            </span>
+            <NorthEastArrow />
+          </div>
+        </div>
       </div>
-      
-      {/* Area konten */}
+
+      {/* Create Notification Button */}
       <div style={{
-        position: 'relative',
-        zIndex: 2,
-        width: '100%',
-        height: '100vh',
-        padding: '2rem',
-        boxSizing: 'border-box'
-      }} />
+        display: 'flex',
+        justifyContent: 'flex-end',
+        marginBottom: '3rem'
+      }}>
+        <button
+          onClick={() => router.push('/notifications/create')}
+          style={{
+            background: 'none',
+            border: 'none',
+            color: '#ffffff',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '1rem',
+            fontSize: '2rem',
+            padding: 0
+          }}
+        >
+          Create Notification
+          <SouthEastArrow />
+        </button>
+      </div>
+
+      {/* Content */}
+      {isLoading ? (
+        <div style={{ textAlign: 'center', padding: '6rem', fontSize: '2rem' }}>
+          Loading...
+        </div>
+      ) : notifications.length === 0 ? (
+        <div style={{ 
+          textAlign: 'center', 
+          padding: '6rem', 
+          fontSize: '2rem'
+        }}>
+          No Notifications
+        </div>
+      ) : (
+        <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+          {notifications.map((notification) => {
+            const isRead = notification.userReads[getCurrentUserId()];
+            const isLiked = notification.likes.includes(getCurrentUserId());
+            
+            return (
+              <div
+                key={notification.id}
+                onClick={() => {
+                  setSelectedNotification(notification);
+                  if (!isRead) markAsRead(notification.id);
+                }}
+                style={{
+                  padding: '2.5rem 0',
+                  borderBottom: '1px solid #333333',
+                  cursor: 'pointer',
+                  opacity: isRead ? 0.7 : 1,
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: '2rem'
+                }}
+              >
+                {/* North East Arrow untuk setiap post */}
+                <NorthEastArrow />
+                
+                <div style={{ flex: 1 }}>
+                  <div style={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    marginBottom: '1rem',
+                    fontSize: '1.5rem'
+                  }}>
+                    <span>{notification.type}</span>
+                    <span>{timeAgo(notification.createdAt)}</span>
+                  </div>
+                  <div style={{ 
+                    fontSize: '2.2rem', 
+                    marginBottom: '1rem'
+                  }}>
+                    {notification.title}
+                  </div>
+                  <div style={{ 
+                    fontSize: '1.8rem',
+                    lineHeight: '1.6',
+                    whiteSpace: 'pre-wrap'
+                  }}>
+                    {notification.message}
+                  </div>
+                  
+                  {/* Link Preview - LANGSUNG DITAMPILKAN TANPA TOMBOL */}
+                  <LinkPreview notification={notification} />
+                  
+                  <div style={{ 
+                    marginTop: '1.5rem',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    fontSize: '1.5rem'
+                  }}>
+                    <span>From {notification.senderName}</span>
+                    <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
+                      <div 
+                        onClick={(e) => toggleNotificationLike(notification.id, e)}
+                        style={{ 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          gap: '0.5rem',
+                          cursor: user ? 'pointer' : 'default',
+                          padding: '8px 12px',
+                          borderRadius: '30px',
+                          background: isLiked ? 'rgba(59, 130, 246, 0.1)' : 'transparent',
+                          border: isLiked ? '1px solid #3b82f6' : 'none'
+                        }}
+                      >
+                        <LikeIcon filled={isLiked} />
+                        <span>{notification.likes?.length || 0}</span>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <CommentIcon />
+                        <span>{notification.comments?.length || 0}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Detail Modal */}
+      {selectedNotification && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: '#000000',
+            padding: '3rem',
+            overflowY: 'auto',
+            zIndex: 1000
+          }}
+          onClick={() => {
+            setSelectedNotification(null);
+            setReplyingTo(null);
+            setShowCommentForm(false);
+            setShowEmoticonPicker(false);
+            setPlayingVideo(null);
+          }}
+        >
+          <div style={{ maxWidth: '900px', margin: '0 auto' }} onClick={(e) => e.stopPropagation()}>
+            {/* Modal Header */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '4rem'
+            }}>
+              <button
+                onClick={() => {
+                  setSelectedNotification(null);
+                  setReplyingTo(null);
+                  setShowCommentForm(false);
+                  setShowEmoticonPicker(false);
+                  setPlayingVideo(null);
+                }}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: '#ffffff',
+                  padding: 0
+                }}
+              >
+                <NorthEastArrow />
+              </button>
+              <span style={{ fontSize: '1.8rem' }}>Notification</span>
+              <span style={{ fontSize: '1.8rem' }}>
+                {timeAgo(selectedNotification.createdAt)}
+              </span>
+            </div>
+
+            {/* Content */}
+            <div style={{ marginBottom: '3rem' }}>
+              <div style={{ 
+                fontSize: '2rem', 
+                marginBottom: '2rem'
+              }}>
+                {selectedNotification.type}
+              </div>
+              
+              <div style={{ 
+                fontSize: '4rem', 
+                marginBottom: '3rem',
+                lineHeight: '1.3'
+              }}>
+                {selectedNotification.title}
+              </div>
+              
+              <div style={{ 
+                lineHeight: '2', 
+                marginBottom: '3rem',
+                fontSize: '2.2rem',
+                whiteSpace: 'pre-line'
+              }}>
+                {selectedNotification.message}
+              </div>
+              
+              {/* YouTube Player Modal */}
+              {playingVideo && (
+                <div style={{
+                  position: 'fixed',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  backgroundColor: 'rgba(0,0,0,0.95)',
+                  zIndex: 2000,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '3rem'
+                }} onClick={closeVideoPlayer}>
+                  <div style={{
+                    position: 'relative',
+                    width: '100%',
+                    maxWidth: '1000px',
+                    aspectRatio: '16/9'
+                  }} onClick={(e) => e.stopPropagation()}>
+                    <button
+                      onClick={closeVideoPlayer}
+                      style={{
+                        position: 'absolute',
+                        top: '-40px',
+                        right: '-40px',
+                        background: 'none',
+                        border: 'none',
+                        color: 'white',
+                        fontSize: '2rem',
+                        cursor: 'pointer',
+                        zIndex: 2001
+                      }}
+                    >
+                      ×
+                    </button>
+                    <iframe
+                      width="100%"
+                      height="100%"
+                      src={getYouTubeEmbedUrl(playingVideo) + '?autoplay=1'}
+                      title="YouTube video player"
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      style={{ borderRadius: '12px' }}
+                    />
+                  </div>
+                </div>
+              )}
+              
+              {/* Links Section di Modal - LANGSUNG DITAMPILKAN TANPA TOMBOL */}
+              {selectedNotification.links && Object.values(selectedNotification.links).some(arr => arr.length > 0) && (
+                <div style={{ marginBottom: '3rem' }}>
+                  <LinkPreview notification={selectedNotification} />
+                </div>
+              )}
+              
+              <div style={{ 
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                fontSize: '2rem',
+                marginTop: '2rem'
+              }}>
+                <span>— {selectedNotification.senderName}</span>
+                <div 
+                  onClick={(e) => toggleNotificationLike(selectedNotification.id, e)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    padding: '8px 16px',
+                    borderRadius: '30px',
+                    cursor: user ? 'pointer' : 'default',
+                    color: selectedNotification.likes.includes(getCurrentUserId()) ? '#3b82f6' : '#ffffff',
+                    background: selectedNotification.likes.includes(getCurrentUserId()) ? 'rgba(59, 130, 246, 0.1)' : 'transparent',
+                    border: selectedNotification.likes.includes(getCurrentUserId()) ? '1px solid #3b82f6' : 'none'
+                  }}
+                >
+                  <LikeIcon filled={selectedNotification.likes.includes(getCurrentUserId())} />
+                  <span>{selectedNotification.likes?.length || 0}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* EMOTICON REACTIONS SECTION */}
+            <div style={{
+              marginTop: '40px',
+              marginBottom: '40px',
+              borderTop: '1px solid #333333',
+              paddingTop: '40px',
+            }}>
+              
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginBottom: '30px',
+              }}>
+                <h3 style={{
+                  fontSize: '1.8rem',
+                  fontWeight: 'normal',
+                  color: 'white',
+                  margin: 0,
+                }}>
+                  Reaksi
+                </h3>
+                
+                <button
+                  onClick={() => setShowEmoticonPicker(!showEmoticonPicker)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.2)',
+                    borderRadius: '30px',
+                    padding: '12px 24px',
+                    color: 'white',
+                    fontSize: '1rem',
+                    cursor: user ? 'pointer' : 'default',
+                  }}
+                >
+                  <span style={{ fontSize: '1.5rem' }}>😊</span>
+                  <span>Tambahkan Reaksi</span>
+                </button>
+              </div>
+
+              {/* Emoticon Picker */}
+              {showEmoticonPicker && (
+                <div
+                  style={{
+                    marginBottom: '30px',
+                  }}
+                >
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(6, 1fr)',
+                    gap: '12px',
+                    padding: '24px',
+                    background: 'rgba(255,255,255,0.03)',
+                    borderRadius: '20px',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                  }}>
+                    {EMOTICONS.map((emoticon) => (
+                      <button
+                        key={emoticon.id}
+                        onClick={() => {
+                          handleReaction(emoticon.id);
+                          setShowEmoticonPicker(false);
+                        }}
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          gap: '8px',
+                          background: userReactions.includes(emoticon.id) ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.05)',
+                          border: userReactions.includes(emoticon.id) ? '1px solid white' : '1px solid rgba(255,255,255,0.1)',
+                          borderRadius: '16px',
+                          padding: '16px 8px',
+                          cursor: user ? 'pointer' : 'default',
+                        }}
+                      >
+                        <span style={{ fontSize: '2.5rem' }}>{emoticon.emoji}</span>
+                        <span style={{ 
+                          fontSize: '0.8rem', 
+                          color: userReactions.includes(emoticon.id) ? 'white' : '#999999' 
+                        }}>
+                          {emoticon.label}
+                        </span>
+                        <span style={{ 
+                          fontSize: '0.9rem', 
+                          color: 'white',
+                          fontWeight: 'bold' 
+                        }}>
+                          {notificationReactions[emoticon.id] || 0}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Active Reactions Summary */}
+              <div style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: '12px',
+                alignItems: 'center',
+              }}>
+                {Object.entries(notificationReactions)
+                  .filter(([_, count]) => count > 0)
+                  .sort(([_, a], [__, b]) => b - a)
+                  .map(([id, count]) => {
+                    const emoticon = EMOTICONS.find(e => e.id === id);
+                    if (!emoticon) return null;
+                    return (
+                      <button
+                        key={id}
+                        onClick={() => handleReaction(id)}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          background: userReactions.includes(id) ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.05)',
+                          border: userReactions.includes(id) ? '1px solid white' : '1px solid rgba(255,255,255,0.1)',
+                          borderRadius: '30px',
+                          padding: '8px 16px',
+                          cursor: user ? 'pointer' : 'default',
+                        }}
+                      >
+                        <span style={{ fontSize: '1.3rem' }}>{emoticon.emoji}</span>
+                        <span style={{ 
+                          fontSize: '0.95rem', 
+                          color: 'white' 
+                        }}>
+                          {count}
+                        </span>
+                      </button>
+                    );
+                  })}
+              </div>
+            </div>
+
+            {/* COMMENTS SECTION */}
+
+            {/* Add Comment Button */}
+            <button
+              onClick={() => {
+                if (!user) {
+                  alert('Silakan login untuk berkomentar');
+                } else {
+                  setShowCommentForm(!showCommentForm);
+                }
+              }}
+              style={{
+                width: '100%',
+                padding: '20px',
+                background: 'rgba(255,255,255,0.02)',
+                border: '1px dashed #444444',
+                borderRadius: '16px',
+                color: user ? '#999999' : 'white',
+                fontSize: '1.1rem',
+                cursor: 'pointer',
+                marginBottom: '40px',
+                textAlign: 'left',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+              }}
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+              </svg>
+              {user ? 'Tulis komentar Anda di sini...' : 'Login untuk menulis komentar'}
+            </button>
+
+            {/* Comment Form */}
+            {showCommentForm && user && (
+              <div style={{ marginBottom: '40px' }}>
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '20px',
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '15px',
+                  }}>
+                    <img 
+                      src={getCurrentUserPhoto()}
+                      alt={getCurrentUserName()}
+                      style={{
+                        width: '56px',
+                        height: '56px',
+                        borderRadius: '50%',
+                        objectFit: 'cover',
+                        border: '2px solid rgba(255,255,255,0.1)',
+                      }}
+                    />
+                    <div>
+                      <span style={{ 
+                        color: 'white', 
+                        fontSize: '1.2rem',
+                        fontWeight: '500',
+                        display: 'block',
+                        marginBottom: '4px'
+                      }}>
+                        {getCurrentUserName()}
+                      </span>
+                      <span style={{ color: '#666666', fontSize: '0.9rem' }}>
+                        Berkomentar sebagai pengguna
+                      </span>
+                    </div>
+                  </div>
+                  <textarea
+                    value={commentText}
+                    onChange={(e) => setCommentText(e.target.value)}
+                    placeholder="Apa pendapat Anda tentang notifikasi ini?"
+                    rows={5}
+                    style={{
+                      padding: '20px',
+                      background: 'rgba(255,255,255,0.03)',
+                      border: '1px solid #333333',
+                      borderRadius: '20px',
+                      color: 'white',
+                      fontSize: '1.1rem',
+                      outline: 'none',
+                      resize: 'vertical',
+                    }}
+                  />
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'flex-end',
+                    gap: '15px',
+                  }}>
+                    <button
+                      type="button"
+                      onClick={() => setShowCommentForm(false)}
+                      style={{
+                        padding: '12px 24px',
+                        background: 'none',
+                        border: '1px solid #333333',
+                        borderRadius: '30px',
+                        color: '#999999',
+                        fontSize: '1rem',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      Batal
+                    </button>
+                    <button
+                      onClick={() => addComment(selectedNotification.id)}
+                      disabled={isSubmitting || !commentText.trim()}
+                      style={{
+                        padding: '12px 32px',
+                        background: isSubmitting || !commentText.trim() ? '#333333' : 'rgba(255,255,255,0.1)',
+                        border: '1px solid rgba(255,255,255,0.2)',
+                        borderRadius: '30px',
+                        color: isSubmitting || !commentText.trim() ? '#999999' : 'white',
+                        fontSize: '1rem',
+                        fontWeight: '500',
+                        cursor: isSubmitting || !commentText.trim() ? 'not-allowed' : 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                      }}
+                    >
+                      <SendIcon />
+                      <span>{isSubmitting ? 'Mengirim...' : 'Kirim Komentar'}</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Comments List */}
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '30px',
+            }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'baseline',
+                justifyContent: 'space-between',
+                marginBottom: '10px',
+              }}>
+                <h3 style={{
+                  fontSize: '1.8rem',
+                  fontWeight: 'normal',
+                  color: 'white',
+                  margin: 0,
+                }}>
+                  Komentar
+                </h3>
+                <span style={{
+                  fontSize: '1.2rem',
+                  color: '#666666',
+                }}>
+                  {selectedNotification.comments?.length || 0} komentar
+                </span>
+              </div>
+
+              {selectedNotification.comments && selectedNotification.comments.length > 0 ? (
+                [...selectedNotification.comments]
+                  .sort((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis())
+                  .map((comment) => (
+                    <div
+                      key={comment.id}
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '15px',
+                        padding: '24px',
+                        backgroundColor: 'rgba(255,255,255,0.02)',
+                        borderRadius: '24px',
+                        border: '1px solid rgba(255,255,255,0.05)',
+                      }}
+                    >
+                      {/* Comment Header */}
+                      <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                      }}>
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '15px',
+                        }}>
+                          <img 
+                            src={comment.userPhoto || `https://ui-avatars.com/api/?name=${comment.userName}&background=random&color=fff`}
+                            alt={comment.userName}
+                            style={{
+                              width: '48px',
+                              height: '48px',
+                              borderRadius: '50%',
+                              objectFit: 'cover',
+                              border: '2px solid rgba(255,255,255,0.1)',
+                            }}
+                          />
+                          <div>
+                            <span style={{
+                              fontSize: '1.2rem',
+                              fontWeight: '500',
+                              color: 'white',
+                              display: 'block',
+                              marginBottom: '4px',
+                            }}>
+                              {comment.userName}
+                            </span>
+                            <span style={{
+                              fontSize: '0.9rem',
+                              color: '#666666',
+                            }}>
+                              {timeAgo(comment.createdAt)}
+                            </span>
+                          </div>
+                        </div>
+                        
+                        {/* Comment Like Button */}
+                        <div 
+                          onClick={(e) => toggleLike(selectedNotification.id, comment.id, e)}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            background: (comment.likedBy || []).includes(getCurrentUserId()) ? 'rgba(59, 130, 246, 0.1)' : 'rgba(255,255,255,0.05)',
+                            border: (comment.likedBy || []).includes(getCurrentUserId()) ? '1px solid #3b82f6' : '1px solid rgba(255,255,255,0.1)',
+                            borderRadius: '30px',
+                            padding: '8px 16px',
+                            cursor: user ? 'pointer' : 'not-allowed',
+                            color: (comment.likedBy || []).includes(getCurrentUserId()) ? '#3b82f6' : 'white',
+                          }}
+                        >
+                          <LikeIcon filled={(comment.likedBy || []).includes(getCurrentUserId())} />
+                          <span style={{ fontSize: '1rem' }}>
+                            {comment.likes || 0}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Comment Content */}
+                      <p style={{
+                        fontSize: '1.1rem',
+                        lineHeight: '1.7',
+                        color: '#e0e0e0',
+                        margin: '10px 0 5px 0',
+                        paddingLeft: '15px',
+                        borderLeft: '2px solid rgba(255,255,255,0.1)',
+                      }}>
+                        {comment.text}
+                      </p>
+
+                      {/* Reply Button */}
+                      <button
+                        onClick={() => {
+                          if (!user) {
+                            alert('Silakan login untuk membalas');
+                          } else {
+                            setReplyingTo(replyingTo === comment.id ? null : comment.id);
+                          }
+                        }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          background: 'none',
+                          border: 'none',
+                          color: '#666666',
+                          fontSize: '0.95rem',
+                          cursor: 'pointer',
+                          padding: '8px 0',
+                          marginTop: '5px',
+                        }}
+                      >
+                        <ReplyIcon />
+                        <span>Balas komentar</span>
+                      </button>
+
+                      {/* Reply Form */}
+                      {replyingTo === comment.id && (
+                        <div
+                          style={{
+                            marginTop: '15px',
+                            marginLeft: '30px',
+                          }}
+                        >
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'flex-start',
+                            gap: '15px',
+                          }}>
+                            <img 
+                              src={getCurrentUserPhoto()}
+                              alt={getCurrentUserName()}
+                              style={{
+                                width: '40px',
+                                height: '40px',
+                                borderRadius: '50%',
+                                objectFit: 'cover',
+                              }}
+                            />
+                            <div style={{
+                              flex: 1,
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: '10px',
+                            }}>
+                              <textarea
+                                value={replyText}
+                                onChange={(e) => setReplyText(e.target.value)}
+                                placeholder="Tulis balasan Anda..."
+                                rows={3}
+                                style={{
+                                  padding: '15px',
+                                  background: 'rgba(255,255,255,0.03)',
+                                  border: '1px solid #333333',
+                                  borderRadius: '16px',
+                                  color: 'white',
+                                  fontSize: '0.95rem',
+                                  outline: 'none',
+                                  resize: 'vertical',
+                                }}
+                              />
+                              <div style={{
+                                display: 'flex',
+                                gap: '10px',
+                                justifyContent: 'flex-end',
+                              }}>
+                                <button
+                                  onClick={() => setReplyingTo(null)}
+                                  style={{
+                                    padding: '8px 16px',
+                                    background: 'none',
+                                    border: '1px solid #333333',
+                                    borderRadius: '20px',
+                                    color: '#999999',
+                                    fontSize: '0.9rem',
+                                    cursor: 'pointer',
+                                  }}
+                                >
+                                  Batal
+                                </button>
+                                <button
+                                  onClick={() => addReply(selectedNotification.id, comment.id)}
+                                  disabled={!replyText.trim() || isSubmitting}
+                                  style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px',
+                                    padding: '8px 24px',
+                                    background: replyText.trim() && !isSubmitting ? 'rgba(255,255,255,0.1)' : '#333333',
+                                    border: '1px solid rgba(255,255,255,0.2)',
+                                    borderRadius: '20px',
+                                    color: replyText.trim() && !isSubmitting ? 'white' : '#999999',
+                                    fontSize: '0.9rem',
+                                    fontWeight: '500',
+                                    cursor: replyText.trim() && !isSubmitting ? 'pointer' : 'not-allowed',
+                                  }}
+                                >
+                                  <ReplyIcon />
+                                  <span>{isSubmitting ? 'Mengirim...' : 'Kirim Balasan'}</span>
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Replies List */}
+                      {comment.replies && comment.replies.length > 0 && (
+                        <div style={{
+                          marginTop: '20px',
+                          marginLeft: '30px',
+                          paddingLeft: '20px',
+                          borderLeft: '2px solid rgba(255,255,255,0.05)',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '20px',
+                        }}>
+                          {comment.replies.map((reply: any) => (
+                            <div
+                              key={reply.id}
+                              style={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'flex-start',
+                              }}
+                            >
+                              <div style={{
+                                display: 'flex',
+                                gap: '12px',
+                                flex: 1,
+                              }}>
+                                <img 
+                                  src={reply.userPhoto || `https://ui-avatars.com/api/?name=${reply.userName}&background=random&color=fff`}
+                                  alt={reply.userName}
+                                  style={{
+                                    width: '32px',
+                                    height: '32px',
+                                    borderRadius: '50%',
+                                    objectFit: 'cover',
+                                  }}
+                                />
+                                <div style={{ flex: 1 }}>
+                                  <div style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '10px',
+                                    marginBottom: '5px',
+                                  }}>
+                                    <span style={{
+                                      fontSize: '1rem',
+                                      fontWeight: '500',
+                                      color: 'white',
+                                    }}>
+                                      {reply.userName}
+                                    </span>
+                                    <span style={{
+                                      fontSize: '0.8rem',
+                                      color: '#666666',
+                                    }}>
+                                      {timeAgo(reply.createdAt)}
+                                    </span>
+                                  </div>
+                                  <p style={{
+                                    fontSize: '0.95rem',
+                                    lineHeight: '1.6',
+                                    color: '#e0e0e0',
+                                    margin: '0 0 8px 0',
+                                  }}>
+                                    {reply.text}
+                                  </p>
+                                  <div
+                                    onClick={(e) => toggleLike(selectedNotification.id, comment.id, e, reply.id)}
+                                    style={{
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      gap: '5px',
+                                      width: 'fit-content',
+                                      padding: '4px 8px',
+                                      borderRadius: '20px',
+                                      cursor: user ? 'pointer' : 'not-allowed',
+                                      color: (reply.likedBy || []).includes(getCurrentUserId()) ? '#3b82f6' : '#666666',
+                                      backgroundColor: (reply.likedBy || []).includes(getCurrentUserId()) ? 'rgba(59, 130, 246, 0.1)' : 'transparent',
+                                    }}
+                                  >
+                                    <LikeIcon filled={(reply.likedBy || []).includes(getCurrentUserId())} />
+                                    <span>{reply.likes || 0}</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))
+              ) : (
+                <div
+                  style={{
+                    padding: '60px',
+                    textAlign: 'center',
+                    color: '#666666',
+                    border: '1px dashed #333333',
+                    borderRadius: '24px',
+                  }}
+                >
+                  <span style={{ fontSize: '3rem', display: 'block', marginBottom: '20px' }}>💬</span>
+                  <p style={{ fontSize: '1.2rem', margin: 0 }}>Belum ada komentar.</p>
+                  <p style={{ fontSize: '1rem', color: '#999999', marginTop: '10px' }}>
+                    Jadilah yang pertama untuk berdiskusi!
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Views */}
+            <div style={{ 
+              paddingTop: '2rem',
+              fontSize: '1.5rem',
+              color: '#666666'
+            }}>
+              Dilihat {selectedNotification.views} kali
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
