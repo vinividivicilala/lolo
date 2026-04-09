@@ -71,7 +71,7 @@ export default function HomePage(): React.JSX.Element {
         pointerEvents: 'none'
       }} />
       
-      {/* Teks MENURU */}
+      {/* Teks MENURU kecil di pojok kiri atas frame */}
       <div style={{
         position: 'fixed',
         top: 'calc(2rem + 16px)',
@@ -86,6 +86,29 @@ export default function HomePage(): React.JSX.Element {
           color: 'rgb(0, 20, 70)',
           fontSize: '13px',
           lineHeight: '13px'
+        }}>
+          MENURU
+        </span>
+      </div>
+      
+      {/* Teks MENURU besar di tengah halaman */}
+      <div style={{
+        position: 'relative',
+        zIndex: 2,
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        width: '100%',
+        height: '100vh'
+      }}>
+        <span style={{
+          fontFamily: 'a2g, monospace, sans-serif',
+          fontWeight: 400,
+          fontStyle: 'normal',
+          color: 'rgb(140, 0, 0)',
+          fontSize: '337px',
+          lineHeight: '412px',
+          textAlign: 'center'
         }}>
           MENURU
         </span>
