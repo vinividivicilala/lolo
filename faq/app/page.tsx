@@ -8875,7 +8875,7 @@ useEffect(() => {
           </div>
         </div>
         
-               <div style={{ height: isMobile ? '3rem' : '4rem', width: '100%' }} />
+                     <div style={{ height: isMobile ? '3rem' : '4rem', width: '100%' }} />
 
         <AnimatePresence mode="wait">
           {currentView === "main" && (
@@ -8888,9 +8888,9 @@ useEffect(() => {
             />
           )}
         </AnimatePresence>
-      </div>      // ← tutup Main Content Container
-    </div>        // ← tutup Inner content container
-  </div>          // ← tutup FRAMED LAYOUT
+      </div>
+    </div>
+  </div>
   );
 }
       
