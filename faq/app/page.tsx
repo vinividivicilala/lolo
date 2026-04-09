@@ -26,8 +26,9 @@ export default function HomePage(): React.JSX.Element {
         right: '2rem',
         bottom: '2rem',
         backgroundColor: '#dbd6c9',
+        borderRadius: '20px',
         zIndex: 1,
-        pointerEvents: 'none' // Agar tidak mengganggu interaksi dengan konten di dalamnya
+        pointerEvents: 'none'
       }} />
       
       {/* Area konten utama dengan padding yang sama agar konten berada di dalam frame */}
