@@ -14,7 +14,6 @@ export default function HomePage(): React.JSX.Element {
       flexDirection: 'column',
       justifyContent: 'center',
       alignItems: 'center',
-      fontFamily: 'Helvetica, Arial, sans-serif',
       WebkitFontSmoothing: 'antialiased',
       MozOsxFontSmoothing: 'grayscale'
     }}>
@@ -31,11 +30,11 @@ export default function HomePage(): React.JSX.Element {
         pointerEvents: 'none'
       }} />
       
-      {/* Teks MENURU di pojok kanan atas frame */}
+      {/* Teks MENURU di pojok kiri atas frame */}
       <div style={{
         position: 'fixed',
         top: '2rem',
-        right: '2rem',
+        left: '2rem',
         padding: '0.5rem 0',
         zIndex: 2,
         pointerEvents: 'none'
@@ -45,8 +44,7 @@ export default function HomePage(): React.JSX.Element {
           fontWeight: 400,
           color: 'rgb(0, 20, 70)',
           fontSize: '13px',
-          lineHeight: '13px',
-          letterSpacing: 'normal'
+          lineHeight: '13px'
         }}>
           MENURU
         </span>
