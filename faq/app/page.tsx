@@ -8875,9 +8875,8 @@ useEffect(() => {
           </div>
         </div>
         
-                   <div style={{ height: isMobile ? '3rem' : '4rem', width: '100%' }} />
-
-        <AnimatePresence mode="wait">
+        <div style={{ height: isMobile ? '3rem' : '4rem', width: '100%' }} />
+                <AnimatePresence mode="wait">
           {currentView === "main" && (
             <motion.div
               key="main-view"
@@ -8886,10 +8885,12 @@ useEffect(() => {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.5 }}
             />
-          )
+          )}
         </AnimatePresence>
       </div>
     </div>
   </div>
   );
 }
+
+      
