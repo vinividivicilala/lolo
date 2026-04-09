@@ -52,8 +52,8 @@ export default function HomePage(): React.JSX.Element {
       width: '100%',
       display: 'flex',
       flexDirection: 'column',
-      justifyContent: 'center',
-      alignItems: 'center',
+      justifyContent: 'flex-start',
+      alignItems: 'flex-start',
       fontFamily: 'ev-light, sans-serif',
       WebkitFontSmoothing: 'antialiased',
       MozOsxFontSmoothing: 'grayscale'
@@ -91,24 +91,22 @@ export default function HomePage(): React.JSX.Element {
         </span>
       </div>
       
-      {/* Teks MENURU besar di tengah halaman */}
+      {/* Teks MENURU besar di bawah judul web (pojok kiri atas, di bawah teks kecil) */}
       <div style={{
-        position: 'relative',
+        position: 'fixed',
+        top: 'calc(2rem + 60px)',
+        left: 'calc(2rem + 20px)',
         zIndex: 2,
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        width: '100%',
-        height: '100vh'
+        pointerEvents: 'none'
       }}>
         <span style={{
           fontFamily: 'a2g, monospace, sans-serif',
-          fontWeight: 400,
+          fontWeight: 900,
           fontStyle: 'normal',
           color: 'rgb(140, 0, 0)',
-          fontSize: '337px',
-          lineHeight: '412px',
-          textAlign: 'center'
+          fontSize: '950px',
+          lineHeight: '0.9',
+          textAlign: 'left'
         }}>
           MENURU
         </span>
