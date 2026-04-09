@@ -1954,46 +1954,47 @@ useEffect(() => {
   const currentPhotoComments = comments.filter(comment => comment.photoIndex === currentPhotoIndex);
 
    return (
-    <div style={{
-      minHeight: '100vh',
-      backgroundColor: '#0a0a0a',
-      margin: 0,
-      padding: 0,
-      width: '100%',
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'flex-start',
-      alignItems: 'center',
-      position: 'relative',
-      fontFamily: 'Helvetica, Arial, sans-serif',
-      WebkitFontSmoothing: 'antialiased',
-      MozOsxFontSmoothing: 'grayscale'
-    }}>
+  // BACKGROUND LUAR - TIDAK SCROLL
+  <div style={{
+    minHeight: '100vh',
+    backgroundColor: '#0a0a0a',
+    margin: 0,
+    padding: 0,
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+    fontFamily: 'Helvetica, Arial, sans-serif',
+  }}>
 
-      {/* FRAMED LAYOUT (INSET LAYOUT) - Background utama dengan border radius - STATIS */}
+    {/* FRAMED LAYOUT - BINGKAI TETAP, TIDAK SCROLL */}
+    {/* Div ini hanya sebagai border/container yang statis */}
+    <div style={{
+      position: 'relative',
+      width: isMobile ? 'calc(100% - 0px)' : 'calc(100% - 40px)',
+      maxWidth: '1400px',
+      height: isMobile ? 'calc(100vh - 0px)' : 'calc(100vh - 40px)',
+      backgroundColor: '#dbd6c9',
+      borderRadius: isMobile ? '0' : '40px',
+      margin: isMobile ? '0' : '20px',
+      overflow: 'hidden',  // PENTING: bingkai tidak scroll
+      boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
+    }}>
+      
+      {/* INNER CONTAINER - INI YANG SCROLL */}
       <div style={{
-        position: 'relative',
         width: '100%',
-        height: '100vh',
+        height: '100%',
         backgroundColor: '#dbd6c9',
+        overflowY: 'auto',  // PENTING: hanya ini yang scroll
+        overflowX: 'hidden',
+        position: 'relative',
         borderRadius: isMobile ? '0' : '40px',
-        margin: isMobile ? '0' : '20px',
-        width: isMobile ? 'calc(100% - 0px)' : 'calc(100% - 40px)',
-        boxSizing: 'border-box',
-        overflow: 'hidden',
-        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
+        // Hilangkan scrollbar (opsional)
+        scrollbarWidth: 'thin',
       }}>
-        {/* Inner content container - YANG SCROLL */}
-        <div style={{
-          width: '100%',
-          height: '100%',
-          backgroundColor: '#dbd6c9',
-          position: 'relative',
-          overflowY: 'auto',
-          overflowX: 'hidden',
-          borderRadius: isMobile ? '0' : '40px',
-          scrollbarWidth: 'thin'
-        }}>
 
 
           {/* SEMUA KONTEN YANG ADA DI DALAM PAGE DITARUH DISINI */}
