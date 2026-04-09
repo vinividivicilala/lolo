@@ -143,18 +143,16 @@ export default function HomePage(): React.JSX.Element {
         boxSizing: 'border-box',
         width: '100%'
       }}>
-        <span 
+    <span 
   ref={menuruBigRef}
   style={{
-    fontFamily: "'Bebas Neue', sans-serif",
+    fontFamily: "'Anton', sans-serif",
     fontWeight: 400,
-    fontStyle: 'normal',
     color: 'rgb(140, 0, 0)',
     fontSize: isMobile ? '200px' : '950px',
-    lineHeight: '0.8',
-    letterSpacing: '-10px',
-    transform: 'scaleY(1.15)',
-    textAlign: 'left',
+    letterSpacing: '-15px',
+    lineHeight: '0.75',
+    transform: 'scaleX(0.75) scaleY(1.2)',
     display: 'inline-block',
     whiteSpace: 'nowrap'
   }}>
