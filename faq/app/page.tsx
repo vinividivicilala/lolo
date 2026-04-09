@@ -63,11 +63,11 @@ export default function HomePage(): React.JSX.Element {
     };
   }, []);
 
-  // Animasi scroll untuk SEMUA konten (teks besar dan konten)
+  // Animasi scroll untuk SEMUA konten
   useEffect(() => {
     if (!scrollContainerRef.current) return;
 
-    const maxScroll = 1200; // Maksimum scroll dalam px
+    const maxScroll = 1500;
     let targetScroll = 0;
     let currentScroll = 0;
     let animationFrame: number;
@@ -78,7 +78,6 @@ export default function HomePage(): React.JSX.Element {
       targetScroll += e.deltaY;
       targetScroll = Math.max(0, Math.min(maxScroll, targetScroll));
       
-      // Animasi smooth
       const animate = () => {
         currentScroll += (targetScroll - currentScroll) * 0.1;
         setScrollY(currentScroll);
@@ -118,7 +117,7 @@ export default function HomePage(): React.JSX.Element {
       position: 'relative'
     }}>
       
-      {/* Framed Layout - Background utama */}
+      {/* Framed Layout - Background utama (tetap di tempat) */}
       <div style={{
         position: 'fixed',
         top: '2rem',
@@ -131,7 +130,7 @@ export default function HomePage(): React.JSX.Element {
         pointerEvents: 'none'
       }} />
       
-      {/* Teks MENURU kecil di pojok kiri atas frame */}
+      {/* Teks MENURU kecil di pojok kiri atas frame (tetap) */}
       <div style={{
         position: 'fixed',
         top: 'calc(2rem + 16px)',
@@ -151,20 +150,19 @@ export default function HomePage(): React.JSX.Element {
         </span>
       </div>
       
-      {/* Scroll Container - Semua konten di dalam sini bisa scroll, termasuk teks besar */}
+      {/* Scroll Container - Semua konten bisa scroll KELUAR dari frame */}
       <div 
         ref={scrollContainerRef}
         style={{
           position: 'relative',
           zIndex: 2,
           width: '100%',
-          height: '100vh',
-          overflow: 'visible',
+          minHeight: '200vh',
           transform: `translateY(-${scrollY}px)`,
           transition: 'transform 0.1s ease-out'
         }}
       >
-        {/* Teks MENURU besar - Ukuran 650px, bisa scroll melewati frame */}
+        {/* Teks MENURU besar - Akan keluar dari frame saat scroll ke atas */}
         <div style={{
           position: 'relative',
           paddingTop: 'calc(2rem + 40px)',
@@ -178,7 +176,7 @@ export default function HomePage(): React.JSX.Element {
             fontWeight: 900,
             fontStyle: 'normal',
             color: 'rgb(140, 0, 0)',
-            fontSize: isMobile ? '180px' : '650px',
+            fontSize: isMobile ? '150px' : '550px',
             lineHeight: '0.85',
             textAlign: 'left',
             display: 'inline-block',
@@ -190,12 +188,13 @@ export default function HomePage(): React.JSX.Element {
           </span>
         </div>
         
-        {/* Konten yang bisa discroll */}
+        {/* Konten yang juga bisa scroll keluar dari frame */}
         <div style={{
           position: 'relative',
           width: '100%',
           padding: '2rem',
           paddingTop: '4rem',
+          paddingBottom: '10rem',
           boxSizing: 'border-box'
         }}>
           <div style={{
@@ -217,7 +216,7 @@ export default function HomePage(): React.JSX.Element {
               lineHeight: '1.8',
               marginBottom: '2rem'
             }}>
-              Scroll to explore more content. This is a scrolling content area.
+              Scroll to explore more content. Scroll ke atas untuk melihat teks MENURU keluar dari frame.
             </p>
             
             <div style={{
