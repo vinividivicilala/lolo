@@ -1953,7 +1953,7 @@ useEffect(() => {
   // Komentar untuk foto saat ini
   const currentPhotoComments = comments.filter(comment => comment.photoIndex === currentPhotoIndex);
 
-  return (
+   return (
     <div style={{
       minHeight: '100vh',
       backgroundColor: '#0a0a0a',
@@ -1965,17 +1965,16 @@ useEffect(() => {
       justifyContent: 'flex-start',
       alignItems: 'center',
       position: 'relative',
-      overflow: 'auto',
       fontFamily: 'Helvetica, Arial, sans-serif',
       WebkitFontSmoothing: 'antialiased',
       MozOsxFontSmoothing: 'grayscale'
     }}>
 
-      {/* FRAMED LAYOUT (INSET LAYOUT) - Background utama dengan border radius */}
+      {/* FRAMED LAYOUT (INSET LAYOUT) - Background utama dengan border radius - STATIS */}
       <div style={{
         position: 'relative',
         width: '100%',
-        minHeight: '100vh',
+        height: '100vh',
         backgroundColor: '#dbd6c9',
         borderRadius: isMobile ? '0' : '40px',
         margin: isMobile ? '0' : '20px',
@@ -1984,15 +1983,18 @@ useEffect(() => {
         overflow: 'hidden',
         boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
       }}>
-        {/* Inner content container */}
+        {/* Inner content container - YANG SCROLL */}
         <div style={{
           width: '100%',
-          minHeight: '100vh',
+          height: '100%',
           backgroundColor: '#dbd6c9',
           position: 'relative',
-          padding: isMobile ? '0' : '0',
-          borderRadius: isMobile ? '0' : '40px'
+          overflowY: 'auto',
+          overflowX: 'hidden',
+          borderRadius: isMobile ? '0' : '40px',
+          scrollbarWidth: 'thin'
         }}>
+
 
           {/* SEMUA KONTEN YANG ADA DI DALAM PAGE DITARUH DISINI */}
           {/* MENURU OVERLAY */}
