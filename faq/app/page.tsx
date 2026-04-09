@@ -43,7 +43,8 @@ export default function HomePage(): React.JSX.Element {
           fontWeight: 400,
           color: 'rgb(0, 20, 70)',
           fontSize: '13px',
-          lineHeight: '13px'
+          lineHeight: '13px',
+          fontStyle: 'normal'
         }}>
           MENURU
         </span>
