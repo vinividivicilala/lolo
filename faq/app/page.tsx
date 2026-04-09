@@ -8887,11 +8887,10 @@ useEffect(() => {
               transition={{ duration: 0.5 }}
             />
           )}
-        </AnimatePresence>
+                </AnimatePresence>
       </div>
     </div>
   )}
-</div>
 </div>
 </div>
   );
