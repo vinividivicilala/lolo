@@ -2354,29 +2354,30 @@ useEffect(() => {
       </AnimatePresence>
 
       {/* PRODUCT OVERLAY */}
-      <AnimatePresence>
-        {showProductOverlay && (
-          <motion.div
-            ref={productOverlayRef}
-            initial={{ clipPath: 'circle(0% at 50% 50%)' }}
-            animate={{ clipPath: 'circle(150% at 50% 50%)' }}
-            exit={{ clipPath: 'circle(0% at 50% 50%)' }}
-            transition={{ duration: 1, ease: [0.76, 0, 0.24, 1] }}
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              backgroundColor: '#0A0A0A',
-              zIndex: 10010,
-              display: 'flex',
-              flexDirection: 'column',
-              overflowY: 'auto',
-              color: 'white',
-              fontFamily: 'Helvetica, Arial, sans-serif'
-            }}
-          >
+          <AnimatePresence>
+            {showProductOverlay && (
+              <motion.div
+                ref={productOverlayRef}
+                initial={{ clipPath: 'circle(0% at 50% 50%)' }}
+                animate={{ clipPath: 'circle(150% at 50% 50%)' }}
+                exit={{ clipPath: 'circle(0% at 50% 50%)' }}
+                transition={{ duration: 1, ease: [0.76, 0, 0.24, 1] }}
+                style={{
+                  position: 'fixed',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  backgroundColor: '#dbd6c9',
+                  zIndex: 10010,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  overflowY: 'auto',
+                  color: '#000000',
+                  fontFamily: 'Helvetica, Arial, sans-serif'
+                }}
+              >
+                
             <div style={{
               position: 'absolute',
               top: 0,
@@ -2617,30 +2618,32 @@ useEffect(() => {
         )}
       </AnimatePresence>
 
-      {/* VISUAL DESIGNER OVERLAY */}
-      <AnimatePresence>
-        {showVisualDesignerOverlay && (
-          <motion.div
-            ref={visualDesignerOverlayRef}
-            initial={{ y: '100%' }}
-            animate={{ y: 0 }}
-            exit={{ y: '100%' }}
-            transition={{ duration: 0.8, ease: [0.76, 0, 0.24, 1] }}
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              backgroundColor: '#050505',
-              zIndex: 10011,
-              display: 'flex',
-              flexDirection: 'column',
-              overflowY: 'auto',
-              color: 'white',
-              fontFamily: 'Helvetica, Arial, sans-serif'
-            }}
-          >
+     {/* VISUAL DESIGNER OVERLAY */}
+          <AnimatePresence>
+            {showVisualDesignerOverlay && (
+              <motion.div
+                ref={visualDesignerOverlayRef}
+                initial={{ y: '100%' }}
+                animate={{ y: 0 }}
+                exit={{ y: '100%' }}
+                transition={{ duration: 0.8, ease: [0.76, 0, 0.24, 1] }}
+                style={{
+                  position: 'fixed',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  backgroundColor: '#dbd6c9',
+                  zIndex: 10011,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  overflowY: 'auto',
+                  color: '#000000',
+                  fontFamily: 'Helvetica, Arial, sans-serif'
+                }}
+              >
+
+                
             <div style={{
               position: 'absolute',
               top: 0,
@@ -2838,29 +2841,31 @@ useEffect(() => {
       </AnimatePresence>
 
       {/* INDONESIA OVERLAY */}
-      <AnimatePresence>
-        {showIndonesiaOverlay && (
-          <motion.div
-            ref={indonesiaOverlayRef}
-            initial={{ y: '100%' }}
-            animate={{ y: 0 }}
-            exit={{ y: '100%' }}
-            transition={{ duration: 0.8, ease: [0.76, 0, 0.24, 1] }}
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              backgroundColor: '#0A0F0A',
-              zIndex: 10012,
-              display: 'flex',
-              flexDirection: 'column',
-              overflowY: 'auto',
-              color: 'white',
-              fontFamily: 'Helvetica, Arial, sans-serif'
-            }}
-          >
+          <AnimatePresence>
+            {showIndonesiaOverlay && (
+              <motion.div
+                ref={indonesiaOverlayRef}
+                initial={{ y: '100%' }}
+                animate={{ y: 0 }}
+                exit={{ y: '100%' }}
+                transition={{ duration: 0.8, ease: [0.76, 0, 0.24, 1] }}
+                style={{
+                  position: 'fixed',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  backgroundColor: '#dbd6c9',
+                  zIndex: 10012,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  overflowY: 'auto',
+                  color: '#000000',
+                  fontFamily: 'Helvetica, Arial, sans-serif'
+                }}
+              >
+
+                
             <div style={{
               position: 'absolute',
               top: 0,
@@ -3023,29 +3028,31 @@ useEffect(() => {
         )}
       </AnimatePresence>
 
-      {/* DONASI TRACKING OVERLAY - PANTAU DONASI USER */}
-      <AnimatePresence>
-        {showDonasiTracking && user && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              backgroundColor: 'rgba(0, 0, 0, 0.98)',
-              zIndex: 10013,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              backdropFilter: 'blur(10px)'
-            }}
-            onClick={handleCloseDonasiTracking}
-          >
+
+ {/* DONASI TRACKING OVERLAY */}
+          <AnimatePresence>
+            {showDonasiTracking && user && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                style={{
+                  position: 'fixed',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  backgroundColor: 'rgba(219, 214, 201, 0.98)',
+                  zIndex: 10013,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backdropFilter: 'blur(10px)'
+                }}
+                onClick={handleCloseDonasiTracking}
+              >
+          
             <motion.div
               initial={{ scale: 0.9, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
@@ -3356,29 +3363,30 @@ useEffect(() => {
         )}
       </AnimatePresence>
 
-      {/* Note Overlay */}
-      <AnimatePresence>
-        {showNoteOverlay && (
-          <motion.div
-            ref={noteOverlayRef}
-            initial={{ x: '-100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '-100%' }}
-            transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              backgroundColor: '#000000',
-              zIndex: 10003,
-              display: 'flex',
-              flexDirection: 'column',
-              overflow: 'hidden',
-              borderRight: '1px solid rgba(255, 255, 255, 0.1)'
-            }}
-          >
+    {/* Note Overlay */}
+          <AnimatePresence>
+            {showNoteOverlay && (
+              <motion.div
+                ref={noteOverlayRef}
+                initial={{ x: '-100%' }}
+                animate={{ x: 0 }}
+                exit={{ x: '-100%' }}
+                transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+                style={{
+                  position: 'fixed',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  backgroundColor: '#dbd6c9',
+                  zIndex: 10003,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  overflow: 'hidden',
+                  borderRight: '1px solid rgba(0, 0, 0, 0.1)'
+                }}
+              >
+                
             <div style={{
               padding: isMobile ? '1.5rem' : '2rem',
               borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
@@ -4562,29 +4570,30 @@ useEffect(() => {
         )}
       </AnimatePresence>
 
-      {/* Modal Profil User */}
-      <AnimatePresence>
-        {showUserProfileModal && user && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              backgroundColor: 'rgba(0, 0, 0, 0.98)',
-              zIndex: 10000,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              backdropFilter: 'blur(10px)'
-            }}
-            onClick={() => setShowUserProfileModal(false)}
-          >
+       {/* Modal Kalender */}
+          <AnimatePresence>
+            {showCalendarModal && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                style={{
+                  position: 'fixed',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  backgroundColor: 'rgba(219, 214, 201, 0.98)',
+                  zIndex: 10002,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backdropFilter: 'blur(10px)',
+                  overflow: 'auto',
+                  padding: isMobile ? '1rem' : '2rem'
+                }}
+              >
             <motion.div
               ref={userProfileModalRef}
               initial={{ scale: 0.9, opacity: 0, y: 20 }}
@@ -5575,29 +5584,31 @@ useEffect(() => {
         )}
       </AnimatePresence>
 
-      {/* Modal Delete Account Confirmation */}
-      <AnimatePresence>
-        {showDeleteAccountModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              backgroundColor: 'rgba(0, 0, 0, 0.98)',
-              zIndex: 10001,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              backdropFilter: 'blur(10px)'
-            }}
-            onClick={() => setShowDeleteAccountModal(false)}
-          >
+       {/* Modal Delete Account Confirmation */}
+          <AnimatePresence>
+            {showDeleteAccountModal && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                style={{
+                  position: 'fixed',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  backgroundColor: 'rgba(219, 214, 201, 0.98)',
+                  zIndex: 10001,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backdropFilter: 'blur(10px)'
+                }}
+                onClick={() => setShowDeleteAccountModal(false)}
+              >
+
+                
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -5673,28 +5684,28 @@ useEffect(() => {
       </AnimatePresence>
 
       {/* Modal Logout Confirmation */}
-      <AnimatePresence>
-        {showLogoutModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              backgroundColor: 'rgba(0, 0, 0, 0.98)',
-              zIndex: 10001,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              backdropFilter: 'blur(10px)'
-            }}
-            onClick={handleCancelLogout}
-          >
+          <AnimatePresence>
+            {showLogoutModal && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                style={{
+                  position: 'fixed',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  backgroundColor: 'rgba(219, 214, 201, 0.98)',
+                  zIndex: 10001,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backdropFilter: 'blur(10px)'
+                }}
+                onClick={handleCancelLogout}
+              >
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -5815,31 +5826,31 @@ useEffect(() => {
       </AnimatePresence>
 
       {/* Menu Overlay dengan GSAP Animation */}
-      <AnimatePresence>
-        {showMenuOverlay && (
-          <motion.div
-            ref={menuOverlayRef}
-            key="menu-overlay"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              backgroundColor: 'black',
-              zIndex: 9995,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              overflow: 'hidden',
-              transform: 'translateY(-100%)'
-            }}
-          >
+        <AnimatePresence>
+            {showMenuOverlay && (
+              <motion.div
+                ref={menuOverlayRef}
+                key="menu-overlay"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                style={{
+                  position: 'fixed',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  backgroundColor: '#dbd6c9',
+                  zIndex: 9995,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  overflow: 'hidden',
+                  transform: 'translateY(-100%)'
+                }}
+              >
             <div style={{
               position: 'absolute',
               top: 0,
@@ -6755,31 +6766,31 @@ useEffect(() => {
         )}
       </AnimatePresence>
       
-      {/* Halaman Full Page MENURU */}
-      <AnimatePresence>
-        {showMenuruFullPage && (
-          <motion.div
-            key="menuru-fullpage"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              backgroundColor: 'black',
-              zIndex: 9998,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'flex-start',
-              overflowY: 'auto',
-              paddingBottom: '4rem'
-            }}
-          >
+     {/* Halaman Full Page MENURU */}
+          <AnimatePresence>
+            {showMenuruFullPage && (
+              <motion.div
+                key="menuru-fullpage"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.5 }}
+                style={{
+                  position: 'fixed',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  backgroundColor: '#dbd6c9',
+                  zIndex: 9998,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'flex-start',
+                  overflowY: 'auto',
+                  paddingBottom: '4rem'
+                }}
+              >
             <div style={{
               position: 'sticky',
               top: 0,
@@ -7486,33 +7497,33 @@ useEffect(() => {
         )}
       </AnimatePresence>
 
-      {/* Notification Dropdown */}
-      <AnimatePresence>
-        {showNotification && (
-          <motion.div
-            ref={notificationDropdownRef}
-            initial={{ opacity: 0, y: -10, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -10, scale: 0.95 }}
-            transition={{ duration: 0.2 }}
-            style={{
-              position: 'fixed',
-              top: isMobile ? '6rem' : '7.5rem',
-              right: isMobile ? '1rem' : '2rem',
-              backgroundColor: 'rgba(20, 20, 20, 0.98)',
-              backdropFilter: 'blur(20px)',
-              borderRadius: '15px',
-              padding: '1rem 0',
-              width: isMobile ? '320px' : '450px',
-              maxWidth: '90vw',
-              maxHeight: '80vh',
-              zIndex: 1001,
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              display: 'flex',
-              flexDirection: 'column',
-              overflow: 'hidden'
-            }}
-          >
+    {/* Notification Dropdown */}
+          <AnimatePresence>
+            {showNotification && (
+              <motion.div
+                ref={notificationDropdownRef}
+                initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                transition={{ duration: 0.2 }}
+                style={{
+                  position: 'fixed',
+                  top: isMobile ? '6rem' : '7.5rem',
+                  right: isMobile ? '1rem' : '2rem',
+                  backgroundColor: '#dbd6c9',
+                  backdropFilter: 'blur(20px)',
+                  borderRadius: '15px',
+                  padding: '1rem 0',
+                  width: isMobile ? '320px' : '450px',
+                  maxWidth: '90vw',
+                  maxHeight: '80vh',
+                  zIndex: 1001,
+                  border: '1px solid rgba(0, 0, 0, 0.2)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  overflow: 'hidden'
+                }}
+              >
             <div style={{
               padding: '0 1.5rem 1rem 1.5rem',
               borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
@@ -7888,29 +7899,29 @@ useEffect(() => {
       </AnimatePresence>
 
       {/* User Dropdown Menu */}
-      <AnimatePresence>
-        {showUserDropdown && user && (
-          <motion.div
-            ref={userDropdownRef}
-            initial={{ opacity: 0, y: -10, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -10, scale: 0.95 }}
-            transition={{ duration: 0.2 }}
-            style={{
-              position: 'fixed',
-              top: isMobile ? '6rem' : '7.5rem',
-              right: isMobile ? '1rem' : '2rem',
-              backgroundColor: 'rgba(30, 30, 30, 0.95)',
-              backdropFilter: 'blur(10px)',
-              borderRadius: '12px',
-              padding: '0.8rem 0',
-              minWidth: '200px',
-              zIndex: 1001,
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              display: 'flex',
-              flexDirection: 'column'
-            }}
-          >
+          <AnimatePresence>
+            {showUserDropdown && user && (
+              <motion.div
+                ref={userDropdownRef}
+                initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                transition={{ duration: 0.2 }}
+                style={{
+                  position: 'fixed',
+                  top: isMobile ? '6rem' : '7.5rem',
+                  right: isMobile ? '1rem' : '2rem',
+                  backgroundColor: '#dbd6c9',
+                  backdropFilter: 'blur(10px)',
+                  borderRadius: '12px',
+                  padding: '0.8rem 0',
+                  minWidth: '200px',
+                  zIndex: 1001,
+                  border: '1px solid rgba(0, 0, 0, 0.2)',
+                  display: 'flex',
+                  flexDirection: 'column'
+                }}
+              >
             <div style={{
               padding: '0.8rem 1rem',
               borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
@@ -8014,23 +8025,23 @@ useEffect(() => {
         )}
       </AnimatePresence>
 
-      {/* Top Navigation Bar - Tanpa warna kuning, transparan */}
-      <div 
-        ref={topNavRef}
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100%',
-          padding: isMobile ? '1rem 1.5rem' : '1.5rem 3rem',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          zIndex: 101,
-          boxSizing: 'border-box',
-          backgroundColor: 'transparent'
-        }}
-      >
+      {/* Top Navigation Bar */}
+          <div 
+            ref={topNavRef}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100%',
+              padding: isMobile ? '1rem 1.5rem' : '1.5rem 3rem',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              zIndex: 101,
+              boxSizing: 'border-box',
+              backgroundColor: 'transparent'
+            }}
+          >
         <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '2rem' : '4rem' }}>
           <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -8385,33 +8396,34 @@ useEffect(() => {
         </div>
       </div>
 
-      {/* Main Content Container */}
-      <div style={{
-        width: '100%',
-        paddingTop: isMobile ? '12rem' : '15rem',
-        boxSizing: 'border-box',
-        zIndex: 10,
-        position: 'relative'
-      }}>
-
-        {/* PRODUCT AND Image Section */}
-        <div style={{
-          width: '100%',
-          padding: isMobile ? '1.5rem' : '3rem',
-          marginTop: isMobile ? '1rem' : '2rem',
-          boxSizing: 'border-box',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: isMobile ? '0.1rem' : '0.2rem'
-        }}>
-          
-          {/* Baris 1: PRODUCT + AND + Foto + 01 */}
+     {/* Main Content Container */}
           <div style={{
-            display: 'flex',
-            alignItems: 'center',
             width: '100%',
-            justifyContent: 'space-between'
+            paddingTop: isMobile ? '12rem' : '15rem',
+            boxSizing: 'border-box',
+            zIndex: 10,
+            position: 'relative'
           }}>
+
+            {/* PRODUCT AND Image Section */}
+            <div style={{
+              width: '100%',
+              padding: isMobile ? '1.5rem' : '3rem',
+              marginTop: isMobile ? '1rem' : '2rem',
+              boxSizing: 'border-box',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: isMobile ? '0.1rem' : '0.2rem'
+            }}>
+
+              
+         {/* Baris 1: PRODUCT + AND + Foto + 01 */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                width: '100%',
+                justifyContent: 'space-between'
+              }}>
             <div
               onClick={handleProductClick}
               style={{
@@ -8585,13 +8597,13 @@ useEffect(() => {
           </div>
 
           {/* Baris 2: Foto + VISUAL DESIGNER */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            width: '100%',
-            justifyContent: 'flex-start',
-            gap: isMobile ? '4rem' : '8rem'
-          }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                width: '100%',
+                justifyContent: 'flex-start',
+                gap: isMobile ? '4rem' : '8rem'
+              }}>
             <div style={{ position: 'relative', display: 'flex', alignItems: 'flex-end' }}>
               <div style={{
                 width: isMobile ? '140px' : '180px',
@@ -8662,13 +8674,14 @@ useEffect(() => {
             </div>
           </div>
 
-          {/* Baris 3: BASED + Foto + IN + PANTAU (Donasi Kamu) - Tanpa linebox */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            width: '100%',
-            justifyContent: 'space-between'
-          }}>
+          {/* Baris 3: BASED + Foto + IN + PANTAU */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                width: '100%',
+                justifyContent: 'space-between'
+              }}>
+                
             <div style={{
               textAlign: 'left',
               height: isMobile ? '5rem' : '7rem',
@@ -8804,13 +8817,13 @@ useEffect(() => {
           </div>
 
           {/* Baris 4: Foto + INDONESIA */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            width: '100%',
-            justifyContent: 'flex-start',
-            gap: isMobile ? '4rem' : '8rem'
-          }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                width: '100%',
+                justifyContent: 'flex-start',
+                gap: isMobile ? '4rem' : '8rem'
+              }}>
             <div style={{ position: 'relative', display: 'flex', alignItems: 'flex-end' }}>
               <div style={{
                 width: isMobile ? '140px' : '180px',
@@ -8880,21 +8893,21 @@ useEffect(() => {
             </div>
           </div>
         </div>
-        
-        <div style={{ height: isMobile ? '3rem' : '4rem', width: '100%' }} />
+       <div style={{ height: isMobile ? '3rem' : '4rem', width: '100%' }} />
 
-        <AnimatePresence mode="wait">
-          {currentView === "main" && (
-            <motion.div
-              key="main-view"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.5 }}
-            />
-          )}
-        </AnimatePresence>
+            <AnimatePresence mode="wait">
+              {currentView === "main" && (
+                <motion.div
+                  key="main-view"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.5 }}
+                />
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
       </div>
     </div>
   );
-}
