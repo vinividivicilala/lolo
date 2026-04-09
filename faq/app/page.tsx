@@ -46,7 +46,7 @@ export default function HomePage(): React.JSX.Element {
           pointerEvents: 'none'
         }}>
           <span style={{
-            fontFamily: "'Inter Tight', sans-serif",
+            fontFamily: "'Inter Tight'",
             fontWeight: 400,
             color: 'rgb(0, 20, 70)',
             fontSize: '13px',
