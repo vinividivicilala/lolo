@@ -54,7 +54,6 @@ export default function HomePage(): React.JSX.Element {
   const [showContent, setShowContent] = useState(false);
   const loadingOverlayRef = useRef<HTMLDivElement>(null);
   const welcomeTextRef = useRef<HTMLDivElement>(null);
-  const menuruBigRef = useRef<HTMLSpanElement>(null);
   const sectionsRef = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
@@ -111,20 +110,18 @@ export default function HomePage(): React.JSX.Element {
   useEffect(() => {
     if (!showContent) return;
 
-    // Refresh ScrollTrigger setelah konten muncul
     setTimeout(() => {
       ScrollTrigger.refresh();
     }, 100);
 
-    // Animasi ScrollTrigger untuk sections
+    // Animasi ScrollTrigger untuk sections (fade in)
     sectionsRef.current.forEach((section, index) => {
       if (!section) return;
       
       gsap.fromTo(section,
         {
           opacity: 0,
-          y: 60,
-          scale: 0.95
+          y: 50
         },
         {
           scrollTrigger: {
@@ -136,15 +133,11 @@ export default function HomePage(): React.JSX.Element {
           },
           opacity: 1,
           y: 0,
-          scale: 1,
-          duration: 1,
-          ease: "power3.out"
+          duration: 0.8,
+          ease: "power2.out"
         }
       );
     });
-
-    // Teks MENURU besar tetap diam (sticky) - tidak ada animasi scroll
-    // Hanya efek selection color
 
     return () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
@@ -265,51 +258,44 @@ export default function HomePage(): React.JSX.Element {
           }}
           className="hide-scrollbar"
           >
-            {/* Sticky Container untuk teks besar */}
+            {/* Spacer atas */}
             <div style={{
-              position: 'sticky',
-              top: 0,
-              zIndex: 10,
-              backgroundColor: 'transparent'
+              height: isMobile ? '60px' : '80px'
+            }} />
+            
+            {/* Teks MENURU besar - ikut scroll biasa */}
+            <div style={{
+              position: 'relative',
+              paddingLeft: 'calc(2rem + 20px)',
+              paddingRight: '2rem',
+              boxSizing: 'border-box',
+              marginBottom: '4rem'
             }}>
-              <div style={{
-                height: isMobile ? '100px' : '150px'
-              }} />
-              
-              <div style={{
-                position: 'relative',
-                paddingLeft: 'calc(2rem + 20px)',
-                paddingRight: '2rem',
-                boxSizing: 'border-box'
-              }}>
-                <span 
-                  ref={menuruBigRef}
-                  id="menuru-big-text"
-                  style={{
-                    fontFamily: "'Impact', 'Arial Black', 'Helvetica Black', 'Franklin Gothic Heavy', 'a2g', monospace, sans-serif",
-                    fontWeight: 900,
-                    fontStyle: 'normal',
-                    color: 'rgb(140, 0, 0)',
-                    fontSize: isMobile ? '150px' : '550px',
-                    lineHeight: '0.85',
-                    textAlign: 'left',
-                    display: 'inline-block',
-                    whiteSpace: 'nowrap',
-                    letterSpacing: '-10px',
-                    textTransform: 'uppercase',
-                    cursor: 'text'
-                  }}>
-                  MENURU
-                </span>
-              </div>
+              <span 
+                id="menuru-big-text"
+                style={{
+                  fontFamily: "'Impact', 'Arial Black', 'Helvetica Black', 'Franklin Gothic Heavy', 'a2g', monospace, sans-serif",
+                  fontWeight: 900,
+                  fontStyle: 'normal',
+                  color: 'rgb(140, 0, 0)',
+                  fontSize: isMobile ? '150px' : '550px',
+                  lineHeight: '0.85',
+                  textAlign: 'left',
+                  display: 'inline-block',
+                  whiteSpace: 'nowrap',
+                  letterSpacing: '-10px',
+                  textTransform: 'uppercase',
+                  cursor: 'text'
+                }}>
+                MENURU
+              </span>
             </div>
             
-            {/* Konten sections yang discroll */}
+            {/* Konten sections dengan animasi ScrollTrigger */}
             <div style={{
               position: 'relative',
               width: '100%',
               padding: '2rem',
-              paddingTop: '4rem',
               paddingBottom: '10rem',
               boxSizing: 'border-box'
             }}>
@@ -325,7 +311,9 @@ export default function HomePage(): React.JSX.Element {
                     padding: '2rem',
                     backgroundColor: 'rgba(0, 20, 70, 0.03)',
                     borderRadius: '16px',
-                    border: '1px solid rgba(0, 20, 70, 0.1)'
+                    border: '1px solid rgba(0, 20, 70, 0.1)',
+                    opacity: 0,
+                    transform: 'translateY(50px)'
                   }}
                 >
                   <h2 style={{
@@ -341,7 +329,7 @@ export default function HomePage(): React.JSX.Element {
                     fontSize: '1.2rem',
                     lineHeight: '1.8'
                   }}>
-                    Scroll ke bawah untuk melihat konten. Teks MENURU besar tetap diam di posisinya.
+                    Scroll ke bawah. Teks MENURU besar ikut scroll biasa, sections muncul dengan animasi GSAP ScrollTrigger.
                   </p>
                 </div>
 
@@ -354,7 +342,9 @@ export default function HomePage(): React.JSX.Element {
                       padding: '2rem',
                       backgroundColor: 'rgba(0, 20, 70, 0.03)',
                       borderRadius: '16px',
-                      border: '1px solid rgba(0, 20, 70, 0.1)'
+                      border: '1px solid rgba(0, 20, 70, 0.1)',
+                      opacity: 0,
+                      transform: 'translateY(50px)'
                     }}
                   >
                     <h3 style={{
