@@ -60,6 +60,10 @@ export default function HomePage(): React.JSX.Element {
     checkMobile();
     window.addEventListener('resize', checkMobile);
 
+    // Sembunyikan scrollbar
+    document.body.style.overflow = 'hidden';
+    document.body.style.height = '100vh';
+
     // Scroll behavior normal dengan GSAP ScrollTrigger
     const ctx = gsap.context(() => {
       // Animasi untuk teks MENURU besar - fade out saat scroll
@@ -123,6 +127,8 @@ export default function HomePage(): React.JSX.Element {
     return () => {
       ctx.revert();
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+      document.body.style.overflow = '';
+      document.body.style.height = '';
     };
   }, []);
 
@@ -142,7 +148,8 @@ export default function HomePage(): React.JSX.Element {
         fontFamily: 'ev-light, sans-serif',
         WebkitFontSmoothing: 'antialiased',
         MozOsxFontSmoothing: 'grayscale',
-        position: 'relative'
+        position: 'relative',
+        overflow: 'hidden'
       }}
     >
       
@@ -194,12 +201,19 @@ export default function HomePage(): React.JSX.Element {
         </span>
       </div>
       
-      {/* Konten Utama */}
+      {/* Konten Utama - bisa scroll */}
       <div style={{
         position: 'relative',
         zIndex: 2,
-        width: '100%'
-      }}>
+        width: '100%',
+        overflowY: 'auto',
+        overflowX: 'hidden',
+        height: '100vh',
+        scrollbarWidth: 'none',
+        msOverflowStyle: 'none'
+      }}
+      className="hide-scrollbar"
+      >
         {/* Spacer */}
         <div style={{
           height: isMobile ? '60px' : '80px'
@@ -345,10 +359,19 @@ export default function HomePage(): React.JSX.Element {
         </svg>
       </div>
 
-      <style jsx>{`
-        @keyframes bounce {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(8px); }
+      <style jsx global>{`
+        /* Hide scrollbar untuk semua browser */
+        .hide-scrollbar {
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+        }
+        
+        .hide-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        
+        body {
+          overflow: hidden;
         }
         
         /* Custom selection color */
@@ -360,6 +383,11 @@ export default function HomePage(): React.JSX.Element {
         #menuru-big-text::-moz-selection {
           background-color: rgb(140, 0, 0) !important;
           color: #dbd6c9 !important;
+        }
+        
+        @keyframes bounce {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(8px); }
         }
       `}</style>
     </div>
