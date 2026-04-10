@@ -62,13 +62,13 @@ export default function HomePage(): React.JSX.Element {
     style.textContent = `
       /* Warna highlight selection untuk teks MENURU */
       #menuru-big-text::selection {
-        background-color: #dbd6c9 !important;
-        color: rgb(140, 0, 0) !important;
+        background-color: rgb(140, 0, 0) !important;
+        color: #dbd6c9 !important;
       }
       
       #menuru-big-text::-moz-selection {
-        background-color: #dbd6c9 !important;
-        color: rgb(140, 0, 0) !important;
+        background-color: rgb(140, 0, 0) !important;
+        color: #dbd6c9 !important;
       }
       
       /* Membatasi area highlight hanya selebar teks */
@@ -257,7 +257,8 @@ export default function HomePage(): React.JSX.Element {
               lineHeight: '1.8',
               marginBottom: '2rem'
             }}>
-              Coba blok (select) teks MENURU besar di atas. Warna highlight akan berubah menjadi warna frame (#dbd6c9), bukan biru biasa.
+              Coba blok (select) teks MENURU besar di atas. 
+              Warna highlight akan menjadi merah (rgb(140,0,0)) dan teks yang terblok akan menjadi warna frame (#dbd6c9).
             </p>
             
             <div style={{
