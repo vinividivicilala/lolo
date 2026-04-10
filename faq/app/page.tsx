@@ -263,13 +263,13 @@ export default function HomePage(): React.JSX.Element {
               height: isMobile ? '120px' : '160px'
             }} />
             
-            {/* Teks MENURU besar - ikut scroll biasa, jarak pas dari navbar */}
+            {/* Teks MENURU besar */}
             <div style={{
               position: 'relative',
               paddingLeft: 'calc(2rem + 20px)',
               paddingRight: '2rem',
               boxSizing: 'border-box',
-              marginBottom: '4rem'
+              marginBottom: '1rem'
             }}>
               <span 
                 id="menuru-big-text"
@@ -288,6 +288,27 @@ export default function HomePage(): React.JSX.Element {
                   cursor: 'text'
                 }}>
                 MENURU
+              </span>
+            </div>
+
+            {/* Teks subtitle di bawah teks besar */}
+            <div style={{
+              position: 'relative',
+              paddingLeft: 'calc(2rem + 20px)',
+              paddingRight: '2rem',
+              boxSizing: 'border-box',
+              marginBottom: '4rem'
+            }}>
+              <span style={{
+                fontFamily: 'B',
+                fontWeight: 400,
+                fontStyle: 'normal',
+                color: 'rgb(206, 0, 25)',
+                fontSize: isMobile ? '30px' : '50px',
+                lineHeight: isMobile ? '30px' : '50px',
+                display: 'block'
+              }}>
+                Creative Designer / Developer. Founder
               </span>
             </div>
             
