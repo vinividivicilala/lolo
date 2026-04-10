@@ -47,7 +47,6 @@ export default function HomePage(): React.JSX.Element {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [scrollY, setScrollY] = useState(0);
-  const [isSelecting, setIsSelecting] = useState(false);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -58,9 +57,31 @@ export default function HomePage(): React.JSX.Element {
     document.body.style.overflow = 'hidden';
     document.body.style.height = '100vh';
 
+    // Inject CSS untuk mengubah warna highlight selection
+    const style = document.createElement('style');
+    style.textContent = `
+      /* Warna highlight selection untuk teks MENURU */
+      #menuru-big-text::selection {
+        background-color: #dbd6c9 !important;
+        color: rgb(140, 0, 0) !important;
+      }
+      
+      #menuru-big-text::-moz-selection {
+        background-color: #dbd6c9 !important;
+        color: rgb(140, 0, 0) !important;
+      }
+      
+      /* Membatasi area highlight hanya selebar teks */
+      #menuru-big-text {
+        display: inline-block;
+      }
+    `;
+    document.head.appendChild(style);
+
     return () => {
       document.body.style.overflow = '';
       document.body.style.height = '';
+      document.head.removeChild(style);
     };
   }, []);
 
@@ -100,24 +121,6 @@ export default function HomePage(): React.JSX.Element {
     };
   }, []);
 
-  // Efek select teks besar
-  useEffect(() => {
-    const handleSelectionChange = () => {
-      const selection = window.getSelection();
-      const selectedText = selection?.toString() || '';
-      const menuruElement = document.getElementById('menuru-big-text');
-      
-      if (selectedText && menuruElement && selection?.containsNode(menuruElement, true)) {
-        setIsSelecting(true);
-      } else {
-        setIsSelecting(false);
-      }
-    };
-
-    document.addEventListener('selectionchange', handleSelectionChange);
-    return () => document.removeEventListener('selectionchange', handleSelectionChange);
-  }, []);
-
   return (
     <div style={{
       minHeight: '100vh',
@@ -154,12 +157,11 @@ export default function HomePage(): React.JSX.Element {
         left: '2rem',
         right: '2rem',
         bottom: '2rem',
-        backgroundColor: isSelecting ? 'rgb(140, 0, 0)' : '#dbd6c9',
+        backgroundColor: '#dbd6c9',
         borderRadius: '20px',
         zIndex: 1,
         pointerEvents: 'none',
-        overflow: 'hidden',
-        transition: 'background-color 0.2s ease'
+        overflow: 'hidden'
       }} />
       
       {/* Teks MENURU kecil di pojok kiri atas frame */}
@@ -205,8 +207,7 @@ export default function HomePage(): React.JSX.Element {
           position: 'relative',
           paddingLeft: 'calc(2rem + 20px)',
           paddingRight: '2rem',
-          boxSizing: 'border-box',
-          userSelect: 'text'
+          boxSizing: 'border-box'
         }}>
           <span 
             id="menuru-big-text"
@@ -214,7 +215,7 @@ export default function HomePage(): React.JSX.Element {
               fontFamily: "'Impact', 'Arial Black', 'Helvetica Black', 'Franklin Gothic Heavy', 'a2g', monospace, sans-serif",
               fontWeight: 900,
               fontStyle: 'normal',
-              color: isSelecting ? '#dbd6c9' : 'rgb(140, 0, 0)',
+              color: 'rgb(140, 0, 0)',
               fontSize: isMobile ? '150px' : '550px',
               lineHeight: '0.85',
               textAlign: 'left',
@@ -222,7 +223,6 @@ export default function HomePage(): React.JSX.Element {
               whiteSpace: 'nowrap',
               letterSpacing: '-10px',
               textTransform: 'uppercase',
-              transition: 'color 0.2s ease',
               cursor: 'text'
             }}>
             MENURU
@@ -257,7 +257,7 @@ export default function HomePage(): React.JSX.Element {
               lineHeight: '1.8',
               marginBottom: '2rem'
             }}>
-              Coba select (blok) teks MENURU besar di atas dengan mouse. Warna akan bertukar antara teks dan background frame.
+              Coba blok (select) teks MENURU besar di atas. Warna highlight akan berubah menjadi warna frame (#dbd6c9), bukan biru biasa.
             </p>
             
             <div style={{
