@@ -55,6 +55,8 @@ export default function HomePage(): React.JSX.Element {
   const loadingOverlayRef = useRef<HTMLDivElement>(null);
   const welcomeTextRef = useRef<HTMLDivElement>(null);
   const sectionsRef = useRef<(HTMLDivElement | null)[]>([]);
+  const menuruFullRef = useRef<HTMLSpanElement>(null);
+  const menuruLetterMRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -106,6 +108,58 @@ export default function HomePage(): React.JSX.Element {
       document.body.style.height = '';
     };
   }, []);
+
+  // GSAP Hover effect untuk huruf M
+  useEffect(() => {
+    if (!showContent) return;
+
+    const menuruFull = menuruFullRef.current;
+    const letterM = menuruLetterMRef.current;
+
+    if (menuruFull && letterM) {
+      // Set initial state - MENURU tersembunyi di bawah
+      gsap.set(menuruFull, {
+        y: 20,
+        opacity: 0,
+        display: 'none'
+      });
+
+      // Hover event untuk huruf M
+      const handleMouseEnter = () => {
+        gsap.set(menuruFull, {
+          display: 'inline-block',
+          y: 20,
+          opacity: 0
+        });
+        gsap.to(menuruFull, {
+          y: 0,
+          opacity: 1,
+          duration: 0.4,
+          ease: "back.out(0.7)"
+        });
+      };
+
+      const handleMouseLeave = () => {
+        gsap.to(menuruFull, {
+          y: 20,
+          opacity: 0,
+          duration: 0.3,
+          ease: "power2.in",
+          onComplete: () => {
+            gsap.set(menuruFull, { display: 'none' });
+          }
+        });
+      };
+
+      letterM.addEventListener('mouseenter', handleMouseEnter);
+      letterM.addEventListener('mouseleave', handleMouseLeave);
+
+      return () => {
+        letterM.removeEventListener('mouseenter', handleMouseEnter);
+        letterM.removeEventListener('mouseleave', handleMouseLeave);
+      };
+    }
+  }, [showContent]);
 
   useEffect(() => {
     if (!showContent) return;
@@ -225,23 +279,46 @@ export default function HomePage(): React.JSX.Element {
             overflow: 'hidden'
           }} />
           
-          {/* Teks MENURU kecil di pojok kiri atas frame */}
+          {/* Judul Website - Huruf "M" dengan hover effect */}
           <div style={{
             position: 'fixed',
             top: 'calc(2rem + 16px)',
             left: 'calc(2rem + 20px)',
             zIndex: 3,
-            pointerEvents: 'none'
+            pointerEvents: 'auto',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px'
           }}>
-            <span style={{
-              fontFamily: 'ev-light, sans-serif',
-              fontWeight: 400,
-              fontStyle: 'normal',
-              color: 'rgb(0, 20, 70)',
-              fontSize: '13px',
-              lineHeight: '13px'
-            }}>
-              MENURU
+            <span 
+              ref={menuruLetterMRef}
+              style={{
+                fontFamily: 'ev-light, sans-serif',
+                fontWeight: 400,
+                fontStyle: 'normal',
+                color: 'rgb(0, 20, 70)',
+                fontSize: '40px',
+                lineHeight: '40px',
+                display: 'inline-block'
+              }}
+            >
+              M
+            </span>
+            <span 
+              ref={menuruFullRef}
+              style={{
+                fontFamily: 'ev-light, sans-serif',
+                fontWeight: 400,
+                fontStyle: 'normal',
+                color: 'rgb(0, 20, 70)',
+                fontSize: '40px',
+                lineHeight: '40px',
+                display: 'none',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              ENURU
             </span>
           </div>
           
@@ -291,7 +368,7 @@ export default function HomePage(): React.JSX.Element {
               </span>
             </div>
 
-            {/* Teks subtitle di bawah teks besar dengan font B */}
+            {/* Teks subtitle di bawah teks besar */}
             <div style={{
               position: 'relative',
               paddingLeft: 'calc(2rem + 20px)',
@@ -350,7 +427,7 @@ export default function HomePage(): React.JSX.Element {
                     fontSize: '1.2rem',
                     lineHeight: '1.8'
                   }}>
-                    Scroll ke bawah. Teks MENURU besar ikut scroll biasa, sections muncul dengan animasi GSAP ScrollTrigger.
+                    Hover ke huruf "M" di pojok kiri atas untuk melihat efek animasi.
                   </p>
                 </div>
 
