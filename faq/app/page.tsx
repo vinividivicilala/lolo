@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import gsap from "gsap";
 import { 
   getFirestore, 
   collection, 
@@ -45,18 +46,96 @@ if (typeof window !== "undefined") {
 export default function HomePage(): React.JSX.Element {
   const [isMobile, setIsMobile] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
   const contentRef = useRef<HTMLDivElement>(null);
+  const loadingRef = useRef<HTMLDivElement>(null);
+  const loadingTextRef = useRef<HTMLDivElement>(null);
+  const loadingBarRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
     window.addEventListener('resize', checkMobile);
 
-    // Sembunyikan scrollbar
+    // Animasi Loading Overlay Modern
+    const tl = gsap.timeline({
+      onComplete: () => {
+        setTimeout(() => {
+          setIsLoading(false);
+        }, 500);
+      }
+    });
+
+    // Animasi loading bar
+    tl.fromTo(loadingBarRef.current,
+      { width: '0%' },
+      { width: '100%', duration: 2.5, ease: "power2.inOut" }
+    );
+
+    // Animasi teks MENURU di loading
+    tl.fromTo(loadingTextRef.current,
+      { 
+        opacity: 0, 
+        y: 50,
+        scale: 0.9,
+        filter: "blur(10px)"
+      },
+      { 
+        opacity: 1, 
+        y: 0, 
+        scale: 1,
+        filter: "blur(0px)",
+        duration: 1,
+        ease: "power3.out"
+      },
+      "-=1.5"
+    );
+
+    // Animasi karakter per huruf (efek Awwwards)
+    const letters = loadingTextRef.current?.querySelectorAll('.letter');
+    if (letters) {
+      gsap.fromTo(letters,
+        { 
+          opacity: 0, 
+          y: 100,
+          rotateX: -90,
+          filter: "blur(20px)"
+        },
+        {
+          opacity: 1,
+          y: 0,
+          rotateX: 0,
+          filter: "blur(0px)",
+          duration: 0.6,
+          stagger: 0.08,
+          ease: "back.out(1.2)",
+          delay: 0.3
+        }
+      );
+    }
+
+    // Fade out loading overlay
+    tl.to(loadingRef.current, {
+      opacity: 0,
+      duration: 0.8,
+      ease: "power2.inOut",
+      delay: 0.5
+    });
+
+    // Sembunyikan scrollbar saat loading
     document.body.style.overflow = 'hidden';
     document.body.style.height = '100vh';
 
-    // Event scroll sederhana dengan requestAnimationFrame untuk performa
+    return () => {
+      document.body.style.overflow = '';
+      document.body.style.height = '';
+    };
+  }, []);
+
+  useEffect(() => {
+    if (isLoading) return;
+    
+    // Event scroll setelah loading selesai
     const handleScroll = () => {
       if (!contentRef.current) return;
       
@@ -65,7 +144,6 @@ export default function HomePage(): React.JSX.Element {
       const progress = maxScroll > 0 ? scrollTop / maxScroll : 0;
       setScrollProgress(progress);
       
-      // Efek parallax untuk teks besar
       const menuruText = document.getElementById('menuru-big-text');
       if (menuruText) {
         const moveX = scrollTop * 0.3;
@@ -74,7 +152,6 @@ export default function HomePage(): React.JSX.Element {
         menuruText.style.opacity = `${opacity}`;
       }
       
-      // Efek fade-in untuk sections
       const sections = document.querySelectorAll('.section-item');
       sections.forEach((section, index) => {
         const rect = section.getBoundingClientRect();
@@ -93,17 +170,136 @@ export default function HomePage(): React.JSX.Element {
     
     if (contentRef.current) {
       contentRef.current.addEventListener('scroll', handleScroll);
-      handleScroll(); // Initial call
+      handleScroll();
     }
     
     return () => {
-      document.body.style.overflow = '';
-      document.body.style.height = '';
       if (contentRef.current) {
         contentRef.current.removeEventListener('scroll', handleScroll);
       }
     };
-  }, []);
+  }, [isLoading]);
+
+  if (isLoading) {
+    return (
+      <div 
+        ref={loadingRef}
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          backgroundColor: '#dbd6c9',
+          zIndex: 9999,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          overflow: 'hidden'
+        }}
+      >
+        {/* Loading Bar */}
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '2px',
+          backgroundColor: 'rgba(0, 0, 0, 0.1)'
+        }}>
+          <div 
+            ref={loadingBarRef}
+            style={{
+              height: '100%',
+              width: '0%',
+              backgroundColor: 'rgb(140, 0, 0)'
+            }}
+          />
+        </div>
+
+        {/* Loading Text MENURU dengan efek per huruf */}
+        <div 
+          ref={loadingTextRef}
+          style={{
+            display: 'flex',
+            gap: isMobile ? '8px' : '15px',
+            justifyContent: 'center',
+            alignItems: 'center',
+            flexWrap: 'wrap'
+          }}
+        >
+          {['M', 'E', 'N', 'U', 'R', 'U'].map((letter, index) => (
+            <span
+              key={index}
+              className="letter"
+              style={{
+                fontFamily: "'Impact', 'Arial Black', 'Helvetica Black', 'Franklin Gothic Heavy', 'a2g', monospace, sans-serif",
+                fontWeight: 900,
+                fontSize: isMobile ? '80px' : '180px',
+                color: 'rgb(140, 0, 0)',
+                display: 'inline-block',
+                letterSpacing: isMobile ? '-5px' : '-10px',
+                textTransform: 'uppercase',
+                lineHeight: 0.9,
+                opacity: 0,
+                transform: 'translateY(100px) rotateX(-90deg)',
+                filter: 'blur(20px)'
+              }}
+            >
+              {letter}
+            </span>
+          ))}
+        </div>
+
+        {/* Loading Subtitle */}
+        <div style={{
+          position: 'absolute',
+          bottom: '3rem',
+          left: 0,
+          right: 0,
+          textAlign: 'center',
+          fontFamily: 'ev-light, sans-serif',
+          fontSize: '11px',
+          color: 'rgb(0, 20, 70)',
+          letterSpacing: '4px',
+          textTransform: 'uppercase'
+        }}>
+          LOADING EXPERIENCE
+        </div>
+
+        {/* Dekorasi dot */}
+        <div style={{
+          position: 'absolute',
+          bottom: '2rem',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          display: 'flex',
+          gap: '6px'
+        }}>
+          {[0, 1, 2].map((i) => (
+            <div
+              key={i}
+              style={{
+                width: '4px',
+                height: '4px',
+                borderRadius: '50%',
+                backgroundColor: 'rgb(140, 0, 0)',
+                animation: `pulse 1.5s ease ${i * 0.2}s infinite`
+              }}
+            />
+          ))}
+        </div>
+
+        <style jsx>{`
+          @keyframes pulse {
+            0%, 100% { opacity: 0.2; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.5); }
+          }
+        `}</style>
+      </div>
+    );
+  }
 
   return (
     <div style={{
@@ -168,7 +364,7 @@ export default function HomePage(): React.JSX.Element {
         </span>
       </div>
       
-      {/* Konten Utama - scrollable tanpa scrollbar */}
+      {/* Konten Utama */}
       <div 
         ref={contentRef}
         style={{
@@ -183,12 +379,10 @@ export default function HomePage(): React.JSX.Element {
         }}
         className="hide-scrollbar"
       >
-        {/* Spacer */}
         <div style={{
           height: isMobile ? '60px' : '80px'
         }} />
         
-        {/* Teks MENURU besar dengan efek parallax */}
         <div style={{
           position: 'relative',
           paddingLeft: 'calc(2rem + 20px)',
@@ -219,7 +413,6 @@ export default function HomePage(): React.JSX.Element {
           </span>
         </div>
         
-        {/* Konten sections dengan efek fade-in */}
         <div style={{
           position: 'relative',
           width: '100%',
@@ -232,7 +425,6 @@ export default function HomePage(): React.JSX.Element {
             margin: '0 auto',
             color: 'rgb(0, 20, 70)'
           }}>
-            {/* Section 1 */}
             <div 
               className="section-item"
               style={{
@@ -259,11 +451,10 @@ export default function HomePage(): React.JSX.Element {
                 fontSize: '1.2rem',
                 lineHeight: '1.8'
               }}>
-                Scroll untuk melihat konten. Setiap section akan muncul dengan animasi fade-in yang halus.
+                Experience modern scrolling with smooth animations.
               </p>
             </div>
 
-            {/* Section 2-8 */}
             {[2, 3, 4, 5, 6, 7, 8].map((item) => (
               <div 
                 key={item}
@@ -291,7 +482,6 @@ export default function HomePage(): React.JSX.Element {
                 }}>
                   Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
                   Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                  Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.
                 </p>
               </div>
             ))}
@@ -299,7 +489,6 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </div>
       
-      {/* Scroll indicator dengan progress */}
       <div style={{
         position: 'fixed',
         bottom: 'calc(2rem + 30px)',
@@ -337,7 +526,6 @@ export default function HomePage(): React.JSX.Element {
         </svg>
       </div>
 
-      {/* Progress bar scroll */}
       <div style={{
         position: 'fixed',
         bottom: '2rem',
@@ -358,7 +546,6 @@ export default function HomePage(): React.JSX.Element {
       </div>
 
       <style jsx global>{`
-        /* Hide scrollbar */
         .hide-scrollbar {
           scrollbar-width: none;
           -ms-overflow-style: none;
@@ -372,13 +559,11 @@ export default function HomePage(): React.JSX.Element {
           overflow: hidden;
         }
         
-        /* Section visible state */
         .section-item.section-visible {
           opacity: 1 !important;
           transform: translateY(0) !important;
         }
         
-        /* Custom selection color */
         #menuru-big-text::selection {
           background-color: rgb(140, 0, 0) !important;
           color: #dbd6c9 !important;
