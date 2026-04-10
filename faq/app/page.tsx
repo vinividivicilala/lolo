@@ -258,7 +258,7 @@ export default function HomePage(): React.JSX.Element {
           }}
           className="hide-scrollbar"
           >
-            {/* Spacer atas - jarak antara navbar (teks kecil) dengan teks besar */}
+            {/* Spacer atas */}
             <div style={{
               height: isMobile ? '120px' : '160px'
             }} />
@@ -291,7 +291,7 @@ export default function HomePage(): React.JSX.Element {
               </span>
             </div>
 
-            {/* Teks subtitle di bawah teks besar */}
+            {/* Teks subtitle di bawah teks besar dengan font B */}
             <div style={{
               position: 'relative',
               paddingLeft: 'calc(2rem + 20px)',
@@ -312,7 +312,7 @@ export default function HomePage(): React.JSX.Element {
               </span>
             </div>
             
-            {/* Konten sections dengan animasi ScrollTrigger */}
+            {/* Konten sections */}
             <div style={{
               position: 'relative',
               width: '100%',
