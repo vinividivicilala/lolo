@@ -63,11 +63,11 @@ export default function HomePage(): React.JSX.Element {
     };
   }, []);
 
-  // Animasi scroll untuk SEMUA konten (teks besar dan konten bawah)
+  // Animasi scroll untuk SEMUA konten
   useEffect(() => {
     if (!scrollContainerRef.current) return;
 
-    const maxScroll = 1200;
+    const maxScroll = 1500;
     let targetScroll = 0;
     let currentScroll = 0;
     let animationFrame: number;
@@ -117,7 +117,18 @@ export default function HomePage(): React.JSX.Element {
       position: 'relative'
     }}>
       
-      {/* Framed Layout - Area dengan overflow hidden agar konten tidak keluar */}
+      {/* Background Utama - Hitam */}
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'black',
+        zIndex: 0
+      }} />
+      
+      {/* Framed Layout - Area krem (#dbd6c9) */}
       <div style={{
         position: 'fixed',
         top: '2rem',
@@ -131,7 +142,7 @@ export default function HomePage(): React.JSX.Element {
         overflow: 'hidden'
       }} />
       
-      {/* Teks MENURU kecil di pojok kiri atas frame (tetap) */}
+      {/* Teks MENURU kecil di pojok kiri atas frame */}
       <div style={{
         position: 'fixed',
         top: 'calc(2rem + 16px)',
@@ -151,7 +162,7 @@ export default function HomePage(): React.JSX.Element {
         </span>
       </div>
       
-      {/* Scroll Container - SEMUA konten scroll bersama, tetap di dalam frame */}
+      {/* Scroll Container - Semua konten scroll */}
       <div 
         ref={scrollContainerRef}
         style={{
@@ -164,10 +175,14 @@ export default function HomePage(): React.JSX.Element {
           transition: 'transform 0.1s ease-out'
         }}
       >
-        {/* Teks MENURU besar - ikut scroll, tetap di dalam frame */}
+        {/* Spacer besar agar teks besar lebih ke bawah */}
+        <div style={{
+          height: isMobile ? '200px' : '300px'
+        }} />
+        
+        {/* Teks MENURU besar - lebih ke bawah dari judul web */}
         <div style={{
           position: 'relative',
-          paddingTop: 'calc(2rem + 40px)',
           paddingLeft: 'calc(2rem + 20px)',
           paddingRight: '2rem',
           boxSizing: 'border-box'
@@ -189,13 +204,13 @@ export default function HomePage(): React.JSX.Element {
           </span>
         </div>
         
-        {/* Konten bawah - ikut scroll bersama teks besar */}
+        {/* Konten bawah */}
         <div style={{
           position: 'relative',
           width: '100%',
           padding: '2rem',
-          paddingTop: '2rem',
-          paddingBottom: '10rem',
+          paddingTop: '4rem',
+          paddingBottom: '15rem',
           boxSizing: 'border-box'
         }}>
           <div style={{
@@ -217,7 +232,7 @@ export default function HomePage(): React.JSX.Element {
               lineHeight: '1.8',
               marginBottom: '2rem'
             }}>
-              Scroll to explore more content. Teks MENURU besar ikut scroll ke atas bersama konten lainnya, dan tetap berada di dalam area frame.
+              Scroll ke atas. Teks MENURU besar akan bergerak ke atas dan melewati batas frame (area krem), masuk ke background hitam.
             </p>
             
             <div style={{
