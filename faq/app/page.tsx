@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { 
   getFirestore, 
   collection, 
@@ -18,6 +19,11 @@ import {
 } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { initializeApp, getApps } from "firebase/app";
+
+// Register GSAP ScrollTrigger
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
 // Konfigurasi Firebase
 const firebaseConfig = {
@@ -45,51 +51,44 @@ if (typeof window !== "undefined") {
 
 export default function HomePage(): React.JSX.Element {
   const [isMobile, setIsMobile] = useState(false);
-  const [scrollProgress, setScrollProgress] = useState(0);
   const [showContent, setShowContent] = useState(false);
-  const contentRef = useRef<HTMLDivElement>(null);
   const loadingOverlayRef = useRef<HTMLDivElement>(null);
   const welcomeTextRef = useRef<HTMLDivElement>(null);
+  const menuruBigRef = useRef<HTMLSpanElement>(null);
+  const sectionsRef = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
     window.addEventListener('resize', checkMobile);
 
-    // Sembunyikan scrollbar saat loading
+    // Sembunyikan scrollbar
     document.body.style.overflow = 'hidden';
     document.body.style.height = '100vh';
 
-    // Animasi Loading Overlay dari bawah ke atas
+    // Animasi Loading Overlay dengan GSAP
     const tl = gsap.timeline({
       onComplete: () => {
         setShowContent(true);
       }
     });
 
-    // Set initial position dari bawah
-    gsap.set(loadingOverlayRef.current, {
-      y: '100%'
-    });
+    gsap.set(loadingOverlayRef.current, { y: '100%' });
 
-    // Animasi overlay naik dari bawah
     tl.to(loadingOverlayRef.current, {
       y: '0%',
       duration: 0.8,
       ease: "power3.inOut"
     });
 
-    // Animasi welcome text fade in
     tl.fromTo(welcomeTextRef.current,
       { opacity: 0, y: 20 },
       { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" },
       "-=0.3"
     );
 
-    // Delay
     tl.to({}, { duration: 1.2 });
 
-    // Animasi welcome text fade out
     tl.to(welcomeTextRef.current, {
       opacity: 0,
       y: -20,
@@ -97,7 +96,6 @@ export default function HomePage(): React.JSX.Element {
       ease: "power2.in"
     });
 
-    // Animasi overlay turun ke bawah
     tl.to(loadingOverlayRef.current, {
       y: '100%',
       duration: 0.8,
@@ -112,55 +110,50 @@ export default function HomePage(): React.JSX.Element {
 
   useEffect(() => {
     if (!showContent) return;
-    
-    // Event scroll setelah loading selesai
-    const handleScroll = () => {
-      if (!contentRef.current) return;
+
+    // Refresh ScrollTrigger setelah konten muncul
+    setTimeout(() => {
+      ScrollTrigger.refresh();
+    }, 100);
+
+    // Animasi ScrollTrigger untuk sections
+    sectionsRef.current.forEach((section, index) => {
+      if (!section) return;
       
-      const scrollTop = contentRef.current.scrollTop;
-      const maxScroll = contentRef.current.scrollHeight - window.innerHeight;
-      const progress = maxScroll > 0 ? scrollTop / maxScroll : 0;
-      setScrollProgress(progress);
-      
-      const menuruText = document.getElementById('menuru-big-text');
-      if (menuruText) {
-        const moveX = scrollTop * 0.3;
-        const opacity = Math.max(0, 1 - scrollTop / 800);
-        menuruText.style.transform = `translateX(-${moveX}px)`;
-        menuruText.style.opacity = `${opacity}`;
-      }
-      
-      const sections = document.querySelectorAll('.section-item');
-      sections.forEach((section, index) => {
-        const rect = section.getBoundingClientRect();
-        const viewportHeight = window.innerHeight;
-        const isVisible = rect.top < viewportHeight - 100 && rect.bottom > 100;
-        
-        if (isVisible) {
-          const delay = index * 0.05;
-          section.classList.add('section-visible');
-          section.setAttribute('style', `transition-delay: ${delay}s`);
-        } else {
-          section.classList.remove('section-visible');
+      gsap.fromTo(section,
+        {
+          opacity: 0,
+          y: 60,
+          scale: 0.95
+        },
+        {
+          scrollTrigger: {
+            trigger: section,
+            start: "top 85%",
+            end: "top 50%",
+            scrub: 1,
+            toggleActions: "play none none reverse"
+          },
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          duration: 1,
+          ease: "power3.out"
         }
-      });
-    };
-    
-    if (contentRef.current) {
-      contentRef.current.addEventListener('scroll', handleScroll);
-      handleScroll();
-    }
-    
+      );
+    });
+
+    // Teks MENURU besar tetap diam (sticky) - tidak ada animasi scroll
+    // Hanya efek selection color
+
     return () => {
-      if (contentRef.current) {
-        contentRef.current.removeEventListener('scroll', handleScroll);
-      }
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
   }, [showContent]);
 
   return (
     <>
-      {/* Loading Overlay - dari bawah ke atas */}
+      {/* Loading Overlay */}
       <div 
         ref={loadingOverlayRef}
         style={{
@@ -259,59 +252,64 @@ export default function HomePage(): React.JSX.Element {
             </span>
           </div>
           
-          {/* Konten Utama */}
-          <div 
-            ref={contentRef}
-            style={{
-              position: 'relative',
-              zIndex: 2,
-              width: '100%',
-              overflowY: 'auto',
-              overflowX: 'hidden',
-              height: '100vh',
-              scrollbarWidth: 'none',
-              msOverflowStyle: 'none'
-            }}
-            className="hide-scrollbar"
+          {/* Konten Utama - scrollable tanpa scrollbar */}
+          <div style={{
+            position: 'relative',
+            zIndex: 2,
+            width: '100%',
+            overflowY: 'auto',
+            overflowX: 'hidden',
+            height: '100vh',
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none'
+          }}
+          className="hide-scrollbar"
           >
+            {/* Sticky Container untuk teks besar */}
             <div style={{
-              height: isMobile ? '60px' : '80px'
-            }} />
-            
-            <div style={{
-              position: 'relative',
-              paddingLeft: 'calc(2rem + 20px)',
-              paddingRight: '2rem',
-              boxSizing: 'border-box',
-              marginBottom: '4rem',
-              overflow: 'hidden'
+              position: 'sticky',
+              top: 0,
+              zIndex: 10,
+              backgroundColor: 'transparent'
             }}>
-              <span 
-                id="menuru-big-text"
-                style={{
-                  fontFamily: "'Impact', 'Arial Black', 'Helvetica Black', 'Franklin Gothic Heavy', 'a2g', monospace, sans-serif",
-                  fontWeight: 900,
-                  fontStyle: 'normal',
-                  color: 'rgb(140, 0, 0)',
-                  fontSize: isMobile ? '150px' : '550px',
-                  lineHeight: '0.85',
-                  textAlign: 'left',
-                  display: 'inline-block',
-                  whiteSpace: 'nowrap',
-                  letterSpacing: '-10px',
-                  textTransform: 'uppercase',
-                  cursor: 'text',
-                  transition: 'transform 0.1s linear, opacity 0.1s linear',
-                  willChange: 'transform, opacity'
-                }}>
-                MENURU
-              </span>
+              <div style={{
+                height: isMobile ? '100px' : '150px'
+              }} />
+              
+              <div style={{
+                position: 'relative',
+                paddingLeft: 'calc(2rem + 20px)',
+                paddingRight: '2rem',
+                boxSizing: 'border-box'
+              }}>
+                <span 
+                  ref={menuruBigRef}
+                  id="menuru-big-text"
+                  style={{
+                    fontFamily: "'Impact', 'Arial Black', 'Helvetica Black', 'Franklin Gothic Heavy', 'a2g', monospace, sans-serif",
+                    fontWeight: 900,
+                    fontStyle: 'normal',
+                    color: 'rgb(140, 0, 0)',
+                    fontSize: isMobile ? '150px' : '550px',
+                    lineHeight: '0.85',
+                    textAlign: 'left',
+                    display: 'inline-block',
+                    whiteSpace: 'nowrap',
+                    letterSpacing: '-10px',
+                    textTransform: 'uppercase',
+                    cursor: 'text'
+                  }}>
+                  MENURU
+                </span>
+              </div>
             </div>
             
+            {/* Konten sections yang discroll */}
             <div style={{
               position: 'relative',
               width: '100%',
               padding: '2rem',
+              paddingTop: '4rem',
               paddingBottom: '10rem',
               boxSizing: 'border-box'
             }}>
@@ -321,16 +319,13 @@ export default function HomePage(): React.JSX.Element {
                 color: 'rgb(0, 20, 70)'
               }}>
                 <div 
-                  className="section-item"
+                  ref={el => { if (el) sectionsRef.current[0] = el; }}
                   style={{
                     marginBottom: '4rem',
                     padding: '2rem',
                     backgroundColor: 'rgba(0, 20, 70, 0.03)',
                     borderRadius: '16px',
-                    border: '1px solid rgba(0, 20, 70, 0.1)',
-                    opacity: 0,
-                    transform: 'translateY(40px)',
-                    transition: 'opacity 0.7s cubic-bezier(0.2, 0.9, 0.4, 1.1), transform 0.7s cubic-bezier(0.2, 0.9, 0.4, 1.1)'
+                    border: '1px solid rgba(0, 20, 70, 0.1)'
                   }}
                 >
                   <h2 style={{
@@ -346,23 +341,20 @@ export default function HomePage(): React.JSX.Element {
                     fontSize: '1.2rem',
                     lineHeight: '1.8'
                   }}>
-                    Experience modern scrolling with smooth animations.
+                    Scroll ke bawah untuk melihat konten. Teks MENURU besar tetap diam di posisinya.
                   </p>
                 </div>
 
-                {[2, 3, 4, 5, 6, 7, 8].map((item) => (
+                {[2, 3, 4, 5, 6, 7, 8].map((item, idx) => (
                   <div 
                     key={item}
-                    className="section-item"
+                    ref={el => { if (el) sectionsRef.current[item - 1] = el; }}
                     style={{
                       marginBottom: '3rem',
                       padding: '2rem',
                       backgroundColor: 'rgba(0, 20, 70, 0.03)',
                       borderRadius: '16px',
-                      border: '1px solid rgba(0, 20, 70, 0.1)',
-                      opacity: 0,
-                      transform: 'translateY(40px)',
-                      transition: 'opacity 0.7s cubic-bezier(0.2, 0.9, 0.4, 1.1), transform 0.7s cubic-bezier(0.2, 0.9, 0.4, 1.1)'
+                      border: '1px solid rgba(0, 20, 70, 0.1)'
                     }}
                   >
                     <h3 style={{
@@ -377,6 +369,7 @@ export default function HomePage(): React.JSX.Element {
                     }}>
                       Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
                       Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                      Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.
                     </p>
                   </div>
                 ))}
@@ -384,6 +377,7 @@ export default function HomePage(): React.JSX.Element {
             </div>
           </div>
           
+          {/* Scroll indicator */}
           <div style={{
             position: 'fixed',
             bottom: 'calc(2rem + 30px)',
@@ -394,8 +388,6 @@ export default function HomePage(): React.JSX.Element {
             flexDirection: 'column',
             alignItems: 'center',
             gap: '0.5rem',
-            opacity: scrollProgress > 0.1 ? 0 : 1,
-            transition: 'opacity 0.4s ease',
             pointerEvents: 'none'
           }}>
             <span style={{
@@ -421,25 +413,6 @@ export default function HomePage(): React.JSX.Element {
             </svg>
           </div>
 
-          <div style={{
-            position: 'fixed',
-            bottom: '2rem',
-            left: '2rem',
-            right: '2rem',
-            height: '1px',
-            backgroundColor: 'rgba(0, 20, 70, 0.2)',
-            zIndex: 3,
-            borderRadius: '1px'
-          }}>
-            <div style={{
-              width: `${scrollProgress * 100}%`,
-              height: '100%',
-              backgroundColor: 'rgb(140, 0, 0)',
-              transition: 'width 0.1s linear',
-              borderRadius: '1px'
-            }} />
-          </div>
-
           <style jsx global>{`
             .hide-scrollbar {
               scrollbar-width: none;
@@ -452,11 +425,6 @@ export default function HomePage(): React.JSX.Element {
             
             body {
               overflow: hidden;
-            }
-            
-            .section-item.section-visible {
-              opacity: 1 !important;
-              transform: translateY(0) !important;
             }
             
             #menuru-big-text::selection {
