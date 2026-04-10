@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { 
   getFirestore, 
   collection, 
@@ -18,6 +19,11 @@ import {
 } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { initializeApp, getApps } from "firebase/app";
+
+// Register GSAP ScrollTrigger
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
 // Konfigurasi Firebase
 const firebaseConfig = {
@@ -44,111 +50,115 @@ if (typeof window !== "undefined") {
 }
 
 export default function HomePage(): React.JSX.Element {
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const menuruBigRef = useRef<HTMLSpanElement>(null);
+  const sectionsRef = useRef<(HTMLDivElement | null)[]>([]);
   const [isMobile, setIsMobile] = useState(false);
-  const [scrollY, setScrollY] = useState(0);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
     window.addEventListener('resize', checkMobile);
 
-    // Sembunyikan scrollbar
-    document.body.style.overflow = 'hidden';
-    document.body.style.height = '100vh';
+    // Scroll behavior normal dengan GSAP ScrollTrigger
+    const ctx = gsap.context(() => {
+      // Animasi untuk teks MENURU besar - fade out saat scroll
+      gsap.to(menuruBigRef.current, {
+        scrollTrigger: {
+          trigger: containerRef.current,
+          start: "top top",
+          end: "bottom top",
+          scrub: 1.5,
+          pin: false
+        },
+        opacity: 0,
+        scale: 0.8,
+        y: -100,
+        filter: "blur(10px)",
+        duration: 2,
+        ease: "power2.out"
+      });
 
-    // Inject CSS untuk mengubah warna highlight selection
-    const style = document.createElement('style');
-    style.textContent = `
-      /* Warna highlight selection untuk teks MENURU */
-      #menuru-big-text::selection {
-        background-color: rgb(140, 0, 0) !important;
-        color: #dbd6c9 !important;
-      }
-      
-      #menuru-big-text::-moz-selection {
-        background-color: rgb(140, 0, 0) !important;
-        color: #dbd6c9 !important;
-      }
-      
-      /* Membatasi area highlight hanya selebar teks */
-      #menuru-big-text {
-        display: inline-block;
-      }
-    `;
-    document.head.appendChild(style);
-
-    return () => {
-      document.body.style.overflow = '';
-      document.body.style.height = '';
-      document.head.removeChild(style);
-    };
-  }, []);
-
-  // Animasi scroll untuk SEMUA konten
-  useEffect(() => {
-    if (!scrollContainerRef.current) return;
-
-    const maxScroll = 1500;
-    let targetScroll = 0;
-    let currentScroll = 0;
-    let animationFrame: number;
-
-    const handleWheel = (e: WheelEvent) => {
-      e.preventDefault();
-      
-      targetScroll += e.deltaY;
-      targetScroll = Math.max(0, Math.min(maxScroll, targetScroll));
-      
-      const animate = () => {
-        currentScroll += (targetScroll - currentScroll) * 0.1;
-        setScrollY(currentScroll);
+      // Animasi untuk setiap section - fade in dan slide up
+      sectionsRef.current.forEach((section, index) => {
+        if (!section) return;
         
-        if (Math.abs(targetScroll - currentScroll) > 0.1) {
-          animationFrame = requestAnimationFrame(animate);
-        }
-      };
-      
-      if (animationFrame) cancelAnimationFrame(animationFrame);
-      animationFrame = requestAnimationFrame(animate);
-    };
+        gsap.fromTo(section,
+          {
+            opacity: 0,
+            y: 80,
+            scale: 0.95
+          },
+          {
+            scrollTrigger: {
+              trigger: section,
+              start: "top 85%",
+              end: "top 50%",
+              scrub: 0.8,
+              toggleActions: "play none none reverse"
+            },
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            duration: 1.2,
+            ease: "power3.out"
+          }
+        );
+      });
 
-    window.addEventListener('wheel', handleWheel, { passive: false });
-    
+      // Animasi parallax untuk background
+      gsap.to(".bg-overlay", {
+        scrollTrigger: {
+          trigger: containerRef.current,
+          start: "top top",
+          end: "bottom bottom",
+          scrub: 1
+        },
+        scale: 1.1,
+        duration: 2,
+        ease: "none"
+      });
+    });
+
     return () => {
-      window.removeEventListener('wheel', handleWheel);
-      if (animationFrame) cancelAnimationFrame(animationFrame);
+      ctx.revert();
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
   }, []);
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      backgroundColor: 'black',
-      margin: 0,
-      padding: 0,
-      width: '100%',
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'flex-start',
-      alignItems: 'flex-start',
-      fontFamily: 'ev-light, sans-serif',
-      WebkitFontSmoothing: 'antialiased',
-      MozOsxFontSmoothing: 'grayscale',
-      overflow: 'hidden',
-      position: 'relative'
-    }}>
-      
-      {/* Background Utama - Hitam */}
-      <div style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
+    <div 
+      ref={containerRef}
+      style={{
+        minHeight: '200vh',
         backgroundColor: 'black',
-        zIndex: 0
-      }} />
+        margin: 0,
+        padding: 0,
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'flex-start',
+        alignItems: 'flex-start',
+        fontFamily: 'ev-light, sans-serif',
+        WebkitFontSmoothing: 'antialiased',
+        MozOsxFontSmoothing: 'grayscale',
+        position: 'relative'
+      }}
+    >
+      
+      {/* Background Utama - Hitam dengan efek */}
+      <div 
+        className="bg-overlay"
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'black',
+          zIndex: 0
+        }}
+      />
       
       {/* Framed Layout - Area krem (#dbd6c9) */}
       <div style={{
@@ -184,32 +194,27 @@ export default function HomePage(): React.JSX.Element {
         </span>
       </div>
       
-      {/* Scroll Container - Semua konten scroll */}
-      <div 
-        ref={scrollContainerRef}
-        style={{
-          position: 'relative',
-          zIndex: 2,
-          width: '100%',
-          height: '100vh',
-          overflow: 'visible',
-          transform: `translateY(-${scrollY}px)`,
-          transition: 'transform 0.1s ease-out'
-        }}
-      >
-        {/* Spacer kecil agar teks besar dekat dengan judul web */}
+      {/* Konten Utama */}
+      <div style={{
+        position: 'relative',
+        zIndex: 2,
+        width: '100%'
+      }}>
+        {/* Spacer */}
         <div style={{
           height: isMobile ? '60px' : '80px'
         }} />
         
-        {/* Teks MENURU besar - dekat dengan judul web */}
+        {/* Teks MENURU besar */}
         <div style={{
           position: 'relative',
           paddingLeft: 'calc(2rem + 20px)',
           paddingRight: '2rem',
-          boxSizing: 'border-box'
+          boxSizing: 'border-box',
+          marginBottom: '4rem'
         }}>
           <span 
+            ref={menuruBigRef}
             id="menuru-big-text"
             style={{
               fontFamily: "'Impact', 'Arial Black', 'Helvetica Black', 'Franklin Gothic Heavy', 'a2g', monospace, sans-serif",
@@ -229,13 +234,12 @@ export default function HomePage(): React.JSX.Element {
           </span>
         </div>
         
-        {/* Konten bawah */}
+        {/* Konten sections dengan animasi scroll */}
         <div style={{
           position: 'relative',
           width: '100%',
           padding: '2rem',
-          paddingTop: '4rem',
-          paddingBottom: '15rem',
+          paddingBottom: '10rem',
           boxSizing: 'border-box'
         }}>
           <div style={{
@@ -243,56 +247,69 @@ export default function HomePage(): React.JSX.Element {
             margin: '0 auto',
             color: 'rgb(0, 20, 70)'
           }}>
-            <h2 style={{
-              fontFamily: 'ev-light, sans-serif',
-              fontSize: '2rem',
-              marginBottom: '2rem'
-            }}>
-              Welcome to MENURU
-            </h2>
-            
-            <p style={{
-              fontFamily: 'ev-light, sans-serif',
-              fontSize: '1.2rem',
-              lineHeight: '1.8',
-              marginBottom: '2rem'
-            }}>
-              Coba blok (select) teks MENURU besar di atas. 
-              Warna highlight akan menjadi merah (rgb(140,0,0)) dan teks yang terblok akan menjadi warna frame (#dbd6c9).
-            </p>
-            
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '2rem'
-            }}>
-              {[1, 2, 3, 4, 5, 6, 7, 8].map((item) => (
-                <div key={item} style={{
-                  padding: '2rem',
-                  backgroundColor: 'rgba(0, 20, 70, 0.05)',
-                  borderRadius: '12px',
-                  border: '1px solid rgba(0, 20, 70, 0.1)'
-                }}>
-                  <h3 style={{
-                    fontSize: '1.5rem',
-                    marginBottom: '1rem'
-                  }}>
-                    Section {item}
-                  </h3>
-                  <p style={{
-                    lineHeight: '1.6'
-                  }}>
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
-                    Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                  </p>
-                </div>
-              ))}
+            {/* Section 1 */}
+            <div 
+              ref={el => { if (el) sectionsRef.current[0] = el; }}
+              style={{
+                marginBottom: '4rem',
+                padding: '2rem',
+                backgroundColor: 'rgba(0, 20, 70, 0.03)',
+                borderRadius: '16px',
+                border: '1px solid rgba(0, 20, 70, 0.1)'
+              }}
+            >
+              <h2 style={{
+                fontFamily: 'ev-light, sans-serif',
+                fontSize: '2rem',
+                marginBottom: '1rem',
+                fontWeight: 400
+              }}>
+                Welcome to MENURU
+              </h2>
+              <p style={{
+                fontFamily: 'ev-light, sans-serif',
+                fontSize: '1.2rem',
+                lineHeight: '1.8'
+              }}>
+                Experience modern scrolling with GSAP ScrollTrigger. Setiap section akan muncul dengan animasi yang halus.
+              </p>
             </div>
+
+            {/* Section 2-8 dengan animasi */}
+            {[2, 3, 4, 5, 6, 7, 8].map((item, idx) => (
+              <div 
+                key={item}
+                ref={el => { if (el) sectionsRef.current[item - 1] = el; }}
+                style={{
+                  marginBottom: '3rem',
+                  padding: '2rem',
+                  backgroundColor: 'rgba(0, 20, 70, 0.03)',
+                  borderRadius: '16px',
+                  border: '1px solid rgba(0, 20, 70, 0.1)',
+                  transform: 'translateY(0)'
+                }}
+              >
+                <h3 style={{
+                  fontSize: '1.5rem',
+                  marginBottom: '1rem',
+                  fontWeight: 400
+                }}>
+                  Section {item}
+                </h3>
+                <p style={{
+                  lineHeight: '1.6'
+                }}>
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
+                  Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                  Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </div>
       
-      {/* Scroll indicator */}
+      {/* Scroll indicator dengan animasi */}
       <div style={{
         position: 'fixed',
         bottom: 'calc(2rem + 30px)',
@@ -303,8 +320,6 @@ export default function HomePage(): React.JSX.Element {
         flexDirection: 'column',
         alignItems: 'center',
         gap: '0.5rem',
-        opacity: scrollY > 50 ? 0 : 1,
-        transition: 'opacity 0.3s ease',
         pointerEvents: 'none'
       }}>
         <span style={{
@@ -334,6 +349,17 @@ export default function HomePage(): React.JSX.Element {
         @keyframes bounce {
           0%, 100% { transform: translateY(0); }
           50% { transform: translateY(8px); }
+        }
+        
+        /* Custom selection color */
+        #menuru-big-text::selection {
+          background-color: rgb(140, 0, 0) !important;
+          color: #dbd6c9 !important;
+        }
+        
+        #menuru-big-text::-moz-selection {
+          background-color: rgb(140, 0, 0) !important;
+          color: #dbd6c9 !important;
         }
       `}</style>
     </div>
