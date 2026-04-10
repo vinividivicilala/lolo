@@ -258,12 +258,12 @@ export default function HomePage(): React.JSX.Element {
           }}
           className="hide-scrollbar"
           >
-            {/* Spacer atas */}
+            {/* Spacer atas - jarak antara navbar (teks kecil) dengan teks besar */}
             <div style={{
-              height: isMobile ? '60px' : '80px'
+              height: isMobile ? '120px' : '160px'
             }} />
             
-            {/* Teks MENURU besar - ikut scroll biasa */}
+            {/* Teks MENURU besar - ikut scroll biasa, jarak pas dari navbar */}
             <div style={{
               position: 'relative',
               paddingLeft: 'calc(2rem + 20px)',
