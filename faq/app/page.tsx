@@ -65,14 +65,14 @@ export default function HomePage(): React.JSX.Element {
     checkMobile();
     window.addEventListener('resize', checkMobile);
 
-    // Sembunyikan scrollbar
-    document.body.style.overflow = 'hidden';
-    document.body.style.height = '100vh';
-
     // Animasi Loading Overlay dengan GSAP
     const tl = gsap.timeline({
       onComplete: () => {
         setShowContent(true);
+        // Refresh ScrollTrigger setelah konten muncul
+        setTimeout(() => {
+          ScrollTrigger.refresh();
+        }, 100);
       }
     });
 
@@ -106,8 +106,7 @@ export default function HomePage(): React.JSX.Element {
     });
 
     return () => {
-      document.body.style.overflow = '';
-      document.body.style.height = '';
+      window.removeEventListener('resize', checkMobile);
     };
   }, []);
 
@@ -161,13 +160,9 @@ export default function HomePage(): React.JSX.Element {
     }
   }, [showContent]);
 
-  // GSAP ScrollTrigger untuk Footer Copyright
+  // GSAP ScrollTrigger untuk sections dan footer
   useEffect(() => {
     if (!showContent) return;
-
-    setTimeout(() => {
-      ScrollTrigger.refresh();
-    }, 100);
 
     // Animasi ScrollTrigger untuk sections (fade in)
     sectionsRef.current.forEach((section, index) => {
@@ -285,8 +280,7 @@ export default function HomePage(): React.JSX.Element {
           fontFamily: 'ev-light, sans-serif',
           WebkitFontSmoothing: 'antialiased',
           MozOsxFontSmoothing: 'grayscale',
-          position: 'relative',
-          overflow: 'hidden'
+          position: 'relative'
         }}>
           
           {/* Background Utama - Hitam */}
@@ -311,7 +305,7 @@ export default function HomePage(): React.JSX.Element {
             borderRadius: '20px',
             zIndex: 1,
             pointerEvents: 'none',
-            overflow: 'hidden'
+            overflow: 'auto'
           }} />
           
           {/* Footer Overlay - di dalam frame, muncul saat scroll */}
@@ -430,20 +424,13 @@ export default function HomePage(): React.JSX.Element {
             </div>
           </div>
           
-          {/* Konten Utama - scrollable tanpa scrollbar */}
+          {/* Konten Utama - scroll normal */}
           <div style={{
             position: 'relative',
             zIndex: 2,
             width: '100%',
-            overflowY: 'auto',
-            overflowX: 'hidden',
-            height: '100vh',
-            scrollbarWidth: 'none',
-            msOverflowStyle: 'none',
-            paddingBottom: '100px'
-          }}
-          className="hide-scrollbar"
-          >
+            paddingBottom: '120px'
+          }}>
             {/* Spacer atas */}
             <div style={{
               height: isMobile ? '120px' : '160px'
@@ -503,7 +490,7 @@ export default function HomePage(): React.JSX.Element {
               position: 'relative',
               width: '100%',
               padding: '2rem',
-              paddingBottom: '15rem',
+              paddingBottom: '10rem',
               boxSizing: 'border-box'
             }}>
               <div style={{
@@ -536,7 +523,7 @@ export default function HomePage(): React.JSX.Element {
                     fontSize: '1.2rem',
                     lineHeight: '1.8'
                   }}>
-                    Scroll ke bawah untuk melihat footer copyright yang muncul dengan animasi GSAP ScrollTrigger.
+                    Scroll ke bawah untuk melihat konten dan footer copyright yang muncul dengan animasi GSAP ScrollTrigger.
                   </p>
                 </div>
 
@@ -611,19 +598,6 @@ export default function HomePage(): React.JSX.Element {
           </div>
 
           <style jsx global>{`
-            .hide-scrollbar {
-              scrollbar-width: none;
-              -ms-overflow-style: none;
-            }
-            
-            .hide-scrollbar::-webkit-scrollbar {
-              display: none;
-            }
-            
-            body {
-              overflow: hidden;
-            }
-            
             #menuru-big-text::selection {
               background-color: rgb(140, 0, 0) !important;
               color: #dbd6c9 !important;
@@ -643,4 +617,3 @@ export default function HomePage(): React.JSX.Element {
       )}
     </>
   );
-}
