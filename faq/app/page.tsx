@@ -91,9 +91,9 @@ const ImageTrail = () => {
         x,
         y,
         rotate: angle + (Math.random() * 20 - 10),
-        scale: 0.85 + Math.random() * 0.3,
-        offsetX: Math.random() * 60 - 30,
-        offsetY: Math.random() * 60 - 30,
+        scale: 0.9 + Math.random() * 0.2,
+        offsetX: Math.random() * 40 - 20,
+        offsetY: Math.random() * 40 - 20,
         src: cursorImages[imageIndex.current % cursorImages.length].src,
       };
 
@@ -121,11 +121,12 @@ const ImageTrail = () => {
     >
       <AnimatePresence>
         {images.map((img, i) => (
-          <motion.div
+          <motion.img
             key={img.id}
+            src={img.src}
             initial={{
               opacity: 0,
-              scale: 0.5,
+              scale: 0.6,
               x: img.x,
               y: img.y,
               rotate: img.rotate,
@@ -139,7 +140,7 @@ const ImageTrail = () => {
             }}
             exit={{
               opacity: 0,
-              scale: 0.6,
+              scale: 0.7,
               transition: { duration: 0.4 },
             }}
             transition={{
@@ -149,28 +150,19 @@ const ImageTrail = () => {
             }}
             style={{
               position: "absolute",
-              width: "90px",
-              aspectRatio: "3 / 4", // ✅ auto ratio biar normal
-              borderRadius: "10px",
-              overflow: "hidden",
-              backgroundColor: "#fff",
-              padding: "4px",
+
+              // 🔥 ukuran NORMAL (tidak terlalu besar/kecil)
+              width: "110px",
+              height: "auto",
+
+              // 🔥 penting: tidak crop
+              objectFit: "contain",
+
+              pointerEvents: "none",
               zIndex: 1000 - i,
-              boxShadow: "0 20px 40px rgba(0,0,0,0.3)",
-              border: "1px solid rgba(0,0,0,0.1)",
+              userSelect: "none",
             }}
-          >
-            <img
-              src={img.src}
-              alt=""
-              style={{
-                width: "100%",
-                height: "100%",
-                objectFit: "contain", // ✅ FULL terlihat
-                display: "block",
-              }}
-            />
-          </motion.div>
+          />
         ))}
       </AnimatePresence>
     </div>
