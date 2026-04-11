@@ -69,7 +69,6 @@ export default function HomePage(): React.JSX.Element {
     const tl = gsap.timeline({
       onComplete: () => {
         setShowContent(true);
-        // Refresh ScrollTrigger setelah konten muncul
         setTimeout(() => {
           ScrollTrigger.refresh();
         }, 100);
@@ -164,7 +163,6 @@ export default function HomePage(): React.JSX.Element {
   useEffect(() => {
     if (!showContent) return;
 
-    // Animasi ScrollTrigger untuk sections (fade in)
     sectionsRef.current.forEach((section, index) => {
       if (!section) return;
       
@@ -189,7 +187,6 @@ export default function HomePage(): React.JSX.Element {
       );
     });
 
-    // Animasi Footer Copyright - muncul saat scroll ke bawah
     if (footerRef.current && footerOverlayRef.current) {
       gsap.set(footerRef.current, {
         y: 100,
@@ -200,7 +197,6 @@ export default function HomePage(): React.JSX.Element {
         opacity: 0
       });
 
-      // Footer muncul saat scroll mendekati akhir
       ScrollTrigger.create({
         trigger: footerRef.current,
         start: "top bottom",
@@ -308,7 +304,7 @@ export default function HomePage(): React.JSX.Element {
             overflow: 'auto'
           }} />
           
-          {/* Footer Overlay - di dalam frame, muncul saat scroll */}
+          {/* Footer Overlay */}
           <div 
             ref={footerOverlayRef}
             style={{
@@ -325,7 +321,7 @@ export default function HomePage(): React.JSX.Element {
             }}
           />
           
-          {/* Judul Website - Huruf "M" dengan hover effect */}
+          {/* Judul Website - Huruf "M" */}
           <div style={{
             position: 'fixed',
             top: 'calc(2rem + 16px)',
@@ -368,7 +364,7 @@ export default function HomePage(): React.JSX.Element {
             </span>
           </div>
           
-          {/* Copyright Footer - muncul saat scroll */}
+          {/* Copyright Footer */}
           <div 
             ref={footerRef}
             style={{
@@ -390,7 +386,6 @@ export default function HomePage(): React.JSX.Element {
               alignItems: 'center',
               gap: '0.5rem'
             }}>
-              {/* Logo Copyright */}
               <svg 
                 width="24" 
                 height="24" 
@@ -424,19 +419,17 @@ export default function HomePage(): React.JSX.Element {
             </div>
           </div>
           
-          {/* Konten Utama - scroll normal */}
+          {/* Konten Utama */}
           <div style={{
             position: 'relative',
             zIndex: 2,
             width: '100%',
             paddingBottom: '120px'
           }}>
-            {/* Spacer atas */}
             <div style={{
               height: isMobile ? '120px' : '160px'
             }} />
             
-            {/* Teks MENURU besar */}
             <div style={{
               position: 'relative',
               paddingLeft: 'calc(2rem + 20px)',
@@ -464,7 +457,6 @@ export default function HomePage(): React.JSX.Element {
               </span>
             </div>
 
-            {/* Teks subtitle di bawah teks besar */}
             <div style={{
               position: 'relative',
               paddingLeft: 'calc(2rem + 20px)',
@@ -485,7 +477,6 @@ export default function HomePage(): React.JSX.Element {
               </span>
             </div>
             
-            {/* Konten sections */}
             <div style={{
               position: 'relative',
               width: '100%',
@@ -527,7 +518,7 @@ export default function HomePage(): React.JSX.Element {
                   </p>
                 </div>
 
-                {[2, 3, 4, 5, 6, 7, 8].map((item, idx) => (
+                {[2, 3, 4, 5, 6, 7, 8].map((item) => (
                   <div 
                     key={item}
                     ref={el => { if (el) sectionsRef.current[item - 1] = el; }}
@@ -561,7 +552,6 @@ export default function HomePage(): React.JSX.Element {
             </div>
           </div>
           
-          {/* Scroll indicator */}
           <div style={{
             position: 'fixed',
             bottom: 'calc(2rem + 30px)',
@@ -596,24 +586,25 @@ export default function HomePage(): React.JSX.Element {
               <path d="M12 5v14M19 12l-7 7-7-7"/>
             </svg>
           </div>
-
-          <style jsx global>{`
-            #menuru-big-text::selection {
-              background-color: rgb(140, 0, 0) !important;
-              color: #dbd6c9 !important;
-            }
-            
-            #menuru-big-text::-moz-selection {
-              background-color: rgb(140, 0, 0) !important;
-              color: #dbd6c9 !important;
-            }
-            
-            @keyframes bounce {
-              0%, 100% { transform: translateY(0); }
-              50% { transform: translateY(8px); }
-            }
-          `}</style>
         </div>
       )}
     </>
   );
+}
+
+<style jsx global>{`
+  #menuru-big-text::selection {
+    background-color: rgb(140, 0, 0) !important;
+    color: #dbd6c9 !important;
+  }
+  
+  #menuru-big-text::-moz-selection {
+    background-color: rgb(140, 0, 0) !important;
+    color: #dbd6c9 !important;
+  }
+  
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(8px); }
+  }
+`}</style>
