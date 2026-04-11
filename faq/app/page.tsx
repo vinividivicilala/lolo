@@ -506,6 +506,88 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
           </div>
+
+
+          <div style={{
+  position: 'fixed',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  zIndex: 999,
+}}>
+  <div style={{
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    background: '#3a3a3a',
+    padding: '10px 14px',
+    borderRadius: '14px',
+    boxShadow: '0 8px 20px rgba(0,0,0,0.25)',
+    border: '2px solid #2a2a2a'
+  }}>
+    
+    {/* Logo */}
+    <div style={{
+      width: '36px',
+      height: '36px',
+      background: '#2b2b2b',
+      borderRadius: '10px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      color: 'white',
+      fontWeight: 'bold'
+    }}>
+      W.
+    </div>
+
+    {/* Avatar */}
+    <img 
+      src="https://i.pravatar.cc/100"
+      style={{
+        width: '32px',
+        height: '32px',
+        borderRadius: '50%',
+        objectFit: 'cover'
+      }}
+    />
+
+    {/* Nama */}
+    <span style={{
+      color: 'white',
+      fontSize: '14px',
+      fontWeight: 500
+    }}>
+      Evan Bohringer
+    </span>
+
+    {/* Button Profile */}
+    <button style={{
+      padding: '6px 12px',
+      borderRadius: '8px',
+      border: '1px solid #555',
+      background: 'transparent',
+      color: 'white',
+      cursor: 'pointer'
+    }}>
+      Profile
+    </button>
+
+    {/* Button Visit */}
+    <button style={{
+      padding: '6px 14px',
+      borderRadius: '10px',
+      background: '#9BE3C2',
+      color: '#003322',
+      border: 'none',
+      fontWeight: 500,
+      cursor: 'pointer'
+    }}>
+      Visit us
+    </button>
+
+  </div>
+</div>
           
           {/* Scroll indicator */}
           <div style={{
