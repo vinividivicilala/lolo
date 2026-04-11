@@ -66,11 +66,14 @@ const cursorImages = [
 
 
 
+
 const ImageTrail = () => {
   const [images, setImages] = useState<any[]>([]);
   const lastPos = useRef({ x: 0, y: 0 });
+  const canSpawn = useRef(true);
 
-  const threshold = 40; // 🔥 biar keluar 1 per 1 (lebih jarang)
+  const threshold = 40; // lebih jarang spawn
+  const delayBetweenSpawn = 120; // delay antar foto (biar 1 per 1)
 
   useEffect(() => {
     const handleMove = (e: MouseEvent) => {
@@ -81,27 +84,28 @@ const ImageTrail = () => {
       const dy = y - lastPos.current.y;
       const distance = Math.sqrt(dx * dx + dy * dy);
 
-      if (distance < threshold) return;
+      if (distance < threshold || !canSpawn.current) return;
 
       lastPos.current = { x, y };
-
-      const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+      canSpawn.current = false;
 
       const newImage = {
         id: Date.now() + Math.random(),
         x,
         y,
-        rotate: angle,
-        offsetX: Math.random() * 20 - 10,
-        offsetY: Math.random() * 20 - 10,
       };
 
-      // 🔥 max 5 gambar saja
       setImages((prev) => [newImage, ...prev].slice(0, 5));
 
+      // delay supaya keluar 1 per 1
+      setTimeout(() => {
+        canSpawn.current = true;
+      }, delayBetweenSpawn);
+
+      // hapus pelan (slow fade)
       setTimeout(() => {
         setImages((prev) => prev.filter((img) => img.id !== newImage.id));
-      }, 1800); // agak lama biar smooth
+      }, 2000);
     };
 
     window.addEventListener("mousemove", handleMove);
@@ -114,7 +118,7 @@ const ImageTrail = () => {
         position: "fixed",
         inset: 0,
         pointerEvents: "none",
-        zIndex: 1, // 🔥 di bawah teks
+        zIndex: 9999,
       }}
     >
       <AnimatePresence>
@@ -124,17 +128,15 @@ const ImageTrail = () => {
             src="images/5.jpg" // 🔥 hanya 1 gambar
             initial={{
               opacity: 0,
-              scale: 0.8,
+              scale: 0.85,
               x: img.x,
               y: img.y,
-              rotate: img.rotate,
             }}
             animate={{
               opacity: 1,
               scale: 1,
-              x: img.x + img.offsetX,
-              y: img.y + img.offsetY,
-              rotate: img.rotate,
+              x: img.x + i * 6, // stack dikit (rapi)
+              y: img.y - i * 10,
             }}
             exit={{
               opacity: 0,
@@ -143,7 +145,7 @@ const ImageTrail = () => {
             }}
             transition={{
               type: "spring",
-              stiffness: 60,   // 🔥 slow motion feel
+              stiffness: 60,   // 🔥 lebih lembut (slow)
               damping: 20,
               mass: 1.2,
             }}
@@ -151,12 +153,12 @@ const ImageTrail = () => {
               position: "absolute",
 
               // 🔥 ukuran BESAR portrait
-              width: "220px",
+              width: "180px",
               height: "auto",
 
               objectFit: "contain",
               pointerEvents: "none",
-              zIndex: 1 - i,
+              zIndex: 1000 - i,
               userSelect: "none",
             }}
           />
@@ -165,10 +167,6 @@ const ImageTrail = () => {
     </div>
   );
 };
-
-
-
-
 
 
 
