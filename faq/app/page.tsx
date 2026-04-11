@@ -52,6 +52,7 @@ if (typeof window !== "undefined") {
 
 
 
+
 const trailImages = [
   "images/25.jpg",
   "images/26.jpg",
@@ -63,11 +64,12 @@ const trailImages = [
 const ImageTrail = () => {
   const [images, setImages] = useState<any[]>([]);
   const lastPos = useRef({ x: 0, y: 0 });
-  const canSpawn = useRef(true);
+  const directionRef = useRef(1); // 1 = kanan, -1 = kiri
   const indexRef = useRef(0);
+  const canSpawn = useRef(true);
 
-  const threshold = 50;
-  const delayBetweenSpawn = 150;
+  const threshold = 60; // 🔥 lebih jauh biar jelas
+  const delayBetweenSpawn = 120;
 
   useEffect(() => {
     const handleMove = (e: MouseEvent) => {
@@ -79,6 +81,9 @@ const ImageTrail = () => {
       const distance = Math.sqrt(dx * dx + dy * dy);
 
       if (distance < threshold || !canSpawn.current) return;
+
+      // 🔥 DETEKSI ARAH
+      directionRef.current = dx > 0 ? 1 : -1;
 
       lastPos.current = { x, y };
       canSpawn.current = false;
@@ -94,13 +99,15 @@ const ImageTrail = () => {
 
       setImages((prev) => [newImage, ...prev].slice(0, 5));
 
+      // delay spawn biar 1 per 1 jelas
       setTimeout(() => {
         canSpawn.current = true;
       }, delayBetweenSpawn);
 
+      // auto remove
       setTimeout(() => {
         setImages((prev) => prev.filter((img) => img.id !== newImage.id));
-      }, 2500);
+      }, 2600);
     };
 
     window.addEventListener("mousemove", handleMove);
@@ -118,8 +125,12 @@ const ImageTrail = () => {
     >
       <AnimatePresence>
         {images.map((img, i) => {
-          const offsetX = i * 70; // 🔥 ke samping
-          const offsetY = 0;      // 🔥 tetap sejajar
+          const direction = directionRef.current;
+
+          // 🔥 JARAK BESAR + IKUT ARAH
+          const spacing = 120; // kunci biar ga dempet
+          const offsetX = i * spacing * direction;
+          const offsetY = 0;
 
           return (
             <motion.img
@@ -144,12 +155,12 @@ const ImageTrail = () => {
               }}
               transition={{
                 type: "spring",
-                stiffness: 50,
-                damping: 22,
+                stiffness: 45, // 🔥 lebih slow
+                damping: 20,
               }}
               style={{
                 position: "absolute",
-                width: "200px",
+                width: "220px", // 🔥 besar & jelas
                 height: "auto",
                 objectFit: "contain",
                 pointerEvents: "none",
@@ -163,6 +174,17 @@ const ImageTrail = () => {
     </div>
   );
 };
+
+
+
+
+
+
+
+
+
+
+
 
 
 export default function HomePage(): React.JSX.Element {
