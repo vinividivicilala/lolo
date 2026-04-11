@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { 
   getFirestore, 
   collection, 
@@ -17,6 +19,11 @@ import {
 } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { initializeApp, getApps } from "firebase/app";
+
+// Register GSAP ScrollTrigger
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
 // Konfigurasi Firebase
 const firebaseConfig = {
@@ -62,19 +69,49 @@ export default function HomePage(): React.JSX.Element {
     document.body.style.overflow = 'hidden';
     document.body.style.height = '100vh';
 
-    // Simulasi loading
-    const timer = setTimeout(() => {
-      setShowContent(true);
-    }, 2000);
+    // Animasi Loading Overlay dengan GSAP
+    const tl = gsap.timeline({
+      onComplete: () => {
+        setShowContent(true);
+      }
+    });
+
+    gsap.set(loadingOverlayRef.current, { y: '100%' });
+
+    tl.to(loadingOverlayRef.current, {
+      y: '0%',
+      duration: 0.8,
+      ease: "power3.inOut"
+    });
+
+    tl.fromTo(welcomeTextRef.current,
+      { opacity: 0, y: 20 },
+      { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" },
+      "-=0.3"
+    );
+
+    tl.to({}, { duration: 1.2 });
+
+    tl.to(welcomeTextRef.current, {
+      opacity: 0,
+      y: -20,
+      duration: 0.5,
+      ease: "power2.in"
+    });
+
+    tl.to(loadingOverlayRef.current, {
+      y: '100%',
+      duration: 0.8,
+      ease: "power3.inOut"
+    });
 
     return () => {
       document.body.style.overflow = '';
       document.body.style.height = '';
-      clearTimeout(timer);
     };
   }, []);
 
-  // Hover effect untuk huruf M (tanpa GSAP)
+  // GSAP Hover effect untuk huruf M
   useEffect(() => {
     if (!showContent) return;
 
@@ -82,25 +119,36 @@ export default function HomePage(): React.JSX.Element {
     const letterM = menuruLetterMRef.current;
 
     if (menuruFull && letterM) {
-      menuruFull.style.display = 'none';
-      menuruFull.style.transform = 'translateY(20px)';
-      menuruFull.style.opacity = '0';
-      menuruFull.style.transition = 'all 0.3s ease';
+      gsap.set(menuruFull, {
+        y: 20,
+        opacity: 0,
+        display: 'none'
+      });
 
       const handleMouseEnter = () => {
-        menuruFull.style.display = 'inline-block';
-        setTimeout(() => {
-          menuruFull.style.transform = 'translateY(0)';
-          menuruFull.style.opacity = '1';
-        }, 10);
+        gsap.set(menuruFull, {
+          display: 'inline-block',
+          y: 20,
+          opacity: 0
+        });
+        gsap.to(menuruFull, {
+          y: 0,
+          opacity: 1,
+          duration: 0.4,
+          ease: "back.out(0.7)"
+        });
       };
 
       const handleMouseLeave = () => {
-        menuruFull.style.transform = 'translateY(20px)';
-        menuruFull.style.opacity = '0';
-        setTimeout(() => {
-          menuruFull.style.display = 'none';
-        }, 300);
+        gsap.to(menuruFull, {
+          y: 20,
+          opacity: 0,
+          duration: 0.3,
+          ease: "power2.in",
+          onComplete: () => {
+            gsap.set(menuruFull, { display: 'none' });
+          }
+        });
       };
 
       letterM.addEventListener('mouseenter', handleMouseEnter);
@@ -113,110 +161,123 @@ export default function HomePage(): React.JSX.Element {
     }
   }, [showContent]);
 
-  // Efek setiap huruf jatuh saat scroll (tanpa GSAP)
+  // Efek setiap huruf JATUH seperti barang dari lemari
   useEffect(() => {
     if (!showContent) return;
 
-    const handleScroll = () => {
-      const scrollContainer = document.querySelector('.scroll-container');
-      if (!scrollContainer) return;
-      
-      const scrollTop = scrollContainer.scrollTop;
-      const windowHeight = window.innerHeight;
-      
-      subtitleLettersRef.current.forEach((letter, index) => {
-        if (!letter) return;
-        
-        const letterRect = letter.getBoundingClientRect();
-        const letterTop = letterRect.top;
-        const triggerPoint = windowHeight * 0.7;
-        
-        if (letterTop < triggerPoint) {
-          const progress = Math.min(1, (triggerPoint - letterTop) / 200);
-          const fallDistance = 50 + (index * 2);
-          const rotation = 10 * progress;
-          const opacity = 1 - progress;
-          
-          letter.style.transform = `translateY(${fallDistance * progress}px) rotate(${rotation}deg)`;
-          letter.style.opacity = `${opacity}`;
-        } else {
-          letter.style.transform = `translateY(0) rotate(0deg)`;
-          letter.style.opacity = '1';
-        }
-      });
-    };
+    // Set initial state untuk setiap huruf
+    subtitleLettersRef.current.forEach((letter, index) => {
+      if (letter) {
+        gsap.set(letter, {
+          y: 0,
+          opacity: 1,
+          rotation: 0,
+          scale: 1
+        });
+      }
+    });
 
-    const scrollContainer = document.querySelector('.scroll-container');
-    if (scrollContainer) {
-      scrollContainer.addEventListener('scroll', handleScroll);
-      return () => scrollContainer.removeEventListener('scroll', handleScroll);
-    }
+    // Animasi ScrollTrigger untuk setiap huruf JATUH
+    subtitleLettersRef.current.forEach((letter, index) => {
+      if (!letter) return;
+      
+      // Efek jatuh: turun cepat, memantul, dan bergetar
+      gsap.to(letter, {
+        scrollTrigger: {
+          trigger: letter,
+          start: "top 70%",
+          end: "top 30%",
+          scrub: 1.2,
+          toggleActions: "play none none reverse"
+        },
+        y: 300,
+        opacity: 0,
+        rotation: 25,
+        scale: 0.8,
+        duration: 1,
+        ease: "bounce.out",
+        delay: index * 0.03
+      });
+    });
+
+    return () => {
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+    };
   }, [showContent]);
 
-  // Animasi fade-in sections
   useEffect(() => {
     if (!showContent) return;
 
-    const handleScrollSections = () => {
-      sectionsRef.current.forEach((section) => {
-        if (!section) return;
-        
-        const rect = section.getBoundingClientRect();
-        const windowHeight = window.innerHeight;
-        const isVisible = rect.top < windowHeight - 100 && rect.bottom > 100;
-        
-        if (isVisible) {
-          section.style.opacity = '1';
-          section.style.transform = 'translateY(0)';
-        }
-      });
-    };
+    setTimeout(() => {
+      ScrollTrigger.refresh();
+    }, 100);
 
-    const scrollContainer = document.querySelector('.scroll-container');
-    if (scrollContainer) {
-      scrollContainer.addEventListener('scroll', handleScrollSections);
-      handleScrollSections();
-      return () => scrollContainer.removeEventListener('scroll', handleScrollSections);
-    }
+    // Animasi ScrollTrigger untuk sections (fade in)
+    sectionsRef.current.forEach((section, index) => {
+      if (!section) return;
+      
+      gsap.fromTo(section,
+        {
+          opacity: 0,
+          y: 50
+        },
+        {
+          scrollTrigger: {
+            trigger: section,
+            start: "top 85%",
+            end: "top 50%",
+            scrub: 1,
+            toggleActions: "play none none reverse"
+          },
+          opacity: 1,
+          y: 0,
+          duration: 0.8,
+          ease: "power2.out"
+        }
+      );
+    });
+
+    return () => {
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+    };
   }, [showContent]);
 
   return (
     <>
       {/* Loading Overlay */}
-      {!showContent && (
+      <div 
+        ref={loadingOverlayRef}
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          backgroundColor: '#dbd6c9',
+          zIndex: 9999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          overflow: 'hidden',
+          transform: 'translateY(100%)'
+        }}
+      >
         <div 
-          ref={loadingOverlayRef}
+          ref={welcomeTextRef}
           style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            backgroundColor: '#dbd6c9',
-            zIndex: 9999,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            overflow: 'hidden'
+            fontFamily: 'ev-light, sans-serif',
+            fontWeight: 400,
+            fontStyle: 'normal',
+            color: 'rgb(0, 20, 70)',
+            fontSize: '13px',
+            lineHeight: '13px',
+            letterSpacing: '2px',
+            opacity: 0
           }}
         >
-          <div 
-            ref={welcomeTextRef}
-            style={{
-              fontFamily: 'ev-light, sans-serif',
-              fontWeight: 400,
-              fontStyle: 'normal',
-              color: 'rgb(0, 20, 70)',
-              fontSize: '13px',
-              lineHeight: '13px',
-              letterSpacing: '2px',
-              animation: 'fadeInOut 2s ease'
-            }}
-          >
-            WELCOME BACK
-          </div>
+          WELCOME BACK
         </div>
-      )}
+      </div>
 
       {/* Main Content */}
       {showContent && (
@@ -298,8 +359,7 @@ export default function HomePage(): React.JSX.Element {
                 fontSize: '40px',
                 lineHeight: '40px',
                 display: 'none',
-                whiteSpace: 'nowrap',
-                transition: 'all 0.3s ease'
+                whiteSpace: 'nowrap'
               }}
             >
               ENURU
@@ -307,18 +367,17 @@ export default function HomePage(): React.JSX.Element {
           </div>
           
           {/* Konten Utama - scrollable tanpa scrollbar */}
-          <div 
-            className="scroll-container"
-            style={{
-              position: 'relative',
-              zIndex: 2,
-              width: '100%',
-              overflowY: 'auto',
-              overflowX: 'hidden',
-              height: '100vh',
-              scrollbarWidth: 'none',
-              msOverflowStyle: 'none'
-            }}
+          <div style={{
+            position: 'relative',
+            zIndex: 2,
+            width: '100%',
+            overflowY: 'auto',
+            overflowX: 'hidden',
+            height: '100vh',
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none'
+          }}
+          className="hide-scrollbar"
           >
             {/* Spacer atas */}
             <div style={{
@@ -353,7 +412,7 @@ export default function HomePage(): React.JSX.Element {
               </span>
             </div>
 
-            {/* Teks subtitle dengan setiap huruf bisa jatuh saat scroll */}
+            {/* Teks subtitle dengan efek JATUH seperti barang dari lemari */}
             <div style={{
               position: 'relative',
               paddingLeft: 'calc(2rem + 20px)',
@@ -377,7 +436,6 @@ export default function HomePage(): React.JSX.Element {
                     lineHeight: isMobile ? '30px' : '50px',
                     display: 'inline-block',
                     whiteSpace: 'pre',
-                    transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease',
                     willChange: 'transform, opacity'
                   }}
                 >
@@ -408,8 +466,7 @@ export default function HomePage(): React.JSX.Element {
                     borderRadius: '16px',
                     border: '1px solid rgba(0, 20, 70, 0.1)',
                     opacity: 0,
-                    transform: 'translateY(50px)',
-                    transition: 'opacity 0.6s ease-out, transform 0.6s ease-out'
+                    transform: 'translateY(50px)'
                   }}
                 >
                   <h2 style={{
@@ -425,11 +482,11 @@ export default function HomePage(): React.JSX.Element {
                     fontSize: '1.2rem',
                     lineHeight: '1.8'
                   }}>
-                    Scroll ke bawah. Setiap huruf pada teks di atas akan jatuh satu per satu!
+                    Scroll ke bawah. Setiap huruf akan JATUH seperti barang jatuh dari lemari!
                   </p>
                 </div>
 
-                {[2, 3, 4, 5, 6, 7, 8].map((item) => (
+                {[2, 3, 4, 5, 6, 7, 8].map((item, idx) => (
                   <div 
                     key={item}
                     ref={el => { if (el) sectionsRef.current[item - 1] = el; }}
@@ -440,9 +497,7 @@ export default function HomePage(): React.JSX.Element {
                       borderRadius: '16px',
                       border: '1px solid rgba(0, 20, 70, 0.1)',
                       opacity: 0,
-                      transform: 'translateY(50px)',
-                      transition: 'opacity 0.6s ease-out, transform 0.6s ease-out',
-                      transitionDelay: `${(item - 2) * 0.1}s`
+                      transform: 'translateY(50px)'
                     }}
                   >
                     <h3 style={{
@@ -502,12 +557,12 @@ export default function HomePage(): React.JSX.Element {
           </div>
 
           <style jsx global>{`
-            .scroll-container {
+            .hide-scrollbar {
               scrollbar-width: none;
               -ms-overflow-style: none;
             }
             
-            .scroll-container::-webkit-scrollbar {
+            .hide-scrollbar::-webkit-scrollbar {
               display: none;
             }
             
@@ -528,13 +583,6 @@ export default function HomePage(): React.JSX.Element {
             @keyframes bounce {
               0%, 100% { transform: translateY(0); }
               50% { transform: translateY(8px); }
-            }
-            
-            @keyframes fadeInOut {
-              0% { opacity: 0; transform: translateY(20px); }
-              30% { opacity: 1; transform: translateY(0); }
-              70% { opacity: 1; transform: translateY(0); }
-              100% { opacity: 0; transform: translateY(-20px); }
             }
           `}</style>
         </div>
