@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { 
@@ -50,143 +49,6 @@ if (typeof window !== "undefined") {
   auth = getAuth(app);
 }
 
-
-
-
-const trailImages = [
-  "images/25.jpg",
-  "images/26.jpg",
-  "images/27.jpg",
-  "images/28.jpg",
-  "images/30.jpg",
-];
-
-const ImageTrail = () => {
-  const [images, setImages] = useState<any[]>([]);
-  const lastPos = useRef({ x: 0, y: 0 });
-  const directionRef = useRef(1); // 1 = kanan, -1 = kiri
-  const indexRef = useRef(0);
-  const canSpawn = useRef(true);
-
-  const threshold = 60; // 🔥 lebih jauh biar jelas
-  const delayBetweenSpawn = 120;
-
-  useEffect(() => {
-    const handleMove = (e: MouseEvent) => {
-      const x = e.clientX;
-      const y = e.clientY;
-
-      const dx = x - lastPos.current.x;
-      const dy = y - lastPos.current.y;
-      const distance = Math.sqrt(dx * dx + dy * dy);
-
-      if (distance < threshold || !canSpawn.current) return;
-
-      // 🔥 DETEKSI ARAH
-      directionRef.current = dx > 0 ? 1 : -1;
-
-      lastPos.current = { x, y };
-      canSpawn.current = false;
-
-      const newImage = {
-        id: Date.now() + Math.random(),
-        x,
-        y,
-        src: trailImages[indexRef.current % trailImages.length],
-      };
-
-      indexRef.current++;
-
-      setImages((prev) => [newImage, ...prev].slice(0, 5));
-
-      // delay spawn biar 1 per 1 jelas
-      setTimeout(() => {
-        canSpawn.current = true;
-      }, delayBetweenSpawn);
-
-      // auto remove
-      setTimeout(() => {
-        setImages((prev) => prev.filter((img) => img.id !== newImage.id));
-      }, 2600);
-    };
-
-    window.addEventListener("mousemove", handleMove);
-    return () => window.removeEventListener("mousemove", handleMove);
-  }, []);
-
-  return (
-    <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        pointerEvents: "none",
-        zIndex: 9999,
-      }}
-    >
-      <AnimatePresence>
-        {images.map((img, i) => {
-          const direction = directionRef.current;
-
-          // 🔥 JARAK BESAR + IKUT ARAH
-          const spacing = 120; // kunci biar ga dempet
-          const offsetX = i * spacing * direction;
-          const offsetY = 0;
-
-          return (
-            <motion.img
-              key={img.id}
-              src={img.src}
-              initial={{
-                opacity: 0,
-                scale: 0.9,
-                x: img.x,
-                y: img.y,
-              }}
-              animate={{
-                opacity: 1,
-                scale: 1,
-                x: img.x + offsetX,
-                y: img.y + offsetY,
-              }}
-              exit={{
-                opacity: 0,
-                scale: 0.95,
-                transition: { duration: 0.6 },
-              }}
-              transition={{
-                type: "spring",
-                stiffness: 45, // 🔥 lebih slow
-                damping: 20,
-              }}
-              style={{
-                position: "absolute",
-                width: "220px", // 🔥 besar & jelas
-                height: "auto",
-                objectFit: "contain",
-                pointerEvents: "none",
-                zIndex: 1000 - i,
-                userSelect: "none",
-              }}
-            />
-          );
-        })}
-      </AnimatePresence>
-    </div>
-  );
-};
-
-
-
-
-
-
-
-
-
-
-
-
-
 export default function HomePage(): React.JSX.Element {
   const [isMobile, setIsMobile] = useState(false);
   const [showContent, setShowContent] = useState(false);
@@ -201,9 +63,11 @@ export default function HomePage(): React.JSX.Element {
     checkMobile();
     window.addEventListener('resize', checkMobile);
 
+    // Sembunyikan scrollbar
     document.body.style.overflow = 'hidden';
     document.body.style.height = '100vh';
 
+    // Animasi Loading Overlay dengan GSAP
     const tl = gsap.timeline({
       onComplete: () => {
         setShowContent(true);
@@ -245,6 +109,7 @@ export default function HomePage(): React.JSX.Element {
     };
   }, []);
 
+  // GSAP Hover effect untuk huruf M
   useEffect(() => {
     if (!showContent) return;
 
@@ -252,12 +117,14 @@ export default function HomePage(): React.JSX.Element {
     const letterM = menuruLetterMRef.current;
 
     if (menuruFull && letterM) {
+      // Set initial state - MENURU tersembunyi di bawah
       gsap.set(menuruFull, {
         y: 20,
         opacity: 0,
         display: 'none'
       });
 
+      // Hover event untuk huruf M
       const handleMouseEnter = () => {
         gsap.set(menuruFull, {
           display: 'inline-block',
@@ -301,6 +168,7 @@ export default function HomePage(): React.JSX.Element {
       ScrollTrigger.refresh();
     }, 100);
 
+    // Animasi ScrollTrigger untuk sections (fade in)
     sectionsRef.current.forEach((section, index) => {
       if (!section) return;
       
@@ -332,9 +200,6 @@ export default function HomePage(): React.JSX.Element {
 
   return (
     <>
-      {/* Image Trail Effect - 10 foto portrait ukuran sedang */}
-      {showContent && <ImageTrail />}
-
       {/* Loading Overlay */}
       <div 
         ref={loadingOverlayRef}
@@ -389,6 +254,7 @@ export default function HomePage(): React.JSX.Element {
           overflow: 'hidden'
         }}>
           
+          {/* Background Utama - Hitam */}
           <div style={{
             position: 'fixed',
             top: 0,
@@ -399,6 +265,7 @@ export default function HomePage(): React.JSX.Element {
             zIndex: 0
           }} />
           
+          {/* Framed Layout - Area krem (#dbd6c9) */}
           <div style={{
             position: 'fixed',
             top: '2rem',
@@ -412,7 +279,7 @@ export default function HomePage(): React.JSX.Element {
             overflow: 'hidden'
           }} />
           
-          {/* Judul Website */}
+          {/* Judul Website - Huruf "M" dengan hover effect */}
           <div style={{
             position: 'fixed',
             top: 'calc(2rem + 16px)',
@@ -455,6 +322,7 @@ export default function HomePage(): React.JSX.Element {
             </span>
           </div>
           
+          {/* Konten Utama - scrollable tanpa scrollbar */}
           <div style={{
             position: 'relative',
             zIndex: 2,
@@ -467,10 +335,12 @@ export default function HomePage(): React.JSX.Element {
           }}
           className="hide-scrollbar"
           >
+            {/* Spacer atas */}
             <div style={{
               height: isMobile ? '120px' : '160px'
             }} />
             
+            {/* Teks MENURU besar */}
             <div style={{
               position: 'relative',
               paddingLeft: 'calc(2rem + 20px)',
@@ -498,6 +368,7 @@ export default function HomePage(): React.JSX.Element {
               </span>
             </div>
 
+            {/* Teks subtitle di bawah teks besar */}
             <div style={{
               position: 'relative',
               paddingLeft: 'calc(2rem + 20px)',
@@ -518,6 +389,7 @@ export default function HomePage(): React.JSX.Element {
               </span>
             </div>
             
+            {/* Konten sections */}
             <div style={{
               position: 'relative',
               width: '100%',
@@ -555,7 +427,7 @@ export default function HomePage(): React.JSX.Element {
                     fontSize: '1.2rem',
                     lineHeight: '1.8'
                   }}>
-                    Gerakkan cursor untuk melihat efek Image Trail dengan 10 foto portrait.
+                    Hover ke huruf "M" di pojok kiri atas untuk melihat efek animasi.
                   </p>
                 </div>
 
@@ -585,6 +457,7 @@ export default function HomePage(): React.JSX.Element {
                     }}>
                       Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
                       Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                      Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.
                     </p>
                   </div>
                 ))}
@@ -592,6 +465,7 @@ export default function HomePage(): React.JSX.Element {
             </div>
           </div>
           
+          {/* Scroll indicator */}
           <div style={{
             position: 'fixed',
             bottom: 'calc(2rem + 30px)',
