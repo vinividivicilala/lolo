@@ -65,10 +65,6 @@ export default function HomePage(): React.JSX.Element {
     checkMobile();
     window.addEventListener('resize', checkMobile);
 
-    // Sembunyikan scrollbar
-    document.body.style.overflow = 'hidden';
-    document.body.style.height = '100vh';
-
     // Animasi Loading Overlay dengan GSAP
     const tl = gsap.timeline({
       onComplete: () => {
@@ -106,8 +102,7 @@ export default function HomePage(): React.JSX.Element {
     });
 
     return () => {
-      document.body.style.overflow = '';
-      document.body.style.height = '';
+      window.removeEventListener('resize', checkMobile);
     };
   }, []);
 
@@ -294,8 +289,7 @@ export default function HomePage(): React.JSX.Element {
           fontFamily: 'ev-light, sans-serif',
           WebkitFontSmoothing: 'antialiased',
           MozOsxFontSmoothing: 'grayscale',
-          position: 'relative',
-          overflow: 'hidden'
+          position: 'relative'
         }}>
           
           {/* Background Utama - Hitam */}
@@ -366,19 +360,12 @@ export default function HomePage(): React.JSX.Element {
             </span>
           </div>
           
-          {/* Konten Utama - scrollable tanpa scrollbar */}
+          {/* Konten Utama */}
           <div style={{
             position: 'relative',
             zIndex: 2,
-            width: '100%',
-            overflowY: 'auto',
-            overflowX: 'hidden',
-            height: '100vh',
-            scrollbarWidth: 'none',
-            msOverflowStyle: 'none'
-          }}
-          className="hide-scrollbar"
-          >
+            width: '100%'
+          }}>
             {/* Spacer atas */}
             <div style={{
               height: isMobile ? '120px' : '160px'
@@ -557,19 +544,6 @@ export default function HomePage(): React.JSX.Element {
           </div>
 
           <style jsx global>{`
-            .hide-scrollbar {
-              scrollbar-width: none;
-              -ms-overflow-style: none;
-            }
-            
-            .hide-scrollbar::-webkit-scrollbar {
-              display: none;
-            }
-            
-            body {
-              overflow: hidden;
-            }
-            
             #menuru-big-text::selection {
               background-color: rgb(140, 0, 0) !important;
               color: #dbd6c9 !important;
