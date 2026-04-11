@@ -69,7 +69,7 @@ const ImageTrail = () => {
   const lastPos = useRef({ x: 0, y: 0 });
   const imageIndex = useRef(0);
 
-  const threshold = 25; // jarak minimal spawn (biar ga terlalu padat)
+  const threshold = 25;
 
   useEffect(() => {
     const handleMove = (e: MouseEvent) => {
@@ -90,8 +90,8 @@ const ImageTrail = () => {
         id: Date.now() + Math.random(),
         x,
         y,
-        rotate: angle + (Math.random() * 20 - 10), // arah + random
-        scale: 0.8 + Math.random() * 0.4,
+        rotate: angle + (Math.random() * 20 - 10),
+        scale: 0.85 + Math.random() * 0.3,
         offsetX: Math.random() * 60 - 30,
         offsetY: Math.random() * 60 - 30,
         src: cursorImages[imageIndex.current % cursorImages.length].src,
@@ -150,19 +150,24 @@ const ImageTrail = () => {
             style={{
               position: "absolute",
               width: "90px",
-              height: "120px",
+              aspectRatio: "3 / 4", // ✅ auto ratio biar normal
               borderRadius: "10px",
               overflow: "hidden",
+              backgroundColor: "#fff",
+              padding: "4px",
               zIndex: 1000 - i,
               boxShadow: "0 20px 40px rgba(0,0,0,0.3)",
+              border: "1px solid rgba(0,0,0,0.1)",
             }}
           >
             <img
               src={img.src}
+              alt=""
               style={{
                 width: "100%",
                 height: "100%",
-                objectFit: "cover",
+                objectFit: "contain", // ✅ FULL terlihat
+                display: "block",
               }}
             />
           </motion.div>
@@ -171,7 +176,6 @@ const ImageTrail = () => {
     </div>
   );
 };
-
 
 export default function HomePage(): React.JSX.Element {
   const [isMobile, setIsMobile] = useState(false);
