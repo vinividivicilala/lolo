@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { 
@@ -48,6 +49,118 @@ if (typeof window !== "undefined") {
   db = getFirestore(app);
   auth = getAuth(app);
 }
+
+// Data gambar untuk cursor trail
+const cursorImages = [
+  { id: 1, src: "images/1.jpg" },
+  { id: 2, src: "images/2.jpg" },
+  { id: 3, src: "images/3.jpg" },
+  { id: 4, src: "images/4.jpg" },
+  { id: 5, src: "images/5.jpg" },
+  { id: 6, src: "images/6.jpg" },
+  { id: 7, src: "images/7.jpg" },
+  { id: 8, src: "images/8.jpg" },
+  { id: 9, src: "images/9.jpg" },
+  { id: 10, src: "images/10.jpg" }
+];
+
+// Komponen Image Trail
+const ImageTrail = () => {
+  const [trail, setTrail] = useState<{ id: number; x: number; y: number; image: string }[]>([]);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const trailRef = useRef<HTMLDivElement>(null);
+  const frameRef = useRef<number>();
+  const imageIndexRef = useRef(0);
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePosition({ x: e.clientX, y: e.clientY });
+      
+      // Tambahkan gambar baru ke trail setiap beberapa frame
+      if (frameRef.current) cancelAnimationFrame(frameRef.current);
+      
+      frameRef.current = requestAnimationFrame(() => {
+        const newImage = cursorImages[imageIndexRef.current % cursorImages.length];
+        const newTrailItem = {
+          id: Date.now() + Math.random(),
+          x: e.clientX,
+          y: e.clientY,
+          image: newImage.src
+        };
+        
+        setTrail(prev => [newTrailItem, ...prev].slice(0, 12));
+        imageIndexRef.current++;
+      });
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      if (frameRef.current) cancelAnimationFrame(frameRef.current);
+    };
+  }, []);
+
+  return (
+    <div ref={trailRef} style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 9998, overflow: 'visible' }}>
+      <AnimatePresence>
+        {trail.map((item, index) => (
+          <motion.div
+            key={item.id}
+            initial={{ 
+              opacity: 0.8, 
+              scale: 0.5,
+              x: item.x - 30,
+              y: item.y - 30,
+              rotate: -15
+            }}
+            animate={{ 
+              opacity: 0,
+              scale: 1.2,
+              x: item.x - 30 + (index * 5),
+              y: item.y - 30 - (index * 8),
+              rotate: 15
+            }}
+            exit={{ opacity: 0 }}
+            transition={{
+              duration: 0.8,
+              ease: "easeOut",
+              opacity: { duration: 0.5 }
+            }}
+            style={{
+              position: 'fixed',
+              width: '60px',
+              height: '60px',
+              borderRadius: '12px',
+              overflow: 'hidden',
+              boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
+              border: '2px solid rgba(255,255,255,0.3)',
+              transformOrigin: 'center center'
+            }}
+          >
+            <img 
+              src={item.image} 
+              alt="trail"
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                display: 'block'
+              }}
+              onError={(e) => {
+                e.currentTarget.style.backgroundColor = '#333';
+                e.currentTarget.style.display = 'flex';
+                e.currentTarget.style.alignItems = 'center';
+                e.currentTarget.style.justifyContent = 'center';
+                e.currentTarget.innerHTML = '<div style="color:white;font-size:10px;">img</div>';
+              }}
+            />
+          </motion.div>
+        ))}
+      </AnimatePresence>
+    </div>
+  );
+};
 
 export default function HomePage(): React.JSX.Element {
   const [isMobile, setIsMobile] = useState(false);
@@ -117,14 +230,12 @@ export default function HomePage(): React.JSX.Element {
     const letterM = menuruLetterMRef.current;
 
     if (menuruFull && letterM) {
-      // Set initial state - MENURU tersembunyi di bawah
       gsap.set(menuruFull, {
         y: 20,
         opacity: 0,
         display: 'none'
       });
 
-      // Hover event untuk huruf M
       const handleMouseEnter = () => {
         gsap.set(menuruFull, {
           display: 'inline-block',
@@ -168,7 +279,6 @@ export default function HomePage(): React.JSX.Element {
       ScrollTrigger.refresh();
     }, 100);
 
-    // Animasi ScrollTrigger untuk sections (fade in)
     sectionsRef.current.forEach((section, index) => {
       if (!section) return;
       
@@ -200,6 +310,9 @@ export default function HomePage(): React.JSX.Element {
 
   return (
     <>
+      {/* Image Trail Effect */}
+      {showContent && <ImageTrail />}
+
       {/* Loading Overlay */}
       <div 
         ref={loadingOverlayRef}
@@ -322,7 +435,7 @@ export default function HomePage(): React.JSX.Element {
             </span>
           </div>
           
-          {/* Konten Utama - scrollable tanpa scrollbar */}
+          {/* Konten Utama */}
           <div style={{
             position: 'relative',
             zIndex: 2,
@@ -335,12 +448,10 @@ export default function HomePage(): React.JSX.Element {
           }}
           className="hide-scrollbar"
           >
-            {/* Spacer atas */}
             <div style={{
               height: isMobile ? '120px' : '160px'
             }} />
             
-            {/* Teks MENURU besar */}
             <div style={{
               position: 'relative',
               paddingLeft: 'calc(2rem + 20px)',
@@ -368,7 +479,6 @@ export default function HomePage(): React.JSX.Element {
               </span>
             </div>
 
-            {/* Teks subtitle di bawah teks besar */}
             <div style={{
               position: 'relative',
               paddingLeft: 'calc(2rem + 20px)',
@@ -389,7 +499,6 @@ export default function HomePage(): React.JSX.Element {
               </span>
             </div>
             
-            {/* Konten sections */}
             <div style={{
               position: 'relative',
               width: '100%',
@@ -427,7 +536,7 @@ export default function HomePage(): React.JSX.Element {
                     fontSize: '1.2rem',
                     lineHeight: '1.8'
                   }}>
-                    Hover ke huruf "M" di pojok kiri atas untuk melihat efek animasi.
+                    Gerakkan cursor untuk melihat efek Image Trail dengan 10 gambar berbeda.
                   </p>
                 </div>
 
@@ -457,7 +566,6 @@ export default function HomePage(): React.JSX.Element {
                     }}>
                       Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
                       Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                      Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.
                     </p>
                   </div>
                 ))}
@@ -465,7 +573,6 @@ export default function HomePage(): React.JSX.Element {
             </div>
           </div>
           
-          {/* Scroll indicator */}
           <div style={{
             position: 'fixed',
             bottom: 'calc(2rem + 30px)',
@@ -513,6 +620,7 @@ export default function HomePage(): React.JSX.Element {
             
             body {
               overflow: hidden;
+              cursor: default;
             }
             
             #menuru-big-text::selection {
