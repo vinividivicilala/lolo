@@ -58,14 +58,12 @@ export default function HomePage(): React.JSX.Element {
   const menuruFullRef = useRef<HTMLSpanElement>(null);
   const menuruLetterMRef = useRef<HTMLSpanElement>(null);
   const footerRef = useRef<HTMLDivElement>(null);
-  const footerOverlayRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
     window.addEventListener('resize', checkMobile);
 
-    // Animasi Loading Overlay dengan GSAP
     const tl = gsap.timeline({
       onComplete: () => {
         setShowContent(true);
@@ -109,7 +107,6 @@ export default function HomePage(): React.JSX.Element {
     };
   }, []);
 
-  // GSAP Hover effect untuk huruf M
   useEffect(() => {
     if (!showContent) return;
 
@@ -159,7 +156,6 @@ export default function HomePage(): React.JSX.Element {
     }
   }, [showContent]);
 
-  // GSAP ScrollTrigger untuk sections dan footer
   useEffect(() => {
     if (!showContent) return;
 
@@ -187,31 +183,22 @@ export default function HomePage(): React.JSX.Element {
       );
     });
 
-    if (footerRef.current && footerOverlayRef.current) {
+    if (footerRef.current) {
       gsap.set(footerRef.current, {
-        y: 100,
-        opacity: 0
-      });
-
-      gsap.set(footerOverlayRef.current, {
+        y: 200,
         opacity: 0
       });
 
       ScrollTrigger.create({
         trigger: footerRef.current,
-        start: "top bottom",
-        end: "bottom bottom",
+        start: "top 90%",
+        end: "bottom 80%",
         scrub: 0.5,
         onUpdate: (self) => {
           const progress = self.progress;
           gsap.to(footerRef.current, {
-            y: 100 - (progress * 100),
+            y: 200 - (progress * 200),
             opacity: progress,
-            duration: 0,
-            ease: "power2.out"
-          });
-          gsap.to(footerOverlayRef.current, {
-            opacity: progress * 0.3,
             duration: 0,
             ease: "power2.out"
           });
@@ -301,25 +288,8 @@ export default function HomePage(): React.JSX.Element {
             borderRadius: '20px',
             zIndex: 1,
             pointerEvents: 'none',
-            overflow: 'auto'
+            overflow: 'hidden'
           }} />
-          
-          {/* Footer Overlay */}
-          <div 
-            ref={footerOverlayRef}
-            style={{
-              position: 'fixed',
-              bottom: '2rem',
-              left: '2rem',
-              right: '2rem',
-              height: '100px',
-              backgroundColor: 'rgba(0, 20, 70, 0.95)',
-              borderRadius: '0 0 20px 20px',
-              zIndex: 2,
-              pointerEvents: 'none',
-              opacity: 0
-            }}
-          />
           
           {/* Judul Website - Huruf "M" */}
           <div style={{
@@ -364,59 +334,72 @@ export default function HomePage(): React.JSX.Element {
             </span>
           </div>
           
-          {/* Copyright Footer */}
+          {/* Copyright Footer - Modern, di tengah, tanpa background */}
           <div 
             ref={footerRef}
             style={{
               position: 'fixed',
-              bottom: '2rem',
-              left: '2rem',
-              right: '2rem',
+              bottom: '50%',
+              left: 0,
+              right: 0,
+              transform: 'translateY(50%)',
               zIndex: 10,
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '1rem 2rem',
-              boxSizing: 'border-box',
-              pointerEvents: 'none'
+              justifyContent: 'center',
+              gap: '0.5rem',
+              pointerEvents: 'none',
+              opacity: 0
             }}
           >
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem'
+            {/* Logo Copyright Modern */}
+            <svg 
+              width={isMobile ? '60px' : '120px'} 
+              height={isMobile ? '60px' : '120px'} 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="rgb(140, 0, 0)" 
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              style={{ display: 'inline-block' }}
+            >
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 8v8M8 12h8"/>
+            </svg>
+            
+            {/* Teks 2 - besar, tidak tebal */}
+            <span style={{
+              fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
+              fontWeight: 300,
+              fontSize: isMobile ? '200px' : '500px',
+              lineHeight: isMobile ? '200px' : '500px',
+              color: 'rgb(140, 0, 0)'
             }}>
-              <svg 
-                width="24" 
-                height="24" 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="rgb(206, 0, 25)" 
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <circle cx="12" cy="12" r="10"/>
-                <path d="M12 8v8M8 12h8"/>
-              </svg>
-              <span style={{
-                fontFamily: "'Impact', 'Arial Black', 'Helvetica Black', sans-serif",
-                fontWeight: 900,
-                fontSize: isMobile ? '24px' : '32px',
-                color: 'rgb(206, 0, 25)',
-                letterSpacing: '2px'
-              }}>
-                2K26
-              </span>
-            </div>
-            <div style={{
-              fontFamily: 'ev-light, sans-serif',
-              fontSize: '11px',
-              color: 'rgb(0, 20, 70)',
-              letterSpacing: '1px'
+              2
+            </span>
+            
+            {/* Teks K - besar, tidak tebal */}
+            <span style={{
+              fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
+              fontWeight: 300,
+              fontSize: isMobile ? '200px' : '500px',
+              lineHeight: isMobile ? '200px' : '500px',
+              color: 'rgb(140, 0, 0)'
             }}>
-              ALL RIGHTS RESERVED
-            </div>
+              K
+            </span>
+            
+            {/* Teks 26 - besar dan tebal */}
+            <span style={{
+              fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
+              fontWeight: 900,
+              fontSize: isMobile ? '200px' : '500px',
+              lineHeight: isMobile ? '200px' : '500px',
+              color: 'rgb(140, 0, 0)'
+            }}>
+              26
+            </span>
           </div>
           
           {/* Konten Utama */}
@@ -514,7 +497,7 @@ export default function HomePage(): React.JSX.Element {
                     fontSize: '1.2rem',
                     lineHeight: '1.8'
                   }}>
-                    Scroll ke bawah untuk melihat konten dan footer copyright yang muncul dengan animasi GSAP ScrollTrigger.
+                    Scroll ke bawah untuk melihat footer copyright yang muncul dengan animasi GSAP ScrollTrigger.
                   </p>
                 </div>
 
@@ -552,6 +535,7 @@ export default function HomePage(): React.JSX.Element {
             </div>
           </div>
           
+          {/* Scroll indicator */}
           <div style={{
             position: 'fixed',
             bottom: 'calc(2rem + 30px)',
@@ -591,20 +575,3 @@ export default function HomePage(): React.JSX.Element {
     </>
   );
 }
-
-<style jsx global>{`
-  #menuru-big-text::selection {
-    background-color: rgb(140, 0, 0) !important;
-    color: #dbd6c9 !important;
-  }
-  
-  #menuru-big-text::-moz-selection {
-    background-color: rgb(140, 0, 0) !important;
-    color: #dbd6c9 !important;
-  }
-  
-  @keyframes bounce {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(8px); }
-  }
-`}</style>
