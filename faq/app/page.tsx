@@ -508,30 +508,30 @@ export default function HomePage(): React.JSX.Element {
           </div>
 
 
-          <div style={{
+<div style={{
   position: 'fixed',
-  top: '50%',
+  bottom: '30px',
   left: '50%',
-  transform: 'translate(-50%, -50%)',
-  zIndex: 999,
+  transform: 'translateX(-50%)',
+  zIndex: 999
 }}>
   <div style={{
     display: 'flex',
     alignItems: 'center',
-    gap: '12px',
-    background: '#3a3a3a',
-    padding: '10px 14px',
-    borderRadius: '14px',
-    boxShadow: '0 8px 20px rgba(0,0,0,0.25)',
-    border: '2px solid #2a2a2a'
+    gap: '14px',
+    background: '#4a4a4a',
+    padding: '10px 16px',
+    borderRadius: '10px', // ⬅️ lebih kotak
+    boxShadow: '0 10px 25px rgba(0,0,0,0.3)',
+    border: '2px solid #3a3a3a'
   }}>
     
     {/* Logo */}
     <div style={{
-      width: '36px',
-      height: '36px',
+      width: '38px',
+      height: '38px',
       background: '#2b2b2b',
-      borderRadius: '10px',
+      borderRadius: '8px', // ⬅️ ikut lebih kotak
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -545,8 +545,8 @@ export default function HomePage(): React.JSX.Element {
     <img 
       src="https://i.pravatar.cc/100"
       style={{
-        width: '32px',
-        height: '32px',
+        width: '34px',
+        height: '34px',
         borderRadius: '50%',
         objectFit: 'cover'
       }}
@@ -564,9 +564,9 @@ export default function HomePage(): React.JSX.Element {
     {/* Button Profile */}
     <button style={{
       padding: '6px 12px',
-      borderRadius: '8px',
-      border: '1px solid #555',
-      background: 'transparent',
+      borderRadius: '6px', // ⬅️ lebih kotak
+      border: '1px solid #666',
+      background: '#3a3a3a',
       color: 'white',
       cursor: 'pointer'
     }}>
@@ -576,7 +576,7 @@ export default function HomePage(): React.JSX.Element {
     {/* Button Visit */}
     <button style={{
       padding: '6px 14px',
-      borderRadius: '10px',
+      borderRadius: '8px',
       background: '#9BE3C2',
       color: '#003322',
       border: 'none',
@@ -588,6 +588,10 @@ export default function HomePage(): React.JSX.Element {
 
   </div>
 </div>
+
+
+
+          
           
           {/* Scroll indicator */}
           <div style={{
