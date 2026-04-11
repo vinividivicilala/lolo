@@ -57,6 +57,8 @@ export default function HomePage(): React.JSX.Element {
   const sectionsRef = useRef<(HTMLDivElement | null)[]>([]);
   const menuruFullRef = useRef<HTMLSpanElement>(null);
   const menuruLetterMRef = useRef<HTMLSpanElement>(null);
+  const footerRef = useRef<HTMLDivElement>(null);
+  const footerOverlayRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -117,14 +119,12 @@ export default function HomePage(): React.JSX.Element {
     const letterM = menuruLetterMRef.current;
 
     if (menuruFull && letterM) {
-      // Set initial state - MENURU tersembunyi di bawah
       gsap.set(menuruFull, {
         y: 20,
         opacity: 0,
         display: 'none'
       });
 
-      // Hover event untuk huruf M
       const handleMouseEnter = () => {
         gsap.set(menuruFull, {
           display: 'inline-block',
@@ -161,6 +161,7 @@ export default function HomePage(): React.JSX.Element {
     }
   }, [showContent]);
 
+  // GSAP ScrollTrigger untuk Footer Copyright
   useEffect(() => {
     if (!showContent) return;
 
@@ -193,34 +194,44 @@ export default function HomePage(): React.JSX.Element {
       );
     });
 
+    // Animasi Footer Copyright - muncul saat scroll ke bawah
+    if (footerRef.current && footerOverlayRef.current) {
+      gsap.set(footerRef.current, {
+        y: 100,
+        opacity: 0
+      });
+
+      gsap.set(footerOverlayRef.current, {
+        opacity: 0
+      });
+
+      // Footer muncul saat scroll mendekati akhir
+      ScrollTrigger.create({
+        trigger: footerRef.current,
+        start: "top bottom",
+        end: "bottom bottom",
+        scrub: 0.5,
+        onUpdate: (self) => {
+          const progress = self.progress;
+          gsap.to(footerRef.current, {
+            y: 100 - (progress * 100),
+            opacity: progress,
+            duration: 0,
+            ease: "power2.out"
+          });
+          gsap.to(footerOverlayRef.current, {
+            opacity: progress * 0.3,
+            duration: 0,
+            ease: "power2.out"
+          });
+        }
+      });
+    }
+
     return () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
   }, [showContent]);
-
-  // 🔥 Footer Animation
-if (footerRef.current) {
-  gsap.fromTo(footerRef.current,
-    {
-      y: 150,
-      opacity: 0,
-      scale: 0.9
-    },
-    {
-      scrollTrigger: {
-        trigger: footerRef.current,
-        start: "top 90%",
-        end: "top 50%",
-        scrub: 1,
-      },
-      y: 0,
-      opacity: 1,
-      scale: 1,
-      duration: 1.2,
-      ease: "power3.out"
-    }
-  );
-}
 
   return (
     <>
@@ -303,6 +314,23 @@ if (footerRef.current) {
             overflow: 'hidden'
           }} />
           
+          {/* Footer Overlay - di dalam frame, muncul saat scroll */}
+          <div 
+            ref={footerOverlayRef}
+            style={{
+              position: 'fixed',
+              bottom: '2rem',
+              left: '2rem',
+              right: '2rem',
+              height: '100px',
+              backgroundColor: 'rgba(0, 20, 70, 0.95)',
+              borderRadius: '0 0 20px 20px',
+              zIndex: 2,
+              pointerEvents: 'none',
+              opacity: 0
+            }}
+          />
+          
           {/* Judul Website - Huruf "M" dengan hover effect */}
           <div style={{
             position: 'fixed',
@@ -346,6 +374,62 @@ if (footerRef.current) {
             </span>
           </div>
           
+          {/* Copyright Footer - muncul saat scroll */}
+          <div 
+            ref={footerRef}
+            style={{
+              position: 'fixed',
+              bottom: '2rem',
+              left: '2rem',
+              right: '2rem',
+              zIndex: 10,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '1rem 2rem',
+              boxSizing: 'border-box',
+              pointerEvents: 'none'
+            }}
+          >
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem'
+            }}>
+              {/* Logo Copyright */}
+              <svg 
+                width="24" 
+                height="24" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="rgb(206, 0, 25)" 
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M12 8v8M8 12h8"/>
+              </svg>
+              <span style={{
+                fontFamily: "'Impact', 'Arial Black', 'Helvetica Black', sans-serif",
+                fontWeight: 900,
+                fontSize: isMobile ? '24px' : '32px',
+                color: 'rgb(206, 0, 25)',
+                letterSpacing: '2px'
+              }}>
+                2K26
+              </span>
+            </div>
+            <div style={{
+              fontFamily: 'ev-light, sans-serif',
+              fontSize: '11px',
+              color: 'rgb(0, 20, 70)',
+              letterSpacing: '1px'
+            }}>
+              ALL RIGHTS RESERVED
+            </div>
+          </div>
+          
           {/* Konten Utama - scrollable tanpa scrollbar */}
           <div style={{
             position: 'relative',
@@ -355,7 +439,8 @@ if (footerRef.current) {
             overflowX: 'hidden',
             height: '100vh',
             scrollbarWidth: 'none',
-            msOverflowStyle: 'none'
+            msOverflowStyle: 'none',
+            paddingBottom: '100px'
           }}
           className="hide-scrollbar"
           >
@@ -418,7 +503,7 @@ if (footerRef.current) {
               position: 'relative',
               width: '100%',
               padding: '2rem',
-              paddingBottom: '10rem',
+              paddingBottom: '15rem',
               boxSizing: 'border-box'
             }}>
               <div style={{
@@ -451,7 +536,7 @@ if (footerRef.current) {
                     fontSize: '1.2rem',
                     lineHeight: '1.8'
                   }}>
-                    Hover ke huruf "M" di pojok kiri atas untuk melihat efek animasi.
+                    Scroll ke bawah untuk melihat footer copyright yang muncul dengan animasi GSAP ScrollTrigger.
                   </p>
                 </div>
 
@@ -524,36 +609,6 @@ if (footerRef.current) {
               <path d="M12 5v14M19 12l-7 7-7-7"/>
             </svg>
           </div>
-
-          {/* 🔥 Footer Overlay Copyright */}
-<div
-  ref={footerRef}
-  style={{
-    position: 'relative',
-    width: '100%',
-    height: '60vh',
-    display: 'flex',
-    alignItems: 'flex-end',
-    justifyContent: 'center',
-    paddingBottom: '4rem'
-  }}
->
-  <div style={{
-    width: '100%',
-    textAlign: 'center'
-  }}>
-    <span style={{
-      fontFamily: "'Impact', 'Arial Black', sans-serif",
-      fontWeight: 900,
-      fontSize: isMobile ? '80px' : '200px',
-      color: 'rgb(0, 20, 70)',
-      letterSpacing: '-5px',
-      display: 'inline-block'
-    }}>
-      © 2K26
-    </span>
-  </div>
-</div>
 
           <style jsx global>{`
             .hide-scrollbar {
