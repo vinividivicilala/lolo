@@ -64,12 +64,13 @@ const cursorImages = [
   { id: 10, src: "images/10.jpg" }
 ];
 
+
+
 const ImageTrail = () => {
   const [images, setImages] = useState<any[]>([]);
   const lastPos = useRef({ x: 0, y: 0 });
-  const imageIndex = useRef(0);
 
-  const threshold = 25;
+  const threshold = 40; // 🔥 biar keluar 1 per 1 (lebih jarang)
 
   useEffect(() => {
     const handleMove = (e: MouseEvent) => {
@@ -90,20 +91,17 @@ const ImageTrail = () => {
         id: Date.now() + Math.random(),
         x,
         y,
-        rotate: angle + (Math.random() * 20 - 10),
-        scale: 0.9 + Math.random() * 0.2,
-        offsetX: Math.random() * 40 - 20,
-        offsetY: Math.random() * 40 - 20,
-        src: cursorImages[imageIndex.current % cursorImages.length].src,
+        rotate: angle,
+        offsetX: Math.random() * 20 - 10,
+        offsetY: Math.random() * 20 - 10,
       };
 
-      imageIndex.current++;
-
-      setImages((prev) => [newImage, ...prev].slice(0, 12));
+      // 🔥 max 5 gambar saja
+      setImages((prev) => [newImage, ...prev].slice(0, 5));
 
       setTimeout(() => {
         setImages((prev) => prev.filter((img) => img.id !== newImage.id));
-      }, 1200);
+      }, 1800); // agak lama biar smooth
     };
 
     window.addEventListener("mousemove", handleMove);
@@ -116,50 +114,49 @@ const ImageTrail = () => {
         position: "fixed",
         inset: 0,
         pointerEvents: "none",
-        zIndex: 9999,
+        zIndex: 1, // 🔥 di bawah teks
       }}
     >
       <AnimatePresence>
         {images.map((img, i) => (
           <motion.img
             key={img.id}
-            src={img.src}
+            src="images/5.jpg" // 🔥 hanya 1 gambar
             initial={{
               opacity: 0,
-              scale: 0.6,
+              scale: 0.8,
               x: img.x,
               y: img.y,
               rotate: img.rotate,
             }}
             animate={{
               opacity: 1,
-              scale: img.scale,
+              scale: 1,
               x: img.x + img.offsetX,
               y: img.y + img.offsetY,
               rotate: img.rotate,
             }}
             exit={{
               opacity: 0,
-              scale: 0.7,
-              transition: { duration: 0.4 },
+              scale: 0.9,
+              transition: { duration: 0.6 },
             }}
             transition={{
               type: "spring",
-              stiffness: 120,
-              damping: 18,
+              stiffness: 60,   // 🔥 slow motion feel
+              damping: 20,
+              mass: 1.2,
             }}
             style={{
               position: "absolute",
 
-              // 🔥 ukuran NORMAL (tidak terlalu besar/kecil)
-              width: "110px",
+              // 🔥 ukuran BESAR portrait
+              width: "220px",
               height: "auto",
 
-              // 🔥 penting: tidak crop
               objectFit: "contain",
-
               pointerEvents: "none",
-              zIndex: 1000 - i,
+              zIndex: 1 - i,
               userSelect: "none",
             }}
           />
@@ -168,6 +165,15 @@ const ImageTrail = () => {
     </div>
   );
 };
+
+
+
+
+
+
+
+
+
 
 export default function HomePage(): React.JSX.Element {
   const [isMobile, setIsMobile] = useState(false);
