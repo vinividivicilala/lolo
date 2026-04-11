@@ -57,13 +57,15 @@ export default function HomePage(): React.JSX.Element {
   const sectionsRef = useRef<(HTMLDivElement | null)[]>([]);
   const menuruFullRef = useRef<HTMLSpanElement>(null);
   const menuruLetterMRef = useRef<HTMLSpanElement>(null);
-  const subtitleLettersRef = useRef<(HTMLSpanElement | null)[]>([]);
-  const subtitleText = "Creative Designer / Developer. Founder";
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
     window.addEventListener('resize', checkMobile);
+
+    // Sembunyikan scrollbar
+    document.body.style.overflow = 'hidden';
+    document.body.style.height = '100vh';
 
     // Animasi Loading Overlay dengan GSAP
     const tl = gsap.timeline({
@@ -102,7 +104,8 @@ export default function HomePage(): React.JSX.Element {
     });
 
     return () => {
-      window.removeEventListener('resize', checkMobile);
+      document.body.style.overflow = '';
+      document.body.style.height = '';
     };
   }, []);
 
@@ -114,12 +117,14 @@ export default function HomePage(): React.JSX.Element {
     const letterM = menuruLetterMRef.current;
 
     if (menuruFull && letterM) {
+      // Set initial state - MENURU tersembunyi di bawah
       gsap.set(menuruFull, {
         y: 20,
         opacity: 0,
         display: 'none'
       });
 
+      // Hover event untuk huruf M
       const handleMouseEnter = () => {
         gsap.set(menuruFull, {
           display: 'inline-block',
@@ -154,50 +159,6 @@ export default function HomePage(): React.JSX.Element {
         letterM.removeEventListener('mouseleave', handleMouseLeave);
       };
     }
-  }, [showContent]);
-
-  // Efek setiap huruf JATUH seperti barang dari lemari
-  useEffect(() => {
-    if (!showContent) return;
-
-    // Set initial state untuk setiap huruf
-    subtitleLettersRef.current.forEach((letter, index) => {
-      if (letter) {
-        gsap.set(letter, {
-          y: 0,
-          opacity: 1,
-          rotation: 0,
-          scale: 1
-        });
-      }
-    });
-
-    // Animasi ScrollTrigger untuk setiap huruf JATUH
-    subtitleLettersRef.current.forEach((letter, index) => {
-      if (!letter) return;
-      
-      // Efek jatuh: turun cepat, memantul, dan bergetar
-      gsap.to(letter, {
-        scrollTrigger: {
-          trigger: letter,
-          start: "top 70%",
-          end: "top 30%",
-          scrub: 1.2,
-          toggleActions: "play none none reverse"
-        },
-        y: 300,
-        opacity: 0,
-        rotation: 25,
-        scale: 0.8,
-        duration: 1,
-        ease: "bounce.out",
-        delay: index * 0.03
-      });
-    });
-
-    return () => {
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
-    };
   }, [showContent]);
 
   useEffect(() => {
@@ -289,7 +250,8 @@ export default function HomePage(): React.JSX.Element {
           fontFamily: 'ev-light, sans-serif',
           WebkitFontSmoothing: 'antialiased',
           MozOsxFontSmoothing: 'grayscale',
-          position: 'relative'
+          position: 'relative',
+          overflow: 'hidden'
         }}>
           
           {/* Background Utama - Hitam */}
@@ -360,12 +322,19 @@ export default function HomePage(): React.JSX.Element {
             </span>
           </div>
           
-          {/* Konten Utama */}
+          {/* Konten Utama - scrollable tanpa scrollbar */}
           <div style={{
             position: 'relative',
             zIndex: 2,
-            width: '100%'
-          }}>
+            width: '100%',
+            overflowY: 'auto',
+            overflowX: 'hidden',
+            height: '100vh',
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none'
+          }}
+          className="hide-scrollbar"
+          >
             {/* Spacer atas */}
             <div style={{
               height: isMobile ? '120px' : '160px'
@@ -399,36 +368,25 @@ export default function HomePage(): React.JSX.Element {
               </span>
             </div>
 
-            {/* Teks subtitle dengan efek JATUH seperti barang dari lemari */}
+            {/* Teks subtitle di bawah teks besar */}
             <div style={{
               position: 'relative',
               paddingLeft: 'calc(2rem + 20px)',
               paddingRight: '2rem',
               boxSizing: 'border-box',
-              marginBottom: '4rem',
-              display: 'flex',
-              flexWrap: 'wrap',
-              alignItems: 'center'
+              marginBottom: '4rem'
             }}>
-              {subtitleText.split('').map((char, index) => (
-                <span
-                  key={index}
-                  ref={el => { if (el) subtitleLettersRef.current[index] = el; }}
-                  style={{
-                    fontFamily: 'B',
-                    fontWeight: 400,
-                    fontStyle: 'normal',
-                    color: 'rgb(206, 0, 25)',
-                    fontSize: isMobile ? '30px' : '50px',
-                    lineHeight: isMobile ? '30px' : '50px',
-                    display: 'inline-block',
-                    whiteSpace: 'pre',
-                    willChange: 'transform, opacity'
-                  }}
-                >
-                  {char === ' ' ? '\u00A0' : char}
-                </span>
-              ))}
+              <span style={{
+                fontFamily: 'B',
+                fontWeight: 400,
+                fontStyle: 'normal',
+                color: 'rgb(206, 0, 25)',
+                fontSize: isMobile ? '30px' : '50px',
+                lineHeight: isMobile ? '30px' : '50px',
+                display: 'block'
+              }}>
+                Creative Designer / Developer. Founder
+              </span>
             </div>
             
             {/* Konten sections */}
@@ -469,7 +427,7 @@ export default function HomePage(): React.JSX.Element {
                     fontSize: '1.2rem',
                     lineHeight: '1.8'
                   }}>
-                    Scroll ke bawah. Setiap huruf akan JATUH seperti barang jatuh dari lemari!
+                    Hover ke huruf "M" di pojok kiri atas untuk melihat efek animasi.
                   </p>
                 </div>
 
@@ -506,92 +464,6 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
           </div>
-
-
-<div style={{
-  position: 'fixed',
-  bottom: '30px',
-  left: '50%',
-  transform: 'translateX(-50%)',
-  zIndex: 999
-}}>
-  <div style={{
-    display: 'flex',
-    alignItems: 'center',
-    gap: '14px',
-    background: '#4a4a4a',
-    padding: '10px 16px',
-    borderRadius: '10px', // ⬅️ lebih kotak
-    boxShadow: '0 10px 25px rgba(0,0,0,0.3)',
-    border: '2px solid #3a3a3a'
-  }}>
-    
-    {/* Logo */}
-    <div style={{
-      width: '38px',
-      height: '38px',
-      background: '#2b2b2b',
-      borderRadius: '8px', // ⬅️ ikut lebih kotak
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      color: 'white',
-      fontWeight: 'bold'
-    }}>
-      W.
-    </div>
-
-    {/* Avatar */}
-    <img 
-      src="https://i.pravatar.cc/100"
-      style={{
-        width: '34px',
-        height: '34px',
-        borderRadius: '50%',
-        objectFit: 'cover'
-      }}
-    />
-
-    {/* Nama */}
-    <span style={{
-      color: 'white',
-      fontSize: '14px',
-      fontWeight: 500
-    }}>
-      Evan Bohringer
-    </span>
-
-    {/* Button Profile */}
-    <button style={{
-      padding: '6px 12px',
-      borderRadius: '6px', // ⬅️ lebih kotak
-      border: '1px solid #666',
-      background: '#3a3a3a',
-      color: 'white',
-      cursor: 'pointer'
-    }}>
-      Profile
-    </button>
-
-    {/* Button Visit */}
-    <button style={{
-      padding: '6px 14px',
-      borderRadius: '8px',
-      background: '#9BE3C2',
-      color: '#003322',
-      border: 'none',
-      fontWeight: 500,
-      cursor: 'pointer'
-    }}>
-      Visit us
-    </button>
-
-  </div>
-</div>
-
-
-
-          
           
           {/* Scroll indicator */}
           <div style={{
@@ -630,6 +502,19 @@ export default function HomePage(): React.JSX.Element {
           </div>
 
           <style jsx global>{`
+            .hide-scrollbar {
+              scrollbar-width: none;
+              -ms-overflow-style: none;
+            }
+            
+            .hide-scrollbar::-webkit-scrollbar {
+              display: none;
+            }
+            
+            body {
+              overflow: hidden;
+            }
+            
             #menuru-big-text::selection {
               background-color: rgb(140, 0, 0) !important;
               color: #dbd6c9 !important;
