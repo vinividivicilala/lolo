@@ -50,30 +50,22 @@ if (typeof window !== "undefined") {
   auth = getAuth(app);
 }
 
-// Data gambar untuk cursor trail - 10 foto berbeda
-const cursorImages = [
-  { id: 1, src: "images/1.jpg" },
-  { id: 2, src: "images/2.jpg" },
-  { id: 3, src: "images/3.jpg" },
-  { id: 4, src: "images/4.jpg" },
-  { id: 5, src: "images/5.jpg" },
-  { id: 6, src: "images/6.jpg" },
-  { id: 7, src: "images/7.jpg" },
-  { id: 8, src: "images/8.jpg" },
-  { id: 9, src: "images/9.jpg" },
-  { id: 10, src: "images/10.jpg" }
+const trailImages = [
+  "images/25.jpg",
+  "images/26.jpg",
+  "images/27.jpg",
+  "images/28.jpg",
+  "images/30.jpg",
 ];
-
-
-
 
 const ImageTrail = () => {
   const [images, setImages] = useState<any[]>([]);
   const lastPos = useRef({ x: 0, y: 0 });
   const canSpawn = useRef(true);
+  const indexRef = useRef(0);
 
-  const threshold = 40; // lebih jarang spawn
-  const delayBetweenSpawn = 120; // delay antar foto (biar 1 per 1)
+  const threshold = 50; // biar jelas geraknya
+  const delayBetweenSpawn = 150;
 
   useEffect(() => {
     const handleMove = (e: MouseEvent) => {
@@ -93,19 +85,21 @@ const ImageTrail = () => {
         id: Date.now() + Math.random(),
         x,
         y,
+        index: indexRef.current,
+        src: trailImages[indexRef.current % trailImages.length],
       };
+
+      indexRef.current++;
 
       setImages((prev) => [newImage, ...prev].slice(0, 5));
 
-      // delay supaya keluar 1 per 1
       setTimeout(() => {
         canSpawn.current = true;
       }, delayBetweenSpawn);
 
-      // hapus pelan (slow fade)
       setTimeout(() => {
         setImages((prev) => prev.filter((img) => img.id !== newImage.id));
-      }, 2000);
+      }, 2500);
     };
 
     window.addEventListener("mousemove", handleMove);
@@ -122,52 +116,56 @@ const ImageTrail = () => {
       }}
     >
       <AnimatePresence>
-        {images.map((img, i) => (
-          <motion.img
-            key={img.id}
-            src="images/5.jpg" // 🔥 hanya 1 gambar
-            initial={{
-              opacity: 0,
-              scale: 0.85,
-              x: img.x,
-              y: img.y,
-            }}
-            animate={{
-              opacity: 1,
-              scale: 1,
-              x: img.x + i * 6, // stack dikit (rapi)
-              y: img.y - i * 10,
-            }}
-            exit={{
-              opacity: 0,
-              scale: 0.9,
-              transition: { duration: 0.6 },
-            }}
-            transition={{
-              type: "spring",
-              stiffness: 60,   // 🔥 lebih lembut (slow)
-              damping: 20,
-              mass: 1.2,
-            }}
-            style={{
-              position: "absolute",
+        {images.map((img, i) => {
+          // 🔥 JARAK FIX BIAR TIDAK DEMPET
+          const offsetX = i * 40;   // jarak horizontal
+          const offsetY = i * -60;  // jarak vertikal (ke atas)
 
-              // 🔥 ukuran BESAR portrait
-              width: "180px",
-              height: "auto",
+          return (
+            <motion.img
+              key={img.id}
+              src={img.src}
+              initial={{
+                opacity: 0,
+                scale: 0.9,
+                x: img.x,
+                y: img.y,
+              }}
+              animate={{
+                opacity: 1,
+                scale: 1,
+                x: img.x + offsetX,
+                y: img.y + offsetY,
+              }}
+              exit={{
+                opacity: 0,
+                scale: 0.95,
+                transition: { duration: 0.6 },
+              }}
+              transition={{
+                type: "spring",
+                stiffness: 50, // 🔥 slow & smooth
+                damping: 22,
+              }}
+              style={{
+                position: "absolute",
 
-              objectFit: "contain",
-              pointerEvents: "none",
-              zIndex: 1000 - i,
-              userSelect: "none",
-            }}
-          />
-        ))}
+                // 🔥 ukuran besar & konsisten
+                width: "200px",
+                height: "auto",
+
+                objectFit: "contain",
+                pointerEvents: "none",
+                zIndex: 1000 - i,
+                userSelect: "none",
+              }}
+            />
+          );
+        })}
       </AnimatePresence>
     </div>
   );
 };
-
 
 
 
