@@ -64,151 +64,114 @@ const cursorImages = [
   { id: 10, src: "images/10.jpg" }
 ];
 
-// Komponen Image Trail dengan 10 foto portrait ukuran sedang
 const ImageTrail = () => {
-  const [images, setImages] = useState<{ id: number; x: number; y: number; src: string; index: number }[]>([]);
-  const timeoutRef = useRef<NodeJS.Timeout>();
-  const lastPositionRef = useRef({ x: 0, y: 0 });
-  const imageIndexRef = useRef(0);
+  const [images, setImages] = useState<any[]>([]);
+  const lastPos = useRef({ x: 0, y: 0 });
+  const imageIndex = useRef(0);
+
+  const threshold = 25; // jarak minimal spawn (biar ga terlalu padat)
 
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      const currentX = e.clientX;
-      const currentY = e.clientY;
-      
-      // Hitung jarak pergerakan cursor
-      const dx = Math.abs(currentX - lastPositionRef.current.x);
-      const dy = Math.abs(currentY - lastPositionRef.current.y);
+    const handleMove = (e: MouseEvent) => {
+      const x = e.clientX;
+      const y = e.clientY;
+
+      const dx = x - lastPos.current.x;
+      const dy = y - lastPos.current.y;
       const distance = Math.sqrt(dx * dx + dy * dy);
-      
-      // Update posisi terakhir
-      lastPositionRef.current = { x: currentX, y: currentY };
-      
-      // Hanya tambahkan gambar jika cursor bergerak cukup jauh (untuk efisiensi)
-      if (distance < 10) return;
-      
-      // Clear timeout sebelumnya
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      
-      // Tambahkan gambar baru ke trail
+
+      if (distance < threshold) return;
+
+      lastPos.current = { x, y };
+
+      const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+
       const newImage = {
         id: Date.now() + Math.random(),
-        x: currentX,
-        y: currentY,
-        src: cursorImages[imageIndexRef.current % cursorImages.length].src,
-        index: imageIndexRef.current
+        x,
+        y,
+        rotate: angle + (Math.random() * 20 - 10), // arah + random
+        scale: 0.8 + Math.random() * 0.4,
+        offsetX: Math.random() * 60 - 30,
+        offsetY: Math.random() * 60 - 30,
+        src: cursorImages[imageIndex.current % cursorImages.length].src,
       };
-      
-      setImages(prev => [newImage, ...prev].slice(0, 10)); // Maksimal 10 gambar
-      imageIndexRef.current++;
-      
-      // Hapus gambar setelah 2 detik (slow fade)
-      timeoutRef.current = setTimeout(() => {
-        setImages(prev => prev.filter(img => img.id !== newImage.id));
-      }, 2000);
+
+      imageIndex.current++;
+
+      setImages((prev) => [newImage, ...prev].slice(0, 12));
+
+      setTimeout(() => {
+        setImages((prev) => prev.filter((img) => img.id !== newImage.id));
+      }, 1200);
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
-    
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    };
+    window.addEventListener("mousemove", handleMove);
+    return () => window.removeEventListener("mousemove", handleMove);
   }, []);
 
   return (
-    <div style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      width: '100%',
-      height: '100%',
-      pointerEvents: 'none',
-      zIndex: 9998,
-      overflow: 'visible'
-    }}>
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        pointerEvents: "none",
+        zIndex: 9999,
+      }}
+    >
       <AnimatePresence>
-        {images.map((image, idx) => (
+        {images.map((img, i) => (
           <motion.div
-            key={image.id}
-            initial={{ 
-              opacity: 0,
-              scale: 0.3,
-              x: image.x - 40,
-              y: image.y - 50,
-              rotate: -10
-            }}
-            animate={{ 
-              opacity: 1,
-              scale: 1,
-              x: image.x - 40 + (idx * 8),
-              y: image.y - 50 - (idx * 12),
-              rotate: idx * 2
-            }}
-            exit={{ 
+            key={img.id}
+            initial={{
               opacity: 0,
               scale: 0.5,
-              transition: { duration: 0.5 }
+              x: img.x,
+              y: img.y,
+              rotate: img.rotate,
+            }}
+            animate={{
+              opacity: 1,
+              scale: img.scale,
+              x: img.x + img.offsetX,
+              y: img.y + img.offsetY,
+              rotate: img.rotate,
+            }}
+            exit={{
+              opacity: 0,
+              scale: 0.6,
+              transition: { duration: 0.4 },
             }}
             transition={{
               type: "spring",
-              stiffness: 100,
-              damping: 20,
-              mass: 0.5,
-              opacity: { duration: 0.3 }
+              stiffness: 120,
+              damping: 18,
             }}
             style={{
-              position: 'fixed',
-              width: '80px',
-              height: '100px',
-              borderRadius: '8px',
-              overflow: 'hidden',
-              boxShadow: '0 15px 35px rgba(0,0,0,0.25), 0 5px 10px rgba(0,0,0,0.15)',
-              border: '2px solid rgba(255,255,255,0.4)',
-              transformOrigin: 'center center',
-              backgroundColor: '#fff',
-              backdropFilter: 'blur(2px)'
+              position: "absolute",
+              width: "90px",
+              height: "120px",
+              borderRadius: "10px",
+              overflow: "hidden",
+              zIndex: 1000 - i,
+              boxShadow: "0 20px 40px rgba(0,0,0,0.3)",
             }}
           >
-            <img 
-              src={image.src} 
-              alt="trail"
+            <img
+              src={img.src}
               style={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-                display: 'block'
-              }}
-              onError={(e) => {
-                const target = e.currentTarget;
-                target.style.backgroundColor = '#2a2a2a';
-                target.style.display = 'flex';
-                target.style.alignItems = 'center';
-                target.style.justifyContent = 'center';
-                target.style.color = 'white';
-                target.style.fontSize = '12px';
-                target.style.fontFamily = 'monospace';
-                // @ts-ignore
-                target.innerHTML = `${image.index + 1}`;
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
               }}
             />
-            {/* Frame overlay effect */}
-            <div style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.2)',
-              borderRadius: '8px',
-              pointerEvents: 'none'
-            }} />
           </motion.div>
         ))}
       </AnimatePresence>
     </div>
   );
 };
+
 
 export default function HomePage(): React.JSX.Element {
   const [isMobile, setIsMobile] = useState(false);
