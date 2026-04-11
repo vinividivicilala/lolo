@@ -52,22 +52,88 @@ if (typeof window !== "undefined") {
 export default function HomePage(): React.JSX.Element {
   const [isMobile, setIsMobile] = useState(false);
   const [showContent, setShowContent] = useState(false);
+  const [currentCardColor, setCurrentCardColor] = useState<'yellow' | 'green' | 'blue'>('yellow');
+  const [cardName, setCardName] = useState('');
+  const [cardDescription, setCardDescription] = useState('');
+  const [displayName, setDisplayName] = useState('');
+  const [displayDescription, setDisplayDescription] = useState('');
   const loadingOverlayRef = useRef<HTMLDivElement>(null);
   const welcomeTextRef = useRef<HTMLDivElement>(null);
   const sectionsRef = useRef<(HTMLDivElement | null)[]>([]);
   const menuruFullRef = useRef<HTMLSpanElement>(null);
   const menuruLetterMRef = useRef<HTMLSpanElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  const colorSchemes = {
+    yellow: {
+      bg: '#F5E6CA',
+      border: '#D4A857',
+      text: '#8B6914',
+      accent: '#E8C872'
+    },
+    green: {
+      bg: '#D9E8D5',
+      border: '#6B8E5E',
+      text: '#2D5A27',
+      accent: '#A8C3A0'
+    },
+    blue: {
+      bg: '#D0E5F0',
+      border: '#5B8EB3',
+      text: '#1C4E70',
+      accent: '#8FB8D4'
+    }
+  };
+
+  const colors = ['yellow', 'green', 'blue'] as const;
+
+  // Random card setiap 10 detik
+  useEffect(() => {
+    if (!showContent) return;
+
+    const interval = setInterval(() => {
+      const randomColor = colors[Math.floor(Math.random() * colors.length)];
+      setCurrentCardColor(randomColor);
+      
+      // Animasi card change
+      if (cardRef.current) {
+        gsap.fromTo(cardRef.current,
+          { scale: 0.95, opacity: 0.8, rotateX: -10 },
+          { scale: 1, opacity: 1, rotateX: 0, duration: 0.6, ease: "back.out(0.5)" }
+        );
+      }
+    }, 10000);
+
+    return () => clearInterval(interval);
+  }, [showContent]);
+
+  // Handle form submit
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (cardName.trim() && cardDescription.trim()) {
+      setDisplayName(cardName);
+      setDisplayDescription(cardDescription);
+      setCardName('');
+      setCardDescription('');
+      
+      // Animasi saat data ditampilkan
+      if (cardRef.current) {
+        gsap.fromTo(cardRef.current,
+          { scale: 0.9, opacity: 0.7, y: 20 },
+          { scale: 1, opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }
+        );
+      }
+    }
+  };
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
     window.addEventListener('resize', checkMobile);
 
-    // Sembunyikan scrollbar
     document.body.style.overflow = 'hidden';
     document.body.style.height = '100vh';
 
-    // Animasi Loading Overlay dengan GSAP
     const tl = gsap.timeline({
       onComplete: () => {
         setShowContent(true);
@@ -109,7 +175,6 @@ export default function HomePage(): React.JSX.Element {
     };
   }, []);
 
-  // GSAP Hover effect untuk huruf M
   useEffect(() => {
     if (!showContent) return;
 
@@ -117,14 +182,12 @@ export default function HomePage(): React.JSX.Element {
     const letterM = menuruLetterMRef.current;
 
     if (menuruFull && letterM) {
-      // Set initial state - MENURU tersembunyi di bawah
       gsap.set(menuruFull, {
         y: 20,
         opacity: 0,
         display: 'none'
       });
 
-      // Hover event untuk huruf M
       const handleMouseEnter = () => {
         gsap.set(menuruFull, {
           display: 'inline-block',
@@ -168,7 +231,6 @@ export default function HomePage(): React.JSX.Element {
       ScrollTrigger.refresh();
     }, 100);
 
-    // Animasi ScrollTrigger untuk sections (fade in)
     sectionsRef.current.forEach((section, index) => {
       if (!section) return;
       
@@ -198,9 +260,10 @@ export default function HomePage(): React.JSX.Element {
     };
   }, [showContent]);
 
+  const currentColor = colorSchemes[currentCardColor];
+
   return (
     <>
-      {/* Loading Overlay */}
       <div 
         ref={loadingOverlayRef}
         style={{
@@ -235,7 +298,6 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </div>
 
-      {/* Main Content */}
       {showContent && (
         <div style={{
           minHeight: '100vh',
@@ -254,7 +316,6 @@ export default function HomePage(): React.JSX.Element {
           overflow: 'hidden'
         }}>
           
-          {/* Background Utama - Hitam */}
           <div style={{
             position: 'fixed',
             top: 0,
@@ -265,7 +326,6 @@ export default function HomePage(): React.JSX.Element {
             zIndex: 0
           }} />
           
-          {/* Framed Layout - Area krem (#dbd6c9) */}
           <div style={{
             position: 'fixed',
             top: '2rem',
@@ -279,7 +339,7 @@ export default function HomePage(): React.JSX.Element {
             overflow: 'hidden'
           }} />
           
-          {/* Judul Website - Huruf "M" dengan hover effect */}
+          {/* Judul Website - Huruf M */}
           <div style={{
             position: 'fixed',
             top: 'calc(2rem + 16px)',
@@ -322,7 +382,147 @@ export default function HomePage(): React.JSX.Element {
             </span>
           </div>
           
-          {/* Konten Utama - scrollable tanpa scrollbar */}
+          {/* Tilted Card - Pojok Kanan Bawah */}
+          <div style={{
+            position: 'fixed',
+            bottom: '2rem',
+            right: '2rem',
+            zIndex: 3,
+            pointerEvents: 'auto',
+            maxWidth: '320px',
+            width: '100%'
+          }}>
+            <div
+              ref={cardRef}
+              style={{
+                backgroundColor: currentColor.bg,
+                border: `2px solid ${currentColor.border}`,
+                borderRadius: '16px',
+                padding: '1.5rem',
+                transform: 'rotate(-2deg) translateY(-10px)',
+                boxShadow: `8px 8px 0px ${currentColor.border}`,
+                transition: 'all 0.3s ease',
+                cursor: 'pointer'
+              }}
+              onMouseEnter={(e) => {
+                gsap.to(e.currentTarget, {
+                  rotate: '0deg',
+                  y: '-15px',
+                  duration: 0.3,
+                  ease: "power2.out"
+                });
+              }}
+              onMouseLeave={(e) => {
+                gsap.to(e.currentTarget, {
+                  rotate: '-2deg',
+                  y: '-10px',
+                  duration: 0.3,
+                  ease: "power2.in"
+                });
+              }}
+            >
+              {displayName && displayDescription ? (
+                <>
+                  <h3 style={{
+                    fontFamily: 'ev-light, sans-serif',
+                    fontSize: '1.3rem',
+                    fontWeight: 600,
+                    color: currentColor.text,
+                    marginBottom: '0.5rem'
+                  }}>
+                    {displayName}
+                  </h3>
+                  <p style={{
+                    fontFamily: 'ev-light, sans-serif',
+                    fontSize: '0.9rem',
+                    color: currentColor.text,
+                    lineHeight: 1.5,
+                    marginBottom: '1rem'
+                  }}>
+                    {displayDescription}
+                  </p>
+                  <div style={{
+                    fontSize: '0.7rem',
+                    color: currentColor.text,
+                    opacity: 0.7,
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center'
+                  }}>
+                    <span>✨ Card berubah warna setiap 10 detik</span>
+                    <span style={{
+                      width: '8px',
+                      height: '8px',
+                      borderRadius: '50%',
+                      backgroundColor: currentColor.border,
+                      display: 'inline-block'
+                    }} />
+                  </div>
+                </>
+              ) : (
+                <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  <input
+                    type="text"
+                    placeholder="Nama Anda"
+                    value={cardName}
+                    onChange={(e) => setCardName(e.target.value)}
+                    style={{
+                      padding: '0.8rem 1rem',
+                      backgroundColor: 'transparent',
+                      border: `1px solid ${currentColor.border}`,
+                      borderRadius: '8px',
+                      color: currentColor.text,
+                      fontSize: '0.9rem',
+                      fontFamily: 'ev-light, sans-serif',
+                      outline: 'none'
+                    }}
+                  />
+                  <textarea
+                    placeholder="Deskripsi"
+                    value={cardDescription}
+                    onChange={(e) => setCardDescription(e.target.value)}
+                    rows={3}
+                    style={{
+                      padding: '0.8rem 1rem',
+                      backgroundColor: 'transparent',
+                      border: `1px solid ${currentColor.border}`,
+                      borderRadius: '8px',
+                      color: currentColor.text,
+                      fontSize: '0.9rem',
+                      fontFamily: 'ev-light, sans-serif',
+                      outline: 'none',
+                      resize: 'vertical'
+                    }}
+                  />
+                  <button
+                    type="submit"
+                    style={{
+                      padding: '0.8rem 1rem',
+                      backgroundColor: currentColor.border,
+                      border: 'none',
+                      borderRadius: '8px',
+                      color: currentColor.bg,
+                      fontSize: '0.9rem',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      fontFamily: 'ev-light, sans-serif',
+                      transition: 'all 0.3s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      gsap.to(e.currentTarget, { scale: 1.02, duration: 0.2 });
+                    }}
+                    onMouseLeave={(e) => {
+                      gsap.to(e.currentTarget, { scale: 1, duration: 0.2 });
+                    }}
+                  >
+                    Tampilkan Card
+                  </button>
+                </form>
+              )}
+            </div>
+          </div>
+          
+          {/* Konten Utama */}
           <div style={{
             position: 'relative',
             zIndex: 2,
@@ -335,12 +535,10 @@ export default function HomePage(): React.JSX.Element {
           }}
           className="hide-scrollbar"
           >
-            {/* Spacer atas */}
             <div style={{
               height: isMobile ? '120px' : '160px'
             }} />
             
-            {/* Teks MENURU besar */}
             <div style={{
               position: 'relative',
               paddingLeft: 'calc(2rem + 20px)',
@@ -368,7 +566,6 @@ export default function HomePage(): React.JSX.Element {
               </span>
             </div>
 
-            {/* Teks subtitle di bawah teks besar */}
             <div style={{
               position: 'relative',
               paddingLeft: 'calc(2rem + 20px)',
@@ -389,7 +586,6 @@ export default function HomePage(): React.JSX.Element {
               </span>
             </div>
             
-            {/* Konten sections */}
             <div style={{
               position: 'relative',
               width: '100%',
@@ -427,7 +623,7 @@ export default function HomePage(): React.JSX.Element {
                     fontSize: '1.2rem',
                     lineHeight: '1.8'
                   }}>
-                    Hover ke huruf "M" di pojok kiri atas untuk melihat efek animasi.
+                    Hover ke huruf "M" di pojok kiri atas. Lihat Tilted Card di pojok kanan bawah yang berubah warna setiap 10 detik!
                   </p>
                 </div>
 
@@ -457,7 +653,6 @@ export default function HomePage(): React.JSX.Element {
                     }}>
                       Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
                       Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                      Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.
                     </p>
                   </div>
                 ))}
@@ -465,7 +660,6 @@ export default function HomePage(): React.JSX.Element {
             </div>
           </div>
           
-          {/* Scroll indicator */}
           <div style={{
             position: 'fixed',
             bottom: 'calc(2rem + 30px)',
