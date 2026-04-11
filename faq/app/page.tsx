@@ -185,7 +185,7 @@ export default function HomePage(): React.JSX.Element {
 
     if (copyrightRef.current) {
       gsap.set(copyrightRef.current, {
-        y: 50,
+        y: 100,
         opacity: 0
       });
 
@@ -197,7 +197,7 @@ export default function HomePage(): React.JSX.Element {
         onUpdate: (self) => {
           const progress = self.progress;
           gsap.to(copyrightRef.current, {
-            y: 50 - (progress * 50),
+            y: 100 - (progress * 100),
             opacity: progress,
             duration: 0,
             ease: "power2.out"
@@ -252,7 +252,7 @@ export default function HomePage(): React.JSX.Element {
       {showContent && (
         <div style={{
           minHeight: '100vh',
-          backgroundColor: '#dbd6c9',
+          backgroundColor: 'black',
           margin: 0,
           padding: 0,
           width: '100%',
@@ -309,12 +309,12 @@ export default function HomePage(): React.JSX.Element {
             </span>
           </div>
           
-          {/* Copyright 2K26 - Footer Tengah */}
+          {/* Copyright 2K26 - Footer Tengah dengan font besar 700px */}
           <div 
             ref={copyrightRef}
             style={{
               position: 'fixed',
-              bottom: '2rem',
+              bottom: '10%',
               left: 0,
               right: 0,
               zIndex: 10,
@@ -326,14 +326,14 @@ export default function HomePage(): React.JSX.Element {
               opacity: 0
             }}
           >
-            {/* Logo Copyright SVG */}
+            {/* Logo Copyright SVG besar */}
             <svg 
-              width={isMobile ? '20px' : '24px'} 
-              height={isMobile ? '20px' : '24px'} 
+              width={isMobile ? '80px' : '140px'} 
+              height={isMobile ? '80px' : '140px'} 
               viewBox="0 0 24 24" 
               fill="none" 
               stroke="rgb(0, 20, 70)" 
-              strokeWidth="1.5"
+              strokeWidth="1"
               strokeLinecap="round"
               strokeLinejoin="round"
             >
@@ -341,31 +341,26 @@ export default function HomePage(): React.JSX.Element {
               <path d="M12 8v8M8 12h8"/>
             </svg>
             
-            {/* Teks 2K26 */}
+            {/* Teks 2K - tidak tebal */}
             <span style={{
               fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
               fontWeight: 300,
-              fontSize: isMobile ? '18px' : '22px',
+              fontSize: isMobile ? '200px' : '700px',
+              lineHeight: isMobile ? '200px' : '700px',
               color: 'rgb(0, 20, 70)',
-              letterSpacing: '1px'
+              letterSpacing: '-10px'
             }}>
-              2
+              2K
             </span>
-            <span style={{
-              fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
-              fontWeight: 300,
-              fontSize: isMobile ? '18px' : '22px',
-              color: 'rgb(0, 20, 70)',
-              letterSpacing: '1px'
-            }}>
-              K
-            </span>
+            
+            {/* Teks 26 - tebal */}
             <span style={{
               fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
               fontWeight: 900,
-              fontSize: isMobile ? '18px' : '22px',
+              fontSize: isMobile ? '200px' : '700px',
+              lineHeight: isMobile ? '200px' : '700px',
               color: 'rgb(0, 20, 70)',
-              letterSpacing: '1px'
+              letterSpacing: '-10px'
             }}>
               26
             </span>
@@ -433,7 +428,7 @@ export default function HomePage(): React.JSX.Element {
               position: 'relative',
               width: '100%',
               padding: '2rem',
-              paddingBottom: '10rem',
+              paddingBottom: '20rem',
               boxSizing: 'border-box'
             }}>
               <div style={{
@@ -466,7 +461,7 @@ export default function HomePage(): React.JSX.Element {
                     fontSize: '1.2rem',
                     lineHeight: '1.8'
                   }}>
-                    Scroll ke bawah untuk melihat copyright 2K26 di footer tengah.
+                    Scroll ke bawah untuk melihat copyright 2K26 dengan font 700px.
                   </p>
                 </div>
 
