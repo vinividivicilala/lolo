@@ -50,6 +50,8 @@ if (typeof window !== "undefined") {
   auth = getAuth(app);
 }
 
+
+
 const trailImages = [
   "images/25.jpg",
   "images/26.jpg",
@@ -64,7 +66,7 @@ const ImageTrail = () => {
   const canSpawn = useRef(true);
   const indexRef = useRef(0);
 
-  const threshold = 50; // biar jelas geraknya
+  const threshold = 50;
   const delayBetweenSpawn = 150;
 
   useEffect(() => {
@@ -85,7 +87,6 @@ const ImageTrail = () => {
         id: Date.now() + Math.random(),
         x,
         y,
-        index: indexRef.current,
         src: trailImages[indexRef.current % trailImages.length],
       };
 
@@ -117,9 +118,8 @@ const ImageTrail = () => {
     >
       <AnimatePresence>
         {images.map((img, i) => {
-          // 🔥 JARAK FIX BIAR TIDAK DEMPET
-          const offsetX = i * 40;   // jarak horizontal
-          const offsetY = i * -60;  // jarak vertikal (ke atas)
+          const offsetX = i * 70; // 🔥 ke samping
+          const offsetY = 0;      // 🔥 tetap sejajar
 
           return (
             <motion.img
@@ -144,16 +144,13 @@ const ImageTrail = () => {
               }}
               transition={{
                 type: "spring",
-                stiffness: 50, // 🔥 slow & smooth
+                stiffness: 50,
                 damping: 22,
               }}
               style={{
                 position: "absolute",
-
-                // 🔥 ukuran besar & konsisten
                 width: "200px",
                 height: "auto",
-
                 objectFit: "contain",
                 pointerEvents: "none",
                 zIndex: 1000 - i,
@@ -166,9 +163,6 @@ const ImageTrail = () => {
     </div>
   );
 };
-
-
-
 
 
 export default function HomePage(): React.JSX.Element {
