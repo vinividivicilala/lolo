@@ -57,7 +57,7 @@ export default function HomePage(): React.JSX.Element {
   const sectionsRef = useRef<(HTMLDivElement | null)[]>([]);
   const menuruFullRef = useRef<HTMLSpanElement>(null);
   const menuruLetterMRef = useRef<HTMLSpanElement>(null);
-  const footerRef = useRef<HTMLDivElement>(null);
+  const copyrightRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -183,21 +183,21 @@ export default function HomePage(): React.JSX.Element {
       );
     });
 
-    if (footerRef.current) {
-      gsap.set(footerRef.current, {
-        y: 200,
+    if (copyrightRef.current) {
+      gsap.set(copyrightRef.current, {
+        y: -100,
         opacity: 0
       });
 
       ScrollTrigger.create({
-        trigger: footerRef.current,
+        trigger: copyrightRef.current,
         start: "top 90%",
         end: "bottom 80%",
         scrub: 0.5,
         onUpdate: (self) => {
           const progress = self.progress;
-          gsap.to(footerRef.current, {
-            y: 200 - (progress * 200),
+          gsap.to(copyrightRef.current, {
+            y: -100 + (progress * 100),
             opacity: progress,
             duration: 0,
             ease: "power2.out"
@@ -334,15 +334,14 @@ export default function HomePage(): React.JSX.Element {
             </span>
           </div>
           
-          {/* Copyright Footer - Modern, di tengah, tanpa background */}
+          {/* Copyright 2K26 - di bawah framed layout */}
           <div 
-            ref={footerRef}
+            ref={copyrightRef}
             style={{
               position: 'fixed',
-              bottom: '50%',
+              bottom: '3rem',
               left: 0,
               right: 0,
-              transform: 'translateY(50%)',
               zIndex: 10,
               display: 'flex',
               alignItems: 'center',
@@ -352,51 +351,46 @@ export default function HomePage(): React.JSX.Element {
               opacity: 0
             }}
           >
-            {/* Logo Copyright Modern */}
+            {/* Logo Copyright SVG */}
             <svg 
-              width={isMobile ? '60px' : '120px'} 
-              height={isMobile ? '60px' : '120px'} 
+              width={isMobile ? '20px' : '24px'} 
+              height={isMobile ? '20px' : '24px'} 
               viewBox="0 0 24 24" 
               fill="none" 
-              stroke="rgb(140, 0, 0)" 
+              stroke="rgb(0, 20, 70)" 
               strokeWidth="1.5"
               strokeLinecap="round"
               strokeLinejoin="round"
-              style={{ display: 'inline-block' }}
             >
               <circle cx="12" cy="12" r="10"/>
               <path d="M12 8v8M8 12h8"/>
             </svg>
             
-            {/* Teks 2 - besar, tidak tebal */}
+            {/* Teks 2K26 */}
             <span style={{
               fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
               fontWeight: 300,
-              fontSize: isMobile ? '200px' : '500px',
-              lineHeight: isMobile ? '200px' : '500px',
-              color: 'rgb(140, 0, 0)'
+              fontSize: isMobile ? '16px' : '20px',
+              color: 'rgb(0, 20, 70)',
+              letterSpacing: '1px'
             }}>
               2
             </span>
-            
-            {/* Teks K - besar, tidak tebal */}
             <span style={{
               fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
               fontWeight: 300,
-              fontSize: isMobile ? '200px' : '500px',
-              lineHeight: isMobile ? '200px' : '500px',
-              color: 'rgb(140, 0, 0)'
+              fontSize: isMobile ? '16px' : '20px',
+              color: 'rgb(0, 20, 70)',
+              letterSpacing: '1px'
             }}>
               K
             </span>
-            
-            {/* Teks 26 - besar dan tebal */}
             <span style={{
               fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
               fontWeight: 900,
-              fontSize: isMobile ? '200px' : '500px',
-              lineHeight: isMobile ? '200px' : '500px',
-              color: 'rgb(140, 0, 0)'
+              fontSize: isMobile ? '16px' : '20px',
+              color: 'rgb(0, 20, 70)',
+              letterSpacing: '1px'
             }}>
               26
             </span>
@@ -497,7 +491,7 @@ export default function HomePage(): React.JSX.Element {
                     fontSize: '1.2rem',
                     lineHeight: '1.8'
                   }}>
-                    Scroll ke bawah untuk melihat footer copyright yang muncul dengan animasi GSAP ScrollTrigger.
+                    Scroll ke bawah untuk melihat copyright 2K26 yang muncul dari atas ke bawah.
                   </p>
                 </div>
 
