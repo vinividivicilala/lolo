@@ -50,7 +50,7 @@ if (typeof window !== "undefined") {
   auth = getAuth(app);
 }
 
-// Data gambar untuk cursor trail
+// Data gambar untuk cursor trail - 10 foto berbeda
 const cursorImages = [
   { id: 1, src: "images/1.jpg" },
   { id: 2, src: "images/2.jpg" },
@@ -64,82 +64,114 @@ const cursorImages = [
   { id: 10, src: "images/10.jpg" }
 ];
 
-// Komponen Image Trail
+// Komponen Image Trail dengan 10 foto portrait ukuran sedang
 const ImageTrail = () => {
-  const [trail, setTrail] = useState<{ id: number; x: number; y: number; image: string }[]>([]);
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const trailRef = useRef<HTMLDivElement>(null);
-  const frameRef = useRef<number>();
+  const [images, setImages] = useState<{ id: number; x: number; y: number; src: string; index: number }[]>([]);
+  const timeoutRef = useRef<NodeJS.Timeout>();
+  const lastPositionRef = useRef({ x: 0, y: 0 });
   const imageIndexRef = useRef(0);
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      setMousePosition({ x: e.clientX, y: e.clientY });
+      const currentX = e.clientX;
+      const currentY = e.clientY;
       
-      // Tambahkan gambar baru ke trail setiap beberapa frame
-      if (frameRef.current) cancelAnimationFrame(frameRef.current);
+      // Hitung jarak pergerakan cursor
+      const dx = Math.abs(currentX - lastPositionRef.current.x);
+      const dy = Math.abs(currentY - lastPositionRef.current.y);
+      const distance = Math.sqrt(dx * dx + dy * dy);
       
-      frameRef.current = requestAnimationFrame(() => {
-        const newImage = cursorImages[imageIndexRef.current % cursorImages.length];
-        const newTrailItem = {
-          id: Date.now() + Math.random(),
-          x: e.clientX,
-          y: e.clientY,
-          image: newImage.src
-        };
-        
-        setTrail(prev => [newTrailItem, ...prev].slice(0, 12));
-        imageIndexRef.current++;
-      });
+      // Update posisi terakhir
+      lastPositionRef.current = { x: currentX, y: currentY };
+      
+      // Hanya tambahkan gambar jika cursor bergerak cukup jauh (untuk efisiensi)
+      if (distance < 10) return;
+      
+      // Clear timeout sebelumnya
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      
+      // Tambahkan gambar baru ke trail
+      const newImage = {
+        id: Date.now() + Math.random(),
+        x: currentX,
+        y: currentY,
+        src: cursorImages[imageIndexRef.current % cursorImages.length].src,
+        index: imageIndexRef.current
+      };
+      
+      setImages(prev => [newImage, ...prev].slice(0, 10)); // Maksimal 10 gambar
+      imageIndexRef.current++;
+      
+      // Hapus gambar setelah 2 detik (slow fade)
+      timeoutRef.current = setTimeout(() => {
+        setImages(prev => prev.filter(img => img.id !== newImage.id));
+      }, 2000);
     };
 
     window.addEventListener('mousemove', handleMouseMove);
     
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
-      if (frameRef.current) cancelAnimationFrame(frameRef.current);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
   }, []);
 
   return (
-    <div ref={trailRef} style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 9998, overflow: 'visible' }}>
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      width: '100%',
+      height: '100%',
+      pointerEvents: 'none',
+      zIndex: 9998,
+      overflow: 'visible'
+    }}>
       <AnimatePresence>
-        {trail.map((item, index) => (
+        {images.map((image, idx) => (
           <motion.div
-            key={item.id}
+            key={image.id}
             initial={{ 
-              opacity: 0.8, 
-              scale: 0.5,
-              x: item.x - 30,
-              y: item.y - 30,
-              rotate: -15
+              opacity: 0,
+              scale: 0.3,
+              x: image.x - 40,
+              y: image.y - 50,
+              rotate: -10
             }}
             animate={{ 
-              opacity: 0,
-              scale: 1.2,
-              x: item.x - 30 + (index * 5),
-              y: item.y - 30 - (index * 8),
-              rotate: 15
+              opacity: 1,
+              scale: 1,
+              x: image.x - 40 + (idx * 8),
+              y: image.y - 50 - (idx * 12),
+              rotate: idx * 2
             }}
-            exit={{ opacity: 0 }}
+            exit={{ 
+              opacity: 0,
+              scale: 0.5,
+              transition: { duration: 0.5 }
+            }}
             transition={{
-              duration: 0.8,
-              ease: "easeOut",
-              opacity: { duration: 0.5 }
+              type: "spring",
+              stiffness: 100,
+              damping: 20,
+              mass: 0.5,
+              opacity: { duration: 0.3 }
             }}
             style={{
               position: 'fixed',
-              width: '60px',
-              height: '60px',
-              borderRadius: '12px',
+              width: '80px',
+              height: '100px',
+              borderRadius: '8px',
               overflow: 'hidden',
-              boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
-              border: '2px solid rgba(255,255,255,0.3)',
-              transformOrigin: 'center center'
+              boxShadow: '0 15px 35px rgba(0,0,0,0.25), 0 5px 10px rgba(0,0,0,0.15)',
+              border: '2px solid rgba(255,255,255,0.4)',
+              transformOrigin: 'center center',
+              backgroundColor: '#fff',
+              backdropFilter: 'blur(2px)'
             }}
           >
             <img 
-              src={item.image} 
+              src={image.src} 
               alt="trail"
               style={{
                 width: '100%',
@@ -148,13 +180,29 @@ const ImageTrail = () => {
                 display: 'block'
               }}
               onError={(e) => {
-                e.currentTarget.style.backgroundColor = '#333';
-                e.currentTarget.style.display = 'flex';
-                e.currentTarget.style.alignItems = 'center';
-                e.currentTarget.style.justifyContent = 'center';
-                e.currentTarget.innerHTML = '<div style="color:white;font-size:10px;">img</div>';
+                const target = e.currentTarget;
+                target.style.backgroundColor = '#2a2a2a';
+                target.style.display = 'flex';
+                target.style.alignItems = 'center';
+                target.style.justifyContent = 'center';
+                target.style.color = 'white';
+                target.style.fontSize = '12px';
+                target.style.fontFamily = 'monospace';
+                // @ts-ignore
+                target.innerHTML = `${image.index + 1}`;
               }}
             />
+            {/* Frame overlay effect */}
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.2)',
+              borderRadius: '8px',
+              pointerEvents: 'none'
+            }} />
           </motion.div>
         ))}
       </AnimatePresence>
@@ -176,11 +224,9 @@ export default function HomePage(): React.JSX.Element {
     checkMobile();
     window.addEventListener('resize', checkMobile);
 
-    // Sembunyikan scrollbar
     document.body.style.overflow = 'hidden';
     document.body.style.height = '100vh';
 
-    // Animasi Loading Overlay dengan GSAP
     const tl = gsap.timeline({
       onComplete: () => {
         setShowContent(true);
@@ -222,7 +268,6 @@ export default function HomePage(): React.JSX.Element {
     };
   }, []);
 
-  // GSAP Hover effect untuk huruf M
   useEffect(() => {
     if (!showContent) return;
 
@@ -310,7 +355,7 @@ export default function HomePage(): React.JSX.Element {
 
   return (
     <>
-      {/* Image Trail Effect */}
+      {/* Image Trail Effect - 10 foto portrait ukuran sedang */}
       {showContent && <ImageTrail />}
 
       {/* Loading Overlay */}
@@ -367,7 +412,6 @@ export default function HomePage(): React.JSX.Element {
           overflow: 'hidden'
         }}>
           
-          {/* Background Utama - Hitam */}
           <div style={{
             position: 'fixed',
             top: 0,
@@ -378,7 +422,6 @@ export default function HomePage(): React.JSX.Element {
             zIndex: 0
           }} />
           
-          {/* Framed Layout - Area krem (#dbd6c9) */}
           <div style={{
             position: 'fixed',
             top: '2rem',
@@ -392,7 +435,7 @@ export default function HomePage(): React.JSX.Element {
             overflow: 'hidden'
           }} />
           
-          {/* Judul Website - Huruf "M" dengan hover effect */}
+          {/* Judul Website */}
           <div style={{
             position: 'fixed',
             top: 'calc(2rem + 16px)',
@@ -435,7 +478,6 @@ export default function HomePage(): React.JSX.Element {
             </span>
           </div>
           
-          {/* Konten Utama */}
           <div style={{
             position: 'relative',
             zIndex: 2,
@@ -536,7 +578,7 @@ export default function HomePage(): React.JSX.Element {
                     fontSize: '1.2rem',
                     lineHeight: '1.8'
                   }}>
-                    Gerakkan cursor untuk melihat efek Image Trail dengan 10 gambar berbeda.
+                    Gerakkan cursor untuk melihat efek Image Trail dengan 10 foto portrait.
                   </p>
                 </div>
 
@@ -620,7 +662,6 @@ export default function HomePage(): React.JSX.Element {
             
             body {
               overflow: hidden;
-              cursor: default;
             }
             
             #menuru-big-text::selection {
