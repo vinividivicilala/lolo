@@ -185,7 +185,7 @@ export default function HomePage(): React.JSX.Element {
 
     if (copyrightRef.current) {
       gsap.set(copyrightRef.current, {
-        y: -100,
+        y: 50,
         opacity: 0
       });
 
@@ -197,7 +197,7 @@ export default function HomePage(): React.JSX.Element {
         onUpdate: (self) => {
           const progress = self.progress;
           gsap.to(copyrightRef.current, {
-            y: -100 + (progress * 100),
+            y: 50 - (progress * 50),
             opacity: progress,
             duration: 0,
             ease: "power2.out"
@@ -252,7 +252,7 @@ export default function HomePage(): React.JSX.Element {
       {showContent && (
         <div style={{
           minHeight: '100vh',
-          backgroundColor: 'black',
+          backgroundColor: '#dbd6c9',
           margin: 0,
           padding: 0,
           width: '100%',
@@ -266,36 +266,11 @@ export default function HomePage(): React.JSX.Element {
           position: 'relative'
         }}>
           
-          {/* Background Utama - Hitam */}
-          <div style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'black',
-            zIndex: 0
-          }} />
-          
-          {/* Framed Layout - Area krem (#dbd6c9) */}
+          {/* Judul Website - Huruf "M" */}
           <div style={{
             position: 'fixed',
             top: '2rem',
             left: '2rem',
-            right: '2rem',
-            bottom: '2rem',
-            backgroundColor: '#dbd6c9',
-            borderRadius: '20px',
-            zIndex: 1,
-            pointerEvents: 'none',
-            overflow: 'hidden'
-          }} />
-          
-          {/* Judul Website - Huruf "M" */}
-          <div style={{
-            position: 'fixed',
-            top: 'calc(2rem + 16px)',
-            left: 'calc(2rem + 20px)',
             zIndex: 3,
             pointerEvents: 'auto',
             cursor: 'pointer',
@@ -334,12 +309,12 @@ export default function HomePage(): React.JSX.Element {
             </span>
           </div>
           
-          {/* Copyright 2K26 - di bawah framed layout */}
+          {/* Copyright 2K26 - Footer Tengah */}
           <div 
             ref={copyrightRef}
             style={{
               position: 'fixed',
-              bottom: '3rem',
+              bottom: '2rem',
               left: 0,
               right: 0,
               zIndex: 10,
@@ -370,7 +345,7 @@ export default function HomePage(): React.JSX.Element {
             <span style={{
               fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
               fontWeight: 300,
-              fontSize: isMobile ? '16px' : '20px',
+              fontSize: isMobile ? '18px' : '22px',
               color: 'rgb(0, 20, 70)',
               letterSpacing: '1px'
             }}>
@@ -379,7 +354,7 @@ export default function HomePage(): React.JSX.Element {
             <span style={{
               fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
               fontWeight: 300,
-              fontSize: isMobile ? '16px' : '20px',
+              fontSize: isMobile ? '18px' : '22px',
               color: 'rgb(0, 20, 70)',
               letterSpacing: '1px'
             }}>
@@ -388,7 +363,7 @@ export default function HomePage(): React.JSX.Element {
             <span style={{
               fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
               fontWeight: 900,
-              fontSize: isMobile ? '16px' : '20px',
+              fontSize: isMobile ? '18px' : '22px',
               color: 'rgb(0, 20, 70)',
               letterSpacing: '1px'
             }}>
@@ -409,7 +384,7 @@ export default function HomePage(): React.JSX.Element {
             
             <div style={{
               position: 'relative',
-              paddingLeft: 'calc(2rem + 20px)',
+              paddingLeft: '2rem',
               paddingRight: '2rem',
               boxSizing: 'border-box',
               marginBottom: '1rem'
@@ -436,7 +411,7 @@ export default function HomePage(): React.JSX.Element {
 
             <div style={{
               position: 'relative',
-              paddingLeft: 'calc(2rem + 20px)',
+              paddingLeft: '2rem',
               paddingRight: '2rem',
               boxSizing: 'border-box',
               marginBottom: '4rem'
@@ -491,7 +466,7 @@ export default function HomePage(): React.JSX.Element {
                     fontSize: '1.2rem',
                     lineHeight: '1.8'
                   }}>
-                    Scroll ke bawah untuk melihat copyright 2K26 yang muncul dari atas ke bawah.
+                    Scroll ke bawah untuk melihat copyright 2K26 di footer tengah.
                   </p>
                 </div>
 
@@ -532,7 +507,7 @@ export default function HomePage(): React.JSX.Element {
           {/* Scroll indicator */}
           <div style={{
             position: 'fixed',
-            bottom: 'calc(2rem + 30px)',
+            bottom: '2rem',
             left: '50%',
             transform: 'translateX(-50%)',
             zIndex: 3,
