@@ -198,6 +198,30 @@ export default function HomePage(): React.JSX.Element {
     };
   }, [showContent]);
 
+  // 🔥 Footer Animation
+if (footerRef.current) {
+  gsap.fromTo(footerRef.current,
+    {
+      y: 150,
+      opacity: 0,
+      scale: 0.9
+    },
+    {
+      scrollTrigger: {
+        trigger: footerRef.current,
+        start: "top 90%",
+        end: "top 50%",
+        scrub: 1,
+      },
+      y: 0,
+      opacity: 1,
+      scale: 1,
+      duration: 1.2,
+      ease: "power3.out"
+    }
+  );
+}
+
   return (
     <>
       {/* Loading Overlay */}
@@ -500,6 +524,36 @@ export default function HomePage(): React.JSX.Element {
               <path d="M12 5v14M19 12l-7 7-7-7"/>
             </svg>
           </div>
+
+          {/* 🔥 Footer Overlay Copyright */}
+<div
+  ref={footerRef}
+  style={{
+    position: 'relative',
+    width: '100%',
+    height: '60vh',
+    display: 'flex',
+    alignItems: 'flex-end',
+    justifyContent: 'center',
+    paddingBottom: '4rem'
+  }}
+>
+  <div style={{
+    width: '100%',
+    textAlign: 'center'
+  }}>
+    <span style={{
+      fontFamily: "'Impact', 'Arial Black', sans-serif",
+      fontWeight: 900,
+      fontSize: isMobile ? '80px' : '200px',
+      color: 'rgb(0, 20, 70)',
+      letterSpacing: '-5px',
+      display: 'inline-block'
+    }}>
+      © 2K26
+    </span>
+  </div>
+</div>
 
           <style jsx global>{`
             .hide-scrollbar {
