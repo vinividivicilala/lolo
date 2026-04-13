@@ -1,22 +1,104 @@
 'use client';
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import gsap from "gsap";
 
 export default function HomePage(): React.JSX.Element {
   const [showPopup, setShowPopup] = useState(false);
+  const acceptBtnRef = useRef<HTMLButtonElement>(null);
+  const declineBtnRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    // Check if user has already made a choice
     const consent = localStorage.getItem('cookieConsent');
     if (consent === null) {
       setShowPopup(true);
     }
   }, []);
 
+  useEffect(() => {
+    if (showPopup && acceptBtnRef.current && declineBtnRef.current) {
+      // Animasi hover untuk tombol Accept
+      const acceptBtn = acceptBtnRef.current;
+      const declineBtn = declineBtnRef.current;
+
+      const createHoverAnimation = (btn: HTMLButtonElement) => {
+        const tl = gsap.timeline({ paused: true });
+        
+        // Efek warna dari bawah (background clip)
+        tl.to(btn, {
+          color: '#ffffff',
+          duration: 0.3,
+          ease: "power2.out",
+        }).to(btn, {
+          backgroundPosition: '0% 0%',
+          duration: 0.3,
+          ease: "power2.out",
+        }, 0);
+
+        btn.addEventListener('mouseenter', () => {
+          tl.play();
+        });
+        
+        btn.addEventListener('mouseleave', () => {
+          tl.reverse();
+        });
+      };
+
+      // Apply style untuk pseudo-element efek bawah
+      [acceptBtn, declineBtn].forEach(btn => {
+        btn.style.position = 'relative';
+        btn.style.overflow = 'hidden';
+        btn.style.zIndex = '1';
+        
+        // Buat pseudo-element untuk efek dari bawah
+        const pseudoStyle = document.createElement('style');
+        pseudoStyle.textContent = `
+          .btn-hover-effect {
+            position: relative;
+            isolation: isolate;
+          }
+          .btn-hover-effect::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 0%;
+            background-color: #000000;
+            transition: height 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            z-index: -1;
+            border-radius: 60px;
+          }
+          .btn-hover-effect:hover::before {
+            height: 100%;
+          }
+          .btn-hover-effect {
+            transition: color 0.3s ease;
+          }
+          .btn-hover-effect:hover {
+            color: white !important;
+          }
+        `;
+        document.head.appendChild(pseudoStyle);
+        btn.classList.add('btn-hover-effect');
+      });
+
+      return () => {
+        [acceptBtn, declineBtn].forEach(btn => {
+          const styles = document.querySelectorAll('style');
+          styles.forEach(style => {
+            if (style.textContent?.includes('btn-hover-effect')) {
+              style.remove();
+            }
+          });
+        });
+      };
+    }
+  }, [showPopup]);
+
   const handleAccept = () => {
     localStorage.setItem('cookieConsent', 'accepted');
     setShowPopup(false);
-    // Here you can initialize analytics or tracking
     console.log('Cookies accepted');
   };
 
@@ -44,105 +126,134 @@ export default function HomePage(): React.JSX.Element {
     }}>
       {/* Halaman kosong */}
 
-      {/* Cookie Popup - Bottom Right */}
+      {/* Cookie Popup - Bottom Right dengan desain Awwwards */}
       {showPopup && (
         <div style={{
           position: 'fixed',
-          bottom: '20px',
-          right: '20px',
-          maxWidth: '320px',
-          backgroundColor: '#1a1a1a',
-          color: '#e0e0e0',
-          borderRadius: '12px',
-          padding: '20px',
-          boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
+          bottom: '30px',
+          right: '30px',
+          width: '480px',
+          maxWidth: 'calc(100vw - 60px)',
+          backgroundColor: '#ffffff',
+          color: '#000000',
+          borderRadius: '32px',
+          padding: '40px',
+          boxShadow: '0 20px 40px rgba(0,0,0,0.15), 0 5px 12px rgba(0,0,0,0.05)',
           zIndex: 1000,
-          fontFamily: 'ev-light, sans-serif',
-          border: '1px solid #333',
-          backdropFilter: 'blur(8px)',
-          animation: 'fadeInUp 0.3s ease-out'
+          fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+          animation: 'slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
+          border: '1px solid rgba(0,0,0,0.05)'
         }}>
           <style>
             {`
-              @keyframes fadeInUp {
+              @keyframes slideUp {
                 from {
                   opacity: 0;
-                  transform: translateY(20px);
+                  transform: translateY(30px);
                 }
                 to {
                   opacity: 1;
                   transform: translateY(0);
                 }
               }
+              
+              @keyframes fadeIn {
+                from {
+                  opacity: 0;
+                }
+                to {
+                  opacity: 1;
+                }
+              }
             `}
           </style>
+          
+          {/* Header dengan icon */}
           <div style={{
+            marginBottom: '24px',
             display: 'flex',
             alignItems: 'center',
-            gap: '10px',
-            marginBottom: '12px'
+            gap: '12px'
           }}>
-            <span style={{ fontSize: '24px' }}>🍪</span>
-            <span style={{ fontWeight: 'bold', fontSize: '16px' }}>Cookie Consent</span>
+            <span style={{ fontSize: '48px', display: 'inline-block' }}>🍪</span>
+            <span style={{ 
+              fontWeight: '700', 
+              fontSize: '28px',
+              letterSpacing: '-0.02em',
+              background: 'linear-gradient(135deg, #000000 0%, #333333 100%)',
+              backgroundClip: 'text',
+              WebkitBackgroundClip: 'text',
+              color: 'transparent'
+            }}>
+              cookies.
+            </span>
           </div>
+          
+          {/* Teks deskripsi - font besar minimalist */}
           <p style={{
-            fontSize: '13px',
-            lineHeight: '1.5',
-            marginBottom: '20px',
-            color: '#b0b0b0'
+            fontSize: '18px',
+            lineHeight: '1.4',
+            marginBottom: '32px',
+            color: '#1a1a1a',
+            fontWeight: '400',
+            letterSpacing: '-0.01em',
+            maxWidth: '90%'
           }}>
-            I use cookies to understand how you navigate this site and what topics interest you most. 
-            No ads, no data sold ever.
+            I use cookies to understand how you navigate<br />
+            this site and what topics interest you most.<br />
+            <span style={{ color: '#666', fontSize: '16px', marginTop: '8px', display: 'inline-block' }}>
+              No ads, no data sold ever.
+            </span>
           </p>
+          
+          {/* Tombol-tombol dengan border radius besar */}
           <div style={{
             display: 'flex',
-            gap: '12px',
-            justifyContent: 'flex-end'
+            gap: '16px',
+            justifyContent: 'flex-start'
           }}>
             <button
+              ref={declineBtnRef}
               onClick={handleDecline}
               style={{
-                padding: '8px 20px',
-                backgroundColor: 'transparent',
-                color: '#e0e0e0',
-                border: '1px solid #555',
-                borderRadius: '6px',
+                padding: '14px 32px',
+                backgroundColor: '#ffffff',
+                color: '#000000',
+                border: '1.5px solid #e0e0e0',
+                borderRadius: '60px',
                 cursor: 'pointer',
-                fontSize: '14px',
-                fontWeight: '500',
+                fontSize: '16px',
+                fontWeight: '600',
+                letterSpacing: '-0.01em',
+                fontFamily: 'inherit',
                 transition: 'all 0.2s ease',
-                fontFamily: 'inherit'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#2a2a2a';
-                e.currentTarget.style.borderColor = '#777';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'transparent';
-                e.currentTarget.style.borderColor = '#555';
+                position: 'relative',
+                overflow: 'hidden',
+                zIndex: 1,
+                background: '#ffffff'
               }}
             >
               Decline
             </button>
             <button
+              ref={acceptBtnRef}
               onClick={handleAccept}
               style={{
-                padding: '8px 20px',
-                backgroundColor: '#4CAF50',
-                color: 'white',
-                border: 'none',
-                borderRadius: '6px',
+                padding: '14px 32px',
+                backgroundColor: '#ffffff',
+                color: '#000000',
+                border: '1.5px solid #e0e0e0',
+                borderRadius: '60px',
                 cursor: 'pointer',
-                fontSize: '14px',
-                fontWeight: '500',
+                fontSize: '16px',
+                fontWeight: '600',
+                letterSpacing: '-0.01em',
+                fontFamily: 'inherit',
                 transition: 'all 0.2s ease',
-                fontFamily: 'inherit'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#45a049';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = '#4CAF50';
+                position: 'relative',
+                overflow: 'hidden',
+                zIndex: 1,
+                background: '#ffffff'
               }}
             >
               Accept
