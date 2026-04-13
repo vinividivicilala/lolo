@@ -5,16 +5,14 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 // Register ScrollTrigger plugin
-if (typeof window !== 'undefined') {
-  gsap.registerPlugin(ScrollTrigger);
-}
+gsap.registerPlugin(ScrollTrigger);
 
 export default function HomePage(): React.JSX.Element {
   const [showPopup, setShowPopup] = useState(false);
   const acceptBtnRef = useRef<HTMLButtonElement>(null);
   const declineBtnRef = useRef<HTMLButtonElement>(null);
-  const portraitRef = useRef<HTMLDivElement>(null);
-  const imageRef = useRef<HTMLImageElement>(null);
+  const imageRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const consent = localStorage.getItem('cookieConsent');
@@ -23,24 +21,24 @@ export default function HomePage(): React.JSX.Element {
     }
   }, []);
 
-  // GSAP hover effect for buttons
   useEffect(() => {
     if (showPopup && acceptBtnRef.current && declineBtnRef.current) {
+      // Animasi hover untuk tombol Accept & Decline
       const acceptBtn = acceptBtnRef.current;
       const declineBtn = declineBtnRef.current;
 
-      const createHoverAnimation = (btn: HTMLButtonElement) => {
-        const style = document.createElement('style');
-        const btnId = `btn-${Math.random()}`;
-        btn.classList.add(btnId);
+      [acceptBtn, declineBtn].forEach(btn => {
+        btn.style.position = 'relative';
+        btn.style.overflow = 'hidden';
+        btn.style.zIndex = '1';
         
-        style.textContent = `
-          .${btnId} {
+        const pseudoStyle = document.createElement('style');
+        pseudoStyle.textContent = `
+          .btn-hover-effect {
             position: relative;
             isolation: isolate;
-            transition: color 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
           }
-          .${btnId}::before {
+          .btn-hover-effect::before {
             content: '';
             position: absolute;
             bottom: 0;
@@ -52,69 +50,77 @@ export default function HomePage(): React.JSX.Element {
             z-index: -1;
             border-radius: 60px;
           }
-          .${btnId}:hover::before {
+          .btn-hover-effect:hover::before {
             height: 100%;
           }
-          .${btnId}:hover {
-            color: #ffffff !important;
-            border-color: #000000 !important;
+          .btn-hover-effect {
+            transition: color 0.3s ease;
+          }
+          .btn-hover-effect:hover {
+            color: white !important;
           }
         `;
-        document.head.appendChild(style);
-      };
-
-      createHoverAnimation(acceptBtn);
-      createHoverAnimation(declineBtn);
+        document.head.appendChild(pseudoStyle);
+        btn.classList.add('btn-hover-effect');
+      });
 
       return () => {
-        const styles = document.querySelectorAll('style');
-        styles.forEach(style => {
-          if (style.textContent?.includes('::before')) {
-            style.remove();
-          }
+        [acceptBtn, declineBtn].forEach(btn => {
+          const styles = document.querySelectorAll('style');
+          styles.forEach(style => {
+            if (style.textContent?.includes('btn-hover-effect')) {
+              style.remove();
+            }
+          });
         });
       };
     }
   }, [showPopup]);
 
-  // GSAP scroll zoom in/out effect for portrait
   useEffect(() => {
-    if (!portraitRef.current || !imageRef.current) return;
+    // Efek scroll zoom in/out untuk foto
+    if (imageRef.current && containerRef.current) {
+      // Set initial state
+      gsap.set(imageRef.current, {
+        rotation: -8,
+        scale: 1,
+        borderRadius: "24px",
+        transformOrigin: "center center",
+      });
 
-    // Set initial state: agak miring ke kiri, ukuran normal (scale 1)
-    gsap.set(portraitRef.current, {
-      rotation: -6,
-      scale: 1,
-      transformOrigin: "center center",
-    });
+      // Create scroll trigger animation
+      const scrollTl = gsap.timeline({
+        scrollTrigger: {
+          trigger: containerRef.current,
+          start: "top top",
+          end: "bottom bottom",
+          scrub: 1.5,
+          pin: false,
+          markers: false,
+          invalidateOnRefresh: true
+        }
+      });
 
-    // Create scroll trigger for zoom in/out
-    ScrollTrigger.create({
-      trigger: document.body,
-      start: "top top",
-      end: "bottom bottom",
-      scrub: 1.2, // Smooth scrubbing
-      onUpdate: (self) => {
-        const progress = self.progress; // 0 at top, 1 at bottom
-        
-        // Scroll ke bawah: zoom in (scale membesar)
-        // Scroll ke atas: zoom out (scale mengecil kembali ke 1)
-        // Scale from 1 to 1.8
-        const scaleValue = 1 + (progress * 0.8); // 1 → 1.8
-        const rotationValue = -6 + (progress * 3); // -6° → -3°
-        
-        gsap.to(portraitRef.current, {
-          scale: scaleValue,
-          rotation: rotationValue,
-          duration: 0.1,
-          ease: "power2.out",
-        });
-      },
-    });
+      // Scroll ke bawah: foto menjadi besar, vertikal, dan berubah bentuk
+      scrollTl.to(imageRef.current, {
+        scale: 2.5,
+        rotation: 0,
+        borderRadius: "8px",
+        duration: 1,
+        ease: "power2.inOut",
+      }, 0)
+      .to(imageRef.current, {
+        width: "auto",
+        height: "auto",
+        duration: 1,
+        ease: "power2.inOut",
+      }, 0);
 
-    return () => {
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
-    };
+      // Cleanup
+      return () => {
+        ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+      };
+    }
   }, []);
 
   const handleAccept = () => {
@@ -130,74 +136,87 @@ export default function HomePage(): React.JSX.Element {
   };
 
   return (
-    <div style={{
-      minHeight: '200vh',
-      backgroundColor: '#f5f5f5',
-      margin: 0,
-      padding: 0,
-      width: '100%',
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'center',
-      alignItems: 'center',
-      fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-      WebkitFontSmoothing: 'antialiased',
-      MozOsxFontSmoothing: 'grayscale',
-      position: 'relative'
-    }}>
-      {/* Hero section dengan foto portrait di tengah */}
+    <div 
+      ref={containerRef}
+      style={{
+        minHeight: '200vh', // Membuat halaman cukup panjang untuk efek scroll
+        backgroundColor: 'black',
+        margin: 0,
+        padding: 0,
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'flex-start',
+        alignItems: 'center',
+        fontFamily: 'ev-light, sans-serif',
+        WebkitFontSmoothing: 'antialiased',
+        MozOsxFontSmoothing: 'grayscale',
+        position: 'relative'
+      }}
+    >
+      {/* Container untuk foto portrait */}
       <div style={{
+        position: 'sticky',
+        top: '50%',
+        transform: 'translateY(-50%)',
+        width: '100%',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        minHeight: '100vh',
-        width: '100%',
-        position: 'relative',
-        flexDirection: 'column',
-        gap: '40px'
+        zIndex: 10,
+        pointerEvents: 'none'
       }}>
-        {/* Foto Portrait besar di tengah, agak miring ke kiri */}
         <div
-          ref={portraitRef}
+          ref={imageRef}
           style={{
-            width: '400px',
+            width: '280px',
             height: 'auto',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            willChange: 'transform',
+            overflow: 'hidden',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.3)',
+            pointerEvents: 'auto',
+            transform: 'rotate(-8deg)',
+            transition: 'box-shadow 0.3s ease'
           }}
         >
-          <img
-            ref={imageRef}
-            src="/images/5.jpg"
+          <img 
+            src="/images/5.jpg" 
             alt="Portrait"
             style={{
               width: '100%',
-              height: 'auto',
+              height: '100%',
               objectFit: 'cover',
-              borderRadius: '24px',
-              boxShadow: '0 20px 40px rgba(0,0,0,0.15)',
-              display: 'block',
+              display: 'block'
             }}
             onError={(e) => {
-              console.error('Failed to load image: /images/5.jpg');
-              e.currentTarget.src = 'https://via.placeholder.com/500x600?text=Portrait+Image';
+              // Fallback jika gambar tidak ditemukan
+              const target = e.target as HTMLImageElement;
+              target.src = 'https://picsum.photos/id/64/400/500';
             }}
           />
         </div>
-        
-        <p style={{
-          fontSize: '14px',
-          color: '#999',
-          marginTop: '20px',
-          letterSpacing: '0.5px'
-        }}>
-          Scroll ↓ — zoom in / zoom out
-        </p>
       </div>
 
-      {/* Cookie Popup - Bottom Right dengan desain Awwwards (TIDAK DIUBAH) */}
+      {/* Konten tambahan untuk efek scroll */}
+      <div style={{
+        position: 'relative',
+        zIndex: 5,
+        width: '100%',
+        marginTop: '100vh'
+      }}>
+        <div style={{
+          backgroundColor: '#111',
+          padding: '80px 20px',
+          textAlign: 'center',
+          color: 'white'
+        }}>
+          <h2 style={{ fontSize: '48px', marginBottom: '20px' }}>Scroll Down</h2>
+          <p style={{ fontSize: '20px', maxWidth: '600px', margin: '0 auto' }}>
+            Lihat efek zoom pada foto di atas saat Anda scroll ke bawah dan ke atas
+          </p>
+        </div>
+      </div>
+
+      {/* Cookie Popup - Bottom Right dengan desain Awwwards */}
       {showPopup && (
         <div style={{
           position: 'fixed',
