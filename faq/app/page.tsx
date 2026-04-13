@@ -77,36 +77,34 @@ export default function HomePage(): React.JSX.Element {
     }
   }, [showPopup]);
 
-  // GSAP scroll effect for portrait
+  // GSAP scroll zoom in/out effect for portrait
   useEffect(() => {
     if (!portraitRef.current || !imageRef.current) return;
 
-    // Set initial state: sedikit miring ke kiri, ukuran sedang
+    // Set initial state: agak miring ke kiri, ukuran normal (scale 1)
     gsap.set(portraitRef.current, {
-      rotation: -8,
-      scaleX: 1,
-      scaleY: 1,
+      rotation: -6,
+      scale: 1,
       transformOrigin: "center center",
     });
 
-    // Create scroll trigger animation
+    // Create scroll trigger for zoom in/out
     ScrollTrigger.create({
       trigger: document.body,
       start: "top top",
       end: "bottom bottom",
-      scrub: 1.5, // Smooth scrubbing with delay
+      scrub: 1.2, // Smooth scrubbing
       onUpdate: (self) => {
         const progress = self.progress; // 0 at top, 1 at bottom
         
-        // Scroll ke bawah (progress 0 → 1): foto membesar secara vertikal
-        // ScaleY from 1 to 2.5, ScaleX tetap atau sedikit berubah
-        const scaleYValue = 1 + (progress * 2.2); // 1 → 3.2
-        const scaleXValue = 1 + (progress * 0.3); // 1 → 1.3 (sedikit melebar)
-        const rotationValue = -8 + (progress * 4); // -8° → -4° (sedikit tegak)
+        // Scroll ke bawah: zoom in (scale membesar)
+        // Scroll ke atas: zoom out (scale mengecil kembali ke 1)
+        // Scale from 1 to 1.8
+        const scaleValue = 1 + (progress * 0.8); // 1 → 1.8
+        const rotationValue = -6 + (progress * 3); // -6° → -3°
         
         gsap.to(portraitRef.current, {
-          scaleY: scaleYValue,
-          scaleX: scaleXValue,
+          scale: scaleValue,
           rotation: rotationValue,
           duration: 0.1,
           ease: "power2.out",
@@ -133,7 +131,7 @@ export default function HomePage(): React.JSX.Element {
 
   return (
     <div style={{
-      minHeight: '200vh', // Make page scrollable
+      minHeight: '200vh',
       backgroundColor: '#f5f5f5',
       margin: 0,
       padding: 0,
@@ -147,7 +145,7 @@ export default function HomePage(): React.JSX.Element {
       MozOsxFontSmoothing: 'grayscale',
       position: 'relative'
     }}>
-      {/* Hero section dengan foto portrait */}
+      {/* Hero section dengan foto portrait di tengah */}
       <div style={{
         display: 'flex',
         justifyContent: 'center',
@@ -158,11 +156,11 @@ export default function HomePage(): React.JSX.Element {
         flexDirection: 'column',
         gap: '40px'
       }}>
-        {/* Foto Portrait dengan efek scroll GSAP */}
+        {/* Foto Portrait besar di tengah, agak miring ke kiri */}
         <div
           ref={portraitRef}
           style={{
-            width: '280px',
+            width: '400px',
             height: 'auto',
             display: 'flex',
             justifyContent: 'center',
@@ -184,7 +182,7 @@ export default function HomePage(): React.JSX.Element {
             }}
             onError={(e) => {
               console.error('Failed to load image: /images/5.jpg');
-              e.currentTarget.src = 'https://via.placeholder.com/400x600?text=Portrait+Image';
+              e.currentTarget.src = 'https://via.placeholder.com/500x600?text=Portrait+Image';
             }}
           />
         </div>
@@ -195,11 +193,11 @@ export default function HomePage(): React.JSX.Element {
           marginTop: '20px',
           letterSpacing: '0.5px'
         }}>
-          Scroll ↓ — portrait expands vertically
+          Scroll ↓ — zoom in / zoom out
         </p>
       </div>
 
-      {/* Cookie Popup - Bottom Right dengan desain Awwwards */}
+      {/* Cookie Popup - Bottom Right dengan desain Awwwards (TIDAK DIUBAH) */}
       {showPopup && (
         <div style={{
           position: 'fixed',
