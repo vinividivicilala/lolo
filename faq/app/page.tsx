@@ -4,11 +4,11 @@ import React, { useState, useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ScrollSmoother } from "gsap/ScrollSmoother";
-import SplitType from 'split-type';
+import { SplitText } from "gsap/SplitText";
 
 // Register GSAP plugins
 if (typeof window !== 'undefined') {
-  gsap.registerPlugin(ScrollTrigger, ScrollSmoother);
+  gsap.registerPlugin(ScrollTrigger, ScrollSmoother, SplitText);
 }
 
 export default function HomePage(): React.JSX.Element {
@@ -22,6 +22,7 @@ export default function HomePage(): React.JSX.Element {
   const mencatatTextRef = useRef<HTMLDivElement>(null);
   const menuruTextRef = useRef<HTMLSpanElement>(null);
   const contactTextRef = useRef<HTMLSpanElement>(null);
+  const lineRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // Initialize ScrollSmoother
@@ -54,13 +55,13 @@ export default function HomePage(): React.JSX.Element {
     };
   }, []);
 
-  // GSAP Split Text animations
+  // GSAP SplitText animations
   useEffect(() => {
     // Split text untuk "Mencatat apa yang kamu inginkan"
     if (mencatatTextRef.current) {
-      const splitMencatat = new SplitType(mencatatTextRef.current, {
-        types: 'words, chars',
-        tagName: 'span'
+      const splitMencatat = new SplitText(mencatatTextRef.current, {
+        type: "chars",
+        charsClass: "split-char"
       });
 
       gsap.fromTo(splitMencatat.chars,
@@ -90,9 +91,9 @@ export default function HomePage(): React.JSX.Element {
 
     // Split text untuk "MENURU"
     if (menuruTextRef.current) {
-      const splitMenuru = new SplitType(menuruTextRef.current, {
-        types: 'chars',
-        tagName: 'span'
+      const splitMenuru = new SplitText(menuruTextRef.current, {
+        type: "chars",
+        charsClass: "split-char"
       });
 
       gsap.fromTo(splitMenuru.chars,
@@ -120,9 +121,9 @@ export default function HomePage(): React.JSX.Element {
 
     // Split text untuk "Contact" pada tombol
     if (contactTextRef.current) {
-      const splitContact = new SplitType(contactTextRef.current, {
-        types: 'chars',
-        tagName: 'span'
+      const splitContact = new SplitText(contactTextRef.current, {
+        type: "chars",
+        charsClass: "split-char"
       });
 
       gsap.fromTo(splitContact.chars,
@@ -142,6 +143,28 @@ export default function HomePage(): React.JSX.Element {
             trigger: contactTextRef.current,
             start: "top 85%",
             end: "bottom 65%",
+            toggleActions: "play none none reverse",
+          }
+        }
+      );
+    }
+
+    // Animasi garis putih di atas teks MENURU
+    if (lineRef.current) {
+      gsap.fromTo(lineRef.current,
+        {
+          width: '0%',
+          opacity: 0
+        },
+        {
+          width: '100%',
+          opacity: 1,
+          duration: 1.5,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: lineRef.current,
+            start: "top 90%",
+            end: "bottom 70%",
             toggleActions: "play none none reverse",
           }
         }
@@ -386,7 +409,7 @@ export default function HomePage(): React.JSX.Element {
                 gap: '40px',
                 width: '100%'
               }}>
-                {/* Teks "Mencatat apa yang kamu inginkan" - dengan GSAP Split Text */}
+                {/* Teks "Mencatat apa yang kamu inginkan" - dengan GSAP SplitText */}
                 <div 
                   ref={mencatatTextRef}
                   style={{
@@ -402,7 +425,7 @@ export default function HomePage(): React.JSX.Element {
                   Mencatat apa yang kamu inginkan
                 </div>
 
-                {/* Tombol Contact dengan GSAP Split Text pada teks Contact */}
+                {/* Tombol Contact dengan GSAP SplitText pada teks Contact */}
                 <button
                   ref={contactBtnRef}
                   onClick={handleContact}
@@ -485,7 +508,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* Bagian footer dengan teks MENURU - dengan GSAP Split Text */}
+            {/* Bagian footer dengan teks MENURU - dengan GSAP SplitText dan garis putih di atas */}
             <div style={{
               width: '100%',
               position: 'relative',
@@ -503,14 +526,26 @@ export default function HomePage(): React.JSX.Element {
                 right: 0,
                 width: '100%',
                 display: 'flex',
-                justifyContent: 'flex-end',
+                flexDirection: 'column',
                 alignItems: 'flex-end',
                 padding: 0,
                 margin: 0,
                 pointerEvents: 'none',
-                zIndex: 1,
-                lineHeight: 0
+                zIndex: 1
               }}>
+                {/* Garis putih di atas teks MENURU */}
+                <div
+                  ref={lineRef}
+                  style={{
+                    width: '0%',
+                    height: '2px',
+                    backgroundColor: 'white',
+                    marginRight: '60px',
+                    marginBottom: '20px',
+                    opacity: 0
+                  }}
+                />
+                
                 <span 
                   ref={menuruTextRef}
                   style={{
@@ -529,7 +564,8 @@ export default function HomePage(): React.JSX.Element {
                     fontKerning: 'normal',
                     margin: 0,
                     padding: 0,
-                    transform: 'translateY(10px)'
+                    transform: 'translateY(10px)',
+                    marginRight: '60px'
                   }}>
                   MENURU
                 </span>
