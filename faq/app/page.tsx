@@ -191,31 +191,13 @@ export default function HomePage(): React.JSX.Element {
           color: white !important;
         }
 
-        .contact-btn-effect:hover .btn-circle-contact {
-          border-color: white !important;
-          background-color: white !important;
+        .contact-btn-effect:hover .contact-svg {
+          stroke: black !important;
+          transform: rotate(0deg) !important;
         }
 
-        .contact-btn-effect:hover .btn-circle-contact .dot-contact {
-          opacity: 0 !important;
-        }
-
-        .contact-btn-effect:hover .btn-circle-contact .arrow-svg-contact {
-          opacity: 1 !important;
-          transform: rotate(45deg) !important;
-        }
-
-        .btn-circle-contact {
-          transition: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-          position: relative;
-        }
-
-        .dot-contact {
-          transition: opacity 0.3s ease;
-        }
-
-        .arrow-svg-contact {
-          transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+        .contact-svg {
+          transition: stroke 0.3s ease, transform 0.3s ease;
         }
       `}</style>
       
@@ -277,7 +259,7 @@ export default function HomePage(): React.JSX.Element {
                   Mencatat apa yang kamu inginkan
                 </div>
 
-                {/* Tombol Contact dengan gaya yang sama seperti tombol Accept/Cookie */}
+                {/* Tombol Contact dengan gaya yang sama seperti tombol Accept/Cookie + South West Arrow */}
                 <button
                   ref={contactBtnRef}
                   onClick={handleContact}
@@ -285,14 +267,14 @@ export default function HomePage(): React.JSX.Element {
                   style={{
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: '12px',
-                    padding: '14px 32px',
+                    gap: '16px',
+                    padding: '14px 36px',
                     backgroundColor: '#ffffff',
                     color: '#000000',
                     border: '1.5px solid #e0e0e0',
                     borderRadius: '60px',
                     cursor: 'pointer',
-                    fontSize: '18px',
+                    fontSize: '20px',
                     fontWeight: '600',
                     letterSpacing: '-0.01em',
                     fontFamily: 'Questrial, sans-serif',
@@ -304,53 +286,27 @@ export default function HomePage(): React.JSX.Element {
                   }}
                 >
                   <span>Contact</span>
-                  <div className="btn-circle-contact" style={{
-                    width: '28px',
-                    height: '28px',
-                    borderRadius: '50%',
-                    border: '1.5px solid #000000',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    transition: 'all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)',
-                    backgroundColor: 'transparent',
-                    position: 'relative'
-                  }}>
-                    {/* Titik bulat (sebelum hover) */}
-                    <div className="dot-contact" style={{
-                      width: '5px',
-                      height: '5px',
-                      borderRadius: '50%',
-                      backgroundColor: '#000000',
-                      opacity: 1,
-                      transition: 'opacity 0.3s ease',
-                      position: 'absolute'
-                    }}></div>
-                    
-                    {/* Panah SVG (saat hover) */}
-                    <svg 
-                      className="arrow-svg-contact"
-                      width="14" 
-                      height="14" 
-                      viewBox="0 0 24 24" 
-                      fill="none" 
-                      xmlns="http://www.w3.org/2000/svg"
-                      style={{
-                        position: 'absolute',
-                        opacity: 0,
-                        transition: 'opacity 0.3s ease, transform 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)',
-                        transform: 'rotate(0deg)'
-                      }}
-                    >
-                      <path 
-                        d="M7 17L17 7M17 7H7M17 7V17" 
-                        stroke="#000000" 
-                        strokeWidth="2" 
-                        strokeLinecap="round" 
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </div>
+                  {/* South West Arrow SVG - besar */}
+                  <svg 
+                    className="contact-svg"
+                    width="28" 
+                    height="28" 
+                    viewBox="0 0 24 24" 
+                    fill="none" 
+                    xmlns="http://www.w3.org/2000/svg"
+                    style={{
+                      transition: 'stroke 0.3s ease, transform 0.3s ease',
+                      stroke: '#000000'
+                    }}
+                  >
+                    <path 
+                      d="M17 7L7 17M7 17H17M7 17V7" 
+                      stroke="currentColor" 
+                      strokeWidth="2" 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round"
+                    />
+                  </svg>
                 </button>
               </div>
             </div>
