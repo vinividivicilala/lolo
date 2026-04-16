@@ -59,7 +59,6 @@ export default function HomePage(): React.JSX.Element {
 
   useEffect(() => {
     if (showPopup && acceptBtnRef.current && declineBtnRef.current) {
-      // Animasi hover untuk tombol Accept
       const acceptBtn = acceptBtnRef.current;
       const declineBtn = declineBtnRef.current;
 
@@ -154,7 +153,6 @@ export default function HomePage(): React.JSX.Element {
   return (
     <>
       <style jsx global>{`
-        /* Hide scrollbar */
         * {
           -ms-overflow-style: none;
           scrollbar-width: none;
@@ -187,6 +185,42 @@ export default function HomePage(): React.JSX.Element {
           min-height: 200vh;
           width: 100%;
           will-change: transform;
+        }
+
+        /* Hover effect untuk contact button */
+        .contact-btn {
+          position: relative;
+          transition: all 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+        }
+
+        .contact-btn:hover {
+          background-color: black !important;
+          border-color: white !important;
+        }
+
+        .contact-btn:hover .btn-circle {
+          background-color: white;
+          transform: rotate(45deg);
+        }
+
+        .contact-btn:hover .btn-arrow {
+          stroke: black;
+        }
+
+        .contact-btn:hover .btn-text {
+          color: white;
+        }
+
+        .btn-circle {
+          transition: all 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+        }
+
+        .btn-arrow {
+          transition: all 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+        }
+
+        .btn-text {
+          transition: color 0.3s ease;
         }
       `}</style>
       
@@ -235,10 +269,10 @@ export default function HomePage(): React.JSX.Element {
               flexDirection: 'column',
               justifyContent: 'flex-end',
               alignItems: 'center',
-              paddingBottom: '100px'
+              paddingBottom: '120px'
             }}>
               
-              {/* Konten di atas footer */}
+              {/* Konten di atas footer - dinaikkan jaraknya */}
               <div style={{
                 width: '100%',
                 maxWidth: '1400px',
@@ -247,9 +281,12 @@ export default function HomePage(): React.JSX.Element {
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                gap: '40px',
-                marginBottom: '80px'
+                gap: '60px',
+                marginBottom: '150px',
+                position: 'relative',
+                top: '-100px'
               }}>
+                {/* Teks "Mencatat apa yang kamu inginkan" - 1 baris */}
                 <div style={{
                   fontSize: '64px',
                   fontFamily: 'Questrial, sans-serif',
@@ -258,65 +295,75 @@ export default function HomePage(): React.JSX.Element {
                   fontWeight: '400',
                   letterSpacing: '-0.02em',
                   lineHeight: '1.2',
-                  maxWidth: '900px'
+                  whiteSpace: 'nowrap'
                 }}>
                   Mencatat apa yang kamu inginkan
                 </div>
 
+                {/* Tombol Contact dengan garis pudar + titik bulat */}
                 <button
                   ref={contactBtnRef}
                   onClick={handleContact}
-                  onMouseEnter={(e) => {
-                    gsap.to(e.currentTarget, {
-                      scale: 1.05,
-                      duration: 0.3,
-                      ease: "power2.out"
-                    });
-                  }}
-                  onMouseLeave={(e) => {
-                    gsap.to(e.currentTarget, {
-                      scale: 1,
-                      duration: 0.3,
-                      ease: "power2.out"
-                    });
-                  }}
+                  className="contact-btn"
                   style={{
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: '12px',
-                    padding: '16px 32px',
+                    gap: '16px',
+                    padding: '0',
                     backgroundColor: 'transparent',
-                    color: 'white',
-                    border: '2px solid white',
-                    borderRadius: '60px',
+                    color: '#666',
+                    border: 'none',
                     cursor: 'pointer',
                     fontSize: '20px',
-                    fontWeight: '500',
+                    fontWeight: '400',
                     fontFamily: 'Questrial, sans-serif',
-                    transition: 'all 0.3s ease',
-                    background: 'transparent'
+                    transition: 'all 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1)',
+                    position: 'relative',
+                    borderBottom: '1px solid rgba(255, 255, 255, 0.3)',
+                    paddingBottom: '8px'
                   }}
                 >
-                  Contact
-                  <svg 
-                    width="24" 
-                    height="24" 
-                    viewBox="0 0 24 24" 
-                    fill="none" 
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path 
-                      d="M7 17L17 7M17 7H7M17 7V17" 
-                      stroke="white" 
-                      strokeWidth="2" 
-                      strokeLinecap="round" 
-                      strokeLinejoin="round"
-                    />
-                  </svg>
+                  <span className="btn-text" style={{
+                    transition: 'color 0.3s ease',
+                    letterSpacing: '0.02em'
+                  }}>
+                    Contact
+                  </span>
+                  <div className="btn-circle" style={{
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '50%',
+                    border: '1px solid rgba(255, 255, 255, 0.3)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'all 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1)',
+                    backgroundColor: 'transparent'
+                  }}>
+                    <svg 
+                      className="btn-arrow"
+                      width="16" 
+                      height="16" 
+                      viewBox="0 0 24 24" 
+                      fill="none" 
+                      xmlns="http://www.w3.org/2000/svg"
+                      style={{
+                        transition: 'all 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1)'
+                      }}
+                    >
+                      <path 
+                        d="M7 17L17 7M17 7H7M17 7V17" 
+                        stroke="rgba(255, 255, 255, 0.5)" 
+                        strokeWidth="2" 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </div>
                 </button>
               </div>
 
-              {/* Footer dengan teks MENURU */}
+              {/* Footer dengan teks MENURU - di paling bawah, digeser ke kanan */}
               <footer style={{
                 position: 'relative',
                 bottom: 0,
@@ -326,7 +373,7 @@ export default function HomePage(): React.JSX.Element {
                 display: 'flex',
                 justifyContent: 'flex-end',
                 alignItems: 'center',
-                padding: '20px 40px 20px 20px',
+                padding: '0 60px 40px 20px',
                 pointerEvents: 'none',
                 zIndex: 1
               }}>
@@ -341,11 +388,11 @@ export default function HomePage(): React.JSX.Element {
                   textTransform: 'uppercase',
                   lineHeight: '0.85',
                   whiteSpace: 'nowrap',
-                  transform: 'translateY(12%)',
+                  transform: 'translateY(15%)',
                   WebkitFontSmoothing: 'antialiased',
                   MozOsxFontSmoothing: 'grayscale',
                   fontKerning: 'normal',
-                  marginRight: '20px'
+                  marginRight: '40px'
                 }}>
                   MENURU
                 </span>
