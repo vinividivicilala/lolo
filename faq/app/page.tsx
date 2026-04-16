@@ -533,7 +533,7 @@ export default function HomePage(): React.JSX.Element {
                 pointerEvents: 'none',
                 zIndex: 1
               }}>
-                {/* Garis putih di atas teks MENURU */}
+                {/* Garis putih di atas teks MENURU - jarak lebih kecil */}
                 <div
                   ref={lineRef}
                   style={{
@@ -541,7 +541,7 @@ export default function HomePage(): React.JSX.Element {
                     height: '2px',
                     backgroundColor: 'white',
                     marginRight: '60px',
-                    marginBottom: '20px',
+                    marginBottom: '8px',
                     opacity: 0
                   }}
                 />
