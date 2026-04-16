@@ -191,25 +191,25 @@ export default function HomePage(): React.JSX.Element {
           color: white !important;
         }
 
-        /* Sembunyikan titik bulat saat hover */
-        .contact-btn-effect:hover .dot-white {
+        /* Sembunyikan titik bulat kecil saat hover */
+        .contact-btn-effect:hover .dot-small {
           opacity: 0 !important;
           transform: scale(0) !important;
         }
 
-        /* Tampilkan panah saat hover */
-        .contact-btn-effect:hover .arrow-svg-white {
+        /* Tampilkan lingkaran besar dengan panah saat hover */
+        .contact-btn-effect:hover .circle-large {
           opacity: 1 !important;
-          transform: rotate(0deg) scale(1) !important;
+          transform: scale(1) !important;
         }
 
-        /* Animasi untuk titik bulat */
-        .dot-white {
+        /* Animasi untuk titik kecil */
+        .dot-small {
           transition: opacity 0.3s ease, transform 0.3s ease;
         }
 
-        /* Animasi untuk panah */
-        .arrow-svg-white {
+        /* Animasi untuk lingkaran besar */
+        .circle-large {
           transition: opacity 0.3s ease, transform 0.3s ease;
         }
       `}</style>
@@ -272,7 +272,7 @@ export default function HomePage(): React.JSX.Element {
                   Mencatat apa yang kamu inginkan
                 </div>
 
-                {/* Tombol Contact dengan titik bulat hitam, hover jadi panah putih */}
+                {/* Tombol Contact dengan titik bulat kecil, hover jadi lingkaran besar + panah putih */}
                 <button
                   ref={contactBtnRef}
                   onClick={handleContact}
@@ -300,19 +300,19 @@ export default function HomePage(): React.JSX.Element {
                 >
                   <span>Contact</span>
                   
-                  {/* Container untuk titik dan panah */}
+                  {/* Container untuk titik dan lingkaran */}
                   <div style={{
                     position: 'relative',
-                    width: '32px',
-                    height: '32px',
+                    width: '36px',
+                    height: '36px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center'
                   }}>
-                    {/* Titik bulat hitam (awal) */}
-                    <div className="dot-white" style={{
-                      width: '10px',
-                      height: '10px',
+                    {/* Titik bulat kecil hitam (awal) */}
+                    <div className="dot-small" style={{
+                      width: '8px',
+                      height: '8px',
                       borderRadius: '50%',
                       backgroundColor: '#000000',
                       opacity: 1,
@@ -321,29 +321,37 @@ export default function HomePage(): React.JSX.Element {
                       position: 'absolute'
                     }}></div>
                     
-                    {/* Panah SVG South West Arrow warna PUTIH (saat hover) */}
-                    <svg 
-                      className="arrow-svg-white"
-                      width="28" 
-                      height="28" 
-                      viewBox="0 0 24 24" 
-                      fill="none" 
-                      xmlns="http://www.w3.org/2000/svg"
-                      style={{
-                        position: 'absolute',
-                        opacity: 0,
-                        transform: 'scale(0.8)',
-                        transition: 'opacity 0.3s ease, transform 0.3s ease'
-                      }}
-                    >
-                      <path 
-                        d="M17 7L7 17M7 17H17M7 17V7" 
-                        stroke="#FFFFFF" 
-                        strokeWidth="2.5" 
-                        strokeLinecap="round" 
-                        strokeLinejoin="round"
-                      />
-                    </svg>
+                    {/* Lingkaran besar dengan panah SVG warna putih (saat hover) */}
+                    <div className="circle-large" style={{
+                      position: 'absolute',
+                      width: '36px',
+                      height: '36px',
+                      borderRadius: '50%',
+                      backgroundColor: 'transparent',
+                      border: '2px solid white',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      opacity: 0,
+                      transform: 'scale(0.8)',
+                      transition: 'opacity 0.3s ease, transform 0.3s ease'
+                    }}>
+                      <svg 
+                        width="20" 
+                        height="20" 
+                        viewBox="0 0 24 24" 
+                        fill="none" 
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path 
+                          d="M17 7L7 17M7 17H17M7 17V7" 
+                          stroke="#FFFFFF" 
+                          strokeWidth="2.5" 
+                          strokeLinecap="round" 
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </div>
                   </div>
                 </button>
               </div>
