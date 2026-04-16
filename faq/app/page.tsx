@@ -198,7 +198,7 @@ export default function HomePage(): React.JSX.Element {
         }
 
         /* Tampilkan panah saat hover */
-        .contact-btn-effect:hover .arrow-svg-black {
+        .contact-btn-effect:hover .arrow-svg-white {
           opacity: 1 !important;
           transform: rotate(0deg) scale(1) !important;
         }
@@ -209,7 +209,7 @@ export default function HomePage(): React.JSX.Element {
         }
 
         /* Animasi untuk panah */
-        .arrow-svg-black {
+        .arrow-svg-white {
           transition: opacity 0.3s ease, transform 0.3s ease;
         }
       `}</style>
@@ -272,7 +272,7 @@ export default function HomePage(): React.JSX.Element {
                   Mencatat apa yang kamu inginkan
                 </div>
 
-                {/* Tombol Contact dengan titik bulat putih besar, hover jadi panah hitam */}
+                {/* Tombol Contact dengan titik bulat hitam, hover jadi panah putih */}
                 <button
                   ref={contactBtnRef}
                   onClick={handleContact}
@@ -309,10 +309,10 @@ export default function HomePage(): React.JSX.Element {
                     alignItems: 'center',
                     justifyContent: 'center'
                   }}>
-                    {/* Titik bulat putih besar (awal) */}
+                    {/* Titik bulat hitam (awal) */}
                     <div className="dot-white" style={{
-                      width: '12px',
-                      height: '12px',
+                      width: '10px',
+                      height: '10px',
                       borderRadius: '50%',
                       backgroundColor: '#000000',
                       opacity: 1,
@@ -321,9 +321,9 @@ export default function HomePage(): React.JSX.Element {
                       position: 'absolute'
                     }}></div>
                     
-                    {/* Panah SVG South West Arrow hitam (saat hover) */}
+                    {/* Panah SVG South West Arrow warna PUTIH (saat hover) */}
                     <svg 
-                      className="arrow-svg-black"
+                      className="arrow-svg-white"
                       width="28" 
                       height="28" 
                       viewBox="0 0 24 24" 
@@ -333,13 +333,12 @@ export default function HomePage(): React.JSX.Element {
                         position: 'absolute',
                         opacity: 0,
                         transform: 'scale(0.8)',
-                        transition: 'opacity 0.3s ease, transform 0.3s ease',
-                        stroke: '#000000'
+                        transition: 'opacity 0.3s ease, transform 0.3s ease'
                       }}
                     >
                       <path 
                         d="M17 7L7 17M7 17H17M7 17V7" 
-                        stroke="#000000" 
+                        stroke="#FFFFFF" 
                         strokeWidth="2.5" 
                         strokeLinecap="round" 
                         strokeLinejoin="round"
