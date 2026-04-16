@@ -163,11 +163,14 @@ export default function HomePage(): React.JSX.Element {
           will-change: transform;
         }
 
-        /* Hover effect untuk contact button */
+        /* Hover effect untuk contact button - terbalik (hitam dulu, putih saat hover) */
         .contact-btn-effect {
           position: relative;
           isolation: isolate;
-          transition: color 0.3s ease;
+          transition: all 0.3s ease;
+          background-color: #000000 !important;
+          color: #ffffff !important;
+          border: 1.5px solid #333333 !important;
         }
         
         .contact-btn-effect::before {
@@ -177,7 +180,7 @@ export default function HomePage(): React.JSX.Element {
           left: 0;
           width: 100%;
           height: 0%;
-          background-color: #000000;
+          background-color: #ffffff;
           transition: height 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
           z-index: -1;
           border-radius: 60px;
@@ -188,29 +191,48 @@ export default function HomePage(): React.JSX.Element {
         }
         
         .contact-btn-effect:hover {
-          color: white !important;
+          color: #000000 !important;
+          border-color: #e0e0e0 !important;
         }
 
-        /* Sembunyikan titik bulat kecil saat hover */
+        /* Warna titik bulat kecil - putih di awal */
+        .contact-btn-effect .dot-small {
+          background-color: #ffffff !important;
+        }
+
+        /* Warna titik bulat kecil berubah jadi hitam saat hover */
         .contact-btn-effect:hover .dot-small {
           opacity: 0 !important;
           transform: scale(0) !important;
         }
 
-        /* Tampilkan lingkaran besar putih dengan panah hitam saat hover */
+        /* Lingkaran besar putih dengan panah hitam di awal */
+        .circle-large-white {
+          background-color: #ffffff !important;
+        }
+
+        .circle-large-white svg path {
+          stroke: #000000 !important;
+        }
+
+        /* Saat hover, lingkaran berubah jadi hitam dengan panah putih */
         .contact-btn-effect:hover .circle-large-white {
+          background-color: #000000 !important;
           opacity: 1 !important;
           transform: scale(1) !important;
         }
 
-        /* Animasi untuk titik kecil */
+        .contact-btn-effect:hover .circle-large-white svg path {
+          stroke: #ffffff !important;
+        }
+
+        /* Animasi */
         .dot-small {
           transition: opacity 0.3s ease, transform 0.3s ease;
         }
 
-        /* Animasi untuk lingkaran besar putih */
         .circle-large-white {
-          transition: opacity 0.3s ease, transform 0.3s ease;
+          transition: opacity 0.3s ease, transform 0.3s ease, background-color 0.3s ease;
         }
       `}</style>
       
@@ -272,7 +294,7 @@ export default function HomePage(): React.JSX.Element {
                   Mencatat apa yang kamu inginkan
                 </div>
 
-                {/* Tombol Contact dengan titik bulat kecil hitam, hover jadi lingkaran besar putih + panah hitam */}
+                {/* Tombol Contact - Background hitam, teks putih, hover jadi putih dengan teks hitam */}
                 <button
                   ref={contactBtnRef}
                   onClick={handleContact}
@@ -282,20 +304,19 @@ export default function HomePage(): React.JSX.Element {
                     alignItems: 'center',
                     gap: '16px',
                     padding: '14px 36px',
-                    backgroundColor: '#ffffff',
-                    color: '#000000',
-                    border: '1.5px solid #e0e0e0',
                     borderRadius: '60px',
                     cursor: 'pointer',
                     fontSize: '20px',
                     fontWeight: '600',
                     letterSpacing: '-0.01em',
                     fontFamily: 'Questrial, sans-serif',
-                    transition: 'all 0.2s ease',
+                    transition: 'all 0.3s ease',
                     position: 'relative',
                     overflow: 'hidden',
                     zIndex: 1,
-                    background: '#ffffff'
+                    border: '1.5px solid #333333',
+                    backgroundColor: '#000000',
+                    color: '#ffffff'
                   }}
                 >
                   <span>Contact</span>
@@ -309,31 +330,31 @@ export default function HomePage(): React.JSX.Element {
                     alignItems: 'center',
                     justifyContent: 'center'
                   }}>
-                    {/* Titik bulat kecil hitam (awal) */}
+                    {/* Titik bulat kecil PUTIH (awal) */}
                     <div className="dot-small" style={{
                       width: '8px',
                       height: '8px',
                       borderRadius: '50%',
-                      backgroundColor: '#000000',
+                      backgroundColor: '#ffffff',
                       opacity: 1,
                       transform: 'scale(1)',
                       transition: 'opacity 0.3s ease, transform 0.3s ease',
                       position: 'absolute'
                     }}></div>
                     
-                    {/* Lingkaran besar FULL PUTIH dengan panah SVG warna HITAM (saat hover) */}
+                    {/* Lingkaran besar PUTIH dengan panah HITAM (awal) - tersembunyi dulu */}
                     <div className="circle-large-white" style={{
                       position: 'absolute',
                       width: '40px',
                       height: '40px',
                       borderRadius: '50%',
-                      backgroundColor: '#FFFFFF',
+                      backgroundColor: '#ffffff',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       opacity: 0,
                       transform: 'scale(0.8)',
-                      transition: 'opacity 0.3s ease, transform 0.3s ease'
+                      transition: 'opacity 0.3s ease, transform 0.3s ease, background-color 0.3s ease'
                     }}>
                       <svg 
                         width="20" 
