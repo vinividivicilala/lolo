@@ -23,6 +23,8 @@ export default function HomePage(): React.JSX.Element {
   const menuruTextRef = useRef<HTMLSpanElement>(null);
   const contactTextRef = useRef<HTMLSpanElement>(null);
   const lineRef = useRef<HTMLDivElement>(null);
+  const menuruTitleRef = useRef<HTMLDivElement>(null);
+  const basedJakartaRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // Initialize ScrollSmoother
@@ -89,14 +91,73 @@ export default function HomePage(): React.JSX.Element {
       );
     }
 
-    // Split text untuk "MENURU" - animasi lebih modern
+    // Split text untuk "MENURU" (teks di atas garis)
+    if (menuruTitleRef.current) {
+      const splitMenuruTitle = new SplitText(menuruTitleRef.current, {
+        type: "chars",
+        charsClass: "split-char"
+      });
+
+      gsap.fromTo(splitMenuruTitle.chars,
+        {
+          opacity: 0,
+          x: -50,
+          filter: 'blur(10px)'
+        },
+        {
+          opacity: 1,
+          x: 0,
+          filter: 'blur(0px)',
+          duration: 1,
+          stagger: 0.03,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: menuruTitleRef.current,
+            start: "top 85%",
+            end: "bottom 70%",
+            toggleActions: "play none none reverse",
+          }
+        }
+      );
+    }
+
+    // Split text untuk "BASED JAKARTA"
+    if (basedJakartaRef.current) {
+      const splitBased = new SplitText(basedJakartaRef.current, {
+        type: "chars",
+        charsClass: "split-char"
+      });
+
+      gsap.fromTo(splitBased.chars,
+        {
+          opacity: 0,
+          y: 30,
+          filter: 'blur(5px)'
+        },
+        {
+          opacity: 1,
+          y: 0,
+          filter: 'blur(0px)',
+          duration: 0.8,
+          stagger: 0.02,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: basedJakartaRef.current,
+            start: "top 85%",
+            end: "bottom 70%",
+            toggleActions: "play none none reverse",
+          }
+        }
+      );
+    }
+
+    // Split text untuk "MENURU" besar di footer - animasi modern
     if (menuruTextRef.current) {
       const splitMenuru = new SplitText(menuruTextRef.current, {
         type: "chars",
         charsClass: "split-char-menuru"
       });
 
-      // Set initial state
       gsap.set(splitMenuru.chars, {
         opacity: 0,
         y: 200,
@@ -105,7 +166,6 @@ export default function HomePage(): React.JSX.Element {
         filter: 'blur(20px)'
       });
 
-      // Modern 3D flip animation with stagger
       gsap.to(splitMenuru.chars, {
         opacity: 1,
         y: 0,
@@ -157,7 +217,7 @@ export default function HomePage(): React.JSX.Element {
       );
     }
 
-    // Animasi garis putih di atas teks MENURU
+    // Animasi garis putih di atas teks MENURU besar
     if (lineRef.current) {
       gsap.fromTo(lineRef.current,
         {
@@ -415,17 +475,17 @@ export default function HomePage(): React.JSX.Element {
                 Scroll down ↓
               </div>
               
-              {/* Teks dan tombol dinaikkan dekat dengan Scroll down */}
+              {/* Teks dan tombol - jarak ke bawah lebih besar */}
               <div style={{
                 position: 'absolute',
-                bottom: '30%',
+                bottom: '15%',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
                 gap: '40px',
                 width: '100%'
               }}>
-                {/* Teks "Mencatat apa yang kamu inginkan" - dengan GSAP SplitText */}
+                {/* Teks "Mencatat apa yang kamu inginkan" */}
                 <div 
                   ref={mencatatTextRef}
                   style={{
@@ -441,7 +501,7 @@ export default function HomePage(): React.JSX.Element {
                   Mencatat apa yang kamu inginkan
                 </div>
 
-                {/* Tombol Contact dengan GSAP SplitText pada teks Contact */}
+                {/* Tombol Contact */}
                 <button
                   ref={contactBtnRef}
                   onClick={handleContact}
@@ -468,7 +528,6 @@ export default function HomePage(): React.JSX.Element {
                 >
                   <span ref={contactTextRef}>Contact</span>
                   
-                  {/* Container untuk titik dan lingkaran */}
                   <div style={{
                     position: 'relative',
                     width: '40px',
@@ -477,7 +536,6 @@ export default function HomePage(): React.JSX.Element {
                     alignItems: 'center',
                     justifyContent: 'center'
                   }}>
-                    {/* Titik bulat kecil PUTIH (awal) */}
                     <div className="dot-small" style={{
                       width: '8px',
                       height: '8px',
@@ -489,7 +547,6 @@ export default function HomePage(): React.JSX.Element {
                       position: 'absolute'
                     }}></div>
                     
-                    {/* Lingkaran besar PUTIH dengan panah HITAM */}
                     <div className="circle-large-white" style={{
                       position: 'absolute',
                       width: '40px',
@@ -524,7 +581,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* Bagian footer dengan teks MENURU - dengan GSAP SplitText modern dan garis putih di atas */}
+            {/* Bagian footer dengan teks MENURU */}
             <div style={{
               width: '100%',
               position: 'relative',
@@ -544,24 +601,58 @@ export default function HomePage(): React.JSX.Element {
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'flex-end',
-                padding: 0,
+                padding: '0 60px 0 0',
                 margin: 0,
                 pointerEvents: 'none',
                 zIndex: 1
               }}>
-                {/* Garis putih di atas teks MENURU - jarak pas 40px */}
+                {/* Teks MENURU kecil di atas garis */}
+                <div
+                  ref={menuruTitleRef}
+                  style={{
+                    fontFamily: "'Questrial', sans-serif",
+                    fontSize: '24px',
+                    color: 'white',
+                    textAlign: 'right',
+                    fontWeight: '400',
+                    letterSpacing: '0.1em',
+                    marginBottom: '8px',
+                    marginRight: '0',
+                    opacity: 0.8
+                  }}>
+                  MENURU
+                </div>
+
+                {/* Teks BASED JAKARTA */}
+                <div
+                  ref={basedJakartaRef}
+                  style={{
+                    fontFamily: "'Questrial', sans-serif",
+                    fontSize: '16px',
+                    color: 'rgba(255,255,255,0.6)',
+                    textAlign: 'right',
+                    fontWeight: '300',
+                    letterSpacing: '0.05em',
+                    marginBottom: '40px',
+                    marginRight: '0'
+                  }}>
+                  BASED JAKARTA
+                </div>
+                
+                {/* Garis putih */}
                 <div
                   ref={lineRef}
                   style={{
                     width: '0%',
                     height: '2px',
                     backgroundColor: 'white',
-                    marginRight: '60px',
+                    marginRight: '0',
                     marginBottom: '40px',
                     opacity: 0
                   }}
                 />
                 
+                {/* Teks MENURU besar */}
                 <span 
                   ref={menuruTextRef}
                   style={{
@@ -581,7 +672,7 @@ export default function HomePage(): React.JSX.Element {
                     margin: 0,
                     padding: 0,
                     transform: 'translateY(10px)',
-                    marginRight: '60px'
+                    marginRight: '0'
                   }}>
                   MENURU
                 </span>
