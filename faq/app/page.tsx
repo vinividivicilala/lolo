@@ -163,7 +163,7 @@ export default function HomePage(): React.JSX.Element {
           will-change: transform;
         }
 
-        /* Hover effect untuk contact button - style sama dengan tombol cookie */
+        /* Hover effect untuk contact button */
         .contact-btn-effect {
           position: relative;
           isolation: isolate;
@@ -191,13 +191,26 @@ export default function HomePage(): React.JSX.Element {
           color: white !important;
         }
 
-        .contact-btn-effect:hover .contact-svg {
-          stroke: black !important;
-          transform: rotate(0deg) !important;
+        /* Sembunyikan titik bulat saat hover */
+        .contact-btn-effect:hover .dot-white {
+          opacity: 0 !important;
+          transform: scale(0) !important;
         }
 
-        .contact-svg {
-          transition: stroke 0.3s ease, transform 0.3s ease;
+        /* Tampilkan panah saat hover */
+        .contact-btn-effect:hover .arrow-svg-black {
+          opacity: 1 !important;
+          transform: rotate(0deg) scale(1) !important;
+        }
+
+        /* Animasi untuk titik bulat */
+        .dot-white {
+          transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        /* Animasi untuk panah */
+        .arrow-svg-black {
+          transition: opacity 0.3s ease, transform 0.3s ease;
         }
       `}</style>
       
@@ -259,7 +272,7 @@ export default function HomePage(): React.JSX.Element {
                   Mencatat apa yang kamu inginkan
                 </div>
 
-                {/* Tombol Contact dengan gaya yang sama seperti tombol Accept/Cookie + South West Arrow */}
+                {/* Tombol Contact dengan titik bulat putih besar, hover jadi panah hitam */}
                 <button
                   ref={contactBtnRef}
                   onClick={handleContact}
@@ -286,27 +299,53 @@ export default function HomePage(): React.JSX.Element {
                   }}
                 >
                   <span>Contact</span>
-                  {/* South West Arrow SVG - besar */}
-                  <svg 
-                    className="contact-svg"
-                    width="28" 
-                    height="28" 
-                    viewBox="0 0 24 24" 
-                    fill="none" 
-                    xmlns="http://www.w3.org/2000/svg"
-                    style={{
-                      transition: 'stroke 0.3s ease, transform 0.3s ease',
-                      stroke: '#000000'
-                    }}
-                  >
-                    <path 
-                      d="M17 7L7 17M7 17H17M7 17V7" 
-                      stroke="currentColor" 
-                      strokeWidth="2" 
-                      strokeLinecap="round" 
-                      strokeLinejoin="round"
-                    />
-                  </svg>
+                  
+                  {/* Container untuk titik dan panah */}
+                  <div style={{
+                    position: 'relative',
+                    width: '32px',
+                    height: '32px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    {/* Titik bulat putih besar (awal) */}
+                    <div className="dot-white" style={{
+                      width: '12px',
+                      height: '12px',
+                      borderRadius: '50%',
+                      backgroundColor: '#000000',
+                      opacity: 1,
+                      transform: 'scale(1)',
+                      transition: 'opacity 0.3s ease, transform 0.3s ease',
+                      position: 'absolute'
+                    }}></div>
+                    
+                    {/* Panah SVG South West Arrow hitam (saat hover) */}
+                    <svg 
+                      className="arrow-svg-black"
+                      width="28" 
+                      height="28" 
+                      viewBox="0 0 24 24" 
+                      fill="none" 
+                      xmlns="http://www.w3.org/2000/svg"
+                      style={{
+                        position: 'absolute',
+                        opacity: 0,
+                        transform: 'scale(0.8)',
+                        transition: 'opacity 0.3s ease, transform 0.3s ease',
+                        stroke: '#000000'
+                      }}
+                    >
+                      <path 
+                        d="M17 7L7 17M7 17H17M7 17V7" 
+                        stroke="#000000" 
+                        strokeWidth="2.5" 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </div>
                 </button>
               </div>
             </div>
