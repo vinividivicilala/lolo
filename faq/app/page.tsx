@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ScrollSmoother } from "gsap/ScrollSmoother";
+import SplitType from 'split-type';
 
 // Register GSAP plugins
 if (typeof window !== 'undefined') {
@@ -16,6 +17,11 @@ export default function HomePage(): React.JSX.Element {
   const declineBtnRef = useRef<HTMLButtonElement>(null);
   const contactBtnRef = useRef<HTMLButtonElement>(null);
   const smootherRef = useRef<any>(null);
+  
+  // Refs untuk teks yang akan di-split
+  const mencatatTextRef = useRef<HTMLDivElement>(null);
+  const menuruTextRef = useRef<HTMLSpanElement>(null);
+  const contactTextRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
     // Initialize ScrollSmoother
@@ -44,6 +50,105 @@ export default function HomePage(): React.JSX.Element {
         smootherRef.current.kill();
         smootherRef.current = null;
       }
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+    };
+  }, []);
+
+  // GSAP Split Text animations
+  useEffect(() => {
+    // Split text untuk "Mencatat apa yang kamu inginkan"
+    if (mencatatTextRef.current) {
+      const splitMencatat = new SplitType(mencatatTextRef.current, {
+        types: 'words, chars',
+        tagName: 'span'
+      });
+
+      gsap.fromTo(splitMencatat.chars,
+        {
+          opacity: 0,
+          y: 100,
+          rotateX: -90,
+          filter: 'blur(10px)'
+        },
+        {
+          opacity: 1,
+          y: 0,
+          rotateX: 0,
+          filter: 'blur(0px)',
+          duration: 1.2,
+          stagger: 0.03,
+          ease: "back.out(1.2)",
+          scrollTrigger: {
+            trigger: mencatatTextRef.current,
+            start: "top 80%",
+            end: "bottom 60%",
+            toggleActions: "play none none reverse",
+          }
+        }
+      );
+    }
+
+    // Split text untuk "MENURU"
+    if (menuruTextRef.current) {
+      const splitMenuru = new SplitType(menuruTextRef.current, {
+        types: 'chars',
+        tagName: 'span'
+      });
+
+      gsap.fromTo(splitMenuru.chars,
+        {
+          opacity: 0,
+          scale: 0,
+          rotation: -180
+        },
+        {
+          opacity: 1,
+          scale: 1,
+          rotation: 0,
+          duration: 1,
+          stagger: 0.02,
+          ease: "back.out(1.4)",
+          scrollTrigger: {
+            trigger: menuruTextRef.current,
+            start: "top 90%",
+            end: "bottom 70%",
+            toggleActions: "play none none reverse",
+          }
+        }
+      );
+    }
+
+    // Split text untuk "Contact" pada tombol
+    if (contactTextRef.current) {
+      const splitContact = new SplitType(contactTextRef.current, {
+        types: 'chars',
+        tagName: 'span'
+      });
+
+      gsap.fromTo(splitContact.chars,
+        {
+          opacity: 0,
+          x: -20,
+          filter: 'blur(5px)'
+        },
+        {
+          opacity: 1,
+          x: 0,
+          filter: 'blur(0px)',
+          duration: 0.8,
+          stagger: 0.05,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: contactTextRef.current,
+            start: "top 85%",
+            end: "bottom 65%",
+            toggleActions: "play none none reverse",
+          }
+        }
+      );
+    }
+
+    return () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
   }, []);
@@ -163,7 +268,13 @@ export default function HomePage(): React.JSX.Element {
           will-change: transform;
         }
 
-        /* Hover effect untuk contact button - terbalik (hitam dulu, putih saat hover) */
+        /* Style untuk split text */
+        .split-char {
+          display: inline-block;
+          will-change: transform, opacity, filter;
+        }
+
+        /* Hover effect untuk contact button */
         .contact-btn-effect {
           position: relative;
           isolation: isolate;
@@ -195,18 +306,15 @@ export default function HomePage(): React.JSX.Element {
           border-color: #e0e0e0 !important;
         }
 
-        /* Warna titik bulat kecil - putih di awal */
         .contact-btn-effect .dot-small {
           background-color: #ffffff !important;
         }
 
-        /* Warna titik bulat kecil berubah jadi hitam saat hover */
         .contact-btn-effect:hover .dot-small {
           opacity: 0 !important;
           transform: scale(0) !important;
         }
 
-        /* Lingkaran besar putih dengan panah hitam di awal */
         .circle-large-white {
           background-color: #ffffff !important;
         }
@@ -215,7 +323,6 @@ export default function HomePage(): React.JSX.Element {
           stroke: #000000 !important;
         }
 
-        /* Saat hover, lingkaran berubah jadi hitam dengan panah putih */
         .contact-btn-effect:hover .circle-large-white {
           background-color: #000000 !important;
           opacity: 1 !important;
@@ -226,7 +333,6 @@ export default function HomePage(): React.JSX.Element {
           stroke: #ffffff !important;
         }
 
-        /* Animasi */
         .dot-small {
           transition: opacity 0.3s ease, transform 0.3s ease;
         }
@@ -280,21 +386,23 @@ export default function HomePage(): React.JSX.Element {
                 gap: '40px',
                 width: '100%'
               }}>
-                {/* Teks "Mencatat apa yang kamu inginkan" - 1 baris */}
-                <div style={{
-                  fontSize: '64px',
-                  fontFamily: 'Questrial, sans-serif',
-                  color: 'white',
-                  textAlign: 'center',
-                  fontWeight: '400',
-                  letterSpacing: '-0.02em',
-                  lineHeight: '1.2',
-                  whiteSpace: 'nowrap'
-                }}>
+                {/* Teks "Mencatat apa yang kamu inginkan" - dengan GSAP Split Text */}
+                <div 
+                  ref={mencatatTextRef}
+                  style={{
+                    fontSize: '64px',
+                    fontFamily: 'Questrial, sans-serif',
+                    color: 'white',
+                    textAlign: 'center',
+                    fontWeight: '400',
+                    letterSpacing: '-0.02em',
+                    lineHeight: '1.2',
+                    whiteSpace: 'nowrap'
+                  }}>
                   Mencatat apa yang kamu inginkan
                 </div>
 
-                {/* Tombol Contact - Background hitam, teks putih, hover jadi putih dengan teks hitam */}
+                {/* Tombol Contact dengan GSAP Split Text pada teks Contact */}
                 <button
                   ref={contactBtnRef}
                   onClick={handleContact}
@@ -319,7 +427,7 @@ export default function HomePage(): React.JSX.Element {
                     color: '#ffffff'
                   }}
                 >
-                  <span>Contact</span>
+                  <span ref={contactTextRef}>Contact</span>
                   
                   {/* Container untuk titik dan lingkaran */}
                   <div style={{
@@ -342,7 +450,7 @@ export default function HomePage(): React.JSX.Element {
                       position: 'absolute'
                     }}></div>
                     
-                    {/* Lingkaran besar PUTIH dengan panah HITAM (awal) - tersembunyi dulu */}
+                    {/* Lingkaran besar PUTIH dengan panah HITAM */}
                     <div className="circle-large-white" style={{
                       position: 'absolute',
                       width: '40px',
@@ -377,7 +485,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* Bagian footer dengan teks MENURU - mentok di paling bawah tanpa space */}
+            {/* Bagian footer dengan teks MENURU - dengan GSAP Split Text */}
             <div style={{
               width: '100%',
               position: 'relative',
@@ -403,24 +511,26 @@ export default function HomePage(): React.JSX.Element {
                 zIndex: 1,
                 lineHeight: 0
               }}>
-                <span style={{
-                  fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
-                  fontWeight: 'normal',
-                  fontSize: '600px',
-                  color: 'white',
-                  textAlign: 'right',
-                  letterSpacing: '-0.02em',
-                  opacity: 0.95,
-                  textTransform: 'uppercase',
-                  lineHeight: '0.7',
-                  whiteSpace: 'nowrap',
-                  WebkitFontSmoothing: 'antialiased',
-                  MozOsxFontSmoothing: 'grayscale',
-                  fontKerning: 'normal',
-                  margin: 0,
-                  padding: 0,
-                  transform: 'translateY(10px)'
-                }}>
+                <span 
+                  ref={menuruTextRef}
+                  style={{
+                    fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
+                    fontWeight: 'normal',
+                    fontSize: '600px',
+                    color: 'white',
+                    textAlign: 'right',
+                    letterSpacing: '-0.02em',
+                    opacity: 0.95,
+                    textTransform: 'uppercase',
+                    lineHeight: '0.7',
+                    whiteSpace: 'nowrap',
+                    WebkitFontSmoothing: 'antialiased',
+                    MozOsxFontSmoothing: 'grayscale',
+                    fontKerning: 'normal',
+                    margin: 0,
+                    padding: 0,
+                    transform: 'translateY(10px)'
+                  }}>
                   MENURU
                 </span>
               </footer>
