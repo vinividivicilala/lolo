@@ -122,11 +122,12 @@ export default function HomePage(): React.JSX.Element {
       fontFamily: 'Questrial, sans-serif',
       WebkitFontSmoothing: 'antialiased',
       MozOsxFontSmoothing: 'grayscale',
-      position: 'relative'
+      position: 'relative',
+      overflowX: 'hidden'
     }}>
       {/* Halaman kosong */}
 
-      {/* Footer dengan teks MENURU - Font Anton */}
+      {/* Footer dengan teks MENURU - Font Anton ukuran 900px tebal 950px */}
       <footer style={{
         position: 'fixed',
         bottom: 0,
@@ -136,19 +137,22 @@ export default function HomePage(): React.JSX.Element {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        padding: '40px 20px',
+        padding: '20px',
         pointerEvents: 'none', // Agar tidak mengganggu interaksi dengan popup
         zIndex: 1
       }}>
         <span style={{
           fontFamily: "'Anton', sans-serif",
-          fontWeight: 400,
-          fontSize: '128px',
+          fontWeight: 950,
+          fontSize: '900px',
           color: 'white',
           textAlign: 'center',
           letterSpacing: '0.02em',
           opacity: 0.9,
-          textTransform: 'uppercase'
+          textTransform: 'uppercase',
+          lineHeight: '0.8',
+          whiteSpace: 'nowrap',
+          transform: 'translateY(20%)' // Menyesuaikan posisi agar terlihat proporsional
         }}>
           MENURU
         </span>
@@ -196,6 +200,18 @@ export default function HomePage(): React.JSX.Element {
                 }
                 to {
                   opacity: 1;
+                }
+              }
+
+              @media (max-width: 768px) {
+                .menuru-text {
+                  font-size: 300px !important;
+                }
+              }
+
+              @media (max-width: 480px) {
+                .menuru-text {
+                  font-size: 150px !important;
                 }
               }
             `}
