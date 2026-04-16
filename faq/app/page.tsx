@@ -89,34 +89,42 @@ export default function HomePage(): React.JSX.Element {
       );
     }
 
-    // Split text untuk "MENURU"
+    // Split text untuk "MENURU" - animasi lebih modern
     if (menuruTextRef.current) {
       const splitMenuru = new SplitText(menuruTextRef.current, {
         type: "chars",
-        charsClass: "split-char"
+        charsClass: "split-char-menuru"
       });
 
-      gsap.fromTo(splitMenuru.chars,
-        {
-          opacity: 0,
-          scale: 0,
-          rotation: -180
+      // Set initial state
+      gsap.set(splitMenuru.chars, {
+        opacity: 0,
+        y: 200,
+        rotationY: 90,
+        transformPerspective: 800,
+        filter: 'blur(20px)'
+      });
+
+      // Modern 3D flip animation with stagger
+      gsap.to(splitMenuru.chars, {
+        opacity: 1,
+        y: 0,
+        rotationY: 0,
+        filter: 'blur(0px)',
+        duration: 1.5,
+        stagger: {
+          each: 0.04,
+          from: "start",
+          ease: "power2.out"
         },
-        {
-          opacity: 1,
-          scale: 1,
-          rotation: 0,
-          duration: 1,
-          stagger: 0.02,
-          ease: "back.out(1.4)",
-          scrollTrigger: {
-            trigger: menuruTextRef.current,
-            start: "top 90%",
-            end: "bottom 70%",
-            toggleActions: "play none none reverse",
-          }
+        ease: "back.out(0.8)",
+        scrollTrigger: {
+          trigger: menuruTextRef.current,
+          start: "top 85%",
+          end: "bottom 65%",
+          toggleActions: "play none none reverse",
         }
-      );
+      });
     }
 
     // Split text untuk "Contact" pada tombol
@@ -154,16 +162,18 @@ export default function HomePage(): React.JSX.Element {
       gsap.fromTo(lineRef.current,
         {
           width: '0%',
-          opacity: 0
+          opacity: 0,
+          x: 100
         },
         {
           width: '100%',
           opacity: 1,
-          duration: 1.5,
-          ease: "power2.out",
+          x: 0,
+          duration: 1.2,
+          ease: "power3.out",
           scrollTrigger: {
             trigger: lineRef.current,
-            start: "top 90%",
+            start: "top 85%",
             end: "bottom 70%",
             toggleActions: "play none none reverse",
           }
@@ -295,6 +305,12 @@ export default function HomePage(): React.JSX.Element {
         .split-char {
           display: inline-block;
           will-change: transform, opacity, filter;
+        }
+
+        .split-char-menuru {
+          display: inline-block;
+          will-change: transform, opacity, filter;
+          transform-style: preserve-3d;
         }
 
         /* Hover effect untuk contact button */
@@ -508,7 +524,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* Bagian footer dengan teks MENURU - dengan GSAP SplitText dan garis putih di atas */}
+            {/* Bagian footer dengan teks MENURU - dengan GSAP SplitText modern dan garis putih di atas */}
             <div style={{
               width: '100%',
               position: 'relative',
@@ -533,7 +549,7 @@ export default function HomePage(): React.JSX.Element {
                 pointerEvents: 'none',
                 zIndex: 1
               }}>
-                {/* Garis putih di atas teks MENURU - jarak lebih kecil */}
+                {/* Garis putih di atas teks MENURU - jarak pas 40px */}
                 <div
                   ref={lineRef}
                   style={{
@@ -541,7 +557,7 @@ export default function HomePage(): React.JSX.Element {
                     height: '2px',
                     backgroundColor: 'white',
                     marginRight: '60px',
-                    marginBottom: '8px',
+                    marginBottom: '40px',
                     opacity: 0
                   }}
                 />
