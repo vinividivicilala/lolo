@@ -126,7 +126,7 @@ export default function HomePage(): React.JSX.Element {
     }}>
       {/* Halaman kosong */}
 
-      {/* Footer dengan teks MENURU */}
+      {/* Footer dengan teks MENURU - Font Anton */}
       <footer style={{
         position: 'fixed',
         bottom: 0,
@@ -141,13 +141,14 @@ export default function HomePage(): React.JSX.Element {
         zIndex: 1
       }}>
         <span style={{
-          fontFamily: "'Alliance Neue', sans-serif",
+          fontFamily: "'Anton', sans-serif",
           fontWeight: 400,
           fontSize: '128px',
           color: 'white',
           textAlign: 'center',
-          letterSpacing: '-0.02em',
-          opacity: 0.9
+          letterSpacing: '0.02em',
+          opacity: 0.9,
+          textTransform: 'uppercase'
         }}>
           MENURU
         </span>
@@ -220,7 +221,8 @@ export default function HomePage(): React.JSX.Element {
                 background: 'linear-gradient(135deg, #000000 0%, #333333 100%)',
                 backgroundClip: 'text',
                 WebkitBackgroundClip: 'text',
-                color: 'transparent'
+                color: 'transparent',
+                fontFamily: 'Questrial, sans-serif'
               }}>
                 cookies.
               </span>
@@ -235,6 +237,7 @@ export default function HomePage(): React.JSX.Element {
               fontWeight: '400',
               letterSpacing: '-0.01em',
               maxWidth: '280px',
+              fontFamily: 'Questrial, sans-serif'
             }}>
               I use cookies to understand how you navigate<br />
               this site and what topics interest you most.
@@ -243,7 +246,8 @@ export default function HomePage(): React.JSX.Element {
               color: '#666', 
               fontSize: '18px', // Font besar untuk subteks
               display: 'inline-block',
-              marginTop: '4px'
+              marginTop: '4px',
+              fontFamily: 'Questrial, sans-serif'
             }}>
               No ads, no data sold ever.
             </span>
