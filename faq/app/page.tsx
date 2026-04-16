@@ -127,7 +127,7 @@ export default function HomePage(): React.JSX.Element {
     }}>
       {/* Halaman kosong */}
 
-      {/* Footer dengan teks MENURU - Font Bebas Neue, ukuran 800px, jarak rapat, gaya brutal */}
+      {/* Footer dengan teks MENURU - Font Bebas Neue, ukuran 750px, jarak antar huruf pas */}
       <footer style={{
         position: 'fixed',
         bottom: 0,
@@ -143,19 +143,19 @@ export default function HomePage(): React.JSX.Element {
       }}>
         <span style={{
           fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
-          fontWeight: 'bold',
-          fontSize: '800px',
+          fontWeight: 'normal',
+          fontSize: '750px',
           color: 'white',
           textAlign: 'center',
-          letterSpacing: '-0.08em',
+          letterSpacing: '-0.02em',
           opacity: 0.95,
           textTransform: 'uppercase',
-          lineHeight: '0.75',
+          lineHeight: '0.85',
           whiteSpace: 'nowrap',
-          transform: 'translateY(15%)',
-          fontStretch: 'ultra-expanded',
+          transform: 'translateY(12%)',
           WebkitFontSmoothing: 'antialiased',
-          MozOsxFontSmoothing: 'grayscale'
+          MozOsxFontSmoothing: 'grayscale',
+          fontKerning: 'normal'
         }}>
           MENURU
         </span>
@@ -206,27 +206,33 @@ export default function HomePage(): React.JSX.Element {
                 }
               }
 
-              @media (max-width: 1400px) {
+              @media (max-width: 1600px) {
                 .menuru-text {
-                  font-size: 500px !important;
+                  font-size: 550px !important;
                 }
               }
 
-              @media (max-width: 1000px) {
+              @media (max-width: 1200px) {
                 .menuru-text {
-                  font-size: 350px !important;
+                  font-size: 400px !important;
+                }
+              }
+
+              @media (max-width: 900px) {
+                .menuru-text {
+                  font-size: 280px !important;
                 }
               }
 
               @media (max-width: 768px) {
                 .menuru-text {
-                  font-size: 200px !important;
+                  font-size: 180px !important;
                 }
               }
 
               @media (max-width: 480px) {
                 .menuru-text {
-                  font-size: 100px !important;
+                  font-size: 90px !important;
                 }
               }
             `}
