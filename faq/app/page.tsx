@@ -197,8 +197,8 @@ export default function HomePage(): React.JSX.Element {
           transform: scale(0) !important;
         }
 
-        /* Tampilkan lingkaran besar dengan panah saat hover */
-        .contact-btn-effect:hover .circle-large {
+        /* Tampilkan lingkaran besar putih dengan panah hitam saat hover */
+        .contact-btn-effect:hover .circle-large-white {
           opacity: 1 !important;
           transform: scale(1) !important;
         }
@@ -208,8 +208,8 @@ export default function HomePage(): React.JSX.Element {
           transition: opacity 0.3s ease, transform 0.3s ease;
         }
 
-        /* Animasi untuk lingkaran besar */
-        .circle-large {
+        /* Animasi untuk lingkaran besar putih */
+        .circle-large-white {
           transition: opacity 0.3s ease, transform 0.3s ease;
         }
       `}</style>
@@ -272,7 +272,7 @@ export default function HomePage(): React.JSX.Element {
                   Mencatat apa yang kamu inginkan
                 </div>
 
-                {/* Tombol Contact dengan titik bulat kecil, hover jadi lingkaran besar + panah putih */}
+                {/* Tombol Contact dengan titik bulat kecil hitam, hover jadi lingkaran besar putih + panah hitam */}
                 <button
                   ref={contactBtnRef}
                   onClick={handleContact}
@@ -303,8 +303,8 @@ export default function HomePage(): React.JSX.Element {
                   {/* Container untuk titik dan lingkaran */}
                   <div style={{
                     position: 'relative',
-                    width: '36px',
-                    height: '36px',
+                    width: '40px',
+                    height: '40px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center'
@@ -321,14 +321,13 @@ export default function HomePage(): React.JSX.Element {
                       position: 'absolute'
                     }}></div>
                     
-                    {/* Lingkaran besar dengan panah SVG warna putih (saat hover) */}
-                    <div className="circle-large" style={{
+                    {/* Lingkaran besar FULL PUTIH dengan panah SVG warna HITAM (saat hover) */}
+                    <div className="circle-large-white" style={{
                       position: 'absolute',
-                      width: '36px',
-                      height: '36px',
+                      width: '40px',
+                      height: '40px',
                       borderRadius: '50%',
-                      backgroundColor: 'transparent',
-                      border: '2px solid white',
+                      backgroundColor: '#FFFFFF',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -345,7 +344,7 @@ export default function HomePage(): React.JSX.Element {
                       >
                         <path 
                           d="M17 7L7 17M7 17H17M7 17V7" 
-                          stroke="#FFFFFF" 
+                          stroke="#000000" 
                           strokeWidth="2.5" 
                           strokeLinecap="round" 
                           strokeLinejoin="round"
