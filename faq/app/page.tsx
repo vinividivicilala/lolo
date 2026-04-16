@@ -31,11 +31,9 @@ export default function HomePage(): React.JSX.Element {
           ignoreMobileResize: true,
           onUpdate: () => {},
         });
-        console.log("ScrollSmoother initialized");
       }
     };
 
-    // Small delay to ensure DOM is ready
     const timer = setTimeout(() => {
       initSmoother();
     }, 100);
@@ -61,28 +59,6 @@ export default function HomePage(): React.JSX.Element {
     if (showPopup && acceptBtnRef.current && declineBtnRef.current) {
       const acceptBtn = acceptBtnRef.current;
       const declineBtn = declineBtnRef.current;
-
-      const createHoverAnimation = (btn: HTMLButtonElement) => {
-        const tl = gsap.timeline({ paused: true });
-        
-        tl.to(btn, {
-          color: '#ffffff',
-          duration: 0.3,
-          ease: "power2.out",
-        }).to(btn, {
-          backgroundPosition: '0% 0%',
-          duration: 0.3,
-          ease: "power2.out",
-        }, 0);
-
-        btn.addEventListener('mouseenter', () => {
-          tl.play();
-        });
-        
-        btn.addEventListener('mouseleave', () => {
-          tl.reverse();
-        });
-      };
 
       [acceptBtn, declineBtn].forEach(btn => {
         btn.style.position = 'relative';
@@ -191,36 +167,46 @@ export default function HomePage(): React.JSX.Element {
         .contact-btn {
           position: relative;
           transition: all 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+          background: transparent;
         }
 
         .contact-btn:hover {
-          background-color: black !important;
-          border-color: white !important;
+          background-color: transparent !important;
+          border-bottom-color: white !important;
         }
 
         .contact-btn:hover .btn-circle {
-          background-color: white;
-          transform: rotate(45deg);
+          border-color: white !important;
         }
 
-        .contact-btn:hover .btn-arrow {
-          stroke: black;
+        .contact-btn:hover .btn-circle svg {
+          opacity: 1 !important;
+          transform: rotate(45deg) !important;
         }
 
-        .contact-btn:hover .btn-text {
-          color: white;
+        .contact-btn:hover .btn-circle .dot {
+          opacity: 0 !important;
+        }
+
+        .contact-btn:hover .btn-circle .arrow-svg {
+          opacity: 1 !important;
         }
 
         .btn-circle {
           transition: all 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+          position: relative;
         }
 
-        .btn-arrow {
+        .btn-circle svg {
           transition: all 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
         }
 
-        .btn-text {
-          transition: color 0.3s ease;
+        .dot {
+          transition: opacity 0.3s ease;
+        }
+
+        .arrow-svg {
+          transition: opacity 0.3s ease, transform 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
         }
       `}</style>
       
@@ -269,10 +255,10 @@ export default function HomePage(): React.JSX.Element {
               flexDirection: 'column',
               justifyContent: 'flex-end',
               alignItems: 'center',
-              paddingBottom: '120px'
+              paddingBottom: 0
             }}>
               
-              {/* Konten di atas footer - dinaikkan jaraknya */}
+              {/* Konten di atas footer */}
               <div style={{
                 width: '100%',
                 maxWidth: '1400px',
@@ -282,9 +268,7 @@ export default function HomePage(): React.JSX.Element {
                 flexDirection: 'column',
                 alignItems: 'center',
                 gap: '60px',
-                marginBottom: '150px',
-                position: 'relative',
-                top: '-100px'
+                marginBottom: '120px'
               }}>
                 {/* Teks "Mencatat apa yang kamu inginkan" - 1 baris */}
                 <div style={{
@@ -300,7 +284,7 @@ export default function HomePage(): React.JSX.Element {
                   Mencatat apa yang kamu inginkan
                 </div>
 
-                {/* Tombol Contact dengan garis pudar + titik bulat */}
+                {/* Tombol Contact dengan garis putih pudar + titik bulat, hover jadi panah */}
                 <button
                   ref={contactBtnRef}
                   onClick={handleContact}
@@ -309,51 +293,65 @@ export default function HomePage(): React.JSX.Element {
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: '16px',
-                    padding: '0',
+                    padding: '0 0 12px 0',
                     backgroundColor: 'transparent',
-                    color: '#666',
+                    color: 'white',
                     border: 'none',
                     cursor: 'pointer',
-                    fontSize: '20px',
-                    fontWeight: '400',
+                    fontSize: '28px',
+                    fontWeight: '500',
                     fontFamily: 'Questrial, sans-serif',
                     transition: 'all 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1)',
-                    position: 'relative',
-                    borderBottom: '1px solid rgba(255, 255, 255, 0.3)',
-                    paddingBottom: '8px'
+                    borderBottom: '1px solid rgba(255, 255, 255, 0.4)',
                   }}
                 >
-                  <span className="btn-text" style={{
+                  <span style={{
                     transition: 'color 0.3s ease',
                     letterSpacing: '0.02em'
                   }}>
                     Contact
                   </span>
                   <div className="btn-circle" style={{
-                    width: '32px',
-                    height: '32px',
+                    width: '40px',
+                    height: '40px',
                     borderRadius: '50%',
-                    border: '1px solid rgba(255, 255, 255, 0.3)',
+                    border: '1px solid rgba(255, 255, 255, 0.4)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     transition: 'all 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1)',
-                    backgroundColor: 'transparent'
+                    backgroundColor: 'transparent',
+                    position: 'relative'
                   }}>
+                    {/* Titik bulat (sebelum hover) */}
+                    <div className="dot" style={{
+                      width: '6px',
+                      height: '6px',
+                      borderRadius: '50%',
+                      backgroundColor: 'white',
+                      opacity: 1,
+                      transition: 'opacity 0.3s ease',
+                      position: 'absolute'
+                    }}></div>
+                    
+                    {/* Panah SVG (saat hover) - gaya seperti cookie popup */}
                     <svg 
-                      className="btn-arrow"
-                      width="16" 
-                      height="16" 
+                      className="arrow-svg"
+                      width="20" 
+                      height="20" 
                       viewBox="0 0 24 24" 
                       fill="none" 
                       xmlns="http://www.w3.org/2000/svg"
                       style={{
-                        transition: 'all 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1)'
+                        position: 'absolute',
+                        opacity: 0,
+                        transition: 'opacity 0.3s ease, transform 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1)',
+                        transform: 'rotate(0deg)'
                       }}
                     >
                       <path 
                         d="M7 17L17 7M17 7H7M17 7V17" 
-                        stroke="rgba(255, 255, 255, 0.5)" 
+                        stroke="white" 
                         strokeWidth="2" 
                         strokeLinecap="round" 
                         strokeLinejoin="round"
@@ -363,7 +361,7 @@ export default function HomePage(): React.JSX.Element {
                 </button>
               </div>
 
-              {/* Footer dengan teks MENURU - di paling bawah, digeser ke kanan */}
+              {/* Footer dengan teks MENURU - mentok di paling bawah tanpa space */}
               <footer style={{
                 position: 'relative',
                 bottom: 0,
@@ -372,10 +370,12 @@ export default function HomePage(): React.JSX.Element {
                 width: '100%',
                 display: 'flex',
                 justifyContent: 'flex-end',
-                alignItems: 'center',
-                padding: '0 60px 40px 20px',
+                alignItems: 'flex-end',
+                padding: 0,
+                margin: 0,
                 pointerEvents: 'none',
-                zIndex: 1
+                zIndex: 1,
+                lineHeight: 0
               }}>
                 <span style={{
                   fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
@@ -386,13 +386,14 @@ export default function HomePage(): React.JSX.Element {
                   letterSpacing: '-0.02em',
                   opacity: 0.95,
                   textTransform: 'uppercase',
-                  lineHeight: '0.85',
+                  lineHeight: '0.7',
                   whiteSpace: 'nowrap',
-                  transform: 'translateY(15%)',
                   WebkitFontSmoothing: 'antialiased',
                   MozOsxFontSmoothing: 'grayscale',
                   fontKerning: 'normal',
-                  marginRight: '40px'
+                  margin: 0,
+                  padding: 0,
+                  transform: 'translateY(10px)'
                 }}>
                   MENURU
                 </span>
