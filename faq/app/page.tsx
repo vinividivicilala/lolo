@@ -126,6 +126,33 @@ export default function HomePage(): React.JSX.Element {
     }}>
       {/* Halaman kosong */}
 
+      {/* Footer dengan teks MENURU */}
+      <footer style={{
+        position: 'fixed',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        width: '100%',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: '40px 20px',
+        pointerEvents: 'none', // Agar tidak mengganggu interaksi dengan popup
+        zIndex: 1
+      }}>
+        <span style={{
+          fontFamily: "'Alliance Neue', sans-serif",
+          fontWeight: 400,
+          fontSize: '128px',
+          color: 'white',
+          textAlign: 'center',
+          letterSpacing: '-0.02em',
+          opacity: 0.9
+        }}>
+          MENURU
+        </span>
+      </footer>
+
       {/* Cookie Popup - Bottom Left dengan desain Awwwards, ukuran kecil memanjang ke samping */}
       {showPopup && (
         <div style={{
