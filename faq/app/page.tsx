@@ -119,30 +119,35 @@ export default function HomePage(): React.JSX.Element {
       flexDirection: 'column',
       justifyContent: 'center',
       alignItems: 'center',
-      fontFamily: 'ev-light, sans-serif',
+      fontFamily: 'Questrial, sans-serif',
       WebkitFontSmoothing: 'antialiased',
       MozOsxFontSmoothing: 'grayscale',
       position: 'relative'
     }}>
       {/* Halaman kosong */}
 
-      {/* Cookie Popup - Bottom Right dengan desain Awwwards */}
+      {/* Cookie Popup - Bottom Left dengan desain Awwwards, ukuran kecil memanjang ke samping */}
       {showPopup && (
         <div style={{
           position: 'fixed',
           bottom: '30px',
-          right: '30px',
-          width: '480px',
+          left: '30px', // Posisi kiri bawah
+          width: 'auto', // Ukuran menyesuaikan konten
           maxWidth: 'calc(100vw - 60px)',
           backgroundColor: '#ffffff',
           color: '#000000',
           borderRadius: '32px',
-          padding: '40px',
+          padding: '24px 32px', // Padding lebih horizontal
           boxShadow: '0 20px 40px rgba(0,0,0,0.15), 0 5px 12px rgba(0,0,0,0.05)',
           zIndex: 1000,
-          fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+          fontFamily: 'Questrial, sans-serif',
           animation: 'slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
-          border: '1px solid rgba(0,0,0,0.05)'
+          border: '1px solid rgba(0,0,0,0.05)',
+          display: 'flex', // Membuat card memanjang ke samping
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: '32px',
+          flexWrap: 'wrap', // Agar responsif
         }}>
           <style>
             {`
@@ -168,49 +173,61 @@ export default function HomePage(): React.JSX.Element {
             `}
           </style>
           
-          {/* Header dengan icon */}
+          {/* Bagian kiri: Header dan deskripsi */}
           <div style={{
-            marginBottom: '24px',
             display: 'flex',
-            alignItems: 'center',
-            gap: '12px'
+            flexDirection: 'column',
+            gap: '8px',
           }}>
-            <span style={{ fontSize: '48px', display: 'inline-block' }}>🍪</span>
-            <span style={{ 
-              fontWeight: '700', 
-              fontSize: '28px',
-              letterSpacing: '-0.02em',
-              background: 'linear-gradient(135deg, #000000 0%, #333333 100%)',
-              backgroundClip: 'text',
-              WebkitBackgroundClip: 'text',
-              color: 'transparent'
+            {/* Header dengan icon - font besar */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px'
             }}>
-              cookies.
+              <span style={{ fontSize: '56px', display: 'inline-block' }}>🍪</span>
+              <span style={{ 
+                fontWeight: '700', 
+                fontSize: '36px', // Font besar untuk judul
+                letterSpacing: '-0.02em',
+                background: 'linear-gradient(135deg, #000000 0%, #333333 100%)',
+                backgroundClip: 'text',
+                WebkitBackgroundClip: 'text',
+                color: 'transparent'
+              }}>
+                cookies.
+              </span>
+            </div>
+            
+            {/* Teks deskripsi - font besar */}
+            <p style={{
+              fontSize: '20px', // Font besar untuk deskripsi
+              lineHeight: '1.4',
+              marginBottom: 0,
+              color: '#1a1a1a',
+              fontWeight: '400',
+              letterSpacing: '-0.01em',
+              maxWidth: '280px',
+            }}>
+              I use cookies to understand how you navigate<br />
+              this site and what topics interest you most.
+            </p>
+            <span style={{ 
+              color: '#666', 
+              fontSize: '18px', // Font besar untuk subteks
+              display: 'inline-block',
+              marginTop: '4px'
+            }}>
+              No ads, no data sold ever.
             </span>
           </div>
           
-          {/* Teks deskripsi - font besar minimalist */}
-          <p style={{
-            fontSize: '18px',
-            lineHeight: '1.4',
-            marginBottom: '32px',
-            color: '#1a1a1a',
-            fontWeight: '400',
-            letterSpacing: '-0.01em',
-            maxWidth: '90%'
-          }}>
-            I use cookies to understand how you navigate<br />
-            this site and what topics interest you most.<br />
-            <span style={{ color: '#666', fontSize: '16px', marginTop: '8px', display: 'inline-block' }}>
-              No ads, no data sold ever.
-            </span>
-          </p>
-          
-          {/* Tombol-tombol dengan border radius besar */}
+          {/* Tombol-tombol dengan font besar */}
           <div style={{
             display: 'flex',
             gap: '16px',
-            justifyContent: 'flex-start'
+            justifyContent: 'flex-start',
+            flexShrink: 0,
           }}>
             <button
               ref={declineBtnRef}
@@ -222,10 +239,10 @@ export default function HomePage(): React.JSX.Element {
                 border: '1.5px solid #e0e0e0',
                 borderRadius: '60px',
                 cursor: 'pointer',
-                fontSize: '16px',
+                fontSize: '18px', // Font besar untuk tombol
                 fontWeight: '600',
                 letterSpacing: '-0.01em',
-                fontFamily: 'inherit',
+                fontFamily: 'Questrial, sans-serif',
                 transition: 'all 0.2s ease',
                 position: 'relative',
                 overflow: 'hidden',
@@ -245,10 +262,10 @@ export default function HomePage(): React.JSX.Element {
                 border: '1.5px solid #e0e0e0',
                 borderRadius: '60px',
                 cursor: 'pointer',
-                fontSize: '16px',
+                fontSize: '18px', // Font besar untuk tombol
                 fontWeight: '600',
                 letterSpacing: '-0.01em',
-                fontFamily: 'inherit',
+                fontFamily: 'Questrial, sans-serif',
                 transition: 'all 0.2s ease',
                 position: 'relative',
                 overflow: 'hidden',
