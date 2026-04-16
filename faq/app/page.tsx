@@ -127,7 +127,7 @@ export default function HomePage(): React.JSX.Element {
     }}>
       {/* Halaman kosong */}
 
-      {/* Footer dengan teks MENURU - Font Anton ukuran 900px tebal 950px */}
+      {/* Footer dengan teks MENURU - Font Bebas Neue, ukuran 800px, jarak rapat, gaya brutal */}
       <footer style={{
         position: 'fixed',
         bottom: 0,
@@ -138,48 +138,51 @@ export default function HomePage(): React.JSX.Element {
         justifyContent: 'center',
         alignItems: 'center',
         padding: '20px',
-        pointerEvents: 'none', // Agar tidak mengganggu interaksi dengan popup
+        pointerEvents: 'none',
         zIndex: 1
       }}>
         <span style={{
-          fontFamily: "'Anton', sans-serif",
-          fontWeight: 950,
-          fontSize: '900px',
+          fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
+          fontWeight: 'bold',
+          fontSize: '800px',
           color: 'white',
           textAlign: 'center',
-          letterSpacing: '0.02em',
-          opacity: 0.9,
+          letterSpacing: '-0.08em',
+          opacity: 0.95,
           textTransform: 'uppercase',
-          lineHeight: '0.8',
+          lineHeight: '0.75',
           whiteSpace: 'nowrap',
-          transform: 'translateY(20%)' // Menyesuaikan posisi agar terlihat proporsional
+          transform: 'translateY(15%)',
+          fontStretch: 'ultra-expanded',
+          WebkitFontSmoothing: 'antialiased',
+          MozOsxFontSmoothing: 'grayscale'
         }}>
           MENURU
         </span>
       </footer>
 
-      {/* Cookie Popup - Bottom Left dengan desain Awwwards, ukuran kecil memanjang ke samping */}
+      {/* Cookie Popup - Bottom Left */}
       {showPopup && (
         <div style={{
           position: 'fixed',
           bottom: '30px',
-          left: '30px', // Posisi kiri bawah
-          width: 'auto', // Ukuran menyesuaikan konten
+          left: '30px',
+          width: 'auto',
           maxWidth: 'calc(100vw - 60px)',
           backgroundColor: '#ffffff',
           color: '#000000',
           borderRadius: '32px',
-          padding: '24px 32px', // Padding lebih horizontal
+          padding: '24px 32px',
           boxShadow: '0 20px 40px rgba(0,0,0,0.15), 0 5px 12px rgba(0,0,0,0.05)',
           zIndex: 1000,
           fontFamily: 'Questrial, sans-serif',
           animation: 'slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
           border: '1px solid rgba(0,0,0,0.05)',
-          display: 'flex', // Membuat card memanjang ke samping
+          display: 'flex',
           flexDirection: 'row',
           alignItems: 'center',
           gap: '32px',
-          flexWrap: 'wrap', // Agar responsif
+          flexWrap: 'wrap',
         }}>
           <style>
             {`
@@ -203,15 +206,27 @@ export default function HomePage(): React.JSX.Element {
                 }
               }
 
+              @media (max-width: 1400px) {
+                .menuru-text {
+                  font-size: 500px !important;
+                }
+              }
+
+              @media (max-width: 1000px) {
+                .menuru-text {
+                  font-size: 350px !important;
+                }
+              }
+
               @media (max-width: 768px) {
                 .menuru-text {
-                  font-size: 300px !important;
+                  font-size: 200px !important;
                 }
               }
 
               @media (max-width: 480px) {
                 .menuru-text {
-                  font-size: 150px !important;
+                  font-size: 100px !important;
                 }
               }
             `}
@@ -223,7 +238,7 @@ export default function HomePage(): React.JSX.Element {
             flexDirection: 'column',
             gap: '8px',
           }}>
-            {/* Header dengan icon - font besar */}
+            {/* Header dengan icon */}
             <div style={{
               display: 'flex',
               alignItems: 'center',
@@ -232,7 +247,7 @@ export default function HomePage(): React.JSX.Element {
               <span style={{ fontSize: '56px', display: 'inline-block' }}>🍪</span>
               <span style={{ 
                 fontWeight: '700', 
-                fontSize: '36px', // Font besar untuk judul
+                fontSize: '36px',
                 letterSpacing: '-0.02em',
                 background: 'linear-gradient(135deg, #000000 0%, #333333 100%)',
                 backgroundClip: 'text',
@@ -244,9 +259,9 @@ export default function HomePage(): React.JSX.Element {
               </span>
             </div>
             
-            {/* Teks deskripsi - font besar */}
+            {/* Teks deskripsi */}
             <p style={{
-              fontSize: '20px', // Font besar untuk deskripsi
+              fontSize: '20px',
               lineHeight: '1.4',
               marginBottom: 0,
               color: '#1a1a1a',
@@ -260,7 +275,7 @@ export default function HomePage(): React.JSX.Element {
             </p>
             <span style={{ 
               color: '#666', 
-              fontSize: '18px', // Font besar untuk subteks
+              fontSize: '18px',
               display: 'inline-block',
               marginTop: '4px',
               fontFamily: 'Questrial, sans-serif'
@@ -269,7 +284,7 @@ export default function HomePage(): React.JSX.Element {
             </span>
           </div>
           
-          {/* Tombol-tombol dengan font besar */}
+          {/* Tombol-tombol */}
           <div style={{
             display: 'flex',
             gap: '16px',
@@ -286,7 +301,7 @@ export default function HomePage(): React.JSX.Element {
                 border: '1.5px solid #e0e0e0',
                 borderRadius: '60px',
                 cursor: 'pointer',
-                fontSize: '18px', // Font besar untuk tombol
+                fontSize: '18px',
                 fontWeight: '600',
                 letterSpacing: '-0.01em',
                 fontFamily: 'Questrial, sans-serif',
@@ -309,7 +324,7 @@ export default function HomePage(): React.JSX.Element {
                 border: '1.5px solid #e0e0e0',
                 borderRadius: '60px',
                 cursor: 'pointer',
-                fontSize: '18px', // Font besar untuk tombol
+                fontSize: '18px',
                 fontWeight: '600',
                 letterSpacing: '-0.01em',
                 fontFamily: 'Questrial, sans-serif',
