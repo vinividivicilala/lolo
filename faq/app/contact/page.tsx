@@ -119,7 +119,7 @@ export default function ContactPage(): React.JSX.Element {
 
   // GSAP SplitText animations
   useEffect(() => {
-    // Split text untuk "Contact"
+    // Split text untuk "Contact" - tidak tebal (weight 300)
     if (contactTitleRef.current) {
       const splitContact = new SplitText(contactTitleRef.current, {
         type: "chars",
@@ -173,7 +173,7 @@ export default function ContactPage(): React.JSX.Element {
       );
     }
 
-    // Animasi teks info
+    // Animasi teks info "Follow the procedure calmly."
     if (infoTextRef.current) {
       gsap.fromTo(infoTextRef.current,
         {
@@ -553,7 +553,7 @@ export default function ContactPage(): React.JSX.Element {
               </span>
             </div>
 
-            {/* Teks Contact dengan garis bawah */}
+            {/* Teks Contact dengan garis bawah - tidak tebal (weight 300) */}
             <div style={{
               position: 'absolute',
               top: '120px',
@@ -566,7 +566,7 @@ export default function ContactPage(): React.JSX.Element {
                 style={{
                   fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
                   fontSize: '300px',
-                  fontWeight: '200',
+                  fontWeight: '300',
                   color: '#000000',
                   textAlign: 'left',
                   letterSpacing: '-0.02em',
@@ -590,31 +590,31 @@ export default function ContactPage(): React.JSX.Element {
               />
             </div>
 
-            {/* Teks info di bawah garis - posisi tengah atas */}
+            {/* Teks info baru - Follow the procedure calmly. - warna hitam, font besar */}
             <div
               ref={infoTextRef}
               style={{
                 position: 'absolute',
-                top: '460px',
+                top: '480px',
                 left: '50%',
                 transform: 'translateX(-50%)',
                 textAlign: 'center',
                 zIndex: 10,
                 fontFamily: "'Questrial', sans-serif",
-                fontSize: '16px',
-                color: '#666666',
-                fontWeight: '300',
-                letterSpacing: '0.02em',
+                fontSize: '32px',
+                color: '#000000',
+                fontWeight: '400',
+                letterSpacing: '-0.01em',
                 opacity: 0,
                 whiteSpace: 'nowrap'
               }}>
-              You can know contact Website this Menuru
+              Follow the procedure calmly.
             </div>
 
-            {/* Baris 01 dan Note - dengan hover effect */}
+            {/* Baris 01 dan Note - di bawah teks Follow the procedure calmly. */}
             <div style={{
               position: 'absolute',
-              bottom: '180px',
+              bottom: '200px',
               left: '0',
               right: '0',
               display: 'flex',
@@ -666,9 +666,9 @@ export default function ContactPage(): React.JSX.Element {
               ref={hoverTextRef}
               style={{
                 position: 'absolute',
-                bottom: '180px',
+                bottom: '200px',
                 left: '50%',
-                transform: 'translateX(calc(-50% + 120px))',
+                transform: 'translateX(calc(-50% + 140px))',
                 fontFamily: "'Questrial', sans-serif",
                 fontSize: '20px',
                 color: '#000000',
@@ -680,10 +680,7 @@ export default function ContactPage(): React.JSX.Element {
                 pointerEvents: 'none',
                 zIndex: 20
               }}>
-              {hoverText01 && (
-                <span style={{ opacity: 1 }}>/ kamu bisa mencatat apa yang kamu inginkan</span>
-              )}
-              {hoverTextNote && (
+              {(hoverText01 || hoverTextNote) && (
                 <span style={{ opacity: 1 }}>/ kamu bisa mencatat apa yang kamu inginkan</span>
               )}
             </div>
