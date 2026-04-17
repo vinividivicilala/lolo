@@ -30,6 +30,99 @@ export default function HomePage(): React.JSX.Element {
   const xRef = useRef<HTMLDivElement>(null);
   const linkedinRef = useRef<HTMLDivElement>(null);
 
+  // Variabel untuk menyimpan teks asli medsos
+  const originalTexts = {
+    ig: 'Instagram',
+    x: 'X',
+    linkedin: 'LinkedIn'
+  };
+
+  // Array kata-kata random untuk animasi hover
+  const randomWords = [
+    'Explore', 'Discover', 'Connect', 'Network', 'Follow', 'Engage', 
+    'Share', 'Learn', 'Grow', 'Create', 'Inspire', 'Innovate',
+    'Digital', 'Social', 'Media', 'Trend', 'Viral', 'Impact'
+  ];
+
+  // Fungsi untuk mendapatkan kata random
+  const getRandomWord = () => {
+    return randomWords[Math.floor(Math.random() * randomWords.length)];
+  };
+
+  // Animasi hover random teks untuk medsos
+  const handleSocialHover = (element: HTMLElement, originalText: string, platform: string) => {
+    // Simpan teks asli jika belum ada
+    if (!element.getAttribute('data-original')) {
+      element.setAttribute('data-original', originalText);
+    }
+
+    // Animasi random teks
+    const duration = 0.8;
+    const steps = 8;
+    let currentStep = 0;
+
+    const interval = setInterval(() => {
+      if (currentStep < steps) {
+        const randomWord = getRandomWord();
+        gsap.to(element, {
+          duration: 0.05,
+          onUpdate: () => {
+            element.textContent = randomWord;
+          }
+        });
+        currentStep++;
+      } else {
+        clearInterval(interval);
+        // Kembalikan ke teks asli
+        gsap.to(element, {
+          duration: 0.2,
+          onUpdate: () => {
+            element.textContent = originalText;
+          },
+          onComplete: () => {
+            element.textContent = originalText;
+          }
+        });
+      }
+    }, 60);
+
+    // Animasi panah SVG
+    const arrowSvg = element.parentElement?.querySelector('.social-arrow');
+    if (arrowSvg) {
+      gsap.to(arrowSvg, {
+        scale: 1.3,
+        rotation: 45,
+        duration: 0.3,
+        ease: "back.out(1.2)",
+        yoyo: true,
+        repeat: 1
+      });
+    }
+
+    // Simpan interval untuk dibersihkan
+    element.setAttribute('data-interval', String(interval));
+  };
+
+  const handleSocialLeave = (element: HTMLElement, originalText: string) => {
+    const interval = element.getAttribute('data-interval');
+    if (interval) {
+      clearInterval(Number(interval));
+    }
+    // Pastikan teks kembali ke asli
+    element.textContent = originalText;
+    
+    // Animasi panah kembali
+    const arrowSvg = element.parentElement?.querySelector('.social-arrow');
+    if (arrowSvg) {
+      gsap.to(arrowSvg, {
+        scale: 1,
+        rotation: 0,
+        duration: 0.3,
+        ease: "power2.out"
+      });
+    }
+  };
+
   useEffect(() => {
     // Initialize ScrollSmoother
     const initSmoother = () => {
@@ -185,97 +278,7 @@ export default function HomePage(): React.JSX.Element {
       );
     }
 
-    // Split text untuk IG
-    if (igRef.current) {
-      const splitIg = new SplitText(igRef.current, {
-        type: "chars",
-        charsClass: "split-char"
-      });
-
-      gsap.fromTo(splitIg.chars,
-        {
-          opacity: 0,
-          y: -20,
-          filter: 'blur(5px)'
-        },
-        {
-          opacity: 1,
-          y: 0,
-          filter: 'blur(0px)',
-          duration: 0.6,
-          stagger: 0.03,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: igRef.current,
-            start: "top 85%",
-            end: "bottom 70%",
-            toggleActions: "play none none reverse",
-          }
-        }
-      );
-    }
-
-    // Split text untuk X
-    if (xRef.current) {
-      const splitX = new SplitText(xRef.current, {
-        type: "chars",
-        charsClass: "split-char"
-      });
-
-      gsap.fromTo(splitX.chars,
-        {
-          opacity: 0,
-          y: -20,
-          filter: 'blur(5px)'
-        },
-        {
-          opacity: 1,
-          y: 0,
-          filter: 'blur(0px)',
-          duration: 0.6,
-          stagger: 0.03,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: xRef.current,
-            start: "top 85%",
-            end: "bottom 70%",
-            toggleActions: "play none none reverse",
-          }
-        }
-      );
-    }
-
-    // Split text untuk LinkedIn
-    if (linkedinRef.current) {
-      const splitLinkedin = new SplitText(linkedinRef.current, {
-        type: "chars",
-        charsClass: "split-char"
-      });
-
-      gsap.fromTo(splitLinkedin.chars,
-        {
-          opacity: 0,
-          y: -20,
-          filter: 'blur(5px)'
-        },
-        {
-          opacity: 1,
-          y: 0,
-          filter: 'blur(0px)',
-          duration: 0.6,
-          stagger: 0.03,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: linkedinRef.current,
-            start: "top 85%",
-            end: "bottom 70%",
-            toggleActions: "play none none reverse",
-          }
-        }
-      );
-    }
-
-    // Split text untuk "MENURU" besar di footer - animasi modern
+    // Split text untuk "MENURU" besar di footer
     if (menuruTextRef.current) {
       const splitMenuru = new SplitText(menuruTextRef.current, {
         type: "chars",
@@ -341,7 +344,7 @@ export default function HomePage(): React.JSX.Element {
       );
     }
 
-    // Animasi garis putih di atas teks MENURU besar
+    // Animasi garis putih
     if (lineRef.current) {
       gsap.fromTo(lineRef.current,
         {
@@ -454,7 +457,6 @@ export default function HomePage(): React.JSX.Element {
 
   const handleSocialClick = (platform: string) => {
     console.log(`${platform} clicked`);
-    // Tambahkan link sesuai kebutuhan
   };
 
   return (
@@ -494,7 +496,6 @@ export default function HomePage(): React.JSX.Element {
           will-change: transform;
         }
 
-        /* Style untuk split text */
         .split-char {
           display: inline-block;
           will-change: transform, opacity, filter;
@@ -573,13 +574,8 @@ export default function HomePage(): React.JSX.Element {
           transition: opacity 0.3s ease, transform 0.3s ease, background-color 0.3s ease;
         }
 
-        /* Hover effect untuk social links */
-        .social-link {
-          transition: opacity 0.3s ease;
-        }
-
-        .social-link:hover {
-          opacity: 0.7;
+        .social-item {
+          transition: all 0.3s ease;
         }
       `}</style>
       
@@ -598,7 +594,7 @@ export default function HomePage(): React.JSX.Element {
             MozOsxFontSmoothing: 'grayscale',
             position: 'relative',
           }}>
-            {/* Konten pertama - 100vh dengan teks Scroll down di tengah */}
+            {/* Konten pertama - 100vh */}
             <div style={{
               height: '100vh',
               width: '100%',
@@ -617,7 +613,6 @@ export default function HomePage(): React.JSX.Element {
                 Scroll down ↓
               </div>
               
-              {/* Teks dan tombol - jarak lebih ke bawah lagi */}
               <div style={{
                 position: 'absolute',
                 bottom: '8%',
@@ -627,7 +622,6 @@ export default function HomePage(): React.JSX.Element {
                 gap: '40px',
                 width: '100%'
               }}>
-                {/* Teks "Mencatat apa yang kamu inginkan" */}
                 <div 
                   ref={mencatatTextRef}
                   style={{
@@ -643,7 +637,6 @@ export default function HomePage(): React.JSX.Element {
                   Mencatat apa yang kamu inginkan
                 </div>
 
-                {/* Tombol Contact dengan North East Arrow */}
                 <button
                   ref={contactBtnRef}
                   onClick={handleContact}
@@ -702,21 +695,8 @@ export default function HomePage(): React.JSX.Element {
                       transform: 'scale(0.8)',
                       transition: 'opacity 0.3s ease, transform 0.3s ease, background-color 0.3s ease'
                     }}>
-                      {/* North East Arrow SVG */}
-                      <svg 
-                        width="20" 
-                        height="20" 
-                        viewBox="0 0 24 24" 
-                        fill="none" 
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path 
-                          d="M7 17L17 7M17 7H7M17 7V17" 
-                          stroke="#000000" 
-                          strokeWidth="2.5" 
-                          strokeLinecap="round" 
-                          strokeLinejoin="round"
-                        />
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
                     </div>
                   </div>
@@ -724,7 +704,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* Bagian footer dengan teks MENURU, email kiri, medsos tengah */}
+            {/* Bagian footer */}
             <div style={{
               width: '100%',
               position: 'relative',
@@ -735,26 +715,26 @@ export default function HomePage(): React.JSX.Element {
               alignItems: 'center',
               minHeight: '100vh'
             }}>
-              {/* Baris Email Kiri dan Medsos Tengah - di atas garis */}
+              {/* Baris Email Kiri dan Medsos Tengah */}
               <div style={{
                 position: 'relative',
                 width: '100%',
                 display: 'flex',
                 justifyContent: 'space-between',
-                alignItems: 'flex-end',
-                padding: '0 60px',
+                alignItems: 'center',
+                padding: '0 80px',
                 marginBottom: '60px',
                 boxSizing: 'border-box'
               }}>
-                {/* Email - Sisi Kiri */}
+                {/* Email - Sisi Kiri dengan font besar */}
                 <div 
                   ref={emailRef}
                   onClick={handleEmailClick}
                   style={{
                     fontFamily: "'Questrial', sans-serif",
-                    fontSize: '16px',
+                    fontSize: '32px',
                     color: '#FFFFFF',
-                    fontWeight: '300',
+                    fontWeight: '400',
                     letterSpacing: '0.02em',
                     cursor: 'pointer',
                     transition: 'opacity 0.3s ease',
@@ -766,79 +746,122 @@ export default function HomePage(): React.JSX.Element {
                   contact.menuru@gmail.com
                 </div>
 
-                {/* Medsos - Sisi Tengah */}
+                {/* Medsos - Sisi Tengah 3 baris */}
                 <div style={{
                   display: 'flex',
-                  gap: '32px',
+                  flexDirection: 'column',
+                  gap: '24px',
                   position: 'absolute',
                   left: '50%',
                   transform: 'translateX(-50%)'
                 }}>
-                  {/* IG */}
+                  {/* Instagram */}
                   <div 
-                    ref={igRef}
-                    onClick={() => handleSocialClick('IG')}
-                    className="social-link"
+                    className="social-item"
                     style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '6px',
-                      fontFamily: "'Questrial', sans-serif",
-                      fontSize: '16px',
-                      color: '#FFFFFF',
-                      fontWeight: '300',
-                      letterSpacing: '0.02em',
+                      gap: '12px',
                       cursor: 'pointer'
                     }}
+                    onMouseEnter={(e) => {
+                      const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
+                      if (textElement) handleSocialHover(textElement, originalTexts.ig, 'IG');
+                    }}
+                    onMouseLeave={(e) => {
+                      const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
+                      if (textElement) handleSocialLeave(textElement, originalTexts.ig);
+                    }}
+                    onClick={() => handleSocialClick('Instagram')}
                   >
-                    IG
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <span 
+                      ref={igRef}
+                      className="social-text"
+                      style={{
+                        fontFamily: "'Questrial', sans-serif",
+                        fontSize: '28px',
+                        color: '#FFFFFF',
+                        fontWeight: '400',
+                        letterSpacing: '0.02em'
+                      }}
+                    >
+                      Instagram
+                    </span>
+                    <svg className="social-arrow" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                   </div>
                   
                   {/* X */}
                   <div 
-                    ref={xRef}
-                    onClick={() => handleSocialClick('X')}
-                    className="social-link"
+                    className="social-item"
                     style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '6px',
-                      fontFamily: "'Questrial', sans-serif",
-                      fontSize: '16px',
-                      color: '#FFFFFF',
-                      fontWeight: '300',
-                      letterSpacing: '0.02em',
+                      gap: '12px',
                       cursor: 'pointer'
                     }}
+                    onMouseEnter={(e) => {
+                      const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
+                      if (textElement) handleSocialHover(textElement, originalTexts.x, 'X');
+                    }}
+                    onMouseLeave={(e) => {
+                      const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
+                      if (textElement) handleSocialLeave(textElement, originalTexts.x);
+                    }}
+                    onClick={() => handleSocialClick('X')}
                   >
-                    X
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <span 
+                      ref={xRef}
+                      className="social-text"
+                      style={{
+                        fontFamily: "'Questrial', sans-serif",
+                        fontSize: '28px',
+                        color: '#FFFFFF',
+                        fontWeight: '400',
+                        letterSpacing: '0.02em'
+                      }}
+                    >
+                      X
+                    </span>
+                    <svg className="social-arrow" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                   </div>
                   
                   {/* LinkedIn */}
                   <div 
-                    ref={linkedinRef}
-                    onClick={() => handleSocialClick('LinkedIn')}
-                    className="social-link"
+                    className="social-item"
                     style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '6px',
-                      fontFamily: "'Questrial', sans-serif",
-                      fontSize: '16px',
-                      color: '#FFFFFF',
-                      fontWeight: '300',
-                      letterSpacing: '0.02em',
+                      gap: '12px',
                       cursor: 'pointer'
                     }}
+                    onMouseEnter={(e) => {
+                      const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
+                      if (textElement) handleSocialHover(textElement, originalTexts.linkedin, 'LinkedIn');
+                    }}
+                    onMouseLeave={(e) => {
+                      const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
+                      if (textElement) handleSocialLeave(textElement, originalTexts.linkedin);
+                    }}
+                    onClick={() => handleSocialClick('LinkedIn')}
                   >
-                    LinkedIn
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <span 
+                      ref={linkedinRef}
+                      className="social-text"
+                      style={{
+                        fontFamily: "'Questrial', sans-serif",
+                        fontSize: '28px',
+                        color: '#FFFFFF',
+                        fontWeight: '400',
+                        letterSpacing: '0.02em'
+                      }}
+                    >
+                      LinkedIn
+                    </span>
+                    <svg className="social-arrow" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                   </div>
@@ -854,38 +877,38 @@ export default function HomePage(): React.JSX.Element {
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'flex-end',
-                padding: '0 60px 0 0',
+                padding: '0 80px 0 0',
                 margin: 0,
                 pointerEvents: 'none',
                 zIndex: 1
               }}>
-                {/* Teks MENURU kecil di atas garis */}
+                {/* MENURU kecil - font besar */}
                 <div
                   ref={menuruTitleRef}
                   style={{
                     fontFamily: "'Questrial', sans-serif",
-                    fontSize: '24px',
+                    fontSize: '48px',
                     color: '#FFFFFF',
                     textAlign: 'right',
-                    fontWeight: '400',
-                    letterSpacing: '0.1em',
-                    marginBottom: '8px',
+                    fontWeight: '500',
+                    letterSpacing: '0.05em',
+                    marginBottom: '12px',
                     marginRight: '0',
                     opacity: 1
                   }}>
                   MENURU
                 </div>
 
-                {/* Teks BASED JAKARTA */}
+                {/* BASED JAKARTA - font besar */}
                 <div
                   ref={basedJakartaRef}
                   style={{
                     fontFamily: "'Questrial', sans-serif",
-                    fontSize: '16px',
+                    fontSize: '24px',
                     color: '#FFFFFF',
                     textAlign: 'right',
                     fontWeight: '300',
-                    letterSpacing: '0.05em',
+                    letterSpacing: '0.08em',
                     marginBottom: '40px',
                     marginRight: '0',
                     opacity: 1
@@ -936,7 +959,7 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </div>
 
-      {/* Cookie Popup - Bottom Left */}
+      {/* Cookie Popup */}
       {showPopup && (
         <div style={{
           position: 'fixed',
