@@ -23,8 +23,6 @@ export default function HomePage(): React.JSX.Element {
   const menuruTextRef = useRef<HTMLSpanElement>(null);
   const contactTextRef = useRef<HTMLSpanElement>(null);
   const lineRef = useRef<HTMLDivElement>(null);
-  const menuruTitleRef = useRef<HTMLDivElement>(null);
-  const basedJakartaRef = useRef<HTMLDivElement>(null);
   const emailRef = useRef<HTMLDivElement>(null);
   const igRef = useRef<HTMLDivElement>(null);
   const xRef = useRef<HTMLDivElement>(null);
@@ -65,27 +63,12 @@ export default function HomePage(): React.JSX.Element {
 
   // Animasi hover random huruf untuk medsos
   const handleSocialHover = (element: HTMLElement, originalText: string) => {
-    // Simpan teks asli jika belum ada
     if (!element.getAttribute('data-original')) {
       element.setAttribute('data-original', originalText);
     }
     
-    // Animasi random huruf
     const interval = randomizeText(element, originalText, 0.6);
     element.setAttribute('data-interval', String(interval));
-    
-    // Animasi panah SVG
-    const arrowSvg = element.parentElement?.querySelector('.social-arrow');
-    if (arrowSvg) {
-      gsap.to(arrowSvg, {
-        scale: 1.3,
-        rotation: 45,
-        duration: 0.3,
-        ease: "back.out(1.2)",
-        yoyo: true,
-        repeat: 1
-      });
-    }
   };
   
   const handleSocialLeave = (element: HTMLElement, originalText: string) => {
@@ -94,16 +77,6 @@ export default function HomePage(): React.JSX.Element {
       clearInterval(Number(interval));
     }
     element.textContent = originalText;
-    
-    const arrowSvg = element.parentElement?.querySelector('.social-arrow');
-    if (arrowSvg) {
-      gsap.to(arrowSvg, {
-        scale: 1,
-        rotation: 0,
-        duration: 0.3,
-        ease: "power2.out"
-      });
-    }
   };
 
   useEffect(() => {
@@ -165,66 +138,6 @@ export default function HomePage(): React.JSX.Element {
             trigger: mencatatTextRef.current,
             start: "top 80%",
             end: "bottom 60%",
-            toggleActions: "play none none reverse",
-          }
-        }
-      );
-    }
-
-    // Split text untuk "MENURU" (teks di atas garis)
-    if (menuruTitleRef.current) {
-      const splitMenuruTitle = new SplitText(menuruTitleRef.current, {
-        type: "chars",
-        charsClass: "split-char"
-      });
-
-      gsap.fromTo(splitMenuruTitle.chars,
-        {
-          opacity: 0,
-          x: -50,
-          filter: 'blur(10px)'
-        },
-        {
-          opacity: 1,
-          x: 0,
-          filter: 'blur(0px)',
-          duration: 1,
-          stagger: 0.03,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: menuruTitleRef.current,
-            start: "top 85%",
-            end: "bottom 70%",
-            toggleActions: "play none none reverse",
-          }
-        }
-      );
-    }
-
-    // Split text untuk "BASED JAKARTA"
-    if (basedJakartaRef.current) {
-      const splitBased = new SplitText(basedJakartaRef.current, {
-        type: "chars",
-        charsClass: "split-char"
-      });
-
-      gsap.fromTo(splitBased.chars,
-        {
-          opacity: 0,
-          y: 30,
-          filter: 'blur(5px)'
-        },
-        {
-          opacity: 1,
-          y: 0,
-          filter: 'blur(0px)',
-          duration: 0.8,
-          stagger: 0.02,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: basedJakartaRef.current,
-            start: "top 85%",
-            end: "bottom 70%",
             toggleActions: "play none none reverse",
           }
         }
@@ -712,18 +625,13 @@ export default function HomePage(): React.JSX.Element {
               alignItems: 'center',
               minHeight: '100vh'
             }}>
-              {/* Baris Email Kiri dan Medsos Tengah */}
+              {/* Email di bawah - lebih ke bawah */}
               <div style={{
-                position: 'relative',
                 width: '100%',
                 display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                padding: '0 80px',
-                marginBottom: '60px',
-                boxSizing: 'border-box'
+                justifyContent: 'center',
+                marginBottom: '80px'
               }}>
-                {/* Email - Sisi Kiri */}
                 <div 
                   ref={emailRef}
                   onClick={handleEmailClick}
@@ -735,133 +643,124 @@ export default function HomePage(): React.JSX.Element {
                     letterSpacing: '0.02em',
                     cursor: 'pointer',
                     transition: 'opacity 0.3s ease',
-                    opacity: 1
+                    opacity: 1,
+                    textAlign: 'center'
                   }}
                   onMouseEnter={(e) => e.currentTarget.style.opacity = '0.7'}
                   onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
                 >
                   contact.menuru@gmail.com
                 </div>
+              </div>
 
-                {/* Medsos - Sisi Tengah 3 baris dengan animasi random huruf */}
-                <div style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '24px',
-                  position: 'absolute',
-                  left: '50%',
-                  transform: 'translateX(-50%)'
-                }}>
-                  {/* Instagram */}
-                  <div 
-                    className="social-item"
+              {/* Medsos - 3 baris dengan jarak sangat dekat */}
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '8px',
+                marginBottom: '60px'
+              }}>
+                {/* Instagram */}
+                <div 
+                  className="social-item"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer'
+                  }}
+                  onMouseEnter={(e) => {
+                    const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
+                    if (textElement) handleSocialHover(textElement, originalTexts.ig);
+                  }}
+                  onMouseLeave={(e) => {
+                    const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
+                    if (textElement) handleSocialLeave(textElement, originalTexts.ig);
+                  }}
+                  onClick={() => handleSocialClick('Instagram')}
+                >
+                  <span 
+                    ref={igRef}
+                    className="social-text"
                     style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '12px',
-                      cursor: 'pointer'
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '28px',
+                      color: '#FFFFFF',
+                      fontWeight: '400',
+                      letterSpacing: '0.02em'
                     }}
-                    onMouseEnter={(e) => {
-                      const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                      if (textElement) handleSocialHover(textElement, originalTexts.ig);
-                    }}
-                    onMouseLeave={(e) => {
-                      const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                      if (textElement) handleSocialLeave(textElement, originalTexts.ig);
-                    }}
-                    onClick={() => handleSocialClick('Instagram')}
                   >
-                    <span 
-                      ref={igRef}
-                      className="social-text"
-                      style={{
-                        fontFamily: "'Questrial', sans-serif",
-                        fontSize: '28px',
-                        color: '#FFFFFF',
-                        fontWeight: '400',
-                        letterSpacing: '0.02em'
-                      }}
-                    >
-                      Instagram
-                    </span>
-                    <svg className="social-arrow" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </div>
-                  
-                  {/* X */}
-                  <div 
-                    className="social-item"
+                    Instagram
+                  </span>
+                </div>
+                
+                {/* X */}
+                <div 
+                  className="social-item"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer'
+                  }}
+                  onMouseEnter={(e) => {
+                    const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
+                    if (textElement) handleSocialHover(textElement, originalTexts.x);
+                  }}
+                  onMouseLeave={(e) => {
+                    const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
+                    if (textElement) handleSocialLeave(textElement, originalTexts.x);
+                  }}
+                  onClick={() => handleSocialClick('X')}
+                >
+                  <span 
+                    ref={xRef}
+                    className="social-text"
                     style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '12px',
-                      cursor: 'pointer'
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '28px',
+                      color: '#FFFFFF',
+                      fontWeight: '400',
+                      letterSpacing: '0.02em'
                     }}
-                    onMouseEnter={(e) => {
-                      const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                      if (textElement) handleSocialHover(textElement, originalTexts.x);
-                    }}
-                    onMouseLeave={(e) => {
-                      const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                      if (textElement) handleSocialLeave(textElement, originalTexts.x);
-                    }}
-                    onClick={() => handleSocialClick('X')}
                   >
-                    <span 
-                      ref={xRef}
-                      className="social-text"
-                      style={{
-                        fontFamily: "'Questrial', sans-serif",
-                        fontSize: '28px',
-                        color: '#FFFFFF',
-                        fontWeight: '400',
-                        letterSpacing: '0.02em'
-                      }}
-                    >
-                      X
-                    </span>
-                    <svg className="social-arrow" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </div>
-                  
-                  {/* LinkedIn */}
-                  <div 
-                    className="social-item"
+                    X
+                  </span>
+                </div>
+                
+                {/* LinkedIn */}
+                <div 
+                  className="social-item"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer'
+                  }}
+                  onMouseEnter={(e) => {
+                    const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
+                    if (textElement) handleSocialHover(textElement, originalTexts.linkedin);
+                  }}
+                  onMouseLeave={(e) => {
+                    const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
+                    if (textElement) handleSocialLeave(textElement, originalTexts.linkedin);
+                  }}
+                  onClick={() => handleSocialClick('LinkedIn')}
+                >
+                  <span 
+                    ref={linkedinRef}
+                    className="social-text"
                     style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '12px',
-                      cursor: 'pointer'
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '28px',
+                      color: '#FFFFFF',
+                      fontWeight: '400',
+                      letterSpacing: '0.02em'
                     }}
-                    onMouseEnter={(e) => {
-                      const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                      if (textElement) handleSocialHover(textElement, originalTexts.linkedin);
-                    }}
-                    onMouseLeave={(e) => {
-                      const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                      if (textElement) handleSocialLeave(textElement, originalTexts.linkedin);
-                    }}
-                    onClick={() => handleSocialClick('LinkedIn')}
                   >
-                    <span 
-                      ref={linkedinRef}
-                      className="social-text"
-                      style={{
-                        fontFamily: "'Questrial', sans-serif",
-                        fontSize: '28px',
-                        color: '#FFFFFF',
-                        fontWeight: '400',
-                        letterSpacing: '0.02em'
-                      }}
-                    >
-                      LinkedIn
-                    </span>
-                    <svg className="social-arrow" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </div>
+                    LinkedIn
+                  </span>
                 </div>
               </div>
 
@@ -879,41 +778,7 @@ export default function HomePage(): React.JSX.Element {
                 pointerEvents: 'none',
                 zIndex: 1
               }}>
-                {/* MENURU kecil */}
-                <div
-                  ref={menuruTitleRef}
-                  style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '48px',
-                    color: '#FFFFFF',
-                    textAlign: 'right',
-                    fontWeight: '500',
-                    letterSpacing: '0.05em',
-                    marginBottom: '12px',
-                    marginRight: '0',
-                    opacity: 1
-                  }}>
-                  MENURU
-                </div>
-
-                {/* BASED JAKARTA */}
-                <div
-                  ref={basedJakartaRef}
-                  style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '24px',
-                    color: '#FFFFFF',
-                    textAlign: 'right',
-                    fontWeight: '300',
-                    letterSpacing: '0.08em',
-                    marginBottom: '40px',
-                    marginRight: '0',
-                    opacity: 1
-                  }}>
-                  BASED JAKARTA
-                </div>
-                
-                {/* Garis putih */}
+                {/* Garis putih - jarak ke bawah lebih besar */}
                 <div
                   ref={lineRef}
                   style={{
@@ -921,7 +786,7 @@ export default function HomePage(): React.JSX.Element {
                     height: '2px',
                     backgroundColor: '#FFFFFF',
                     marginRight: '0',
-                    marginBottom: '40px',
+                    marginBottom: '80px',
                     opacity: 0
                   }}
                 />
