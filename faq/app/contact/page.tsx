@@ -665,57 +665,60 @@ export default function ContactPage(): React.JSX.Element {
                 marginLeft: '80px',
                 marginBottom: '150px'
               }}>
-                {/* 01 - Note */}
-                <div
-                  ref={item01Ref}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'baseline',
-                    justifyContent: 'space-between',
-                    maxWidth: '600px',
-                    cursor: 'pointer',
-                    transition: 'transform 0.3s ease'
-                  }}
-                  onMouseEnter={() => setHoveredItem('01')}
-                  onMouseLeave={() => setHoveredItem(null)}
-                >
-                  <span style={{
-                    fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
-                    fontSize: '90px',
-                    fontWeight: '300',
-                    color: '#000000',
-                    letterSpacing: '-0.02em',
-                    lineHeight: '1'
-                  }}>
-                    01
-                  </span>
-                  <span style={{
-                    fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
-                    fontSize: '300px',
-                    fontWeight: '300',
-                    color: '#000000',
-                    letterSpacing: '-0.02em'
-                  }}>
-                    Note
-                  </span>
-                </div>
+               {/* 01 - Note */}
+<div
+  ref={item01Ref}
+  style={{
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    maxWidth: '800px',
+    cursor: 'pointer',
+    transition: 'transform 0.3s ease'
+  }}
+  onMouseEnter={() => setHoveredItem('01')}
+  onMouseLeave={() => setHoveredItem(null)}
+>
+  <span style={{
+    fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
+    fontSize: '90px',
+    fontWeight: '300',
+    color: '#000000',
+    letterSpacing: '-0.02em',
+    lineHeight: '1'
+  }}>
+    01
+  </span>
+  <div style={{
+    display: 'flex',
+    alignItems: 'center',
+    gap: '30px'
+  }}>
+    <span style={{
+      fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
+      fontSize: '300px',
+      fontWeight: '300',
+      color: '#000000',
+      letterSpacing: '-0.02em'
+    }}>
+      Note
+    </span>
+    {/* Hover text untuk 01 - muncul di samping kanan */}
+    {hoveredItem === '01' && (
+      <div
+        ref={hoverTextRef}
+        style={{
+          fontFamily: "'Questrial', sans-serif",
+          fontSize: '20px',
+          fontWeight: '400',
+          color: '#000000',
+          whiteSpace: 'nowrap'
+        }}
+      >
+        / kamu bisa mencatat apa yang kamu inginkan
+      </div>
+    )}
 
-                {/* Hover text untuk 01 */}
-                {hoveredItem === '01' && (
-                  <div
-                    ref={hoverTextRef}
-                    style={{
-                      fontFamily: "'Questrial', sans-serif",
-                      fontSize: '20px',
-                      fontWeight: '400',
-                      color: '#000000',
-                      marginLeft: '80px',
-                      marginTop: '-30px'
-                    }}
-                  >
-                    / kamu bisa mencatat apa yang kamu inginkan
-                  </div>
-                )}
 
                 {/* 02 - Calendar */}
                 <div
@@ -803,7 +806,7 @@ export default function ContactPage(): React.JSX.Element {
                 >
                   <span style={{
                     fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
-                    fontSize: '300px',
+                    fontSize: '90px',
                     fontWeight: '300',
                     color: '#000000',
                     letterSpacing: '-0.02em',
@@ -813,7 +816,7 @@ export default function ContactPage(): React.JSX.Element {
                   </span>
                   <span style={{
                     fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
-                    fontSize: '90px',
+                    fontSize: '300px',
                     fontWeight: '300',
                     color: '#000000',
                     letterSpacing: '-0.02em'
