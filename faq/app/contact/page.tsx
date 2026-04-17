@@ -601,46 +601,47 @@ export default function ContactPage(): React.JSX.Element {
                 You can know contact Website this Menuru
               </div>
 
-              {/* Baris 01 dan Note dengan jarak dekat tapi tidak terlalu dekat */}
-              <div style={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                gap: '120px',
-                position: 'relative'
-              }}>
-                {/* 01 - Sisi Kiri - font 90px */}
-                <div
-                  style={{
-                    fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
-                    fontSize: '90px',
-                    fontWeight: '400',
-                    color: '#000000',
-                    cursor: 'pointer',
-                    lineHeight: '1'
-                  }}
-                  onMouseEnter={() => setShowNoteText(true)}
-                  onMouseLeave={() => setShowNoteText(false)}
-                >
-                  01
-                </div>
+           {/* Baris 01 dan Note */}
+<div style={{
+  display: 'flex',
+  justifyContent: 'flex-start',
+  alignItems: 'center',
+  gap: '60px',
+  position: 'relative',
+  paddingLeft: '80px'
+}}>
+  {/* 01 - kecil & ringan */}
+  <div
+    style={{
+      fontFamily: "'Inter', 'Helvetica Neue', Arial, sans-serif",
+      fontSize: '32px',
+      fontWeight: '400',
+      color: '#111',
+      letterSpacing: '2px',
+      lineHeight: '1'
+    }}
+    onMouseEnter={() => setShowNoteText(true)}
+    onMouseLeave={() => setShowNoteText(false)}
+  >
+    01
+  </div>
 
-                {/* Note - font 193px */}
-                <div
-                  style={{
-                    fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
-                    fontSize: '193px',
-                    fontWeight: '400',
-                    color: '#000000',
-                    cursor: 'pointer',
-                    lineHeight: '1'
-                  }}
-                  onMouseEnter={() => setShowNoteText(true)}
-                  onMouseLeave={() => setShowNoteText(false)}
-                >
-                  Note
-                </div>
-              </div>
+  {/* Note jadi besar & clean */}
+  <div
+    style={{
+      fontFamily: "'Inter', 'Helvetica Neue', Arial, sans-serif",
+      fontSize: '160px',
+      fontWeight: '400',
+      color: '#111',
+      letterSpacing: '-2px',
+      lineHeight: '1'
+    }}
+    onMouseEnter={() => setShowNoteText(true)}
+    onMouseLeave={() => setShowNoteText(false)}
+  >
+    Note
+  </div>
+</div>
 
               {/* Teks hover yang muncul di samping kanan Note - dengan GSAP SplitText */}
               {showNoteText && (
