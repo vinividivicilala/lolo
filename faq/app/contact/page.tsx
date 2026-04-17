@@ -601,64 +601,61 @@ export default function ContactPage(): React.JSX.Element {
                 You can know contact Website this Menuru
               </div>
 
-              {/* Baris 01 di kiri dan Note di sebelahnya dengan jarak agak dekat */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '60px'
-              }}>
-                {/* 01 - Sisi Kiri - font minimalis 24px */}
-                <div
-                  style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '24px',
-                    fontWeight: '400',
-                    color: '#000000',
-                    cursor: 'pointer'
-                  }}
-                  onMouseEnter={() => setShowNoteText(true)}
-                  onMouseLeave={() => setShowNoteText(false)}
-                >
-                  01
-                </div>
+           {/* Baris 01 di kiri dan Note di sebelahnya dengan jarak agak dekat */}
+<div style={{
+  display: 'flex',
+  alignItems: 'center',
+  gap: '60px'
+}}>
+  {/* 01 - Sisi Kiri - font 100px */}
+  <div
+    style={{
+      fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
+      fontSize: '100px',
+      fontWeight: '400',
+      color: '#000000',
+      cursor: 'pointer'
+    }}
+    onMouseEnter={() => setShowNoteText(true)}
+    onMouseLeave={() => setShowNoteText(false)}
+  >
+    01
+  </div>
 
-                {/* Note - font minimalis 24px */}
-                <div
-                  style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '24px',
-                    fontWeight: '400',
-                    color: '#000000',
-                    cursor: 'pointer'
-                  }}
-                  onMouseEnter={() => setShowNoteText(true)}
-                  onMouseLeave={() => setShowNoteText(false)}
-                >
-                  Note
-                </div>
-              </div>
+  {/* Note - font 197px */}
+  <div
+    style={{
+      fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
+      fontSize: '197px',
+      fontWeight: '400',
+      color: '#000000',
+      cursor: 'pointer'
+    }}
+    onMouseEnter={() => setShowNoteText(true)}
+    onMouseLeave={() => setShowNoteText(false)}
+  >
+    Note
+  </div>
+</div>
 
-              {/* Teks hover yang muncul di samping kanan Note - dengan GSAP SplitText */}
-              {showNoteText && (
-                <div
-                  ref={hoverTextRef}
-                  style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '20px',
-                    fontWeight: '400',
-                    color: '#000000',
-                    position: 'absolute',
-                    right: '40px',
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    whiteSpace: 'nowrap'
-                  }}
-                >
-                  / kamu bisa mencatat apa yang kamu inginkan
-                </div>
-              )}
-            </div>
+              {/* Teks hover yang muncul di samping kanan Note */}
+{showNoteText && (
+  <div
+    ref={hoverTextRef}
+    style={{
+      fontFamily: "'Questrial', sans-serif",
+      fontSize: '20px',
+      fontWeight: '400',
+      color: '#000000',
+      marginLeft: '30px',
+      whiteSpace: 'nowrap'
+    }}
+  >
+    / kamu bisa mencatat apa yang kamu inginkan
+  </div>
+)}
 
+            
             {/* Email dan Medsos - di bagian bawah */}
             <div style={{
               position: 'relative',
