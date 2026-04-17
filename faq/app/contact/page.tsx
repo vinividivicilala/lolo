@@ -15,7 +15,7 @@ if (typeof window !== 'undefined') {
 
 export default function ContactPage(): React.JSX.Element {
   const [showPopup, setShowPopup] = useState(false);
-  const [showNoteText, setShowNoteText] = useState(false);
+  const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   const acceptBtnRef = useRef<HTMLButtonElement>(null);
   const declineBtnRef = useRef<HTMLButtonElement>(null);
   const smootherRef = useRef<any>(null);
@@ -31,9 +31,6 @@ export default function ContactPage(): React.JSX.Element {
   const linkedinRef = useRef<HTMLDivElement>(null);
   const infoTextRef = useRef<HTMLDivElement>(null);
   const hoverTextRef = useRef<HTMLDivElement>(null);
-
-  // State untuk hover item
-  const [hoveredItem, setHoveredItem] = useState<string | null>(null);
 
   // Variabel untuk menyimpan teks asli medsos
   const originalTexts = {
@@ -604,18 +601,18 @@ export default function ContactPage(): React.JSX.Element {
                 You can know contact Website this Menuru
               </div>
 
-              {/* Daftar item 01-04 - sejajar semua, font besar tidak tebal */}
+              {/* Daftar item 01-04 - tidak tebal, font besar, digeser ke kanan */}
               <div style={{
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '40px',
-                marginLeft: '0'
+                marginLeft: '200px'
               }}>
                 {/* 01 - Note */}
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '30px'
+                  gap: '40px'
                 }}>
                   <div
                     style={{
@@ -663,7 +660,7 @@ export default function ContactPage(): React.JSX.Element {
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '30px'
+                  gap: '40px'
                 }}>
                   <div
                     style={{
@@ -691,7 +688,7 @@ export default function ContactPage(): React.JSX.Element {
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '30px'
+                  gap: '40px'
                 }}>
                   <div
                     style={{
@@ -719,7 +716,7 @@ export default function ContactPage(): React.JSX.Element {
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '30px'
+                  gap: '40px'
                 }}>
                   <div
                     style={{
