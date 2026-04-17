@@ -15,6 +15,8 @@ if (typeof window !== 'undefined') {
 
 export default function ContactPage(): React.JSX.Element {
   const [showPopup, setShowPopup] = useState(false);
+  const [hoverText01, setHoverText01] = useState(false);
+  const [hoverTextNote, setHoverTextNote] = useState(false);
   const acceptBtnRef = useRef<HTMLButtonElement>(null);
   const declineBtnRef = useRef<HTMLButtonElement>(null);
   const smootherRef = useRef<any>(null);
@@ -28,6 +30,10 @@ export default function ContactPage(): React.JSX.Element {
   const igRef = useRef<HTMLDivElement>(null);
   const xRef = useRef<HTMLDivElement>(null);
   const linkedinRef = useRef<HTMLDivElement>(null);
+  const infoTextRef = useRef<HTMLDivElement>(null);
+  const number01Ref = useRef<HTMLDivElement>(null);
+  const noteRef = useRef<HTMLDivElement>(null);
+  const hoverTextRef = useRef<HTMLDivElement>(null);
 
   // Variabel untuk menyimpan teks asli medsos
   const originalTexts = {
@@ -143,7 +149,7 @@ export default function ContactPage(): React.JSX.Element {
       );
     }
 
-    // Animasi garis bawah teks Contact - panjang ke samping penuh seperti garis MENURU
+    // Animasi garis bawah teks Contact
     if (contactUnderlineRef.current) {
       gsap.fromTo(contactUnderlineRef.current,
         {
@@ -159,6 +165,78 @@ export default function ContactPage(): React.JSX.Element {
           ease: "power3.out",
           scrollTrigger: {
             trigger: contactUnderlineRef.current,
+            start: "top 85%",
+            end: "bottom 70%",
+            toggleActions: "play none none reverse",
+          }
+        }
+      );
+    }
+
+    // Animasi teks info
+    if (infoTextRef.current) {
+      gsap.fromTo(infoTextRef.current,
+        {
+          opacity: 0,
+          y: 30,
+          filter: 'blur(5px)'
+        },
+        {
+          opacity: 1,
+          y: 0,
+          filter: 'blur(0px)',
+          duration: 0.8,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: infoTextRef.current,
+            start: "top 85%",
+            end: "bottom 70%",
+            toggleActions: "play none none reverse",
+          }
+        }
+      );
+    }
+
+    // Animasi number 01
+    if (number01Ref.current) {
+      gsap.fromTo(number01Ref.current,
+        {
+          opacity: 0,
+          x: -30,
+          filter: 'blur(5px)'
+        },
+        {
+          opacity: 1,
+          x: 0,
+          filter: 'blur(0px)',
+          duration: 0.6,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: number01Ref.current,
+            start: "top 85%",
+            end: "bottom 70%",
+            toggleActions: "play none none reverse",
+          }
+        }
+      );
+    }
+
+    // Animasi Note
+    if (noteRef.current) {
+      gsap.fromTo(noteRef.current,
+        {
+          opacity: 0,
+          y: -20,
+          filter: 'blur(5px)'
+        },
+        {
+          opacity: 1,
+          y: 0,
+          filter: 'blur(0px)',
+          duration: 0.6,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: noteRef.current,
             start: "top 85%",
             end: "bottom 70%",
             toggleActions: "play none none reverse",
@@ -197,7 +275,7 @@ export default function ContactPage(): React.JSX.Element {
       );
     }
 
-    // Split text untuk "MENURU" besar di footer - warna hitam
+    // Split text untuk "MENURU" besar di footer
     if (menuruTextRef.current) {
       const splitMenuru = new SplitText(menuruTextRef.current, {
         type: "chars",
@@ -400,6 +478,10 @@ export default function ContactPage(): React.JSX.Element {
         .social-item {
           transition: all 0.3s ease;
         }
+
+        .hover-text {
+          transition: opacity 0.3s ease, transform 0.3s ease;
+        }
       `}</style>
       
       <div id="smooth-wrapper-contact">
@@ -471,7 +553,7 @@ export default function ContactPage(): React.JSX.Element {
               </span>
             </div>
 
-            {/* Teks Contact dengan garis bawah panjang ke samping */}
+            {/* Teks Contact dengan garis bawah */}
             <div style={{
               position: 'absolute',
               top: '120px',
@@ -488,14 +570,14 @@ export default function ContactPage(): React.JSX.Element {
                   color: '#000000',
                   textAlign: 'left',
                   letterSpacing: '-0.02em',
-                  textTransform: 'capitalize',
+                  textTransform: 'none',
                   lineHeight: '1',
                   WebkitFontSmoothing: 'antialiased',
                   MozOsxFontSmoothing: 'grayscale'
                 }}>
                 Contact
               </div>
-              {/* Garis bawah teks Contact - panjang ke samping penuh seperti garis MENURU */}
+              {/* Garis bawah teks Contact */}
               <div
                 ref={contactUnderlineRef}
                 style={{
@@ -506,6 +588,104 @@ export default function ContactPage(): React.JSX.Element {
                   opacity: 0
                 }}
               />
+            </div>
+
+            {/* Teks info di bawah garis - posisi tengah atas */}
+            <div
+              ref={infoTextRef}
+              style={{
+                position: 'absolute',
+                top: '460px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                textAlign: 'center',
+                zIndex: 10,
+                fontFamily: "'Questrial', sans-serif",
+                fontSize: '16px',
+                color: '#666666',
+                fontWeight: '300',
+                letterSpacing: '0.02em',
+                opacity: 0,
+                whiteSpace: 'nowrap'
+              }}>
+              You can know contact Website this Menuru
+            </div>
+
+            {/* Baris 01 dan Note - dengan hover effect */}
+            <div style={{
+              position: 'absolute',
+              bottom: '180px',
+              left: '0',
+              right: '0',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              padding: '0 80px',
+              zIndex: 10
+            }}>
+              {/* 01 di sisi kiri */}
+              <div
+                ref={number01Ref}
+                onMouseEnter={() => setHoverText01(true)}
+                onMouseLeave={() => setHoverText01(false)}
+                style={{
+                  fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
+                  fontSize: '80px',
+                  fontWeight: '300',
+                  color: '#000000',
+                  cursor: 'pointer',
+                  opacity: 0,
+                  letterSpacing: '-0.02em'
+                }}>
+                01
+              </div>
+
+              {/* Note di sisi tengah */}
+              <div
+                ref={noteRef}
+                onMouseEnter={() => setHoverTextNote(true)}
+                onMouseLeave={() => setHoverTextNote(false)}
+                style={{
+                  fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
+                  fontSize: '80px',
+                  fontWeight: '300',
+                  color: '#000000',
+                  cursor: 'pointer',
+                  opacity: 0,
+                  letterSpacing: '-0.02em',
+                  position: 'absolute',
+                  left: '50%',
+                  transform: 'translateX(-50%)'
+                }}>
+                Note
+              </div>
+            </div>
+
+            {/* Hover text yang muncul di samping Note */}
+            <div
+              ref={hoverTextRef}
+              style={{
+                position: 'absolute',
+                bottom: '180px',
+                left: '50%',
+                transform: 'translateX(calc(-50% + 120px))',
+                fontFamily: "'Questrial', sans-serif",
+                fontSize: '20px',
+                color: '#000000',
+                fontWeight: '300',
+                letterSpacing: '0.02em',
+                whiteSpace: 'nowrap',
+                opacity: 0,
+                transition: 'opacity 0.3s ease, transform 0.3s ease',
+                pointerEvents: 'none',
+                zIndex: 20
+              }}>
+              {hoverText01 && (
+                <span style={{ opacity: 1 }}>/ kamu bisa mencatat apa yang kamu inginkan</span>
+              )}
+              {hoverTextNote && (
+                <span style={{ opacity: 1 }}>/ kamu bisa mencatat apa yang kamu inginkan</span>
+              )}
             </div>
 
             {/* Email dan Medsos - di bagian bawah */}
