@@ -1,3 +1,4 @@
+// app/page.tsx (Halaman Utama)
 'use client';
 
 import React, { useState, useEffect, useRef } from "react";
@@ -5,6 +6,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ScrollSmoother } from "gsap/ScrollSmoother";
 import { SplitText } from "gsap/SplitText";
+import Link from "next/link";
 
 // Register GSAP plugins
 if (typeof window !== 'undefined') {
@@ -546,71 +548,73 @@ export default function HomePage(): React.JSX.Element {
                   }}>.</span>
                 </div>
 
-                {/* Tombol Contact */}
-                <button
-                  ref={contactBtnRef}
-                  onClick={handleContact}
-                  className="contact-btn-effect"
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '16px',
-                    padding: '14px 36px',
-                    borderRadius: '60px',
-                    cursor: 'pointer',
-                    fontSize: '20px',
-                    fontWeight: '600',
-                    letterSpacing: '-0.01em',
-                    fontFamily: 'Questrial, sans-serif',
-                    transition: 'all 0.3s ease',
-                    position: 'relative',
-                    overflow: 'hidden',
-                    zIndex: 1,
-                    border: '1.5px solid #333333',
-                    backgroundColor: '#000000',
-                    color: '#ffffff'
-                  }}
-                >
-                  <span ref={contactTextRef}>Contact</span>
-                  
-                  <div style={{
-                    position: 'relative',
-                    width: '40px',
-                    height: '40px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}>
-                    <div className="dot-small" style={{
-                      width: '8px',
-                      height: '8px',
-                      borderRadius: '50%',
-                      backgroundColor: '#ffffff',
-                      opacity: 1,
-                      transform: 'scale(1)',
-                      transition: 'opacity 0.3s ease, transform 0.3s ease',
-                      position: 'absolute'
-                    }}></div>
+                {/* Tombol Contact dengan Link ke halaman Contact */}
+                <Link href="/contact">
+                  <button
+                    ref={contactBtnRef}
+                    onClick={handleContact}
+                    className="contact-btn-effect"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '16px',
+                      padding: '14px 36px',
+                      borderRadius: '60px',
+                      cursor: 'pointer',
+                      fontSize: '20px',
+                      fontWeight: '600',
+                      letterSpacing: '-0.01em',
+                      fontFamily: 'Questrial, sans-serif',
+                      transition: 'all 0.3s ease',
+                      position: 'relative',
+                      overflow: 'hidden',
+                      zIndex: 1,
+                      border: '1.5px solid #333333',
+                      backgroundColor: '#000000',
+                      color: '#ffffff'
+                    }}
+                  >
+                    <span ref={contactTextRef}>Contact</span>
                     
-                    <div className="circle-large-white" style={{
-                      position: 'absolute',
+                    <div style={{
+                      position: 'relative',
                       width: '40px',
                       height: '40px',
-                      borderRadius: '50%',
-                      backgroundColor: '#ffffff',
                       display: 'flex',
                       alignItems: 'center',
-                      justifyContent: 'center',
-                      opacity: 0,
-                      transform: 'scale(0.8)',
-                      transition: 'opacity 0.3s ease, transform 0.3s ease, background-color 0.3s ease'
+                      justifyContent: 'center'
                     }}>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
+                      <div className="dot-small" style={{
+                        width: '8px',
+                        height: '8px',
+                        borderRadius: '50%',
+                        backgroundColor: '#ffffff',
+                        opacity: 1,
+                        transform: 'scale(1)',
+                        transition: 'opacity 0.3s ease, transform 0.3s ease',
+                        position: 'absolute'
+                      }}></div>
+                      
+                      <div className="circle-large-white" style={{
+                        position: 'absolute',
+                        width: '40px',
+                        height: '40px',
+                        borderRadius: '50%',
+                        backgroundColor: '#ffffff',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        opacity: 0,
+                        transform: 'scale(0.8)',
+                        transition: 'opacity 0.3s ease, transform 0.3s ease, background-color 0.3s ease'
+                      }}>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </div>
                     </div>
-                  </div>
-                </button>
+                  </button>
+                </Link>
               </div>
             </div>
 
@@ -636,7 +640,7 @@ export default function HomePage(): React.JSX.Element {
                 marginBottom: '30px',
                 boxSizing: 'border-box'
               }}>
-                {/* Email - Sisi Kiri (lebih ke bawah) */}
+                {/* Email - Sisi Kiri */}
                 <div 
                   ref={emailRef}
                   onClick={handleEmailClick}
@@ -657,7 +661,7 @@ export default function HomePage(): React.JSX.Element {
                   contact.menuru@gmail.com
                 </div>
 
-                {/* Medsos - Sisi Tengah 3 baris, tanpa panah SVG, jarak dekat */}
+                {/* Medsos - Sisi Tengah 3 baris */}
                 <div style={{
                   display: 'flex',
                   flexDirection: 'column',
@@ -782,7 +786,7 @@ export default function HomePage(): React.JSX.Element {
                 pointerEvents: 'none',
                 zIndex: 1
               }}>
-                {/* Garis putih - jarak ke bawah ditambah */}
+                {/* Garis putih */}
                 <div
                   ref={lineRef}
                   style={{
