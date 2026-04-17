@@ -596,148 +596,94 @@ export default function ContactPage(): React.JSX.Element {
                   textAlign: 'center',
                   letterSpacing: '-0.01em',
                   lineHeight: '1.2',
-                  marginBottom: '80px'
+                  marginBottom: '100px'
                 }}>
                 You can know contact Website this Menuru
               </div>
 
-              {/* Daftar item 01-04 - tidak tebal, font besar, digeser ke kanan */}
+              {/* Daftar item seperti di foto - tidak tebal, font besar tapi normal */}
               <div style={{
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '40px',
-                marginLeft: '200px'
+                gap: '60px',
+                marginLeft: '80px'
               }}>
-                {/* 01 - Note */}
+                {/* 01 - A project */}
                 <div style={{
                   display: 'flex',
-                  alignItems: 'center',
-                  gap: '40px'
+                  alignItems: 'baseline',
+                  gap: '60px'
                 }}>
-                  <div
-                    style={{
-                      fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
-                      fontSize: '80px',
-                      fontWeight: '400',
-                      color: '#000000',
-                      cursor: 'pointer'
-                    }}
-                    onMouseEnter={() => setHoveredItem('01')}
-                    onMouseLeave={() => setHoveredItem(null)}
-                  >
+                  <span style={{
+                    fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
+                    fontSize: '100px',
+                    fontWeight: '300',
+                    color: '#000000',
+                    letterSpacing: '-0.02em'
+                  }}>
                     01
-                  </div>
-                  <div
-                    style={{
-                      fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
-                      fontSize: '80px',
-                      fontWeight: '400',
-                      color: '#000000',
-                      cursor: 'pointer'
-                    }}
-                    onMouseEnter={() => setHoveredItem('01')}
-                    onMouseLeave={() => setHoveredItem(null)}
-                  >
-                    Note
-                  </div>
-                  {hoveredItem === '01' && (
-                    <div
-                      ref={hoverTextRef}
-                      style={{
-                        fontFamily: "'Questrial', sans-serif",
-                        fontSize: '20px',
-                        fontWeight: '400',
-                        color: '#000000',
-                        whiteSpace: 'nowrap'
-                      }}
-                    >
-                      / kamu bisa mencatat apa yang kamu inginkan
-                    </div>
-                  )}
+                  </span>
+                  <span style={{
+                    fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
+                    fontSize: '100px',
+                    fontWeight: '300',
+                    color: '#000000',
+                    letterSpacing: '-0.02em'
+                  }}>
+                    A project
+                  </span>
                 </div>
 
-                {/* 02 - Calendar */}
+                {/* 02 - Application */}
                 <div style={{
                   display: 'flex',
-                  alignItems: 'center',
-                  gap: '40px'
+                  alignItems: 'baseline',
+                  gap: '60px'
                 }}>
-                  <div
-                    style={{
-                      fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
-                      fontSize: '80px',
-                      fontWeight: '400',
-                      color: '#000000'
-                    }}
-                  >
+                  <span style={{
+                    fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
+                    fontSize: '100px',
+                    fontWeight: '300',
+                    color: '#000000',
+                    letterSpacing: '-0.02em'
+                  }}>
                     02
-                  </div>
-                  <div
-                    style={{
-                      fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
-                      fontSize: '80px',
-                      fontWeight: '400',
-                      color: '#000000'
-                    }}
-                  >
-                    Calendar
-                  </div>
+                  </span>
+                  <span style={{
+                    fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
+                    fontSize: '100px',
+                    fontWeight: '300',
+                    color: '#000000',
+                    letterSpacing: '-0.02em'
+                  }}>
+                    Application
+                  </span>
                 </div>
 
-                {/* 03 - Donation */}
+                {/* 03 - Read more */}
                 <div style={{
                   display: 'flex',
-                  alignItems: 'center',
-                  gap: '40px'
+                  alignItems: 'baseline',
+                  gap: '60px'
                 }}>
-                  <div
-                    style={{
-                      fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
-                      fontSize: '80px',
-                      fontWeight: '400',
-                      color: '#000000'
-                    }}
-                  >
+                  <span style={{
+                    fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
+                    fontSize: '100px',
+                    fontWeight: '300',
+                    color: '#000000',
+                    letterSpacing: '-0.02em'
+                  }}>
                     03
-                  </div>
-                  <div
-                    style={{
-                      fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
-                      fontSize: '80px',
-                      fontWeight: '400',
-                      color: '#000000'
-                    }}
-                  >
-                    Donation
-                  </div>
-                </div>
-
-                {/* 04 - Community */}
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '40px'
-                }}>
-                  <div
-                    style={{
-                      fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
-                      fontSize: '80px',
-                      fontWeight: '400',
-                      color: '#000000'
-                    }}
-                  >
-                    04
-                  </div>
-                  <div
-                    style={{
-                      fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
-                      fontSize: '80px',
-                      fontWeight: '400',
-                      color: '#000000'
-                    }}
-                  >
-                    Community
-                  </div>
+                  </span>
+                  <span style={{
+                    fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
+                    fontSize: '100px',
+                    fontWeight: '300',
+                    color: '#000000',
+                    letterSpacing: '-0.02em'
+                  }}>
+                    Read more
+                  </span>
                 </div>
               </div>
             </div>
