@@ -89,10 +89,9 @@ export default function ContactPage(): React.JSX.Element {
     element.textContent = originalText;
   };
 
-  // Animasi hover untuk item 01-04 menggunakan GSAP tanpa SplitText
+  // Animasi hover untuk item 01-04 menggunakan GSAP
   useEffect(() => {
     if (hoveredItem === '01' && hoverTextRef.current && item01Ref.current) {
-      // Animasi teks hover muncul
       gsap.fromTo(hoverTextRef.current,
         {
           opacity: 0,
@@ -107,8 +106,6 @@ export default function ContactPage(): React.JSX.Element {
           ease: "power2.out"
         }
       );
-      
-      // Animasi item 01
       gsap.to(item01Ref.current, {
         scale: 1.02,
         duration: 0.3,
@@ -130,7 +127,6 @@ export default function ContactPage(): React.JSX.Element {
     }
   }, [hoveredItem]);
 
-  // Animasi hover untuk item 02
   useEffect(() => {
     if (hoveredItem === '02' && item02Ref.current) {
       gsap.to(item02Ref.current, {
@@ -147,7 +143,6 @@ export default function ContactPage(): React.JSX.Element {
     }
   }, [hoveredItem]);
 
-  // Animasi hover untuk item 03
   useEffect(() => {
     if (hoveredItem === '03' && item03Ref.current) {
       gsap.to(item03Ref.current, {
@@ -164,7 +159,6 @@ export default function ContactPage(): React.JSX.Element {
     }
   }, [hoveredItem]);
 
-  // Animasi hover untuk item 04
   useEffect(() => {
     if (hoveredItem === '04' && item04Ref.current) {
       gsap.to(item04Ref.current, {
@@ -182,7 +176,6 @@ export default function ContactPage(): React.JSX.Element {
   }, [hoveredItem]);
 
   useEffect(() => {
-    // Initialize ScrollSmoother
     const initSmoother = () => {
       if (typeof window !== 'undefined' && !smootherRef.current) {
         smootherRef.current = ScrollSmoother.create({
@@ -602,7 +595,7 @@ export default function ContactPage(): React.JSX.Element {
               </span>
             </div>
 
-            {/* Teks Contact dengan garis bawah - font besar seperti teks 01 */}
+            {/* Teks Contact besar 300px */}
             <div style={{
               position: 'absolute',
               top: '120px',
@@ -614,7 +607,7 @@ export default function ContactPage(): React.JSX.Element {
                 ref={contactTitleRef}
                 style={{
                   fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
-                  fontSize: '120px',
+                  fontSize: '300px',
                   fontWeight: '300',
                   color: '#000000',
                   textAlign: 'left',
@@ -662,20 +655,21 @@ export default function ContactPage(): React.JSX.Element {
                 You can know contact Website this Menuru
               </div>
 
-              {/* Daftar item 01-04 - digeser ke kanan, font besar, dengan hover animasi GSAP */}
+              {/* Daftar item 01-04 - angka di kiri, teks di tengah dengan jarak jauh */}
               <div style={{
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '50px',
-                marginLeft: '200px'
+                gap: '60px',
+                marginLeft: '80px'
               }}>
-                {/* 01 - Note dengan hover text */}
+                {/* 01 - Note */}
                 <div
                   ref={item01Ref}
                   style={{
                     display: 'flex',
                     alignItems: 'baseline',
-                    gap: '60px',
+                    justifyContent: 'space-between',
+                    maxWidth: '600px',
                     cursor: 'pointer',
                     transition: 'transform 0.3s ease'
                   }}
@@ -684,7 +678,7 @@ export default function ContactPage(): React.JSX.Element {
                 >
                   <span style={{
                     fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
-                    fontSize: '80px',
+                    fontSize: '90px',
                     fontWeight: '300',
                     color: '#000000',
                     letterSpacing: '-0.02em'
@@ -693,7 +687,7 @@ export default function ContactPage(): React.JSX.Element {
                   </span>
                   <span style={{
                     fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
-                    fontSize: '80px',
+                    fontSize: '90px',
                     fontWeight: '300',
                     color: '#000000',
                     letterSpacing: '-0.02em'
@@ -702,7 +696,7 @@ export default function ContactPage(): React.JSX.Element {
                   </span>
                 </div>
 
-                {/* Hover text untuk 01 - Note */}
+                {/* Hover text untuk 01 */}
                 {hoveredItem === '01' && (
                   <div
                     ref={hoverTextRef}
@@ -711,7 +705,7 @@ export default function ContactPage(): React.JSX.Element {
                       fontSize: '20px',
                       fontWeight: '400',
                       color: '#000000',
-                      marginLeft: '140px',
+                      marginLeft: '80px',
                       marginTop: '-30px'
                     }}
                   >
@@ -725,7 +719,8 @@ export default function ContactPage(): React.JSX.Element {
                   style={{
                     display: 'flex',
                     alignItems: 'baseline',
-                    gap: '60px',
+                    justifyContent: 'space-between',
+                    maxWidth: '600px',
                     cursor: 'pointer',
                     transition: 'transform 0.3s ease'
                   }}
@@ -734,7 +729,7 @@ export default function ContactPage(): React.JSX.Element {
                 >
                   <span style={{
                     fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
-                    fontSize: '80px',
+                    fontSize: '90px',
                     fontWeight: '300',
                     color: '#000000',
                     letterSpacing: '-0.02em'
@@ -743,7 +738,7 @@ export default function ContactPage(): React.JSX.Element {
                   </span>
                   <span style={{
                     fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
-                    fontSize: '80px',
+                    fontSize: '90px',
                     fontWeight: '300',
                     color: '#000000',
                     letterSpacing: '-0.02em'
@@ -758,7 +753,8 @@ export default function ContactPage(): React.JSX.Element {
                   style={{
                     display: 'flex',
                     alignItems: 'baseline',
-                    gap: '60px',
+                    justifyContent: 'space-between',
+                    maxWidth: '600px',
                     cursor: 'pointer',
                     transition: 'transform 0.3s ease'
                   }}
@@ -767,7 +763,7 @@ export default function ContactPage(): React.JSX.Element {
                 >
                   <span style={{
                     fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
-                    fontSize: '80px',
+                    fontSize: '90px',
                     fontWeight: '300',
                     color: '#000000',
                     letterSpacing: '-0.02em'
@@ -776,7 +772,7 @@ export default function ContactPage(): React.JSX.Element {
                   </span>
                   <span style={{
                     fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
-                    fontSize: '80px',
+                    fontSize: '90px',
                     fontWeight: '300',
                     color: '#000000',
                     letterSpacing: '-0.02em'
@@ -791,7 +787,8 @@ export default function ContactPage(): React.JSX.Element {
                   style={{
                     display: 'flex',
                     alignItems: 'baseline',
-                    gap: '60px',
+                    justifyContent: 'space-between',
+                    maxWidth: '600px',
                     cursor: 'pointer',
                     transition: 'transform 0.3s ease'
                   }}
@@ -800,7 +797,7 @@ export default function ContactPage(): React.JSX.Element {
                 >
                   <span style={{
                     fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
-                    fontSize: '80px',
+                    fontSize: '90px',
                     fontWeight: '300',
                     color: '#000000',
                     letterSpacing: '-0.02em'
@@ -809,7 +806,7 @@ export default function ContactPage(): React.JSX.Element {
                   </span>
                   <span style={{
                     fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
-                    fontSize: '80px',
+                    fontSize: '90px',
                     fontWeight: '300',
                     color: '#000000',
                     letterSpacing: '-0.02em'
