@@ -21,8 +21,6 @@ export default function ContactPage(): React.JSX.Element {
   
   // Refs untuk teks yang akan di-split
   const menuruTextRef = useRef<HTMLSpanElement>(null);
-  const menuruTitleRef = useRef<HTMLDivElement>(null);
-  const basedJakartaRef = useRef<HTMLDivElement>(null);
   const lineRef = useRef<HTMLDivElement>(null);
   const emailRef = useRef<HTMLDivElement>(null);
   const igRef = useRef<HTMLDivElement>(null);
@@ -113,66 +111,6 @@ export default function ContactPage(): React.JSX.Element {
 
   // GSAP SplitText animations
   useEffect(() => {
-    // Split text untuk "MENURU" kecil
-    if (menuruTitleRef.current) {
-      const splitMenuruTitle = new SplitText(menuruTitleRef.current, {
-        type: "chars",
-        charsClass: "split-char"
-      });
-
-      gsap.fromTo(splitMenuruTitle.chars,
-        {
-          opacity: 0,
-          x: -50,
-          filter: 'blur(10px)'
-        },
-        {
-          opacity: 1,
-          x: 0,
-          filter: 'blur(0px)',
-          duration: 1,
-          stagger: 0.03,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: menuruTitleRef.current,
-            start: "top 85%",
-            end: "bottom 70%",
-            toggleActions: "play none none reverse",
-          }
-        }
-      );
-    }
-
-    // Split text untuk "BASED JAKARTA"
-    if (basedJakartaRef.current) {
-      const splitBased = new SplitText(basedJakartaRef.current, {
-        type: "chars",
-        charsClass: "split-char"
-      });
-
-      gsap.fromTo(splitBased.chars,
-        {
-          opacity: 0,
-          y: 30,
-          filter: 'blur(5px)'
-        },
-        {
-          opacity: 1,
-          y: 0,
-          filter: 'blur(0px)',
-          duration: 0.8,
-          stagger: 0.02,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: basedJakartaRef.current,
-            start: "top 85%",
-            end: "bottom 70%",
-            toggleActions: "play none none reverse",
-          }
-        }
-      );
-    }
-
     // Split text untuk email
     if (emailRef.current) {
       const splitEmail = new SplitText(emailRef.current, {
@@ -451,6 +389,28 @@ export default function ContactPage(): React.JSX.Element {
               </Link>
             </div>
 
+            {/* Judul Website MENURU - Desain seperti teks MENURU besar di sisi kanan */}
+            <div style={{
+              position: 'fixed',
+              top: '40px',
+              right: '40px',
+              zIndex: 100,
+              pointerEvents: 'none'
+            }}>
+              <span style={{
+                fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
+                fontWeight: 'normal',
+                fontSize: '48px',
+                color: '#000000',
+                letterSpacing: '-0.02em',
+                textTransform: 'uppercase',
+                WebkitFontSmoothing: 'antialiased',
+                MozOsxFontSmoothing: 'grayscale'
+              }}>
+                MENURU
+              </span>
+            </div>
+
             {/* Email dan Medsos */}
             <div style={{
               position: 'relative',
@@ -608,40 +568,6 @@ export default function ContactPage(): React.JSX.Element {
               pointerEvents: 'none',
               zIndex: 1
             }}>
-              {/* MENURU kecil */}
-              <div
-                ref={menuruTitleRef}
-                style={{
-                  fontFamily: "'Questrial', sans-serif",
-                  fontSize: '48px',
-                  color: '#000000',
-                  textAlign: 'right',
-                  fontWeight: '500',
-                  letterSpacing: '0.05em',
-                  marginBottom: '12px',
-                  marginRight: '0',
-                  opacity: 1
-                }}>
-                MENURU
-              </div>
-
-              {/* BASED JAKARTA */}
-              <div
-                ref={basedJakartaRef}
-                style={{
-                  fontFamily: "'Questrial', sans-serif",
-                  fontSize: '24px',
-                  color: '#000000',
-                  textAlign: 'right',
-                  fontWeight: '300',
-                  letterSpacing: '0.08em',
-                  marginBottom: '40px',
-                  marginRight: '0',
-                  opacity: 1
-                }}>
-                BASED JAKARTA
-              </div>
-              
               {/* Garis hitam */}
               <div
                 ref={lineRef}
@@ -650,7 +576,7 @@ export default function ContactPage(): React.JSX.Element {
                   height: '2px',
                   backgroundColor: '#000000',
                   marginRight: '0',
-                  marginBottom: '40px',
+                  marginBottom: '60px',
                   opacity: 0
                 }}
               />
