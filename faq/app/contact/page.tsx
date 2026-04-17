@@ -119,7 +119,7 @@ export default function ContactPage(): React.JSX.Element {
 
   // GSAP SplitText animations
   useEffect(() => {
-    // Split text untuk "Contact" - tidak tebal (weight 300)
+    // Split text untuk "Contact" - normal (weight 400)
     if (contactTitleRef.current) {
       const splitContact = new SplitText(contactTitleRef.current, {
         type: "chars",
@@ -553,7 +553,7 @@ export default function ContactPage(): React.JSX.Element {
               </span>
             </div>
 
-            {/* Teks Contact dengan garis bawah - tidak tebal (weight 300) */}
+            {/* Teks Contact dengan garis bawah - normal (weight 400) */}
             <div style={{
               position: 'absolute',
               top: '120px',
@@ -566,7 +566,7 @@ export default function ContactPage(): React.JSX.Element {
                 style={{
                   fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
                   fontSize: '300px',
-                  fontWeight: '300',
+                  fontWeight: '400',
                   color: '#000000',
                   textAlign: 'left',
                   letterSpacing: '-0.02em',
@@ -590,23 +590,24 @@ export default function ContactPage(): React.JSX.Element {
               />
             </div>
 
-            {/* Teks info baru - Follow the procedure calmly. - warna hitam, font besar */}
+            {/* Teks info - Follow the procedure calmly. - ukuran 200px */}
             <div
               ref={infoTextRef}
               style={{
                 position: 'absolute',
-                top: '480px',
+                top: '500px',
                 left: '50%',
                 transform: 'translateX(-50%)',
                 textAlign: 'center',
                 zIndex: 10,
-                fontFamily: "'Questrial', sans-serif",
-                fontSize: '32px',
-                color: '#000000',
+                fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
+                fontSize: '200px',
                 fontWeight: '400',
-                letterSpacing: '-0.01em',
+                color: '#000000',
+                letterSpacing: '-0.02em',
                 opacity: 0,
-                whiteSpace: 'nowrap'
+                whiteSpace: 'nowrap',
+                lineHeight: '1'
               }}>
               Follow the procedure calmly.
             </div>
@@ -614,7 +615,7 @@ export default function ContactPage(): React.JSX.Element {
             {/* Baris 01 dan Note - di bawah teks Follow the procedure calmly. */}
             <div style={{
               position: 'absolute',
-              bottom: '200px',
+              bottom: '280px',
               left: '0',
               right: '0',
               display: 'flex',
@@ -631,7 +632,7 @@ export default function ContactPage(): React.JSX.Element {
                 style={{
                   fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
                   fontSize: '80px',
-                  fontWeight: '300',
+                  fontWeight: '400',
                   color: '#000000',
                   cursor: 'pointer',
                   opacity: 0,
@@ -648,7 +649,7 @@ export default function ContactPage(): React.JSX.Element {
                 style={{
                   fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
                   fontSize: '80px',
-                  fontWeight: '300',
+                  fontWeight: '400',
                   color: '#000000',
                   cursor: 'pointer',
                   opacity: 0,
@@ -666,13 +667,13 @@ export default function ContactPage(): React.JSX.Element {
               ref={hoverTextRef}
               style={{
                 position: 'absolute',
-                bottom: '200px',
+                bottom: '280px',
                 left: '50%',
                 transform: 'translateX(calc(-50% + 140px))',
                 fontFamily: "'Questrial', sans-serif",
-                fontSize: '20px',
+                fontSize: '24px',
                 color: '#000000',
-                fontWeight: '300',
+                fontWeight: '400',
                 letterSpacing: '0.02em',
                 whiteSpace: 'nowrap',
                 opacity: 0,
