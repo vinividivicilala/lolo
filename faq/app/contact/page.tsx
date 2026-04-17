@@ -112,7 +112,7 @@ export default function ContactPage(): React.JSX.Element {
 
   // GSAP SplitText animations
   useEffect(() => {
-    // Split text untuk "CONTACT" besar
+    // Split text untuk "CONTACT" besar di sisi kiri
     if (contactTitleRef.current) {
       const splitContact = new SplitText(contactTitleRef.current, {
         type: "chars",
@@ -122,14 +122,12 @@ export default function ContactPage(): React.JSX.Element {
       gsap.fromTo(splitContact.chars,
         {
           opacity: 0,
-          y: 100,
-          rotateX: -90,
+          x: -100,
           filter: 'blur(10px)'
         },
         {
           opacity: 1,
-          y: 0,
-          rotateX: 0,
+          x: 0,
           filter: 'blur(0px)',
           duration: 1.2,
           stagger: 0.03,
@@ -448,14 +446,11 @@ export default function ContactPage(): React.JSX.Element {
               </span>
             </div>
 
-            {/* Teks CONTACT besar di tengah halaman */}
+            {/* Teks CONTACT besar di sisi kiri, di bawah judul web */}
             <div style={{
               position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              width: '100%',
-              textAlign: 'center',
+              top: '35%',
+              left: '80px',
               zIndex: 10
             }}>
               <div 
@@ -465,10 +460,10 @@ export default function ContactPage(): React.JSX.Element {
                   fontSize: '250px',
                   fontWeight: '400',
                   color: '#000000',
-                  textAlign: 'center',
+                  textAlign: 'left',
                   letterSpacing: '-0.02em',
                   textTransform: 'uppercase',
-                  lineHeight: '1',
+                  lineHeight: '0.9',
                   WebkitFontSmoothing: 'antialiased',
                   MozOsxFontSmoothing: 'grayscale'
                 }}>
