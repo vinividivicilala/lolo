@@ -475,10 +475,10 @@ export default function HomePage(): React.JSX.Element {
                 Scroll down ↓
               </div>
               
-              {/* Teks dan tombol - jarak ke bawah lebih besar */}
+              {/* Teks dan tombol - jarak lebih ke bawah lagi (bottom: 8%) */}
               <div style={{
                 position: 'absolute',
-                bottom: '15%',
+                bottom: '8%',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
@@ -606,35 +606,36 @@ export default function HomePage(): React.JSX.Element {
                 pointerEvents: 'none',
                 zIndex: 1
               }}>
-                {/* Teks MENURU kecil di atas garis */}
+                {/* Teks MENURU kecil di atas garis - warna putih solid */}
                 <div
                   ref={menuruTitleRef}
                   style={{
                     fontFamily: "'Questrial', sans-serif",
                     fontSize: '24px',
-                    color: 'white',
+                    color: '#FFFFFF',
                     textAlign: 'right',
                     fontWeight: '400',
                     letterSpacing: '0.1em',
                     marginBottom: '8px',
                     marginRight: '0',
-                    opacity: 0.8
+                    opacity: 1
                   }}>
                   MENURU
                 </div>
 
-                {/* Teks BASED JAKARTA */}
+                {/* Teks BASED JAKARTA - warna putih solid */}
                 <div
                   ref={basedJakartaRef}
                   style={{
                     fontFamily: "'Questrial', sans-serif",
                     fontSize: '16px',
-                    color: 'rgba(255,255,255,0.6)',
+                    color: '#FFFFFF',
                     textAlign: 'right',
                     fontWeight: '300',
                     letterSpacing: '0.05em',
                     marginBottom: '40px',
-                    marginRight: '0'
+                    marginRight: '0',
+                    opacity: 1
                   }}>
                   BASED JAKARTA
                 </div>
@@ -645,7 +646,7 @@ export default function HomePage(): React.JSX.Element {
                   style={{
                     width: '0%',
                     height: '2px',
-                    backgroundColor: 'white',
+                    backgroundColor: '#FFFFFF',
                     marginRight: '0',
                     marginBottom: '40px',
                     opacity: 0
@@ -659,10 +660,10 @@ export default function HomePage(): React.JSX.Element {
                     fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
                     fontWeight: 'normal',
                     fontSize: '600px',
-                    color: 'white',
+                    color: '#FFFFFF',
                     textAlign: 'right',
                     letterSpacing: '-0.02em',
-                    opacity: 0.95,
+                    opacity: 1,
                     textTransform: 'uppercase',
                     lineHeight: '0.7',
                     whiteSpace: 'nowrap',
