@@ -602,68 +602,67 @@ export default function ContactPage(): React.JSX.Element {
               </div>
 
               {/* Baris 01 di kiri dan Note di sebelahnya dengan hover text di samping Note */}
-<div style={{
-  display: 'flex',
-  alignItems: 'center',
-  gap: '60px'
-}}>
-  {/* 01 */}
-  <div
-    style={{
-      fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
-      fontSize: '100px',
-      fontWeight: '400',
-      color: '#000000',
-      cursor: 'pointer'
-    }}
-    onMouseEnter={() => setShowNoteText(true)}
-    onMouseLeave={() => setShowNoteText(false)}
-  >
-    01
-  </div>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '60px'
+              }}>
+                {/* 01 - Sisi Kiri - font 100px */}
+                <div
+                  style={{
+                    fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
+                    fontSize: '100px',
+                    fontWeight: '400',
+                    color: '#000000',
+                    cursor: 'pointer'
+                  }}
+                  onMouseEnter={() => setShowNoteText(true)}
+                  onMouseLeave={() => setShowNoteText(false)}
+                >
+                  01
+                </div>
 
-  {/* Note dan hover text dalam satu grup */}
-  <div style={{
-    display: 'flex',
-    alignItems: 'center',
-    gap: '20px'
-  }}>
-    <div
-      style={{
-        fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
-        fontSize: '197px',
-        fontWeight: '400',
-        color: '#000000',
-        cursor: 'pointer'
-      }}
-      onMouseEnter={() => setShowNoteText(true)}
-      onMouseLeave={() => setShowNoteText(false)}
-    >
-      Note
-    </div>
-    </div>
+                {/* Note dan hover text dalam satu grup */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '30px'
+                }}>
+                  {/* Note - font 197px */}
+                  <div
+                    style={{
+                      fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
+                      fontSize: '197px',
+                      fontWeight: '400',
+                      color: '#000000',
+                      cursor: 'pointer',
+                      lineHeight: '1'
+                    }}
+                    onMouseEnter={() => setShowNoteText(true)}
+                    onMouseLeave={() => setShowNoteText(false)}
+                  >
+                    Note
+                  </div>
 
-    {/* Teks hover muncul di samping Note */}
-    {showNoteText && (
-      <div
-        ref={hoverTextRef}
-        style={{
-          fontFamily: "'Questrial', sans-serif",
-          fontSize: '20px',
-          fontWeight: '400',
-          color: '#000000',
-          whiteSpace: 'nowrap'
-        }}
-      >
-        / kamu bisa mencatat apa yang kamu inginkan
-      </div>
-    )}
-  </div>
+                  {/* Teks hover muncul di samping Note - dengan GSAP SplitText */}
+                  {showNoteText && (
+                    <div
+                      ref={hoverTextRef}
+                      style={{
+                        fontFamily: "'Questrial', sans-serif",
+                        fontSize: '20px',
+                        fontWeight: '400',
+                        color: '#000000',
+                        whiteSpace: 'nowrap'
+                      }}
+                    >
+                      / kamu bisa mencatat apa yang kamu inginkan
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
 
-
-         
-
-            
             {/* Email dan Medsos - di bagian bawah */}
             <div style={{
               position: 'relative',
