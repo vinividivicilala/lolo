@@ -665,7 +665,7 @@ export default function ContactPage(): React.JSX.Element {
                 marginLeft: '80px',
                 marginBottom: '150px'
               }}>
-               {/* 01 - Note */}
+         {/* 01 - Note dengan hover text di samping kanan */}
 <div
   ref={item01Ref}
   style={{
@@ -692,7 +692,7 @@ export default function ContactPage(): React.JSX.Element {
   <div style={{
     display: 'flex',
     alignItems: 'center',
-    gap: '30px'
+    gap: '40px'
   }}>
     <span style={{
       fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
@@ -703,7 +703,7 @@ export default function ContactPage(): React.JSX.Element {
     }}>
       Note
     </span>
-    {/* Hover text untuk 01 - muncul di samping kanan */}
+    {/* Teks hover muncul di samping kanan Note */}
     {hoveredItem === '01' && (
       <div
         ref={hoverTextRef}
@@ -718,7 +718,8 @@ export default function ContactPage(): React.JSX.Element {
         / kamu bisa mencatat apa yang kamu inginkan
       </div>
     )}
-
+  </div>
+</div>
 
                 {/* 02 - Calendar */}
                 <div
