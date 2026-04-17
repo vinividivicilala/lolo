@@ -687,7 +687,7 @@ export default function ContactPage(): React.JSX.Element {
                   </span>
                   <span style={{
                     fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
-                    fontSize: '90px',
+                    fontSize: '300px',
                     fontWeight: '300',
                     color: '#000000',
                     letterSpacing: '-0.02em'
@@ -738,7 +738,7 @@ export default function ContactPage(): React.JSX.Element {
                   </span>
                   <span style={{
                     fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
-                    fontSize: '90px',
+                    fontSize: '300px',
                     fontWeight: '300',
                     color: '#000000',
                     letterSpacing: '-0.02em'
@@ -772,7 +772,7 @@ export default function ContactPage(): React.JSX.Element {
                   </span>
                   <span style={{
                     fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
-                    fontSize: '90px',
+                    fontSize: '300px',
                     fontWeight: '300',
                     color: '#000000',
                     letterSpacing: '-0.02em'
@@ -806,7 +806,7 @@ export default function ContactPage(): React.JSX.Element {
                   </span>
                   <span style={{
                     fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
-                    fontSize: '90px',
+                    fontSize: '300px',
                     fontWeight: '300',
                     color: '#000000',
                     letterSpacing: '-0.02em'
