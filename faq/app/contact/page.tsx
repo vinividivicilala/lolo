@@ -601,21 +601,23 @@ export default function ContactPage(): React.JSX.Element {
                 You can know contact Website this Menuru
               </div>
 
-              {/* Baris 01 di kiri dan Note di tengah */}
+              {/* Baris 01 dan Note dengan jarak dekat tapi tidak terlalu dekat */}
               <div style={{
                 display: 'flex',
-                justifyContent: 'space-between',
+                justifyContent: 'center',
                 alignItems: 'center',
+                gap: '120px',
                 position: 'relative'
               }}>
-                {/* 01 - Sisi Kiri */}
+                {/* 01 - Sisi Kiri - font 90px */}
                 <div
                   style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '24px',
+                    fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
+                    fontSize: '90px',
                     fontWeight: '400',
                     color: '#000000',
-                    cursor: 'pointer'
+                    cursor: 'pointer',
+                    lineHeight: '1'
                   }}
                   onMouseEnter={() => setShowNoteText(true)}
                   onMouseLeave={() => setShowNoteText(false)}
@@ -623,39 +625,37 @@ export default function ContactPage(): React.JSX.Element {
                   01
                 </div>
 
-                {/* Note - Sisi Tengah */}
+                {/* Note - font 193px */}
                 <div
                   style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '24px',
+                    fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
+                    fontSize: '193px',
                     fontWeight: '400',
                     color: '#000000',
                     cursor: 'pointer',
-                    position: 'absolute',
-                    left: '50%',
-                    transform: 'translateX(-50%)'
+                    lineHeight: '1'
                   }}
                   onMouseEnter={() => setShowNoteText(true)}
                   onMouseLeave={() => setShowNoteText(false)}
                 >
                   Note
                 </div>
-
-                {/* Tempat kosong di kanan untuk keseimbangan */}
-                <div style={{ width: '50px' }} />
               </div>
 
-              {/* Teks hover yang muncul di bawah - dengan GSAP SplitText */}
+              {/* Teks hover yang muncul di samping kanan Note - dengan GSAP SplitText */}
               {showNoteText && (
                 <div
                   ref={hoverTextRef}
                   style={{
                     fontFamily: "'Questrial', sans-serif",
-                    fontSize: '20px',
+                    fontSize: '24px',
                     fontWeight: '400',
                     color: '#000000',
-                    textAlign: 'center',
-                    marginTop: '30px'
+                    position: 'absolute',
+                    right: '40px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    whiteSpace: 'nowrap'
                   }}
                 >
                   / kamu bisa mencatat apa yang kamu inginkan
