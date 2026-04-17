@@ -25,6 +25,10 @@ export default function HomePage(): React.JSX.Element {
   const lineRef = useRef<HTMLDivElement>(null);
   const menuruTitleRef = useRef<HTMLDivElement>(null);
   const basedJakartaRef = useRef<HTMLDivElement>(null);
+  const emailRef = useRef<HTMLDivElement>(null);
+  const igRef = useRef<HTMLDivElement>(null);
+  const xRef = useRef<HTMLDivElement>(null);
+  const linkedinRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // Initialize ScrollSmoother
@@ -143,6 +147,126 @@ export default function HomePage(): React.JSX.Element {
           ease: "power2.out",
           scrollTrigger: {
             trigger: basedJakartaRef.current,
+            start: "top 85%",
+            end: "bottom 70%",
+            toggleActions: "play none none reverse",
+          }
+        }
+      );
+    }
+
+    // Split text untuk email
+    if (emailRef.current) {
+      const splitEmail = new SplitText(emailRef.current, {
+        type: "chars",
+        charsClass: "split-char"
+      });
+
+      gsap.fromTo(splitEmail.chars,
+        {
+          opacity: 0,
+          x: -30,
+          filter: 'blur(5px)'
+        },
+        {
+          opacity: 1,
+          x: 0,
+          filter: 'blur(0px)',
+          duration: 0.8,
+          stagger: 0.02,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: emailRef.current,
+            start: "top 85%",
+            end: "bottom 70%",
+            toggleActions: "play none none reverse",
+          }
+        }
+      );
+    }
+
+    // Split text untuk IG
+    if (igRef.current) {
+      const splitIg = new SplitText(igRef.current, {
+        type: "chars",
+        charsClass: "split-char"
+      });
+
+      gsap.fromTo(splitIg.chars,
+        {
+          opacity: 0,
+          y: -20,
+          filter: 'blur(5px)'
+        },
+        {
+          opacity: 1,
+          y: 0,
+          filter: 'blur(0px)',
+          duration: 0.6,
+          stagger: 0.03,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: igRef.current,
+            start: "top 85%",
+            end: "bottom 70%",
+            toggleActions: "play none none reverse",
+          }
+        }
+      );
+    }
+
+    // Split text untuk X
+    if (xRef.current) {
+      const splitX = new SplitText(xRef.current, {
+        type: "chars",
+        charsClass: "split-char"
+      });
+
+      gsap.fromTo(splitX.chars,
+        {
+          opacity: 0,
+          y: -20,
+          filter: 'blur(5px)'
+        },
+        {
+          opacity: 1,
+          y: 0,
+          filter: 'blur(0px)',
+          duration: 0.6,
+          stagger: 0.03,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: xRef.current,
+            start: "top 85%",
+            end: "bottom 70%",
+            toggleActions: "play none none reverse",
+          }
+        }
+      );
+    }
+
+    // Split text untuk LinkedIn
+    if (linkedinRef.current) {
+      const splitLinkedin = new SplitText(linkedinRef.current, {
+        type: "chars",
+        charsClass: "split-char"
+      });
+
+      gsap.fromTo(splitLinkedin.chars,
+        {
+          opacity: 0,
+          y: -20,
+          filter: 'blur(5px)'
+        },
+        {
+          opacity: 1,
+          y: 0,
+          filter: 'blur(0px)',
+          duration: 0.6,
+          stagger: 0.03,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: linkedinRef.current,
             start: "top 85%",
             end: "bottom 70%",
             toggleActions: "play none none reverse",
@@ -324,6 +448,15 @@ export default function HomePage(): React.JSX.Element {
     console.log('Contact clicked');
   };
 
+  const handleEmailClick = () => {
+    window.location.href = 'mailto:contact.menuru@gmail.com';
+  };
+
+  const handleSocialClick = (platform: string) => {
+    console.log(`${platform} clicked`);
+    // Tambahkan link sesuai kebutuhan
+  };
+
   return (
     <>
       <style jsx global>{`
@@ -439,6 +572,15 @@ export default function HomePage(): React.JSX.Element {
         .circle-large-white {
           transition: opacity 0.3s ease, transform 0.3s ease, background-color 0.3s ease;
         }
+
+        /* Hover effect untuk social links */
+        .social-link {
+          transition: opacity 0.3s ease;
+        }
+
+        .social-link:hover {
+          opacity: 0.7;
+        }
       `}</style>
       
       <div id="smooth-wrapper">
@@ -475,7 +617,7 @@ export default function HomePage(): React.JSX.Element {
                 Scroll down ↓
               </div>
               
-              {/* Teks dan tombol - jarak lebih ke bawah lagi (bottom: 8%) */}
+              {/* Teks dan tombol - jarak lebih ke bawah lagi */}
               <div style={{
                 position: 'absolute',
                 bottom: '8%',
@@ -501,7 +643,7 @@ export default function HomePage(): React.JSX.Element {
                   Mencatat apa yang kamu inginkan
                 </div>
 
-                {/* Tombol Contact */}
+                {/* Tombol Contact dengan North East Arrow */}
                 <button
                   ref={contactBtnRef}
                   onClick={handleContact}
@@ -560,6 +702,7 @@ export default function HomePage(): React.JSX.Element {
                       transform: 'scale(0.8)',
                       transition: 'opacity 0.3s ease, transform 0.3s ease, background-color 0.3s ease'
                     }}>
+                      {/* North East Arrow SVG */}
                       <svg 
                         width="20" 
                         height="20" 
@@ -568,7 +711,7 @@ export default function HomePage(): React.JSX.Element {
                         xmlns="http://www.w3.org/2000/svg"
                       >
                         <path 
-                          d="M17 7L7 17M7 17H17M7 17V7" 
+                          d="M7 17L17 7M17 7H7M17 7V17" 
                           stroke="#000000" 
                           strokeWidth="2.5" 
                           strokeLinecap="round" 
@@ -581,7 +724,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* Bagian footer dengan teks MENURU */}
+            {/* Bagian footer dengan teks MENURU, email kiri, medsos tengah */}
             <div style={{
               width: '100%',
               position: 'relative',
@@ -592,6 +735,116 @@ export default function HomePage(): React.JSX.Element {
               alignItems: 'center',
               minHeight: '100vh'
             }}>
+              {/* Baris Email Kiri dan Medsos Tengah - di atas garis */}
+              <div style={{
+                position: 'relative',
+                width: '100%',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'flex-end',
+                padding: '0 60px',
+                marginBottom: '60px',
+                boxSizing: 'border-box'
+              }}>
+                {/* Email - Sisi Kiri */}
+                <div 
+                  ref={emailRef}
+                  onClick={handleEmailClick}
+                  style={{
+                    fontFamily: "'Questrial', sans-serif",
+                    fontSize: '16px',
+                    color: '#FFFFFF',
+                    fontWeight: '300',
+                    letterSpacing: '0.02em',
+                    cursor: 'pointer',
+                    transition: 'opacity 0.3s ease',
+                    opacity: 1
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.opacity = '0.7'}
+                  onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+                >
+                  contact.menuru@gmail.com
+                </div>
+
+                {/* Medsos - Sisi Tengah */}
+                <div style={{
+                  display: 'flex',
+                  gap: '32px',
+                  position: 'absolute',
+                  left: '50%',
+                  transform: 'translateX(-50%)'
+                }}>
+                  {/* IG */}
+                  <div 
+                    ref={igRef}
+                    onClick={() => handleSocialClick('IG')}
+                    className="social-link"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '16px',
+                      color: '#FFFFFF',
+                      fontWeight: '300',
+                      letterSpacing: '0.02em',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    IG
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                  
+                  {/* X */}
+                  <div 
+                    ref={xRef}
+                    onClick={() => handleSocialClick('X')}
+                    className="social-link"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '16px',
+                      color: '#FFFFFF',
+                      fontWeight: '300',
+                      letterSpacing: '0.02em',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    X
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                  
+                  {/* LinkedIn */}
+                  <div 
+                    ref={linkedinRef}
+                    onClick={() => handleSocialClick('LinkedIn')}
+                    className="social-link"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '16px',
+                      color: '#FFFFFF',
+                      fontWeight: '300',
+                      letterSpacing: '0.02em',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    LinkedIn
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
               <footer style={{
                 position: 'relative',
                 bottom: 0,
@@ -606,7 +859,7 @@ export default function HomePage(): React.JSX.Element {
                 pointerEvents: 'none',
                 zIndex: 1
               }}>
-                {/* Teks MENURU kecil di atas garis - warna putih solid */}
+                {/* Teks MENURU kecil di atas garis */}
                 <div
                   ref={menuruTitleRef}
                   style={{
@@ -623,7 +876,7 @@ export default function HomePage(): React.JSX.Element {
                   MENURU
                 </div>
 
-                {/* Teks BASED JAKARTA - warna putih solid */}
+                {/* Teks BASED JAKARTA */}
                 <div
                   ref={basedJakartaRef}
                   style={{
