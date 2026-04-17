@@ -625,13 +625,18 @@ export default function HomePage(): React.JSX.Element {
               alignItems: 'center',
               minHeight: '100vh'
             }}>
-              {/* Email - tengah */}
+              {/* Email dan Medsos */}
               <div style={{
+                position: 'relative',
                 width: '100%',
                 display: 'flex',
-                justifyContent: 'center',
-                marginBottom: '60px'
+                justifyContent: 'space-between',
+                alignItems: 'flex-end',
+                padding: '0 80px',
+                marginBottom: '30px',
+                boxSizing: 'border-box'
               }}>
+                {/* Email - Sisi Kiri (lebih ke bawah) */}
                 <div 
                   ref={emailRef}
                   onClick={handleEmailClick}
@@ -644,123 +649,122 @@ export default function HomePage(): React.JSX.Element {
                     cursor: 'pointer',
                     transition: 'opacity 0.3s ease',
                     opacity: 1,
-                    textAlign: 'center'
+                    marginBottom: '20px'
                   }}
                   onMouseEnter={(e) => e.currentTarget.style.opacity = '0.7'}
                   onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
                 >
                   contact.menuru@gmail.com
                 </div>
-              </div>
 
-              {/* Medsos - 3 baris dengan jarak SANGAT DEKAT (4px) */}
-              <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: '4px',
-                marginBottom: '60px'
-              }}>
-                {/* Instagram */}
-                <div 
-                  className="social-item"
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    cursor: 'pointer'
-                  }}
-                  onMouseEnter={(e) => {
-                    const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                    if (textElement) handleSocialHover(textElement, originalTexts.ig);
-                  }}
-                  onMouseLeave={(e) => {
-                    const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                    if (textElement) handleSocialLeave(textElement, originalTexts.ig);
-                  }}
-                  onClick={() => handleSocialClick('Instagram')}
-                >
-                  <span 
-                    ref={igRef}
-                    className="social-text"
+                {/* Medsos - Sisi Tengah 3 baris, tanpa panah SVG, jarak dekat */}
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '8px',
+                  position: 'absolute',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  marginBottom: '20px'
+                }}>
+                  {/* Instagram */}
+                  <div 
+                    className="social-item"
                     style={{
-                      fontFamily: "'Questrial', sans-serif",
-                      fontSize: '28px',
-                      color: '#FFFFFF',
-                      fontWeight: '400',
-                      letterSpacing: '0.02em'
+                      display: 'flex',
+                      alignItems: 'center',
+                      cursor: 'pointer'
                     }}
+                    onMouseEnter={(e) => {
+                      const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
+                      if (textElement) handleSocialHover(textElement, originalTexts.ig);
+                    }}
+                    onMouseLeave={(e) => {
+                      const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
+                      if (textElement) handleSocialLeave(textElement, originalTexts.ig);
+                    }}
+                    onClick={() => handleSocialClick('Instagram')}
                   >
-                    Instagram
-                  </span>
-                </div>
-                
-                {/* X */}
-                <div 
-                  className="social-item"
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    cursor: 'pointer'
-                  }}
-                  onMouseEnter={(e) => {
-                    const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                    if (textElement) handleSocialHover(textElement, originalTexts.x);
-                  }}
-                  onMouseLeave={(e) => {
-                    const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                    if (textElement) handleSocialLeave(textElement, originalTexts.x);
-                  }}
-                  onClick={() => handleSocialClick('X')}
-                >
-                  <span 
-                    ref={xRef}
-                    className="social-text"
+                    <span 
+                      ref={igRef}
+                      className="social-text"
+                      style={{
+                        fontFamily: "'Questrial', sans-serif",
+                        fontSize: '28px',
+                        color: '#FFFFFF',
+                        fontWeight: '400',
+                        letterSpacing: '0.02em'
+                      }}
+                    >
+                      Instagram
+                    </span>
+                  </div>
+                  
+                  {/* X */}
+                  <div 
+                    className="social-item"
                     style={{
-                      fontFamily: "'Questrial', sans-serif",
-                      fontSize: '28px',
-                      color: '#FFFFFF',
-                      fontWeight: '400',
-                      letterSpacing: '0.02em'
+                      display: 'flex',
+                      alignItems: 'center',
+                      cursor: 'pointer'
                     }}
+                    onMouseEnter={(e) => {
+                      const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
+                      if (textElement) handleSocialHover(textElement, originalTexts.x);
+                    }}
+                    onMouseLeave={(e) => {
+                      const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
+                      if (textElement) handleSocialLeave(textElement, originalTexts.x);
+                    }}
+                    onClick={() => handleSocialClick('X')}
                   >
-                    X
-                  </span>
-                </div>
-                
-                {/* LinkedIn */}
-                <div 
-                  className="social-item"
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    cursor: 'pointer'
-                  }}
-                  onMouseEnter={(e) => {
-                    const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                    if (textElement) handleSocialHover(textElement, originalTexts.linkedin);
-                  }}
-                  onMouseLeave={(e) => {
-                    const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                    if (textElement) handleSocialLeave(textElement, originalTexts.linkedin);
-                  }}
-                  onClick={() => handleSocialClick('LinkedIn')}
-                >
-                  <span 
-                    ref={linkedinRef}
-                    className="social-text"
+                    <span 
+                      ref={xRef}
+                      className="social-text"
+                      style={{
+                        fontFamily: "'Questrial', sans-serif",
+                        fontSize: '28px',
+                        color: '#FFFFFF',
+                        fontWeight: '400',
+                        letterSpacing: '0.02em'
+                      }}
+                    >
+                      X
+                    </span>
+                  </div>
+                  
+                  {/* LinkedIn */}
+                  <div 
+                    className="social-item"
                     style={{
-                      fontFamily: "'Questrial', sans-serif",
-                      fontSize: '28px',
-                      color: '#FFFFFF',
-                      fontWeight: '400',
-                      letterSpacing: '0.02em'
+                      display: 'flex',
+                      alignItems: 'center',
+                      cursor: 'pointer'
                     }}
+                    onMouseEnter={(e) => {
+                      const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
+                      if (textElement) handleSocialHover(textElement, originalTexts.linkedin);
+                    }}
+                    onMouseLeave={(e) => {
+                      const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
+                      if (textElement) handleSocialLeave(textElement, originalTexts.linkedin);
+                    }}
+                    onClick={() => handleSocialClick('LinkedIn')}
                   >
-                    LinkedIn
-                  </span>
+                    <span 
+                      ref={linkedinRef}
+                      className="social-text"
+                      style={{
+                        fontFamily: "'Questrial', sans-serif",
+                        fontSize: '28px',
+                        color: '#FFFFFF',
+                        fontWeight: '400',
+                        letterSpacing: '0.02em'
+                      }}
+                    >
+                      LinkedIn
+                    </span>
+                  </div>
                 </div>
               </div>
 
@@ -778,7 +782,7 @@ export default function HomePage(): React.JSX.Element {
                 pointerEvents: 'none',
                 zIndex: 1
               }}>
-                {/* Garis putih */}
+                {/* Garis putih - jarak ke bawah ditambah */}
                 <div
                   ref={lineRef}
                   style={{
@@ -786,7 +790,7 @@ export default function HomePage(): React.JSX.Element {
                     height: '2px',
                     backgroundColor: '#FFFFFF',
                     marginRight: '0',
-                    marginBottom: '80px',
+                    marginBottom: '60px',
                     opacity: 0
                   }}
                 />
