@@ -625,12 +625,12 @@ export default function HomePage(): React.JSX.Element {
               alignItems: 'center',
               minHeight: '100vh'
             }}>
-              {/* Email di bawah - lebih ke bawah */}
+              {/* Email - tengah */}
               <div style={{
                 width: '100%',
                 display: 'flex',
                 justifyContent: 'center',
-                marginBottom: '80px'
+                marginBottom: '60px'
               }}>
                 <div 
                   ref={emailRef}
@@ -653,12 +653,12 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </div>
 
-              {/* Medsos - 3 baris dengan jarak sangat dekat */}
+              {/* Medsos - 3 baris dengan jarak SANGAT DEKAT (4px) */}
               <div style={{
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                gap: '8px',
+                gap: '4px',
                 marginBottom: '60px'
               }}>
                 {/* Instagram */}
@@ -778,7 +778,7 @@ export default function HomePage(): React.JSX.Element {
                 pointerEvents: 'none',
                 zIndex: 1
               }}>
-                {/* Garis putih - jarak ke bawah lebih besar */}
+                {/* Garis putih */}
                 <div
                   ref={lineRef}
                   style={{
