@@ -596,30 +596,26 @@ export default function ContactPage(): React.JSX.Element {
                   textAlign: 'center',
                   letterSpacing: '-0.01em',
                   lineHeight: '1.2',
-                  marginBottom: '60px'
+                  marginBottom: '80px'
                 }}>
                 You can know contact Website this Menuru
               </div>
 
-              {/* Baris 01 dan Note - jarak dekat, font besar 250px */}
+              {/* Baris 01 di kiri dan Note di tengah */}
               <div style={{
                 display: 'flex',
-                justifyContent: 'center',
+                justifyContent: 'space-between',
                 alignItems: 'center',
-                gap: '20px',
-                marginTop: '40px',
                 position: 'relative'
               }}>
-                {/* 01 */}
+                {/* 01 - Sisi Kiri */}
                 <div
                   style={{
-                    fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
-                    fontSize: '250px',
+                    fontFamily: "'Questrial', sans-serif",
+                    fontSize: '24px',
                     fontWeight: '400',
                     color: '#000000',
-                    cursor: 'pointer',
-                    lineHeight: '1',
-                    letterSpacing: '-0.02em'
+                    cursor: 'pointer'
                   }}
                   onMouseEnter={() => setShowNoteText(true)}
                   onMouseLeave={() => setShowNoteText(false)}
@@ -627,16 +623,17 @@ export default function ContactPage(): React.JSX.Element {
                   01
                 </div>
 
-                {/* Note */}
+                {/* Note - Sisi Tengah */}
                 <div
                   style={{
-                    fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
-                    fontSize: '250px',
+                    fontFamily: "'Questrial', sans-serif",
+                    fontSize: '24px',
                     fontWeight: '400',
                     color: '#000000',
                     cursor: 'pointer',
-                    lineHeight: '1',
-                    letterSpacing: '-0.02em'
+                    position: 'absolute',
+                    left: '50%',
+                    transform: 'translateX(-50%)'
                   }}
                   onMouseEnter={() => setShowNoteText(true)}
                   onMouseLeave={() => setShowNoteText(false)}
@@ -644,23 +641,26 @@ export default function ContactPage(): React.JSX.Element {
                   Note
                 </div>
 
-                {/* Teks hover yang muncul di samping Note - dengan GSAP SplitText */}
-                {showNoteText && (
-                  <div
-                    ref={hoverTextRef}
-                    style={{
-                      fontFamily: "'Questrial', sans-serif",
-                      fontSize: '32px',
-                      fontWeight: '400',
-                      color: '#000000',
-                      marginLeft: '20px',
-                      whiteSpace: 'nowrap'
-                    }}
-                  >
-                    / kamu bisa mencatat apa yang kamu inginkan
-                  </div>
-                )}
+                {/* Tempat kosong di kanan untuk keseimbangan */}
+                <div style={{ width: '50px' }} />
               </div>
+
+              {/* Teks hover yang muncul di bawah - dengan GSAP SplitText */}
+              {showNoteText && (
+                <div
+                  ref={hoverTextRef}
+                  style={{
+                    fontFamily: "'Questrial', sans-serif",
+                    fontSize: '20px',
+                    fontWeight: '400',
+                    color: '#000000',
+                    textAlign: 'center',
+                    marginTop: '30px'
+                  }}
+                >
+                  / kamu bisa mencatat apa yang kamu inginkan
+                </div>
+              )}
             </div>
 
             {/* Email dan Medsos - di bagian bawah */}
