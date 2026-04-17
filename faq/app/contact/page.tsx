@@ -1,753 +1,735 @@
+// app/contact/page.tsx (Halaman Contact)
 'use client';
 
 import React, { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { useRouter } from "next/navigation";
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { ScrollSmoother } from "gsap/ScrollSmoother";
+import { SplitText } from "gsap/SplitText";
+import Link from "next/link";
 
-export default function HomePage(): React.JSX.Element {
-  const router = useRouter();
-  const [isMobile, setIsMobile] = useState(false);
-  const [loadingText, setLoadingText] = useState("NURU");
-  const [isLoading, setIsLoading] = useState(true);
-  const [isDarkMode, setIsDarkMode] = useState(true);
-  const [cursorType, setCursorType] = useState("default");
-  const [cursorText, setCursorText] = useState("");
-  const [hoveredLink, setHoveredLink] = useState("");
-  const [showDescription, setShowDescription] = useState(true);
-  const headerRef = useRef<HTMLDivElement>(null);
-  const cursorRef = useRef<HTMLDivElement>(null);
-  const topNavRef = useRef<HTMLDivElement>(null);
-  const scrollTextRef = useRef<HTMLDivElement>(null);
-  const descriptionRef = useRef<HTMLDivElement>(null);
+// Register GSAP plugins
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger, ScrollSmoother, SplitText);
+}
 
-  // Animasi loading text
-  const loadingTexts = [
-    "NURU", "MBACA", "NULIS", "NGEXPLORASI", 
-    "NEMUKAN", "NCIPTA", "NGGALI", "NARIK",
-    "NGAMATI", "NANCANG", "NGEMBANGKAN", "NYUSUN"
-  ];
+export default function ContactPage(): React.JSX.Element {
+  const [showPopup, setShowPopup] = useState(false);
+  const acceptBtnRef = useRef<HTMLButtonElement>(null);
+  const declineBtnRef = useRef<HTMLButtonElement>(null);
+  const smootherRef = useRef<any>(null);
+  
+  // Refs untuk teks yang akan di-split
+  const menuruTextRef = useRef<HTMLSpanElement>(null);
+  const lineRef = useRef<HTMLDivElement>(null);
+  const emailRef = useRef<HTMLDivElement>(null);
+  const igRef = useRef<HTMLDivElement>(null);
+  const xRef = useRef<HTMLDivElement>(null);
+  const linkedinRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-
-    // Animasi loading text
-    let currentIndex = 0;
-    const textInterval = setInterval(() => {
-      currentIndex = (currentIndex + 1) % loadingTexts.length;
-      setLoadingText(loadingTexts[currentIndex]);
-    }, 500);
-
-    // Hentikan loading setelah selesai
-    const loadingTimeout = setTimeout(() => {
-      setIsLoading(false);
-      clearInterval(textInterval);
-    }, 3000);
-
-    // Animasi teks berjalan dari atas ke bawah
-    const setupAutoScroll = () => {
-      if (scrollTextRef.current) {
-        const itemHeight = isMobile ? 80 : 100;
-        const totalItems = 15;
-        const totalScrollDistance = totalItems * itemHeight - window.innerHeight;
-        
-        // Hapus animasi sebelumnya jika ada
-        gsap.killTweensOf(scrollTextRef.current);
-        
-        // Animasi infinite loop dari atas ke bawah
-        gsap.to(scrollTextRef.current, {
-          y: -totalScrollDistance,
-          duration: 20,
-          ease: "none",
-          repeat: -1,
-          yoyo: false
-        });
-      }
-    };
-
-    // Handle scroll untuk hide/show description
-    const handleScroll = () => {
-      if (descriptionRef.current) {
-        const descriptionRect = descriptionRef.current.getBoundingClientRect();
-        // Jika deskripsi sudah hampir keluar dari viewport (atas), sembunyikan
-        if (descriptionRect.top < -50) {
-          setShowDescription(false);
-        } else {
-          setShowDescription(true);
-        }
-      }
-    };
-
-    // Setup auto scroll setelah component mount
-    setTimeout(setupAutoScroll, 100);
-    window.addEventListener('resize', setupAutoScroll);
-    window.addEventListener('scroll', handleScroll);
-
-    // Custom cursor animation
-    const moveCursor = (e: MouseEvent) => {
-      if (cursorRef.current) {
-        gsap.to(cursorRef.current, {
-          x: e.clientX,
-          y: e.clientY,
-          duration: 0.1,
-          ease: "power2.out"
-        });
-      }
-    };
-
-    document.addEventListener('mousemove', moveCursor);
-
-    return () => {
-      window.removeEventListener('resize', checkMobile);
-      window.removeEventListener('resize', setupAutoScroll);
-      window.removeEventListener('scroll', handleScroll);
-      clearInterval(textInterval);
-      clearTimeout(loadingTimeout);
-      document.removeEventListener('mousemove', moveCursor);
-      if (scrollTextRef.current) {
-        gsap.killTweensOf(scrollTextRef.current);
-      }
-    };
-  }, [isMobile]);
-
-  // Fungsi toggle dark/light mode
-  const toggleColorMode = () => {
-    setIsDarkMode(!isDarkMode);
+  // Variabel untuk menyimpan teks asli medsos
+  const originalTexts = {
+    ig: 'Instagram',
+    x: 'X',
+    linkedin: 'LinkedIn'
   };
 
-  // Handler untuk cursor hover
-  const handleLinkHover = (type: string, text: string = "", linkName: string = "") => {
-    setCursorType(type);
-    setCursorText(text);
-    setHoveredLink(linkName);
+  // Fungsi untuk mendapatkan huruf random (A-Z)
+  const getRandomChar = () => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+    return chars[Math.floor(Math.random() * chars.length)];
   };
 
-  const handleLinkLeave = () => {
-    setCursorType("default");
-    setCursorText("");
-    setHoveredLink("");
+  // Fungsi untuk mengacak huruf pada teks
+  const randomizeText = (element: HTMLElement, originalText: string, duration: number = 0.5) => {
+    const originalChars = originalText.split('');
+    const totalSteps = 15;
+    let currentStep = 0;
+    
+    const interval = setInterval(() => {
+      if (currentStep < totalSteps) {
+        const randomized = originalChars.map(() => getRandomChar()).join('');
+        element.textContent = randomized;
+        currentStep++;
+      } else {
+        clearInterval(interval);
+        element.textContent = originalText;
+      }
+    }, duration * 1000 / totalSteps);
+    
+    return interval;
   };
 
-  // Warna cursor
-  const getCursorColors = () => {
-    if (cursorType === "link") {
-      return {
-        dotColor: '#6366F1',
-        textColor: 'white'
-      };
+  // Animasi hover random huruf untuk medsos
+  const handleSocialHover = (element: HTMLElement, originalText: string) => {
+    if (!element.getAttribute('data-original')) {
+      element.setAttribute('data-original', originalText);
     }
     
-    return {
-      dotColor: '#EC4899',
-      textColor: 'white'
-    };
+    const interval = randomizeText(element, originalText, 0.6);
+    element.setAttribute('data-interval', String(interval));
+  };
+  
+  const handleSocialLeave = (element: HTMLElement, originalText: string) => {
+    const interval = element.getAttribute('data-interval');
+    if (interval) {
+      clearInterval(Number(interval));
+    }
+    element.textContent = originalText;
   };
 
-  const cursorColors = getCursorColors();
+  useEffect(() => {
+    // Initialize ScrollSmoother
+    const initSmoother = () => {
+      if (typeof window !== 'undefined' && !smootherRef.current) {
+        smootherRef.current = ScrollSmoother.create({
+          wrapper: "#smooth-wrapper-contact",
+          content: "#smooth-content-contact",
+          smooth: 1.2,
+          effects: true,
+          smoothTouch: 0.5,
+          normalizeScroll: true,
+          ignoreMobileResize: true,
+          onUpdate: () => {},
+        });
+      }
+    };
+
+    const timer = setTimeout(() => {
+      initSmoother();
+    }, 100);
+
+    return () => {
+      clearTimeout(timer);
+      if (smootherRef.current) {
+        smootherRef.current.kill();
+        smootherRef.current = null;
+      }
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+    };
+  }, []);
+
+  // GSAP SplitText animations
+  useEffect(() => {
+    // Split text untuk email
+    if (emailRef.current) {
+      const splitEmail = new SplitText(emailRef.current, {
+        type: "chars",
+        charsClass: "split-char"
+      });
+
+      gsap.fromTo(splitEmail.chars,
+        {
+          opacity: 0,
+          x: -30,
+          filter: 'blur(5px)'
+        },
+        {
+          opacity: 1,
+          x: 0,
+          filter: 'blur(0px)',
+          duration: 0.8,
+          stagger: 0.02,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: emailRef.current,
+            start: "top 85%",
+            end: "bottom 70%",
+            toggleActions: "play none none reverse",
+          }
+        }
+      );
+    }
+
+    // Split text untuk "MENURU" besar di footer - warna hitam
+    if (menuruTextRef.current) {
+      const splitMenuru = new SplitText(menuruTextRef.current, {
+        type: "chars",
+        charsClass: "split-char-menuru"
+      });
+
+      gsap.set(splitMenuru.chars, {
+        opacity: 0,
+        y: 200,
+        rotationY: 90,
+        transformPerspective: 800,
+        filter: 'blur(20px)'
+      });
+
+      gsap.to(splitMenuru.chars, {
+        opacity: 1,
+        y: 0,
+        rotationY: 0,
+        filter: 'blur(0px)',
+        duration: 1.5,
+        stagger: {
+          each: 0.04,
+          from: "start",
+          ease: "power2.out"
+        },
+        ease: "back.out(0.8)",
+        scrollTrigger: {
+          trigger: menuruTextRef.current,
+          start: "top 85%",
+          end: "bottom 65%",
+          toggleActions: "play none none reverse",
+        }
+      });
+    }
+
+    // Animasi garis putih
+    if (lineRef.current) {
+      gsap.fromTo(lineRef.current,
+        {
+          width: '0%',
+          opacity: 0,
+          x: 100
+        },
+        {
+          width: '100%',
+          opacity: 1,
+          x: 0,
+          duration: 1.2,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: lineRef.current,
+            start: "top 85%",
+            end: "bottom 70%",
+            toggleActions: "play none none reverse",
+          }
+        }
+      );
+    }
+
+    return () => {
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+    };
+  }, []);
+
+  useEffect(() => {
+    const consent = localStorage.getItem('cookieConsent');
+    if (consent === null) {
+      setShowPopup(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (showPopup && acceptBtnRef.current && declineBtnRef.current) {
+      const acceptBtn = acceptBtnRef.current;
+      const declineBtn = declineBtnRef.current;
+
+      [acceptBtn, declineBtn].forEach(btn => {
+        btn.style.position = 'relative';
+        btn.style.overflow = 'hidden';
+        btn.style.zIndex = '1';
+        
+        const pseudoStyle = document.createElement('style');
+        pseudoStyle.textContent = `
+          .btn-hover-effect {
+            position: relative;
+            isolation: isolate;
+          }
+          .btn-hover-effect::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 0%;
+            background-color: #000000;
+            transition: height 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            z-index: -1;
+            border-radius: 60px;
+          }
+          .btn-hover-effect:hover::before {
+            height: 100%;
+          }
+          .btn-hover-effect {
+            transition: color 0.3s ease;
+          }
+          .btn-hover-effect:hover {
+            color: white !important;
+          }
+        `;
+        document.head.appendChild(pseudoStyle);
+        btn.classList.add('btn-hover-effect');
+      });
+
+      return () => {
+        [acceptBtn, declineBtn].forEach(btn => {
+          const styles = document.querySelectorAll('style');
+          styles.forEach(style => {
+            if (style.textContent?.includes('btn-hover-effect')) {
+              style.remove();
+            }
+          });
+        });
+      };
+    }
+  }, [showPopup]);
+
+  const handleAccept = () => {
+    localStorage.setItem('cookieConsent', 'accepted');
+    setShowPopup(false);
+    console.log('Cookies accepted');
+  };
+
+  const handleDecline = () => {
+    localStorage.setItem('cookieConsent', 'declined');
+    setShowPopup(false);
+    console.log('Cookies declined');
+  };
+
+  const handleEmailClick = () => {
+    window.location.href = 'mailto:contact.menuru@gmail.com';
+  };
+
+  const handleSocialClick = (platform: string) => {
+    console.log(`${platform} clicked`);
+  };
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      backgroundColor: isDarkMode ? 'black' : '#ff0028',
-      margin: 0,
-      padding: 0,
-      width: '100%',
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'flex-start',
-      alignItems: 'center',
-      position: 'relative',
-      overflow: 'hidden',
-      fontFamily: 'Helvetica, Arial, sans-serif',
-      WebkitFontSmoothing: 'antialiased',
-      MozOsxFontSmoothing: 'grayscale',
-      transition: 'background-color 0.5s ease',
-      cursor: 'none'
-    }}>
+    <>
+      <style jsx global>{`
+        * {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        
+        *::-webkit-scrollbar {
+          display: none;
+        }
+        
+        html, body {
+          margin: 0;
+          padding: 0;
+          height: 100%;
+          width: 100%;
+          overflow: hidden;
+          background-color: white;
+        }
+        
+        #smooth-wrapper-contact {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          overflow: hidden;
+          z-index: 1;
+        }
+        
+        #smooth-content-contact {
+          min-height: 100vh;
+          width: 100%;
+          will-change: transform;
+        }
 
-      {/* Custom Cursor */}
-      <div
-        ref={cursorRef}
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: cursorType === "link" ? '140px' : '20px',
-          height: cursorType === "link" ? '60px' : '20px',
-          backgroundColor: cursorColors.dotColor,
-          borderRadius: cursorType === "link" ? '30px' : '50%',
-          pointerEvents: 'none',
-          zIndex: 9999,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: '14px',
-          fontWeight: '700',
-          color: cursorColors.textColor,
-          textAlign: 'center',
-          transition: 'all 0.2s ease',
-          transform: 'translate(-50%, -50%)',
-          padding: cursorType === "link" ? '0 20px' : '0',
-          boxShadow: '0 2px 10px rgba(0,0,0,0.3)',
-          border: 'none'
-        }}
-      >
-        {cursorType === "link" && (
+        .split-char {
+          display: inline-block;
+          will-change: transform, opacity, filter;
+        }
+
+        .split-char-menuru {
+          display: inline-block;
+          will-change: transform, opacity, filter;
+          transform-style: preserve-3d;
+        }
+
+        .social-item {
+          transition: all 0.3s ease;
+        }
+      `}</style>
+      
+      <div id="smooth-wrapper-contact">
+        <div id="smooth-content-contact">
           <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px'
-          }}>
-            <span style={{ 
-              fontSize: '14px', 
-              fontWeight: '700',
-              letterSpacing: '0.5px',
-              whiteSpace: 'nowrap'
-            }}>
-              {cursorText}
-            </span>
-            <svg 
-              width="20" 
-              height="20" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke={cursorColors.textColor}
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M7 17L17 7M17 7H7M17 7V17"/>
-            </svg>
-          </div>
-        )}
-      </div>
-
-      {/* Top Navigation Bar */}
-      <div 
-        ref={topNavRef}
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100%',
-          padding: isMobile ? '0.8rem 1rem' : '1rem 2rem',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: 101,
-          boxSizing: 'border-box',
-          opacity: 1
-        }}
-      >
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: isMobile ? '1rem' : '2rem',
-          backgroundColor: 'transparent',
-          backdropFilter: 'blur(10px)',
-          borderRadius: '50px',
-          padding: isMobile ? '0.6rem 1rem' : '0.8rem 1.5rem',
-          border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.3)'}`,
-          boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
-        }}>
-          {/* Docs */}
-          <motion.div
-            onClick={() => router.push('/docs')}
-            onMouseEnter={() => handleLinkHover("link", "VIEW", "docs")}
-            onMouseLeave={handleLinkLeave}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              cursor: 'none',
-              padding: '0.4rem 0.8rem',
-              borderRadius: '25px',
-              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.95)',
-              border: isDarkMode ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(255,255,255,0.3)',
-              transition: 'all 0.3s ease'
-            }}
-            whileHover={{ 
-              backgroundColor: 'white',
-              scale: 1.05,
-              border: '1px solid white'
-            }}
-          >
-            <svg 
-              width={isMobile ? "18" : "20"} 
-              height={isMobile ? "18" : "20"} 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="#6366F1"
-              strokeWidth="2"
-            >
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-              <polyline points="14,2 14,8 20,8"/>
-              <line x1="16" y1="13" x2="8" y2="13"/>
-              <line x1="16" y1="17" x2="8" y2="17"/>
-              <polyline points="10,9 9,9 8,9"/>
-            </svg>
-            <span style={{
-              color: '#6366F1',
-              fontSize: isMobile ? '0.8rem' : '0.9rem',
-              fontWeight: '600',
-              fontFamily: 'Helvetica, Arial, sans-serif'
-            }}>
-              Docs
-            </span>
-            <div style={{
-              backgroundColor: '#EC4899',
-              color: 'white',
-              fontSize: '0.7rem',
-              fontWeight: '700',
-              padding: '0.1rem 0.4rem',
-              borderRadius: '10px',
-              marginLeft: '0.3rem',
-              border: 'none'
-            }}>
-              NEW
-            </div>
-          </motion.div>
-
-          {/* Chatbot */}
-          <motion.div
-            onClick={() => router.push('/chatbot')}
-            onMouseEnter={() => handleLinkHover("link", "VIEW", "chatbot")}
-            onMouseLeave={handleLinkLeave}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              cursor: 'none',
-              padding: '0.4rem 0.8rem',
-              borderRadius: '25px',
-              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.95)',
-              border: isDarkMode ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(255,255,255,0.3)',
-              transition: 'all 0.3s ease'
-            }}
-            whileHover={{ 
-              backgroundColor: 'white',
-              scale: 1.05,
-              border: '1px solid white'
-            }}
-          >
-            <svg 
-              width={isMobile ? "18" : "20"} 
-              height={isMobile ? "18" : "20"} 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="#6366F1"
-              strokeWidth="2"
-            >
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-              <line x1="8" y1="7" x2="16" y2="7"/>
-              <line x1="8" y1="11" x2="12" y2="11"/>
-            </svg>
-            <span style={{
-              color: '#6366F1',
-              fontSize: isMobile ? '0.8rem' : '0.9rem',
-              fontWeight: '600',
-              fontFamily: 'Helvetica, Arial, sans-serif'
-            }}>
-              Chatbot
-            </span>
-            <div style={{
-              backgroundColor: '#EC4899',
-              color: 'white',
-              fontSize: '0.7rem',
-              fontWeight: '700',
-              padding: '0.1rem 0.4rem',
-              borderRadius: '10px',
-              marginLeft: '0.3rem',
-              border: 'none'
-            }}>
-              NEW
-            </div>
-          </motion.div>
-
-          {/* Update */}
-          <motion.div
-            onClick={() => router.push('/update')}
-            onMouseEnter={() => handleLinkHover("link", "VIEW", "update")}
-            onMouseLeave={handleLinkLeave}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              cursor: 'none',
-              padding: '0.4rem 0.8rem',
-              borderRadius: '25px',
-              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.95)',
-              border: isDarkMode ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(255,255,255,0.3)',
-              transition: 'all 0.3s ease'
-            }}
-            whileHover={{ 
-              backgroundColor: 'white',
-              scale: 1.05,
-              border: '1px solid white'
-            }}
-          >
-            <svg 
-              width={isMobile ? "18" : "20"} 
-              height={isMobile ? "18" : "20"} 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="#6366F1"
-              strokeWidth="2"
-            >
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-              <polyline points="14,2 14,8 20,8"/>
-              <line x1="16" y1="13" x2="8" y2="13"/>
-              <line x1="16" y1="17" x2="8" y2="17"/>
-              <polyline points="10,9 9,9 8,9"/>
-            </svg>
-            <span style={{
-              color: '#6366F1',
-              fontSize: isMobile ? '0.8rem' : '0.9rem',
-              fontWeight: '600',
-              fontFamily: 'Helvetica, Arial, sans-serif'
-            }}>
-              Update
-            </span>
-            <div style={{
-              backgroundColor: '#EC4899',
-              color: 'white',
-              fontSize: '0.7rem',
-              fontWeight: '700',
-              padding: '0.1rem 0.4rem',
-              borderRadius: '10px',
-              marginLeft: '0.3rem',
-              border: 'none'
-            }}>
-              NEW
-            </div>
-          </motion.div>
-
-          {/* Timeline */}
-          <motion.div
-            onClick={() => router.push('/timeline')}
-            onMouseEnter={() => handleLinkHover("link", "VIEW", "timeline")}
-            onMouseLeave={handleLinkLeave}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              cursor: 'none',
-              padding: '0.4rem 0.8rem',
-              borderRadius: '25px',
-              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.95)',
-              border: isDarkMode ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(255,255,255,0.3)',
-              transition: 'all 0.3s ease'
-            }}
-            whileHover={{ 
-              backgroundColor: 'white',
-              scale: 1.05,
-              border: '1px solid white'
-            }}
-          >
-            <svg 
-              width={isMobile ? "18" : "20"} 
-              height={isMobile ? "18" : "20"} 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="#6366F1"
-              strokeWidth="2"
-            >
-              <polyline points="1 4 1 10 7 10"/>
-              <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
-              <line x1="12" y1="7" x2="12" y2="13"/>
-              <line x1="16" y1="11" x2="12" y2="7"/>
-            </svg>
-            <span style={{
-              color: '#6366F1',
-              fontSize: isMobile ? '0.8rem' : '0.9rem',
-              fontWeight: '600',
-              fontFamily: 'Helvetica, Arial, sans-serif'
-            }}>
-              Timeline
-            </span>
-            <div style={{
-              backgroundColor: '#EC4899',
-              color: 'white',
-              fontSize: '0.7rem',
-              fontWeight: '700',
-              padding: '0.1rem 0.4rem',
-              borderRadius: '10px',
-              marginLeft: '0.3rem',
-              border: 'none'
-            }}>
-              NEW
-            </div>
-          </motion.div>
-        </div>
-      </div>
-
-      {/* Header Section */}
-      <div 
-        ref={headerRef}
-        style={{
-          position: 'fixed',
-          top: isMobile ? '3.5rem' : '4.5rem',
-          left: 0,
-          width: '100%',
-          padding: isMobile ? '1rem' : '2rem',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          zIndex: 100,
-          boxSizing: 'border-box',
-          opacity: 1
-        }}
-      >
-        {/* Teks "MENURU" dengan animasi loading hanya di bagian NURU */}
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8, delay: 0.5 }}
-        >
-          <div style={{
-            fontSize: isMobile ? '1.5rem' : '2.5rem',
-            fontWeight: '300',
-            fontFamily: 'Helvetica, Arial, sans-serif',
+            minHeight: '100vh',
+            backgroundColor: 'white',
             margin: 0,
-            letterSpacing: '2px',
-            lineHeight: 1,
-            textTransform: 'uppercase',
-            color: isDarkMode ? 'white' : 'black',
-            minHeight: isMobile ? '1.8rem' : '2.8rem',
+            padding: 0,
+            width: '100%',
             display: 'flex',
-            alignItems: 'center',
-            transition: 'color 0.5s ease'
+            flexDirection: 'column',
+            justifyContent: 'flex-end',
+            fontFamily: 'Questrial, sans-serif',
+            WebkitFontSmoothing: 'antialiased',
+            MozOsxFontSmoothing: 'grayscale',
+            position: 'relative',
           }}>
-            ME
-            <AnimatePresence mode="wait">
-              {isLoading ? (
-                <motion.span
-                  key={loadingText}
-                  initial={{ opacity: 0, y: 5 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -5 }}
-                  transition={{ duration: 0.3 }}
-                  style={{
-                    display: 'inline-block'
-                  }}
-                >
-                  {loadingText}
-                </motion.span>
-              ) : (
-                <motion.span
-                  key="nuru-final"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.5 }}
-                >
-                  NURU
-                </motion.span>
-              )}
-            </AnimatePresence>
-          </div>
-        </motion.div>
+            {/* Tombol Back ke Home */}
+            <div style={{
+              position: 'fixed',
+              top: '40px',
+              left: '40px',
+              zIndex: 100
+            }}>
+              <Link href="/">
+                <button style={{
+                  fontFamily: "'Questrial', sans-serif",
+                  fontSize: '16px',
+                  color: '#000000',
+                  backgroundColor: 'transparent',
+                  border: '1px solid #000000',
+                  borderRadius: '60px',
+                  padding: '10px 24px',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#000000';
+                  e.currentTarget.style.color = '#ffffff';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.color = '#000000';
+                }}>
+                  ← Back to Home
+                </button>
+              </Link>
+            </div>
 
-        {/* Right Side Buttons */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: isMobile ? '0.8rem' : '1rem'
-        }}>
-          {/* Color Mode Toggle Button */}
-          <motion.button
-            onClick={toggleColorMode}
-            onMouseEnter={() => handleLinkHover("link", "VIEW", "theme")}
-            onMouseLeave={handleLinkLeave}
-            style={{
-              padding: isMobile ? '0.4rem 0.8rem' : '0.6rem 1rem',
-              fontSize: isMobile ? '0.8rem' : '1rem',
-              fontWeight: '600',
-              color: 'white',
-              backgroundColor: 'transparent',
-              border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.3)'}`,
-              borderRadius: '50px',
-              cursor: 'none',
-              fontFamily: 'Helvetica, Arial, sans-serif',
-              backdropFilter: 'blur(10px)',
-              whiteSpace: 'nowrap',
-              display: 'flex',
-              alignItems: 'center',
-              gap: isMobile ? '0.3rem' : '0.5rem',
-              margin: 0,
-              transition: 'all 0.3s ease',
-              boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
-            }}
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1, duration: 0.6 }}
-            whileHover={{ 
-              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.2)',
-              scale: 1.05,
-              border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.5)'}`,
-              transition: { duration: 0.2 }
-            }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <motion.div
-              animate={{ rotate: isDarkMode ? 0 : 180 }}
-              transition={{ duration: 0.5 }}
-            >
-              {isDarkMode ? '☀️' : '🌙'}
-            </motion.div>
-            {isMobile ? '' : (isDarkMode ? 'LIGHT' : 'DARK')}
-          </motion.button>
-
-          {/* Sign In Button */}
-          <motion.button
-            onClick={() => router.push('/signin')}
-            onMouseEnter={() => handleLinkHover("link", "VIEW", "signin")}
-            onMouseLeave={handleLinkLeave}
-            style={{
-              padding: isMobile ? '0.4rem 1rem' : '0.6rem 1.5rem',
-              fontSize: isMobile ? '0.9rem' : '1.5rem',
-              fontWeight: '600',
-              color: 'white',
-              backgroundColor: 'transparent',
-              border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.3)'}`,
-              borderRadius: '50px',
-              cursor: 'none',
-              fontFamily: 'Helvetica, Arial, sans-serif',
-              backdropFilter: 'blur(10px)',
-              whiteSpace: 'nowrap',
-              display: 'flex',
-              alignItems: 'center',
-              gap: isMobile ? '0.3rem' : '0.5rem',
-              margin: 0,
-              maxWidth: isMobile ? '120px' : 'none',
-              transition: 'all 0.3s ease',
-              boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
-            }}
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.2, duration: 0.6 }}
-            whileHover={{ 
-              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.2)',
-              scale: 1.05,
-              border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.5)'}`,
-              transition: { duration: 0.2 }
-            }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <svg 
-              width={isMobile ? "18" : "30"} 
-              height={isMobile ? "18" : "30"} 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeWidth="2"
-            >
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-              <circle cx="12" cy="7" r="4"/>
-            </svg>
-            {isMobile ? 'SIGN IN' : 'SIGN IN'}
-          </motion.button>
-        </div>
-      </div>
-
-      {/* Deskripsi MENURU di Body Halaman Utama - DIBUAT HILANG SAAT SCROLL */}
-      <motion.div
-        ref={descriptionRef}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: showDescription ? 1 : 0, y: showDescription ? 0 : -20 }}
-        transition={{ duration: 0.5 }}
-        style={{
-          position: 'absolute',
-          top: isMobile ? '8rem' : '12rem',
-          left: isMobile ? '1rem' : '2rem',
-          width: isMobile ? 'calc(100% - 2rem)' : '800px',
-          maxWidth: '800px',
-          textAlign: 'left',
-          marginBottom: '2rem',
-          zIndex: 20,
-          pointerEvents: showDescription ? 'auto' : 'none'
-        }}
-      >
-        <p style={{
-          color: isDarkMode ? 'white' : 'black',
-          fontSize: isMobile ? '1.8rem' : '3.5rem',
-          fontWeight: '400',
-          fontFamily: 'HelveticaNowDisplay, Arial, sans-serif',
-          lineHeight: 1.1,
-          margin: 0,
-          marginBottom: isMobile ? '1.5rem' : '2rem',
-          transition: 'color 0.5s ease',
-          wordWrap: 'break-word',
-          overflowWrap: 'break-word'
-        }}>
-          Menuru is a branding personal journal life with a experiences of self about happy, sad, angry, etc.
-        </p>
-
-        {/* Foto di bawah teks deskripsi */}
-        <div style={{
-          width: isMobile ? 'calc(100% - 1rem)' : '650px', // Lebar sedikit lebih kecil
-          marginLeft: isMobile ? '0.5rem' : '1.5rem', // Geser ke kiri sedikit
-          overflow: 'hidden',
-          borderRadius: '15px',
-          boxShadow: '0 15px 40px rgba(0,0,0,0.4)',
-          border: `2px solid ${isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
-          marginTop: '1rem' // Jarak dari teks
-        }}>
-          <img 
-            src="images/5.jpg" 
-            alt="Menuru Visual"
-            style={{
+            {/* Email dan Medsos - dipusatkan */}
+            <div style={{
+              position: 'relative',
               width: '100%',
-              height: 'auto',
-              display: 'block',
-              objectFit: 'cover',
-              borderRadius: '13px'
-            }}
-            onError={(e) => {
-              console.error("Gambar tidak ditemukan:", e);
-              e.currentTarget.style.backgroundColor = isDarkMode ? '#333' : '#eee';
-              e.currentTarget.style.display = 'flex';
-              e.currentTarget.style.alignItems = 'center';
-              e.currentTarget.style.justifyContent = 'center';
-              e.currentTarget.style.color = isDarkMode ? '#fff' : '#000';
-              e.currentTarget.style.height = '400px';
-              e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">Image: 5.jpg</div>';
-            }}
-          />
-        </div>
-      </motion.div>
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'flex-end',
+              padding: '0 80px',
+              marginBottom: '60px',
+              boxSizing: 'border-box'
+            }}>
+              {/* Email - Sisi Kiri */}
+              <div 
+                ref={emailRef}
+                onClick={handleEmailClick}
+                style={{
+                  fontFamily: "'Questrial', sans-serif",
+                  fontSize: '32px',
+                  color: '#000000',
+                  fontWeight: '400',
+                  letterSpacing: '0.02em',
+                  cursor: 'pointer',
+                  transition: 'opacity 0.3s ease',
+                  opacity: 1,
+                  marginBottom: '20px'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.opacity = '0.5'}
+                onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+              >
+                contact.menuru@gmail.com
+              </div>
 
-      {/* Content tambahan untuk membuat halaman lebih panjang */}
-      <div style={{
-        height: '150vh',
-        width: '100%',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginTop: isMobile ? '90vh' : '80vh', // Disesuaikan agar ada jarak dengan foto
-        zIndex: 10,
-        position: 'relative'
-      }}>
-        <motion.p
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          transition={{ duration: 0.8 }}
-          style={{
-            color: isDarkMode ? 'white' : 'black',
-            fontSize: isMobile ? '1.5rem' : '2rem',
-            fontWeight: '300',
-            textAlign: 'center',
-            maxWidth: '600px',
-            padding: '0 2rem'
-          }}
-        >
-          More content coming soon...
-        </motion.p>
+              {/* Medsos - Sisi Tengah 3 baris */}
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '8px',
+                position: 'absolute',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                marginBottom: '20px'
+              }}>
+                {/* Instagram */}
+                <div 
+                  className="social-item"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    cursor: 'pointer'
+                  }}
+                  onMouseEnter={(e) => {
+                    const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
+                    if (textElement) handleSocialHover(textElement, originalTexts.ig);
+                  }}
+                  onMouseLeave={(e) => {
+                    const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
+                    if (textElement) handleSocialLeave(textElement, originalTexts.ig);
+                  }}
+                  onClick={() => handleSocialClick('Instagram')}
+                >
+                  <span 
+                    ref={igRef}
+                    className="social-text"
+                    style={{
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '28px',
+                      color: '#000000',
+                      fontWeight: '400',
+                      letterSpacing: '0.02em'
+                    }}
+                  >
+                    Instagram
+                  </span>
+                </div>
+                
+                {/* X */}
+                <div 
+                  className="social-item"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    cursor: 'pointer'
+                  }}
+                  onMouseEnter={(e) => {
+                    const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
+                    if (textElement) handleSocialHover(textElement, originalTexts.x);
+                  }}
+                  onMouseLeave={(e) => {
+                    const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
+                    if (textElement) handleSocialLeave(textElement, originalTexts.x);
+                  }}
+                  onClick={() => handleSocialClick('X')}
+                >
+                  <span 
+                    ref={xRef}
+                    className="social-text"
+                    style={{
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '28px',
+                      color: '#000000',
+                      fontWeight: '400',
+                      letterSpacing: '0.02em'
+                    }}
+                  >
+                    X
+                  </span>
+                </div>
+                
+                {/* LinkedIn */}
+                <div 
+                  className="social-item"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    cursor: 'pointer'
+                  }}
+                  onMouseEnter={(e) => {
+                    const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
+                    if (textElement) handleSocialHover(textElement, originalTexts.linkedin);
+                  }}
+                  onMouseLeave={(e) => {
+                    const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
+                    if (textElement) handleSocialLeave(textElement, originalTexts.linkedin);
+                  }}
+                  onClick={() => handleSocialClick('LinkedIn')}
+                >
+                  <span 
+                    ref={linkedinRef}
+                    className="social-text"
+                    style={{
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '28px',
+                      color: '#000000',
+                      fontWeight: '400',
+                      letterSpacing: '0.02em'
+                    }}
+                  >
+                    LinkedIn
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <footer style={{
+              position: 'relative',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              width: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'flex-end',
+              padding: '0 80px 0 0',
+              margin: 0,
+              pointerEvents: 'none',
+              zIndex: 1
+            }}>
+              {/* Garis hitam (karena background putih) */}
+              <div
+                ref={lineRef}
+                style={{
+                  width: '0%',
+                  height: '2px',
+                  backgroundColor: '#000000',
+                  marginRight: '0',
+                  marginBottom: '60px',
+                  opacity: 0
+                }}
+              />
+              
+              {/* Teks MENURU besar - WARNA HITAM */}
+              <span 
+                ref={menuruTextRef}
+                style={{
+                  fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
+                  fontWeight: 'normal',
+                  fontSize: '600px',
+                  color: '#000000',
+                  textAlign: 'right',
+                  letterSpacing: '-0.02em',
+                  opacity: 1,
+                  textTransform: 'uppercase',
+                  lineHeight: '0.7',
+                  whiteSpace: 'nowrap',
+                  WebkitFontSmoothing: 'antialiased',
+                  MozOsxFontSmoothing: 'grayscale',
+                  fontKerning: 'normal',
+                  margin: 0,
+                  padding: 0,
+                  transform: 'translateY(10px)',
+                  marginRight: '0'
+                }}>
+                MENURU
+              </span>
+            </footer>
+          </div>
+        </div>
       </div>
-    </div>
+
+      {/* Cookie Popup */}
+      {showPopup && (
+        <div style={{
+          position: 'fixed',
+          bottom: '30px',
+          left: '30px',
+          width: 'auto',
+          maxWidth: 'calc(100vw - 60px)',
+          backgroundColor: '#ffffff',
+          color: '#000000',
+          borderRadius: '32px',
+          padding: '24px 32px',
+          boxShadow: '0 20px 40px rgba(0,0,0,0.15), 0 5px 12px rgba(0,0,0,0.05)',
+          zIndex: 1000,
+          fontFamily: 'Questrial, sans-serif',
+          animation: 'slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
+          border: '1px solid rgba(0,0,0,0.05)',
+          display: 'flex',
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: '32px',
+          flexWrap: 'wrap',
+        }}>
+          <style>
+            {`
+              @keyframes slideUp {
+                from {
+                  opacity: 0;
+                  transform: translateY(30px);
+                }
+                to {
+                  opacity: 1;
+                  transform: translateY(0);
+                }
+              }
+            `}
+          </style>
+          
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '8px',
+          }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px'
+            }}>
+              <span style={{ fontSize: '56px', display: 'inline-block' }}>🍪</span>
+              <span style={{ 
+                fontWeight: '700', 
+                fontSize: '36px',
+                letterSpacing: '-0.02em',
+                background: 'linear-gradient(135deg, #000000 0%, #333333 100%)',
+                backgroundClip: 'text',
+                WebkitBackgroundClip: 'text',
+                color: 'transparent',
+                fontFamily: 'Questrial, sans-serif'
+              }}>
+                cookies.
+              </span>
+            </div>
+            
+            <p style={{
+              fontSize: '20px',
+              lineHeight: '1.4',
+              marginBottom: 0,
+              color: '#1a1a1a',
+              fontWeight: '400',
+              letterSpacing: '-0.01em',
+              maxWidth: '280px',
+              fontFamily: 'Questrial, sans-serif'
+            }}>
+              I use cookies to understand how you navigate<br />
+              this site and what topics interest you most.
+            </p>
+            <span style={{ 
+              color: '#666', 
+              fontSize: '18px',
+              display: 'inline-block',
+              marginTop: '4px',
+              fontFamily: 'Questrial, sans-serif'
+            }}>
+              No ads, no data sold ever.
+            </span>
+          </div>
+          
+          <div style={{
+            display: 'flex',
+            gap: '16px',
+            justifyContent: 'flex-start',
+            flexShrink: 0,
+          }}>
+            <button
+              ref={declineBtnRef}
+              onClick={handleDecline}
+              style={{
+                padding: '14px 32px',
+                backgroundColor: '#ffffff',
+                color: '#000000',
+                border: '1.5px solid #e0e0e0',
+                borderRadius: '60px',
+                cursor: 'pointer',
+                fontSize: '18px',
+                fontWeight: '600',
+                letterSpacing: '-0.01em',
+                fontFamily: 'Questrial, sans-serif',
+                transition: 'all 0.2s ease',
+                position: 'relative',
+                overflow: 'hidden',
+                zIndex: 1,
+                background: '#ffffff'
+              }}
+            >
+              Decline
+            </button>
+            <button
+              ref={acceptBtnRef}
+              onClick={handleAccept}
+              style={{
+                padding: '14px 32px',
+                backgroundColor: '#ffffff',
+                color: '#000000',
+                border: '1.5px solid #e0e0e0',
+                borderRadius: '60px',
+                cursor: 'pointer',
+                fontSize: '18px',
+                fontWeight: '600',
+                letterSpacing: '-0.01em',
+                fontFamily: 'Questrial, sans-serif',
+                transition: 'all 0.2s ease',
+                position: 'relative',
+                overflow: 'hidden',
+                zIndex: 1,
+                background: '#ffffff'
+              }}
+            >
+              Accept
+            </button>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
