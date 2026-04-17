@@ -37,55 +37,43 @@ export default function HomePage(): React.JSX.Element {
     linkedin: 'LinkedIn'
   };
 
-  // Array kata-kata random untuk animasi hover
-  const randomWords = [
-    'Explore', 'Discover', 'Connect', 'Network', 'Follow', 'Engage', 
-    'Share', 'Learn', 'Grow', 'Create', 'Inspire', 'Innovate',
-    'Digital', 'Social', 'Media', 'Trend', 'Viral', 'Impact'
-  ];
-
-  // Fungsi untuk mendapatkan kata random
-  const getRandomWord = () => {
-    return randomWords[Math.floor(Math.random() * randomWords.length)];
+  // Fungsi untuk mendapatkan huruf random (A-Z)
+  const getRandomChar = () => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+    return chars[Math.floor(Math.random() * chars.length)];
   };
 
-  // Animasi hover random teks untuk medsos
-  const handleSocialHover = (element: HTMLElement, originalText: string, platform: string) => {
+  // Fungsi untuk mengacak huruf pada teks
+  const randomizeText = (element: HTMLElement, originalText: string, duration: number = 0.5) => {
+    const originalChars = originalText.split('');
+    const totalSteps = 15;
+    let currentStep = 0;
+    
+    const interval = setInterval(() => {
+      if (currentStep < totalSteps) {
+        const randomized = originalChars.map(() => getRandomChar()).join('');
+        element.textContent = randomized;
+        currentStep++;
+      } else {
+        clearInterval(interval);
+        element.textContent = originalText;
+      }
+    }, duration * 1000 / totalSteps);
+    
+    return interval;
+  };
+
+  // Animasi hover random huruf untuk medsos
+  const handleSocialHover = (element: HTMLElement, originalText: string) => {
     // Simpan teks asli jika belum ada
     if (!element.getAttribute('data-original')) {
       element.setAttribute('data-original', originalText);
     }
-
-    // Animasi random teks
-    const duration = 0.8;
-    const steps = 8;
-    let currentStep = 0;
-
-    const interval = setInterval(() => {
-      if (currentStep < steps) {
-        const randomWord = getRandomWord();
-        gsap.to(element, {
-          duration: 0.05,
-          onUpdate: () => {
-            element.textContent = randomWord;
-          }
-        });
-        currentStep++;
-      } else {
-        clearInterval(interval);
-        // Kembalikan ke teks asli
-        gsap.to(element, {
-          duration: 0.2,
-          onUpdate: () => {
-            element.textContent = originalText;
-          },
-          onComplete: () => {
-            element.textContent = originalText;
-          }
-        });
-      }
-    }, 60);
-
+    
+    // Animasi random huruf
+    const interval = randomizeText(element, originalText, 0.6);
+    element.setAttribute('data-interval', String(interval));
+    
     // Animasi panah SVG
     const arrowSvg = element.parentElement?.querySelector('.social-arrow');
     if (arrowSvg) {
@@ -98,20 +86,15 @@ export default function HomePage(): React.JSX.Element {
         repeat: 1
       });
     }
-
-    // Simpan interval untuk dibersihkan
-    element.setAttribute('data-interval', String(interval));
   };
-
+  
   const handleSocialLeave = (element: HTMLElement, originalText: string) => {
     const interval = element.getAttribute('data-interval');
     if (interval) {
       clearInterval(Number(interval));
     }
-    // Pastikan teks kembali ke asli
     element.textContent = originalText;
     
-    // Animasi panah kembali
     const arrowSvg = element.parentElement?.querySelector('.social-arrow');
     if (arrowSvg) {
       gsap.to(arrowSvg, {
@@ -622,21 +605,35 @@ export default function HomePage(): React.JSX.Element {
                 gap: '40px',
                 width: '100%'
               }}>
-                <div 
-                  ref={mencatatTextRef}
-                  style={{
-                    fontSize: '64px',
-                    fontFamily: 'Questrial, sans-serif',
+                {/* Teks "Mencatat apa yang kamu inginkan" dengan titik besar di akhir */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px'
+                }}>
+                  <div 
+                    ref={mencatatTextRef}
+                    style={{
+                      fontSize: '64px',
+                      fontFamily: 'Questrial, sans-serif',
+                      color: 'white',
+                      textAlign: 'center',
+                      fontWeight: '400',
+                      letterSpacing: '-0.02em',
+                      lineHeight: '1.2',
+                      whiteSpace: 'nowrap'
+                    }}>
+                    Mencatat apa yang kamu inginkan
+                  </div>
+                  <span style={{
+                    fontSize: '80px',
                     color: 'white',
-                    textAlign: 'center',
                     fontWeight: '400',
-                    letterSpacing: '-0.02em',
-                    lineHeight: '1.2',
-                    whiteSpace: 'nowrap'
-                  }}>
-                  Mencatat apa yang kamu inginkan
+                    lineHeight: '1'
+                  }}>.</span>
                 </div>
 
+                {/* Tombol Contact */}
                 <button
                   ref={contactBtnRef}
                   onClick={handleContact}
@@ -726,7 +723,7 @@ export default function HomePage(): React.JSX.Element {
                 marginBottom: '60px',
                 boxSizing: 'border-box'
               }}>
-                {/* Email - Sisi Kiri dengan font besar */}
+                {/* Email - Sisi Kiri */}
                 <div 
                   ref={emailRef}
                   onClick={handleEmailClick}
@@ -746,7 +743,7 @@ export default function HomePage(): React.JSX.Element {
                   contact.menuru@gmail.com
                 </div>
 
-                {/* Medsos - Sisi Tengah 3 baris */}
+                {/* Medsos - Sisi Tengah 3 baris dengan animasi random huruf */}
                 <div style={{
                   display: 'flex',
                   flexDirection: 'column',
@@ -766,7 +763,7 @@ export default function HomePage(): React.JSX.Element {
                     }}
                     onMouseEnter={(e) => {
                       const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                      if (textElement) handleSocialHover(textElement, originalTexts.ig, 'IG');
+                      if (textElement) handleSocialHover(textElement, originalTexts.ig);
                     }}
                     onMouseLeave={(e) => {
                       const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
@@ -803,7 +800,7 @@ export default function HomePage(): React.JSX.Element {
                     }}
                     onMouseEnter={(e) => {
                       const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                      if (textElement) handleSocialHover(textElement, originalTexts.x, 'X');
+                      if (textElement) handleSocialHover(textElement, originalTexts.x);
                     }}
                     onMouseLeave={(e) => {
                       const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
@@ -840,7 +837,7 @@ export default function HomePage(): React.JSX.Element {
                     }}
                     onMouseEnter={(e) => {
                       const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                      if (textElement) handleSocialHover(textElement, originalTexts.linkedin, 'LinkedIn');
+                      if (textElement) handleSocialHover(textElement, originalTexts.linkedin);
                     }}
                     onMouseLeave={(e) => {
                       const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
@@ -882,7 +879,7 @@ export default function HomePage(): React.JSX.Element {
                 pointerEvents: 'none',
                 zIndex: 1
               }}>
-                {/* MENURU kecil - font besar */}
+                {/* MENURU kecil */}
                 <div
                   ref={menuruTitleRef}
                   style={{
@@ -899,7 +896,7 @@ export default function HomePage(): React.JSX.Element {
                   MENURU
                 </div>
 
-                {/* BASED JAKARTA - font besar */}
+                {/* BASED JAKARTA */}
                 <div
                   ref={basedJakartaRef}
                   style={{
