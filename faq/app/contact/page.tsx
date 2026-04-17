@@ -641,6 +641,7 @@ export default function ContactPage(): React.JSX.Element {
     >
       Note
     </div>
+    </div>
 
     {/* Teks hover muncul di samping Note */}
     {showNoteText && (
@@ -658,7 +659,7 @@ export default function ContactPage(): React.JSX.Element {
       </div>
     )}
   </div>
-</div>
+
 
          
 
