@@ -32,6 +32,9 @@ export default function ContactPage(): React.JSX.Element {
   const infoTextRef = useRef<HTMLDivElement>(null);
   const hoverTextRef = useRef<HTMLDivElement>(null);
 
+  // State untuk hover item
+  const [hoveredItem, setHoveredItem] = useState<string | null>(null);
+
   // Variabel untuk menyimpan teks asli medsos
   const originalTexts = {
     ig: 'Instagram',
@@ -85,7 +88,7 @@ export default function ContactPage(): React.JSX.Element {
 
   // Animasi GSAP SplitText untuk hover text
   useEffect(() => {
-    if (showNoteText && hoverTextRef.current) {
+    if (hoveredItem === '01' && hoverTextRef.current) {
       const splitHover = new SplitText(hoverTextRef.current, {
         type: "chars",
         charsClass: "split-char-hover"
@@ -113,7 +116,7 @@ export default function ContactPage(): React.JSX.Element {
         splitHover.revert();
       };
     }
-  }, [showNoteText]);
+  }, [hoveredItem]);
 
   useEffect(() => {
     // Initialize ScrollSmoother
@@ -601,51 +604,46 @@ export default function ContactPage(): React.JSX.Element {
                 You can know contact Website this Menuru
               </div>
 
-              {/* Baris 01 di kiri dan Note di sebelahnya dengan hover text di samping Note */}
+              {/* Daftar item 01-04 - sejajar semua, font besar tidak tebal */}
               <div style={{
                 display: 'flex',
-                alignItems: 'center',
-                gap: '60px'
+                flexDirection: 'column',
+                gap: '40px',
+                marginLeft: '0'
               }}>
-                {/* 01 - Sisi Kiri - font 100px */}
-                <div
-                  style={{
-                    fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
-                    fontSize: '100px',
-                    fontWeight: '400',
-                    color: '#000000',
-                    cursor: 'pointer'
-                  }}
-                  onMouseEnter={() => setShowNoteText(true)}
-                  onMouseLeave={() => setShowNoteText(false)}
-                >
-                  01
-                </div>
-
-                {/* Note dan hover text dalam satu grup */}
+                {/* 01 - Note */}
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
                   gap: '30px'
                 }}>
-                  {/* Note - font 197px */}
                   <div
                     style={{
                       fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
-                      fontSize: '197px',
+                      fontSize: '80px',
                       fontWeight: '400',
                       color: '#000000',
-                      cursor: 'pointer',
-                      lineHeight: '1'
+                      cursor: 'pointer'
                     }}
-                    onMouseEnter={() => setShowNoteText(true)}
-                    onMouseLeave={() => setShowNoteText(false)}
+                    onMouseEnter={() => setHoveredItem('01')}
+                    onMouseLeave={() => setHoveredItem(null)}
+                  >
+                    01
+                  </div>
+                  <div
+                    style={{
+                      fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
+                      fontSize: '80px',
+                      fontWeight: '400',
+                      color: '#000000',
+                      cursor: 'pointer'
+                    }}
+                    onMouseEnter={() => setHoveredItem('01')}
+                    onMouseLeave={() => setHoveredItem(null)}
                   >
                     Note
                   </div>
-
-                  {/* Teks hover muncul di samping Note - dengan GSAP SplitText */}
-                  {showNoteText && (
+                  {hoveredItem === '01' && (
                     <div
                       ref={hoverTextRef}
                       style={{
@@ -659,6 +657,90 @@ export default function ContactPage(): React.JSX.Element {
                       / kamu bisa mencatat apa yang kamu inginkan
                     </div>
                   )}
+                </div>
+
+                {/* 02 - Calendar */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '30px'
+                }}>
+                  <div
+                    style={{
+                      fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
+                      fontSize: '80px',
+                      fontWeight: '400',
+                      color: '#000000'
+                    }}
+                  >
+                    02
+                  </div>
+                  <div
+                    style={{
+                      fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
+                      fontSize: '80px',
+                      fontWeight: '400',
+                      color: '#000000'
+                    }}
+                  >
+                    Calendar
+                  </div>
+                </div>
+
+                {/* 03 - Donation */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '30px'
+                }}>
+                  <div
+                    style={{
+                      fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
+                      fontSize: '80px',
+                      fontWeight: '400',
+                      color: '#000000'
+                    }}
+                  >
+                    03
+                  </div>
+                  <div
+                    style={{
+                      fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
+                      fontSize: '80px',
+                      fontWeight: '400',
+                      color: '#000000'
+                    }}
+                  >
+                    Donation
+                  </div>
+                </div>
+
+                {/* 04 - Community */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '30px'
+                }}>
+                  <div
+                    style={{
+                      fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
+                      fontSize: '80px',
+                      fontWeight: '400',
+                      color: '#000000'
+                    }}
+                  >
+                    04
+                  </div>
+                  <div
+                    style={{
+                      fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
+                      fontSize: '80px',
+                      fontWeight: '400',
+                      color: '#000000'
+                    }}
+                  >
+                    Community
+                  </div>
                 </div>
               </div>
             </div>
