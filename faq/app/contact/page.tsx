@@ -30,7 +30,7 @@ export default function ContactPage(): React.JSX.Element {
   const xRef = useRef<HTMLDivElement>(null);
   const linkedinRef = useRef<HTMLDivElement>(null);
   const infoTextRef = useRef<HTMLDivElement>(null);
-  const noteTextRef = useRef<HTMLDivElement>(null);
+  const hoverTextRef = useRef<HTMLDivElement>(null);
 
   // Variabel untuk menyimpan teks asli medsos
   const originalTexts = {
@@ -82,6 +82,38 @@ export default function ContactPage(): React.JSX.Element {
     }
     element.textContent = originalText;
   };
+
+  // Animasi GSAP SplitText untuk hover text
+  useEffect(() => {
+    if (showNoteText && hoverTextRef.current) {
+      const splitHover = new SplitText(hoverTextRef.current, {
+        type: "chars",
+        charsClass: "split-char-hover"
+      });
+
+      gsap.fromTo(splitHover.chars,
+        {
+          opacity: 0,
+          y: 50,
+          rotationX: -90,
+          filter: 'blur(10px)'
+        },
+        {
+          opacity: 1,
+          y: 0,
+          rotationX: 0,
+          filter: 'blur(0px)',
+          duration: 0.6,
+          stagger: 0.03,
+          ease: "back.out(1.2)"
+        }
+      );
+
+      return () => {
+        splitHover.revert();
+      };
+    }
+  }, [showNoteText]);
 
   useEffect(() => {
     // Initialize ScrollSmoother
@@ -430,12 +462,13 @@ export default function ContactPage(): React.JSX.Element {
           transform-style: preserve-3d;
         }
 
-        .social-item {
-          transition: all 0.3s ease;
+        .split-char-hover {
+          display: inline-block;
+          will-change: transform, opacity, filter;
         }
 
-        .note-hover-text {
-          transition: opacity 0.3s ease;
+        .social-item {
+          transition: all 0.3s ease;
         }
       `}</style>
       
@@ -563,27 +596,30 @@ export default function ContactPage(): React.JSX.Element {
                   textAlign: 'center',
                   letterSpacing: '-0.01em',
                   lineHeight: '1.2',
-                  marginBottom: '80px'
+                  marginBottom: '60px'
                 }}>
                 You can know contact Website this Menuru
               </div>
 
-              {/* Baris 01 dan Note */}
+              {/* Baris 01 dan Note - jarak dekat, font besar 250px */}
               <div style={{
                 display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'flex-start',
-                marginTop: '40px'
+                justifyContent: 'center',
+                alignItems: 'center',
+                gap: '20px',
+                marginTop: '40px',
+                position: 'relative'
               }}>
-                {/* Sisi Kiri - 01 */}
+                {/* 01 */}
                 <div
                   style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '24px',
+                    fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
+                    fontSize: '250px',
                     fontWeight: '400',
                     color: '#000000',
                     cursor: 'pointer',
-                    position: 'relative'
+                    lineHeight: '1',
+                    letterSpacing: '-0.02em'
                   }}
                   onMouseEnter={() => setShowNoteText(true)}
                   onMouseLeave={() => setShowNoteText(false)}
@@ -591,16 +627,16 @@ export default function ContactPage(): React.JSX.Element {
                   01
                 </div>
 
-                {/* Sisi Tengah - Note dengan hover text */}
+                {/* Note */}
                 <div
                   style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '24px',
+                    fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
+                    fontSize: '250px',
                     fontWeight: '400',
                     color: '#000000',
                     cursor: 'pointer',
-                    position: 'relative',
-                    textAlign: 'center'
+                    lineHeight: '1',
+                    letterSpacing: '-0.02em'
                   }}
                   onMouseEnter={() => setShowNoteText(true)}
                   onMouseLeave={() => setShowNoteText(false)}
@@ -608,27 +644,23 @@ export default function ContactPage(): React.JSX.Element {
                   Note
                 </div>
 
-                {/* Sisi Kanan - kosong untuk keseimbangan */}
-                <div style={{ width: '50px' }} />
+                {/* Teks hover yang muncul di samping Note - dengan GSAP SplitText */}
+                {showNoteText && (
+                  <div
+                    ref={hoverTextRef}
+                    style={{
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '32px',
+                      fontWeight: '400',
+                      color: '#000000',
+                      marginLeft: '20px',
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
+                    / kamu bisa mencatat apa yang kamu inginkan
+                  </div>
+                )}
               </div>
-
-              {/* Teks yang muncul saat hover 01 atau Note */}
-              {showNoteText && (
-                <div
-                  ref={noteTextRef}
-                  style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '18px',
-                    fontWeight: '400',
-                    color: '#666666',
-                    textAlign: 'center',
-                    marginTop: '20px',
-                    animation: 'fadeInUp 0.3s ease'
-                  }}
-                >
-                  / kamu bisa mencatat apa yang kamu inginkan
-                </div>
-              )}
             </div>
 
             {/* Email dan Medsos - di bagian bawah */}
@@ -860,16 +892,6 @@ export default function ContactPage(): React.JSX.Element {
                 from {
                   opacity: 0;
                   transform: translateY(30px);
-                }
-                to {
-                  opacity: 1;
-                  transform: translateY(0);
-                }
-              }
-              @keyframes fadeInUp {
-                from {
-                  opacity: 0;
-                  transform: translateY(10px);
                 }
                 to {
                   opacity: 1;
