@@ -500,7 +500,7 @@ export default function ContactPage(): React.JSX.Element {
         }
         
         #smooth-content-contact {
-          min-height: 200vh;
+          min-height: 250vh;
           width: 100%;
           will-change: transform;
         }
@@ -529,7 +529,7 @@ export default function ContactPage(): React.JSX.Element {
       <div id="smooth-wrapper-contact">
         <div id="smooth-content-contact">
           <div style={{
-            minHeight: '200vh',
+            minHeight: '250vh',
             backgroundColor: 'white',
             margin: 0,
             padding: 0,
@@ -597,11 +597,12 @@ export default function ContactPage(): React.JSX.Element {
 
             {/* Teks Contact besar 300px */}
             <div style={{
-              position: 'absolute',
+              position: 'relative',
               top: '120px',
               left: '40px',
               zIndex: 10,
-              width: 'calc(100% - 80px)'
+              width: 'calc(100% - 80px)',
+              marginBottom: '100px'
             }}>
               <div 
                 ref={contactTitleRef}
@@ -634,11 +635,12 @@ export default function ContactPage(): React.JSX.Element {
 
             {/* Info Text di bawah garis */}
             <div style={{
-              position: 'absolute',
-              top: '500px',
+              position: 'relative',
+              top: '150px',
               left: '40px',
               right: '40px',
-              zIndex: 10
+              zIndex: 10,
+              marginBottom: '200px'
             }}>
               <div 
                 ref={infoTextRef}
@@ -655,12 +657,13 @@ export default function ContactPage(): React.JSX.Element {
                 You can know contact Website this Menuru
               </div>
 
-              {/* Daftar item 01-04 - angka di kiri, teks di tengah dengan jarak jauh */}
+              {/* Daftar item 01-04 - semua angka 300px */}
               <div style={{
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '60px',
-                marginLeft: '80px'
+                marginLeft: '80px',
+                marginBottom: '150px'
               }}>
                 {/* 01 - Note */}
                 <div
@@ -681,7 +684,8 @@ export default function ContactPage(): React.JSX.Element {
                     fontSize: '90px',
                     fontWeight: '300',
                     color: '#000000',
-                    letterSpacing: '-0.02em'
+                    letterSpacing: '-0.02em',
+                    lineHeight: '1'
                   }}>
                     01
                   </span>
@@ -732,7 +736,8 @@ export default function ContactPage(): React.JSX.Element {
                     fontSize: '90px',
                     fontWeight: '300',
                     color: '#000000',
-                    letterSpacing: '-0.02em'
+                    letterSpacing: '-0.02em',
+                    lineHeight: '1'
                   }}>
                     02
                   </span>
@@ -766,7 +771,8 @@ export default function ContactPage(): React.JSX.Element {
                     fontSize: '90px',
                     fontWeight: '300',
                     color: '#000000',
-                    letterSpacing: '-0.02em'
+                    letterSpacing: '-0.02em',
+                    lineHeight: '1'
                   }}>
                     03
                   </span>
@@ -797,16 +803,17 @@ export default function ContactPage(): React.JSX.Element {
                 >
                   <span style={{
                     fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
-                    fontSize: '90px',
+                    fontSize: '300px',
                     fontWeight: '300',
                     color: '#000000',
-                    letterSpacing: '-0.02em'
+                    letterSpacing: '-0.02em',
+                    lineHeight: '1'
                   }}>
                     04
                   </span>
                   <span style={{
                     fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
-                    fontSize: '300px',
+                    fontSize: '90px',
                     fontWeight: '300',
                     color: '#000000',
                     letterSpacing: '-0.02em'
