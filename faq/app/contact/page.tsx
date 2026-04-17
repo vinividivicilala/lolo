@@ -467,7 +467,7 @@ export default function ContactPage(): React.JSX.Element {
                   WebkitFontSmoothing: 'antialiased',
                   MozOsxFontSmoothing: 'grayscale'
                 }}>
-                CONTACT
+                Contact
               </div>
             </div>
 
