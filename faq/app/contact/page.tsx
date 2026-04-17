@@ -21,6 +21,7 @@ export default function ContactPage(): React.JSX.Element {
   
   // Refs untuk teks yang akan di-split
   const menuruTextRef = useRef<HTMLSpanElement>(null);
+  const contactTitleRef = useRef<HTMLDivElement>(null);
   const lineRef = useRef<HTMLDivElement>(null);
   const emailRef = useRef<HTMLDivElement>(null);
   const igRef = useRef<HTMLDivElement>(null);
@@ -111,6 +112,38 @@ export default function ContactPage(): React.JSX.Element {
 
   // GSAP SplitText animations
   useEffect(() => {
+    // Split text untuk "CONTACT" besar
+    if (contactTitleRef.current) {
+      const splitContact = new SplitText(contactTitleRef.current, {
+        type: "chars",
+        charsClass: "split-char-contact"
+      });
+
+      gsap.fromTo(splitContact.chars,
+        {
+          opacity: 0,
+          y: 100,
+          rotateX: -90,
+          filter: 'blur(10px)'
+        },
+        {
+          opacity: 1,
+          y: 0,
+          rotateX: 0,
+          filter: 'blur(0px)',
+          duration: 1.2,
+          stagger: 0.03,
+          ease: "back.out(1.2)",
+          scrollTrigger: {
+            trigger: contactTitleRef.current,
+            start: "top 80%",
+            end: "bottom 60%",
+            toggleActions: "play none none reverse",
+          }
+        }
+      );
+    }
+
     // Split text untuk email
     if (emailRef.current) {
       const splitEmail = new SplitText(emailRef.current, {
@@ -330,6 +363,11 @@ export default function ContactPage(): React.JSX.Element {
           will-change: transform, opacity, filter;
         }
 
+        .split-char-contact {
+          display: inline-block;
+          will-change: transform, opacity, filter;
+        }
+
         .split-char-menuru {
           display: inline-block;
           will-change: transform, opacity, filter;
@@ -351,7 +389,6 @@ export default function ContactPage(): React.JSX.Element {
             width: '100%',
             display: 'flex',
             flexDirection: 'column',
-            justifyContent: 'flex-end',
             fontFamily: 'Questrial, sans-serif',
             WebkitFontSmoothing: 'antialiased',
             MozOsxFontSmoothing: 'grayscale',
@@ -389,7 +426,7 @@ export default function ContactPage(): React.JSX.Element {
               </Link>
             </div>
 
-            {/* Judul Website MENURU - Desain seperti teks MENURU besar di sisi kanan */}
+            {/* Judul Website MENURU - pojok kanan atas */}
             <div style={{
               position: 'fixed',
               top: '40px',
@@ -411,7 +448,35 @@ export default function ContactPage(): React.JSX.Element {
               </span>
             </div>
 
-            {/* Email dan Medsos */}
+            {/* Teks CONTACT besar di tengah halaman */}
+            <div style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: '100%',
+              textAlign: 'center',
+              zIndex: 10
+            }}>
+              <div 
+                ref={contactTitleRef}
+                style={{
+                  fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
+                  fontSize: '250px',
+                  fontWeight: '400',
+                  color: '#000000',
+                  textAlign: 'center',
+                  letterSpacing: '-0.02em',
+                  textTransform: 'uppercase',
+                  lineHeight: '1',
+                  WebkitFontSmoothing: 'antialiased',
+                  MozOsxFontSmoothing: 'grayscale'
+                }}>
+                CONTACT
+              </div>
+            </div>
+
+            {/* Email dan Medsos - di bagian bawah */}
             <div style={{
               position: 'relative',
               width: '100%',
@@ -420,7 +485,8 @@ export default function ContactPage(): React.JSX.Element {
               alignItems: 'flex-end',
               padding: '0 80px',
               marginBottom: '30px',
-              boxSizing: 'border-box'
+              boxSizing: 'border-box',
+              marginTop: 'auto'
             }}>
               {/* Email - Sisi Kiri */}
               <div 
