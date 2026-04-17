@@ -112,7 +112,7 @@ export default function ContactPage(): React.JSX.Element {
 
   // GSAP SplitText animations
   useEffect(() => {
-    // Split text untuk "CONTACT" besar di sisi kiri
+    // Split text untuk "CONTACT"
     if (contactTitleRef.current) {
       const splitContact = new SplitText(contactTitleRef.current, {
         type: "chars",
@@ -122,20 +122,20 @@ export default function ContactPage(): React.JSX.Element {
       gsap.fromTo(splitContact.chars,
         {
           opacity: 0,
-          x: -100,
+          x: -50,
           filter: 'blur(10px)'
         },
         {
           opacity: 1,
           x: 0,
           filter: 'blur(0px)',
-          duration: 1.2,
-          stagger: 0.03,
+          duration: 1,
+          stagger: 0.04,
           ease: "back.out(1.2)",
           scrollTrigger: {
             trigger: contactTitleRef.current,
-            start: "top 80%",
-            end: "bottom 60%",
+            start: "top 85%",
+            end: "bottom 70%",
             toggleActions: "play none none reverse",
           }
         }
@@ -446,24 +446,24 @@ export default function ContactPage(): React.JSX.Element {
               </span>
             </div>
 
-            {/* Teks CONTACT besar di sisi kiri, di bawah judul web */}
+            {/* Teks CONTACT di bawah tombol Back */}
             <div style={{
               position: 'absolute',
-              top: '35%',
-              left: '80px',
+              top: '120px',
+              left: '40px',
               zIndex: 10
             }}>
               <div 
                 ref={contactTitleRef}
                 style={{
                   fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
-                  fontSize: '250px',
+                  fontSize: '150px',
                   fontWeight: '400',
                   color: '#000000',
                   textAlign: 'left',
                   letterSpacing: '-0.02em',
                   textTransform: 'uppercase',
-                  lineHeight: '0.9',
+                  lineHeight: '1',
                   WebkitFontSmoothing: 'antialiased',
                   MozOsxFontSmoothing: 'grayscale'
                 }}>
