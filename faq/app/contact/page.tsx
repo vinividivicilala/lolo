@@ -30,6 +30,12 @@ export default function ContactPage(): React.JSX.Element {
   const xRef = useRef<HTMLDivElement>(null);
   const linkedinRef = useRef<HTMLDivElement>(null);
   const infoTextRef = useRef<HTMLDivElement>(null);
+  
+  // Refs untuk hover items
+  const item01Ref = useRef<HTMLDivElement>(null);
+  const item02Ref = useRef<HTMLDivElement>(null);
+  const item03Ref = useRef<HTMLDivElement>(null);
+  const item04Ref = useRef<HTMLDivElement>(null);
   const hoverTextRef = useRef<HTMLDivElement>(null);
 
   // Variabel untuk menyimpan teks asli medsos
@@ -83,35 +89,95 @@ export default function ContactPage(): React.JSX.Element {
     element.textContent = originalText;
   };
 
-  // Animasi GSAP SplitText untuk hover text
+  // Animasi hover untuk item 01-04 menggunakan GSAP tanpa SplitText
   useEffect(() => {
-    if (hoveredItem === '01' && hoverTextRef.current) {
-      const splitHover = new SplitText(hoverTextRef.current, {
-        type: "chars",
-        charsClass: "split-char-hover"
-      });
-
-      gsap.fromTo(splitHover.chars,
+    if (hoveredItem === '01' && hoverTextRef.current && item01Ref.current) {
+      // Animasi teks hover muncul
+      gsap.fromTo(hoverTextRef.current,
         {
           opacity: 0,
-          y: 50,
-          rotationX: -90,
-          filter: 'blur(10px)'
+          x: -20,
+          filter: 'blur(5px)'
         },
         {
           opacity: 1,
-          y: 0,
-          rotationX: 0,
+          x: 0,
           filter: 'blur(0px)',
-          duration: 0.6,
-          stagger: 0.03,
-          ease: "back.out(1.2)"
+          duration: 0.4,
+          ease: "power2.out"
         }
       );
+      
+      // Animasi item 01
+      gsap.to(item01Ref.current, {
+        scale: 1.02,
+        duration: 0.3,
+        ease: "power2.out"
+      });
+    } else if (hoveredItem !== '01' && hoverTextRef.current) {
+      gsap.to(hoverTextRef.current, {
+        opacity: 0,
+        duration: 0.2,
+        ease: "power2.in"
+      });
+      if (item01Ref.current) {
+        gsap.to(item01Ref.current, {
+          scale: 1,
+          duration: 0.3,
+          ease: "power2.out"
+        });
+      }
+    }
+  }, [hoveredItem]);
 
-      return () => {
-        splitHover.revert();
-      };
+  // Animasi hover untuk item 02
+  useEffect(() => {
+    if (hoveredItem === '02' && item02Ref.current) {
+      gsap.to(item02Ref.current, {
+        scale: 1.02,
+        duration: 0.3,
+        ease: "power2.out"
+      });
+    } else if (hoveredItem !== '02' && item02Ref.current) {
+      gsap.to(item02Ref.current, {
+        scale: 1,
+        duration: 0.3,
+        ease: "power2.out"
+      });
+    }
+  }, [hoveredItem]);
+
+  // Animasi hover untuk item 03
+  useEffect(() => {
+    if (hoveredItem === '03' && item03Ref.current) {
+      gsap.to(item03Ref.current, {
+        scale: 1.02,
+        duration: 0.3,
+        ease: "power2.out"
+      });
+    } else if (hoveredItem !== '03' && item03Ref.current) {
+      gsap.to(item03Ref.current, {
+        scale: 1,
+        duration: 0.3,
+        ease: "power2.out"
+      });
+    }
+  }, [hoveredItem]);
+
+  // Animasi hover untuk item 04
+  useEffect(() => {
+    if (hoveredItem === '04' && item04Ref.current) {
+      gsap.to(item04Ref.current, {
+        scale: 1.02,
+        duration: 0.3,
+        ease: "power2.out"
+      });
+    } else if (hoveredItem !== '04' && item04Ref.current) {
+      gsap.to(item04Ref.current, {
+        scale: 1,
+        duration: 0.3,
+        ease: "power2.out"
+      });
     }
   }, [hoveredItem]);
 
@@ -462,11 +528,6 @@ export default function ContactPage(): React.JSX.Element {
           transform-style: preserve-3d;
         }
 
-        .split-char-hover {
-          display: inline-block;
-          will-change: transform, opacity, filter;
-        }
-
         .social-item {
           transition: all 0.3s ease;
         }
@@ -541,7 +602,7 @@ export default function ContactPage(): React.JSX.Element {
               </span>
             </div>
 
-            {/* Teks Contact dengan garis bawah */}
+            {/* Teks Contact dengan garis bawah - font besar seperti teks 01 */}
             <div style={{
               position: 'absolute',
               top: '120px',
@@ -552,9 +613,9 @@ export default function ContactPage(): React.JSX.Element {
               <div 
                 ref={contactTitleRef}
                 style={{
-                  fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
-                  fontSize: '300px',
-                  fontWeight: '200',
+                  fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
+                  fontSize: '120px',
+                  fontWeight: '300',
                   color: '#000000',
                   textAlign: 'left',
                   letterSpacing: '-0.02em',
@@ -601,22 +662,29 @@ export default function ContactPage(): React.JSX.Element {
                 You can know contact Website this Menuru
               </div>
 
-              {/* Daftar item seperti di foto - tidak tebal, font besar tapi normal */}
+              {/* Daftar item 01-04 - digeser ke kanan, font besar, dengan hover animasi GSAP */}
               <div style={{
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '60px',
-                marginLeft: '80px'
+                gap: '50px',
+                marginLeft: '200px'
               }}>
-                {/* 01 - A project */}
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'baseline',
-                  gap: '60px'
-                }}>
+                {/* 01 - Note dengan hover text */}
+                <div
+                  ref={item01Ref}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'baseline',
+                    gap: '60px',
+                    cursor: 'pointer',
+                    transition: 'transform 0.3s ease'
+                  }}
+                  onMouseEnter={() => setHoveredItem('01')}
+                  onMouseLeave={() => setHoveredItem(null)}
+                >
                   <span style={{
                     fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
-                    fontSize: '100px',
+                    fontSize: '80px',
                     fontWeight: '300',
                     color: '#000000',
                     letterSpacing: '-0.02em'
@@ -625,24 +693,48 @@ export default function ContactPage(): React.JSX.Element {
                   </span>
                   <span style={{
                     fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
-                    fontSize: '100px',
+                    fontSize: '80px',
                     fontWeight: '300',
                     color: '#000000',
                     letterSpacing: '-0.02em'
                   }}>
-                    A project
+                    Note
                   </span>
                 </div>
 
-                {/* 02 - Application */}
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'baseline',
-                  gap: '60px'
-                }}>
+                {/* Hover text untuk 01 - Note */}
+                {hoveredItem === '01' && (
+                  <div
+                    ref={hoverTextRef}
+                    style={{
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '20px',
+                      fontWeight: '400',
+                      color: '#000000',
+                      marginLeft: '140px',
+                      marginTop: '-30px'
+                    }}
+                  >
+                    / kamu bisa mencatat apa yang kamu inginkan
+                  </div>
+                )}
+
+                {/* 02 - Calendar */}
+                <div
+                  ref={item02Ref}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'baseline',
+                    gap: '60px',
+                    cursor: 'pointer',
+                    transition: 'transform 0.3s ease'
+                  }}
+                  onMouseEnter={() => setHoveredItem('02')}
+                  onMouseLeave={() => setHoveredItem(null)}
+                >
                   <span style={{
                     fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
-                    fontSize: '100px',
+                    fontSize: '80px',
                     fontWeight: '300',
                     color: '#000000',
                     letterSpacing: '-0.02em'
@@ -651,24 +743,31 @@ export default function ContactPage(): React.JSX.Element {
                   </span>
                   <span style={{
                     fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
-                    fontSize: '100px',
+                    fontSize: '80px',
                     fontWeight: '300',
                     color: '#000000',
                     letterSpacing: '-0.02em'
                   }}>
-                    Application
+                    Calendar
                   </span>
                 </div>
 
-                {/* 03 - Read more */}
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'baseline',
-                  gap: '60px'
-                }}>
+                {/* 03 - Donation */}
+                <div
+                  ref={item03Ref}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'baseline',
+                    gap: '60px',
+                    cursor: 'pointer',
+                    transition: 'transform 0.3s ease'
+                  }}
+                  onMouseEnter={() => setHoveredItem('03')}
+                  onMouseLeave={() => setHoveredItem(null)}
+                >
                   <span style={{
                     fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
-                    fontSize: '100px',
+                    fontSize: '80px',
                     fontWeight: '300',
                     color: '#000000',
                     letterSpacing: '-0.02em'
@@ -677,12 +776,45 @@ export default function ContactPage(): React.JSX.Element {
                   </span>
                   <span style={{
                     fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
-                    fontSize: '100px',
+                    fontSize: '80px',
                     fontWeight: '300',
                     color: '#000000',
                     letterSpacing: '-0.02em'
                   }}>
-                    Read more
+                    Donation
+                  </span>
+                </div>
+
+                {/* 04 - Community */}
+                <div
+                  ref={item04Ref}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'baseline',
+                    gap: '60px',
+                    cursor: 'pointer',
+                    transition: 'transform 0.3s ease'
+                  }}
+                  onMouseEnter={() => setHoveredItem('04')}
+                  onMouseLeave={() => setHoveredItem(null)}
+                >
+                  <span style={{
+                    fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
+                    fontSize: '80px',
+                    fontWeight: '300',
+                    color: '#000000',
+                    letterSpacing: '-0.02em'
+                  }}>
+                    04
+                  </span>
+                  <span style={{
+                    fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
+                    fontSize: '80px',
+                    fontWeight: '300',
+                    color: '#000000',
+                    letterSpacing: '-0.02em'
+                  }}>
+                    Community
                   </span>
                 </div>
               </div>
