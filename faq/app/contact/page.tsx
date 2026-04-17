@@ -22,6 +22,7 @@ export default function ContactPage(): React.JSX.Element {
   // Refs untuk teks yang akan di-split
   const menuruTextRef = useRef<HTMLSpanElement>(null);
   const contactTitleRef = useRef<HTMLDivElement>(null);
+  const contactUnderlineRef = useRef<HTMLDivElement>(null);
   const lineRef = useRef<HTMLDivElement>(null);
   const emailRef = useRef<HTMLDivElement>(null);
   const igRef = useRef<HTMLDivElement>(null);
@@ -112,7 +113,7 @@ export default function ContactPage(): React.JSX.Element {
 
   // GSAP SplitText animations
   useEffect(() => {
-    // Split text untuk "CONTACT"
+    // Split text untuk "Contact"
     if (contactTitleRef.current) {
       const splitContact = new SplitText(contactTitleRef.current, {
         type: "chars",
@@ -134,6 +135,30 @@ export default function ContactPage(): React.JSX.Element {
           ease: "back.out(1.2)",
           scrollTrigger: {
             trigger: contactTitleRef.current,
+            start: "top 85%",
+            end: "bottom 70%",
+            toggleActions: "play none none reverse",
+          }
+        }
+      );
+    }
+
+    // Animasi garis bawah teks Contact - panjang ke samping penuh seperti garis MENURU
+    if (contactUnderlineRef.current) {
+      gsap.fromTo(contactUnderlineRef.current,
+        {
+          width: '0%',
+          opacity: 0,
+          x: 100
+        },
+        {
+          width: '100%',
+          opacity: 1,
+          x: 0,
+          duration: 1.2,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: contactUnderlineRef.current,
             start: "top 85%",
             end: "bottom 70%",
             toggleActions: "play none none reverse",
@@ -446,29 +471,41 @@ export default function ContactPage(): React.JSX.Element {
               </span>
             </div>
 
-            {/* Teks CONTACT di bawah tombol Back */}
+            {/* Teks Contact dengan garis bawah panjang ke samping */}
             <div style={{
               position: 'absolute',
               top: '120px',
               left: '40px',
-              zIndex: 10
+              zIndex: 10,
+              width: 'calc(100% - 80px)'
             }}>
               <div 
                 ref={contactTitleRef}
                 style={{
                   fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
-                  fontSize: '150px',
-                  fontWeight: '400',
+                  fontSize: '300px',
+                  fontWeight: '200',
                   color: '#000000',
                   textAlign: 'left',
                   letterSpacing: '-0.02em',
-                  textTransform: 'uppercase',
+                  textTransform: 'capitalize',
                   lineHeight: '1',
                   WebkitFontSmoothing: 'antialiased',
                   MozOsxFontSmoothing: 'grayscale'
                 }}>
                 Contact
               </div>
+              {/* Garis bawah teks Contact - panjang ke samping penuh seperti garis MENURU */}
+              <div
+                ref={contactUnderlineRef}
+                style={{
+                  width: '0%',
+                  height: '2px',
+                  backgroundColor: '#000000',
+                  marginTop: '20px',
+                  opacity: 0
+                }}
+              />
             </div>
 
             {/* Email dan Medsos - di bagian bawah */}
