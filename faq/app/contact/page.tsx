@@ -622,7 +622,9 @@ export default function ContactPage(): React.JSX.Element {
             MozOsxFontSmoothing: 'grayscale',
             position: 'relative',
           }}>
-           {/* Tombol Menu */}
+
+
+      {/* Tombol Menu */}
 <div
   ref={menuButtonRef}
   onClick={handleMenuClick}
@@ -636,17 +638,17 @@ export default function ContactPage(): React.JSX.Element {
     zIndex: 100,
     display: 'flex',
     alignItems: 'center',
-    gap: '16px',
-    padding: isMenuHovered ? '18px 32px' : '12px 24px',
+    gap: '20px',
+    padding: '20px 40px',
     backgroundColor: '#000000',
-    borderRadius: '60px',
+    borderRadius: '80px',
     cursor: 'pointer',
     transition: 'all 0.3s ease'
   }}
 >
   <span style={{
     fontFamily: "'Questrial', sans-serif",
-    fontSize: isMenuHovered ? '54px' : '16px',
+    fontSize: '24px',
     fontWeight: '400',
     color: '#ffffff',
     letterSpacing: '0.02em',
@@ -657,59 +659,64 @@ export default function ContactPage(): React.JSX.Element {
   
   <div style={{
     position: 'relative',
-    width: isMenuHovered ? '32px' : '24px',
-    height: isMenuHovered ? '32px' : '24px',
+    width: '40px',
+    height: '40px',
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'center',
-    transition: 'all 0.3s ease'
+    justifyContent: 'center'
   }}>
-    {/* Titik bulat - membesar saat hover */}
+    {/* Titik bulat kecil - normal */}
     <div
-      ref={dotRef}
       style={{
-        width: isMenuHovered ? '12px' : '8px',
-        height: isMenuHovered ? '12px' : '8px',
+        width: isMenuHovered ? '40px' : '10px',
+        height: isMenuHovered ? '40px' : '10px',
         borderRadius: '50%',
         backgroundColor: '#e49366',
         position: 'absolute',
-        transition: 'all 0.3s ease',
-        opacity: isMenuHovered ? 0 : 1,
-        transform: isMenuHovered ? 'scale(0)' : 'scale(1)'
+        transition: 'width 0.3s ease, height 0.3s ease',
+        opacity: isMenuHovered ? 0 : 1
       }}
     />
     
-    {/* Garis hamburger 1 */}
+    {/* Lingkaran besar (hover) - berisi hamburger */}
     <div
-      ref={line1Ref}
       style={{
-        position: 'absolute',
-        width: isMenuHovered ? '24px' : '20px',
-        height: '2px',
+        width: isMenuHovered ? '40px' : '0px',
+        height: isMenuHovered ? '40px' : '0px',
+        borderRadius: '50%',
         backgroundColor: '#e49366',
-        borderRadius: '2px',
-        transform: isMenuHovered ? 'translateY(-6px)' : 'translateY(0)',
-        opacity: isMenuHovered ? 1 : 0,
-        transition: 'all 0.3s ease'
-      }}
-    />
-    
-    {/* Garis hamburger 2 */}
-    <div
-      ref={line2Ref}
-      style={{
         position: 'absolute',
-        width: isMenuHovered ? '24px' : '20px',
-        height: '2px',
-        backgroundColor: '#e49366',
-        borderRadius: '2px',
-        transform: isMenuHovered ? 'translateY(6px)' : 'translateY(0)',
-        opacity: isMenuHovered ? 1 : 0,
-        transition: 'all 0.3s ease'
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: '6px',
+        transition: 'width 0.3s ease, height 0.3s ease',
+        opacity: isMenuHovered ? 1 : 0
       }}
-    />
+    >
+      {/* Garis hamburger 1 */}
+      <div
+        style={{
+          width: '20px',
+          height: '2px',
+          backgroundColor: '#000000',
+          borderRadius: '2px'
+        }}
+      />
+      {/* Garis hamburger 2 */}
+      <div
+        style={{
+          width: '20px',
+          height: '2px',
+          backgroundColor: '#000000',
+          borderRadius: '2px'
+        }}
+      />
+    </div>
   </div>
 </div>
+        
 
             {/* Tombol Back ke Home */}
             <div style={{
