@@ -1,4 +1,4 @@
-// app/contact/page.tsx (Halaman Contact)
+// app/contact/page.tsx (Halaman Contact) - Full Kode
 'use client';
 
 import React, { useState, useEffect, useRef } from "react";
@@ -84,16 +84,16 @@ export default function ContactPage(): React.JSX.Element {
         gsap.fromTo(menuBigTextRef.current,
           {
             opacity: 0,
-            x: 50,
-            filter: 'blur(10px)'
+            x: 100,
+            scale: 0.9
           },
           {
-            opacity: 0.95,
+            opacity: 1,
             x: 0,
-            filter: 'blur(0px)',
-            duration: 1,
+            scale: 1,
+            duration: 0.8,
             delay: 0.3,
-            ease: "power2.out"
+            ease: "back.out(0.8)"
           }
         );
       }
@@ -739,7 +739,7 @@ export default function ContactPage(): React.JSX.Element {
                 justifyContent: 'flex-start',
                 padding: '60px',
                 boxSizing: 'border-box',
-                overflow: 'hidden' // Tidak ada scroll
+                overflow: 'hidden'
               }}
             >
               {/* Tombol Close (X) besar bulat */}
@@ -789,19 +789,19 @@ export default function ContactPage(): React.JSX.Element {
                 MENURU
               </div>
 
-              {/* Teks MENURU besar di sisi kanan - FONT BRUTAL, WEIGHT BOLD, UKURAN BESAR */}
+              {/* Teks MENURU besar di sisi kanan - FONT BRUTAL ANTON */}
               <span
                 ref={menuBigTextRef}
                 style={{
                   position: 'absolute',
                   bottom: '40px',
                   right: '40px',
-                  fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
-                  fontSize: '200px',
-                  fontWeight: '900',
+                  fontFamily: "'Anton', 'Bebas Neue', 'Impact', sans-serif",
+                  fontSize: '220px',
+                  fontWeight: '400',
                   color: '#ffffff',
                   textAlign: 'right',
-                  letterSpacing: '-0.03em',
+                  letterSpacing: '0.02em',
                   textTransform: 'uppercase',
                   lineHeight: '0.8',
                   opacity: 0.95,
@@ -822,7 +822,7 @@ export default function ContactPage(): React.JSX.Element {
                 marginLeft: '40px',
                 zIndex: 10
               }}>
-                {/* Note - tanpa panah, hover geser ke kanan */}
+                {/* Note */}
                 <div
                   ref={menuItemRefs.note}
                   onMouseEnter={() => handleMenuItemHover(menuItemRefs.note, true)}
@@ -845,7 +845,7 @@ export default function ContactPage(): React.JSX.Element {
                   </span>
                 </div>
 
-                {/* Blog - tanpa panah, hover geser ke kanan */}
+                {/* Blog */}
                 <div
                   ref={menuItemRefs.blog}
                   onMouseEnter={() => handleMenuItemHover(menuItemRefs.blog, true)}
@@ -868,7 +868,7 @@ export default function ContactPage(): React.JSX.Element {
                   </span>
                 </div>
 
-                {/* Community - tanpa panah, hover geser ke kanan */}
+                {/* Community */}
                 <div
                   ref={menuItemRefs.community}
                   onMouseEnter={() => handleMenuItemHover(menuItemRefs.community, true)}
@@ -891,7 +891,7 @@ export default function ContactPage(): React.JSX.Element {
                   </span>
                 </div>
 
-                {/* Donation - tanpa panah, hover geser ke kanan */}
+                {/* Donation */}
                 <div
                   ref={menuItemRefs.donation}
                   onMouseEnter={() => handleMenuItemHover(menuItemRefs.donation, true)}
@@ -914,7 +914,7 @@ export default function ContactPage(): React.JSX.Element {
                   </span>
                 </div>
 
-                {/* Calendar - tanpa panah, hover geser ke kanan */}
+                {/* Calendar */}
                 <div
                   ref={menuItemRefs.calendar}
                   onMouseEnter={() => handleMenuItemHover(menuItemRefs.calendar, true)}
@@ -937,7 +937,7 @@ export default function ContactPage(): React.JSX.Element {
                   </span>
                 </div>
 
-                {/* Contact - DENGAN panah SVG besar, tanpa hover animasi geser */}
+                {/* Contact - dengan panah SVG */}
                 <div
                   ref={menuItemRefs.contact}
                   style={{
