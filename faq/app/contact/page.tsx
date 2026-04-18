@@ -62,7 +62,7 @@ export default function ContactPage(): React.JSX.Element {
     linkedin: 'LinkedIn'
   };
 
-  // Animasi menu drawer muncul dari bawah ke atas
+  // Animasi menu drawer muncul dari bawah ke atas (lebih lambat)
   useEffect(() => {
     if (isMenuOpen && menuDrawerRef.current) {
       gsap.fromTo(menuDrawerRef.current,
@@ -73,7 +73,7 @@ export default function ContactPage(): React.JSX.Element {
         {
           y: '0%',
           opacity: 1,
-          duration: 0.6,
+          duration: 0.8,
           ease: "power3.out",
           display: 'flex'
         }
@@ -82,7 +82,7 @@ export default function ContactPage(): React.JSX.Element {
       gsap.to(menuDrawerRef.current, {
         y: '100%',
         opacity: 0,
-        duration: 0.5,
+        duration: 0.6,
         ease: "power3.in",
         onComplete: () => {
           if (menuDrawerRef.current) {
@@ -112,38 +112,21 @@ export default function ContactPage(): React.JSX.Element {
     }
   }, [isMenuHovered]);
 
-  // Animasi hover untuk menu items di drawer
+  // Animasi hover untuk menu items di drawer (tanpa panah, hanya geser)
   const handleMenuItemHover = (ref: React.RefObject<HTMLDivElement>, isHover: boolean) => {
     if (ref.current) {
-      const arrowSvg = ref.current.querySelector('.menu-arrow');
       if (isHover) {
         gsap.to(ref.current, {
-          x: 10,
+          x: 15,
           duration: 0.3,
           ease: "power2.out"
         });
-        if (arrowSvg) {
-          gsap.to(arrowSvg, {
-            x: 5,
-            rotation: 45,
-            duration: 0.3,
-            ease: "back.out(1)"
-          });
-        }
       } else {
         gsap.to(ref.current, {
           x: 0,
           duration: 0.3,
           ease: "power2.out"
         });
-        if (arrowSvg) {
-          gsap.to(arrowSvg, {
-            x: 0,
-            rotation: 0,
-            duration: 0.3,
-            ease: "power2.out"
-          });
-        }
       }
     }
   };
@@ -734,9 +717,10 @@ export default function ContactPage(): React.JSX.Element {
                 display: 'none',
                 flexDirection: 'column',
                 alignItems: 'flex-start',
-                justifyContent: 'center',
+                justifyContent: 'flex-start',
                 padding: '60px',
-                boxSizing: 'border-box'
+                boxSizing: 'border-box',
+                overflow: 'hidden'
               }}
             >
               {/* Tombol Close (X) besar bulat */}
@@ -783,14 +767,15 @@ export default function ContactPage(): React.JSX.Element {
                 MENURU
               </div>
 
-              {/* 6 Menu Items besar dengan tanda panah */}
+              {/* 6 Menu Items - di sisi kiri tengah, jarak dekat */}
               <div style={{
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '30px',
-                marginTop: '80px'
+                gap: '15px',
+                marginTop: '120px',
+                marginLeft: '40px'
               }}>
-                {/* Note */}
+                {/* Note - tanpa panah, hover geser ke kanan */}
                 <div
                   ref={menuItemRefs.note}
                   onMouseEnter={() => handleMenuItemHover(menuItemRefs.note, true)}
@@ -804,19 +789,16 @@ export default function ContactPage(): React.JSX.Element {
                 >
                   <span style={{
                     fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
-                    fontSize: '80px',
+                    fontSize: '64px',
                     fontWeight: '300',
                     color: '#ffffff',
                     letterSpacing: '-0.02em'
                   }}>
                     Note
                   </span>
-                  <svg className="menu-arrow" width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
                 </div>
 
-                {/* Blog */}
+                {/* Blog - tanpa panah, hover geser ke kanan */}
                 <div
                   ref={menuItemRefs.blog}
                   onMouseEnter={() => handleMenuItemHover(menuItemRefs.blog, true)}
@@ -830,19 +812,16 @@ export default function ContactPage(): React.JSX.Element {
                 >
                   <span style={{
                     fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
-                    fontSize: '80px',
+                    fontSize: '64px',
                     fontWeight: '300',
                     color: '#ffffff',
                     letterSpacing: '-0.02em'
                   }}>
                     Blog
                   </span>
-                  <svg className="menu-arrow" width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
                 </div>
 
-                {/* Community */}
+                {/* Community - tanpa panah, hover geser ke kanan */}
                 <div
                   ref={menuItemRefs.community}
                   onMouseEnter={() => handleMenuItemHover(menuItemRefs.community, true)}
@@ -856,19 +835,16 @@ export default function ContactPage(): React.JSX.Element {
                 >
                   <span style={{
                     fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
-                    fontSize: '80px',
+                    fontSize: '64px',
                     fontWeight: '300',
                     color: '#ffffff',
                     letterSpacing: '-0.02em'
                   }}>
                     Community
                   </span>
-                  <svg className="menu-arrow" width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
                 </div>
 
-                {/* Donation */}
+                {/* Donation - tanpa panah, hover geser ke kanan */}
                 <div
                   ref={menuItemRefs.donation}
                   onMouseEnter={() => handleMenuItemHover(menuItemRefs.donation, true)}
@@ -882,19 +858,16 @@ export default function ContactPage(): React.JSX.Element {
                 >
                   <span style={{
                     fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
-                    fontSize: '80px',
+                    fontSize: '64px',
                     fontWeight: '300',
                     color: '#ffffff',
                     letterSpacing: '-0.02em'
                   }}>
                     Donation
                   </span>
-                  <svg className="menu-arrow" width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
                 </div>
 
-                {/* Calendar */}
+                {/* Calendar - tanpa panah, hover geser ke kanan */}
                 <div
                   ref={menuItemRefs.calendar}
                   onMouseEnter={() => handleMenuItemHover(menuItemRefs.calendar, true)}
@@ -908,19 +881,16 @@ export default function ContactPage(): React.JSX.Element {
                 >
                   <span style={{
                     fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
-                    fontSize: '80px',
+                    fontSize: '64px',
                     fontWeight: '300',
                     color: '#ffffff',
                     letterSpacing: '-0.02em'
                   }}>
                     Calendar
                   </span>
-                  <svg className="menu-arrow" width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
                 </div>
 
-                {/* Contact (tetap ada panah, tanpa hover animasi) */}
+                {/* Contact - DENGAN panah SVG besar, tanpa hover animasi geser */}
                 <div
                   ref={menuItemRefs.contact}
                   style={{
@@ -934,14 +904,14 @@ export default function ContactPage(): React.JSX.Element {
                   <Link href="/contact" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '20px' }}>
                     <span style={{
                       fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
-                      fontSize: '80px',
+                      fontSize: '64px',
                       fontWeight: '300',
                       color: '#ffffff',
                       letterSpacing: '-0.02em'
                     }}>
                       Contact
                     </span>
-                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                   </Link>
