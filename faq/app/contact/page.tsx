@@ -1,5 +1,4 @@
-// app/contact/page.tsx (Halaman Contact) - Bagian yang ditambahkan
-
+// app/contact/page.tsx (Halaman Contact)
 'use client';
 
 import React, { useState, useEffect, useRef } from "react";
@@ -18,6 +17,7 @@ export default function ContactPage(): React.JSX.Element {
   const [showPopup, setShowPopup] = useState(false);
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   const [isMenuHovered, setIsMenuHovered] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const acceptBtnRef = useRef<HTMLButtonElement>(null);
   const declineBtnRef = useRef<HTMLButtonElement>(null);
   const smootherRef = useRef<any>(null);
@@ -40,11 +40,10 @@ export default function ContactPage(): React.JSX.Element {
   const item04Ref = useRef<HTMLDivElement>(null);
   const hoverTextRef = useRef<HTMLDivElement>(null);
   
-  // Ref untuk menu button
+  // Ref untuk menu button dan menu drawer
   const menuButtonRef = useRef<HTMLDivElement>(null);
-  const dotRef = useRef<HTMLDivElement>(null);
-  const line1Ref = useRef<HTMLDivElement>(null);
-  const line2Ref = useRef<HTMLDivElement>(null);
+  const menuDrawerRef = useRef<HTMLDivElement>(null);
+  const closeButtonRef = useRef<HTMLDivElement>(null);
 
   // Variabel untuk menyimpan teks asli medsos
   const originalTexts = {
@@ -53,57 +52,38 @@ export default function ContactPage(): React.JSX.Element {
     linkedin: 'LinkedIn'
   };
 
-  // Animasi menu button hover (titik bulat menjadi hamburger 2 garis)
+  // Animasi menu drawer muncul dari bawah ke atas
   useEffect(() => {
-    if (isMenuHovered) {
-      // Sembunyikan titik bulat
-      if (dotRef.current) {
-        gsap.to(dotRef.current, {
-          scale: 0,
-          opacity: 0,
-          duration: 0.2,
-          ease: "power2.in"
-        });
-      }
-      // Tampilkan garis hamburger
-      if (line1Ref.current && line2Ref.current) {
-        gsap.set([line1Ref.current, line2Ref.current], { display: 'block' });
-        gsap.fromTo(line1Ref.current,
-          { rotation: 0, y: 0, opacity: 0 },
-          { rotation: 0, y: 0, opacity: 1, duration: 0.3, ease: "back.out" }
-        );
-        gsap.fromTo(line2Ref.current,
-          { rotation: 0, y: 0, opacity: 0 },
-          { rotation: 0, y: 8, opacity: 1, duration: 0.3, ease: "back.out" }
-        );
-      }
-    } else {
-      // Tampilkan kembali titik bulat
-      if (dotRef.current) {
-        gsap.to(dotRef.current, {
-          scale: 1,
+    if (isMenuOpen && menuDrawerRef.current) {
+      gsap.fromTo(menuDrawerRef.current,
+        {
+          y: '100%',
+          opacity: 0
+        },
+        {
+          y: '0%',
           opacity: 1,
-          duration: 0.2,
-          ease: "power2.out"
-        });
-      }
-      // Sembunyikan garis hamburger
-      if (line1Ref.current && line2Ref.current) {
-        gsap.to([line1Ref.current, line2Ref.current], {
-          opacity: 0,
-          duration: 0.2,
-          ease: "power2.in",
-          onComplete: () => {
-            if (line1Ref.current && line2Ref.current) {
-              gsap.set([line1Ref.current, line2Ref.current], { display: 'none' });
-            }
+          duration: 0.6,
+          ease: "power3.out",
+          display: 'flex'
+        }
+      );
+    } else if (!isMenuOpen && menuDrawerRef.current) {
+      gsap.to(menuDrawerRef.current, {
+        y: '100%',
+        opacity: 0,
+        duration: 0.5,
+        ease: "power3.in",
+        onComplete: () => {
+          if (menuDrawerRef.current) {
+            menuDrawerRef.current.style.display = 'none';
           }
-        });
-      }
+        }
+      });
     }
-  }, [isMenuHovered]);
+  }, [isMenuOpen]);
 
-  // Animasi hover menu button scale
+  // Animasi hover menu button
   useEffect(() => {
     if (menuButtonRef.current) {
       if (isMenuHovered) {
@@ -546,7 +526,11 @@ export default function ContactPage(): React.JSX.Element {
   };
 
   const handleMenuClick = () => {
-    console.log('Menu clicked');
+    setIsMenuOpen(true);
+  };
+
+  const handleCloseMenu = () => {
+    setIsMenuOpen(false);
   };
 
   return (
@@ -622,101 +606,179 @@ export default function ContactPage(): React.JSX.Element {
             MozOsxFontSmoothing: 'grayscale',
             position: 'relative',
           }}>
+            {/* Tombol Menu */}
+            <div
+              ref={menuButtonRef}
+              onClick={handleMenuClick}
+              onMouseEnter={() => setIsMenuHovered(true)}
+              onMouseLeave={() => setIsMenuHovered(false)}
+              style={{
+                position: 'fixed',
+                top: '20px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                zIndex: 100,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '20px',
+                padding: '20px 40px',
+                backgroundColor: '#000000',
+                borderRadius: '80px',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease'
+              }}
+            >
+              <span style={{
+                fontFamily: "'Questrial', sans-serif",
+                fontSize: '24px',
+                fontWeight: '400',
+                color: '#ffffff',
+                letterSpacing: '0.02em'
+              }}>
+                Menu
+              </span>
+              
+              <div style={{
+                position: 'relative',
+                width: '40px',
+                height: '40px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                {/* Titik bulat kecil - normal */}
+                <div
+                  style={{
+                    width: isMenuHovered ? '40px' : '10px',
+                    height: isMenuHovered ? '40px' : '10px',
+                    borderRadius: '50%',
+                    backgroundColor: '#e49366',
+                    position: 'absolute',
+                    transition: 'width 0.3s ease, height 0.3s ease',
+                    opacity: isMenuHovered ? 0 : 1
+                  }}
+                />
+                
+                {/* Lingkaran besar (hover) - berisi hamburger */}
+                <div
+                  style={{
+                    width: isMenuHovered ? '40px' : '0px',
+                    height: isMenuHovered ? '40px' : '0px',
+                    borderRadius: '50%',
+                    backgroundColor: '#e49366',
+                    position: 'absolute',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px',
+                    transition: 'width 0.3s ease, height 0.3s ease',
+                    opacity: isMenuHovered ? 1 : 0
+                  }}
+                >
+                  <div style={{ width: '20px', height: '2px', backgroundColor: '#000000', borderRadius: '2px' }} />
+                  <div style={{ width: '20px', height: '2px', backgroundColor: '#000000', borderRadius: '2px' }} />
+                </div>
+              </div>
+            </div>
 
+            {/* Menu Drawer - halaman menu dari bawah ke atas */}
+            <div
+              ref={menuDrawerRef}
+              style={{
+                position: 'fixed',
+                bottom: 0,
+                left: 0,
+                right: 0,
+                width: '100%',
+                height: '100%',
+                backgroundColor: '#000000',
+                zIndex: 200,
+                display: 'none',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '40px'
+              }}
+            >
+              {/* Tombol Close (X) bulat */}
+              <div
+                ref={closeButtonRef}
+                onClick={handleCloseMenu}
+                onMouseEnter={(e) => {
+                  gsap.to(e.currentTarget, { scale: 1.1, duration: 0.2 });
+                }}
+                onMouseLeave={(e) => {
+                  gsap.to(e.currentTarget, { scale: 1, duration: 0.2 });
+                }}
+                style={{
+                  position: 'absolute',
+                  top: '30px',
+                  right: '30px',
+                  width: '50px',
+                  height: '50px',
+                  borderRadius: '50%',
+                  backgroundColor: '#e49366',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M18 6L6 18M6 6L18 18" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
 
-      {/* Tombol Menu */}
-<div
-  ref={menuButtonRef}
-  onClick={handleMenuClick}
-  onMouseEnter={() => setIsMenuHovered(true)}
-  onMouseLeave={() => setIsMenuHovered(false)}
-  style={{
-    position: 'fixed',
-    top: '20px',
-    left: '50%',
-    transform: 'translateX(-50%)',
-    zIndex: 100,
-    display: 'flex',
-    alignItems: 'center',
-    gap: '20px',
-    padding: '20px 40px',
-    backgroundColor: '#000000',
-    borderRadius: '80px',
-    cursor: 'pointer',
-    transition: 'all 0.3s ease'
-  }}
->
-  <span style={{
-    fontFamily: "'Questrial', sans-serif",
-    fontSize: '24px',
-    fontWeight: '400',
-    color: '#ffffff',
-    letterSpacing: '0.02em',
-    transition: 'all 0.3s ease'
-  }}>
-    Menu
-  </span>
-  
-  <div style={{
-    position: 'relative',
-    width: '40px',
-    height: '40px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center'
-  }}>
-    {/* Titik bulat kecil - normal */}
-    <div
-      style={{
-        width: isMenuHovered ? '40px' : '10px',
-        height: isMenuHovered ? '40px' : '10px',
-        borderRadius: '50%',
-        backgroundColor: '#e49366',
-        position: 'absolute',
-        transition: 'width 0.3s ease, height 0.3s ease',
-        opacity: isMenuHovered ? 0 : 1
-      }}
-    />
-    
-    {/* Lingkaran besar (hover) - berisi hamburger */}
-    <div
-      style={{
-        width: isMenuHovered ? '40px' : '0px',
-        height: isMenuHovered ? '40px' : '0px',
-        borderRadius: '50%',
-        backgroundColor: '#e49366',
-        position: 'absolute',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: '6px',
-        transition: 'width 0.3s ease, height 0.3s ease',
-        opacity: isMenuHovered ? 1 : 0
-      }}
-    >
-      {/* Garis hamburger 1 */}
-      <div
-        style={{
-          width: '20px',
-          height: '2px',
-          backgroundColor: '#000000',
-          borderRadius: '2px'
-        }}
-      />
-      {/* Garis hamburger 2 */}
-      <div
-        style={{
-          width: '20px',
-          height: '2px',
-          backgroundColor: '#000000',
-          borderRadius: '2px'
-        }}
-      />
-    </div>
-  </div>
-</div>
-        
+              {/* Menu items - halaman kosong dengan teks menu */}
+              <div style={{
+                textAlign: 'center',
+                color: 'white',
+                fontFamily: "'Bebas Neue', 'Impact', sans-serif",
+                fontSize: '80px',
+                fontWeight: '300',
+                letterSpacing: '-0.02em'
+              }}>
+                MENU
+              </div>
+              
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '20px',
+                textAlign: 'center'
+              }}>
+                <Link href="/" onClick={handleCloseMenu}>
+                  <div style={{
+                    color: 'white',
+                    fontFamily: "'Questrial', sans-serif",
+                    fontSize: '24px',
+                    cursor: 'pointer',
+                    transition: 'opacity 0.3s ease',
+                    opacity: 0.7
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+                  onMouseLeave={(e) => e.currentTarget.style.opacity = '0.7'}>
+                    Home
+                  </div>
+                </Link>
+                <Link href="/contact" onClick={handleCloseMenu}>
+                  <div style={{
+                    color: 'white',
+                    fontFamily: "'Questrial', sans-serif",
+                    fontSize: '24px',
+                    cursor: 'pointer',
+                    transition: 'opacity 0.3s ease',
+                    opacity: 0.7
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+                  onMouseLeave={(e) => e.currentTarget.style.opacity = '0.7'}>
+                    Contact
+                  </div>
+                </Link>
+              </div>
+            </div>
 
             {/* Tombol Back ke Home */}
             <div style={{
@@ -797,7 +859,6 @@ export default function ContactPage(): React.JSX.Element {
                 }}>
                 Contact
               </div>
-              {/* Garis bawah teks Contact */}
               <div
                 ref={contactUnderlineRef}
                 style={{
@@ -880,7 +941,6 @@ export default function ContactPage(): React.JSX.Element {
                     }}>
                       Note
                     </span>
-                    {/* Hover text muncul di samping kanan Note */}
                     {hoveredItem === '01' && (
                       <div
                         ref={hoverTextRef}
@@ -1017,7 +1077,6 @@ export default function ContactPage(): React.JSX.Element {
               boxSizing: 'border-box',
               marginTop: 'auto'
             }}>
-              {/* Email - Sisi Kiri */}
               <div 
                 ref={emailRef}
                 onClick={handleEmailClick}
@@ -1038,7 +1097,6 @@ export default function ContactPage(): React.JSX.Element {
                 contact.menuru@gmail.com
               </div>
 
-              {/* Medsos - Sisi Tengah 3 baris */}
               <div style={{
                 display: 'flex',
                 flexDirection: 'column',
@@ -1048,14 +1106,9 @@ export default function ContactPage(): React.JSX.Element {
                 transform: 'translateX(-50%)',
                 marginBottom: '20px'
               }}>
-                {/* Instagram */}
                 <div 
                   className="social-item"
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    cursor: 'pointer'
-                  }}
+                  style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
                   onMouseEnter={(e) => {
                     const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
                     if (textElement) handleSocialHover(textElement, originalTexts.ig);
@@ -1066,29 +1119,11 @@ export default function ContactPage(): React.JSX.Element {
                   }}
                   onClick={() => handleSocialClick('Instagram')}
                 >
-                  <span 
-                    ref={igRef}
-                    className="social-text"
-                    style={{
-                      fontFamily: "'Questrial', sans-serif",
-                      fontSize: '28px',
-                      color: '#000000',
-                      fontWeight: '400',
-                      letterSpacing: '0.02em'
-                    }}
-                  >
-                    Instagram
-                  </span>
+                  <span ref={igRef} className="social-text" style={{ fontFamily: "'Questrial', sans-serif", fontSize: '28px', color: '#000000', fontWeight: '400', letterSpacing: '0.02em' }}>Instagram</span>
                 </div>
-                
-                {/* X */}
                 <div 
                   className="social-item"
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    cursor: 'pointer'
-                  }}
+                  style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
                   onMouseEnter={(e) => {
                     const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
                     if (textElement) handleSocialHover(textElement, originalTexts.x);
@@ -1099,29 +1134,11 @@ export default function ContactPage(): React.JSX.Element {
                   }}
                   onClick={() => handleSocialClick('X')}
                 >
-                  <span 
-                    ref={xRef}
-                    className="social-text"
-                    style={{
-                      fontFamily: "'Questrial', sans-serif",
-                      fontSize: '28px',
-                      color: '#000000',
-                      fontWeight: '400',
-                      letterSpacing: '0.02em'
-                    }}
-                  >
-                    X
-                  </span>
+                  <span ref={xRef} className="social-text" style={{ fontFamily: "'Questrial', sans-serif", fontSize: '28px', color: '#000000', fontWeight: '400', letterSpacing: '0.02em' }}>X</span>
                 </div>
-                
-                {/* LinkedIn */}
                 <div 
                   className="social-item"
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    cursor: 'pointer'
-                  }}
+                  style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
                   onMouseEnter={(e) => {
                     const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
                     if (textElement) handleSocialHover(textElement, originalTexts.linkedin);
@@ -1132,19 +1149,7 @@ export default function ContactPage(): React.JSX.Element {
                   }}
                   onClick={() => handleSocialClick('LinkedIn')}
                 >
-                  <span 
-                    ref={linkedinRef}
-                    className="social-text"
-                    style={{
-                      fontFamily: "'Questrial', sans-serif",
-                      fontSize: '28px',
-                      color: '#000000',
-                      fontWeight: '400',
-                      letterSpacing: '0.02em'
-                    }}
-                  >
-                    LinkedIn
-                  </span>
+                  <span ref={linkedinRef} className="social-text" style={{ fontFamily: "'Questrial', sans-serif", fontSize: '28px', color: '#000000', fontWeight: '400', letterSpacing: '0.02em' }}>LinkedIn</span>
                 </div>
               </div>
             </div>
@@ -1163,43 +1168,8 @@ export default function ContactPage(): React.JSX.Element {
               pointerEvents: 'none',
               zIndex: 1
             }}>
-              {/* Garis hitam */}
-              <div
-                ref={lineRef}
-                style={{
-                  width: '0%',
-                  height: '2px',
-                  backgroundColor: '#000000',
-                  marginRight: '0',
-                  marginBottom: '60px',
-                  opacity: 0
-                }}
-              />
-              
-              {/* Teks MENURU besar */}
-              <span 
-                ref={menuruTextRef}
-                style={{
-                  fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
-                  fontWeight: 'normal',
-                  fontSize: '600px',
-                  color: '#000000',
-                  textAlign: 'right',
-                  letterSpacing: '-0.02em',
-                  opacity: 1,
-                  textTransform: 'uppercase',
-                  lineHeight: '0.7',
-                  whiteSpace: 'nowrap',
-                  WebkitFontSmoothing: 'antialiased',
-                  MozOsxFontSmoothing: 'grayscale',
-                  fontKerning: 'normal',
-                  margin: 0,
-                  padding: 0,
-                  transform: 'translateY(10px)',
-                  marginRight: '0'
-                }}>
-                MENURU
-              </span>
+              <div ref={lineRef} style={{ width: '0%', height: '2px', backgroundColor: '#000000', marginRight: '0', marginBottom: '60px', opacity: 0 }} />
+              <span ref={menuruTextRef} style={{ fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif", fontWeight: 'normal', fontSize: '600px', color: '#000000', textAlign: 'right', letterSpacing: '-0.02em', opacity: 1, textTransform: 'uppercase', lineHeight: '0.7', whiteSpace: 'nowrap', WebkitFontSmoothing: 'antialiased', MozOsxFontSmoothing: 'grayscale', fontKerning: 'normal', margin: 0, padding: 0, transform: 'translateY(10px)', marginRight: '0' }}>MENURU</span>
             </footer>
           </div>
         </div>
@@ -1228,122 +1198,18 @@ export default function ContactPage(): React.JSX.Element {
           gap: '32px',
           flexWrap: 'wrap',
         }}>
-          <style>
-            {`
-              @keyframes slideUp {
-                from {
-                  opacity: 0;
-                  transform: translateY(30px);
-                }
-                to {
-                  opacity: 1;
-                  transform: translateY(0);
-                }
-              }
-            `}
-          </style>
-          
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '8px',
-          }}>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px'
-            }}>
+          <style>{`@keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }`}</style>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <span style={{ fontSize: '56px', display: 'inline-block' }}>🍪</span>
-              <span style={{ 
-                fontWeight: '700', 
-                fontSize: '36px',
-                letterSpacing: '-0.02em',
-                background: 'linear-gradient(135deg, #000000 0%, #333333 100%)',
-                backgroundClip: 'text',
-                WebkitBackgroundClip: 'text',
-                color: 'transparent',
-                fontFamily: 'Questrial, sans-serif'
-              }}>
-                cookies.
-              </span>
+              <span style={{ fontWeight: '700', fontSize: '36px', letterSpacing: '-0.02em', background: 'linear-gradient(135deg, #000000 0%, #333333 100%)', backgroundClip: 'text', WebkitBackgroundClip: 'text', color: 'transparent', fontFamily: 'Questrial, sans-serif' }}>cookies.</span>
             </div>
-            
-            <p style={{
-              fontSize: '20px',
-              lineHeight: '1.4',
-              marginBottom: 0,
-              color: '#1a1a1a',
-              fontWeight: '400',
-              letterSpacing: '-0.01em',
-              maxWidth: '280px',
-              fontFamily: 'Questrial, sans-serif'
-            }}>
-              I use cookies to understand how you navigate<br />
-              this site and what topics interest you most.
-            </p>
-            <span style={{ 
-              color: '#666', 
-              fontSize: '18px',
-              display: 'inline-block',
-              marginTop: '4px',
-              fontFamily: 'Questrial, sans-serif'
-            }}>
-              No ads, no data sold ever.
-            </span>
+            <p style={{ fontSize: '20px', lineHeight: '1.4', marginBottom: 0, color: '#1a1a1a', fontWeight: '400', letterSpacing: '-0.01em', maxWidth: '280px', fontFamily: 'Questrial, sans-serif' }}>I use cookies to understand how you navigate<br />this site and what topics interest you most.</p>
+            <span style={{ color: '#666', fontSize: '18px', display: 'inline-block', marginTop: '4px', fontFamily: 'Questrial, sans-serif' }}>No ads, no data sold ever.</span>
           </div>
-          
-          <div style={{
-            display: 'flex',
-            gap: '16px',
-            justifyContent: 'flex-start',
-            flexShrink: 0,
-          }}>
-            <button
-              ref={declineBtnRef}
-              onClick={handleDecline}
-              style={{
-                padding: '14px 32px',
-                backgroundColor: '#ffffff',
-                color: '#000000',
-                border: '1.5px solid #e0e0e0',
-                borderRadius: '60px',
-                cursor: 'pointer',
-                fontSize: '18px',
-                fontWeight: '600',
-                letterSpacing: '-0.01em',
-                fontFamily: 'Questrial, sans-serif',
-                transition: 'all 0.2s ease',
-                position: 'relative',
-                overflow: 'hidden',
-                zIndex: 1,
-                background: '#ffffff'
-              }}
-            >
-              Decline
-            </button>
-            <button
-              ref={acceptBtnRef}
-              onClick={handleAccept}
-              style={{
-                padding: '14px 32px',
-                backgroundColor: '#ffffff',
-                color: '#000000',
-                border: '1.5px solid #e0e0e0',
-                borderRadius: '60px',
-                cursor: 'pointer',
-                fontSize: '18px',
-                fontWeight: '600',
-                letterSpacing: '-0.01em',
-                fontFamily: 'Questrial, sans-serif',
-                transition: 'all 0.2s ease',
-                position: 'relative',
-                overflow: 'hidden',
-                zIndex: 1,
-                background: '#ffffff'
-              }}
-            >
-              Accept
-            </button>
+          <div style={{ display: 'flex', gap: '16px', justifyContent: 'flex-start', flexShrink: 0 }}>
+            <button ref={declineBtnRef} onClick={handleDecline} style={{ padding: '14px 32px', backgroundColor: '#ffffff', color: '#000000', border: '1.5px solid #e0e0e0', borderRadius: '60px', cursor: 'pointer', fontSize: '18px', fontWeight: '600', letterSpacing: '-0.01em', fontFamily: 'Questrial, sans-serif', transition: 'all 0.2s ease', position: 'relative', overflow: 'hidden', zIndex: 1, background: '#ffffff' }}>Decline</button>
+            <button ref={acceptBtnRef} onClick={handleAccept} style={{ padding: '14px 32px', backgroundColor: '#ffffff', color: '#000000', border: '1.5px solid #e0e0e0', borderRadius: '60px', cursor: 'pointer', fontSize: '18px', fontWeight: '600', letterSpacing: '-0.01em', fontFamily: 'Questrial, sans-serif', transition: 'all 0.2s ease', position: 'relative', overflow: 'hidden', zIndex: 1, background: '#ffffff' }}>Accept</button>
           </div>
         </div>
       )}
