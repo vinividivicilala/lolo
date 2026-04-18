@@ -1,4 +1,5 @@
-// app/contact/page.tsx (Halaman Contact)
+// app/contact/page.tsx (Halaman Contact) - Bagian yang ditambahkan
+
 'use client';
 
 import React, { useState, useEffect, useRef } from "react";
@@ -16,6 +17,7 @@ if (typeof window !== 'undefined') {
 export default function ContactPage(): React.JSX.Element {
   const [showPopup, setShowPopup] = useState(false);
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
+  const [isMenuHovered, setIsMenuHovered] = useState(false);
   const acceptBtnRef = useRef<HTMLButtonElement>(null);
   const declineBtnRef = useRef<HTMLButtonElement>(null);
   const smootherRef = useRef<any>(null);
@@ -37,6 +39,12 @@ export default function ContactPage(): React.JSX.Element {
   const item03Ref = useRef<HTMLDivElement>(null);
   const item04Ref = useRef<HTMLDivElement>(null);
   const hoverTextRef = useRef<HTMLDivElement>(null);
+  
+  // Ref untuk menu button
+  const menuButtonRef = useRef<HTMLDivElement>(null);
+  const dotRef = useRef<HTMLDivElement>(null);
+  const line1Ref = useRef<HTMLDivElement>(null);
+  const line2Ref = useRef<HTMLDivElement>(null);
 
   // Variabel untuk menyimpan teks asli medsos
   const originalTexts = {
@@ -44,6 +52,75 @@ export default function ContactPage(): React.JSX.Element {
     x: 'X',
     linkedin: 'LinkedIn'
   };
+
+  // Animasi menu button hover (titik bulat menjadi hamburger 2 garis)
+  useEffect(() => {
+    if (isMenuHovered) {
+      // Sembunyikan titik bulat
+      if (dotRef.current) {
+        gsap.to(dotRef.current, {
+          scale: 0,
+          opacity: 0,
+          duration: 0.2,
+          ease: "power2.in"
+        });
+      }
+      // Tampilkan garis hamburger
+      if (line1Ref.current && line2Ref.current) {
+        gsap.set([line1Ref.current, line2Ref.current], { display: 'block' });
+        gsap.fromTo(line1Ref.current,
+          { rotation: 0, y: 0, opacity: 0 },
+          { rotation: 0, y: 0, opacity: 1, duration: 0.3, ease: "back.out" }
+        );
+        gsap.fromTo(line2Ref.current,
+          { rotation: 0, y: 0, opacity: 0 },
+          { rotation: 0, y: 8, opacity: 1, duration: 0.3, ease: "back.out" }
+        );
+      }
+    } else {
+      // Tampilkan kembali titik bulat
+      if (dotRef.current) {
+        gsap.to(dotRef.current, {
+          scale: 1,
+          opacity: 1,
+          duration: 0.2,
+          ease: "power2.out"
+        });
+      }
+      // Sembunyikan garis hamburger
+      if (line1Ref.current && line2Ref.current) {
+        gsap.to([line1Ref.current, line2Ref.current], {
+          opacity: 0,
+          duration: 0.2,
+          ease: "power2.in",
+          onComplete: () => {
+            if (line1Ref.current && line2Ref.current) {
+              gsap.set([line1Ref.current, line2Ref.current], { display: 'none' });
+            }
+          }
+        });
+      }
+    }
+  }, [isMenuHovered]);
+
+  // Animasi hover menu button scale
+  useEffect(() => {
+    if (menuButtonRef.current) {
+      if (isMenuHovered) {
+        gsap.to(menuButtonRef.current, {
+          scale: 1.05,
+          duration: 0.3,
+          ease: "power2.out"
+        });
+      } else {
+        gsap.to(menuButtonRef.current, {
+          scale: 1,
+          duration: 0.3,
+          ease: "power2.out"
+        });
+      }
+    }
+  }, [isMenuHovered]);
 
   // Fungsi untuk mendapatkan huruf random (A-Z)
   const getRandomChar = () => {
@@ -468,6 +545,10 @@ export default function ContactPage(): React.JSX.Element {
     console.log(`${platform} clicked`);
   };
 
+  const handleMenuClick = () => {
+    console.log('Menu clicked');
+  };
+
   return (
     <>
       <style jsx global>{`
@@ -541,10 +622,86 @@ export default function ContactPage(): React.JSX.Element {
             MozOsxFontSmoothing: 'grayscale',
             position: 'relative',
           }}>
+            {/* Tombol Menu baru - dengan border radius, bg hitam, teks Menu, titik bulat, hover jadi hamburger */}
+            <div
+              ref={menuButtonRef}
+              onClick={handleMenuClick}
+              onMouseEnter={() => setIsMenuHovered(true)}
+              onMouseLeave={() => setIsMenuHovered(false)}
+              style={{
+                position: 'fixed',
+                top: '20px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                zIndex: 100,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                padding: '12px 24px',
+                backgroundColor: '#000000',
+                borderRadius: '60px',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease'
+              }}
+            >
+              <span style={{
+                fontFamily: "'Questrial', sans-serif",
+                fontSize: '16px',
+                fontWeight: '400',
+                color: '#ffffff',
+                letterSpacing: '0.02em'
+              }}>
+                Menu
+              </span>
+              <div style={{
+                position: 'relative',
+                width: '24px',
+                height: '24px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                {/* Titik bulat */}
+                <div
+                  ref={dotRef}
+                  style={{
+                    width: '8px',
+                    height: '8px',
+                    borderRadius: '50%',
+                    backgroundColor: '#e49366',
+                    position: 'absolute'
+                  }}
+                />
+                {/* Garis hamburger (2 garis) - tersembunyi default */}
+                <div
+                  ref={line1Ref}
+                  style={{
+                    position: 'absolute',
+                    width: '20px',
+                    height: '2px',
+                    backgroundColor: '#e49366',
+                    borderRadius: '2px',
+                    display: 'none'
+                  }}
+                />
+                <div
+                  ref={line2Ref}
+                  style={{
+                    position: 'absolute',
+                    width: '20px',
+                    height: '2px',
+                    backgroundColor: '#e49366',
+                    borderRadius: '2px',
+                    display: 'none'
+                  }}
+                />
+              </div>
+            </div>
+
             {/* Tombol Back ke Home */}
             <div style={{
               position: 'fixed',
-              top: '40px',
+              top: '20px',
               left: '40px',
               zIndex: 100
             }}>
@@ -576,7 +733,7 @@ export default function ContactPage(): React.JSX.Element {
             {/* Judul Website MENURU - pojok kanan atas */}
             <div style={{
               position: 'fixed',
-              top: '40px',
+              top: '20px',
               right: '40px',
               zIndex: 100,
               pointerEvents: 'none'
@@ -657,7 +814,7 @@ export default function ContactPage(): React.JSX.Element {
                 You can know contact Website this Menuru
               </div>
 
-              {/* Daftar item 01-04 - semua angka 300px */}
+              {/* Daftar item 01-04 */}
               <div style={{
                 display: 'flex',
                 flexDirection: 'column',
@@ -665,70 +822,70 @@ export default function ContactPage(): React.JSX.Element {
                 marginLeft: '80px',
                 marginBottom: '150px'
               }}>
-         {/* 01 - Note dengan hover text di samping kanan */}
-<div
-  ref={item01Ref}
-  style={{
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    maxWidth: '800px',
-    cursor: 'pointer',
-    transition: 'transform 0.3s ease'
-  }}
-  onMouseEnter={() => setHoveredItem('01')}
-  onMouseLeave={() => setHoveredItem(null)}
->
-  <span style={{
-    fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
-    fontSize: '90px',
-    fontWeight: '300',
-    color: '#000000',
-    letterSpacing: '-0.02em',
-    lineHeight: '1'
-  }}>
-    01
-  </span>
-  <div style={{
-    display: 'flex',
-    alignItems: 'center',
-    gap: '40px'
-  }}>
-    <span style={{
-      fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
-      fontSize: '300px',
-      fontWeight: '300',
-      color: '#000000',
-      letterSpacing: '-0.02em'
-    }}>
-      Note
-    </span>
-    {/* Teks hover muncul di samping kanan Note */}
-    {hoveredItem === '01' && (
-      <div
-        ref={hoverTextRef}
-        style={{
-          fontFamily: "'Questrial', sans-serif",
-          fontSize: '20px',
-          fontWeight: '400',
-          color: '#000000',
-          whiteSpace: 'nowrap'
-        }}
-      >
-        / kamu bisa mencatat apa yang kamu inginkan
-      </div>
-    )}
-  </div>
-</div>
+                {/* 01 - Note dengan hover text di samping kanan */}
+                <div
+                  ref={item01Ref}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    maxWidth: '800px',
+                    cursor: 'pointer',
+                    transition: 'transform 0.3s ease'
+                  }}
+                  onMouseEnter={() => setHoveredItem('01')}
+                  onMouseLeave={() => setHoveredItem(null)}
+                >
+                  <span style={{
+                    fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
+                    fontSize: '90px',
+                    fontWeight: '300',
+                    color: '#000000',
+                    letterSpacing: '-0.02em',
+                    lineHeight: '1'
+                  }}>
+                    01
+                  </span>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '30px'
+                  }}>
+                    <span style={{
+                      fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
+                      fontSize: '300px',
+                      fontWeight: '300',
+                      color: '#000000',
+                      letterSpacing: '-0.02em'
+                    }}>
+                      Note
+                    </span>
+                    {/* Hover text muncul di samping kanan Note */}
+                    {hoveredItem === '01' && (
+                      <div
+                        ref={hoverTextRef}
+                        style={{
+                          fontFamily: "'Questrial', sans-serif",
+                          fontSize: '20px',
+                          fontWeight: '400',
+                          color: '#000000',
+                          whiteSpace: 'nowrap'
+                        }}
+                      >
+                        / kamu bisa mencatat apa yang kamu inginkan
+                      </div>
+                    )}
+                  </div>
+                </div>
 
                 {/* 02 - Calendar */}
                 <div
                   ref={item02Ref}
                   style={{
                     display: 'flex',
-                    alignItems: 'baseline',
+                    alignItems: 'center',
                     justifyContent: 'space-between',
-                    maxWidth: '600px',
+                    maxWidth: '800px',
                     cursor: 'pointer',
                     transition: 'transform 0.3s ease'
                   }}
@@ -761,9 +918,9 @@ export default function ContactPage(): React.JSX.Element {
                   ref={item03Ref}
                   style={{
                     display: 'flex',
-                    alignItems: 'baseline',
+                    alignItems: 'center',
                     justifyContent: 'space-between',
-                    maxWidth: '600px',
+                    maxWidth: '800px',
                     cursor: 'pointer',
                     transition: 'transform 0.3s ease'
                   }}
@@ -796,9 +953,9 @@ export default function ContactPage(): React.JSX.Element {
                   ref={item04Ref}
                   style={{
                     display: 'flex',
-                    alignItems: 'baseline',
+                    alignItems: 'center',
                     justifyContent: 'space-between',
-                    maxWidth: '600px',
+                    maxWidth: '800px',
                     cursor: 'pointer',
                     transition: 'transform 0.3s ease'
                   }}
