@@ -44,6 +44,7 @@ export default function ContactPage(): React.JSX.Element {
   const menuButtonRef = useRef<HTMLDivElement>(null);
   const menuDrawerRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLDivElement>(null);
+  const menuMenuruTextRef = useRef<HTMLSpanElement>(null);
 
   // Refs untuk menu items di drawer
   const menuItemRefs = {
@@ -62,9 +63,14 @@ export default function ContactPage(): React.JSX.Element {
     linkedin: 'LinkedIn'
   };
 
-  // Animasi menu drawer muncul dari bawah ke atas (lebih lambat)
+  // Animasi menu drawer muncul dari bawah ke atas
   useEffect(() => {
     if (isMenuOpen && menuDrawerRef.current) {
+      // Disable scroll pada body saat menu terbuka
+      document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+      
       gsap.fromTo(menuDrawerRef.current,
         {
           y: '100%',
@@ -75,10 +81,77 @@ export default function ContactPage(): React.JSX.Element {
           opacity: 1,
           duration: 0.8,
           ease: "power3.out",
-          display: 'flex'
+          display: 'flex',
+          onComplete: () => {
+            // Pastikan tidak ada scroll
+            if (menuDrawerRef.current) {
+              menuDrawerRef.current.style.overflow = 'hidden';
+            }
+          }
         }
       );
+      
+      // Animasi teks MENURU besar di halaman menu
+      if (menuMenuruTextRef.current) {
+        const splitMenuMenuru = new SplitText(menuMenuruTextRef.current, {
+          type: "chars",
+          charsClass: "split-char-menuru-menu"
+        });
+        
+        gsap.fromTo(splitMenuMenuru.chars,
+          {
+            opacity: 0,
+            y: 100,
+            rotationX: -90,
+            filter: 'blur(10px)'
+          },
+          {
+            opacity: 1,
+            y: 0,
+            rotationX: 0,
+            filter: 'blur(0px)',
+            duration: 1,
+            stagger: 0.03,
+            ease: "back.out(1.2)"
+          }
+        );
+      }
+      
+      // Animasi menu items
+      const menuItems = [
+        menuItemRefs.note,
+        menuItemRefs.blog,
+        menuItemRefs.community,
+        menuItemRefs.donation,
+        menuItemRefs.calendar,
+        menuItemRefs.contact
+      ];
+      
+      menuItems.forEach((item, index) => {
+        if (item.current) {
+          gsap.fromTo(item.current,
+            {
+              opacity: 0,
+              x: -50,
+              filter: 'blur(10px)'
+            },
+            {
+              opacity: 1,
+              x: 0,
+              filter: 'blur(0px)',
+              duration: 0.6,
+              delay: 0.2 + (index * 0.08),
+              ease: "power2.out"
+            }
+          );
+        }
+      });
     } else if (!isMenuOpen && menuDrawerRef.current) {
+      // Enable scroll kembali saat menu tertutup
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+      
       gsap.to(menuDrawerRef.current, {
         y: '100%',
         opacity: 0,
@@ -112,7 +185,7 @@ export default function ContactPage(): React.JSX.Element {
     }
   }, [isMenuHovered]);
 
-  // Animasi hover untuk menu items di drawer (tanpa panah, hanya geser)
+  // Animasi hover untuk menu items di drawer
   const handleMenuItemHover = (ref: React.RefObject<HTMLDivElement>, isHover: boolean) => {
     if (ref.current) {
       if (isHover) {
@@ -128,6 +201,35 @@ export default function ContactPage(): React.JSX.Element {
           ease: "power2.out"
         });
       }
+    }
+  };
+
+  // Animasi saat klik menu item
+  const handleMenuItemClick = (ref: React.RefObject<HTMLDivElement>, href: string) => {
+    if (ref.current) {
+      gsap.to(ref.current, {
+        scale: 0.95,
+        duration: 0.15,
+        ease: "power2.in",
+        onComplete: () => {
+          gsap.to(ref.current, {
+            scale: 1,
+            duration: 0.15,
+            ease: "power2.out",
+            onComplete: () => {
+              setIsMenuOpen(false);
+              setTimeout(() => {
+                window.location.href = href;
+              }, 300);
+            }
+          });
+        }
+      });
+    } else {
+      setIsMenuOpen(false);
+      setTimeout(() => {
+        window.location.href = href;
+      }, 300);
     }
   };
 
@@ -609,6 +711,12 @@ export default function ContactPage(): React.JSX.Element {
           transform-style: preserve-3d;
         }
 
+        .split-char-menuru-menu {
+          display: inline-block;
+          will-change: transform, opacity, filter;
+          transform-style: preserve-3d;
+        }
+
         .social-item {
           transition: all 0.3s ease;
         }
@@ -702,7 +810,7 @@ export default function ContactPage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* Menu Drawer */}
+            {/* Menu Drawer - tanpa scroll */}
             <div
               ref={menuDrawerRef}
               style={{
@@ -753,6 +861,27 @@ export default function ContactPage(): React.JSX.Element {
                 </svg>
               </div>
 
+              {/* Teks MENURU besar di sisi kanan bawah - font Archivo Black */}
+              <div
+                ref={menuMenuruTextRef}
+                style={{
+                  position: 'absolute',
+                  bottom: '40px',
+                  right: '40px',
+                  fontFamily: "'Archivo Black', 'Impact', sans-serif",
+                  fontSize: '180px',
+                  fontWeight: '400',
+                  color: 'rgba(255,255,255,0.15)',
+                  letterSpacing: '-0.02em',
+                  textTransform: 'uppercase',
+                  lineHeight: '0.8',
+                  pointerEvents: 'none',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                MENURU
+              </div>
+
               {/* Teks judul web di samping kiri atas */}
               <div style={{
                 position: 'absolute',
@@ -775,16 +904,18 @@ export default function ContactPage(): React.JSX.Element {
                 marginTop: '120px',
                 marginLeft: '40px'
               }}>
-                {/* Note - tanpa panah, hover geser ke kanan */}
+                {/* Note */}
                 <div
                   ref={menuItemRefs.note}
                   onMouseEnter={() => handleMenuItemHover(menuItemRefs.note, true)}
                   onMouseLeave={() => handleMenuItemHover(menuItemRefs.note, false)}
+                  onClick={() => handleMenuItemClick(menuItemRefs.note, '/note')}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
                     gap: '20px',
-                    cursor: 'pointer'
+                    cursor: 'pointer',
+                    opacity: 0
                   }}
                 >
                   <span style={{
@@ -798,16 +929,18 @@ export default function ContactPage(): React.JSX.Element {
                   </span>
                 </div>
 
-                {/* Blog - tanpa panah, hover geser ke kanan */}
+                {/* Blog */}
                 <div
                   ref={menuItemRefs.blog}
                   onMouseEnter={() => handleMenuItemHover(menuItemRefs.blog, true)}
                   onMouseLeave={() => handleMenuItemHover(menuItemRefs.blog, false)}
+                  onClick={() => handleMenuItemClick(menuItemRefs.blog, '/blog')}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
                     gap: '20px',
-                    cursor: 'pointer'
+                    cursor: 'pointer',
+                    opacity: 0
                   }}
                 >
                   <span style={{
@@ -821,16 +954,18 @@ export default function ContactPage(): React.JSX.Element {
                   </span>
                 </div>
 
-                {/* Community - tanpa panah, hover geser ke kanan */}
+                {/* Community */}
                 <div
                   ref={menuItemRefs.community}
                   onMouseEnter={() => handleMenuItemHover(menuItemRefs.community, true)}
                   onMouseLeave={() => handleMenuItemHover(menuItemRefs.community, false)}
+                  onClick={() => handleMenuItemClick(menuItemRefs.community, '/community')}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
                     gap: '20px',
-                    cursor: 'pointer'
+                    cursor: 'pointer',
+                    opacity: 0
                   }}
                 >
                   <span style={{
@@ -844,16 +979,18 @@ export default function ContactPage(): React.JSX.Element {
                   </span>
                 </div>
 
-                {/* Donation - tanpa panah, hover geser ke kanan */}
+                {/* Donation */}
                 <div
                   ref={menuItemRefs.donation}
                   onMouseEnter={() => handleMenuItemHover(menuItemRefs.donation, true)}
                   onMouseLeave={() => handleMenuItemHover(menuItemRefs.donation, false)}
+                  onClick={() => handleMenuItemClick(menuItemRefs.donation, '/donation')}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
                     gap: '20px',
-                    cursor: 'pointer'
+                    cursor: 'pointer',
+                    opacity: 0
                   }}
                 >
                   <span style={{
@@ -867,16 +1004,18 @@ export default function ContactPage(): React.JSX.Element {
                   </span>
                 </div>
 
-                {/* Calendar - tanpa panah, hover geser ke kanan */}
+                {/* Calendar */}
                 <div
                   ref={menuItemRefs.calendar}
                   onMouseEnter={() => handleMenuItemHover(menuItemRefs.calendar, true)}
                   onMouseLeave={() => handleMenuItemHover(menuItemRefs.calendar, false)}
+                  onClick={() => handleMenuItemClick(menuItemRefs.calendar, '/calendar')}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
                     gap: '20px',
-                    cursor: 'pointer'
+                    cursor: 'pointer',
+                    opacity: 0
                   }}
                 >
                   <span style={{
@@ -890,18 +1029,19 @@ export default function ContactPage(): React.JSX.Element {
                   </span>
                 </div>
 
-                {/* Contact - DENGAN panah SVG besar, tanpa hover animasi geser */}
+                {/* Contact - dengan panah SVG */}
                 <div
                   ref={menuItemRefs.contact}
+                  onClick={() => handleMenuItemClick(menuItemRefs.contact, '/contact')}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
                     gap: '20px',
-                    cursor: 'pointer'
+                    cursor: 'pointer',
+                    opacity: 0
                   }}
-                  onClick={handleCloseMenu}
                 >
-                  <Link href="/contact" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '20px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
                     <span style={{
                       fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
                       fontSize: '64px',
@@ -914,7 +1054,7 @@ export default function ContactPage(): React.JSX.Element {
                     <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
-                  </Link>
+                  </div>
                 </div>
               </div>
             </div>
