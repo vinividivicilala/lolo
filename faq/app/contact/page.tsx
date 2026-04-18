@@ -44,6 +44,7 @@ export default function ContactPage(): React.JSX.Element {
   const menuButtonRef = useRef<HTMLDivElement>(null);
   const menuDrawerRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLDivElement>(null);
+  const menuBigTextRef = useRef<HTMLSpanElement>(null);
 
   // Refs untuk menu items di drawer
   const menuItemRefs = {
@@ -78,6 +79,24 @@ export default function ContactPage(): React.JSX.Element {
           display: 'flex'
         }
       );
+      // Animasi teks MENURU besar di menu drawer
+      if (menuBigTextRef.current) {
+        gsap.fromTo(menuBigTextRef.current,
+          {
+            opacity: 0,
+            x: 50,
+            filter: 'blur(10px)'
+          },
+          {
+            opacity: 0.95,
+            x: 0,
+            filter: 'blur(0px)',
+            duration: 1,
+            delay: 0.3,
+            ease: "power2.out"
+          }
+        );
+      }
     } else if (!isMenuOpen && menuDrawerRef.current) {
       gsap.to(menuDrawerRef.current, {
         y: '100%',
@@ -766,6 +785,29 @@ export default function ContactPage(): React.JSX.Element {
               }}>
                 MENURU
               </div>
+
+              {/* Teks MENURU besar di sisi kanan - seperti di halaman contact */}
+              <span
+                ref={menuBigTextRef}
+                style={{
+                  position: 'absolute',
+                  bottom: '40px',
+                  right: '40px',
+                  fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
+                  fontSize: '200px',
+                  fontWeight: '300',
+                  color: '#ffffff',
+                  textAlign: 'right',
+                  letterSpacing: '-0.02em',
+                  textTransform: 'uppercase',
+                  lineHeight: '0.7',
+                  opacity: 0.95,
+                  WebkitFontSmoothing: 'antialiased',
+                  MozOsxFontSmoothing: 'grayscale'
+                }}
+              >
+                MENURU
+              </span>
 
               {/* 6 Menu Items - di sisi kiri tengah, jarak dekat */}
               <div style={{
