@@ -721,7 +721,7 @@ export default function ContactPage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* Menu Drawer */}
+            {/* Menu Drawer - Tanpa scroll */}
             <div
               ref={menuDrawerRef}
               style={{
@@ -739,7 +739,7 @@ export default function ContactPage(): React.JSX.Element {
                 justifyContent: 'flex-start',
                 padding: '60px',
                 boxSizing: 'border-box',
-                overflow: 'hidden'
+                overflow: 'hidden' // Tidak ada scroll
               }}
             >
               {/* Tombol Close (X) besar bulat */}
@@ -764,7 +764,8 @@ export default function ContactPage(): React.JSX.Element {
                   alignItems: 'center',
                   justifyContent: 'center',
                   cursor: 'pointer',
-                  transition: 'all 0.2s ease'
+                  transition: 'all 0.2s ease',
+                  zIndex: 10
                 }}
               >
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -779,14 +780,16 @@ export default function ContactPage(): React.JSX.Element {
                 left: '40px',
                 fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
                 fontSize: '48px',
+                fontWeight: '700',
                 color: '#ffffff',
                 letterSpacing: '-0.02em',
-                textTransform: 'uppercase'
+                textTransform: 'uppercase',
+                zIndex: 10
               }}>
                 MENURU
               </div>
 
-              {/* Teks MENURU besar di sisi kanan - seperti di halaman contact */}
+              {/* Teks MENURU besar di sisi kanan - FONT BRUTAL, WEIGHT BOLD, UKURAN BESAR */}
               <span
                 ref={menuBigTextRef}
                 style={{
@@ -795,15 +798,16 @@ export default function ContactPage(): React.JSX.Element {
                   right: '40px',
                   fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
                   fontSize: '200px',
-                  fontWeight: '300',
+                  fontWeight: '900',
                   color: '#ffffff',
                   textAlign: 'right',
-                  letterSpacing: '-0.02em',
+                  letterSpacing: '-0.03em',
                   textTransform: 'uppercase',
-                  lineHeight: '0.7',
+                  lineHeight: '0.8',
                   opacity: 0.95,
                   WebkitFontSmoothing: 'antialiased',
-                  MozOsxFontSmoothing: 'grayscale'
+                  MozOsxFontSmoothing: 'grayscale',
+                  zIndex: 10
                 }}
               >
                 MENURU
@@ -815,7 +819,8 @@ export default function ContactPage(): React.JSX.Element {
                 flexDirection: 'column',
                 gap: '15px',
                 marginTop: '120px',
-                marginLeft: '40px'
+                marginLeft: '40px',
+                zIndex: 10
               }}>
                 {/* Note - tanpa panah, hover geser ke kanan */}
                 <div
