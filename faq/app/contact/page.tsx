@@ -45,6 +45,16 @@ export default function ContactPage(): React.JSX.Element {
   const menuDrawerRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLDivElement>(null);
 
+  // Refs untuk menu items di drawer
+  const menuItemRefs = {
+    note: useRef<HTMLDivElement>(null),
+    blog: useRef<HTMLDivElement>(null),
+    community: useRef<HTMLDivElement>(null),
+    donation: useRef<HTMLDivElement>(null),
+    calendar: useRef<HTMLDivElement>(null),
+    contact: useRef<HTMLDivElement>(null),
+  };
+
   // Variabel untuk menyimpan teks asli medsos
   const originalTexts = {
     ig: 'Instagram',
@@ -101,6 +111,42 @@ export default function ContactPage(): React.JSX.Element {
       }
     }
   }, [isMenuHovered]);
+
+  // Animasi hover untuk menu items di drawer
+  const handleMenuItemHover = (ref: React.RefObject<HTMLDivElement>, isHover: boolean) => {
+    if (ref.current) {
+      const arrowSvg = ref.current.querySelector('.menu-arrow');
+      if (isHover) {
+        gsap.to(ref.current, {
+          x: 10,
+          duration: 0.3,
+          ease: "power2.out"
+        });
+        if (arrowSvg) {
+          gsap.to(arrowSvg, {
+            x: 5,
+            rotation: 45,
+            duration: 0.3,
+            ease: "back.out(1)"
+          });
+        }
+      } else {
+        gsap.to(ref.current, {
+          x: 0,
+          duration: 0.3,
+          ease: "power2.out"
+        });
+        if (arrowSvg) {
+          gsap.to(arrowSvg, {
+            x: 0,
+            rotation: 0,
+            duration: 0.3,
+            ease: "power2.out"
+          });
+        }
+      }
+    }
+  };
 
   // Fungsi untuk mendapatkan huruf random (A-Z)
   const getRandomChar = () => {
@@ -264,7 +310,6 @@ export default function ContactPage(): React.JSX.Element {
 
   // GSAP SplitText animations
   useEffect(() => {
-    // Split text untuk "Contact"
     if (contactTitleRef.current) {
       const splitContact = new SplitText(contactTitleRef.current, {
         type: "chars",
@@ -294,7 +339,6 @@ export default function ContactPage(): React.JSX.Element {
       );
     }
 
-    // Animasi garis bawah teks Contact
     if (contactUnderlineRef.current) {
       gsap.fromTo(contactUnderlineRef.current,
         {
@@ -318,7 +362,6 @@ export default function ContactPage(): React.JSX.Element {
       );
     }
 
-    // Split text untuk info text
     if (infoTextRef.current) {
       const splitInfo = new SplitText(infoTextRef.current, {
         type: "chars",
@@ -348,7 +391,6 @@ export default function ContactPage(): React.JSX.Element {
       );
     }
 
-    // Split text untuk email
     if (emailRef.current) {
       const splitEmail = new SplitText(emailRef.current, {
         type: "chars",
@@ -378,7 +420,6 @@ export default function ContactPage(): React.JSX.Element {
       );
     }
 
-    // Split text untuk "MENURU" besar di footer
     if (menuruTextRef.current) {
       const splitMenuru = new SplitText(menuruTextRef.current, {
         type: "chars",
@@ -414,7 +455,6 @@ export default function ContactPage(): React.JSX.Element {
       });
     }
 
-    // Animasi garis hitam
     if (lineRef.current) {
       gsap.fromTo(lineRef.current,
         {
@@ -646,7 +686,6 @@ export default function ContactPage(): React.JSX.Element {
                 alignItems: 'center',
                 justifyContent: 'center'
               }}>
-                {/* Titik bulat kecil - normal */}
                 <div
                   style={{
                     width: isMenuHovered ? '40px' : '10px',
@@ -658,8 +697,6 @@ export default function ContactPage(): React.JSX.Element {
                     opacity: isMenuHovered ? 0 : 1
                   }}
                 />
-                
-                {/* Lingkaran besar (hover) - berisi hamburger */}
                 <div
                   style={{
                     width: isMenuHovered ? '40px' : '0px',
@@ -682,7 +719,7 @@ export default function ContactPage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* Menu Drawer - halaman menu dari bawah ke atas */}
+            {/* Menu Drawer */}
             <div
               ref={menuDrawerRef}
               style={{
@@ -696,12 +733,13 @@ export default function ContactPage(): React.JSX.Element {
                 zIndex: 200,
                 display: 'none',
                 flexDirection: 'column',
-                alignItems: 'center',
+                alignItems: 'flex-start',
                 justifyContent: 'center',
-                gap: '40px'
+                padding: '60px',
+                boxSizing: 'border-box'
               }}
             >
-              {/* Tombol Close (X) bulat */}
+              {/* Tombol Close (X) besar bulat */}
               <div
                 ref={closeButtonRef}
                 onClick={handleCloseMenu}
@@ -713,10 +751,10 @@ export default function ContactPage(): React.JSX.Element {
                 }}
                 style={{
                   position: 'absolute',
-                  top: '30px',
-                  right: '30px',
-                  width: '50px',
-                  height: '50px',
+                  top: '40px',
+                  right: '40px',
+                  width: '60px',
+                  height: '60px',
                   borderRadius: '50%',
                   backgroundColor: '#e49366',
                   display: 'flex',
@@ -726,57 +764,188 @@ export default function ContactPage(): React.JSX.Element {
                   transition: 'all 0.2s ease'
                 }}
               >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M18 6L6 18M6 6L18 18" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </div>
 
-              {/* Menu items - halaman kosong dengan teks menu */}
+              {/* Teks judul web di samping kiri atas */}
               <div style={{
-                textAlign: 'center',
-                color: 'white',
-                fontFamily: "'Bebas Neue', 'Impact', sans-serif",
-                fontSize: '80px',
-                fontWeight: '300',
-                letterSpacing: '-0.02em'
+                position: 'absolute',
+                top: '40px',
+                left: '40px',
+                fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
+                fontSize: '48px',
+                color: '#ffffff',
+                letterSpacing: '-0.02em',
+                textTransform: 'uppercase'
               }}>
-                MENU
+                MENURU
               </div>
-              
+
+              {/* 6 Menu Items besar dengan tanda panah */}
               <div style={{
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '20px',
-                textAlign: 'center'
+                gap: '30px',
+                marginTop: '80px'
               }}>
-                <Link href="/" onClick={handleCloseMenu}>
-                  <div style={{
-                    color: 'white',
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '24px',
-                    cursor: 'pointer',
-                    transition: 'opacity 0.3s ease',
-                    opacity: 0.7
+                {/* Note */}
+                <div
+                  ref={menuItemRefs.note}
+                  onMouseEnter={() => handleMenuItemHover(menuItemRefs.note, true)}
+                  onMouseLeave={() => handleMenuItemHover(menuItemRefs.note, false)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '20px',
+                    cursor: 'pointer'
                   }}
-                  onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
-                  onMouseLeave={(e) => e.currentTarget.style.opacity = '0.7'}>
-                    Home
-                  </div>
-                </Link>
-                <Link href="/contact" onClick={handleCloseMenu}>
-                  <div style={{
-                    color: 'white',
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '24px',
-                    cursor: 'pointer',
-                    transition: 'opacity 0.3s ease',
-                    opacity: 0.7
+                >
+                  <span style={{
+                    fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
+                    fontSize: '80px',
+                    fontWeight: '300',
+                    color: '#ffffff',
+                    letterSpacing: '-0.02em'
+                  }}>
+                    Note
+                  </span>
+                  <svg className="menu-arrow" width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+
+                {/* Blog */}
+                <div
+                  ref={menuItemRefs.blog}
+                  onMouseEnter={() => handleMenuItemHover(menuItemRefs.blog, true)}
+                  onMouseLeave={() => handleMenuItemHover(menuItemRefs.blog, false)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '20px',
+                    cursor: 'pointer'
                   }}
-                  onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
-                  onMouseLeave={(e) => e.currentTarget.style.opacity = '0.7'}>
-                    Contact
-                  </div>
-                </Link>
+                >
+                  <span style={{
+                    fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
+                    fontSize: '80px',
+                    fontWeight: '300',
+                    color: '#ffffff',
+                    letterSpacing: '-0.02em'
+                  }}>
+                    Blog
+                  </span>
+                  <svg className="menu-arrow" width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+
+                {/* Community */}
+                <div
+                  ref={menuItemRefs.community}
+                  onMouseEnter={() => handleMenuItemHover(menuItemRefs.community, true)}
+                  onMouseLeave={() => handleMenuItemHover(menuItemRefs.community, false)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '20px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <span style={{
+                    fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
+                    fontSize: '80px',
+                    fontWeight: '300',
+                    color: '#ffffff',
+                    letterSpacing: '-0.02em'
+                  }}>
+                    Community
+                  </span>
+                  <svg className="menu-arrow" width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+
+                {/* Donation */}
+                <div
+                  ref={menuItemRefs.donation}
+                  onMouseEnter={() => handleMenuItemHover(menuItemRefs.donation, true)}
+                  onMouseLeave={() => handleMenuItemHover(menuItemRefs.donation, false)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '20px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <span style={{
+                    fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
+                    fontSize: '80px',
+                    fontWeight: '300',
+                    color: '#ffffff',
+                    letterSpacing: '-0.02em'
+                  }}>
+                    Donation
+                  </span>
+                  <svg className="menu-arrow" width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+
+                {/* Calendar */}
+                <div
+                  ref={menuItemRefs.calendar}
+                  onMouseEnter={() => handleMenuItemHover(menuItemRefs.calendar, true)}
+                  onMouseLeave={() => handleMenuItemHover(menuItemRefs.calendar, false)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '20px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <span style={{
+                    fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
+                    fontSize: '80px',
+                    fontWeight: '300',
+                    color: '#ffffff',
+                    letterSpacing: '-0.02em'
+                  }}>
+                    Calendar
+                  </span>
+                  <svg className="menu-arrow" width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+
+                {/* Contact (tetap ada panah, tanpa hover animasi) */}
+                <div
+                  ref={menuItemRefs.contact}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '20px',
+                    cursor: 'pointer'
+                  }}
+                  onClick={handleCloseMenu}
+                >
+                  <Link href="/contact" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '20px' }}>
+                    <span style={{
+                      fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
+                      fontSize: '80px',
+                      fontWeight: '300',
+                      color: '#ffffff',
+                      letterSpacing: '-0.02em'
+                    }}>
+                      Contact
+                    </span>
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </Link>
+                </div>
               </div>
             </div>
 
@@ -895,7 +1064,6 @@ export default function ContactPage(): React.JSX.Element {
                 You can know contact Website this Menuru
               </div>
 
-              {/* Daftar item 01-04 */}
               <div style={{
                 display: 'flex',
                 flexDirection: 'column',
@@ -903,7 +1071,7 @@ export default function ContactPage(): React.JSX.Element {
                 marginLeft: '80px',
                 marginBottom: '150px'
               }}>
-                {/* 01 - Note dengan hover text di samping kanan */}
+                {/* 01 - Note */}
                 <div
                   ref={item01Ref}
                   style={{
@@ -1065,7 +1233,7 @@ export default function ContactPage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* Email dan Medsos - di bagian bawah */}
+            {/* Email dan Medsos */}
             <div style={{
               position: 'relative',
               width: '100%',
