@@ -15,6 +15,7 @@ if (typeof window !== 'undefined') {
 
 export default function HomePage(): React.JSX.Element {
   const [showPopup, setShowPopup] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const acceptBtnRef = useRef<HTMLButtonElement>(null);
   const declineBtnRef = useRef<HTMLButtonElement>(null);
   const contactBtnRef = useRef<HTMLButtonElement>(null);
@@ -24,12 +25,15 @@ export default function HomePage(): React.JSX.Element {
   const mencatatTextRef = useRef<HTMLDivElement>(null);
   const menuruTextRef = useRef<HTMLSpanElement>(null);
   const menuruTopTextRef = useRef<HTMLDivElement>(null);
+  const brandTextRef = useRef<HTMLDivElement>(null);
+  const yearTextRef = useRef<HTMLDivElement>(null);
   const contactTextRef = useRef<HTMLSpanElement>(null);
   const lineRef = useRef<HTMLDivElement>(null);
   const emailRef = useRef<HTMLDivElement>(null);
   const igRef = useRef<HTMLDivElement>(null);
   const xRef = useRef<HTMLDivElement>(null);
   const linkedinRef = useRef<HTMLDivElement>(null);
+  const loadingOverlayRef = useRef<HTMLDivElement>(null);
 
   // Variabel untuk menyimpan teks asli medsos
   const originalTexts = {
@@ -113,198 +117,312 @@ export default function HomePage(): React.JSX.Element {
     };
   }, []);
 
-  // GSAP SplitText animations
+  // Animasi loading overlay dengan SplitText modern
   useEffect(() => {
-    // ANIMASI MENURU DI ATAS KIRI - JALAN SAAT LOADING (tanpa scroll)
-    if (menuruTopTextRef.current) {
-      const splitMenuruTop = new SplitText(menuruTopTextRef.current, {
+    if (isLoading && loadingOverlayRef.current) {
+      // Split text untuk MENURU (kiri)
+      const splitMenuruLoading = new SplitText(menuruTopTextRef.current, {
         type: "chars, words",
-        charsClass: "split-char-menuru-top"
+        charsClass: "split-char-loading"
       });
 
-      // Set initial state - dari bawah dengan blur
-      gsap.set(splitMenuruTop.chars, {
-        opacity: 0,
-        y: 60,
-        rotationX: -90,
-        transformPerspective: 1000,
-        filter: 'blur(20px)',
-        transformOrigin: '50% 50% -30px'
+      // Split text untuk BRAND (tengah kanan)
+      const splitBrand = new SplitText(brandTextRef.current, {
+        type: "chars, words",
+        charsClass: "split-char-loading"
       });
 
-      // Animasi masuk langsung saat loading (tanpa scroll trigger)
-      gsap.to(splitMenuruTop.chars, {
+      // Split text untuk 2026 (bawah kanan)
+      const splitYear = new SplitText(yearTextRef.current, {
+        type: "chars",
+        charsClass: "split-char-loading"
+      });
+
+      // Set initial state untuk semua karakter - dari blur dan posisi ekstrim
+      if (splitMenuruLoading.chars) {
+        gsap.set(splitMenuruLoading.chars, {
+          opacity: 0,
+          y: 120,
+          rotationX: -120,
+          rotationY: 45,
+          transformPerspective: 1200,
+          filter: 'blur(25px)',
+          transformOrigin: '50% 50% -80px'
+        });
+      }
+
+      if (splitBrand.chars) {
+        gsap.set(splitBrand.chars, {
+          opacity: 0,
+          x: 100,
+          rotationY: 90,
+          transformPerspective: 1200,
+          filter: 'blur(20px)',
+          transformOrigin: '50% 50% -50px'
+        });
+      }
+
+      if (splitYear.chars) {
+        gsap.set(splitYear.chars, {
+          opacity: 0,
+          y: 80,
+          rotationX: -60,
+          transformPerspective: 1000,
+          filter: 'blur(15px)',
+          transformOrigin: '50% 50% -30px'
+        });
+      }
+
+      // Timeline untuk animasi loading
+      const loadingTimeline = gsap.timeline({
+        onComplete: () => {
+          // Fade out overlay setelah animasi selesai
+          gsap.to(loadingOverlayRef.current, {
+            opacity: 0,
+            duration: 1.2,
+            ease: "power3.inOut",
+            onComplete: () => {
+              setIsLoading(false);
+            }
+          });
+        }
+      });
+
+      // Animasi MENURU dari kiri
+      loadingTimeline.to(splitMenuruLoading.chars, {
+        opacity: 1,
+        y: 0,
+        rotationX: 0,
+        rotationY: 0,
+        filter: 'blur(0px)',
+        duration: 1.2,
+        stagger: {
+          each: 0.05,
+          from: "start",
+          ease: "back.out(1.2)"
+        },
+        ease: "back.out(0.8)"
+      }, 0);
+
+      // Animasi BRAND dari kanan
+      loadingTimeline.to(splitBrand.chars, {
+        opacity: 1,
+        x: 0,
+        rotationY: 0,
+        filter: 'blur(0px)',
+        duration: 1,
+        stagger: {
+          each: 0.04,
+          from: "end",
+          ease: "power2.out"
+        },
+        ease: "back.out(1)"
+      }, 0.2);
+
+      // Animasi 2026 dari bawah
+      loadingTimeline.to(splitYear.chars, {
         opacity: 1,
         y: 0,
         rotationX: 0,
         filter: 'blur(0px)',
-        duration: 1.2,
+        duration: 0.9,
         stagger: {
-          each: 0.04,
+          each: 0.08,
           from: "start",
-          ease: "power2.out"
+          ease: "bounce.out"
         },
-        ease: "back.out(0.8)",
-        delay: 0.3
-      });
+        ease: "back.out(1.1)"
+      }, 0.4);
+
+      // Efek hover pada karakter MENURU
+      if (splitMenuruLoading.chars) {
+        splitMenuruLoading.chars.forEach((char: HTMLElement) => {
+          char.style.transition = 'all 0.3s ease';
+          char.addEventListener('mouseenter', () => {
+            gsap.to(char, {
+              scale: 1.2,
+              color: '#ff4444',
+              duration: 0.2,
+              ease: "back.out(1)"
+            });
+          });
+          char.addEventListener('mouseleave', () => {
+            gsap.to(char, {
+              scale: 1,
+              color: '#ffffff',
+              duration: 0.3,
+              ease: "power2.out"
+            });
+          });
+        });
+      }
+
+      return () => {
+        loadingTimeline.kill();
+      };
     }
+  }, [isLoading]);
 
-    // Split text untuk "Mencatat apa yang kamu inginkan"
-    if (mencatatTextRef.current) {
-      const splitMencatat = new SplitText(mencatatTextRef.current, {
-        type: "chars",
-        charsClass: "split-char"
-      });
+  // GSAP SplitText animations untuk konten utama
+  useEffect(() => {
+    if (!isLoading) {
+      // Split text untuk "Mencatat apa yang kamu inginkan"
+      if (mencatatTextRef.current) {
+        const splitMencatat = new SplitText(mencatatTextRef.current, {
+          type: "chars",
+          charsClass: "split-char"
+        });
 
-      gsap.fromTo(splitMencatat.chars,
-        {
+        gsap.fromTo(splitMencatat.chars,
+          {
+            opacity: 0,
+            y: 100,
+            rotateX: -90,
+            filter: 'blur(10px)'
+          },
+          {
+            opacity: 1,
+            y: 0,
+            rotateX: 0,
+            filter: 'blur(0px)',
+            duration: 1.2,
+            stagger: 0.03,
+            ease: "back.out(1.2)",
+            scrollTrigger: {
+              trigger: mencatatTextRef.current,
+              start: "top 80%",
+              end: "bottom 60%",
+              toggleActions: "play none none reverse",
+            }
+          }
+        );
+      }
+
+      // Split text untuk email
+      if (emailRef.current) {
+        const splitEmail = new SplitText(emailRef.current, {
+          type: "chars",
+          charsClass: "split-char"
+        });
+
+        gsap.fromTo(splitEmail.chars,
+          {
+            opacity: 0,
+            x: -30,
+            filter: 'blur(5px)'
+          },
+          {
+            opacity: 1,
+            x: 0,
+            filter: 'blur(0px)',
+            duration: 0.8,
+            stagger: 0.02,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: emailRef.current,
+              start: "top 85%",
+              end: "bottom 70%",
+              toggleActions: "play none none reverse",
+            }
+          }
+        );
+      }
+
+      // Split text untuk "MENURU" besar di footer
+      if (menuruTextRef.current) {
+        const splitMenuru = new SplitText(menuruTextRef.current, {
+          type: "chars",
+          charsClass: "split-char-menuru"
+        });
+
+        gsap.set(splitMenuru.chars, {
           opacity: 0,
-          y: 100,
-          rotateX: -90,
-          filter: 'blur(10px)'
-        },
-        {
+          y: 200,
+          rotationY: 90,
+          transformPerspective: 800,
+          filter: 'blur(20px)'
+        });
+
+        gsap.to(splitMenuru.chars, {
           opacity: 1,
           y: 0,
-          rotateX: 0,
+          rotationY: 0,
           filter: 'blur(0px)',
-          duration: 1.2,
-          stagger: 0.03,
-          ease: "back.out(1.2)",
+          duration: 1.5,
+          stagger: {
+            each: 0.04,
+            from: "start",
+            ease: "power2.out"
+          },
+          ease: "back.out(0.8)",
           scrollTrigger: {
-            trigger: mencatatTextRef.current,
-            start: "top 80%",
-            end: "bottom 60%",
-            toggleActions: "play none none reverse",
-          }
-        }
-      );
-    }
-
-    // Split text untuk email
-    if (emailRef.current) {
-      const splitEmail = new SplitText(emailRef.current, {
-        type: "chars",
-        charsClass: "split-char"
-      });
-
-      gsap.fromTo(splitEmail.chars,
-        {
-          opacity: 0,
-          x: -30,
-          filter: 'blur(5px)'
-        },
-        {
-          opacity: 1,
-          x: 0,
-          filter: 'blur(0px)',
-          duration: 0.8,
-          stagger: 0.02,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: emailRef.current,
-            start: "top 85%",
-            end: "bottom 70%",
-            toggleActions: "play none none reverse",
-          }
-        }
-      );
-    }
-
-    // Split text untuk "MENURU" besar di footer
-    if (menuruTextRef.current) {
-      const splitMenuru = new SplitText(menuruTextRef.current, {
-        type: "chars",
-        charsClass: "split-char-menuru"
-      });
-
-      gsap.set(splitMenuru.chars, {
-        opacity: 0,
-        y: 200,
-        rotationY: 90,
-        transformPerspective: 800,
-        filter: 'blur(20px)'
-      });
-
-      gsap.to(splitMenuru.chars, {
-        opacity: 1,
-        y: 0,
-        rotationY: 0,
-        filter: 'blur(0px)',
-        duration: 1.5,
-        stagger: {
-          each: 0.04,
-          from: "start",
-          ease: "power2.out"
-        },
-        ease: "back.out(0.8)",
-        scrollTrigger: {
-          trigger: menuruTextRef.current,
-          start: "top 85%",
-          end: "bottom 65%",
-          toggleActions: "play none none reverse",
-        }
-      });
-    }
-
-    // Split text untuk "Contact" pada tombol
-    if (contactTextRef.current) {
-      const splitContact = new SplitText(contactTextRef.current, {
-        type: "chars",
-        charsClass: "split-char"
-      });
-
-      gsap.fromTo(splitContact.chars,
-        {
-          opacity: 0,
-          x: -20,
-          filter: 'blur(5px)'
-        },
-        {
-          opacity: 1,
-          x: 0,
-          filter: 'blur(0px)',
-          duration: 0.8,
-          stagger: 0.05,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: contactTextRef.current,
+            trigger: menuruTextRef.current,
             start: "top 85%",
             end: "bottom 65%",
             toggleActions: "play none none reverse",
           }
-        }
-      );
-    }
+        });
+      }
 
-    // Animasi garis
-    if (lineRef.current) {
-      gsap.fromTo(lineRef.current,
-        {
-          width: '0%',
-          opacity: 0,
-          x: 100
-        },
-        {
-          width: '100%',
-          opacity: 1,
-          x: 0,
-          duration: 1.2,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: lineRef.current,
-            start: "top 85%",
-            end: "bottom 70%",
-            toggleActions: "play none none reverse",
+      // Split text untuk "Contact" pada tombol
+      if (contactTextRef.current) {
+        const splitContact = new SplitText(contactTextRef.current, {
+          type: "chars",
+          charsClass: "split-char"
+        });
+
+        gsap.fromTo(splitContact.chars,
+          {
+            opacity: 0,
+            x: -20,
+            filter: 'blur(5px)'
+          },
+          {
+            opacity: 1,
+            x: 0,
+            filter: 'blur(0px)',
+            duration: 0.8,
+            stagger: 0.05,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: contactTextRef.current,
+              start: "top 85%",
+              end: "bottom 65%",
+              toggleActions: "play none none reverse",
+            }
           }
-        }
-      );
+        );
+      }
+
+      // Animasi garis
+      if (lineRef.current) {
+        gsap.fromTo(lineRef.current,
+          {
+            width: '0%',
+            opacity: 0,
+            x: 100
+          },
+          {
+            width: '100%',
+            opacity: 1,
+            x: 0,
+            duration: 1.2,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: lineRef.current,
+              start: "top 85%",
+              end: "bottom 70%",
+              toggleActions: "play none none reverse",
+            }
+          }
+        );
+      }
     }
 
     return () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
-  }, []);
+  }, [isLoading]);
 
   useEffect(() => {
     const consent = localStorage.getItem('cookieConsent');
@@ -440,13 +558,13 @@ export default function HomePage(): React.JSX.Element {
           transform-style: preserve-3d;
         }
 
-        .split-char-menuru-top {
+        .split-char-loading {
           display: inline-block;
           will-change: transform, opacity, filter;
           transform-style: preserve-3d;
         }
 
-        /* Hover effect untuk contact button - versi putih/hitam terbalik */
+        /* Hover effect untuk contact button */
         .contact-btn-effect {
           position: relative;
           isolation: isolate;
@@ -518,7 +636,88 @@ export default function HomePage(): React.JSX.Element {
         }
       `}</style>
       
-      <div id="smooth-wrapper">
+      {/* LOADING OVERLAY - HITAM DENGAN SPLIT TEXT */}
+      {isLoading && (
+        <div
+          ref={loadingOverlayRef}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            backgroundColor: '#000000',
+            zIndex: 9999,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            pointerEvents: 'auto',
+          }}
+        >
+          {/* MENURU - Sisi Kiri */}
+          <div
+            ref={menuruTopTextRef}
+            style={{
+              position: 'absolute',
+              top: '10px',
+              left: '40px',
+              fontFamily: 'Inter, "Helvetica Neue", sans-serif',
+              fontWeight: '400',
+              fontSize: '219px',
+              lineHeight: '219px',
+              color: '#ffffff',
+              letterSpacing: '-0.02em',
+              textTransform: 'uppercase',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            MENURU
+          </div>
+
+          {/* BRAND - Sisi Tengah Kanan */}
+          <div
+            ref={brandTextRef}
+            style={{
+              position: 'absolute',
+              top: '50%',
+              right: '60px',
+              transform: 'translateY(-50%)',
+              fontFamily: 'Inter, "Helvetica Neue", sans-serif',
+              fontWeight: '400',
+              fontSize: '219px',
+              lineHeight: '219px',
+              color: '#ffffff',
+              letterSpacing: '-0.02em',
+              textTransform: 'uppercase',
+              whiteSpace: 'nowrap',
+              textAlign: 'right',
+            }}
+          >
+            BRAND
+          </div>
+
+          {/* 2026 - Bawah Kanan */}
+          <div
+            ref={yearTextRef}
+            style={{
+              position: 'absolute',
+              bottom: '40px',
+              right: '60px',
+              fontFamily: 'Inter, "Helvetica Neue", sans-serif',
+              fontWeight: '400',
+              fontSize: '219px',
+              lineHeight: '219px',
+              color: '#ffffff',
+              letterSpacing: '-0.02em',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            2026
+          </div>
+        </div>
+      )}
+
+      <div id="smooth-wrapper" style={{ opacity: isLoading ? 0 : 1, transition: 'opacity 0.8s ease' }}>
         <div id="smooth-content">
           <div style={{
             minHeight: '200vh',
@@ -533,30 +732,6 @@ export default function HomePage(): React.JSX.Element {
             MozOsxFontSmoothing: 'grayscale',
             position: 'relative',
           }}>
-            {/* TEKS MENURU DI ATAS SISI KIRI - PALING ATAS */}
-            <div
-              ref={menuruTopTextRef}
-              style={{
-                position: 'absolute',
-                top: '20px',
-                left: '40px',
-                zIndex: 10,
-                fontFamily: 'Inter, "Helvetica Neue", sans-serif',
-                fontWeight: '400',
-                fontSize: '213px',
-                lineHeight: '213px',
-                color: '#000000',
-                letterSpacing: '-0.02em',
-                textTransform: 'uppercase',
-                margin: 0,
-                padding: 0,
-                whiteSpace: 'nowrap',
-                pointerEvents: 'auto',
-              }}
-            >
-              MENURU
-            </div>
-
             {/* Konten pertama - 100vh */}
             <div style={{
               height: '100vh',
@@ -894,8 +1069,8 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </div>
 
-      {/* Cookie Popup - versi terbalik */}
-      {showPopup && (
+      {/* Cookie Popup */}
+      {showPopup && !isLoading && (
         <div style={{
           position: 'fixed',
           bottom: '30px',
