@@ -189,30 +189,29 @@ export default function HomePage(): React.JSX.Element {
 
     // Overlay transition dari kanan ke kiri setelah loading selesai
     const transitionTimer = setTimeout(() => {
-      if (loadingOverlayRef.current) {
-        // Animasi keluar loading screen
+      if (loadingOverlayRef.current && loadingContentRef.current) {
+        // Animasi fade out konten loading
         gsap.to(loadingContentRef.current, {
           opacity: 0,
-          y: -30,
-          duration: 0.6,
+          y: -50,
+          duration: 0.5,
           ease: "power2.in",
+        });
+        
+        // Animasi overlay geser dari kanan ke kiri
+        gsap.to(loadingOverlayRef.current, {
+          x: '-100%',
+          duration: 1.2,
+          ease: "power4.inOut",
           onComplete: () => {
-            // Animasi overlay dari kanan ke kiri
-            gsap.fromTo(loadingOverlayRef.current,
-              {
-                x: '0%',
-              },
-              {
-                x: '-100%',
-                duration: 1.2,
-                ease: "power4.inOut",
-                onComplete: () => {
-                  setIsLoading(false);
-                  // Inisialisasi ScrollSmoother setelah loading selesai
-                  initSmootherAfterLoad();
-                }
-              }
-            );
+            // Hapus loading screen dan tampilkan halaman utama
+            setIsLoading(false);
+            // Inisialisasi ScrollSmoother setelah loading selesai
+            setTimeout(() => {
+              initSmootherAfterLoad();
+              // Trigger animasi utama setelah halaman muncul
+              triggerMainAnimations();
+            }, 100);
           }
         });
       }
@@ -236,11 +235,8 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // GSAP SplitText animations untuk halaman utama
-  useEffect(() => {
-    if (isLoading) return;
-
-    // ANIMASI MENURU DI ATAS KIRI
+  const triggerMainAnimations = () => {
+    // Animasi MENURU di atas kiri
     if (menuruTopTextRef.current) {
       const splitMenuruTop = new SplitText(menuruTopTextRef.current, {
         type: "chars, words",
@@ -253,7 +249,6 @@ export default function HomePage(): React.JSX.Element {
         rotationX: -90,
         transformPerspective: 1000,
         filter: 'blur(20px)',
-        transformOrigin: '50% 50% -30px'
       });
 
       gsap.to(splitMenuruTop.chars, {
@@ -262,17 +257,13 @@ export default function HomePage(): React.JSX.Element {
         rotationX: 0,
         filter: 'blur(0px)',
         duration: 1,
-        stagger: {
-          each: 0.03,
-          from: "start",
-          ease: "power2.out"
-        },
+        stagger: 0.03,
         ease: "back.out(0.8)",
-        delay: 0.2
+        delay: 0.1
       });
     }
 
-    // Split text untuk "Mencatat apa yang kamu inginkan"
+    // Animasi Mencatat text
     if (mencatatTextRef.current) {
       const splitMencatat = new SplitText(mencatatTextRef.current, {
         type: "chars",
@@ -294,17 +285,17 @@ export default function HomePage(): React.JSX.Element {
           duration: 1.2,
           stagger: 0.03,
           ease: "back.out(1.2)",
-          scrollTrigger: {
-            trigger: mencatatTextRef.current,
-            start: "top 80%",
-            end: "bottom 60%",
-            toggleActions: "play none none reverse",
-          }
+          delay: 0.3
         }
       );
     }
+  };
 
-    // Split text untuk email
+  // GSAP SplitText animations untuk halaman utama (scroll triggered)
+  useEffect(() => {
+    if (isLoading) return;
+
+    // Split text untuk email (scroll triggered)
     if (emailRef.current) {
       const splitEmail = new SplitText(emailRef.current, {
         type: "chars",
@@ -494,13 +485,11 @@ export default function HomePage(): React.JSX.Element {
   const handleAccept = () => {
     localStorage.setItem('cookieConsent', 'accepted');
     setShowPopup(false);
-    console.log('Cookies accepted');
   };
 
   const handleDecline = () => {
     localStorage.setItem('cookieConsent', 'declined');
     setShowPopup(false);
-    console.log('Cookies declined');
   };
 
   const handleContact = () => {
@@ -515,6 +504,7 @@ export default function HomePage(): React.JSX.Element {
     console.log(`${platform} clicked`);
   };
 
+  // Tampilkan loading screen
   if (isLoading) {
     return (
       <>
@@ -568,7 +558,7 @@ export default function HomePage(): React.JSX.Element {
               justifyContent: 'center',
             }}
           >
-            {/* MENURU - Sisi Kiri */}
+            {/* MENURU - Sisi Kiri Atas */}
             <div
               ref={menuruLoadingRef}
               style={{
@@ -632,6 +622,7 @@ export default function HomePage(): React.JSX.Element {
     );
   }
 
+  // Tampilkan halaman utama
   return (
     <>
       <style jsx global>{`
