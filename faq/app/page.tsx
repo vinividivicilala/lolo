@@ -16,12 +16,10 @@ if (typeof window !== 'undefined') {
 export default function HomePage(): React.JSX.Element {
   const [showPopup, setShowPopup] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [showMainWrapper, setShowMainWrapper] = useState(false);
   const acceptBtnRef = useRef<HTMLButtonElement>(null);
   const declineBtnRef = useRef<HTMLButtonElement>(null);
   const contactBtnRef = useRef<HTMLButtonElement>(null);
   const smootherRef = useRef<any>(null);
-  const mainWrapperRef = useRef<HTMLDivElement>(null);
   
   // Refs untuk teks yang akan di-split
   const mencatatTextRef = useRef<HTMLDivElement>(null);
@@ -33,7 +31,6 @@ export default function HomePage(): React.JSX.Element {
   const igRef = useRef<HTMLDivElement>(null);
   const xRef = useRef<HTMLDivElement>(null);
   const linkedinRef = useRef<HTMLDivElement>(null);
-  const scrollDownRef = useRef<HTMLDivElement>(null);
   
   // Refs untuk loading screen
   const loadingOverlayRef = useRef<HTMLDivElement>(null);
@@ -91,106 +88,6 @@ export default function HomePage(): React.JSX.Element {
       clearInterval(Number(interval));
     }
     element.textContent = originalText;
-  };
-
-  // Fungsi untuk animasi entry halaman utama
-  const animateMainContent = () => {
-    // Pastikan wrapper utama visible
-    if (mainWrapperRef.current) {
-      mainWrapperRef.current.style.visibility = 'visible';
-    }
-
-    const tl = gsap.timeline();
-    
-    // Animasi MENURU di atas kiri
-    if (menuruTopTextRef.current) {
-      const splitMenuruTop = new SplitText(menuruTopTextRef.current, {
-        type: "chars, words",
-        charsClass: "split-char-menuru-top"
-      });
-      
-      gsap.set(splitMenuruTop.chars, {
-        opacity: 0,
-        y: 100,
-        rotationX: -90,
-        transformPerspective: 1000,
-        filter: 'blur(20px)',
-      });
-      
-      tl.fromTo(splitMenuruTop.chars,
-        {
-          opacity: 0,
-          y: 100,
-          rotationX: -90,
-          filter: 'blur(20px)'
-        },
-        {
-          opacity: 1,
-          y: 0,
-          rotationX: 0,
-          filter: 'blur(0px)',
-          duration: 0.8,
-          stagger: 0.03,
-          ease: "back.out(0.8)",
-        }, 0);
-    }
-    
-    // Animasi Scroll Down text
-    if (scrollDownRef.current) {
-      tl.fromTo(scrollDownRef.current,
-        {
-          opacity: 0,
-          y: 20
-        },
-        {
-          opacity: 0.5,
-          y: 0,
-          duration: 0.6,
-          ease: "power2.out",
-        }, 0.3);
-    }
-    
-    // Animasi Mencatat text
-    if (mencatatTextRef.current) {
-      const splitMencatat = new SplitText(mencatatTextRef.current, {
-        type: "chars",
-        charsClass: "split-char"
-      });
-      
-      tl.fromTo(splitMencatat.chars,
-        {
-          opacity: 0,
-          y: 100,
-          rotateX: -90,
-          filter: 'blur(10px)'
-        },
-        {
-          opacity: 1,
-          y: 0,
-          rotateX: 0,
-          filter: 'blur(0px)',
-          duration: 1,
-          stagger: 0.03,
-          ease: "back.out(1.2)",
-        }, 0.2);
-    }
-    
-    // Animasi Contact button
-    if (contactBtnRef.current) {
-      tl.fromTo(contactBtnRef.current,
-        {
-          opacity: 0,
-          scale: 0.8,
-          y: 30
-        },
-        {
-          opacity: 1,
-          scale: 1,
-          y: 0,
-          duration: 0.6,
-          ease: "back.out(0.8)",
-        }, 0.5);
-    }
   };
 
   // Loading animation
@@ -290,14 +187,14 @@ export default function HomePage(): React.JSX.Element {
       });
     }
 
-    // Transition setelah loading selesai
+    // Transition setelah loading selesai - geser ke kiri
     const transitionTimer = setTimeout(() => {
       if (loadingOverlayRef.current && loadingContentRef.current) {
         // Animasi fade out konten loading
         gsap.to(loadingContentRef.current, {
           opacity: 0,
-          y: -50,
-          duration: 0.4,
+          y: -30,
+          duration: 0.3,
           ease: "power2.in",
         });
         
@@ -307,21 +204,12 @@ export default function HomePage(): React.JSX.Element {
           duration: 1.0,
           ease: "power4.inOut",
           onComplete: () => {
-            // Tampilkan wrapper utama (dengan visibility hidden dulu)
-            setShowMainWrapper(true);
-            
-            // Hapus loading screen
+            // Langsung hapus loading screen
             setIsLoading(false);
-            
-            // Inisialisasi ScrollSmoother
+            // Inisialisasi ScrollSmoother setelah loading selesai
             setTimeout(() => {
               initSmootherAfterLoad();
             }, 50);
-            
-            // Jalankan animasi entry untuk main content
-            setTimeout(() => {
-              animateMainContent();
-            }, 150);
           }
         });
       }
@@ -345,9 +233,100 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // GSAP SplitText animations untuk halaman utama (scroll triggered)
+  // GSAP SplitText animations untuk halaman utama
   useEffect(() => {
     if (isLoading) return;
+
+    // Animasi MENURU di atas kiri (langsung tampil tanpa scroll)
+    if (menuruTopTextRef.current) {
+      const splitMenuruTop = new SplitText(menuruTopTextRef.current, {
+        type: "chars, words",
+        charsClass: "split-char-menuru-top"
+      });
+
+      gsap.fromTo(splitMenuruTop.chars,
+        {
+          opacity: 0,
+          y: 80,
+          rotationX: -90,
+          filter: 'blur(20px)'
+        },
+        {
+          opacity: 1,
+          y: 0,
+          rotationX: 0,
+          filter: 'blur(0px)',
+          duration: 0.8,
+          stagger: 0.03,
+          ease: "back.out(0.8)",
+          delay: 0.1
+        }
+      );
+    }
+
+    // Animasi Mencatat text
+    if (mencatatTextRef.current) {
+      const splitMencatat = new SplitText(mencatatTextRef.current, {
+        type: "chars",
+        charsClass: "split-char"
+      });
+
+      gsap.fromTo(splitMencatat.chars,
+        {
+          opacity: 0,
+          y: 100,
+          rotateX: -90,
+          filter: 'blur(10px)'
+        },
+        {
+          opacity: 1,
+          y: 0,
+          rotateX: 0,
+          filter: 'blur(0px)',
+          duration: 1,
+          stagger: 0.03,
+          ease: "back.out(1.2)",
+          delay: 0.2
+        }
+      );
+    }
+
+    // Animasi Scroll Down text
+    const scrollDownElement = document.querySelector('.scroll-down-text');
+    if (scrollDownElement) {
+      gsap.fromTo(scrollDownElement,
+        {
+          opacity: 0,
+          y: 20
+        },
+        {
+          opacity: 0.5,
+          y: 0,
+          duration: 0.6,
+          delay: 0.3,
+          ease: "power2.out"
+        }
+      );
+    }
+
+    // Animasi Contact button
+    if (contactBtnRef.current) {
+      gsap.fromTo(contactBtnRef.current,
+        {
+          opacity: 0,
+          scale: 0.8,
+          y: 30
+        },
+        {
+          opacity: 1,
+          scale: 1,
+          y: 0,
+          duration: 0.6,
+          delay: 0.5,
+          ease: "back.out(0.8)"
+        }
+      );
+    }
 
     // Split text untuk email (scroll triggered)
     if (emailRef.current) {
@@ -676,7 +655,7 @@ export default function HomePage(): React.JSX.Element {
     );
   }
 
-  // Tampilkan halaman utama - dengan wrapper yang visibility-nya hidden sampai animasi siap
+  // Tampilkan halaman utama
   return (
     <>
       <style jsx global>{`
@@ -805,23 +784,19 @@ export default function HomePage(): React.JSX.Element {
       
       <div id="smooth-wrapper">
         <div id="smooth-content">
-          <div 
-            ref={mainWrapperRef}
-            style={{
-              minHeight: '200vh',
-              backgroundColor: 'white',
-              margin: 0,
-              padding: 0,
-              width: '100%',
-              display: 'flex',
-              flexDirection: 'column',
-              fontFamily: 'Questrial, sans-serif',
-              WebkitFontSmoothing: 'antialiased',
-              MozOsxFontSmoothing: 'grayscale',
-              position: 'relative',
-              visibility: showMainWrapper ? 'visible' : 'hidden',
-            }}
-          >
+          <div style={{
+            minHeight: '200vh',
+            backgroundColor: 'white',
+            margin: 0,
+            padding: 0,
+            width: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            fontFamily: 'Questrial, sans-serif',
+            WebkitFontSmoothing: 'antialiased',
+            MozOsxFontSmoothing: 'grayscale',
+            position: 'relative',
+          }}>
             {/* TEKS MENURU DI ATAS SISI KIRI - PALING ATAS */}
             <div
               ref={menuruTopTextRef}
@@ -857,12 +832,12 @@ export default function HomePage(): React.JSX.Element {
               position: 'relative',
             }}>
               <div 
-                ref={scrollDownRef}
+                className="scroll-down-text"
                 style={{
                   textAlign: 'center',
                   color: 'black',
                   fontSize: '24px',
-                  opacity: 0,
+                  opacity: 0.5
                 }}
               >
                 Scroll down ↓
@@ -928,8 +903,7 @@ export default function HomePage(): React.JSX.Element {
                       zIndex: 1,
                       border: '1.5px solid #cccccc',
                       backgroundColor: '#ffffff',
-                      color: '#000000',
-                      opacity: 0,
+                      color: '#000000'
                     }}
                   >
                     <span ref={contactTextRef}>Contact</span>
