@@ -16,11 +16,12 @@ if (typeof window !== 'undefined') {
 export default function HomePage(): React.JSX.Element {
   const [showPopup, setShowPopup] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [showMainContent, setShowMainContent] = useState(false);
+  const [showMainWrapper, setShowMainWrapper] = useState(false);
   const acceptBtnRef = useRef<HTMLButtonElement>(null);
   const declineBtnRef = useRef<HTMLButtonElement>(null);
   const contactBtnRef = useRef<HTMLButtonElement>(null);
   const smootherRef = useRef<any>(null);
+  const mainWrapperRef = useRef<HTMLDivElement>(null);
   
   // Refs untuk teks yang akan di-split
   const mencatatTextRef = useRef<HTMLDivElement>(null);
@@ -33,7 +34,6 @@ export default function HomePage(): React.JSX.Element {
   const xRef = useRef<HTMLDivElement>(null);
   const linkedinRef = useRef<HTMLDivElement>(null);
   const scrollDownRef = useRef<HTMLDivElement>(null);
-  const mainContentRef = useRef<HTMLDivElement>(null);
   
   // Refs untuk loading screen
   const loadingOverlayRef = useRef<HTMLDivElement>(null);
@@ -95,6 +95,11 @@ export default function HomePage(): React.JSX.Element {
 
   // Fungsi untuk animasi entry halaman utama
   const animateMainContent = () => {
+    // Pastikan wrapper utama visible
+    if (mainWrapperRef.current) {
+      mainWrapperRef.current.style.visibility = 'visible';
+    }
+
     const tl = gsap.timeline();
     
     // Animasi MENURU di atas kiri
@@ -302,18 +307,21 @@ export default function HomePage(): React.JSX.Element {
           duration: 1.0,
           ease: "power4.inOut",
           onComplete: () => {
-            // Tampilkan main content terlebih dahulu (dengan opacity 0)
-            setShowMainContent(true);
-            // Hapus loading screen setelah main content siap
+            // Tampilkan wrapper utama (dengan visibility hidden dulu)
+            setShowMainWrapper(true);
+            
+            // Hapus loading screen
+            setIsLoading(false);
+            
+            // Inisialisasi ScrollSmoother
             setTimeout(() => {
-              setIsLoading(false);
-              // Inisialisasi ScrollSmoother
               initSmootherAfterLoad();
-              // Jalankan animasi entry untuk main content
-              setTimeout(() => {
-                animateMainContent();
-              }, 100);
             }, 50);
+            
+            // Jalankan animasi entry untuk main content
+            setTimeout(() => {
+              animateMainContent();
+            }, 150);
           }
         });
       }
@@ -668,7 +676,7 @@ export default function HomePage(): React.JSX.Element {
     );
   }
 
-  // Tampilkan halaman utama dengan opacity awal 0, lalu fade in
+  // Tampilkan halaman utama - dengan wrapper yang visibility-nya hidden sampai animasi siap
   return (
     <>
       <style jsx global>{`
@@ -793,27 +801,12 @@ export default function HomePage(): React.JSX.Element {
         .social-item {
           transition: all 0.3s ease;
         }
-
-        .main-content-wrapper {
-          opacity: 0;
-          animation: fadeInContent 0.01s ease forwards;
-        }
-
-        @keyframes fadeInContent {
-          from {
-            opacity: 0;
-          }
-          to {
-            opacity: 1;
-          }
-        }
       `}</style>
       
       <div id="smooth-wrapper">
         <div id="smooth-content">
           <div 
-            ref={mainContentRef}
-            className="main-content-wrapper"
+            ref={mainWrapperRef}
             style={{
               minHeight: '200vh',
               backgroundColor: 'white',
@@ -826,7 +819,7 @@ export default function HomePage(): React.JSX.Element {
               WebkitFontSmoothing: 'antialiased',
               MozOsxFontSmoothing: 'grayscale',
               position: 'relative',
-              opacity: showMainContent ? 1 : 0,
+              visibility: showMainWrapper ? 'visible' : 'hidden',
             }}
           >
             {/* TEKS MENURU DI ATAS SISI KIRI - PALING ATAS */}
@@ -848,7 +841,6 @@ export default function HomePage(): React.JSX.Element {
                 padding: 0,
                 whiteSpace: 'nowrap',
                 pointerEvents: 'auto',
-                opacity: 0,
               }}
             >
               MENURU
