@@ -24,6 +24,7 @@ export default function ContactPage(): React.JSX.Element {
   
   // Refs untuk teks yang akan di-split
   const menuruTextRef = useRef<HTMLSpanElement>(null);
+  const menuruLargeTextRef = useRef<HTMLSpanElement>(null); // REF BARU UNTUK TEKS MENURU BESAR
   const contactTitleRef = useRef<HTMLDivElement>(null);
   const contactUnderlineRef = useRef<HTMLDivElement>(null);
   const lineRef = useRef<HTMLDivElement>(null);
@@ -424,6 +425,42 @@ export default function ContactPage(): React.JSX.Element {
       );
     }
 
+    // ANIMASI UNTUK TEKS MENURU BESAR (font Amiamie, size 213px)
+    if (menuruLargeTextRef.current) {
+      const splitMenuruLarge = new SplitText(menuruLargeTextRef.current, {
+        type: "chars",
+        charsClass: "split-char-menuru-large"
+      });
+
+      gsap.set(splitMenuruLarge.chars, {
+        opacity: 0,
+        y: 100,
+        rotationX: -45,
+        transformPerspective: 1000,
+        filter: 'blur(15px)'
+      });
+
+      gsap.to(splitMenuruLarge.chars, {
+        opacity: 1,
+        y: 0,
+        rotationX: 0,
+        filter: 'blur(0px)',
+        duration: 1.2,
+        stagger: {
+          each: 0.06,
+          from: "random",
+          ease: "power2.out"
+        },
+        ease: "back.out(1.2)",
+        scrollTrigger: {
+          trigger: menuruLargeTextRef.current,
+          start: "top 85%",
+          end: "bottom 65%",
+          toggleActions: "play none none reverse",
+        }
+      });
+    }
+
     if (contactUnderlineRef.current) {
       gsap.fromTo(contactUnderlineRef.current,
         {
@@ -706,6 +743,12 @@ export default function ContactPage(): React.JSX.Element {
         }
 
         .split-char-menuru {
+          display: inline-block;
+          will-change: transform, opacity, filter;
+          transform-style: preserve-3d;
+        }
+
+        .split-char-menuru-large {
           display: inline-block;
           will-change: transform, opacity, filter;
           transform-style: preserve-3d;
@@ -1111,6 +1154,33 @@ export default function ContactPage(): React.JSX.Element {
               }}>
                 MENURU
               </span>
+            </div>
+
+            {/* TEKS MENURU BESAR - Font Amiamie, 213px, dengan GSAP SplitText */}
+            <div style={{
+              position: 'relative',
+              top: '100px',
+              left: '40px',
+              zIndex: 10,
+              width: 'calc(100% - 80px)',
+              marginBottom: '80px'
+            }}>
+              <div 
+                ref={menuruLargeTextRef}
+                style={{
+                  fontFamily: "'Amiamie', 'Georgia', 'Times New Roman', serif",
+                  fontWeight: '400',
+                  fontSize: '213px',
+                  lineHeight: '213px',
+                  color: '#000000',
+                  textAlign: 'left',
+                  letterSpacing: '-0.02em',
+                  textTransform: 'uppercase',
+                  WebkitFontSmoothing: 'antialiased',
+                  MozOsxFontSmoothing: 'grayscale'
+                }}>
+                MENURU
+              </div>
             </div>
 
             {/* Teks Contact besar 300px */}
