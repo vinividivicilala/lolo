@@ -26,7 +26,7 @@ export default function HomePage(): React.JSX.Element {
   const mencatatTextRef = useRef<HTMLDivElement>(null);
   const menuruTextRef = useRef<HTMLSpanElement>(null);
   const menuruTopTextRef = useRef<HTMLDivElement>(null);
-  const menuruTopMainRef = useRef<HTMLDivElement>(null); // Ref untuk MENURU di halaman utama
+  const menuruTopMainRef = useRef<HTMLDivElement>(null);
   const brandTextRef = useRef<HTMLDivElement>(null);
   const yearTextRef = useRef<HTMLDivElement>(null);
   const contactTextRef = useRef<HTMLSpanElement>(null);
@@ -119,28 +119,24 @@ export default function HomePage(): React.JSX.Element {
     };
   }, []);
 
-  // Animasi loading overlay dengan SplitText modern (tanpa hover effect)
+  // Animasi loading overlay dengan SplitText modern
   useEffect(() => {
     if (isLoading && loadingOverlayRef.current) {
-      // Split text untuk MENURU (kiri) - loading
       const splitMenuruLoading = new SplitText(menuruTopTextRef.current, {
         type: "chars, words",
         charsClass: "split-char-loading"
       });
 
-      // Split text untuk BRAND (tengah kanan)
       const splitBrand = new SplitText(brandTextRef.current, {
         type: "chars, words",
         charsClass: "split-char-loading"
       });
 
-      // Split text untuk 2026 (bawah kanan)
       const splitYear = new SplitText(yearTextRef.current, {
         type: "chars",
         charsClass: "split-char-loading"
       });
 
-      // Set initial state untuk semua karakter
       if (splitMenuruLoading.chars) {
         gsap.set(splitMenuruLoading.chars, {
           opacity: 0,
@@ -175,22 +171,18 @@ export default function HomePage(): React.JSX.Element {
         });
       }
 
-      // Timeline untuk animasi loading
       const loadingTimeline = gsap.timeline({
         onComplete: () => {
-          // Animasi overlay geser ke kiri
           gsap.to(loadingOverlayRef.current, {
             x: '-100%',
             duration: 1.2,
             ease: "power3.inOut",
             onComplete: () => {
               setIsLoading(false);
-              // Setelah loading selesai, jalankan animasi SplitText untuk MENURU di halaman utama
               animateMenuruMain();
             }
           });
           
-          // Animasi halaman utama muncul dari kanan (geser ke kiri)
           gsap.fromTo(mainContentRef.current,
             {
               x: '100%',
@@ -206,7 +198,6 @@ export default function HomePage(): React.JSX.Element {
         }
       });
 
-      // Animasi MENURU dari kiri
       loadingTimeline.to(splitMenuruLoading.chars, {
         opacity: 1,
         y: 0,
@@ -214,41 +205,27 @@ export default function HomePage(): React.JSX.Element {
         rotationY: 0,
         filter: 'blur(0px)',
         duration: 1.2,
-        stagger: {
-          each: 0.05,
-          from: "start",
-          ease: "back.out(1.2)"
-        },
+        stagger: { each: 0.05, from: "start", ease: "back.out(1.2)" },
         ease: "back.out(0.8)"
       }, 0);
 
-      // Animasi BRAND dari kanan
       loadingTimeline.to(splitBrand.chars, {
         opacity: 1,
         x: 0,
         rotationY: 0,
         filter: 'blur(0px)',
         duration: 1,
-        stagger: {
-          each: 0.04,
-          from: "end",
-          ease: "power2.out"
-        },
+        stagger: { each: 0.04, from: "end", ease: "power2.out" },
         ease: "back.out(1)"
       }, 0.2);
 
-      // Animasi 2026 dari bawah
       loadingTimeline.to(splitYear.chars, {
         opacity: 1,
         y: 0,
         rotationX: 0,
         filter: 'blur(0px)',
         duration: 0.9,
-        stagger: {
-          each: 0.08,
-          from: "start",
-          ease: "bounce.out"
-        },
+        stagger: { each: 0.08, from: "start", ease: "bounce.out" },
         ease: "back.out(1.1)"
       }, 0.4);
 
@@ -258,7 +235,7 @@ export default function HomePage(): React.JSX.Element {
     }
   }, [isLoading]);
 
-  // Fungsi animasi untuk MENURU di halaman utama (SplitText modern berbeda)
+  // Animasi MENURU di halaman utama - SUPERIOR MODERN EFFECT
   const animateMenuruMain = () => {
     if (menuruTopMainRef.current) {
       const splitMenuruMain = new SplitText(menuruTopMainRef.current, {
@@ -266,63 +243,74 @@ export default function HomePage(): React.JSX.Element {
         charsClass: "split-char-menuru-main"
       });
 
-      // Set initial state - efek berbeda: dari kiri dengan rotasi dan scale
+      // Efek cinematic 3D dengan multiple transform
       gsap.set(splitMenuruMain.chars, {
         opacity: 0,
-        x: -80,
-        rotationY: -60,
-        scale: 0.5,
-        transformPerspective: 1000,
-        filter: 'blur(12px)',
-        transformOrigin: '50% 50% -40px'
+        scale: 0,
+        rotationX: -180,
+        rotationY: 180,
+        rotationZ: -45,
+        transformPerspective: 1500,
+        filter: 'blur(20px)',
+        transformOrigin: '50% 50% -100px',
+        y: 100
       });
 
-      // Animasi masuk dengan efek modern
+      // Animasi dengan efek cascade yang dramatis
       gsap.to(splitMenuruMain.chars, {
         opacity: 1,
-        x: 0,
-        rotationY: 0,
         scale: 1,
+        rotationX: 0,
+        rotationY: 0,
+        rotationZ: 0,
         filter: 'blur(0px)',
-        duration: 1.1,
+        y: 0,
+        duration: 1.3,
         stagger: {
-          each: 0.04,
-          from: "start",
-          ease: "power2.out"
+          each: 0.06,
+          from: "center",
+          ease: "power2.inOut",
+          grid: "auto"
         },
-        ease: "elastic.out(1, 0.5)",
-        delay: 0.2
+        ease: "back.out(1.2)",
+        delay: 0.1
       });
 
-      // Efek hover ringan pada karakter (opsional)
-      if (splitMenuruMain.chars) {
-        splitMenuruMain.chars.forEach((char: HTMLElement) => {
-          char.style.transition = 'all 0.2s ease';
-          char.addEventListener('mouseenter', () => {
-            gsap.to(char, {
-              scale: 1.1,
-              color: '#666666',
-              duration: 0.15,
-              ease: "power2.out"
-            });
-          });
-          char.addEventListener('mouseleave', () => {
-            gsap.to(char, {
-              scale: 1,
-              color: '#000000',
-              duration: 0.2,
-              ease: "power2.out"
-            });
-          });
-        });
-      }
+      // Efek tambahan: glow dan shadow yang muncul
+      gsap.fromTo(splitMenuruMain.chars,
+        {
+          textShadow: "0 0 0px rgba(0,0,0,0)"
+        },
+        {
+          textShadow: "0 10px 30px rgba(0,0,0,0.15)",
+          duration: 1,
+          stagger: 0.06,
+          delay: 0.5,
+          ease: "power2.out"
+        }
+      );
+
+      // Efek wave motion subtle setelah animasi selesai
+      gsap.to(splitMenuruMain.chars, {
+        y: -3,
+        duration: 0.8,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut",
+        stagger: {
+          each: 0.03,
+          from: "random",
+          amount: 0.5
+        },
+        delay: 2,
+        repeatDelay: 0
+      });
     }
   };
 
-  // GSAP SplitText animations untuk konten utama lainnya (setelah loading selesai)
+  // GSAP SplitText animations untuk konten utama lainnya
   useEffect(() => {
     if (!isLoading) {
-      // Split text untuk "Mencatat apa yang kamu inginkan"
       if (mencatatTextRef.current) {
         const splitMencatat = new SplitText(mencatatTextRef.current, {
           type: "chars",
@@ -354,7 +342,6 @@ export default function HomePage(): React.JSX.Element {
         );
       }
 
-      // Split text untuk email
       if (emailRef.current) {
         const splitEmail = new SplitText(emailRef.current, {
           type: "chars",
@@ -384,7 +371,6 @@ export default function HomePage(): React.JSX.Element {
         );
       }
 
-      // Split text untuk "MENURU" besar di footer
       if (menuruTextRef.current) {
         const splitMenuru = new SplitText(menuruTextRef.current, {
           type: "chars",
@@ -405,11 +391,7 @@ export default function HomePage(): React.JSX.Element {
           rotationY: 0,
           filter: 'blur(0px)',
           duration: 1.5,
-          stagger: {
-            each: 0.04,
-            from: "start",
-            ease: "power2.out"
-          },
+          stagger: { each: 0.04, from: "start", ease: "power2.out" },
           ease: "back.out(0.8)",
           scrollTrigger: {
             trigger: menuruTextRef.current,
@@ -420,7 +402,6 @@ export default function HomePage(): React.JSX.Element {
         });
       }
 
-      // Split text untuk "Contact" pada tombol
       if (contactTextRef.current) {
         const splitContact = new SplitText(contactTextRef.current, {
           type: "chars",
@@ -450,7 +431,6 @@ export default function HomePage(): React.JSX.Element {
         );
       }
 
-      // Animasi garis
       if (lineRef.current) {
         gsap.fromTo(lineRef.current,
           {
@@ -545,26 +525,20 @@ export default function HomePage(): React.JSX.Element {
   const handleAccept = () => {
     localStorage.setItem('cookieConsent', 'accepted');
     setShowPopup(false);
-    console.log('Cookies accepted');
   };
 
   const handleDecline = () => {
     localStorage.setItem('cookieConsent', 'declined');
     setShowPopup(false);
-    console.log('Cookies declined');
   };
 
-  const handleContact = () => {
-    console.log('Contact clicked');
-  };
+  const handleContact = () => {};
 
   const handleEmailClick = () => {
     window.location.href = 'mailto:contact.menuru@gmail.com';
   };
 
-  const handleSocialClick = (platform: string) => {
-    console.log(`${platform} clicked`);
-  };
+  const handleSocialClick = (platform: string) => {};
 
   return (
     <>
@@ -626,7 +600,6 @@ export default function HomePage(): React.JSX.Element {
           transform-style: preserve-3d;
         }
 
-        /* Hover effect untuk contact button */
         .contact-btn-effect {
           position: relative;
           isolation: isolate;
@@ -698,7 +671,7 @@ export default function HomePage(): React.JSX.Element {
         }
       `}</style>
       
-      {/* LOADING OVERLAY - HITAM DENGAN SPLIT TEXT (tanpa hover effect) */}
+      {/* LOADING OVERLAY */}
       {isLoading && (
         <div
           ref={loadingOverlayRef}
@@ -716,61 +689,52 @@ export default function HomePage(): React.JSX.Element {
             pointerEvents: 'auto',
           }}
         >
-          {/* MENURU - Sisi Kiri Loading */}
-          <div
-            style={{
-              position: 'absolute',
-              top: '10px',
-              left: '40px',
-              fontFamily: 'Inter, "Helvetica Neue", sans-serif',
-              fontWeight: '400',
-              fontSize: '219px',
-              lineHeight: '219px',
-              color: '#ffffff',
-              letterSpacing: '-0.02em',
-              textTransform: 'uppercase',
-              whiteSpace: 'nowrap',
-            }}
-          >
+          <div style={{
+            position: 'absolute',
+            top: '10px',
+            left: '40px',
+            fontFamily: 'Inter, "Helvetica Neue", sans-serif',
+            fontWeight: '400',
+            fontSize: '219px',
+            lineHeight: '219px',
+            color: '#ffffff',
+            letterSpacing: '-0.02em',
+            textTransform: 'uppercase',
+            whiteSpace: 'nowrap',
+          }}>
             <span ref={menuruTopTextRef}>MENURU</span>
           </div>
 
-          {/* BRAND - Sisi Tengah Kanan Loading */}
-          <div
-            style={{
-              position: 'absolute',
-              top: '50%',
-              right: '60px',
-              transform: 'translateY(-50%)',
-              fontFamily: 'Inter, "Helvetica Neue", sans-serif',
-              fontWeight: '400',
-              fontSize: '219px',
-              lineHeight: '219px',
-              color: '#ffffff',
-              letterSpacing: '-0.02em',
-              textTransform: 'uppercase',
-              whiteSpace: 'nowrap',
-              textAlign: 'right',
-            }}
-          >
+          <div style={{
+            position: 'absolute',
+            top: '50%',
+            right: '60px',
+            transform: 'translateY(-50%)',
+            fontFamily: 'Inter, "Helvetica Neue", sans-serif',
+            fontWeight: '400',
+            fontSize: '219px',
+            lineHeight: '219px',
+            color: '#ffffff',
+            letterSpacing: '-0.02em',
+            textTransform: 'uppercase',
+            whiteSpace: 'nowrap',
+            textAlign: 'right',
+          }}>
             <span ref={brandTextRef}>BRAND</span>
           </div>
 
-          {/* 2026 - Bawah Kanan Loading */}
-          <div
-            style={{
-              position: 'absolute',
-              bottom: '40px',
-              right: '60px',
-              fontFamily: 'Inter, "Helvetica Neue", sans-serif',
-              fontWeight: '400',
-              fontSize: '219px',
-              lineHeight: '219px',
-              color: '#ffffff',
-              letterSpacing: '-0.02em',
-              whiteSpace: 'nowrap',
-            }}
-          >
+          <div style={{
+            position: 'absolute',
+            bottom: '40px',
+            right: '60px',
+            fontFamily: 'Inter, "Helvetica Neue", sans-serif',
+            fontWeight: '400',
+            fontSize: '219px',
+            lineHeight: '219px',
+            color: '#ffffff',
+            letterSpacing: '-0.02em',
+            whiteSpace: 'nowrap',
+          }}>
             <span ref={yearTextRef}>2026</span>
           </div>
         </div>
@@ -797,7 +761,7 @@ export default function HomePage(): React.JSX.Element {
               transition: 'all 0.01s ease'
             }}
           >
-            {/* TEKS MENURU DI ATAS SISI KIRI Halaman Utama - DENGAN SPLIT TEXT GSAP MODERN BERBEDA */}
+            {/* TEKS MENURU DI HALAMAN UTAMA - SUPERIOR GSAP EFFECT */}
             <div
               ref={menuruTopMainRef}
               style={{
@@ -849,7 +813,6 @@ export default function HomePage(): React.JSX.Element {
                 gap: '40px',
                 width: '100%'
               }}>
-                {/* Teks "Mencatat apa yang kamu inginkan" dengan titik besar di akhir */}
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -877,7 +840,6 @@ export default function HomePage(): React.JSX.Element {
                   }}>.</span>
                 </div>
 
-                {/* Tombol Contact dengan Link ke halaman Contact */}
                 <Link href="/contact">
                   <button
                     ref={contactBtnRef}
@@ -958,7 +920,6 @@ export default function HomePage(): React.JSX.Element {
               alignItems: 'center',
               minHeight: '100vh'
             }}>
-              {/* Email dan Medsos */}
               <div style={{
                 position: 'relative',
                 width: '100%',
@@ -969,7 +930,6 @@ export default function HomePage(): React.JSX.Element {
                 marginBottom: '30px',
                 boxSizing: 'border-box'
               }}>
-                {/* Email - Sisi Kiri */}
                 <div 
                   ref={emailRef}
                   onClick={handleEmailClick}
@@ -990,7 +950,6 @@ export default function HomePage(): React.JSX.Element {
                   contact.menuru@gmail.com
                 </div>
 
-                {/* Medsos - Sisi Tengah 3 baris */}
                 <div style={{
                   display: 'flex',
                   flexDirection: 'column',
@@ -1000,14 +959,9 @@ export default function HomePage(): React.JSX.Element {
                   transform: 'translateX(-50%)',
                   marginBottom: '20px'
                 }}>
-                  {/* Instagram */}
                   <div 
                     className="social-item"
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      cursor: 'pointer'
-                    }}
+                    style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
                     onMouseEnter={(e) => {
                       const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
                       if (textElement) handleSocialHover(textElement, originalTexts.ig);
@@ -1018,29 +972,18 @@ export default function HomePage(): React.JSX.Element {
                     }}
                     onClick={() => handleSocialClick('Instagram')}
                   >
-                    <span 
-                      ref={igRef}
-                      className="social-text"
-                      style={{
-                        fontFamily: "'Questrial', sans-serif",
-                        fontSize: '28px',
-                        color: '#000000',
-                        fontWeight: '400',
-                        letterSpacing: '0.02em'
-                      }}
-                    >
-                      Instagram
-                    </span>
+                    <span ref={igRef} className="social-text" style={{
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '28px',
+                      color: '#000000',
+                      fontWeight: '400',
+                      letterSpacing: '0.02em'
+                    }}>Instagram</span>
                   </div>
                   
-                  {/* X */}
                   <div 
                     className="social-item"
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      cursor: 'pointer'
-                    }}
+                    style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
                     onMouseEnter={(e) => {
                       const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
                       if (textElement) handleSocialHover(textElement, originalTexts.x);
@@ -1051,29 +994,18 @@ export default function HomePage(): React.JSX.Element {
                     }}
                     onClick={() => handleSocialClick('X')}
                   >
-                    <span 
-                      ref={xRef}
-                      className="social-text"
-                      style={{
-                        fontFamily: "'Questrial', sans-serif",
-                        fontSize: '28px',
-                        color: '#000000',
-                        fontWeight: '400',
-                        letterSpacing: '0.02em'
-                      }}
-                    >
-                      X
-                    </span>
+                    <span ref={xRef} className="social-text" style={{
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '28px',
+                      color: '#000000',
+                      fontWeight: '400',
+                      letterSpacing: '0.02em'
+                    }}>X</span>
                   </div>
                   
-                  {/* LinkedIn */}
                   <div 
                     className="social-item"
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      cursor: 'pointer'
-                    }}
+                    style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
                     onMouseEnter={(e) => {
                       const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
                       if (textElement) handleSocialHover(textElement, originalTexts.linkedin);
@@ -1084,19 +1016,13 @@ export default function HomePage(): React.JSX.Element {
                     }}
                     onClick={() => handleSocialClick('LinkedIn')}
                   >
-                    <span 
-                      ref={linkedinRef}
-                      className="social-text"
-                      style={{
-                        fontFamily: "'Questrial', sans-serif",
-                        fontSize: '28px',
-                        color: '#000000',
-                        fontWeight: '400',
-                        letterSpacing: '0.02em'
-                      }}
-                    >
-                      LinkedIn
-                    </span>
+                    <span ref={linkedinRef} className="social-text" style={{
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '28px',
+                      color: '#000000',
+                      fontWeight: '400',
+                      letterSpacing: '0.02em'
+                    }}>LinkedIn</span>
                   </div>
                 </div>
               </div>
@@ -1115,7 +1041,6 @@ export default function HomePage(): React.JSX.Element {
                 pointerEvents: 'none',
                 zIndex: 1
               }}>
-                {/* Garis hitam */}
                 <div
                   ref={lineRef}
                   style={{
@@ -1128,7 +1053,6 @@ export default function HomePage(): React.JSX.Element {
                   }}
                 />
                 
-                {/* Teks MENURU besar di footer */}
                 <span 
                   ref={menuruTextRef}
                   style={{
@@ -1184,28 +1108,14 @@ export default function HomePage(): React.JSX.Element {
           <style>
             {`
               @keyframes slideUp {
-                from {
-                  opacity: 0;
-                  transform: translateY(30px);
-                }
-                to {
-                  opacity: 1;
-                  transform: translateY(0);
-                }
+                from { opacity: 0; transform: translateY(30px); }
+                to { opacity: 1; transform: translateY(0); }
               }
             `}
           </style>
           
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '8px',
-          }}>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px'
-            }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <span style={{ fontSize: '56px', display: 'inline-block' }}>🍪</span>
               <span style={{ 
                 fontWeight: '700', 
@@ -1216,9 +1126,7 @@ export default function HomePage(): React.JSX.Element {
                 WebkitBackgroundClip: 'text',
                 color: 'transparent',
                 fontFamily: 'Questrial, sans-serif'
-              }}>
-                cookies.
-              </span>
+              }}>cookies.</span>
             </div>
             
             <p style={{
@@ -1234,23 +1142,12 @@ export default function HomePage(): React.JSX.Element {
               I use cookies to understand how you navigate<br />
               this site and what topics interest you most.
             </p>
-            <span style={{ 
-              color: '#aaaaaa', 
-              fontSize: '18px',
-              display: 'inline-block',
-              marginTop: '4px',
-              fontFamily: 'Questrial, sans-serif'
-            }}>
+            <span style={{ color: '#aaaaaa', fontSize: '18px', display: 'inline-block', marginTop: '4px', fontFamily: 'Questrial, sans-serif' }}>
               No ads, no data sold ever.
             </span>
           </div>
           
-          <div style={{
-            display: 'flex',
-            gap: '16px',
-            justifyContent: 'flex-start',
-            flexShrink: 0,
-          }}>
+          <div style={{ display: 'flex', gap: '16px', justifyContent: 'flex-start', flexShrink: 0 }}>
             <button
               ref={declineBtnRef}
               onClick={handleDecline}
