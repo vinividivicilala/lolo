@@ -26,6 +26,7 @@ export default function HomePage(): React.JSX.Element {
   const mencatatTextRef = useRef<HTMLDivElement>(null);
   const menuruTextRef = useRef<HTMLSpanElement>(null);
   const menuruTopTextRef = useRef<HTMLDivElement>(null);
+  const menuruTopMainRef = useRef<HTMLDivElement>(null); // Ref untuk MENURU di halaman utama
   const brandTextRef = useRef<HTMLDivElement>(null);
   const yearTextRef = useRef<HTMLDivElement>(null);
   const contactTextRef = useRef<HTMLSpanElement>(null);
@@ -184,6 +185,8 @@ export default function HomePage(): React.JSX.Element {
             ease: "power3.inOut",
             onComplete: () => {
               setIsLoading(false);
+              // Setelah loading selesai, jalankan animasi SplitText untuk MENURU di halaman utama
+              animateMenuruMain();
             }
           });
           
@@ -255,41 +258,70 @@ export default function HomePage(): React.JSX.Element {
     }
   }, [isLoading]);
 
-  // GSAP SplitText animations untuk konten utama (setelah loading selesai)
+  // Fungsi animasi untuk MENURU di halaman utama (SplitText modern berbeda)
+  const animateMenuruMain = () => {
+    if (menuruTopMainRef.current) {
+      const splitMenuruMain = new SplitText(menuruTopMainRef.current, {
+        type: "chars, words",
+        charsClass: "split-char-menuru-main"
+      });
+
+      // Set initial state - efek berbeda: dari kiri dengan rotasi dan scale
+      gsap.set(splitMenuruMain.chars, {
+        opacity: 0,
+        x: -80,
+        rotationY: -60,
+        scale: 0.5,
+        transformPerspective: 1000,
+        filter: 'blur(12px)',
+        transformOrigin: '50% 50% -40px'
+      });
+
+      // Animasi masuk dengan efek modern
+      gsap.to(splitMenuruMain.chars, {
+        opacity: 1,
+        x: 0,
+        rotationY: 0,
+        scale: 1,
+        filter: 'blur(0px)',
+        duration: 1.1,
+        stagger: {
+          each: 0.04,
+          from: "start",
+          ease: "power2.out"
+        },
+        ease: "elastic.out(1, 0.5)",
+        delay: 0.2
+      });
+
+      // Efek hover ringan pada karakter (opsional)
+      if (splitMenuruMain.chars) {
+        splitMenuruMain.chars.forEach((char: HTMLElement) => {
+          char.style.transition = 'all 0.2s ease';
+          char.addEventListener('mouseenter', () => {
+            gsap.to(char, {
+              scale: 1.1,
+              color: '#666666',
+              duration: 0.15,
+              ease: "power2.out"
+            });
+          });
+          char.addEventListener('mouseleave', () => {
+            gsap.to(char, {
+              scale: 1,
+              color: '#000000',
+              duration: 0.2,
+              ease: "power2.out"
+            });
+          });
+        });
+      }
+    }
+  };
+
+  // GSAP SplitText animations untuk konten utama lainnya (setelah loading selesai)
   useEffect(() => {
     if (!isLoading) {
-      // Split text untuk "MENURU" di atas kiri halaman utama
-      if (menuruTopTextRef.current && !loadingOverlayRef.current) {
-        const splitMenuruTop = new SplitText(menuruTopTextRef.current, {
-          type: "chars, words",
-          charsClass: "split-char-menuru-top"
-        });
-
-        gsap.fromTo(splitMenuruTop.chars,
-          {
-            opacity: 0,
-            y: 60,
-            rotationX: -90,
-            filter: 'blur(15px)'
-          },
-          {
-            opacity: 1,
-            y: 0,
-            rotationX: 0,
-            filter: 'blur(0px)',
-            duration: 1,
-            stagger: 0.04,
-            ease: "back.out(1)",
-            scrollTrigger: {
-              trigger: menuruTopTextRef.current,
-              start: "top 90%",
-              end: "bottom 70%",
-              toggleActions: "play none none reverse",
-            }
-          }
-        );
-      }
-
       // Split text untuk "Mencatat apa yang kamu inginkan"
       if (mencatatTextRef.current) {
         const splitMencatat = new SplitText(mencatatTextRef.current, {
@@ -582,7 +614,7 @@ export default function HomePage(): React.JSX.Element {
           transform-style: preserve-3d;
         }
 
-        .split-char-menuru-top {
+        .split-char-menuru-main {
           display: inline-block;
           will-change: transform, opacity, filter;
           transform-style: preserve-3d;
@@ -765,8 +797,9 @@ export default function HomePage(): React.JSX.Element {
               transition: 'all 0.01s ease'
             }}
           >
-            {/* TEKS MENURU DI ATAS SISI KIRI Halaman Utama - TETAP ADA */}
+            {/* TEKS MENURU DI ATAS SISI KIRI Halaman Utama - DENGAN SPLIT TEXT GSAP MODERN BERBEDA */}
             <div
+              ref={menuruTopMainRef}
               style={{
                 position: 'absolute',
                 top: '10px',
