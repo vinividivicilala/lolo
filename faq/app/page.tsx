@@ -1,4 +1,4 @@
-// app/page.tsx (Halaman Utama)
+// app/page.tsx (Halaman Utama) - Bagian yang ditambahkan
 'use client';
 
 import React, { useState, useEffect, useRef } from "react";
@@ -23,13 +23,15 @@ export default function HomePage(): React.JSX.Element {
   // Refs untuk teks yang akan di-split
   const mencatatTextRef = useRef<HTMLDivElement>(null);
   const menuruTextRef = useRef<HTMLSpanElement>(null);
-  const menuruTopTextRef = useRef<HTMLDivElement>(null); // REF BARU untuk MENURU di atas kiri
   const contactTextRef = useRef<HTMLSpanElement>(null);
   const lineRef = useRef<HTMLDivElement>(null);
   const emailRef = useRef<HTMLDivElement>(null);
   const igRef = useRef<HTMLDivElement>(null);
   const xRef = useRef<HTMLDivElement>(null);
   const linkedinRef = useRef<HTMLDivElement>(null);
+  
+  // NEW REF: Untuk teks MENURU di pojok kiri atas
+  const topMenuruTextRef = useRef<HTMLHeadingElement>(null);
 
   // Variabel untuk menyimpan teks asli medsos
   const originalTexts = {
@@ -115,66 +117,68 @@ export default function HomePage(): React.JSX.Element {
 
   // GSAP SplitText animations
   useEffect(() => {
-    // ANIMASI BARU: Split text untuk "MENURU" di atas sisi kiri
-    if (menuruTopTextRef.current) {
-      const splitMenuruTop = new SplitText(menuruTopTextRef.current, {
-        type: "chars, words, lines",
-        charsClass: "split-char-menuru-top"
+    // NEW: Split text animation untuk "MENURU" di pojok kiri atas
+    if (topMenuruTextRef.current) {
+      const splitTopMenuru = new SplitText(topMenuruTextRef.current, {
+        type: "chars",
+        charsClass: "split-char-top-menuru"
       });
 
-      // Set initial state - dari blur dan posisi turun
-      gsap.set(splitMenuruTop.chars, {
+      // Set initial state - tersembunyi dengan efek 3D yang dramatis
+      gsap.set(splitTopMenuru.chars, {
         opacity: 0,
-        y: 80,
-        rotationX: -45,
+        y: -200,
+        rotationX: -180,
         transformPerspective: 1000,
-        filter: 'blur(15px)',
-        transformOrigin: '50% 50% -50px'
+        filter: 'blur(30px)',
+        scale: 0.5
       });
 
-      // Animasi masuk yang dramatis
-      gsap.to(splitMenuruTop.chars, {
+      // Animasi masuk yang spektakuler
+      gsap.to(splitTopMenuru.chars, {
         opacity: 1,
         y: 0,
         rotationX: 0,
         filter: 'blur(0px)',
-        duration: 1.4,
+        scale: 1,
+        duration: 1.8,
         stagger: {
-          each: 0.03,
+          each: 0.06,
           from: "start",
-          ease: "power2.out"
+          ease: "power4.out"
         },
-        ease: "back.out(0.7)",
-        scrollTrigger: {
-          trigger: menuruTopTextRef.current,
-          start: "top 90%",
-          end: "bottom 70%",
-          toggleActions: "play none none reverse",
-        }
+        ease: "elastic.out(1, 0.5)",
+        delay: 0.2
       });
 
-      // Efek hover pada setiap karakter
-      if (splitMenuruTop.chars) {
-        splitMenuruTop.chars.forEach((char: HTMLElement, index: number) => {
-          char.style.transition = 'all 0.3s ease';
-          char.addEventListener('mouseenter', () => {
-            gsap.to(char, {
-              scale: 1.15,
-              color: '#cccccc',
-              duration: 0.2,
-              ease: "back.out(1)"
-            });
-          });
-          char.addEventListener('mouseleave', () => {
-            gsap.to(char, {
-              scale: 1,
-              color: '#ffffff',
-              duration: 0.3,
-              ease: "power2.out"
-            });
+      // Efek hover untuk setiap karakter
+      splitTopMenuru.chars.forEach((char: HTMLElement, index: number) => {
+        char.style.cursor = 'pointer';
+        char.style.display = 'inline-block';
+        char.style.transition = 'all 0.3s ease';
+        
+        char.addEventListener('mouseenter', () => {
+          gsap.to(char, {
+            y: -20,
+            scale: 1.2,
+            rotationZ: Math.random() * 10 - 5,
+            color: '#000000',
+            duration: 0.3,
+            ease: "back.out(2)"
           });
         });
-      }
+        
+        char.addEventListener('mouseleave', () => {
+          gsap.to(char, {
+            y: 0,
+            scale: 1,
+            rotationZ: 0,
+            color: '#000000',
+            duration: 0.3,
+            ease: "power2.out"
+          });
+        });
+      });
     }
 
     // Split text untuk "Mencatat apa yang kamu inginkan"
@@ -468,10 +472,15 @@ export default function HomePage(): React.JSX.Element {
           transform-style: preserve-3d;
         }
 
-        .split-char-menuru-top {
+        /* NEW: Style untuk split character MENURU di pojok kiri atas */
+        .split-char-top-menuru {
           display: inline-block;
           will-change: transform, opacity, filter;
           transform-style: preserve-3d;
+          font-family: 'Inter', 'Helvetica Neue', sans-serif;
+          font-weight: 400;
+          font-style: normal;
+          color: #000000;
         }
 
         /* Hover effect untuk contact button */
@@ -561,28 +570,36 @@ export default function HomePage(): React.JSX.Element {
             MozOsxFontSmoothing: 'grayscale',
             position: 'relative',
           }}>
-            {/* TEKS MENURU DI ATAS SISI KIRI - TAMBAHAN BARU */}
-            <div
-              ref={menuruTopTextRef}
-              style={{
-                position: 'absolute',
-                top: '80px',
-                left: '80px',
-                zIndex: 10,
-                fontFamily: 'Inter, "Helvetica Neue", sans-serif',
-                fontWeight: '400',
-                fontSize: '213px',
-                lineHeight: '213px',
-                color: '#FFFFFF',
-                letterSpacing: '-0.02em',
-                textTransform: 'uppercase',
-                margin: 0,
-                padding: 0,
-                whiteSpace: 'nowrap',
-                pointerEvents: 'auto',
-              }}
-            >
-              MENURU
+            {/* NEW: MENURU Text - Pojok Kiri Atas dengan Background Putih */}
+            <div style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              zIndex: 100,
+              backgroundColor: '#ffffff',
+              padding: '20px 40px',
+              margin: 0,
+              pointerEvents: 'auto'
+            }}>
+              <h1
+                ref={topMenuruTextRef}
+                style={{
+                  fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
+                  fontWeight: 400,
+                  fontStyle: 'normal',
+                  fontSize: '213px',
+                  lineHeight: '213px',
+                  color: '#000000',
+                  margin: 0,
+                  padding: 0,
+                  letterSpacing: '-0.02em',
+                  textTransform: 'uppercase',
+                  WebkitFontSmoothing: 'antialiased',
+                  MozOsxFontSmoothing: 'grayscale'
+                }}
+              >
+                MENURU
+              </h1>
             </div>
 
             {/* Konten pertama - 100vh */}
