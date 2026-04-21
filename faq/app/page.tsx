@@ -23,6 +23,7 @@ export default function HomePage(): React.JSX.Element {
   // Refs untuk teks yang akan di-split
   const mencatatTextRef = useRef<HTMLDivElement>(null);
   const menuruTextRef = useRef<HTMLSpanElement>(null);
+  const menuruTopTextRef = useRef<HTMLDivElement>(null); // REF BARU untuk MENURU di atas kiri
   const contactTextRef = useRef<HTMLSpanElement>(null);
   const lineRef = useRef<HTMLDivElement>(null);
   const emailRef = useRef<HTMLDivElement>(null);
@@ -114,6 +115,68 @@ export default function HomePage(): React.JSX.Element {
 
   // GSAP SplitText animations
   useEffect(() => {
+    // ANIMASI BARU: Split text untuk "MENURU" di atas sisi kiri
+    if (menuruTopTextRef.current) {
+      const splitMenuruTop = new SplitText(menuruTopTextRef.current, {
+        type: "chars, words, lines",
+        charsClass: "split-char-menuru-top"
+      });
+
+      // Set initial state - dari blur dan posisi turun
+      gsap.set(splitMenuruTop.chars, {
+        opacity: 0,
+        y: 80,
+        rotationX: -45,
+        transformPerspective: 1000,
+        filter: 'blur(15px)',
+        transformOrigin: '50% 50% -50px'
+      });
+
+      // Animasi masuk yang dramatis
+      gsap.to(splitMenuruTop.chars, {
+        opacity: 1,
+        y: 0,
+        rotationX: 0,
+        filter: 'blur(0px)',
+        duration: 1.4,
+        stagger: {
+          each: 0.03,
+          from: "start",
+          ease: "power2.out"
+        },
+        ease: "back.out(0.7)",
+        scrollTrigger: {
+          trigger: menuruTopTextRef.current,
+          start: "top 90%",
+          end: "bottom 70%",
+          toggleActions: "play none none reverse",
+        }
+      });
+
+      // Efek hover pada setiap karakter
+      if (splitMenuruTop.chars) {
+        splitMenuruTop.chars.forEach((char: HTMLElement, index: number) => {
+          char.style.transition = 'all 0.3s ease';
+          char.addEventListener('mouseenter', () => {
+            gsap.to(char, {
+              scale: 1.15,
+              color: '#cccccc',
+              duration: 0.2,
+              ease: "back.out(1)"
+            });
+          });
+          char.addEventListener('mouseleave', () => {
+            gsap.to(char, {
+              scale: 1,
+              color: '#ffffff',
+              duration: 0.3,
+              ease: "power2.out"
+            });
+          });
+        });
+      }
+    }
+
     // Split text untuk "Mencatat apa yang kamu inginkan"
     if (mencatatTextRef.current) {
       const splitMencatat = new SplitText(mencatatTextRef.current, {
@@ -405,6 +468,12 @@ export default function HomePage(): React.JSX.Element {
           transform-style: preserve-3d;
         }
 
+        .split-char-menuru-top {
+          display: inline-block;
+          will-change: transform, opacity, filter;
+          transform-style: preserve-3d;
+        }
+
         /* Hover effect untuk contact button */
         .contact-btn-effect {
           position: relative;
@@ -492,6 +561,30 @@ export default function HomePage(): React.JSX.Element {
             MozOsxFontSmoothing: 'grayscale',
             position: 'relative',
           }}>
+            {/* TEKS MENURU DI ATAS SISI KIRI - TAMBAHAN BARU */}
+            <div
+              ref={menuruTopTextRef}
+              style={{
+                position: 'absolute',
+                top: '80px',
+                left: '80px',
+                zIndex: 10,
+                fontFamily: 'Inter, "Helvetica Neue", sans-serif',
+                fontWeight: '400',
+                fontSize: '213px',
+                lineHeight: '213px',
+                color: '#FFFFFF',
+                letterSpacing: '-0.02em',
+                textTransform: 'uppercase',
+                margin: 0,
+                padding: 0,
+                whiteSpace: 'nowrap',
+                pointerEvents: 'auto',
+              }}
+            >
+              MENURU
+            </div>
+
             {/* Konten pertama - 100vh */}
             <div style={{
               height: '100vh',
