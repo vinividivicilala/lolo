@@ -20,6 +20,7 @@ export default function HomePage(): React.JSX.Element {
   const declineBtnRef = useRef<HTMLButtonElement>(null);
   const contactBtnRef = useRef<HTMLButtonElement>(null);
   const smootherRef = useRef<any>(null);
+  const mainContentRef = useRef<HTMLDivElement>(null);
   
   // Refs untuk teks yang akan di-split
   const mencatatTextRef = useRef<HTMLDivElement>(null);
@@ -117,10 +118,10 @@ export default function HomePage(): React.JSX.Element {
     };
   }, []);
 
-  // Animasi loading overlay dengan SplitText modern
+  // Animasi loading overlay dengan SplitText modern (tanpa hover effect)
   useEffect(() => {
     if (isLoading && loadingOverlayRef.current) {
-      // Split text untuk MENURU (kiri)
+      // Split text untuk MENURU (kiri) - loading
       const splitMenuruLoading = new SplitText(menuruTopTextRef.current, {
         type: "chars, words",
         charsClass: "split-char-loading"
@@ -138,7 +139,7 @@ export default function HomePage(): React.JSX.Element {
         charsClass: "split-char-loading"
       });
 
-      // Set initial state untuk semua karakter - dari blur dan posisi ekstrim
+      // Set initial state untuk semua karakter
       if (splitMenuruLoading.chars) {
         gsap.set(splitMenuruLoading.chars, {
           opacity: 0,
@@ -176,15 +177,29 @@ export default function HomePage(): React.JSX.Element {
       // Timeline untuk animasi loading
       const loadingTimeline = gsap.timeline({
         onComplete: () => {
-          // Fade out overlay setelah animasi selesai
+          // Animasi overlay geser ke kiri
           gsap.to(loadingOverlayRef.current, {
-            opacity: 0,
+            x: '-100%',
             duration: 1.2,
             ease: "power3.inOut",
             onComplete: () => {
               setIsLoading(false);
             }
           });
+          
+          // Animasi halaman utama muncul dari kanan (geser ke kiri)
+          gsap.fromTo(mainContentRef.current,
+            {
+              x: '100%',
+              opacity: 0.5
+            },
+            {
+              x: '0%',
+              opacity: 1,
+              duration: 1.2,
+              ease: "power3.inOut"
+            }
+          );
         }
       });
 
@@ -234,38 +249,47 @@ export default function HomePage(): React.JSX.Element {
         ease: "back.out(1.1)"
       }, 0.4);
 
-      // Efek hover pada karakter MENURU
-      if (splitMenuruLoading.chars) {
-        splitMenuruLoading.chars.forEach((char: HTMLElement) => {
-          char.style.transition = 'all 0.3s ease';
-          char.addEventListener('mouseenter', () => {
-            gsap.to(char, {
-              scale: 1.2,
-              color: '#ff4444',
-              duration: 0.2,
-              ease: "back.out(1)"
-            });
-          });
-          char.addEventListener('mouseleave', () => {
-            gsap.to(char, {
-              scale: 1,
-              color: '#ffffff',
-              duration: 0.3,
-              ease: "power2.out"
-            });
-          });
-        });
-      }
-
       return () => {
         loadingTimeline.kill();
       };
     }
   }, [isLoading]);
 
-  // GSAP SplitText animations untuk konten utama
+  // GSAP SplitText animations untuk konten utama (setelah loading selesai)
   useEffect(() => {
     if (!isLoading) {
+      // Split text untuk "MENURU" di atas kiri halaman utama
+      if (menuruTopTextRef.current && !loadingOverlayRef.current) {
+        const splitMenuruTop = new SplitText(menuruTopTextRef.current, {
+          type: "chars, words",
+          charsClass: "split-char-menuru-top"
+        });
+
+        gsap.fromTo(splitMenuruTop.chars,
+          {
+            opacity: 0,
+            y: 60,
+            rotationX: -90,
+            filter: 'blur(15px)'
+          },
+          {
+            opacity: 1,
+            y: 0,
+            rotationX: 0,
+            filter: 'blur(0px)',
+            duration: 1,
+            stagger: 0.04,
+            ease: "back.out(1)",
+            scrollTrigger: {
+              trigger: menuruTopTextRef.current,
+              start: "top 90%",
+              end: "bottom 70%",
+              toggleActions: "play none none reverse",
+            }
+          }
+        );
+      }
+
       // Split text untuk "Mencatat apa yang kamu inginkan"
       if (mencatatTextRef.current) {
         const splitMencatat = new SplitText(mencatatTextRef.current, {
@@ -558,6 +582,12 @@ export default function HomePage(): React.JSX.Element {
           transform-style: preserve-3d;
         }
 
+        .split-char-menuru-top {
+          display: inline-block;
+          will-change: transform, opacity, filter;
+          transform-style: preserve-3d;
+        }
+
         .split-char-loading {
           display: inline-block;
           will-change: transform, opacity, filter;
@@ -636,7 +666,7 @@ export default function HomePage(): React.JSX.Element {
         }
       `}</style>
       
-      {/* LOADING OVERLAY - HITAM DENGAN SPLIT TEXT */}
+      {/* LOADING OVERLAY - HITAM DENGAN SPLIT TEXT (tanpa hover effect) */}
       {isLoading && (
         <div
           ref={loadingOverlayRef}
@@ -654,9 +684,8 @@ export default function HomePage(): React.JSX.Element {
             pointerEvents: 'auto',
           }}
         >
-          {/* MENURU - Sisi Kiri */}
+          {/* MENURU - Sisi Kiri Loading */}
           <div
-            ref={menuruTopTextRef}
             style={{
               position: 'absolute',
               top: '10px',
@@ -671,12 +700,11 @@ export default function HomePage(): React.JSX.Element {
               whiteSpace: 'nowrap',
             }}
           >
-            MENURU
+            <span ref={menuruTopTextRef}>MENURU</span>
           </div>
 
-          {/* BRAND - Sisi Tengah Kanan */}
+          {/* BRAND - Sisi Tengah Kanan Loading */}
           <div
-            ref={brandTextRef}
             style={{
               position: 'absolute',
               top: '50%',
@@ -693,12 +721,11 @@ export default function HomePage(): React.JSX.Element {
               textAlign: 'right',
             }}
           >
-            BRAND
+            <span ref={brandTextRef}>BRAND</span>
           </div>
 
-          {/* 2026 - Bawah Kanan */}
+          {/* 2026 - Bawah Kanan Loading */}
           <div
-            ref={yearTextRef}
             style={{
               position: 'absolute',
               bottom: '40px',
@@ -712,26 +739,55 @@ export default function HomePage(): React.JSX.Element {
               whiteSpace: 'nowrap',
             }}
           >
-            2026
+            <span ref={yearTextRef}>2026</span>
           </div>
         </div>
       )}
 
-      <div id="smooth-wrapper" style={{ opacity: isLoading ? 0 : 1, transition: 'opacity 0.8s ease' }}>
+      <div id="smooth-wrapper">
         <div id="smooth-content">
-          <div style={{
-            minHeight: '200vh',
-            backgroundColor: 'white',
-            margin: 0,
-            padding: 0,
-            width: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-            fontFamily: 'Questrial, sans-serif',
-            WebkitFontSmoothing: 'antialiased',
-            MozOsxFontSmoothing: 'grayscale',
-            position: 'relative',
-          }}>
+          <div 
+            ref={mainContentRef}
+            style={{
+              minHeight: '200vh',
+              backgroundColor: 'white',
+              margin: 0,
+              padding: 0,
+              width: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              fontFamily: 'Questrial, sans-serif',
+              WebkitFontSmoothing: 'antialiased',
+              MozOsxFontSmoothing: 'grayscale',
+              position: 'relative',
+              opacity: isLoading ? 0 : 1,
+              transform: isLoading ? 'translateX(100%)' : 'translateX(0)',
+              transition: 'all 0.01s ease'
+            }}
+          >
+            {/* TEKS MENURU DI ATAS SISI KIRI Halaman Utama - TETAP ADA */}
+            <div
+              style={{
+                position: 'absolute',
+                top: '10px',
+                left: '40px',
+                zIndex: 10,
+                fontFamily: 'Inter, "Helvetica Neue", sans-serif',
+                fontWeight: '400',
+                fontSize: '213px',
+                lineHeight: '213px',
+                color: '#000000',
+                letterSpacing: '-0.02em',
+                textTransform: 'uppercase',
+                margin: 0,
+                padding: 0,
+                whiteSpace: 'nowrap',
+                pointerEvents: 'auto',
+              }}
+            >
+              MENURU
+            </div>
+
             {/* Konten pertama - 100vh */}
             <div style={{
               height: '100vh',
