@@ -184,6 +184,8 @@ export default function HomePage(): React.JSX.Element {
           ease: "power2.inOut",
           onComplete: () => {
             setLoading(false);
+            // Enable body scroll setelah loading selesai
+            document.body.style.overflow = 'auto';
           }
         });
       }, 1500);
@@ -192,221 +194,222 @@ export default function HomePage(): React.JSX.Element {
     }
   }, [loading]);
 
+  // Initialize ScrollSmoother setelah loading selesai
   useEffect(() => {
-    // Initialize ScrollSmoother
-    const initSmoother = () => {
-      if (typeof window !== 'undefined' && !smootherRef.current && !loading) {
-        smootherRef.current = ScrollSmoother.create({
-          wrapper: "#smooth-wrapper",
-          content: "#smooth-content",
-          smooth: 1.2,
-          effects: true,
-          smoothTouch: 0.5,
-          normalizeScroll: true,
-          ignoreMobileResize: true,
-          onUpdate: () => {},
-        });
-      }
-    };
+    if (!loading) {
+      // Beri sedikit delay untuk memastikan DOM sudah siap
+      const initSmoother = setTimeout(() => {
+        if (typeof window !== 'undefined' && !smootherRef.current) {
+          smootherRef.current = ScrollSmoother.create({
+            wrapper: "#smooth-wrapper",
+            content: "#smooth-content",
+            smooth: 1.2,
+            effects: true,
+            smoothTouch: 0.5,
+            normalizeScroll: true,
+            ignoreMobileResize: true,
+          });
+        }
+      }, 100);
 
-    const timer = setTimeout(() => {
-      if (!loading) initSmoother();
-    }, 100);
-
-    return () => {
-      clearTimeout(timer);
-      if (smootherRef.current) {
-        smootherRef.current.kill();
-        smootherRef.current = null;
-      }
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
-    };
+      return () => {
+        clearTimeout(initSmoother);
+        if (smootherRef.current) {
+          smootherRef.current.kill();
+          smootherRef.current = null;
+        }
+      };
+    }
   }, [loading]);
 
-  // GSAP SplitText animations untuk konten utama
+  // GSAP SplitText animations untuk konten utama (hanya setelah loading selesai)
   useEffect(() => {
     if (loading) return;
     
-    // ANIMASI MENURU DI ATAS KIRI - JALAN SAAT LOADING SELESAI
-    if (menuruTopTextRef.current) {
-      const splitMenuruTop = new SplitText(menuruTopTextRef.current, {
-        type: "chars",
-        charsClass: "split-char-menuru-top"
-      });
+    // Beri sedikit delay agar animasi lebih smooth
+    const timer = setTimeout(() => {
+      // ANIMASI MENURU DI ATAS KIRI
+      if (menuruTopTextRef.current) {
+        const splitMenuruTop = new SplitText(menuruTopTextRef.current, {
+          type: "chars",
+          charsClass: "split-char-menuru-top"
+        });
 
-      gsap.set(splitMenuruTop.chars, {
-        opacity: 0,
-        y: 60,
-        rotationX: -90,
-        transformPerspective: 1000,
-        filter: 'blur(20px)',
-      });
-
-      gsap.to(splitMenuruTop.chars, {
-        opacity: 1,
-        y: 0,
-        rotationX: 0,
-        filter: 'blur(0px)',
-        duration: 0.8,
-        stagger: 0.03,
-        ease: "back.out(0.8)",
-        delay: 0.2
-      });
-    }
-
-    // Split text untuk "Mencatat apa yang kamu inginkan"
-    if (mencatatTextRef.current) {
-      const splitMencatat = new SplitText(mencatatTextRef.current, {
-        type: "chars",
-        charsClass: "split-char"
-      });
-
-      gsap.fromTo(splitMencatat.chars,
-        {
+        gsap.set(splitMenuruTop.chars, {
           opacity: 0,
-          y: 100,
-          rotateX: -90,
-          filter: 'blur(10px)'
-        },
-        {
+          y: 60,
+          rotationX: -90,
+          transformPerspective: 1000,
+          filter: 'blur(20px)',
+        });
+
+        gsap.to(splitMenuruTop.chars, {
           opacity: 1,
           y: 0,
-          rotateX: 0,
+          rotationX: 0,
           filter: 'blur(0px)',
-          duration: 1.2,
+          duration: 0.8,
           stagger: 0.03,
-          ease: "back.out(1.2)",
-          scrollTrigger: {
-            trigger: mencatatTextRef.current,
-            start: "top 80%",
-            end: "bottom 60%",
-            toggleActions: "play none none reverse",
+          ease: "back.out(0.8)",
+          delay: 0.2
+        });
+      }
+
+      // Split text untuk "Mencatat apa yang kamu inginkan"
+      if (mencatatTextRef.current) {
+        const splitMencatat = new SplitText(mencatatTextRef.current, {
+          type: "chars",
+          charsClass: "split-char"
+        });
+
+        gsap.fromTo(splitMencatat.chars,
+          {
+            opacity: 0,
+            y: 100,
+            rotateX: -90,
+            filter: 'blur(10px)'
+          },
+          {
+            opacity: 1,
+            y: 0,
+            rotateX: 0,
+            filter: 'blur(0px)',
+            duration: 1.2,
+            stagger: 0.03,
+            ease: "back.out(1.2)",
+            scrollTrigger: {
+              trigger: mencatatTextRef.current,
+              start: "top 80%",
+              end: "bottom 60%",
+              toggleActions: "play none none reverse",
+            }
           }
-        }
-      );
-    }
+        );
+      }
 
-    // Split text untuk email
-    if (emailRef.current) {
-      const splitEmail = new SplitText(emailRef.current, {
-        type: "chars",
-        charsClass: "split-char"
-      });
+      // Split text untuk email
+      if (emailRef.current) {
+        const splitEmail = new SplitText(emailRef.current, {
+          type: "chars",
+          charsClass: "split-char"
+        });
 
-      gsap.fromTo(splitEmail.chars,
-        {
-          opacity: 0,
-          x: -30,
-          filter: 'blur(5px)'
-        },
-        {
-          opacity: 1,
-          x: 0,
-          filter: 'blur(0px)',
-          duration: 0.8,
-          stagger: 0.02,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: emailRef.current,
-            start: "top 85%",
-            end: "bottom 70%",
-            toggleActions: "play none none reverse",
+        gsap.fromTo(splitEmail.chars,
+          {
+            opacity: 0,
+            x: -30,
+            filter: 'blur(5px)'
+          },
+          {
+            opacity: 1,
+            x: 0,
+            filter: 'blur(0px)',
+            duration: 0.8,
+            stagger: 0.02,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: emailRef.current,
+              start: "top 85%",
+              end: "bottom 70%",
+              toggleActions: "play none none reverse",
+            }
           }
-        }
-      );
-    }
+        );
+      }
 
-    // Split text untuk "MENURU" besar di footer
-    if (menuruTextRef.current) {
-      const splitMenuru = new SplitText(menuruTextRef.current, {
-        type: "chars",
-        charsClass: "split-char-menuru"
-      });
+      // Split text untuk "MENURU" besar di footer
+      if (menuruTextRef.current) {
+        const splitMenuru = new SplitText(menuruTextRef.current, {
+          type: "chars",
+          charsClass: "split-char-menuru"
+        });
 
-      gsap.set(splitMenuru.chars, {
-        opacity: 0,
-        y: 200,
-        rotationY: 90,
-        transformPerspective: 800,
-        filter: 'blur(20px)'
-      });
-
-      gsap.to(splitMenuru.chars, {
-        opacity: 1,
-        y: 0,
-        rotationY: 0,
-        filter: 'blur(0px)',
-        duration: 1.5,
-        stagger: {
-          each: 0.04,
-          from: "start",
-          ease: "power2.out"
-        },
-        ease: "back.out(0.8)",
-        scrollTrigger: {
-          trigger: menuruTextRef.current,
-          start: "top 85%",
-          end: "bottom 65%",
-          toggleActions: "play none none reverse",
-        }
-      });
-    }
-
-    // Split text untuk "Contact" pada tombol
-    if (contactTextRef.current) {
-      const splitContact = new SplitText(contactTextRef.current, {
-        type: "chars",
-        charsClass: "split-char"
-      });
-
-      gsap.fromTo(splitContact.chars,
-        {
+        gsap.set(splitMenuru.chars, {
           opacity: 0,
-          x: -20,
-          filter: 'blur(5px)'
-        },
-        {
+          y: 200,
+          rotationY: 90,
+          transformPerspective: 800,
+          filter: 'blur(20px)'
+        });
+
+        gsap.to(splitMenuru.chars, {
           opacity: 1,
-          x: 0,
+          y: 0,
+          rotationY: 0,
           filter: 'blur(0px)',
-          duration: 0.8,
-          stagger: 0.05,
-          ease: "power2.out",
+          duration: 1.5,
+          stagger: {
+            each: 0.04,
+            from: "start",
+            ease: "power2.out"
+          },
+          ease: "back.out(0.8)",
           scrollTrigger: {
-            trigger: contactTextRef.current,
+            trigger: menuruTextRef.current,
             start: "top 85%",
             end: "bottom 65%",
             toggleActions: "play none none reverse",
           }
-        }
-      );
-    }
+        });
+      }
 
-    // Animasi garis
-    if (lineRef.current) {
-      gsap.fromTo(lineRef.current,
-        {
-          width: '0%',
-          opacity: 0,
-          x: 100
-        },
-        {
-          width: '100%',
-          opacity: 1,
-          x: 0,
-          duration: 1.2,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: lineRef.current,
-            start: "top 85%",
-            end: "bottom 70%",
-            toggleActions: "play none none reverse",
+      // Split text untuk "Contact" pada tombol
+      if (contactTextRef.current) {
+        const splitContact = new SplitText(contactTextRef.current, {
+          type: "chars",
+          charsClass: "split-char"
+        });
+
+        gsap.fromTo(splitContact.chars,
+          {
+            opacity: 0,
+            x: -20,
+            filter: 'blur(5px)'
+          },
+          {
+            opacity: 1,
+            x: 0,
+            filter: 'blur(0px)',
+            duration: 0.8,
+            stagger: 0.05,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: contactTextRef.current,
+              start: "top 85%",
+              end: "bottom 65%",
+              toggleActions: "play none none reverse",
+            }
           }
-        }
-      );
-    }
+        );
+      }
+
+      // Animasi garis
+      if (lineRef.current) {
+        gsap.fromTo(lineRef.current,
+          {
+            width: '0%',
+            opacity: 0,
+            x: 100
+          },
+          {
+            width: '100%',
+            opacity: 1,
+            x: 0,
+            duration: 1.2,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: lineRef.current,
+              start: "top 85%",
+              end: "bottom 70%",
+              toggleActions: "play none none reverse",
+            }
+          }
+        );
+      }
+    }, 100);
 
     return () => {
+      clearTimeout(timer);
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
   }, [loading]);
@@ -497,6 +500,7 @@ export default function HomePage(): React.JSX.Element {
     console.log(`${platform} clicked`);
   };
 
+  // Tampilkan loading overlay
   if (loading) {
     return (
       <>
@@ -602,6 +606,7 @@ export default function HomePage(): React.JSX.Element {
     );
   }
 
+  // Tampilkan halaman utama setelah loading selesai
   return (
     <>
       <style jsx global>{`
