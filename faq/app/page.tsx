@@ -1,4 +1,4 @@
-// app/page.tsx (Halaman Utama) - Bagian yang ditambahkan
+// app/page.tsx (Halaman Utama)
 'use client';
 
 import React, { useState, useEffect, useRef } from "react";
@@ -23,15 +23,13 @@ export default function HomePage(): React.JSX.Element {
   // Refs untuk teks yang akan di-split
   const mencatatTextRef = useRef<HTMLDivElement>(null);
   const menuruTextRef = useRef<HTMLSpanElement>(null);
+  const menuruTopTextRef = useRef<HTMLDivElement>(null);
   const contactTextRef = useRef<HTMLSpanElement>(null);
   const lineRef = useRef<HTMLDivElement>(null);
   const emailRef = useRef<HTMLDivElement>(null);
   const igRef = useRef<HTMLDivElement>(null);
   const xRef = useRef<HTMLDivElement>(null);
   const linkedinRef = useRef<HTMLDivElement>(null);
-  
-  // NEW REF: Untuk teks MENURU di pojok kiri atas
-  const topMenuruTextRef = useRef<HTMLHeadingElement>(null);
 
   // Variabel untuk menyimpan teks asli medsos
   const originalTexts = {
@@ -117,67 +115,37 @@ export default function HomePage(): React.JSX.Element {
 
   // GSAP SplitText animations
   useEffect(() => {
-    // NEW: Split text animation untuk "MENURU" di pojok kiri atas
-    if (topMenuruTextRef.current) {
-      const splitTopMenuru = new SplitText(topMenuruTextRef.current, {
-        type: "chars",
-        charsClass: "split-char-top-menuru"
+    // ANIMASI MENURU DI ATAS KIRI - JALAN SAAT LOADING (tanpa scroll)
+    if (menuruTopTextRef.current) {
+      const splitMenuruTop = new SplitText(menuruTopTextRef.current, {
+        type: "chars, words",
+        charsClass: "split-char-menuru-top"
       });
 
-      // Set initial state - tersembunyi dengan efek 3D yang dramatis
-      gsap.set(splitTopMenuru.chars, {
+      // Set initial state - dari bawah dengan blur
+      gsap.set(splitMenuruTop.chars, {
         opacity: 0,
-        y: -200,
-        rotationX: -180,
+        y: 60,
+        rotationX: -90,
         transformPerspective: 1000,
-        filter: 'blur(30px)',
-        scale: 0.5
+        filter: 'blur(20px)',
+        transformOrigin: '50% 50% -30px'
       });
 
-      // Animasi masuk yang spektakuler
-      gsap.to(splitTopMenuru.chars, {
+      // Animasi masuk langsung saat loading (tanpa scroll trigger)
+      gsap.to(splitMenuruTop.chars, {
         opacity: 1,
         y: 0,
         rotationX: 0,
         filter: 'blur(0px)',
-        scale: 1,
-        duration: 1.8,
+        duration: 1.2,
         stagger: {
-          each: 0.06,
+          each: 0.04,
           from: "start",
-          ease: "power4.out"
+          ease: "power2.out"
         },
-        ease: "elastic.out(1, 0.5)",
-        delay: 0.2
-      });
-
-      // Efek hover untuk setiap karakter
-      splitTopMenuru.chars.forEach((char: HTMLElement, index: number) => {
-        char.style.cursor = 'pointer';
-        char.style.display = 'inline-block';
-        char.style.transition = 'all 0.3s ease';
-        
-        char.addEventListener('mouseenter', () => {
-          gsap.to(char, {
-            y: -20,
-            scale: 1.2,
-            rotationZ: Math.random() * 10 - 5,
-            color: '#000000',
-            duration: 0.3,
-            ease: "back.out(2)"
-          });
-        });
-        
-        char.addEventListener('mouseleave', () => {
-          gsap.to(char, {
-            y: 0,
-            scale: 1,
-            rotationZ: 0,
-            color: '#000000',
-            duration: 0.3,
-            ease: "power2.out"
-          });
-        });
+        ease: "back.out(0.8)",
+        delay: 0.3
       });
     }
 
@@ -309,7 +277,7 @@ export default function HomePage(): React.JSX.Element {
       );
     }
 
-    // Animasi garis putih
+    // Animasi garis
     if (lineRef.current) {
       gsap.fromTo(lineRef.current,
         {
@@ -368,7 +336,7 @@ export default function HomePage(): React.JSX.Element {
             left: 0;
             width: 100%;
             height: 0%;
-            background-color: #000000;
+            background-color: #ffffff;
             transition: height 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
             z-index: -1;
             border-radius: 60px;
@@ -380,7 +348,7 @@ export default function HomePage(): React.JSX.Element {
             transition: color 0.3s ease;
           }
           .btn-hover-effect:hover {
-            color: white !important;
+            color: #000000 !important;
           }
         `;
         document.head.appendChild(pseudoStyle);
@@ -442,7 +410,7 @@ export default function HomePage(): React.JSX.Element {
           height: 100%;
           width: 100%;
           overflow: hidden;
-          background-color: black;
+          background-color: white;
         }
         
         #smooth-wrapper {
@@ -472,25 +440,20 @@ export default function HomePage(): React.JSX.Element {
           transform-style: preserve-3d;
         }
 
-        /* NEW: Style untuk split character MENURU di pojok kiri atas */
-        .split-char-top-menuru {
+        .split-char-menuru-top {
           display: inline-block;
           will-change: transform, opacity, filter;
           transform-style: preserve-3d;
-          font-family: 'Inter', 'Helvetica Neue', sans-serif;
-          font-weight: 400;
-          font-style: normal;
-          color: #000000;
         }
 
-        /* Hover effect untuk contact button */
+        /* Hover effect untuk contact button - versi putih/hitam terbalik */
         .contact-btn-effect {
           position: relative;
           isolation: isolate;
           transition: all 0.3s ease;
-          background-color: #000000 !important;
-          color: #ffffff !important;
-          border: 1.5px solid #333333 !important;
+          background-color: #ffffff !important;
+          color: #000000 !important;
+          border: 1.5px solid #cccccc !important;
         }
         
         .contact-btn-effect::before {
@@ -500,7 +463,7 @@ export default function HomePage(): React.JSX.Element {
           left: 0;
           width: 100%;
           height: 0%;
-          background-color: #ffffff;
+          background-color: #000000;
           transition: height 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
           z-index: -1;
           border-radius: 60px;
@@ -511,12 +474,12 @@ export default function HomePage(): React.JSX.Element {
         }
         
         .contact-btn-effect:hover {
-          color: #000000 !important;
-          border-color: #e0e0e0 !important;
+          color: #ffffff !important;
+          border-color: #333333 !important;
         }
 
         .contact-btn-effect .dot-small {
-          background-color: #ffffff !important;
+          background-color: #000000 !important;
         }
 
         .contact-btn-effect:hover .dot-small {
@@ -525,21 +488,21 @@ export default function HomePage(): React.JSX.Element {
         }
 
         .circle-large-white {
-          background-color: #ffffff !important;
+          background-color: #000000 !important;
         }
 
         .circle-large-white svg path {
-          stroke: #000000 !important;
+          stroke: #ffffff !important;
         }
 
         .contact-btn-effect:hover .circle-large-white {
-          background-color: #000000 !important;
+          background-color: #ffffff !important;
           opacity: 1 !important;
           transform: scale(1) !important;
         }
 
         .contact-btn-effect:hover .circle-large-white svg path {
-          stroke: #ffffff !important;
+          stroke: #000000 !important;
         }
 
         .dot-small {
@@ -559,7 +522,7 @@ export default function HomePage(): React.JSX.Element {
         <div id="smooth-content">
           <div style={{
             minHeight: '200vh',
-            backgroundColor: 'black',
+            backgroundColor: 'white',
             margin: 0,
             padding: 0,
             width: '100%',
@@ -570,36 +533,28 @@ export default function HomePage(): React.JSX.Element {
             MozOsxFontSmoothing: 'grayscale',
             position: 'relative',
           }}>
-            {/* NEW: MENURU Text - Pojok Kiri Atas dengan Background Putih */}
-            <div style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              zIndex: 100,
-              backgroundColor: '#ffffff',
-              padding: '20px 40px',
-              margin: 0,
-              pointerEvents: 'auto'
-            }}>
-              <h1
-                ref={topMenuruTextRef}
-                style={{
-                  fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
-                  fontWeight: 400,
-                  fontStyle: 'normal',
-                  fontSize: '213px',
-                  lineHeight: '213px',
-                  color: '#000000',
-                  margin: 0,
-                  padding: 0,
-                  letterSpacing: '-0.02em',
-                  textTransform: 'uppercase',
-                  WebkitFontSmoothing: 'antialiased',
-                  MozOsxFontSmoothing: 'grayscale'
-                }}
-              >
-                MENURU
-              </h1>
+            {/* TEKS MENURU DI ATAS SISI KIRI - PALING ATAS */}
+            <div
+              ref={menuruTopTextRef}
+              style={{
+                position: 'absolute',
+                top: '20px',
+                left: '40px',
+                zIndex: 10,
+                fontFamily: 'Inter, "Helvetica Neue", sans-serif',
+                fontWeight: '400',
+                fontSize: '213px',
+                lineHeight: '213px',
+                color: '#000000',
+                letterSpacing: '-0.02em',
+                textTransform: 'uppercase',
+                margin: 0,
+                padding: 0,
+                whiteSpace: 'nowrap',
+                pointerEvents: 'auto',
+              }}
+            >
+              MENURU
             </div>
 
             {/* Konten pertama - 100vh */}
@@ -614,7 +569,7 @@ export default function HomePage(): React.JSX.Element {
             }}>
               <div style={{
                 textAlign: 'center',
-                color: 'white',
+                color: 'black',
                 fontSize: '24px',
                 opacity: 0.5
               }}>
@@ -641,7 +596,7 @@ export default function HomePage(): React.JSX.Element {
                     style={{
                       fontSize: '64px',
                       fontFamily: 'Questrial, sans-serif',
-                      color: 'white',
+                      color: 'black',
                       textAlign: 'center',
                       fontWeight: '400',
                       letterSpacing: '-0.02em',
@@ -652,7 +607,7 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                   <span style={{
                     fontSize: '80px',
-                    color: 'white',
+                    color: 'black',
                     fontWeight: '400',
                     lineHeight: '1'
                   }}>.</span>
@@ -679,9 +634,9 @@ export default function HomePage(): React.JSX.Element {
                       position: 'relative',
                       overflow: 'hidden',
                       zIndex: 1,
-                      border: '1.5px solid #333333',
-                      backgroundColor: '#000000',
-                      color: '#ffffff'
+                      border: '1.5px solid #cccccc',
+                      backgroundColor: '#ffffff',
+                      color: '#000000'
                     }}
                   >
                     <span ref={contactTextRef}>Contact</span>
@@ -698,7 +653,7 @@ export default function HomePage(): React.JSX.Element {
                         width: '8px',
                         height: '8px',
                         borderRadius: '50%',
-                        backgroundColor: '#ffffff',
+                        backgroundColor: '#000000',
                         opacity: 1,
                         transform: 'scale(1)',
                         transition: 'opacity 0.3s ease, transform 0.3s ease',
@@ -710,7 +665,7 @@ export default function HomePage(): React.JSX.Element {
                         width: '40px',
                         height: '40px',
                         borderRadius: '50%',
-                        backgroundColor: '#ffffff',
+                        backgroundColor: '#000000',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -719,7 +674,7 @@ export default function HomePage(): React.JSX.Element {
                         transition: 'opacity 0.3s ease, transform 0.3s ease, background-color 0.3s ease'
                       }}>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                          <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
                       </div>
                     </div>
@@ -732,7 +687,7 @@ export default function HomePage(): React.JSX.Element {
             <div style={{
               width: '100%',
               position: 'relative',
-              backgroundColor: 'black',
+              backgroundColor: 'white',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'flex-end',
@@ -757,7 +712,7 @@ export default function HomePage(): React.JSX.Element {
                   style={{
                     fontFamily: "'Questrial', sans-serif",
                     fontSize: '32px',
-                    color: '#FFFFFF',
+                    color: '#000000',
                     fontWeight: '400',
                     letterSpacing: '0.02em',
                     cursor: 'pointer',
@@ -805,7 +760,7 @@ export default function HomePage(): React.JSX.Element {
                       style={{
                         fontFamily: "'Questrial', sans-serif",
                         fontSize: '28px',
-                        color: '#FFFFFF',
+                        color: '#000000',
                         fontWeight: '400',
                         letterSpacing: '0.02em'
                       }}
@@ -838,7 +793,7 @@ export default function HomePage(): React.JSX.Element {
                       style={{
                         fontFamily: "'Questrial', sans-serif",
                         fontSize: '28px',
-                        color: '#FFFFFF',
+                        color: '#000000',
                         fontWeight: '400',
                         letterSpacing: '0.02em'
                       }}
@@ -871,7 +826,7 @@ export default function HomePage(): React.JSX.Element {
                       style={{
                         fontFamily: "'Questrial', sans-serif",
                         fontSize: '28px',
-                        color: '#FFFFFF',
+                        color: '#000000',
                         fontWeight: '400',
                         letterSpacing: '0.02em'
                       }}
@@ -896,27 +851,27 @@ export default function HomePage(): React.JSX.Element {
                 pointerEvents: 'none',
                 zIndex: 1
               }}>
-                {/* Garis putih */}
+                {/* Garis hitam */}
                 <div
                   ref={lineRef}
                   style={{
                     width: '0%',
                     height: '2px',
-                    backgroundColor: '#FFFFFF',
+                    backgroundColor: '#000000',
                     marginRight: '0',
                     marginBottom: '60px',
                     opacity: 0
                   }}
                 />
                 
-                {/* Teks MENURU besar */}
+                {/* Teks MENURU besar di footer */}
                 <span 
                   ref={menuruTextRef}
                   style={{
                     fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
                     fontWeight: 'normal',
                     fontSize: '600px',
-                    color: '#FFFFFF',
+                    color: '#000000',
                     textAlign: 'right',
                     letterSpacing: '-0.02em',
                     opacity: 1,
@@ -939,7 +894,7 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </div>
 
-      {/* Cookie Popup */}
+      {/* Cookie Popup - versi terbalik */}
       {showPopup && (
         <div style={{
           position: 'fixed',
@@ -947,15 +902,15 @@ export default function HomePage(): React.JSX.Element {
           left: '30px',
           width: 'auto',
           maxWidth: 'calc(100vw - 60px)',
-          backgroundColor: '#ffffff',
-          color: '#000000',
+          backgroundColor: '#000000',
+          color: '#ffffff',
           borderRadius: '32px',
           padding: '24px 32px',
-          boxShadow: '0 20px 40px rgba(0,0,0,0.15), 0 5px 12px rgba(0,0,0,0.05)',
+          boxShadow: '0 20px 40px rgba(0,0,0,0.3), 0 5px 12px rgba(0,0,0,0.1)',
           zIndex: 1000,
           fontFamily: 'Questrial, sans-serif',
           animation: 'slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
-          border: '1px solid rgba(0,0,0,0.05)',
+          border: '1px solid rgba(255,255,255,0.1)',
           display: 'flex',
           flexDirection: 'row',
           alignItems: 'center',
@@ -992,7 +947,7 @@ export default function HomePage(): React.JSX.Element {
                 fontWeight: '700', 
                 fontSize: '36px',
                 letterSpacing: '-0.02em',
-                background: 'linear-gradient(135deg, #000000 0%, #333333 100%)',
+                background: 'linear-gradient(135deg, #ffffff 0%, #cccccc 100%)',
                 backgroundClip: 'text',
                 WebkitBackgroundClip: 'text',
                 color: 'transparent',
@@ -1006,7 +961,7 @@ export default function HomePage(): React.JSX.Element {
               fontSize: '20px',
               lineHeight: '1.4',
               marginBottom: 0,
-              color: '#1a1a1a',
+              color: '#ffffff',
               fontWeight: '400',
               letterSpacing: '-0.01em',
               maxWidth: '280px',
@@ -1016,7 +971,7 @@ export default function HomePage(): React.JSX.Element {
               this site and what topics interest you most.
             </p>
             <span style={{ 
-              color: '#666', 
+              color: '#aaaaaa', 
               fontSize: '18px',
               display: 'inline-block',
               marginTop: '4px',
@@ -1037,9 +992,9 @@ export default function HomePage(): React.JSX.Element {
               onClick={handleDecline}
               style={{
                 padding: '14px 32px',
-                backgroundColor: '#ffffff',
-                color: '#000000',
-                border: '1.5px solid #e0e0e0',
+                backgroundColor: '#000000',
+                color: '#ffffff',
+                border: '1.5px solid #333333',
                 borderRadius: '60px',
                 cursor: 'pointer',
                 fontSize: '18px',
@@ -1050,7 +1005,7 @@ export default function HomePage(): React.JSX.Element {
                 position: 'relative',
                 overflow: 'hidden',
                 zIndex: 1,
-                background: '#ffffff'
+                background: '#000000'
               }}
             >
               Decline
@@ -1060,9 +1015,9 @@ export default function HomePage(): React.JSX.Element {
               onClick={handleAccept}
               style={{
                 padding: '14px 32px',
-                backgroundColor: '#ffffff',
-                color: '#000000',
-                border: '1.5px solid #e0e0e0',
+                backgroundColor: '#000000',
+                color: '#ffffff',
+                border: '1.5px solid #333333',
                 borderRadius: '60px',
                 cursor: 'pointer',
                 fontSize: '18px',
@@ -1073,7 +1028,7 @@ export default function HomePage(): React.JSX.Element {
                 position: 'relative',
                 overflow: 'hidden',
                 zIndex: 1,
-                background: '#ffffff'
+                background: '#000000'
               }}
             >
               Accept
