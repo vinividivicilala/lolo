@@ -15,7 +15,7 @@ if (typeof window !== 'undefined') {
 
 export default function HomePage(): React.JSX.Element {
   const [showPopup, setShowPopup] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
   const acceptBtnRef = useRef<HTMLButtonElement>(null);
   const declineBtnRef = useRef<HTMLButtonElement>(null);
   const contactBtnRef = useRef<HTMLButtonElement>(null);
@@ -32,12 +32,11 @@ export default function HomePage(): React.JSX.Element {
   const xRef = useRef<HTMLDivElement>(null);
   const linkedinRef = useRef<HTMLDivElement>(null);
   
-  // Refs untuk loading screen
+  // Loading animation refs
   const loadingOverlayRef = useRef<HTMLDivElement>(null);
-  const loadingContentRef = useRef<HTMLDivElement>(null);
-  const menuruLoadingRef = useRef<HTMLDivElement>(null);
-  const brandLoadingRef = useRef<HTMLDivElement>(null);
-  const yearLoadingRef = useRef<HTMLDivElement>(null);
+  const loadingMenuruRef = useRef<HTMLDivElement>(null);
+  const loadingBrandRef = useRef<HTMLDivElement>(null);
+  const loadingYearRef = useRef<HTMLDivElement>(null);
 
   // Variabel untuk menyimpan teks asli medsos
   const originalTexts = {
@@ -90,181 +89,172 @@ export default function HomePage(): React.JSX.Element {
     element.textContent = originalText;
   };
 
-  // Loading animation
+  // LOADING ANIMATION
   useEffect(() => {
-    if (!isLoading) return;
-
-    // Animasi split text untuk MENURU di loading screen
-    if (menuruLoadingRef.current) {
-      const splitMenuru = new SplitText(menuruLoadingRef.current, {
-        type: "chars, words",
-        charsClass: "loading-char-menuru"
-      });
-
-      gsap.set(splitMenuru.chars, {
-        opacity: 0,
-        y: 150,
-        rotationX: -180,
-        transformPerspective: 1200,
-        filter: 'blur(30px)',
-        transformOrigin: '50% 50% -80px'
-      });
-
-      gsap.to(splitMenuru.chars, {
-        opacity: 1,
-        y: 0,
-        rotationX: 0,
-        filter: 'blur(0px)',
-        duration: 1.2,
-        stagger: {
-          each: 0.05,
-          from: "start",
-          ease: "power3.out"
-        },
-        ease: "back.out(1.2)",
-        delay: 0.2
-      });
-    }
-
-    // Animasi split text untuk BRAND di loading screen
-    if (brandLoadingRef.current) {
-      const splitBrand = new SplitText(brandLoadingRef.current, {
-        type: "chars, words",
-        charsClass: "loading-char-brand"
-      });
-
-      gsap.set(splitBrand.chars, {
-        opacity: 0,
-        x: -80,
-        rotationY: -90,
-        transformPerspective: 1000,
-        filter: 'blur(15px)'
-      });
-
-      gsap.to(splitBrand.chars, {
-        opacity: 1,
-        x: 0,
-        rotationY: 0,
-        filter: 'blur(0px)',
-        duration: 1,
-        stagger: {
-          each: 0.04,
-          from: "end",
-          ease: "power2.out"
-        },
-        ease: "back.out(0.8)",
-        delay: 0.4
-      });
-    }
-
-    // Animasi split text untuk 2026 di loading screen
-    if (yearLoadingRef.current) {
-      const splitYear = new SplitText(yearLoadingRef.current, {
-        type: "chars, words",
-        charsClass: "loading-char-year"
-      });
-
-      gsap.set(splitYear.chars, {
-        opacity: 0,
-        y: 50,
-        scale: 2,
-        filter: 'blur(20px)'
-      });
-
-      gsap.to(splitYear.chars, {
-        opacity: 1,
-        y: 0,
-        scale: 1,
-        filter: 'blur(0px)',
-        duration: 0.8,
-        stagger: {
-          each: 0.06,
-          from: "start",
-          ease: "elastic.out(1, 0.5)"
-        },
-        ease: "back.out(1)",
-        delay: 0.6
-      });
-    }
-
-    // Transition setelah loading selesai - geser ke kiri
-    const transitionTimer = setTimeout(() => {
-      if (loadingOverlayRef.current && loadingContentRef.current) {
-        // Animasi fade out konten loading
-        gsap.to(loadingContentRef.current, {
-          opacity: 0,
-          y: -30,
-          duration: 0.3,
-          ease: "power2.in",
+    if (loading && loadingOverlayRef.current) {
+      // Animasi untuk MENURU di loading
+      const menuruElement = loadingMenuruRef.current;
+      if (menuruElement) {
+        const splitMenuruLoading = new SplitText(menuruElement, {
+          type: "chars",
+          charsClass: "loading-char-menuru"
         });
         
-        // Animasi overlay geser dari kanan ke kiri
-        gsap.to(loadingOverlayRef.current, {
-          x: '-100%',
-          duration: 1.0,
-          ease: "power4.inOut",
-          onComplete: () => {
-            // Langsung hapus loading screen
-            setIsLoading(false);
-            // Inisialisasi ScrollSmoother setelah loading selesai
-            setTimeout(() => {
-              initSmootherAfterLoad();
-            }, 50);
-          }
-        });
-      }
-    }, 2000);
-
-    return () => clearTimeout(transitionTimer);
-  }, [isLoading]);
-
-  const initSmootherAfterLoad = () => {
-    if (typeof window !== 'undefined' && !smootherRef.current) {
-      smootherRef.current = ScrollSmoother.create({
-        wrapper: "#smooth-wrapper",
-        content: "#smooth-content",
-        smooth: 1.2,
-        effects: true,
-        smoothTouch: 0.5,
-        normalizeScroll: true,
-        ignoreMobileResize: true,
-        onUpdate: () => {},
-      });
-    }
-  };
-
-  // GSAP SplitText animations untuk halaman utama
-  useEffect(() => {
-    if (isLoading) return;
-
-    // Animasi MENURU di atas kiri (langsung tampil tanpa scroll)
-    if (menuruTopTextRef.current) {
-      const splitMenuruTop = new SplitText(menuruTopTextRef.current, {
-        type: "chars, words",
-        charsClass: "split-char-menuru-top"
-      });
-
-      gsap.fromTo(splitMenuruTop.chars,
-        {
+        gsap.set(splitMenuruLoading.chars, {
           opacity: 0,
-          y: 80,
+          y: 100,
           rotationX: -90,
-          filter: 'blur(20px)'
-        },
-        {
+          transformPerspective: 1000,
+          filter: 'blur(20px)',
+          transformOrigin: '50% 50% -30px'
+        });
+        
+        gsap.to(splitMenuruLoading.chars, {
           opacity: 1,
           y: 0,
           rotationX: 0,
           filter: 'blur(0px)',
           duration: 0.8,
-          stagger: 0.03,
-          ease: "back.out(0.8)",
-          delay: 0.1
-        }
-      );
+          stagger: 0.04,
+          ease: "back.out(0.7)",
+          delay: 0.2
+        });
+      }
+      
+      // Animasi untuk BRAND di loading
+      const brandElement = loadingBrandRef.current;
+      if (brandElement) {
+        const splitBrandLoading = new SplitText(brandElement, {
+          type: "chars",
+          charsClass: "loading-char-brand"
+        });
+        
+        gsap.set(splitBrandLoading.chars, {
+          opacity: 0,
+          x: 50,
+          rotationY: 90,
+          transformPerspective: 800,
+          filter: 'blur(10px)'
+        });
+        
+        gsap.to(splitBrandLoading.chars, {
+          opacity: 1,
+          x: 0,
+          rotationY: 0,
+          filter: 'blur(0px)',
+          duration: 0.8,
+          stagger: 0.05,
+          ease: "power2.out",
+          delay: 0.4
+        });
+      }
+      
+      // Animasi untuk 2026 di loading
+      const yearElement = loadingYearRef.current;
+      if (yearElement) {
+        const splitYearLoading = new SplitText(yearElement, {
+          type: "chars",
+          charsClass: "loading-char-year"
+        });
+        
+        gsap.set(splitYearLoading.chars, {
+          opacity: 0,
+          y: 50,
+          scale: 0.5,
+          filter: 'blur(8px)'
+        });
+        
+        gsap.to(splitYearLoading.chars, {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          filter: 'blur(0px)',
+          duration: 0.6,
+          stagger: 0.08,
+          ease: "elastic.out(1, 0.5)",
+          delay: 0.6
+        });
+      }
+      
+      // Fade out loading overlay setelah semua animasi selesai
+      const timeout = setTimeout(() => {
+        gsap.to(loadingOverlayRef.current, {
+          opacity: 0,
+          duration: 0.8,
+          ease: "power2.inOut",
+          onComplete: () => {
+            setLoading(false);
+          }
+        });
+      }, 1500);
+      
+      return () => clearTimeout(timeout);
+    }
+  }, [loading]);
+
+  useEffect(() => {
+    // Initialize ScrollSmoother
+    const initSmoother = () => {
+      if (typeof window !== 'undefined' && !smootherRef.current && !loading) {
+        smootherRef.current = ScrollSmoother.create({
+          wrapper: "#smooth-wrapper",
+          content: "#smooth-content",
+          smooth: 1.2,
+          effects: true,
+          smoothTouch: 0.5,
+          normalizeScroll: true,
+          ignoreMobileResize: true,
+          onUpdate: () => {},
+        });
+      }
+    };
+
+    const timer = setTimeout(() => {
+      if (!loading) initSmoother();
+    }, 100);
+
+    return () => {
+      clearTimeout(timer);
+      if (smootherRef.current) {
+        smootherRef.current.kill();
+        smootherRef.current = null;
+      }
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+    };
+  }, [loading]);
+
+  // GSAP SplitText animations untuk konten utama
+  useEffect(() => {
+    if (loading) return;
+    
+    // ANIMASI MENURU DI ATAS KIRI - JALAN SAAT LOADING SELESAI
+    if (menuruTopTextRef.current) {
+      const splitMenuruTop = new SplitText(menuruTopTextRef.current, {
+        type: "chars",
+        charsClass: "split-char-menuru-top"
+      });
+
+      gsap.set(splitMenuruTop.chars, {
+        opacity: 0,
+        y: 60,
+        rotationX: -90,
+        transformPerspective: 1000,
+        filter: 'blur(20px)',
+      });
+
+      gsap.to(splitMenuruTop.chars, {
+        opacity: 1,
+        y: 0,
+        rotationX: 0,
+        filter: 'blur(0px)',
+        duration: 0.8,
+        stagger: 0.03,
+        ease: "back.out(0.8)",
+        delay: 0.2
+      });
     }
 
-    // Animasi Mencatat text
+    // Split text untuk "Mencatat apa yang kamu inginkan"
     if (mencatatTextRef.current) {
       const splitMencatat = new SplitText(mencatatTextRef.current, {
         type: "chars",
@@ -283,52 +273,20 @@ export default function HomePage(): React.JSX.Element {
           y: 0,
           rotateX: 0,
           filter: 'blur(0px)',
-          duration: 1,
+          duration: 1.2,
           stagger: 0.03,
           ease: "back.out(1.2)",
-          delay: 0.2
+          scrollTrigger: {
+            trigger: mencatatTextRef.current,
+            start: "top 80%",
+            end: "bottom 60%",
+            toggleActions: "play none none reverse",
+          }
         }
       );
     }
 
-    // Animasi Scroll Down text
-    const scrollDownElement = document.querySelector('.scroll-down-text');
-    if (scrollDownElement) {
-      gsap.fromTo(scrollDownElement,
-        {
-          opacity: 0,
-          y: 20
-        },
-        {
-          opacity: 0.5,
-          y: 0,
-          duration: 0.6,
-          delay: 0.3,
-          ease: "power2.out"
-        }
-      );
-    }
-
-    // Animasi Contact button
-    if (contactBtnRef.current) {
-      gsap.fromTo(contactBtnRef.current,
-        {
-          opacity: 0,
-          scale: 0.8,
-          y: 30
-        },
-        {
-          opacity: 1,
-          scale: 1,
-          y: 0,
-          duration: 0.6,
-          delay: 0.5,
-          ease: "back.out(0.8)"
-        }
-      );
-    }
-
-    // Split text untuk email (scroll triggered)
+    // Split text untuk email
     if (emailRef.current) {
       const splitEmail = new SplitText(emailRef.current, {
         type: "chars",
@@ -394,7 +352,7 @@ export default function HomePage(): React.JSX.Element {
       });
     }
 
-    // Split text untuk "Contact" pada tombol (scroll triggered tambahan)
+    // Split text untuk "Contact" pada tombol
     if (contactTextRef.current) {
       const splitContact = new SplitText(contactTextRef.current, {
         type: "chars",
@@ -451,7 +409,7 @@ export default function HomePage(): React.JSX.Element {
     return () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
-  }, [isLoading]);
+  }, [loading]);
 
   useEffect(() => {
     const consent = localStorage.getItem('cookieConsent');
@@ -518,11 +476,13 @@ export default function HomePage(): React.JSX.Element {
   const handleAccept = () => {
     localStorage.setItem('cookieConsent', 'accepted');
     setShowPopup(false);
+    console.log('Cookies accepted');
   };
 
   const handleDecline = () => {
     localStorage.setItem('cookieConsent', 'declined');
     setShowPopup(false);
+    console.log('Cookies declined');
   };
 
   const handleContact = () => {
@@ -537,8 +497,7 @@ export default function HomePage(): React.JSX.Element {
     console.log(`${platform} clicked`);
   };
 
-  // Tampilkan loading screen
-  if (isLoading) {
+  if (loading) {
     return (
       <>
         <style jsx global>{`
@@ -575,87 +534,74 @@ export default function HomePage(): React.JSX.Element {
             backgroundColor: '#000000',
             zIndex: 9999,
             display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
             alignItems: 'center',
-            justifyContent: 'center',
-            overflow: 'hidden',
+            padding: '60px 80px',
+            fontFamily: 'Inter, "Helvetica Neue", sans-serif',
           }}
         >
+          {/* MENURU - Sisi Kiri */}
           <div
-            ref={loadingContentRef}
+            ref={loadingMenuruRef}
             style={{
-              position: 'relative',
-              width: '100%',
-              height: '100%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
+              position: 'absolute',
+              top: '40px',
+              left: '80px',
+              fontSize: '180px',
+              fontWeight: '400',
+              color: '#ffffff',
+              letterSpacing: '-0.02em',
+              textTransform: 'uppercase',
+              lineHeight: '0.9',
+              fontFamily: 'Inter, "Helvetica Neue", sans-serif',
             }}
           >
-            {/* MENURU - Sisi Kiri Atas */}
-            <div
-              ref={menuruLoadingRef}
-              style={{
-                position: 'absolute',
-                top: '15px',
-                left: '40px',
-                fontFamily: 'Inter, "Helvetica Neue", sans-serif',
-                fontWeight: '400',
-                fontSize: '213px',
-                lineHeight: '213px',
-                color: '#FFFFFF',
-                letterSpacing: '-0.02em',
-                textTransform: 'uppercase',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              MENURU
-            </div>
-
-            {/* BRAND - Sisi Tengah Kanan */}
-            <div
-              ref={brandLoadingRef}
-              style={{
-                position: 'absolute',
-                top: '50%',
-                right: '80px',
-                transform: 'translateY(-50%)',
-                fontFamily: 'Inter, "Helvetica Neue", sans-serif',
-                fontWeight: '400',
-                fontSize: '120px',
-                lineHeight: '1.2',
-                color: '#FFFFFF',
-                letterSpacing: '-0.02em',
-                textTransform: 'uppercase',
-                textAlign: 'right',
-              }}
-            >
-              BRAND
-            </div>
-
-            {/* 2026 - Bawah Kanan */}
-            <div
-              ref={yearLoadingRef}
-              style={{
-                position: 'absolute',
-                bottom: '40px',
-                right: '80px',
-                fontFamily: 'Inter, "Helvetica Neue", sans-serif',
-                fontWeight: '400',
-                fontSize: '64px',
-                lineHeight: '1.2',
-                color: '#FFFFFF',
-                letterSpacing: '-0.02em',
-              }}
-            >
-              2026
-            </div>
+            MENURU
+          </div>
+          
+          {/* BRAND - Sisi Tengah Kanan */}
+          <div
+            ref={loadingBrandRef}
+            style={{
+              position: 'absolute',
+              top: '50%',
+              right: '80px',
+              transform: 'translateY(-50%)',
+              fontSize: '120px',
+              fontWeight: '400',
+              color: '#ffffff',
+              letterSpacing: '-0.02em',
+              textTransform: 'uppercase',
+              lineHeight: '1',
+              textAlign: 'right',
+              fontFamily: 'Inter, "Helvetica Neue", sans-serif',
+            }}
+          >
+            BRAND
+          </div>
+          
+          {/* 2026 - Bawah Kanan */}
+          <div
+            ref={loadingYearRef}
+            style={{
+              position: 'absolute',
+              bottom: '60px',
+              right: '80px',
+              fontSize: '80px',
+              fontWeight: '400',
+              color: '#ffffff',
+              letterSpacing: '-0.02em',
+              fontFamily: 'Inter, "Helvetica Neue", sans-serif',
+            }}
+          >
+            2026
           </div>
         </div>
       </>
     );
   }
 
-  // Tampilkan halaman utama
   return (
     <>
       <style jsx global>{`
@@ -710,7 +656,7 @@ export default function HomePage(): React.JSX.Element {
           transform-style: preserve-3d;
         }
 
-        /* Hover effect untuk contact button */
+        /* Hover effect untuk contact button - versi putih/hitam terbalik */
         .contact-btn-effect {
           position: relative;
           isolation: isolate;
@@ -802,13 +748,13 @@ export default function HomePage(): React.JSX.Element {
               ref={menuruTopTextRef}
               style={{
                 position: 'absolute',
-                top: '5px',
+                top: '20px',
                 left: '40px',
                 zIndex: 10,
                 fontFamily: 'Inter, "Helvetica Neue", sans-serif',
                 fontWeight: '400',
-                fontSize: '213px',
-                lineHeight: '213px',
+                fontSize: '180px',
+                lineHeight: '0.9',
                 color: '#000000',
                 letterSpacing: '-0.02em',
                 textTransform: 'uppercase',
@@ -831,15 +777,12 @@ export default function HomePage(): React.JSX.Element {
               alignItems: 'center',
               position: 'relative',
             }}>
-              <div 
-                className="scroll-down-text"
-                style={{
-                  textAlign: 'center',
-                  color: 'black',
-                  fontSize: '24px',
-                  opacity: 0.5
-                }}
-              >
+              <div style={{
+                textAlign: 'center',
+                color: 'black',
+                fontSize: '24px',
+                opacity: 0.5
+              }}>
                 Scroll down ↓
               </div>
               
@@ -852,7 +795,7 @@ export default function HomePage(): React.JSX.Element {
                 gap: '40px',
                 width: '100%'
               }}>
-                {/* Teks "Mencatat apa yang kamu inginkan" */}
+                {/* Teks "Mencatat apa yang kamu inginkan" dengan titik besar di akhir */}
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -880,7 +823,7 @@ export default function HomePage(): React.JSX.Element {
                   }}>.</span>
                 </div>
 
-                {/* Tombol Contact */}
+                {/* Tombol Contact dengan Link ke halaman Contact */}
                 <Link href="/contact">
                   <button
                     ref={contactBtnRef}
@@ -993,7 +936,7 @@ export default function HomePage(): React.JSX.Element {
                   contact.menuru@gmail.com
                 </div>
 
-                {/* Medsos - Sisi Tengah */}
+                {/* Medsos - Sisi Tengah 3 baris */}
                 <div style={{
                   display: 'flex',
                   flexDirection: 'column',
@@ -1003,9 +946,14 @@ export default function HomePage(): React.JSX.Element {
                   transform: 'translateX(-50%)',
                   marginBottom: '20px'
                 }}>
+                  {/* Instagram */}
                   <div 
                     className="social-item"
-                    style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      cursor: 'pointer'
+                    }}
                     onMouseEnter={(e) => {
                       const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
                       if (textElement) handleSocialHover(textElement, originalTexts.ig);
@@ -1016,18 +964,29 @@ export default function HomePage(): React.JSX.Element {
                     }}
                     onClick={() => handleSocialClick('Instagram')}
                   >
-                    <span ref={igRef} className="social-text" style={{
-                      fontFamily: "'Questrial', sans-serif",
-                      fontSize: '28px',
-                      color: '#000000',
-                      fontWeight: '400',
-                      letterSpacing: '0.02em'
-                    }}>Instagram</span>
+                    <span 
+                      ref={igRef}
+                      className="social-text"
+                      style={{
+                        fontFamily: "'Questrial', sans-serif",
+                        fontSize: '28px',
+                        color: '#000000',
+                        fontWeight: '400',
+                        letterSpacing: '0.02em'
+                      }}
+                    >
+                      Instagram
+                    </span>
                   </div>
                   
+                  {/* X */}
                   <div 
                     className="social-item"
-                    style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      cursor: 'pointer'
+                    }}
                     onMouseEnter={(e) => {
                       const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
                       if (textElement) handleSocialHover(textElement, originalTexts.x);
@@ -1038,18 +997,29 @@ export default function HomePage(): React.JSX.Element {
                     }}
                     onClick={() => handleSocialClick('X')}
                   >
-                    <span ref={xRef} className="social-text" style={{
-                      fontFamily: "'Questrial', sans-serif",
-                      fontSize: '28px',
-                      color: '#000000',
-                      fontWeight: '400',
-                      letterSpacing: '0.02em'
-                    }}>X</span>
+                    <span 
+                      ref={xRef}
+                      className="social-text"
+                      style={{
+                        fontFamily: "'Questrial', sans-serif",
+                        fontSize: '28px',
+                        color: '#000000',
+                        fontWeight: '400',
+                        letterSpacing: '0.02em'
+                      }}
+                    >
+                      X
+                    </span>
                   </div>
                   
+                  {/* LinkedIn */}
                   <div 
                     className="social-item"
-                    style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      cursor: 'pointer'
+                    }}
                     onMouseEnter={(e) => {
                       const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
                       if (textElement) handleSocialHover(textElement, originalTexts.linkedin);
@@ -1060,13 +1030,19 @@ export default function HomePage(): React.JSX.Element {
                     }}
                     onClick={() => handleSocialClick('LinkedIn')}
                   >
-                    <span ref={linkedinRef} className="social-text" style={{
-                      fontFamily: "'Questrial', sans-serif",
-                      fontSize: '28px',
-                      color: '#000000',
-                      fontWeight: '400',
-                      letterSpacing: '0.02em'
-                    }}>LinkedIn</span>
+                    <span 
+                      ref={linkedinRef}
+                      className="social-text"
+                      style={{
+                        fontFamily: "'Questrial', sans-serif",
+                        fontSize: '28px',
+                        color: '#000000',
+                        fontWeight: '400',
+                        letterSpacing: '0.02em'
+                      }}
+                    >
+                      LinkedIn
+                    </span>
                   </div>
                 </div>
               </div>
@@ -1085,6 +1061,7 @@ export default function HomePage(): React.JSX.Element {
                 pointerEvents: 'none',
                 zIndex: 1
               }}>
+                {/* Garis hitam */}
                 <div
                   ref={lineRef}
                   style={{
@@ -1097,6 +1074,7 @@ export default function HomePage(): React.JSX.Element {
                   }}
                 />
                 
+                {/* Teks MENURU besar di footer */}
                 <span 
                   ref={menuruTextRef}
                   style={{
@@ -1110,9 +1088,13 @@ export default function HomePage(): React.JSX.Element {
                     textTransform: 'uppercase',
                     lineHeight: '0.7',
                     whiteSpace: 'nowrap',
+                    WebkitFontSmoothing: 'antialiased',
+                    MozOsxFontSmoothing: 'grayscale',
+                    fontKerning: 'normal',
                     margin: 0,
                     padding: 0,
                     transform: 'translateY(10px)',
+                    marginRight: '0'
                   }}>
                   MENURU
                 </span>
@@ -1122,7 +1104,7 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </div>
 
-      {/* Cookie Popup */}
+      {/* Cookie Popup - versi terbalik */}
       {showPopup && (
         <div style={{
           position: 'fixed',
@@ -1134,7 +1116,7 @@ export default function HomePage(): React.JSX.Element {
           color: '#ffffff',
           borderRadius: '32px',
           padding: '24px 32px',
-          boxShadow: '0 20px 40px rgba(0,0,0,0.3)',
+          boxShadow: '0 20px 40px rgba(0,0,0,0.3), 0 5px 12px rgba(0,0,0,0.1)',
           zIndex: 1000,
           fontFamily: 'Questrial, sans-serif',
           animation: 'slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
@@ -1160,9 +1142,17 @@ export default function HomePage(): React.JSX.Element {
             `}
           </style>
           
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <span style={{ fontSize: '56px' }}>🍪</span>
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '8px',
+          }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px'
+            }}>
+              <span style={{ fontSize: '56px', display: 'inline-block' }}>🍪</span>
               <span style={{ 
                 fontWeight: '700', 
                 fontSize: '36px',
@@ -1171,24 +1161,42 @@ export default function HomePage(): React.JSX.Element {
                 backgroundClip: 'text',
                 WebkitBackgroundClip: 'text',
                 color: 'transparent',
-              }}>cookies.</span>
+                fontFamily: 'Questrial, sans-serif'
+              }}>
+                cookies.
+              </span>
             </div>
+            
             <p style={{
               fontSize: '20px',
               lineHeight: '1.4',
               marginBottom: 0,
               color: '#ffffff',
+              fontWeight: '400',
+              letterSpacing: '-0.01em',
               maxWidth: '280px',
+              fontFamily: 'Questrial, sans-serif'
             }}>
               I use cookies to understand how you navigate<br />
               this site and what topics interest you most.
             </p>
-            <span style={{ color: '#aaaaaa', fontSize: '18px' }}>
+            <span style={{ 
+              color: '#aaaaaa', 
+              fontSize: '18px',
+              display: 'inline-block',
+              marginTop: '4px',
+              fontFamily: 'Questrial, sans-serif'
+            }}>
               No ads, no data sold ever.
             </span>
           </div>
           
-          <div style={{ display: 'flex', gap: '16px', flexShrink: 0 }}>
+          <div style={{
+            display: 'flex',
+            gap: '16px',
+            justifyContent: 'flex-start',
+            flexShrink: 0,
+          }}>
             <button
               ref={declineBtnRef}
               onClick={handleDecline}
@@ -1201,10 +1209,13 @@ export default function HomePage(): React.JSX.Element {
                 cursor: 'pointer',
                 fontSize: '18px',
                 fontWeight: '600',
+                letterSpacing: '-0.01em',
                 fontFamily: 'Questrial, sans-serif',
+                transition: 'all 0.2s ease',
                 position: 'relative',
                 overflow: 'hidden',
                 zIndex: 1,
+                background: '#000000'
               }}
             >
               Decline
@@ -1221,10 +1232,13 @@ export default function HomePage(): React.JSX.Element {
                 cursor: 'pointer',
                 fontSize: '18px',
                 fontWeight: '600',
+                letterSpacing: '-0.01em',
                 fontFamily: 'Questrial, sans-serif',
+                transition: 'all 0.2s ease',
                 position: 'relative',
                 overflow: 'hidden',
                 zIndex: 1,
+                background: '#000000'
               }}
             >
               Accept
