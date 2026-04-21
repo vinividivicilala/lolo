@@ -173,16 +173,19 @@ export default function HomePage(): React.JSX.Element {
 
       const loadingTimeline = gsap.timeline({
         onComplete: () => {
+          // Overlay geser ke kiri
           gsap.to(loadingOverlayRef.current, {
             x: '-100%',
-            duration: 1.2,
+            duration: 1,
             ease: "power3.inOut",
             onComplete: () => {
               setIsLoading(false);
+              // Animasi MENURU muncul dari kiri ke kanan
               animateMenuruMain();
             }
           });
           
+          // Halaman utama geser dari kanan ke kiri
           gsap.fromTo(mainContentRef.current,
             {
               x: '100%',
@@ -191,7 +194,7 @@ export default function HomePage(): React.JSX.Element {
             {
               x: '0%',
               opacity: 1,
-              duration: 1.2,
+              duration: 1,
               ease: "power3.inOut"
             }
           );
@@ -235,75 +238,22 @@ export default function HomePage(): React.JSX.Element {
     }
   }, [isLoading]);
 
-  // Animasi MENURU di halaman utama - SUPERIOR MODERN EFFECT
+  // Animasi MENURU di halaman utama - SLIDE IN DARI KIRI KE KANAN, DIAM
   const animateMenuruMain = () => {
     if (menuruTopMainRef.current) {
-      const splitMenuruMain = new SplitText(menuruTopMainRef.current, {
-        type: "chars, words",
-        charsClass: "split-char-menuru-main"
+      // Set initial state: di luar layar sebelah kiri
+      gsap.set(menuruTopMainRef.current, {
+        x: -500,
+        opacity: 0
       });
 
-      // Efek cinematic 3D dengan multiple transform
-      gsap.set(splitMenuruMain.chars, {
-        opacity: 0,
-        scale: 0,
-        rotationX: -180,
-        rotationY: 180,
-        rotationZ: -45,
-        transformPerspective: 1500,
-        filter: 'blur(20px)',
-        transformOrigin: '50% 50% -100px',
-        y: 100
-      });
-
-      // Animasi dengan efek cascade yang dramatis
-      gsap.to(splitMenuruMain.chars, {
+      // Animasi slide in dari kiri ke kanan, lalu diam
+      gsap.to(menuruTopMainRef.current, {
+        x: 0,
         opacity: 1,
-        scale: 1,
-        rotationX: 0,
-        rotationY: 0,
-        rotationZ: 0,
-        filter: 'blur(0px)',
-        y: 0,
-        duration: 1.3,
-        stagger: {
-          each: 0.06,
-          from: "center",
-          ease: "power2.inOut",
-          grid: "auto"
-        },
-        ease: "back.out(1.2)",
-        delay: 0.1
-      });
-
-      // Efek tambahan: glow dan shadow yang muncul
-      gsap.fromTo(splitMenuruMain.chars,
-        {
-          textShadow: "0 0 0px rgba(0,0,0,0)"
-        },
-        {
-          textShadow: "0 10px 30px rgba(0,0,0,0.15)",
-          duration: 1,
-          stagger: 0.06,
-          delay: 0.5,
-          ease: "power2.out"
-        }
-      );
-
-      // Efek wave motion subtle setelah animasi selesai
-      gsap.to(splitMenuruMain.chars, {
-        y: -3,
         duration: 0.8,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut",
-        stagger: {
-          each: 0.03,
-          from: "random",
-          amount: 0.5
-        },
-        delay: 2,
-        repeatDelay: 0
+        ease: "power2.out",
+        delay: 0.1
       });
     }
   };
@@ -588,12 +538,6 @@ export default function HomePage(): React.JSX.Element {
           transform-style: preserve-3d;
         }
 
-        .split-char-menuru-main {
-          display: inline-block;
-          will-change: transform, opacity, filter;
-          transform-style: preserve-3d;
-        }
-
         .split-char-loading {
           display: inline-block;
           will-change: transform, opacity, filter;
@@ -761,7 +705,7 @@ export default function HomePage(): React.JSX.Element {
               transition: 'all 0.01s ease'
             }}
           >
-            {/* TEKS MENURU DI HALAMAN UTAMA - SUPERIOR GSAP EFFECT */}
+            {/* TEKS MENURU DI HALAMAN UTAMA - SLIDE IN DARI KIRI KE KANAN, DIAM */}
             <div
               ref={menuruTopMainRef}
               style={{
@@ -780,6 +724,8 @@ export default function HomePage(): React.JSX.Element {
                 padding: 0,
                 whiteSpace: 'nowrap',
                 pointerEvents: 'auto',
+                opacity: 0,
+                transform: 'translateX(-500px)'
               }}
             >
               MENURU
