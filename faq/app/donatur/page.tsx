@@ -15,7 +15,6 @@ if (typeof window !== 'undefined') {
 
 export default function DonaturPage(): React.JSX.Element {
   const [showPopup, setShowPopup] = useState(false);
-  const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   const [isMenuHovered, setIsMenuHovered] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const acceptBtnRef = useRef<HTMLButtonElement>(null);
@@ -33,13 +32,6 @@ export default function DonaturPage(): React.JSX.Element {
   const linkedinRef = useRef<HTMLDivElement>(null);
   const infoTextRef = useRef<HTMLDivElement>(null);
   
-  // Refs untuk hover items
-  const item01Ref = useRef<HTMLDivElement>(null);
-  const item02Ref = useRef<HTMLDivElement>(null);
-  const item03Ref = useRef<HTMLDivElement>(null);
-  const item04Ref = useRef<HTMLDivElement>(null);
-  const hoverTextRef = useRef<HTMLDivElement>(null);
-  
   // Ref untuk menu button dan menu drawer
   const menuButtonRef = useRef<HTMLDivElement>(null);
   const menuDrawerRef = useRef<HTMLDivElement>(null);
@@ -53,7 +45,7 @@ export default function DonaturPage(): React.JSX.Element {
     community: useRef<HTMLDivElement>(null),
     donation: useRef<HTMLDivElement>(null),
     calendar: useRef<HTMLDivElement>(null),
-    contact: useRef<HTMLDivElement>(null),
+    donatur: useRef<HTMLDivElement>(null),
   };
 
   // Variabel untuk menyimpan teks asli medsos
@@ -124,7 +116,7 @@ export default function DonaturPage(): React.JSX.Element {
         menuItemRefs.community,
         menuItemRefs.donation,
         menuItemRefs.calendar,
-        menuItemRefs.contact
+        menuItemRefs.donatur
       ];
       
       menuItems.forEach((item, index) => {
@@ -276,92 +268,6 @@ export default function DonaturPage(): React.JSX.Element {
     }
     element.textContent = originalText;
   };
-
-  // Animasi hover untuk item 01-04 menggunakan GSAP
-  useEffect(() => {
-    if (hoveredItem === '01' && hoverTextRef.current && item01Ref.current) {
-      gsap.fromTo(hoverTextRef.current,
-        {
-          opacity: 0,
-          x: -20,
-          filter: 'blur(5px)'
-        },
-        {
-          opacity: 1,
-          x: 0,
-          filter: 'blur(0px)',
-          duration: 0.4,
-          ease: "power2.out"
-        }
-      );
-      gsap.to(item01Ref.current, {
-        scale: 1.02,
-        duration: 0.3,
-        ease: "power2.out"
-      });
-    } else if (hoveredItem !== '01' && hoverTextRef.current) {
-      gsap.to(hoverTextRef.current, {
-        opacity: 0,
-        duration: 0.2,
-        ease: "power2.in"
-      });
-      if (item01Ref.current) {
-        gsap.to(item01Ref.current, {
-          scale: 1,
-          duration: 0.3,
-          ease: "power2.out"
-        });
-      }
-    }
-  }, [hoveredItem]);
-
-  useEffect(() => {
-    if (hoveredItem === '02' && item02Ref.current) {
-      gsap.to(item02Ref.current, {
-        scale: 1.02,
-        duration: 0.3,
-        ease: "power2.out"
-      });
-    } else if (hoveredItem !== '02' && item02Ref.current) {
-      gsap.to(item02Ref.current, {
-        scale: 1,
-        duration: 0.3,
-        ease: "power2.out"
-      });
-    }
-  }, [hoveredItem]);
-
-  useEffect(() => {
-    if (hoveredItem === '03' && item03Ref.current) {
-      gsap.to(item03Ref.current, {
-        scale: 1.02,
-        duration: 0.3,
-        ease: "power2.out"
-      });
-    } else if (hoveredItem !== '03' && item03Ref.current) {
-      gsap.to(item03Ref.current, {
-        scale: 1,
-        duration: 0.3,
-        ease: "power2.out"
-      });
-    }
-  }, [hoveredItem]);
-
-  useEffect(() => {
-    if (hoveredItem === '04' && item04Ref.current) {
-      gsap.to(item04Ref.current, {
-        scale: 1.02,
-        duration: 0.3,
-        ease: "power2.out"
-      });
-    } else if (hoveredItem !== '04' && item04Ref.current) {
-      gsap.to(item04Ref.current, {
-        scale: 1,
-        duration: 0.3,
-        ease: "power2.out"
-      });
-    }
-  }, [hoveredItem]);
 
   useEffect(() => {
     const initSmoother = () => {
@@ -1029,10 +935,10 @@ export default function DonaturPage(): React.JSX.Element {
                   </span>
                 </div>
 
-                {/* Contact - dengan panah SVG */}
+                {/* Donatur - dengan panah SVG */}
                 <div
-                  ref={menuItemRefs.contact}
-                  onClick={() => handleMenuItemClick(menuItemRefs.contact, '/contact')}
+                  ref={menuItemRefs.donatur}
+                  onClick={() => handleMenuItemClick(menuItemRefs.donatur, '/donatur')}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -1049,7 +955,7 @@ export default function DonaturPage(): React.JSX.Element {
                       color: '#ffffff',
                       letterSpacing: '-0.02em'
                     }}>
-                      Contact
+                      Donatur
                     </span>
                     <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -1172,174 +1078,6 @@ export default function DonaturPage(): React.JSX.Element {
                   marginBottom: '100px'
                 }}>
                 Terima kasih untuk para donatur yang telah berbagi kebaikan
-              </div>
-
-              <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '60px',
-                marginLeft: '80px',
-                marginBottom: '150px'
-              }}>
-                {/* 01 - Note */}
-                <div
-                  ref={item01Ref}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    maxWidth: '800px',
-                    cursor: 'pointer',
-                    transition: 'transform 0.3s ease'
-                  }}
-                  onMouseEnter={() => setHoveredItem('01')}
-                  onMouseLeave={() => setHoveredItem(null)}
-                >
-                  <span style={{
-                    fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
-                    fontSize: '90px',
-                    fontWeight: '300',
-                    color: '#000000',
-                    letterSpacing: '-0.02em',
-                    lineHeight: '1'
-                  }}>
-                    01
-                  </span>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '30px'
-                  }}>
-                    <span style={{
-                      fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
-                      fontSize: '300px',
-                      fontWeight: '300',
-                      color: '#000000',
-                      letterSpacing: '-0.02em'
-                    }}>
-                      Note
-                    </span>
-                    {hoveredItem === '01' && (
-                      <div
-                        ref={hoverTextRef}
-                        style={{
-                          fontFamily: "'Questrial', sans-serif",
-                          fontSize: '20px',
-                          fontWeight: '400',
-                          color: '#000000',
-                          whiteSpace: 'nowrap'
-                        }}
-                      >
-                        / kamu bisa mencatat apa yang kamu inginkan
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* 02 - Calendar */}
-                <div
-                  ref={item02Ref}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    maxWidth: '800px',
-                    cursor: 'pointer',
-                    transition: 'transform 0.3s ease'
-                  }}
-                  onMouseEnter={() => setHoveredItem('02')}
-                  onMouseLeave={() => setHoveredItem(null)}
-                >
-                  <span style={{
-                    fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
-                    fontSize: '90px',
-                    fontWeight: '300',
-                    color: '#000000',
-                    letterSpacing: '-0.02em',
-                    lineHeight: '1'
-                  }}>
-                    02
-                  </span>
-                  <span style={{
-                    fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
-                    fontSize: '300px',
-                    fontWeight: '300',
-                    color: '#000000',
-                    letterSpacing: '-0.02em'
-                  }}>
-                    Calendar
-                  </span>
-                </div>
-
-                {/* 03 - Donation */}
-                <div
-                  ref={item03Ref}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    maxWidth: '800px',
-                    cursor: 'pointer',
-                    transition: 'transform 0.3s ease'
-                  }}
-                  onMouseEnter={() => setHoveredItem('03')}
-                  onMouseLeave={() => setHoveredItem(null)}
-                >
-                  <span style={{
-                    fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
-                    fontSize: '90px',
-                    fontWeight: '300',
-                    color: '#000000',
-                    letterSpacing: '-0.02em',
-                    lineHeight: '1'
-                  }}>
-                    03
-                  </span>
-                  <span style={{
-                    fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
-                    fontSize: '300px',
-                    fontWeight: '300',
-                    color: '#000000',
-                    letterSpacing: '-0.02em'
-                  }}>
-                    Donation
-                  </span>
-                </div>
-
-                {/* 04 - Community */}
-                <div
-                  ref={item04Ref}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    maxWidth: '800px',
-                    cursor: 'pointer',
-                    transition: 'transform 0.3s ease'
-                  }}
-                  onMouseEnter={() => setHoveredItem('04')}
-                  onMouseLeave={() => setHoveredItem(null)}
-                >
-                  <span style={{
-                    fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
-                    fontSize: '90px',
-                    fontWeight: '300',
-                    color: '#000000',
-                    letterSpacing: '-0.02em',
-                    lineHeight: '1'
-                  }}>
-                    04
-                  </span>
-                  <span style={{
-                    fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
-                    fontSize: '300px',
-                    fontWeight: '300',
-                    color: '#000000',
-                    letterSpacing: '-0.02em'
-                  }}>
-                    Community
-                  </span>
-                </div>
               </div>
             </div>
 
