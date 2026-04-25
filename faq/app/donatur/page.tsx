@@ -78,6 +78,7 @@ export default function DonaturPage(): React.JSX.Element {
     date: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [smootherInitialized, setSmootherInitialized] = useState(false);
   
   const acceptBtnRef = useRef<HTMLButtonElement>(null);
   const declineBtnRef = useRef<HTMLButtonElement>(null);
@@ -228,7 +229,7 @@ export default function DonaturPage(): React.JSX.Element {
     }
   };
 
-  // Animasi menu drawer muncul dari bawah ke atas
+  // Animasi menu drawer
   useEffect(() => {
     if (isMenuOpen && menuDrawerRef.current) {
       document.body.style.overflow = 'hidden';
@@ -386,23 +387,47 @@ export default function DonaturPage(): React.JSX.Element {
     element.textContent = originalText;
   };
 
-  // Inisialisasi ScrollSmoother - PENTING untuk scroll halus
+  // Inisialisasi ScrollSmoother - DIPERBAIKI
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
+    // Refresh ScrollTrigger setelah content loaded
     const initSmoother = () => {
-      if (typeof window !== 'undefined' && !smootherRef.current) {
-        smootherRef.current = ScrollSmoother.create({
-          wrapper: "#smooth-wrapper-donatur",
-          content: "#smooth-content-donatur",
-          smooth: 1.2,
-          effects: true,
-          smoothTouch: 0.5,
-          normalizeScroll: true,
-          ignoreMobileResize: true,
-        });
+      if (!smootherRef.current && document.getElementById('smooth-wrapper-donatur') && document.getElementById('smooth-content-donatur')) {
+        try {
+          // Kill existing ScrollTrigger instances
+          ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+          
+          smootherRef.current = ScrollSmoother.create({
+            wrapper: "#smooth-wrapper-donatur",
+            content: "#smooth-content-donatur",
+            smooth: 1.2,
+            effects: true,
+            smoothTouch: 0.5,
+            normalizeScroll: true,
+            ignoreMobileResize: true,
+          });
+          setSmootherInitialized(true);
+          ScrollTrigger.refresh();
+        } catch (e) {
+          console.error("Error initializing ScrollSmoother:", e);
+        }
       }
     };
 
-    const timer = setTimeout(initSmoother, 100);
+    // Delay initialization to ensure DOM is ready
+    const timer = setTimeout(initSmoother, 500);
+    
+    // Refresh on window load
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        ScrollTrigger.refresh();
+        if (smootherRef.current) {
+          smootherRef.current.scrollTop(0);
+        }
+      }, 100);
+    });
+
     return () => {
       clearTimeout(timer);
       if (smootherRef.current) {
@@ -410,11 +435,23 @@ export default function DonaturPage(): React.JSX.Element {
         smootherRef.current = null;
       }
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+      window.removeEventListener('load', initSmoother);
     };
   }, []);
 
+  // Refresh ScrollTrigger when donations change (content height may change)
+  useEffect(() => {
+    if (smootherInitialized) {
+      setTimeout(() => {
+        ScrollTrigger.refresh();
+      }, 100);
+    }
+  }, [donations, smootherInitialized]);
+
   // GSAP SplitText animations
   useEffect(() => {
+    if (!smootherInitialized) return;
+    
     if (donaturTitleRef.current) {
       const splitDonatur = new SplitText(donaturTitleRef.current, {
         type: "chars",
@@ -487,7 +524,7 @@ export default function DonaturPage(): React.JSX.Element {
     return () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
-  }, []);
+  }, [smootherInitialized]);
 
   // Cookie consent
   useEffect(() => {
@@ -584,9 +621,10 @@ export default function DonaturPage(): React.JSX.Element {
         }
         
         #smooth-content-donatur {
-          min-height: 250vh;
+          min-height: 280vh;
           width: 100%;
           will-change: transform;
+          background-color: white;
         }
 
         .split-char {
@@ -639,8 +677,9 @@ export default function DonaturPage(): React.JSX.Element {
       
       <div id="smooth-wrapper-donatur">
         <div id="smooth-content-donatur">
+          {/* Main Content - flex column dengan min-height yang cukup */}
           <div style={{
-            minHeight: '250vh',
+            minHeight: '100vh',
             backgroundColor: 'white',
             margin: 0,
             padding: 0,
@@ -652,7 +691,7 @@ export default function DonaturPage(): React.JSX.Element {
             MozOsxFontSmoothing: 'grayscale',
             position: 'relative',
           }}>
-            {/* Tombol Menu - SAMA PERSIS seperti semula */}
+            {/* Tombol Menu */}
             <div
               ref={menuButtonRef}
               onClick={handleMenuClick}
@@ -724,7 +763,7 @@ export default function DonaturPage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* Menu Drawer - SAMA PERSIS seperti semula dengan tambahan Contact */}
+            {/* Menu Drawer */}
             <div
               ref={menuDrawerRef}
               style={{
@@ -839,7 +878,6 @@ export default function DonaturPage(): React.JSX.Element {
                   <span style={{ fontFamily: "'Inter', 'Helvetica Neue', sans-serif", fontSize: '64px', fontWeight: '300', color: '#ffffff', letterSpacing: '-0.02em' }}>Community</span>
                 </div>
 
-                {/* Donation - dengan panah North East */}
                 <div
                   ref={menuItemRefs.donation}
                   onMouseEnter={() => handleMenuItemHover(menuItemRefs.donation, true)}
@@ -865,7 +903,6 @@ export default function DonaturPage(): React.JSX.Element {
                   <span style={{ fontFamily: "'Inter', 'Helvetica Neue', sans-serif", fontSize: '64px', fontWeight: '300', color: '#ffffff', letterSpacing: '-0.02em' }}>Calendar</span>
                 </div>
 
-                {/* Contact - Dikembalikan */}
                 <div
                   ref={menuItemRefs.contact}
                   onMouseEnter={() => handleMenuItemHover(menuItemRefs.contact, true)}
@@ -910,7 +947,7 @@ export default function DonaturPage(): React.JSX.Element {
               </Link>
             </div>
 
-            {/* Judul Website MENURU - pojok kanan atas */}
+            {/* Judul Website MENURU */}
             <div style={{
               position: 'fixed',
               top: '20px',
@@ -924,15 +961,13 @@ export default function DonaturPage(): React.JSX.Element {
                 fontSize: '48px',
                 color: '#000000',
                 letterSpacing: '-0.02em',
-                textTransform: 'uppercase',
-                WebkitFontSmoothing: 'antialiased',
-                MozOsxFontSmoothing: 'grayscale'
+                textTransform: 'uppercase'
               }}>
                 MENURU
               </span>
             </div>
 
-            {/* Navbar Kanan: Create Donation + Nama User + Login/Logout */}
+            {/* Navbar Kanan: Create Donation + Nama User */}
             <div style={{
               position: 'fixed',
               top: '80px',
@@ -996,7 +1031,6 @@ export default function DonaturPage(): React.JSX.Element {
                     Logout
                   </button>
 
-                  {/* Tombol Create Donation BIG dengan panah North West */}
                   <button
                     ref={createDonationBtnRef}
                     onClick={openDonationForm}
@@ -1020,7 +1054,6 @@ export default function DonaturPage(): React.JSX.Element {
                     onMouseLeave={(e) => gsap.to(e.currentTarget, { scale: 1, duration: 0.2 })}
                   >
                     <span>Create Donation</span>
-                    {/* North West Arrow */}
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M17 7L7 17M7 17H17M7 17V7" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
@@ -1193,7 +1226,7 @@ export default function DonaturPage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* Teks Donatur besar 280px */}
+            {/* Teks Donatur besar */}
             <div style={{
               position: 'relative',
               top: '140px',
@@ -1211,10 +1244,7 @@ export default function DonaturPage(): React.JSX.Element {
                   color: '#000000',
                   textAlign: 'left',
                   letterSpacing: '-0.02em',
-                  textTransform: 'none',
-                  lineHeight: '0.9',
-                  WebkitFontSmoothing: 'antialiased',
-                  MozOsxFontSmoothing: 'grayscale'
+                  lineHeight: '0.9'
                 }}>
                 Donatur
               </div>
@@ -1342,7 +1372,7 @@ export default function DonaturPage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* Email dan Medsos - SAMA PERSIS seperti semula */}
+            {/* Email dan Medsos */}
             <div style={{
               position: 'relative',
               width: '100%',
@@ -1437,7 +1467,7 @@ export default function DonaturPage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* Footer dengan line bawah dan teks MENURU besar - SAMA PERSIS seperti semula */}
+            {/* Footer - SAMA PERSIS dengan yg awal */}
             <footer style={{
               position: 'relative',
               bottom: 0,
@@ -1466,11 +1496,9 @@ export default function DonaturPage(): React.JSX.Element {
                 whiteSpace: 'nowrap', 
                 WebkitFontSmoothing: 'antialiased', 
                 MozOsxFontSmoothing: 'grayscale', 
-                fontKerning: 'normal', 
                 margin: 0, 
                 padding: 0, 
                 transform: 'translateY(10px)', 
-                marginRight: '0' 
               }}>
                 MENURU
               </span>
@@ -1479,7 +1507,7 @@ export default function DonaturPage(): React.JSX.Element {
         </div>
       </div>
 
-      {/* Cookie Popup - SAMA PERSIS seperti semula */}
+      {/* Cookie Popup */}
       {showPopup && (
         <div style={{
           position: 'fixed',
