@@ -69,22 +69,6 @@ const CloseIcon = ({ size = 24 }) => (
   </svg>
 );
 
-const CalendarIcon = ({ size = 18 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-    <line x1="16" y1="2" x2="16" y2="6"/>
-    <line x1="8" y1="2" x2="8" y2="6"/>
-    <line x1="3" y1="10" x2="21" y2="10"/>
-  </svg>
-);
-
-const UserIcon = ({ size = 18 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-    <circle cx="12" cy="8" r="4"/>
-    <path d="M5 20v-2a7 7 0 0 1 14 0v2"/>
-  </svg>
-);
-
 const HeartIcon = ({ size = 18, filled = false }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill={filled ? "#000" : "none"} stroke="currentColor" strokeWidth="1.5">
     <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
@@ -167,12 +151,16 @@ export default function DonationPage(): React.JSX.Element {
     endDate: ""
   });
   
-  // Refs untuk teks split
+  // Refs untuk teks split (design lama)
   const menuruTextRef = useRef<HTMLSpanElement>(null);
   const donationTitleRef = useRef<HTMLDivElement>(null);
   const donationUnderlineRef = useRef<HTMLDivElement>(null);
   const lineRef = useRef<HTMLDivElement>(null);
   const infoTextRef = useRef<HTMLDivElement>(null);
+  const emailRef = useRef<HTMLDivElement>(null);
+  const igRef = useRef<HTMLDivElement>(null);
+  const xRef = useRef<HTMLDivElement>(null);
+  const linkedinRef = useRef<HTMLDivElement>(null);
   
   // Menu refs
   const menuButtonRef = useRef<HTMLDivElement>(null);
@@ -187,6 +175,54 @@ export default function DonationPage(): React.JSX.Element {
     donation: useRef<HTMLDivElement>(null),
     calendar: useRef<HTMLDivElement>(null),
     contact: useRef<HTMLDivElement>(null),
+  };
+
+  // Original texts for social media hover effect
+  const originalTexts = {
+    ig: 'Instagram',
+    x: 'X',
+    linkedin: 'LinkedIn'
+  };
+
+  // Random text effect for social media
+  const getRandomChar = () => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+    return chars[Math.floor(Math.random() * chars.length)];
+  };
+
+  const randomizeText = (element: HTMLElement, originalText: string, duration: number = 0.5) => {
+    const originalChars = originalText.split('');
+    const totalSteps = 15;
+    let currentStep = 0;
+    
+    const interval = setInterval(() => {
+      if (currentStep < totalSteps) {
+        const randomized = originalChars.map(() => getRandomChar()).join('');
+        element.textContent = randomized;
+        currentStep++;
+      } else {
+        clearInterval(interval);
+        element.textContent = originalText;
+      }
+    }, duration * 1000 / totalSteps);
+    
+    return interval;
+  };
+
+  const handleSocialHover = (element: HTMLElement, originalText: string) => {
+    if (!element.getAttribute('data-original')) {
+      element.setAttribute('data-original', originalText);
+    }
+    const interval = randomizeText(element, originalText, 0.6);
+    element.setAttribute('data-interval', String(interval));
+  };
+  
+  const handleSocialLeave = (element: HTMLElement, originalText: string) => {
+    const interval = element.getAttribute('data-interval');
+    if (interval) {
+      clearInterval(Number(interval));
+    }
+    element.textContent = originalText;
   };
 
   // Format Rupiah
@@ -483,6 +519,15 @@ export default function DonationPage(): React.JSX.Element {
     }
   };
 
+  // Email and Social click handlers
+  const handleEmailClick = () => {
+    window.location.href = 'mailto:contact.menuru@gmail.com';
+  };
+
+  const handleSocialClick = (platform: string) => {
+    console.log(`${platform} clicked`);
+  };
+
   // GSAP Scroll animations
   useEffect(() => {
     const initSmoother = () => {
@@ -530,6 +575,15 @@ export default function DonationPage(): React.JSX.Element {
         { opacity: 0, y: 30, filter: 'blur(5px)' },
         { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.8, stagger: 0.02, ease: "power2.out",
           scrollTrigger: { trigger: infoTextRef.current, start: "top 85%", toggleActions: "play none none reverse" }
+        }
+      );
+    }
+    if (emailRef.current) {
+      const splitEmail = new SplitText(emailRef.current, { type: "chars", charsClass: "split-char" });
+      gsap.fromTo(splitEmail.chars,
+        { opacity: 0, x: -30, filter: 'blur(5px)' },
+        { opacity: 1, x: 0, filter: 'blur(0px)', duration: 0.8, stagger: 0.02, ease: "power2.out",
+          scrollTrigger: { trigger: emailRef.current, start: "top 85%", toggleActions: "play none none reverse" }
         }
       );
     }
@@ -664,6 +718,7 @@ export default function DonationPage(): React.JSX.Element {
         .split-char-menuru-menu { display: inline-block; will-change: transform, opacity, filter; transform-style: preserve-3d; }
         .donation-card { transition: all 0.3s ease; }
         .donation-card:hover { transform: translateY(-4px); }
+        .social-item { transition: all 0.3s ease; }
       `}</style>
       
       <div id="smooth-wrapper-donation">
@@ -680,7 +735,7 @@ export default function DonationPage(): React.JSX.Element {
             WebkitFontSmoothing: 'antialiased',
             position: 'relative',
           }}>
-            {/* Menu Button */}
+            {/* Menu Button - Design Lama */}
             <div
               ref={menuButtonRef}
               onClick={handleMenuClick}
@@ -694,29 +749,29 @@ export default function DonationPage(): React.JSX.Element {
                 zIndex: 100,
                 display: 'flex',
                 alignItems: 'center',
-                gap: '16px',
-                padding: '14px 32px',
-                backgroundColor: '#000',
-                borderRadius: '100px',
+                gap: '20px',
+                padding: '20px 40px',
+                backgroundColor: '#000000',
+                borderRadius: '80px',
                 cursor: 'pointer',
               }}
             >
-              <span style={{ fontFamily: "'Inter', sans-serif", fontSize: '16px', fontWeight: '400', color: '#fff', letterSpacing: '0.02em' }}>Menu</span>
-              <div style={{ position: 'relative', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <div style={{ width: isMenuHovered ? '32px' : '8px', height: isMenuHovered ? '32px' : '8px', borderRadius: '50%', backgroundColor: '#e49366', position: 'absolute', transition: 'width 0.3s ease, height 0.3s ease', opacity: isMenuHovered ? 0 : 1 }} />
-                <div style={{ width: isMenuHovered ? '32px' : '0px', height: isMenuHovered ? '32px' : '0px', borderRadius: '50%', backgroundColor: '#e49366', position: 'absolute', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '5px', transition: 'width 0.3s ease, height 0.3s ease', opacity: isMenuHovered ? 1 : 0 }}>
-                  <div style={{ width: '16px', height: '1.5px', backgroundColor: '#000', borderRadius: '1px' }} />
-                  <div style={{ width: '16px', height: '1.5px', backgroundColor: '#000', borderRadius: '1px' }} />
+              <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '24px', fontWeight: '400', color: '#ffffff', letterSpacing: '0.02em' }}>Menu</span>
+              <div style={{ position: 'relative', width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ width: isMenuHovered ? '40px' : '10px', height: isMenuHovered ? '40px' : '10px', borderRadius: '50%', backgroundColor: '#e49366', position: 'absolute', transition: 'width 0.3s ease, height 0.3s ease', opacity: isMenuHovered ? 0 : 1 }} />
+                <div style={{ width: isMenuHovered ? '40px' : '0px', height: isMenuHovered ? '40px' : '0px', borderRadius: '50%', backgroundColor: '#e49366', position: 'absolute', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '6px', transition: 'width 0.3s ease, height 0.3s ease', opacity: isMenuHovered ? 1 : 0 }}>
+                  <div style={{ width: '20px', height: '2px', backgroundColor: '#000000', borderRadius: '2px' }} />
+                  <div style={{ width: '20px', height: '2px', backgroundColor: '#000000', borderRadius: '2px' }} />
                 </div>
               </div>
             </div>
 
-            {/* Menu Drawer */}
+            {/* Menu Drawer - Design Lama */}
             <div
               ref={menuDrawerRef}
               style={{
                 position: 'fixed', bottom: 0, left: 0, right: 0, width: '100%', height: '100%',
-                backgroundColor: '#000', zIndex: 200, display: 'none', flexDirection: 'column',
+                backgroundColor: '#000000', zIndex: 200, display: 'none', flexDirection: 'column',
                 alignItems: 'flex-start', justifyContent: 'flex-start', padding: '60px', boxSizing: 'border-box', overflow: 'hidden'
               }}
             >
@@ -725,105 +780,116 @@ export default function DonationPage(): React.JSX.Element {
                 onClick={handleCloseMenu}
                 onMouseEnter={(e) => gsap.to(e.currentTarget, { scale: 1.1, duration: 0.2 })}
                 onMouseLeave={(e) => gsap.to(e.currentTarget, { scale: 1, duration: 0.2 })}
-                style={{ position: 'absolute', top: '40px', right: '40px', width: '56px', height: '56px', borderRadius: '50%', backgroundColor: '#e49366', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                style={{ position: 'absolute', top: '40px', right: '40px', width: '60px', height: '60px', borderRadius: '50%', backgroundColor: '#e49366', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
               >
-                <CloseIcon size={24} />
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                  <path d="M18 6L6 18M6 6L18 18" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
               </div>
-              <div ref={menuMenuruTextRef} style={{ position: 'absolute', bottom: '40px', right: '40px', fontFamily: "'Archivo Black', sans-serif", fontSize: '160px', fontWeight: '400', color: 'rgba(255,255,255,0.08)', letterSpacing: '-0.02em', textTransform: 'uppercase', lineHeight: '0.8', pointerEvents: 'none', whiteSpace: 'nowrap' }}>MENURU</div>
-              <div style={{ position: 'absolute', top: '40px', left: '40px', fontFamily: "'Bebas Neue', sans-serif", fontSize: '40px', color: '#fff', letterSpacing: '-0.02em', textTransform: 'uppercase' }}>MENURU</div>
+              <div ref={menuMenuruTextRef} style={{ position: 'absolute', bottom: '40px', right: '40px', fontFamily: "'Archivo Black', 'Impact', sans-serif", fontSize: '180px', fontWeight: '400', color: 'rgba(255,255,255,0.15)', letterSpacing: '-0.02em', textTransform: 'uppercase', lineHeight: '0.8', pointerEvents: 'none', whiteSpace: 'nowrap' }}>MENURU</div>
+              <div style={{ position: 'absolute', top: '40px', left: '40px', fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif", fontSize: '48px', color: '#ffffff', letterSpacing: '-0.02em', textTransform: 'uppercase' }}>MENURU</div>
               
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '100px', marginLeft: '40px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginTop: '120px', marginLeft: '40px' }}>
                 <div ref={menuItemRefs.note} onMouseEnter={() => handleMenuItemHover(menuItemRefs.note, true)} onMouseLeave={() => handleMenuItemHover(menuItemRefs.note, false)} onClick={() => handleMenuItemClick(menuItemRefs.note, '/note')} style={{ display: 'flex', alignItems: 'center', gap: '20px', cursor: 'pointer', opacity: 0 }}>
-                  <span style={{ fontFamily: "'Inter', sans-serif", fontSize: '56px', fontWeight: '300', color: '#fff', letterSpacing: '-0.02em' }}>Note</span>
+                  <span style={{ fontFamily: "'Inter', 'Helvetica Neue', sans-serif", fontSize: '64px', fontWeight: '300', color: '#ffffff', letterSpacing: '-0.02em' }}>Note</span>
                 </div>
                 <div ref={menuItemRefs.blog} onMouseEnter={() => handleMenuItemHover(menuItemRefs.blog, true)} onMouseLeave={() => handleMenuItemHover(menuItemRefs.blog, false)} onClick={() => handleMenuItemClick(menuItemRefs.blog, '/blog')} style={{ display: 'flex', alignItems: 'center', gap: '20px', cursor: 'pointer', opacity: 0 }}>
-                  <span style={{ fontFamily: "'Inter', sans-serif", fontSize: '56px', fontWeight: '300', color: '#fff', letterSpacing: '-0.02em' }}>Blog</span>
+                  <span style={{ fontFamily: "'Inter', 'Helvetica Neue', sans-serif", fontSize: '64px', fontWeight: '300', color: '#ffffff', letterSpacing: '-0.02em' }}>Blog</span>
                 </div>
                 <div ref={menuItemRefs.community} onMouseEnter={() => handleMenuItemHover(menuItemRefs.community, true)} onMouseLeave={() => handleMenuItemHover(menuItemRefs.community, false)} onClick={() => handleMenuItemClick(menuItemRefs.community, '/community')} style={{ display: 'flex', alignItems: 'center', gap: '20px', cursor: 'pointer', opacity: 0 }}>
-                  <span style={{ fontFamily: "'Inter', sans-serif", fontSize: '56px', fontWeight: '300', color: '#fff', letterSpacing: '-0.02em' }}>Community</span>
+                  <span style={{ fontFamily: "'Inter', 'Helvetica Neue', sans-serif", fontSize: '64px', fontWeight: '300', color: '#ffffff', letterSpacing: '-0.02em' }}>Community</span>
                 </div>
+                {/* Donation dengan panah - pindahkan panah ke Donation */}
                 <div ref={menuItemRefs.donation} onClick={() => handleMenuItemClick(menuItemRefs.donation, '/donation')} style={{ display: 'flex', alignItems: 'center', gap: '20px', cursor: 'pointer', opacity: 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                    <span style={{ fontFamily: "'Inter', sans-serif", fontSize: '56px', fontWeight: '300', color: '#fff', letterSpacing: '-0.02em' }}>Donation</span>
-                    <NorthEastArrow size={28} color="#fff" />
+                    <span style={{ fontFamily: "'Inter', 'Helvetica Neue', sans-serif", fontSize: '64px', fontWeight: '300', color: '#ffffff', letterSpacing: '-0.02em' }}>Donation</span>
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
                   </div>
                 </div>
                 <div ref={menuItemRefs.calendar} onMouseEnter={() => handleMenuItemHover(menuItemRefs.calendar, true)} onMouseLeave={() => handleMenuItemHover(menuItemRefs.calendar, false)} onClick={() => handleMenuItemClick(menuItemRefs.calendar, '/calendar')} style={{ display: 'flex', alignItems: 'center', gap: '20px', cursor: 'pointer', opacity: 0 }}>
-                  <span style={{ fontFamily: "'Inter', sans-serif", fontSize: '56px', fontWeight: '300', color: '#fff', letterSpacing: '-0.02em' }}>Calendar</span>
+                  <span style={{ fontFamily: "'Inter', 'Helvetica Neue', sans-serif", fontSize: '64px', fontWeight: '300', color: '#ffffff', letterSpacing: '-0.02em' }}>Calendar</span>
                 </div>
                 <div ref={menuItemRefs.contact} onMouseEnter={() => handleMenuItemHover(menuItemRefs.contact, true)} onMouseLeave={() => handleMenuItemHover(menuItemRefs.contact, false)} onClick={() => handleMenuItemClick(menuItemRefs.contact, '/contact')} style={{ display: 'flex', alignItems: 'center', gap: '20px', cursor: 'pointer', opacity: 0 }}>
-                  <span style={{ fontFamily: "'Inter', sans-serif", fontSize: '56px', fontWeight: '300', color: '#fff', letterSpacing: '-0.02em' }}>Contact</span>
+                  <span style={{ fontFamily: "'Inter', 'Helvetica Neue', sans-serif", fontSize: '64px', fontWeight: '300', color: '#ffffff', letterSpacing: '-0.02em' }}>Contact</span>
                 </div>
               </div>
             </div>
 
-            {/* Back to Home */}
+            {/* Back to Home - Design Lama */}
             <div style={{ position: 'fixed', top: '24px', left: '40px', zIndex: 100 }}>
               <Link href="/">
                 <button style={{
-                  fontFamily: "'Inter', sans-serif", fontSize: '14px', color: '#000', backgroundColor: 'transparent',
-                  border: '1px solid #e0e0e0', borderRadius: '100px', padding: '8px 20px', cursor: 'pointer',
-                  transition: 'all 0.3s ease'
+                  fontFamily: "'Questrial', sans-serif", fontSize: '16px', color: '#000000', backgroundColor: 'transparent',
+                  border: '1px solid #000000', borderRadius: '60px', padding: '10px 24px', cursor: 'pointer', transition: 'all 0.3s ease'
                 }}
-                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#000'; e.currentTarget.style.color = '#fff'; }}
-                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#000'; }}>
+                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#000000'; e.currentTarget.style.color = '#ffffff'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#000000'; }}>
                   ← Back to Home
                 </button>
               </Link>
             </div>
 
-            {/* MENURU Logo */}
+            {/* MENURU Logo - Design Lama */}
             <div style={{ position: 'fixed', top: '24px', right: '40px', zIndex: 100, pointerEvents: 'none' }}>
-              <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontWeight: 'normal', fontSize: '32px', color: '#000', letterSpacing: '-0.02em', textTransform: 'uppercase' }}>MENURU</span>
+              <span style={{ fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif", fontWeight: 'normal', fontSize: '48px', color: '#000000', letterSpacing: '-0.02em', textTransform: 'uppercase' }}>MENURU</span>
             </div>
 
-            {/* Title Section */}
-            <div style={{ position: 'relative', top: '100px', left: '40px', zIndex: 10, width: 'calc(100% - 80px)', marginBottom: '80px' }}>
-              <div ref={donationTitleRef} style={{ fontFamily: "'Inter', sans-serif", fontSize: '200px', fontWeight: '300', color: '#000', textAlign: 'left', letterSpacing: '-0.03em', lineHeight: '0.9' }}>Donation</div>
-              <div ref={donationUnderlineRef} style={{ width: '0%', height: '1px', backgroundColor: '#000', marginTop: '20px', opacity: 0 }} />
+            {/* Title Section - Design Lama */}
+            <div style={{ position: 'relative', top: '120px', left: '40px', zIndex: 10, width: 'calc(100% - 80px)', marginBottom: '100px' }}>
+              <div ref={donationTitleRef} style={{ fontFamily: "'Inter', 'Helvetica Neue', sans-serif", fontSize: '300px', fontWeight: '300', color: '#000000', textAlign: 'left', letterSpacing: '-0.02em', lineHeight: '1' }}>Donation</div>
+              <div ref={donationUnderlineRef} style={{ width: '0%', height: '2px', backgroundColor: '#000000', marginTop: '20px', opacity: 0 }} />
             </div>
 
-            {/* Info Text + Create Button */}
-            <div style={{ position: 'relative', top: '120px', left: '40px', right: '40px', zIndex: 10, marginBottom: '100px' }}>
-              <div ref={infoTextRef} style={{ fontFamily: "'Inter', sans-serif", fontSize: '20px', fontWeight: '400', color: '#666', textAlign: 'left', letterSpacing: '-0.01em', lineHeight: '1.5', marginBottom: '60px', maxWidth: '600px' }}>
+            {/* Info Text + Create Button - Design Baru */}
+            <div style={{ position: 'relative', top: '150px', left: '40px', right: '40px', zIndex: 10, marginBottom: '100px' }}>
+              <div ref={infoTextRef} style={{ fontFamily: "'Questrial', sans-serif", fontSize: '36px', fontWeight: '400', color: '#000000', textAlign: 'left', letterSpacing: '-0.01em', lineHeight: '1.3', marginBottom: '60px', maxWidth: '700px' }}>
                 Support meaningful causes through donations. Every contribution makes a difference.
               </div>
               
-              {user && (
-                <button
-                  onClick={() => setIsCreateModalOpen(true)}
-                  style={{
-                    display: 'inline-flex', alignItems: 'center', gap: '12px',
-                    background: 'none', border: 'none', cursor: 'pointer',
-                    padding: 0, fontFamily: "'Inter', sans-serif"
-                  }}
-                  onMouseEnter={(e) => {
-                    const span = e.currentTarget.querySelector('span');
-                    const svg = e.currentTarget.querySelector('svg');
-                    if (span) span.style.transform = 'translateX(8px)';
-                    if (svg) svg.style.transform = 'translateX(4px)';
-                  }}
-                  onMouseLeave={(e) => {
-                    const span = e.currentTarget.querySelector('span');
-                    const svg = e.currentTarget.querySelector('svg');
-                    if (span) span.style.transform = 'translateX(0)';
-                    if (svg) svg.style.transform = 'translateX(0)';
-                  }}
-                >
-                  <span style={{ fontSize: '18px', fontWeight: '400', color: '#000', transition: 'transform 0.3s ease' }}>Create a Donation</span>
-                  <NorthEastArrow size={20} color="#000" style={{ transition: 'transform 0.3s ease' }} />
+              {user ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '24px', flexWrap: 'wrap' }}>
+                  <button
+                    onClick={() => setIsCreateModalOpen(true)}
+                    style={{
+                      display: 'inline-flex', alignItems: 'center', gap: '12px',
+                      background: 'none', border: 'none', cursor: 'pointer',
+                      padding: 0, fontFamily: "'Questrial', sans-serif"
+                    }}
+                    onMouseEnter={(e) => {
+                      const span = e.currentTarget.querySelector('span');
+                      if (span) span.style.transform = 'translateX(8px)';
+                    }}
+                    onMouseLeave={(e) => {
+                      const span = e.currentTarget.querySelector('span');
+                      if (span) span.style.transform = 'translateX(0)';
+                    }}
+                  >
+                    <span style={{ fontSize: '20px', fontWeight: '400', color: '#000', transition: 'transform 0.3s ease' }}>Create a Donation</span>
+                    <NorthEastArrow size={20} color="#000" />
+                  </button>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '8px 20px', border: '1px solid #e0e0e0', borderRadius: '60px' }}>
+                    <img src={user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.email || 'User')}&background=000&color=fff&size=32`} alt="" style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover' }} />
+                    <span style={{ fontSize: '14px', color: '#000' }}>{user.displayName?.slice(0, 15)}</span>
+                    <InstagramVerifiedBadge size={14} />
+                    <button onClick={handleLogout} style={{ background: 'none', border: 'none', fontSize: '12px', color: '#999', cursor: 'pointer' }}>Logout</button>
+                  </div>
+                </div>
+              ) : (
+                <button onClick={handleGoogleLogin} style={{ display: 'inline-flex', alignItems: 'center', gap: '12px', background: 'none', border: '1px solid #000', borderRadius: '60px', padding: '12px 28px', fontSize: '16px', cursor: 'pointer', fontFamily: "'Questrial', sans-serif" }}>
+                  Login with Google
+                  <NorthEastArrow size={16} color="#000" />
                 </button>
               )}
             </div>
 
-            {/* Donations List */}
-            <div style={{ position: 'relative', left: '40px', right: '40px', zIndex: 10, marginBottom: '120px', maxWidth: '900px' }}>
+            {/* Donations List - Design Baru */}
+            <div style={{ position: 'relative', left: '40px', right: '40px', zIndex: 10, marginBottom: '150px', maxWidth: '800px' }}>
               {donations.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '80px 20px', color: '#999', borderTop: '1px solid #eee' }}>
-                  <p style={{ fontSize: '16px', marginBottom: '20px' }}>No donations yet</p>
-                  {!user && (
-                    <button onClick={handleGoogleLogin} style={{ background: 'none', border: '1px solid #e0e0e0', padding: '10px 24px', borderRadius: '100px', fontSize: '14px', cursor: 'pointer' }}>Login to create one</button>
-                  )}
+                  <p style={{ fontSize: '18px', marginBottom: '20px', fontFamily: "'Questrial', sans-serif" }}>No donations yet</p>
+                  {!user && <p style={{ fontSize: '14px', color: '#bbb' }}>Login to create a donation campaign</p>}
                 </div>
               ) : (
                 donations.map((donation) => {
@@ -832,76 +898,78 @@ export default function DonationPage(): React.JSX.Element {
                   const daysLeft = getDaysRemaining(donation.endDate);
                   
                   return (
-                    <div key={donation.id} className="donation-card" style={{ marginBottom: '60px', borderTop: '1px solid #eee', paddingTop: '40px' }}>
-                      {/* Header */}
+                    <div key={donation.id} className="donation-card" style={{ marginBottom: '80px', borderTop: '1px solid #eee', paddingTop: '50px' }}>
+                      {/* Header - Design Lama */}
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                          <div style={{ width: '44px', height: '44px', borderRadius: '50%', backgroundColor: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <UserIcon size={20} color="#999" />
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                          <div style={{ width: '52px', height: '52px', borderRadius: '50%', backgroundColor: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <span style={{ fontSize: '24px' }}>🏢</span>
                           </div>
                           <div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                              <span style={{ fontSize: '15px', fontWeight: '500', color: '#000' }}>{donation.organizationName}</span>
-                              <InstagramVerifiedBadge size={14} />
+                              <span style={{ fontSize: '18px', fontWeight: '500', color: '#000', fontFamily: "'Questrial', sans-serif" }}>{donation.organizationName}</span>
+                              <InstagramVerifiedBadge size={16} />
                             </div>
-                            <div style={{ fontSize: '12px', color: '#999', marginTop: '2px' }}>{formatTime(donation.createdAt)} • {donation.location}</div>
+                            <div style={{ fontSize: '14px', color: '#999', marginTop: '4px', fontFamily: "'Questrial', sans-serif" }}>{formatTime(donation.createdAt)} • {donation.location}</div>
                           </div>
                         </div>
                       </div>
 
-                      {/* Title */}
-                      <h2 style={{ fontSize: '28px', fontWeight: '500', marginBottom: '12px', color: '#000', letterSpacing: '-0.02em' }}>{donation.title}</h2>
+                      {/* Title - Design Baru */}
+                      <h2 style={{ fontSize: '36px', fontWeight: '400', marginBottom: '16px', color: '#000', letterSpacing: '-0.02em', fontFamily: "'Inter', sans-serif" }}>{donation.title}</h2>
                       
-                      {/* Description */}
-                      <p style={{ fontSize: '15px', color: '#666', lineHeight: '1.6', marginBottom: '28px', maxWidth: '700px' }}>{donation.description}</p>
+                      {/* Description - Design Baru */}
+                      <p style={{ fontSize: '16px', color: '#666', lineHeight: '1.6', marginBottom: '32px', maxWidth: '700px', fontFamily: "'Questrial', sans-serif" }}>{donation.description}</p>
                       
-                      {/* Progress */}
-                      <div style={{ marginBottom: '24px', maxWidth: '500px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', marginBottom: '10px', color: '#999' }}>
+                      {/* Progress - Design Baru */}
+                      <div style={{ marginBottom: '28px', maxWidth: '500px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', marginBottom: '12px', color: '#999', fontFamily: "'Questrial', sans-serif" }}>
                           <span>Raised</span>
-                          <span style={{ color: '#000' }}>{formatRupiah(donation.currentAmount)}</span>
+                          <span style={{ color: '#000', fontWeight: '500' }}>{formatRupiah(donation.currentAmount)}</span>
                         </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', marginBottom: '10px', color: '#999' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', marginBottom: '12px', color: '#999', fontFamily: "'Questrial', sans-serif" }}>
                           <span>Target</span>
-                          <span style={{ color: '#000' }}>{formatRupiah(donation.targetAmount)}</span>
+                          <span style={{ color: '#000', fontWeight: '500' }}>{formatRupiah(donation.targetAmount)}</span>
                         </div>
-                        <div style={{ height: '2px', backgroundColor: '#f0f0f0', borderRadius: '1px', overflow: 'hidden', marginTop: '16px' }}>
-                          <div style={{ width: `${percentage}%`, height: '100%', backgroundColor: '#000', borderRadius: '1px' }} />
+                        <div style={{ height: '2px', backgroundColor: '#f0f0f0', borderRadius: '1px', overflow: 'hidden', marginTop: '20px' }}>
+                          <div style={{ width: `${percentage}%`, height: '100%', backgroundColor: '#000', borderRadius: '1px', transition: 'width 0.5s ease' }} />
                         </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '12px', fontSize: '12px', color: '#999' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '14px', fontSize: '13px', color: '#999', fontFamily: "'Questrial', sans-serif" }}>
                           <span>{percentage}% funded</span>
-                          <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>{daysLeft > 0 ? `${daysLeft} days left` : 'Ended'}</span>
+                          <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            {daysLeft > 0 ? `${daysLeft} days left` : 'Ended'}
+                          </span>
                         </div>
                       </div>
 
-                      {/* Donors Messages */}
+                      {/* Donors Messages - Design Baru */}
                       {donation.donors.length > 0 && (
-                        <div style={{ marginBottom: '24px' }}>
-                          <div style={{ fontSize: '13px', fontWeight: '500', color: '#000', marginBottom: '16px', letterSpacing: '-0.01em' }}>Recent Donors</div>
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        <div style={{ marginBottom: '28px' }}>
+                          <div style={{ fontSize: '14px', fontWeight: '500', color: '#000', marginBottom: '16px', letterSpacing: '-0.01em', fontFamily: "'Questrial', sans-serif" }}>Latest Donors</div>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                             {donation.donors.slice(-3).reverse().map((donor) => (
-                              <div key={donor.id} style={{ borderLeft: '1px solid #eee', paddingLeft: '16px' }}>
-                                <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: '4px', flexWrap: 'wrap', gap: '8px' }}>
-                                  <span style={{ fontSize: '13px', fontWeight: '500', color: '#000' }}>{donor.name}</span>
-                                  <span style={{ fontSize: '12px', color: '#999' }}>{formatRupiah(donor.amount)}</span>
+                              <div key={donor.id} style={{ borderLeft: '2px solid #e0e0e0', paddingLeft: '16px' }}>
+                                <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: '6px', flexWrap: 'wrap', gap: '8px' }}>
+                                  <span style={{ fontSize: '14px', fontWeight: '500', color: '#000', fontFamily: "'Questrial', sans-serif" }}>{donor.name}</span>
+                                  <span style={{ fontSize: '13px', color: '#999', fontFamily: "'Questrial', sans-serif" }}>{formatRupiah(donor.amount)}</span>
                                 </div>
-                                <p style={{ fontSize: '13px', color: '#666', margin: 0, fontStyle: 'italic' }}>"{donor.message}"</p>
+                                <p style={{ fontSize: '14px', color: '#666', margin: 0, fontStyle: 'italic', fontFamily: "'Questrial', sans-serif" }}>"{donor.message}"</p>
                               </div>
                             ))}
                           </div>
                         </div>
                       )}
 
-                      {/* Actions */}
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '24px', paddingTop: '16px', borderTop: '1px solid #f0f0f0' }}>
-                        <button onClick={() => handleLike(donation.id)} style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'none', border: 'none', fontSize: '13px', color: isLiked ? '#000' : '#999', cursor: 'pointer' }}>
-                          <HeartIcon size={18} filled={isLiked} />
+                      {/* Actions - Design Baru */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '28px', paddingTop: '20px', borderTop: '1px solid #f0f0f0' }}>
+                        <button onClick={() => handleLike(donation.id)} style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'none', border: 'none', fontSize: '14px', color: isLiked ? '#000' : '#999', cursor: 'pointer', fontFamily: "'Questrial', sans-serif" }}>
+                          <HeartIcon size={20} filled={isLiked} />
                           <span>{donation.likes.length}</span>
                         </button>
-                        <button onClick={() => { setSelectedDonation(donation); setIsDonateModalOpen(true); }} style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'none', border: 'none', fontSize: '13px', color: '#000', cursor: 'pointer', marginLeft: 'auto' }}>
-                          <SendIcon size={16} />
+                        <button onClick={() => { setSelectedDonation(donation); setIsDonateModalOpen(true); }} style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'none', border: 'none', fontSize: '14px', color: '#000', cursor: 'pointer', marginLeft: 'auto', fontFamily: "'Questrial', sans-serif" }}>
+                          <SendIcon size={18} />
                           <span>Donate</span>
-                          <NorthEastArrow size={14} color="#000" />
+                          <NorthEastArrow size={16} color="#000" />
                         </button>
                       </div>
                     </div>
@@ -910,29 +978,131 @@ export default function DonationPage(): React.JSX.Element {
               )}
             </div>
 
-            {/* Footer */}
-            <footer style={{ position: 'relative', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', padding: '0 40px 0 0', margin: 0, pointerEvents: 'none', zIndex: 1 }}>
-              <div ref={lineRef} style={{ width: '0%', height: '1px', backgroundColor: '#000', marginRight: '0', marginBottom: '40px', opacity: 0 }} />
-              <span ref={menuruTextRef} style={{ fontFamily: "'Bebas Neue', sans-serif", fontWeight: 'normal', fontSize: '400px', color: '#000', textAlign: 'right', letterSpacing: '-0.02em', opacity: 1, textTransform: 'uppercase', lineHeight: '0.7', whiteSpace: 'nowrap', margin: 0, padding: 0 }}>MENURU</span>
+            {/* Email and Social Media - Design Lama */}
+            <div style={{
+              position: 'relative',
+              width: '100%',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'flex-end',
+              padding: '0 80px',
+              marginBottom: '30px',
+              boxSizing: 'border-box',
+              marginTop: 'auto'
+            }}>
+              <div 
+                ref={emailRef}
+                onClick={handleEmailClick}
+                style={{
+                  fontFamily: "'Questrial', sans-serif",
+                  fontSize: '32px',
+                  color: '#000000',
+                  fontWeight: '400',
+                  letterSpacing: '0.02em',
+                  cursor: 'pointer',
+                  transition: 'opacity 0.3s ease',
+                  opacity: 1,
+                  marginBottom: '20px'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.opacity = '0.5'}
+                onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+              >
+                contact.menuru@gmail.com
+              </div>
+
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '8px',
+                position: 'absolute',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                marginBottom: '20px'
+              }}>
+                <div 
+                  className="social-item"
+                  style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
+                  onMouseEnter={(e) => {
+                    const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
+                    if (textElement) handleSocialHover(textElement, originalTexts.ig);
+                  }}
+                  onMouseLeave={(e) => {
+                    const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
+                    if (textElement) handleSocialLeave(textElement, originalTexts.ig);
+                  }}
+                  onClick={() => handleSocialClick('Instagram')}
+                >
+                  <span ref={igRef} className="social-text" style={{ fontFamily: "'Questrial', sans-serif", fontSize: '28px', color: '#000000', fontWeight: '400', letterSpacing: '0.02em' }}>Instagram</span>
+                </div>
+                <div 
+                  className="social-item"
+                  style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
+                  onMouseEnter={(e) => {
+                    const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
+                    if (textElement) handleSocialHover(textElement, originalTexts.x);
+                  }}
+                  onMouseLeave={(e) => {
+                    const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
+                    if (textElement) handleSocialLeave(textElement, originalTexts.x);
+                  }}
+                  onClick={() => handleSocialClick('X')}
+                >
+                  <span ref={xRef} className="social-text" style={{ fontFamily: "'Questrial', sans-serif", fontSize: '28px', color: '#000000', fontWeight: '400', letterSpacing: '0.02em' }}>X</span>
+                </div>
+                <div 
+                  className="social-item"
+                  style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
+                  onMouseEnter={(e) => {
+                    const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
+                    if (textElement) handleSocialHover(textElement, originalTexts.linkedin);
+                  }}
+                  onMouseLeave={(e) => {
+                    const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
+                    if (textElement) handleSocialLeave(textElement, originalTexts.linkedin);
+                  }}
+                  onClick={() => handleSocialClick('LinkedIn')}
+                >
+                  <span ref={linkedinRef} className="social-text" style={{ fontFamily: "'Questrial', sans-serif", fontSize: '28px', color: '#000000', fontWeight: '400', letterSpacing: '0.02em' }}>LinkedIn</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer - Design Lama */}
+            <footer style={{
+              position: 'relative',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              width: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'flex-end',
+              padding: '0 80px 0 0',
+              margin: 0,
+              pointerEvents: 'none',
+              zIndex: 1
+            }}>
+              <div ref={lineRef} style={{ width: '0%', height: '2px', backgroundColor: '#000000', marginRight: '0', marginBottom: '60px', opacity: 0 }} />
+              <span ref={menuruTextRef} style={{ fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif", fontWeight: 'normal', fontSize: '600px', color: '#000000', textAlign: 'right', letterSpacing: '-0.02em', opacity: 1, textTransform: 'uppercase', lineHeight: '0.7', whiteSpace: 'nowrap', margin: 0, padding: 0 }}>MENURU</span>
             </footer>
           </div>
         </div>
       </div>
 
-      {/* Create Donation Modal */}
+      {/* Create Donation Modal - Design Baru */}
       {isCreateModalOpen && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.8)', zIndex: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }} onClick={() => setIsCreateModalOpen(false)}>
           <div style={{ background: '#fff', width: '100%', maxWidth: '560px', padding: '48px', position: 'relative' }} onClick={(e) => e.stopPropagation()}>
             <button onClick={() => setIsCreateModalOpen(false)} style={{ position: 'absolute', top: '24px', right: '24px', background: 'none', border: 'none', cursor: 'pointer' }}><CloseIcon size={20} /></button>
             
-            <h2 style={{ fontSize: '28px', fontWeight: '400', color: '#000', marginBottom: '8px', letterSpacing: '-0.02em' }}>Create Donation</h2>
-            <p style={{ fontSize: '14px', color: '#999', marginBottom: '40px' }}>Start a campaign to make an impact</p>
+            <h2 style={{ fontSize: '32px', fontWeight: '400', color: '#000', marginBottom: '8px', letterSpacing: '-0.02em', fontFamily: "'Inter', sans-serif" }}>Create Donation</h2>
+            <p style={{ fontSize: '14px', color: '#999', marginBottom: '40px', fontFamily: "'Questrial', sans-serif" }}>Start a campaign to make an impact</p>
             
-            <input type="text" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} placeholder="Campaign Title" style={{ width: '100%', padding: '16px 0', border: 'none', borderBottom: '1px solid #e0e0e0', fontSize: '16px', color: '#000', outline: 'none', marginBottom: '28px', fontFamily: "'Inter', sans-serif" }} />
+            <input type="text" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} placeholder="Campaign Title" style={{ width: '100%', padding: '16px 0', border: 'none', borderBottom: '1px solid #e0e0e0', fontSize: '18px', color: '#000', outline: 'none', marginBottom: '28px', fontFamily: "'Inter', sans-serif" }} />
             
-            <textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} placeholder="Campaign Description" rows={4} style={{ width: '100%', padding: '16px 0', border: 'none', borderBottom: '1px solid #e0e0e0', fontSize: '15px', color: '#000', outline: 'none', resize: 'none', marginBottom: '28px', fontFamily: "'Inter', sans-serif" }} />
+            <textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} placeholder="Campaign Description" rows={4} style={{ width: '100%', padding: '16px 0', border: 'none', borderBottom: '1px solid #e0e0e0', fontSize: '16px', color: '#000', outline: 'none', resize: 'none', marginBottom: '28px', fontFamily: "'Inter', sans-serif" }} />
             
-            <input type="text" value={formData.targetAmount} onChange={(e) => setFormData({ ...formData, targetAmount: formatNumberWithDots(e.target.value) })} placeholder="Target Amount (IDR)" style={{ width: '100%', padding: '16px 0', border: 'none', borderBottom: '1px solid #e0e0e0', fontSize: '16px', color: '#000', outline: 'none', marginBottom: '28px', fontFamily: "'Inter', sans-serif" }} />
+            <input type="text" value={formData.targetAmount} onChange={(e) => setFormData({ ...formData, targetAmount: formatNumberWithDots(e.target.value) })} placeholder="Target Amount (IDR)" style={{ width: '100%', padding: '16px 0', border: 'none', borderBottom: '1px solid #e0e0e0', fontSize: '18px', color: '#000', outline: 'none', marginBottom: '28px', fontFamily: "'Inter', sans-serif" }} />
             
             <input type="text" value={formData.organizationName} onChange={(e) => setFormData({ ...formData, organizationName: e.target.value })} placeholder="Organization / PT Name" style={{ width: '100%', padding: '16px 0', border: 'none', borderBottom: '1px solid #e0e0e0', fontSize: '16px', color: '#000', outline: 'none', marginBottom: '28px', fontFamily: "'Inter', sans-serif" }} />
             
@@ -940,27 +1110,27 @@ export default function DonationPage(): React.JSX.Element {
             
             <input type="date" value={formData.endDate} onChange={(e) => setFormData({ ...formData, endDate: e.target.value })} style={{ width: '100%', padding: '16px 0', border: 'none', borderBottom: '1px solid #e0e0e0', fontSize: '14px', color: '#000', outline: 'none', marginBottom: '40px', fontFamily: "'Inter', sans-serif" }} />
             
-            <button onClick={handleCreateDonation} disabled={isSubmitting || !formData.title || !formData.description || !formData.targetAmount} style={{ width: '100%', padding: '14px', background: '#000', border: 'none', color: '#fff', fontSize: '14px', fontWeight: '400', cursor: (isSubmitting || !formData.title || !formData.description || !formData.targetAmount) ? 'not-allowed' : 'pointer', opacity: (isSubmitting || !formData.title || !formData.description || !formData.targetAmount) ? 0.5 : 1, fontFamily: "'Inter', sans-serif" }}>
+            <button onClick={handleCreateDonation} disabled={isSubmitting || !formData.title || !formData.description || !formData.targetAmount} style={{ width: '100%', padding: '16px', background: '#000', border: 'none', color: '#fff', fontSize: '16px', fontWeight: '400', cursor: (isSubmitting || !formData.title || !formData.description || !formData.targetAmount) ? 'not-allowed' : 'pointer', opacity: (isSubmitting || !formData.title || !formData.description || !formData.targetAmount) ? 0.5 : 1, fontFamily: "'Inter', sans-serif" }}>
               {isSubmitting ? 'Creating...' : 'Create Campaign'}
             </button>
           </div>
         </div>
       )}
 
-      {/* Donate Modal */}
+      {/* Donate Modal - Design Baru */}
       {isDonateModalOpen && selectedDonation && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.8)', zIndex: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }} onClick={() => setIsDonateModalOpen(false)}>
           <div style={{ background: '#fff', width: '100%', maxWidth: '480px', padding: '48px', position: 'relative' }} onClick={(e) => e.stopPropagation()}>
             <button onClick={() => setIsDonateModalOpen(false)} style={{ position: 'absolute', top: '24px', right: '24px', background: 'none', border: 'none', cursor: 'pointer' }}><CloseIcon size={20} /></button>
             
-            <h2 style={{ fontSize: '24px', fontWeight: '400', color: '#000', marginBottom: '8px', letterSpacing: '-0.02em' }}>Make a Donation</h2>
-            <p style={{ fontSize: '13px', color: '#999', marginBottom: '32px' }}>{selectedDonation.title}</p>
+            <h2 style={{ fontSize: '28px', fontWeight: '400', color: '#000', marginBottom: '8px', letterSpacing: '-0.02em', fontFamily: "'Inter', sans-serif" }}>Make a Donation</h2>
+            <p style={{ fontSize: '13px', color: '#999', marginBottom: '32px', fontFamily: "'Questrial', sans-serif" }}>{selectedDonation.title}</p>
             
-            <input type="text" value={donationAmount} onChange={(e) => setDonationAmount(formatNumberWithDots(e.target.value))} placeholder="Amount (IDR) - Min Rp 10,000" style={{ width: '100%', padding: '16px 0', border: 'none', borderBottom: '1px solid #e0e0e0', fontSize: '20px', color: '#000', outline: 'none', marginBottom: '28px', fontFamily: "'Inter', sans-serif" }} />
+            <input type="text" value={donationAmount} onChange={(e) => setDonationAmount(formatNumberWithDots(e.target.value))} placeholder="Amount (IDR) - Min Rp 10,000" style={{ width: '100%', padding: '16px 0', border: 'none', borderBottom: '1px solid #e0e0e0', fontSize: '24px', color: '#000', outline: 'none', marginBottom: '28px', fontFamily: "'Inter', sans-serif" }} />
             
-            <textarea value={donationMessage} onChange={(e) => setDonationMessage(e.target.value)} placeholder="Leave a message of support..." rows={3} style={{ width: '100%', padding: '16px 0', border: 'none', borderBottom: '1px solid #e0e0e0', fontSize: '14px', color: '#000', outline: 'none', resize: 'none', marginBottom: '40px', fontFamily: "'Inter', sans-serif" }} />
+            <textarea value={donationMessage} onChange={(e) => setDonationMessage(e.target.value)} placeholder="Leave a message of support..." rows={3} style={{ width: '100%', padding: '16px 0', border: 'none', borderBottom: '1px solid #e0e0e0', fontSize: '15px', color: '#000', outline: 'none', resize: 'none', marginBottom: '40px', fontFamily: "'Inter', sans-serif" }} />
             
-            <button onClick={handleDonate} disabled={isSubmitting || !donationAmount || !donationMessage} style={{ width: '100%', padding: '14px', background: '#000', border: 'none', color: '#fff', fontSize: '14px', fontWeight: '400', cursor: (isSubmitting || !donationAmount || !donationMessage) ? 'not-allowed' : 'pointer', opacity: (isSubmitting || !donationAmount || !donationMessage) ? 0.5 : 1, fontFamily: "'Inter', sans-serif", display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
+            <button onClick={handleDonate} disabled={isSubmitting || !donationAmount || !donationMessage} style={{ width: '100%', padding: '16px', background: '#000', border: 'none', color: '#fff', fontSize: '15px', fontWeight: '400', cursor: (isSubmitting || !donationAmount || !donationMessage) ? 'not-allowed' : 'pointer', opacity: (isSubmitting || !donationAmount || !donationMessage) ? 0.5 : 1, fontFamily: "'Inter', sans-serif", display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
               {isSubmitting ? 'Processing...' : 'Donate'}
               <NorthWestArrow size={16} color="#fff" />
             </button>
@@ -970,22 +1140,46 @@ export default function DonationPage(): React.JSX.Element {
 
       {/* Success Notification */}
       {showSuccess && (
-        <div style={{ position: 'fixed', bottom: '30px', left: '50%', transform: 'translateX(-50%)', background: '#000', color: '#fff', padding: '10px 24px', borderRadius: '100px', fontSize: '13px', zIndex: 400, fontFamily: "'Inter', sans-serif" }}>
+        <div style={{ position: 'fixed', bottom: '30px', left: '50%', transform: 'translateX(-50%)', background: '#000', color: '#fff', padding: '12px 28px', borderRadius: '60px', fontSize: '14px', zIndex: 400, fontFamily: "'Questrial', sans-serif" }}>
           {successMessage}
         </div>
       )}
 
-      {/* Cookie Popup */}
+      {/* Cookie Popup - Design Lama */}
       {showPopup && (
-        <div style={{ position: 'fixed', bottom: '24px', left: '24px', backgroundColor: '#fff', borderRadius: '16px', padding: '20px 24px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', border: '1px solid #e0e0e0', zIndex: 1000, fontFamily: "'Inter', sans-serif", maxWidth: '360px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
-            <span style={{ fontSize: '28px' }}>🍪</span>
-            <span style={{ fontSize: '20px', fontWeight: '400', color: '#000' }}>cookies.</span>
+        <div style={{
+          position: 'fixed',
+          bottom: '30px',
+          left: '30px',
+          width: 'auto',
+          maxWidth: 'calc(100vw - 60px)',
+          backgroundColor: '#ffffff',
+          color: '#000000',
+          borderRadius: '32px',
+          padding: '24px 32px',
+          boxShadow: '0 20px 40px rgba(0,0,0,0.15), 0 5px 12px rgba(0,0,0,0.05)',
+          zIndex: 1000,
+          fontFamily: 'Questrial, sans-serif',
+          animation: 'slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
+          border: '1px solid rgba(0,0,0,0.05)',
+          display: 'flex',
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: '32px',
+          flexWrap: 'wrap',
+        }}>
+          <style>{`@keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }`}</style>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <span style={{ fontSize: '56px', display: 'inline-block' }}>🍪</span>
+              <span style={{ fontWeight: '700', fontSize: '36px', letterSpacing: '-0.02em', background: 'linear-gradient(135deg, #000000 0%, #333333 100%)', backgroundClip: 'text', WebkitBackgroundClip: 'text', color: 'transparent', fontFamily: 'Questrial, sans-serif' }}>cookies.</span>
+            </div>
+            <p style={{ fontSize: '20px', lineHeight: '1.4', marginBottom: 0, color: '#1a1a1a', fontWeight: '400', letterSpacing: '-0.01em', maxWidth: '280px', fontFamily: 'Questrial, sans-serif' }}>I use cookies to understand how you navigate<br />this site and what topics interest you most.</p>
+            <span style={{ color: '#666', fontSize: '18px', display: 'inline-block', marginTop: '4px', fontFamily: 'Questrial, sans-serif' }}>No ads, no data sold ever.</span>
           </div>
-          <p style={{ fontSize: '13px', color: '#666', marginBottom: '20px', lineHeight: '1.5' }}>We use cookies to understand how you navigate this site.</p>
-          <div style={{ display: 'flex', gap: '12px' }}>
-            <button ref={declineBtnRef} onClick={handleDecline} style={{ padding: '8px 20px', background: '#fff', border: '1px solid #e0e0e0', borderRadius: '100px', fontSize: '12px', cursor: 'pointer' }}>Decline</button>
-            <button ref={acceptBtnRef} onClick={handleAccept} style={{ padding: '8px 20px', background: '#000', border: 'none', borderRadius: '100px', fontSize: '12px', color: '#fff', cursor: 'pointer' }}>Accept</button>
+          <div style={{ display: 'flex', gap: '16px', justifyContent: 'flex-start', flexShrink: 0 }}>
+            <button ref={declineBtnRef} onClick={handleDecline} style={{ padding: '14px 32px', backgroundColor: '#ffffff', color: '#000000', border: '1.5px solid #e0e0e0', borderRadius: '60px', cursor: 'pointer', fontSize: '18px', fontWeight: '600', letterSpacing: '-0.01em', fontFamily: 'Questrial, sans-serif', transition: 'all 0.2s ease', position: 'relative', overflow: 'hidden', zIndex: 1, background: '#ffffff' }}>Decline</button>
+            <button ref={acceptBtnRef} onClick={handleAccept} style={{ padding: '14px 32px', backgroundColor: '#ffffff', color: '#000000', border: '1.5px solid #e0e0e0', borderRadius: '60px', cursor: 'pointer', fontSize: '18px', fontWeight: '600', letterSpacing: '-0.01em', fontFamily: 'Questrial, sans-serif', transition: 'all 0.2s ease', position: 'relative', overflow: 'hidden', zIndex: 1, background: '#ffffff' }}>Accept</button>
           </div>
         </div>
       )}
