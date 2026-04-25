@@ -7,19 +7,125 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ScrollSmoother } from "gsap/ScrollSmoother";
 import { SplitText } from "gsap/SplitText";
 import Link from "next/link";
+import { initializeApp, getApps } from "firebase/app";
+import { 
+  getAuth, 
+  onAuthStateChanged,
+  signInWithPopup,
+  GoogleAuthProvider,
+  signOut 
+} from "firebase/auth";
+import { 
+  getFirestore, 
+  collection, 
+  doc, 
+  addDoc, 
+  Timestamp,
+  updateDoc,
+  arrayUnion,
+  increment
+} from "firebase/firestore";
 
 // Register GSAP plugins
 if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger, ScrollSmoother, SplitText);
 }
 
+// Firebase Config
+const firebaseConfig = {
+  apiKey: "AIzaSyD_htQZ1TClnXKZGRJ4izbMQ02y6V3aNAQ",
+  authDomain: "wawa44-58d1e.firebaseapp.com",
+  databaseURL: "https://wawa44-58d1e-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "wawa44-58d1e",
+  storageBucket: "wawa44-58d1e.firebasestorage.app",
+  messagingSenderId: "836899520599",
+  appId: "1:836899520599:web:b346e4370ecfa9bb89e312",
+  measurementId: "G-8LMP7F4BE9"
+};
+
+// Instagram Verified Badge Component
+const InstagramVerifiedBadge = ({ size = 24 }) => {
+  const [showTooltip, setShowTooltip] = useState(false);
+  
+  return (
+    <span 
+      style={{ 
+        position: 'relative', 
+        display: 'inline-flex',
+        alignItems: 'center',
+        marginLeft: '6px',
+        cursor: 'help'
+      }}
+      onMouseEnter={() => setShowTooltip(true)}
+      onMouseLeave={() => setShowTooltip(false)}
+    >
+      <svg
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          fill="#0095F6"
+          d="M12 2.2 C13.6 3.8 16.2 3.8 17.8 2.2 C18.6 3.8 20.2 5.4 21.8 6.2 C20.2 7.8 20.2 10.4 21.8 12 C20.2 13.6 20.2 16.2 21.8 17.8 C20.2 18.6 18.6 20.2 17.8 21.8 C16.2 20.2 13.6 20.2 12 21.8 C10.4 20.2 7.8 20.2 6.2 21.8 C5.4 20.2 3.8 18.6 2.2 17.8 C3.8 16.2 3.8 13.6 2.2 12 C3.8 10.4 3.8 7.8 2.2 6.2 C3.8 5.4 5.4 3.8 6.2 2.2 C7.8 3.8 10.4 3.8 12 2.2 Z"
+        />
+        <path d="M9.2 12.3l2 2 4.6-4.6" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+      {showTooltip && (
+        <div style={{
+          position: 'absolute',
+          bottom: '100%',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          backgroundColor: '#1a1a1a',
+          color: '#fff',
+          padding: '6px 12px',
+          borderRadius: '6px',
+          fontSize: '12px',
+          whiteSpace: 'nowrap',
+          marginBottom: '8px',
+          zIndex: 1000,
+          fontFamily: 'Helvetica, Arial, sans-serif',
+        }}>
+          Verified Account
+          <div style={{
+            position: 'absolute',
+            top: '100%',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            borderWidth: '5px',
+            borderStyle: 'solid',
+            borderColor: '#1a1a1a transparent transparent transparent'
+          }} />
+        </div>
+      )}
+    </span>
+  );
+};
+
 export default function DonaturPage(): React.JSX.Element {
   const [showPopup, setShowPopup] = useState(false);
   const [isMenuHovered, setIsMenuHovered] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showDonateModal, setShowDonateModal] = useState(false);
+  const [donationAmount, setDonationAmount] = useState("");
+  const [donationMessage, setDonationMessage] = useState("");
+  const [donationName, setDonationName] = useState("");
+  const [donationEmail, setDonationEmail] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+  
   const acceptBtnRef = useRef<HTMLButtonElement>(null);
   const declineBtnRef = useRef<HTMLButtonElement>(null);
   const smootherRef = useRef<any>(null);
+  
+  // Firebase State
+  const [firebaseAuth, setFirebaseAuth] = useState<any>(null);
+  const [firebaseDb, setFirebaseDb] = useState<any>(null);
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   
   // Refs untuk teks yang akan di-split
   const menuruTextRef = useRef<HTMLSpanElement>(null);
@@ -55,10 +161,147 @@ export default function DonaturPage(): React.JSX.Element {
     linkedin: 'LinkedIn'
   };
 
-  // Animasi menu drawer muncul dari bawah ke atas
+  // Format Rupiah
+  const formatRupiah = (amount: number) => {
+    return new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount);
+  };
+
+  // Format number dengan titik
+  const formatNumberWithDots = (value: string) => {
+    const number = value.replace(/[^\d]/g, '');
+    return number.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  };
+
+  // Parse number dari format titik
+  const parseNumberFromDots = (value: string) => {
+    return parseInt(value.replace(/[^\d]/g, '')) || 0;
+  };
+
+  // Handle Donation
+  const handleDonate = async () => {
+    if (!donationName.trim()) {
+      alert("Please enter your name");
+      return;
+    }
+    
+    if (!donationEmail.trim()) {
+      alert("Please enter your email");
+      return;
+    }
+    
+    if (!donationEmail.includes('@')) {
+      alert("Please enter a valid email");
+      return;
+    }
+    
+    const amount = parseNumberFromDots(donationAmount);
+    if (amount < 10000) {
+      alert("Minimum donation is Rp 10,000");
+      return;
+    }
+    
+    if (!donationMessage.trim()) {
+      alert("Please write a donation message");
+      return;
+    }
+    
+    setIsSubmitting(true);
+    
+    try {
+      // Simpan donasi ke Firestore
+      const donationsRef = collection(firebaseDb, 'donations');
+      await addDoc(donationsRef, {
+        name: donationName,
+        email: donationEmail,
+        amount: amount,
+        message: donationMessage,
+        createdAt: Timestamp.now()
+      });
+      
+      // Reset form
+      setDonationAmount("");
+      setDonationMessage("");
+      setDonationName("");
+      setDonationEmail("");
+      setShowDonateModal(false);
+      setSuccessMessage(`Thank you for your donation of ${formatRupiah(amount)}! 🙏`);
+      setShowSuccess(true);
+      
+      setTimeout(() => {
+        setShowSuccess(false);
+      }, 3000);
+      
+    } catch (error) {
+      console.error("Error donating:", error);
+      alert("Failed to send donation. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Handle Google Login
+  const handleGoogleLogin = async () => {
+    if (!firebaseAuth) return;
+    
+    try {
+      const provider = new GoogleAuthProvider();
+      await signInWithPopup(firebaseAuth, provider);
+    } catch (error) {
+      console.error("Google login error:", error);
+    }
+  };
+
+  // Handle Logout
+  const handleLogout = async () => {
+    if (!firebaseAuth) return;
+    
+    try {
+      await signOut(firebaseAuth);
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
+
+  // Firebase Initialization
+  useEffect(() => {
+    try {
+      const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+      const auth = getAuth(app);
+      const db = getFirestore(app);
+      
+      setFirebaseAuth(auth);
+      setFirebaseDb(db);
+    } catch (error) {
+      console.error("Firebase initialization error:", error);
+    }
+  }, []);
+
+  // Auth State Listener
+  useEffect(() => {
+    if (!firebaseAuth) return;
+    
+    const unsubscribe = onAuthStateChanged(firebaseAuth, (currentUser: any) => {
+      setUser(currentUser);
+      setLoading(false);
+      
+      // Auto fill form if user is logged in
+      if (currentUser) {
+        setDonationName(currentUser.displayName || currentUser.email?.split('@')[0] || '');
+        setDonationEmail(currentUser.email || '');
+      }
+    });
+    
+    return () => unsubscribe();
+  }, [firebaseAuth]);
+
+  // Animasi menu drawer
   useEffect(() => {
     if (isMenuOpen && menuDrawerRef.current) {
-      // Disable scroll pada body saat menu terbuka
       document.body.style.overflow = 'hidden';
       document.body.style.position = 'fixed';
       document.body.style.width = '100%';
@@ -82,7 +325,6 @@ export default function DonaturPage(): React.JSX.Element {
         }
       );
       
-      // Animasi teks MENURU besar di halaman menu
       if (menuMenuruTextRef.current) {
         const splitMenuMenuru = new SplitText(menuMenuruTextRef.current, {
           type: "chars",
@@ -108,7 +350,6 @@ export default function DonaturPage(): React.JSX.Element {
         );
       }
       
-      // Animasi menu items
       const menuItems = [
         menuItemRefs.note,
         menuItemRefs.blog,
@@ -175,7 +416,6 @@ export default function DonaturPage(): React.JSX.Element {
     }
   }, [isMenuHovered]);
 
-  // Animasi hover untuk menu items di drawer
   const handleMenuItemHover = (ref: React.RefObject<HTMLDivElement>, isHover: boolean) => {
     if (ref.current) {
       if (isHover) {
@@ -194,7 +434,6 @@ export default function DonaturPage(): React.JSX.Element {
     }
   };
 
-  // Animasi saat klik menu item
   const handleMenuItemClick = (ref: React.RefObject<HTMLDivElement>, href: string) => {
     if (ref.current) {
       gsap.to(ref.current, {
@@ -223,13 +462,11 @@ export default function DonaturPage(): React.JSX.Element {
     }
   };
 
-  // Fungsi untuk mendapatkan huruf random (A-Z)
   const getRandomChar = () => {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
     return chars[Math.floor(Math.random() * chars.length)];
   };
 
-  // Fungsi untuk mengacak huruf pada teks
   const randomizeText = (element: HTMLElement, originalText: string, duration: number = 0.5) => {
     const originalChars = originalText.split('');
     const totalSteps = 15;
@@ -249,7 +486,6 @@ export default function DonaturPage(): React.JSX.Element {
     return interval;
   };
 
-  // Animasi hover random huruf untuk medsos
   const handleSocialHover = (element: HTMLElement, originalText: string) => {
     if (!element.getAttribute('data-original')) {
       element.setAttribute('data-original', originalText);
@@ -267,7 +503,6 @@ export default function DonaturPage(): React.JSX.Element {
     element.textContent = originalText;
   };
 
-  // Inisialisasi ScrollSmoother
   useEffect(() => {
     const initSmoother = () => {
       if (typeof window !== 'undefined' && !smootherRef.current) {
@@ -300,7 +535,6 @@ export default function DonaturPage(): React.JSX.Element {
 
   // GSAP SplitText animations
   useEffect(() => {
-    // Animasi untuk teks Donatur
     if (donaturTitleRef.current) {
       const splitDonatur = new SplitText(donaturTitleRef.current, {
         type: "chars",
@@ -330,7 +564,6 @@ export default function DonaturPage(): React.JSX.Element {
       );
     }
 
-    // Animasi untuk underline Donatur
     if (donaturUnderlineRef.current) {
       gsap.fromTo(donaturUnderlineRef.current,
         {
@@ -354,7 +587,6 @@ export default function DonaturPage(): React.JSX.Element {
       );
     }
 
-    // Animasi untuk info text
     if (infoTextRef.current) {
       const splitInfo = new SplitText(infoTextRef.current, {
         type: "chars",
@@ -384,7 +616,6 @@ export default function DonaturPage(): React.JSX.Element {
       );
     }
 
-    // Animasi untuk email
     if (emailRef.current) {
       const splitEmail = new SplitText(emailRef.current, {
         type: "chars",
@@ -414,7 +645,6 @@ export default function DonaturPage(): React.JSX.Element {
       );
     }
 
-    // Animasi untuk teks MENURU di footer
     if (menuruTextRef.current) {
       const splitMenuru = new SplitText(menuruTextRef.current, {
         type: "chars",
@@ -450,7 +680,6 @@ export default function DonaturPage(): React.JSX.Element {
       });
     }
 
-    // Animasi untuk line bawah sebelum MENURU
     if (lineRef.current) {
       gsap.fromTo(lineRef.current,
         {
@@ -479,7 +708,6 @@ export default function DonaturPage(): React.JSX.Element {
     };
   }, []);
 
-  // Cookie consent
   useEffect(() => {
     const consent = localStorage.getItem('cookieConsent');
     if (consent === null) {
@@ -487,7 +715,6 @@ export default function DonaturPage(): React.JSX.Element {
     }
   }, []);
 
-  // Cookie popup hover effect
   useEffect(() => {
     if (showPopup && acceptBtnRef.current && declineBtnRef.current) {
       const acceptBtn = acceptBtnRef.current;
@@ -546,13 +773,11 @@ export default function DonaturPage(): React.JSX.Element {
   const handleAccept = () => {
     localStorage.setItem('cookieConsent', 'accepted');
     setShowPopup(false);
-    console.log('Cookies accepted');
   };
 
   const handleDecline = () => {
     localStorage.setItem('cookieConsent', 'declined');
     setShowPopup(false);
-    console.log('Cookies declined');
   };
 
   const handleEmailClick = () => {
@@ -570,6 +795,21 @@ export default function DonaturPage(): React.JSX.Element {
   const handleCloseMenu = () => {
     setIsMenuOpen(false);
   };
+
+  if (loading) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        backgroundColor: '#fff',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        fontFamily: 'Questrial, sans-serif',
+      }}>
+        <div style={{ color: '#000', fontSize: '18px' }}>Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -632,6 +872,17 @@ export default function DonaturPage(): React.JSX.Element {
 
         .social-item {
           transition: all 0.3s ease;
+        }
+
+        @keyframes modalFadeIn {
+          from {
+            opacity: 0;
+            transform: scale(0.95);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
         }
       `}</style>
       
@@ -744,7 +995,6 @@ export default function DonaturPage(): React.JSX.Element {
                 overflow: 'hidden'
               }}
             >
-              {/* Tombol Close */}
               <div
                 ref={closeButtonRef}
                 onClick={handleCloseMenu}
@@ -774,7 +1024,6 @@ export default function DonaturPage(): React.JSX.Element {
                 </svg>
               </div>
 
-              {/* Teks MENURU besar */}
               <div
                 ref={menuMenuruTextRef}
                 style={{
@@ -795,7 +1044,6 @@ export default function DonaturPage(): React.JSX.Element {
                 MENURU
               </div>
 
-              {/* Teks judul web */}
               <div style={{
                 position: 'absolute',
                 top: '40px',
@@ -809,7 +1057,6 @@ export default function DonaturPage(): React.JSX.Element {
                 MENURU
               </div>
 
-              {/* Menu Items */}
               <div style={{
                 display: 'flex',
                 flexDirection: 'column',
@@ -937,7 +1184,6 @@ export default function DonaturPage(): React.JSX.Element {
                   </span>
                 </div>
 
-                {/* Donatur - dengan panah */}
                 <div
                   ref={menuItemRefs.donatur}
                   onClick={() => handleMenuItemClick(menuItemRefs.donatur, '/donatur')}
@@ -1058,14 +1304,14 @@ export default function DonaturPage(): React.JSX.Element {
               />
             </div>
 
-            {/* Info Text */}
+            {/* Info Text - English */}
             <div style={{
               position: 'relative',
               top: '150px',
               left: '40px',
               right: '40px',
               zIndex: 10,
-              marginBottom: '200px'
+              marginBottom: '100px'
             }}>
               <div 
                 ref={infoTextRef}
@@ -1077,9 +1323,382 @@ export default function DonaturPage(): React.JSX.Element {
                   textAlign: 'center',
                   letterSpacing: '-0.01em',
                   lineHeight: '1.2',
-                  marginBottom: '100px'
+                  marginBottom: '60px'
                 }}>
-                Terima kasih untuk para donatur yang telah berbagi kebaikan
+                Support our mission by becoming a donor
+              </div>
+            </div>
+
+            {/* Donation Form - Modern Design */}
+            <div style={{
+              position: 'relative',
+              maxWidth: '600px',
+              margin: '0 auto',
+              padding: '0 40px',
+              marginBottom: '150px'
+            }}>
+              <div style={{
+                backgroundColor: '#f5f5f5',
+                borderRadius: '32px',
+                padding: '48px',
+                boxShadow: '0 20px 40px rgba(0,0,0,0.05), 0 5px 12px rgba(0,0,0,0.03)',
+              }}>
+                <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+                  <h3 style={{
+                    fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
+                    fontSize: '28px',
+                    fontWeight: '600',
+                    color: '#000000',
+                    marginBottom: '8px'
+                  }}>
+                    Make a Donation
+                  </h3>
+                  <p style={{
+                    fontFamily: "'Questrial', sans-serif",
+                    fontSize: '16px',
+                    color: '#666666'
+                  }}>
+                    Your generosity makes a difference
+                  </p>
+                </div>
+
+                {/* Name Input */}
+                <div style={{ marginBottom: '24px' }}>
+                  <label style={{
+                    display: 'block',
+                    fontFamily: "'Questrial', sans-serif",
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    color: '#333',
+                    marginBottom: '8px'
+                  }}>
+                    Full Name
+                  </label>
+                  <input
+                    type="text"
+                    value={donationName}
+                    onChange={(e) => setDonationName(e.target.value)}
+                    placeholder="Enter your full name"
+                    style={{
+                      width: '100%',
+                      padding: '16px 20px',
+                      backgroundColor: '#ffffff',
+                      border: '1px solid #e0e0e0',
+                      borderRadius: '16px',
+                      fontSize: '16px',
+                      fontFamily: "'Questrial', sans-serif",
+                      color: '#000000',
+                      outline: 'none',
+                      transition: 'all 0.3s ease',
+                    }}
+                    onFocus={(e) => {
+                      e.currentTarget.style.borderColor = '#000000';
+                      e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0,0,0,0.05)';
+                    }}
+                    onBlur={(e) => {
+                      e.currentTarget.style.borderColor = '#e0e0e0';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }}
+                  />
+                </div>
+
+                {/* Email Input */}
+                <div style={{ marginBottom: '24px' }}>
+                  <label style={{
+                    display: 'block',
+                    fontFamily: "'Questrial', sans-serif",
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    color: '#333',
+                    marginBottom: '8px'
+                  }}>
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    value={donationEmail}
+                    onChange={(e) => setDonationEmail(e.target.value)}
+                    placeholder="your@email.com"
+                    style={{
+                      width: '100%',
+                      padding: '16px 20px',
+                      backgroundColor: '#ffffff',
+                      border: '1px solid #e0e0e0',
+                      borderRadius: '16px',
+                      fontSize: '16px',
+                      fontFamily: "'Questrial', sans-serif",
+                      color: '#000000',
+                      outline: 'none',
+                      transition: 'all 0.3s ease',
+                    }}
+                    onFocus={(e) => {
+                      e.currentTarget.style.borderColor = '#000000';
+                      e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0,0,0,0.05)';
+                    }}
+                    onBlur={(e) => {
+                      e.currentTarget.style.borderColor = '#e0e0e0';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }}
+                  />
+                </div>
+
+                {/* Amount Input with Preset Buttons */}
+                <div style={{ marginBottom: '24px' }}>
+                  <label style={{
+                    display: 'block',
+                    fontFamily: "'Questrial', sans-serif",
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    color: '#333',
+                    marginBottom: '8px'
+                  }}>
+                    Donation Amount
+                  </label>
+                  <div style={{
+                    display: 'flex',
+                    gap: '12px',
+                    marginBottom: '16px',
+                    flexWrap: 'wrap'
+                  }}>
+                    {[50000, 100000, 250000, 500000].map((amount) => (
+                      <button
+                        key={amount}
+                        onClick={() => setDonationAmount(formatNumberWithDots(amount.toString()))}
+                        style={{
+                          padding: '10px 20px',
+                          backgroundColor: donationAmount === formatNumberWithDots(amount.toString()) ? '#000000' : '#ffffff',
+                          color: donationAmount === formatNumberWithDots(amount.toString()) ? '#ffffff' : '#000000',
+                          border: donationAmount === formatNumberWithDots(amount.toString()) ? '1px solid #000000' : '1px solid #e0e0e0',
+                          borderRadius: '40px',
+                          fontSize: '14px',
+                          fontWeight: '500',
+                          fontFamily: "'Questrial', sans-serif",
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease',
+                        }}
+                      >
+                        {formatRupiah(amount)}
+                      </button>
+                    ))}
+                  </div>
+                  <input
+                    type="text"
+                    value={donationAmount}
+                    onChange={(e) => setDonationAmount(formatNumberWithDots(e.target.value))}
+                    placeholder="Or enter custom amount"
+                    style={{
+                      width: '100%',
+                      padding: '16px 20px',
+                      backgroundColor: '#ffffff',
+                      border: '1px solid #e0e0e0',
+                      borderRadius: '16px',
+                      fontSize: '16px',
+                      fontFamily: "'Questrial', sans-serif",
+                      color: '#000000',
+                      outline: 'none',
+                      transition: 'all 0.3s ease',
+                    }}
+                    onFocus={(e) => {
+                      e.currentTarget.style.borderColor = '#000000';
+                      e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0,0,0,0.05)';
+                    }}
+                    onBlur={(e) => {
+                      e.currentTarget.style.borderColor = '#e0e0e0';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }}
+                  />
+                </div>
+
+                {/* Message Input */}
+                <div style={{ marginBottom: '32px' }}>
+                  <label style={{
+                    display: 'block',
+                    fontFamily: "'Questrial', sans-serif",
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    color: '#333',
+                    marginBottom: '8px'
+                  }}>
+                    Donation Message
+                  </label>
+                  <textarea
+                    value={donationMessage}
+                    onChange={(e) => setDonationMessage(e.target.value)}
+                    placeholder="Write a message of support..."
+                    rows={4}
+                    style={{
+                      width: '100%',
+                      padding: '16px 20px',
+                      backgroundColor: '#ffffff',
+                      border: '1px solid #e0e0e0',
+                      borderRadius: '16px',
+                      fontSize: '16px',
+                      fontFamily: "'Questrial', sans-serif",
+                      color: '#000000',
+                      outline: 'none',
+                      resize: 'vertical',
+                      transition: 'all 0.3s ease',
+                    }}
+                    onFocus={(e) => {
+                      e.currentTarget.style.borderColor = '#000000';
+                      e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0,0,0,0.05)';
+                    }}
+                    onBlur={(e) => {
+                      e.currentTarget.style.borderColor = '#e0e0e0';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }}
+                  />
+                </div>
+
+                {/* Login with Google Button */}
+                {!user && (
+                  <div style={{ marginBottom: '24px' }}>
+                    <button
+                      onClick={handleGoogleLogin}
+                      style={{
+                        width: '100%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '12px',
+                        padding: '14px 20px',
+                        backgroundColor: '#ffffff',
+                        border: '1px solid #e0e0e0',
+                        borderRadius: '16px',
+                        fontSize: '16px',
+                        fontWeight: '500',
+                        fontFamily: "'Questrial', sans-serif",
+                        color: '#000000',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = '#f5f5f5';
+                        e.currentTarget.style.borderColor = '#000000';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = '#ffffff';
+                        e.currentTarget.style.borderColor = '#e0e0e0';
+                      }}
+                    >
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                      </svg>
+                      <span>Login with Google</span>
+                    </button>
+                    <p style={{
+                      fontSize: '12px',
+                      color: '#999',
+                      textAlign: 'center',
+                      marginTop: '12px',
+                      fontFamily: "'Questrial', sans-serif"
+                    }}>
+                      Login to save your donation history
+                    </p>
+                  </div>
+                )}
+
+                {/* User Info Display when logged in */}
+                {user && (
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    padding: '12px 16px',
+                    backgroundColor: '#f0f0f0',
+                    borderRadius: '16px',
+                    marginBottom: '24px'
+                  }}>
+                    <img 
+                      src={user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'User')}&background=000&color=fff&size=40`} 
+                      alt={user.displayName}
+                      style={{
+                        width: '40px',
+                        height: '40px',
+                        borderRadius: '50%',
+                        objectFit: 'cover',
+                      }}
+                    />
+                    <div style={{ flex: 1 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span style={{
+                          fontFamily: "'Questrial', sans-serif",
+                          fontSize: '14px',
+                          fontWeight: '500',
+                          color: '#000'
+                        }}>
+                          {user.displayName || user.email?.split('@')[0]}
+                        </span>
+                        <InstagramVerifiedBadge size={16} />
+                      </div>
+                      <span style={{
+                        fontFamily: "'Questrial', sans-serif",
+                        fontSize: '12px',
+                        color: '#666'
+                      }}>
+                        {user.email}
+                      </span>
+                    </div>
+                    <button
+                      onClick={handleLogout}
+                      style={{
+                        padding: '8px 16px',
+                        backgroundColor: 'transparent',
+                        border: '1px solid #ddd',
+                        borderRadius: '40px',
+                        fontSize: '12px',
+                        color: '#666',
+                        cursor: 'pointer',
+                        fontFamily: "'Questrial', sans-serif",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = '#000';
+                        e.currentTarget.style.color = '#fff';
+                        e.currentTarget.style.borderColor = '#000';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = 'transparent';
+                        e.currentTarget.style.color = '#666';
+                        e.currentTarget.style.borderColor = '#ddd';
+                      }}
+                    >
+                      Logout
+                    </button>
+                  </div>
+                )}
+
+                {/* Submit Button */}
+                <button
+                  onClick={handleDonate}
+                  disabled={isSubmitting || !donationAmount || !donationMessage || !donationName || !donationEmail}
+                  style={{
+                    width: '100%',
+                    padding: '18px',
+                    backgroundColor: '#000000',
+                    border: 'none',
+                    borderRadius: '40px',
+                    fontSize: '18px',
+                    fontWeight: '600',
+                    fontFamily: "'Questrial', sans-serif",
+                    color: '#ffffff',
+                    cursor: isSubmitting || !donationAmount || !donationMessage || !donationName || !donationEmail ? 'not-allowed' : 'pointer',
+                    opacity: isSubmitting || !donationAmount || !donationMessage || !donationName || !donationEmail ? 0.5 : 1,
+                    transition: 'all 0.2s ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isSubmitting && donationAmount && donationMessage && donationName && donationEmail) {
+                      e.currentTarget.style.backgroundColor = '#333';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = '#000000';
+                  }}
+                >
+                  {isSubmitting ? 'Processing...' : 'Send Donation →'}
+                </button>
               </div>
             </div>
 
@@ -1250,6 +1869,30 @@ export default function DonaturPage(): React.JSX.Element {
             <button ref={declineBtnRef} onClick={handleDecline} style={{ padding: '14px 32px', backgroundColor: '#ffffff', color: '#000000', border: '1.5px solid #e0e0e0', borderRadius: '60px', cursor: 'pointer', fontSize: '18px', fontWeight: '600', letterSpacing: '-0.01em', fontFamily: 'Questrial, sans-serif', transition: 'all 0.2s ease', position: 'relative', overflow: 'hidden', zIndex: 1, background: '#ffffff' }}>Decline</button>
             <button ref={acceptBtnRef} onClick={handleAccept} style={{ padding: '14px 32px', backgroundColor: '#ffffff', color: '#000000', border: '1.5px solid #e0e0e0', borderRadius: '60px', cursor: 'pointer', fontSize: '18px', fontWeight: '600', letterSpacing: '-0.01em', fontFamily: 'Questrial, sans-serif', transition: 'all 0.2s ease', position: 'relative', overflow: 'hidden', zIndex: 1, background: '#ffffff' }}>Accept</button>
           </div>
+        </div>
+      )}
+
+      {/* Success Notification */}
+      {showSuccess && (
+        <div
+          style={{
+            position: 'fixed',
+            bottom: '120px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            backgroundColor: '#000000',
+            color: '#ffffff',
+            padding: '16px 32px',
+            borderRadius: '60px',
+            fontSize: '16px',
+            zIndex: 1001,
+            fontWeight: '500',
+            fontFamily: 'Questrial, sans-serif',
+            boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
+            animation: 'slideUp 0.3s ease-out',
+          }}
+        >
+          {successMessage}
         </div>
       )}
     </>
