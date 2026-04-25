@@ -187,8 +187,8 @@ export default function DonaturPage(): React.JSX.Element {
     });
     
     doc.setFontSize(10);
-    doc.text("Thank you for your donation!", 105, doc.lastAutoTable.finalY + 20, { align: "center" });
-    doc.text("MENURU - Berbagi Kebaikan", 105, doc.lastAutoTable.finalY + 30, { align: "center" });
+    doc.text("Thank you for your donation!", 105, (doc as any).lastAutoTable.finalY + 20, { align: "center" });
+    doc.text("MENURU - Berbagi Kebaikan", 105, (doc as any).lastAutoTable.finalY + 30, { align: "center" });
     
     doc.save(`donation_${donation.id?.slice(-8)}.pdf`);
   };
@@ -1125,7 +1125,7 @@ export default function DonaturPage(): React.JSX.Element {
                               {donation.donorName}
                             </h4>
                             <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '13px', color: '#aaa' }}>•</span>
-                            <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '13px", color: '#aaa' }}>
+                            <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '13px', color: '#aaa' }}>
                               {donation.organization}
                             </span>
                           </div>
@@ -1152,8 +1152,8 @@ export default function DonaturPage(): React.JSX.Element {
                               marginTop: '8px',
                               textDecoration: 'underline'
                             }}
-                            onMouseEnter={(e) => e.currentTarget.style.color = '#000000'}
-                            onMouseLeave={(e) => e.currentTarget.style.color = '#999'}
+                            onMouseEnter={(e) => { (e.target as HTMLElement).style.color = '#000000'; }}
+                            onMouseLeave={(e) => { (e.target as HTMLElement).style.color = '#999'; }}
                           >
                             Download PDF
                           </button>
@@ -1191,8 +1191,8 @@ export default function DonaturPage(): React.JSX.Element {
                   opacity: 1,
                   marginBottom: '20px'
                 }}
-                onMouseEnter={(e) => e.currentTarget.style.opacity = '0.5'}
-                onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+                onMouseEnter={(e) => { (e.target as HTMLElement).style.opacity = '0.5'; }}
+                onMouseLeave={(e) => { (e.target as HTMLElement).style.opacity = '1'; }}
               >
                 contact.menuru@gmail.com
               </div>
