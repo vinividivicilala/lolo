@@ -7,32 +7,55 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ScrollSmoother } from "gsap/ScrollSmoother";
 import { SplitText } from "gsap/SplitText";
 import Link from "next/link";
-import { initializeApp } from "firebase/app";
-import { getFirestore, collection, addDoc, getDocs, query, orderBy } from "firebase/firestore";
+import { 
+  getFirestore, 
+  collection, 
+  query, 
+  orderBy, 
+  onSnapshot,
+  doc,
+  updateDoc,
+  Timestamp,
+  arrayUnion,
+  arrayRemove,
+  increment as firestoreIncrement
+} from "firebase/firestore";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { initializeApp, getApps } from "firebase/app";
 
-// Firebase configuration
+// Konfigurasi Firebase
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyD_htQZ1TClnXKZGRJ4izbMQ02y6V3aNAQ",
+  authDomain: "wawa44-58d1e.firebaseapp.com",
+  databaseURL: "https://wawa44-58d1e-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "wawa44-58d1e",
+  storageBucket: "wawa44-58d1e.firebasestorage.app",
+  messagingSenderId: "836899520599",
+  appId: "1:836899520599:web:b346e4370ecfa9bb89e312",
+  measurementId: "G-8LMP7F4BE9"
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+let app = null;
+let db = null;
+let auth = null;
+
+if (typeof window !== "undefined") {
+  app = getApps().length === 0
+    ? initializeApp(firebaseConfig)
+    : getApps()[0];
+  db = getFirestore(app);
+  auth = getAuth(app);
+}
+
 
 // Register GSAP plugins
 if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger, ScrollSmoother, SplitText);
 }
 
-// Donation type definition
 interface Donation {
   id?: string;
-  title: string;
+  donorName: string;
   description: string;
   totalAmount: number;
   organization: string;
@@ -47,7 +70,7 @@ export default function DonaturPage(): React.JSX.Element {
   const [isDonationFormOpen, setIsDonationFormOpen] = useState(false);
   const [donations, setDonations] = useState<Donation[]>([]);
   const [formData, setFormData] = useState({
-    title: '',
+    donorName: '',
     description: '',
     totalAmount: '',
     organization: '',
@@ -84,6 +107,7 @@ export default function DonaturPage(): React.JSX.Element {
     community: useRef<HTMLDivElement>(null),
     donation: useRef<HTMLDivElement>(null),
     calendar: useRef<HTMLDivElement>(null),
+    contact: useRef<HTMLDivElement>(null),
   };
 
   // Load donations from Firebase
@@ -93,7 +117,7 @@ export default function DonaturPage(): React.JSX.Element {
 
   const loadDonations = async () => {
     try {
-      const q = query(collection(db, "donations"), orderBy("createdAt", "desc"));
+      const q = query(collection(db, "donations"), orderBy("createdAt", "desc"), limit(50));
       const querySnapshot = await getDocs(q);
       const loadedDonations: Donation[] = [];
       querySnapshot.forEach((doc) => {
@@ -106,14 +130,14 @@ export default function DonaturPage(): React.JSX.Element {
   };
 
   const handleCreateDonation = async () => {
-    if (!formData.title.trim() || !formData.description.trim() || !formData.totalAmount || !formData.organization.trim() || !formData.date) {
+    if (!formData.donorName.trim() || !formData.description.trim() || !formData.totalAmount || !formData.organization.trim() || !formData.date) {
       return;
     }
 
     setIsSubmitting(true);
     try {
       const newDonation: Omit<Donation, 'id'> = {
-        title: formData.title,
+        donorName: formData.donorName,
         description: formData.description,
         totalAmount: parseFloat(formData.totalAmount),
         organization: formData.organization,
@@ -125,7 +149,7 @@ export default function DonaturPage(): React.JSX.Element {
       setDonations([{ id: docRef.id, ...newDonation }, ...donations]);
       
       // Reset form and close
-      setFormData({ title: '', description: '', totalAmount: '', organization: '', date: '' });
+      setFormData({ donorName: '', description: '', totalAmount: '', organization: '', date: '' });
       setIsDonationFormOpen(false);
     } catch (error) {
       console.error("Error creating donation:", error);
@@ -160,7 +184,7 @@ export default function DonaturPage(): React.JSX.Element {
       
       const menuItems = [
         menuItemRefs.note, menuItemRefs.blog, menuItemRefs.community,
-        menuItemRefs.donation, menuItemRefs.calendar
+        menuItemRefs.donation, menuItemRefs.calendar, menuItemRefs.contact
       ];
       
       menuItems.forEach((item, index) => {
@@ -194,22 +218,22 @@ export default function DonaturPage(): React.JSX.Element {
       
       gsap.fromTo(modal,
         { scale: 0.95, opacity: 0, y: 20 },
-        { scale: 1, opacity: 1, y: 0, duration: 0.5, ease: "back.out(0.8)" }
+        { scale: 1, opacity: 1, y: 0, duration: 0.4, ease: "back.out(0.8)" }
       );
       
       gsap.fromTo(overlay,
         { opacity: 0 },
-        { opacity: 1, duration: 0.3 }
+        { opacity: 1, duration: 0.2 }
       );
     } else if (!isDonationFormOpen && modal && overlay) {
       gsap.to(modal, {
-        scale: 0.95, opacity: 0, y: 20, duration: 0.3,
+        scale: 0.95, opacity: 0, y: 20, duration: 0.2,
         onComplete: () => {
           modal.style.display = 'none';
           overlay.style.display = 'none';
         }
       });
-      gsap.to(overlay, { opacity: 0, duration: 0.3 });
+      gsap.to(overlay, { opacity: 0, duration: 0.2 });
     }
   }, [isDonationFormOpen]);
 
@@ -224,7 +248,6 @@ export default function DonaturPage(): React.JSX.Element {
     }
   }, [isMenuHovered]);
 
-  // Animasi hover untuk menu items di drawer
   const handleMenuItemHover = (ref: React.RefObject<HTMLDivElement>, isHover: boolean) => {
     if (ref.current) {
       gsap.to(ref.current, {
@@ -255,7 +278,6 @@ export default function DonaturPage(): React.JSX.Element {
     }
   };
 
-  // Fungsi untuk mendapatkan huruf random (A-Z)
   const getRandomChar = () => {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
     return chars[Math.floor(Math.random() * chars.length)];
@@ -294,7 +316,6 @@ export default function DonaturPage(): React.JSX.Element {
     element.textContent = originalText;
   };
 
-  // Inisialisasi ScrollSmoother
   useEffect(() => {
     const initSmoother = () => {
       if (typeof window !== 'undefined' && !smootherRef.current) {
@@ -318,7 +339,6 @@ export default function DonaturPage(): React.JSX.Element {
     };
   }, []);
 
-  // GSAP SplitText animations
   useEffect(() => {
     if (donaturTitleRef.current) {
       const splitDonatur = new SplitText(donaturTitleRef.current, {
@@ -392,13 +412,11 @@ export default function DonaturPage(): React.JSX.Element {
     return () => ScrollTrigger.getAll().forEach(trigger => trigger.kill());
   }, []);
 
-  // Cookie consent
   useEffect(() => {
     const consent = localStorage.getItem('cookieConsent');
     if (consent === null) setShowPopup(true);
   }, []);
 
-  // Cookie popup hover effect
   useEffect(() => {
     if (showPopup && acceptBtnRef.current && declineBtnRef.current) {
       const style = document.createElement('style');
@@ -436,6 +454,11 @@ export default function DonaturPage(): React.JSX.Element {
   const openDonationForm = () => setIsDonationFormOpen(true);
   const closeDonationForm = () => setIsDonationFormOpen(false);
 
+  // Format currency
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount);
+  };
+
   return (
     <>
       <style jsx global>{`
@@ -456,14 +479,10 @@ export default function DonaturPage(): React.JSX.Element {
           padding: 12px 0;
           transition: border-color 0.3s ease;
           outline: none;
+          width: 100%;
         }
-        input:focus, textarea:focus, select:focus {
-          border-bottom-color: #000000;
-        }
-        textarea {
-          resize: vertical;
-          min-height: 80px;
-        }
+        input:focus, textarea:focus, select:focus { border-bottom-color: #000000; }
+        textarea { resize: vertical; min-height: 80px; }
       `}</style>
       
       <div id="smooth-wrapper-donatur">
@@ -645,7 +664,6 @@ export default function DonaturPage(): React.JSX.Element {
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
                     <span style={{ fontFamily: "'Inter', sans-serif", fontSize: '64px', fontWeight: '300', color: '#ffffff' }}>Donation</span>
-                    {/* North East Arrow SVG */}
                     <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
@@ -660,6 +678,17 @@ export default function DonaturPage(): React.JSX.Element {
                   style={{ display: 'flex', alignItems: 'center', gap: '20px', cursor: 'pointer', opacity: 0 }}
                 >
                   <span style={{ fontFamily: "'Inter', sans-serif", fontSize: '64px', fontWeight: '300', color: '#ffffff' }}>Calendar</span>
+                </div>
+
+                {/* Contact menu item - Dikembalikan */}
+                <div
+                  ref={menuItemRefs.contact}
+                  onMouseEnter={() => handleMenuItemHover(menuItemRefs.contact, true)}
+                  onMouseLeave={() => handleMenuItemHover(menuItemRefs.contact, false)}
+                  onClick={() => handleMenuItemClick(menuItemRefs.contact, '/contact')}
+                  style={{ display: 'flex', alignItems: 'center', gap: '20px', cursor: 'pointer', opacity: 0 }}
+                >
+                  <span style={{ fontFamily: "'Inter', sans-serif", fontSize: '64px', fontWeight: '300', color: '#ffffff' }}>Contact</span>
                 </div>
               </div>
             </div>
@@ -690,32 +719,51 @@ export default function DonaturPage(): React.JSX.Element {
               <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '48px', color: '#000000', textTransform: 'uppercase' }}>MENURU</span>
             </div>
 
-            {/* CREATE DONATION BUTTON */}
-            <div style={{ position: 'fixed', bottom: '30px', right: '30px', zIndex: 100 }}>
+            {/* Navbar Kanan: Create Donation + Nama User */}
+            <div style={{
+              position: 'fixed',
+              top: '20px',
+              right: '40px',
+              zIndex: 100,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '24px',
+              pointerEvents: 'auto'
+            }}>
+              {/* Nama User */}
+              <div style={{
+                fontFamily: "'Questrial', sans-serif",
+                fontSize: '16px',
+                color: '#000000',
+                padding: '10px 0'
+              }}>
+                Hi, Donatur
+              </div>
+              
+              {/* Create Donation Button */}
               <button
                 ref={createDonationBtnRef}
                 onClick={openDonationForm}
                 style={{
                   fontFamily: "'Questrial', sans-serif",
-                  fontSize: '18px',
+                  fontSize: '14px',
                   color: '#ffffff',
                   backgroundColor: '#000000',
                   border: 'none',
                   borderRadius: '60px',
-                  padding: '16px 32px',
+                  padding: '10px 20px',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '12px',
+                  gap: '8px',
                   transition: 'transform 0.3s ease'
                 }}
-                onMouseEnter={(e) => gsap.to(e.currentTarget, { scale: 1.05, duration: 0.3 })}
-                onMouseLeave={(e) => gsap.to(e.currentTarget, { scale: 1, duration: 0.3 })}
+                onMouseEnter={(e) => gsap.to(e.currentTarget, { scale: 1.05, duration: 0.2 })}
+                onMouseLeave={(e) => gsap.to(e.currentTarget, { scale: 1, duration: 0.2 })}
               >
-                <span>Create Donation</span>
-                {/* North West Arrow SVG */}
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M17 7L7 17M7 17H17M7 17V7" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <span>+ Create</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </button>
             </div>
@@ -738,91 +786,87 @@ export default function DonaturPage(): React.JSX.Element {
               left: '50%',
               transform: 'translate(-50%, -50%)',
               width: '90%',
-              maxWidth: '600px',
+              maxWidth: '550px',
               backgroundColor: '#ffffff',
               zIndex: 301,
               display: 'none',
               borderRadius: '24px',
               overflow: 'hidden'
             }}>
-              <div style={{ padding: '48px', position: 'relative' }}>
+              <div style={{ padding: '40px', position: 'relative' }}>
                 <button
                   onClick={closeDonationForm}
                   style={{
                     position: 'absolute',
-                    top: '24px',
-                    right: '24px',
+                    top: '20px',
+                    right: '20px',
                     background: 'none',
                     border: 'none',
                     cursor: 'pointer',
                     padding: '8px'
                   }}
                 >
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                     <path d="M18 6L6 18M6 6L18 18" stroke="#000000" strokeWidth="2" strokeLinecap="round"/>
                   </svg>
                 </button>
 
                 <h2 style={{
                   fontFamily: "'Inter', sans-serif",
-                  fontSize: '28px',
-                  fontWeight: '300',
+                  fontSize: '24px',
+                  fontWeight: '400',
                   color: '#000000',
-                  marginBottom: '32px',
+                  marginBottom: '28px',
                   letterSpacing: '-0.02em'
-                }}>Create New Donation</h2>
+                }}>Create Donation</h2>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
                   <div>
-                    <label style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', color: '#666', display: 'block', marginBottom: '8px' }}>Title</label>
+                    <label style={{ fontFamily: "'Questrial', sans-serif", fontSize: '13px', color: '#999', display: 'block', marginBottom: '6px' }}>Donor Name</label>
                     <input
                       type="text"
-                      value={formData.title}
-                      onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                      placeholder="e.g., Education Fund"
-                      style={{ width: '100%' }}
+                      value={formData.donorName}
+                      onChange={(e) => setFormData({ ...formData, donorName: e.target.value })}
+                      placeholder="Your name"
                     />
                   </div>
 
                   <div>
-                    <label style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', color: '#666', display: 'block', marginBottom: '8px' }}>Description</label>
+                    <label style={{ fontFamily: "'Questrial', sans-serif", fontSize: '13px', color: '#999', display: 'block', marginBottom: '6px' }}>Description</label>
                     <textarea
                       value={formData.description}
                       onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                      placeholder="Describe the purpose of this donation..."
-                      style={{ width: '100%' }}
+                      placeholder="What this donation for..."
+                      rows={3}
                     />
                   </div>
 
                   <div>
-                    <label style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', color: '#666', display: 'block', marginBottom: '8px' }}>Total Amount (IDR)</label>
+                    <label style={{ fontFamily: "'Questrial', sans-serif", fontSize: '13px', color: '#999', display: 'block', marginBottom: '6px' }}>Total Amount (IDR)</label>
                     <input
                       type="number"
                       value={formData.totalAmount}
                       onChange={(e) => setFormData({ ...formData, totalAmount: e.target.value })}
                       placeholder="e.g., 10000000"
-                      style={{ width: '100%' }}
                     />
                   </div>
 
                   <div>
-                    <label style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', color: '#666', display: 'block', marginBottom: '8px' }}>Organization / PT / Institution</label>
+                    <label style={{ fontFamily: "'Questrial', sans-serif", fontSize: '13px', color: '#999', display: 'block', marginBottom: '6px' }}>Organization / PT</label>
                     <input
                       type="text"
                       value={formData.organization}
                       onChange={(e) => setFormData({ ...formData, organization: e.target.value })}
-                      placeholder="e.g., Yayasan ABC"
-                      style={{ width: '100%' }}
+                      placeholder="Institution name"
                     />
                   </div>
 
                   <div>
-                    <label style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', color: '#666', display: 'block', marginBottom: '8px' }}>Date</label>
+                    <label style={{ fontFamily: "'Questrial', sans-serif", fontSize: '13px', color: '#999', display: 'block', marginBottom: '6px' }}>Date</label>
                     <input
                       type="date"
                       value={formData.date}
                       onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                      style={{ width: '100%' }}
                     />
                   </div>
 
@@ -831,19 +875,19 @@ export default function DonaturPage(): React.JSX.Element {
                     disabled={isSubmitting}
                     style={{
                       fontFamily: "'Questrial', sans-serif",
-                      fontSize: '16px',
+                      fontSize: '15px',
                       color: '#ffffff',
                       backgroundColor: '#000000',
                       border: 'none',
                       borderRadius: '60px',
-                      padding: '14px 28px',
+                      padding: '12px 24px',
                       cursor: isSubmitting ? 'not-allowed' : 'pointer',
-                      marginTop: '16px',
+                      marginTop: '12px',
                       opacity: isSubmitting ? 0.6 : 1,
-                      transition: 'transform 0.3s ease'
+                      transition: 'transform 0.2s ease'
                     }}
-                    onMouseEnter={(e) => !isSubmitting && gsap.to(e.currentTarget, { scale: 1.02, duration: 0.3 })}
-                    onMouseLeave={(e) => !isSubmitting && gsap.to(e.currentTarget, { scale: 1, duration: 0.3 })}
+                    onMouseEnter={(e) => !isSubmitting && gsap.to(e.currentTarget, { scale: 1.02, duration: 0.2 })}
+                    onMouseLeave={(e) => !isSubmitting && gsap.to(e.currentTarget, { scale: 1, duration: 0.2 })}
                   >
                     {isSubmitting ? 'Creating...' : 'Create Donation'}
                   </button>
@@ -852,28 +896,28 @@ export default function DonaturPage(): React.JSX.Element {
             </div>
 
             {/* Teks Donatur besar */}
-            <div style={{ position: 'relative', top: '120px', left: '40px', zIndex: 10, width: 'calc(100% - 80px)', marginBottom: '100px' }}>
+            <div style={{ position: 'relative', top: '120px', left: '40px', zIndex: 10, width: 'calc(100% - 80px)', marginBottom: '80px' }}>
               <div ref={donaturTitleRef} style={{
                 fontFamily: "'Inter', sans-serif",
-                fontSize: '300px',
+                fontSize: '280px',
                 fontWeight: '300',
                 color: '#000000',
                 textAlign: 'left',
                 letterSpacing: '-0.02em',
-                lineHeight: '1'
+                lineHeight: '0.9'
               }}>Donatur</div>
               <div ref={donaturUnderlineRef} style={{ width: '0%', height: '2px', backgroundColor: '#000000', marginTop: '20px', opacity: 0 }} />
             </div>
 
             {/* Info Text */}
-            <div style={{ position: 'relative', top: '150px', left: '40px', right: '40px', zIndex: 10, marginBottom: '200px' }}>
+            <div style={{ position: 'relative', top: '100px', left: '40px', right: '40px', zIndex: 10, marginBottom: '150px' }}>
               <div ref={infoTextRef} style={{
                 fontFamily: "'Questrial', sans-serif",
-                fontSize: '64px',
+                fontSize: '56px',
                 color: '#000000',
                 textAlign: 'center',
                 lineHeight: '1.2',
-                marginBottom: '100px'
+                marginBottom: '80px'
               }}>Terima kasih untuk para donatur yang telah berbagi kebaikan</div>
             </div>
 
@@ -881,41 +925,44 @@ export default function DonaturPage(): React.JSX.Element {
             <div style={{
               position: 'relative',
               width: 'calc(100% - 160px)',
-              margin: '0 auto 150px auto',
+              margin: '0 auto 120px auto',
               padding: '0 40px'
             }}>
               <h3 style={{
                 fontFamily: "'Inter', sans-serif",
-                fontSize: '24px',
+                fontSize: '20px',
                 fontWeight: '400',
                 color: '#000000',
-                marginBottom: '48px',
+                marginBottom: '40px',
                 letterSpacing: '-0.02em',
                 borderBottom: '1px solid #e0e0e0',
-                paddingBottom: '16px'
+                paddingBottom: '12px'
               }}>Recent Donations</h3>
               
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                 {donations.length === 0 ? (
-                  <p style={{ fontFamily: "'Questrial', sans-serif", fontSize: '18px', color: '#999', textAlign: 'center', padding: '60px 0' }}>No donations yet. Create one above.</p>
+                  <p style={{ fontFamily: "'Questrial', sans-serif", fontSize: '16px', color: '#999', textAlign: 'center', padding: '40px 0' }}>No donations yet. Create one above.</p>
                 ) : (
                   donations.map((donation) => (
                     <div key={donation.id} style={{
-                      borderBottom: '1px solid #e0e0e0',
-                      paddingBottom: '24px',
-                      transition: 'transform 0.3s ease'
+                      borderBottom: '1px solid #f0f0f0',
+                      paddingBottom: '20px',
+                      transition: 'transform 0.2s ease'
                     }}
-                    onMouseEnter={(e) => gsap.to(e.currentTarget, { x: 10, duration: 0.3 })}
-                    onMouseLeave={(e) => gsap.to(e.currentTarget, { x: 0, duration: 0.3 })}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
-                        <div>
-                          <h4 style={{ fontFamily: "'Inter', sans-serif", fontSize: '20px', fontWeight: '500', color: '#000000', margin: 0 }}>{donation.title}</h4>
-                          <p style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', color: '#666', margin: '8px 0 4px 0' }}>{donation.organization}</p>
-                          <p style={{ fontFamily: "'Questrial', sans-serif", fontSize: '16px', color: '#333', margin: '8px 0 0 0', lineHeight: '1.4' }}>{donation.description}</p>
+                    onMouseEnter={(e) => gsap.to(e.currentTarget, { x: 8, duration: 0.2 })}
+                    onMouseLeave={(e) => gsap.to(e.currentTarget, { x: 0, duration: 0.2 })}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '6px', flexWrap: 'wrap' }}>
+                            <h4 style={{ fontFamily: "'Inter', sans-serif", fontSize: '18px', fontWeight: '500', color: '#000000', margin: 0 }}>{donation.donorName}</h4>
+                            <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '13px', color: '#aaa' }}>•</span>
+                            <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '13px', color: '#aaa' }}>{donation.organization}</span>
+                          </div>
+                          <p style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', color: '#666', margin: '6px 0 0 0', lineHeight: '1.4' }}>{donation.description}</p>
                         </div>
                         <div style={{ textAlign: 'right' }}>
-                          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: '28px', fontWeight: '500', color: '#000000', margin: 0 }}>Rp {donation.totalAmount.toLocaleString('id-ID')}</p>
-                          <p style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', color: '#999', margin: '8px 0 0 0' }}>{new Date(donation.date).toLocaleDateString('id-ID')}</p>
+                          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: '20px', fontWeight: '500', color: '#000000', margin: 0 }}>{formatCurrency(donation.totalAmount)}</p>
+                          <p style={{ fontFamily: "'Questrial', sans-serif", fontSize: '12px', color: '#bbb', margin: '6px 0 0 0' }}>{new Date(donation.date).toLocaleDateString('id-ID')}</p>
                         </div>
                       </div>
                     </div>
@@ -924,7 +971,7 @@ export default function DonaturPage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* Email dan Medsos - Contact section tetap */}
+            {/* Email dan Medsos - Contact section tetap SAMA PERSIS seperti semula */}
             <div style={{
               position: 'relative',
               width: '100%',
@@ -943,13 +990,18 @@ export default function DonaturPage(): React.JSX.Element {
                   fontFamily: "'Questrial', sans-serif",
                   fontSize: '32px',
                   color: '#000000',
+                  fontWeight: '400',
+                  letterSpacing: '0.02em',
                   cursor: 'pointer',
                   transition: 'opacity 0.3s ease',
+                  opacity: 1,
                   marginBottom: '20px'
                 }}
                 onMouseEnter={(e) => e.currentTarget.style.opacity = '0.5'}
                 onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
-              >contact.menuru@gmail.com</div>
+              >
+                contact.menuru@gmail.com
+              </div>
 
               <div style={{
                 display: 'flex',
@@ -960,30 +1012,60 @@ export default function DonaturPage(): React.JSX.Element {
                 transform: 'translateX(-50%)',
                 marginBottom: '20px'
               }}>
-                <div className="social-item" style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
-                  onMouseEnter={(e) => { const text = e.currentTarget.querySelector('.social-text') as HTMLElement; if (text) handleSocialHover(text, 'Instagram'); }}
-                  onMouseLeave={(e) => { const text = e.currentTarget.querySelector('.social-text') as HTMLElement; if (text) handleSocialLeave(text, 'Instagram'); }}
-                  onClick={() => handleSocialClick('Instagram')}>
-                  <span ref={igRef} className="social-text" style={{ fontFamily: "'Questrial', sans-serif", fontSize: '28px', color: '#000000' }}>Instagram</span>
+                <div 
+                  className="social-item"
+                  style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
+                  onMouseEnter={(e) => {
+                    const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
+                    if (textElement) handleSocialHover(textElement, 'Instagram');
+                  }}
+                  onMouseLeave={(e) => {
+                    const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
+                    if (textElement) handleSocialLeave(textElement, 'Instagram');
+                  }}
+                  onClick={() => handleSocialClick('Instagram')}
+                >
+                  <span ref={igRef} className="social-text" style={{ fontFamily: "'Questrial', sans-serif", fontSize: '28px', color: '#000000', fontWeight: '400', letterSpacing: '0.02em' }}>Instagram</span>
                 </div>
-                <div className="social-item" style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
-                  onMouseEnter={(e) => { const text = e.currentTarget.querySelector('.social-text') as HTMLElement; if (text) handleSocialHover(text, 'X'); }}
-                  onMouseLeave={(e) => { const text = e.currentTarget.querySelector('.social-text') as HTMLElement; if (text) handleSocialLeave(text, 'X'); }}
-                  onClick={() => handleSocialClick('X')}>
-                  <span ref={xRef} className="social-text" style={{ fontFamily: "'Questrial', sans-serif", fontSize: '28px', color: '#000000' }}>X</span>
+                <div 
+                  className="social-item"
+                  style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
+                  onMouseEnter={(e) => {
+                    const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
+                    if (textElement) handleSocialHover(textElement, 'X');
+                  }}
+                  onMouseLeave={(e) => {
+                    const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
+                    if (textElement) handleSocialLeave(textElement, 'X');
+                  }}
+                  onClick={() => handleSocialClick('X')}
+                >
+                  <span ref={xRef} className="social-text" style={{ fontFamily: "'Questrial', sans-serif", fontSize: '28px', color: '#000000', fontWeight: '400', letterSpacing: '0.02em' }}>X</span>
                 </div>
-                <div className="social-item" style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
-                  onMouseEnter={(e) => { const text = e.currentTarget.querySelector('.social-text') as HTMLElement; if (text) handleSocialHover(text, 'LinkedIn'); }}
-                  onMouseLeave={(e) => { const text = e.currentTarget.querySelector('.social-text') as HTMLElement; if (text) handleSocialLeave(text, 'LinkedIn'); }}
-                  onClick={() => handleSocialClick('LinkedIn')}>
-                  <span ref={linkedinRef} className="social-text" style={{ fontFamily: "'Questrial', sans-serif", fontSize: '28px', color: '#000000' }}>LinkedIn</span>
+                <div 
+                  className="social-item"
+                  style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
+                  onMouseEnter={(e) => {
+                    const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
+                    if (textElement) handleSocialHover(textElement, 'LinkedIn');
+                  }}
+                  onMouseLeave={(e) => {
+                    const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
+                    if (textElement) handleSocialLeave(textElement, 'LinkedIn');
+                  }}
+                  onClick={() => handleSocialClick('LinkedIn')}
+                >
+                  <span ref={linkedinRef} className="social-text" style={{ fontFamily: "'Questrial', sans-serif", fontSize: '28px', color: '#000000', fontWeight: '400', letterSpacing: '0.02em' }}>LinkedIn</span>
                 </div>
               </div>
             </div>
 
-            {/* Footer */}
+            {/* Footer SAMA PERSIS seperti semula */}
             <footer style={{
               position: 'relative',
+              bottom: 0,
+              left: 0,
+              right: 0,
               width: '100%',
               display: 'flex',
               flexDirection: 'column',
@@ -993,18 +1075,28 @@ export default function DonaturPage(): React.JSX.Element {
               pointerEvents: 'none',
               zIndex: 1
             }}>
-              <div ref={lineRef} style={{ width: '0%', height: '2px', backgroundColor: '#000000', marginBottom: '60px', opacity: 0 }} />
+              <div ref={lineRef} style={{ width: '0%', height: '2px', backgroundColor: '#000000', marginRight: '0', marginBottom: '60px', opacity: 0 }} />
               <span ref={menuruTextRef} style={{ 
-                fontFamily: "'Bebas Neue', sans-serif", 
+                fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif", 
+                fontWeight: 'normal', 
                 fontSize: '600px', 
                 color: '#000000', 
                 textAlign: 'right', 
                 letterSpacing: '-0.02em', 
+                opacity: 1, 
                 textTransform: 'uppercase', 
                 lineHeight: '0.7', 
-                whiteSpace: 'nowrap',
-                transform: 'translateY(10px)'
-              }}>MENURU</span>
+                whiteSpace: 'nowrap', 
+                WebkitFontSmoothing: 'antialiased', 
+                MozOsxFontSmoothing: 'grayscale', 
+                fontKerning: 'normal', 
+                margin: 0, 
+                padding: 0, 
+                transform: 'translateY(10px)', 
+                marginRight: '0' 
+              }}>
+                MENURU
+              </span>
             </footer>
           </div>
         </div>
@@ -1016,29 +1108,35 @@ export default function DonaturPage(): React.JSX.Element {
           position: 'fixed',
           bottom: '30px',
           left: '30px',
+          width: 'auto',
+          maxWidth: 'calc(100vw - 60px)',
           backgroundColor: '#ffffff',
+          color: '#000000',
           borderRadius: '32px',
           padding: '24px 32px',
-          boxShadow: '0 20px 40px rgba(0,0,0,0.15)',
+          boxShadow: '0 20px 40px rgba(0,0,0,0.15), 0 5px 12px rgba(0,0,0,0.05)',
           zIndex: 1000,
           fontFamily: 'Questrial, sans-serif',
+          animation: 'slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
+          border: '1px solid rgba(0,0,0,0.05)',
           display: 'flex',
           flexDirection: 'row',
           alignItems: 'center',
           gap: '32px',
           flexWrap: 'wrap',
         }}>
+          <style>{`@keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }`}</style>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <span style={{ fontSize: '56px' }}>🍪</span>
-              <span style={{ fontSize: '36px', fontWeight: '700', letterSpacing: '-0.02em' }}>cookies.</span>
+              <span style={{ fontSize: '56px', display: 'inline-block' }}>🍪</span>
+              <span style={{ fontWeight: '700', fontSize: '36px', letterSpacing: '-0.02em', background: 'linear-gradient(135deg, #000000 0%, #333333 100%)', backgroundClip: 'text', WebkitBackgroundClip: 'text', color: 'transparent', fontFamily: 'Questrial, sans-serif' }}>cookies.</span>
             </div>
-            <p style={{ fontSize: '20px', lineHeight: '1.4', maxWidth: '280px' }}>I use cookies to understand how you navigate<br />this site and what topics interest you most.</p>
-            <span style={{ color: '#666', fontSize: '18px' }}>No ads, no data sold ever.</span>
+            <p style={{ fontSize: '20px', lineHeight: '1.4', marginBottom: 0, color: '#1a1a1a', fontWeight: '400', letterSpacing: '-0.01em', maxWidth: '280px', fontFamily: 'Questrial, sans-serif' }}>I use cookies to understand how you navigate<br />this site and what topics interest you most.</p>
+            <span style={{ color: '#666', fontSize: '18px', display: 'inline-block', marginTop: '4px', fontFamily: 'Questrial, sans-serif' }}>No ads, no data sold ever.</span>
           </div>
-          <div style={{ display: 'flex', gap: '16px' }}>
-            <button ref={declineBtnRef} onClick={handleDecline} style={{ padding: '14px 32px', backgroundColor: '#ffffff', border: '1.5px solid #e0e0e0', borderRadius: '60px', cursor: 'pointer', fontSize: '18px', fontWeight: '600' }}>Decline</button>
-            <button ref={acceptBtnRef} onClick={handleAccept} style={{ padding: '14px 32px', backgroundColor: '#ffffff', border: '1.5px solid #e0e0e0', borderRadius: '60px', cursor: 'pointer', fontSize: '18px', fontWeight: '600' }}>Accept</button>
+          <div style={{ display: 'flex', gap: '16px', justifyContent: 'flex-start', flexShrink: 0 }}>
+            <button ref={declineBtnRef} onClick={handleDecline} style={{ padding: '14px 32px', backgroundColor: '#ffffff', color: '#000000', border: '1.5px solid #e0e0e0', borderRadius: '60px', cursor: 'pointer', fontSize: '18px', fontWeight: '600', letterSpacing: '-0.01em', fontFamily: 'Questrial, sans-serif', transition: 'all 0.2s ease', position: 'relative', overflow: 'hidden', zIndex: 1, background: '#ffffff' }}>Decline</button>
+            <button ref={acceptBtnRef} onClick={handleAccept} style={{ padding: '14px 32px', backgroundColor: '#ffffff', color: '#000000', border: '1.5px solid #e0e0e0', borderRadius: '60px', cursor: 'pointer', fontSize: '18px', fontWeight: '600', letterSpacing: '-0.01em', fontFamily: 'Questrial, sans-serif', transition: 'all 0.2s ease', position: 'relative', overflow: 'hidden', zIndex: 1, background: '#ffffff' }}>Accept</button>
           </div>
         </div>
       )}
