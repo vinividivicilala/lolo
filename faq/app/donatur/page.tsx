@@ -7,21 +7,31 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ScrollSmoother } from "gsap/ScrollSmoother";
 import { SplitText } from "gsap/SplitText";
 import Link from "next/link";
+import { initializeApp, getApps } from "firebase/app";
+import { 
+  getAuth, 
+  onAuthStateChanged,
+  signInWithPopup,
+  GoogleAuthProvider,
+  signOut 
+} from "firebase/auth";
 import { 
   getFirestore, 
   collection, 
+  doc, 
+  setDoc, 
   query, 
   orderBy, 
-  onSnapshot,
-  doc,
-  updateDoc,
   Timestamp,
+  updateDoc,
   arrayUnion,
   arrayRemove,
-  increment as firestoreIncrement
+  addDoc,
+  onSnapshot,
+  increment
 } from "firebase/firestore";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { initializeApp, getApps } from "firebase/app";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 // Konfigurasi Firebase
 const firebaseConfig = {
@@ -35,18 +45,11 @@ const firebaseConfig = {
   measurementId: "G-8LMP7F4BE9"
 };
 
-let app = null;
-let db = null;
-let auth = null;
-
-if (typeof window !== "undefined") {
-  app = getApps().length === 0
-    ? initializeApp(firebaseConfig)
-    : getApps()[0];
-  db = getFirestore(app);
-  auth = getAuth(app);
-}
-
+// Initialize Firebase
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApps()[0];
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
+const db = getFirestore(app);
 
 // Register GSAP plugins
 if (typeof window !== 'undefined') {
@@ -56,6 +59,8 @@ if (typeof window !== 'undefined') {
 interface Donation {
   id?: string;
   donorName: string;
+  donorEmail: string;
+  donorPhoto?: string;
   description: string;
   totalAmount: number;
   organization: string;
@@ -64,6 +69,8 @@ interface Donation {
 }
 
 export default function DonaturPage(): React.JSX.Element {
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   const [showPopup, setShowPopup] = useState(false);
   const [isMenuHovered, setIsMenuHovered] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -98,7 +105,6 @@ export default function DonaturPage(): React.JSX.Element {
   const menuDrawerRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLDivElement>(null);
   const menuMenuruTextRef = useRef<HTMLSpanElement>(null);
-  const createDonationBtnRef = useRef<HTMLButtonElement>(null);
 
   // Refs untuk menu items di drawer
   const menuItemRefs = {
@@ -110,26 +116,97 @@ export default function DonaturPage(): React.JSX.Element {
     contact: useRef<HTMLDivElement>(null),
   };
 
-  // Load donations from Firebase
+  // Auth state listener
   useEffect(() => {
-    loadDonations();
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUser(user);
+      setLoading(false);
+      if (user) {
+        setFormData(prev => ({ ...prev, donorName: user.displayName || '' }));
+      }
+    });
+    return () => unsubscribe();
   }, []);
 
-  const loadDonations = async () => {
-    try {
-      const q = query(collection(db, "donations"), orderBy("createdAt", "desc"), limit(50));
-      const querySnapshot = await getDocs(q);
+  // Load donations from Firebase with realtime listener
+  useEffect(() => {
+    const q = query(collection(db, "donations"), orderBy("createdAt", "desc"));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
       const loadedDonations: Donation[] = [];
-      querySnapshot.forEach((doc) => {
-        loadedDonations.push({ id: doc.id, ...doc.data() } as Donation);
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        loadedDonations.push({ 
+          id: doc.id, 
+          ...data,
+          createdAt: data.createdAt?.toDate?.() || new Date()
+        } as Donation);
       });
       setDonations(loadedDonations);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const handleGoogleLogin = async () => {
+    try {
+      const result = await signInWithPopup(auth, provider);
+      setUser(result.user);
+      setFormData(prev => ({ ...prev, donorName: result.user.displayName || '' }));
     } catch (error) {
-      console.error("Error loading donations:", error);
+      console.error("Error signing in:", error);
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      setUser(null);
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
+  };
+
+  const generatePDF = (donation: Donation) => {
+    const doc = new jsPDF();
+    
+    doc.setFont("helvetica");
+    doc.setFontSize(24);
+    doc.text("MENURU", 105, 30, { align: "center" });
+    
+    doc.setFontSize(16);
+    doc.text("Donation Receipt", 105, 50, { align: "center" });
+    
+    doc.setFontSize(10);
+    doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, 70);
+    doc.text(`Receipt No: ${donation.id?.slice(-8).toUpperCase()}`, 150, 70);
+    
+    autoTable(doc, {
+      startY: 85,
+      head: [["Description", "Details"]],
+      body: [
+        ["Donor Name", donation.donorName],
+        ["Donor Email", donation.donorEmail],
+        ["Organization", donation.organization],
+        ["Description", donation.description],
+        ["Total Amount", `Rp ${donation.totalAmount.toLocaleString('id-ID')}`],
+        ["Donation Date", new Date(donation.date).toLocaleDateString('id-ID')],
+      ],
+      theme: "plain",
+      styles: { fontSize: 10, cellPadding: 5 },
+      headStyles: { fillColor: [0, 0, 0], textColor: [255, 255, 255] },
+    });
+    
+    doc.setFontSize(10);
+    doc.text("Thank you for your donation!", 105, doc.lastAutoTable.finalY + 20, { align: "center" });
+    doc.text("MENURU - Berbagi Kebaikan", 105, doc.lastAutoTable.finalY + 30, { align: "center" });
+    
+    doc.save(`donation_${donation.id?.slice(-8)}.pdf`);
+  };
+
   const handleCreateDonation = async () => {
+    if (!user) {
+      alert("Please login first to create donation");
+      return;
+    }
     if (!formData.donorName.trim() || !formData.description.trim() || !formData.totalAmount || !formData.organization.trim() || !formData.date) {
       return;
     }
@@ -138,6 +215,8 @@ export default function DonaturPage(): React.JSX.Element {
     try {
       const newDonation: Omit<Donation, 'id'> = {
         donorName: formData.donorName,
+        donorEmail: user.email || '',
+        donorPhoto: user.photoURL || '',
         description: formData.description,
         totalAmount: parseFloat(formData.totalAmount),
         organization: formData.organization,
@@ -145,11 +224,12 @@ export default function DonaturPage(): React.JSX.Element {
         createdAt: new Date()
       };
 
-      const docRef = await addDoc(collection(db, "donations"), newDonation);
-      setDonations([{ id: docRef.id, ...newDonation }, ...donations]);
+      const docRef = await addDoc(collection(db, "donations"), {
+        ...newDonation,
+        createdAt: Timestamp.fromDate(new Date())
+      });
       
-      // Reset form and close
-      setFormData({ donorName: '', description: '', totalAmount: '', organization: '', date: '' });
+      setFormData({ donorName: user.displayName || '', description: '', totalAmount: '', organization: '', date: '' });
       setIsDonationFormOpen(false);
     } catch (error) {
       console.error("Error creating donation:", error);
@@ -158,7 +238,7 @@ export default function DonaturPage(): React.JSX.Element {
     }
   };
 
-  // Animasi menu drawer muncul dari bawah ke atas
+  // Animasi menu drawer
   useEffect(() => {
     if (isMenuOpen && menuDrawerRef.current) {
       document.body.style.overflow = 'hidden';
@@ -454,10 +534,24 @@ export default function DonaturPage(): React.JSX.Element {
   const openDonationForm = () => setIsDonationFormOpen(true);
   const closeDonationForm = () => setIsDonationFormOpen(false);
 
-  // Format currency
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount);
   };
+
+  if (loading) {
+    return (
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        backgroundColor: 'white',
+        fontFamily: "'Questrial', sans-serif"
+      }}>
+        Loading...
+      </div>
+    );
+  }
 
   return (
     <>
@@ -654,7 +748,6 @@ export default function DonaturPage(): React.JSX.Element {
                   <span style={{ fontFamily: "'Inter', sans-serif", fontSize: '64px', fontWeight: '300', color: '#ffffff' }}>Community</span>
                 </div>
 
-                {/* Donation - with arrow */}
                 <div
                   ref={menuItemRefs.donation}
                   onMouseEnter={() => handleMenuItemHover(menuItemRefs.donation, true)}
@@ -664,7 +757,7 @@ export default function DonaturPage(): React.JSX.Element {
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
                     <span style={{ fontFamily: "'Inter', sans-serif", fontSize: '64px', fontWeight: '300', color: '#ffffff' }}>Donation</span>
-                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                   </div>
@@ -680,7 +773,6 @@ export default function DonaturPage(): React.JSX.Element {
                   <span style={{ fontFamily: "'Inter', sans-serif", fontSize: '64px', fontWeight: '300', color: '#ffffff' }}>Calendar</span>
                 </div>
 
-                {/* Contact menu item - Dikembalikan */}
                 <div
                   ref={menuItemRefs.contact}
                   onMouseEnter={() => handleMenuItemHover(menuItemRefs.contact, true)}
@@ -719,53 +811,122 @@ export default function DonaturPage(): React.JSX.Element {
               <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '48px', color: '#000000', textTransform: 'uppercase' }}>MENURU</span>
             </div>
 
-            {/* Navbar Kanan: Create Donation + Nama User */}
+            {/* Navbar Kanan: Nama User, Login/Logout, Create Donation */}
             <div style={{
               position: 'fixed',
-              top: '20px',
+              top: '80px',
               right: '40px',
               zIndex: 100,
               display: 'flex',
               alignItems: 'center',
-              gap: '24px',
+              gap: '20px',
               pointerEvents: 'auto'
             }}>
-              {/* Nama User */}
-              <div style={{
-                fontFamily: "'Questrial', sans-serif",
-                fontSize: '16px',
-                color: '#000000',
-                padding: '10px 0'
-              }}>
-                Hi, Donatur
-              </div>
-              
-              {/* Create Donation Button */}
-              <button
-                ref={createDonationBtnRef}
-                onClick={openDonationForm}
-                style={{
-                  fontFamily: "'Questrial', sans-serif",
-                  fontSize: '14px',
-                  color: '#ffffff',
-                  backgroundColor: '#000000',
-                  border: 'none',
-                  borderRadius: '60px',
-                  padding: '10px 20px',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  transition: 'transform 0.3s ease'
-                }}
-                onMouseEnter={(e) => gsap.to(e.currentTarget, { scale: 1.05, duration: 0.2 })}
-                onMouseLeave={(e) => gsap.to(e.currentTarget, { scale: 1, duration: 0.2 })}
-              >
-                <span>+ Create</span>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </button>
+              {user ? (
+                <>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px'
+                  }}>
+                    {user.photoURL && (
+                      <img 
+                        src={user.photoURL} 
+                        alt="Profile" 
+                        style={{
+                          width: '40px',
+                          height: '40px',
+                          borderRadius: '50%',
+                          objectFit: 'cover'
+                        }}
+                      />
+                    )}
+                    <span style={{
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '16px',
+                      color: '#000000'
+                    }}>
+                      {user.displayName?.split(' ')[0] || 'User'}
+                    </span>
+                  </div>
+                  
+                  <button
+                    onClick={handleLogout}
+                    style={{
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '14px',
+                      color: '#999',
+                      backgroundColor: 'transparent',
+                      border: '1px solid #e0e0e0',
+                      borderRadius: '60px',
+                      padding: '8px 16px',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease'
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#000000'; e.currentTarget.style.color = '#000000'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e0e0e0'; e.currentTarget.style.color = '#999'; }}
+                  >
+                    Logout
+                  </button>
+
+                  {/* Tombol Create Donation BIG dengan panah */}
+                  <button
+                    onClick={openDonationForm}
+                    style={{
+                      fontFamily: "'Inter', sans-serif",
+                      fontSize: '18px',
+                      fontWeight: '500',
+                      color: '#ffffff',
+                      backgroundColor: '#000000',
+                      border: 'none',
+                      borderRadius: '60px',
+                      padding: '14px 32px',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '12px',
+                      transition: 'transform 0.3s ease',
+                      letterSpacing: '-0.02em'
+                    }}
+                    onMouseEnter={(e) => gsap.to(e.currentTarget, { scale: 1.05, duration: 0.2 })}
+                    onMouseLeave={(e) => gsap.to(e.currentTarget, { scale: 1, duration: 0.2 })}
+                  >
+                    <span>Create Donation</span>
+                    {/* North West Arrow BIG */}
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M17 7L7 17M7 17H17M7 17V7" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={handleGoogleLogin}
+                  style={{
+                    fontFamily: "'Questrial', sans-serif",
+                    fontSize: '16px',
+                    color: '#000000',
+                    backgroundColor: 'transparent',
+                    border: '1px solid #000000',
+                    borderRadius: '60px',
+                    padding: '10px 24px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    transition: 'all 0.3s ease'
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#000000'; e.currentTarget.style.color = '#ffffff'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#000000'; }}
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                  </svg>
+                  Sign in with Google
+                </button>
+              )}
             </div>
 
             {/* Donation Form Modal */}
@@ -813,10 +974,10 @@ export default function DonaturPage(): React.JSX.Element {
 
                 <h2 style={{
                   fontFamily: "'Inter', sans-serif",
-                  fontSize: '24px',
+                  fontSize: '28px',
                   fontWeight: '400',
                   color: '#000000',
-                  marginBottom: '28px',
+                  marginBottom: '32px',
                   letterSpacing: '-0.02em'
                 }}>Create Donation</h2>
 
@@ -828,6 +989,7 @@ export default function DonaturPage(): React.JSX.Element {
                       value={formData.donorName}
                       onChange={(e) => setFormData({ ...formData, donorName: e.target.value })}
                       placeholder="Your name"
+                      disabled={!!user}
                     />
                   </div>
 
@@ -872,31 +1034,31 @@ export default function DonaturPage(): React.JSX.Element {
 
                   <button
                     onClick={handleCreateDonation}
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || !user}
                     style={{
                       fontFamily: "'Questrial', sans-serif",
-                      fontSize: '15px',
+                      fontSize: '16px',
                       color: '#ffffff',
                       backgroundColor: '#000000',
                       border: 'none',
                       borderRadius: '60px',
-                      padding: '12px 24px',
-                      cursor: isSubmitting ? 'not-allowed' : 'pointer',
+                      padding: '14px 28px',
+                      cursor: (isSubmitting || !user) ? 'not-allowed' : 'pointer',
                       marginTop: '12px',
-                      opacity: isSubmitting ? 0.6 : 1,
+                      opacity: (isSubmitting || !user) ? 0.5 : 1,
                       transition: 'transform 0.2s ease'
                     }}
-                    onMouseEnter={(e) => !isSubmitting && gsap.to(e.currentTarget, { scale: 1.02, duration: 0.2 })}
-                    onMouseLeave={(e) => !isSubmitting && gsap.to(e.currentTarget, { scale: 1, duration: 0.2 })}
+                    onMouseEnter={(e) => !isSubmitting && user && gsap.to(e.currentTarget, { scale: 1.02, duration: 0.2 })}
+                    onMouseLeave={(e) => !isSubmitting && user && gsap.to(e.currentTarget, { scale: 1, duration: 0.2 })}
                   >
-                    {isSubmitting ? 'Creating...' : 'Create Donation'}
+                    {!user ? 'Please Login First' : (isSubmitting ? 'Creating...' : 'Create Donation')}
                   </button>
                 </div>
               </div>
             </div>
 
             {/* Teks Donatur besar */}
-            <div style={{ position: 'relative', top: '120px', left: '40px', zIndex: 10, width: 'calc(100% - 80px)', marginBottom: '80px' }}>
+            <div style={{ position: 'relative', top: '140px', left: '40px', zIndex: 10, width: 'calc(100% - 80px)', marginBottom: '80px' }}>
               <div ref={donaturTitleRef} style={{
                 fontFamily: "'Inter', sans-serif",
                 fontSize: '280px',
@@ -910,7 +1072,7 @@ export default function DonaturPage(): React.JSX.Element {
             </div>
 
             {/* Info Text */}
-            <div style={{ position: 'relative', top: '100px', left: '40px', right: '40px', zIndex: 10, marginBottom: '150px' }}>
+            <div style={{ position: 'relative', top: '120px', left: '40px', right: '40px', zIndex: 10, marginBottom: '150px' }}>
               <div ref={infoTextRef} style={{
                 fontFamily: "'Questrial', sans-serif",
                 fontSize: '56px',
@@ -954,15 +1116,35 @@ export default function DonaturPage(): React.JSX.Element {
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
                         <div style={{ flex: 1 }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '6px', flexWrap: 'wrap' }}>
+                            {donation.donorPhoto && (
+                              <img src={donation.donorPhoto} alt="" style={{ width: '28px', height: '28px', borderRadius: '50%' }} />
+                            )}
                             <h4 style={{ fontFamily: "'Inter', sans-serif", fontSize: '18px', fontWeight: '500', color: '#000000', margin: 0 }}>{donation.donorName}</h4>
                             <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '13px', color: '#aaa' }}>•</span>
-                            <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '13px', color: '#aaa' }}>{donation.organization}</span>
+                            <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '13px", color: '#aaa' }}>{donation.organization}</span>
                           </div>
                           <p style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', color: '#666', margin: '6px 0 0 0', lineHeight: '1.4' }}>{donation.description}</p>
                         </div>
                         <div style={{ textAlign: 'right' }}>
                           <p style={{ fontFamily: "'Inter', sans-serif", fontSize: '20px', fontWeight: '500', color: '#000000', margin: 0 }}>{formatCurrency(donation.totalAmount)}</p>
-                          <p style={{ fontFamily: "'Questrial', sans-serif", fontSize: '12px', color: '#bbb', margin: '6px 0 0 0' }}>{new Date(donation.date).toLocaleDateString('id-ID')}</p>
+                          <p style={{ fontFamily: "'Questrial', sans-serif", fontSize: '12px", color: '#bbb', margin: '6px 0 0 0' }}>{new Date(donation.date).toLocaleDateString('id-ID')}</p>
+                          <button
+                            onClick={() => generatePDF(donation)}
+                            style={{
+                              fontFamily: "'Questrial', sans-serif",
+                              fontSize: '11px',
+                              color: '#999',
+                              backgroundColor: 'transparent',
+                              border: 'none',
+                              cursor: 'pointer',
+                              marginTop: '8px',
+                              textDecoration: 'underline'
+                            }}
+                            onMouseEnter={(e) => e.currentTarget.style.color = '#000000'}
+                            onMouseLeave={(e) => e.currentTarget.style.color = '#999'}
+                          >
+                            Download PDF
+                          </button>
                         </div>
                       </div>
                     </div>
@@ -971,7 +1153,7 @@ export default function DonaturPage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* Email dan Medsos - Contact section tetap SAMA PERSIS seperti semula */}
+            {/* Email dan Medsos */}
             <div style={{
               position: 'relative',
               width: '100%',
@@ -1060,7 +1242,7 @@ export default function DonaturPage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* Footer SAMA PERSIS seperti semula */}
+            {/* Footer */}
             <footer style={{
               position: 'relative',
               bottom: 0,
