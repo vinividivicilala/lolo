@@ -97,6 +97,7 @@ export default function DonaturPage(): React.JSX.Element {
   const menuDrawerRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLDivElement>(null);
   const menuMenuruTextRef = useRef<HTMLSpanElement>(null);
+  const createDonationBtnRef = useRef<HTMLButtonElement>(null);
 
   const menuItemRefs = {
     note: useRef<HTMLDivElement>(null),
@@ -187,8 +188,9 @@ export default function DonaturPage(): React.JSX.Element {
     });
     
     doc.setFontSize(10);
-    doc.text("Thank you for your donation!", 105, (doc as any).lastAutoTable.finalY + 20, { align: "center" });
-    doc.text("MENURU - Berbagi Kebaikan", 105, (doc as any).lastAutoTable.finalY + 30, { align: "center" });
+    const finalY = (doc as any).lastAutoTable?.finalY || 150;
+    doc.text("Thank you for your donation!", 105, finalY + 20, { align: "center" });
+    doc.text("MENURU - Berbagi Kebaikan", 105, finalY + 30, { align: "center" });
     
     doc.save(`donation_${donation.id?.slice(-8)}.pdf`);
   };
@@ -226,7 +228,7 @@ export default function DonaturPage(): React.JSX.Element {
     }
   };
 
-  // Animasi menu drawer
+  // Animasi menu drawer muncul dari bawah ke atas
   useEffect(() => {
     if (isMenuOpen && menuDrawerRef.current) {
       document.body.style.overflow = 'hidden';
@@ -297,14 +299,15 @@ export default function DonaturPage(): React.JSX.Element {
       gsap.to(modal, {
         scale: 0.95, opacity: 0, y: 20, duration: 0.2,
         onComplete: () => {
-          modal.style.display = 'none';
-          overlay.style.display = 'none';
+          if (modal) modal.style.display = 'none';
+          if (overlay) overlay.style.display = 'none';
         }
       });
       gsap.to(overlay, { opacity: 0, duration: 0.2 });
     }
   }, [isDonationFormOpen]);
 
+  // Animasi hover menu button
   useEffect(() => {
     if (menuButtonRef.current) {
       gsap.to(menuButtonRef.current, {
@@ -383,6 +386,7 @@ export default function DonaturPage(): React.JSX.Element {
     element.textContent = originalText;
   };
 
+  // Inisialisasi ScrollSmoother - PENTING untuk scroll halus
   useEffect(() => {
     const initSmoother = () => {
       if (typeof window !== 'undefined' && !smootherRef.current) {
@@ -401,11 +405,15 @@ export default function DonaturPage(): React.JSX.Element {
     const timer = setTimeout(initSmoother, 100);
     return () => {
       clearTimeout(timer);
-      if (smootherRef.current) smootherRef.current.kill();
+      if (smootherRef.current) {
+        smootherRef.current.kill();
+        smootherRef.current = null;
+      }
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
   }, []);
 
+  // GSAP SplitText animations
   useEffect(() => {
     if (donaturTitleRef.current) {
       const splitDonatur = new SplitText(donaturTitleRef.current, {
@@ -476,14 +484,18 @@ export default function DonaturPage(): React.JSX.Element {
       );
     }
 
-    return () => ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+    return () => {
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+    };
   }, []);
 
+  // Cookie consent
   useEffect(() => {
     const consent = localStorage.getItem('cookieConsent');
     if (consent === null) setShowPopup(true);
   }, []);
 
+  // Cookie popup hover effect
   useEffect(() => {
     if (showPopup && acceptBtnRef.current && declineBtnRef.current) {
       const style = document.createElement('style');
@@ -543,14 +555,66 @@ export default function DonaturPage(): React.JSX.Element {
   return (
     <>
       <style jsx global>{`
-        * { -ms-overflow-style: none; scrollbar-width: none; }
-        *::-webkit-scrollbar { display: none; }
-        html, body { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; background-color: white; }
-        #smooth-wrapper-donatur { position: fixed; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; z-index: 1; }
-        #smooth-content-donatur { min-height: 250vh; width: 100%; will-change: transform; }
-        .split-char, .split-char-donatur, .split-char-menuru, .split-char-menuru-menu { display: inline-block; will-change: transform, opacity, filter; }
-        .split-char-menuru, .split-char-menuru-menu { transform-style: preserve-3d; }
-        .social-item { transition: all 0.3s ease; }
+        * {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        
+        *::-webkit-scrollbar {
+          display: none;
+        }
+        
+        html, body {
+          margin: 0;
+          padding: 0;
+          height: 100%;
+          width: 100%;
+          overflow: hidden;
+          background-color: white;
+        }
+        
+        #smooth-wrapper-donatur {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          overflow: hidden;
+          z-index: 1;
+        }
+        
+        #smooth-content-donatur {
+          min-height: 250vh;
+          width: 100%;
+          will-change: transform;
+        }
+
+        .split-char {
+          display: inline-block;
+          will-change: transform, opacity, filter;
+        }
+
+        .split-char-donatur {
+          display: inline-block;
+          will-change: transform, opacity, filter;
+        }
+
+        .split-char-menuru {
+          display: inline-block;
+          will-change: transform, opacity, filter;
+          transform-style: preserve-3d;
+        }
+
+        .split-char-menuru-menu {
+          display: inline-block;
+          will-change: transform, opacity, filter;
+          transform-style: preserve-3d;
+        }
+
+        .social-item {
+          transition: all 0.3s ease;
+        }
+
         input, textarea, select {
           background: transparent;
           border: none;
@@ -562,8 +626,15 @@ export default function DonaturPage(): React.JSX.Element {
           outline: none;
           width: 100%;
         }
-        input:focus, textarea:focus, select:focus { border-bottom-color: #000000; }
-        textarea { resize: vertical; min-height: 80px; }
+        
+        input:focus, textarea:focus, select:focus {
+          border-bottom-color: #000000;
+        }
+        
+        textarea {
+          resize: vertical;
+          min-height: 80px;
+        }
       `}</style>
       
       <div id="smooth-wrapper-donatur">
@@ -577,9 +648,11 @@ export default function DonaturPage(): React.JSX.Element {
             display: 'flex',
             flexDirection: 'column',
             fontFamily: 'Questrial, sans-serif',
+            WebkitFontSmoothing: 'antialiased',
+            MozOsxFontSmoothing: 'grayscale',
             position: 'relative',
           }}>
-            {/* Tombol Menu */}
+            {/* Tombol Menu - SAMA PERSIS seperti semula */}
             <div
               ref={menuButtonRef}
               onClick={handleMenuClick}
@@ -600,38 +673,58 @@ export default function DonaturPage(): React.JSX.Element {
                 cursor: 'pointer'
               }}
             >
-              <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '24px', color: '#ffffff' }}>Menu</span>
-              <div style={{ position: 'relative', width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <div style={{
-                  width: isMenuHovered ? '40px' : '10px',
-                  height: isMenuHovered ? '40px' : '10px',
-                  borderRadius: '50%',
-                  backgroundColor: '#e49366',
-                  position: 'absolute',
-                  transition: 'width 0.3s ease, height 0.3s ease',
-                  opacity: isMenuHovered ? 0 : 1
-                }} />
-                <div style={{
-                  width: isMenuHovered ? '40px' : '0px',
-                  height: isMenuHovered ? '40px' : '0px',
-                  borderRadius: '50%',
-                  backgroundColor: '#e49366',
-                  position: 'absolute',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '6px',
-                  transition: 'width 0.3s ease, height 0.3s ease',
-                  opacity: isMenuHovered ? 1 : 0
-                }}>
+              <span style={{
+                fontFamily: "'Questrial', sans-serif",
+                fontSize: '24px',
+                fontWeight: '400',
+                color: '#ffffff',
+                letterSpacing: '0.02em'
+              }}>
+                Menu
+              </span>
+              
+              <div style={{
+                position: 'relative',
+                width: '40px',
+                height: '40px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <div
+                  style={{
+                    width: isMenuHovered ? '40px' : '10px',
+                    height: isMenuHovered ? '40px' : '10px',
+                    borderRadius: '50%',
+                    backgroundColor: '#e49366',
+                    position: 'absolute',
+                    transition: 'width 0.3s ease, height 0.3s ease',
+                    opacity: isMenuHovered ? 0 : 1
+                  }}
+                />
+                <div
+                  style={{
+                    width: isMenuHovered ? '40px' : '0px',
+                    height: isMenuHovered ? '40px' : '0px',
+                    borderRadius: '50%',
+                    backgroundColor: '#e49366',
+                    position: 'absolute',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px',
+                    transition: 'width 0.3s ease, height 0.3s ease',
+                    opacity: isMenuHovered ? 1 : 0
+                  }}
+                >
                   <div style={{ width: '20px', height: '2px', backgroundColor: '#000000', borderRadius: '2px' }} />
                   <div style={{ width: '20px', height: '2px', backgroundColor: '#000000', borderRadius: '2px' }} />
                 </div>
               </div>
             </div>
 
-            {/* Menu Drawer */}
+            {/* Menu Drawer - SAMA PERSIS seperti semula dengan tambahan Contact */}
             <div
               ref={menuDrawerRef}
               style={{
@@ -700,15 +793,22 @@ export default function DonaturPage(): React.JSX.Element {
                 position: 'absolute',
                 top: '40px',
                 left: '40px',
-                fontFamily: "'Bebas Neue', 'Impact', sans-serif",
+                fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
                 fontSize: '48px',
                 color: '#ffffff',
+                letterSpacing: '-0.02em',
                 textTransform: 'uppercase'
               }}>
                 MENURU
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginTop: '120px', marginLeft: '40px' }}>
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '15px',
+                marginTop: '120px',
+                marginLeft: '40px'
+              }}>
                 <div
                   ref={menuItemRefs.note}
                   onMouseEnter={() => handleMenuItemHover(menuItemRefs.note, true)}
@@ -716,7 +816,7 @@ export default function DonaturPage(): React.JSX.Element {
                   onClick={() => handleMenuItemClick(menuItemRefs.note, '/note')}
                   style={{ display: 'flex', alignItems: 'center', gap: '20px', cursor: 'pointer', opacity: 0 }}
                 >
-                  <span style={{ fontFamily: "'Inter', sans-serif", fontSize: '64px', fontWeight: '300', color: '#ffffff' }}>Note</span>
+                  <span style={{ fontFamily: "'Inter', 'Helvetica Neue', sans-serif", fontSize: '64px', fontWeight: '300', color: '#ffffff', letterSpacing: '-0.02em' }}>Note</span>
                 </div>
 
                 <div
@@ -726,7 +826,7 @@ export default function DonaturPage(): React.JSX.Element {
                   onClick={() => handleMenuItemClick(menuItemRefs.blog, '/blog')}
                   style={{ display: 'flex', alignItems: 'center', gap: '20px', cursor: 'pointer', opacity: 0 }}
                 >
-                  <span style={{ fontFamily: "'Inter', sans-serif", fontSize: '64px', fontWeight: '300', color: '#ffffff' }}>Blog</span>
+                  <span style={{ fontFamily: "'Inter', 'Helvetica Neue', sans-serif", fontSize: '64px', fontWeight: '300', color: '#ffffff', letterSpacing: '-0.02em' }}>Blog</span>
                 </div>
 
                 <div
@@ -736,9 +836,10 @@ export default function DonaturPage(): React.JSX.Element {
                   onClick={() => handleMenuItemClick(menuItemRefs.community, '/community')}
                   style={{ display: 'flex', alignItems: 'center', gap: '20px', cursor: 'pointer', opacity: 0 }}
                 >
-                  <span style={{ fontFamily: "'Inter', sans-serif", fontSize: '64px', fontWeight: '300', color: '#ffffff' }}>Community</span>
+                  <span style={{ fontFamily: "'Inter', 'Helvetica Neue', sans-serif", fontSize: '64px', fontWeight: '300', color: '#ffffff', letterSpacing: '-0.02em' }}>Community</span>
                 </div>
 
+                {/* Donation - dengan panah North East */}
                 <div
                   ref={menuItemRefs.donation}
                   onMouseEnter={() => handleMenuItemHover(menuItemRefs.donation, true)}
@@ -747,7 +848,7 @@ export default function DonaturPage(): React.JSX.Element {
                   style={{ display: 'flex', alignItems: 'center', gap: '20px', cursor: 'pointer', opacity: 0 }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                    <span style={{ fontFamily: "'Inter', sans-serif", fontSize: '64px', fontWeight: '300', color: '#ffffff' }}>Donation</span>
+                    <span style={{ fontFamily: "'Inter', 'Helvetica Neue', sans-serif", fontSize: '64px', fontWeight: '300', color: '#ffffff', letterSpacing: '-0.02em' }}>Donation</span>
                     <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
@@ -761,9 +862,10 @@ export default function DonaturPage(): React.JSX.Element {
                   onClick={() => handleMenuItemClick(menuItemRefs.calendar, '/calendar')}
                   style={{ display: 'flex', alignItems: 'center', gap: '20px', cursor: 'pointer', opacity: 0 }}
                 >
-                  <span style={{ fontFamily: "'Inter', sans-serif", fontSize: '64px', fontWeight: '300', color: '#ffffff' }}>Calendar</span>
+                  <span style={{ fontFamily: "'Inter', 'Helvetica Neue', sans-serif", fontSize: '64px', fontWeight: '300', color: '#ffffff', letterSpacing: '-0.02em' }}>Calendar</span>
                 </div>
 
+                {/* Contact - Dikembalikan */}
                 <div
                   ref={menuItemRefs.contact}
                   onMouseEnter={() => handleMenuItemHover(menuItemRefs.contact, true)}
@@ -771,13 +873,18 @@ export default function DonaturPage(): React.JSX.Element {
                   onClick={() => handleMenuItemClick(menuItemRefs.contact, '/contact')}
                   style={{ display: 'flex', alignItems: 'center', gap: '20px', cursor: 'pointer', opacity: 0 }}
                 >
-                  <span style={{ fontFamily: "'Inter', sans-serif", fontSize: '64px', fontWeight: '300', color: '#ffffff' }}>Contact</span>
+                  <span style={{ fontFamily: "'Inter', 'Helvetica Neue', sans-serif", fontSize: '64px', fontWeight: '300', color: '#ffffff', letterSpacing: '-0.02em' }}>Contact</span>
                 </div>
               </div>
             </div>
 
             {/* Tombol Back ke Home */}
-            <div style={{ position: 'fixed', top: '20px', left: '40px', zIndex: 100 }}>
+            <div style={{
+              position: 'fixed',
+              top: '20px',
+              left: '40px',
+              zIndex: 100
+            }}>
               <Link href="/">
                 <button style={{
                   fontFamily: "'Questrial', sans-serif",
@@ -790,19 +897,42 @@ export default function DonaturPage(): React.JSX.Element {
                   cursor: 'pointer',
                   transition: 'all 0.3s ease'
                 }}
-                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#000000'; e.currentTarget.style.color = '#ffffff'; }}
-                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#000000'; }}>
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#000000';
+                  e.currentTarget.style.color = '#ffffff';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.color = '#000000';
+                }}>
                   ← Back to Home
                 </button>
               </Link>
             </div>
 
-            {/* Judul Website MENURU */}
-            <div style={{ position: 'fixed', top: '20px', right: '40px', zIndex: 100, pointerEvents: 'none' }}>
-              <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '48px', color: '#000000', textTransform: 'uppercase' }}>MENURU</span>
+            {/* Judul Website MENURU - pojok kanan atas */}
+            <div style={{
+              position: 'fixed',
+              top: '20px',
+              right: '40px',
+              zIndex: 100,
+              pointerEvents: 'none'
+            }}>
+              <span style={{
+                fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
+                fontWeight: 'normal',
+                fontSize: '48px',
+                color: '#000000',
+                letterSpacing: '-0.02em',
+                textTransform: 'uppercase',
+                WebkitFontSmoothing: 'antialiased',
+                MozOsxFontSmoothing: 'grayscale'
+              }}>
+                MENURU
+              </span>
             </div>
 
-            {/* Navbar Kanan: Nama User, Login/Logout, Create Donation */}
+            {/* Navbar Kanan: Create Donation + Nama User + Login/Logout */}
             <div style={{
               position: 'fixed',
               top: '80px',
@@ -854,13 +984,21 @@ export default function DonaturPage(): React.JSX.Element {
                       cursor: 'pointer',
                       transition: 'all 0.2s ease'
                     }}
-                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#000000'; e.currentTarget.style.color = '#000000'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e0e0e0'; e.currentTarget.style.color = '#999'; }}
+                    onMouseEnter={(e) => { 
+                      e.currentTarget.style.borderColor = '#000000'; 
+                      e.currentTarget.style.color = '#000000'; 
+                    }}
+                    onMouseLeave={(e) => { 
+                      e.currentTarget.style.borderColor = '#e0e0e0'; 
+                      e.currentTarget.style.color = '#999'; 
+                    }}
                   >
                     Logout
                   </button>
 
+                  {/* Tombol Create Donation BIG dengan panah North West */}
                   <button
+                    ref={createDonationBtnRef}
                     onClick={openDonationForm}
                     style={{
                       fontFamily: "'Inter', sans-serif",
@@ -882,6 +1020,7 @@ export default function DonaturPage(): React.JSX.Element {
                     onMouseLeave={(e) => gsap.to(e.currentTarget, { scale: 1, duration: 0.2 })}
                   >
                     <span>Create Donation</span>
+                    {/* North West Arrow */}
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M17 7L7 17M7 17H17M7 17V7" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
@@ -904,8 +1043,14 @@ export default function DonaturPage(): React.JSX.Element {
                     gap: '12px',
                     transition: 'all 0.3s ease'
                   }}
-                  onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#000000'; e.currentTarget.style.color = '#ffffff'; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#000000'; }}
+                  onMouseEnter={(e) => { 
+                    e.currentTarget.style.backgroundColor = '#000000'; 
+                    e.currentTarget.style.color = '#ffffff'; 
+                  }}
+                  onMouseLeave={(e) => { 
+                    e.currentTarget.style.backgroundColor = 'transparent'; 
+                    e.currentTarget.style.color = '#000000'; 
+                  }}
                 >
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -1048,32 +1193,64 @@ export default function DonaturPage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* Teks Donatur besar */}
-            <div style={{ position: 'relative', top: '140px', left: '40px', zIndex: 10, width: 'calc(100% - 80px)', marginBottom: '80px' }}>
-              <div ref={donaturTitleRef} style={{
-                fontFamily: "'Inter', sans-serif",
-                fontSize: '280px',
-                fontWeight: '300',
-                color: '#000000',
-                textAlign: 'left',
-                letterSpacing: '-0.02em',
-                lineHeight: '0.9'
-              }}>
+            {/* Teks Donatur besar 280px */}
+            <div style={{
+              position: 'relative',
+              top: '140px',
+              left: '40px',
+              zIndex: 10,
+              width: 'calc(100% - 80px)',
+              marginBottom: '80px'
+            }}>
+              <div 
+                ref={donaturTitleRef}
+                style={{
+                  fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
+                  fontSize: '280px',
+                  fontWeight: '300',
+                  color: '#000000',
+                  textAlign: 'left',
+                  letterSpacing: '-0.02em',
+                  textTransform: 'none',
+                  lineHeight: '0.9',
+                  WebkitFontSmoothing: 'antialiased',
+                  MozOsxFontSmoothing: 'grayscale'
+                }}>
                 Donatur
               </div>
-              <div ref={donaturUnderlineRef} style={{ width: '0%', height: '2px', backgroundColor: '#000000', marginTop: '20px', opacity: 0 }} />
+              <div
+                ref={donaturUnderlineRef}
+                style={{
+                  width: '0%',
+                  height: '2px',
+                  backgroundColor: '#000000',
+                  marginTop: '20px',
+                  opacity: 0
+                }}
+              />
             </div>
 
             {/* Info Text */}
-            <div style={{ position: 'relative', top: '120px', left: '40px', right: '40px', zIndex: 10, marginBottom: '150px' }}>
-              <div ref={infoTextRef} style={{
-                fontFamily: "'Questrial', sans-serif",
-                fontSize: '56px',
-                color: '#000000',
-                textAlign: 'center',
-                lineHeight: '1.2',
-                marginBottom: '80px'
-              }}>
+            <div style={{
+              position: 'relative',
+              top: '120px',
+              left: '40px',
+              right: '40px',
+              zIndex: 10,
+              marginBottom: '150px'
+            }}>
+              <div 
+                ref={infoTextRef}
+                style={{
+                  fontFamily: "'Questrial', sans-serif",
+                  fontSize: '56px',
+                  fontWeight: '400',
+                  color: '#000000',
+                  textAlign: 'center',
+                  letterSpacing: '-0.01em',
+                  lineHeight: '1.2',
+                  marginBottom: '80px'
+                }}>
                 Terima kasih untuk para donatur yang telah berbagi kebaikan
               </div>
             </div>
@@ -1165,7 +1342,7 @@ export default function DonaturPage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* Email dan Medsos */}
+            {/* Email dan Medsos - SAMA PERSIS seperti semula */}
             <div style={{
               position: 'relative',
               width: '100%',
@@ -1260,7 +1437,7 @@ export default function DonaturPage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* Footer */}
+            {/* Footer dengan line bawah dan teks MENURU besar - SAMA PERSIS seperti semula */}
             <footer style={{
               position: 'relative',
               bottom: 0,
@@ -1302,7 +1479,7 @@ export default function DonaturPage(): React.JSX.Element {
         </div>
       </div>
 
-      {/* Cookie Popup */}
+      {/* Cookie Popup - SAMA PERSIS seperti semula */}
       {showPopup && (
         <div style={{
           position: 'fixed',
