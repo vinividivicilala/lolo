@@ -221,6 +221,11 @@ export default function DonaturPage(): React.JSX.Element {
       
       setFormData({ donorName: user.displayName || '', description: '', totalAmount: '', organization: '', date: '' });
       setIsDonationFormOpen(false);
+      
+      // Refresh scroll after adding new donation
+      setTimeout(() => {
+        ScrollTrigger.refresh();
+      }, 100);
     } catch (error) {
       console.error("Error creating donation:", error);
     } finally {
@@ -228,7 +233,7 @@ export default function DonaturPage(): React.JSX.Element {
     }
   };
 
-  // Animasi menu drawer muncul dari bawah ke atas
+  // Animasi menu drawer
   useEffect(() => {
     if (isMenuOpen && menuDrawerRef.current) {
       document.body.style.overflow = 'hidden';
@@ -386,23 +391,47 @@ export default function DonaturPage(): React.JSX.Element {
     element.textContent = originalText;
   };
 
-  // Inisialisasi ScrollSmoother - PENTING untuk scroll halus
+  // Inisialisasi ScrollSmoother - DIPERBAIKI dengan min-height yang cukup
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     const initSmoother = () => {
-      if (typeof window !== 'undefined' && !smootherRef.current) {
-        smootherRef.current = ScrollSmoother.create({
-          wrapper: "#smooth-wrapper-donatur",
-          content: "#smooth-content-donatur",
-          smooth: 1.2,
-          effects: true,
-          smoothTouch: 0.5,
-          normalizeScroll: true,
-          ignoreMobileResize: true,
-        });
+      if (!smootherRef.current && document.getElementById('smooth-wrapper-donatur') && document.getElementById('smooth-content-donatur')) {
+        try {
+          // Kill existing ScrollTrigger instances
+          ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+          
+          smootherRef.current = ScrollSmoother.create({
+            wrapper: "#smooth-wrapper-donatur",
+            content: "#smooth-content-donatur",
+            smooth: 1.2,
+            effects: true,
+            smoothTouch: 0.5,
+            normalizeScroll: true,
+            ignoreMobileResize: true,
+          });
+          
+          // Refresh scroll position
+          ScrollTrigger.refresh();
+        } catch (e) {
+          console.error("Error initializing ScrollSmoother:", e);
+        }
       }
     };
 
-    const timer = setTimeout(initSmoother, 100);
+    // Delay initialization to ensure DOM is ready
+    const timer = setTimeout(initSmoother, 300);
+    
+    // Refresh on window load
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        ScrollTrigger.refresh();
+        if (smootherRef.current) {
+          smootherRef.current.scrollTop(0);
+        }
+      }, 100);
+    });
+
     return () => {
       clearTimeout(timer);
       if (smootherRef.current) {
@@ -413,78 +442,109 @@ export default function DonaturPage(): React.JSX.Element {
     };
   }, []);
 
+  // Refresh ScrollTrigger when window resize or donations change
+  useEffect(() => {
+    const handleResize = () => {
+      setTimeout(() => {
+        ScrollTrigger.refresh();
+      }, 100);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    
+    // Initial refresh after content loads
+    setTimeout(() => {
+      ScrollTrigger.refresh();
+    }, 500);
+    
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
+  // Refresh when donations change
+  useEffect(() => {
+    setTimeout(() => {
+      ScrollTrigger.refresh();
+    }, 100);
+  }, [donations]);
+
   // GSAP SplitText animations
   useEffect(() => {
-    if (donaturTitleRef.current) {
-      const splitDonatur = new SplitText(donaturTitleRef.current, {
-        type: "chars",
-        charsClass: "split-char-donatur"
-      });
-      gsap.fromTo(splitDonatur.chars,
-        { opacity: 0, x: -50, filter: 'blur(10px)' },
-        { opacity: 1, x: 0, filter: 'blur(0px)', duration: 1, stagger: 0.04, ease: "back.out(1.2)",
-          scrollTrigger: { trigger: donaturTitleRef.current, start: "top 85%", end: "bottom 70%", toggleActions: "play none none reverse" }
-        }
-      );
-    }
+    // Small delay to ensure ScrollSmoother is ready
+    const timer = setTimeout(() => {
+      if (donaturTitleRef.current) {
+        const splitDonatur = new SplitText(donaturTitleRef.current, {
+          type: "chars",
+          charsClass: "split-char-donatur"
+        });
+        gsap.fromTo(splitDonatur.chars,
+          { opacity: 0, x: -50, filter: 'blur(10px)' },
+          { opacity: 1, x: 0, filter: 'blur(0px)', duration: 1, stagger: 0.04, ease: "back.out(1.2)",
+            scrollTrigger: { trigger: donaturTitleRef.current, start: "top 85%", end: "bottom 70%", toggleActions: "play none none reverse" }
+          }
+        );
+      }
 
-    if (donaturUnderlineRef.current) {
-      gsap.fromTo(donaturUnderlineRef.current,
-        { width: '0%', opacity: 0, x: 100 },
-        { width: '100%', opacity: 1, x: 0, duration: 1.2, ease: "power3.out",
-          scrollTrigger: { trigger: donaturUnderlineRef.current, start: "top 85%", end: "bottom 70%", toggleActions: "play none none reverse" }
-        }
-      );
-    }
+      if (donaturUnderlineRef.current) {
+        gsap.fromTo(donaturUnderlineRef.current,
+          { width: '0%', opacity: 0, x: 100 },
+          { width: '100%', opacity: 1, x: 0, duration: 1.2, ease: "power3.out",
+            scrollTrigger: { trigger: donaturUnderlineRef.current, start: "top 85%", end: "bottom 70%", toggleActions: "play none none reverse" }
+          }
+        );
+      }
 
-    if (infoTextRef.current) {
-      const splitInfo = new SplitText(infoTextRef.current, {
-        type: "chars",
-        charsClass: "split-char"
-      });
-      gsap.fromTo(splitInfo.chars,
-        { opacity: 0, y: 30, filter: 'blur(5px)' },
-        { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.8, stagger: 0.02,
-          scrollTrigger: { trigger: infoTextRef.current, start: "top 85%", end: "bottom 70%", toggleActions: "play none none reverse" }
-        }
-      );
-    }
+      if (infoTextRef.current) {
+        const splitInfo = new SplitText(infoTextRef.current, {
+          type: "chars",
+          charsClass: "split-char"
+        });
+        gsap.fromTo(splitInfo.chars,
+          { opacity: 0, y: 30, filter: 'blur(5px)' },
+          { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.8, stagger: 0.02,
+            scrollTrigger: { trigger: infoTextRef.current, start: "top 85%", end: "bottom 70%", toggleActions: "play none none reverse" }
+          }
+        );
+      }
 
-    if (emailRef.current) {
-      const splitEmail = new SplitText(emailRef.current, {
-        type: "chars",
-        charsClass: "split-char"
-      });
-      gsap.fromTo(splitEmail.chars,
-        { opacity: 0, x: -30, filter: 'blur(5px)' },
-        { opacity: 1, x: 0, filter: 'blur(0px)', duration: 0.8, stagger: 0.02,
-          scrollTrigger: { trigger: emailRef.current, start: "top 85%", end: "bottom 70%", toggleActions: "play none none reverse" }
-        }
-      );
-    }
+      if (emailRef.current) {
+        const splitEmail = new SplitText(emailRef.current, {
+          type: "chars",
+          charsClass: "split-char"
+        });
+        gsap.fromTo(splitEmail.chars,
+          { opacity: 0, x: -30, filter: 'blur(5px)' },
+          { opacity: 1, x: 0, filter: 'blur(0px)', duration: 0.8, stagger: 0.02,
+            scrollTrigger: { trigger: emailRef.current, start: "top 85%", end: "bottom 70%", toggleActions: "play none none reverse" }
+          }
+        );
+      }
 
-    if (menuruTextRef.current) {
-      const splitMenuru = new SplitText(menuruTextRef.current, {
-        type: "chars",
-        charsClass: "split-char-menuru"
-      });
-      gsap.set(splitMenuru.chars, { opacity: 0, y: 200, rotationY: 90, transformPerspective: 800, filter: 'blur(20px)' });
-      gsap.to(splitMenuru.chars, {
-        opacity: 1, y: 0, rotationY: 0, filter: 'blur(0px)', duration: 1.5, stagger: { each: 0.04, from: "start" },
-        scrollTrigger: { trigger: menuruTextRef.current, start: "top 85%", end: "bottom 65%", toggleActions: "play none none reverse" }
-      });
-    }
+      if (menuruTextRef.current) {
+        const splitMenuru = new SplitText(menuruTextRef.current, {
+          type: "chars",
+          charsClass: "split-char-menuru"
+        });
+        gsap.set(splitMenuru.chars, { opacity: 0, y: 200, rotationY: 90, transformPerspective: 800, filter: 'blur(20px)' });
+        gsap.to(splitMenuru.chars, {
+          opacity: 1, y: 0, rotationY: 0, filter: 'blur(0px)', duration: 1.5, stagger: { each: 0.04, from: "start" },
+          scrollTrigger: { trigger: menuruTextRef.current, start: "top 85%", end: "bottom 65%", toggleActions: "play none none reverse" }
+        });
+      }
 
-    if (lineRef.current) {
-      gsap.fromTo(lineRef.current,
-        { width: '0%', opacity: 0, x: 100 },
-        { width: '100%', opacity: 1, x: 0, duration: 1.2,
-          scrollTrigger: { trigger: lineRef.current, start: "top 85%", end: "bottom 70%", toggleActions: "play none none reverse" }
-        }
-      );
-    }
+      if (lineRef.current) {
+        gsap.fromTo(lineRef.current,
+          { width: '0%', opacity: 0, x: 100 },
+          { width: '100%', opacity: 1, x: 0, duration: 1.2,
+            scrollTrigger: { trigger: lineRef.current, start: "top 85%", end: "bottom 70%", toggleActions: "play none none reverse" }
+          }
+        );
+      }
+    }, 500);
 
     return () => {
+      clearTimeout(timer);
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
   }, []);
@@ -584,9 +644,10 @@ export default function DonaturPage(): React.JSX.Element {
         }
         
         #smooth-content-donatur {
-          min-height: 250vh;
+          min-height: 200vh;
           width: 100%;
           will-change: transform;
+          background-color: white;
         }
 
         .split-char {
@@ -639,8 +700,9 @@ export default function DonaturPage(): React.JSX.Element {
       
       <div id="smooth-wrapper-donatur">
         <div id="smooth-content-donatur">
+          {/* Main Content */}
           <div style={{
-            minHeight: '250vh',
+            minHeight: '150vh',
             backgroundColor: 'white',
             margin: 0,
             padding: 0,
@@ -652,7 +714,7 @@ export default function DonaturPage(): React.JSX.Element {
             MozOsxFontSmoothing: 'grayscale',
             position: 'relative',
           }}>
-            {/* Tombol Menu - SAMA PERSIS seperti semula */}
+            {/* Tombol Menu */}
             <div
               ref={menuButtonRef}
               onClick={handleMenuClick}
@@ -724,7 +786,7 @@ export default function DonaturPage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* Menu Drawer - SAMA PERSIS seperti semula dengan tambahan Contact */}
+            {/* Menu Drawer */}
             <div
               ref={menuDrawerRef}
               style={{
@@ -839,7 +901,6 @@ export default function DonaturPage(): React.JSX.Element {
                   <span style={{ fontFamily: "'Inter', 'Helvetica Neue', sans-serif", fontSize: '64px', fontWeight: '300', color: '#ffffff', letterSpacing: '-0.02em' }}>Community</span>
                 </div>
 
-                {/* Donation - dengan panah North East */}
                 <div
                   ref={menuItemRefs.donation}
                   onMouseEnter={() => handleMenuItemHover(menuItemRefs.donation, true)}
@@ -865,7 +926,6 @@ export default function DonaturPage(): React.JSX.Element {
                   <span style={{ fontFamily: "'Inter', 'Helvetica Neue', sans-serif", fontSize: '64px', fontWeight: '300', color: '#ffffff', letterSpacing: '-0.02em' }}>Calendar</span>
                 </div>
 
-                {/* Contact - Dikembalikan */}
                 <div
                   ref={menuItemRefs.contact}
                   onMouseEnter={() => handleMenuItemHover(menuItemRefs.contact, true)}
@@ -910,7 +970,7 @@ export default function DonaturPage(): React.JSX.Element {
               </Link>
             </div>
 
-            {/* Judul Website MENURU - pojok kanan atas */}
+            {/* Judul Website MENURU */}
             <div style={{
               position: 'fixed',
               top: '20px',
@@ -924,15 +984,13 @@ export default function DonaturPage(): React.JSX.Element {
                 fontSize: '48px',
                 color: '#000000',
                 letterSpacing: '-0.02em',
-                textTransform: 'uppercase',
-                WebkitFontSmoothing: 'antialiased',
-                MozOsxFontSmoothing: 'grayscale'
+                textTransform: 'uppercase'
               }}>
                 MENURU
               </span>
             </div>
 
-            {/* Navbar Kanan: Create Donation + Nama User + Login/Logout */}
+            {/* Navbar Kanan: Create Donation + Nama User */}
             <div style={{
               position: 'fixed',
               top: '80px',
@@ -996,7 +1054,6 @@ export default function DonaturPage(): React.JSX.Element {
                     Logout
                   </button>
 
-                  {/* Tombol Create Donation BIG dengan panah North West */}
                   <button
                     ref={createDonationBtnRef}
                     onClick={openDonationForm}
@@ -1020,7 +1077,6 @@ export default function DonaturPage(): React.JSX.Element {
                     onMouseLeave={(e) => gsap.to(e.currentTarget, { scale: 1, duration: 0.2 })}
                   >
                     <span>Create Donation</span>
-                    {/* North West Arrow */}
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M17 7L7 17M7 17H17M7 17V7" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
@@ -1193,7 +1249,7 @@ export default function DonaturPage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* Teks Donatur besar 280px */}
+            {/* Teks Donatur besar */}
             <div style={{
               position: 'relative',
               top: '140px',
@@ -1211,10 +1267,7 @@ export default function DonaturPage(): React.JSX.Element {
                   color: '#000000',
                   textAlign: 'left',
                   letterSpacing: '-0.02em',
-                  textTransform: 'none',
-                  lineHeight: '0.9',
-                  WebkitFontSmoothing: 'antialiased',
-                  MozOsxFontSmoothing: 'grayscale'
+                  lineHeight: '0.9'
                 }}>
                 Donatur
               </div>
@@ -1237,7 +1290,7 @@ export default function DonaturPage(): React.JSX.Element {
               left: '40px',
               right: '40px',
               zIndex: 10,
-              marginBottom: '150px'
+              marginBottom: '100px'
             }}>
               <div 
                 ref={infoTextRef}
@@ -1259,7 +1312,7 @@ export default function DonaturPage(): React.JSX.Element {
             <div style={{
               position: 'relative',
               width: 'calc(100% - 160px)',
-              margin: '0 auto 120px auto',
+              margin: '0 auto 80px auto',
               padding: '0 40px'
             }}>
               <h3 style={{
@@ -1342,7 +1395,7 @@ export default function DonaturPage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* Email dan Medsos - SAMA PERSIS seperti semula */}
+            {/* Email dan Medsos */}
             <div style={{
               position: 'relative',
               width: '100%',
@@ -1351,8 +1404,7 @@ export default function DonaturPage(): React.JSX.Element {
               alignItems: 'flex-end',
               padding: '0 80px',
               marginBottom: '30px',
-              boxSizing: 'border-box',
-              marginTop: 'auto'
+              boxSizing: 'border-box'
             }}>
               <div 
                 ref={emailRef}
@@ -1437,22 +1489,20 @@ export default function DonaturPage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* Footer dengan line bawah dan teks MENURU besar - SAMA PERSIS seperti semula */}
+            {/* Footer - di paling akhir */}
             <footer style={{
               position: 'relative',
-              bottom: 0,
-              left: 0,
-              right: 0,
               width: '100%',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'flex-end',
-              padding: '0 80px 0 0',
+              padding: '0 80px 80px 0',
               margin: 0,
               pointerEvents: 'none',
-              zIndex: 1
+              zIndex: 1,
+              marginTop: '100px'
             }}>
-              <div ref={lineRef} style={{ width: '0%', height: '2px', backgroundColor: '#000000', marginRight: '0', marginBottom: '60px', opacity: 0 }} />
+              <div ref={lineRef} style={{ width: '0%', height: '2px', backgroundColor: '#000000', marginBottom: '60px', opacity: 0 }} />
               <span ref={menuruTextRef} style={{ 
                 fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif", 
                 fontWeight: 'normal', 
@@ -1466,11 +1516,9 @@ export default function DonaturPage(): React.JSX.Element {
                 whiteSpace: 'nowrap', 
                 WebkitFontSmoothing: 'antialiased', 
                 MozOsxFontSmoothing: 'grayscale', 
-                fontKerning: 'normal', 
                 margin: 0, 
                 padding: 0, 
                 transform: 'translateY(10px)', 
-                marginRight: '0' 
               }}>
                 MENURU
               </span>
@@ -1479,7 +1527,7 @@ export default function DonaturPage(): React.JSX.Element {
         </div>
       </div>
 
-      {/* Cookie Popup - SAMA PERSIS seperti semula */}
+      {/* Cookie Popup */}
       {showPopup && (
         <div style={{
           position: 'fixed',
