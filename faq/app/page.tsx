@@ -7,32 +7,49 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ScrollSmoother } from "gsap/ScrollSmoother";
 import { SplitText } from "gsap/SplitText";
 import Link from "next/link";
-import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore';
-import { initializeApp } from 'firebase/app';
 
-// Firebase configuration
-const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+// Dynamic import untuk Firebase agar tidak di-load saat build
+let db: any = null;
+let getFirestore: any = null;
+let doc: any = null;
+let getDoc: any = null;
+let initializeApp: any = null;
 
 // Register GSAP plugins
 if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger, ScrollSmoother, SplitText);
+  
+  // Load Firebase hanya di client side
+  const loadFirebase = async () => {
+    const firebaseModule = await import('firebase/app');
+    const firestoreModule = await import('firebase/firestore');
+    
+    initializeApp = firebaseModule.initializeApp;
+    getFirestore = firestoreModule.getFirestore;
+    doc = firestoreModule.doc;
+    getDoc = firestoreModule.getDoc;
+    
+    const firebaseConfig = {
+      apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "YOUR_API_KEY",
+      authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "YOUR_AUTH_DOMAIN",
+      projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "YOUR_PROJECT_ID",
+      storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "YOUR_STORAGE_BUCKET",
+      messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "YOUR_MESSAGING_SENDER_ID",
+      appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "YOUR_APP_ID"
+    };
+    
+    const app = initializeApp(firebaseConfig);
+    db = getFirestore(app);
+  };
+  
+  loadFirebase();
 }
 
 export default function HomePage(): React.JSX.Element {
   const [showPopup, setShowPopup] = useState(false);
   const [announcement, setAnnouncement] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isClient, setIsClient] = useState(false);
   const acceptBtnRef = useRef<HTMLButtonElement>(null);
   const declineBtnRef = useRef<HTMLButtonElement>(null);
   const contactBtnRef = useRef<HTMLButtonElement>(null);
@@ -55,6 +72,11 @@ export default function HomePage(): React.JSX.Element {
   const loadingOverlayRef = useRef<HTMLDivElement>(null);
   const callTextRef = useRef<HTMLDivElement>(null);
 
+  // Set isClient to true after mount
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   // Variabel untuk menyimpan teks asli medsos
   const originalTexts = {
     ig: 'Instagram',
@@ -62,18 +84,21 @@ export default function HomePage(): React.JSX.Element {
     linkedin: 'LinkedIn'
   };
 
-  // Fetch announcement from Firebase
+  // Fetch announcement from Firebase (only on client)
   useEffect(() => {
     const fetchAnnouncement = async () => {
+      if (!isClient) return;
+      
       try {
-        const announcementRef = doc(db, 'announcements', 'current');
-        const announcementSnap = await getDoc(announcementRef);
-        
-        if (announcementSnap.exists()) {
-          const data = announcementSnap.data();
-          // Check if announcement is still valid (not expired)
-          if (data.expiryDate && new Date(data.expiryDate) > new Date()) {
-            setAnnouncement(data.message);
+        if (db && doc && getDoc) {
+          const announcementRef = doc(db, 'announcements', 'current');
+          const announcementSnap = await getDoc(announcementRef);
+          
+          if (announcementSnap.exists()) {
+            const data = announcementSnap.data();
+            if (data.expiryDate && new Date(data.expiryDate) > new Date()) {
+              setAnnouncement(data.message);
+            }
           }
         }
       } catch (error) {
@@ -82,7 +107,7 @@ export default function HomePage(): React.JSX.Element {
     };
     
     fetchAnnouncement();
-  }, []);
+  }, [isClient]);
 
   // Fungsi untuk mendapatkan huruf random (A-Z)
   const getRandomChar = () => {
@@ -92,6 +117,8 @@ export default function HomePage(): React.JSX.Element {
 
   // Fungsi untuk mengacak huruf pada teks
   const randomizeText = (element: HTMLElement, originalText: string, duration: number = 0.5) => {
+    if (typeof window === 'undefined') return;
+    
     const originalChars = originalText.split('');
     const totalSteps = 15;
     let currentStep = 0;
@@ -112,6 +139,8 @@ export default function HomePage(): React.JSX.Element {
 
   // Animasi hover random huruf untuk medsos
   const handleSocialHover = (element: HTMLElement, originalText: string) => {
+    if (typeof window === 'undefined') return;
+    
     if (!element.getAttribute('data-original')) {
       element.setAttribute('data-original', originalText);
     }
@@ -121,6 +150,8 @@ export default function HomePage(): React.JSX.Element {
   };
   
   const handleSocialLeave = (element: HTMLElement, originalText: string) => {
+    if (typeof window === 'undefined') return;
+    
     const interval = element.getAttribute('data-interval');
     if (interval) {
       clearInterval(Number(interval));
@@ -129,9 +160,11 @@ export default function HomePage(): React.JSX.Element {
   };
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     // Initialize ScrollSmoother
     const initSmoother = () => {
-      if (typeof window !== 'undefined' && !smootherRef.current) {
+      if (!smootherRef.current) {
         smootherRef.current = ScrollSmoother.create({
           wrapper: "#smooth-wrapper",
           content: "#smooth-content",
@@ -161,6 +194,8 @@ export default function HomePage(): React.JSX.Element {
 
   // Animasi loading overlay dengan SplitText modern
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     if (isLoading && loadingOverlayRef.current) {
       const splitMenuruLoading = new SplitText(menuruTopTextRef.current, {
         type: "chars, words",
@@ -282,6 +317,8 @@ export default function HomePage(): React.JSX.Element {
 
   // Animasi MENURU di halaman utama - SLIDE IN DARI KIRI KE KANAN, DIAM
   const animateMenuruMain = () => {
+    if (typeof window === 'undefined') return;
+    
     if (menuruTopMainRef.current) {
       // Set initial state: di luar layar sebelah kiri
       gsap.set(menuruTopMainRef.current, {
@@ -302,6 +339,8 @@ export default function HomePage(): React.JSX.Element {
 
   // Animasi teks Call Farid
   const animateCallText = () => {
+    if (typeof window === 'undefined') return;
+    
     if (callTextRef.current) {
       const splitCall = new SplitText(callTextRef.current, {
         type: "lines",
@@ -329,6 +368,8 @@ export default function HomePage(): React.JSX.Element {
 
   // GSAP SplitText animations untuk konten utama lainnya
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     if (!isLoading) {
       if (mencatatTextRef.current) {
         const splitMencatat = new SplitText(mencatatTextRef.current, {
@@ -480,6 +521,8 @@ export default function HomePage(): React.JSX.Element {
   }, [isLoading]);
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     const consent = localStorage.getItem('cookieConsent');
     if (consent === null) {
       setShowPopup(true);
@@ -487,6 +530,8 @@ export default function HomePage(): React.JSX.Element {
   }, []);
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     if (showPopup && acceptBtnRef.current && declineBtnRef.current) {
       const acceptBtn = acceptBtnRef.current;
       const declineBtn = declineBtnRef.current;
@@ -542,11 +587,13 @@ export default function HomePage(): React.JSX.Element {
   }, [showPopup]);
 
   const handleAccept = () => {
+    if (typeof window === 'undefined') return;
     localStorage.setItem('cookieConsent', 'accepted');
     setShowPopup(false);
   };
 
   const handleDecline = () => {
+    if (typeof window === 'undefined') return;
     localStorage.setItem('cookieConsent', 'declined');
     setShowPopup(false);
   };
@@ -554,10 +601,16 @@ export default function HomePage(): React.JSX.Element {
   const handleContact = () => {};
 
   const handleEmailClick = () => {
+    if (typeof window === 'undefined') return;
     window.location.href = 'mailto:contact.menuru@gmail.com';
   };
 
   const handleSocialClick = (platform: string) => {};
+
+  // Prevent hydration errors by not rendering GSAP-dependent content until client-side
+  if (!isClient) {
+    return null;
+  }
 
   return (
     <>
