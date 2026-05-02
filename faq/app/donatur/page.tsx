@@ -1,4 +1,4 @@
-// app/donatur/page.tsx
+// app/donatur/page.tsx - Hapus 2 line (garis)
 'use client';
 
 import React, { useState, useEffect, useRef } from "react";
@@ -83,7 +83,6 @@ export default function DonaturPage(): React.JSX.Element {
   
   const menuruTextRef = useRef<HTMLSpanElement>(null);
   const donaturTitleRef = useRef<HTMLDivElement>(null);
-  const donaturUnderlineRef = useRef<HTMLDivElement>(null);
   const emailRef = useRef<HTMLDivElement>(null);
   const igRef = useRef<HTMLDivElement>(null);
   const xRef = useRef<HTMLDivElement>(null);
@@ -401,16 +400,6 @@ export default function DonaturPage(): React.JSX.Element {
           { opacity: 0, x: -50, filter: 'blur(10px)' },
           { opacity: 1, x: 0, filter: 'blur(0px)', duration: 1, stagger: 0.04, ease: "back.out(1.2)",
             scrollTrigger: { trigger: donaturTitleRef.current, start: "top 85%", end: "bottom 70%", toggleActions: "play none none reverse" }
-          }
-        );
-      }
-
-      // Animasi Donatur Underline
-      if (donaturUnderlineRef.current) {
-        gsap.fromTo(donaturUnderlineRef.current,
-          { width: '0%', opacity: 0, x: 100 },
-          { width: '100%', opacity: 1, x: 0, duration: 1.2, ease: "power3.out",
-            scrollTrigger: { trigger: donaturUnderlineRef.current, start: "top 85%", end: "bottom 70%", toggleActions: "play none none reverse" }
           }
         );
       }
@@ -1175,7 +1164,7 @@ export default function DonaturPage(): React.JSX.Element {
 
         {/* Konten Utama */}
         <div style={{ flex: 1 }}>
-          {/* Teks Donatur besar */}
+          {/* Teks Donatur besar - TANPA GARIS BAWAH */}
           <div style={{
             position: 'relative',
             top: '120px',
@@ -1196,16 +1185,7 @@ export default function DonaturPage(): React.JSX.Element {
               }}>
               Donatur
             </div>
-            <div
-              ref={donaturUnderlineRef}
-              style={{
-                width: '0%',
-                height: '2px',
-                backgroundColor: '#000000',
-                marginTop: '20px',
-                opacity: 0
-              }}
-            />
+            {/* HAPUS garis bawah donaturUnderlineRef */}
           </div>
 
           {/* Info Text - JARAK JAUH KE BAWAH */}
@@ -1231,7 +1211,7 @@ export default function DonaturPage(): React.JSX.Element {
             </div>
           </div>
 
-          {/* Recent Donations */}
+          {/* Recent Donations - TANPA BORDER BOTTOM PADA JUDUL */}
           <div style={{
             position: 'relative',
             width: 'calc(100% - 160px)',
@@ -1244,9 +1224,8 @@ export default function DonaturPage(): React.JSX.Element {
               fontWeight: '400',
               color: '#000000',
               marginBottom: '40px',
-              letterSpacing: '-0.02em',
-              borderBottom: '1px solid #e0e0e0',
-              paddingBottom: '16px'
+              letterSpacing: '-0.02em'
+              // HAPUS borderBottom
             }}>
               Recent Donations
             </h3>
@@ -1278,7 +1257,7 @@ export default function DonaturPage(): React.JSX.Element {
                             {donation.donorName}
                           </h4>
                           <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '16px', color: '#aaa' }}>•</span>
-                          <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '16px', color: '#aaa' }}>
+                          <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '16px", color: '#aaa' }}>
                             {donation.organization}
                           </span>
                         </div>
