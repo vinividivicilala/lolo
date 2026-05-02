@@ -606,18 +606,18 @@ export default function HomePage(): React.JSX.Element {
           color: rgb(16, 16, 16);
         }
 
-        /* Badge style */
+        /* Badge style - Hitam dengan teks merah */
         .badge-founder {
           display: inline-flex;
           align-items: center;
           padding: 8px 20px;
-          background-color: #f0f0f0;
+          background-color: #000000;
           border-radius: 60px;
           font-family: 'Questrial', sans-serif;
           font-size: 18px;
           font-weight: 500;
-          color: #000000;
-          border: 1px solid #e0e0e0;
+          color: #ff0000;
+          border: 1px solid #333333;
         }
       `}</style>
       
@@ -875,7 +875,7 @@ export default function HomePage(): React.JSX.Element {
                   <div>Call Farid.</div>
                 </div>
 
-                {/* Profile Section - Gambar, Nama, dan Badge */}
+                {/* Profile Section - Gambar Portrait, Nama, dan Badge */}
                 <div
                   ref={profileRef}
                   style={{
@@ -888,11 +888,11 @@ export default function HomePage(): React.JSX.Element {
                     opacity: 0
                   }}
                 >
-                  {/* Gambar Profile */}
+                  {/* Gambar Profile - Portrait (lebih tinggi dari lebar) */}
                   <div style={{
-                    width: '80px',
-                    height: '80px',
-                    borderRadius: '50%',
+                    width: '70px',
+                    height: '90px',
+                    borderRadius: '12px',
                     overflow: 'hidden',
                     position: 'relative',
                     border: '2px solid #e0e0e0'
@@ -901,7 +901,7 @@ export default function HomePage(): React.JSX.Element {
                       src="/images/5.jpg"
                       alt="Farid Ardiansyah"
                       fill
-                      style={{ objectFit: 'cover' }}
+                      style={{ objectFit: 'cover', objectPosition: 'center' }}
                     />
                   </div>
 
@@ -916,7 +916,7 @@ export default function HomePage(): React.JSX.Element {
                     Farid Ardiansyah
                   </div>
 
-                  {/* Badge Founder & Programmer */}
+                  {/* Badge Founder & Programmer - Hitam dengan teks merah */}
                   <div className="badge-founder">
                     Founder & Programmer
                   </div>
