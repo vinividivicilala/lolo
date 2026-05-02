@@ -40,7 +40,7 @@ export default function HomePage(): React.JSX.Element {
   const loadingOverlayRef = useRef<HTMLDivElement>(null);
   const callTextRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
-  const contentWrapperRef = useRef<HTMLDivElement>(null);
+  const bottomContentRef = useRef<HTMLDivElement>(null);
 
   // Variabel untuk menyimpan teks asli medsos
   const originalTexts = {
@@ -189,7 +189,7 @@ export default function HomePage(): React.JSX.Element {
               { x: '0%', opacity: 1, duration: 1, ease: "power3.inOut" }
             );
             animateMenuruMain();
-            animateContent();
+            animateBottomContent();
           }
         });
       }
@@ -251,11 +251,11 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Animasi content wrapper
-  const animateContent = () => {
-    if (contentWrapperRef.current) {
-      gsap.fromTo(contentWrapperRef.current,
-        { opacity: 0, y: 100, filter: 'blur(10px)' },
+  // Animasi bottom content
+  const animateBottomContent = () => {
+    if (bottomContentRef.current) {
+      gsap.fromTo(bottomContentRef.current,
+        { opacity: 0, y: 50, filter: 'blur(10px)' },
         {
           opacity: 1,
           y: 0,
@@ -663,7 +663,7 @@ export default function HomePage(): React.JSX.Element {
               MENURU
             </div>
 
-            {/* Hanya Scroll Down di tengah */}
+            {/* Hanya Scroll Down di tengah - 100vh */}
             <div style={{
               height: '100vh',
               width: '100%',
@@ -694,16 +694,16 @@ export default function HomePage(): React.JSX.Element {
               alignItems: 'center',
               minHeight: '100vh'
             }}>
-              {/* Content Wrapper - Mencatat, Contact, Call Farid, Profile */}
+              {/* Bottom Content - Mencatat, Contact, Call Farid, Profile */}
               <div
-                ref={contentWrapperRef}
+                ref={bottomContentRef}
                 style={{
                   width: '100%',
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
                   gap: '40px',
-                  marginBottom: '100px',
+                  marginBottom: '80px',
                   opacity: 0
                 }}
               >
