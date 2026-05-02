@@ -7,6 +7,22 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ScrollSmoother } from "gsap/ScrollSmoother";
 import { SplitText } from "gsap/SplitText";
 import Link from "next/link";
+import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore';
+import { initializeApp } from 'firebase/app';
+
+// Firebase configuration
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_AUTH_DOMAIN",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_STORAGE_BUCKET",
+  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
 // Register GSAP plugins
 if (typeof window !== 'undefined') {
@@ -15,6 +31,7 @@ if (typeof window !== 'undefined') {
 
 export default function HomePage(): React.JSX.Element {
   const [showPopup, setShowPopup] = useState(false);
+  const [announcement, setAnnouncement] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const acceptBtnRef = useRef<HTMLButtonElement>(null);
   const declineBtnRef = useRef<HTMLButtonElement>(null);
@@ -43,6 +60,28 @@ export default function HomePage(): React.JSX.Element {
     x: 'X',
     linkedin: 'LinkedIn'
   };
+
+  // Fetch announcement from Firebase
+  useEffect(() => {
+    const fetchAnnouncement = async () => {
+      try {
+        const announcementRef = doc(db, 'announcements', 'current');
+        const announcementSnap = await getDoc(announcementRef);
+        
+        if (announcementSnap.exists()) {
+          const data = announcementSnap.data();
+          // Check if announcement is still valid (not expired)
+          if (data.expiryDate && new Date(data.expiryDate) > new Date()) {
+            setAnnouncement(data.message);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching announcement:', error);
+      }
+    };
+    
+    fetchAnnouncement();
+  }, []);
 
   // Fungsi untuk mendapatkan huruf random (A-Z)
   const getRandomChar = () => {
@@ -613,6 +652,14 @@ export default function HomePage(): React.JSX.Element {
         .social-item {
           transition: all 0.3s ease;
         }
+
+        .cookie-link {
+          transition: opacity 0.3s ease;
+        }
+        
+        .cookie-link:hover {
+          opacity: 0.7;
+        }
       `}</style>
       
       {/* LOADING OVERLAY */}
@@ -1034,12 +1081,11 @@ export default function HomePage(): React.JSX.Element {
           position: 'fixed',
           bottom: '30px',
           left: '30px',
-          width: 'auto',
-          maxWidth: 'calc(100vw - 60px)',
+          right: '30px',
           backgroundColor: '#000000',
           color: '#ffffff',
           borderRadius: '32px',
-          padding: '24px 32px',
+          padding: '28px 40px',
           boxShadow: '0 20px 40px rgba(0,0,0,0.3), 0 5px 12px rgba(0,0,0,0.1)',
           zIndex: 1000,
           fontFamily: 'Questrial, sans-serif',
@@ -1048,7 +1094,8 @@ export default function HomePage(): React.JSX.Element {
           display: 'flex',
           flexDirection: 'row',
           alignItems: 'center',
-          gap: '32px',
+          justifyContent: 'space-between',
+          gap: '40px',
           flexWrap: 'wrap',
         }}>
           <style>
@@ -1060,37 +1107,74 @@ export default function HomePage(): React.JSX.Element {
             `}
           </style>
           
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', flex: 1 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <span style={{ fontSize: '56px', display: 'inline-block' }}>🍪</span>
+              <span style={{ fontSize: '48px', display: 'inline-block' }}>🍪</span>
               <span style={{ 
                 fontWeight: '700', 
-                fontSize: '36px',
+                fontSize: '32px',
                 letterSpacing: '-0.02em',
                 background: 'linear-gradient(135deg, #ffffff 0%, #cccccc 100%)',
                 backgroundClip: 'text',
                 WebkitBackgroundClip: 'text',
                 color: 'transparent',
                 fontFamily: 'Questrial, sans-serif'
-              }}>cookies.</span>
+              }}>Cookies Notice</span>
             </div>
             
             <p style={{
-              fontSize: '20px',
-              lineHeight: '1.4',
+              fontSize: '18px',
+              lineHeight: '1.5',
               marginBottom: 0,
               color: '#ffffff',
               fontWeight: '400',
               letterSpacing: '-0.01em',
-              maxWidth: '280px',
+              maxWidth: '600px',
               fontFamily: 'Questrial, sans-serif'
             }}>
-              I use cookies to understand how you navigate<br />
-              this site and what topics interest you most.
+              This site uses cookies to provide you with the best user experience. 
+              By using this website, you accept our use of cookies.
             </p>
-            <span style={{ color: '#aaaaaa', fontSize: '18px', display: 'inline-block', marginTop: '4px', fontFamily: 'Questrial, sans-serif' }}>
-              No ads, no data sold ever.
-            </span>
+            
+            <Link href="/privacy-policy" passHref>
+              <span 
+                className="cookie-link"
+                style={{ 
+                  color: '#aaaaaa', 
+                  fontSize: '16px', 
+                  display: 'inline-flex', 
+                  alignItems: 'center', 
+                  gap: '6px',
+                  marginTop: '4px',
+                  cursor: 'pointer',
+                  textDecoration: 'underline',
+                  fontFamily: 'Questrial, sans-serif',
+                  fontWeight: '500'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.color = '#ffffff'}
+                onMouseLeave={(e) => e.currentTarget.style.color = '#aaaaaa'}
+              >
+                Show details
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </span>
+            </Link>
+
+            {/* Announcement notification */}
+            {announcement && (
+              <div style={{
+                marginTop: '12px',
+                padding: '10px 16px',
+                backgroundColor: 'rgba(255,255,255,0.1)',
+                borderRadius: '12px',
+                borderLeft: '3px solid #ffffff',
+                fontSize: '14px',
+                color: '#e0e0e0'
+              }}>
+                📢 {announcement}
+              </div>
+            )}
           </div>
           
           <div style={{ display: 'flex', gap: '16px', justifyContent: 'flex-start', flexShrink: 0 }}>
@@ -1098,13 +1182,13 @@ export default function HomePage(): React.JSX.Element {
               ref={declineBtnRef}
               onClick={handleDecline}
               style={{
-                padding: '14px 32px',
+                padding: '12px 28px',
                 backgroundColor: '#000000',
                 color: '#ffffff',
                 border: '1.5px solid #333333',
                 borderRadius: '60px',
                 cursor: 'pointer',
-                fontSize: '18px',
+                fontSize: '16px',
                 fontWeight: '600',
                 letterSpacing: '-0.01em',
                 fontFamily: 'Questrial, sans-serif',
@@ -1121,13 +1205,13 @@ export default function HomePage(): React.JSX.Element {
               ref={acceptBtnRef}
               onClick={handleAccept}
               style={{
-                padding: '14px 32px',
+                padding: '12px 28px',
                 backgroundColor: '#000000',
                 color: '#ffffff',
-                border: '1.5px solid #333333',
+                border: '1.5px solid #ffffff',
                 borderRadius: '60px',
                 cursor: 'pointer',
-                fontSize: '18px',
+                fontSize: '16px',
                 fontWeight: '600',
                 letterSpacing: '-0.01em',
                 fontFamily: 'Questrial, sans-serif',
