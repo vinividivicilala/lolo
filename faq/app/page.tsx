@@ -8,48 +8,15 @@ import { ScrollSmoother } from "gsap/ScrollSmoother";
 import { SplitText } from "gsap/SplitText";
 import Link from "next/link";
 
-// Dynamic import untuk Firebase agar tidak di-load saat build
-let db: any = null;
-let getFirestore: any = null;
-let doc: any = null;
-let getDoc: any = null;
-let initializeApp: any = null;
-
 // Register GSAP plugins
 if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger, ScrollSmoother, SplitText);
-  
-  // Load Firebase hanya di client side
-  const loadFirebase = async () => {
-    const firebaseModule = await import('firebase/app');
-    const firestoreModule = await import('firebase/firestore');
-    
-    initializeApp = firebaseModule.initializeApp;
-    getFirestore = firestoreModule.getFirestore;
-    doc = firestoreModule.doc;
-    getDoc = firestoreModule.getDoc;
-    
-    const firebaseConfig = {
-      apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "YOUR_API_KEY",
-      authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "YOUR_AUTH_DOMAIN",
-      projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "YOUR_PROJECT_ID",
-      storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "YOUR_STORAGE_BUCKET",
-      messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "YOUR_MESSAGING_SENDER_ID",
-      appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "YOUR_APP_ID"
-    };
-    
-    const app = initializeApp(firebaseConfig);
-    db = getFirestore(app);
-  };
-  
-  loadFirebase();
 }
 
 export default function HomePage(): React.JSX.Element {
   const [showPopup, setShowPopup] = useState(false);
   const [announcement, setAnnouncement] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isClient, setIsClient] = useState(false);
   const acceptBtnRef = useRef<HTMLButtonElement>(null);
   const declineBtnRef = useRef<HTMLButtonElement>(null);
   const contactBtnRef = useRef<HTMLButtonElement>(null);
@@ -72,42 +39,12 @@ export default function HomePage(): React.JSX.Element {
   const loadingOverlayRef = useRef<HTMLDivElement>(null);
   const callTextRef = useRef<HTMLDivElement>(null);
 
-  // Set isClient to true after mount
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-
   // Variabel untuk menyimpan teks asli medsos
   const originalTexts = {
     ig: 'Instagram',
     x: 'X',
     linkedin: 'LinkedIn'
   };
-
-  // Fetch announcement from Firebase (only on client)
-  useEffect(() => {
-    const fetchAnnouncement = async () => {
-      if (!isClient) return;
-      
-      try {
-        if (db && doc && getDoc) {
-          const announcementRef = doc(db, 'announcements', 'current');
-          const announcementSnap = await getDoc(announcementRef);
-          
-          if (announcementSnap.exists()) {
-            const data = announcementSnap.data();
-            if (data.expiryDate && new Date(data.expiryDate) > new Date()) {
-              setAnnouncement(data.message);
-            }
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching announcement:', error);
-      }
-    };
-    
-    fetchAnnouncement();
-  }, [isClient]);
 
   // Fungsi untuk mendapatkan huruf random (A-Z)
   const getRandomChar = () => {
@@ -117,8 +54,6 @@ export default function HomePage(): React.JSX.Element {
 
   // Fungsi untuk mengacak huruf pada teks
   const randomizeText = (element: HTMLElement, originalText: string, duration: number = 0.5) => {
-    if (typeof window === 'undefined') return;
-    
     const originalChars = originalText.split('');
     const totalSteps = 15;
     let currentStep = 0;
@@ -139,8 +74,6 @@ export default function HomePage(): React.JSX.Element {
 
   // Animasi hover random huruf untuk medsos
   const handleSocialHover = (element: HTMLElement, originalText: string) => {
-    if (typeof window === 'undefined') return;
-    
     if (!element.getAttribute('data-original')) {
       element.setAttribute('data-original', originalText);
     }
@@ -150,8 +83,6 @@ export default function HomePage(): React.JSX.Element {
   };
   
   const handleSocialLeave = (element: HTMLElement, originalText: string) => {
-    if (typeof window === 'undefined') return;
-    
     const interval = element.getAttribute('data-interval');
     if (interval) {
       clearInterval(Number(interval));
@@ -159,12 +90,10 @@ export default function HomePage(): React.JSX.Element {
     element.textContent = originalText;
   };
 
+  // Initialize ScrollSmoother
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    
-    // Initialize ScrollSmoother
     const initSmoother = () => {
-      if (!smootherRef.current) {
+      if (typeof window !== 'undefined' && !smootherRef.current) {
         smootherRef.current = ScrollSmoother.create({
           wrapper: "#smooth-wrapper",
           content: "#smooth-content",
@@ -173,11 +102,11 @@ export default function HomePage(): React.JSX.Element {
           smoothTouch: 0.5,
           normalizeScroll: true,
           ignoreMobileResize: true,
-          onUpdate: () => {},
         });
       }
     };
 
+    // Small delay to ensure DOM is ready
     const timer = setTimeout(() => {
       initSmoother();
     }, 100);
@@ -192,92 +121,83 @@ export default function HomePage(): React.JSX.Element {
     };
   }, []);
 
-  // Animasi loading overlay dengan SplitText modern
+  // Animasi loading overlay
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    
-    if (isLoading && loadingOverlayRef.current) {
-      const splitMenuruLoading = new SplitText(menuruTopTextRef.current, {
-        type: "chars, words",
-        charsClass: "split-char-loading"
-      });
+    if (!isLoading || !loadingOverlayRef.current) return;
 
-      const splitBrand = new SplitText(brandTextRef.current, {
-        type: "chars, words",
-        charsClass: "split-char-loading"
-      });
+    // Split text untuk loading
+    const splitMenuruLoading = new SplitText(menuruTopTextRef.current, {
+      type: "chars, words",
+      charsClass: "split-char-loading"
+    });
 
-      const splitYear = new SplitText(yearTextRef.current, {
-        type: "chars",
-        charsClass: "split-char-loading"
-      });
+    const splitBrand = new SplitText(brandTextRef.current, {
+      type: "chars, words",
+      charsClass: "split-char-loading"
+    });
 
-      if (splitMenuruLoading.chars) {
-        gsap.set(splitMenuruLoading.chars, {
-          opacity: 0,
-          y: 120,
-          rotationX: -120,
-          rotationY: 45,
-          transformPerspective: 1200,
-          filter: 'blur(25px)',
-          transformOrigin: '50% 50% -80px'
+    const splitYear = new SplitText(yearTextRef.current, {
+      type: "chars",
+      charsClass: "split-char-loading"
+    });
+
+    if (splitMenuruLoading.chars) {
+      gsap.set(splitMenuruLoading.chars, {
+        opacity: 0,
+        y: 120,
+        rotationX: -120,
+        rotationY: 45,
+        transformPerspective: 1200,
+        filter: 'blur(25px)',
+        transformOrigin: '50% 50% -80px'
+      });
+    }
+
+    if (splitBrand.chars) {
+      gsap.set(splitBrand.chars, {
+        opacity: 0,
+        x: 100,
+        rotationY: 90,
+        transformPerspective: 1200,
+        filter: 'blur(20px)',
+        transformOrigin: '50% 50% -50px'
+      });
+    }
+
+    if (splitYear.chars) {
+      gsap.set(splitYear.chars, {
+        opacity: 0,
+        y: 80,
+        rotationX: -60,
+        transformPerspective: 1000,
+        filter: 'blur(15px)',
+        transformOrigin: '50% 50% -30px'
+      });
+    }
+
+    const loadingTimeline = gsap.timeline({
+      onComplete: () => {
+        // Animate overlay out
+        gsap.to(loadingOverlayRef.current, {
+          x: '-100%',
+          duration: 1,
+          ease: "power3.inOut",
+          onComplete: () => {
+            setIsLoading(false);
+            // Animate main content
+            gsap.fromTo(mainContentRef.current,
+              { x: '100%', opacity: 0.5 },
+              { x: '0%', opacity: 1, duration: 1, ease: "power3.inOut" }
+            );
+            animateMenuruMain();
+            animateCallText();
+          }
         });
       }
+    });
 
-      if (splitBrand.chars) {
-        gsap.set(splitBrand.chars, {
-          opacity: 0,
-          x: 100,
-          rotationY: 90,
-          transformPerspective: 1200,
-          filter: 'blur(20px)',
-          transformOrigin: '50% 50% -50px'
-        });
-      }
-
-      if (splitYear.chars) {
-        gsap.set(splitYear.chars, {
-          opacity: 0,
-          y: 80,
-          rotationX: -60,
-          transformPerspective: 1000,
-          filter: 'blur(15px)',
-          transformOrigin: '50% 50% -30px'
-        });
-      }
-
-      const loadingTimeline = gsap.timeline({
-        onComplete: () => {
-          // Overlay geser ke kiri
-          gsap.to(loadingOverlayRef.current, {
-            x: '-100%',
-            duration: 1,
-            ease: "power3.inOut",
-            onComplete: () => {
-              setIsLoading(false);
-              // Animasi MENURU muncul dari kiri ke kanan
-              animateMenuruMain();
-              // Animasi teks Call Farid
-              animateCallText();
-            }
-          });
-          
-          // Halaman utama geser dari kanan ke kiri
-          gsap.fromTo(mainContentRef.current,
-            {
-              x: '100%',
-              opacity: 0.5
-            },
-            {
-              x: '0%',
-              opacity: 1,
-              duration: 1,
-              ease: "power3.inOut"
-            }
-          );
-        }
-      });
-
+    // Animate loading text
+    if (splitMenuruLoading.chars) {
       loadingTimeline.to(splitMenuruLoading.chars, {
         opacity: 1,
         y: 0,
@@ -288,7 +208,9 @@ export default function HomePage(): React.JSX.Element {
         stagger: { each: 0.05, from: "start", ease: "back.out(1.2)" },
         ease: "back.out(0.8)"
       }, 0);
+    }
 
+    if (splitBrand.chars) {
       loadingTimeline.to(splitBrand.chars, {
         opacity: 1,
         x: 0,
@@ -298,7 +220,9 @@ export default function HomePage(): React.JSX.Element {
         stagger: { each: 0.04, from: "end", ease: "power2.out" },
         ease: "back.out(1)"
       }, 0.2);
+    }
 
+    if (splitYear.chars) {
       loadingTimeline.to(splitYear.chars, {
         opacity: 1,
         y: 0,
@@ -308,25 +232,17 @@ export default function HomePage(): React.JSX.Element {
         stagger: { each: 0.08, from: "start", ease: "bounce.out" },
         ease: "back.out(1.1)"
       }, 0.4);
-
-      return () => {
-        loadingTimeline.kill();
-      };
     }
+
+    return () => {
+      loadingTimeline.kill();
+    };
   }, [isLoading]);
 
-  // Animasi MENURU di halaman utama - SLIDE IN DARI KIRI KE KANAN, DIAM
+  // Animasi MENURU di halaman utama
   const animateMenuruMain = () => {
-    if (typeof window === 'undefined') return;
-    
     if (menuruTopMainRef.current) {
-      // Set initial state: di luar layar sebelah kiri
-      gsap.set(menuruTopMainRef.current, {
-        x: -500,
-        opacity: 0
-      });
-
-      // Animasi slide in dari kiri ke kanan, lalu diam
+      gsap.set(menuruTopMainRef.current, { x: -500, opacity: 0 });
       gsap.to(menuruTopMainRef.current, {
         x: 0,
         opacity: 1,
@@ -339,8 +255,6 @@ export default function HomePage(): React.JSX.Element {
 
   // Animasi teks Call Farid
   const animateCallText = () => {
-    if (typeof window === 'undefined') return;
-    
     if (callTextRef.current) {
       const splitCall = new SplitText(callTextRef.current, {
         type: "lines",
@@ -348,11 +262,7 @@ export default function HomePage(): React.JSX.Element {
       });
 
       gsap.fromTo(splitCall.lines,
-        {
-          opacity: 0,
-          y: 50,
-          filter: 'blur(10px)'
-        },
+        { opacity: 0, y: 50, filter: 'blur(10px)' },
         {
           opacity: 1,
           y: 0,
@@ -366,153 +276,139 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // GSAP SplitText animations untuk konten utama lainnya
+  // Scroll animations
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    
-    if (!isLoading) {
-      if (mencatatTextRef.current) {
-        const splitMencatat = new SplitText(mencatatTextRef.current, {
-          type: "chars",
-          charsClass: "split-char"
-        });
+    if (isLoading) return;
 
-        gsap.fromTo(splitMencatat.chars,
-          {
-            opacity: 0,
-            y: 100,
-            rotateX: -90,
-            filter: 'blur(10px)'
-          },
-          {
-            opacity: 1,
-            y: 0,
-            rotateX: 0,
-            filter: 'blur(0px)',
-            duration: 1.2,
-            stagger: 0.03,
-            ease: "back.out(1.2)",
-            scrollTrigger: {
-              trigger: mencatatTextRef.current,
-              start: "top 80%",
-              end: "bottom 60%",
-              toggleActions: "play none none reverse",
-            }
-          }
-        );
-      }
+    // Animasi mencatat text
+    if (mencatatTextRef.current) {
+      const splitMencatat = new SplitText(mencatatTextRef.current, {
+        type: "chars",
+        charsClass: "split-char"
+      });
 
-      if (emailRef.current) {
-        const splitEmail = new SplitText(emailRef.current, {
-          type: "chars",
-          charsClass: "split-char"
-        });
-
-        gsap.fromTo(splitEmail.chars,
-          {
-            opacity: 0,
-            x: -30,
-            filter: 'blur(5px)'
-          },
-          {
-            opacity: 1,
-            x: 0,
-            filter: 'blur(0px)',
-            duration: 0.8,
-            stagger: 0.02,
-            ease: "power2.out",
-            scrollTrigger: {
-              trigger: emailRef.current,
-              start: "top 85%",
-              end: "bottom 70%",
-              toggleActions: "play none none reverse",
-            }
-          }
-        );
-      }
-
-      if (menuruTextRef.current) {
-        const splitMenuru = new SplitText(menuruTextRef.current, {
-          type: "chars",
-          charsClass: "split-char-menuru"
-        });
-
-        gsap.set(splitMenuru.chars, {
-          opacity: 0,
-          y: 200,
-          rotationY: 90,
-          transformPerspective: 800,
-          filter: 'blur(20px)'
-        });
-
-        gsap.to(splitMenuru.chars, {
+      gsap.fromTo(splitMencatat.chars,
+        { opacity: 0, y: 100, rotateX: -90, filter: 'blur(10px)' },
+        {
           opacity: 1,
           y: 0,
-          rotationY: 0,
+          rotateX: 0,
           filter: 'blur(0px)',
-          duration: 1.5,
-          stagger: { each: 0.04, from: "start", ease: "power2.out" },
-          ease: "back.out(0.8)",
+          duration: 1.2,
+          stagger: 0.03,
+          ease: "back.out(1.2)",
           scrollTrigger: {
-            trigger: menuruTextRef.current,
+            trigger: mencatatTextRef.current,
+            start: "top 80%",
+            end: "bottom 60%",
+            toggleActions: "play none none reverse",
+          }
+        }
+      );
+    }
+
+    // Animasi email
+    if (emailRef.current) {
+      const splitEmail = new SplitText(emailRef.current, {
+        type: "chars",
+        charsClass: "split-char"
+      });
+
+      gsap.fromTo(splitEmail.chars,
+        { opacity: 0, x: -30, filter: 'blur(5px)' },
+        {
+          opacity: 1,
+          x: 0,
+          filter: 'blur(0px)',
+          duration: 0.8,
+          stagger: 0.02,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: emailRef.current,
+            start: "top 85%",
+            end: "bottom 70%",
+            toggleActions: "play none none reverse",
+          }
+        }
+      );
+    }
+
+    // Animasi MENURU footer
+    if (menuruTextRef.current) {
+      const splitMenuru = new SplitText(menuruTextRef.current, {
+        type: "chars",
+        charsClass: "split-char-menuru"
+      });
+
+      gsap.set(splitMenuru.chars, {
+        opacity: 0,
+        y: 200,
+        rotationY: 90,
+        transformPerspective: 800,
+        filter: 'blur(20px)'
+      });
+
+      gsap.to(splitMenuru.chars, {
+        opacity: 1,
+        y: 0,
+        rotationY: 0,
+        filter: 'blur(0px)',
+        duration: 1.5,
+        stagger: { each: 0.04, from: "start", ease: "power2.out" },
+        ease: "back.out(0.8)",
+        scrollTrigger: {
+          trigger: menuruTextRef.current,
+          start: "top 85%",
+          end: "bottom 65%",
+          toggleActions: "play none none reverse",
+        }
+      });
+    }
+
+    // Animasi contact text
+    if (contactTextRef.current) {
+      const splitContact = new SplitText(contactTextRef.current, {
+        type: "chars",
+        charsClass: "split-char"
+      });
+
+      gsap.fromTo(splitContact.chars,
+        { opacity: 0, x: -20, filter: 'blur(5px)' },
+        {
+          opacity: 1,
+          x: 0,
+          filter: 'blur(0px)',
+          duration: 0.8,
+          stagger: 0.05,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: contactTextRef.current,
             start: "top 85%",
             end: "bottom 65%",
             toggleActions: "play none none reverse",
           }
-        });
-      }
+        }
+      );
+    }
 
-      if (contactTextRef.current) {
-        const splitContact = new SplitText(contactTextRef.current, {
-          type: "chars",
-          charsClass: "split-char"
-        });
-
-        gsap.fromTo(splitContact.chars,
-          {
-            opacity: 0,
-            x: -20,
-            filter: 'blur(5px)'
-          },
-          {
-            opacity: 1,
-            x: 0,
-            filter: 'blur(0px)',
-            duration: 0.8,
-            stagger: 0.05,
-            ease: "power2.out",
-            scrollTrigger: {
-              trigger: contactTextRef.current,
-              start: "top 85%",
-              end: "bottom 65%",
-              toggleActions: "play none none reverse",
-            }
+    // Animasi line
+    if (lineRef.current) {
+      gsap.fromTo(lineRef.current,
+        { width: '0%', opacity: 0, x: 100 },
+        {
+          width: '100%',
+          opacity: 1,
+          x: 0,
+          duration: 1.2,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: lineRef.current,
+            start: "top 85%",
+            end: "bottom 70%",
+            toggleActions: "play none none reverse",
           }
-        );
-      }
-
-      if (lineRef.current) {
-        gsap.fromTo(lineRef.current,
-          {
-            width: '0%',
-            opacity: 0,
-            x: 100
-          },
-          {
-            width: '100%',
-            opacity: 1,
-            x: 0,
-            duration: 1.2,
-            ease: "power3.out",
-            scrollTrigger: {
-              trigger: lineRef.current,
-              start: "top 85%",
-              end: "bottom 70%",
-              toggleActions: "play none none reverse",
-            }
-          }
-        );
-      }
+        }
+      );
     }
 
     return () => {
@@ -520,18 +416,16 @@ export default function HomePage(): React.JSX.Element {
     };
   }, [isLoading]);
 
+  // Cookie consent
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    
     const consent = localStorage.getItem('cookieConsent');
     if (consent === null) {
       setShowPopup(true);
     }
   }, []);
 
+  // Button hover effects
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    
     if (showPopup && acceptBtnRef.current && declineBtnRef.current) {
       const acceptBtn = acceptBtnRef.current;
       const declineBtn = declineBtnRef.current;
@@ -540,60 +434,16 @@ export default function HomePage(): React.JSX.Element {
         btn.style.position = 'relative';
         btn.style.overflow = 'hidden';
         btn.style.zIndex = '1';
-        
-        const pseudoStyle = document.createElement('style');
-        pseudoStyle.textContent = `
-          .btn-hover-effect {
-            position: relative;
-            isolation: isolate;
-          }
-          .btn-hover-effect::before {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 0%;
-            background-color: #ffffff;
-            transition: height 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-            z-index: -1;
-            border-radius: 60px;
-          }
-          .btn-hover-effect:hover::before {
-            height: 100%;
-          }
-          .btn-hover-effect {
-            transition: color 0.3s ease;
-          }
-          .btn-hover-effect:hover {
-            color: #000000 !important;
-          }
-        `;
-        document.head.appendChild(pseudoStyle);
-        btn.classList.add('btn-hover-effect');
       });
-
-      return () => {
-        [acceptBtn, declineBtn].forEach(btn => {
-          const styles = document.querySelectorAll('style');
-          styles.forEach(style => {
-            if (style.textContent?.includes('btn-hover-effect')) {
-              style.remove();
-            }
-          });
-        });
-      };
     }
   }, [showPopup]);
 
   const handleAccept = () => {
-    if (typeof window === 'undefined') return;
     localStorage.setItem('cookieConsent', 'accepted');
     setShowPopup(false);
   };
 
   const handleDecline = () => {
-    if (typeof window === 'undefined') return;
     localStorage.setItem('cookieConsent', 'declined');
     setShowPopup(false);
   };
@@ -601,16 +451,10 @@ export default function HomePage(): React.JSX.Element {
   const handleContact = () => {};
 
   const handleEmailClick = () => {
-    if (typeof window === 'undefined') return;
     window.location.href = 'mailto:contact.menuru@gmail.com';
   };
 
   const handleSocialClick = (platform: string) => {};
-
-  // Prevent hydration errors by not rendering GSAP-dependent content until client-side
-  if (!isClient) {
-    return null;
-  }
 
   return (
     <>
@@ -750,9 +594,9 @@ export default function HomePage(): React.JSX.Element {
           opacity: 0.7;
         }
 
-        .call-text-line {
-          display: block;
-          margin-bottom: 5px;
+        @keyframes slideUp {
+          from { opacity: 0; transform: translateY(30px); }
+          to { opacity: 1; transform: translateY(0); }
         }
       `}</style>
       
@@ -846,7 +690,7 @@ export default function HomePage(): React.JSX.Element {
               transition: 'all 0.01s ease'
             }}
           >
-            {/* TEKS MENURU DI HALAMAN UTAMA - SLIDE IN DARI KIRI KE KANAN, DIAM */}
+            {/* TEKS MENURU DI HALAMAN UTAMA */}
             <div
               ref={menuruTopMainRef}
               style={{
@@ -1222,15 +1066,6 @@ export default function HomePage(): React.JSX.Element {
           gap: '40px',
           flexWrap: 'wrap',
         }}>
-          <style>
-            {`
-              @keyframes slideUp {
-                from { opacity: 0; transform: translateY(30px); }
-                to { opacity: 1; transform: translateY(0); }
-              }
-            `}
-          </style>
-          
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', flex: 1 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <span style={{ fontSize: '48px', display: 'inline-block' }}>🍪</span>
