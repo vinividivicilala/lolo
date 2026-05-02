@@ -53,6 +53,7 @@ export default function HomePage(): React.JSX.Element {
   const xRef = useRef<HTMLDivElement>(null);
   const linkedinRef = useRef<HTMLDivElement>(null);
   const loadingOverlayRef = useRef<HTMLDivElement>(null);
+  const callTextRef = useRef<HTMLDivElement>(null);
 
   // Variabel untuk menyimpan teks asli medsos
   const originalTexts = {
@@ -221,6 +222,8 @@ export default function HomePage(): React.JSX.Element {
               setIsLoading(false);
               // Animasi MENURU muncul dari kiri ke kanan
               animateMenuruMain();
+              // Animasi teks Call Farid
+              animateCallText();
             }
           });
           
@@ -294,6 +297,33 @@ export default function HomePage(): React.JSX.Element {
         ease: "power2.out",
         delay: 0.1
       });
+    }
+  };
+
+  // Animasi teks Call Farid
+  const animateCallText = () => {
+    if (callTextRef.current) {
+      const splitCall = new SplitText(callTextRef.current, {
+        type: "lines",
+        linesClass: "split-line"
+      });
+
+      gsap.fromTo(splitCall.lines,
+        {
+          opacity: 0,
+          y: 50,
+          filter: 'blur(10px)'
+        },
+        {
+          opacity: 1,
+          y: 0,
+          filter: 'blur(0px)',
+          duration: 1,
+          stagger: 0.2,
+          ease: "power3.out",
+          delay: 0.3
+        }
+      );
     }
   };
 
@@ -583,6 +613,12 @@ export default function HomePage(): React.JSX.Element {
           transform-style: preserve-3d;
         }
 
+        .split-line {
+          display: block;
+          overflow: hidden;
+          will-change: transform, opacity, filter;
+        }
+
         .contact-btn-effect {
           position: relative;
           isolation: isolate;
@@ -659,6 +695,11 @@ export default function HomePage(): React.JSX.Element {
         
         .cookie-link:hover {
           opacity: 0.7;
+        }
+
+        .call-text-line {
+          display: block;
+          margin-bottom: 5px;
         }
       `}</style>
       
@@ -801,104 +842,134 @@ export default function HomePage(): React.JSX.Element {
                 position: 'absolute',
                 bottom: '8%',
                 display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
+                flexDirection: 'row',
+                alignItems: 'flex-end',
+                justifyContent: 'space-between',
                 gap: '40px',
-                width: '100%'
+                width: '85%',
+                maxWidth: '1400px'
               }}>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px'
-                }}>
-                  <div 
-                    ref={mencatatTextRef}
-                    style={{
-                      fontSize: '64px',
-                      fontFamily: 'Questrial, sans-serif',
-                      color: 'black',
-                      textAlign: 'center',
-                      fontWeight: '400',
-                      letterSpacing: '-0.02em',
-                      lineHeight: '1.2',
-                      whiteSpace: 'nowrap'
-                    }}>
-                    Mencatat apa yang kamu inginkan
-                  </div>
-                  <span style={{
-                    fontSize: '80px',
-                    color: 'black',
+                {/* LEFT SIDE - Call Farid Text */}
+                <div
+                  ref={callTextRef}
+                  style={{
+                    flex: 1,
+                    textAlign: 'left',
+                    fontFamily: "'Questrial', sans-serif",
+                    fontSize: '28px',
+                    color: '#000000',
                     fontWeight: '400',
-                    lineHeight: '1'
-                  }}>.</span>
+                    letterSpacing: '-0.02em',
+                    lineHeight: '1.3',
+                    marginBottom: '10px'
+                  }}
+                >
+                  <div style={{ marginBottom: '8px' }}>Ready to surpass your</div>
+                  <div style={{ marginBottom: '8px' }}>wildest dreams?</div>
+                  <div style={{ fontWeight: '500', color: '#333333' }}>Call Farid.</div>
                 </div>
 
-                <Link href="/contact">
-                  <button
-                    ref={contactBtnRef}
-                    onClick={handleContact}
-                    className="contact-btn-effect"
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '16px',
-                      padding: '14px 36px',
-                      borderRadius: '60px',
-                      cursor: 'pointer',
-                      fontSize: '20px',
-                      fontWeight: '600',
-                      letterSpacing: '-0.01em',
-                      fontFamily: 'Questrial, sans-serif',
-                      transition: 'all 0.3s ease',
-                      position: 'relative',
-                      overflow: 'hidden',
-                      zIndex: 1,
-                      border: '1.5px solid #cccccc',
-                      backgroundColor: '#ffffff',
-                      color: '#000000'
-                    }}
-                  >
-                    <span ref={contactTextRef}>Contact</span>
-                    
-                    <div style={{
-                      position: 'relative',
-                      width: '40px',
-                      height: '40px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}>
-                      <div className="dot-small" style={{
-                        width: '8px',
-                        height: '8px',
-                        borderRadius: '50%',
-                        backgroundColor: '#000000',
-                        opacity: 1,
-                        transform: 'scale(1)',
-                        transition: 'opacity 0.3s ease, transform 0.3s ease',
-                        position: 'absolute'
-                      }}></div>
+                {/* RIGHT SIDE - Existing content */}
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'flex-end',
+                  gap: '40px'
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}>
+                    <div 
+                      ref={mencatatTextRef}
+                      style={{
+                        fontSize: '64px',
+                        fontFamily: 'Questrial, sans-serif',
+                        color: 'black',
+                        textAlign: 'center',
+                        fontWeight: '400',
+                        letterSpacing: '-0.02em',
+                        lineHeight: '1.2',
+                        whiteSpace: 'nowrap'
+                      }}>
+                      Mencatat apa yang kamu inginkan
+                    </div>
+                    <span style={{
+                      fontSize: '80px',
+                      color: 'black',
+                      fontWeight: '400',
+                      lineHeight: '1'
+                    }}>.</span>
+                  </div>
+
+                  <Link href="/contact">
+                    <button
+                      ref={contactBtnRef}
+                      onClick={handleContact}
+                      className="contact-btn-effect"
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '16px',
+                        padding: '14px 36px',
+                        borderRadius: '60px',
+                        cursor: 'pointer',
+                        fontSize: '20px',
+                        fontWeight: '600',
+                        letterSpacing: '-0.01em',
+                        fontFamily: 'Questrial, sans-serif',
+                        transition: 'all 0.3s ease',
+                        position: 'relative',
+                        overflow: 'hidden',
+                        zIndex: 1,
+                        border: '1.5px solid #cccccc',
+                        backgroundColor: '#ffffff',
+                        color: '#000000'
+                      }}
+                    >
+                      <span ref={contactTextRef}>Contact</span>
                       
-                      <div className="circle-large-white" style={{
-                        position: 'absolute',
+                      <div style={{
+                        position: 'relative',
                         width: '40px',
                         height: '40px',
-                        borderRadius: '50%',
-                        backgroundColor: '#000000',
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'center',
-                        opacity: 0,
-                        transform: 'scale(0.8)',
-                        transition: 'opacity 0.3s ease, transform 0.3s ease, background-color 0.3s ease'
+                        justifyContent: 'center'
                       }}>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
+                        <div className="dot-small" style={{
+                          width: '8px',
+                          height: '8px',
+                          borderRadius: '50%',
+                          backgroundColor: '#000000',
+                          opacity: 1,
+                          transform: 'scale(1)',
+                          transition: 'opacity 0.3s ease, transform 0.3s ease',
+                          position: 'absolute'
+                        }}></div>
+                        
+                        <div className="circle-large-white" style={{
+                          position: 'absolute',
+                          width: '40px',
+                          height: '40px',
+                          borderRadius: '50%',
+                          backgroundColor: '#000000',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          opacity: 0,
+                          transform: 'scale(0.8)',
+                          transition: 'opacity 0.3s ease, transform 0.3s ease, background-color 0.3s ease'
+                        }}>
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </div>
                       </div>
-                    </div>
-                  </button>
-                </Link>
+                    </button>
+                  </Link>
+                </div>
               </div>
             </div>
 
