@@ -391,7 +391,7 @@ export default function DonaturPage(): React.JSX.Element {
     element.textContent = originalText;
   };
 
-  // GSAP SplitText animations untuk SEMUA TEKS
+  // GSAP SplitText animations
   useEffect(() => {
     const timer = setTimeout(() => {
       // Animasi Donatur Title
@@ -515,17 +515,17 @@ export default function DonaturPage(): React.JSX.Element {
         });
       }
 
-      // Animasi Footer Line 1 (atas email dan medsos)
+      // Animasi Footer Line 1
       if (footerLineRef.current) {
         gsap.fromTo(footerLineRef.current,
-          { width: '0%', opacity: 0, x: 100 },
-          { width: '100%', opacity: 1, x: 0, duration: 1.2,
+          { width: '0%', opacity: 0 },
+          { width: '100%', opacity: 1, duration: 1.2,
             scrollTrigger: { trigger: footerLineRef.current, start: "top 85%", end: "bottom 70%", toggleActions: "play none none reverse" }
           }
         );
       }
 
-      // Animasi Line 1 (bawah donatur)
+      // Animasi Line 1
       if (line1Ref.current) {
         gsap.fromTo(line1Ref.current,
           { width: '0%', opacity: 0, x: 100 },
@@ -776,7 +776,7 @@ export default function DonaturPage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* Menu Drawer - HAPUS teks MENURU di dalamnya */}
+        {/* Menu Drawer */}
         <div
           ref={menuDrawerRef}
           style={{
@@ -821,11 +821,6 @@ export default function DonaturPage(): React.JSX.Element {
             </svg>
           </div>
 
-          {/* HAPUS teks MENURU besar di background */}
-
-          {/* HAPUS nama web MENURU di pojok kiri atas */}
-
-          {/* Menu Items */}
           <div style={{
             display: 'flex',
             flexDirection: 'column',
@@ -1246,13 +1241,13 @@ export default function DonaturPage(): React.JSX.Element {
             />
           </div>
 
-          {/* Info Text */}
+          {/* Info Text - JARAK JAUH KE BAWAH */}
           <div style={{
             position: 'relative',
             top: '100px',
             left: '40px',
             right: '40px',
-            marginBottom: '80px'
+            marginBottom: '200px'
           }}>
             <div 
               ref={infoTextRef}
@@ -1269,29 +1264,29 @@ export default function DonaturPage(): React.JSX.Element {
             </div>
           </div>
 
-          {/* Donations List */}
+          {/* Recent Donations - Dengan ukuran teks lebih besar */}
           <div style={{
             position: 'relative',
             width: 'calc(100% - 160px)',
-            margin: '0 auto 60px auto',
+            margin: '0 auto 80px auto',
             padding: '0 40px'
           }}>
             <h3 style={{
               fontFamily: "'Inter', sans-serif",
-              fontSize: '20px',
+              fontSize: '28px',
               fontWeight: '400',
               color: '#000000',
-              marginBottom: '30px',
+              marginBottom: '40px',
               letterSpacing: '-0.02em',
               borderBottom: '1px solid #e0e0e0',
-              paddingBottom: '12px'
+              paddingBottom: '16px'
             }}>
               Recent Donations
             </h3>
             
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
               {donations.length === 0 ? (
-                <p style={{ fontFamily: "'Questrial', sans-serif", fontSize: '16px', color: '#999', textAlign: 'center', padding: '40px 0' }}>
+                <p style={{ fontFamily: "'Questrial', sans-serif", fontSize: '18px', color: '#999', textAlign: 'center', padding: '60px 0' }}>
                   No donations yet. Create one above.
                 </p>
               ) : (
@@ -1300,47 +1295,47 @@ export default function DonaturPage(): React.JSX.Element {
                     key={donation.id} 
                     style={{
                       borderBottom: '1px solid #f0f0f0',
-                      paddingBottom: '16px',
+                      paddingBottom: '28px',
                       transition: 'transform 0.2s ease'
                     }}
-                    onMouseEnter={(e) => gsap.to(e.currentTarget, { x: 8, duration: 0.2 })}
+                    onMouseEnter={(e) => gsap.to(e.currentTarget, { x: 10, duration: 0.2 })}
                     onMouseLeave={(e) => gsap.to(e.currentTarget, { x: 0, duration: 0.2 })}
                   >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '20px' }}>
                       <div style={{ flex: 1 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '6px', flexWrap: 'wrap' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '12px', flexWrap: 'wrap' }}>
                           {donation.donorPhoto && (
-                            <img src={donation.donorPhoto} alt="" style={{ width: '28px', height: '28px', borderRadius: '50%' }} />
+                            <img src={donation.donorPhoto} alt="" style={{ width: '40px', height: '40px', borderRadius: '50%' }} />
                           )}
-                          <h4 style={{ fontFamily: "'Inter', sans-serif", fontSize: '18px', fontWeight: '500', color: '#000000', margin: 0 }}>
+                          <h4 style={{ fontFamily: "'Inter', sans-serif", fontSize: '24px', fontWeight: '500', color: '#000000', margin: 0 }}>
                             {donation.donorName}
                           </h4>
-                          <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '13px', color: '#aaa' }}>•</span>
-                          <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '13px', color: '#aaa' }}>
+                          <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '16px', color: '#aaa' }}>•</span>
+                          <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '16px', color: '#aaa' }}>
                             {donation.organization}
                           </span>
                         </div>
-                        <p style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', color: '#666', margin: '6px 0 0 0', lineHeight: '1.4' }}>
+                        <p style={{ fontFamily: "'Questrial', sans-serif", fontSize: '18px', color: '#666', margin: '12px 0 0 0', lineHeight: '1.5' }}>
                           {donation.description}
                         </p>
                       </div>
                       <div style={{ textAlign: 'right' }}>
-                        <p style={{ fontFamily: "'Inter', sans-serif", fontSize: '20px', fontWeight: '500', color: '#000000', margin: 0 }}>
+                        <p style={{ fontFamily: "'Inter', sans-serif", fontSize: '28px', fontWeight: '500', color: '#000000', margin: 0 }}>
                           {formatCurrency(donation.totalAmount)}
                         </p>
-                        <p style={{ fontFamily: "'Questrial', sans-serif", fontSize: '12px', color: '#bbb', margin: '6px 0 0 0' }}>
+                        <p style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', color: '#bbb', margin: '12px 0 0 0' }}>
                           {new Date(donation.date).toLocaleDateString('id-ID')}
                         </p>
                         <button
                           onClick={() => generatePDF(donation)}
                           style={{
                             fontFamily: "'Questrial', sans-serif",
-                            fontSize: '11px',
+                            fontSize: '13px',
                             color: '#999',
                             backgroundColor: 'transparent',
                             border: 'none',
                             cursor: 'pointer',
-                            marginTop: '8px',
+                            marginTop: '12px',
                             textDecoration: 'underline'
                           }}
                           onMouseEnter={(e) => { (e.target as HTMLElement).style.color = '#000000'; }}
@@ -1359,13 +1354,13 @@ export default function DonaturPage(): React.JSX.Element {
           {/* Konten tambahan */}
           <div style={{
             width: 'calc(100% - 160px)',
-            margin: '0 auto 40px auto',
-            padding: '30px 40px',
+            margin: '0 auto 60px auto',
+            padding: '40px 40px',
             borderTop: '1px solid #f0f0f0'
           }}>
             <div style={{
               fontFamily: "'Questrial', sans-serif",
-              fontSize: '16px',
+              fontSize: '18px',
               color: '#999',
               textAlign: 'center',
               lineHeight: '1.6',
@@ -1373,12 +1368,12 @@ export default function DonaturPage(): React.JSX.Element {
               margin: '0 auto'
             }}>
               <p>Setiap donasi yang Anda berikan akan disalurkan kepada yang membutuhkan.</p>
-              <p style={{ marginTop: '16px' }}>Terima kasih atas kepercayaan dan partisipasi Anda dalam berbagi kebaikan.</p>
+              <p style={{ marginTop: '20px' }}>Terima kasih atas kepercayaan dan partisipasi Anda dalam berbagi kebaikan.</p>
             </div>
           </div>
         </div>
 
-        {/* FOOTER - Dengan 2 line: satu di atas email, satu di atas teks MENURU */}
+        {/* FOOTER - Teks MENURU besar di paling bawah mentok layar */}
         <div style={{
           width: '100%',
           backgroundColor: 'white',
@@ -1388,15 +1383,15 @@ export default function DonaturPage(): React.JSX.Element {
           borderTop: '1px solid #f0f0f0'
         }}>
           {/* LINE 1 - Sebelum email dan medsos */}
-          <div ref={footerLineRef} style={{ width: '0%', height: '2px', backgroundColor: '#000000', marginTop: '40px', marginBottom: '40px', opacity: 0 }} />
+          <div ref={footerLineRef} style={{ width: '0%', height: '2px', backgroundColor: '#000000', marginTop: '50px', marginBottom: '50px', opacity: 0 }} />
 
-          {/* Email dan Medsos - Email di kiri, Medsos di TENGAH */}
+          {/* Email dan Medsos */}
           <div style={{
             width: '100%',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'flex-end',
-            marginBottom: '60px',
+            marginBottom: '80px',
             position: 'relative'
           }}>
             {/* Email - di kiri */}
@@ -1418,11 +1413,11 @@ export default function DonaturPage(): React.JSX.Element {
               contact.menuru@gmail.com
             </div>
 
-            {/* Medsos - di TENGAH (absolute center) */}
+            {/* Medsos - di TENGAH */}
             <div style={{
               display: 'flex',
               flexDirection: 'column',
-              gap: '6px',
+              gap: '8px',
               position: 'absolute',
               left: '50%',
               transform: 'translateX(-50%)',
@@ -1476,14 +1471,14 @@ export default function DonaturPage(): React.JSX.Element {
             </div>
 
             {/* Spacer kanan untuk balance */}
-            <div style={{ width: '200px' }} />
+            <div style={{ width: '250px' }} />
           </div>
 
           {/* LINE 2 - Sebelum teks MENURU besar */}
-          <div ref={line2Ref} style={{ width: '0%', height: '2px', backgroundColor: '#000000', marginBottom: '60px', opacity: 0 }} />
+          <div ref={line2Ref} style={{ width: '0%', height: '2px', backgroundColor: '#000000', marginBottom: '80px', opacity: 0 }} />
 
           {/* Teks MENURU besar - MENTOK DI PALING BAWAH */}
-          <div style={{ textAlign: 'right', paddingBottom: '80px' }}>
+          <div style={{ textAlign: 'right', paddingBottom: '60px' }}>
             <span ref={footerMenuruRef} style={{ 
               fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif", 
               fontWeight: 'normal', 
