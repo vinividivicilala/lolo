@@ -825,16 +825,15 @@ export default function HomePage(): React.JSX.Element {
                   </button>
                 </Link>
 
-                {/* Call Farid Text - DI BAWAH TOMBOL CONTACT, POSISI KIRI BAWAH */}
+                {/* Call Farid Text - DI BAWAH TOMBOL CONTACT, TIDAK PAKAI ABSOLUTE */}
                 <div
                   ref={callTextRef}
                   className="call-farid-text"
                   style={{
-                    position: 'absolute',
-                    bottom: '-80px',
-                    left: '80px',
                     textAlign: 'left',
-                    width: 'auto'
+                    width: '100%',
+                    paddingLeft: '80px',
+                    marginTop: '20px'
                   }}
                 >
                   <div>Ready to surpass your</div>
