@@ -40,6 +40,7 @@ export default function HomePage(): React.JSX.Element {
   const loadingOverlayRef = useRef<HTMLDivElement>(null);
   const callTextRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
+  const contentWrapperRef = useRef<HTMLDivElement>(null);
 
   // Variabel untuk menyimpan teks asli medsos
   const originalTexts = {
@@ -188,8 +189,7 @@ export default function HomePage(): React.JSX.Element {
               { x: '0%', opacity: 1, duration: 1, ease: "power3.inOut" }
             );
             animateMenuruMain();
-            animateCallText();
-            animateProfile();
+            animateContent();
           }
         });
       }
@@ -251,41 +251,18 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Animasi teks Call Farid
-  const animateCallText = () => {
-    if (callTextRef.current) {
-      const splitCall = new SplitText(callTextRef.current, {
-        type: "lines",
-        linesClass: "split-line"
-      });
-
-      gsap.fromTo(splitCall.lines,
-        { opacity: 0, y: 50, filter: 'blur(10px)' },
+  // Animasi content wrapper
+  const animateContent = () => {
+    if (contentWrapperRef.current) {
+      gsap.fromTo(contentWrapperRef.current,
+        { opacity: 0, y: 100, filter: 'blur(10px)' },
         {
           opacity: 1,
           y: 0,
           filter: 'blur(0px)',
           duration: 1,
-          stagger: 0.2,
           ease: "power3.out",
           delay: 0.3
-        }
-      );
-    }
-  };
-
-  // Animasi profile
-  const animateProfile = () => {
-    if (profileRef.current) {
-      gsap.fromTo(profileRef.current,
-        { opacity: 0, x: -50, filter: 'blur(10px)' },
-        {
-          opacity: 1,
-          x: 0,
-          filter: 'blur(0px)',
-          duration: 0.8,
-          ease: "power3.out",
-          delay: 0.6
         }
       );
     }
@@ -294,32 +271,6 @@ export default function HomePage(): React.JSX.Element {
   // Scroll animations
   useEffect(() => {
     if (isLoading) return;
-
-    if (mencatatTextRef.current) {
-      const splitMencatat = new SplitText(mencatatTextRef.current, {
-        type: "chars",
-        charsClass: "split-char"
-      });
-
-      gsap.fromTo(splitMencatat.chars,
-        { opacity: 0, y: 100, rotateX: -90, filter: 'blur(10px)' },
-        {
-          opacity: 1,
-          y: 0,
-          rotateX: 0,
-          filter: 'blur(0px)',
-          duration: 1.2,
-          stagger: 0.03,
-          ease: "back.out(1.2)",
-          scrollTrigger: {
-            trigger: mencatatTextRef.current,
-            start: "top 80%",
-            end: "bottom 60%",
-            toggleActions: "play none none reverse",
-          }
-        }
-      );
-    }
 
     if (emailRef.current) {
       const splitEmail = new SplitText(emailRef.current, {
@@ -375,31 +326,6 @@ export default function HomePage(): React.JSX.Element {
           toggleActions: "play none none reverse",
         }
       });
-    }
-
-    if (contactTextRef.current) {
-      const splitContact = new SplitText(contactTextRef.current, {
-        type: "chars",
-        charsClass: "split-char"
-      });
-
-      gsap.fromTo(splitContact.chars,
-        { opacity: 0, x: -20, filter: 'blur(5px)' },
-        {
-          opacity: 1,
-          x: 0,
-          filter: 'blur(0px)',
-          duration: 0.8,
-          stagger: 0.05,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: contactTextRef.current,
-            start: "top 85%",
-            end: "bottom 65%",
-            toggleActions: "play none none reverse",
-          }
-        }
-      );
     }
 
     if (lineRef.current) {
@@ -606,17 +532,17 @@ export default function HomePage(): React.JSX.Element {
           color: rgb(16, 16, 16);
         }
 
-        /* Badge style - Hitam dengan teks merah */
+        /* Badge style - Hitam dengan teks putih, font 30px */
         .badge-founder {
           display: inline-flex;
           align-items: center;
-          padding: 8px 20px;
+          padding: 10px 28px;
           background-color: #000000;
           border-radius: 60px;
           font-family: 'Questrial', sans-serif;
-          font-size: 18px;
+          font-size: 30px;
           font-weight: 500;
-          color: #ff0000;
+          color: #ffffff;
           border: 1px solid #333333;
         }
       `}</style>
@@ -737,7 +663,7 @@ export default function HomePage(): React.JSX.Element {
               MENURU
             </div>
 
-            {/* Konten pertama - 100vh */}
+            {/* Hanya Scroll Down di tengah */}
             <div style={{
               height: '100vh',
               width: '100%',
@@ -755,16 +681,32 @@ export default function HomePage(): React.JSX.Element {
               }}>
                 Scroll down ↓
               </div>
-              
-              <div style={{
-                position: 'absolute',
-                bottom: '8%',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: '40px',
-                width: '100%'
-              }}>
+            </div>
+
+            {/* Bagian footer dengan semua konten */}
+            <div style={{
+              width: '100%',
+              position: 'relative',
+              backgroundColor: 'white',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'flex-end',
+              alignItems: 'center',
+              minHeight: '100vh'
+            }}>
+              {/* Content Wrapper - Mencatat, Contact, Call Farid, Profile */}
+              <div
+                ref={contentWrapperRef}
+                style={{
+                  width: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '40px',
+                  marginBottom: '100px',
+                  opacity: 0
+                }}
+              >
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -859,15 +801,13 @@ export default function HomePage(): React.JSX.Element {
                   </button>
                 </Link>
 
-                {/* Call Farid Text - DI BAWAH TOMBOL CONTACT */}
+                {/* Call Farid Text */}
                 <div
                   ref={callTextRef}
                   className="call-farid-text"
                   style={{
-                    textAlign: 'left',
-                    width: '100%',
-                    paddingLeft: '80px',
-                    marginTop: '20px'
+                    textAlign: 'center',
+                    width: '100%'
                   }}
                 >
                   <div>Ready to surpass your</div>
@@ -881,17 +821,16 @@ export default function HomePage(): React.JSX.Element {
                   style={{
                     display: 'flex',
                     alignItems: 'center',
+                    justifyContent: 'center',
                     gap: '24px',
                     width: '100%',
-                    paddingLeft: '80px',
-                    marginTop: '30px',
-                    opacity: 0
+                    marginTop: '10px'
                   }}
                 >
-                  {/* Gambar Profile - Portrait (lebih tinggi dari lebar) */}
+                  {/* Gambar Profile - Portrait */}
                   <div style={{
-                    width: '70px',
-                    height: '90px',
+                    width: '80px',
+                    height: '100px',
                     borderRadius: '12px',
                     overflow: 'hidden',
                     position: 'relative',
@@ -916,25 +855,14 @@ export default function HomePage(): React.JSX.Element {
                     Farid Ardiansyah
                   </div>
 
-                  {/* Badge Founder & Programmer - Hitam dengan teks merah */}
+                  {/* Badge Founder & Programmer - Hitam, teks putih, font 30px */}
                   <div className="badge-founder">
                     Founder & Programmer
                   </div>
                 </div>
               </div>
-            </div>
 
-            {/* Bagian footer - TIDAK DIUBAH */}
-            <div style={{
-              width: '100%',
-              position: 'relative',
-              backgroundColor: 'white',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'flex-end',
-              alignItems: 'center',
-              minHeight: '100vh'
-            }}>
+              {/* Email dan Social Media Section */}
               <div style={{
                 position: 'relative',
                 width: '100%',
@@ -1097,7 +1025,7 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </div>
 
-      {/* Cookie Popup - DIPERBAIKI */}
+      {/* Cookie Popup */}
       {showPopup && !isLoading && (
         <div style={{
           position: 'fixed',
