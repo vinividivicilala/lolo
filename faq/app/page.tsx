@@ -106,7 +106,6 @@ export default function HomePage(): React.JSX.Element {
       }
     };
 
-    // Small delay to ensure DOM is ready
     const timer = setTimeout(() => {
       initSmoother();
     }, 100);
@@ -125,7 +124,6 @@ export default function HomePage(): React.JSX.Element {
   useEffect(() => {
     if (!isLoading || !loadingOverlayRef.current) return;
 
-    // Split text untuk loading
     const splitMenuruLoading = new SplitText(menuruTopTextRef.current, {
       type: "chars, words",
       charsClass: "split-char-loading"
@@ -177,14 +175,12 @@ export default function HomePage(): React.JSX.Element {
 
     const loadingTimeline = gsap.timeline({
       onComplete: () => {
-        // Animate overlay out
         gsap.to(loadingOverlayRef.current, {
           x: '-100%',
           duration: 1,
           ease: "power3.inOut",
           onComplete: () => {
             setIsLoading(false);
-            // Animate main content
             gsap.fromTo(mainContentRef.current,
               { x: '100%', opacity: 0.5 },
               { x: '0%', opacity: 1, duration: 1, ease: "power3.inOut" }
@@ -196,7 +192,6 @@ export default function HomePage(): React.JSX.Element {
       }
     });
 
-    // Animate loading text
     if (splitMenuruLoading.chars) {
       loadingTimeline.to(splitMenuruLoading.chars, {
         opacity: 1,
@@ -280,7 +275,6 @@ export default function HomePage(): React.JSX.Element {
   useEffect(() => {
     if (isLoading) return;
 
-    // Animasi mencatat text
     if (mencatatTextRef.current) {
       const splitMencatat = new SplitText(mencatatTextRef.current, {
         type: "chars",
@@ -307,7 +301,6 @@ export default function HomePage(): React.JSX.Element {
       );
     }
 
-    // Animasi email
     if (emailRef.current) {
       const splitEmail = new SplitText(emailRef.current, {
         type: "chars",
@@ -333,7 +326,6 @@ export default function HomePage(): React.JSX.Element {
       );
     }
 
-    // Animasi MENURU footer
     if (menuruTextRef.current) {
       const splitMenuru = new SplitText(menuruTextRef.current, {
         type: "chars",
@@ -365,7 +357,6 @@ export default function HomePage(): React.JSX.Element {
       });
     }
 
-    // Animasi contact text
     if (contactTextRef.current) {
       const splitContact = new SplitText(contactTextRef.current, {
         type: "chars",
@@ -391,7 +382,6 @@ export default function HomePage(): React.JSX.Element {
       );
     }
 
-    // Animasi line
     if (lineRef.current) {
       gsap.fromTo(lineRef.current,
         { width: '0%', opacity: 0, x: 100 },
@@ -423,20 +413,6 @@ export default function HomePage(): React.JSX.Element {
       setShowPopup(true);
     }
   }, []);
-
-  // Button hover effects
-  useEffect(() => {
-    if (showPopup && acceptBtnRef.current && declineBtnRef.current) {
-      const acceptBtn = acceptBtnRef.current;
-      const declineBtn = declineBtnRef.current;
-
-      [acceptBtn, declineBtn].forEach(btn => {
-        btn.style.position = 'relative';
-        btn.style.overflow = 'hidden';
-        btn.style.zIndex = '1';
-      });
-    }
-  }, [showPopup]);
 
   const handleAccept = () => {
     localStorage.setItem('cookieConsent', 'accepted');
@@ -739,138 +715,150 @@ export default function HomePage(): React.JSX.Element {
                 position: 'absolute',
                 bottom: '8%',
                 display: 'flex',
-                flexDirection: 'row',
-                alignItems: 'flex-end',
-                justifyContent: 'space-between',
-                gap: '40px',
-                width: '85%',
-                maxWidth: '1400px'
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '60px',
+                width: '100%'
               }}>
-                {/* LEFT SIDE - Call Farid Text */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px'
+                }}>
+                  <div 
+                    ref={mencatatTextRef}
+                    style={{
+                      fontSize: '64px',
+                      fontFamily: 'Questrial, sans-serif',
+                      color: 'black',
+                      textAlign: 'center',
+                      fontWeight: '400',
+                      letterSpacing: '-0.02em',
+                      lineHeight: '1.2',
+                      whiteSpace: 'nowrap'
+                    }}>
+                    Mencatat apa yang kamu inginkan
+                  </div>
+                  <span style={{
+                    fontSize: '80px',
+                    color: 'black',
+                    fontWeight: '400',
+                    lineHeight: '1'
+                  }}>.</span>
+                </div>
+
+                {/* Call Farid Text - DI BAWAH, GESER KE KIRI, FONT 90px BOLD HITAM */}
                 <div
                   ref={callTextRef}
                   style={{
-                    flex: 1,
                     textAlign: 'left',
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '28px',
-                    color: '#000000',
-                    fontWeight: '400',
-                    letterSpacing: '-0.02em',
-                    lineHeight: '1.3',
-                    marginBottom: '10px'
+                    width: '100%',
+                    paddingLeft: '80px',
+                    marginTop: '20px'
                   }}
                 >
-                  <div style={{ marginBottom: '8px' }}>Ready to surpass your</div>
-                  <div style={{ marginBottom: '8px' }}>wildest dreams?</div>
-                  <div style={{ fontWeight: '500', color: '#333333' }}>Call Farid.</div>
+                  <div style={{ 
+                    fontFamily: "'Questrial', sans-serif",
+                    fontSize: '90px', 
+                    color: '#000000', 
+                    fontWeight: '700',
+                    letterSpacing: '-0.02em',
+                    lineHeight: '1.2'
+                  }}>
+                    Ready to surpass your
+                  </div>
+                  <div style={{ 
+                    fontFamily: "'Questrial', sans-serif",
+                    fontSize: '90px', 
+                    color: '#000000', 
+                    fontWeight: '700',
+                    letterSpacing: '-0.02em',
+                    lineHeight: '1.2'
+                  }}>
+                    wildest dreams?
+                  </div>
+                  <div style={{ 
+                    fontFamily: "'Questrial', sans-serif",
+                    fontSize: '90px', 
+                    color: '#000000', 
+                    fontWeight: '700',
+                    letterSpacing: '-0.02em',
+                    lineHeight: '1.2'
+                  }}>
+                    Call Farid.
+                  </div>
                 </div>
 
-                {/* RIGHT SIDE - Existing content */}
-                <div style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'flex-end',
-                  gap: '40px'
-                }}>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px'
-                  }}>
-                    <div 
-                      ref={mencatatTextRef}
-                      style={{
-                        fontSize: '64px',
-                        fontFamily: 'Questrial, sans-serif',
-                        color: 'black',
-                        textAlign: 'center',
-                        fontWeight: '400',
-                        letterSpacing: '-0.02em',
-                        lineHeight: '1.2',
-                        whiteSpace: 'nowrap'
-                      }}>
-                      Mencatat apa yang kamu inginkan
-                    </div>
-                    <span style={{
-                      fontSize: '80px',
-                      color: 'black',
-                      fontWeight: '400',
-                      lineHeight: '1'
-                    }}>.</span>
-                  </div>
-
-                  <Link href="/contact">
-                    <button
-                      ref={contactBtnRef}
-                      onClick={handleContact}
-                      className="contact-btn-effect"
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '16px',
-                        padding: '14px 36px',
-                        borderRadius: '60px',
-                        cursor: 'pointer',
-                        fontSize: '20px',
-                        fontWeight: '600',
-                        letterSpacing: '-0.01em',
-                        fontFamily: 'Questrial, sans-serif',
-                        transition: 'all 0.3s ease',
-                        position: 'relative',
-                        overflow: 'hidden',
-                        zIndex: 1,
-                        border: '1.5px solid #cccccc',
-                        backgroundColor: '#ffffff',
-                        color: '#000000'
-                      }}
-                    >
-                      <span ref={contactTextRef}>Contact</span>
+                <Link href="/contact">
+                  <button
+                    ref={contactBtnRef}
+                    onClick={handleContact}
+                    className="contact-btn-effect"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '16px',
+                      padding: '14px 36px',
+                      borderRadius: '60px',
+                      cursor: 'pointer',
+                      fontSize: '20px',
+                      fontWeight: '600',
+                      letterSpacing: '-0.01em',
+                      fontFamily: 'Questrial, sans-serif',
+                      transition: 'all 0.3s ease',
+                      position: 'relative',
+                      overflow: 'hidden',
+                      zIndex: 1,
+                      border: '1.5px solid #cccccc',
+                      backgroundColor: '#ffffff',
+                      color: '#000000'
+                    }}
+                  >
+                    <span ref={contactTextRef}>Contact</span>
+                    
+                    <div style={{
+                      position: 'relative',
+                      width: '40px',
+                      height: '40px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
+                      <div className="dot-small" style={{
+                        width: '8px',
+                        height: '8px',
+                        borderRadius: '50%',
+                        backgroundColor: '#000000',
+                        opacity: 1,
+                        transform: 'scale(1)',
+                        transition: 'opacity 0.3s ease, transform 0.3s ease',
+                        position: 'absolute'
+                      }}></div>
                       
-                      <div style={{
-                        position: 'relative',
+                      <div className="circle-large-white" style={{
+                        position: 'absolute',
                         width: '40px',
                         height: '40px',
+                        borderRadius: '50%',
+                        backgroundColor: '#000000',
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'center'
+                        justifyContent: 'center',
+                        opacity: 0,
+                        transform: 'scale(0.8)',
+                        transition: 'opacity 0.3s ease, transform 0.3s ease, background-color 0.3s ease'
                       }}>
-                        <div className="dot-small" style={{
-                          width: '8px',
-                          height: '8px',
-                          borderRadius: '50%',
-                          backgroundColor: '#000000',
-                          opacity: 1,
-                          transform: 'scale(1)',
-                          transition: 'opacity 0.3s ease, transform 0.3s ease',
-                          position: 'absolute'
-                        }}></div>
-                        
-                        <div className="circle-large-white" style={{
-                          position: 'absolute',
-                          width: '40px',
-                          height: '40px',
-                          borderRadius: '50%',
-                          backgroundColor: '#000000',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          opacity: 0,
-                          transform: 'scale(0.8)',
-                          transition: 'opacity 0.3s ease, transform 0.3s ease, background-color 0.3s ease'
-                        }}>
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-                          </svg>
-                        </div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
                       </div>
-                    </button>
-                  </Link>
-                </div>
+                    </div>
+                  </button>
+                </Link>
               </div>
             </div>
 
-            {/* Bagian footer */}
+            {/* Bagian footer - TIDAK DIUBAH */}
             <div style={{
               width: '100%',
               position: 'relative',
@@ -1043,7 +1031,7 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </div>
 
-      {/* Cookie Popup */}
+      {/* Cookie Popup - DIPERBAIKI */}
       {showPopup && !isLoading && (
         <div style={{
           position: 'fixed',
@@ -1119,21 +1107,6 @@ export default function HomePage(): React.JSX.Element {
                 </svg>
               </span>
             </Link>
-
-            {/* Announcement notification */}
-            {announcement && (
-              <div style={{
-                marginTop: '12px',
-                padding: '10px 16px',
-                backgroundColor: 'rgba(255,255,255,0.1)',
-                borderRadius: '12px',
-                borderLeft: '3px solid #ffffff',
-                fontSize: '14px',
-                color: '#e0e0e0'
-              }}>
-                📢 {announcement}
-              </div>
-            )}
           </div>
           
           <div style={{ display: 'flex', gap: '16px', justifyContent: 'flex-start', flexShrink: 0 }}>
