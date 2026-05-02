@@ -7,6 +7,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ScrollSmoother } from "gsap/ScrollSmoother";
 import { SplitText } from "gsap/SplitText";
 import Link from "next/link";
+import Image from "next/image";
 
 // Register GSAP plugins
 if (typeof window !== 'undefined') {
@@ -38,6 +39,7 @@ export default function HomePage(): React.JSX.Element {
   const linkedinRef = useRef<HTMLDivElement>(null);
   const loadingOverlayRef = useRef<HTMLDivElement>(null);
   const callTextRef = useRef<HTMLDivElement>(null);
+  const profileRef = useRef<HTMLDivElement>(null);
 
   // Variabel untuk menyimpan teks asli medsos
   const originalTexts = {
@@ -187,6 +189,7 @@ export default function HomePage(): React.JSX.Element {
             );
             animateMenuruMain();
             animateCallText();
+            animateProfile();
           }
         });
       }
@@ -266,6 +269,23 @@ export default function HomePage(): React.JSX.Element {
           stagger: 0.2,
           ease: "power3.out",
           delay: 0.3
+        }
+      );
+    }
+  };
+
+  // Animasi profile
+  const animateProfile = () => {
+    if (profileRef.current) {
+      gsap.fromTo(profileRef.current,
+        { opacity: 0, x: -50, filter: 'blur(10px)' },
+        {
+          opacity: 1,
+          x: 0,
+          filter: 'blur(0px)',
+          duration: 0.8,
+          ease: "power3.out",
+          delay: 0.6
         }
       );
     }
@@ -585,6 +605,20 @@ export default function HomePage(): React.JSX.Element {
           line-height: 66px;
           color: rgb(16, 16, 16);
         }
+
+        /* Badge style */
+        .badge-founder {
+          display: inline-flex;
+          align-items: center;
+          padding: 8px 20px;
+          background-color: #f0f0f0;
+          border-radius: 60px;
+          font-family: 'Questrial', sans-serif;
+          font-size: 18px;
+          font-weight: 500;
+          color: #000000;
+          border: 1px solid #e0e0e0;
+        }
       `}</style>
       
       {/* LOADING OVERLAY */}
@@ -825,7 +859,7 @@ export default function HomePage(): React.JSX.Element {
                   </button>
                 </Link>
 
-                {/* Call Farid Text - DI BAWAH TOMBOL CONTACT, TIDAK PAKAI ABSOLUTE */}
+                {/* Call Farid Text - DI BAWAH TOMBOL CONTACT */}
                 <div
                   ref={callTextRef}
                   className="call-farid-text"
@@ -839,6 +873,53 @@ export default function HomePage(): React.JSX.Element {
                   <div>Ready to surpass your</div>
                   <div>wildest dreams?</div>
                   <div>Call Farid.</div>
+                </div>
+
+                {/* Profile Section - Gambar, Nama, dan Badge */}
+                <div
+                  ref={profileRef}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '24px',
+                    width: '100%',
+                    paddingLeft: '80px',
+                    marginTop: '30px',
+                    opacity: 0
+                  }}
+                >
+                  {/* Gambar Profile */}
+                  <div style={{
+                    width: '80px',
+                    height: '80px',
+                    borderRadius: '50%',
+                    overflow: 'hidden',
+                    position: 'relative',
+                    border: '2px solid #e0e0e0'
+                  }}>
+                    <Image
+                      src="/images/5.jpg"
+                      alt="Farid Ardiansyah"
+                      fill
+                      style={{ objectFit: 'cover' }}
+                    />
+                  </div>
+
+                  {/* Nama */}
+                  <div style={{
+                    fontFamily: "'Questrial', sans-serif",
+                    fontSize: '40px',
+                    fontWeight: '400',
+                    color: 'rgb(16, 16, 16)',
+                    letterSpacing: '-0.02em'
+                  }}>
+                    Farid Ardiansyah
+                  </div>
+
+                  {/* Badge Founder & Programmer */}
+                  <div className="badge-founder">
+                    Founder & Programmer
+                  </div>
                 </div>
               </div>
             </div>
