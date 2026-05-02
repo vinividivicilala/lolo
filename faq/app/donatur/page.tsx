@@ -84,8 +84,6 @@ export default function DonaturPage(): React.JSX.Element {
   const menuruTextRef = useRef<HTMLSpanElement>(null);
   const donaturTitleRef = useRef<HTMLDivElement>(null);
   const donaturUnderlineRef = useRef<HTMLDivElement>(null);
-  const line1Ref = useRef<HTMLDivElement>(null);
-  const line2Ref = useRef<HTMLDivElement>(null);
   const emailRef = useRef<HTMLDivElement>(null);
   const igRef = useRef<HTMLDivElement>(null);
   const xRef = useRef<HTMLDivElement>(null);
@@ -96,7 +94,6 @@ export default function DonaturPage(): React.JSX.Element {
   const footerXRef = useRef<HTMLDivElement>(null);
   const footerLinkedinRef = useRef<HTMLDivElement>(null);
   const footerMenuruRef = useRef<HTMLSpanElement>(null);
-  const footerLineRef = useRef<HTMLDivElement>(null);
   
   const menuButtonRef = useRef<HTMLDivElement>(null);
   const menuDrawerRef = useRef<HTMLDivElement>(null);
@@ -513,36 +510,6 @@ export default function DonaturPage(): React.JSX.Element {
           opacity: 1, y: 0, rotationY: 0, filter: 'blur(0px)', duration: 1.5, stagger: { each: 0.04, from: "start" },
           scrollTrigger: { trigger: footerMenuruRef.current, start: "top 85%", end: "bottom 65%", toggleActions: "play none none reverse" }
         });
-      }
-
-      // Animasi Footer Line 1
-      if (footerLineRef.current) {
-        gsap.fromTo(footerLineRef.current,
-          { width: '0%', opacity: 0 },
-          { width: '100%', opacity: 1, duration: 1.2,
-            scrollTrigger: { trigger: footerLineRef.current, start: "top 85%", end: "bottom 70%", toggleActions: "play none none reverse" }
-          }
-        );
-      }
-
-      // Animasi Line 1
-      if (line1Ref.current) {
-        gsap.fromTo(line1Ref.current,
-          { width: '0%', opacity: 0, x: 100 },
-          { width: '100%', opacity: 1, x: 0, duration: 1.2,
-            scrollTrigger: { trigger: line1Ref.current, start: "top 85%", end: "bottom 70%", toggleActions: "play none none reverse" }
-          }
-        );
-      }
-
-      // Animasi Line 2
-      if (line2Ref.current) {
-        gsap.fromTo(line2Ref.current,
-          { width: '0%', opacity: 0, x: 100 },
-          { width: '100%', opacity: 1, x: 0, duration: 1.2,
-            scrollTrigger: { trigger: line2Ref.current, start: "top 85%", end: "bottom 70%", toggleActions: "play none none reverse" }
-          }
-        );
       }
       
       ScrollTrigger.refresh();
@@ -1264,7 +1231,7 @@ export default function DonaturPage(): React.JSX.Element {
             </div>
           </div>
 
-          {/* Recent Donations - Dengan ukuran teks lebih besar */}
+          {/* Recent Donations */}
           <div style={{
             position: 'relative',
             width: 'calc(100% - 160px)',
@@ -1350,30 +1317,9 @@ export default function DonaturPage(): React.JSX.Element {
               )}
             </div>
           </div>
-
-          {/* Konten tambahan */}
-          <div style={{
-            width: 'calc(100% - 160px)',
-            margin: '0 auto 60px auto',
-            padding: '40px 40px',
-            borderTop: '1px solid #f0f0f0'
-          }}>
-            <div style={{
-              fontFamily: "'Questrial', sans-serif",
-              fontSize: '18px',
-              color: '#999',
-              textAlign: 'center',
-              lineHeight: '1.6',
-              maxWidth: '800px',
-              margin: '0 auto'
-            }}>
-              <p>Setiap donasi yang Anda berikan akan disalurkan kepada yang membutuhkan.</p>
-              <p style={{ marginTop: '20px' }}>Terima kasih atas kepercayaan dan partisipasi Anda dalam berbagi kebaikan.</p>
-            </div>
-          </div>
         </div>
 
-        {/* FOOTER - Teks MENURU besar di paling bawah mentok layar */}
+        {/* FOOTER - Tanpa line, hanya email, medsos, dan teks MENURU besar */}
         <div style={{
           width: '100%',
           backgroundColor: 'white',
@@ -1382,9 +1328,6 @@ export default function DonaturPage(): React.JSX.Element {
           boxSizing: 'border-box',
           borderTop: '1px solid #f0f0f0'
         }}>
-          {/* LINE 1 - Sebelum email dan medsos */}
-          <div ref={footerLineRef} style={{ width: '0%', height: '2px', backgroundColor: '#000000', marginTop: '50px', marginBottom: '50px', opacity: 0 }} />
-
           {/* Email dan Medsos */}
           <div style={{
             width: '100%',
@@ -1392,6 +1335,7 @@ export default function DonaturPage(): React.JSX.Element {
             justifyContent: 'space-between',
             alignItems: 'flex-end',
             marginBottom: '80px',
+            marginTop: '50px',
             position: 'relative'
           }}>
             {/* Email - di kiri */}
@@ -1474,11 +1418,8 @@ export default function DonaturPage(): React.JSX.Element {
             <div style={{ width: '250px' }} />
           </div>
 
-          {/* LINE 2 - Sebelum teks MENURU besar */}
-          <div ref={line2Ref} style={{ width: '0%', height: '2px', backgroundColor: '#000000', marginBottom: '80px', opacity: 0 }} />
-
-          {/* Teks MENURU besar - MENTOK DI PALING BAWAH */}
-          <div style={{ textAlign: 'right', paddingBottom: '60px' }}>
+          {/* Teks MENURU besar - MENTOK DI PALING BAWAH LAYAR */}
+          <div style={{ textAlign: 'right', paddingBottom: '40px' }}>
             <span ref={footerMenuruRef} style={{ 
               fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif", 
               fontWeight: 'normal', 
