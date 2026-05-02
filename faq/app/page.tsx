@@ -435,6 +435,8 @@ export default function HomePage(): React.JSX.Element {
   return (
     <>
       <style jsx global>{`
+        @import url('https://fonts.googleapis.com/css2?family=Questrial&display=swap');
+        
         * {
           -ms-overflow-style: none;
           scrollbar-width: none;
@@ -573,6 +575,15 @@ export default function HomePage(): React.JSX.Element {
         @keyframes slideUp {
           from { opacity: 0; transform: translateY(30px); }
           to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Font untuk Call Farid */
+        .call-farid-text {
+          font-family: 'HelveticaNowDisplay', 'Arial', sans-serif;
+          font-weight: 400;
+          font-size: 60px;
+          line-height: 66px;
+          color: rgb(16, 16, 16);
         }
       `}</style>
       
@@ -717,7 +728,7 @@ export default function HomePage(): React.JSX.Element {
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                gap: '60px',
+                gap: '40px',
                 width: '100%'
               }}>
                 <div style={{
@@ -745,48 +756,6 @@ export default function HomePage(): React.JSX.Element {
                     fontWeight: '400',
                     lineHeight: '1'
                   }}>.</span>
-                </div>
-
-                {/* Call Farid Text - DI BAWAH, GESER KE KIRI, FONT 90px BOLD HITAM */}
-                <div
-                  ref={callTextRef}
-                  style={{
-                    textAlign: 'left',
-                    width: '100%',
-                    paddingLeft: '80px',
-                    marginTop: '20px'
-                  }}
-                >
-                  <div style={{ 
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '90px', 
-                    color: '#000000', 
-                    fontWeight: '700',
-                    letterSpacing: '-0.02em',
-                    lineHeight: '1.2'
-                  }}>
-                    Ready to surpass your
-                  </div>
-                  <div style={{ 
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '90px', 
-                    color: '#000000', 
-                    fontWeight: '700',
-                    letterSpacing: '-0.02em',
-                    lineHeight: '1.2'
-                  }}>
-                    wildest dreams?
-                  </div>
-                  <div style={{ 
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '90px', 
-                    color: '#000000', 
-                    fontWeight: '700',
-                    letterSpacing: '-0.02em',
-                    lineHeight: '1.2'
-                  }}>
-                    Call Farid.
-                  </div>
                 </div>
 
                 <Link href="/contact">
@@ -855,6 +824,23 @@ export default function HomePage(): React.JSX.Element {
                     </div>
                   </button>
                 </Link>
+
+                {/* Call Farid Text - DI BAWAH TOMBOL CONTACT, POSISI KIRI BAWAH */}
+                <div
+                  ref={callTextRef}
+                  className="call-farid-text"
+                  style={{
+                    position: 'absolute',
+                    bottom: '-80px',
+                    left: '80px',
+                    textAlign: 'left',
+                    width: 'auto'
+                  }}
+                >
+                  <div>Ready to surpass your</div>
+                  <div>wildest dreams?</div>
+                  <div>Call Farid.</div>
+                </div>
               </div>
             </div>
 
