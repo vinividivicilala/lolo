@@ -1,4 +1,4 @@
-// app/donatur/page.tsx (Halaman Donatur)
+// app/donatur/page.tsx (Halaman Donatur) - Tambahan konten di bawah Recent Donations
 'use client';
 
 import React, { useState, useEffect, useRef } from "react";
@@ -390,28 +390,17 @@ export default function DonaturPage(): React.JSX.Element {
     element.textContent = originalText;
   };
 
-  // PERBAIKAN SCROLL SMOOTHER - HANYA INI YANG DIUBAH
+  // Inisialisasi ScrollSmoother
   useEffect(() => {
     if (typeof window === 'undefined') return;
     
-    // Tunggu DOM siap sepenuhnya
     const initSmoother = () => {
       const wrapper = document.getElementById('smooth-wrapper-donatur');
       const content = document.getElementById('smooth-content-donatur');
       
       if (wrapper && content && !smootherRef.current) {
         try {
-          // Kill existing ScrollTrigger
           ScrollTrigger.getAll().forEach(trigger => trigger.kill());
-          
-          // Pastikan content memiliki tinggi yang cukup
-          const contentHeight = content.scrollHeight;
-          const viewportHeight = window.innerHeight;
-          
-          if (contentHeight <= viewportHeight) {
-            // Jika konten lebih pendek dari viewport, tambahkan tinggi
-            content.style.minHeight = `${viewportHeight + 500}px`;
-          }
           
           smootherRef.current = ScrollSmoother.create({
             wrapper: "#smooth-wrapper-donatur",
@@ -423,7 +412,6 @@ export default function DonaturPage(): React.JSX.Element {
             ignoreMobileResize: true,
           });
           
-          // Refresh ScrollTrigger
           setTimeout(() => {
             ScrollTrigger.refresh();
             if (smootherRef.current) {
@@ -437,10 +425,8 @@ export default function DonaturPage(): React.JSX.Element {
       }
     };
 
-    // Inisialisasi dengan delay
     const timer = setTimeout(initSmoother, 500);
     
-    // Refresh saat load selesai
     window.addEventListener('load', () => {
       setTimeout(() => {
         if (smootherRef.current) {
@@ -711,7 +697,6 @@ export default function DonaturPage(): React.JSX.Element {
       
       <div id="smooth-wrapper-donatur">
         <div id="smooth-content-donatur">
-          {/* SEMUA KONTEN TIDAK DIUBAH - SAMA PERSIS DENGAN DESAIN ASLI */}
           <div style={{
             minHeight: '100vh',
             backgroundColor: 'white',
@@ -1323,7 +1308,7 @@ export default function DonaturPage(): React.JSX.Element {
             <div style={{
               position: 'relative',
               width: 'calc(100% - 160px)',
-              margin: '0 auto 120px auto',
+              margin: '0 auto 80px auto',
               padding: '0 40px'
             }}>
               <h3 style={{
@@ -1403,6 +1388,38 @@ export default function DonaturPage(): React.JSX.Element {
                     </div>
                   ))
                 )}
+              </div>
+            </div>
+
+            {/* ============================================ */}
+            {/* KONTEN TAMBAHAN AGAR BISA SCROLL KE BAWAH */}
+            {/* ============================================ */}
+            <div style={{
+              position: 'relative',
+              width: 'calc(100% - 160px)',
+              margin: '0 auto 60px auto',
+              padding: '40px',
+              backgroundColor: 'transparent',
+              borderTop: '1px solid #f0f0f0'
+            }}>
+              <div style={{
+                fontFamily: "'Questrial', sans-serif",
+                fontSize: '18px',
+                color: '#999',
+                textAlign: 'center',
+                lineHeight: '1.6',
+                maxWidth: '800px',
+                margin: '0 auto'
+              }}>
+                <p style={{ marginBottom: '20px' }}>
+                  Setiap donasi yang Anda berikan akan disalurkan kepada yang membutuhkan.
+                </p>
+                <p style={{ marginBottom: '20px' }}>
+                  Transparansi penuh dan laporan penggunaan dana dapat diakses kapan saja.
+                </p>
+                <p>
+                  Terima kasih atas kepercayaan dan partisipasi Anda dalam berbagi kebaikan.
+                </p>
               </div>
             </div>
 
@@ -1514,8 +1531,7 @@ export default function DonaturPage(): React.JSX.Element {
               padding: '0 80px 0 0',
               margin: 0,
               pointerEvents: 'none',
-              zIndex: 1,
-              marginBottom: '0'
+              zIndex: 1
             }}>
               <div ref={lineRef} style={{ width: '0%', height: '2px', backgroundColor: '#000000', marginRight: '0', marginBottom: '60px', opacity: 0 }} />
               <span ref={menuruTextRef} style={{ 
