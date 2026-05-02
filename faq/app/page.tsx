@@ -530,6 +530,7 @@ export default function HomePage(): React.JSX.Element {
           font-size: 60px;
           line-height: 66px;
           color: rgb(16, 16, 16);
+          text-align: left;
         }
 
         /* Badge style - Hitam dengan teks putih, font 30px */
@@ -694,16 +695,17 @@ export default function HomePage(): React.JSX.Element {
               alignItems: 'center',
               minHeight: '100vh'
             }}>
-              {/* Bottom Content - Mencatat, Contact, Call Farid, Profile */}
+              {/* Bottom Content - Mencatat, Contact, Call Farid, Profile - SEMUA RATA KIRI */}
               <div
                 ref={bottomContentRef}
                 style={{
                   width: '100%',
                   display: 'flex',
                   flexDirection: 'column',
-                  alignItems: 'center',
+                  alignItems: 'flex-start',
                   gap: '40px',
                   marginBottom: '80px',
+                  paddingLeft: '80px',
                   opacity: 0
                 }}
               >
@@ -718,7 +720,7 @@ export default function HomePage(): React.JSX.Element {
                       fontSize: '64px',
                       fontFamily: 'Questrial, sans-serif',
                       color: 'black',
-                      textAlign: 'center',
+                      textAlign: 'left',
                       fontWeight: '400',
                       letterSpacing: '-0.02em',
                       lineHeight: '1.2',
@@ -801,12 +803,11 @@ export default function HomePage(): React.JSX.Element {
                   </button>
                 </Link>
 
-                {/* Call Farid Text */}
+                {/* Call Farid Text - RATA KIRI */}
                 <div
                   ref={callTextRef}
                   className="call-farid-text"
                   style={{
-                    textAlign: 'center',
                     width: '100%'
                   }}
                 >
@@ -815,13 +816,13 @@ export default function HomePage(): React.JSX.Element {
                   <div>Call Farid.</div>
                 </div>
 
-                {/* Profile Section - Gambar Portrait, Nama, dan Badge */}
+                {/* Profile Section - Gambar Portrait, Nama, dan Badge - RATA KIRI */}
                 <div
                   ref={profileRef}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center',
+                    justifyContent: 'flex-start',
                     gap: '24px',
                     width: '100%',
                     marginTop: '10px'
