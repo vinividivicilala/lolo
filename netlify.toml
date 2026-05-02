@@ -1,12 +1,8 @@
 [build]
+  base = "faq"
   command = "npm run build"
   publish = ".next"
-  functions = ".netlify/functions"
 
 [build.environment]
   NODE_VERSION = "22.18.0"
   NEXT_TELEMETRY_DISABLED = "1"
-  NEXT_DISABLE_SWC_MINIFY = "1"
-
-[[plugins]]
-  package = "@netlify/plugin-nextjs"
