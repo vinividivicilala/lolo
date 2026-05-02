@@ -1,4 +1,4 @@
-// app/donatur/page.tsx - Hapus 2 line (garis)
+// app/donatur/page.tsx
 'use client';
 
 import React, { useState, useEffect, useRef } from "react";
@@ -81,7 +81,6 @@ export default function DonaturPage(): React.JSX.Element {
   const acceptBtnRef = useRef<HTMLButtonElement>(null);
   const declineBtnRef = useRef<HTMLButtonElement>(null);
   
-  const menuruTextRef = useRef<HTMLSpanElement>(null);
   const donaturTitleRef = useRef<HTMLDivElement>(null);
   const emailRef = useRef<HTMLDivElement>(null);
   const igRef = useRef<HTMLDivElement>(null);
@@ -390,7 +389,6 @@ export default function DonaturPage(): React.JSX.Element {
   // GSAP SplitText animations
   useEffect(() => {
     const timer = setTimeout(() => {
-      // Animasi Donatur Title
       if (donaturTitleRef.current) {
         const splitDonatur = new SplitText(donaturTitleRef.current, {
           type: "chars",
@@ -404,7 +402,6 @@ export default function DonaturPage(): React.JSX.Element {
         );
       }
 
-      // Animasi Info Text
       if (infoTextRef.current) {
         const splitInfo = new SplitText(infoTextRef.current, {
           type: "chars",
@@ -418,7 +415,6 @@ export default function DonaturPage(): React.JSX.Element {
         );
       }
 
-      // Animasi Email Contact
       if (emailRef.current) {
         const splitEmail = new SplitText(emailRef.current, {
           type: "chars",
@@ -432,7 +428,6 @@ export default function DonaturPage(): React.JSX.Element {
         );
       }
 
-      // Animasi Footer Email
       if (footerEmailRef.current) {
         const splitFooterEmail = new SplitText(footerEmailRef.current, {
           type: "chars",
@@ -446,7 +441,6 @@ export default function DonaturPage(): React.JSX.Element {
         );
       }
 
-      // Animasi Footer Instagram
       if (footerIgRef.current) {
         const splitIg = new SplitText(footerIgRef.current, {
           type: "chars",
@@ -460,7 +454,6 @@ export default function DonaturPage(): React.JSX.Element {
         );
       }
 
-      // Animasi Footer X
       if (footerXRef.current) {
         const splitX = new SplitText(footerXRef.current, {
           type: "chars",
@@ -474,7 +467,6 @@ export default function DonaturPage(): React.JSX.Element {
         );
       }
 
-      // Animasi Footer LinkedIn
       if (footerLinkedinRef.current) {
         const splitLinkedin = new SplitText(footerLinkedinRef.current, {
           type: "chars",
@@ -488,7 +480,6 @@ export default function DonaturPage(): React.JSX.Element {
         );
       }
 
-      // Animasi Footer MENURU besar
       if (footerMenuruRef.current) {
         const splitMenuru = new SplitText(footerMenuruRef.current, {
           type: "chars",
@@ -1164,7 +1155,7 @@ export default function DonaturPage(): React.JSX.Element {
 
         {/* Konten Utama */}
         <div style={{ flex: 1 }}>
-          {/* Teks Donatur besar - TANPA GARIS BAWAH */}
+          {/* Teks Donatur besar */}
           <div style={{
             position: 'relative',
             top: '120px',
@@ -1185,10 +1176,9 @@ export default function DonaturPage(): React.JSX.Element {
               }}>
               Donatur
             </div>
-            {/* HAPUS garis bawah donaturUnderlineRef */}
           </div>
 
-          {/* Info Text - JARAK JAUH KE BAWAH */}
+          {/* Info Text */}
           <div style={{
             position: 'relative',
             top: '100px',
@@ -1211,7 +1201,7 @@ export default function DonaturPage(): React.JSX.Element {
             </div>
           </div>
 
-          {/* Recent Donations - TANPA BORDER BOTTOM PADA JUDUL */}
+          {/* Recent Donations */}
           <div style={{
             position: 'relative',
             width: 'calc(100% - 160px)',
@@ -1225,7 +1215,6 @@ export default function DonaturPage(): React.JSX.Element {
               color: '#000000',
               marginBottom: '40px',
               letterSpacing: '-0.02em'
-              // HAPUS borderBottom
             }}>
               Recent Donations
             </h3>
@@ -1257,7 +1246,7 @@ export default function DonaturPage(): React.JSX.Element {
                             {donation.donorName}
                           </h4>
                           <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '16px', color: '#aaa' }}>•</span>
-                          <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '16px", color: '#aaa' }}>
+                          <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '16px', color: '#aaa' }}>
                             {donation.organization}
                           </span>
                         </div>
@@ -1298,7 +1287,7 @@ export default function DonaturPage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* FOOTER - Tanpa line, hanya email, medsos, dan teks MENURU besar */}
+        {/* FOOTER */}
         <div style={{
           width: '100%',
           backgroundColor: 'white',
@@ -1397,7 +1386,7 @@ export default function DonaturPage(): React.JSX.Element {
             <div style={{ width: '250px' }} />
           </div>
 
-          {/* Teks MENURU besar - MENTOK DI PALING BAWAH LAYAR */}
+          {/* Teks MENURU besar */}
           <div style={{ textAlign: 'right', paddingBottom: '40px' }}>
             <span ref={footerMenuruRef} style={{ 
               fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif", 
