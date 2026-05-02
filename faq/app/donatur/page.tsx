@@ -1,4 +1,4 @@
-// app/donatur/page.tsx (Halaman Donatur) - Tanpa ScrollSmoother, pakai GSAP ScrollTrigger biasa
+// app/donatur/page.tsx
 'use client';
 
 import React, { useState, useEffect, useRef } from "react";
@@ -44,7 +44,7 @@ const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 const db = getFirestore(app);
 
-// Register GSAP plugins (tanpa ScrollSmoother)
+// Register GSAP plugins
 if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger, SplitText);
 }
@@ -84,12 +84,19 @@ export default function DonaturPage(): React.JSX.Element {
   const menuruTextRef = useRef<HTMLSpanElement>(null);
   const donaturTitleRef = useRef<HTMLDivElement>(null);
   const donaturUnderlineRef = useRef<HTMLDivElement>(null);
-  const lineRef = useRef<HTMLDivElement>(null);
+  const line1Ref = useRef<HTMLDivElement>(null);
+  const line2Ref = useRef<HTMLDivElement>(null);
   const emailRef = useRef<HTMLDivElement>(null);
   const igRef = useRef<HTMLDivElement>(null);
   const xRef = useRef<HTMLDivElement>(null);
   const linkedinRef = useRef<HTMLDivElement>(null);
   const infoTextRef = useRef<HTMLDivElement>(null);
+  const footerEmailRef = useRef<HTMLDivElement>(null);
+  const footerIgRef = useRef<HTMLDivElement>(null);
+  const footerXRef = useRef<HTMLDivElement>(null);
+  const footerLinkedinRef = useRef<HTMLDivElement>(null);
+  const footerMenuruRef = useRef<HTMLSpanElement>(null);
+  const footerLineRef = useRef<HTMLDivElement>(null);
   
   const menuButtonRef = useRef<HTMLDivElement>(null);
   const menuDrawerRef = useRef<HTMLDivElement>(null);
@@ -384,9 +391,10 @@ export default function DonaturPage(): React.JSX.Element {
     element.textContent = originalText;
   };
 
-  // GSAP SplitText animations - TANPA ScrollSmoother
+  // GSAP SplitText animations untuk SEMUA TEKS
   useEffect(() => {
     const timer = setTimeout(() => {
+      // Animasi Donatur Title
       if (donaturTitleRef.current) {
         const splitDonatur = new SplitText(donaturTitleRef.current, {
           type: "chars",
@@ -400,6 +408,7 @@ export default function DonaturPage(): React.JSX.Element {
         );
       }
 
+      // Animasi Donatur Underline
       if (donaturUnderlineRef.current) {
         gsap.fromTo(donaturUnderlineRef.current,
           { width: '0%', opacity: 0, x: 100 },
@@ -409,6 +418,7 @@ export default function DonaturPage(): React.JSX.Element {
         );
       }
 
+      // Animasi Info Text
       if (infoTextRef.current) {
         const splitInfo = new SplitText(infoTextRef.current, {
           type: "chars",
@@ -422,6 +432,7 @@ export default function DonaturPage(): React.JSX.Element {
         );
       }
 
+      // Animasi Email Contact
       if (emailRef.current) {
         const splitEmail = new SplitText(emailRef.current, {
           type: "chars",
@@ -435,23 +446,101 @@ export default function DonaturPage(): React.JSX.Element {
         );
       }
 
-      if (menuruTextRef.current) {
-        const splitMenuru = new SplitText(menuruTextRef.current, {
+      // Animasi Footer Email
+      if (footerEmailRef.current) {
+        const splitFooterEmail = new SplitText(footerEmailRef.current, {
           type: "chars",
-          charsClass: "split-char-menuru"
+          charsClass: "split-char-footer"
+        });
+        gsap.fromTo(splitFooterEmail.chars,
+          { opacity: 0, y: 30, filter: 'blur(5px)' },
+          { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.8, stagger: 0.02,
+            scrollTrigger: { trigger: footerEmailRef.current, start: "top 85%", end: "bottom 70%", toggleActions: "play none none reverse" }
+          }
+        );
+      }
+
+      // Animasi Footer Instagram
+      if (footerIgRef.current) {
+        const splitIg = new SplitText(footerIgRef.current, {
+          type: "chars",
+          charsClass: "split-char-footer"
+        });
+        gsap.fromTo(splitIg.chars,
+          { opacity: 0, y: 30, filter: 'blur(5px)' },
+          { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.8, stagger: 0.02,
+            scrollTrigger: { trigger: footerIgRef.current, start: "top 85%", end: "bottom 70%", toggleActions: "play none none reverse" }
+          }
+        );
+      }
+
+      // Animasi Footer X
+      if (footerXRef.current) {
+        const splitX = new SplitText(footerXRef.current, {
+          type: "chars",
+          charsClass: "split-char-footer"
+        });
+        gsap.fromTo(splitX.chars,
+          { opacity: 0, y: 30, filter: 'blur(5px)' },
+          { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.8, stagger: 0.02,
+            scrollTrigger: { trigger: footerXRef.current, start: "top 85%", end: "bottom 70%", toggleActions: "play none none reverse" }
+          }
+        );
+      }
+
+      // Animasi Footer LinkedIn
+      if (footerLinkedinRef.current) {
+        const splitLinkedin = new SplitText(footerLinkedinRef.current, {
+          type: "chars",
+          charsClass: "split-char-footer"
+        });
+        gsap.fromTo(splitLinkedin.chars,
+          { opacity: 0, y: 30, filter: 'blur(5px)' },
+          { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.8, stagger: 0.02,
+            scrollTrigger: { trigger: footerLinkedinRef.current, start: "top 85%", end: "bottom 70%", toggleActions: "play none none reverse" }
+          }
+        );
+      }
+
+      // Animasi Footer MENURU besar
+      if (footerMenuruRef.current) {
+        const splitMenuru = new SplitText(footerMenuruRef.current, {
+          type: "chars",
+          charsClass: "split-char-menuru-footer"
         });
         gsap.set(splitMenuru.chars, { opacity: 0, y: 200, rotationY: 90, transformPerspective: 800, filter: 'blur(20px)' });
         gsap.to(splitMenuru.chars, {
           opacity: 1, y: 0, rotationY: 0, filter: 'blur(0px)', duration: 1.5, stagger: { each: 0.04, from: "start" },
-          scrollTrigger: { trigger: menuruTextRef.current, start: "top 85%", end: "bottom 65%", toggleActions: "play none none reverse" }
+          scrollTrigger: { trigger: footerMenuruRef.current, start: "top 85%", end: "bottom 65%", toggleActions: "play none none reverse" }
         });
       }
 
-      if (lineRef.current) {
-        gsap.fromTo(lineRef.current,
+      // Animasi Footer Line 1 (atas email dan medsos)
+      if (footerLineRef.current) {
+        gsap.fromTo(footerLineRef.current,
           { width: '0%', opacity: 0, x: 100 },
           { width: '100%', opacity: 1, x: 0, duration: 1.2,
-            scrollTrigger: { trigger: lineRef.current, start: "top 85%", end: "bottom 70%", toggleActions: "play none none reverse" }
+            scrollTrigger: { trigger: footerLineRef.current, start: "top 85%", end: "bottom 70%", toggleActions: "play none none reverse" }
+          }
+        );
+      }
+
+      // Animasi Line 1 (bawah donatur)
+      if (line1Ref.current) {
+        gsap.fromTo(line1Ref.current,
+          { width: '0%', opacity: 0, x: 100 },
+          { width: '100%', opacity: 1, x: 0, duration: 1.2,
+            scrollTrigger: { trigger: line1Ref.current, start: "top 85%", end: "bottom 70%", toggleActions: "play none none reverse" }
+          }
+        );
+      }
+
+      // Animasi Line 2
+      if (line2Ref.current) {
+        gsap.fromTo(line2Ref.current,
+          { width: '0%', opacity: 0, x: 100 },
+          { width: '100%', opacity: 1, x: 0, duration: 1.2,
+            scrollTrigger: { trigger: line2Ref.current, start: "top 85%", end: "bottom 70%", toggleActions: "play none none reverse" }
           }
         );
       }
@@ -557,7 +646,7 @@ export default function DonaturPage(): React.JSX.Element {
           will-change: transform, opacity, filter;
         }
 
-        .split-char-menuru {
+        .split-char-menuru-footer {
           display: inline-block;
           will-change: transform, opacity, filter;
           transform-style: preserve-3d;
@@ -567,6 +656,11 @@ export default function DonaturPage(): React.JSX.Element {
           display: inline-block;
           will-change: transform, opacity, filter;
           transform-style: preserve-3d;
+        }
+
+        .split-char-footer {
+          display: inline-block;
+          will-change: transform, opacity, filter;
         }
 
         .social-item {
@@ -595,7 +689,7 @@ export default function DonaturPage(): React.JSX.Element {
         }
       `}</style>
       
-      {/* Main Content - Tanpa wrapper ScrollSmoother, scroll biasa */}
+      {/* Main Content */}
       <div style={{
         minHeight: '100vh',
         backgroundColor: 'white',
@@ -682,7 +776,7 @@ export default function DonaturPage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* Menu Drawer */}
+        {/* Menu Drawer - HAPUS teks MENURU di dalamnya */}
         <div
           ref={menuDrawerRef}
           style={{
@@ -727,39 +821,11 @@ export default function DonaturPage(): React.JSX.Element {
             </svg>
           </div>
 
-          <div
-            ref={menuMenuruTextRef}
-            style={{
-              position: 'absolute',
-              bottom: '40px',
-              right: '40px',
-              fontFamily: "'Archivo Black', 'Impact', sans-serif",
-              fontSize: '180px',
-              fontWeight: '400',
-              color: 'rgba(255,255,255,0.15)',
-              letterSpacing: '-0.02em',
-              textTransform: 'uppercase',
-              lineHeight: '0.8',
-              pointerEvents: 'none',
-              whiteSpace: 'nowrap'
-            }}
-          >
-            MENURU
-          </div>
+          {/* HAPUS teks MENURU besar di background */}
 
-          <div style={{
-            position: 'absolute',
-            top: '40px',
-            left: '40px',
-            fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
-            fontSize: '48px',
-            color: '#ffffff',
-            letterSpacing: '-0.02em',
-            textTransform: 'uppercase'
-          }}>
-            MENURU
-          </div>
+          {/* HAPUS nama web MENURU di pojok kiri atas */}
 
+          {/* Menu Items */}
           <div style={{
             display: 'flex',
             flexDirection: 'column',
@@ -1145,313 +1211,294 @@ export default function DonaturPage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* Teks Donatur besar */}
-        <div style={{
-          position: 'relative',
-          top: '120px',
-          left: '40px',
-          zIndex: 10,
-          width: 'calc(100% - 80px)',
-          marginBottom: '80px'
-        }}>
-          <div 
-            ref={donaturTitleRef}
-            style={{
-              fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
-              fontSize: '280px',
-              fontWeight: '300',
-              color: '#000000',
-              textAlign: 'left',
-              letterSpacing: '-0.02em',
-              lineHeight: '0.9'
-            }}>
-            Donatur
+        {/* Konten Utama */}
+        <div style={{ flex: 1 }}>
+          {/* Teks Donatur besar */}
+          <div style={{
+            position: 'relative',
+            top: '120px',
+            left: '40px',
+            width: 'calc(100% - 80px)',
+            marginBottom: '80px'
+          }}>
+            <div 
+              ref={donaturTitleRef}
+              style={{
+                fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
+                fontSize: '280px',
+                fontWeight: '300',
+                color: '#000000',
+                textAlign: 'left',
+                letterSpacing: '-0.02em',
+                lineHeight: '0.9'
+              }}>
+              Donatur
+            </div>
+            <div
+              ref={donaturUnderlineRef}
+              style={{
+                width: '0%',
+                height: '2px',
+                backgroundColor: '#000000',
+                marginTop: '20px',
+                opacity: 0
+              }}
+            />
           </div>
-          <div
-            ref={donaturUnderlineRef}
-            style={{
-              width: '0%',
-              height: '2px',
-              backgroundColor: '#000000',
-              marginTop: '20px',
-              opacity: 0
-            }}
-          />
-        </div>
 
-        {/* Info Text */}
-        <div style={{
-          position: 'relative',
-          top: '100px',
-          left: '40px',
-          right: '40px',
-          zIndex: 10,
-          marginBottom: '80px'
-        }}>
-          <div 
-            ref={infoTextRef}
-            style={{
-              fontFamily: "'Questrial', sans-serif",
-              fontSize: '56px',
+          {/* Info Text */}
+          <div style={{
+            position: 'relative',
+            top: '100px',
+            left: '40px',
+            right: '40px',
+            marginBottom: '80px'
+          }}>
+            <div 
+              ref={infoTextRef}
+              style={{
+                fontFamily: "'Questrial', sans-serif",
+                fontSize: '56px',
+                fontWeight: '400',
+                color: '#000000',
+                textAlign: 'center',
+                letterSpacing: '-0.01em',
+                lineHeight: '1.2'
+              }}>
+              Terima kasih untuk para donatur yang telah berbagi kebaikan
+            </div>
+          </div>
+
+          {/* Donations List */}
+          <div style={{
+            position: 'relative',
+            width: 'calc(100% - 160px)',
+            margin: '0 auto 60px auto',
+            padding: '0 40px'
+          }}>
+            <h3 style={{
+              fontFamily: "'Inter', sans-serif",
+              fontSize: '20px',
               fontWeight: '400',
               color: '#000000',
-              textAlign: 'center',
-              letterSpacing: '-0.01em',
-              lineHeight: '1.2',
-              marginBottom: '80px'
+              marginBottom: '30px',
+              letterSpacing: '-0.02em',
+              borderBottom: '1px solid #e0e0e0',
+              paddingBottom: '12px'
             }}>
-            Terima kasih untuk para donatur yang telah berbagi kebaikan
-          </div>
-        </div>
-
-        {/* Donations List */}
-        <div style={{
-          position: 'relative',
-          width: 'calc(100% - 160px)',
-          margin: '0 auto 60px auto',
-          padding: '0 40px'
-        }}>
-          <h3 style={{
-            fontFamily: "'Inter', sans-serif",
-            fontSize: '20px',
-            fontWeight: '400',
-            color: '#000000',
-            marginBottom: '30px',
-            letterSpacing: '-0.02em',
-            borderBottom: '1px solid #e0e0e0',
-            paddingBottom: '12px'
-          }}>
-            Recent Donations
-          </h3>
-          
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            {donations.length === 0 ? (
-              <p style={{ fontFamily: "'Questrial', sans-serif", fontSize: '16px', color: '#999', textAlign: 'center', padding: '40px 0' }}>
-                No donations yet. Create one above.
-              </p>
-            ) : (
-              donations.map((donation) => (
-                <div 
-                  key={donation.id} 
-                  style={{
-                    borderBottom: '1px solid #f0f0f0',
-                    paddingBottom: '16px',
-                    transition: 'transform 0.2s ease'
-                  }}
-                  onMouseEnter={(e) => gsap.to(e.currentTarget, { x: 8, duration: 0.2 })}
-                  onMouseLeave={(e) => gsap.to(e.currentTarget, { x: 0, duration: 0.2 })}
-                >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '6px', flexWrap: 'wrap' }}>
-                        {donation.donorPhoto && (
-                          <img src={donation.donorPhoto} alt="" style={{ width: '28px', height: '28px', borderRadius: '50%' }} />
-                        )}
-                        <h4 style={{ fontFamily: "'Inter', sans-serif", fontSize: '18px', fontWeight: '500', color: '#000000', margin: 0 }}>
-                          {donation.donorName}
-                        </h4>
-                        <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '13px', color: '#aaa' }}>•</span>
-                        <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '13px', color: '#aaa' }}>
-                          {donation.organization}
-                        </span>
+              Recent Donations
+            </h3>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {donations.length === 0 ? (
+                <p style={{ fontFamily: "'Questrial', sans-serif", fontSize: '16px', color: '#999', textAlign: 'center', padding: '40px 0' }}>
+                  No donations yet. Create one above.
+                </p>
+              ) : (
+                donations.map((donation) => (
+                  <div 
+                    key={donation.id} 
+                    style={{
+                      borderBottom: '1px solid #f0f0f0',
+                      paddingBottom: '16px',
+                      transition: 'transform 0.2s ease'
+                    }}
+                    onMouseEnter={(e) => gsap.to(e.currentTarget, { x: 8, duration: 0.2 })}
+                    onMouseLeave={(e) => gsap.to(e.currentTarget, { x: 0, duration: 0.2 })}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '6px', flexWrap: 'wrap' }}>
+                          {donation.donorPhoto && (
+                            <img src={donation.donorPhoto} alt="" style={{ width: '28px', height: '28px', borderRadius: '50%' }} />
+                          )}
+                          <h4 style={{ fontFamily: "'Inter', sans-serif", fontSize: '18px', fontWeight: '500', color: '#000000', margin: 0 }}>
+                            {donation.donorName}
+                          </h4>
+                          <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '13px', color: '#aaa' }}>•</span>
+                          <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '13px', color: '#aaa' }}>
+                            {donation.organization}
+                          </span>
+                        </div>
+                        <p style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', color: '#666', margin: '6px 0 0 0', lineHeight: '1.4' }}>
+                          {donation.description}
+                        </p>
                       </div>
-                      <p style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', color: '#666', margin: '6px 0 0 0', lineHeight: '1.4' }}>
-                        {donation.description}
-                      </p>
-                    </div>
-                    <div style={{ textAlign: 'right' }}>
-                      <p style={{ fontFamily: "'Inter', sans-serif", fontSize: '20px', fontWeight: '500', color: '#000000', margin: 0 }}>
-                        {formatCurrency(donation.totalAmount)}
-                      </p>
-                      <p style={{ fontFamily: "'Questrial', sans-serif", fontSize: '12px', color: '#bbb', margin: '6px 0 0 0' }}>
-                        {new Date(donation.date).toLocaleDateString('id-ID')}
-                      </p>
-                      <button
-                        onClick={() => generatePDF(donation)}
-                        style={{
-                          fontFamily: "'Questrial', sans-serif",
-                          fontSize: '11px',
-                          color: '#999',
-                          backgroundColor: 'transparent',
-                          border: 'none',
-                          cursor: 'pointer',
-                          marginTop: '8px',
-                          textDecoration: 'underline'
-                        }}
-                        onMouseEnter={(e) => { (e.target as HTMLElement).style.color = '#000000'; }}
-                        onMouseLeave={(e) => { (e.target as HTMLElement).style.color = '#999'; }}
-                      >
-                        Download PDF
-                      </button>
+                      <div style={{ textAlign: 'right' }}>
+                        <p style={{ fontFamily: "'Inter', sans-serif", fontSize: '20px', fontWeight: '500', color: '#000000', margin: 0 }}>
+                          {formatCurrency(donation.totalAmount)}
+                        </p>
+                        <p style={{ fontFamily: "'Questrial', sans-serif", fontSize: '12px', color: '#bbb', margin: '6px 0 0 0' }}>
+                          {new Date(donation.date).toLocaleDateString('id-ID')}
+                        </p>
+                        <button
+                          onClick={() => generatePDF(donation)}
+                          style={{
+                            fontFamily: "'Questrial', sans-serif",
+                            fontSize: '11px',
+                            color: '#999',
+                            backgroundColor: 'transparent',
+                            border: 'none',
+                            cursor: 'pointer',
+                            marginTop: '8px',
+                            textDecoration: 'underline'
+                          }}
+                          onMouseEnter={(e) => { (e.target as HTMLElement).style.color = '#000000'; }}
+                          onMouseLeave={(e) => { (e.target as HTMLElement).style.color = '#999'; }}
+                        >
+                          Download PDF
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))
-            )}
+                ))
+              )}
+            </div>
+          </div>
+
+          {/* Konten tambahan */}
+          <div style={{
+            width: 'calc(100% - 160px)',
+            margin: '0 auto 40px auto',
+            padding: '30px 40px',
+            borderTop: '1px solid #f0f0f0'
+          }}>
+            <div style={{
+              fontFamily: "'Questrial', sans-serif",
+              fontSize: '16px',
+              color: '#999',
+              textAlign: 'center',
+              lineHeight: '1.6',
+              maxWidth: '800px',
+              margin: '0 auto'
+            }}>
+              <p>Setiap donasi yang Anda berikan akan disalurkan kepada yang membutuhkan.</p>
+              <p style={{ marginTop: '16px' }}>Terima kasih atas kepercayaan dan partisipasi Anda dalam berbagi kebaikan.</p>
+            </div>
           </div>
         </div>
 
-        {/* Konten tambahan untuk scroll */}
+        {/* FOOTER - Dengan 2 line: satu di atas email, satu di atas teks MENURU */}
         <div style={{
-          position: 'relative',
-          width: 'calc(100% - 160px)',
-          margin: '0 auto 60px auto',
-          padding: '40px',
-          backgroundColor: 'transparent',
+          width: '100%',
+          backgroundColor: 'white',
+          marginTop: 'auto',
+          padding: '0 80px',
+          boxSizing: 'border-box',
           borderTop: '1px solid #f0f0f0'
         }}>
-          <div style={{
-            fontFamily: "'Questrial', sans-serif",
-            fontSize: '18px',
-            color: '#999',
-            textAlign: 'center',
-            lineHeight: '1.6',
-            maxWidth: '800px',
-            margin: '0 auto'
-          }}>
-            <p style={{ marginBottom: '20px' }}>
-              Setiap donasi yang Anda berikan akan disalurkan kepada yang membutuhkan.
-            </p>
-            <p style={{ marginBottom: '20px' }}>
-              Transparansi penuh dan laporan penggunaan dana dapat diakses kapan saja.
-            </p>
-            <p>
-              Terima kasih atas kepercayaan dan partisipasi Anda dalam berbagi kebaikan.
-            </p>
-          </div>
-        </div>
+          {/* LINE 1 - Sebelum email dan medsos */}
+          <div ref={footerLineRef} style={{ width: '0%', height: '2px', backgroundColor: '#000000', marginTop: '40px', marginBottom: '40px', opacity: 0 }} />
 
-        {/* Email dan Medsos */}
-        <div style={{
-          position: 'relative',
-          width: '100%',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'flex-end',
-          padding: '0 80px',
-          marginBottom: '30px',
-          boxSizing: 'border-box',
-          marginTop: 'auto'
-        }}>
-          <div 
-            ref={emailRef}
-            onClick={handleEmailClick}
-            style={{
-              fontFamily: "'Questrial', sans-serif",
-              fontSize: '32px',
-              color: '#000000',
-              fontWeight: '400',
-              letterSpacing: '0.02em',
-              cursor: 'pointer',
-              transition: 'opacity 0.3s ease',
-              opacity: 1,
-              marginBottom: '20px'
-            }}
-            onMouseEnter={(e) => { (e.target as HTMLElement).style.opacity = '0.5'; }}
-            onMouseLeave={(e) => { (e.target as HTMLElement).style.opacity = '1'; }}
-          >
-            contact.menuru@gmail.com
-          </div>
-
+          {/* Email dan Medsos - Email di kiri, Medsos di TENGAH */}
           <div style={{
+            width: '100%',
             display: 'flex',
-            flexDirection: 'column',
-            gap: '8px',
-            position: 'absolute',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            marginBottom: '20px'
+            justifyContent: 'space-between',
+            alignItems: 'flex-end',
+            marginBottom: '60px',
+            position: 'relative'
           }}>
+            {/* Email - di kiri */}
             <div 
-              className="social-item"
-              style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
-              onMouseEnter={(e) => {
-                const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                if (textElement) handleSocialHover(textElement, 'Instagram');
+              ref={footerEmailRef}
+              onClick={handleEmailClick}
+              style={{
+                fontFamily: "'Questrial', sans-serif",
+                fontSize: '28px',
+                color: '#000000',
+                fontWeight: '400',
+                letterSpacing: '0.02em',
+                cursor: 'pointer',
+                transition: 'opacity 0.3s ease'
               }}
-              onMouseLeave={(e) => {
-                const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                if (textElement) handleSocialLeave(textElement, 'Instagram');
-              }}
-              onClick={() => handleSocialClick('Instagram')}
+              onMouseEnter={(e) => { (e.target as HTMLElement).style.opacity = '0.5'; }}
+              onMouseLeave={(e) => { (e.target as HTMLElement).style.opacity = '1'; }}
             >
-              <span ref={igRef} className="social-text" style={{ fontFamily: "'Questrial', sans-serif", fontSize: '28px', color: '#000000', fontWeight: '400', letterSpacing: '0.02em' }}>
-                Instagram
-              </span>
+              contact.menuru@gmail.com
             </div>
-            <div 
-              className="social-item"
-              style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
-              onMouseEnter={(e) => {
-                const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                if (textElement) handleSocialHover(textElement, 'X');
-              }}
-              onMouseLeave={(e) => {
-                const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                if (textElement) handleSocialLeave(textElement, 'X');
-              }}
-              onClick={() => handleSocialClick('X')}
-            >
-              <span ref={xRef} className="social-text" style={{ fontFamily: "'Questrial', sans-serif", fontSize: '28px', color: '#000000', fontWeight: '400', letterSpacing: '0.02em' }}>
-                X
-              </span>
+
+            {/* Medsos - di TENGAH (absolute center) */}
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '6px',
+              position: 'absolute',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              textAlign: 'center'
+            }}>
+              <div 
+                className="social-item"
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer' }}
+                onMouseEnter={(e) => {
+                  const textElement = e.currentTarget.querySelector('.social-text-footer') as HTMLElement;
+                  if (textElement) handleSocialHover(textElement, 'Instagram');
+                }}
+                onMouseLeave={(e) => {
+                  const textElement = e.currentTarget.querySelector('.social-text-footer') as HTMLElement;
+                  if (textElement) handleSocialLeave(textElement, 'Instagram');
+                }}
+                onClick={() => handleSocialClick('Instagram')}
+              >
+                <span ref={footerIgRef} className="social-text-footer" style={{ fontFamily: "'Questrial', sans-serif", fontSize: '28px', color: '#000000', fontWeight: '400', letterSpacing: '0.02em' }}>Instagram</span>
+              </div>
+              <div 
+                className="social-item"
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer' }}
+                onMouseEnter={(e) => {
+                  const textElement = e.currentTarget.querySelector('.social-text-footer') as HTMLElement;
+                  if (textElement) handleSocialHover(textElement, 'X');
+                }}
+                onMouseLeave={(e) => {
+                  const textElement = e.currentTarget.querySelector('.social-text-footer') as HTMLElement;
+                  if (textElement) handleSocialLeave(textElement, 'X');
+                }}
+                onClick={() => handleSocialClick('X')}
+              >
+                <span ref={footerXRef} className="social-text-footer" style={{ fontFamily: "'Questrial', sans-serif", fontSize: '28px', color: '#000000', fontWeight: '400', letterSpacing: '0.02em' }}>X</span>
+              </div>
+              <div 
+                className="social-item"
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer' }}
+                onMouseEnter={(e) => {
+                  const textElement = e.currentTarget.querySelector('.social-text-footer') as HTMLElement;
+                  if (textElement) handleSocialHover(textElement, 'LinkedIn');
+                }}
+                onMouseLeave={(e) => {
+                  const textElement = e.currentTarget.querySelector('.social-text-footer') as HTMLElement;
+                  if (textElement) handleSocialLeave(textElement, 'LinkedIn');
+                }}
+                onClick={() => handleSocialClick('LinkedIn')}
+              >
+                <span ref={footerLinkedinRef} className="social-text-footer" style={{ fontFamily: "'Questrial', sans-serif", fontSize: '28px', color: '#000000', fontWeight: '400', letterSpacing: '0.02em' }}>LinkedIn</span>
+              </div>
             </div>
-            <div 
-              className="social-item"
-              style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
-              onMouseEnter={(e) => {
-                const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                if (textElement) handleSocialHover(textElement, 'LinkedIn');
-              }}
-              onMouseLeave={(e) => {
-                const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                if (textElement) handleSocialLeave(textElement, 'LinkedIn');
-              }}
-              onClick={() => handleSocialClick('LinkedIn')}
-            >
-              <span ref={linkedinRef} className="social-text" style={{ fontFamily: "'Questrial', sans-serif", fontSize: '28px', color: '#000000', fontWeight: '400', letterSpacing: '0.02em' }}>
-                LinkedIn
-              </span>
-            </div>
+
+            {/* Spacer kanan untuk balance */}
+            <div style={{ width: '200px' }} />
+          </div>
+
+          {/* LINE 2 - Sebelum teks MENURU besar */}
+          <div ref={line2Ref} style={{ width: '0%', height: '2px', backgroundColor: '#000000', marginBottom: '60px', opacity: 0 }} />
+
+          {/* Teks MENURU besar - MENTOK DI PALING BAWAH */}
+          <div style={{ textAlign: 'right', paddingBottom: '80px' }}>
+            <span ref={footerMenuruRef} style={{ 
+              fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif", 
+              fontWeight: 'normal', 
+              fontSize: '600px', 
+              color: '#000000', 
+              letterSpacing: '-0.02em', 
+              textTransform: 'uppercase', 
+              lineHeight: '0.7', 
+              whiteSpace: 'nowrap', 
+              display: 'inline-block'
+            }}>
+              MENURU
+            </span>
           </div>
         </div>
-
-        {/* Footer */}
-        <footer style={{
-          position: 'relative',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          width: '100%',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'flex-end',
-          padding: '0 80px 80px 0',
-          margin: 0,
-          pointerEvents: 'none',
-          zIndex: 1
-        }}>
-          <div ref={lineRef} style={{ width: '0%', height: '2px', backgroundColor: '#000000', marginBottom: '60px', opacity: 0 }} />
-          <span ref={menuruTextRef} style={{ 
-            fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif", 
-            fontWeight: 'normal', 
-            fontSize: '600px', 
-            color: '#000000', 
-            textAlign: 'right', 
-            letterSpacing: '-0.02em', 
-            opacity: 1, 
-            textTransform: 'uppercase', 
-            lineHeight: '0.7', 
-            whiteSpace: 'nowrap', 
-            WebkitFontSmoothing: 'antialiased', 
-            MozOsxFontSmoothing: 'grayscale', 
-            margin: 0, 
-            padding: 0, 
-            transform: 'translateY(10px)'
-          }}>
-            MENURU
-          </span>
-        </footer>
       </div>
 
       {/* Cookie Popup */}
