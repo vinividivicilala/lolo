@@ -391,12 +391,16 @@ export default function DonaturPage(): React.JSX.Element {
     element.textContent = originalText;
   };
 
-  // Inisialisasi ScrollSmoother - DIPERBAIKI
+  // Inisialisasi ScrollSmoother
   useEffect(() => {
     if (typeof window === 'undefined') return;
     
-    const initSmoother = () => {
-      if (!smootherRef.current && document.getElementById('smooth-wrapper-donatur') && document.getElementById('smooth-content-donatur')) {
+    // Pastikan content sudah ter-render
+    const timeout = setTimeout(() => {
+      const wrapper = document.getElementById('smooth-wrapper-donatur');
+      const content = document.getElementById('smooth-content-donatur');
+      
+      if (wrapper && content && !smootherRef.current) {
         try {
           // Kill existing ScrollTrigger instances
           ScrollTrigger.getAll().forEach(trigger => trigger.kill());
@@ -412,25 +416,21 @@ export default function DonaturPage(): React.JSX.Element {
           });
           
           setSmootherReady(true);
-          ScrollTrigger.refresh();
           
-          // Small delay to ensure scroll works
+          // Refresh scroll position
           setTimeout(() => {
+            ScrollTrigger.refresh();
             if (smootherRef.current) {
               smootherRef.current.scrollTop(0);
             }
-            ScrollTrigger.refresh();
           }, 100);
+          
         } catch (e) {
           console.error("Error initializing ScrollSmoother:", e);
         }
       }
-    };
-
-    // Delay initialization to ensure DOM is ready
-    const timer = setTimeout(initSmoother, 500);
+    }, 500);
     
-    // Refresh on window load
     window.addEventListener('load', () => {
       setTimeout(() => {
         ScrollTrigger.refresh();
@@ -441,7 +441,7 @@ export default function DonaturPage(): React.JSX.Element {
     });
 
     return () => {
-      clearTimeout(timer);
+      clearTimeout(timeout);
       if (smootherRef.current) {
         smootherRef.current.kill();
         smootherRef.current = null;
@@ -460,10 +460,6 @@ export default function DonaturPage(): React.JSX.Element {
     
     window.addEventListener('resize', handleResize);
     
-    setTimeout(() => {
-      ScrollTrigger.refresh();
-    }, 500);
-    
     return () => {
       window.removeEventListener('resize', handleResize);
     };
@@ -473,7 +469,7 @@ export default function DonaturPage(): React.JSX.Element {
     if (smootherReady) {
       setTimeout(() => {
         ScrollTrigger.refresh();
-      }, 100);
+      }, 200);
     }
   }, [donations, smootherReady]);
 
@@ -544,13 +540,13 @@ export default function DonaturPage(): React.JSX.Element {
 
       if (lineRef.current) {
         gsap.fromTo(lineRef.current,
-          { width: '0%', opacity: 0, x: 100 },
-          { width: '100%', opacity: 1, x: 0, duration: 1.2,
+          { width: '0%', opacity: 0 },
+          { width: '100%', opacity: 1, duration: 1.2,
             scrollTrigger: { trigger: lineRef.current, start: "top 85%", end: "bottom 70%", toggleActions: "play none none reverse" }
           }
         );
       }
-    }, 500);
+    }, 800);
 
     return () => {
       clearTimeout(timer);
@@ -652,7 +648,7 @@ export default function DonaturPage(): React.JSX.Element {
         }
         
         #smooth-content-donatur {
-          min-height: 250vh;
+          min-height: 300vh;
           width: 100%;
           will-change: transform;
           background-color: white;
@@ -708,12 +704,13 @@ export default function DonaturPage(): React.JSX.Element {
       
       <div id="smooth-wrapper-donatur">
         <div id="smooth-content-donatur">
-          {/* Main Content */}
+          {/* Main Content dengan padding bottom besar untuk scroll */}
           <div style={{
             minHeight: '100vh',
             backgroundColor: 'white',
             margin: 0,
             padding: 0,
+            paddingBottom: '100px',
             width: '100%',
             display: 'flex',
             flexDirection: 'column',
@@ -794,7 +791,7 @@ export default function DonaturPage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* Menu Drawer - HAPUS nama web di dalamnya */}
+            {/* Menu Drawer */}
             <div
               ref={menuDrawerRef}
               style={{
@@ -839,7 +836,6 @@ export default function DonaturPage(): React.JSX.Element {
                 </svg>
               </div>
 
-              {/* Teks MENURU besar di background */}
               <div
                 ref={menuMenuruTextRef}
                 style={{
@@ -860,9 +856,6 @@ export default function DonaturPage(): React.JSX.Element {
                 MENURU
               </div>
 
-              {/* HAPUS nama web MENURU di pojok kiri atas menu drawer */}
-
-              {/* Menu Items */}
               <div style={{
                 display: 'flex',
                 flexDirection: 'column',
@@ -969,7 +962,7 @@ export default function DonaturPage(): React.JSX.Element {
               </Link>
             </div>
 
-            {/* Judul Website MENURU - TETAP ADA di luar menu */}
+            {/* Judul Website MENURU */}
             <div style={{
               position: 'fixed',
               top: '20px',
@@ -1261,7 +1254,7 @@ export default function DonaturPage(): React.JSX.Element {
                 ref={donaturTitleRef}
                 style={{
                   fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
-                  fontSize: '280px',
+                  fontSize: '200px',
                   fontWeight: '300',
                   color: '#000000',
                   textAlign: 'left',
@@ -1285,7 +1278,7 @@ export default function DonaturPage(): React.JSX.Element {
             {/* Info Text */}
             <div style={{
               position: 'relative',
-              top: '120px',
+              top: '100px',
               left: '40px',
               right: '40px',
               zIndex: 10,
@@ -1295,13 +1288,13 @@ export default function DonaturPage(): React.JSX.Element {
                 ref={infoTextRef}
                 style={{
                   fontFamily: "'Questrial', sans-serif",
-                  fontSize: '56px',
+                  fontSize: '48px',
                   fontWeight: '400',
                   color: '#000000',
                   textAlign: 'center',
                   letterSpacing: '-0.01em',
                   lineHeight: '1.2',
-                  marginBottom: '80px'
+                  marginBottom: '60px'
                 }}>
                 Terima kasih untuk para donatur yang telah berbagi kebaikan
               </div>
@@ -1311,7 +1304,7 @@ export default function DonaturPage(): React.JSX.Element {
             <div style={{
               position: 'relative',
               width: 'calc(100% - 160px)',
-              margin: '0 auto 80px auto',
+              margin: '0 auto 60px auto',
               padding: '0 40px'
             }}>
               <h3 style={{
@@ -1319,7 +1312,7 @@ export default function DonaturPage(): React.JSX.Element {
                 fontSize: '20px',
                 fontWeight: '400',
                 color: '#000000',
-                marginBottom: '40px',
+                marginBottom: '30px',
                 letterSpacing: '-0.02em',
                 borderBottom: '1px solid #e0e0e0',
                 paddingBottom: '12px'
@@ -1327,7 +1320,7 @@ export default function DonaturPage(): React.JSX.Element {
                 Recent Donations
               </h3>
               
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 {donations.length === 0 ? (
                   <p style={{ fontFamily: "'Questrial', sans-serif", fontSize: '16px', color: '#999', textAlign: 'center', padding: '40px 0' }}>
                     No donations yet. Create one above.
@@ -1338,7 +1331,7 @@ export default function DonaturPage(): React.JSX.Element {
                       key={donation.id} 
                       style={{
                         borderBottom: '1px solid #f0f0f0',
-                        paddingBottom: '20px',
+                        paddingBottom: '16px',
                         transition: 'transform 0.2s ease'
                       }}
                       onMouseEnter={(e) => gsap.to(e.currentTarget, { x: 8, duration: 0.2 })}
@@ -1401,16 +1394,16 @@ export default function DonaturPage(): React.JSX.Element {
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'flex-end',
-              padding: '0 80px 0 80px',
+              padding: '0 80px',
               margin: 0,
               pointerEvents: 'none',
               zIndex: 1,
-              marginTop: '150px',
+              marginTop: '100px',
               paddingBottom: '80px',
               boxSizing: 'border-box'
             }}>
               {/* Line */}
-              <div ref={lineRef} style={{ width: '100%', height: '2px', backgroundColor: '#000000', marginBottom: '60px', opacity: 0 }} />
+              <div ref={lineRef} style={{ width: '0%', height: '2px', backgroundColor: '#000000', marginBottom: '60px', opacity: 0 }} />
               
               {/* Email di kiri, Medsos di tengah */}
               <div style={{
@@ -1419,7 +1412,8 @@ export default function DonaturPage(): React.JSX.Element {
                 justifyContent: 'space-between',
                 alignItems: 'flex-end',
                 marginBottom: '80px',
-                pointerEvents: 'auto'
+                pointerEvents: 'auto',
+                position: 'relative'
               }}>
                 {/* Email - di kiri */}
                 <div 
@@ -1505,7 +1499,7 @@ export default function DonaturPage(): React.JSX.Element {
               <span ref={menuruTextRef} style={{ 
                 fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif", 
                 fontWeight: 'normal', 
-                fontSize: '600px', 
+                fontSize: '400px', 
                 color: '#000000', 
                 textAlign: 'right', 
                 letterSpacing: '-0.02em', 
