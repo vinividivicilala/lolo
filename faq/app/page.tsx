@@ -50,10 +50,7 @@ export default function HomePage(): React.JSX.Element {
   const profileRef = useRef<HTMLDivElement>(null);
   const bottomContentRef = useRef<HTMLDivElement>(null);
   const calendarBtnRef = useRef<HTMLButtonElement>(null);
-  const homeTextRef = useRef<HTMLDivElement>(null);
-  const card1Ref = useRef<HTMLDivElement>(null);
-  const card2Ref = useRef<HTMLDivElement>(null);
-  const card3Ref = useRef<HTMLDivElement>(null);
+  const studioTextRef = useRef<HTMLDivElement>(null);
 
   // Variabel untuk menyimpan teks asli medsos
   const originalTexts = {
@@ -253,8 +250,7 @@ export default function HomePage(): React.JSX.Element {
               { x: '0%', opacity: 1, duration: 1, ease: "power3.inOut" }
             );
             animateMenuruMain();
-            animateHomeText();
-            animateCards();
+            animateStudioText();
             animateBottomContent();
           }
         });
@@ -316,49 +312,15 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  const animateHomeText = () => {
-    if (homeTextRef.current) {
-      gsap.set(homeTextRef.current, { opacity: 0, y: 50 });
-      gsap.to(homeTextRef.current, {
+  const animateStudioText = () => {
+    if (studioTextRef.current) {
+      gsap.set(studioTextRef.current, { opacity: 0, y: 50 });
+      gsap.to(studioTextRef.current, {
         opacity: 1,
         y: 0,
         duration: 0.8,
         ease: "power2.out",
         delay: 0.3
-      });
-    }
-  };
-
-  const animateCards = () => {
-    // Animasi card geser ke kanan saat reload
-    if (card1Ref.current) {
-      gsap.set(card1Ref.current, { x: -100, opacity: 0 });
-      gsap.to(card1Ref.current, {
-        x: 0,
-        opacity: 1,
-        duration: 0.6,
-        ease: "back.out(0.6)",
-        delay: 0.4
-      });
-    }
-    if (card2Ref.current) {
-      gsap.set(card2Ref.current, { x: -100, opacity: 0 });
-      gsap.to(card2Ref.current, {
-        x: 0,
-        opacity: 1,
-        duration: 0.6,
-        ease: "back.out(0.6)",
-        delay: 0.5
-      });
-    }
-    if (card3Ref.current) {
-      gsap.set(card3Ref.current, { x: -100, opacity: 0 });
-      gsap.to(card3Ref.current, {
-        x: 0,
-        opacity: 1,
-        duration: 0.6,
-        ease: "back.out(0.6)",
-        delay: 0.6
       });
     }
   };
@@ -373,7 +335,7 @@ export default function HomePage(): React.JSX.Element {
           filter: 'blur(0px)',
           duration: 1,
           ease: "power3.out",
-          delay: 0.7
+          delay: 0.5
         }
       );
     }
@@ -515,28 +477,6 @@ export default function HomePage(): React.JSX.Element {
 
   const days = getDaysInMonth(currentMonth);
   const weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-
-  // Data cards
-  const cards = [
-    {
-      title: "You can Note",
-      description: "Catat semua ide dan inspirasi Anda dengan mudah. Sistem note-taking yang sederhana dan efisien.",
-      image: "/images/5.jpg",
-      delay: 0.4
-    },
-    {
-      title: "Donation Money to People",
-      description: "Salurkan donasi Anda kepada mereka yang membutuhkan. Transparan, aman, dan tepat sasaran.",
-      image: "/images/5.jpg",
-      delay: 0.5
-    },
-    {
-      title: "Calendar organize your schedule",
-      description: "Atur jadwal Anda dengan kalender pintar. Tidak akan ada lagi jadwal yang terlewat.",
-      image: "/images/5.jpg",
-      delay: 0.6
-    }
-  ];
 
   return (
     <>
@@ -804,53 +744,14 @@ export default function HomePage(): React.JSX.Element {
           box-shadow: 0 0 0 3px #000000;
         }
 
-        .home-text {
+        .studio-text {
           font-family: 'HelveticaNowDisplay', 'Arial', sans-serif;
           font-weight: 400;
-          font-size: 150px;
+          font-size: 80px;
           color: rgb(16, 16, 16);
           letter-spacing: -0.02em;
-          line-height: 1;
-        }
-
-        /* Card Styles */
-        .feature-card {
-          background: white;
-          border-radius: 24px;
-          overflow: hidden;
-          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-          transition: all 0.3s ease;
-          cursor: pointer;
-        }
-        
-        .feature-card:hover {
-          transform: translateY(-8px);
-          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
-        }
-        
-        .card-image {
-          width: 100%;
-          height: 200px;
-          object-fit: cover;
-        }
-        
-        .card-content {
-          padding: 20px;
-        }
-        
-        .card-title {
-          font-family: 'HelveticaNowDisplay', 'Arial', sans-serif;
-          font-size: 24px;
-          font-weight: 600;
-          color: rgb(16, 16, 16);
-          margin-bottom: 12px;
-        }
-        
-        .card-description {
-          font-family: 'Questrial', sans-serif;
-          font-size: 16px;
-          color: #666666;
-          line-height: 1.5;
+          line-height: 1.2;
+          max-width: 800px;
         }
       `}</style>
       
@@ -944,7 +845,7 @@ export default function HomePage(): React.JSX.Element {
               transition: 'all 0.01s ease'
             }}
           >
-            {/* HEADER SECTION - MENURU dan HOME */}
+            {/* HEADER SECTION - MENURU */}
             <div style={{
               position: 'fixed',
               top: 0,
@@ -972,140 +873,26 @@ export default function HomePage(): React.JSX.Element {
               >
                 MENURU
               </div>
-
-              {/* TEKS HOME */}
-              <div
-                ref={homeTextRef}
-                style={{
-                  fontFamily: 'HelveticaNowDisplay, Arial, sans-serif',
-                  fontWeight: '400',
-                  fontSize: '150px',
-                  color: 'rgb(16, 16, 16)',
-                  letterSpacing: '-0.02em',
-                  lineHeight: '1',
-                  marginTop: '10px',
-                  opacity: 0
-                }}
-              >
-                HOME
-              </div>
             </div>
 
-            {/* 3 CARDS SECTION - Di bawah HOME */}
+            {/* MENURU.STUDIO TEXT - Di bawah MENURU */}
             <div style={{
               display: 'flex',
               justifyContent: 'center',
               alignItems: 'center',
-              gap: '40px',
-              padding: '0 80px',
-              marginTop: '350px',
-              flexWrap: 'wrap'
+              minHeight: '100vh',
+              padding: '0 40px'
             }}>
-              {/* Card 1 - You can Note */}
               <div
-                ref={card1Ref}
-                className="feature-card"
+                ref={studioTextRef}
+                className="studio-text"
                 style={{
-                  width: '320px',
+                  textAlign: 'center',
                   opacity: 0
                 }}
               >
-                <div style={{
-                  width: '100%',
-                  height: '220px',
-                  position: 'relative',
-                  overflow: 'hidden'
-                }}>
-                  <Image
-                    src="/images/5.jpg"
-                    alt="You can Note"
-                    fill
-                    style={{ objectFit: 'cover' }}
-                  />
-                </div>
-                <div className="card-content">
-                  <div className="card-title">You can Note</div>
-                  <div className="card-description">
-                    Catat semua ide dan inspirasi Anda dengan mudah. 
-                    Sistem note-taking yang sederhana dan efisien.
-                  </div>
-                </div>
+                MENURU.STUDIO – Jakarta UX/UI Design Personal for Note, Donation & Calendar
               </div>
-
-              {/* Card 2 - Donation Money to People */}
-              <div
-                ref={card2Ref}
-                className="feature-card"
-                style={{
-                  width: '320px',
-                  opacity: 0
-                }}
-              >
-                <div style={{
-                  width: '100%',
-                  height: '220px',
-                  position: 'relative',
-                  overflow: 'hidden'
-                }}>
-                  <Image
-                    src="/images/5.jpg"
-                    alt="Donation Money to People"
-                    fill
-                    style={{ objectFit: 'cover' }}
-                  />
-                </div>
-                <div className="card-content">
-                  <div className="card-title">Donation Money to People</div>
-                  <div className="card-description">
-                    Salurkan donasi Anda kepada mereka yang membutuhkan. 
-                    Transparan, aman, dan tepat sasaran.
-                  </div>
-                </div>
-              </div>
-
-              {/* Card 3 - Calendar organize your schedule */}
-              <div
-                ref={card3Ref}
-                className="feature-card"
-                style={{
-                  width: '320px',
-                  opacity: 0
-                }}
-              >
-                <div style={{
-                  width: '100%',
-                  height: '220px',
-                  position: 'relative',
-                  overflow: 'hidden'
-                }}>
-                  <Image
-                    src="/images/5.jpg"
-                    alt="Calendar organize your schedule"
-                    fill
-                    style={{ objectFit: 'cover' }}
-                  />
-                </div>
-                <div className="card-content">
-                  <div className="card-title">Calendar organize your schedule</div>
-                  <div className="card-description">
-                    Atur jadwal Anda dengan kalender pintar. 
-                    Tidak akan ada lagi jadwal yang terlewat.
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Teks tambahan di bawah card */}
-            <div style={{
-              textAlign: 'center',
-              marginTop: '60px',
-              marginBottom: '60px',
-              fontFamily: 'HelveticaNowDisplay, Arial, sans-serif',
-              fontSize: '28px',
-              color: 'rgb(16, 16, 16)',
-              letterSpacing: '-0.02em'
-            }}>
-              with a friendly, dedicated team.
             </div>
 
             {/* Bagian footer dengan semua konten */}
