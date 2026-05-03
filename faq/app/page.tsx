@@ -41,6 +41,7 @@ export default function HomePage(): React.JSX.Element {
   const callTextRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
   const bottomContentRef = useRef<HTMLDivElement>(null);
+  const calendarBtnRef = useRef<HTMLButtonElement>(null);
 
   // Variabel untuk menyimpan teks asli medsos
   const originalTexts = {
@@ -378,6 +379,11 @@ export default function HomePage(): React.JSX.Element {
 
   const handleSocialClick = (platform: string) => {};
 
+  const handleCalendarCall = () => {
+    // Add your calendar link here
+    window.open('https://calendly.com/', '_blank');
+  };
+
   return (
     <>
       <style jsx global>{`
@@ -545,6 +551,42 @@ export default function HomePage(): React.JSX.Element {
           font-weight: 500;
           color: #ffffff;
           border: 1px solid #333333;
+        }
+
+        /* Email underline style */
+        .email-link {
+          text-decoration: underline;
+          text-underline-offset: 8px;
+          text-decoration-thickness: 2px;
+          cursor: pointer;
+          transition: opacity 0.3s ease;
+        }
+        
+        .email-link:hover {
+          opacity: 0.7;
+        }
+
+        /* Calendar button style - hijau stabilo */
+        .calendar-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 12px;
+          padding: 12px 28px;
+          background-color: #c5e800;
+          border: none;
+          border-radius: 60px;
+          cursor: pointer;
+          font-family: 'Questrial', sans-serif;
+          font-size: 20px;
+          font-weight: 600;
+          color: #000000;
+          transition: all 0.3s ease;
+          white-space: nowrap;
+        }
+        
+        .calendar-btn:hover {
+          background-color: #b0d100;
+          transform: scale(1.02);
         }
       `}</style>
       
@@ -803,17 +845,34 @@ export default function HomePage(): React.JSX.Element {
                   </button>
                 </Link>
 
-                {/* Call Farid Text - RATA KIRI */}
-                <div
-                  ref={callTextRef}
-                  className="call-farid-text"
-                  style={{
-                    width: '100%'
-                  }}
-                >
-                  <div>Ready to surpass your</div>
-                  <div>wildest dreams?</div>
-                  <div>Call Farid.</div>
+                {/* Call Farid Text dengan tombol Calendar di sampingnya */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '30px',
+                  flexWrap: 'wrap',
+                  width: '100%'
+                }}>
+                  <div
+                    ref={callTextRef}
+                    className="call-farid-text"
+                  >
+                    <div>Ready to surpass your</div>
+                    <div>wildest dreams?</div>
+                    <div>Call Farid.</div>
+                  </div>
+
+                  {/* Tombol Calendar Call - Hijau stabilo dengan panah North West Arrow */}
+                  <button
+                    ref={calendarBtnRef}
+                    onClick={handleCalendarCall}
+                    className="calendar-btn"
+                  >
+                    Calendar call
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M17 7L7 17M17 7H11M17 7V13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </button>
                 </div>
 
                 {/* Profile Section - Gambar Portrait, Nama, dan Badge - RATA KIRI */}
@@ -863,7 +922,7 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </div>
 
-              {/* Email dan Social Media Section */}
+              {/* Email dan Social Media Section - Email dengan underline dan panah north east */}
               <div style={{
                 position: 'relative',
                 width: '100%',
@@ -877,21 +936,23 @@ export default function HomePage(): React.JSX.Element {
                 <div 
                   ref={emailRef}
                   onClick={handleEmailClick}
+                  className="email-link"
                   style={{
                     fontFamily: "'Questrial', sans-serif",
                     fontSize: '32px',
                     color: '#000000',
                     fontWeight: '400',
                     letterSpacing: '0.02em',
-                    cursor: 'pointer',
-                    transition: 'opacity 0.3s ease',
-                    opacity: 1,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '12px',
                     marginBottom: '20px'
                   }}
-                  onMouseEnter={(e) => e.currentTarget.style.opacity = '0.7'}
-                  onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
                 >
                   contact.menuru@gmail.com
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
                 </div>
 
                 <div style={{
