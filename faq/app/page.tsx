@@ -1,4 +1,4 @@
-// app/page.tsx (Halaman Utama)
+// app/page.tsx (Halaman Utama) - PERBAIKAN PADA BAGIAN MODAL RIGHT SECTION
 'use client';
 
 import React, { useState, useEffect, useRef } from "react";
@@ -90,9 +90,9 @@ export default function HomePage(): React.JSX.Element {
   };
 
   const getDayColor = (date: Date) => {
-    if (date.toDateString() === today.toDateString()) return "#4a90e2"; // Biru stabilo untuk hari ini
-    if (date.toDateString() === tomorrow.toDateString()) return "#c5e800"; // Hijau stabilo untuk besok
-    return "#ff69b4"; // Pink stabilo untuk hari berikutnya
+    if (date.toDateString() === today.toDateString()) return "#4a90e2";
+    if (date.toDateString() === tomorrow.toDateString()) return "#c5e800";
+    return "#ff69b4";
   };
 
   const handleDateSelect = (date: Date) => {
@@ -626,7 +626,6 @@ export default function HomePage(): React.JSX.Element {
           to { opacity: 1; transform: scale(1); }
         }
 
-        /* Font untuk Call Farid dan Email */
         .call-farid-text {
           font-family: 'HelveticaNowDisplay', 'Arial', sans-serif;
           font-weight: 400;
@@ -644,7 +643,6 @@ export default function HomePage(): React.JSX.Element {
           letter-spacing: 0.02em;
         }
 
-        /* Badge style - Hitam dengan teks putih, font 30px */
         .badge-founder {
           display: inline-flex;
           align-items: center;
@@ -658,7 +656,6 @@ export default function HomePage(): React.JSX.Element {
           border: 1px solid #333333;
         }
 
-        /* Calendar button style - hijau stabilo */
         .calendar-btn {
           display: inline-flex;
           align-items: center;
@@ -681,7 +678,6 @@ export default function HomePage(): React.JSX.Element {
           transform: scale(1.02);
         }
 
-        /* Email wrapper */
         .email-wrapper {
           display: inline-flex;
           align-items: center;
@@ -694,7 +690,6 @@ export default function HomePage(): React.JSX.Element {
           opacity: 0.7;
         }
 
-        /* Calendar Modal Styles */
         .calendar-modal-overlay {
           position: fixed;
           top: 0;
@@ -895,7 +890,7 @@ export default function HomePage(): React.JSX.Element {
               alignItems: 'center',
               minHeight: '100vh'
             }}>
-              {/* Bottom Content - Mencatat, Contact, Call Farid, Profile - SEMUA RATA KIRI */}
+              {/* Bottom Content */}
               <div
                 ref={bottomContentRef}
                 style={{
@@ -1003,7 +998,7 @@ export default function HomePage(): React.JSX.Element {
                   </button>
                 </Link>
 
-                {/* Call Farid Text dengan tombol Calendar di sampingnya */}
+                {/* Call Farid Text dengan tombol Calendar */}
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -1011,27 +1006,19 @@ export default function HomePage(): React.JSX.Element {
                   flexWrap: 'wrap',
                   width: '100%'
                 }}>
-                  <div
-                    ref={callTextRef}
-                    className="call-farid-text"
-                  >
+                  <div ref={callTextRef} className="call-farid-text">
                     <div>Ready to surpass your</div>
                     <div>wildest dreams?</div>
                     <div>Call Farid.</div>
                   </div>
 
-                  {/* Tombol Calendar Call */}
-                  <button
-                    ref={calendarBtnRef}
-                    onClick={handleCalendarCall}
-                    className="calendar-btn"
-                  >
+                  <button ref={calendarBtnRef} onClick={handleCalendarCall} className="calendar-btn">
                     <ArrowIcon size={24} />
                     Calendar call
                   </button>
                 </div>
 
-                {/* Profile Section - Gambar Portrait, Nama, dan Badge - RATA KIRI */}
+                {/* Profile Section */}
                 <div
                   ref={profileRef}
                   style={{
@@ -1043,7 +1030,6 @@ export default function HomePage(): React.JSX.Element {
                     marginTop: '10px'
                   }}
                 >
-                  {/* Gambar Profile - Portrait */}
                   <div style={{
                     width: '80px',
                     height: '100px',
@@ -1060,7 +1046,6 @@ export default function HomePage(): React.JSX.Element {
                     />
                   </div>
 
-                  {/* Nama */}
                   <div style={{
                     fontFamily: "'Questrial', sans-serif",
                     fontSize: '40px',
@@ -1071,7 +1056,6 @@ export default function HomePage(): React.JSX.Element {
                     Farid Ardiansyah
                   </div>
 
-                  {/* Badge Founder & Programmer - Hitam, teks putih, font 30px */}
                   <div className="badge-founder">
                     Founder & Programmer
                   </div>
@@ -1093,9 +1077,7 @@ export default function HomePage(): React.JSX.Element {
                   ref={emailRef}
                   onClick={handleEmailClick}
                   className="email-wrapper"
-                  style={{
-                    marginBottom: '20px'
-                  }}
+                  style={{ marginBottom: '20px' }}
                 >
                   <ArrowIcon size={24} />
                   <span className="email-text">contact.menuru@gmail.com</span>
@@ -1233,7 +1215,7 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </div>
 
-      {/* Calendar Call Modal */}
+      {/* Calendar Call Modal - PERBAIKAN PADA BAGIAN RIGHT SECTION */}
       {showCalendarModal && (
         <div className="calendar-modal-overlay">
           <div ref={modalRef} className="calendar-modal">
@@ -1527,7 +1509,7 @@ export default function HomePage(): React.JSX.Element {
                 )}
               </div>
 
-              {/* RIGHT SECTION - Tomorrow/Next Day Details */}
+              {/* RIGHT SECTION - Tomorrow/Next Day Details - PERBAIKAN */}
               <div style={{
                 flex: 1,
                 padding: '32px',
@@ -1592,7 +1574,7 @@ export default function HomePage(): React.JSX.Element {
                   backgroundColor: '#ff69b4',
                   borderRadius: '20px',
                   color: '#ffffff'
-                }}">
+                }}>
                   <div style={{
                     fontFamily: "'Questrial', sans-serif",
                     fontSize: '14px',
