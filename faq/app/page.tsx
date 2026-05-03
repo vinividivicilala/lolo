@@ -1,4 +1,5 @@
-// app/page.tsx (Halaman Utama)
+// app/page.tsx (Halaman Utama) - FULL CODE DENGAN TEKS HOME YANG MUNCUL
+
 'use client';
 
 import React, { useState, useEffect, useRef } from "react";
@@ -77,12 +78,10 @@ export default function HomePage(): React.JSX.Element {
     const lastDay = new Date(year, month + 1, 0);
     const days = [];
     
-    // Add empty days for alignment
     for (let i = 0; i < firstDay.getDay(); i++) {
       days.push(null);
     }
     
-    // Add actual days
     for (let i = 1; i <= lastDay.getDate(); i++) {
       days.push(new Date(year, month, i));
     }
@@ -117,13 +116,11 @@ export default function HomePage(): React.JSX.Element {
     setCurrentMonth(newDate);
   };
 
-  // Fungsi untuk mendapatkan huruf random (A-Z)
   const getRandomChar = () => {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
     return chars[Math.floor(Math.random() * chars.length)];
   };
 
-  // Fungsi untuk mengacak huruf pada teks
   const randomizeText = (element: HTMLElement, originalText: string, duration: number = 0.5) => {
     const originalChars = originalText.split('');
     const totalSteps = 15;
@@ -143,7 +140,6 @@ export default function HomePage(): React.JSX.Element {
     return interval;
   };
 
-  // Animasi hover random huruf untuk medsos
   const handleSocialHover = (element: HTMLElement, originalText: string) => {
     if (!element.getAttribute('data-original')) {
       element.setAttribute('data-original', originalText);
@@ -161,7 +157,6 @@ export default function HomePage(): React.JSX.Element {
     element.textContent = originalText;
   };
 
-  // Initialize ScrollSmoother
   useEffect(() => {
     const initSmoother = () => {
       if (typeof window !== 'undefined' && !smootherRef.current) {
@@ -191,7 +186,6 @@ export default function HomePage(): React.JSX.Element {
     };
   }, []);
 
-  // Animasi loading overlay
   useEffect(() => {
     if (!isLoading || !loadingOverlayRef.current) return;
 
@@ -306,7 +300,6 @@ export default function HomePage(): React.JSX.Element {
     };
   }, [isLoading]);
 
-  // Animasi MENURU di halaman utama
   const animateMenuruMain = () => {
     if (menuruTopMainRef.current) {
       gsap.set(menuruTopMainRef.current, { x: -500, opacity: 0 });
@@ -320,31 +313,19 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Animasi teks HOME
   const animateHomeText = () => {
     if (homeTextRef.current) {
-      const splitHome = new SplitText(homeTextRef.current, {
-        type: "chars",
-        charsClass: "split-char"
+      gsap.set(homeTextRef.current, { opacity: 0, y: 50 });
+      gsap.to(homeTextRef.current, {
+        opacity: 1,
+        y: 0,
+        duration: 0.8,
+        ease: "power2.out",
+        delay: 0.3
       });
-
-      gsap.fromTo(splitHome.chars,
-        { opacity: 0, y: 100, rotationX: -90, filter: 'blur(10px)' },
-        {
-          opacity: 1,
-          y: 0,
-          rotationX: 0,
-          filter: 'blur(0px)',
-          duration: 1.2,
-          stagger: 0.05,
-          ease: "back.out(1.2)",
-          delay: 0.2
-        }
-      );
     }
   };
 
-  // Animasi bottom content
   const animateBottomContent = () => {
     if (bottomContentRef.current) {
       gsap.fromTo(bottomContentRef.current,
@@ -361,7 +342,6 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Scroll animations
   useEffect(() => {
     if (isLoading) return;
 
@@ -445,7 +425,6 @@ export default function HomePage(): React.JSX.Element {
     };
   }, [isLoading]);
 
-  // Cookie consent
   useEffect(() => {
     const consent = localStorage.getItem('cookieConsent');
     if (consent === null) {
@@ -453,7 +432,6 @@ export default function HomePage(): React.JSX.Element {
     }
   }, []);
 
-  // Close modal when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
@@ -492,7 +470,6 @@ export default function HomePage(): React.JSX.Element {
     setShowCalendarModal(true);
   };
 
-  // SVG Arrow Component (North East Arrow)
   const ArrowIcon = ({ size = 24 }: { size?: number }) => (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -868,45 +845,51 @@ export default function HomePage(): React.JSX.Element {
               transition: 'all 0.01s ease'
             }}
           >
-            {/* TEKS MENURU DI HALAMAN UTAMA (ATAS) */}
-            <div
-              ref={menuruTopMainRef}
-              style={{
-                position: 'absolute',
-                top: '10px',
-                left: '40px',
-                zIndex: 10,
-                fontFamily: 'Inter, "Helvetica Neue", sans-serif',
-                fontWeight: '400',
-                fontSize: '213px',
-                lineHeight: '213px',
-                color: '#000000',
-                letterSpacing: '-0.02em',
-                textTransform: 'uppercase',
-                margin: 0,
-                padding: 0,
-                whiteSpace: 'nowrap',
-                pointerEvents: 'auto',
-                opacity: 0,
-                transform: 'translateX(-500px)'
-              }}
-            >
-              MENURU
-            </div>
+            {/* HEADER SECTION - MENURU dan HOME */}
+            <div style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              zIndex: 100,
+              pointerEvents: 'none',
+              padding: '20px 0 0 40px'
+            }}>
+              {/* TEKS MENURU */}
+              <div
+                ref={menuruTopMainRef}
+                style={{
+                  fontFamily: 'Inter, "Helvetica Neue", sans-serif',
+                  fontWeight: '400',
+                  fontSize: '213px',
+                  lineHeight: '213px',
+                  color: '#000000',
+                  letterSpacing: '-0.02em',
+                  textTransform: 'uppercase',
+                  whiteSpace: 'nowrap',
+                  opacity: 0,
+                  transform: 'translateX(-500px)'
+                }}
+              >
+                MENURU
+              </div>
 
-            {/* TEKS HOME DI BAWAH MENURU (ATAS) - SISI KIRI */}
-            <div
-              ref={homeTextRef}
-              className="home-text"
-              style={{
-                position: 'absolute',
-                top: '240px',
-                left: '40px',
-                zIndex: 10,
-                opacity: 0
-              }}
-            >
-              HOME
+              {/* TEKS HOME */}
+              <div
+                ref={homeTextRef}
+                style={{
+                  fontFamily: 'HelveticaNowDisplay, Arial, sans-serif',
+                  fontWeight: '400',
+                  fontSize: '150px',
+                  color: 'rgb(16, 16, 16)',
+                  letterSpacing: '-0.02em',
+                  lineHeight: '1',
+                  marginTop: '10px',
+                  opacity: 0
+                }}
+              >
+                HOME
+              </div>
             </div>
 
             {/* Hanya Scroll Down di tengah - 100vh */}
@@ -929,7 +912,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* Bagian footer dengan semua konten */}
+            {/* Bagian footer dengan semua konten - SAMA SEPERTI SEBELUMNYA */}
             <div style={{
               width: '100%',
               position: 'relative',
@@ -1048,7 +1031,6 @@ export default function HomePage(): React.JSX.Element {
                   </button>
                 </Link>
 
-                {/* Call Farid Text dengan tombol Calendar */}
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -1068,7 +1050,6 @@ export default function HomePage(): React.JSX.Element {
                   </button>
                 </div>
 
-                {/* Profile Section */}
                 <div
                   ref={profileRef}
                   style={{
@@ -1275,7 +1256,6 @@ export default function HomePage(): React.JSX.Element {
               height: '100%',
               minHeight: '600px'
             }}>
-              {/* LEFT SECTION */}
               <div style={{
                 flex: 1.2,
                 padding: '32px',
@@ -1417,7 +1397,6 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </div>
 
-              {/* MIDDLE SECTION */}
               <div style={{
                 flex: 2,
                 padding: '32px',
@@ -1550,7 +1529,6 @@ export default function HomePage(): React.JSX.Element {
                 )}
               </div>
 
-              {/* RIGHT SECTION */}
               <div style={{
                 flex: 1,
                 padding: '32px',
