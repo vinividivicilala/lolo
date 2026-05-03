@@ -380,7 +380,6 @@ export default function HomePage(): React.JSX.Element {
   const handleSocialClick = (platform: string) => {};
 
   const handleCalendarCall = () => {
-    // Add your calendar link here
     window.open('https://calendly.com/', '_blank');
   };
 
@@ -553,13 +552,17 @@ export default function HomePage(): React.JSX.Element {
           border: 1px solid #333333;
         }
 
-        /* Email underline style */
+        /* Email underline style - GARIS PANJANG */
         .email-link {
           text-decoration: underline;
           text-underline-offset: 8px;
           text-decoration-thickness: 2px;
+          text-decoration-style: solid;
           cursor: pointer;
           transition: opacity 0.3s ease;
+          display: inline-flex;
+          align-items: center;
+          gap: 12px;
         }
         
         .email-link:hover {
@@ -862,16 +865,16 @@ export default function HomePage(): React.JSX.Element {
                     <div>Call Farid.</div>
                   </div>
 
-                  {/* Tombol Calendar Call - Hijau stabilo dengan panah North West Arrow */}
+                  {/* Tombol Calendar Call - Hijau stabilo dengan panah North West Arrow ukuran 30px */}
                   <button
                     ref={calendarBtnRef}
                     onClick={handleCalendarCall}
                     className="calendar-btn"
                   >
-                    Calendar call
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M17 7L7 17M17 7H11M17 7V13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
+                    Calendar call
                   </button>
                 </div>
 
@@ -922,7 +925,7 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </div>
 
-              {/* Email dan Social Media Section - Email dengan underline dan panah north east */}
+              {/* Email dan Social Media Section - Email dengan underline GARIS PANJANG dan panah di KIRI ukuran 30px */}
               <div style={{
                 position: 'relative',
                 width: '100%',
@@ -943,16 +946,13 @@ export default function HomePage(): React.JSX.Element {
                     color: '#000000',
                     fontWeight: '400',
                     letterSpacing: '0.02em',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '12px',
                     marginBottom: '20px'
                   }}
                 >
-                  contact.menuru@gmail.com
-                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
+                  contact.menuru@gmail.com
                 </div>
 
                 <div style={{
