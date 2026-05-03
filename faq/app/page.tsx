@@ -868,7 +868,7 @@ export default function HomePage(): React.JSX.Element {
               transition: 'all 0.01s ease'
             }}
           >
-            {/* TEKS MENURU DI HALAMAN UTAMA */}
+            {/* TEKS MENURU DI HALAMAN UTAMA (ATAS) */}
             <div
               ref={menuruTopMainRef}
               style={{
@@ -894,7 +894,7 @@ export default function HomePage(): React.JSX.Element {
               MENURU
             </div>
 
-            {/* TEKS HOME DI BAWAH MENURU - SISI KIRI */}
+            {/* TEKS HOME DI BAWAH MENURU (ATAS) - SISI KIRI */}
             <div
               ref={homeTextRef}
               className="home-text"
