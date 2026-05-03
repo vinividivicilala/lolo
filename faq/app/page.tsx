@@ -383,6 +383,13 @@ export default function HomePage(): React.JSX.Element {
     window.open('https://calendly.com/', '_blank');
   };
 
+  // SVG Arrow Component (North East Arrow)
+  const ArrowIcon = ({ size = 24 }: { size?: number }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+
   return (
     <>
       <style jsx global>{`
@@ -528,7 +535,7 @@ export default function HomePage(): React.JSX.Element {
           to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Font untuk Call Farid */
+        /* Font untuk Call Farid dan Email */
         .call-farid-text {
           font-family: 'HelveticaNowDisplay', 'Arial', sans-serif;
           font-weight: 400;
@@ -536,6 +543,14 @@ export default function HomePage(): React.JSX.Element {
           line-height: 66px;
           color: rgb(16, 16, 16);
           text-align: left;
+        }
+
+        .email-text {
+          font-family: 'HelveticaNowDisplay', 'Arial', sans-serif;
+          font-weight: 400;
+          font-size: 32px;
+          color: rgb(16, 16, 16);
+          letter-spacing: 0.02em;
         }
 
         /* Badge style - Hitam dengan teks putih, font 30px */
@@ -552,28 +567,11 @@ export default function HomePage(): React.JSX.Element {
           border: 1px solid #333333;
         }
 
-        /* Email underline style - GARIS PANJANG */
-        .email-link {
-          text-decoration: underline;
-          text-underline-offset: 8px;
-          text-decoration-thickness: 2px;
-          text-decoration-style: solid;
-          cursor: pointer;
-          transition: opacity 0.3s ease;
-          display: inline-flex;
-          align-items: center;
-          gap: 12px;
-        }
-        
-        .email-link:hover {
-          opacity: 0.7;
-        }
-
         /* Calendar button style - hijau stabilo */
         .calendar-btn {
           display: inline-flex;
           align-items: center;
-          gap: 12px;
+          gap: 8px;
           padding: 12px 28px;
           background-color: #c5e800;
           border: none;
@@ -590,6 +588,19 @@ export default function HomePage(): React.JSX.Element {
         .calendar-btn:hover {
           background-color: #b0d100;
           transform: scale(1.02);
+        }
+
+        /* Email wrapper */
+        .email-wrapper {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          cursor: pointer;
+          transition: opacity 0.3s ease;
+        }
+        
+        .email-wrapper:hover {
+          opacity: 0.7;
         }
       `}</style>
       
@@ -865,15 +876,13 @@ export default function HomePage(): React.JSX.Element {
                     <div>Call Farid.</div>
                   </div>
 
-                  {/* Tombol Calendar Call - Hijau stabilo dengan panah North West Arrow ukuran 30px */}
+                  {/* Tombol Calendar Call - SAMA dengan design arrow email */}
                   <button
                     ref={calendarBtnRef}
                     onClick={handleCalendarCall}
                     className="calendar-btn"
                   >
-                    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M17 7L7 17M17 7H11M17 7V13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
+                    <ArrowIcon size={24} />
                     Calendar call
                   </button>
                 </div>
@@ -925,7 +934,7 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </div>
 
-              {/* Email dan Social Media Section - Email dengan underline GARIS PANJANG dan panah di KIRI ukuran 30px */}
+              {/* Email dan Social Media Section - Email TANPA underline, font sama seperti Ready */}
               <div style={{
                 position: 'relative',
                 width: '100%',
@@ -939,20 +948,13 @@ export default function HomePage(): React.JSX.Element {
                 <div 
                   ref={emailRef}
                   onClick={handleEmailClick}
-                  className="email-link"
+                  className="email-wrapper"
                   style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '32px',
-                    color: '#000000',
-                    fontWeight: '400',
-                    letterSpacing: '0.02em',
                     marginBottom: '20px'
                   }}
                 >
-                  <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                  contact.menuru@gmail.com
+                  <ArrowIcon size={24} />
+                  <span className="email-text">contact.menuru@gmail.com</span>
                 </div>
 
                 <div style={{
