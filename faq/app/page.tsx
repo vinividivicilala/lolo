@@ -18,11 +18,19 @@ export default function HomePage(): React.JSX.Element {
   const [showPopup, setShowPopup] = useState(false);
   const [announcement, setAnnouncement] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [showCalendarModal, setShowCalendarModal] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [selectedTime, setSelectedTime] = useState<string>("");
+  const [meetingType, setMeetingType] = useState<string>("Online");
+  const [location, setLocation] = useState<string>("");
+  const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
+  
   const acceptBtnRef = useRef<HTMLButtonElement>(null);
   const declineBtnRef = useRef<HTMLButtonElement>(null);
   const contactBtnRef = useRef<HTMLButtonElement>(null);
   const smootherRef = useRef<any>(null);
   const mainContentRef = useRef<HTMLDivElement>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
   
   // Refs untuk teks yang akan di-split
   const mencatatTextRef = useRef<HTMLDivElement>(null);
@@ -48,6 +56,64 @@ export default function HomePage(): React.JSX.Element {
     ig: 'Instagram',
     x: 'X',
     linkedin: 'LinkedIn'
+  };
+
+  // Get current date info
+  const today = new Date();
+  const tomorrow = new Date(today);
+  tomorrow.setDate(today.getDate() + 1);
+  const dayAfterTomorrow = new Date(today);
+  dayAfterTomorrow.setDate(today.getDate() + 2);
+
+  // Available time slots
+  const timeSlots = ["09:00", "10:00", "11:00", "13:00", "14:00", "15:00", "16:00"];
+
+  // Get days in month
+  const getDaysInMonth = (date: Date) => {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const days = [];
+    
+    // Add empty days for alignment
+    for (let i = 0; i < firstDay.getDay(); i++) {
+      days.push(null);
+    }
+    
+    // Add actual days
+    for (let i = 1; i <= lastDay.getDate(); i++) {
+      days.push(new Date(year, month, i));
+    }
+    
+    return days;
+  };
+
+  const getDayColor = (date: Date) => {
+    if (date.toDateString() === today.toDateString()) return "#4a90e2"; // Biru stabilo untuk hari ini
+    if (date.toDateString() === tomorrow.toDateString()) return "#c5e800"; // Hijau stabilo untuk besok
+    return "#ff69b4"; // Pink stabilo untuk hari berikutnya
+  };
+
+  const handleDateSelect = (date: Date) => {
+    setSelectedDate(date);
+  };
+
+  const handleScheduleMeeting = () => {
+    if (selectedDate && selectedTime) {
+      alert(`Meeting scheduled for ${selectedDate.toLocaleDateString()} at ${selectedTime}\nType: ${meetingType}\nLocation: ${location || 'Not specified'}`);
+      setShowCalendarModal(false);
+      setSelectedDate(null);
+      setSelectedTime("");
+    } else {
+      alert("Please select date and time");
+    }
+  };
+
+  const changeMonth = (increment: number) => {
+    const newDate = new Date(currentMonth);
+    newDate.setMonth(currentMonth.getMonth() + increment);
+    setCurrentMonth(newDate);
   };
 
   // Fungsi untuk mendapatkan huruf random (A-Z)
@@ -361,6 +427,23 @@ export default function HomePage(): React.JSX.Element {
     }
   }, []);
 
+  // Close modal when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+        setShowCalendarModal(false);
+      }
+    };
+    
+    if (showCalendarModal) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showCalendarModal]);
+
   const handleAccept = () => {
     localStorage.setItem('cookieConsent', 'accepted');
     setShowPopup(false);
@@ -380,7 +463,7 @@ export default function HomePage(): React.JSX.Element {
   const handleSocialClick = (platform: string) => {};
 
   const handleCalendarCall = () => {
-    window.open('https://calendly.com/', '_blank');
+    setShowCalendarModal(true);
   };
 
   // SVG Arrow Component (North East Arrow)
@@ -389,6 +472,9 @@ export default function HomePage(): React.JSX.Element {
       <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   );
+
+  const days = getDaysInMonth(currentMonth);
+  const weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
   return (
     <>
@@ -535,6 +621,11 @@ export default function HomePage(): React.JSX.Element {
           to { opacity: 1; transform: translateY(0); }
         }
 
+        @keyframes modalFadeIn {
+          from { opacity: 0; transform: scale(0.95); }
+          to { opacity: 1; transform: scale(1); }
+        }
+
         /* Font untuk Call Farid dan Email */
         .call-farid-text {
           font-family: 'HelveticaNowDisplay', 'Arial', sans-serif;
@@ -601,6 +692,59 @@ export default function HomePage(): React.JSX.Element {
         
         .email-wrapper:hover {
           opacity: 0.7;
+        }
+
+        /* Calendar Modal Styles */
+        .calendar-modal-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background-color: rgba(0, 0, 0, 0.7);
+          backdrop-filter: blur(8px);
+          z-index: 10000;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          animation: modalFadeIn 0.3s ease;
+        }
+
+        .calendar-modal {
+          background-color: #ffffff;
+          border-radius: 32px;
+          width: 90%;
+          max-width: 1300px;
+          max-height: 85vh;
+          overflow-y: auto;
+          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+          animation: modalFadeIn 0.3s ease;
+        }
+
+        .calendar-day {
+          transition: all 0.2s ease;
+          cursor: pointer;
+          border-radius: 12px;
+        }
+        
+        .calendar-day:hover {
+          transform: scale(1.05);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .time-slot {
+          transition: all 0.2s ease;
+          cursor: pointer;
+          border-radius: 8px;
+        }
+        
+        .time-slot:hover {
+          transform: scale(1.02);
+          background-color: #f0f0f0 !important;
+        }
+
+        .selected-date {
+          box-shadow: 0 0 0 3px #000000;
         }
       `}</style>
       
@@ -876,7 +1020,7 @@ export default function HomePage(): React.JSX.Element {
                     <div>Call Farid.</div>
                   </div>
 
-                  {/* Tombol Calendar Call - SAMA dengan design arrow email */}
+                  {/* Tombol Calendar Call */}
                   <button
                     ref={calendarBtnRef}
                     onClick={handleCalendarCall}
@@ -934,7 +1078,7 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </div>
 
-              {/* Email dan Social Media Section - Email TANPA underline, font sama seperti Ready */}
+              {/* Email dan Social Media Section */}
               <div style={{
                 position: 'relative',
                 width: '100%',
@@ -1088,6 +1232,418 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
       </div>
+
+      {/* Calendar Call Modal */}
+      {showCalendarModal && (
+        <div className="calendar-modal-overlay">
+          <div ref={modalRef} className="calendar-modal">
+            <div style={{
+              display: 'flex',
+              flexDirection: 'row',
+              height: '100%',
+              minHeight: '600px'
+            }}>
+              {/* LEFT SECTION - Profile, Deskripsi, Options */}
+              <div style={{
+                flex: 1.2,
+                padding: '32px',
+                borderRight: '1px solid #e0e0e0',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '28px'
+              }}>
+                {/* Profile */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '20px',
+                  paddingBottom: '20px',
+                  borderBottom: '1px solid #e0e0e0'
+                }}>
+                  <div style={{
+                    width: '70px',
+                    height: '90px',
+                    borderRadius: '12px',
+                    overflow: 'hidden',
+                    position: 'relative',
+                    border: '2px solid #e0e0e0'
+                  }}>
+                    <Image
+                      src="/images/5.jpg"
+                      alt="Farid Ardiansyah"
+                      fill
+                      style={{ objectFit: 'cover', objectPosition: 'center' }}
+                    />
+                  </div>
+                  <div>
+                    <div style={{
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '28px',
+                      fontWeight: '600',
+                      color: '#000000'
+                    }}>Farid Ardiansyah</div>
+                    <div style={{
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '16px',
+                      color: '#666666'
+                    }}>Founder & Programmer</div>
+                  </div>
+                </div>
+
+                {/* Deskripsi Kerjasama */}
+                <div>
+                  <div style={{
+                    fontFamily: "'Questrial', sans-serif",
+                    fontSize: '18px',
+                    fontWeight: '600',
+                    color: '#000000',
+                    marginBottom: '12px'
+                  }}>📋 Tentang Kerjasama</div>
+                  <div style={{
+                    fontFamily: "'Questrial', sans-serif",
+                    fontSize: '14px',
+                    color: '#666666',
+                    lineHeight: '1.6'
+                  }}>
+                    Diskusi tentang kolaborasi pengembangan website, aplikasi mobile, 
+                    atau konsultasi teknologi. Saya siap membantu mewujudkan ide digital Anda!
+                  </div>
+                </div>
+
+                {/* Waktu Tunggu Respon */}
+                <div>
+                  <div style={{
+                    fontFamily: "'Questrial', sans-serif",
+                    fontSize: '16px',
+                    fontWeight: '600',
+                    color: '#000000',
+                    marginBottom: '8px'
+                  }}>⏱️ Waktu Tunggu Respon</div>
+                  <div style={{
+                    fontFamily: "'Questrial', sans-serif",
+                    fontSize: '14px',
+                    color: '#c5e800',
+                    backgroundColor: '#1a1a1a',
+                    display: 'inline-block',
+                    padding: '6px 16px',
+                    borderRadius: '60px'
+                  }}>Maksimal 1x24 jam</div>
+                </div>
+
+                {/* Option Pemilihan Meeting */}
+                <div>
+                  <div style={{
+                    fontFamily: "'Questrial', sans-serif",
+                    fontSize: '16px',
+                    fontWeight: '600',
+                    color: '#000000',
+                    marginBottom: '12px'
+                  }}>📍 Tipe Meeting</div>
+                  <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                    {["Online", "Offline", "Hybrid"].map((type) => (
+                      <button
+                        key={type}
+                        onClick={() => setMeetingType(type)}
+                        style={{
+                          padding: '10px 24px',
+                          borderRadius: '60px',
+                          border: meetingType === type ? '2px solid #000000' : '1px solid #cccccc',
+                          backgroundColor: meetingType === type ? '#000000' : '#ffffff',
+                          color: meetingType === type ? '#ffffff' : '#000000',
+                          cursor: 'pointer',
+                          fontFamily: "'Questrial', sans-serif",
+                          fontSize: '14px',
+                          fontWeight: '500',
+                          transition: 'all 0.2s ease'
+                        }}
+                      >
+                        {type}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Lokasi User Client */}
+                <div>
+                  <div style={{
+                    fontFamily: "'Questrial', sans-serif",
+                    fontSize: '16px',
+                    fontWeight: '600',
+                    color: '#000000',
+                    marginBottom: '8px'
+                  }}>📍 Lokasi (opsional)</div>
+                  <input
+                    type="text"
+                    placeholder="Kota / Alamat lengkap"
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '12px 16px',
+                      borderRadius: '12px',
+                      border: '1px solid #cccccc',
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '14px',
+                      outline: 'none'
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* MIDDLE SECTION - Calendar Real Time */}
+              <div style={{
+                flex: 2,
+                padding: '32px',
+                borderRight: '1px solid #e0e0e0',
+                overflowY: 'auto'
+              }}>
+                {/* Calendar Header */}
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: '24px'
+                }}>
+                  <button
+                    onClick={() => changeMonth(-1)}
+                    style={{
+                      padding: '8px 16px',
+                      borderRadius: '8px',
+                      border: '1px solid #cccccc',
+                      backgroundColor: '#ffffff',
+                      cursor: 'pointer',
+                      fontFamily: "'Questrial', sans-serif"
+                    }}
+                  >
+                    ← Prev
+                  </button>
+                  <div style={{
+                    fontFamily: "'Questrial', sans-serif",
+                    fontSize: '20px',
+                    fontWeight: '600',
+                    color: '#000000'
+                  }}>
+                    {currentMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}
+                  </div>
+                  <button
+                    onClick={() => changeMonth(1)}
+                    style={{
+                      padding: '8px 16px',
+                      borderRadius: '8px',
+                      border: '1px solid #cccccc',
+                      backgroundColor: '#ffffff',
+                      cursor: 'pointer',
+                      fontFamily: "'Questrial', sans-serif"
+                    }}
+                  >
+                    Next →
+                  </button>
+                </div>
+
+                {/* Week Days Header */}
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(7, 1fr)',
+                  gap: '8px',
+                  marginBottom: '12px'
+                }}>
+                  {weekDays.map((day) => (
+                    <div key={day} style={{
+                      textAlign: 'center',
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: '#999999',
+                      padding: '8px'
+                    }}>
+                      {day}
+                    </div>
+                  ))}
+                </div>
+
+                {/* Calendar Days */}
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(7, 1fr)',
+                  gap: '8px'
+                }}>
+                  {days.map((date, index) => (
+                    <div
+                      key={index}
+                      onClick={() => date && handleDateSelect(date)}
+                      className="calendar-day"
+                      style={{
+                        textAlign: 'center',
+                        padding: '12px 8px',
+                        backgroundColor: date ? getDayColor(date) : 'transparent',
+                        color: date ? '#ffffff' : 'transparent',
+                        cursor: date ? 'pointer' : 'default',
+                        fontWeight: date ? '600' : 'normal',
+                        borderRadius: '12px',
+                        opacity: date ? 1 : 0.3,
+                        boxShadow: selectedDate?.toDateString() === date?.toDateString() ? '0 0 0 3px #000000' : 'none'
+                      }}
+                    >
+                      {date ? date.getDate() : ''}
+                    </div>
+                  ))}
+                </div>
+
+                {/* Time Slots */}
+                {selectedDate && (
+                  <div style={{ marginTop: '32px' }}>
+                    <div style={{
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '16px',
+                      fontWeight: '600',
+                      color: '#000000',
+                      marginBottom: '16px'
+                    }}>
+                      Pilih Waktu untuk {selectedDate.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' })}
+                    </div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
+                      {timeSlots.map((time) => (
+                        <button
+                          key={time}
+                          onClick={() => setSelectedTime(time)}
+                          className="time-slot"
+                          style={{
+                            padding: '10px 20px',
+                            borderRadius: '60px',
+                            border: selectedTime === time ? '2px solid #000000' : '1px solid #cccccc',
+                            backgroundColor: selectedTime === time ? '#000000' : '#ffffff',
+                            color: selectedTime === time ? '#ffffff' : '#000000',
+                            cursor: 'pointer',
+                            fontFamily: "'Questrial', sans-serif",
+                            fontSize: '14px',
+                            fontWeight: '500'
+                          }}
+                        >
+                          {time} WIB
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* RIGHT SECTION - Tomorrow/Next Day Details */}
+              <div style={{
+                flex: 1,
+                padding: '32px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '24px'
+              }}>
+                <div style={{
+                  fontFamily: "'Questrial', sans-serif",
+                  fontSize: '20px',
+                  fontWeight: '700',
+                  color: '#000000',
+                  paddingBottom: '12px',
+                  borderBottom: '2px solid #e0e0e0'
+                }}>
+                  📅 Jadwal Mendatang
+                </div>
+
+                {/* Tomorrow */}
+                <div style={{
+                  padding: '16px',
+                  backgroundColor: '#c5e800',
+                  borderRadius: '20px',
+                  color: '#000000'
+                }}>
+                  <div style={{
+                    fontFamily: "'Questrial', sans-serif",
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    marginBottom: '8px'
+                  }}>
+                    🌟 Besok
+                  </div>
+                  <div style={{
+                    fontFamily: "'Questrial', sans-serif",
+                    fontSize: '24px',
+                    fontWeight: '700',
+                    marginBottom: '4px'
+                  }}>
+                    {tomorrow.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+                  </div>
+                  <div style={{
+                    fontFamily: "'Questrial', sans-serif",
+                    fontSize: '18px',
+                    fontWeight: '500'
+                  }}>
+                    {timeSlots[2]} - {timeSlots[4]} WIB
+                  </div>
+                  <div style={{
+                    fontFamily: "'Questrial', sans-serif",
+                    fontSize: '14px',
+                    marginTop: '8px',
+                    opacity: 0.8
+                  }}>
+                    ⚡ Slot terbaik
+                  </div>
+                </div>
+
+                {/* Day After Tomorrow */}
+                <div style={{
+                  padding: '16px',
+                  backgroundColor: '#ff69b4',
+                  borderRadius: '20px',
+                  color: '#ffffff'
+                }}">
+                  <div style={{
+                    fontFamily: "'Questrial', sans-serif",
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    marginBottom: '8px'
+                  }}>
+                    💫 Lusa
+                  </div>
+                  <div style={{
+                    fontFamily: "'Questrial', sans-serif",
+                    fontSize: '20px',
+                    fontWeight: '700',
+                    marginBottom: '4px'
+                  }}>
+                    {dayAfterTomorrow.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+                  </div>
+                  <div style={{
+                    fontFamily: "'Questrial', sans-serif",
+                    fontSize: '16px',
+                    fontWeight: '500'
+                  }}>
+                    {timeSlots[1]} - {timeSlots[3]} WIB
+                  </div>
+                </div>
+
+                {/* Schedule Button */}
+                <button
+                  onClick={handleScheduleMeeting}
+                  style={{
+                    marginTop: 'auto',
+                    padding: '14px 24px',
+                    backgroundColor: '#000000',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '60px',
+                    cursor: 'pointer',
+                    fontFamily: "'Questrial', sans-serif",
+                    fontSize: '16px',
+                    fontWeight: '600',
+                    transition: 'all 0.3s ease'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
+                  onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+                >
+                  Schedule Meeting →
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Cookie Popup */}
       {showPopup && !isLoading && (
