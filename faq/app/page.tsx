@@ -751,7 +751,6 @@ export default function HomePage(): React.JSX.Element {
           color: rgb(16, 16, 16);
           letter-spacing: -0.02em;
           line-height: 1.2;
-          max-width: 800px;
         }
       `}</style>
       
@@ -845,7 +844,7 @@ export default function HomePage(): React.JSX.Element {
               transition: 'all 0.01s ease'
             }}
           >
-             {/* HEADER SECTION - MENURU */}
+            {/* HEADER SECTION - MENURU */}
             <div style={{
               position: 'fixed',
               top: 0,
