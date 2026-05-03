@@ -845,7 +845,7 @@ export default function HomePage(): React.JSX.Element {
               transition: 'all 0.01s ease'
             }}
           >
-            {/* HEADER SECTION - MENURU */}
+             {/* HEADER SECTION - MENURU */}
             <div style={{
               position: 'fixed',
               top: 0,
@@ -875,23 +875,23 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* MENURU.STUDIO TEXT - Di bawah MENURU */}
+            {/* MENURU.STUDIO TEXT - Di sisi kiri, 2 baris */}
             <div style={{
               display: 'flex',
-              justifyContent: 'center',
               alignItems: 'center',
               minHeight: '100vh',
-              padding: '0 40px'
+              paddingLeft: '80px'
             }}>
               <div
                 ref={studioTextRef}
                 className="studio-text"
                 style={{
-                  textAlign: 'center',
+                  textAlign: 'left',
                   opacity: 0
                 }}
               >
-                MENURU.STUDIO – Jakarta UX/UI Design Personal for Note, Donation & Calendar
+                <div>MENURU.STUDIO – Jakarta</div>
+                <div>UX/UI Design Personal for Note, Donation & Calendar</div>
               </div>
             </div>
 
