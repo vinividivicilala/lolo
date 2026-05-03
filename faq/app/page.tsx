@@ -1,4 +1,4 @@
-// app/page.tsx (Halaman Utama) - PERBAIKAN PADA BAGIAN MODAL RIGHT SECTION
+// app/page.tsx (Halaman Utama)
 'use client';
 
 import React, { useState, useEffect, useRef } from "react";
@@ -50,6 +50,7 @@ export default function HomePage(): React.JSX.Element {
   const profileRef = useRef<HTMLDivElement>(null);
   const bottomContentRef = useRef<HTMLDivElement>(null);
   const calendarBtnRef = useRef<HTMLButtonElement>(null);
+  const homeTextRef = useRef<HTMLDivElement>(null);
 
   // Variabel untuk menyimpan teks asli medsos
   const originalTexts = {
@@ -256,6 +257,7 @@ export default function HomePage(): React.JSX.Element {
               { x: '0%', opacity: 1, duration: 1, ease: "power3.inOut" }
             );
             animateMenuruMain();
+            animateHomeText();
             animateBottomContent();
           }
         });
@@ -318,6 +320,30 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
+  // Animasi teks HOME
+  const animateHomeText = () => {
+    if (homeTextRef.current) {
+      const splitHome = new SplitText(homeTextRef.current, {
+        type: "chars",
+        charsClass: "split-char"
+      });
+
+      gsap.fromTo(splitHome.chars,
+        { opacity: 0, y: 100, rotationX: -90, filter: 'blur(10px)' },
+        {
+          opacity: 1,
+          y: 0,
+          rotationX: 0,
+          filter: 'blur(0px)',
+          duration: 1.2,
+          stagger: 0.05,
+          ease: "back.out(1.2)",
+          delay: 0.2
+        }
+      );
+    }
+  };
+
   // Animasi bottom content
   const animateBottomContent = () => {
     if (bottomContentRef.current) {
@@ -329,7 +355,7 @@ export default function HomePage(): React.JSX.Element {
           filter: 'blur(0px)',
           duration: 1,
           ease: "power3.out",
-          delay: 0.3
+          delay: 0.5
         }
       );
     }
@@ -741,6 +767,15 @@ export default function HomePage(): React.JSX.Element {
         .selected-date {
           box-shadow: 0 0 0 3px #000000;
         }
+
+        .home-text {
+          font-family: 'HelveticaNowDisplay', 'Arial', sans-serif;
+          font-weight: 400;
+          font-size: 150px;
+          color: rgb(16, 16, 16);
+          letter-spacing: -0.02em;
+          line-height: 1;
+        }
       `}</style>
       
       {/* LOADING OVERLAY */}
@@ -857,6 +892,21 @@ export default function HomePage(): React.JSX.Element {
               }}
             >
               MENURU
+            </div>
+
+            {/* TEKS HOME DI BAWAH MENURU - SISI KIRI */}
+            <div
+              ref={homeTextRef}
+              className="home-text"
+              style={{
+                position: 'absolute',
+                top: '240px',
+                left: '40px',
+                zIndex: 10,
+                opacity: 0
+              }}
+            >
+              HOME
             </div>
 
             {/* Hanya Scroll Down di tengah - 100vh */}
@@ -1215,7 +1265,7 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </div>
 
-      {/* Calendar Call Modal - PERBAIKAN PADA BAGIAN RIGHT SECTION */}
+      {/* Calendar Call Modal */}
       {showCalendarModal && (
         <div className="calendar-modal-overlay">
           <div ref={modalRef} className="calendar-modal">
@@ -1225,7 +1275,7 @@ export default function HomePage(): React.JSX.Element {
               height: '100%',
               minHeight: '600px'
             }}>
-              {/* LEFT SECTION - Profile, Deskripsi, Options */}
+              {/* LEFT SECTION */}
               <div style={{
                 flex: 1.2,
                 padding: '32px',
@@ -1234,7 +1284,6 @@ export default function HomePage(): React.JSX.Element {
                 flexDirection: 'column',
                 gap: '28px'
               }}>
-                {/* Profile */}
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -1272,7 +1321,6 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 </div>
 
-                {/* Deskripsi Kerjasama */}
                 <div>
                   <div style={{
                     fontFamily: "'Questrial', sans-serif",
@@ -1292,7 +1340,6 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 </div>
 
-                {/* Waktu Tunggu Respon */}
                 <div>
                   <div style={{
                     fontFamily: "'Questrial', sans-serif",
@@ -1312,7 +1359,6 @@ export default function HomePage(): React.JSX.Element {
                   }}>Maksimal 1x24 jam</div>
                 </div>
 
-                {/* Option Pemilihan Meeting */}
                 <div>
                   <div style={{
                     fontFamily: "'Questrial', sans-serif",
@@ -1345,7 +1391,6 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 </div>
 
-                {/* Lokasi User Client */}
                 <div>
                   <div style={{
                     fontFamily: "'Questrial', sans-serif",
@@ -1372,14 +1417,13 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </div>
 
-              {/* MIDDLE SECTION - Calendar Real Time */}
+              {/* MIDDLE SECTION */}
               <div style={{
                 flex: 2,
                 padding: '32px',
                 borderRight: '1px solid #e0e0e0',
                 overflowY: 'auto'
               }}>
-                {/* Calendar Header */}
                 <div style={{
                   display: 'flex',
                   justifyContent: 'space-between',
@@ -1422,7 +1466,6 @@ export default function HomePage(): React.JSX.Element {
                   </button>
                 </div>
 
-                {/* Week Days Header */}
                 <div style={{
                   display: 'grid',
                   gridTemplateColumns: 'repeat(7, 1fr)',
@@ -1443,7 +1486,6 @@ export default function HomePage(): React.JSX.Element {
                   ))}
                 </div>
 
-                {/* Calendar Days */}
                 <div style={{
                   display: 'grid',
                   gridTemplateColumns: 'repeat(7, 1fr)',
@@ -1471,7 +1513,6 @@ export default function HomePage(): React.JSX.Element {
                   ))}
                 </div>
 
-                {/* Time Slots */}
                 {selectedDate && (
                   <div style={{ marginTop: '32px' }}>
                     <div style={{
@@ -1509,7 +1550,7 @@ export default function HomePage(): React.JSX.Element {
                 )}
               </div>
 
-              {/* RIGHT SECTION - Tomorrow/Next Day Details - PERBAIKAN */}
+              {/* RIGHT SECTION */}
               <div style={{
                 flex: 1,
                 padding: '32px',
@@ -1528,7 +1569,6 @@ export default function HomePage(): React.JSX.Element {
                   📅 Jadwal Mendatang
                 </div>
 
-                {/* Tomorrow */}
                 <div style={{
                   padding: '16px',
                   backgroundColor: '#c5e800',
@@ -1540,9 +1580,7 @@ export default function HomePage(): React.JSX.Element {
                     fontSize: '14px',
                     fontWeight: '600',
                     marginBottom: '8px'
-                  }}>
-                    🌟 Besok
-                  </div>
+                  }}>🌟 Besok</div>
                   <div style={{
                     fontFamily: "'Questrial', sans-serif",
                     fontSize: '24px',
@@ -1563,12 +1601,9 @@ export default function HomePage(): React.JSX.Element {
                     fontSize: '14px',
                     marginTop: '8px',
                     opacity: 0.8
-                  }}>
-                    ⚡ Slot terbaik
-                  </div>
+                  }}>⚡ Slot terbaik</div>
                 </div>
 
-                {/* Day After Tomorrow */}
                 <div style={{
                   padding: '16px',
                   backgroundColor: '#ff69b4',
@@ -1580,9 +1615,7 @@ export default function HomePage(): React.JSX.Element {
                     fontSize: '14px',
                     fontWeight: '600',
                     marginBottom: '8px'
-                  }}>
-                    💫 Lusa
-                  </div>
+                  }}>💫 Lusa</div>
                   <div style={{
                     fontFamily: "'Questrial', sans-serif",
                     fontSize: '20px',
@@ -1600,7 +1633,6 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 </div>
 
-                {/* Schedule Button */}
                 <button
                   onClick={handleScheduleMeeting}
                   style={{
