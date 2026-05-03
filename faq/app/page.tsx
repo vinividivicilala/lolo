@@ -874,23 +874,24 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* MENURU.STUDIO TEXT - Di sisi kiri, 2 baris */}
+                       {/* MENURU.STUDIO TEXT - Di sisi kanan, 2 baris */}
             <div style={{
               display: 'flex',
               alignItems: 'center',
+              justifyContent: 'flex-end',
               minHeight: '100vh',
-              paddingLeft: '80px'
+              paddingRight: '80px'
             }}>
               <div
                 ref={studioTextRef}
                 className="studio-text"
                 style={{
-                  textAlign: 'left',
+                  textAlign: 'right',
                   opacity: 0
                 }}
               >
-                <div>MENURU.STUDIO – Jakarta</div>
-                <div>UX/UI Design Personal for Note, Donation & Calendar</div>
+                <div>MENURU.STUDIO – Jakarta UX/UI Design</div>
+                <div>Personal for Note, Donation & Calendar</div>
               </div>
             </div>
 
