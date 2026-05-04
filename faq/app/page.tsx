@@ -1,4 +1,4 @@
-// app/page.tsx (Halaman Utama) - FULL CODE
+// app/page.tsx (Halaman Utama) - FULL CODE dengan 4 foto portrait besar
 
 'use client';
 
@@ -172,53 +172,53 @@ export default function HomePage(): React.JSX.Element {
     gsap.killTweensOf([img1Ref.current, img2Ref.current, img3Ref.current, img4Ref.current]);
     
     // Gambar 1 - dari kiri atas
-    gsap.set(img1Ref.current, { x: -300, y: -200, rotation: -15, scale: 0.8, opacity: 0 });
+    gsap.set(img1Ref.current, { x: -400, y: -300, rotation: -15, scale: 0.7, opacity: 0 });
     gsap.to(img1Ref.current, {
       x: 0,
       y: 0,
-      rotation: -3,
+      rotation: -5,
       scale: 1,
       opacity: 1,
-      duration: 0.7,
+      duration: 0.8,
       ease: "back.out(0.8)",
       delay: 0
     });
     
     // Gambar 2 - dari kanan atas
-    gsap.set(img2Ref.current, { x: 300, y: -200, rotation: 15, scale: 0.8, opacity: 0 });
+    gsap.set(img2Ref.current, { x: 400, y: -300, rotation: 15, scale: 0.7, opacity: 0 });
     gsap.to(img2Ref.current, {
       x: 0,
       y: 0,
-      rotation: 3,
+      rotation: 5,
       scale: 1,
       opacity: 1,
-      duration: 0.7,
+      duration: 0.8,
       ease: "back.out(0.8)",
       delay: 0.1
     });
     
     // Gambar 3 - dari kiri bawah
-    gsap.set(img3Ref.current, { x: -300, y: 200, rotation: -10, scale: 0.8, opacity: 0 });
+    gsap.set(img3Ref.current, { x: -400, y: 300, rotation: -10, scale: 0.7, opacity: 0 });
     gsap.to(img3Ref.current, {
       x: 0,
       y: 0,
-      rotation: 2,
+      rotation: 3,
       scale: 1,
       opacity: 1,
-      duration: 0.7,
+      duration: 0.8,
       ease: "back.out(0.8)",
       delay: 0.2
     });
     
     // Gambar 4 - dari kanan bawah
-    gsap.set(img4Ref.current, { x: 300, y: 200, rotation: 10, scale: 0.8, opacity: 0 });
+    gsap.set(img4Ref.current, { x: 400, y: 300, rotation: 10, scale: 0.7, opacity: 0 });
     gsap.to(img4Ref.current, {
       x: 0,
       y: 0,
-      rotation: -2,
+      rotation: -3,
       scale: 1,
       opacity: 1,
-      duration: 0.7,
+      duration: 0.8,
       ease: "back.out(0.8)",
       delay: 0.3
     });
@@ -854,13 +854,18 @@ export default function HomePage(): React.JSX.Element {
 
         .floating-img {
           position: absolute;
-          width: 450px;
-          height: 300px;
+          width: 320px;
+          height: 480px;
           border-radius: 20px;
           overflow: hidden;
-          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
           opacity: 0;
           background-color: #f5f5f5;
+          transition: box-shadow 0.3s ease;
+        }
+        
+        .floating-img:hover {
+          box-shadow: 0 35px 60px -15px rgba(0, 0, 0, 0.4);
         }
       `}</style>
       
@@ -990,7 +995,9 @@ export default function HomePage(): React.JSX.Element {
                 alignItems: 'center',
                 justifyContent: 'flex-end',
                 minHeight: '100vh',
-                paddingRight: '80px'
+                paddingRight: '80px',
+                position: 'relative',
+                zIndex: 50
               }}
             >
               <div
@@ -1008,23 +1015,24 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* Floating Images - Muncul saat hover */}
+            {/* Floating Images - Muncul saat hover - 4 foto portrait besar */}
             <div className="floating-images">
               {/* Gambar 1 - ae.jpg - Pojok Kiri Atas */}
               <div
                 ref={img1Ref}
                 className="floating-img"
                 style={{
-                  top: '8%',
-                  left: '3%',
-                  transform: 'rotate(-3deg)'
+                  top: '5%',
+                  left: '5%',
+                  transform: 'rotate(-4deg)'
                 }}
               >
                 <Image
                   src="/images/ae.jpg"
-                  alt="Gallery 1"
+                  alt="Gallery ae"
                   fill
                   style={{ objectFit: 'cover' }}
+                  priority
                 />
               </div>
 
@@ -1033,16 +1041,17 @@ export default function HomePage(): React.JSX.Element {
                 ref={img2Ref}
                 className="floating-img"
                 style={{
-                  top: '8%',
-                  right: '3%',
-                  transform: 'rotate(3deg)'
+                  top: '5%',
+                  right: '5%',
+                  transform: 'rotate(4deg)'
                 }}
               >
                 <Image
                   src="/images/ai.jpg"
-                  alt="Gallery 2"
+                  alt="Gallery ai"
                   fill
                   style={{ objectFit: 'cover' }}
+                  priority
                 />
               </div>
 
@@ -1051,16 +1060,17 @@ export default function HomePage(): React.JSX.Element {
                 ref={img3Ref}
                 className="floating-img"
                 style={{
-                  bottom: '8%',
-                  left: '3%',
-                  transform: 'rotate(2deg)'
+                  bottom: '5%',
+                  left: '5%',
+                  transform: 'rotate(3deg)'
                 }}
               >
                 <Image
                   src="/images/lkhh.jpg"
-                  alt="Gallery 3"
+                  alt="Gallery lkhh"
                   fill
                   style={{ objectFit: 'cover' }}
+                  priority
                 />
               </div>
 
@@ -1069,16 +1079,17 @@ export default function HomePage(): React.JSX.Element {
                 ref={img4Ref}
                 className="floating-img"
                 style={{
-                  bottom: '8%',
-                  right: '3%',
-                  transform: 'rotate(-2deg)'
+                  bottom: '5%',
+                  right: '5%',
+                  transform: 'rotate(-3deg)'
                 }}
               >
                 <Image
                   src="/images/popo09.jpg"
-                  alt="Gallery 4"
+                  alt="Gallery popo09"
                   fill
                   style={{ objectFit: 'cover' }}
+                  priority
                 />
               </div>
             </div>
