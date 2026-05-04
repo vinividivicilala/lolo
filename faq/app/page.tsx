@@ -1,4 +1,4 @@
-// app/page.tsx (Halaman Utama) - FULL CODE dengan 4 foto di 4 sisi
+// app/page.tsx (Halaman Utama) - FULL CODE dengan ukuran foto lebih besar
 
 'use client';
 
@@ -172,45 +172,45 @@ export default function HomePage(): React.JSX.Element {
     gsap.killTweensOf([imgLeftRef.current, imgRightRef.current, imgTopRef.current, imgBottomRef.current]);
     
     // Gambar KIRI - muncul dari luar layar sisi kiri
-    gsap.set(imgLeftRef.current, { x: -200, opacity: 0, rotation: -5 });
+    gsap.set(imgLeftRef.current, { x: -300, opacity: 0, rotation: -5 });
     gsap.to(imgLeftRef.current, {
       x: 0,
       opacity: 1,
       rotation: -3,
-      duration: 0.6,
+      duration: 0.7,
       ease: "back.out(0.8)",
       delay: 0
     });
     
     // Gambar KANAN - muncul dari luar layar sisi kanan
-    gsap.set(imgRightRef.current, { x: 200, opacity: 0, rotation: 5 });
+    gsap.set(imgRightRef.current, { x: 300, opacity: 0, rotation: 5 });
     gsap.to(imgRightRef.current, {
       x: 0,
       opacity: 1,
       rotation: 3,
-      duration: 0.6,
+      duration: 0.7,
       ease: "back.out(0.8)",
       delay: 0.1
     });
     
     // Gambar ATAS - muncul dari luar layar sisi atas
-    gsap.set(imgTopRef.current, { y: -200, opacity: 0, rotation: 3 });
+    gsap.set(imgTopRef.current, { y: -300, opacity: 0, rotation: 3 });
     gsap.to(imgTopRef.current, {
       y: 0,
       opacity: 1,
       rotation: 5,
-      duration: 0.6,
+      duration: 0.7,
       ease: "back.out(0.8)",
       delay: 0.2
     });
     
     // Gambar BAWAH - muncul dari luar layar sisi bawah
-    gsap.set(imgBottomRef.current, { y: 200, opacity: 0, rotation: -3 });
+    gsap.set(imgBottomRef.current, { y: 300, opacity: 0, rotation: -3 });
     gsap.to(imgBottomRef.current, {
       y: 0,
       opacity: 1,
       rotation: -5,
-      duration: 0.6,
+      duration: 0.7,
       ease: "back.out(0.8)",
       delay: 0.3
     });
@@ -848,13 +848,13 @@ export default function HomePage(): React.JSX.Element {
 
         .floating-img {
           position: absolute;
-          width: 320px;
-          height: 480px;
+          width: 500px;
+          height: 650px;
           border-radius: 24px;
           overflow: hidden;
           box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
           opacity: 0;
-          background-color: #f5f5f5;
+          background-color: rgba(0, 0, 0, 0.05);
           transition: box-shadow 0.3s ease;
           z-index: 201;
         }
@@ -1010,7 +1010,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* Floating Images - Muncul saat hover - 4 foto di 4 sisi berbeda (KIRI, KANAN, ATAS, BAWAH) */}
+            {/* Floating Images - Muncul saat hover - 4 foto di 4 sisi berbeda dengan ukuran lebih besar */}
             <div className="floating-images">
               {/* Gambar 1 - Sisi KIRI - ae.jpg */}
               <div
@@ -1018,7 +1018,7 @@ export default function HomePage(): React.JSX.Element {
                 className="floating-img"
                 style={{
                   top: '50%',
-                  left: '30px',
+                  left: '5%',
                   transform: 'translateY(-50%) rotate(-3deg)'
                 }}
               >
@@ -1026,7 +1026,7 @@ export default function HomePage(): React.JSX.Element {
                   src="/images/ae.jpg"
                   alt="Gallery ae"
                   fill
-                  style={{ objectFit: 'cover' }}
+                  style={{ objectFit: 'contain' }}
                   priority
                 />
               </div>
@@ -1037,7 +1037,7 @@ export default function HomePage(): React.JSX.Element {
                 className="floating-img"
                 style={{
                   top: '50%',
-                  right: '30px',
+                  right: '5%',
                   transform: 'translateY(-50%) rotate(3deg)'
                 }}
               >
@@ -1045,7 +1045,7 @@ export default function HomePage(): React.JSX.Element {
                   src="/images/ai.jpg"
                   alt="Gallery ai"
                   fill
-                  style={{ objectFit: 'cover' }}
+                  style={{ objectFit: 'contain' }}
                   priority
                 />
               </div>
@@ -1055,7 +1055,7 @@ export default function HomePage(): React.JSX.Element {
                 ref={imgTopRef}
                 className="floating-img"
                 style={{
-                  top: '80px',
+                  top: '5%',
                   left: '50%',
                   transform: 'translateX(-50%) rotate(5deg)'
                 }}
@@ -1064,7 +1064,7 @@ export default function HomePage(): React.JSX.Element {
                   src="/images/lkhh.jpg"
                   alt="Gallery lkhh"
                   fill
-                  style={{ objectFit: 'cover' }}
+                  style={{ objectFit: 'contain' }}
                   priority
                 />
               </div>
@@ -1074,7 +1074,7 @@ export default function HomePage(): React.JSX.Element {
                 ref={imgBottomRef}
                 className="floating-img"
                 style={{
-                  bottom: '80px',
+                  bottom: '5%',
                   left: '50%',
                   transform: 'translateX(-50%) rotate(-5deg)'
                 }}
@@ -1083,7 +1083,7 @@ export default function HomePage(): React.JSX.Element {
                   src="/images/popo09.jpg"
                   alt="Gallery popo09"
                   fill
-                  style={{ objectFit: 'cover' }}
+                  style={{ objectFit: 'contain' }}
                   priority
                 />
               </div>
