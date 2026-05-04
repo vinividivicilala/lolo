@@ -1,4 +1,4 @@
-// app/page.tsx (Halaman Utama) - Bagian yang ditambahkan efek hover pada teks studio
+// app/page.tsx (Halaman Utama) - FULL CODE
 
 'use client';
 
@@ -172,53 +172,53 @@ export default function HomePage(): React.JSX.Element {
     gsap.killTweensOf([img1Ref.current, img2Ref.current, img3Ref.current, img4Ref.current]);
     
     // Gambar 1 - dari kiri atas
-    gsap.set(img1Ref.current, { x: -200, y: -200, rotation: -15, scale: 0.8, opacity: 0 });
+    gsap.set(img1Ref.current, { x: -300, y: -200, rotation: -15, scale: 0.8, opacity: 0 });
     gsap.to(img1Ref.current, {
       x: 0,
       y: 0,
-      rotation: 0,
+      rotation: -3,
       scale: 1,
       opacity: 1,
-      duration: 0.6,
+      duration: 0.7,
       ease: "back.out(0.8)",
       delay: 0
     });
     
     // Gambar 2 - dari kanan atas
-    gsap.set(img2Ref.current, { x: 200, y: -200, rotation: 15, scale: 0.8, opacity: 0 });
+    gsap.set(img2Ref.current, { x: 300, y: -200, rotation: 15, scale: 0.8, opacity: 0 });
     gsap.to(img2Ref.current, {
       x: 0,
       y: 0,
-      rotation: 0,
+      rotation: 3,
       scale: 1,
       opacity: 1,
-      duration: 0.6,
+      duration: 0.7,
       ease: "back.out(0.8)",
       delay: 0.1
     });
     
     // Gambar 3 - dari kiri bawah
-    gsap.set(img3Ref.current, { x: -200, y: 200, rotation: -10, scale: 0.8, opacity: 0 });
+    gsap.set(img3Ref.current, { x: -300, y: 200, rotation: -10, scale: 0.8, opacity: 0 });
     gsap.to(img3Ref.current, {
       x: 0,
       y: 0,
-      rotation: 0,
+      rotation: 2,
       scale: 1,
       opacity: 1,
-      duration: 0.6,
+      duration: 0.7,
       ease: "back.out(0.8)",
       delay: 0.2
     });
     
     // Gambar 4 - dari kanan bawah
-    gsap.set(img4Ref.current, { x: 200, y: 200, rotation: 10, scale: 0.8, opacity: 0 });
+    gsap.set(img4Ref.current, { x: 300, y: 200, rotation: 10, scale: 0.8, opacity: 0 });
     gsap.to(img4Ref.current, {
       x: 0,
       y: 0,
-      rotation: 0,
+      rotation: -2,
       scale: 1,
       opacity: 1,
-      duration: 0.6,
+      duration: 0.7,
       ease: "back.out(0.8)",
       delay: 0.3
     });
@@ -854,8 +854,8 @@ export default function HomePage(): React.JSX.Element {
 
         .floating-img {
           position: absolute;
-          width: 300px;
-          height: 400px;
+          width: 450px;
+          height: 300px;
           border-radius: 20px;
           overflow: hidden;
           box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
@@ -1010,32 +1010,32 @@ export default function HomePage(): React.JSX.Element {
 
             {/* Floating Images - Muncul saat hover */}
             <div className="floating-images">
-              {/* Gambar 1 - Pojok Kiri Atas */}
+              {/* Gambar 1 - ae.jpg - Pojok Kiri Atas */}
               <div
                 ref={img1Ref}
                 className="floating-img"
                 style={{
-                  top: '15%',
-                  left: '10%',
-                  transform: 'rotate(-5deg)'
+                  top: '8%',
+                  left: '3%',
+                  transform: 'rotate(-3deg)'
                 }}
               >
                 <Image
-                  src="/images/mnvb.jpg"
+                  src="/images/ae.jpg"
                   alt="Gallery 1"
                   fill
                   style={{ objectFit: 'cover' }}
                 />
               </div>
 
-              {/* Gambar 2 - Pojok Kanan Atas */}
+              {/* Gambar 2 - ai.jpg - Pojok Kanan Atas */}
               <div
                 ref={img2Ref}
                 className="floating-img"
                 style={{
-                  top: '15%',
-                  right: '10%',
-                  transform: 'rotate(5deg)'
+                  top: '8%',
+                  right: '3%',
+                  transform: 'rotate(3deg)'
                 }}
               >
                 <Image
@@ -1046,36 +1046,36 @@ export default function HomePage(): React.JSX.Element {
                 />
               </div>
 
-              {/* Gambar 3 - Pojok Kiri Bawah */}
+              {/* Gambar 3 - lkhh.jpg - Pojok Kiri Bawah */}
               <div
                 ref={img3Ref}
                 className="floating-img"
                 style={{
-                  bottom: '15%',
-                  left: '10%',
-                  transform: 'rotate(3deg)'
+                  bottom: '8%',
+                  left: '3%',
+                  transform: 'rotate(2deg)'
                 }}
               >
                 <Image
-                  src="/images/ah.jpg"
+                  src="/images/lkhh.jpg"
                   alt="Gallery 3"
                   fill
                   style={{ objectFit: 'cover' }}
                 />
               </div>
 
-              {/* Gambar 4 - Pojok Kanan Bawah */}
+              {/* Gambar 4 - popo09.jpg - Pojok Kanan Bawah */}
               <div
                 ref={img4Ref}
                 className="floating-img"
                 style={{
-                  bottom: '15%',
-                  right: '10%',
-                  transform: 'rotate(-3deg)'
+                  bottom: '8%',
+                  right: '3%',
+                  transform: 'rotate(-2deg)'
                 }}
               >
                 <Image
-                  src="/images/aj.jpg"
+                  src="/images/popo09.jpg"
                   alt="Gallery 4"
                   fill
                   style={{ objectFit: 'cover' }}
