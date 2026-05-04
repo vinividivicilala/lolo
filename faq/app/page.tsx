@@ -1,4 +1,4 @@
-// app/page.tsx (Halaman Utama) - FULL CODE dengan 4 foto portrait besar
+// app/page.tsx (Halaman Utama) - FULL CODE dengan 4 foto di 4 sisi
 
 'use client';
 
@@ -55,10 +55,10 @@ export default function HomePage(): React.JSX.Element {
   const studioTextRef = useRef<HTMLDivElement>(null);
   
   // Refs untuk gambar-gambar
-  const img1Ref = useRef<HTMLDivElement>(null);
-  const img2Ref = useRef<HTMLDivElement>(null);
-  const img3Ref = useRef<HTMLDivElement>(null);
-  const img4Ref = useRef<HTMLDivElement>(null);
+  const imgLeftRef = useRef<HTMLDivElement>(null);
+  const imgRightRef = useRef<HTMLDivElement>(null);
+  const imgTopRef = useRef<HTMLDivElement>(null);
+  const imgBottomRef = useRef<HTMLDivElement>(null);
 
   // Variabel untuk menyimpan teks asli medsos
   const originalTexts = {
@@ -164,61 +164,53 @@ export default function HomePage(): React.JSX.Element {
     element.textContent = originalText;
   };
 
-  // Animasi hover untuk menampilkan gambar-gambar
+  // Animasi hover untuk menampilkan gambar-gambar dari 4 sisi
   const handleStudioHoverEnter = () => {
     setHoverActive(true);
     
-    // Animasi gambar muncul dari berbagai arah
-    gsap.killTweensOf([img1Ref.current, img2Ref.current, img3Ref.current, img4Ref.current]);
+    // Animasi gambar muncul dari berbagai sisi
+    gsap.killTweensOf([imgLeftRef.current, imgRightRef.current, imgTopRef.current, imgBottomRef.current]);
     
-    // Gambar 1 - dari kiri atas
-    gsap.set(img1Ref.current, { x: -400, y: -300, rotation: -15, scale: 0.7, opacity: 0 });
-    gsap.to(img1Ref.current, {
+    // Gambar KIRI - muncul dari luar layar sisi kiri
+    gsap.set(imgLeftRef.current, { x: -200, opacity: 0, rotation: -5 });
+    gsap.to(imgLeftRef.current, {
       x: 0,
-      y: 0,
-      rotation: -5,
-      scale: 1,
       opacity: 1,
-      duration: 0.8,
+      rotation: -3,
+      duration: 0.6,
       ease: "back.out(0.8)",
       delay: 0
     });
     
-    // Gambar 2 - dari kanan atas
-    gsap.set(img2Ref.current, { x: 400, y: -300, rotation: 15, scale: 0.7, opacity: 0 });
-    gsap.to(img2Ref.current, {
+    // Gambar KANAN - muncul dari luar layar sisi kanan
+    gsap.set(imgRightRef.current, { x: 200, opacity: 0, rotation: 5 });
+    gsap.to(imgRightRef.current, {
       x: 0,
-      y: 0,
-      rotation: 5,
-      scale: 1,
       opacity: 1,
-      duration: 0.8,
+      rotation: 3,
+      duration: 0.6,
       ease: "back.out(0.8)",
       delay: 0.1
     });
     
-    // Gambar 3 - dari kiri bawah
-    gsap.set(img3Ref.current, { x: -400, y: 300, rotation: -10, scale: 0.7, opacity: 0 });
-    gsap.to(img3Ref.current, {
-      x: 0,
+    // Gambar ATAS - muncul dari luar layar sisi atas
+    gsap.set(imgTopRef.current, { y: -200, opacity: 0, rotation: 3 });
+    gsap.to(imgTopRef.current, {
       y: 0,
-      rotation: 3,
-      scale: 1,
       opacity: 1,
-      duration: 0.8,
+      rotation: 5,
+      duration: 0.6,
       ease: "back.out(0.8)",
       delay: 0.2
     });
     
-    // Gambar 4 - dari kanan bawah
-    gsap.set(img4Ref.current, { x: 400, y: 300, rotation: 10, scale: 0.7, opacity: 0 });
-    gsap.to(img4Ref.current, {
-      x: 0,
+    // Gambar BAWAH - muncul dari luar layar sisi bawah
+    gsap.set(imgBottomRef.current, { y: 200, opacity: 0, rotation: -3 });
+    gsap.to(imgBottomRef.current, {
       y: 0,
-      rotation: -3,
-      scale: 1,
       opacity: 1,
-      duration: 0.8,
+      rotation: -5,
+      duration: 0.6,
       ease: "back.out(0.8)",
       delay: 0.3
     });
@@ -228,10 +220,10 @@ export default function HomePage(): React.JSX.Element {
     setHoverActive(false);
     
     // Animasi gambar menghilang
-    gsap.to([img1Ref.current, img2Ref.current, img3Ref.current, img4Ref.current], {
+    gsap.to([imgLeftRef.current, imgRightRef.current, imgTopRef.current, imgBottomRef.current], {
       opacity: 0,
-      scale: 0.5,
-      duration: 0.4,
+      scale: 0.8,
+      duration: 0.3,
       ease: "power2.in",
       stagger: 0.05
     });
@@ -834,6 +826,8 @@ export default function HomePage(): React.JSX.Element {
           line-height: 1.2;
           cursor: pointer;
           transition: opacity 0.3s ease;
+          position: relative;
+          z-index: 50;
         }
         
         .studio-text:hover {
@@ -849,19 +843,20 @@ export default function HomePage(): React.JSX.Element {
           height: 100%;
           pointer-events: none;
           z-index: 200;
-          overflow: hidden;
+          overflow: visible;
         }
 
         .floating-img {
           position: absolute;
           width: 320px;
           height: 480px;
-          border-radius: 20px;
+          border-radius: 24px;
           overflow: hidden;
           box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
           opacity: 0;
           background-color: #f5f5f5;
           transition: box-shadow 0.3s ease;
+          z-index: 201;
         }
         
         .floating-img:hover {
@@ -1015,16 +1010,16 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* Floating Images - Muncul saat hover - 4 foto portrait besar */}
+            {/* Floating Images - Muncul saat hover - 4 foto di 4 sisi berbeda (KIRI, KANAN, ATAS, BAWAH) */}
             <div className="floating-images">
-              {/* Gambar 1 - ae.jpg - Pojok Kiri Atas */}
+              {/* Gambar 1 - Sisi KIRI - ae.jpg */}
               <div
-                ref={img1Ref}
+                ref={imgLeftRef}
                 className="floating-img"
                 style={{
-                  top: '5%',
-                  left: '5%',
-                  transform: 'rotate(-4deg)'
+                  top: '50%',
+                  left: '30px',
+                  transform: 'translateY(-50%) rotate(-3deg)'
                 }}
               >
                 <Image
@@ -1036,14 +1031,14 @@ export default function HomePage(): React.JSX.Element {
                 />
               </div>
 
-              {/* Gambar 2 - ai.jpg - Pojok Kanan Atas */}
+              {/* Gambar 2 - Sisi KANAN - ai.jpg */}
               <div
-                ref={img2Ref}
+                ref={imgRightRef}
                 className="floating-img"
                 style={{
-                  top: '5%',
-                  right: '5%',
-                  transform: 'rotate(4deg)'
+                  top: '50%',
+                  right: '30px',
+                  transform: 'translateY(-50%) rotate(3deg)'
                 }}
               >
                 <Image
@@ -1055,14 +1050,14 @@ export default function HomePage(): React.JSX.Element {
                 />
               </div>
 
-              {/* Gambar 3 - lkhh.jpg - Pojok Kiri Bawah */}
+              {/* Gambar 3 - Sisi ATAS - lkhh.jpg */}
               <div
-                ref={img3Ref}
+                ref={imgTopRef}
                 className="floating-img"
                 style={{
-                  bottom: '5%',
-                  left: '5%',
-                  transform: 'rotate(3deg)'
+                  top: '80px',
+                  left: '50%',
+                  transform: 'translateX(-50%) rotate(5deg)'
                 }}
               >
                 <Image
@@ -1074,14 +1069,14 @@ export default function HomePage(): React.JSX.Element {
                 />
               </div>
 
-              {/* Gambar 4 - popo09.jpg - Pojok Kanan Bawah */}
+              {/* Gambar 4 - Sisi BAWAH - popo09.jpg */}
               <div
-                ref={img4Ref}
+                ref={imgBottomRef}
                 className="floating-img"
                 style={{
-                  bottom: '5%',
-                  right: '5%',
-                  transform: 'rotate(-3deg)'
+                  bottom: '80px',
+                  left: '50%',
+                  transform: 'translateX(-50%) rotate(-5deg)'
                 }}
               >
                 <Image
