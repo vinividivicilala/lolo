@@ -1,4 +1,4 @@
-// app/page.tsx (Halaman Utama) - FULL CODE dengan 2 foto (kiri dan kanan)
+// app/page.tsx (Halaman Utama) - FULL CODE dengan 2 foto di sisi teks studio
 
 'use client';
 
@@ -54,7 +54,7 @@ export default function HomePage(): React.JSX.Element {
   const calendarBtnRef = useRef<HTMLButtonElement>(null);
   const studioTextRef = useRef<HTMLDivElement>(null);
   
-  // Refs untuk gambar-gambar (hanya kiri dan kanan)
+  // Refs untuk gambar-gambar (kiri dan kanan teks)
   const imgLeftRef = useRef<HTMLDivElement>(null);
   const imgRightRef = useRef<HTMLDivElement>(null);
 
@@ -162,32 +162,32 @@ export default function HomePage(): React.JSX.Element {
     element.textContent = originalText;
   };
 
-  // Animasi hover untuk menampilkan gambar dari kiri dan kanan
+  // Animasi hover untuk menampilkan gambar dari kiri dan kanan teks
   const handleStudioHoverEnter = () => {
     setHoverActive(true);
     
-    // Animasi gambar muncul dari kiri dan kanan
+    // Animasi gambar muncul dari kiri dan kanan teks
     gsap.killTweensOf([imgLeftRef.current, imgRightRef.current]);
     
-    // Gambar KIRI - muncul dari luar layar sisi kiri
-    gsap.set(imgLeftRef.current, { x: -300, opacity: 0, rotation: -5 });
+    // Gambar KIRI - muncul dari sisi kiri teks
+    gsap.set(imgLeftRef.current, { x: -50, opacity: 0, rotation: -5 });
     gsap.to(imgLeftRef.current, {
       x: 0,
       opacity: 1,
       rotation: -3,
-      duration: 0.7,
-      ease: "back.out(0.8)",
+      duration: 0.6,
+      ease: "back.out(0.7)",
       delay: 0
     });
     
-    // Gambar KANAN - muncul dari luar layar sisi kanan
-    gsap.set(imgRightRef.current, { x: 300, opacity: 0, rotation: 5 });
+    // Gambar KANAN - muncul dari sisi kanan teks
+    gsap.set(imgRightRef.current, { x: 50, opacity: 0, rotation: 5 });
     gsap.to(imgRightRef.current, {
       x: 0,
       opacity: 1,
       rotation: 3,
-      duration: 0.7,
-      ease: "back.out(0.8)",
+      duration: 0.6,
+      ease: "back.out(0.7)",
       delay: 0.1
     });
   };
@@ -809,36 +809,6 @@ export default function HomePage(): React.JSX.Element {
         .studio-text:hover {
           opacity: 0.8;
         }
-
-        /* Floating images container */
-        .floating-images {
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          pointer-events: none;
-          z-index: 200;
-          overflow: visible;
-        }
-
-        .floating-img {
-          position: absolute;
-          width: 450px;
-          height: 600px;
-          border-radius: 24px;
-          overflow: hidden;
-          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
-          opacity: 0;
-          background-color: #f5f5f5;
-          transition: box-shadow 0.3s ease, transform 0.3s ease;
-          z-index: 201;
-        }
-        
-        .floating-img:hover {
-          box-shadow: 0 35px 60px -15px rgba(0, 0, 0, 0.4);
-          transform: scale(1.02) rotate(0deg) !important;
-        }
       `}</style>
       
       {/* LOADING OVERLAY */}
@@ -960,24 +930,53 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* MENURU.STUDIO TEXT - Di sisi kanan, 2 baris dengan hover effect */}
+            {/* MENURU.STUDIO TEXT - Dengan 2 foto di kiri dan kanan teks */}
             <div
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'flex-end',
+                justifyContent: 'center',
                 minHeight: '100vh',
-                paddingRight: '80px',
                 position: 'relative',
                 zIndex: 50
               }}
             >
+              {/* Foto KIRI - karakter lebar */}
+              <div
+                ref={imgLeftRef}
+                style={{
+                  position: 'absolute',
+                  left: '15%',
+                  top: '50%',
+                  transform: 'translateY(-50%) rotate(-3deg)',
+                  opacity: 0,
+                  zIndex: 45,
+                  width: '300px',
+                  height: '450px',
+                  borderRadius: '24px',
+                  overflow: 'hidden',
+                  boxShadow: '0 25px 50px -12px rgba(0,0,0,0.3)',
+                  backgroundColor: '#f5f5f5'
+                }}
+              >
+                <Image
+                  src="/images/ae.jpg"
+                  alt="Character"
+                  fill
+                  style={{ objectFit: 'cover', objectPosition: 'center' }}
+                  priority
+                />
+              </div>
+
+              {/* Teks Studio */}
               <div
                 ref={studioTextRef}
                 className="studio-text"
                 style={{
-                  textAlign: 'right',
-                  opacity: 0
+                  textAlign: 'center',
+                  opacity: 0,
+                  position: 'relative',
+                  zIndex: 50
                 }}
                 onMouseEnter={handleStudioHoverEnter}
                 onMouseLeave={handleStudioHoverLeave}
@@ -985,42 +984,28 @@ export default function HomePage(): React.JSX.Element {
                 <div>MENURU.STUDIO – Jakarta UX/UI Design</div>
                 <div>Personal for Note, Donation & Calendar</div>
               </div>
-            </div>
 
-            {/* Floating Images - Muncul saat hover - 2 foto di sisi kiri dan kanan */}
-            <div className="floating-images">
-              {/* Gambar 1 - Sisi KIRI - ae.jpg */}
-              <div
-                ref={imgLeftRef}
-                className="floating-img"
-                style={{
-                  top: '50%',
-                  left: '5%',
-                  transform: 'translateY(-50%) rotate(-3deg)'
-                }}
-              >
-                <Image
-                  src="/images/ae.jpg"
-                  alt="Gallery ae"
-                  fill
-                  style={{ objectFit: 'cover', objectPosition: 'center' }}
-                  priority
-                />
-              </div>
-
-              {/* Gambar 2 - Sisi KANAN - ai.jpg */}
+              {/* Foto KANAN */}
               <div
                 ref={imgRightRef}
-                className="floating-img"
                 style={{
+                  position: 'absolute',
+                  right: '15%',
                   top: '50%',
-                  right: '5%',
-                  transform: 'translateY(-50%) rotate(3deg)'
+                  transform: 'translateY(-50%) rotate(3deg)',
+                  opacity: 0,
+                  zIndex: 45,
+                  width: '300px',
+                  height: '450px',
+                  borderRadius: '24px',
+                  overflow: 'hidden',
+                  boxShadow: '0 25px 50px -12px rgba(0,0,0,0.3)',
+                  backgroundColor: '#f5f5f5'
                 }}
               >
                 <Image
                   src="/images/ai.jpg"
-                  alt="Gallery ai"
+                  alt="Gallery"
                   fill
                   style={{ objectFit: 'cover', objectPosition: 'center' }}
                   priority
