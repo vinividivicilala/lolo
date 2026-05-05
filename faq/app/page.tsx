@@ -53,7 +53,7 @@ export default function HomePage(): React.JSX.Element {
   const bottomContentRef = useRef<HTMLDivElement>(null);
   const calendarBtnRef = useRef<HTMLButtonElement>(null);
   const studioTextRef = useRef<HTMLDivElement>(null);
-  const leftTextRef = useRef<HTMLDivElement>(null); // Ref untuk teks kiri baru
+  const bottomLeftTextRef = useRef<HTMLDivElement>(null); // Ref untuk teks bawah kiri
   
   // Refs untuk gambar-gambar
   const img1Ref = useRef<HTMLDivElement>(null);
@@ -406,15 +406,15 @@ export default function HomePage(): React.JSX.Element {
       });
     }
     
-    // Animasi untuk teks kiri
-    if (leftTextRef.current) {
-      gsap.set(leftTextRef.current, { opacity: 0, y: 50 });
-      gsap.to(leftTextRef.current, {
+    // Animasi untuk teks bawah kiri
+    if (bottomLeftTextRef.current) {
+      gsap.set(bottomLeftTextRef.current, { opacity: 0, y: 50 });
+      gsap.to(bottomLeftTextRef.current, {
         opacity: 1,
         y: 0,
         duration: 0.8,
         ease: "power2.out",
-        delay: 0.35
+        delay: 0.4
       });
     }
   };
@@ -875,6 +875,16 @@ export default function HomePage(): React.JSX.Element {
           opacity: 0;
           background-color: #f5f5f5;
         }
+
+        /* Bottom left text style */
+        .bottom-left-text {
+          font-family: 'HelveticaNowDisplay', 'Arial', sans-serif;
+          font-weight: 400;
+          font-size: 100px;
+          color: rgb(16, 16, 16);
+          letter-spacing: -0.02em;
+          line-height: 1.2;
+        }
       `}</style>
       
       {/* LOADING OVERLAY */}
@@ -996,37 +1006,19 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* MENURU.STUDIO TEXT - Layout 2 kolom dengan teks kiri dan kanan */}
+            {/* MENURU.STUDIO TEXT - Container dengan posisi relatif untuk teks di bawah */}
             <div
               style={{
                 display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
+                flexDirection: 'column',
+                alignItems: 'flex-end',
+                justifyContent: 'center',
                 minHeight: '100vh',
-                padding: '0 80px',
-                width: 'calc(100% - 160px)',
+                paddingRight: '80px',
+                position: 'relative',
               }}
             >
-              {/* Kolom Kiri - IDN dan MN'RU© - 26' */}
-              <div
-                ref={leftTextRef}
-                style={{
-                  fontFamily: 'Questrial, sans-serif',
-                  fontSize: '40px',
-                  fontWeight: '400',
-                  color: '#000000',
-                  letterSpacing: '-0.02em',
-                  lineHeight: '1.3',
-                  textAlign: 'left',
-                  opacity: 0,
-                }}
-              >
-                IDN
-                <br />
-                MN'RU© - 26'
-              </div>
-
-              {/* Kolom Kanan - Teks studio yang sudah ada */}
+              {/* Teks studio utama */}
               <div
                 ref={studioTextRef}
                 className="studio-text"
@@ -1039,6 +1031,23 @@ export default function HomePage(): React.JSX.Element {
               >
                 <div>MENURU.STUDIO – Jakarta UX/UI Design</div>
                 <div>Personal for Note, Donation & Calendar</div>
+              </div>
+
+              {/* Teks bawah kiri - IDN dan MN'RU© - 26' */}
+              <div
+                ref={bottomLeftTextRef}
+                className="bottom-left-text"
+                style={{
+                  position: 'absolute',
+                  bottom: '20%',
+                  left: '80px',
+                  textAlign: 'left',
+                  opacity: 0,
+                }}
+              >
+                IDN
+                <br />
+                MN'RU© - 26'
               </div>
             </div>
 
@@ -1075,6 +1084,42 @@ export default function HomePage(): React.JSX.Element {
                 <Image
                   src="/images/ai.jpg"
                   alt="Gallery 2"
+                  fill
+                  style={{ objectFit: 'cover' }}
+                />
+              </div>
+
+              {/* Gambar 3 - Pojok Kiri Bawah */}
+              <div
+                ref={img3Ref}
+                className="floating-img"
+                style={{
+                  bottom: '15%',
+                  left: '10%',
+                  transform: 'rotate(-5deg)'
+                }}
+              >
+                <Image
+                  src="/images/lkhh.jpg"
+                  alt="Gallery 3"
+                  fill
+                  style={{ objectFit: 'cover' }}
+                />
+              </div>
+
+              {/* Gambar 4 - Pojok Kanan Bawah */}
+              <div
+                ref={img4Ref}
+                className="floating-img"
+                style={{
+                  bottom: '15%',
+                  right: '10%',
+                  transform: 'rotate(5deg)'
+                }}
+              >
+                <Image
+                  src="/images/ai.jpg"
+                  alt="Gallery 4"
                   fill
                   style={{ objectFit: 'cover' }}
                 />
