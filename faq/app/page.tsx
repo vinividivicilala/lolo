@@ -1021,7 +1021,7 @@ export default function HomePage(): React.JSX.Element {
                 }}
               >
                 <Image
-                  src="/images/mnvb.jpg"
+                  src="/images/lkhh.jpg"
                   alt="Gallery 1"
                   fill
                   style={{ objectFit: 'cover' }}
@@ -1041,42 +1041,6 @@ export default function HomePage(): React.JSX.Element {
                 <Image
                   src="/images/ai.jpg"
                   alt="Gallery 2"
-                  fill
-                  style={{ objectFit: 'cover' }}
-                />
-              </div>
-
-              {/* Gambar 3 - Pojok Kiri Bawah */}
-              <div
-                ref={img3Ref}
-                className="floating-img"
-                style={{
-                  bottom: '15%',
-                  left: '10%',
-                  transform: 'rotate(3deg)'
-                }}
-              >
-                <Image
-                  src="/images/ah.jpg"
-                  alt="Gallery 3"
-                  fill
-                  style={{ objectFit: 'cover' }}
-                />
-              </div>
-
-              {/* Gambar 4 - Pojok Kanan Bawah */}
-              <div
-                ref={img4Ref}
-                className="floating-img"
-                style={{
-                  bottom: '15%',
-                  right: '10%',
-                  transform: 'rotate(-3deg)'
-                }}
-              >
-                <Image
-                  src="/images/aj.jpg"
-                  alt="Gallery 4"
                   fill
                   style={{ objectFit: 'cover' }}
                 />
