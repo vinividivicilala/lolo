@@ -1,4 +1,4 @@
-// app/page.tsx (Halaman Utama) - FULL CODE dengan 2 foto di sisi teks studio
+// app/page.tsx (Halaman Utama) - FULL CODE dengan 2 foto portrait besar di sisi kiri dan kanan (di atas teks)
 
 'use client';
 
@@ -54,7 +54,7 @@ export default function HomePage(): React.JSX.Element {
   const calendarBtnRef = useRef<HTMLButtonElement>(null);
   const studioTextRef = useRef<HTMLDivElement>(null);
   
-  // Refs untuk gambar-gambar (kiri dan kanan teks)
+  // Refs untuk gambar-gambar besar di kiri dan kanan
   const imgLeftRef = useRef<HTMLDivElement>(null);
   const imgRightRef = useRef<HTMLDivElement>(null);
 
@@ -162,31 +162,31 @@ export default function HomePage(): React.JSX.Element {
     element.textContent = originalText;
   };
 
-  // Animasi hover untuk menampilkan gambar dari kiri dan kanan teks
+  // Animasi hover untuk menampilkan foto besar dari kiri dan kanan
   const handleStudioHoverEnter = () => {
     setHoverActive(true);
     
-    // Animasi gambar muncul dari kiri dan kanan teks
+    // Animasi foto muncul dari kiri dan kanan
     gsap.killTweensOf([imgLeftRef.current, imgRightRef.current]);
     
-    // Gambar KIRI - muncul dari sisi kiri teks
-    gsap.set(imgLeftRef.current, { x: -50, opacity: 0, rotation: -5 });
+    // Foto KIRI - muncul dari sisi kiri
+    gsap.set(imgLeftRef.current, { x: -100, opacity: 0, rotation: -5 });
     gsap.to(imgLeftRef.current, {
       x: 0,
       opacity: 1,
       rotation: -3,
-      duration: 0.6,
+      duration: 0.7,
       ease: "back.out(0.7)",
       delay: 0
     });
     
-    // Gambar KANAN - muncul dari sisi kanan teks
-    gsap.set(imgRightRef.current, { x: 50, opacity: 0, rotation: 5 });
+    // Foto KANAN - muncul dari sisi kanan
+    gsap.set(imgRightRef.current, { x: 100, opacity: 0, rotation: 5 });
     gsap.to(imgRightRef.current, {
       x: 0,
       opacity: 1,
       rotation: 3,
-      duration: 0.6,
+      duration: 0.7,
       ease: "back.out(0.7)",
       delay: 0.1
     });
@@ -195,10 +195,10 @@ export default function HomePage(): React.JSX.Element {
   const handleStudioHoverLeave = () => {
     setHoverActive(false);
     
-    // Animasi gambar menghilang
+    // Animasi foto menghilang
     gsap.to([imgLeftRef.current, imgRightRef.current], {
       opacity: 0,
-      scale: 0.8,
+      scale: 0.9,
       duration: 0.3,
       ease: "power2.in",
       stagger: 0.05
@@ -371,6 +371,12 @@ export default function HomePage(): React.JSX.Element {
         ease: "power2.out",
         delay: 0.3
       });
+    }
+    
+    // Juga animasi foto muncul saat load
+    if (imgLeftRef.current && imgRightRef.current) {
+      gsap.set(imgLeftRef.current, { opacity: 1 });
+      gsap.set(imgRightRef.current, { opacity: 1 });
     }
   };
 
@@ -930,10 +936,11 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* MENURU.STUDIO TEXT - Dengan 2 foto di kiri dan kanan teks */}
+            {/* MENURU.STUDIO TEXT dengan 2 foto BESAR di sisi kiri dan kanan (di atas teks) */}
             <div
               style={{
                 display: 'flex',
+                flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
                 minHeight: '100vh',
@@ -941,34 +948,67 @@ export default function HomePage(): React.JSX.Element {
                 zIndex: 50
               }}
             >
-              {/* Foto KIRI - karakter lebar */}
+              {/* Container untuk 2 foto BESAR di sisi kiri dan kanan */}
               <div
-                ref={imgLeftRef}
                 style={{
-                  position: 'absolute',
-                  left: '15%',
-                  top: '50%',
-                  transform: 'translateY(-50%) rotate(-3deg)',
-                  opacity: 0,
-                  zIndex: 45,
-                  width: '300px',
-                  height: '450px',
-                  borderRadius: '24px',
-                  overflow: 'hidden',
-                  boxShadow: '0 25px 50px -12px rgba(0,0,0,0.3)',
-                  backgroundColor: '#f5f5f5'
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '80px',
+                  marginBottom: '60px',
+                  position: 'relative'
                 }}
               >
-                <Image
-                  src="/images/ae.jpg"
-                  alt="Character"
-                  fill
-                  style={{ objectFit: 'cover', objectPosition: 'center' }}
-                  priority
-                />
+                {/* Foto KIRI - portrait besar */}
+                <div
+                  ref={imgLeftRef}
+                  style={{
+                    width: '350px',
+                    height: '520px',
+                    borderRadius: '24px',
+                    overflow: 'hidden',
+                    boxShadow: '0 25px 50px -12px rgba(0,0,0,0.3)',
+                    opacity: 0,
+                    transform: 'rotate(-3deg)',
+                    backgroundColor: '#f5f5f5'
+                  }}
+                >
+                  <Image
+                    src="/images/ae.jpg"
+                    alt="Character Left"
+                    width={350}
+                    height={520}
+                    style={{ objectFit: 'cover', width: '100%', height: '100%' }}
+                    priority
+                  />
+                </div>
+
+                {/* Foto KANAN - portrait besar */}
+                <div
+                  ref={imgRightRef}
+                  style={{
+                    width: '350px',
+                    height: '520px',
+                    borderRadius: '24px',
+                    overflow: 'hidden',
+                    boxShadow: '0 25px 50px -12px rgba(0,0,0,0.3)',
+                    opacity: 0,
+                    transform: 'rotate(3deg)',
+                    backgroundColor: '#f5f5f5'
+                  }}
+                >
+                  <Image
+                    src="/images/ai.jpg"
+                    alt="Gallery Right"
+                    width={350}
+                    height={520}
+                    style={{ objectFit: 'cover', width: '100%', height: '100%' }}
+                    priority
+                  />
+                </div>
               </div>
 
-              {/* Teks Studio */}
+              {/* Teks Studio di Bawah foto */}
               <div
                 ref={studioTextRef}
                 className="studio-text"
@@ -983,33 +1023,6 @@ export default function HomePage(): React.JSX.Element {
               >
                 <div>MENURU.STUDIO – Jakarta UX/UI Design</div>
                 <div>Personal for Note, Donation & Calendar</div>
-              </div>
-
-              {/* Foto KANAN */}
-              <div
-                ref={imgRightRef}
-                style={{
-                  position: 'absolute',
-                  right: '15%',
-                  top: '50%',
-                  transform: 'translateY(-50%) rotate(3deg)',
-                  opacity: 0,
-                  zIndex: 45,
-                  width: '300px',
-                  height: '450px',
-                  borderRadius: '24px',
-                  overflow: 'hidden',
-                  boxShadow: '0 25px 50px -12px rgba(0,0,0,0.3)',
-                  backgroundColor: '#f5f5f5'
-                }}
-              >
-                <Image
-                  src="/images/ai.jpg"
-                  alt="Gallery"
-                  fill
-                  style={{ objectFit: 'cover', objectPosition: 'center' }}
-                  priority
-                />
               </div>
             </div>
 
