@@ -1,4 +1,4 @@
-// app/page.tsx (Halaman Utama) - Bagian yang ditambahkan efek hover pada teks studio
+// app/page.tsx (Halaman Utama) - Dengan section hitam setelah scroll
 
 'use client';
 
@@ -53,7 +53,8 @@ export default function HomePage(): React.JSX.Element {
   const bottomContentRef = useRef<HTMLDivElement>(null);
   const calendarBtnRef = useRef<HTMLButtonElement>(null);
   const studioTextRef = useRef<HTMLDivElement>(null);
-  const bottomLeftTextRef = useRef<HTMLDivElement>(null); // Ref untuk teks bawah kiri
+  const bottomLeftTextRef = useRef<HTMLDivElement>(null);
+  const blackSectionRef = useRef<HTMLDivElement>(null); // Ref untuk section hitam
   
   // Refs untuk gambar-gambar
   const img1Ref = useRef<HTMLDivElement>(null);
@@ -169,10 +170,8 @@ export default function HomePage(): React.JSX.Element {
   const handleStudioHoverEnter = () => {
     setHoverActive(true);
     
-    // Animasi gambar muncul dari berbagai arah
     gsap.killTweensOf([img1Ref.current, img2Ref.current, img3Ref.current, img4Ref.current]);
     
-    // Gambar 1 - dari kiri atas
     gsap.set(img1Ref.current, { x: -200, y: -200, rotation: -15, scale: 0.8, opacity: 0 });
     gsap.to(img1Ref.current, {
       x: 0,
@@ -185,7 +184,6 @@ export default function HomePage(): React.JSX.Element {
       delay: 0
     });
     
-    // Gambar 2 - dari kanan atas
     gsap.set(img2Ref.current, { x: 200, y: -200, rotation: 15, scale: 0.8, opacity: 0 });
     gsap.to(img2Ref.current, {
       x: 0,
@@ -198,7 +196,6 @@ export default function HomePage(): React.JSX.Element {
       delay: 0.1
     });
     
-    // Gambar 3 - dari kiri bawah
     gsap.set(img3Ref.current, { x: -200, y: 200, rotation: -10, scale: 0.8, opacity: 0 });
     gsap.to(img3Ref.current, {
       x: 0,
@@ -211,7 +208,6 @@ export default function HomePage(): React.JSX.Element {
       delay: 0.2
     });
     
-    // Gambar 4 - dari kanan bawah
     gsap.set(img4Ref.current, { x: 200, y: 200, rotation: 10, scale: 0.8, opacity: 0 });
     gsap.to(img4Ref.current, {
       x: 0,
@@ -228,7 +224,6 @@ export default function HomePage(): React.JSX.Element {
   const handleStudioHoverLeave = () => {
     setHoverActive(false);
     
-    // Animasi gambar menghilang
     gsap.to([img1Ref.current, img2Ref.current, img3Ref.current, img4Ref.current], {
       opacity: 0,
       scale: 0.5,
@@ -406,7 +401,6 @@ export default function HomePage(): React.JSX.Element {
       });
     }
     
-    // Animasi untuk teks bawah kiri
     if (bottomLeftTextRef.current) {
       gsap.set(bottomLeftTextRef.current, { opacity: 0, y: 50 });
       gsap.to(bottomLeftTextRef.current, {
@@ -513,6 +507,18 @@ export default function HomePage(): React.JSX.Element {
       );
     }
 
+    // Animasi pin untuk section hitam
+    if (blackSectionRef.current) {
+      ScrollTrigger.create({
+        trigger: blackSectionRef.current,
+        start: "top top",
+        end: "bottom bottom",
+        pin: true,
+        pinSpacing: true,
+        scrub: 1,
+      });
+    }
+
     return () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
@@ -606,7 +612,7 @@ export default function HomePage(): React.JSX.Element {
         }
         
         #smooth-content {
-          min-height: 200vh;
+          min-height: 300vh;
           width: 100%;
           will-change: transform;
         }
@@ -853,7 +859,6 @@ export default function HomePage(): React.JSX.Element {
           opacity: 0.8;
         }
 
-        /* Floating images container */
         .floating-images {
           position: fixed;
           top: 0;
@@ -876,7 +881,6 @@ export default function HomePage(): React.JSX.Element {
           background-color: #f5f5f5;
         }
 
-        /* Bottom left text style - font 40px */
         .bottom-left-text {
           font-family: 'HelveticaNowDisplay', 'Arial', sans-serif;
           font-weight: 400;
@@ -884,6 +888,17 @@ export default function HomePage(): React.JSX.Element {
           color: rgb(16, 16, 16);
           letter-spacing: -0.02em;
           line-height: 1.3;
+        }
+
+        .black-section {
+          background-color: #000000;
+          min-height: 100vh;
+          width: 100%;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          color: #ffffff;
         }
       `}</style>
       
@@ -961,7 +976,7 @@ export default function HomePage(): React.JSX.Element {
           <div 
             ref={mainContentRef}
             style={{
-              minHeight: '200vh',
+              minHeight: '100vh',
               backgroundColor: 'white',
               margin: 0,
               padding: 0,
@@ -1006,7 +1021,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* MENURU.STUDIO TEXT - Container dengan posisi relatif untuk teks di bawah */}
+            {/* SECTION 1 - MENURU.STUDIO dengan teks IDN/MN'RU© - 26' */}
             <div
               style={{
                 display: 'flex',
@@ -1018,7 +1033,6 @@ export default function HomePage(): React.JSX.Element {
                 position: 'relative',
               }}
             >
-              {/* Teks studio utama */}
               <div
                 ref={studioTextRef}
                 className="studio-text"
@@ -1033,7 +1047,6 @@ export default function HomePage(): React.JSX.Element {
                 <div>Personal for Note, Donation & Calendar</div>
               </div>
 
-              {/* Teks bawah kiri - IDN dan MN'RU© - 26' dengan jarak lebih jauh ke bawah */}
               <div
                 ref={bottomLeftTextRef}
                 className="bottom-left-text"
@@ -1051,9 +1064,42 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
+            {/* SECTION 2 - BLACK SECTION (setelah scroll) */}
+            <div
+              ref={blackSectionRef}
+              className="black-section"
+              style={{
+                backgroundColor: '#000000',
+                minHeight: '100vh',
+                width: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                alignItems: 'center',
+                color: '#ffffff',
+                position: 'relative',
+                zIndex: 10,
+              }}
+            >
+              <div style={{
+                textAlign: 'center',
+                fontFamily: 'HelveticaNowDisplay, Arial, sans-serif',
+                fontSize: '60px',
+                fontWeight: '400',
+                letterSpacing: '-0.02em',
+                lineHeight: '1.2',
+                maxWidth: '80%',
+              }}>
+                <div>Welcome to the</div>
+                <div>Next Chapter</div>
+                <div style={{ fontSize: '40px', marginTop: '40px', opacity: 0.8 }}>
+                  Scroll to explore more
+                </div>
+              </div>
+            </div>
+
             {/* Floating Images - Muncul saat hover */}
             <div className="floating-images">
-              {/* Gambar 1 - Pojok Kiri Atas */}
               <div
                 ref={img1Ref}
                 className="floating-img"
@@ -1071,7 +1117,6 @@ export default function HomePage(): React.JSX.Element {
                 />
               </div>
 
-              {/* Gambar 2 - Pojok Kanan Atas */}
               <div
                 ref={img2Ref}
                 className="floating-img"
@@ -1089,7 +1134,6 @@ export default function HomePage(): React.JSX.Element {
                 />
               </div>
 
-              {/* Gambar 3 - Pojok Kiri Bawah */}
               <div
                 ref={img3Ref}
                 className="floating-img"
@@ -1099,14 +1143,14 @@ export default function HomePage(): React.JSX.Element {
                   transform: 'rotate(-5deg)'
                 }}
               >
-                <Image                  src="/images/lkhh.jpg"
+                <Image
+                  src="/images/lkhh.jpg"
                   alt="Gallery 3"
                   fill
                   style={{ objectFit: 'cover' }}
                 />
               </div>
 
-              {/* Gambar 4 - Pojok Kanan Bawah */}
               <div
                 ref={img4Ref}
                 className="floating-img"
