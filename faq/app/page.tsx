@@ -414,7 +414,7 @@ export default function HomePage(): React.JSX.Element {
         y: 0,
         duration: 0.8,
         ease: "power2.out",
-        delay: 0.4
+        delay: 0.45
       });
     }
   };
@@ -876,14 +876,14 @@ export default function HomePage(): React.JSX.Element {
           background-color: #f5f5f5;
         }
 
-        /* Bottom left text style */
+        /* Bottom left text style - font 40px */
         .bottom-left-text {
           font-family: 'HelveticaNowDisplay', 'Arial', sans-serif;
           font-weight: 400;
-          font-size: 100px;
+          font-size: 40px;
           color: rgb(16, 16, 16);
           letter-spacing: -0.02em;
-          line-height: 1.2;
+          line-height: 1.3;
         }
       `}</style>
       
@@ -1033,13 +1033,13 @@ export default function HomePage(): React.JSX.Element {
                 <div>Personal for Note, Donation & Calendar</div>
               </div>
 
-              {/* Teks bawah kiri - IDN dan MN'RU© - 26' */}
+              {/* Teks bawah kiri - IDN dan MN'RU© - 26' dengan jarak lebih jauh ke bawah */}
               <div
                 ref={bottomLeftTextRef}
                 className="bottom-left-text"
                 style={{
                   position: 'absolute',
-                  bottom: '20%',
+                  bottom: '5%',
                   left: '80px',
                   textAlign: 'left',
                   opacity: 0,
@@ -1099,8 +1099,7 @@ export default function HomePage(): React.JSX.Element {
                   transform: 'rotate(-5deg)'
                 }}
               >
-                <Image
-                  src="/images/lkhh.jpg"
+                <Image                  src="/images/lkhh.jpg"
                   alt="Gallery 3"
                   fill
                   style={{ objectFit: 'cover' }}
