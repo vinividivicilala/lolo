@@ -1,4 +1,4 @@
-// app/page.tsx (Halaman Utama) - FULL CODE dengan 2 foto portrait besar di sisi kiri dan kanan (di atas teks)
+// app/page.tsx (Halaman Utama) - Bagian yang ditambahkan untuk efek hover gallery
 
 'use client';
 
@@ -25,7 +25,7 @@ export default function HomePage(): React.JSX.Element {
   const [meetingType, setMeetingType] = useState<string>("Online");
   const [location, setLocation] = useState<string>("");
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
-  const [hoverActive, setHoverActive] = useState(false);
+  const [hoverImages, setHoverImages] = useState<{ id: number; x: number; y: number; image: string; direction: string }[]>([]);
   
   const acceptBtnRef = useRef<HTMLButtonElement>(null);
   const declineBtnRef = useRef<HTMLButtonElement>(null);
@@ -33,6 +33,7 @@ export default function HomePage(): React.JSX.Element {
   const smootherRef = useRef<any>(null);
   const mainContentRef = useRef<HTMLDivElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
+  const studioTextContainerRef = useRef<HTMLDivElement>(null);
   
   // Refs untuk teks yang akan di-split
   const mencatatTextRef = useRef<HTMLDivElement>(null);
@@ -53,10 +54,115 @@ export default function HomePage(): React.JSX.Element {
   const bottomContentRef = useRef<HTMLDivElement>(null);
   const calendarBtnRef = useRef<HTMLButtonElement>(null);
   const studioTextRef = useRef<HTMLDivElement>(null);
-  
-  // Refs untuk gambar-gambar besar di kiri dan kanan
-  const imgLeftRef = useRef<HTMLDivElement>(null);
-  const imgRightRef = useRef<HTMLDivElement>(null);
+
+  // Daftar gambar yang akan ditampilkan
+  const galleryImages = [
+    { src: "/images/lkhh.jpg", direction: "top-left" },
+    { src: "/images/ai.jpg", direction: "top-right" },
+    { src: "/images/5.jpg", direction: "bottom-left" },
+    { src: "/images/5.jpg", direction: "bottom-right" },
+    { src: "/images/5.jpg", direction: "center" },
+  ];
+
+  // Fungsi untuk generate posisi random di sekitar teks
+  const getRandomPosition = (direction: string, containerRect: DOMRect) => {
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    const imageSize = 280; // Ukuran gambar portrait
+    
+    switch(direction) {
+      case "top-left":
+        return {
+          x: Math.random() * (viewportWidth * 0.3) + 20,
+          y: Math.random() * (viewportHeight * 0.3) + 20
+        };
+      case "top-right":
+        return {
+          x: viewportWidth - (Math.random() * (viewportWidth * 0.3) + imageSize + 20),
+          y: Math.random() * (viewportHeight * 0.3) + 20
+        };
+      case "bottom-left":
+        return {
+          x: Math.random() * (viewportWidth * 0.3) + 20,
+          y: viewportHeight - (Math.random() * (viewportHeight * 0.3) + imageSize + 20)
+        };
+      case "bottom-right":
+        return {
+          x: viewportWidth - (Math.random() * (viewportWidth * 0.3) + imageSize + 20),
+          y: viewportHeight - (Math.random() * (viewportHeight * 0.3) + imageSize + 20)
+        };
+      case "center":
+        return {
+          x: viewportWidth / 2 - imageSize / 2 + (Math.random() - 0.5) * 200,
+          y: viewportHeight / 2 - imageSize / 2 + (Math.random() - 0.5) * 150
+        };
+      default:
+        return { x: 100, y: 100 };
+    }
+  };
+
+  const handleStudioTextMouseEnter = (e: React.MouseEvent) => {
+    const containerRect = studioTextContainerRef.current?.getBoundingClientRect();
+    if (!containerRect) return;
+    
+    const newImages = galleryImages.map((img, index) => ({
+      id: Date.now() + index,
+      x: getRandomPosition(img.direction, containerRect).x,
+      y: getRandomPosition(img.direction, containerRect).y,
+      image: img.src,
+      direction: img.direction
+    }));
+    
+    setHoverImages(newImages);
+    
+    // Animasi fade in untuk setiap gambar
+    newImages.forEach((img, i) => {
+      const element = document.getElementById(`hover-img-${img.id}`);
+      if (element) {
+        gsap.fromTo(element,
+          { 
+            opacity: 0, 
+            scale: 0.5,
+            rotation: i % 2 === 0 ? -15 : 15,
+            filter: 'blur(20px)'
+          },
+          {
+            opacity: 1,
+            scale: 1,
+            rotation: 0,
+            filter: 'blur(0px)',
+            duration: 0.6,
+            delay: i * 0.1,
+            ease: "back.out(0.8)"
+          }
+        );
+      }
+    });
+  };
+
+  const handleStudioTextMouseLeave = () => {
+    // Animasi fade out untuk semua gambar
+    hoverImages.forEach((img) => {
+      const element = document.getElementById(`hover-img-${img.id}`);
+      if (element) {
+        gsap.to(element, {
+          opacity: 0,
+          scale: 0.3,
+          rotation: Math.random() * 30 - 15,
+          filter: 'blur(10px)',
+          duration: 0.4,
+          ease: "power2.in",
+          onComplete: () => {
+            setHoverImages([]);
+          }
+        });
+      }
+    });
+    
+    if (hoverImages.length === 0) {
+      setHoverImages([]);
+    }
+  };
 
   // Variabel untuk menyimpan teks asli medsos
   const originalTexts = {
@@ -160,49 +266,6 @@ export default function HomePage(): React.JSX.Element {
       clearInterval(Number(interval));
     }
     element.textContent = originalText;
-  };
-
-  // Animasi hover untuk menampilkan foto besar dari kiri dan kanan
-  const handleStudioHoverEnter = () => {
-    setHoverActive(true);
-    
-    // Animasi foto muncul dari kiri dan kanan
-    gsap.killTweensOf([imgLeftRef.current, imgRightRef.current]);
-    
-    // Foto KIRI - muncul dari sisi kiri
-    gsap.set(imgLeftRef.current, { x: -100, opacity: 0, rotation: -5 });
-    gsap.to(imgLeftRef.current, {
-      x: 0,
-      opacity: 1,
-      rotation: -3,
-      duration: 0.7,
-      ease: "back.out(0.7)",
-      delay: 0
-    });
-    
-    // Foto KANAN - muncul dari sisi kanan
-    gsap.set(imgRightRef.current, { x: 100, opacity: 0, rotation: 5 });
-    gsap.to(imgRightRef.current, {
-      x: 0,
-      opacity: 1,
-      rotation: 3,
-      duration: 0.7,
-      ease: "back.out(0.7)",
-      delay: 0.1
-    });
-  };
-
-  const handleStudioHoverLeave = () => {
-    setHoverActive(false);
-    
-    // Animasi foto menghilang
-    gsap.to([imgLeftRef.current, imgRightRef.current], {
-      opacity: 0,
-      scale: 0.9,
-      duration: 0.3,
-      ease: "power2.in",
-      stagger: 0.05
-    });
   };
 
   useEffect(() => {
@@ -371,12 +434,6 @@ export default function HomePage(): React.JSX.Element {
         ease: "power2.out",
         delay: 0.3
       });
-    }
-    
-    // Juga animasi foto muncul saat load
-    if (imgLeftRef.current && imgRightRef.current) {
-      gsap.set(imgLeftRef.current, { opacity: 1 });
-      gsap.set(imgRightRef.current, { opacity: 1 });
     }
   };
 
@@ -807,13 +864,31 @@ export default function HomePage(): React.JSX.Element {
           letter-spacing: -0.02em;
           line-height: 1.2;
           cursor: pointer;
-          transition: opacity 0.3s ease;
-          position: relative;
-          z-index: 50;
+          transition: all 0.3s ease;
         }
         
         .studio-text:hover {
-          opacity: 0.8;
+          letter-spacing: 0.02em;
+        }
+
+        /* Hover Image Gallery Styles */
+        .hover-gallery-image {
+          position: fixed;
+          z-index: 1000;
+          pointer-events: none;
+          border-radius: 20px;
+          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2), 0 5px 12px rgba(0, 0, 0, 0.1);
+          overflow: hidden;
+          width: 280px;
+          height: 350px;
+        }
+        
+        .hover-gallery-image img {
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+          object-position: center;
+          background-color: #f5f5f5;
         }
       `}</style>
       
@@ -886,6 +961,28 @@ export default function HomePage(): React.JSX.Element {
         </div>
       )}
 
+      {/* Floating Hover Images Gallery */}
+      {hoverImages.map((img) => (
+        <div
+          key={img.id}
+          id={`hover-img-${img.id}`}
+          className="hover-gallery-image"
+          style={{
+            left: img.x,
+            top: img.y,
+            opacity: 0
+          }}
+        >
+          <Image
+            src={img.image}
+            alt="Gallery"
+            width={280}
+            height={350}
+            style={{ objectFit: 'contain', width: '100%', height: '100%' }}
+          />
+        </div>
+      ))}
+
       <div id="smooth-wrapper">
         <div id="smooth-content">
           <div 
@@ -917,6 +1014,7 @@ export default function HomePage(): React.JSX.Element {
               pointerEvents: 'none',
               padding: '20px 0 0 40px'
             }}>
+              {/* TEKS MENURU */}
               <div
                 ref={menuruTopMainRef}
                 style={{
@@ -936,90 +1034,26 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* MENURU.STUDIO TEXT dengan 2 foto BESAR di sisi kiri dan kanan (di atas teks) */}
+            {/* MENURU.STUDIO TEXT - Dengan efek hover gallery */}
             <div
+              ref={studioTextContainerRef}
               style={{
                 display: 'flex',
-                flexDirection: 'column',
                 alignItems: 'center',
-                justifyContent: 'center',
+                justifyContent: 'flex-end',
                 minHeight: '100vh',
-                position: 'relative',
-                zIndex: 50
+                paddingRight: '80px'
               }}
             >
-              {/* Container untuk 2 foto BESAR di sisi kiri dan kanan */}
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '80px',
-                  marginBottom: '60px',
-                  position: 'relative'
-                }}
-              >
-                {/* Foto KIRI - portrait besar */}
-                <div
-                  ref={imgLeftRef}
-                  style={{
-                    width: '350px',
-                    height: '520px',
-                    borderRadius: '24px',
-                    overflow: 'hidden',
-                    boxShadow: '0 25px 50px -12px rgba(0,0,0,0.3)',
-                    opacity: 0,
-                    transform: 'rotate(-3deg)',
-                    backgroundColor: '#f5f5f5'
-                  }}
-                >
-                  <Image
-                    src="/images/ae.jpg"
-                    alt="Character Left"
-                    width={350}
-                    height={520}
-                    style={{ objectFit: 'cover', width: '100%', height: '100%' }}
-                    priority
-                  />
-                </div>
-
-                {/* Foto KANAN - portrait besar */}
-                <div
-                  ref={imgRightRef}
-                  style={{
-                    width: '350px',
-                    height: '520px',
-                    borderRadius: '24px',
-                    overflow: 'hidden',
-                    boxShadow: '0 25px 50px -12px rgba(0,0,0,0.3)',
-                    opacity: 0,
-                    transform: 'rotate(3deg)',
-                    backgroundColor: '#f5f5f5'
-                  }}
-                >
-                  <Image
-                    src="/images/ai.jpg"
-                    alt="Gallery Right"
-                    width={350}
-                    height={520}
-                    style={{ objectFit: 'cover', width: '100%', height: '100%' }}
-                    priority
-                  />
-                </div>
-              </div>
-
-              {/* Teks Studio di Bawah foto */}
               <div
                 ref={studioTextRef}
                 className="studio-text"
                 style={{
-                  textAlign: 'center',
-                  opacity: 0,
-                  position: 'relative',
-                  zIndex: 50
+                  textAlign: 'right',
+                  opacity: 0
                 }}
-                onMouseEnter={handleStudioHoverEnter}
-                onMouseLeave={handleStudioHoverLeave}
+                onMouseEnter={handleStudioTextMouseEnter}
+                onMouseLeave={handleStudioTextMouseLeave}
               >
                 <div>MENURU.STUDIO – Jakarta UX/UI Design</div>
                 <div>Personal for Note, Donation & Calendar</div>
@@ -1037,6 +1071,7 @@ export default function HomePage(): React.JSX.Element {
               alignItems: 'center',
               minHeight: '100vh'
             }}>
+              {/* Bottom Content */}
               <div
                 ref={bottomContentRef}
                 style={{
