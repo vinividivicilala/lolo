@@ -53,12 +53,7 @@ export default function HomePage(): React.JSX.Element {
   const bottomContentRef = useRef<HTMLDivElement>(null);
   const calendarBtnRef = useRef<HTMLButtonElement>(null);
   const studioTextRef = useRef<HTMLDivElement>(null);
-  
-  // Refs untuk pinned section
-  const featureSectionRef = useRef<HTMLDivElement>(null);
-  const pinContainerRef = useRef<HTMLDivElement>(null);
-  const donationSectionRef = useRef<HTMLDivElement>(null);
-  const noteSectionRef = useRef<HTMLDivElement>(null);
+  const leftTextRef = useRef<HTMLDivElement>(null); // Ref untuk teks kiri baru
   
   // Refs untuk gambar-gambar
   const img1Ref = useRef<HTMLDivElement>(null);
@@ -243,95 +238,6 @@ export default function HomePage(): React.JSX.Element {
     });
   };
 
-  // Setup pinned section scroll animation
-  const setupPinnedScroll = () => {
-    if (!pinContainerRef.current || !donationSectionRef.current || !noteSectionRef.current) return;
-
-    // Section 01 - Donation
-    gsap.to(donationSectionRef.current, {
-      scrollTrigger: {
-        trigger: pinContainerRef.current,
-        start: "top top",
-        end: "bottom top",
-        pin: pinContainerRef.current,
-        pinSpacing: true,
-        scrub: 0.5,
-        id: "pin-section",
-        invalidateOnRefresh: true,
-        onUpdate: (self) => {
-          const progress = self.progress;
-          // Opacity effect for donation section
-          if (donationSectionRef.current) {
-            gsap.set(donationSectionRef.current, {
-              opacity: 1 - progress,
-              scale: 1 - progress * 0.3,
-              filter: `blur(${progress * 8}px)`,
-              pointerEvents: progress > 0.5 ? 'none' : 'auto'
-            });
-          }
-          // Reveal note section
-          if (noteSectionRef.current) {
-            const revealProgress = Math.max(0, progress - 0.3) / 0.7;
-            gsap.set(noteSectionRef.current, {
-              opacity: revealProgress,
-              scale: 0.95 + revealProgress * 0.05,
-              filter: `blur(${(1 - revealProgress) * 8}px)`
-            });
-          }
-        }
-      }
-    });
-
-    // Parallax effect for numbers
-    gsap.fromTo(".feature-number",
-      { x: -100, opacity: 0 },
-      {
-        x: 0,
-        opacity: 1,
-        duration: 0.8,
-        stagger: 0.3,
-        scrollTrigger: {
-          trigger: pinContainerRef.current,
-          start: "top 80%",
-          end: "bottom 20%",
-          scrub: 0.5,
-        }
-      }
-    );
-
-    gsap.fromTo(".feature-title",
-      { x: 100, opacity: 0 },
-      {
-        x: 0,
-        opacity: 1,
-        duration: 0.8,
-        stagger: 0.3,
-        scrollTrigger: {
-          trigger: pinContainerRef.current,
-          start: "top 80%",
-          end: "bottom 20%",
-          scrub: 0.5,
-        }
-      }
-    );
-
-    gsap.fromTo(".feature-desc",
-      { y: 50, opacity: 0 },
-      {
-        y: 0,
-        opacity: 1,
-        duration: 0.6,
-        stagger: 0.2,
-        scrollTrigger: {
-          trigger: pinContainerRef.current,
-          start: "top 70%",
-          end: "bottom 30%",
-          scrub: 0.5,
-        }
-      }
-    );
-  };
-
   useEffect(() => {
     const initSmoother = () => {
       if (typeof window !== 'undefined' && !smootherRef.current) {
@@ -428,8 +334,6 @@ export default function HomePage(): React.JSX.Element {
             animateMenuruMain();
             animateStudioText();
             animateBottomContent();
-            // Setup pinned scroll after loading
-            setTimeout(setupPinnedScroll, 100);
           }
         });
       }
@@ -499,6 +403,18 @@ export default function HomePage(): React.JSX.Element {
         duration: 0.8,
         ease: "power2.out",
         delay: 0.3
+      });
+    }
+    
+    // Animasi untuk teks kiri
+    if (leftTextRef.current) {
+      gsap.set(leftTextRef.current, { opacity: 0, y: 50 });
+      gsap.to(leftTextRef.current, {
+        opacity: 1,
+        y: 0,
+        duration: 0.8,
+        ease: "power2.out",
+        delay: 0.35
       });
     }
   };
@@ -959,159 +875,6 @@ export default function HomePage(): React.JSX.Element {
           opacity: 0;
           background-color: #f5f5f5;
         }
-
-        /* Feature Section Styles */
-        .feature-pin-container {
-          min-height: 100vh;
-          width: 100%;
-          position: relative;
-          background-color: #ffffff;
-          margin: 50px 0;
-        }
-
-        .feature-section {
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          min-height: 100vh;
-          width: 100%;
-          padding: 80px;
-          box-sizing: border-box;
-        }
-
-        .feature-header {
-          margin-bottom: 80px;
-        }
-
-        .feature-title-large {
-          font-size: 40px;
-          font-weight: 600;
-          font-family: 'Questrial', sans-serif;
-          color: #000000;
-          letter-spacing: -0.02em;
-          margin-bottom: 20px;
-          position: relative;
-          display: inline-block;
-        }
-
-        .feature-title-large::after {
-          content: '';
-          position: absolute;
-          bottom: -10px;
-          left: 0;
-          width: 60px;
-          height: 3px;
-          background-color: #c5e800;
-        }
-
-        .feature-item {
-          display: flex;
-          align-items: flex-start;
-          gap: 40px;
-          margin-bottom: 60px;
-          padding: 30px 0;
-          border-bottom: 1px solid #e0e0e0;
-          transition: all 0.3s ease;
-        }
-
-        .feature-number {
-          flex-shrink: 0;
-          width: 120px;
-          font-size: 40px;
-          font-weight: 700;
-          font-family: 'Questrial', sans-serif;
-          color: #c5e800;
-          letter-spacing: -0.03em;
-        }
-
-        .feature-content {
-          flex: 1;
-        }
-
-        .feature-item-title {
-          font-size: 40px;
-          font-weight: 600;
-          font-family: 'Questrial', sans-serif;
-          color: #000000;
-          margin-bottom: 16px;
-          letter-spacing: -0.02em;
-        }
-
-        .feature-desc {
-          font-size: 18px;
-          font-family: 'Questrial', sans-serif;
-          color: #666666;
-          line-height: 1.6;
-          max-width: 600px;
-        }
-
-        .pin-container {
-          min-height: 100vh;
-        }
-
-        .pin-section {
-          position: relative;
-          width: 100%;
-          background-color: #ffffff;
-        }
-
-        .pin-content {
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          min-height: 100vh;
-          padding: 80px;
-          box-sizing: border-box;
-        }
-
-        .pin-item {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 80px;
-          box-sizing: border-box;
-          opacity: 0;
-        }
-
-        .donation-item {
-          opacity: 1;
-          z-index: 2;
-        }
-
-        .note-item {
-          opacity: 0;
-          z-index: 1;
-        }
-
-        /* donasi dan note kita */
-        .donation-number, .note-number {
-          font-size: 40px;
-          font-weight: 700;
-          font-family: 'Questrial', sans-serif;
-          color: #c5e800;
-          margin-bottom: 20px;
-        }
-
-        .donation-title, .note-title {
-          font-size: 40px;
-          font-weight: 600;
-          font-family: 'Questrial', sans-serif;
-          color: #000000;
-          margin-bottom: 16px;
-        }
-
-        .donation-desc, .note-desc {
-          font-size: 18px;
-          font-family: 'Questrial', sans-serif;
-          color: #666666;
-          line-height: 1.6;
-          max-width: 600px;
-        }
       `}</style>
       
       {/* LOADING OVERLAY */}
@@ -1233,16 +996,37 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* MENURU.STUDIO TEXT - Di sisi kanan, 2 baris dengan hover effect */}
+            {/* MENURU.STUDIO TEXT - Layout 2 kolom dengan teks kiri dan kanan */}
             <div
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'flex-end',
+                justifyContent: 'space-between',
                 minHeight: '100vh',
-                paddingRight: '80px'
+                padding: '0 80px',
+                width: 'calc(100% - 160px)',
               }}
             >
+              {/* Kolom Kiri - IDN dan MN'RU© - 26' */}
+              <div
+                ref={leftTextRef}
+                style={{
+                  fontFamily: 'Questrial, sans-serif',
+                  fontSize: '40px',
+                  fontWeight: '400',
+                  color: '#000000',
+                  letterSpacing: '-0.02em',
+                  lineHeight: '1.3',
+                  textAlign: 'left',
+                  opacity: 0,
+                }}
+              >
+                IDN
+                <br />
+                MN'RU© - 26'
+              </div>
+
+              {/* Kolom Kanan - Teks studio yang sudah ada */}
               <div
                 ref={studioTextRef}
                 className="studio-text"
@@ -1255,45 +1039,6 @@ export default function HomePage(): React.JSX.Element {
               >
                 <div>MENURU.STUDIO – Jakarta UX/UI Design</div>
                 <div>Personal for Note, Donation & Calendar</div>
-              </div>
-            </div>
-
-            {/* Feature Section with GSAP Pinned Scroll */}
-            <div ref={featureSectionRef} className="feature-pin-container">
-              <div ref={pinContainerRef} className="pin-container">
-                {/* Donation Section (01) */}
-                <div 
-                  ref={donationSectionRef} 
-                  className="pin-section donation-item"
-                  style={{ position: 'relative', minHeight: '100vh', backgroundColor: '#ffffff' }}
-                >
-                  <div className="pin-content" style={{ paddingLeft: '80px' }}>
-                    <div className="donation-number">01</div>
-                    <div className="donation-title">Donation</div>
-                    <div className="donation-desc">
-                      Dukung karya dan inovasi kami melalui donasi. 
-                      Setiap kontribusi Anda membantu kami terus berkembang 
-                      dan menciptakan solusi digital yang lebih baik.
-                    </div>
-                  </div>
-                </div>
-
-                {/* Note Section (02) */}
-                <div 
-                  ref={noteSectionRef} 
-                  className="pin-section note-item"
-                  style={{ position: 'relative', minHeight: '100vh', backgroundColor: '#ffffff' }}
-                >
-                  <div className="pin-content" style={{ paddingLeft: '80px' }}>
-                    <div className="note-number">02</div>
-                    <div className="note-title">Note</div>
-                    <div className="note-desc">
-                      Catat ide, inspirasi, dan rencana Anda bersama MENURU. 
-                      Kami menyediakan ruang digital untuk menuangkan pemikiran 
-                      dan mengembangkan potensi terbaik Anda.
-                    </div>
-                  </div>
-                </div>
               </div>
             </div>
 
@@ -1330,42 +1075,6 @@ export default function HomePage(): React.JSX.Element {
                 <Image
                   src="/images/ai.jpg"
                   alt="Gallery 2"
-                  fill
-                  style={{ objectFit: 'cover' }}
-                />
-              </div>
-
-              {/* Gambar 3 - Pojok Kiri Bawah */}
-              <div
-                ref={img3Ref}
-                className="floating-img"
-                style={{
-                  bottom: '15%',
-                  left: '10%',
-                  transform: 'rotate(-3deg)'
-                }}
-              >
-                <Image
-                  src="/images/5.jpg"
-                  alt="Gallery 3"
-                  fill
-                  style={{ objectFit: 'cover' }}
-                />
-              </div>
-
-              {/* Gambar 4 - Pojok Kanan Bawah */}
-              <div
-                ref={img4Ref}
-                className="floating-img"
-                style={{
-                  bottom: '15%',
-                  right: '10%',
-                  transform: 'rotate(3deg)'
-                }}
-              >
-                <Image
-                  src="/images/lkhh.jpg"
-                  alt="Gallery 4"
                   fill
                   style={{ objectFit: 'cover' }}
                 />
