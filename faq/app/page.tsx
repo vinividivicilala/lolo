@@ -1,4 +1,4 @@
-// app/page.tsx (Halaman Utama) - Full code dengan TRUSTED COLLABS di pojok kiri atas
+// app/page.tsx (Halaman Utama) - Dengan carousel horizontal di bawah TRUSTED COLLABS
 
 'use client';
 
@@ -33,6 +33,7 @@ export default function HomePage(): React.JSX.Element {
   const smootherRef = useRef<any>(null);
   const mainContentRef = useRef<HTMLDivElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
+  const carouselRef = useRef<HTMLDivElement>(null);
   
   // Refs untuk teks yang akan di-split
   const mencatatTextRef = useRef<HTMLDivElement>(null);
@@ -60,9 +61,49 @@ export default function HomePage(): React.JSX.Element {
   const colorChangeSectionRef = useRef<HTMLDivElement>(null);
   const trustedTextRef = useRef<HTMLDivElement>(null);
   
-  // Refs untuk gambar-gambar
+  // Refs untuk gambar-gambar hover
   const img1Ref = useRef<HTMLDivElement>(null);
   const img2Ref = useRef<HTMLDivElement>(null);
+
+  // Data untuk carousel
+  const carouselItems = [
+    {
+      id: 1,
+      image: "/images/lkhh.jpg",
+      brand: "LKHH Studio",
+      description: "Creative digital agency specializing in branding and web design."
+    },
+    {
+      id: 2,
+      image: "/images/ai.jpg",
+      brand: "AI Creative",
+      description: "Artificial intelligence solutions for modern businesses."
+    },
+    {
+      id: 3,
+      image: "/images/5.jpg",
+      brand: "Farid Corp",
+      description: "Technology consulting and software development."
+    },
+    {
+      id: 4,
+      image: "/images/lkhh.jpg",
+      brand: "Studio Beta",
+      description: "UI/UX design and product innovation."
+    },
+    {
+      id: 5,
+      image: "/images/ai.jpg",
+      brand: "Gamma Labs",
+      description: "Research and development in emerging technologies."
+    },
+    {
+      id: 6,
+      image: "/images/5.jpg",
+      brand: "Delta Creative",
+      description: "Content creation and digital marketing."
+    }
+  ];
 
   // Variabel untuk menyimpan teks asli medsos
   const originalTexts = {
@@ -222,6 +263,37 @@ export default function HomePage(): React.JSX.Element {
     });
   };
 
+  // Scroll snapping untuk carousel horizontal
+  useEffect(() => {
+    if (isLoading) return;
+    
+    const carousel = carouselRef.current;
+    if (!carousel) return;
+
+    let isScrolling = false;
+    
+    const handleWheel = (e: WheelEvent) => {
+      if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+      
+      e.preventDefault();
+      if (isScrolling) return;
+      
+      isScrolling = true;
+      const scrollAmount = e.deltaY > 0 ? 400 : -400;
+      carousel.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+      
+      setTimeout(() => {
+        isScrolling = false;
+      }, 200);
+    };
+    
+    carousel.addEventListener('wheel', handleWheel, { passive: false });
+    
+    return () => {
+      carousel.removeEventListener('wheel', handleWheel);
+    };
+  }, [isLoading]);
+
   useEffect(() => {
     const initSmoother = () => {
       if (typeof window !== 'undefined' && !smootherRef.current) {
@@ -263,7 +335,6 @@ export default function HomePage(): React.JSX.Element {
       const sectionTop = colorChangeSectionRef.current.offsetTop;
       const sectionBottom = sectionTop + colorChangeSectionRef.current.offsetHeight;
       
-      // Cek apakah scroll berada di dalam section baru
       const isInSection = scrollPosition + windowHeight/2 >= sectionTop && scrollPosition + windowHeight/2 <= sectionBottom;
       
       if (isInSection) {
@@ -272,7 +343,6 @@ export default function HomePage(): React.JSX.Element {
           duration: 0.5,
           ease: "power2.inOut"
         });
-        // Warna teks menjadi putih saat background hitam
         if (trustedTextRef.current) {
           gsap.to(trustedTextRef.current, {
             color: '#ffffff',
@@ -280,13 +350,18 @@ export default function HomePage(): React.JSX.Element {
             ease: "power2.inOut"
           });
         }
+        // Ubah warna teks carousel items menjadi putih
+        gsap.to('.carousel-brand, .carousel-desc', {
+          color: '#ffffff',
+          duration: 0.5,
+          ease: "power2.inOut"
+        });
       } else {
         gsap.to(colorChangeSectionRef.current, {
           backgroundColor: '#ffffff',
           duration: 0.5,
           ease: "power2.inOut"
         });
-        // Warna teks menjadi hitam saat background putih
         if (trustedTextRef.current) {
           gsap.to(trustedTextRef.current, {
             color: 'rgb(21, 22, 26)',
@@ -294,6 +369,12 @@ export default function HomePage(): React.JSX.Element {
             ease: "power2.inOut"
           });
         }
+        // Kembalikan warna teks carousel items menjadi hitam
+        gsap.to('.carousel-brand, .carousel-desc', {
+          color: 'rgb(21, 22, 26)',
+          duration: 0.5,
+          ease: "power2.inOut"
+        });
       }
     };
 
@@ -301,14 +382,13 @@ export default function HomePage(): React.JSX.Element {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [isLoading]);
 
-  // Animasi SplitText untuk TRUSTED COLLABS ketika section terlihat
+  // Animasi SplitText untuk TRUSTED COLLABS
   useEffect(() => {
     if (isLoading) return;
 
     const trustedElement = trustedTextRef.current;
     if (!trustedElement) return;
 
-    // Buat ScrollTrigger untuk animasi teks
     const splitTrusted = new SplitText(trustedElement, {
       type: "chars, words",
       charsClass: "trusted-char"
@@ -998,6 +1078,7 @@ export default function HomePage(): React.JSX.Element {
           padding-left: 80px;
           padding-top: 80px;
           box-sizing: border-box;
+          overflow-x: hidden;
         }
 
         .trusted-text {
@@ -1010,6 +1091,92 @@ export default function HomePage(): React.JSX.Element {
           text-align: left;
           margin: 0;
           transition: color 0.5s ease;
+          margin-bottom: 60px;
+        }
+
+        /* Carousel Horizontal Styles */
+        .carousel-container {
+          width: 100%;
+          overflow-x: auto;
+          overflow-y: hidden;
+          cursor: grab;
+          scroll-behavior: smooth;
+          padding-bottom: 40px;
+        }
+        
+        .carousel-container:active {
+          cursor: grabbing;
+        }
+        
+        .carousel-track {
+          display: flex;
+          gap: 30px;
+          padding-right: 80px;
+        }
+        
+        .carousel-item {
+          flex-shrink: 0;
+          width: 380px;
+          background: transparent;
+          border-radius: 24px;
+          transition: all 0.3s ease;
+        }
+        
+        .carousel-item:hover {
+          transform: translateY(-10px);
+        }
+        
+        .carousel-image {
+          width: 100%;
+          height: 380px;
+          border-radius: 20px;
+          overflow: hidden;
+          position: relative;
+          margin-bottom: 20px;
+        }
+        
+        .carousel-brand {
+          font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
+          font-weight: 500;
+          font-size: 24px;
+          color: rgb(21, 22, 26);
+          margin: 0 0 8px 0;
+          transition: color 0.5s ease;
+          letter-spacing: -0.02em;
+        }
+        
+        .carousel-desc {
+          font-family: 'Questrial', sans-serif;
+          font-weight: 400;
+          font-size: 14px;
+          color: rgb(21, 22, 26);
+          line-height: 1.5;
+          transition: color 0.5s ease;
+          opacity: 0.8;
+        }
+
+        /* Custom scrollbar untuk carousel */
+        .carousel-container::-webkit-scrollbar {
+          height: 4px;
+          display: block;
+        }
+        
+        .carousel-container::-webkit-scrollbar-track {
+          background: rgba(0, 0, 0, 0.1);
+          border-radius: 10px;
+        }
+        
+        .carousel-container::-webkit-scrollbar-thumb {
+          background: rgba(0, 0, 0, 0.3);
+          border-radius: 10px;
+        }
+        
+        .color-change-section .carousel-container::-webkit-scrollbar-track {
+          background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .color-change-section .carousel-container::-webkit-scrollbar-thumb {
+          background: rgba(255, 255, 255, 0.5);
         }
       `}</style>
       
@@ -1213,7 +1380,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* SECTION BARU - Yang berubah warna saat scroll dengan teks TRUSTED COLLABS di pojok kiri atas */}
+            {/* SECTION BARU - Yang berubah warna saat scroll dengan teks TRUSTED COLLABS dan carousel */}
             <div
               ref={colorChangeSectionRef}
               className="color-change-section"
@@ -1226,6 +1393,29 @@ export default function HomePage(): React.JSX.Element {
                 className="trusted-text"
               >
                 TRUSTED COLLABS
+              </div>
+
+              {/* Carousel Horizontal */}
+              <div 
+                ref={carouselRef}
+                className="carousel-container"
+              >
+                <div className="carousel-track">
+                  {carouselItems.map((item) => (
+                    <div key={item.id} className="carousel-item">
+                      <div className="carousel-image">
+                        <Image
+                          src={item.image}
+                          alt={item.brand}
+                          fill
+                          style={{ objectFit: 'cover' }}
+                        />
+                      </div>
+                      <h3 className="carousel-brand">{item.brand}</h3>
+                      <p className="carousel-desc">{item.description}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
 
