@@ -1,4 +1,4 @@
-// app/page.tsx (Halaman Utama) - Dengan section hitam setelah scroll
+// app/page.tsx (Halaman Utama) - Dengan efek scroll background change
 
 'use client';
 
@@ -26,6 +26,7 @@ export default function HomePage(): React.JSX.Element {
   const [location, setLocation] = useState<string>("");
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [hoverActive, setHoverActive] = useState(false);
+  const [isBlackSection, setIsBlackSection] = useState(false); // State untuk background section
   
   const acceptBtnRef = useRef<HTMLButtonElement>(null);
   const declineBtnRef = useRef<HTMLButtonElement>(null);
@@ -33,6 +34,7 @@ export default function HomePage(): React.JSX.Element {
   const smootherRef = useRef<any>(null);
   const mainContentRef = useRef<HTMLDivElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
+  const sectionRef = useRef<HTMLDivElement>(null); // Ref untuk section yang berubah warna
   
   // Refs untuk teks yang akan di-split
   const mencatatTextRef = useRef<HTMLDivElement>(null);
@@ -54,7 +56,6 @@ export default function HomePage(): React.JSX.Element {
   const calendarBtnRef = useRef<HTMLButtonElement>(null);
   const studioTextRef = useRef<HTMLDivElement>(null);
   const bottomLeftTextRef = useRef<HTMLDivElement>(null);
-  const blackSectionRef = useRef<HTMLDivElement>(null); // Ref untuk section hitam
   
   // Refs untuk gambar-gambar
   const img1Ref = useRef<HTMLDivElement>(null);
@@ -261,6 +262,58 @@ export default function HomePage(): React.JSX.Element {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
   }, []);
+
+  // Efek scroll untuk mengubah background
+  useEffect(() => {
+    if (isLoading) return;
+
+    const handleScroll = () => {
+      if (!sectionRef.current) return;
+      
+      const scrollPosition = window.scrollY;
+      const windowHeight = window.innerHeight;
+      const sectionTop = sectionRef.current.offsetTop;
+      const sectionBottom = sectionTop + sectionRef.current.offsetHeight;
+      
+      // Cek apakah scroll berada di dalam section
+      if (scrollPosition + windowHeight/2 >= sectionTop && scrollPosition + windowHeight/2 <= sectionBottom) {
+        if (!isBlackSection) {
+          setIsBlackSection(true);
+          // Animasi transisi background
+          gsap.to(sectionRef.current, {
+            backgroundColor: '#000000',
+            duration: 0.5,
+            ease: "power2.inOut"
+          });
+          // Ubah warna teks menjadi putih di section hitam
+          gsap.to([studioTextRef.current, bottomLeftTextRef.current], {
+            color: '#ffffff',
+            duration: 0.5,
+            ease: "power2.inOut"
+          });
+        }
+      } else {
+        if (isBlackSection) {
+          setIsBlackSection(false);
+          // Kembali ke putih
+          gsap.to(sectionRef.current, {
+            backgroundColor: '#ffffff',
+            duration: 0.5,
+            ease: "power2.inOut"
+          });
+          // Kembalikan warna teks ke hitam
+          gsap.to([studioTextRef.current, bottomLeftTextRef.current], {
+            color: 'rgb(16, 16, 16)',
+            duration: 0.5,
+            ease: "power2.inOut"
+          });
+        }
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [isLoading, isBlackSection]);
 
   useEffect(() => {
     if (!isLoading || !loadingOverlayRef.current) return;
@@ -505,18 +558,6 @@ export default function HomePage(): React.JSX.Element {
           }
         }
       );
-    }
-
-    // Animasi pin untuk section hitam
-    if (blackSectionRef.current) {
-      ScrollTrigger.create({
-        trigger: blackSectionRef.current,
-        start: "top top",
-        end: "bottom bottom",
-        pin: true,
-        pinSpacing: true,
-        scrub: 1,
-      });
     }
 
     return () => {
@@ -852,7 +893,7 @@ export default function HomePage(): React.JSX.Element {
           letter-spacing: -0.02em;
           line-height: 1.2;
           cursor: pointer;
-          transition: opacity 0.3s ease;
+          transition: color 0.3s ease, opacity 0.3s ease;
         }
         
         .studio-text:hover {
@@ -888,17 +929,7 @@ export default function HomePage(): React.JSX.Element {
           color: rgb(16, 16, 16);
           letter-spacing: -0.02em;
           line-height: 1.3;
-        }
-
-        .black-section {
-          background-color: #000000;
-          min-height: 100vh;
-          width: 100%;
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          align-items: center;
-          color: #ffffff;
+          transition: color 0.3s ease;
         }
       `}</style>
       
@@ -1021,81 +1052,61 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* SECTION 1 - MENURU.STUDIO dengan teks IDN/MN'RU© - 26' */}
-            <div
+            {/* MAIN SECTION - Yang berubah warna saat scroll */}
+            <div 
+              ref={sectionRef}
               style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'flex-end',
-                justifyContent: 'center',
-                minHeight: '100vh',
-                paddingRight: '80px',
-                position: 'relative',
-              }}
-            >
-              <div
-                ref={studioTextRef}
-                className="studio-text"
-                style={{
-                  textAlign: 'right',
-                  opacity: 0
-                }}
-                onMouseEnter={handleStudioHoverEnter}
-                onMouseLeave={handleStudioHoverLeave}
-              >
-                <div>MENURU.STUDIO – Jakarta UX/UI Design</div>
-                <div>Personal for Note, Donation & Calendar</div>
-              </div>
-
-              <div
-                ref={bottomLeftTextRef}
-                className="bottom-left-text"
-                style={{
-                  position: 'absolute',
-                  bottom: '5%',
-                  left: '80px',
-                  textAlign: 'left',
-                  opacity: 0,
-                }}
-              >
-                IDN
-                <br />
-                MN'RU© - 26'
-              </div>
-            </div>
-
-            {/* SECTION 2 - BLACK SECTION (setelah scroll) */}
-            <div
-              ref={blackSectionRef}
-              className="black-section"
-              style={{
-                backgroundColor: '#000000',
-                minHeight: '100vh',
+                backgroundColor: '#ffffff',
+                transition: 'background-color 0.5s ease',
+                minHeight: '200vh',
                 width: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
-                alignItems: 'center',
-                color: '#ffffff',
-                position: 'relative',
-                zIndex: 10,
               }}
             >
-              <div style={{
-                textAlign: 'center',
-                fontFamily: 'HelveticaNowDisplay, Arial, sans-serif',
-                fontSize: '60px',
-                fontWeight: '400',
-                letterSpacing: '-0.02em',
-                lineHeight: '1.2',
-                maxWidth: '80%',
-              }}>
-                <div>Welcome to the</div>
-                <div>Next Chapter</div>
-                <div style={{ fontSize: '40px', marginTop: '40px', opacity: 0.8 }}>
-                  Scroll to explore more
+              {/* MENURU.STUDIO TEXT dengan teks IDN/MN'RU© - 26' */}
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'flex-end',
+                  justifyContent: 'center',
+                  minHeight: '100vh',
+                  paddingRight: '80px',
+                  position: 'relative',
+                }}
+              >
+                <div
+                  ref={studioTextRef}
+                  className="studio-text"
+                  style={{
+                    textAlign: 'right',
+                    opacity: 0
+                  }}
+                  onMouseEnter={handleStudioHoverEnter}
+                  onMouseLeave={handleStudioHoverLeave}
+                >
+                  <div>MENURU.STUDIO – Jakarta UX/UI Design</div>
+                  <div>Personal for Note, Donation & Calendar</div>
+                </div>
+
+                <div
+                  ref={bottomLeftTextRef}
+                  className="bottom-left-text"
+                  style={{
+                    position: 'absolute',
+                    bottom: '5%',
+                    left: '80px',
+                    textAlign: 'left',
+                    opacity: 0,
+                  }}
+                >
+                  IDN
+                  <br />
+                  MN'RU© - 26'
                 </div>
               </div>
+
+              {/* Space tambahan untuk efek scroll */}
+              <div style={{ height: '100vh' }} />
             </div>
 
             {/* Floating Images - Muncul saat hover */}
