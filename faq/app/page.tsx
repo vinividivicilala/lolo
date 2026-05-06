@@ -1,4 +1,4 @@
-// app/page.tsx (Halaman Utama) - Dengan carousel pinned section, warna hitam tetap
+// app/page.tsx (Halaman Utama) - Dengan carousel pinned section, ukuran tetap, warna highlight pink, hijau, biru
 
 'use client';
 
@@ -59,7 +59,7 @@ export default function HomePage(): React.JSX.Element {
   const bottomLeftTextRef = useRef<HTMLDivElement>(null);
   const studioContainerRef = useRef<HTMLDivElement>(null);
   
-  // Section baru dengan warna hitam tetap
+  // Section trusted collabs
   const trustedSectionRef = useRef<HTMLDivElement>(null);
   const trustedTextRef = useRef<HTMLDivElement>(null);
   
@@ -67,14 +67,15 @@ export default function HomePage(): React.JSX.Element {
   const img1Ref = useRef<HTMLDivElement>(null);
   const img2Ref = useRef<HTMLDivElement>(null);
 
-  // Data untuk carousel
+  // Data untuk carousel dengan warna highlight PINK, HIJAU, BIRU
   const carouselItems = [
     {
       id: 1,
       number: "01",
       image: "/images/lkhh.jpg",
       brand: "LKHH Studio",
-      brandColor: "#FF6B6B",
+      brandColor: "#FF69B4", // PINK
+      highlightText: "Creative Agency",
       description: "Creative digital agency specializing in branding and web design. We help businesses grow with innovative solutions and creative strategies.",
       link: "https://lkhhstudio.com",
       linkText: "Visit Website →"
@@ -84,7 +85,8 @@ export default function HomePage(): React.JSX.Element {
       number: "02",
       image: "/images/ai.jpg",
       brand: "AI Creative",
-      brandColor: "#4ECDC4",
+      brandColor: "#4CAF50", // HIJAU
+      highlightText: "AI Solutions",
       description: "Artificial intelligence solutions for modern businesses. Transform your operations with cutting-edge AI technology and machine learning.",
       link: "https://aicreative.com",
       linkText: "Explore AI →"
@@ -94,7 +96,8 @@ export default function HomePage(): React.JSX.Element {
       number: "03",
       image: "/images/5.jpg",
       brand: "Farid Corp",
-      brandColor: "#FFE66D",
+      brandColor: "#2196F3", // BIRU
+      highlightText: "Tech Consulting",
       description: "Technology consulting and software development. From idea to deployment, we've got you covered with end-to-end solutions.",
       link: "https://faridcorp.com",
       linkText: "Learn More →"
@@ -104,7 +107,8 @@ export default function HomePage(): React.JSX.Element {
       number: "04",
       image: "/images/lkhh.jpg",
       brand: "Studio Beta",
-      brandColor: "#A855F7",
+      brandColor: "#FF69B4", // PINK
+      highlightText: "UI/UX Design",
       description: "UI/UX design and product innovation. Creating beautiful experiences that users love and remember.",
       link: "https://studiobeta.com",
       linkText: "View Portfolio →"
@@ -114,7 +118,8 @@ export default function HomePage(): React.JSX.Element {
       number: "05",
       image: "/images/ai.jpg",
       brand: "Gamma Labs",
-      brandColor: "#F97316",
+      brandColor: "#4CAF50", // HIJAU
+      highlightText: "R&D",
       description: "Research and development in emerging technologies. Pushing the boundaries of what's possible in tech.",
       link: "https://gammalabs.com",
       linkText: "Discover →"
@@ -124,10 +129,44 @@ export default function HomePage(): React.JSX.Element {
       number: "06",
       image: "/images/5.jpg",
       brand: "Delta Creative",
-      brandColor: "#06B6D4",
+      brandColor: "#2196F3", // BIRU
+      highlightText: "Digital Marketing",
       description: "Content creation and digital marketing. Tell your story to the world with our creative team.",
       link: "https://deltacreative.com",
       linkText: "Get Started →"
+    },
+    {
+      id: 7,
+      number: "07",
+      image: "/images/lkhh.jpg",
+      brand: "Echo Studio",
+      brandColor: "#FF69B4", // PINK
+      highlightText: "Sound Design",
+      description: "Professional audio production and sound design for multimedia projects.",
+      link: "https://echostudio.com",
+      linkText: "Listen Now →"
+    },
+    {
+      id: 8,
+      number: "08",
+      image: "/images/ai.jpg",
+      brand: "Nexa Labs",
+      brandColor: "#4CAF50", // HIJAU
+      highlightText: "Innovation Hub",
+      description: "Incubating cutting-edge startups and fostering technological innovation.",
+      link: "https://nexalabs.com",
+      linkText: "Join Us →"
+    },
+    {
+      id: 9,
+      number: "09",
+      image: "/images/5.jpg",
+      brand: "Omni Tech",
+      brandColor: "#2196F3", // BIRU
+      highlightText: "IT Solutions",
+      description: "Comprehensive IT solutions for enterprise-level businesses.",
+      link: "https://omnitech.com",
+      linkText: "Get Quote →"
     }
   ];
 
@@ -235,7 +274,6 @@ export default function HomePage(): React.JSX.Element {
     element.textContent = originalText;
   };
 
-  // Animasi hover untuk menampilkan gambar di area teks MENURU.STUDIO
   const handleStudioHoverEnter = () => {
     setHoverActive(true);
     
@@ -298,7 +336,6 @@ export default function HomePage(): React.JSX.Element {
     
     if (!section || !carousel) return;
 
-    // Hitung total lebar scroll carousel yang diperlukan untuk melihat semua item
     const getTotalScrollWidth = () => {
       if (!carouselTrackRef.current) return 0;
       const trackWidth = carouselTrackRef.current.scrollWidth;
@@ -306,7 +343,6 @@ export default function HomePage(): React.JSX.Element {
       return Math.max(0, trackWidth - containerWidth);
     };
 
-    // Buat ScrollTrigger untuk pinned section
     const pinnedTrigger = ScrollTrigger.create({
       trigger: section,
       start: "top top",
@@ -315,14 +351,12 @@ export default function HomePage(): React.JSX.Element {
       pinSpacing: true,
       scrub: 1,
       onUpdate: (self) => {
-        // Scroll carousel berdasarkan progress scroll horizontal
         if (carouselRef.current && carouselTrackRef.current) {
           const totalScrollWidth = getTotalScrollWidth();
           const scrollPosition = self.progress * totalScrollWidth;
           carouselRef.current.scrollLeft = scrollPosition;
           
-          // Update active index berdasarkan posisi scroll
-          const itemWidth = 520; // Lebar item (480px + 40px gap)
+          const itemWidth = 520;
           const newIndex = Math.floor(scrollPosition / itemWidth);
           if (newIndex !== activeIndex && newIndex < carouselItems.length) {
             setActiveIndex(newIndex);
@@ -1048,7 +1082,7 @@ export default function HomePage(): React.JSX.Element {
           line-height: 1.3;
         }
 
-        /* Section Trusted - Warna HITAM TETAP */
+        /* Section Trusted - Warna HITAM TETAP, ukuran tidak berubah */
         .trusted-section {
           min-height: 100vh;
           width: 100%;
@@ -1116,9 +1150,16 @@ export default function HomePage(): React.JSX.Element {
           overflow: hidden;
           position: relative;
           margin-bottom: 24px;
+          background-color: #1a1a1a;
         }
         
-        /* Nomor di samping kiri - menggunakan layout flex row */
+        .carousel-image img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+        
+        /* Nomor di samping kiri */
         .carousel-content-row {
           display: flex;
           gap: 24px;
@@ -1164,17 +1205,18 @@ export default function HomePage(): React.JSX.Element {
           display: inline-block;
           padding: 4px 16px;
           border-radius: 40px;
-          font-size: 14px;
-          font-weight: 500;
+          font-size: 13px;
+          font-weight: 600;
           font-family: 'Questrial', sans-serif;
+          letter-spacing: 0.3px;
         }
         
         .carousel-desc {
           font-family: 'Questrial', sans-serif;
           font-weight: 400;
-          font-size: 16px;
+          font-size: 15px;
           line-height: 1.6;
-          color: rgba(255, 255, 255, 0.8);
+          color: rgba(255, 255, 255, 0.75);
           margin: 0 0 20px 0;
         }
         
@@ -1183,7 +1225,7 @@ export default function HomePage(): React.JSX.Element {
           align-items: center;
           gap: 8px;
           font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
-          font-size: 15px;
+          font-size: 14px;
           font-weight: 500;
           text-decoration: none;
           transition: all 0.3s ease;
@@ -1195,7 +1237,7 @@ export default function HomePage(): React.JSX.Element {
           opacity: 0.8;
         }
 
-        /* Custom scrollbar untuk carousel */
+        /* Custom scrollbar */
         .carousel-container::-webkit-scrollbar {
           height: 4px;
           display: block;
@@ -1487,11 +1529,7 @@ export default function HomePage(): React.JSX.Element {
                                 color: item.brandColor === '#FFE66D' ? '#000000' : '#ffffff'
                               }}
                             >
-                              {item.brand === "LKHH Studio" ? "Creative Agency" :
-                               item.brand === "AI Creative" ? "AI Solutions" :
-                               item.brand === "Farid Corp" ? "Tech Consulting" :
-                               item.brand === "Studio Beta" ? "UI/UX Design" :
-                               item.brand === "Gamma Labs" ? "R&D" : "Digital Marketing"}
+                              {item.highlightText}
                             </span>
                           </div>
                           <p className="carousel-desc">{item.description}</p>
