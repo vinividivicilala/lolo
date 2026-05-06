@@ -1,4 +1,4 @@
-// app/page.tsx (Halaman Utama) - Dengan section baru yang berubah warna
+// app/page.tsx (Halaman Utama) - Hover gambar di area MENURU.STUDIO
 
 'use client';
 
@@ -167,23 +167,22 @@ export default function HomePage(): React.JSX.Element {
     element.textContent = originalText;
   };
 
-  // Animasi hover untuk menampilkan gambar di tengah teks
+  // Animasi hover untuk menampilkan gambar di area teks MENURU.STUDIO
   const handleStudioHoverEnter = () => {
     setHoverActive(true);
     
-    // Animasi gambar muncul dari tengah
+    // Animasi gambar muncul dari samping menuju ke tengah area teks
     gsap.killTweensOf([img1Ref.current, img2Ref.current]);
     
-    // Gambar 1 - dari tengah kiri
+    // Gambar 1 - dari kiri
     gsap.set(img1Ref.current, { 
-      x: -400, 
+      x: -300, 
       y: 0, 
       rotation: -10, 
-      scale: 0.9, 
+      scale: 0.8, 
       opacity: 0,
-      left: '15%',
-      top: '50%',
-      transform: 'translateY(-50%)'
+      left: '5%',
+      top: '45%'
     });
     gsap.to(img1Ref.current, {
       x: 0,
@@ -191,21 +190,20 @@ export default function HomePage(): React.JSX.Element {
       rotation: 0,
       scale: 1,
       opacity: 1,
-      duration: 0.7,
+      duration: 0.6,
       ease: "back.out(0.8)",
       delay: 0
     });
     
-    // Gambar 2 - dari tengah kanan
+    // Gambar 2 - dari kanan
     gsap.set(img2Ref.current, { 
-      x: 400, 
+      x: 300, 
       y: 0, 
       rotation: 10, 
-      scale: 0.9, 
+      scale: 0.8, 
       opacity: 0,
-      right: '15%',
-      top: '50%',
-      transform: 'translateY(-50%)'
+      right: '5%',
+      top: '45%'
     });
     gsap.to(img2Ref.current, {
       x: 0,
@@ -213,7 +211,7 @@ export default function HomePage(): React.JSX.Element {
       rotation: 0,
       scale: 1,
       opacity: 1,
-      duration: 0.7,
+      duration: 0.6,
       ease: "back.out(0.8)",
       delay: 0.1
     });
@@ -225,7 +223,7 @@ export default function HomePage(): React.JSX.Element {
     // Animasi gambar menghilang
     gsap.to([img1Ref.current, img2Ref.current], {
       opacity: 0,
-      scale: 0.7,
+      scale: 0.6,
       duration: 0.4,
       ease: "power2.in"
     });
@@ -893,8 +891,8 @@ export default function HomePage(): React.JSX.Element {
           opacity: 0.8;
         }
 
-        /* Floating images container - di tengah layar */
-        .floating-images-center {
+        /* Floating images container - muncul di area teks */
+        .floating-images-studio {
           position: fixed;
           top: 0;
           left: 0;
@@ -907,11 +905,11 @@ export default function HomePage(): React.JSX.Element {
 
         .floating-img-large {
           position: absolute;
-          width: 500px;
-          height: 600px;
+          width: 450px;
+          height: 550px;
           border-radius: 20px;
           overflow: hidden;
-          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+          box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
           opacity: 0;
           background-color: #f5f5f5;
         }
@@ -1062,7 +1060,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* SECTION 1 - MENURU.STUDIO dengan teks IDN/MN'RU© - 26' */}
+            {/* SECTION 1 - MENURU.STUDIO dengan teks IDN/MN'RU© - 26' dan hover images */}
             <div
               style={{
                 display: 'flex',
@@ -1105,14 +1103,14 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* Floating Images - Muncul di tengah layar saat hover */}
-            <div className="floating-images-center">
-              {/* Gambar 1 - Kiri tengah */}
+            {/* Floating Images - Muncul di area teks MENURU.STUDIO saat hover */}
+            <div className="floating-images-studio">
+              {/* Gambar 1 - Kiri area teks */}
               <div
                 ref={img1Ref}
                 className="floating-img-large"
                 style={{
-                  left: '10%',
+                  left: '8%',
                   top: '50%',
                   transform: 'translateY(-50%)'
                 }}
@@ -1125,12 +1123,12 @@ export default function HomePage(): React.JSX.Element {
                 />
               </div>
 
-              {/* Gambar 2 - Kanan tengah */}
+              {/* Gambar 2 - Kanan area teks */}
               <div
                 ref={img2Ref}
                 className="floating-img-large"
                 style={{
-                  right: '10%',
+                  right: '8%',
                   top: '50%',
                   transform: 'translateY(-50%)'
                 }}
