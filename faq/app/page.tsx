@@ -1,4 +1,4 @@
-// app/page.tsx (Halaman Utama) - Hover gambar hanya di area MENURU.STUDIO
+// app/page.tsx (Halaman Utama) - Section hitam dengan teks TRUSTED COLLABS
 
 'use client';
 
@@ -54,13 +54,13 @@ export default function HomePage(): React.JSX.Element {
   const calendarBtnRef = useRef<HTMLButtonElement>(null);
   const studioTextRef = useRef<HTMLDivElement>(null);
   const bottomLeftTextRef = useRef<HTMLDivElement>(null);
-  const studioContainerRef = useRef<HTMLDivElement>(null); // Container untuk area studio
+  const studioContainerRef = useRef<HTMLDivElement>(null);
   
   // Section baru yang berubah warna
   const colorChangeSectionRef = useRef<HTMLDivElement>(null);
-  const sectionContentRef = useRef<HTMLDivElement>(null);
+  const trustedTextRef = useRef<HTMLDivElement>(null); // Ref untuk teks TRUSTED COLLABS
   
-  // Refs untuk gambar-gambar - diperbesar ukurannya
+  // Refs untuk gambar-gambar
   const img1Ref = useRef<HTMLDivElement>(null);
   const img2Ref = useRef<HTMLDivElement>(null);
 
@@ -172,10 +172,8 @@ export default function HomePage(): React.JSX.Element {
   const handleStudioHoverEnter = () => {
     setHoverActive(true);
     
-    // Animasi gambar muncul
     gsap.killTweensOf([img1Ref.current, img2Ref.current]);
     
-    // Gambar 1 - dari kiri
     gsap.set(img1Ref.current, { 
       x: -200, 
       y: 0, 
@@ -194,7 +192,6 @@ export default function HomePage(): React.JSX.Element {
       delay: 0
     });
     
-    // Gambar 2 - dari kanan
     gsap.set(img2Ref.current, { 
       x: 200, 
       y: 0, 
@@ -217,7 +214,6 @@ export default function HomePage(): React.JSX.Element {
   const handleStudioHoverLeave = () => {
     setHoverActive(false);
     
-    // Animasi gambar menghilang
     gsap.to([img1Ref.current, img2Ref.current], {
       opacity: 0,
       scale: 0.6,
@@ -255,7 +251,7 @@ export default function HomePage(): React.JSX.Element {
     };
   }, []);
 
-  // Efek scroll untuk mengubah warna section baru
+  // Efek scroll untuk mengubah warna section baru dan animasi teks
   useEffect(() => {
     if (isLoading) return;
 
@@ -274,33 +270,71 @@ export default function HomePage(): React.JSX.Element {
           duration: 0.5,
           ease: "power2.inOut"
         });
-        // Ubah warna teks di section baru menjadi putih
-        if (sectionContentRef.current) {
-          gsap.to(sectionContentRef.current.querySelectorAll('.changeable-text'), {
-            color: '#ffffff',
-            duration: 0.5,
-            ease: "power2.inOut"
-          });
-        }
       } else {
         gsap.to(colorChangeSectionRef.current, {
           backgroundColor: '#ffffff',
           duration: 0.5,
           ease: "power2.inOut"
         });
-        // Kembalikan warna teks di section baru menjadi hitam
-        if (sectionContentRef.current) {
-          gsap.to(sectionContentRef.current.querySelectorAll('.changeable-text'), {
-            color: '#000000',
-            duration: 0.5,
-            ease: "power2.inOut"
-          });
-        }
       }
     };
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+  }, [isLoading]);
+
+  // Animasi SplitText untuk TRUSTED COLLABS ketika section hitam terlihat
+  useEffect(() => {
+    if (isLoading) return;
+
+    const trustedElement = trustedTextRef.current;
+    if (!trustedElement) return;
+
+    // Buat ScrollTrigger untuk animasi teks
+    const splitTrusted = new SplitText(trustedElement, {
+      type: "chars, words",
+      charsClass: "trusted-char"
+    });
+
+    gsap.set(splitTrusted.chars, {
+      opacity: 0,
+      y: 100,
+      rotationX: -90,
+      transformPerspective: 800,
+      filter: 'blur(20px)'
+    });
+
+    ScrollTrigger.create({
+      trigger: colorChangeSectionRef.current,
+      start: "top 80%",
+      end: "bottom 20%",
+      onEnter: () => {
+        gsap.to(splitTrusted.chars, {
+          opacity: 1,
+          y: 0,
+          rotationX: 0,
+          filter: 'blur(0px)',
+          duration: 1.2,
+          stagger: { each: 0.03, from: "start", ease: "power2.out" },
+          ease: "back.out(0.6)"
+        });
+      },
+      onLeaveBack: () => {
+        gsap.to(splitTrusted.chars, {
+          opacity: 0,
+          y: 100,
+          rotationX: -90,
+          filter: 'blur(20px)',
+          duration: 0.8,
+          stagger: { each: 0.02, from: "start" },
+        });
+      },
+      toggleActions: "play none none reverse"
+    });
+
+    return () => {
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+    };
   }, [isLoading]);
 
   useEffect(() => {
@@ -663,6 +697,12 @@ export default function HomePage(): React.JSX.Element {
           transform-style: preserve-3d;
         }
 
+        .trusted-char {
+          display: inline-block;
+          will-change: transform, opacity, filter;
+          transform-style: preserve-3d;
+        }
+
         .split-line {
           display: block;
           overflow: hidden;
@@ -888,7 +928,6 @@ export default function HomePage(): React.JSX.Element {
           opacity: 0.8;
         }
 
-        /* Container untuk gambar hover - hanya muncul di area studio */
         .studio-hover-images {
           position: absolute;
           top: 0;
@@ -919,21 +958,29 @@ export default function HomePage(): React.JSX.Element {
           line-height: 1.3;
         }
 
-        /* Section baru yang berubah warna */
         .color-change-section {
           min-height: 100vh;
           width: 100%;
           display: flex;
           flex-direction: column;
-          justify-content: center;
-          align-items: center;
+          justify-content: flex-start;
+          align-items: flex-start;
           transition: background-color 0.5s ease;
           position: relative;
           z-index: 5;
+          padding-top: 120px;
         }
 
-        .changeable-text {
-          transition: color 0.5s ease;
+        .trusted-text {
+          font-family: 'HelveticaNowDisplay', 'Arial', sans-serif;
+          font-weight: 700;
+          font-size: 200px;
+          color: #ffffff;
+          letter-spacing: -0.02em;
+          line-height: 1.1;
+          text-align: left;
+          padding-left: 80px;
+          margin: 0;
         }
       `}</style>
       
@@ -1101,7 +1148,6 @@ export default function HomePage(): React.JSX.Element {
 
               {/* Floating Images - Muncul di area teks MENURU.STUDIO saat hover */}
               <div className="studio-hover-images">
-                {/* Gambar 1 - Kiri area teks */}
                 <div
                   ref={img1Ref}
                   className="floating-img-studio"
@@ -1119,7 +1165,6 @@ export default function HomePage(): React.JSX.Element {
                   />
                 </div>
 
-                {/* Gambar 2 - Kanan area teks */}
                 <div
                   ref={img2Ref}
                   className="floating-img-studio"
@@ -1139,7 +1184,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* SECTION BARU - Yang berubah warna saat scroll */}
+            {/* SECTION BARU - Yang berubah warna saat scroll dengan teks TRUSTED COLLABS */}
             <div
               ref={colorChangeSectionRef}
               className="color-change-section"
@@ -1147,41 +1192,11 @@ export default function HomePage(): React.JSX.Element {
                 backgroundColor: '#ffffff',
               }}
             >
-              <div ref={sectionContentRef} style={{
-                textAlign: 'center',
-                maxWidth: '80%',
-                padding: '60px'
-              }}>
-                <h1 className="changeable-text" style={{
-                  fontFamily: 'HelveticaNowDisplay, Arial, sans-serif',
-                  fontSize: '80px',
-                  fontWeight: '400',
-                  letterSpacing: '-0.02em',
-                  marginBottom: '30px',
-                  color: '#000000'
-                }}>
-                  This Section Changes Color
-                </h1>
-                <p className="changeable-text" style={{
-                  fontFamily: 'Questrial, sans-serif',
-                  fontSize: '24px',
-                  lineHeight: '1.6',
-                  color: '#000000',
-                  maxWidth: '800px',
-                  margin: '0 auto'
-                }}>
-                  Scroll down to see the background turn black.<br />
-                  Scroll back up to return to white.
-                </p>
-                <div style={{ marginTop: '60px' }}>
-                  <div className="changeable-text" style={{
-                    fontSize: '40px',
-                    fontWeight: '400',
-                    color: '#000000'
-                  }}>
-                    ✨ Experience the Magic ✨
-                  </div>
-                </div>
+              <div
+                ref={trustedTextRef}
+                className="trusted-text"
+              >
+                TRUSTED<br />COLLABS
               </div>
             </div>
 
@@ -1522,6 +1537,7 @@ export default function HomePage(): React.JSX.Element {
       {showCalendarModal && (
         <div className="calendar-modal-overlay">
           <div ref={modalRef} className="calendar-modal">
+            {/* Modal content same as before */}
             <div style={{
               display: 'flex',
               flexDirection: 'row',
