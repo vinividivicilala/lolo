@@ -1,4 +1,4 @@
-// app/page.tsx (Halaman Utama) - Section hitam dengan teks TRUSTED COLLABS
+// app/page.tsx (Halaman Utama) - Section hitam dengan teks TRUSTED COLLABS 1 baris
 
 'use client';
 
@@ -58,7 +58,7 @@ export default function HomePage(): React.JSX.Element {
   
   // Section baru yang berubah warna
   const colorChangeSectionRef = useRef<HTMLDivElement>(null);
-  const trustedTextRef = useRef<HTMLDivElement>(null); // Ref untuk teks TRUSTED COLLABS
+  const trustedTextRef = useRef<HTMLDivElement>(null);
   
   // Refs untuk gambar-gambar
   const img1Ref = useRef<HTMLDivElement>(null);
@@ -251,7 +251,7 @@ export default function HomePage(): React.JSX.Element {
     };
   }, []);
 
-  // Efek scroll untuk mengubah warna section baru
+  // Efek scroll untuk mengubah warna section baru dan warna teks
   useEffect(() => {
     if (isLoading) return;
 
@@ -264,18 +264,36 @@ export default function HomePage(): React.JSX.Element {
       const sectionBottom = sectionTop + colorChangeSectionRef.current.offsetHeight;
       
       // Cek apakah scroll berada di dalam section baru
-      if (scrollPosition + windowHeight/2 >= sectionTop && scrollPosition + windowHeight/2 <= sectionBottom) {
+      const isInSection = scrollPosition + windowHeight/2 >= sectionTop && scrollPosition + windowHeight/2 <= sectionBottom;
+      
+      if (isInSection) {
         gsap.to(colorChangeSectionRef.current, {
           backgroundColor: '#000000',
           duration: 0.5,
           ease: "power2.inOut"
         });
+        // Warna teks menjadi putih saat background hitam
+        if (trustedTextRef.current) {
+          gsap.to(trustedTextRef.current, {
+            color: '#ffffff',
+            duration: 0.5,
+            ease: "power2.inOut"
+          });
+        }
       } else {
         gsap.to(colorChangeSectionRef.current, {
           backgroundColor: '#ffffff',
           duration: 0.5,
           ease: "power2.inOut"
         });
+        // Warna teks menjadi hitam saat background putih
+        if (trustedTextRef.current) {
+          gsap.to(trustedTextRef.current, {
+            color: 'rgb(21, 22, 26)',
+            duration: 0.5,
+            ease: "power2.inOut"
+          });
+        }
       }
     };
 
@@ -646,6 +664,15 @@ export default function HomePage(): React.JSX.Element {
       <style jsx global>{`
         @import url('https://fonts.googleapis.com/css2?family=Questrial&display=swap');
         
+        @font-face {
+          font-family: 'Aeonik-Regular';
+          src: url('/fonts/Aeonik-Regular.woff2') format('woff2'),
+               url('/fonts/Aeonik-Regular.woff') format('woff');
+          font-weight: 400;
+          font-style: normal;
+          font-display: swap;
+        }
+        
         * {
           -ms-overflow-style: none;
           scrollbar-width: none;
@@ -963,13 +990,12 @@ export default function HomePage(): React.JSX.Element {
           width: 100%;
           display: flex;
           flex-direction: column;
-          justify-content: flex-start;
-          align-items: flex-end;
+          justify-content: center;
+          align-items: flex-start;
           transition: background-color 0.5s ease;
           position: relative;
           z-index: 5;
-          padding-top: 120px;
-          padding-right: 80px;
+          padding-left: 80px;
           box-sizing: border-box;
         }
 
@@ -979,9 +1005,10 @@ export default function HomePage(): React.JSX.Element {
           font-size: 150px;
           color: rgb(21, 22, 26);
           letter-spacing: -0.02em;
-          line-height: 200px;
-          text-align: right;
+          line-height: 1.2;
+          text-align: left;
           margin: 0;
+          transition: color 0.5s ease;
         }
       `}</style>
       
@@ -1185,7 +1212,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* SECTION BARU - Yang berubah warna saat scroll dengan teks TRUSTED COLLABS di kanan */}
+            {/* SECTION BARU - Yang berubah warna saat scroll dengan teks TRUSTED COLLABS 1 baris di kiri */}
             <div
               ref={colorChangeSectionRef}
               className="color-change-section"
@@ -1197,7 +1224,7 @@ export default function HomePage(): React.JSX.Element {
                 ref={trustedTextRef}
                 className="trusted-text"
               >
-                TRUSTED<br />COLLABS
+                TRUSTED COLLABS
               </div>
             </div>
 
@@ -1534,7 +1561,7 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </div>
 
-      {/* Calendar Call Modal - same as before */}
+      {/* Calendar Call Modal */}
       {showCalendarModal && (
         <div className="calendar-modal-overlay">
           <div ref={modalRef} className="calendar-modal">
