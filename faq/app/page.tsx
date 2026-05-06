@@ -1,4 +1,4 @@
-// app/page.tsx (Halaman Utama) - Dengan carousel horizontal di bawah TRUSTED COLLABS
+// app/page.tsx (Halaman Utama) - Dengan section biru baru "Features"
 
 'use client';
 
@@ -26,6 +26,7 @@ export default function HomePage(): React.JSX.Element {
   const [location, setLocation] = useState<string>("");
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [hoverActive, setHoverActive] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
   
   const acceptBtnRef = useRef<HTMLButtonElement>(null);
   const declineBtnRef = useRef<HTMLButtonElement>(null);
@@ -34,6 +35,7 @@ export default function HomePage(): React.JSX.Element {
   const mainContentRef = useRef<HTMLDivElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
+  const carouselTrackRef = useRef<HTMLDivElement>(null);
   
   // Refs untuk teks yang akan di-split
   const mencatatTextRef = useRef<HTMLDivElement>(null);
@@ -57,51 +59,118 @@ export default function HomePage(): React.JSX.Element {
   const bottomLeftTextRef = useRef<HTMLDivElement>(null);
   const studioContainerRef = useRef<HTMLDivElement>(null);
   
-  // Section baru yang berubah warna
-  const colorChangeSectionRef = useRef<HTMLDivElement>(null);
+  // Section trusted collabs
+  const trustedSectionRef = useRef<HTMLDivElement>(null);
   const trustedTextRef = useRef<HTMLDivElement>(null);
+  
+  // Section biru baru - Features
+  const featuresSectionRef = useRef<HTMLDivElement>(null);
+  const featuresTextRef = useRef<HTMLDivElement>(null);
   
   // Refs untuk gambar-gambar hover
   const img1Ref = useRef<HTMLDivElement>(null);
   const img2Ref = useRef<HTMLDivElement>(null);
 
-  // Data untuk carousel
+  // Data untuk carousel dengan warna highlight PINK, HIJAU, BIRU
   const carouselItems = [
     {
       id: 1,
+      number: "01",
       image: "/images/lkhh.jpg",
       brand: "LKHH Studio",
-      description: "Creative digital agency specializing in branding and web design."
+      brandColor: "#FF69B4",
+      highlightText: "Creative Agency",
+      description: "Creative digital agency specializing in branding and web design. We help businesses grow with innovative solutions and creative strategies.",
+      link: "https://lkhhstudio.com",
+      linkText: "Visit Website →"
     },
     {
       id: 2,
+      number: "02",
       image: "/images/ai.jpg",
       brand: "AI Creative",
-      description: "Artificial intelligence solutions for modern businesses."
+      brandColor: "#4CAF50",
+      highlightText: "AI Solutions",
+      description: "Artificial intelligence solutions for modern businesses. Transform your operations with cutting-edge AI technology and machine learning.",
+      link: "https://aicreative.com",
+      linkText: "Explore AI →"
     },
     {
       id: 3,
+      number: "03",
       image: "/images/5.jpg",
       brand: "Farid Corp",
-      description: "Technology consulting and software development."
+      brandColor: "#2196F3",
+      highlightText: "Tech Consulting",
+      description: "Technology consulting and software development. From idea to deployment, we've got you covered with end-to-end solutions.",
+      link: "https://faridcorp.com",
+      linkText: "Learn More →"
     },
     {
       id: 4,
+      number: "04",
       image: "/images/lkhh.jpg",
       brand: "Studio Beta",
-      description: "UI/UX design and product innovation."
+      brandColor: "#FF69B4",
+      highlightText: "UI/UX Design",
+      description: "UI/UX design and product innovation. Creating beautiful experiences that users love and remember.",
+      link: "https://studiobeta.com",
+      linkText: "View Portfolio →"
     },
     {
       id: 5,
+      number: "05",
       image: "/images/ai.jpg",
       brand: "Gamma Labs",
-      description: "Research and development in emerging technologies."
+      brandColor: "#4CAF50",
+      highlightText: "R&D",
+      description: "Research and development in emerging technologies. Pushing the boundaries of what's possible in tech.",
+      link: "https://gammalabs.com",
+      linkText: "Discover →"
     },
     {
       id: 6,
+      number: "06",
       image: "/images/5.jpg",
       brand: "Delta Creative",
-      description: "Content creation and digital marketing."
+      brandColor: "#2196F3",
+      highlightText: "Digital Marketing",
+      description: "Content creation and digital marketing. Tell your story to the world with our creative team.",
+      link: "https://deltacreative.com",
+      linkText: "Get Started →"
+    },
+    {
+      id: 7,
+      number: "07",
+      image: "/images/lkhh.jpg",
+      brand: "Echo Studio",
+      brandColor: "#FF69B4",
+      highlightText: "Sound Design",
+      description: "Professional audio production and sound design for multimedia projects.",
+      link: "https://echostudio.com",
+      linkText: "Listen Now →"
+    },
+    {
+      id: 8,
+      number: "08",
+      image: "/images/ai.jpg",
+      brand: "Nexa Labs",
+      brandColor: "#4CAF50",
+      highlightText: "Innovation Hub",
+      description: "Incubating cutting-edge startups and fostering technological innovation.",
+      link: "https://nexalabs.com",
+      linkText: "Join Us →"
+    },
+    {
+      id: 9,
+      number: "09",
+      image: "/images/5.jpg",
+      brand: "Omni Tech",
+      brandColor: "#2196F3",
+      highlightText: "IT Solutions",
+      description: "Comprehensive IT solutions for enterprise-level businesses.",
+      link: "https://omnitech.com",
+      linkText: "Get Quote →"
     }
   ];
 
@@ -209,7 +278,6 @@ export default function HomePage(): React.JSX.Element {
     element.textContent = originalText;
   };
 
-  // Animasi hover untuk menampilkan gambar di area teks MENURU.STUDIO
   const handleStudioHoverEnter = () => {
     setHoverActive(true);
     
@@ -263,34 +331,99 @@ export default function HomePage(): React.JSX.Element {
     });
   };
 
-  // Scroll snapping untuk carousel horizontal
+  // Pinned section effect - section ditahan sampai semua carousel habis di-scroll
   useEffect(() => {
     if (isLoading) return;
-    
-    const carousel = carouselRef.current;
-    if (!carousel) return;
 
-    let isScrolling = false;
+    const section = trustedSectionRef.current;
+    const carousel = carouselRef.current;
     
-    const handleWheel = (e: WheelEvent) => {
-      if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
-      
-      e.preventDefault();
-      if (isScrolling) return;
-      
-      isScrolling = true;
-      const scrollAmount = e.deltaY > 0 ? 400 : -400;
-      carousel.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-      
-      setTimeout(() => {
-        isScrolling = false;
-      }, 200);
+    if (!section || !carousel) return;
+
+    const getTotalScrollWidth = () => {
+      if (!carouselTrackRef.current) return 0;
+      const trackWidth = carouselTrackRef.current.scrollWidth;
+      const containerWidth = carousel.clientWidth;
+      return Math.max(0, trackWidth - containerWidth);
     };
-    
-    carousel.addEventListener('wheel', handleWheel, { passive: false });
-    
+
+    const pinnedTrigger = ScrollTrigger.create({
+      trigger: section,
+      start: "top top",
+      end: () => `+=${getTotalScrollWidth() + 100}`,
+      pin: true,
+      pinSpacing: true,
+      scrub: 1,
+      onUpdate: (self) => {
+        if (carouselRef.current && carouselTrackRef.current) {
+          const totalScrollWidth = getTotalScrollWidth();
+          const scrollPosition = self.progress * totalScrollWidth;
+          carouselRef.current.scrollLeft = scrollPosition;
+          
+          const itemWidth = 520;
+          const newIndex = Math.floor(scrollPosition / itemWidth);
+          if (newIndex !== activeIndex && newIndex < carouselItems.length) {
+            setActiveIndex(newIndex);
+          }
+        }
+      }
+    });
+
     return () => {
-      carousel.removeEventListener('wheel', handleWheel);
+      pinnedTrigger.kill();
+    };
+  }, [isLoading, carouselItems.length, activeIndex]);
+
+  // Animasi SplitText untuk Features
+  useEffect(() => {
+    if (isLoading) return;
+
+    const featuresElement = featuresTextRef.current;
+    if (!featuresElement) return;
+
+    const splitFeatures = new SplitText(featuresElement, {
+      type: "chars, words",
+      charsClass: "features-char"
+    });
+
+    gsap.set(splitFeatures.chars, {
+      opacity: 0,
+      y: 100,
+      rotationX: -90,
+      transformPerspective: 800,
+      filter: 'blur(20px)'
+    });
+
+    ScrollTrigger.create({
+      trigger: featuresSectionRef.current,
+      start: "top 80%",
+      end: "bottom 20%",
+      onEnter: () => {
+        gsap.to(splitFeatures.chars, {
+          opacity: 1,
+          y: 0,
+          rotationX: 0,
+          filter: 'blur(0px)',
+          duration: 1.2,
+          stagger: { each: 0.03, from: "start", ease: "power2.out" },
+          ease: "back.out(0.6)"
+        });
+      },
+      onLeaveBack: () => {
+        gsap.to(splitFeatures.chars, {
+          opacity: 0,
+          y: 100,
+          rotationX: -90,
+          filter: 'blur(20px)',
+          duration: 0.8,
+          stagger: { each: 0.02, from: "start" },
+        });
+      },
+      toggleActions: "play none none reverse"
+    });
+
+    return () => {
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
   }, [isLoading]);
 
@@ -323,65 +456,6 @@ export default function HomePage(): React.JSX.Element {
     };
   }, []);
 
-  // Efek scroll untuk mengubah warna section baru dan warna teks
-  useEffect(() => {
-    if (isLoading) return;
-
-    const handleScroll = () => {
-      if (!colorChangeSectionRef.current) return;
-      
-      const scrollPosition = window.scrollY;
-      const windowHeight = window.innerHeight;
-      const sectionTop = colorChangeSectionRef.current.offsetTop;
-      const sectionBottom = sectionTop + colorChangeSectionRef.current.offsetHeight;
-      
-      const isInSection = scrollPosition + windowHeight/2 >= sectionTop && scrollPosition + windowHeight/2 <= sectionBottom;
-      
-      if (isInSection) {
-        gsap.to(colorChangeSectionRef.current, {
-          backgroundColor: '#000000',
-          duration: 0.5,
-          ease: "power2.inOut"
-        });
-        if (trustedTextRef.current) {
-          gsap.to(trustedTextRef.current, {
-            color: '#ffffff',
-            duration: 0.5,
-            ease: "power2.inOut"
-          });
-        }
-        // Ubah warna teks carousel items menjadi putih
-        gsap.to('.carousel-brand, .carousel-desc', {
-          color: '#ffffff',
-          duration: 0.5,
-          ease: "power2.inOut"
-        });
-      } else {
-        gsap.to(colorChangeSectionRef.current, {
-          backgroundColor: '#ffffff',
-          duration: 0.5,
-          ease: "power2.inOut"
-        });
-        if (trustedTextRef.current) {
-          gsap.to(trustedTextRef.current, {
-            color: 'rgb(21, 22, 26)',
-            duration: 0.5,
-            ease: "power2.inOut"
-          });
-        }
-        // Kembalikan warna teks carousel items menjadi hitam
-        gsap.to('.carousel-brand, .carousel-desc', {
-          color: 'rgb(21, 22, 26)',
-          duration: 0.5,
-          ease: "power2.inOut"
-        });
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [isLoading]);
-
   // Animasi SplitText untuk TRUSTED COLLABS
   useEffect(() => {
     if (isLoading) return;
@@ -403,7 +477,7 @@ export default function HomePage(): React.JSX.Element {
     });
 
     ScrollTrigger.create({
-      trigger: colorChangeSectionRef.current,
+      trigger: trustedSectionRef.current,
       start: "top 80%",
       end: "bottom 20%",
       onEnter: () => {
@@ -782,7 +856,7 @@ export default function HomePage(): React.JSX.Element {
         }
         
         #smooth-content {
-          min-height: 300vh;
+          min-height: 400vh;
           width: 100%;
           will-change: transform;
         }
@@ -805,6 +879,12 @@ export default function HomePage(): React.JSX.Element {
         }
 
         .trusted-char {
+          display: inline-block;
+          will-change: transform, opacity, filter;
+          transform-style: preserve-3d;
+        }
+
+        .features-char {
           display: inline-block;
           will-change: transform, opacity, filter;
           transform-style: preserve-3d;
@@ -1065,18 +1145,20 @@ export default function HomePage(): React.JSX.Element {
           line-height: 1.3;
         }
 
-        .color-change-section {
+        /* Section Trusted - Warna HITAM TETAP */
+        .trusted-section {
           min-height: 100vh;
           width: 100%;
+          background-color: #000000;
           display: flex;
           flex-direction: column;
           justify-content: flex-start;
           align-items: flex-start;
-          transition: background-color 0.5s ease;
           position: relative;
           z-index: 5;
           padding-left: 80px;
           padding-top: 80px;
+          padding-bottom: 80px;
           box-sizing: border-box;
           overflow-x: hidden;
         }
@@ -1085,13 +1167,40 @@ export default function HomePage(): React.JSX.Element {
           font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
           font-weight: 400;
           font-size: 150px;
-          color: rgb(21, 22, 26);
+          color: #ffffff;
           letter-spacing: -0.02em;
           line-height: 1.2;
           text-align: left;
           margin: 0;
-          transition: color 0.5s ease;
           margin-bottom: 60px;
+        }
+
+        /* Section Features - Warna BIRU (#0000ff) */
+        .features-section {
+          min-height: 100vh;
+          width: 100%;
+          background-color: #0000ff;
+          display: flex;
+          flex-direction: column;
+          justify-content: flex-start;
+          align-items: flex-start;
+          position: relative;
+          z-index: 5;
+          padding-left: 80px;
+          padding-top: 120px;
+          padding-bottom: 80px;
+          box-sizing: border-box;
+        }
+
+        .features-text {
+          font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
+          font-weight: 400;
+          font-size: 300px;
+          color: #ffffff;
+          letter-spacing: -0.02em;
+          line-height: 1.1;
+          text-align: left;
+          margin: 0;
         }
 
         /* Carousel Horizontal Styles */
@@ -1110,15 +1219,14 @@ export default function HomePage(): React.JSX.Element {
         
         .carousel-track {
           display: flex;
-          gap: 30px;
+          gap: 40px;
           padding-right: 80px;
         }
         
         .carousel-item {
           flex-shrink: 0;
-          width: 380px;
+          width: 480px;
           background: transparent;
-          border-radius: 24px;
           transition: all 0.3s ease;
         }
         
@@ -1128,55 +1236,137 @@ export default function HomePage(): React.JSX.Element {
         
         .carousel-image {
           width: 100%;
-          height: 380px;
+          height: 320px;
           border-radius: 20px;
           overflow: hidden;
           position: relative;
-          margin-bottom: 20px;
+          margin-bottom: 24px;
+          background-color: #1a1a1a;
+        }
+        
+        .carousel-image img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+        
+        .carousel-content-row {
+          display: flex;
+          gap: 24px;
+          align-items: flex-start;
+        }
+        
+        .carousel-number-side {
+          flex-shrink: 0;
+          width: 60px;
+        }
+        
+        .carousel-number-side span {
+          font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
+          font-size: 48px;
+          font-weight: 700;
+          color: #ffffff;
+          opacity: 0.8;
+          letter-spacing: -0.02em;
+        }
+        
+        .carousel-info {
+          flex: 1;
+        }
+        
+        .brand-wrapper {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          flex-wrap: wrap;
+          margin-bottom: 16px;
         }
         
         .carousel-brand {
           font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
-          font-weight: 500;
-          font-size: 24px;
-          color: rgb(21, 22, 26);
-          margin: 0 0 8px 0;
-          transition: color 0.5s ease;
+          font-weight: 600;
+          font-size: 28px;
+          color: #ffffff;
+          margin: 0;
           letter-spacing: -0.02em;
+        }
+        
+        .brand-highlight {
+          display: inline-block;
+          padding: 4px 16px;
+          border-radius: 40px;
+          font-size: 13px;
+          font-weight: 600;
+          font-family: 'Questrial', sans-serif;
+          letter-spacing: 0.3px;
         }
         
         .carousel-desc {
           font-family: 'Questrial', sans-serif;
           font-weight: 400;
+          font-size: 15px;
+          line-height: 1.6;
+          color: rgba(255, 255, 255, 0.75);
+          margin: 0 0 20px 0;
+        }
+        
+        .carousel-link {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
           font-size: 14px;
-          color: rgb(21, 22, 26);
-          line-height: 1.5;
-          transition: color 0.5s ease;
+          font-weight: 500;
+          text-decoration: none;
+          transition: all 0.3s ease;
+          padding: 8px 0;
+        }
+        
+        .carousel-link:hover {
+          gap: 12px;
           opacity: 0.8;
         }
 
-        /* Custom scrollbar untuk carousel */
         .carousel-container::-webkit-scrollbar {
           height: 4px;
           display: block;
         }
         
         .carousel-container::-webkit-scrollbar-track {
-          background: rgba(0, 0, 0, 0.1);
+          background: rgba(255, 255, 255, 0.2);
           border-radius: 10px;
         }
         
         .carousel-container::-webkit-scrollbar-thumb {
-          background: rgba(0, 0, 0, 0.3);
+          background: rgba(255, 255, 255, 0.5);
           border-radius: 10px;
         }
-        
-        .color-change-section .carousel-container::-webkit-scrollbar-track {
-          background: rgba(255, 255, 255, 0.2);
+
+        .scroll-indicator {
+          position: absolute;
+          bottom: 40px;
+          right: 80px;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          font-family: 'Questrial', sans-serif;
+          font-size: 14px;
+          color: rgba(255, 255, 255, 0.6);
+          transition: opacity 0.3s ease;
+          z-index: 10;
         }
         
-        .color-change-section .carousel-container::-webkit-scrollbar-thumb {
-          background: rgba(255, 255, 255, 0.5);
+        .scroll-indicator:hover {
+          opacity: 1;
+        }
+        
+        .scroll-arrow {
+          animation: bounceRight 1.5s infinite;
+        }
+        
+        @keyframes bounceRight {
+          0%, 100% { transform: translateX(0); }
+          50% { transform: translateX(8px); }
         }
       `}</style>
       
@@ -1299,7 +1489,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* SECTION 1 - MENURU.STUDIO dengan teks IDN/MN'RU© - 26' dan hover images */}
+            {/* SECTION 1 - MENURU.STUDIO */}
             <div
               ref={studioContainerRef}
               style={{
@@ -1342,7 +1532,7 @@ export default function HomePage(): React.JSX.Element {
                 MN'RU© - 26'
               </div>
 
-              {/* Floating Images - Muncul di area teks MENURU.STUDIO saat hover */}
+              {/* Floating Images Hover */}
               <div className="studio-hover-images">
                 <div
                   ref={img1Ref}
@@ -1380,13 +1570,23 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* SECTION BARU - Yang berubah warna saat scroll dengan teks TRUSTED COLLABS dan carousel */}
+            {/* SECTION FEATURES - Warna BIRU (#0000ff) dengan teks "Features" font 300px */}
             <div
-              ref={colorChangeSectionRef}
-              className="color-change-section"
-              style={{
-                backgroundColor: '#ffffff',
-              }}
+              ref={featuresSectionRef}
+              className="features-section"
+            >
+              <div
+                ref={featuresTextRef}
+                className="features-text"
+              >
+                Features
+              </div>
+            </div>
+
+            {/* SECTION TRUSTED COLLABS - Warna HITAM TETAP dengan Carousel */}
+            <div
+              ref={trustedSectionRef}
+              className="trusted-section"
             >
               <div
                 ref={trustedTextRef}
@@ -1400,7 +1600,10 @@ export default function HomePage(): React.JSX.Element {
                 ref={carouselRef}
                 className="carousel-container"
               >
-                <div className="carousel-track">
+                <div 
+                  ref={carouselTrackRef}
+                  className="carousel-track"
+                >
                   {carouselItems.map((item) => (
                     <div key={item.id} className="carousel-item">
                       <div className="carousel-image">
@@ -1411,15 +1614,54 @@ export default function HomePage(): React.JSX.Element {
                           style={{ objectFit: 'cover' }}
                         />
                       </div>
-                      <h3 className="carousel-brand">{item.brand}</h3>
-                      <p className="carousel-desc">{item.description}</p>
+                      
+                      <div className="carousel-content-row">
+                        <div className="carousel-number-side">
+                          <span>{item.number}</span>
+                        </div>
+                        <div className="carousel-info">
+                          <div className="brand-wrapper">
+                            <h3 className="carousel-brand">{item.brand}</h3>
+                            <span 
+                              className="brand-highlight"
+                              style={{ 
+                                backgroundColor: item.brandColor,
+                                color: item.brandColor === '#FFE66D' ? '#000000' : '#ffffff'
+                              }}
+                            >
+                              {item.highlightText}
+                            </span>
+                          </div>
+                          <p className="carousel-desc">{item.description}</p>
+                          <a 
+                            href={item.link} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="carousel-link"
+                            style={{ color: item.brandColor }}
+                          >
+                            {item.linkText}
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                          </a>
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>
               </div>
+
+              {/* Scroll Indicator */}
+              <div className="scroll-indicator">
+                <span>Scroll → to explore more collaborators</span>
+                <svg className="scroll-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M5 12H19M19 12L13 6M19 12L13 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
             </div>
 
-            {/* Bagian footer dengan semua konten */}
+            {/* Bagian footer */}
             <div style={{
               width: '100%',
               position: 'relative',
