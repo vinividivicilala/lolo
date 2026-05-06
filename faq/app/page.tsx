@@ -1,4 +1,4 @@
-// app/page.tsx (Halaman Utama) - Hover gambar di area MENURU.STUDIO
+// app/page.tsx (Halaman Utama) - Hover gambar hanya di area MENURU.STUDIO
 
 'use client';
 
@@ -54,6 +54,7 @@ export default function HomePage(): React.JSX.Element {
   const calendarBtnRef = useRef<HTMLButtonElement>(null);
   const studioTextRef = useRef<HTMLDivElement>(null);
   const bottomLeftTextRef = useRef<HTMLDivElement>(null);
+  const studioContainerRef = useRef<HTMLDivElement>(null); // Container untuk area studio
   
   // Section baru yang berubah warna
   const colorChangeSectionRef = useRef<HTMLDivElement>(null);
@@ -171,18 +172,16 @@ export default function HomePage(): React.JSX.Element {
   const handleStudioHoverEnter = () => {
     setHoverActive(true);
     
-    // Animasi gambar muncul dari samping menuju ke tengah area teks
+    // Animasi gambar muncul
     gsap.killTweensOf([img1Ref.current, img2Ref.current]);
     
     // Gambar 1 - dari kiri
     gsap.set(img1Ref.current, { 
-      x: -300, 
+      x: -200, 
       y: 0, 
       rotation: -10, 
       scale: 0.8, 
-      opacity: 0,
-      left: '5%',
-      top: '45%'
+      opacity: 0
     });
     gsap.to(img1Ref.current, {
       x: 0,
@@ -197,13 +196,11 @@ export default function HomePage(): React.JSX.Element {
     
     // Gambar 2 - dari kanan
     gsap.set(img2Ref.current, { 
-      x: 300, 
+      x: 200, 
       y: 0, 
       rotation: 10, 
       scale: 0.8, 
-      opacity: 0,
-      right: '5%',
-      top: '45%'
+      opacity: 0
     });
     gsap.to(img2Ref.current, {
       x: 0,
@@ -891,22 +888,21 @@ export default function HomePage(): React.JSX.Element {
           opacity: 0.8;
         }
 
-        /* Floating images container - muncul di area teks */
-        .floating-images-studio {
-          position: fixed;
+        /* Container untuk gambar hover - hanya muncul di area studio */
+        .studio-hover-images {
+          position: absolute;
           top: 0;
           left: 0;
           width: 100%;
           height: 100%;
           pointer-events: none;
-          z-index: 200;
-          overflow: hidden;
+          z-index: 150;
         }
 
-        .floating-img-large {
+        .floating-img-studio {
           position: absolute;
-          width: 450px;
-          height: 550px;
+          width: 400px;
+          height: 500px;
           border-radius: 20px;
           overflow: hidden;
           box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
@@ -1062,6 +1058,7 @@ export default function HomePage(): React.JSX.Element {
 
             {/* SECTION 1 - MENURU.STUDIO dengan teks IDN/MN'RU© - 26' dan hover images */}
             <div
+              ref={studioContainerRef}
               style={{
                 display: 'flex',
                 flexDirection: 'column',
@@ -1101,44 +1098,44 @@ export default function HomePage(): React.JSX.Element {
                 <br />
                 MN'RU© - 26'
               </div>
-            </div>
 
-            {/* Floating Images - Muncul di area teks MENURU.STUDIO saat hover */}
-            <div className="floating-images-studio">
-              {/* Gambar 1 - Kiri area teks */}
-              <div
-                ref={img1Ref}
-                className="floating-img-large"
-                style={{
-                  left: '8%',
-                  top: '50%',
-                  transform: 'translateY(-50%)'
-                }}
-              >
-                <Image
-                  src="/images/lkhh.jpg"
-                  alt="Gallery 1"
-                  fill
-                  style={{ objectFit: 'cover' }}
-                />
-              </div>
+              {/* Floating Images - Muncul di area teks MENURU.STUDIO saat hover */}
+              <div className="studio-hover-images">
+                {/* Gambar 1 - Kiri area teks */}
+                <div
+                  ref={img1Ref}
+                  className="floating-img-studio"
+                  style={{
+                    left: '0%',
+                    top: '50%',
+                    transform: 'translateY(-50%)'
+                  }}
+                >
+                  <Image
+                    src="/images/lkhh.jpg"
+                    alt="Gallery 1"
+                    fill
+                    style={{ objectFit: 'cover' }}
+                  />
+                </div>
 
-              {/* Gambar 2 - Kanan area teks */}
-              <div
-                ref={img2Ref}
-                className="floating-img-large"
-                style={{
-                  right: '8%',
-                  top: '50%',
-                  transform: 'translateY(-50%)'
-                }}
-              >
-                <Image
-                  src="/images/ai.jpg"
-                  alt="Gallery 2"
-                  fill
-                  style={{ objectFit: 'cover' }}
-                />
+                {/* Gambar 2 - Kanan area teks */}
+                <div
+                  ref={img2Ref}
+                  className="floating-img-studio"
+                  style={{
+                    right: '0%',
+                    top: '50%',
+                    transform: 'translateY(-50%)'
+                  }}
+                >
+                  <Image
+                    src="/images/ai.jpg"
+                    alt="Gallery 2"
+                    fill
+                    style={{ objectFit: 'cover' }}
+                  />
+                </div>
               </div>
             </div>
 
