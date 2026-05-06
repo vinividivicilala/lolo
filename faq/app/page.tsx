@@ -1,4 +1,4 @@
-// app/page.tsx (Halaman Utama) - Section hitam dengan teks TRUSTED COLLABS 1 baris
+// app/page.tsx (Halaman Utama) - Full code dengan TRUSTED COLLABS di pojok kiri atas
 
 'use client';
 
@@ -301,7 +301,7 @@ export default function HomePage(): React.JSX.Element {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [isLoading]);
 
-  // Animasi SplitText untuk TRUSTED COLLABS ketika section hitam terlihat
+  // Animasi SplitText untuk TRUSTED COLLABS ketika section terlihat
   useEffect(() => {
     if (isLoading) return;
 
@@ -990,12 +990,13 @@ export default function HomePage(): React.JSX.Element {
           width: 100%;
           display: flex;
           flex-direction: column;
-          justify-content: center;
+          justify-content: flex-start;
           align-items: flex-start;
           transition: background-color 0.5s ease;
           position: relative;
           z-index: 5;
           padding-left: 80px;
+          padding-top: 80px;
           box-sizing: border-box;
         }
 
@@ -1212,7 +1213,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* SECTION BARU - Yang berubah warna saat scroll dengan teks TRUSTED COLLABS 1 baris di kiri */}
+            {/* SECTION BARU - Yang berubah warna saat scroll dengan teks TRUSTED COLLABS di pojok kiri atas */}
             <div
               ref={colorChangeSectionRef}
               className="color-change-section"
