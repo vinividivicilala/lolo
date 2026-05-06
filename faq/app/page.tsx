@@ -1,4 +1,4 @@
-// app/page.tsx (Halaman Utama) - Dengan efek scroll background change
+// app/page.tsx (Halaman Utama) - Dengan section baru yang berubah warna
 
 'use client';
 
@@ -26,7 +26,6 @@ export default function HomePage(): React.JSX.Element {
   const [location, setLocation] = useState<string>("");
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [hoverActive, setHoverActive] = useState(false);
-  const [isBlackSection, setIsBlackSection] = useState(false); // State untuk background section
   
   const acceptBtnRef = useRef<HTMLButtonElement>(null);
   const declineBtnRef = useRef<HTMLButtonElement>(null);
@@ -34,7 +33,6 @@ export default function HomePage(): React.JSX.Element {
   const smootherRef = useRef<any>(null);
   const mainContentRef = useRef<HTMLDivElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
-  const sectionRef = useRef<HTMLDivElement>(null); // Ref untuk section yang berubah warna
   
   // Refs untuk teks yang akan di-split
   const mencatatTextRef = useRef<HTMLDivElement>(null);
@@ -57,11 +55,13 @@ export default function HomePage(): React.JSX.Element {
   const studioTextRef = useRef<HTMLDivElement>(null);
   const bottomLeftTextRef = useRef<HTMLDivElement>(null);
   
-  // Refs untuk gambar-gambar
+  // Section baru yang berubah warna
+  const colorChangeSectionRef = useRef<HTMLDivElement>(null);
+  const sectionContentRef = useRef<HTMLDivElement>(null);
+  
+  // Refs untuk gambar-gambar - diperbesar ukurannya
   const img1Ref = useRef<HTMLDivElement>(null);
   const img2Ref = useRef<HTMLDivElement>(null);
-  const img3Ref = useRef<HTMLDivElement>(null);
-  const img4Ref = useRef<HTMLDivElement>(null);
 
   // Variabel untuk menyimpan teks asli medsos
   const originalTexts = {
@@ -167,70 +167,67 @@ export default function HomePage(): React.JSX.Element {
     element.textContent = originalText;
   };
 
-  // Animasi hover untuk menampilkan gambar-gambar
+  // Animasi hover untuk menampilkan gambar di tengah teks
   const handleStudioHoverEnter = () => {
     setHoverActive(true);
     
-    gsap.killTweensOf([img1Ref.current, img2Ref.current, img3Ref.current, img4Ref.current]);
+    // Animasi gambar muncul dari tengah
+    gsap.killTweensOf([img1Ref.current, img2Ref.current]);
     
-    gsap.set(img1Ref.current, { x: -200, y: -200, rotation: -15, scale: 0.8, opacity: 0 });
+    // Gambar 1 - dari tengah kiri
+    gsap.set(img1Ref.current, { 
+      x: -400, 
+      y: 0, 
+      rotation: -10, 
+      scale: 0.9, 
+      opacity: 0,
+      left: '15%',
+      top: '50%',
+      transform: 'translateY(-50%)'
+    });
     gsap.to(img1Ref.current, {
       x: 0,
       y: 0,
       rotation: 0,
       scale: 1,
       opacity: 1,
-      duration: 0.6,
+      duration: 0.7,
       ease: "back.out(0.8)",
       delay: 0
     });
     
-    gsap.set(img2Ref.current, { x: 200, y: -200, rotation: 15, scale: 0.8, opacity: 0 });
+    // Gambar 2 - dari tengah kanan
+    gsap.set(img2Ref.current, { 
+      x: 400, 
+      y: 0, 
+      rotation: 10, 
+      scale: 0.9, 
+      opacity: 0,
+      right: '15%',
+      top: '50%',
+      transform: 'translateY(-50%)'
+    });
     gsap.to(img2Ref.current, {
       x: 0,
       y: 0,
       rotation: 0,
       scale: 1,
       opacity: 1,
-      duration: 0.6,
+      duration: 0.7,
       ease: "back.out(0.8)",
       delay: 0.1
-    });
-    
-    gsap.set(img3Ref.current, { x: -200, y: 200, rotation: -10, scale: 0.8, opacity: 0 });
-    gsap.to(img3Ref.current, {
-      x: 0,
-      y: 0,
-      rotation: 0,
-      scale: 1,
-      opacity: 1,
-      duration: 0.6,
-      ease: "back.out(0.8)",
-      delay: 0.2
-    });
-    
-    gsap.set(img4Ref.current, { x: 200, y: 200, rotation: 10, scale: 0.8, opacity: 0 });
-    gsap.to(img4Ref.current, {
-      x: 0,
-      y: 0,
-      rotation: 0,
-      scale: 1,
-      opacity: 1,
-      duration: 0.6,
-      ease: "back.out(0.8)",
-      delay: 0.3
     });
   };
 
   const handleStudioHoverLeave = () => {
     setHoverActive(false);
     
-    gsap.to([img1Ref.current, img2Ref.current, img3Ref.current, img4Ref.current], {
+    // Animasi gambar menghilang
+    gsap.to([img1Ref.current, img2Ref.current], {
       opacity: 0,
-      scale: 0.5,
+      scale: 0.7,
       duration: 0.4,
-      ease: "power2.in",
-      stagger: 0.05
+      ease: "power2.in"
     });
   };
 
@@ -263,47 +260,43 @@ export default function HomePage(): React.JSX.Element {
     };
   }, []);
 
-  // Efek scroll untuk mengubah background
+  // Efek scroll untuk mengubah warna section baru
   useEffect(() => {
     if (isLoading) return;
 
     const handleScroll = () => {
-      if (!sectionRef.current) return;
+      if (!colorChangeSectionRef.current) return;
       
       const scrollPosition = window.scrollY;
       const windowHeight = window.innerHeight;
-      const sectionTop = sectionRef.current.offsetTop;
-      const sectionBottom = sectionTop + sectionRef.current.offsetHeight;
+      const sectionTop = colorChangeSectionRef.current.offsetTop;
+      const sectionBottom = sectionTop + colorChangeSectionRef.current.offsetHeight;
       
-      // Cek apakah scroll berada di dalam section
+      // Cek apakah scroll berada di dalam section baru
       if (scrollPosition + windowHeight/2 >= sectionTop && scrollPosition + windowHeight/2 <= sectionBottom) {
-        if (!isBlackSection) {
-          setIsBlackSection(true);
-          // Animasi transisi background
-          gsap.to(sectionRef.current, {
-            backgroundColor: '#000000',
-            duration: 0.5,
-            ease: "power2.inOut"
-          });
-          // Ubah warna teks menjadi putih di section hitam
-          gsap.to([studioTextRef.current, bottomLeftTextRef.current], {
+        gsap.to(colorChangeSectionRef.current, {
+          backgroundColor: '#000000',
+          duration: 0.5,
+          ease: "power2.inOut"
+        });
+        // Ubah warna teks di section baru menjadi putih
+        if (sectionContentRef.current) {
+          gsap.to(sectionContentRef.current.querySelectorAll('.changeable-text'), {
             color: '#ffffff',
             duration: 0.5,
             ease: "power2.inOut"
           });
         }
       } else {
-        if (isBlackSection) {
-          setIsBlackSection(false);
-          // Kembali ke putih
-          gsap.to(sectionRef.current, {
-            backgroundColor: '#ffffff',
-            duration: 0.5,
-            ease: "power2.inOut"
-          });
-          // Kembalikan warna teks ke hitam
-          gsap.to([studioTextRef.current, bottomLeftTextRef.current], {
-            color: 'rgb(16, 16, 16)',
+        gsap.to(colorChangeSectionRef.current, {
+          backgroundColor: '#ffffff',
+          duration: 0.5,
+          ease: "power2.inOut"
+        });
+        // Kembalikan warna teks di section baru menjadi hitam
+        if (sectionContentRef.current) {
+          gsap.to(sectionContentRef.current.querySelectorAll('.changeable-text'), {
+            color: '#000000',
             duration: 0.5,
             ease: "power2.inOut"
           });
@@ -313,7 +306,7 @@ export default function HomePage(): React.JSX.Element {
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [isLoading, isBlackSection]);
+  }, [isLoading]);
 
   useEffect(() => {
     if (!isLoading || !loadingOverlayRef.current) return;
@@ -893,14 +886,15 @@ export default function HomePage(): React.JSX.Element {
           letter-spacing: -0.02em;
           line-height: 1.2;
           cursor: pointer;
-          transition: color 0.3s ease, opacity 0.3s ease;
+          transition: opacity 0.3s ease;
         }
         
         .studio-text:hover {
           opacity: 0.8;
         }
 
-        .floating-images {
+        /* Floating images container - di tengah layar */
+        .floating-images-center {
           position: fixed;
           top: 0;
           left: 0;
@@ -911,13 +905,13 @@ export default function HomePage(): React.JSX.Element {
           overflow: hidden;
         }
 
-        .floating-img {
+        .floating-img-large {
           position: absolute;
-          width: 300px;
-          height: 400px;
+          width: 500px;
+          height: 600px;
           border-radius: 20px;
           overflow: hidden;
-          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
           opacity: 0;
           background-color: #f5f5f5;
         }
@@ -929,7 +923,23 @@ export default function HomePage(): React.JSX.Element {
           color: rgb(16, 16, 16);
           letter-spacing: -0.02em;
           line-height: 1.3;
-          transition: color 0.3s ease;
+        }
+
+        /* Section baru yang berubah warna */
+        .color-change-section {
+          min-height: 100vh;
+          width: 100%;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          transition: background-color 0.5s ease;
+          position: relative;
+          z-index: 5;
+        }
+
+        .changeable-text {
+          transition: color 0.5s ease;
         }
       `}</style>
       
@@ -1052,72 +1062,59 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* MAIN SECTION - Yang berubah warna saat scroll */}
-            <div 
-              ref={sectionRef}
+            {/* SECTION 1 - MENURU.STUDIO dengan teks IDN/MN'RU© - 26' */}
+            <div
               style={{
-                backgroundColor: '#ffffff',
-                transition: 'background-color 0.5s ease',
-                minHeight: '200vh',
-                width: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'flex-end',
+                justifyContent: 'center',
+                minHeight: '100vh',
+                paddingRight: '80px',
+                position: 'relative',
               }}
             >
-              {/* MENURU.STUDIO TEXT dengan teks IDN/MN'RU© - 26' */}
               <div
+                ref={studioTextRef}
+                className="studio-text"
                 style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'flex-end',
-                  justifyContent: 'center',
-                  minHeight: '100vh',
-                  paddingRight: '80px',
-                  position: 'relative',
+                  textAlign: 'right',
+                  opacity: 0
                 }}
+                onMouseEnter={handleStudioHoverEnter}
+                onMouseLeave={handleStudioHoverLeave}
               >
-                <div
-                  ref={studioTextRef}
-                  className="studio-text"
-                  style={{
-                    textAlign: 'right',
-                    opacity: 0
-                  }}
-                  onMouseEnter={handleStudioHoverEnter}
-                  onMouseLeave={handleStudioHoverLeave}
-                >
-                  <div>MENURU.STUDIO – Jakarta UX/UI Design</div>
-                  <div>Personal for Note, Donation & Calendar</div>
-                </div>
-
-                <div
-                  ref={bottomLeftTextRef}
-                  className="bottom-left-text"
-                  style={{
-                    position: 'absolute',
-                    bottom: '5%',
-                    left: '80px',
-                    textAlign: 'left',
-                    opacity: 0,
-                  }}
-                >
-                  IDN
-                  <br />
-                  MN'RU© - 26'
-                </div>
+                <div>MENURU.STUDIO – Jakarta UX/UI Design</div>
+                <div>Personal for Note, Donation & Calendar</div>
               </div>
 
-              {/* Space tambahan untuk efek scroll */}
-              <div style={{ height: '100vh' }} />
+              <div
+                ref={bottomLeftTextRef}
+                className="bottom-left-text"
+                style={{
+                  position: 'absolute',
+                  bottom: '5%',
+                  left: '80px',
+                  textAlign: 'left',
+                  opacity: 0,
+                }}
+              >
+                IDN
+                <br />
+                MN'RU© - 26'
+              </div>
             </div>
 
-            {/* Floating Images - Muncul saat hover */}
-            <div className="floating-images">
+            {/* Floating Images - Muncul di tengah layar saat hover */}
+            <div className="floating-images-center">
+              {/* Gambar 1 - Kiri tengah */}
               <div
                 ref={img1Ref}
-                className="floating-img"
+                className="floating-img-large"
                 style={{
-                  top: '15%',
                   left: '10%',
-                  transform: 'rotate(-5deg)'
+                  top: '50%',
+                  transform: 'translateY(-50%)'
                 }}
               >
                 <Image
@@ -1128,13 +1125,14 @@ export default function HomePage(): React.JSX.Element {
                 />
               </div>
 
+              {/* Gambar 2 - Kanan tengah */}
               <div
                 ref={img2Ref}
-                className="floating-img"
+                className="floating-img-large"
                 style={{
-                  top: '15%',
                   right: '10%',
-                  transform: 'rotate(5deg)'
+                  top: '50%',
+                  transform: 'translateY(-50%)'
                 }}
               >
                 <Image
@@ -1144,39 +1142,51 @@ export default function HomePage(): React.JSX.Element {
                   style={{ objectFit: 'cover' }}
                 />
               </div>
+            </div>
 
-              <div
-                ref={img3Ref}
-                className="floating-img"
-                style={{
-                  bottom: '15%',
-                  left: '10%',
-                  transform: 'rotate(-5deg)'
-                }}
-              >
-                <Image
-                  src="/images/lkhh.jpg"
-                  alt="Gallery 3"
-                  fill
-                  style={{ objectFit: 'cover' }}
-                />
-              </div>
-
-              <div
-                ref={img4Ref}
-                className="floating-img"
-                style={{
-                  bottom: '15%',
-                  right: '10%',
-                  transform: 'rotate(5deg)'
-                }}
-              >
-                <Image
-                  src="/images/ai.jpg"
-                  alt="Gallery 4"
-                  fill
-                  style={{ objectFit: 'cover' }}
-                />
+            {/* SECTION BARU - Yang berubah warna saat scroll */}
+            <div
+              ref={colorChangeSectionRef}
+              className="color-change-section"
+              style={{
+                backgroundColor: '#ffffff',
+              }}
+            >
+              <div ref={sectionContentRef} style={{
+                textAlign: 'center',
+                maxWidth: '80%',
+                padding: '60px'
+              }}>
+                <h1 className="changeable-text" style={{
+                  fontFamily: 'HelveticaNowDisplay, Arial, sans-serif',
+                  fontSize: '80px',
+                  fontWeight: '400',
+                  letterSpacing: '-0.02em',
+                  marginBottom: '30px',
+                  color: '#000000'
+                }}>
+                  This Section Changes Color
+                </h1>
+                <p className="changeable-text" style={{
+                  fontFamily: 'Questrial, sans-serif',
+                  fontSize: '24px',
+                  lineHeight: '1.6',
+                  color: '#000000',
+                  maxWidth: '800px',
+                  margin: '0 auto'
+                }}>
+                  Scroll down to see the background turn black.<br />
+                  Scroll back up to return to white.
+                </p>
+                <div style={{ marginTop: '60px' }}>
+                  <div className="changeable-text" style={{
+                    fontSize: '40px',
+                    fontWeight: '400',
+                    color: '#000000'
+                  }}>
+                    ✨ Experience the Magic ✨
+                  </div>
+                </div>
               </div>
             </div>
 
