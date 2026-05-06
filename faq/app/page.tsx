@@ -251,7 +251,7 @@ export default function HomePage(): React.JSX.Element {
     };
   }, []);
 
-  // Efek scroll untuk mengubah warna section baru dan animasi teks
+  // Efek scroll untuk mengubah warna section baru
   useEffect(() => {
     if (isLoading) return;
 
@@ -964,22 +964,23 @@ export default function HomePage(): React.JSX.Element {
           display: flex;
           flex-direction: column;
           justify-content: flex-start;
-          align-items: flex-start;
+          align-items: flex-end;
           transition: background-color 0.5s ease;
           position: relative;
           z-index: 5;
           padding-top: 120px;
+          padding-right: 80px;
+          box-sizing: border-box;
         }
 
         .trusted-text {
-          font-family: 'HelveticaNowDisplay', 'Arial', sans-serif;
-          font-weight: 700;
-          font-size: 200px;
-          color: #ffffff;
+          font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
+          font-weight: 400;
+          font-size: 150px;
+          color: rgb(21, 22, 26);
           letter-spacing: -0.02em;
-          line-height: 1.1;
-          text-align: left;
-          padding-left: 80px;
+          line-height: 200px;
+          text-align: right;
           margin: 0;
         }
       `}</style>
@@ -1184,7 +1185,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* SECTION BARU - Yang berubah warna saat scroll dengan teks TRUSTED COLLABS */}
+            {/* SECTION BARU - Yang berubah warna saat scroll dengan teks TRUSTED COLLABS di kanan */}
             <div
               ref={colorChangeSectionRef}
               className="color-change-section"
@@ -1533,11 +1534,10 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </div>
 
-      {/* Calendar Call Modal */}
+      {/* Calendar Call Modal - same as before */}
       {showCalendarModal && (
         <div className="calendar-modal-overlay">
           <div ref={modalRef} className="calendar-modal">
-            {/* Modal content same as before */}
             <div style={{
               display: 'flex',
               flexDirection: 'row',
