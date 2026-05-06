@@ -1,4 +1,4 @@
-// app/page.tsx (Halaman Utama) - Dengan carousel horizontal di bawah TRUSTED COLLABS
+// app/page.tsx (Halaman Utama) - Dengan section biru "Features" di bawah MN'RU© - 26'
 
 'use client';
 
@@ -57,9 +57,13 @@ export default function HomePage(): React.JSX.Element {
   const bottomLeftTextRef = useRef<HTMLDivElement>(null);
   const studioContainerRef = useRef<HTMLDivElement>(null);
   
-  // Section baru yang berubah warna
+  // Section yang berubah warna (TRUSTED COLLABS)
   const colorChangeSectionRef = useRef<HTMLDivElement>(null);
   const trustedTextRef = useRef<HTMLDivElement>(null);
+  
+  // Section biru baru - FEATURES
+  const featuresSectionRef = useRef<HTMLDivElement>(null);
+  const featuresTextRef = useRef<HTMLDivElement>(null);
   
   // Refs untuk gambar-gambar hover
   const img1Ref = useRef<HTMLDivElement>(null);
@@ -294,6 +298,59 @@ export default function HomePage(): React.JSX.Element {
     };
   }, [isLoading]);
 
+  // Animasi SplitText untuk FITUR (Features)
+  useEffect(() => {
+    if (isLoading) return;
+
+    const featuresElement = featuresTextRef.current;
+    if (!featuresElement) return;
+
+    const splitFeatures = new SplitText(featuresElement, {
+      type: "chars, words",
+      charsClass: "features-char"
+    });
+
+    gsap.set(splitFeatures.chars, {
+      opacity: 0,
+      y: 100,
+      rotationX: -90,
+      transformPerspective: 800,
+      filter: 'blur(20px)'
+    });
+
+    ScrollTrigger.create({
+      trigger: featuresSectionRef.current,
+      start: "top 80%",
+      end: "bottom 20%",
+      onEnter: () => {
+        gsap.to(splitFeatures.chars, {
+          opacity: 1,
+          y: 0,
+          rotationX: 0,
+          filter: 'blur(0px)',
+          duration: 1.2,
+          stagger: { each: 0.03, from: "start", ease: "power2.out" },
+          ease: "back.out(0.6)"
+        });
+      },
+      onLeaveBack: () => {
+        gsap.to(splitFeatures.chars, {
+          opacity: 0,
+          y: 100,
+          rotationX: -90,
+          filter: 'blur(20px)',
+          duration: 0.8,
+          stagger: { each: 0.02, from: "start" },
+        });
+      },
+      toggleActions: "play none none reverse"
+    });
+
+    return () => {
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+    };
+  }, [isLoading]);
+
   useEffect(() => {
     const initSmoother = () => {
       if (typeof window !== 'undefined' && !smootherRef.current) {
@@ -323,7 +380,7 @@ export default function HomePage(): React.JSX.Element {
     };
   }, []);
 
-  // Efek scroll untuk mengubah warna section baru dan warna teks
+  // Efek scroll untuk mengubah warna section TRUSTED COLLABS
   useEffect(() => {
     if (isLoading) return;
 
@@ -350,7 +407,6 @@ export default function HomePage(): React.JSX.Element {
             ease: "power2.inOut"
           });
         }
-        // Ubah warna teks carousel items menjadi putih
         gsap.to('.carousel-brand, .carousel-desc', {
           color: '#ffffff',
           duration: 0.5,
@@ -369,7 +425,6 @@ export default function HomePage(): React.JSX.Element {
             ease: "power2.inOut"
           });
         }
-        // Kembalikan warna teks carousel items menjadi hitam
         gsap.to('.carousel-brand, .carousel-desc', {
           color: 'rgb(21, 22, 26)',
           duration: 0.5,
@@ -782,7 +837,7 @@ export default function HomePage(): React.JSX.Element {
         }
         
         #smooth-content {
-          min-height: 300vh;
+          min-height: 400vh;
           width: 100%;
           will-change: transform;
         }
@@ -805,6 +860,12 @@ export default function HomePage(): React.JSX.Element {
         }
 
         .trusted-char {
+          display: inline-block;
+          will-change: transform, opacity, filter;
+          transform-style: preserve-3d;
+        }
+
+        .features-char {
           display: inline-block;
           will-change: transform, opacity, filter;
           transform-style: preserve-3d;
@@ -1065,6 +1126,35 @@ export default function HomePage(): React.JSX.Element {
           line-height: 1.3;
         }
 
+        /* SECTION FEATURES - Warna BIRU (#0000ff) */
+        .features-section {
+          min-height: 100vh;
+          width: 100%;
+          background-color: #0000ff;
+          display: flex;
+          flex-direction: column;
+          justify-content: flex-start;
+          align-items: flex-start;
+          position: relative;
+          z-index: 5;
+          padding-left: 80px;
+          padding-top: 120px;
+          padding-bottom: 80px;
+          box-sizing: border-box;
+        }
+
+        .features-text {
+          font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
+          font-weight: 400;
+          font-size: 300px;
+          color: #ffffff;
+          letter-spacing: -0.02em;
+          line-height: 1.1;
+          text-align: left;
+          margin: 0;
+        }
+
+        /* SECTION TRUSTED COLLABS */
         .color-change-section {
           min-height: 100vh;
           width: 100%;
@@ -1380,7 +1470,20 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* SECTION BARU - Yang berubah warna saat scroll dengan teks TRUSTED COLLABS dan carousel */}
+            {/* SECTION FEATURES - Warna BIRU (#0000ff) dengan teks "Features" font 300px di kiri atas */}
+            <div
+              ref={featuresSectionRef}
+              className="features-section"
+            >
+              <div
+                ref={featuresTextRef}
+                className="features-text"
+              >
+                Features
+              </div>
+            </div>
+
+            {/* SECTION TRUSTED COLLABS - Yang berubah warna saat scroll */}
             <div
               ref={colorChangeSectionRef}
               className="color-change-section"
