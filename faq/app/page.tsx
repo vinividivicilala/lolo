@@ -1,4 +1,4 @@
-// app/page.tsx (Halaman Utama) - Dengan carousel horizontal di bawah TRUSTED COLLABS
+// app/page.tsx (Halaman Utama) - Dengan carousel pinned section
 
 'use client';
 
@@ -26,6 +26,7 @@ export default function HomePage(): React.JSX.Element {
   const [location, setLocation] = useState<string>("");
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [hoverActive, setHoverActive] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
   
   const acceptBtnRef = useRef<HTMLButtonElement>(null);
   const declineBtnRef = useRef<HTMLButtonElement>(null);
@@ -34,6 +35,8 @@ export default function HomePage(): React.JSX.Element {
   const mainContentRef = useRef<HTMLDivElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
+  const carouselTrackRef = useRef<HTMLDivElement>(null);
+  const sectionWrapperRef = useRef<HTMLDivElement>(null);
   
   // Refs untuk teks yang akan di-split
   const mencatatTextRef = useRef<HTMLDivElement>(null);
@@ -65,43 +68,67 @@ export default function HomePage(): React.JSX.Element {
   const img1Ref = useRef<HTMLDivElement>(null);
   const img2Ref = useRef<HTMLDivElement>(null);
 
-  // Data untuk carousel
+  // Data untuk carousel dengan warna brand yang berbeda
   const carouselItems = [
     {
       id: 1,
+      number: "01",
       image: "/images/lkhh.jpg",
       brand: "LKHH Studio",
-      description: "Creative digital agency specializing in branding and web design."
+      brandColor: "#FF6B6B",
+      description: "Creative digital agency specializing in branding and web design. We help businesses grow with innovative solutions.",
+      link: "https://lkhhstudio.com",
+      linkText: "Visit Website →"
     },
     {
       id: 2,
+      number: "02",
       image: "/images/ai.jpg",
       brand: "AI Creative",
-      description: "Artificial intelligence solutions for modern businesses."
+      brandColor: "#4ECDC4",
+      description: "Artificial intelligence solutions for modern businesses. Transform your operations with cutting-edge AI technology.",
+      link: "https://aicreative.com",
+      linkText: "Explore AI →"
     },
     {
       id: 3,
+      number: "03",
       image: "/images/5.jpg",
       brand: "Farid Corp",
-      description: "Technology consulting and software development."
+      brandColor: "#FFE66D",
+      description: "Technology consulting and software development. From idea to deployment, we've got you covered.",
+      link: "https://faridcorp.com",
+      linkText: "Learn More →"
     },
     {
       id: 4,
+      number: "04",
       image: "/images/lkhh.jpg",
       brand: "Studio Beta",
-      description: "UI/UX design and product innovation."
+      brandColor: "#A855F7",
+      description: "UI/UX design and product innovation. Creating beautiful experiences that users love.",
+      link: "https://studiobeta.com",
+      linkText: "View Portfolio →"
     },
     {
       id: 5,
+      number: "05",
       image: "/images/ai.jpg",
       brand: "Gamma Labs",
-      description: "Research and development in emerging technologies."
+      brandColor: "#F97316",
+      description: "Research and development in emerging technologies. Pushing the boundaries of what's possible.",
+      link: "https://gammalabs.com",
+      linkText: "Discover →"
     },
     {
       id: 6,
+      number: "06",
       image: "/images/5.jpg",
       brand: "Delta Creative",
-      description: "Content creation and digital marketing."
+      brandColor: "#06B6D4",
+      description: "Content creation and digital marketing. Tell your story to the world with our creative team.",
+      link: "https://deltacreative.com",
+      linkText: "Get Started →"
     }
   ];
 
@@ -263,36 +290,52 @@ export default function HomePage(): React.JSX.Element {
     });
   };
 
-  // Scroll snapping untuk carousel horizontal
+  // Pinned section effect - section ditahan sampai carousel habis di-scroll
   useEffect(() => {
     if (isLoading) return;
-    
-    const carousel = carouselRef.current;
-    if (!carousel) return;
 
-    let isScrolling = false;
+    const section = colorChangeSectionRef.current;
+    const carousel = carouselRef.current;
     
-    const handleWheel = (e: WheelEvent) => {
-      if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
-      
-      e.preventDefault();
-      if (isScrolling) return;
-      
-      isScrolling = true;
-      const scrollAmount = e.deltaY > 0 ? 400 : -400;
-      carousel.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-      
-      setTimeout(() => {
-        isScrolling = false;
-      }, 200);
+    if (!section || !carousel) return;
+
+    // Hitung total lebar scroll carousel
+    const getMaxScroll = () => {
+      if (!carouselTrackRef.current) return 0;
+      const trackWidth = carouselTrackRef.current.scrollWidth;
+      const containerWidth = carousel.clientWidth;
+      return Math.max(0, trackWidth - containerWidth);
     };
-    
-    carousel.addEventListener('wheel', handleWheel, { passive: false });
-    
+
+    // Buat ScrollTrigger untuk pinned section
+    const pinnedTrigger = ScrollTrigger.create({
+      trigger: section,
+      start: "top top",
+      end: () => `+=${getMaxScroll() + 200}`,
+      pin: true,
+      pinSpacing: true,
+      scrub: 1,
+      onUpdate: (self) => {
+        // Scroll carousel berdasarkan progress scroll
+        if (carouselRef.current && carouselTrackRef.current) {
+          const maxScroll = getMaxScroll();
+          const scrollPosition = self.progress * maxScroll;
+          carouselRef.current.scrollLeft = scrollPosition;
+          
+          // Update active index
+          const itemWidth = 410; // 380px + 30px gap
+          const newIndex = Math.floor(scrollPosition / itemWidth);
+          if (newIndex !== activeIndex && newIndex < carouselItems.length) {
+            setActiveIndex(newIndex);
+          }
+        }
+      }
+    });
+
     return () => {
-      carousel.removeEventListener('wheel', handleWheel);
+      pinnedTrigger.kill();
     };
-  }, [isLoading]);
+  }, [isLoading, carouselItems.length, activeIndex]);
 
   useEffect(() => {
     const initSmoother = () => {
@@ -323,7 +366,7 @@ export default function HomePage(): React.JSX.Element {
     };
   }, []);
 
-  // Efek scroll untuk mengubah warna section baru dan warna teks
+  // Efek scroll untuk mengubah warna section
   useEffect(() => {
     if (isLoading) return;
 
@@ -350,9 +393,13 @@ export default function HomePage(): React.JSX.Element {
             ease: "power2.inOut"
           });
         }
-        // Ubah warna teks carousel items menjadi putih
-        gsap.to('.carousel-brand, .carousel-desc', {
+        gsap.to('.carousel-brand, .carousel-desc, .carousel-link, .carousel-number', {
           color: '#ffffff',
+          duration: 0.5,
+          ease: "power2.inOut"
+        });
+        gsap.to('.carousel-number-box', {
+          borderColor: '#ffffff',
           duration: 0.5,
           ease: "power2.inOut"
         });
@@ -369,9 +416,13 @@ export default function HomePage(): React.JSX.Element {
             ease: "power2.inOut"
           });
         }
-        // Kembalikan warna teks carousel items menjadi hitam
-        gsap.to('.carousel-brand, .carousel-desc', {
+        gsap.to('.carousel-brand, .carousel-desc, .carousel-link, .carousel-number', {
           color: 'rgb(21, 22, 26)',
+          duration: 0.5,
+          ease: "power2.inOut"
+        });
+        gsap.to('.carousel-number-box', {
+          borderColor: 'rgb(21, 22, 26)',
           duration: 0.5,
           ease: "power2.inOut"
         });
@@ -1077,6 +1128,7 @@ export default function HomePage(): React.JSX.Element {
           z-index: 5;
           padding-left: 80px;
           padding-top: 80px;
+          padding-bottom: 80px;
           box-sizing: border-box;
           overflow-x: hidden;
         }
@@ -1095,28 +1147,23 @@ export default function HomePage(): React.JSX.Element {
         }
 
         /* Carousel Horizontal Styles */
-        .carousel-container {
+        .carousel-pinned-container {
           width: 100%;
-          overflow-x: auto;
-          overflow-y: hidden;
+          overflow-x: hidden;
           cursor: grab;
-          scroll-behavior: smooth;
-          padding-bottom: 40px;
-        }
-        
-        .carousel-container:active {
-          cursor: grabbing;
+          position: relative;
         }
         
         .carousel-track {
           display: flex;
           gap: 30px;
           padding-right: 80px;
+          will-change: transform;
         }
         
         .carousel-item {
           flex-shrink: 0;
-          width: 380px;
+          width: 420px;
           background: transparent;
           border-radius: 24px;
           transition: all 0.3s ease;
@@ -1126,57 +1173,127 @@ export default function HomePage(): React.JSX.Element {
           transform: translateY(-10px);
         }
         
-        .carousel-image {
-          width: 100%;
-          height: 380px;
-          border-radius: 20px;
-          overflow: hidden;
+        .carousel-image-wrapper {
           position: relative;
           margin-bottom: 20px;
         }
         
+        .carousel-image {
+          width: 100%;
+          height: 420px;
+          border-radius: 20px;
+          overflow: hidden;
+          position: relative;
+        }
+        
+        .carousel-number {
+          position: absolute;
+          top: 20px;
+          left: 20px;
+          font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
+          font-size: 48px;
+          font-weight: 700;
+          color: rgba(255, 255, 255, 0.9);
+          text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+          z-index: 2;
+          letter-spacing: -0.02em;
+          transition: color 0.5s ease;
+        }
+        
+        .carousel-number-box {
+          position: absolute;
+          top: 15px;
+          left: 15px;
+          width: 80px;
+          height: 80px;
+          border: 2px solid rgba(255, 255, 255, 0.8);
+          border-radius: 16px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          backdrop-filter: blur(4px);
+          transition: border-color 0.5s ease;
+        }
+        
+        .carousel-number-box span {
+          font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
+          font-size: 32px;
+          font-weight: 700;
+          color: white;
+          text-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
+        }
+        
         .carousel-brand {
           font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
-          font-weight: 500;
-          font-size: 24px;
-          color: rgb(21, 22, 26);
-          margin: 0 0 8px 0;
+          font-weight: 600;
+          font-size: 28px;
+          margin: 0 0 12px 0;
           transition: color 0.5s ease;
           letter-spacing: -0.02em;
+          display: inline-block;
+        }
+        
+        .brand-highlight {
+          display: inline-block;
+          padding: 4px 12px;
+          border-radius: 40px;
+          transition: all 0.3s ease;
         }
         
         .carousel-desc {
           font-family: 'Questrial', sans-serif;
           font-weight: 400;
-          font-size: 14px;
-          color: rgb(21, 22, 26);
-          line-height: 1.5;
+          font-size: 16px;
+          line-height: 1.6;
           transition: color 0.5s ease;
-          opacity: 0.8;
+          opacity: 0.85;
+          margin: 16px 0;
+        }
+        
+        .carousel-link {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
+          font-size: 15px;
+          font-weight: 500;
+          text-decoration: none;
+          transition: all 0.3s ease;
+          padding: 8px 0;
+          border-bottom: 1px solid transparent;
+        }
+        
+        .carousel-link:hover {
+          gap: 12px;
+          border-bottom-color: currentColor;
         }
 
-        /* Custom scrollbar untuk carousel */
-        .carousel-container::-webkit-scrollbar {
-          height: 4px;
-          display: block;
+        /* Scroll indicator */
+        .scroll-indicator {
+          position: absolute;
+          bottom: 40px;
+          right: 80px;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          font-family: 'Questrial', sans-serif;
+          font-size: 14px;
+          opacity: 0.6;
+          transition: opacity 0.3s ease;
+          z-index: 10;
         }
         
-        .carousel-container::-webkit-scrollbar-track {
-          background: rgba(0, 0, 0, 0.1);
-          border-radius: 10px;
+        .scroll-indicator:hover {
+          opacity: 1;
         }
         
-        .carousel-container::-webkit-scrollbar-thumb {
-          background: rgba(0, 0, 0, 0.3);
-          border-radius: 10px;
+        .scroll-arrow {
+          animation: bounceRight 1.5s infinite;
         }
         
-        .color-change-section .carousel-container::-webkit-scrollbar-track {
-          background: rgba(255, 255, 255, 0.2);
-        }
-        
-        .color-change-section .carousel-container::-webkit-scrollbar-thumb {
-          background: rgba(255, 255, 255, 0.5);
+        @keyframes bounceRight {
+          0%, 100% { transform: translateX(0); }
+          50% { transform: translateX(8px); }
         }
       `}</style>
       
@@ -1380,7 +1497,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* SECTION BARU - Yang berubah warna saat scroll dengan teks TRUSTED COLLABS dan carousel */}
+            {/* SECTION BARU - Yang berubah warna saat scroll dengan teks TRUSTED COLLABS dan carousel pinned */}
             <div
               ref={colorChangeSectionRef}
               className="color-change-section"
@@ -1395,27 +1512,73 @@ export default function HomePage(): React.JSX.Element {
                 TRUSTED COLLABS
               </div>
 
-              {/* Carousel Horizontal */}
+              {/* Carousel Horizontal dengan Pinned Effect */}
               <div 
                 ref={carouselRef}
-                className="carousel-container"
+                className="carousel-pinned-container"
+                style={{
+                  width: '100%',
+                  overflowX: 'auto',
+                  overflowY: 'hidden',
+                  cursor: 'grab',
+                  scrollBehavior: 'smooth',
+                  paddingBottom: '40px',
+                }}
               >
-                <div className="carousel-track">
+                <div 
+                  ref={carouselTrackRef}
+                  className="carousel-track"
+                >
                   {carouselItems.map((item) => (
                     <div key={item.id} className="carousel-item">
-                      <div className="carousel-image">
-                        <Image
-                          src={item.image}
-                          alt={item.brand}
-                          fill
-                          style={{ objectFit: 'cover' }}
-                        />
+                      <div className="carousel-image-wrapper">
+                        <div className="carousel-number-box">
+                          <span>{item.number}</span>
+                        </div>
+                        <div className="carousel-image">
+                          <Image
+                            src={item.image}
+                            alt={item.brand}
+                            fill
+                            style={{ objectFit: 'cover' }}
+                          />
+                        </div>
                       </div>
-                      <h3 className="carousel-brand">{item.brand}</h3>
+                      <h3 className="carousel-brand">
+                        <span 
+                          className="brand-highlight"
+                          style={{ 
+                            backgroundColor: item.brandColor,
+                            color: item.brandColor === '#FFE66D' ? '#000000' : '#ffffff'
+                          }}
+                        >
+                          {item.brand}
+                        </span>
+                      </h3>
                       <p className="carousel-desc">{item.description}</p>
+                      <a 
+                        href={item.link} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="carousel-link"
+                        style={{ color: item.brandColor }}
+                      >
+                        {item.linkText}
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </a>
                     </div>
                   ))}
                 </div>
+              </div>
+
+              {/* Scroll Indicator */}
+              <div className="scroll-indicator">
+                <span>Scroll to explore more collaborators</span>
+                <svg className="scroll-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M5 12H19M19 12L13 6M19 12L13 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
               </div>
             </div>
 
