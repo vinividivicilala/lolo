@@ -1,4 +1,4 @@
-// app/page.tsx (Halaman Utama) - Features section berubah warna saat scroll seperti TRUSTED COLLABS
+// app/page.tsx (Halaman Utama) - Features section lengkap dengan ukuran yang disesuaikan
 
 'use client';
 
@@ -26,6 +26,7 @@ export default function HomePage(): React.JSX.Element {
   const [location, setLocation] = useState<string>("");
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [hoverActive, setHoverActive] = useState(false);
+  const [activeHover, setActiveHover] = useState<number | null>(null);
   
   const acceptBtnRef = useRef<HTMLButtonElement>(null);
   const declineBtnRef = useRef<HTMLButtonElement>(null);
@@ -57,9 +58,31 @@ export default function HomePage(): React.JSX.Element {
   const bottomLeftTextRef = useRef<HTMLDivElement>(null);
   const studioContainerRef = useRef<HTMLDivElement>(null);
   
-  // Section Features
-  const featuresSectionRef = useRef<HTMLDivElement>(null);
-  const featuresTextRef = useRef<HTMLDivElement>(null);
+  // Section Features - Main Title
+  const featuresMainSectionRef = useRef<HTMLDivElement>(null);
+  const featuresTitleRef = useRef<HTMLDivElement>(null);
+  
+  // Section Features Items (01-05)
+  const featuresSectionsRef = useRef<(HTMLDivElement | null)[]>([]);
+  const featuresLeftNumbersRef = useRef<(HTMLDivElement | null)[]>([]);
+  const featuresRightTextsRef = useRef<(HTMLDivElement | null)[]>([]);
+  const featuresOverlaysRef = useRef<(HTMLDivElement | null)[]>([]);
+  const featuresArrowsRef = useRef<(HTMLDivElement | null)[]>([]);
+  const featuresHoverContainersRef = useRef<(HTMLDivElement | null)[]>([]);
+  const featuresUpdateContainersRef = useRef<(HTMLDivElement | null)[]>([]);
+  const featuresCircleImagesRef = useRef<(HTMLDivElement | null)[]>([]);
+  
+  // Circle images refs untuk setiap item
+  const circleImgRefs = useRef<{[key: number]: (HTMLDivElement | null)[]}>({});
+  
+  // Data features items - dengan ukuran lebih kecil
+  const featuresItems = [
+    { number: "01", title: "Note", updateText: "Update¹", sup: "¹" },
+    { number: "02", title: "Community", updateText: "Join²", sup: "²" },
+    { number: "03", title: "Calendar", updateText: "Schedule³", sup: "³" },
+    { number: "04", title: "Blog", updateText: "Read⁴", sup: "⁴" },
+    { number: "05", title: "Donation", updateText: "Support⁵", sup: "⁵" }
+  ];
   
   // Section TRUSTED COLLABS
   const trustedSectionRef = useRef<HTMLDivElement>(null);
@@ -267,6 +290,108 @@ export default function HomePage(): React.JSX.Element {
     });
   };
 
+  // Animasi hover untuk setiap feature item
+  const handleItemHoverEnter = (index: number) => {
+    setActiveHover(index);
+    
+    // Munculkan overlay hitam
+    gsap.to(featuresOverlaysRef.current[index], {
+      opacity: 1,
+      duration: 0.4,
+      ease: "power2.out"
+    });
+    
+    // Munculkan Update container
+    gsap.to(featuresUpdateContainersRef.current[index], {
+      opacity: 1,
+      x: 0,
+      duration: 0.4,
+      ease: "power2.out"
+    });
+    
+    // Munculkan circle images
+    gsap.to(featuresCircleImagesRef.current[index], {
+      opacity: 1,
+      x: 0,
+      duration: 0.4,
+      ease: "power2.out"
+    });
+    
+    // Ubah panah menjadi garis lurus dan warna putih
+    if (featuresArrowsRef.current[index]) {
+      gsap.to(featuresArrowsRef.current[index], {
+        rotation: 0,
+        duration: 0.3,
+        ease: "back.out(0.6)"
+      });
+      gsap.to(`.features-right-arrow-${index} svg`, {
+        stroke: '#ffffff',
+        duration: 0.3,
+        ease: "power2.out"
+      });
+    }
+    
+    // Animasi foto bulat
+    if (circleImgRefs.current[index]) {
+      gsap.to(circleImgRefs.current[index], {
+        scale: 1.2,
+        duration: 0.4,
+        ease: "back.out(0.6)",
+        stagger: 0.1
+      });
+    }
+  };
+
+  const handleItemHoverLeave = (index: number) => {
+    setActiveHover(null);
+    
+    // Hilangkan overlay hitam
+    gsap.to(featuresOverlaysRef.current[index], {
+      opacity: 0,
+      duration: 0.3,
+      ease: "power2.in"
+    });
+    
+    // Sembunyikan Update container
+    gsap.to(featuresUpdateContainersRef.current[index], {
+      opacity: 0,
+      x: 50,
+      duration: 0.3,
+      ease: "power2.in"
+    });
+    
+    // Sembunyikan circle images
+    gsap.to(featuresCircleImagesRef.current[index], {
+      opacity: 0,
+      x: 20,
+      duration: 0.3,
+      ease: "power2.in"
+    });
+    
+    // Kembalikan panah ke bentuk diagonal dengan warna putih (karena bg biru)
+    if (featuresArrowsRef.current[index]) {
+      gsap.to(featuresArrowsRef.current[index], {
+        rotation: 45,
+        duration: 0.3,
+        ease: "back.inOut(0.6)"
+      });
+      gsap.to(`.features-right-arrow-${index} svg`, {
+        stroke: '#ffffff',
+        duration: 0.3,
+        ease: "power2.out"
+      });
+    }
+    
+    // Animasi foto bulat kembali
+    if (circleImgRefs.current[index]) {
+      gsap.to(circleImgRefs.current[index], {
+        scale: 1,
+        duration: 0.3,
+        ease: "power2.in"
+      });
+    }
+  };
+
   // Scroll snapping untuk carousel horizontal
   useEffect(() => {
     if (isLoading) return;
@@ -327,158 +452,113 @@ export default function HomePage(): React.JSX.Element {
     };
   }, []);
 
-  // Efek scroll untuk FEATURES section - biru hilang saat scroll ke bawah, muncul saat scroll ke atas
+  // Animasi SplitText untuk FEATURES title
   useEffect(() => {
     if (isLoading) return;
 
-    const handleScroll = () => {
-      if (!featuresSectionRef.current) return;
-      
-      const scrollPosition = window.scrollY;
-      const windowHeight = window.innerHeight;
-      const sectionTop = featuresSectionRef.current.offsetTop;
-      const sectionBottom = sectionTop + featuresSectionRef.current.offsetHeight;
-      
-      const isInSection = scrollPosition + windowHeight/2 >= sectionTop && scrollPosition + windowHeight/2 <= sectionBottom;
-      
-      if (isInSection) {
-        // Saat discroll ke dalam section Features - background BIRU
-        gsap.to(featuresSectionRef.current, {
-          backgroundColor: '#0000ff',
-          duration: 0.5,
-          ease: "power2.inOut"
-        });
-        if (featuresTextRef.current) {
-          gsap.to(featuresTextRef.current, {
-            color: '#ffffff',
-            duration: 0.5,
-            ease: "power2.inOut"
+    const titleElement = featuresTitleRef.current;
+    
+    if (titleElement) {
+      const split = new SplitText(titleElement, {
+        type: "chars, words",
+        charsClass: "features-char"
+      });
+      gsap.set(split.chars, {
+        opacity: 0,
+        y: 100,
+        rotationX: -90,
+        transformPerspective: 800,
+        filter: 'blur(20px)'
+      });
+      ScrollTrigger.create({
+        trigger: featuresMainSectionRef.current,
+        start: "top 80%",
+        end: "bottom 20%",
+        onEnter: () => {
+          gsap.to(split.chars, {
+            opacity: 1,
+            y: 0,
+            rotationX: 0,
+            filter: 'blur(0px)',
+            duration: 1.2,
+            stagger: { each: 0.04, from: "start", ease: "power2.out" },
+            ease: "back.out(0.6)"
           });
-        }
-      } else {
-        // Saat keluar dari section Features - background PUTIH
-        gsap.to(featuresSectionRef.current, {
-          backgroundColor: '#ffffff',
-          duration: 0.5,
-          ease: "power2.inOut"
-        });
-        if (featuresTextRef.current) {
-          gsap.to(featuresTextRef.current, {
-            color: '#000000',
-            duration: 0.5,
-            ease: "power2.inOut"
+        },
+        onLeaveBack: () => {
+          gsap.to(split.chars, {
+            opacity: 0,
+            y: 100,
+            rotationX: -90,
+            filter: 'blur(20px)',
+            duration: 0.8,
+            stagger: { each: 0.02, from: "start" },
           });
-        }
-      }
-    };
+        },
+        toggleActions: "play none none reverse"
+      });
+    }
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => {
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+    };
   }, [isLoading]);
 
-  // Efek scroll untuk TRUSTED COLLABS section
+  // Animasi SplitText untuk setiap features item
   useEffect(() => {
     if (isLoading) return;
 
-    const handleScroll = () => {
-      if (!trustedSectionRef.current) return;
+    featuresItems.forEach((_, idx) => {
+      const leftElement = featuresLeftNumbersRef.current[idx];
+      const rightElement = featuresRightTextsRef.current[idx];
       
-      const scrollPosition = window.scrollY;
-      const windowHeight = window.innerHeight;
-      const sectionTop = trustedSectionRef.current.offsetTop;
-      const sectionBottom = sectionTop + trustedSectionRef.current.offsetHeight;
-      
-      const isInSection = scrollPosition + windowHeight/2 >= sectionTop && scrollPosition + windowHeight/2 <= sectionBottom;
-      
-      if (isInSection) {
-        gsap.to(trustedSectionRef.current, {
-          backgroundColor: '#000000',
-          duration: 0.5,
-          ease: "power2.inOut"
-        });
-        if (trustedTextRef.current) {
-          gsap.to(trustedTextRef.current, {
-            color: '#ffffff',
-            duration: 0.5,
-            ease: "power2.inOut"
+      const elements = [
+        { ref: leftElement, stagger: 0.04 },
+        { ref: rightElement, stagger: 0.03 }
+      ];
+
+      elements.forEach(({ ref, stagger }) => {
+        if (ref) {
+          const split = new SplitText(ref, {
+            type: "chars, words",
+            charsClass: "features-char"
+          });
+          gsap.set(split.chars, {
+            opacity: 0,
+            y: 100,
+            rotationX: -90,
+            transformPerspective: 800,
+            filter: 'blur(20px)'
+          });
+          ScrollTrigger.create({
+            trigger: featuresSectionsRef.current[idx],
+            start: "top 80%",
+            end: "bottom 20%",
+            onEnter: () => {
+              gsap.to(split.chars, {
+                opacity: 1,
+                y: 0,
+                rotationX: 0,
+                filter: 'blur(0px)',
+                duration: 1.2,
+                stagger: { each: stagger, from: "start", ease: "power2.out" },
+                ease: "back.out(0.6)"
+              });
+            },
+            onLeaveBack: () => {
+              gsap.to(split.chars, {
+                opacity: 0,
+                y: 100,
+                rotationX: -90,
+                filter: 'blur(20px)',
+                duration: 0.8,
+                stagger: { each: 0.02, from: "start" },
+              });
+            },
+            toggleActions: "play none none reverse"
           });
         }
-        gsap.to('.carousel-brand, .carousel-desc', {
-          color: '#ffffff',
-          duration: 0.5,
-          ease: "power2.inOut"
-        });
-      } else {
-        gsap.to(trustedSectionRef.current, {
-          backgroundColor: '#ffffff',
-          duration: 0.5,
-          ease: "power2.inOut"
-        });
-        if (trustedTextRef.current) {
-          gsap.to(trustedTextRef.current, {
-            color: 'rgb(21, 22, 26)',
-            duration: 0.5,
-            ease: "power2.inOut"
-          });
-        }
-        gsap.to('.carousel-brand, .carousel-desc', {
-          color: 'rgb(21, 22, 26)',
-          duration: 0.5,
-          ease: "power2.inOut"
-        });
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [isLoading]);
-
-  // Animasi SplitText untuk FEATURES
-  useEffect(() => {
-    if (isLoading) return;
-
-    const featuresElement = featuresTextRef.current;
-    if (!featuresElement) return;
-
-    const splitFeatures = new SplitText(featuresElement, {
-      type: "chars, words",
-      charsClass: "features-char"
-    });
-
-    gsap.set(splitFeatures.chars, {
-      opacity: 0,
-      y: 100,
-      rotationX: -90,
-      transformPerspective: 800,
-      filter: 'blur(20px)'
-    });
-
-    ScrollTrigger.create({
-      trigger: featuresSectionRef.current,
-      start: "top 80%",
-      end: "bottom 20%",
-      onEnter: () => {
-        gsap.to(splitFeatures.chars, {
-          opacity: 1,
-          y: 0,
-          rotationX: 0,
-          filter: 'blur(0px)',
-          duration: 1.2,
-          stagger: { each: 0.03, from: "start", ease: "power2.out" },
-          ease: "back.out(0.6)"
-        });
-      },
-      onLeaveBack: () => {
-        gsap.to(splitFeatures.chars, {
-          opacity: 0,
-          y: 100,
-          rotationX: -90,
-          filter: 'blur(20px)',
-          duration: 0.8,
-          stagger: { each: 0.02, from: "start" },
-        });
-      },
-      toggleActions: "play none none reverse"
+      });
     });
 
     return () => {
@@ -840,6 +920,18 @@ export default function HomePage(): React.JSX.Element {
     </svg>
   );
 
+  const NorthEastArrow = ({ size = 60, index = 0 }: { size?: number; index?: number }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={`features-right-arrow-${index}`}>
+      <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+
+  const StraightLine = ({ size = 60, index = 0 }: { size?: number; index?: number }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={`features-right-arrow-${index}`}>
+      <path d="M3 12H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+    </svg>
+  );
+
   const days = getDaysInMonth(currentMonth);
   const weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
@@ -886,7 +978,7 @@ export default function HomePage(): React.JSX.Element {
         }
         
         #smooth-content {
-          min-height: 400vh;
+          min-height: 700vh;
           width: 100%;
           will-change: transform;
         }
@@ -1175,34 +1267,176 @@ export default function HomePage(): React.JSX.Element {
           line-height: 1.3;
         }
 
-        /* SECTION FEATURES - Warna berubah saat scroll */
-        .features-section {
-          min-height: 100vh;
+        /* FEATURES MAIN SECTION - hanya untuk title */
+        .features-main-section {
+          min-height: 20vh;
           width: 100%;
           background-color: #0000ff;
           display: flex;
-          flex-direction: column;
+          align-items: center;
           justify-content: flex-start;
-          align-items: flex-start;
-          transition: background-color 0.5s ease;
-          position: relative;
-          z-index: 5;
-          padding-left: 80px;
-          padding-top: 120px;
-          padding-bottom: 80px;
+          padding: 60px 80px 40px 80px;
           box-sizing: border-box;
         }
 
-        .features-text {
+        .features-main-title {
           font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
           font-weight: 400;
           font-size: 300px;
           color: #ffffff;
           letter-spacing: -0.02em;
           line-height: 1.1;
-          text-align: left;
+          margin: 0;
+        }
+
+        /* SECTION FEATURES ITEMS - ukuran diperkecil agar 1 baris */
+        .features-item-section {
+          min-height: 15vh;
+          width: 100%;
+          background-color: #0000ff;
+          display: flex;
+          align-items: center;
+          padding: 20px 80px;
+          box-sizing: border-box;
+          border-bottom: 1px solid rgba(255,255,255,0.15);
+        }
+
+        .features-bottom {
+          width: 100%;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          position: relative;
+          z-index: 10;
+        }
+
+        .features-left-number {
+          font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
+          font-weight: 400;
+          font-size: 180px;
+          color: #ffffff;
+          letter-spacing: -0.02em;
+          line-height: 1;
           margin: 0;
           transition: color 0.5s ease;
+        }
+
+        /* Hover Container */
+        .hover-container {
+          position: relative;
+          cursor: pointer;
+          z-index: 20;
+          display: flex;
+          align-items: center;
+          gap: 30px;
+        }
+
+        .features-right-text {
+          font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
+          font-weight: 400;
+          font-size: 180px;
+          color: #ffffff;
+          letter-spacing: -0.02em;
+          line-height: 1;
+          margin: 0;
+          transition: color 0.5s ease;
+          display: inline-block;
+          z-index: 2;
+          position: relative;
+          white-space: nowrap;
+        }
+
+        /* Update container */
+        .update-container {
+          opacity: 0;
+          transform: translateX(50px);
+          transition: all 0.3s ease;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 2;
+          position: relative;
+        }
+
+        .update-number {
+          font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
+          font-size: 60px;
+          font-weight: 400;
+          color: #ffffff;
+          line-height: 1;
+          transition: color 0.5s ease;
+          white-space: nowrap;
+        }
+
+        /* Arrow */
+        .features-right-arrow {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          transition: transform 0.3s ease;
+          z-index: 2;
+          position: relative;
+        }
+
+        .features-right-arrow svg {
+          width: 60px;
+          height: 60px;
+          stroke: currentColor;
+          transition: stroke 0.5s ease, transform 0.3s ease;
+        }
+
+        /* Circle Images container */
+        .circle-images-container {
+          opacity: 0;
+          transform: translateX(20px);
+          transition: all 0.3s ease;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          margin-left: 16px;
+          z-index: 2;
+          position: relative;
+        }
+
+        .circle-img {
+          width: 60px;
+          height: 60px;
+          border-radius: 50%;
+          overflow: hidden;
+          position: relative;
+          transition: all 0.3s ease;
+          border: 2px solid #ffffff;
+          box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        /* Overlay hitam - menutupi dari 01 sampai sisi kanan */
+        .features-overlay {
+          position: absolute;
+          top: -20px;
+          left: -600px;
+          right: -200px;
+          bottom: -20px;
+          background-color: #000000;
+          opacity: 0;
+          pointer-events: none;
+          z-index: 1;
+          border-radius: 0px;
+          transition: opacity 0.3s ease;
+        }
+
+        /* Hover container saat hover */
+        .hover-container:hover .features-overlay {
+          opacity: 1;
+        }
+
+        .hover-container:hover .update-container {
+          opacity: 1;
+          transform: translateX(0);
+        }
+
+        .hover-container:hover .circle-images-container {
+          opacity: 1;
+          transform: translateX(0);
         }
 
         /* SECTION TRUSTED COLLABS */
@@ -1218,6 +1452,7 @@ export default function HomePage(): React.JSX.Element {
           z-index: 5;
           padding-left: 80px;
           padding-top: 80px;
+          padding-bottom: 80px;
           box-sizing: border-box;
           overflow-x: hidden;
         }
@@ -1296,7 +1531,6 @@ export default function HomePage(): React.JSX.Element {
           opacity: 0.8;
         }
 
-        /* Custom scrollbar untuk carousel */
         .carousel-container::-webkit-scrollbar {
           height: 4px;
           display: block;
@@ -1440,7 +1674,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* SECTION 1 - MENURU.STUDIO dengan teks IDN/MN'RU© - 26' dan hover images */}
+            {/* SECTION 1 - MENURU.STUDIO */}
             <div
               ref={studioContainerRef}
               style={{
@@ -1483,7 +1717,7 @@ export default function HomePage(): React.JSX.Element {
                 MN'RU© - 26'
               </div>
 
-              {/* Floating Images - Muncul di area teks MENURU.STUDIO saat hover */}
+              {/* Floating Images */}
               <div className="studio-hover-images">
                 <div
                   ref={img1Ref}
@@ -1521,23 +1755,108 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* SECTION FEATURES - Warna berubah: biru saat discroll ke dalam, putih saat keluar */}
+            {/* FEATURES MAIN SECTION - hanya 1 teks Features ukuran 300px */}
             <div
-              ref={featuresSectionRef}
-              className="features-section"
+              ref={featuresMainSectionRef}
+              className="features-main-section"
               style={{
                 backgroundColor: '#0000ff',
               }}
             >
               <div
-                ref={featuresTextRef}
-                className="features-text"
+                ref={featuresTitleRef}
+                className="features-main-title"
               >
                 Features
               </div>
             </div>
 
-            {/* SECTION TRUSTED COLLABS - Warna berubah: hitam saat discroll ke dalam, putih saat keluar */}
+            {/* FEATURES ITEMS - 01 sampai 05 dengan ukuran lebih kecil */}
+            {featuresItems.map((item, idx) => (
+              <div
+                key={idx}
+                ref={(el) => { featuresSectionsRef.current[idx] = el; }}
+                className="features-item-section"
+                style={{
+                  backgroundColor: '#0000ff',
+                }}
+              >
+                <div className="features-bottom">
+                  <div
+                    ref={(el) => { featuresLeftNumbersRef.current[idx] = el; }}
+                    className="features-left-number"
+                  >
+                    {item.number}
+                  </div>
+                  
+                  <div 
+                    ref={(el) => { featuresHoverContainersRef.current[idx] = el; }}
+                    className="hover-container"
+                    onMouseEnter={() => handleItemHoverEnter(idx)}
+                    onMouseLeave={() => handleItemHoverLeave(idx)}
+                  >
+                    <div
+                      ref={(el) => { featuresRightTextsRef.current[idx] = el; }}
+                      className="features-right-text"
+                    >
+                      {item.title}
+                    </div>
+                    
+                    <div ref={(el) => { featuresUpdateContainersRef.current[idx] = el; }} className="update-container">
+                      <div className="update-number">
+                        {item.updateText}
+                      </div>
+                    </div>
+                    
+                    <div 
+                      ref={(el) => { featuresArrowsRef.current[idx] = el; }}
+                      className="features-right-arrow"
+                    >
+                      {activeHover === idx ? (
+                        <StraightLine size={60} index={idx} />
+                      ) : (
+                        <NorthEastArrow size={60} index={idx} />
+                      )}
+                    </div>
+                    
+                    <div ref={(el) => { featuresCircleImagesRef.current[idx] = el; }} className="circle-images-container">
+                      <div
+                        ref={(el) => { 
+                          if (!circleImgRefs.current[idx]) circleImgRefs.current[idx] = [];
+                          circleImgRefs.current[idx][0] = el;
+                        }}
+                        className="circle-img"
+                      >
+                        <Image
+                          src={idx % 2 === 0 ? "/images/lkhh.jpg" : "/images/ai.jpg"}
+                          alt="circle 1"
+                          fill
+                          style={{ objectFit: 'cover' }}
+                        />
+                      </div>
+                      <div
+                        ref={(el) => { 
+                          if (!circleImgRefs.current[idx]) circleImgRefs.current[idx] = [];
+                          circleImgRefs.current[idx][1] = el;
+                        }}
+                        className="circle-img"
+                      >
+                        <Image
+                          src={idx % 2 === 0 ? "/images/ai.jpg" : "/images/5.jpg"}
+                          alt="circle 2"
+                          fill
+                          style={{ objectFit: 'cover' }}
+                        />
+                      </div>
+                    </div>
+                    
+                    <div ref={(el) => { featuresOverlaysRef.current[idx] = el; }} className="features-overlay" />
+                  </div>
+                </div>
+              </div>
+            ))}
+
+            {/* SECTION TRUSTED COLLABS */}
             <div
               ref={trustedSectionRef}
               className="trusted-section"
@@ -1552,7 +1871,6 @@ export default function HomePage(): React.JSX.Element {
                 TRUSTED COLLABS
               </div>
 
-              {/* Carousel Horizontal */}
               <div 
                 ref={carouselRef}
                 className="carousel-container"
@@ -1576,7 +1894,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* Bagian footer dengan semua konten */}
+            {/* Bagian footer - sama seperti sebelumnya */}
             <div style={{
               width: '100%',
               position: 'relative',
