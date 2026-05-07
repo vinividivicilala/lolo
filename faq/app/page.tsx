@@ -1,4 +1,4 @@
-// app/page.tsx (Halaman Utama) - Features section dengan 1 teks Features di atas dan 5 item
+// app/page.tsx (Halaman Utama) - Features section lengkap dengan ukuran yang disesuaikan
 
 'use client';
 
@@ -75,7 +75,7 @@ export default function HomePage(): React.JSX.Element {
   // Circle images refs untuk setiap item
   const circleImgRefs = useRef<{[key: number]: (HTMLDivElement | null)[]}>({});
   
-  // Data features items
+  // Data features items - dengan ukuran lebih kecil
   const featuresItems = [
     { number: "01", title: "Note", updateText: "Update¹", sup: "¹" },
     { number: "02", title: "Community", updateText: "Join²", sup: "²" },
@@ -368,7 +368,7 @@ export default function HomePage(): React.JSX.Element {
       ease: "power2.in"
     });
     
-    // Kembalikan panah ke bentuk diagonal
+    // Kembalikan panah ke bentuk diagonal dengan warna putih (karena bg biru)
     if (featuresArrowsRef.current[index]) {
       gsap.to(featuresArrowsRef.current[index], {
         rotation: 45,
@@ -920,13 +920,13 @@ export default function HomePage(): React.JSX.Element {
     </svg>
   );
 
-  const NorthEastArrow = ({ size = 80, index = 0 }: { size?: number; index?: number }) => (
+  const NorthEastArrow = ({ size = 60, index = 0 }: { size?: number; index?: number }) => (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={`features-right-arrow-${index}`}>
       <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   );
 
-  const StraightLine = ({ size = 80, index = 0 }: { size?: number; index?: number }) => (
+  const StraightLine = ({ size = 60, index = 0 }: { size?: number; index?: number }) => (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={`features-right-arrow-${index}`}>
       <path d="M3 12H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
     </svg>
@@ -1269,13 +1269,13 @@ export default function HomePage(): React.JSX.Element {
 
         /* FEATURES MAIN SECTION - hanya untuk title */
         .features-main-section {
-          min-height: 30vh;
+          min-height: 20vh;
           width: 100%;
           background-color: #0000ff;
           display: flex;
           align-items: center;
           justify-content: flex-start;
-          padding: 80px 80px 40px 80px;
+          padding: 60px 80px 40px 80px;
           box-sizing: border-box;
         }
 
@@ -1289,14 +1289,14 @@ export default function HomePage(): React.JSX.Element {
           margin: 0;
         }
 
-        /* SECTION FEATURES ITEMS */
+        /* SECTION FEATURES ITEMS - ukuran diperkecil agar 1 baris */
         .features-item-section {
-          min-height: 20vh;
+          min-height: 15vh;
           width: 100%;
           background-color: #0000ff;
           display: flex;
-          align-items: flex-end;
-          padding: 40px 80px 80px 80px;
+          align-items: center;
+          padding: 20px 80px;
           box-sizing: border-box;
           border-bottom: 1px solid rgba(255,255,255,0.15);
         }
@@ -1305,7 +1305,7 @@ export default function HomePage(): React.JSX.Element {
           width: 100%;
           display: flex;
           justify-content: space-between;
-          align-items: flex-end;
+          align-items: center;
           position: relative;
           z-index: 10;
         }
@@ -1313,10 +1313,10 @@ export default function HomePage(): React.JSX.Element {
         .features-left-number {
           font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
           font-weight: 400;
-          font-size: 300px;
+          font-size: 180px;
           color: #ffffff;
           letter-spacing: -0.02em;
-          line-height: 1.1;
+          line-height: 1;
           margin: 0;
           transition: color 0.5s ease;
         }
@@ -1328,21 +1328,22 @@ export default function HomePage(): React.JSX.Element {
           z-index: 20;
           display: flex;
           align-items: center;
-          gap: 40px;
+          gap: 30px;
         }
 
         .features-right-text {
           font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
           font-weight: 400;
-          font-size: 300px;
+          font-size: 180px;
           color: #ffffff;
           letter-spacing: -0.02em;
-          line-height: 1.1;
+          line-height: 1;
           margin: 0;
           transition: color 0.5s ease;
           display: inline-block;
           z-index: 2;
           position: relative;
+          white-space: nowrap;
         }
 
         /* Update container */
@@ -1359,11 +1360,12 @@ export default function HomePage(): React.JSX.Element {
 
         .update-number {
           font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
-          font-size: 100px;
+          font-size: 60px;
           font-weight: 400;
           color: #ffffff;
           line-height: 1;
           transition: color 0.5s ease;
+          white-space: nowrap;
         }
 
         /* Arrow */
@@ -1377,8 +1379,8 @@ export default function HomePage(): React.JSX.Element {
         }
 
         .features-right-arrow svg {
-          width: 80px;
-          height: 80px;
+          width: 60px;
+          height: 60px;
           stroke: currentColor;
           transition: stroke 0.5s ease, transform 0.3s ease;
         }
@@ -1390,30 +1392,30 @@ export default function HomePage(): React.JSX.Element {
           transition: all 0.3s ease;
           display: flex;
           align-items: center;
-          gap: 16px;
+          gap: 12px;
           margin-left: 16px;
           z-index: 2;
           position: relative;
         }
 
         .circle-img {
-          width: 80px;
-          height: 80px;
+          width: 60px;
+          height: 60px;
           border-radius: 50%;
           overflow: hidden;
           position: relative;
           transition: all 0.3s ease;
-          border: 3px solid #ffffff;
+          border: 2px solid #ffffff;
           box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
 
         /* Overlay hitam - menutupi dari 01 sampai sisi kanan */
         .features-overlay {
           position: absolute;
-          top: -30px;
-          left: -800px;
+          top: -20px;
+          left: -600px;
           right: -200px;
-          bottom: -30px;
+          bottom: -20px;
           background-color: #000000;
           opacity: 0;
           pointer-events: none;
@@ -1769,7 +1771,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* FEATURES ITEMS - 01 sampai 05 */}
+            {/* FEATURES ITEMS - 01 sampai 05 dengan ukuran lebih kecil */}
             {featuresItems.map((item, idx) => (
               <div
                 key={idx}
@@ -1811,9 +1813,9 @@ export default function HomePage(): React.JSX.Element {
                       className="features-right-arrow"
                     >
                       {activeHover === idx ? (
-                        <StraightLine size={80} index={idx} />
+                        <StraightLine size={60} index={idx} />
                       ) : (
-                        <NorthEastArrow size={80} index={idx} />
+                        <NorthEastArrow size={60} index={idx} />
                       )}
                     </div>
                     
@@ -1892,7 +1894,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* Bagian footer */}
+            {/* Bagian footer - sama seperti sebelumnya */}
             <div style={{
               width: '100%',
               position: 'relative',
