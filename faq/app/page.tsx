@@ -336,7 +336,6 @@ export default function HomePage(): React.JSX.Element {
   const handleNoteHoverEnter = () => {
     setNoteHover(true);
     
-    // Overlay hitam langsung muncul
     gsap.set(featuresOverlayRef.current, { opacity: 1 });
     
     gsap.to(updateContainerRef.current, {
@@ -353,21 +352,21 @@ export default function HomePage(): React.JSX.Element {
       ease: "power2.out"
     });
     
-    // Ganti warna menjadi hitam
+    // Warna menjadi merah (hover)
     gsap.to(featuresLeftNumberRef.current, {
-      color: '#000000',
+      color: '#ff0000',
       duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to('.update-number', {
-      color: '#000000',
+      color: '#ff0000',
       duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to(featuresRightTextRef.current, {
-      color: '#000000',
+      color: '#ff0000',
       duration: 0.2,
       ease: "power2.out"
     });
@@ -379,7 +378,7 @@ export default function HomePage(): React.JSX.Element {
         ease: "back.out(0.6)"
       });
       gsap.to('.features-right-arrow svg', {
-        stroke: '#000000',
+        stroke: '#ff0000',
         duration: 0.2,
         ease: "power2.out"
       });
@@ -396,7 +395,6 @@ export default function HomePage(): React.JSX.Element {
   const handleNoteHoverLeave = () => {
     setNoteHover(false);
     
-    // Overlay hitam langsung hilang
     gsap.set(featuresOverlayRef.current, { opacity: 0 });
     
     gsap.to(updateContainerRef.current, {
@@ -413,21 +411,21 @@ export default function HomePage(): React.JSX.Element {
       ease: "power2.in"
     });
     
-    // Kembalikan warna menjadi putih
+    // Kembalikan warna biru
     gsap.to(featuresLeftNumberRef.current, {
-      color: '#ffffff',
+      color: '#0000ff',
       duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to('.update-number', {
-      color: '#ffffff',
+      color: '#0000ff',
       duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to(featuresRightTextRef.current, {
-      color: '#ffffff',
+      color: '#0000ff',
       duration: 0.2,
       ease: "power2.out"
     });
@@ -439,7 +437,7 @@ export default function HomePage(): React.JSX.Element {
         ease: "back.inOut(0.6)"
       });
       gsap.to('.features-right-arrow svg', {
-        stroke: '#ffffff',
+        stroke: '#0000ff',
         duration: 0.2,
         ease: "power2.out"
       });
@@ -473,19 +471,19 @@ export default function HomePage(): React.JSX.Element {
     });
     
     gsap.to(featuresLeftNumber2Ref.current, {
-      color: '#000000',
+      color: '#ff0000',
       duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to('.update-number', {
-      color: '#000000',
+      color: '#ff0000',
       duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to(featuresRightText2Ref.current, {
-      color: '#000000',
+      color: '#ff0000',
       duration: 0.2,
       ease: "power2.out"
     });
@@ -497,7 +495,7 @@ export default function HomePage(): React.JSX.Element {
         ease: "back.out(0.6)"
       });
       gsap.to('.features-right-arrow-2 svg', {
-        stroke: '#000000',
+        stroke: '#ff0000',
         duration: 0.2,
         ease: "power2.out"
       });
@@ -531,19 +529,19 @@ export default function HomePage(): React.JSX.Element {
     });
     
     gsap.to(featuresLeftNumber2Ref.current, {
-      color: '#ffffff',
+      color: '#0000ff',
       duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to('.update-number', {
-      color: '#ffffff',
+      color: '#0000ff',
       duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to(featuresRightText2Ref.current, {
-      color: '#ffffff',
+      color: '#0000ff',
       duration: 0.2,
       ease: "power2.out"
     });
@@ -555,7 +553,7 @@ export default function HomePage(): React.JSX.Element {
         ease: "back.inOut(0.6)"
       });
       gsap.to('.features-right-arrow-2 svg', {
-        stroke: '#ffffff',
+        stroke: '#0000ff',
         duration: 0.2,
         ease: "power2.out"
       });
@@ -589,19 +587,19 @@ export default function HomePage(): React.JSX.Element {
     });
     
     gsap.to(featuresLeftNumber3Ref.current, {
-      color: '#000000',
+      color: '#ff0000',
       duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to('.update-number', {
-      color: '#000000',
+      color: '#ff0000',
       duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to(featuresRightText3Ref.current, {
-      color: '#000000',
+      color: '#ff0000',
       duration: 0.2,
       ease: "power2.out"
     });
@@ -613,7 +611,7 @@ export default function HomePage(): React.JSX.Element {
         ease: "back.out(0.6)"
       });
       gsap.to('.features-right-arrow-3 svg', {
-        stroke: '#000000',
+        stroke: '#ff0000',
         duration: 0.2,
         ease: "power2.out"
       });
@@ -647,19 +645,19 @@ export default function HomePage(): React.JSX.Element {
     });
     
     gsap.to(featuresLeftNumber3Ref.current, {
-      color: '#ffffff',
+      color: '#0000ff',
       duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to('.update-number', {
-      color: '#ffffff',
+      color: '#0000ff',
       duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to(featuresRightText3Ref.current, {
-      color: '#ffffff',
+      color: '#0000ff',
       duration: 0.2,
       ease: "power2.out"
     });
@@ -671,7 +669,7 @@ export default function HomePage(): React.JSX.Element {
         ease: "back.inOut(0.6)"
       });
       gsap.to('.features-right-arrow-3 svg', {
-        stroke: '#ffffff',
+        stroke: '#0000ff',
         duration: 0.2,
         ease: "power2.out"
       });
@@ -705,19 +703,19 @@ export default function HomePage(): React.JSX.Element {
     });
     
     gsap.to(featuresLeftNumber4Ref.current, {
-      color: '#000000',
+      color: '#ff0000',
       duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to('.update-number', {
-      color: '#000000',
+      color: '#ff0000',
       duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to(featuresRightText4Ref.current, {
-      color: '#000000',
+      color: '#ff0000',
       duration: 0.2,
       ease: "power2.out"
     });
@@ -729,7 +727,7 @@ export default function HomePage(): React.JSX.Element {
         ease: "back.out(0.6)"
       });
       gsap.to('.features-right-arrow-4 svg', {
-        stroke: '#000000',
+        stroke: '#ff0000',
         duration: 0.2,
         ease: "power2.out"
       });
@@ -763,19 +761,19 @@ export default function HomePage(): React.JSX.Element {
     });
     
     gsap.to(featuresLeftNumber4Ref.current, {
-      color: '#ffffff',
+      color: '#0000ff',
       duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to('.update-number', {
-      color: '#ffffff',
+      color: '#0000ff',
       duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to(featuresRightText4Ref.current, {
-      color: '#ffffff',
+      color: '#0000ff',
       duration: 0.2,
       ease: "power2.out"
     });
@@ -787,7 +785,7 @@ export default function HomePage(): React.JSX.Element {
         ease: "back.inOut(0.6)"
       });
       gsap.to('.features-right-arrow-4 svg', {
-        stroke: '#ffffff',
+        stroke: '#0000ff',
         duration: 0.2,
         ease: "power2.out"
       });
@@ -821,19 +819,19 @@ export default function HomePage(): React.JSX.Element {
     });
     
     gsap.to(featuresLeftNumber5Ref.current, {
-      color: '#000000',
+      color: '#ff0000',
       duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to('.update-number', {
-      color: '#000000',
+      color: '#ff0000',
       duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to(featuresRightText5Ref.current, {
-      color: '#000000',
+      color: '#ff0000',
       duration: 0.2,
       ease: "power2.out"
     });
@@ -845,7 +843,7 @@ export default function HomePage(): React.JSX.Element {
         ease: "back.out(0.6)"
       });
       gsap.to('.features-right-arrow-5 svg', {
-        stroke: '#000000',
+        stroke: '#ff0000',
         duration: 0.2,
         ease: "power2.out"
       });
@@ -879,19 +877,19 @@ export default function HomePage(): React.JSX.Element {
     });
     
     gsap.to(featuresLeftNumber5Ref.current, {
-      color: '#ffffff',
+      color: '#0000ff',
       duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to('.update-number', {
-      color: '#ffffff',
+      color: '#0000ff',
       duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to(featuresRightText5Ref.current, {
-      color: '#ffffff',
+      color: '#0000ff',
       duration: 0.2,
       ease: "power2.out"
     });
@@ -903,7 +901,7 @@ export default function HomePage(): React.JSX.Element {
         ease: "back.inOut(0.6)"
       });
       gsap.to('.features-right-arrow-5 svg', {
-        stroke: '#ffffff',
+        stroke: '#0000ff',
         duration: 0.2,
         ease: "power2.out"
       });
@@ -976,7 +974,7 @@ export default function HomePage(): React.JSX.Element {
     };
   }, []);
 
-  // Efek scroll untuk FEATURES section
+  // Efek scroll untuk FEATURES section - Background putih saat di-scroll
   useEffect(() => {
     if (isLoading) return;
 
@@ -992,6 +990,79 @@ export default function HomePage(): React.JSX.Element {
       
       if (isInSection) {
         gsap.to(featuresSectionRef.current, {
+          backgroundColor: '#ffffff',
+          duration: 0.3,
+          ease: "power2.inOut"
+        });
+        gsap.to(featuresTitleRef.current, {
+          color: '#000000',
+          duration: 0.3,
+          ease: "power2.inOut"
+        });
+        // Update warna default untuk elemen features menjadi biru
+        gsap.to(featuresLeftNumberRef.current, {
+          color: '#0000ff',
+          duration: 0.3,
+          ease: "power2.inOut"
+        });
+        gsap.to(featuresRightTextRef.current, {
+          color: '#0000ff',
+          duration: 0.3,
+          ease: "power2.inOut"
+        });
+        gsap.to('.update-number', {
+          color: '#0000ff',
+          duration: 0.3,
+          ease: "power2.inOut"
+        });
+        gsap.to('.features-right-arrow svg', {
+          stroke: '#0000ff',
+          duration: 0.3,
+          ease: "power2.inOut"
+        });
+        // Untuk features lainnya
+        gsap.to(featuresLeftNumber2Ref.current, {
+          color: '#0000ff',
+          duration: 0.3,
+          ease: "power2.inOut"
+        });
+        gsap.to(featuresRightText2Ref.current, {
+          color: '#0000ff',
+          duration: 0.3,
+          ease: "power2.inOut"
+        });
+        gsap.to(featuresLeftNumber3Ref.current, {
+          color: '#0000ff',
+          duration: 0.3,
+          ease: "power2.inOut"
+        });
+        gsap.to(featuresRightText3Ref.current, {
+          color: '#0000ff',
+          duration: 0.3,
+          ease: "power2.inOut"
+        });
+        gsap.to(featuresLeftNumber4Ref.current, {
+          color: '#0000ff',
+          duration: 0.3,
+          ease: "power2.inOut"
+        });
+        gsap.to(featuresRightText4Ref.current, {
+          color: '#0000ff',
+          duration: 0.3,
+          ease: "power2.inOut"
+        });
+        gsap.to(featuresLeftNumber5Ref.current, {
+          color: '#0000ff',
+          duration: 0.3,
+          ease: "power2.inOut"
+        });
+        gsap.to(featuresRightText5Ref.current, {
+          color: '#0000ff',
+          duration: 0.3,
+          ease: "power2.inOut"
+        });
+      } else {
+        gsap.to(featuresSectionRef.current, {
           backgroundColor: '#0000ff',
           duration: 0.3,
           ease: "power2.inOut"
@@ -1001,14 +1072,65 @@ export default function HomePage(): React.JSX.Element {
           duration: 0.3,
           ease: "power2.inOut"
         });
-      } else {
-        gsap.to(featuresSectionRef.current, {
-          backgroundColor: '#ffffff',
+        // Kembalikan warna default menjadi putih saat tidak di section
+        gsap.to(featuresLeftNumberRef.current, {
+          color: '#ffffff',
           duration: 0.3,
           ease: "power2.inOut"
         });
-        gsap.to(featuresTitleRef.current, {
-          color: '#000000',
+        gsap.to(featuresRightTextRef.current, {
+          color: '#ffffff',
+          duration: 0.3,
+          ease: "power2.inOut"
+        });
+        gsap.to('.update-number', {
+          color: '#ffffff',
+          duration: 0.3,
+          ease: "power2.inOut"
+        });
+        gsap.to('.features-right-arrow svg', {
+          stroke: '#ffffff',
+          duration: 0.3,
+          ease: "power2.inOut"
+        });
+        // Untuk features lainnya
+        gsap.to(featuresLeftNumber2Ref.current, {
+          color: '#ffffff',
+          duration: 0.3,
+          ease: "power2.inOut"
+        });
+        gsap.to(featuresRightText2Ref.current, {
+          color: '#ffffff',
+          duration: 0.3,
+          ease: "power2.inOut"
+        });
+        gsap.to(featuresLeftNumber3Ref.current, {
+          color: '#ffffff',
+          duration: 0.3,
+          ease: "power2.inOut"
+        });
+        gsap.to(featuresRightText3Ref.current, {
+          color: '#ffffff',
+          duration: 0.3,
+          ease: "power2.inOut"
+        });
+        gsap.to(featuresLeftNumber4Ref.current, {
+          color: '#ffffff',
+          duration: 0.3,
+          ease: "power2.inOut"
+        });
+        gsap.to(featuresRightText4Ref.current, {
+          color: '#ffffff',
+          duration: 0.3,
+          ease: "power2.inOut"
+        });
+        gsap.to(featuresLeftNumber5Ref.current, {
+          color: '#ffffff',
+          duration: 0.3,
+          ease: "power2.inOut"
+        });
+        gsap.to(featuresRightText5Ref.current, {
+          color: '#ffffff',
           duration: 0.3,
           ease: "power2.inOut"
         });
@@ -1843,7 +1965,7 @@ export default function HomePage(): React.JSX.Element {
           padding: 40px 80px 40px 80px;
           box-sizing: border-box;
           overflow: visible;
-          border-bottom: 1px solid rgba(255,255,255,0.15);
+          border-bottom: 1px solid rgba(0,0,0,0.1);
         }
 
         .features-top {
@@ -1877,11 +1999,11 @@ export default function HomePage(): React.JSX.Element {
           font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
           font-weight: 400;
           font-size: 150px;
-          color: #ffffff;
           letter-spacing: -0.02em;
           line-height: 1;
           margin: 0;
           transition: color 0.2s ease;
+          color: #ffffff;
         }
 
         /* Hover Container */
@@ -1898,7 +2020,6 @@ export default function HomePage(): React.JSX.Element {
           font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
           font-weight: 400;
           font-size: 150px;
-          color: #ffffff;
           letter-spacing: -0.02em;
           line-height: 1;
           margin: 0;
@@ -1906,6 +2027,7 @@ export default function HomePage(): React.JSX.Element {
           display: inline-block;
           z-index: 2;
           position: relative;
+          color: #ffffff;
         }
 
         /* Update container */
@@ -1948,6 +2070,7 @@ export default function HomePage(): React.JSX.Element {
           height: 50px;
           stroke: currentColor;
           transition: stroke 0.2s ease, transform 0.2s ease;
+          stroke: #ffffff;
         }
 
         /* Circle Images container */
@@ -2325,9 +2448,6 @@ export default function HomePage(): React.JSX.Element {
             <div
               ref={featuresSectionRef}
               className="features-section"
-              style={{
-                backgroundColor: '#0000ff',
-              }}
             >
               <div className="features-top">
                 <div
@@ -2409,9 +2529,6 @@ export default function HomePage(): React.JSX.Element {
             <div
               ref={featuresSection2Ref}
               className="features-section"
-              style={{
-                backgroundColor: '#0000ff',
-              }}
             >
               <div className="features-bottom">
                 <div
@@ -2485,9 +2602,6 @@ export default function HomePage(): React.JSX.Element {
             <div
               ref={featuresSection3Ref}
               className="features-section"
-              style={{
-                backgroundColor: '#0000ff',
-              }}
             >
               <div className="features-bottom">
                 <div
@@ -2561,9 +2675,6 @@ export default function HomePage(): React.JSX.Element {
             <div
               ref={featuresSection4Ref}
               className="features-section"
-              style={{
-                backgroundColor: '#0000ff',
-              }}
             >
               <div className="features-bottom">
                 <div
@@ -2637,9 +2748,6 @@ export default function HomePage(): React.JSX.Element {
             <div
               ref={featuresSection5Ref}
               className="features-section"
-              style={{
-                backgroundColor: '#0000ff',
-              }}
             >
               <div className="features-bottom">
                 <div
