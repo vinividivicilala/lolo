@@ -1486,7 +1486,7 @@ export default function HomePage(): React.JSX.Element {
         }
         
         #smooth-content {
-          min-height: 800vh;
+          min-height: 850vh;
           width: 100%;
           will-change: transform;
         }
@@ -1777,7 +1777,7 @@ export default function HomePage(): React.JSX.Element {
 
         /* SECTION FEATURES */
         .features-section {
-          min-height: 30vh;
+          min-height: 25vh;
           width: 100%;
           background-color: #0000ff;
           display: flex;
@@ -1786,7 +1786,7 @@ export default function HomePage(): React.JSX.Element {
           transition: background-color 0.5s ease;
           position: relative;
           z-index: 5;
-          padding: 60px 80px 60px 80px;
+          padding: 40px 80px 40px 80px;
           box-sizing: border-box;
           overflow: visible;
           border-bottom: 1px solid rgba(255,255,255,0.15);
@@ -1796,7 +1796,7 @@ export default function HomePage(): React.JSX.Element {
           width: 100%;
           display: flex;
           justify-content: flex-start;
-          margin-bottom: 40px;
+          margin-bottom: 30px;
         }
 
         .features-title {
@@ -1822,7 +1822,7 @@ export default function HomePage(): React.JSX.Element {
         .features-left-number {
           font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
           font-weight: 400;
-          font-size: 180px;
+          font-size: 150px;
           color: #ffffff;
           letter-spacing: -0.02em;
           line-height: 1;
@@ -1837,13 +1837,13 @@ export default function HomePage(): React.JSX.Element {
           z-index: 20;
           display: flex;
           align-items: center;
-          gap: 30px;
+          gap: 25px;
         }
 
         .features-right-text {
           font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
           font-weight: 400;
-          font-size: 180px;
+          font-size: 150px;
           color: #ffffff;
           letter-spacing: -0.02em;
           line-height: 1;
@@ -1868,7 +1868,7 @@ export default function HomePage(): React.JSX.Element {
 
         .update-number {
           font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
-          font-size: 80px;
+          font-size: 70px;
           font-weight: 400;
           color: #ffffff;
           line-height: 1;
@@ -1876,7 +1876,7 @@ export default function HomePage(): React.JSX.Element {
         }
 
         .update-number sup {
-          font-size: 40px;
+          font-size: 35px;
         }
 
         /* Arrow */
@@ -1890,8 +1890,8 @@ export default function HomePage(): React.JSX.Element {
         }
 
         .features-right-arrow svg {
-          width: 60px;
-          height: 60px;
+          width: 50px;
+          height: 50px;
           stroke: currentColor;
           transition: stroke 0.5s ease, transform 0.3s ease;
         }
@@ -1903,15 +1903,15 @@ export default function HomePage(): React.JSX.Element {
           transition: all 0.3s ease;
           display: flex;
           align-items: center;
-          gap: 12px;
-          margin-left: 12px;
+          gap: 10px;
+          margin-left: 10px;
           z-index: 2;
           position: relative;
         }
 
         .circle-img {
-          width: 60px;
-          height: 60px;
+          width: 50px;
+          height: 50px;
           border-radius: 50%;
           overflow: hidden;
           position: relative;
@@ -1920,11 +1920,11 @@ export default function HomePage(): React.JSX.Element {
           box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
 
-        /* Overlay hitam - full width ke kiri */
+        /* Overlay hitam - full width ke kiri mentok */
         .features-overlay {
           position: absolute;
           top: -20px;
-          left: -100%;
+          left: -100vw;
           right: -200px;
           bottom: -20px;
           background-color: #000000;
@@ -1933,7 +1933,7 @@ export default function HomePage(): React.JSX.Element {
           z-index: 1;
           border-radius: 0px;
           transition: opacity 0.3s ease;
-          width: calc(100% + 100% + 200px);
+          width: calc(100% + 100vw + 200px);
         }
 
         /* Hover container saat hover */
@@ -2267,7 +2267,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* SECTION FEATURES - 01 NOTE - HAPUS TEKS FEATURES DI SETIAP SECTION */}
+            {/* SECTION FEATURES - 01 NOTE */}
             <div
               ref={featuresSectionRef}
               className="features-section"
@@ -2275,7 +2275,14 @@ export default function HomePage(): React.JSX.Element {
                 backgroundColor: '#0000ff',
               }}
             >
-              {/* features-top dihapus - tidak menampilkan teks Features di setiap section */}
+              <div className="features-top">
+                <div
+                  ref={featuresTitleRef}
+                  className="features-title"
+                >
+                  Features
+                </div>
+              </div>
               <div className="features-bottom">
                 <div
                   ref={featuresLeftNumberRef}
@@ -2308,9 +2315,9 @@ export default function HomePage(): React.JSX.Element {
                     className="features-right-arrow"
                   >
                     {noteHover ? (
-                      <StraightLine size={60} />
+                      <StraightLine size={50} />
                     ) : (
-                      <NorthEastArrow size={60} />
+                      <NorthEastArrow size={50} />
                     )}
                   </div>
                   
@@ -2344,7 +2351,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* SECTION FEATURES - 02 COMMUNITY - HAPUS TEKS FEATURES */}
+            {/* SECTION FEATURES - 02 COMMUNITY */}
             <div
               ref={featuresSection2Ref}
               className="features-section"
@@ -2384,9 +2391,9 @@ export default function HomePage(): React.JSX.Element {
                     className="features-right-arrow"
                   >
                     {communityHover ? (
-                      <StraightLine size={60} />
+                      <StraightLine size={50} />
                     ) : (
-                      <NorthEastArrow size={60} />
+                      <NorthEastArrow size={50} />
                     )}
                   </div>
                   
@@ -2420,7 +2427,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* SECTION FEATURES - 03 CALENDAR - HAPUS TEKS FEATURES */}
+            {/* SECTION FEATURES - 03 CALENDAR */}
             <div
               ref={featuresSection3Ref}
               className="features-section"
@@ -2460,9 +2467,9 @@ export default function HomePage(): React.JSX.Element {
                     className="features-right-arrow"
                   >
                     {calendarHover ? (
-                      <StraightLine size={60} />
+                      <StraightLine size={50} />
                     ) : (
-                      <NorthEastArrow size={60} />
+                      <NorthEastArrow size={50} />
                     )}
                   </div>
                   
@@ -2496,7 +2503,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* SECTION FEATURES - 04 BLOG - HAPUS TEKS FEATURES */}
+            {/* SECTION FEATURES - 04 BLOG */}
             <div
               ref={featuresSection4Ref}
               className="features-section"
@@ -2536,9 +2543,9 @@ export default function HomePage(): React.JSX.Element {
                     className="features-right-arrow"
                   >
                     {blogHover ? (
-                      <StraightLine size={60} />
+                      <StraightLine size={50} />
                     ) : (
-                      <NorthEastArrow size={60} />
+                      <NorthEastArrow size={50} />
                     )}
                   </div>
                   
@@ -2572,7 +2579,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* SECTION FEATURES - 05 DONATION - HAPUS TEKS FEATURES */}
+            {/* SECTION FEATURES - 05 DONATION */}
             <div
               ref={featuresSection5Ref}
               className="features-section"
@@ -2612,9 +2619,9 @@ export default function HomePage(): React.JSX.Element {
                     className="features-right-arrow"
                   >
                     {donationHover ? (
-                      <StraightLine size={60} />
+                      <StraightLine size={50} />
                     ) : (
-                      <NorthEastArrow size={60} />
+                      <NorthEastArrow size={50} />
                     )}
                   </div>
                   
@@ -2686,7 +2693,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* Bagian footer - HAPUS BACKGROUND HITAM PADA TEKS MENURU BESAR */}
+            {/* Bagian footer */}
             <div style={{
               width: '100%',
               position: 'relative',
@@ -2695,7 +2702,7 @@ export default function HomePage(): React.JSX.Element {
               flexDirection: 'column',
               justifyContent: 'flex-end',
               alignItems: 'center',
-              minHeight: '100vh'
+              minHeight: '110vh'
             }}>
               <div
                 ref={bottomContentRef}
