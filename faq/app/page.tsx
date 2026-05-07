@@ -360,6 +360,13 @@ export default function HomePage(): React.JSX.Element {
       ease: "power2.out"
     });
     
+    // Ganti warna angka 01 saat hover
+    gsap.to(featuresLeftNumberRef.current, {
+      color: '#ffffff',
+      duration: 0.3,
+      ease: "power2.out"
+    });
+    
     if (featuresArrowRef.current) {
       gsap.to(featuresArrowRef.current, {
         rotation: 0,
@@ -404,6 +411,13 @@ export default function HomePage(): React.JSX.Element {
       ease: "power2.in"
     });
     
+    // Kembalikan warna angka 01
+    gsap.to(featuresLeftNumberRef.current, {
+      color: '#ffffff',
+      duration: 0.3,
+      ease: "power2.out"
+    });
+    
     if (featuresArrowRef.current) {
       gsap.to(featuresArrowRef.current, {
         rotation: 45,
@@ -445,6 +459,12 @@ export default function HomePage(): React.JSX.Element {
       opacity: 1,
       x: 0,
       duration: 0.4,
+      ease: "power2.out"
+    });
+    
+    gsap.to(featuresLeftNumber2Ref.current, {
+      color: '#ffffff',
+      duration: 0.3,
       ease: "power2.out"
     });
     
@@ -492,6 +512,12 @@ export default function HomePage(): React.JSX.Element {
       ease: "power2.in"
     });
     
+    gsap.to(featuresLeftNumber2Ref.current, {
+      color: '#ffffff',
+      duration: 0.3,
+      ease: "power2.out"
+    });
+    
     if (featuresArrow2Ref.current) {
       gsap.to(featuresArrow2Ref.current, {
         rotation: 45,
@@ -533,6 +559,12 @@ export default function HomePage(): React.JSX.Element {
       opacity: 1,
       x: 0,
       duration: 0.4,
+      ease: "power2.out"
+    });
+    
+    gsap.to(featuresLeftNumber3Ref.current, {
+      color: '#ffffff',
+      duration: 0.3,
       ease: "power2.out"
     });
     
@@ -580,6 +612,12 @@ export default function HomePage(): React.JSX.Element {
       ease: "power2.in"
     });
     
+    gsap.to(featuresLeftNumber3Ref.current, {
+      color: '#ffffff',
+      duration: 0.3,
+      ease: "power2.out"
+    });
+    
     if (featuresArrow3Ref.current) {
       gsap.to(featuresArrow3Ref.current, {
         rotation: 45,
@@ -621,6 +659,12 @@ export default function HomePage(): React.JSX.Element {
       opacity: 1,
       x: 0,
       duration: 0.4,
+      ease: "power2.out"
+    });
+    
+    gsap.to(featuresLeftNumber4Ref.current, {
+      color: '#ffffff',
+      duration: 0.3,
       ease: "power2.out"
     });
     
@@ -668,6 +712,12 @@ export default function HomePage(): React.JSX.Element {
       ease: "power2.in"
     });
     
+    gsap.to(featuresLeftNumber4Ref.current, {
+      color: '#ffffff',
+      duration: 0.3,
+      ease: "power2.out"
+    });
+    
     if (featuresArrow4Ref.current) {
       gsap.to(featuresArrow4Ref.current, {
         rotation: 45,
@@ -709,6 +759,12 @@ export default function HomePage(): React.JSX.Element {
       opacity: 1,
       x: 0,
       duration: 0.4,
+      ease: "power2.out"
+    });
+    
+    gsap.to(featuresLeftNumber5Ref.current, {
+      color: '#ffffff',
+      duration: 0.3,
       ease: "power2.out"
     });
     
@@ -754,6 +810,12 @@ export default function HomePage(): React.JSX.Element {
       x: 20,
       duration: 0.3,
       ease: "power2.in"
+    });
+    
+    gsap.to(featuresLeftNumber5Ref.current, {
+      color: '#ffffff',
+      duration: 0.3,
+      ease: "power2.out"
     });
     
     if (featuresArrow5Ref.current) {
@@ -1858,11 +1920,11 @@ export default function HomePage(): React.JSX.Element {
           box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
 
-        /* Overlay hitam */
+        /* Overlay hitam - full width ke kiri */
         .features-overlay {
           position: absolute;
           top: -20px;
-          left: -800px;
+          left: -100%;
           right: -200px;
           bottom: -20px;
           background-color: #000000;
@@ -1871,6 +1933,7 @@ export default function HomePage(): React.JSX.Element {
           z-index: 1;
           border-radius: 0px;
           transition: opacity 0.3s ease;
+          width: calc(100% + 100% + 200px);
         }
 
         /* Hover container saat hover */
@@ -2204,7 +2267,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* SECTION FEATURES - 01 NOTE */}
+            {/* SECTION FEATURES - 01 NOTE - HAPUS TEKS FEATURES DI SETIAP SECTION */}
             <div
               ref={featuresSectionRef}
               className="features-section"
@@ -2212,14 +2275,7 @@ export default function HomePage(): React.JSX.Element {
                 backgroundColor: '#0000ff',
               }}
             >
-              <div className="features-top">
-                <div
-                  ref={featuresTitleRef}
-                  className="features-title"
-                >
-                  Features
-                </div>
-              </div>
+              {/* features-top dihapus - tidak menampilkan teks Features di setiap section */}
               <div className="features-bottom">
                 <div
                   ref={featuresLeftNumberRef}
@@ -2288,7 +2344,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* SECTION FEATURES - 02 COMMUNITY */}
+            {/* SECTION FEATURES - 02 COMMUNITY - HAPUS TEKS FEATURES */}
             <div
               ref={featuresSection2Ref}
               className="features-section"
@@ -2296,14 +2352,6 @@ export default function HomePage(): React.JSX.Element {
                 backgroundColor: '#0000ff',
               }}
             >
-              <div className="features-top">
-                <div
-                  ref={featuresTitle2Ref}
-                  className="features-title"
-                >
-                  Features
-                </div>
-              </div>
               <div className="features-bottom">
                 <div
                   ref={featuresLeftNumber2Ref}
@@ -2372,7 +2420,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* SECTION FEATURES - 03 CALENDAR */}
+            {/* SECTION FEATURES - 03 CALENDAR - HAPUS TEKS FEATURES */}
             <div
               ref={featuresSection3Ref}
               className="features-section"
@@ -2380,14 +2428,6 @@ export default function HomePage(): React.JSX.Element {
                 backgroundColor: '#0000ff',
               }}
             >
-              <div className="features-top">
-                <div
-                  ref={featuresTitle3Ref}
-                  className="features-title"
-                >
-                  Features
-                </div>
-              </div>
               <div className="features-bottom">
                 <div
                   ref={featuresLeftNumber3Ref}
@@ -2456,7 +2496,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* SECTION FEATURES - 04 BLOG */}
+            {/* SECTION FEATURES - 04 BLOG - HAPUS TEKS FEATURES */}
             <div
               ref={featuresSection4Ref}
               className="features-section"
@@ -2464,14 +2504,6 @@ export default function HomePage(): React.JSX.Element {
                 backgroundColor: '#0000ff',
               }}
             >
-              <div className="features-top">
-                <div
-                  ref={featuresTitle4Ref}
-                  className="features-title"
-                >
-                  Features
-                </div>
-              </div>
               <div className="features-bottom">
                 <div
                   ref={featuresLeftNumber4Ref}
@@ -2540,7 +2572,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* SECTION FEATURES - 05 DONATION */}
+            {/* SECTION FEATURES - 05 DONATION - HAPUS TEKS FEATURES */}
             <div
               ref={featuresSection5Ref}
               className="features-section"
@@ -2548,14 +2580,6 @@ export default function HomePage(): React.JSX.Element {
                 backgroundColor: '#0000ff',
               }}
             >
-              <div className="features-top">
-                <div
-                  ref={featuresTitle5Ref}
-                  className="features-title"
-                >
-                  Features
-                </div>
-              </div>
               <div className="features-bottom">
                 <div
                   ref={featuresLeftNumber5Ref}
