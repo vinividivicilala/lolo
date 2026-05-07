@@ -76,7 +76,6 @@ export default function HomePage(): React.JSX.Element {
   
   // Section Features - 02 Community
   const featuresSection2Ref = useRef<HTMLDivElement>(null);
-  const featuresTitle2Ref = useRef<HTMLDivElement>(null);
   const featuresLeftNumber2Ref = useRef<HTMLDivElement>(null);
   const featuresRightText2Ref = useRef<HTMLDivElement>(null);
   const featuresOverlay2Ref = useRef<HTMLDivElement>(null);
@@ -87,7 +86,6 @@ export default function HomePage(): React.JSX.Element {
   
   // Section Features - 03 Calendar
   const featuresSection3Ref = useRef<HTMLDivElement>(null);
-  const featuresTitle3Ref = useRef<HTMLDivElement>(null);
   const featuresLeftNumber3Ref = useRef<HTMLDivElement>(null);
   const featuresRightText3Ref = useRef<HTMLDivElement>(null);
   const featuresOverlay3Ref = useRef<HTMLDivElement>(null);
@@ -98,7 +96,6 @@ export default function HomePage(): React.JSX.Element {
   
   // Section Features - 04 Blog
   const featuresSection4Ref = useRef<HTMLDivElement>(null);
-  const featuresTitle4Ref = useRef<HTMLDivElement>(null);
   const featuresLeftNumber4Ref = useRef<HTMLDivElement>(null);
   const featuresRightText4Ref = useRef<HTMLDivElement>(null);
   const featuresOverlay4Ref = useRef<HTMLDivElement>(null);
@@ -109,7 +106,6 @@ export default function HomePage(): React.JSX.Element {
   
   // Section Features - 05 Donation
   const featuresSection5Ref = useRef<HTMLDivElement>(null);
-  const featuresTitle5Ref = useRef<HTMLDivElement>(null);
   const featuresLeftNumber5Ref = useRef<HTMLDivElement>(null);
   const featuresRightText5Ref = useRef<HTMLDivElement>(null);
   const featuresOverlay5Ref = useRef<HTMLDivElement>(null);
@@ -367,6 +363,20 @@ export default function HomePage(): React.JSX.Element {
       ease: "power2.out"
     });
     
+    // Ganti warna teks Update menjadi hitam saat hover
+    gsap.to('.update-number', {
+      color: '#000000',
+      duration: 0.3,
+      ease: "power2.out"
+    });
+    
+    // Ganti warna teks Note menjadi hitam saat hover
+    gsap.to(featuresRightTextRef.current, {
+      color: '#000000',
+      duration: 0.3,
+      ease: "power2.out"
+    });
+    
     if (featuresArrowRef.current) {
       gsap.to(featuresArrowRef.current, {
         rotation: 0,
@@ -374,7 +384,7 @@ export default function HomePage(): React.JSX.Element {
         ease: "back.out(0.6)"
       });
       gsap.to('.features-right-arrow svg', {
-        stroke: '#ffffff',
+        stroke: '#000000',
         duration: 0.3,
         ease: "power2.out"
       });
@@ -413,6 +423,20 @@ export default function HomePage(): React.JSX.Element {
     
     // Kembalikan warna angka 01 menjadi putih
     gsap.to(featuresLeftNumberRef.current, {
+      color: '#ffffff',
+      duration: 0.3,
+      ease: "power2.out"
+    });
+    
+    // Kembalikan warna teks Update menjadi putih
+    gsap.to('.update-number', {
+      color: '#ffffff',
+      duration: 0.3,
+      ease: "power2.out"
+    });
+    
+    // Kembalikan warna teks Note menjadi putih
+    gsap.to(featuresRightTextRef.current, {
       color: '#ffffff',
       duration: 0.3,
       ease: "power2.out"
@@ -462,8 +486,19 @@ export default function HomePage(): React.JSX.Element {
       ease: "power2.out"
     });
     
-    // Ganti warna angka 02 menjadi hitam saat hover
     gsap.to(featuresLeftNumber2Ref.current, {
+      color: '#000000',
+      duration: 0.3,
+      ease: "power2.out"
+    });
+    
+    gsap.to('.update-number', {
+      color: '#000000',
+      duration: 0.3,
+      ease: "power2.out"
+    });
+    
+    gsap.to(featuresRightText2Ref.current, {
       color: '#000000',
       duration: 0.3,
       ease: "power2.out"
@@ -476,7 +511,7 @@ export default function HomePage(): React.JSX.Element {
         ease: "back.out(0.6)"
       });
       gsap.to('.features-right-arrow-2 svg', {
-        stroke: '#ffffff',
+        stroke: '#000000',
         duration: 0.3,
         ease: "power2.out"
       });
@@ -513,8 +548,19 @@ export default function HomePage(): React.JSX.Element {
       ease: "power2.in"
     });
     
-    // Kembalikan warna angka 02 menjadi putih
     gsap.to(featuresLeftNumber2Ref.current, {
+      color: '#ffffff',
+      duration: 0.3,
+      ease: "power2.out"
+    });
+    
+    gsap.to('.update-number', {
+      color: '#ffffff',
+      duration: 0.3,
+      ease: "power2.out"
+    });
+    
+    gsap.to(featuresRightText2Ref.current, {
       color: '#ffffff',
       duration: 0.3,
       ease: "power2.out"
@@ -564,8 +610,19 @@ export default function HomePage(): React.JSX.Element {
       ease: "power2.out"
     });
     
-    // Ganti warna angka 03 menjadi hitam saat hover
     gsap.to(featuresLeftNumber3Ref.current, {
+      color: '#000000',
+      duration: 0.3,
+      ease: "power2.out"
+    });
+    
+    gsap.to('.update-number', {
+      color: '#000000',
+      duration: 0.3,
+      ease: "power2.out"
+    });
+    
+    gsap.to(featuresRightText3Ref.current, {
       color: '#000000',
       duration: 0.3,
       ease: "power2.out"
@@ -578,7 +635,7 @@ export default function HomePage(): React.JSX.Element {
         ease: "back.out(0.6)"
       });
       gsap.to('.features-right-arrow-3 svg', {
-        stroke: '#ffffff',
+        stroke: '#000000',
         duration: 0.3,
         ease: "power2.out"
       });
@@ -615,8 +672,19 @@ export default function HomePage(): React.JSX.Element {
       ease: "power2.in"
     });
     
-    // Kembalikan warna angka 03 menjadi putih
     gsap.to(featuresLeftNumber3Ref.current, {
+      color: '#ffffff',
+      duration: 0.3,
+      ease: "power2.out"
+    });
+    
+    gsap.to('.update-number', {
+      color: '#ffffff',
+      duration: 0.3,
+      ease: "power2.out"
+    });
+    
+    gsap.to(featuresRightText3Ref.current, {
       color: '#ffffff',
       duration: 0.3,
       ease: "power2.out"
@@ -666,8 +734,19 @@ export default function HomePage(): React.JSX.Element {
       ease: "power2.out"
     });
     
-    // Ganti warna angka 04 menjadi hitam saat hover
     gsap.to(featuresLeftNumber4Ref.current, {
+      color: '#000000',
+      duration: 0.3,
+      ease: "power2.out"
+    });
+    
+    gsap.to('.update-number', {
+      color: '#000000',
+      duration: 0.3,
+      ease: "power2.out"
+    });
+    
+    gsap.to(featuresRightText4Ref.current, {
       color: '#000000',
       duration: 0.3,
       ease: "power2.out"
@@ -680,7 +759,7 @@ export default function HomePage(): React.JSX.Element {
         ease: "back.out(0.6)"
       });
       gsap.to('.features-right-arrow-4 svg', {
-        stroke: '#ffffff',
+        stroke: '#000000',
         duration: 0.3,
         ease: "power2.out"
       });
@@ -717,8 +796,19 @@ export default function HomePage(): React.JSX.Element {
       ease: "power2.in"
     });
     
-    // Kembalikan warna angka 04 menjadi putih
     gsap.to(featuresLeftNumber4Ref.current, {
+      color: '#ffffff',
+      duration: 0.3,
+      ease: "power2.out"
+    });
+    
+    gsap.to('.update-number', {
+      color: '#ffffff',
+      duration: 0.3,
+      ease: "power2.out"
+    });
+    
+    gsap.to(featuresRightText4Ref.current, {
       color: '#ffffff',
       duration: 0.3,
       ease: "power2.out"
@@ -768,8 +858,19 @@ export default function HomePage(): React.JSX.Element {
       ease: "power2.out"
     });
     
-    // Ganti warna angka 05 menjadi hitam saat hover
     gsap.to(featuresLeftNumber5Ref.current, {
+      color: '#000000',
+      duration: 0.3,
+      ease: "power2.out"
+    });
+    
+    gsap.to('.update-number', {
+      color: '#000000',
+      duration: 0.3,
+      ease: "power2.out"
+    });
+    
+    gsap.to(featuresRightText5Ref.current, {
       color: '#000000',
       duration: 0.3,
       ease: "power2.out"
@@ -782,7 +883,7 @@ export default function HomePage(): React.JSX.Element {
         ease: "back.out(0.6)"
       });
       gsap.to('.features-right-arrow-5 svg', {
-        stroke: '#ffffff',
+        stroke: '#000000',
         duration: 0.3,
         ease: "power2.out"
       });
@@ -819,8 +920,19 @@ export default function HomePage(): React.JSX.Element {
       ease: "power2.in"
     });
     
-    // Kembalikan warna angka 05 menjadi putih
     gsap.to(featuresLeftNumber5Ref.current, {
+      color: '#ffffff',
+      duration: 0.3,
+      ease: "power2.out"
+    });
+    
+    gsap.to('.update-number', {
+      color: '#ffffff',
+      duration: 0.3,
+      ease: "power2.out"
+    });
+    
+    gsap.to(featuresRightText5Ref.current, {
       color: '#ffffff',
       duration: 0.3,
       ease: "power2.out"
@@ -926,52 +1038,28 @@ export default function HomePage(): React.JSX.Element {
           duration: 0.5,
           ease: "power2.inOut"
         });
-        gsap.to([featuresTitleRef.current, featuresLeftNumberRef.current, featuresRightTextRef.current], {
+        gsap.to(featuresTitleRef.current, {
           color: '#ffffff',
           duration: 0.5,
           ease: "power2.inOut"
         });
-        gsap.to('.update-number', {
-          color: '#ffffff',
-          duration: 0.5,
-          ease: "power2.inOut"
-        });
-        if (!noteHover) {
-          gsap.to('.features-right-arrow svg', {
-            stroke: '#ffffff',
-            duration: 0.5,
-            ease: "power2.inOut"
-          });
-        }
       } else {
         gsap.to(featuresSectionRef.current, {
           backgroundColor: '#ffffff',
           duration: 0.5,
           ease: "power2.inOut"
         });
-        gsap.to([featuresTitleRef.current, featuresLeftNumberRef.current, featuresRightTextRef.current], {
+        gsap.to(featuresTitleRef.current, {
           color: '#000000',
           duration: 0.5,
           ease: "power2.inOut"
         });
-        gsap.to('.update-number', {
-          color: '#000000',
-          duration: 0.5,
-          ease: "power2.inOut"
-        });
-        if (!noteHover) {
-          gsap.to('.features-right-arrow svg', {
-            stroke: '#000000',
-            duration: 0.5,
-            ease: "power2.inOut"
-          });
-        }
       }
     };
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [isLoading, noteHover]);
+  }, [isLoading]);
 
   // Efek scroll untuk TRUSTED COLLABS section
   useEffect(() => {
@@ -1810,7 +1898,7 @@ export default function HomePage(): React.JSX.Element {
         .features-title {
           font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
           font-weight: 400;
-          font-size: 100px;
+          font-size: 300px;
           color: #ffffff;
           letter-spacing: -0.02em;
           line-height: 1;
@@ -2367,14 +2455,7 @@ export default function HomePage(): React.JSX.Element {
                 backgroundColor: '#0000ff',
               }}
             >
-              <div className="features-top">
-                <div
-                  ref={featuresTitle2Ref}
-                  className="features-title"
-                >
-                  Features
-                </div>
-              </div>
+              {/* Tidak ada features-top, hanya features-bottom */}
               <div className="features-bottom">
                 <div
                   ref={featuresLeftNumber2Ref}
@@ -2451,14 +2532,6 @@ export default function HomePage(): React.JSX.Element {
                 backgroundColor: '#0000ff',
               }}
             >
-              <div className="features-top">
-                <div
-                  ref={featuresTitle3Ref}
-                  className="features-title"
-                >
-                  Features
-                </div>
-              </div>
               <div className="features-bottom">
                 <div
                   ref={featuresLeftNumber3Ref}
@@ -2535,14 +2608,6 @@ export default function HomePage(): React.JSX.Element {
                 backgroundColor: '#0000ff',
               }}
             >
-              <div className="features-top">
-                <div
-                  ref={featuresTitle4Ref}
-                  className="features-title"
-                >
-                  Features
-                </div>
-              </div>
               <div className="features-bottom">
                 <div
                   ref={featuresLeftNumber4Ref}
@@ -2619,14 +2684,6 @@ export default function HomePage(): React.JSX.Element {
                 backgroundColor: '#0000ff',
               }}
             >
-              <div className="features-top">
-                <div
-                  ref={featuresTitle5Ref}
-                  className="features-title"
-                >
-                  Features
-                </div>
-              </div>
               <div className="features-bottom">
                 <div
                   ref={featuresLeftNumber5Ref}
