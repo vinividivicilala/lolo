@@ -1,4 +1,4 @@
-// app/page.tsx (Halaman Utama) - Features section dengan 01 di kiri, Features di tengah, Note + panah di kanan
+// app/page.tsx (Halaman Utama) - Features section dengan 01 dan Note di bawah teks Features
 
 'use client';
 
@@ -59,8 +59,8 @@ export default function HomePage(): React.JSX.Element {
   
   // Section Features
   const featuresSectionRef = useRef<HTMLDivElement>(null);
+  const featuresTitleRef = useRef<HTMLDivElement>(null);
   const featuresLeftNumberRef = useRef<HTMLDivElement>(null);
-  const featuresCenterTextRef = useRef<HTMLDivElement>(null);
   const featuresRightTextRef = useRef<HTMLDivElement>(null);
   
   // Section TRUSTED COLLABS
@@ -349,7 +349,7 @@ export default function HomePage(): React.JSX.Element {
           duration: 0.5,
           ease: "power2.inOut"
         });
-        gsap.to([featuresLeftNumberRef.current, featuresCenterTextRef.current, featuresRightTextRef.current], {
+        gsap.to([featuresTitleRef.current, featuresLeftNumberRef.current, featuresRightTextRef.current], {
           color: '#ffffff',
           duration: 0.5,
           ease: "power2.inOut"
@@ -365,7 +365,7 @@ export default function HomePage(): React.JSX.Element {
           duration: 0.5,
           ease: "power2.inOut"
         });
-        gsap.to([featuresLeftNumberRef.current, featuresCenterTextRef.current, featuresRightTextRef.current], {
+        gsap.to([featuresTitleRef.current, featuresLeftNumberRef.current, featuresRightTextRef.current], {
           color: '#000000',
           duration: 0.5,
           ease: "power2.inOut"
@@ -443,13 +443,13 @@ export default function HomePage(): React.JSX.Element {
   useEffect(() => {
     if (isLoading) return;
 
+    const titleElement = featuresTitleRef.current;
     const leftElement = featuresLeftNumberRef.current;
-    const centerElement = featuresCenterTextRef.current;
     const rightElement = featuresRightTextRef.current;
     
     const elements = [
-      { ref: leftElement, stagger: 0.05 },
-      { ref: centerElement, stagger: 0.04 },
+      { ref: titleElement, stagger: 0.06 },
+      { ref: leftElement, stagger: 0.04 },
       { ref: rightElement, stagger: 0.03 }
     ];
 
@@ -855,7 +855,7 @@ export default function HomePage(): React.JSX.Element {
     </svg>
   );
 
-  const NorthEastArrow = ({ size = 48 }: { size?: number }) => (
+  const NorthEastArrow = ({ size = 120 }: { size?: number }) => (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
@@ -1196,27 +1196,43 @@ export default function HomePage(): React.JSX.Element {
           line-height: 1.3;
         }
 
-        /* SECTION FEATURES - 3 kolom */
+        /* SECTION FEATURES - Features di atas, 01 dan Note di bawah */
         .features-section {
           min-height: 100vh;
           width: 100%;
           background-color: #0000ff;
           display: flex;
-          flex-direction: row;
+          flex-direction: column;
           justify-content: space-between;
-          align-items: center;
           transition: background-color 0.5s ease;
           position: relative;
           z-index: 5;
-          padding: 0 80px;
+          padding: 120px 80px 80px 80px;
           box-sizing: border-box;
         }
 
-        .features-left {
-          flex: 1;
+        .features-top {
+          width: 100%;
           display: flex;
           justify-content: flex-start;
-          align-items: center;
+        }
+
+        .features-title {
+          font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
+          font-weight: 400;
+          font-size: 300px;
+          color: #ffffff;
+          letter-spacing: -0.02em;
+          line-height: 1.1;
+          margin: 0;
+          transition: color 0.5s ease;
+        }
+
+        .features-bottom {
+          width: 100%;
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-end;
         }
 
         .features-left-number {
@@ -1230,28 +1246,8 @@ export default function HomePage(): React.JSX.Element {
           transition: color 0.5s ease;
         }
 
-        .features-center {
-          flex: 1;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-        }
-
-        .features-center-text {
-          font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
-          font-weight: 400;
-          font-size: 300px;
-          color: #ffffff;
-          letter-spacing: -0.02em;
-          line-height: 1.1;
-          margin: 0;
-          transition: color 0.5s ease;
-        }
-
         .features-right {
-          flex: 1;
           display: flex;
-          justify-content: flex-end;
           align-items: center;
           gap: 24px;
         }
@@ -1595,7 +1591,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* SECTION FEATURES - 01 di kiri, Features di tengah, Note + panah di kanan */}
+            {/* SECTION FEATURES - Features di pojok kiri atas, 01 di kiri bawah, Note + panah di kanan bawah */}
             <div
               ref={featuresSectionRef}
               className="features-section"
@@ -1603,31 +1599,31 @@ export default function HomePage(): React.JSX.Element {
                 backgroundColor: '#0000ff',
               }}
             >
-              <div className="features-left">
+              <div className="features-top">
+                <div
+                  ref={featuresTitleRef}
+                  className="features-title"
+                >
+                  Features
+                </div>
+              </div>
+              <div className="features-bottom">
                 <div
                   ref={featuresLeftNumberRef}
                   className="features-left-number"
                 >
                   01
                 </div>
-              </div>
-              <div className="features-center">
-                <div
-                  ref={featuresCenterTextRef}
-                  className="features-center-text"
-                >
-                  Features
-                </div>
-              </div>
-              <div className="features-right">
-                <div
-                  ref={featuresRightTextRef}
-                  className="features-right-text"
-                >
-                  Note
-                </div>
-                <div className="features-right-arrow">
-                  <NorthEastArrow size={120} />
+                <div className="features-right">
+                  <div
+                    ref={featuresRightTextRef}
+                    className="features-right-text"
+                  >
+                    Note
+                  </div>
+                  <div className="features-right-arrow">
+                    <NorthEastArrow size={120} />
+                  </div>
                 </div>
               </div>
             </div>
