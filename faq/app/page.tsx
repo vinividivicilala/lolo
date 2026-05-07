@@ -1540,7 +1540,7 @@ export default function HomePage(): React.JSX.Element {
         }
         
         #smooth-content {
-          min-height: 850vh;
+          min-height: 750vh;
           width: 100%;
           will-change: transform;
         }
@@ -2747,7 +2747,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* Bagian footer */}
+            {/* Bagian footer - hanya berisi teks MENURU besar */}
             <div style={{
               width: '100%',
               position: 'relative',
@@ -3039,18 +3039,6 @@ export default function HomePage(): React.JSX.Element {
                 pointerEvents: 'none',
                 zIndex: 1
               }}>
-                <div
-                  ref={lineRef}
-                  style={{
-                    width: '0%',
-                    height: '2px',
-                    backgroundColor: '#000000',
-                    marginRight: '0',
-                    marginBottom: '60px',
-                    opacity: 0
-                  }}
-                />
-                
                 {/* Teks MENURU besar - TANPA background hitam */}
                 <span 
                   ref={menuruTextRef}
