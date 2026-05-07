@@ -1,4 +1,4 @@
-// app/page.tsx (Halaman Utama) - Features section dengan hover effect yang benar
+// app/page.tsx (Halaman Utama) - Features section lengkap dengan 5 item
 
 'use client';
 
@@ -26,7 +26,7 @@ export default function HomePage(): React.JSX.Element {
   const [location, setLocation] = useState<string>("");
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [hoverActive, setHoverActive] = useState(false);
-  const [noteHover, setNoteHover] = useState(false);
+  const [activeFeatureHover, setActiveFeatureHover] = useState<number | null>(null);
   
   const acceptBtnRef = useRef<HTMLButtonElement>(null);
   const declineBtnRef = useRef<HTMLButtonElement>(null);
@@ -58,17 +58,26 @@ export default function HomePage(): React.JSX.Element {
   const bottomLeftTextRef = useRef<HTMLDivElement>(null);
   const studioContainerRef = useRef<HTMLDivElement>(null);
   
-  // Section Features
-  const featuresSectionRef = useRef<HTMLDivElement>(null);
-  const featuresTitleRef = useRef<HTMLDivElement>(null);
-  const featuresLeftNumberRef = useRef<HTMLDivElement>(null);
-  const featuresRightTextRef = useRef<HTMLDivElement>(null);
-  const featuresOverlayRef = useRef<HTMLDivElement>(null);
-  const featuresArrowRef = useRef<HTMLDivElement>(null);
-  const hoverContainerRef = useRef<HTMLDivElement>(null);
-  const noteTextRef = useRef<HTMLDivElement>(null);
-  const updateContainerRef = useRef<HTMLDivElement>(null);
-  const circleImagesRef = useRef<HTMLDivElement>(null);
+  // Section Features - Array untuk multiple features
+  const featuresSectionsRef = useRef<(HTMLDivElement | null)[]>([]);
+  const featuresTitlesRef = useRef<(HTMLDivElement | null)[]>([]);
+  const featuresLeftNumbersRef = useRef<(HTMLDivElement | null)[]>([]);
+  const featuresRightTextsRef = useRef<(HTMLDivElement | null)[]>([]);
+  const featuresOverlaysRef = useRef<(HTMLDivElement | null)[]>([]);
+  const featuresArrowsRef = useRef<(HTMLDivElement | null)[]>([]);
+  const featuresHoverContainersRef = useRef<(HTMLDivElement | null)[]>([]);
+  const featuresUpdateContainersRef = useRef<(HTMLDivElement | null)[]>([]);
+  const featuresCircleImagesRef = useRef<(HTMLDivElement | null)[]>([]);
+  const circleImagesRefs = useRef<(HTMLDivElement | null)[][]>([]);
+  
+  // Data features
+  const featuresData = [
+    { number: "01", title: "Note", updateText: "Update¹", hasImages: true },
+    { number: "02", title: "Community", updateText: "Join²", hasImages: true },
+    { number: "03", title: "Calendar", updateText: "Schedule³", hasImages: true },
+    { number: "04", title: "Blog", updateText: "Read⁴", hasImages: true },
+    { number: "05", title: "Donation", updateText: "Support⁵", hasImages: true }
+  ];
   
   // Section TRUSTED COLLABS
   const trustedSectionRef = useRef<HTMLDivElement>(null);
@@ -78,9 +87,8 @@ export default function HomePage(): React.JSX.Element {
   const img1Ref = useRef<HTMLDivElement>(null);
   const img2Ref = useRef<HTMLDivElement>(null);
   
-  // Refs untuk foto bulat
-  const circleImg1Ref = useRef<HTMLDivElement>(null);
-  const circleImg2Ref = useRef<HTMLDivElement>(null);
+  // Refs untuk foto bulat - array untuk setiap feature
+  const circleImgRefs = useRef<{[key: string]: (HTMLDivElement | null)[][]}>({});
 
   // Data untuk carousel
   const carouselItems = [
@@ -280,105 +288,108 @@ export default function HomePage(): React.JSX.Element {
     });
   };
 
-  // Animasi hover untuk Note
-  const handleNoteHoverEnter = () => {
-    setNoteHover(true);
+  // Animasi hover untuk setiap feature
+  const handleFeatureHoverEnter = (index: number) => {
+    setActiveFeatureHover(index);
     
     // Munculkan overlay hitam
-    gsap.to(featuresOverlayRef.current, {
+    gsap.to(featuresOverlaysRef.current[index], {
       opacity: 1,
       duration: 0.4,
       ease: "power2.out"
     });
     
-    // Munculkan Update dan foto
-    gsap.to(updateContainerRef.current, {
-      opacity: 1,
-      x: 0,
-      duration: 0.4,
-      ease: "power2.out"
-    });
-    
-    gsap.to(circleImagesRef.current, {
+    // Munculkan Update container
+    gsap.to(featuresUpdateContainersRef.current[index], {
       opacity: 1,
       x: 0,
       duration: 0.4,
       ease: "power2.out"
     });
     
-    // Ubah panah menjadi garis lurus (horizontal) dan warna menjadi putih
-    if (featuresArrowRef.current) {
-      gsap.to(featuresArrowRef.current, {
+    // Munculkan circle images
+    gsap.to(featuresCircleImagesRef.current[index], {
+      opacity: 1,
+      x: 0,
+      duration: 0.4,
+      ease: "power2.out"
+    });
+    
+    // Ubah panah menjadi garis lurus dan warna menjadi putih
+    if (featuresArrowsRef.current[index]) {
+      gsap.to(featuresArrowsRef.current[index], {
         rotation: 0,
         duration: 0.3,
         ease: "back.out(0.6)"
       });
       // Ubah warna stroke SVG menjadi putih
-      gsap.to('.features-right-arrow svg', {
+      gsap.to(`.features-right-arrow-${index} svg`, {
         stroke: '#ffffff',
         duration: 0.3,
         ease: "power2.out"
       });
     }
     
-    // Animasi foto bulat muncul dengan ukuran lebih besar
-    gsap.to([circleImg1Ref.current, circleImg2Ref.current], {
-      scale: 1.2,
-      duration: 0.4,
-      ease: "back.out(0.6)",
-      stagger: 0.1
-    });
+    // Animasi foto bulat
+    if (circleImgRefs.current[index]) {
+      gsap.to(circleImgRefs.current[index], {
+        scale: 1.2,
+        duration: 0.4,
+        ease: "back.out(0.6)",
+        stagger: 0.1
+      });
+    }
   };
 
-  const handleNoteHoverLeave = () => {
-    setNoteHover(false);
+  const handleFeatureHoverLeave = (index: number) => {
+    setActiveFeatureHover(null);
     
     // Hilangkan overlay hitam
-    gsap.to(featuresOverlayRef.current, {
+    gsap.to(featuresOverlaysRef.current[index], {
       opacity: 0,
       duration: 0.3,
       ease: "power2.in"
     });
     
-    // Sembunyikan Update dan foto
-    gsap.to(updateContainerRef.current, {
+    // Sembunyikan Update container
+    gsap.to(featuresUpdateContainersRef.current[index], {
       opacity: 0,
       x: 50,
       duration: 0.3,
       ease: "power2.in"
     });
     
-    gsap.to(circleImagesRef.current, {
+    // Sembunyikan circle images
+    gsap.to(featuresCircleImagesRef.current[index], {
       opacity: 0,
       x: 20,
       duration: 0.3,
       ease: "power2.in"
     });
     
-    // Kembalikan panah ke bentuk diagonal dengan warna sesuai background
-    if (featuresArrowRef.current) {
-      gsap.to(featuresArrowRef.current, {
+    // Kembalikan panah ke bentuk diagonal
+    if (featuresArrowsRef.current[index]) {
+      gsap.to(featuresArrowsRef.current[index], {
         rotation: 45,
         duration: 0.3,
         ease: "back.inOut(0.6)"
       });
       // Kembalikan warna stroke SVG
-      const isInBlueSection = window.scrollY + window.innerHeight/2 >= (featuresSectionRef.current?.offsetTop || 0) && 
-                              window.scrollY + window.innerHeight/2 <= (featuresSectionRef.current?.offsetTop || 0) + (featuresSectionRef.current?.offsetHeight || 0);
-      const strokeColor = isInBlueSection ? '#ffffff' : '#000000';
-      gsap.to('.features-right-arrow svg', {
-        stroke: strokeColor,
+      gsap.to(`.features-right-arrow-${index} svg`, {
+        stroke: '#ffffff',
         duration: 0.3,
         ease: "power2.out"
       });
     }
     
     // Animasi foto bulat kembali
-    gsap.to([circleImg1Ref.current, circleImg2Ref.current], {
-      scale: 1,
-      duration: 0.3,
-      ease: "power2.in"
-    });
+    if (circleImgRefs.current[index]) {
+      gsap.to(circleImgRefs.current[index], {
+        scale: 1,
+        duration: 0.3,
+        ease: "power2.in"
+      });
+    }
   };
 
   // Scroll snapping untuk carousel horizontal
@@ -441,193 +452,63 @@ export default function HomePage(): React.JSX.Element {
     };
   }, []);
 
-  // Efek scroll untuk FEATURES section
+  // Animasi SplitText untuk setiap FEATURES section
   useEffect(() => {
     if (isLoading) return;
 
-    const handleScroll = () => {
-      if (!featuresSectionRef.current) return;
+    featuresData.forEach((feature, idx) => {
+      const titleElement = featuresTitlesRef.current[idx];
+      const leftElement = featuresLeftNumbersRef.current[idx];
+      const rightElement = featuresRightTextsRef.current[idx];
       
-      const scrollPosition = window.scrollY;
-      const windowHeight = window.innerHeight;
-      const sectionTop = featuresSectionRef.current.offsetTop;
-      const sectionBottom = sectionTop + featuresSectionRef.current.offsetHeight;
-      
-      const isInSection = scrollPosition + windowHeight/2 >= sectionTop && scrollPosition + windowHeight/2 <= sectionBottom;
-      
-      if (isInSection) {
-        // Saat di section biru
-        gsap.to(featuresSectionRef.current, {
-          backgroundColor: '#0000ff',
-          duration: 0.5,
-          ease: "power2.inOut"
-        });
-        // Teks Features, 01, Note berubah jadi putih
-        gsap.to([featuresTitleRef.current, featuresLeftNumberRef.current, featuresRightTextRef.current], {
-          color: '#ffffff',
-          duration: 0.5,
-          ease: "power2.inOut"
-        });
-        // Update text juga putih
-        gsap.to('.update-number', {
-          color: '#ffffff',
-          duration: 0.5,
-          ease: "power2.inOut"
-        });
-        // Arrow svg menjadi putih (jika tidak dalam keadaan hover)
-        if (!noteHover) {
-          gsap.to('.features-right-arrow svg', {
-            stroke: '#ffffff',
-            duration: 0.5,
-            ease: "power2.inOut"
+      const elements = [
+        { ref: titleElement, stagger: 0.06 },
+        { ref: leftElement, stagger: 0.04 },
+        { ref: rightElement, stagger: 0.03 }
+      ];
+
+      elements.forEach(({ ref, stagger }) => {
+        if (ref) {
+          const split = new SplitText(ref, {
+            type: "chars, words",
+            charsClass: "features-char"
+          });
+          gsap.set(split.chars, {
+            opacity: 0,
+            y: 100,
+            rotationX: -90,
+            transformPerspective: 800,
+            filter: 'blur(20px)'
+          });
+          ScrollTrigger.create({
+            trigger: featuresSectionsRef.current[idx],
+            start: "top 80%",
+            end: "bottom 20%",
+            onEnter: () => {
+              gsap.to(split.chars, {
+                opacity: 1,
+                y: 0,
+                rotationX: 0,
+                filter: 'blur(0px)',
+                duration: 1.2,
+                stagger: { each: stagger, from: "start", ease: "power2.out" },
+                ease: "back.out(0.6)"
+              });
+            },
+            onLeaveBack: () => {
+              gsap.to(split.chars, {
+                opacity: 0,
+                y: 100,
+                rotationX: -90,
+                filter: 'blur(20px)',
+                duration: 0.8,
+                stagger: { each: 0.02, from: "start" },
+              });
+            },
+            toggleActions: "play none none reverse"
           });
         }
-      } else {
-        // Saat di luar section (bg putih)
-        gsap.to(featuresSectionRef.current, {
-          backgroundColor: '#ffffff',
-          duration: 0.5,
-          ease: "power2.inOut"
-        });
-        // Teks Features, 01, Note tetap hitam
-        gsap.to([featuresTitleRef.current, featuresLeftNumberRef.current, featuresRightTextRef.current], {
-          color: '#000000',
-          duration: 0.5,
-          ease: "power2.inOut"
-        });
-        // Update text hitam
-        gsap.to('.update-number', {
-          color: '#000000',
-          duration: 0.5,
-          ease: "power2.inOut"
-        });
-        // Arrow svg menjadi hitam (jika tidak dalam keadaan hover)
-        if (!noteHover) {
-          gsap.to('.features-right-arrow svg', {
-            stroke: '#000000',
-            duration: 0.5,
-            ease: "power2.inOut"
-          });
-        }
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [isLoading, noteHover]);
-
-  // Efek scroll untuk TRUSTED COLLABS section
-  useEffect(() => {
-    if (isLoading) return;
-
-    const handleScroll = () => {
-      if (!trustedSectionRef.current) return;
-      
-      const scrollPosition = window.scrollY;
-      const windowHeight = window.innerHeight;
-      const sectionTop = trustedSectionRef.current.offsetTop;
-      const sectionBottom = sectionTop + trustedSectionRef.current.offsetHeight;
-      
-      const isInSection = scrollPosition + windowHeight/2 >= sectionTop && scrollPosition + windowHeight/2 <= sectionBottom;
-      
-      if (isInSection) {
-        gsap.to(trustedSectionRef.current, {
-          backgroundColor: '#000000',
-          duration: 0.5,
-          ease: "power2.inOut"
-        });
-        if (trustedTextRef.current) {
-          gsap.to(trustedTextRef.current, {
-            color: '#ffffff',
-            duration: 0.5,
-            ease: "power2.inOut"
-          });
-        }
-        gsap.to('.carousel-brand, .carousel-desc', {
-          color: '#ffffff',
-          duration: 0.5,
-          ease: "power2.inOut"
-        });
-      } else {
-        gsap.to(trustedSectionRef.current, {
-          backgroundColor: '#ffffff',
-          duration: 0.5,
-          ease: "power2.inOut"
-        });
-        if (trustedTextRef.current) {
-          gsap.to(trustedTextRef.current, {
-            color: 'rgb(21, 22, 26)',
-            duration: 0.5,
-            ease: "power2.inOut"
-          });
-        }
-        gsap.to('.carousel-brand, .carousel-desc', {
-          color: 'rgb(21, 22, 26)',
-          duration: 0.5,
-          ease: "power2.inOut"
-        });
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [isLoading]);
-
-  // Animasi SplitText untuk FEATURES section
-  useEffect(() => {
-    if (isLoading) return;
-
-    const titleElement = featuresTitleRef.current;
-    const leftElement = featuresLeftNumberRef.current;
-    const rightElement = featuresRightTextRef.current;
-    
-    const elements = [
-      { ref: titleElement, stagger: 0.06 },
-      { ref: leftElement, stagger: 0.04 },
-      { ref: rightElement, stagger: 0.03 }
-    ];
-
-    elements.forEach(({ ref, stagger }) => {
-      if (ref) {
-        const split = new SplitText(ref, {
-          type: "chars, words",
-          charsClass: "features-char"
-        });
-        gsap.set(split.chars, {
-          opacity: 0,
-          y: 100,
-          rotationX: -90,
-          transformPerspective: 800,
-          filter: 'blur(20px)'
-        });
-        ScrollTrigger.create({
-          trigger: featuresSectionRef.current,
-          start: "top 80%",
-          end: "bottom 20%",
-          onEnter: () => {
-            gsap.to(split.chars, {
-              opacity: 1,
-              y: 0,
-              rotationX: 0,
-              filter: 'blur(0px)',
-              duration: 1.2,
-              stagger: { each: stagger, from: "start", ease: "power2.out" },
-              ease: "back.out(0.6)"
-            });
-          },
-          onLeaveBack: () => {
-            gsap.to(split.chars, {
-              opacity: 0,
-              y: 100,
-              rotationX: -90,
-              filter: 'blur(20px)',
-              duration: 0.8,
-              stagger: { each: 0.02, from: "start" },
-            });
-          },
-          toggleActions: "play none none reverse"
-        });
-      }
+      });
     });
 
     return () => {
@@ -989,14 +870,14 @@ export default function HomePage(): React.JSX.Element {
     </svg>
   );
 
-  const NorthEastArrow = ({ size = 80 }: { size?: number }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  const NorthEastArrow = ({ size = 80, index = 0 }: { size?: number; index?: number }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={`features-right-arrow-${index}`}>
       <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   );
 
-  const StraightLine = ({ size = 80 }: { size?: number }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  const StraightLine = ({ size = 80, index = 0 }: { size?: number; index?: number }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={`features-right-arrow-${index}`}>
       <path d="M3 12H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
     </svg>
   );
@@ -1047,7 +928,7 @@ export default function HomePage(): React.JSX.Element {
         }
         
         #smooth-content {
-          min-height: 400vh;
+          min-height: 600vh;
           width: 100%;
           will-change: transform;
         }
@@ -1338,7 +1219,7 @@ export default function HomePage(): React.JSX.Element {
 
         /* SECTION FEATURES */
         .features-section {
-          min-height: 100vh;
+          min-height: 30vh;
           width: 100%;
           background-color: #0000ff;
           display: flex;
@@ -1350,18 +1231,20 @@ export default function HomePage(): React.JSX.Element {
           padding: 120px 80px 80px 80px;
           box-sizing: border-box;
           overflow: visible;
+          border-bottom: 1px solid rgba(255,255,255,0.1);
         }
 
         .features-top {
           width: 100%;
           display: flex;
           justify-content: flex-start;
+          margin-bottom: 120px;
         }
 
         .features-title {
           font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
           font-weight: 400;
-          font-size: 300px;
+          font-size: 180px;
           color: #ffffff;
           letter-spacing: -0.02em;
           line-height: 1.1;
@@ -1413,7 +1296,7 @@ export default function HomePage(): React.JSX.Element {
           position: relative;
         }
 
-        /* Update container - hidden by default */
+        /* Update container */
         .update-container {
           opacity: 0;
           transform: translateX(50px);
@@ -1434,7 +1317,7 @@ export default function HomePage(): React.JSX.Element {
           transition: color 0.5s ease;
         }
 
-        /* Arrow - selalu terlihat */
+        /* Arrow */
         .features-right-arrow {
           display: inline-flex;
           align-items: center;
@@ -1451,7 +1334,7 @@ export default function HomePage(): React.JSX.Element {
           transition: stroke 0.5s ease, transform 0.3s ease;
         }
 
-        /* Circle Images container - hidden by default */
+        /* Circle Images container */
         .circle-images-container {
           opacity: 0;
           transform: translateX(20px);
@@ -1475,7 +1358,7 @@ export default function HomePage(): React.JSX.Element {
           box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
 
-        /* Overlay hitam - menutupi area dari 01 sampai kanan */
+        /* Overlay hitam */
         .features-overlay {
           position: absolute;
           top: -30px;
@@ -1518,6 +1401,7 @@ export default function HomePage(): React.JSX.Element {
           z-index: 5;
           padding-left: 80px;
           padding-top: 80px;
+          padding-bottom: 80px;
           box-sizing: border-box;
           overflow-x: hidden;
         }
@@ -1820,94 +1704,105 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* SECTION FEATURES */}
-            <div
-              ref={featuresSectionRef}
-              className="features-section"
-              style={{
-                backgroundColor: '#0000ff',
-              }}
-            >
-              <div className="features-top">
-                <div
-                  ref={featuresTitleRef}
-                  className="features-title"
-                >
-                  Features
-                </div>
-              </div>
-              <div className="features-bottom">
-                <div
-                  ref={featuresLeftNumberRef}
-                  className="features-left-number"
-                >
-                  01
-                </div>
-                
-                {/* Hover Container untuk Note */}
-                <div 
-                  ref={hoverContainerRef}
-                  className="hover-container"
-                  onMouseEnter={handleNoteHoverEnter}
-                  onMouseLeave={handleNoteHoverLeave}
-                >
+            {/* SECTION FEATURES - Multiple Items */}
+            {featuresData.map((feature, idx) => (
+              <div
+                key={idx}
+                ref={(el) => { featuresSectionsRef.current[idx] = el; }}
+                className="features-section"
+                style={{
+                  backgroundColor: '#0000ff',
+                }}
+              >
+                <div className="features-top">
                   <div
-                    ref={featuresRightTextRef}
-                    className="features-right-text"
+                    ref={(el) => { featuresTitlesRef.current[idx] = el; }}
+                    className="features-title"
                   >
-                    Note
+                    Features
+                  </div>
+                </div>
+                <div className="features-bottom">
+                  <div
+                    ref={(el) => { featuresLeftNumbersRef.current[idx] = el; }}
+                    className="features-left-number"
+                  >
+                    {feature.number}
                   </div>
                   
-                  {/* Update container - hanya muncul saat hover */}
-                  <div ref={updateContainerRef} className="update-container">
-                    <div className="update-number">
-                      Update<sup style={{ fontSize: '60px', verticalAlign: 'super' }}>¹</sup>
-                    </div>
-                  </div>
-                  
-                  {/* Arrow - selalu terlihat */}
+                  {/* Hover Container untuk setiap feature */}
                   <div 
-                    ref={featuresArrowRef}
-                    className="features-right-arrow"
+                    ref={(el) => { featuresHoverContainersRef.current[idx] = el; }}
+                    className="hover-container"
+                    onMouseEnter={() => handleFeatureHoverEnter(idx)}
+                    onMouseLeave={() => handleFeatureHoverLeave(idx)}
                   >
-                    {noteHover ? (
-                      <StraightLine size={80} />
-                    ) : (
-                      <NorthEastArrow size={80} />
+                    <div
+                      ref={(el) => { featuresRightTextsRef.current[idx] = el; }}
+                      className="features-right-text"
+                    >
+                      {feature.title}
+                    </div>
+                    
+                    {/* Update container */}
+                    <div ref={(el) => { featuresUpdateContainersRef.current[idx] = el; }} className="update-container">
+                      <div className="update-number">
+                        {feature.updateText}
+                      </div>
+                    </div>
+                    
+                    {/* Arrow */}
+                    <div 
+                      ref={(el) => { featuresArrowsRef.current[idx] = el; }}
+                      className="features-right-arrow"
+                    >
+                      {activeFeatureHover === idx ? (
+                        <StraightLine size={80} index={idx} />
+                      ) : (
+                        <NorthEastArrow size={80} index={idx} />
+                      )}
+                    </div>
+                    
+                    {/* Circle images container */}
+                    {feature.hasImages && (
+                      <div ref={(el) => { featuresCircleImagesRef.current[idx] = el; }} className="circle-images-container">
+                        <div
+                          ref={(el) => { 
+                            if (!circleImgRefs.current[idx]) circleImgRefs.current[idx] = [];
+                            circleImgRefs.current[idx][0] = el;
+                          }}
+                          className="circle-img"
+                        >
+                          <Image
+                            src="/images/lkhh.jpg"
+                            alt="circle 1"
+                            fill
+                            style={{ objectFit: 'cover' }}
+                          />
+                        </div>
+                        <div
+                          ref={(el) => { 
+                            if (!circleImgRefs.current[idx]) circleImgRefs.current[idx] = [];
+                            circleImgRefs.current[idx][1] = el;
+                          }}
+                          className="circle-img"
+                        >
+                          <Image
+                            src="/images/ai.jpg"
+                            alt="circle 2"
+                            fill
+                            style={{ objectFit: 'cover' }}
+                          />
+                        </div>
+                      </div>
                     )}
+                    
+                    {/* Overlay hitam */}
+                    <div ref={(el) => { featuresOverlaysRef.current[idx] = el; }} className="features-overlay" />
                   </div>
-                  
-                  {/* Circle images container - hanya muncul saat hover */}
-                  <div ref={circleImagesRef} className="circle-images-container">
-                    <div
-                      ref={circleImg1Ref}
-                      className="circle-img"
-                    >
-                      <Image
-                        src="/images/lkhh.jpg"
-                        alt="circle 1"
-                        fill
-                        style={{ objectFit: 'cover' }}
-                      />
-                    </div>
-                    <div
-                      ref={circleImg2Ref}
-                      className="circle-img"
-                    >
-                      <Image
-                        src="/images/ai.jpg"
-                        alt="circle 2"
-                        fill
-                        style={{ objectFit: 'cover' }}
-                      />
-                    </div>
-                  </div>
-                  
-                  {/* Overlay hitam */}
-                  <div ref={featuresOverlayRef} className="features-overlay" />
                 </div>
               </div>
-            </div>
+            ))}
 
             {/* SECTION TRUSTED COLLABS */}
             <div
