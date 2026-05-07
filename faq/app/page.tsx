@@ -66,6 +66,7 @@ export default function HomePage(): React.JSX.Element {
   const featuresOverlayRef = useRef<HTMLDivElement>(null);
   const featuresArrowRef = useRef<HTMLDivElement>(null);
   const hoverContainerRef = useRef<HTMLDivElement>(null);
+  const noteTextRef = useRef<HTMLDivElement>(null);
   
   // Section TRUSTED COLLABS
   const trustedSectionRef = useRef<HTMLDivElement>(null);
@@ -281,17 +282,24 @@ export default function HomePage(): React.JSX.Element {
   const handleNoteHoverEnter = () => {
     setNoteHover(true);
     
-    // Munculkan overlay hitam di container hover
+    // Geser teks Note ke kiri
+    gsap.to(noteTextRef.current, {
+      x: -30,
+      duration: 0.4,
+      ease: "power2.out"
+    });
+    
+    // Munculkan overlay hitam di area yang tepat
     gsap.to(featuresOverlayRef.current, {
       opacity: 1,
       duration: 0.4,
       ease: "power2.out"
     });
     
-    // Ubah panah menjadi garis lurus
+    // Ubah panah menjadi garis lurus (horizontal)
     if (featuresArrowRef.current) {
       gsap.to(featuresArrowRef.current, {
-        rotation: 45,
+        rotation: 0,
         duration: 0.3,
         ease: "back.out(0.6)"
       });
@@ -310,6 +318,13 @@ export default function HomePage(): React.JSX.Element {
   const handleNoteHoverLeave = () => {
     setNoteHover(false);
     
+    // Kembalikan teks Note ke posisi semula
+    gsap.to(noteTextRef.current, {
+      x: 0,
+      duration: 0.4,
+      ease: "power2.out"
+    });
+    
     // Hilangkan overlay
     gsap.to(featuresOverlayRef.current, {
       opacity: 0,
@@ -317,10 +332,10 @@ export default function HomePage(): React.JSX.Element {
       ease: "power2.in"
     });
     
-    // Kembalikan panah
+    // Kembalikan panah ke bentuk diagonal
     if (featuresArrowRef.current) {
       gsap.to(featuresArrowRef.current, {
-        rotation: 0,
+        rotation: 45,
         duration: 0.3,
         ease: "back.inOut(0.6)"
       });
@@ -1272,7 +1287,7 @@ export default function HomePage(): React.JSX.Element {
           line-height: 1.3;
         }
 
-        /* SECTION FEATURES */
+        /* SECTION FEATURES - UPDATED */
         .features-section {
           min-height: 100vh;
           width: 100%;
@@ -1311,7 +1326,7 @@ export default function HomePage(): React.JSX.Element {
           justify-content: space-between;
           align-items: flex-end;
           position: relative;
-          z-index: 2;
+          z-index: 10;
         }
 
         .features-left-number {
@@ -1329,6 +1344,7 @@ export default function HomePage(): React.JSX.Element {
         .hover-container {
           position: relative;
           cursor: pointer;
+          z-index: 20;
         }
 
         .features-right {
@@ -1345,47 +1361,39 @@ export default function HomePage(): React.JSX.Element {
           letter-spacing: -0.02em;
           line-height: 1.1;
           margin: 0;
-          transition: color 0.5s ease;
+          transition: color 0.5s ease, transform 0.4s ease;
+          display: inline-block;
         }
 
-        /* Update text dengan superscript */
+        /* Update wrapper dengan superscript */
         .update-wrapper {
           display: flex;
           flex-direction: column;
-          align-items: flex-start;
+          align-items: center;
+          justify-content: flex-start;
+          gap: 0px;
         }
 
         .update-number {
           font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
-          font-size: 24px;
+          font-size: 25px;
           font-weight: 400;
           color: #ffffff;
           line-height: 1;
-          margin-bottom: 4px;
-          opacity: 0;
-          transform: translateY(10px);
+          opacity: 1;
+          transform: translateY(0);
           transition: all 0.3s ease;
         }
 
         .update-text {
           font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
-          font-size: 20px;
+          font-size: 12px;
           font-weight: 400;
           color: #ffffff;
           line-height: 1;
-          opacity: 0;
-          transform: translateX(-10px);
-          transition: all 0.3s ease;
-        }
-
-        .hover-container:hover .update-number {
-          opacity: 1;
-          transform: translateY(0);
-        }
-
-        .hover-container:hover .update-text {
           opacity: 1;
           transform: translateX(0);
+          transition: all 0.3s ease;
         }
 
         .features-right-arrow {
@@ -1422,31 +1430,21 @@ export default function HomePage(): React.JSX.Element {
           border: 2px solid #ffffff;
         }
 
-        .hover-container:hover .circle-img {
-          opacity: 1;
-          transform: scale(1);
-        }
-
-        /* Overlay hitam - hanya di area hover */
+        /* Overlay hitam - tepat di area kanan bawah, tidak menutupi 01 */
         .features-overlay {
           position: absolute;
-          bottom: 0;
-          right: 0;
+          bottom: -30px;
+          right: -100px;
           width: auto;
-          min-width: 300px;
+          min-width: 280px;
           height: auto;
           background-color: #000000;
           opacity: 0;
           pointer-events: none;
-          z-index: 1;
+          z-index: 5;
           border-radius: 40px;
-          padding: 20px 40px 20px 40px;
+          padding: 30px 50px 30px 50px;
           transition: opacity 0.3s ease;
-        }
-
-        .hover-container:hover ~ .features-overlay,
-        .features-overlay:hover {
-          opacity: 1;
         }
 
         /* SECTION TRUSTED COLLABS */
@@ -1764,7 +1762,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* SECTION FEATURES */}
+            {/* SECTION FEATURES - UPDATED */}
             <div
               ref={featuresSectionRef}
               className="features-section"
@@ -1797,14 +1795,14 @@ export default function HomePage(): React.JSX.Element {
                 >
                   <div className="features-right">
                     <div
-                      ref={featuresRightTextRef}
+                      ref={noteTextRef}
                       className="features-right-text"
                     >
                       Note
                     </div>
                     <div className="update-wrapper">
                       <div className="update-number">
-                        128<span style={{ fontSize: '16px', verticalAlign: 'super' }}>+</span>
+                        128<sup style={{ fontSize: '14px', verticalAlign: 'super' }}>¹</sup>
                       </div>
                       <div className="update-text">
                         update
@@ -1845,7 +1843,9 @@ export default function HomePage(): React.JSX.Element {
                       </div>
                     </div>
                   </div>
-                  <div ref={featuresOverlayRef} className="features-overlay" />
+                  <div ref={featuresOverlayRef} className="features-overlay">
+                    {/* Konten overlay jika diperlukan */}
+                  </div>
                 </div>
               </div>
             </div>
@@ -2226,7 +2226,7 @@ export default function HomePage(): React.JSX.Element {
       {showCalendarModal && (
         <div className="calendar-modal-overlay">
           <div ref={modalRef} className="calendar-modal">
-            {/* Modal content sama seperti sebelumnya */}
+            {/* Modal content */}
             <div style={{
               display: 'flex',
               flexDirection: 'row',
