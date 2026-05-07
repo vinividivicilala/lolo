@@ -1,4 +1,4 @@
-// app/page.tsx (Halaman Utama) - Dengan section biru "Features" di bawah MN'RU© - 26'
+// app/page.tsx (Halaman Utama) - Features section berubah warna saat scroll seperti TRUSTED COLLABS
 
 'use client';
 
@@ -57,13 +57,13 @@ export default function HomePage(): React.JSX.Element {
   const bottomLeftTextRef = useRef<HTMLDivElement>(null);
   const studioContainerRef = useRef<HTMLDivElement>(null);
   
-  // Section yang berubah warna (TRUSTED COLLABS)
-  const colorChangeSectionRef = useRef<HTMLDivElement>(null);
-  const trustedTextRef = useRef<HTMLDivElement>(null);
-  
-  // Section biru baru - FEATURES
+  // Section Features
   const featuresSectionRef = useRef<HTMLDivElement>(null);
   const featuresTextRef = useRef<HTMLDivElement>(null);
+  
+  // Section TRUSTED COLLABS
+  const trustedSectionRef = useRef<HTMLDivElement>(null);
+  const trustedTextRef = useRef<HTMLDivElement>(null);
   
   // Refs untuk gambar-gambar hover
   const img1Ref = useRef<HTMLDivElement>(null);
@@ -298,7 +298,142 @@ export default function HomePage(): React.JSX.Element {
     };
   }, [isLoading]);
 
-  // Animasi SplitText untuk FITUR (Features)
+  useEffect(() => {
+    const initSmoother = () => {
+      if (typeof window !== 'undefined' && !smootherRef.current) {
+        smootherRef.current = ScrollSmoother.create({
+          wrapper: "#smooth-wrapper",
+          content: "#smooth-content",
+          smooth: 1.2,
+          effects: true,
+          smoothTouch: 0.5,
+          normalizeScroll: true,
+          ignoreMobileResize: true,
+        });
+      }
+    };
+
+    const timer = setTimeout(() => {
+      initSmoother();
+    }, 100);
+
+    return () => {
+      clearTimeout(timer);
+      if (smootherRef.current) {
+        smootherRef.current.kill();
+        smootherRef.current = null;
+      }
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+    };
+  }, []);
+
+  // Efek scroll untuk FEATURES section - biru hilang saat scroll ke bawah, muncul saat scroll ke atas
+  useEffect(() => {
+    if (isLoading) return;
+
+    const handleScroll = () => {
+      if (!featuresSectionRef.current) return;
+      
+      const scrollPosition = window.scrollY;
+      const windowHeight = window.innerHeight;
+      const sectionTop = featuresSectionRef.current.offsetTop;
+      const sectionBottom = sectionTop + featuresSectionRef.current.offsetHeight;
+      
+      const isInSection = scrollPosition + windowHeight/2 >= sectionTop && scrollPosition + windowHeight/2 <= sectionBottom;
+      
+      if (isInSection) {
+        // Saat discroll ke dalam section Features - background BIRU
+        gsap.to(featuresSectionRef.current, {
+          backgroundColor: '#0000ff',
+          duration: 0.5,
+          ease: "power2.inOut"
+        });
+        if (featuresTextRef.current) {
+          gsap.to(featuresTextRef.current, {
+            color: '#ffffff',
+            duration: 0.5,
+            ease: "power2.inOut"
+          });
+        }
+      } else {
+        // Saat keluar dari section Features - background PUTIH
+        gsap.to(featuresSectionRef.current, {
+          backgroundColor: '#ffffff',
+          duration: 0.5,
+          ease: "power2.inOut"
+        });
+        if (featuresTextRef.current) {
+          gsap.to(featuresTextRef.current, {
+            color: '#000000',
+            duration: 0.5,
+            ease: "power2.inOut"
+          });
+        }
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [isLoading]);
+
+  // Efek scroll untuk TRUSTED COLLABS section
+  useEffect(() => {
+    if (isLoading) return;
+
+    const handleScroll = () => {
+      if (!trustedSectionRef.current) return;
+      
+      const scrollPosition = window.scrollY;
+      const windowHeight = window.innerHeight;
+      const sectionTop = trustedSectionRef.current.offsetTop;
+      const sectionBottom = sectionTop + trustedSectionRef.current.offsetHeight;
+      
+      const isInSection = scrollPosition + windowHeight/2 >= sectionTop && scrollPosition + windowHeight/2 <= sectionBottom;
+      
+      if (isInSection) {
+        gsap.to(trustedSectionRef.current, {
+          backgroundColor: '#000000',
+          duration: 0.5,
+          ease: "power2.inOut"
+        });
+        if (trustedTextRef.current) {
+          gsap.to(trustedTextRef.current, {
+            color: '#ffffff',
+            duration: 0.5,
+            ease: "power2.inOut"
+          });
+        }
+        gsap.to('.carousel-brand, .carousel-desc', {
+          color: '#ffffff',
+          duration: 0.5,
+          ease: "power2.inOut"
+        });
+      } else {
+        gsap.to(trustedSectionRef.current, {
+          backgroundColor: '#ffffff',
+          duration: 0.5,
+          ease: "power2.inOut"
+        });
+        if (trustedTextRef.current) {
+          gsap.to(trustedTextRef.current, {
+            color: 'rgb(21, 22, 26)',
+            duration: 0.5,
+            ease: "power2.inOut"
+          });
+        }
+        gsap.to('.carousel-brand, .carousel-desc', {
+          color: 'rgb(21, 22, 26)',
+          duration: 0.5,
+          ease: "power2.inOut"
+        });
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [isLoading]);
+
+  // Animasi SplitText untuk FEATURES
   useEffect(() => {
     if (isLoading) return;
 
@@ -351,92 +486,6 @@ export default function HomePage(): React.JSX.Element {
     };
   }, [isLoading]);
 
-  useEffect(() => {
-    const initSmoother = () => {
-      if (typeof window !== 'undefined' && !smootherRef.current) {
-        smootherRef.current = ScrollSmoother.create({
-          wrapper: "#smooth-wrapper",
-          content: "#smooth-content",
-          smooth: 1.2,
-          effects: true,
-          smoothTouch: 0.5,
-          normalizeScroll: true,
-          ignoreMobileResize: true,
-        });
-      }
-    };
-
-    const timer = setTimeout(() => {
-      initSmoother();
-    }, 100);
-
-    return () => {
-      clearTimeout(timer);
-      if (smootherRef.current) {
-        smootherRef.current.kill();
-        smootherRef.current = null;
-      }
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
-    };
-  }, []);
-
-  // Efek scroll untuk mengubah warna section TRUSTED COLLABS
-  useEffect(() => {
-    if (isLoading) return;
-
-    const handleScroll = () => {
-      if (!colorChangeSectionRef.current) return;
-      
-      const scrollPosition = window.scrollY;
-      const windowHeight = window.innerHeight;
-      const sectionTop = colorChangeSectionRef.current.offsetTop;
-      const sectionBottom = sectionTop + colorChangeSectionRef.current.offsetHeight;
-      
-      const isInSection = scrollPosition + windowHeight/2 >= sectionTop && scrollPosition + windowHeight/2 <= sectionBottom;
-      
-      if (isInSection) {
-        gsap.to(colorChangeSectionRef.current, {
-          backgroundColor: '#000000',
-          duration: 0.5,
-          ease: "power2.inOut"
-        });
-        if (trustedTextRef.current) {
-          gsap.to(trustedTextRef.current, {
-            color: '#ffffff',
-            duration: 0.5,
-            ease: "power2.inOut"
-          });
-        }
-        gsap.to('.carousel-brand, .carousel-desc', {
-          color: '#ffffff',
-          duration: 0.5,
-          ease: "power2.inOut"
-        });
-      } else {
-        gsap.to(colorChangeSectionRef.current, {
-          backgroundColor: '#ffffff',
-          duration: 0.5,
-          ease: "power2.inOut"
-        });
-        if (trustedTextRef.current) {
-          gsap.to(trustedTextRef.current, {
-            color: 'rgb(21, 22, 26)',
-            duration: 0.5,
-            ease: "power2.inOut"
-          });
-        }
-        gsap.to('.carousel-brand, .carousel-desc', {
-          color: 'rgb(21, 22, 26)',
-          duration: 0.5,
-          ease: "power2.inOut"
-        });
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [isLoading]);
-
   // Animasi SplitText untuk TRUSTED COLLABS
   useEffect(() => {
     if (isLoading) return;
@@ -458,7 +507,7 @@ export default function HomePage(): React.JSX.Element {
     });
 
     ScrollTrigger.create({
-      trigger: colorChangeSectionRef.current,
+      trigger: trustedSectionRef.current,
       start: "top 80%",
       end: "bottom 20%",
       onEnter: () => {
@@ -1126,7 +1175,7 @@ export default function HomePage(): React.JSX.Element {
           line-height: 1.3;
         }
 
-        /* SECTION FEATURES - Warna BIRU (#0000ff) */
+        /* SECTION FEATURES - Warna berubah saat scroll */
         .features-section {
           min-height: 100vh;
           width: 100%;
@@ -1135,6 +1184,7 @@ export default function HomePage(): React.JSX.Element {
           flex-direction: column;
           justify-content: flex-start;
           align-items: flex-start;
+          transition: background-color 0.5s ease;
           position: relative;
           z-index: 5;
           padding-left: 80px;
@@ -1152,10 +1202,11 @@ export default function HomePage(): React.JSX.Element {
           line-height: 1.1;
           text-align: left;
           margin: 0;
+          transition: color 0.5s ease;
         }
 
         /* SECTION TRUSTED COLLABS */
-        .color-change-section {
+        .trusted-section {
           min-height: 100vh;
           width: 100%;
           display: flex;
@@ -1261,11 +1312,11 @@ export default function HomePage(): React.JSX.Element {
           border-radius: 10px;
         }
         
-        .color-change-section .carousel-container::-webkit-scrollbar-track {
+        .trusted-section .carousel-container::-webkit-scrollbar-track {
           background: rgba(255, 255, 255, 0.2);
         }
         
-        .color-change-section .carousel-container::-webkit-scrollbar-thumb {
+        .trusted-section .carousel-container::-webkit-scrollbar-thumb {
           background: rgba(255, 255, 255, 0.5);
         }
       `}</style>
@@ -1470,10 +1521,13 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* SECTION FEATURES - Warna BIRU (#0000ff) dengan teks "Features" font 300px di kiri atas */}
+            {/* SECTION FEATURES - Warna berubah: biru saat discroll ke dalam, putih saat keluar */}
             <div
               ref={featuresSectionRef}
               className="features-section"
+              style={{
+                backgroundColor: '#0000ff',
+              }}
             >
               <div
                 ref={featuresTextRef}
@@ -1483,10 +1537,10 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* SECTION TRUSTED COLLABS - Yang berubah warna saat scroll */}
+            {/* SECTION TRUSTED COLLABS - Warna berubah: hitam saat discroll ke dalam, putih saat keluar */}
             <div
-              ref={colorChangeSectionRef}
-              className="color-change-section"
+              ref={trustedSectionRef}
+              className="trusted-section"
               style={{
                 backgroundColor: '#ffffff',
               }}
