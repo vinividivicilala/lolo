@@ -297,7 +297,7 @@ export default function HomePage(): React.JSX.Element {
       rotation: 0,
       scale: 1,
       opacity: 1,
-      duration: 0.6,
+      duration: 0.4,
       ease: "back.out(0.8)",
       delay: 0
     });
@@ -315,7 +315,7 @@ export default function HomePage(): React.JSX.Element {
       rotation: 0,
       scale: 1,
       opacity: 1,
-      duration: 0.6,
+      duration: 0.4,
       ease: "back.out(0.8)",
       delay: 0.1
     });
@@ -327,7 +327,7 @@ export default function HomePage(): React.JSX.Element {
     gsap.to([img1Ref.current, img2Ref.current], {
       opacity: 0,
       scale: 0.6,
-      duration: 0.4,
+      duration: 0.3,
       ease: "power2.in"
     });
   };
@@ -336,128 +336,118 @@ export default function HomePage(): React.JSX.Element {
   const handleNoteHoverEnter = () => {
     setNoteHover(true);
     
-    gsap.to(featuresOverlayRef.current, {
-      opacity: 1,
-      duration: 0.4,
-      ease: "power2.out"
-    });
+    // Overlay hitam langsung muncul
+    gsap.set(featuresOverlayRef.current, { opacity: 1 });
     
     gsap.to(updateContainerRef.current, {
       opacity: 1,
       x: 0,
-      duration: 0.4,
+      duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to(circleImagesRef.current, {
       opacity: 1,
       x: 0,
-      duration: 0.4,
+      duration: 0.2,
       ease: "power2.out"
     });
     
-    // Ganti warna angka 01 menjadi hitam saat hover
+    // Ganti warna menjadi hitam
     gsap.to(featuresLeftNumberRef.current, {
       color: '#000000',
-      duration: 0.3,
+      duration: 0.2,
       ease: "power2.out"
     });
     
-    // Ganti warna teks Update menjadi hitam saat hover
     gsap.to('.update-number', {
       color: '#000000',
-      duration: 0.3,
+      duration: 0.2,
       ease: "power2.out"
     });
     
-    // Ganti warna teks Note menjadi hitam saat hover
     gsap.to(featuresRightTextRef.current, {
       color: '#000000',
-      duration: 0.3,
+      duration: 0.2,
       ease: "power2.out"
     });
     
     if (featuresArrowRef.current) {
       gsap.to(featuresArrowRef.current, {
         rotation: 0,
-        duration: 0.3,
+        duration: 0.2,
         ease: "back.out(0.6)"
       });
       gsap.to('.features-right-arrow svg', {
         stroke: '#000000',
-        duration: 0.3,
+        duration: 0.2,
         ease: "power2.out"
       });
     }
     
     gsap.to([circleImg1Ref.current, circleImg2Ref.current], {
       scale: 1.2,
-      duration: 0.4,
+      duration: 0.2,
       ease: "back.out(0.6)",
-      stagger: 0.1
+      stagger: 0.05
     });
   };
 
   const handleNoteHoverLeave = () => {
     setNoteHover(false);
     
-    gsap.to(featuresOverlayRef.current, {
-      opacity: 0,
-      duration: 0.3,
-      ease: "power2.in"
-    });
+    // Overlay hitam langsung hilang
+    gsap.set(featuresOverlayRef.current, { opacity: 0 });
     
     gsap.to(updateContainerRef.current, {
       opacity: 0,
       x: 50,
-      duration: 0.3,
+      duration: 0.2,
       ease: "power2.in"
     });
     
     gsap.to(circleImagesRef.current, {
       opacity: 0,
       x: 20,
-      duration: 0.3,
+      duration: 0.2,
       ease: "power2.in"
     });
     
-    // Kembalikan warna angka 01 menjadi putih
+    // Kembalikan warna menjadi putih
     gsap.to(featuresLeftNumberRef.current, {
       color: '#ffffff',
-      duration: 0.3,
+      duration: 0.2,
       ease: "power2.out"
     });
     
-    // Kembalikan warna teks Update menjadi putih
     gsap.to('.update-number', {
       color: '#ffffff',
-      duration: 0.3,
+      duration: 0.2,
       ease: "power2.out"
     });
     
-    // Kembalikan warna teks Note menjadi putih
     gsap.to(featuresRightTextRef.current, {
       color: '#ffffff',
-      duration: 0.3,
+      duration: 0.2,
       ease: "power2.out"
     });
     
     if (featuresArrowRef.current) {
       gsap.to(featuresArrowRef.current, {
         rotation: 45,
-        duration: 0.3,
+        duration: 0.2,
         ease: "back.inOut(0.6)"
       });
       gsap.to('.features-right-arrow svg', {
         stroke: '#ffffff',
-        duration: 0.3,
+        duration: 0.2,
         ease: "power2.out"
       });
     }
     
     gsap.to([circleImg1Ref.current, circleImg2Ref.current], {
       scale: 1,
-      duration: 0.3,
+      duration: 0.2,
       ease: "power2.in"
     });
   };
@@ -466,122 +456,114 @@ export default function HomePage(): React.JSX.Element {
   const handleCommunityHoverEnter = () => {
     setCommunityHover(true);
     
-    gsap.to(featuresOverlay2Ref.current, {
-      opacity: 1,
-      duration: 0.4,
-      ease: "power2.out"
-    });
+    gsap.set(featuresOverlay2Ref.current, { opacity: 1 });
     
     gsap.to(updateContainer2Ref.current, {
       opacity: 1,
       x: 0,
-      duration: 0.4,
+      duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to(circleImages2Ref.current, {
       opacity: 1,
       x: 0,
-      duration: 0.4,
+      duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to(featuresLeftNumber2Ref.current, {
       color: '#000000',
-      duration: 0.3,
+      duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to('.update-number', {
       color: '#000000',
-      duration: 0.3,
+      duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to(featuresRightText2Ref.current, {
       color: '#000000',
-      duration: 0.3,
+      duration: 0.2,
       ease: "power2.out"
     });
     
     if (featuresArrow2Ref.current) {
       gsap.to(featuresArrow2Ref.current, {
         rotation: 0,
-        duration: 0.3,
+        duration: 0.2,
         ease: "back.out(0.6)"
       });
       gsap.to('.features-right-arrow-2 svg', {
         stroke: '#000000',
-        duration: 0.3,
+        duration: 0.2,
         ease: "power2.out"
       });
     }
     
     gsap.to([circleImg1_2Ref.current, circleImg2_2Ref.current], {
       scale: 1.2,
-      duration: 0.4,
+      duration: 0.2,
       ease: "back.out(0.6)",
-      stagger: 0.1
+      stagger: 0.05
     });
   };
 
   const handleCommunityHoverLeave = () => {
     setCommunityHover(false);
     
-    gsap.to(featuresOverlay2Ref.current, {
-      opacity: 0,
-      duration: 0.3,
-      ease: "power2.in"
-    });
+    gsap.set(featuresOverlay2Ref.current, { opacity: 0 });
     
     gsap.to(updateContainer2Ref.current, {
       opacity: 0,
       x: 50,
-      duration: 0.3,
+      duration: 0.2,
       ease: "power2.in"
     });
     
     gsap.to(circleImages2Ref.current, {
       opacity: 0,
       x: 20,
-      duration: 0.3,
+      duration: 0.2,
       ease: "power2.in"
     });
     
     gsap.to(featuresLeftNumber2Ref.current, {
       color: '#ffffff',
-      duration: 0.3,
+      duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to('.update-number', {
       color: '#ffffff',
-      duration: 0.3,
+      duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to(featuresRightText2Ref.current, {
       color: '#ffffff',
-      duration: 0.3,
+      duration: 0.2,
       ease: "power2.out"
     });
     
     if (featuresArrow2Ref.current) {
       gsap.to(featuresArrow2Ref.current, {
         rotation: 45,
-        duration: 0.3,
+        duration: 0.2,
         ease: "back.inOut(0.6)"
       });
       gsap.to('.features-right-arrow-2 svg', {
         stroke: '#ffffff',
-        duration: 0.3,
+        duration: 0.2,
         ease: "power2.out"
       });
     }
     
     gsap.to([circleImg1_2Ref.current, circleImg2_2Ref.current], {
       scale: 1,
-      duration: 0.3,
+      duration: 0.2,
       ease: "power2.in"
     });
   };
@@ -590,122 +572,114 @@ export default function HomePage(): React.JSX.Element {
   const handleCalendarHoverEnter = () => {
     setCalendarHover(true);
     
-    gsap.to(featuresOverlay3Ref.current, {
-      opacity: 1,
-      duration: 0.4,
-      ease: "power2.out"
-    });
+    gsap.set(featuresOverlay3Ref.current, { opacity: 1 });
     
     gsap.to(updateContainer3Ref.current, {
       opacity: 1,
       x: 0,
-      duration: 0.4,
+      duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to(circleImages3Ref.current, {
       opacity: 1,
       x: 0,
-      duration: 0.4,
+      duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to(featuresLeftNumber3Ref.current, {
       color: '#000000',
-      duration: 0.3,
+      duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to('.update-number', {
       color: '#000000',
-      duration: 0.3,
+      duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to(featuresRightText3Ref.current, {
       color: '#000000',
-      duration: 0.3,
+      duration: 0.2,
       ease: "power2.out"
     });
     
     if (featuresArrow3Ref.current) {
       gsap.to(featuresArrow3Ref.current, {
         rotation: 0,
-        duration: 0.3,
+        duration: 0.2,
         ease: "back.out(0.6)"
       });
       gsap.to('.features-right-arrow-3 svg', {
         stroke: '#000000',
-        duration: 0.3,
+        duration: 0.2,
         ease: "power2.out"
       });
     }
     
     gsap.to([circleImg1_3Ref.current, circleImg2_3Ref.current], {
       scale: 1.2,
-      duration: 0.4,
+      duration: 0.2,
       ease: "back.out(0.6)",
-      stagger: 0.1
+      stagger: 0.05
     });
   };
 
   const handleCalendarHoverLeave = () => {
     setCalendarHover(false);
     
-    gsap.to(featuresOverlay3Ref.current, {
-      opacity: 0,
-      duration: 0.3,
-      ease: "power2.in"
-    });
+    gsap.set(featuresOverlay3Ref.current, { opacity: 0 });
     
     gsap.to(updateContainer3Ref.current, {
       opacity: 0,
       x: 50,
-      duration: 0.3,
+      duration: 0.2,
       ease: "power2.in"
     });
     
     gsap.to(circleImages3Ref.current, {
       opacity: 0,
       x: 20,
-      duration: 0.3,
+      duration: 0.2,
       ease: "power2.in"
     });
     
     gsap.to(featuresLeftNumber3Ref.current, {
       color: '#ffffff',
-      duration: 0.3,
+      duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to('.update-number', {
       color: '#ffffff',
-      duration: 0.3,
+      duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to(featuresRightText3Ref.current, {
       color: '#ffffff',
-      duration: 0.3,
+      duration: 0.2,
       ease: "power2.out"
     });
     
     if (featuresArrow3Ref.current) {
       gsap.to(featuresArrow3Ref.current, {
         rotation: 45,
-        duration: 0.3,
+        duration: 0.2,
         ease: "back.inOut(0.6)"
       });
       gsap.to('.features-right-arrow-3 svg', {
         stroke: '#ffffff',
-        duration: 0.3,
+        duration: 0.2,
         ease: "power2.out"
       });
     }
     
     gsap.to([circleImg1_3Ref.current, circleImg2_3Ref.current], {
       scale: 1,
-      duration: 0.3,
+      duration: 0.2,
       ease: "power2.in"
     });
   };
@@ -714,122 +688,114 @@ export default function HomePage(): React.JSX.Element {
   const handleBlogHoverEnter = () => {
     setBlogHover(true);
     
-    gsap.to(featuresOverlay4Ref.current, {
-      opacity: 1,
-      duration: 0.4,
-      ease: "power2.out"
-    });
+    gsap.set(featuresOverlay4Ref.current, { opacity: 1 });
     
     gsap.to(updateContainer4Ref.current, {
       opacity: 1,
       x: 0,
-      duration: 0.4,
+      duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to(circleImages4Ref.current, {
       opacity: 1,
       x: 0,
-      duration: 0.4,
+      duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to(featuresLeftNumber4Ref.current, {
       color: '#000000',
-      duration: 0.3,
+      duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to('.update-number', {
       color: '#000000',
-      duration: 0.3,
+      duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to(featuresRightText4Ref.current, {
       color: '#000000',
-      duration: 0.3,
+      duration: 0.2,
       ease: "power2.out"
     });
     
     if (featuresArrow4Ref.current) {
       gsap.to(featuresArrow4Ref.current, {
         rotation: 0,
-        duration: 0.3,
+        duration: 0.2,
         ease: "back.out(0.6)"
       });
       gsap.to('.features-right-arrow-4 svg', {
         stroke: '#000000',
-        duration: 0.3,
+        duration: 0.2,
         ease: "power2.out"
       });
     }
     
     gsap.to([circleImg1_4Ref.current, circleImg2_4Ref.current], {
       scale: 1.2,
-      duration: 0.4,
+      duration: 0.2,
       ease: "back.out(0.6)",
-      stagger: 0.1
+      stagger: 0.05
     });
   };
 
   const handleBlogHoverLeave = () => {
     setBlogHover(false);
     
-    gsap.to(featuresOverlay4Ref.current, {
-      opacity: 0,
-      duration: 0.3,
-      ease: "power2.in"
-    });
+    gsap.set(featuresOverlay4Ref.current, { opacity: 0 });
     
     gsap.to(updateContainer4Ref.current, {
       opacity: 0,
       x: 50,
-      duration: 0.3,
+      duration: 0.2,
       ease: "power2.in"
     });
     
     gsap.to(circleImages4Ref.current, {
       opacity: 0,
       x: 20,
-      duration: 0.3,
+      duration: 0.2,
       ease: "power2.in"
     });
     
     gsap.to(featuresLeftNumber4Ref.current, {
       color: '#ffffff',
-      duration: 0.3,
+      duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to('.update-number', {
       color: '#ffffff',
-      duration: 0.3,
+      duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to(featuresRightText4Ref.current, {
       color: '#ffffff',
-      duration: 0.3,
+      duration: 0.2,
       ease: "power2.out"
     });
     
     if (featuresArrow4Ref.current) {
       gsap.to(featuresArrow4Ref.current, {
         rotation: 45,
-        duration: 0.3,
+        duration: 0.2,
         ease: "back.inOut(0.6)"
       });
       gsap.to('.features-right-arrow-4 svg', {
         stroke: '#ffffff',
-        duration: 0.3,
+        duration: 0.2,
         ease: "power2.out"
       });
     }
     
     gsap.to([circleImg1_4Ref.current, circleImg2_4Ref.current], {
       scale: 1,
-      duration: 0.4,
+      duration: 0.2,
       ease: "power2.in"
     });
   };
@@ -838,122 +804,114 @@ export default function HomePage(): React.JSX.Element {
   const handleDonationHoverEnter = () => {
     setDonationHover(true);
     
-    gsap.to(featuresOverlay5Ref.current, {
-      opacity: 1,
-      duration: 0.4,
-      ease: "power2.out"
-    });
+    gsap.set(featuresOverlay5Ref.current, { opacity: 1 });
     
     gsap.to(updateContainer5Ref.current, {
       opacity: 1,
       x: 0,
-      duration: 0.4,
+      duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to(circleImages5Ref.current, {
       opacity: 1,
       x: 0,
-      duration: 0.4,
+      duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to(featuresLeftNumber5Ref.current, {
       color: '#000000',
-      duration: 0.3,
+      duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to('.update-number', {
       color: '#000000',
-      duration: 0.3,
+      duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to(featuresRightText5Ref.current, {
       color: '#000000',
-      duration: 0.3,
+      duration: 0.2,
       ease: "power2.out"
     });
     
     if (featuresArrow5Ref.current) {
       gsap.to(featuresArrow5Ref.current, {
         rotation: 0,
-        duration: 0.3,
+        duration: 0.2,
         ease: "back.out(0.6)"
       });
       gsap.to('.features-right-arrow-5 svg', {
         stroke: '#000000',
-        duration: 0.3,
+        duration: 0.2,
         ease: "power2.out"
       });
     }
     
     gsap.to([circleImg1_5Ref.current, circleImg2_5Ref.current], {
       scale: 1.2,
-      duration: 0.4,
+      duration: 0.2,
       ease: "back.out(0.6)",
-      stagger: 0.1
+      stagger: 0.05
     });
   };
 
   const handleDonationHoverLeave = () => {
     setDonationHover(false);
     
-    gsap.to(featuresOverlay5Ref.current, {
-      opacity: 0,
-      duration: 0.3,
-      ease: "power2.in"
-    });
+    gsap.set(featuresOverlay5Ref.current, { opacity: 0 });
     
     gsap.to(updateContainer5Ref.current, {
       opacity: 0,
       x: 50,
-      duration: 0.3,
+      duration: 0.2,
       ease: "power2.in"
     });
     
     gsap.to(circleImages5Ref.current, {
       opacity: 0,
       x: 20,
-      duration: 0.3,
+      duration: 0.2,
       ease: "power2.in"
     });
     
     gsap.to(featuresLeftNumber5Ref.current, {
       color: '#ffffff',
-      duration: 0.3,
+      duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to('.update-number', {
       color: '#ffffff',
-      duration: 0.3,
+      duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to(featuresRightText5Ref.current, {
       color: '#ffffff',
-      duration: 0.3,
+      duration: 0.2,
       ease: "power2.out"
     });
     
     if (featuresArrow5Ref.current) {
       gsap.to(featuresArrow5Ref.current, {
         rotation: 45,
-        duration: 0.3,
+        duration: 0.2,
         ease: "back.inOut(0.6)"
       });
       gsap.to('.features-right-arrow-5 svg', {
         stroke: '#ffffff',
-        duration: 0.3,
+        duration: 0.2,
         ease: "power2.out"
       });
     }
     
     gsap.to([circleImg1_5Ref.current, circleImg2_5Ref.current], {
       scale: 1,
-      duration: 0.3,
+      duration: 0.2,
       ease: "power2.in"
     });
   };
@@ -1035,23 +993,23 @@ export default function HomePage(): React.JSX.Element {
       if (isInSection) {
         gsap.to(featuresSectionRef.current, {
           backgroundColor: '#0000ff',
-          duration: 0.5,
+          duration: 0.3,
           ease: "power2.inOut"
         });
         gsap.to(featuresTitleRef.current, {
           color: '#ffffff',
-          duration: 0.5,
+          duration: 0.3,
           ease: "power2.inOut"
         });
       } else {
         gsap.to(featuresSectionRef.current, {
           backgroundColor: '#ffffff',
-          duration: 0.5,
+          duration: 0.3,
           ease: "power2.inOut"
         });
         gsap.to(featuresTitleRef.current, {
           color: '#000000',
-          duration: 0.5,
+          duration: 0.3,
           ease: "power2.inOut"
         });
       }
@@ -1078,37 +1036,37 @@ export default function HomePage(): React.JSX.Element {
       if (isInSection) {
         gsap.to(trustedSectionRef.current, {
           backgroundColor: '#000000',
-          duration: 0.5,
+          duration: 0.3,
           ease: "power2.inOut"
         });
         if (trustedTextRef.current) {
           gsap.to(trustedTextRef.current, {
             color: '#ffffff',
-            duration: 0.5,
+            duration: 0.3,
             ease: "power2.inOut"
           });
         }
         gsap.to('.carousel-brand, .carousel-desc', {
           color: '#ffffff',
-          duration: 0.5,
+          duration: 0.3,
           ease: "power2.inOut"
         });
       } else {
         gsap.to(trustedSectionRef.current, {
           backgroundColor: '#ffffff',
-          duration: 0.5,
+          duration: 0.3,
           ease: "power2.inOut"
         });
         if (trustedTextRef.current) {
           gsap.to(trustedTextRef.current, {
             color: 'rgb(21, 22, 26)',
-            duration: 0.5,
+            duration: 0.3,
             ease: "power2.inOut"
           });
         }
         gsap.to('.carousel-brand, .carousel-desc', {
           color: 'rgb(21, 22, 26)',
-          duration: 0.5,
+          duration: 0.3,
           ease: "power2.inOut"
         });
       }
@@ -1879,7 +1837,7 @@ export default function HomePage(): React.JSX.Element {
           display: flex;
           flex-direction: column;
           justify-content: space-between;
-          transition: background-color 0.5s ease;
+          transition: background-color 0.3s ease;
           position: relative;
           z-index: 5;
           padding: 40px 80px 40px 80px;
@@ -1903,7 +1861,7 @@ export default function HomePage(): React.JSX.Element {
           letter-spacing: -0.02em;
           line-height: 1;
           margin: 0;
-          transition: color 0.5s ease;
+          transition: color 0.3s ease;
         }
 
         .features-bottom {
@@ -1923,7 +1881,7 @@ export default function HomePage(): React.JSX.Element {
           letter-spacing: -0.02em;
           line-height: 1;
           margin: 0;
-          transition: color 0.5s ease;
+          transition: color 0.2s ease;
         }
 
         /* Hover Container */
@@ -1944,7 +1902,7 @@ export default function HomePage(): React.JSX.Element {
           letter-spacing: -0.02em;
           line-height: 1;
           margin: 0;
-          transition: color 0.5s ease;
+          transition: color 0.2s ease;
           display: inline-block;
           z-index: 2;
           position: relative;
@@ -1954,7 +1912,7 @@ export default function HomePage(): React.JSX.Element {
         .update-container {
           opacity: 0;
           transform: translateX(50px);
-          transition: all 0.3s ease;
+          transition: opacity 0.2s ease, transform 0.2s ease;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -1968,7 +1926,7 @@ export default function HomePage(): React.JSX.Element {
           font-weight: 400;
           color: #ffffff;
           line-height: 1;
-          transition: color 0.5s ease;
+          transition: color 0.2s ease;
         }
 
         .update-number sup {
@@ -1980,7 +1938,7 @@ export default function HomePage(): React.JSX.Element {
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          transition: transform 0.3s ease;
+          transition: transform 0.2s ease;
           z-index: 2;
           position: relative;
         }
@@ -1989,14 +1947,14 @@ export default function HomePage(): React.JSX.Element {
           width: 50px;
           height: 50px;
           stroke: currentColor;
-          transition: stroke 0.5s ease, transform 0.3s ease;
+          transition: stroke 0.2s ease, transform 0.2s ease;
         }
 
         /* Circle Images container */
         .circle-images-container {
           opacity: 0;
           transform: translateX(20px);
-          transition: all 0.3s ease;
+          transition: opacity 0.2s ease, transform 0.2s ease;
           display: flex;
           align-items: center;
           gap: 10px;
@@ -2011,7 +1969,7 @@ export default function HomePage(): React.JSX.Element {
           border-radius: 50%;
           overflow: hidden;
           position: relative;
-          transition: all 0.3s ease;
+          transition: transform 0.2s ease;
           border: 2px solid #ffffff;
           box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
@@ -2028,7 +1986,7 @@ export default function HomePage(): React.JSX.Element {
           pointer-events: none;
           z-index: 1;
           border-radius: 0px;
-          transition: opacity 0.3s ease;
+          transition: opacity 0.2s ease;
           width: calc(100% + 100vw + 200px);
         }
 
@@ -2055,7 +2013,7 @@ export default function HomePage(): React.JSX.Element {
           flex-direction: column;
           justify-content: flex-start;
           align-items: flex-start;
-          transition: background-color 0.5s ease;
+          transition: background-color 0.3s ease;
           position: relative;
           z-index: 5;
           padding-left: 80px;
@@ -2074,7 +2032,7 @@ export default function HomePage(): React.JSX.Element {
           line-height: 1.2;
           text-align: left;
           margin: 0;
-          transition: color 0.5s ease;
+          transition: color 0.3s ease;
           margin-bottom: 60px;
         }
 
@@ -2125,7 +2083,7 @@ export default function HomePage(): React.JSX.Element {
           font-size: 24px;
           color: rgb(21, 22, 26);
           margin: 0 0 8px 0;
-          transition: color 0.5s ease;
+          transition: color 0.3s ease;
           letter-spacing: -0.02em;
         }
         
@@ -2135,7 +2093,7 @@ export default function HomePage(): React.JSX.Element {
           font-size: 14px;
           color: rgb(21, 22, 26);
           line-height: 1.5;
-          transition: color 0.5s ease;
+          transition: color 0.3s ease;
           opacity: 0.8;
         }
 
@@ -2455,7 +2413,6 @@ export default function HomePage(): React.JSX.Element {
                 backgroundColor: '#0000ff',
               }}
             >
-              {/* Tidak ada features-top, hanya features-bottom */}
               <div className="features-bottom">
                 <div
                   ref={featuresLeftNumber2Ref}
