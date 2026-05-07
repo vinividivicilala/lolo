@@ -1540,7 +1540,7 @@ export default function HomePage(): React.JSX.Element {
         }
         
         #smooth-content {
-          min-height: 750vh;
+          min-height: 100vh;
           width: 100%;
           will-change: transform;
         }
@@ -2747,7 +2747,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* Bagian footer - hanya berisi teks MENURU besar */}
+            {/* Bagian footer - hanya berisi teks MENURU besar tanpa background hitam */}
             <div style={{
               width: '100%',
               position: 'relative',
@@ -2756,7 +2756,7 @@ export default function HomePage(): React.JSX.Element {
               flexDirection: 'column',
               justifyContent: 'flex-end',
               alignItems: 'center',
-              minHeight: '110vh'
+              minHeight: '60vh'
             }}>
               <div
                 ref={bottomContentRef}
@@ -3025,6 +3025,7 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </div>
 
+              {/* Hanya teks MENURU besar tanpa background hitam */}
               <footer style={{
                 position: 'relative',
                 bottom: 0,
@@ -3037,9 +3038,9 @@ export default function HomePage(): React.JSX.Element {
                 padding: '0 80px 0 0',
                 margin: 0,
                 pointerEvents: 'none',
-                zIndex: 1
+                zIndex: 1,
+                marginTop: '40px'
               }}>
-                {/* Teks MENURU besar - TANPA background hitam */}
                 <span 
                   ref={menuruTextRef}
                   style={{
@@ -3058,7 +3059,6 @@ export default function HomePage(): React.JSX.Element {
                     fontKerning: 'normal',
                     margin: 0,
                     padding: 0,
-                    transform: 'translateY(10px)',
                     marginRight: '0',
                     backgroundColor: 'transparent'
                   }}>
