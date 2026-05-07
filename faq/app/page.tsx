@@ -284,12 +284,12 @@ export default function HomePage(): React.JSX.Element {
     
     // Geser teks Note ke kiri
     gsap.to(noteTextRef.current, {
-      x: -30,
+      x: -50,
       duration: 0.4,
       ease: "power2.out"
     });
     
-    // Munculkan overlay hitam di area yang tepat
+    // Munculkan overlay hitam - menutupi dari 01 sampai sisi kanan
     gsap.to(featuresOverlayRef.current, {
       opacity: 1,
       duration: 0.4,
@@ -305,10 +305,10 @@ export default function HomePage(): React.JSX.Element {
       });
     }
     
-    // Animasi foto bulat muncul
+    // Animasi foto bulat muncul dengan ukuran lebih besar
     gsap.to([circleImg1Ref.current, circleImg2Ref.current], {
       opacity: 1,
-      scale: 1,
+      scale: 1.2,
       duration: 0.4,
       ease: "back.out(0.6)",
       stagger: 0.1
@@ -410,7 +410,7 @@ export default function HomePage(): React.JSX.Element {
     };
   }, []);
 
-  // Efek scroll untuk FEATURES section
+  // Efek scroll untuk FEATURES section - menjaga warna teks Note tetap hitam saat bg putih
   useEffect(() => {
     if (isLoading) return;
 
@@ -430,7 +430,14 @@ export default function HomePage(): React.JSX.Element {
           duration: 0.5,
           ease: "power2.inOut"
         });
+        // Teks Features, 01, Note berubah jadi putih saat di section biru
         gsap.to([featuresTitleRef.current, featuresLeftNumberRef.current, featuresRightTextRef.current], {
+          color: '#ffffff',
+          duration: 0.5,
+          ease: "power2.inOut"
+        });
+        // Update text juga putih
+        gsap.to('.update-number, .update-text', {
           color: '#ffffff',
           duration: 0.5,
           ease: "power2.inOut"
@@ -448,7 +455,14 @@ export default function HomePage(): React.JSX.Element {
           duration: 0.5,
           ease: "power2.inOut"
         });
+        // Teks Features, 01, Note tetap hitam saat di luar section biru
         gsap.to([featuresTitleRef.current, featuresLeftNumberRef.current, featuresRightTextRef.current], {
+          color: '#000000',
+          duration: 0.5,
+          ease: "power2.inOut"
+        });
+        // Update text juga hitam
+        gsap.to('.update-number, .update-text', {
           color: '#000000',
           duration: 0.5,
           ease: "power2.inOut"
@@ -1350,7 +1364,7 @@ export default function HomePage(): React.JSX.Element {
         .features-right {
           display: flex;
           align-items: center;
-          gap: 20px;
+          gap: 40px;
         }
 
         .features-right-text {
@@ -1365,35 +1379,35 @@ export default function HomePage(): React.JSX.Element {
           display: inline-block;
         }
 
-        /* Update wrapper dengan superscript */
+        /* Update wrapper dengan font 100px */
         .update-wrapper {
           display: flex;
           flex-direction: column;
           align-items: center;
-          justify-content: flex-start;
+          justify-content: center;
           gap: 0px;
         }
 
         .update-number {
           font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
-          font-size: 25px;
+          font-size: 100px;
           font-weight: 400;
           color: #ffffff;
           line-height: 1;
           opacity: 1;
           transform: translateY(0);
-          transition: all 0.3s ease;
+          transition: color 0.5s ease;
         }
 
         .update-text {
           font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
-          font-size: 12px;
+          font-size: 20px;
           font-weight: 400;
           color: #ffffff;
           line-height: 1;
           opacity: 1;
           transform: translateX(0);
-          transition: all 0.3s ease;
+          transition: color 0.5s ease;
         }
 
         .features-right-arrow {
@@ -1410,40 +1424,41 @@ export default function HomePage(): React.JSX.Element {
           transition: stroke 0.5s ease;
         }
 
-        /* Circle Images */
+        /* Circle Images - Ukuran lebih besar */
         .circle-images {
           display: flex;
           align-items: center;
-          gap: 12px;
+          gap: 16px;
           margin-left: 16px;
         }
 
         .circle-img {
-          width: 50px;
-          height: 50px;
+          width: 80px;
+          height: 80px;
           border-radius: 50%;
           overflow: hidden;
           position: relative;
           opacity: 0;
           transform: scale(0.8);
           transition: all 0.3s ease;
-          border: 2px solid #ffffff;
+          border: 3px solid #ffffff;
+          box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
 
-        /* Overlay hitam - tepat di area kanan bawah, tidak menutupi 01 */
+        /* Overlay hitam - menutupi dari 01 sampai sisi kanan, tinggi sebatas konten */
         .features-overlay {
           position: absolute;
-          bottom: -30px;
-          right: -100px;
+          bottom: -40px;
+          right: -200px;
+          left: -800px;
           width: auto;
-          min-width: 280px;
           height: auto;
           background-color: #000000;
           opacity: 0;
           pointer-events: none;
-          z-index: 5;
-          border-radius: 40px;
-          padding: 30px 50px 30px 50px;
+          z-index: -1;
+          border-radius: 0px;
+          padding: 20px 0;
           transition: opacity 0.3s ease;
         }
 
@@ -1802,10 +1817,10 @@ export default function HomePage(): React.JSX.Element {
                     </div>
                     <div className="update-wrapper">
                       <div className="update-number">
-                        128<sup style={{ fontSize: '14px', verticalAlign: 'super' }}>¹</sup>
+                        Update<sup style={{ fontSize: '60px', verticalAlign: 'super' }}>¹</sup>
                       </div>
                       <div className="update-text">
-                        update
+                        note
                       </div>
                     </div>
                     <div 
@@ -1843,9 +1858,8 @@ export default function HomePage(): React.JSX.Element {
                       </div>
                     </div>
                   </div>
-                  <div ref={featuresOverlayRef} className="features-overlay">
-                    {/* Konten overlay jika diperlukan */}
-                  </div>
+                  {/* Overlay hitam menutupi dari 01 sampai kanan */}
+                  <div ref={featuresOverlayRef} className="features-overlay" />
                 </div>
               </div>
             </div>
@@ -1889,7 +1903,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* Bagian footer */}
+            {/* Bagian footer - sama seperti sebelumnya */}
             <div style={{
               width: '100%',
               position: 'relative',
@@ -2226,7 +2240,6 @@ export default function HomePage(): React.JSX.Element {
       {showCalendarModal && (
         <div className="calendar-modal-overlay">
           <div ref={modalRef} className="calendar-modal">
-            {/* Modal content */}
             <div style={{
               display: 'flex',
               flexDirection: 'row',
