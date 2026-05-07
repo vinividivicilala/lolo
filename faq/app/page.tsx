@@ -1,4 +1,4 @@
-// app/page.tsx (Halaman Utama) - Features section berubah warna saat scroll seperti TRUSTED COLLABS
+// app/page.tsx (Halaman Utama) - Features section dengan 01 di kiri dan Note + panah di kanan
 
 'use client';
 
@@ -59,7 +59,8 @@ export default function HomePage(): React.JSX.Element {
   
   // Section Features
   const featuresSectionRef = useRef<HTMLDivElement>(null);
-  const featuresTextRef = useRef<HTMLDivElement>(null);
+  const featuresLeftNumberRef = useRef<HTMLDivElement>(null);
+  const featuresRightTextRef = useRef<HTMLDivElement>(null);
   
   // Section TRUSTED COLLABS
   const trustedSectionRef = useRef<HTMLDivElement>(null);
@@ -327,7 +328,7 @@ export default function HomePage(): React.JSX.Element {
     };
   }, []);
 
-  // Efek scroll untuk FEATURES section - biru hilang saat scroll ke bawah, muncul saat scroll ke atas
+  // Efek scroll untuk FEATURES section
   useEffect(() => {
     if (isLoading) return;
 
@@ -342,33 +343,27 @@ export default function HomePage(): React.JSX.Element {
       const isInSection = scrollPosition + windowHeight/2 >= sectionTop && scrollPosition + windowHeight/2 <= sectionBottom;
       
       if (isInSection) {
-        // Saat discroll ke dalam section Features - background BIRU
         gsap.to(featuresSectionRef.current, {
           backgroundColor: '#0000ff',
           duration: 0.5,
           ease: "power2.inOut"
         });
-        if (featuresTextRef.current) {
-          gsap.to(featuresTextRef.current, {
-            color: '#ffffff',
-            duration: 0.5,
-            ease: "power2.inOut"
-          });
-        }
+        gsap.to([featuresLeftNumberRef.current, featuresRightTextRef.current], {
+          color: '#ffffff',
+          duration: 0.5,
+          ease: "power2.inOut"
+        });
       } else {
-        // Saat keluar dari section Features - background PUTIH
         gsap.to(featuresSectionRef.current, {
           backgroundColor: '#ffffff',
           duration: 0.5,
           ease: "power2.inOut"
         });
-        if (featuresTextRef.current) {
-          gsap.to(featuresTextRef.current, {
-            color: '#000000',
-            duration: 0.5,
-            ease: "power2.inOut"
-          });
-        }
+        gsap.to([featuresLeftNumberRef.current, featuresRightTextRef.current], {
+          color: '#000000',
+          duration: 0.5,
+          ease: "power2.inOut"
+        });
       }
     };
 
@@ -433,53 +428,94 @@ export default function HomePage(): React.JSX.Element {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [isLoading]);
 
-  // Animasi SplitText untuk FEATURES
+  // Animasi SplitText untuk FEATURES - angka 01 dan Note
   useEffect(() => {
     if (isLoading) return;
 
-    const featuresElement = featuresTextRef.current;
-    if (!featuresElement) return;
+    const leftElement = featuresLeftNumberRef.current;
+    const rightElement = featuresRightTextRef.current;
+    
+    if (leftElement) {
+      const splitLeft = new SplitText(leftElement, {
+        type: "chars, words",
+        charsClass: "features-char"
+      });
+      gsap.set(splitLeft.chars, {
+        opacity: 0,
+        y: 100,
+        rotationX: -90,
+        transformPerspective: 800,
+        filter: 'blur(20px)'
+      });
+      ScrollTrigger.create({
+        trigger: featuresSectionRef.current,
+        start: "top 80%",
+        end: "bottom 20%",
+        onEnter: () => {
+          gsap.to(splitLeft.chars, {
+            opacity: 1,
+            y: 0,
+            rotationX: 0,
+            filter: 'blur(0px)',
+            duration: 1.2,
+            stagger: { each: 0.05, from: "start", ease: "power2.out" },
+            ease: "back.out(0.6)"
+          });
+        },
+        onLeaveBack: () => {
+          gsap.to(splitLeft.chars, {
+            opacity: 0,
+            y: 100,
+            rotationX: -90,
+            filter: 'blur(20px)',
+            duration: 0.8,
+            stagger: { each: 0.03, from: "start" },
+          });
+        },
+        toggleActions: "play none none reverse"
+      });
+    }
 
-    const splitFeatures = new SplitText(featuresElement, {
-      type: "chars, words",
-      charsClass: "features-char"
-    });
-
-    gsap.set(splitFeatures.chars, {
-      opacity: 0,
-      y: 100,
-      rotationX: -90,
-      transformPerspective: 800,
-      filter: 'blur(20px)'
-    });
-
-    ScrollTrigger.create({
-      trigger: featuresSectionRef.current,
-      start: "top 80%",
-      end: "bottom 20%",
-      onEnter: () => {
-        gsap.to(splitFeatures.chars, {
-          opacity: 1,
-          y: 0,
-          rotationX: 0,
-          filter: 'blur(0px)',
-          duration: 1.2,
-          stagger: { each: 0.03, from: "start", ease: "power2.out" },
-          ease: "back.out(0.6)"
-        });
-      },
-      onLeaveBack: () => {
-        gsap.to(splitFeatures.chars, {
-          opacity: 0,
-          y: 100,
-          rotationX: -90,
-          filter: 'blur(20px)',
-          duration: 0.8,
-          stagger: { each: 0.02, from: "start" },
-        });
-      },
-      toggleActions: "play none none reverse"
-    });
+    if (rightElement) {
+      const splitRight = new SplitText(rightElement, {
+        type: "chars, words",
+        charsClass: "features-char"
+      });
+      gsap.set(splitRight.chars, {
+        opacity: 0,
+        y: 100,
+        rotationX: -90,
+        transformPerspective: 800,
+        filter: 'blur(20px)'
+      });
+      ScrollTrigger.create({
+        trigger: featuresSectionRef.current,
+        start: "top 80%",
+        end: "bottom 20%",
+        onEnter: () => {
+          gsap.to(splitRight.chars, {
+            opacity: 1,
+            y: 0,
+            rotationX: 0,
+            filter: 'blur(0px)',
+            duration: 1.2,
+            stagger: { each: 0.03, from: "start", ease: "power2.out" },
+            ease: "back.out(0.6)"
+          });
+        },
+        onLeaveBack: () => {
+          gsap.to(splitRight.chars, {
+            opacity: 0,
+            y: 100,
+            rotationX: -90,
+            filter: 'blur(20px)',
+            duration: 0.8,
+            stagger: { each: 0.02, from: "start" },
+          });
+        },
+        toggleActions: "play none none reverse"
+      });
+    }
 
     return () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
@@ -840,6 +876,12 @@ export default function HomePage(): React.JSX.Element {
     </svg>
   );
 
+  const NorthEastArrow = ({ size = 48 }: { size?: number }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+
   const days = getDaysInMonth(currentMonth);
   const weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
@@ -1175,34 +1217,70 @@ export default function HomePage(): React.JSX.Element {
           line-height: 1.3;
         }
 
-        /* SECTION FEATURES - Warna berubah saat scroll */
+        /* SECTION FEATURES */
         .features-section {
           min-height: 100vh;
           width: 100%;
           background-color: #0000ff;
           display: flex;
-          flex-direction: column;
-          justify-content: flex-start;
-          align-items: flex-start;
+          flex-direction: row;
+          justify-content: space-between;
+          align-items: center;
           transition: background-color 0.5s ease;
           position: relative;
           z-index: 5;
-          padding-left: 80px;
-          padding-top: 120px;
-          padding-bottom: 80px;
+          padding: 0 80px;
           box-sizing: border-box;
         }
 
-        .features-text {
+        .features-left {
+          flex: 1;
+          display: flex;
+          justify-content: flex-start;
+          align-items: center;
+        }
+
+        .features-left-number {
           font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
           font-weight: 400;
           font-size: 300px;
           color: #ffffff;
           letter-spacing: -0.02em;
           line-height: 1.1;
-          text-align: left;
           margin: 0;
           transition: color 0.5s ease;
+        }
+
+        .features-right {
+          flex: 1;
+          display: flex;
+          justify-content: flex-end;
+          align-items: center;
+          gap: 24px;
+        }
+
+        .features-right-text {
+          font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
+          font-weight: 400;
+          font-size: 300px;
+          color: #ffffff;
+          letter-spacing: -0.02em;
+          line-height: 1.1;
+          margin: 0;
+          transition: color 0.5s ease;
+        }
+
+        .features-right-arrow {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          transition: color 0.5s ease;
+        }
+
+        .features-right-arrow svg {
+          width: 120px;
+          height: 120px;
+          stroke: currentColor;
         }
 
         /* SECTION TRUSTED COLLABS */
@@ -1296,7 +1374,6 @@ export default function HomePage(): React.JSX.Element {
           opacity: 0.8;
         }
 
-        /* Custom scrollbar untuk carousel */
         .carousel-container::-webkit-scrollbar {
           height: 4px;
           display: block;
@@ -1521,7 +1598,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* SECTION FEATURES - Warna berubah: biru saat discroll ke dalam, putih saat keluar */}
+            {/* SECTION FEATURES - 01 di kiri, Note + panah di kanan */}
             <div
               ref={featuresSectionRef}
               className="features-section"
@@ -1529,15 +1606,28 @@ export default function HomePage(): React.JSX.Element {
                 backgroundColor: '#0000ff',
               }}
             >
-              <div
-                ref={featuresTextRef}
-                className="features-text"
-              >
-                Features
+              <div className="features-left">
+                <div
+                  ref={featuresLeftNumberRef}
+                  className="features-left-number"
+                >
+                  01
+                </div>
+              </div>
+              <div className="features-right">
+                <div
+                  ref={featuresRightTextRef}
+                  className="features-right-text"
+                >
+                  Note
+                </div>
+                <div className="features-right-arrow">
+                  <NorthEastArrow size={120} />
+                </div>
               </div>
             </div>
 
-            {/* SECTION TRUSTED COLLABS - Warna berubah: hitam saat discroll ke dalam, putih saat keluar */}
+            {/* SECTION TRUSTED COLLABS */}
             <div
               ref={trustedSectionRef}
               className="trusted-section"
