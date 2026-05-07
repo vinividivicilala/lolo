@@ -683,7 +683,7 @@ export default function HomePage(): React.JSX.Element {
     
     gsap.to([circleImg1_4Ref.current, circleImg2_4Ref.current], {
       scale: 1,
-      duration: 0.3,
+      duration: 0.4,
       ease: "power2.in"
     });
   };
@@ -836,7 +836,7 @@ export default function HomePage(): React.JSX.Element {
     };
   }, []);
 
-  // Efek scroll untuk FEATURES section - 01 Note
+  // Efek scroll untuk FEATURES section
   useEffect(() => {
     if (isLoading) return;
 
@@ -960,62 +960,52 @@ export default function HomePage(): React.JSX.Element {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [isLoading]);
 
-  // Animasi SplitText untuk FEATURES section - 01 Note
+  // Animasi SplitText untuk FEATURES title
   useEffect(() => {
     if (isLoading) return;
 
     const titleElement = featuresTitleRef.current;
-    const leftElement = featuresLeftNumberRef.current;
-    const rightElement = featuresRightTextRef.current;
     
-    const elements = [
-      { ref: titleElement, stagger: 0.06 },
-      { ref: leftElement, stagger: 0.04 },
-      { ref: rightElement, stagger: 0.03 }
-    ];
-
-    elements.forEach(({ ref, stagger }) => {
-      if (ref) {
-        const split = new SplitText(ref, {
-          type: "chars, words",
-          charsClass: "features-char"
-        });
-        gsap.set(split.chars, {
-          opacity: 0,
-          y: 100,
-          rotationX: -90,
-          transformPerspective: 800,
-          filter: 'blur(20px)'
-        });
-        ScrollTrigger.create({
-          trigger: featuresSectionRef.current,
-          start: "top 80%",
-          end: "bottom 20%",
-          onEnter: () => {
-            gsap.to(split.chars, {
-              opacity: 1,
-              y: 0,
-              rotationX: 0,
-              filter: 'blur(0px)',
-              duration: 1.2,
-              stagger: { each: stagger, from: "start", ease: "power2.out" },
-              ease: "back.out(0.6)"
-            });
-          },
-          onLeaveBack: () => {
-            gsap.to(split.chars, {
-              opacity: 0,
-              y: 100,
-              rotationX: -90,
-              filter: 'blur(20px)',
-              duration: 0.8,
-              stagger: { each: 0.02, from: "start" },
-            });
-          },
-          toggleActions: "play none none reverse"
-        });
-      }
-    });
+    if (titleElement) {
+      const split = new SplitText(titleElement, {
+        type: "chars, words",
+        charsClass: "features-char"
+      });
+      gsap.set(split.chars, {
+        opacity: 0,
+        y: 100,
+        rotationX: -90,
+        transformPerspective: 800,
+        filter: 'blur(20px)'
+      });
+      ScrollTrigger.create({
+        trigger: featuresSectionRef.current,
+        start: "top 80%",
+        end: "bottom 20%",
+        onEnter: () => {
+          gsap.to(split.chars, {
+            opacity: 1,
+            y: 0,
+            rotationX: 0,
+            filter: 'blur(0px)',
+            duration: 1.2,
+            stagger: { each: 0.06, from: "start", ease: "power2.out" },
+            ease: "back.out(0.6)"
+          });
+        },
+        onLeaveBack: () => {
+          gsap.to(split.chars, {
+            opacity: 0,
+            y: 100,
+            rotationX: -90,
+            filter: 'blur(20px)',
+            duration: 0.8,
+            stagger: { each: 0.02, from: "start" },
+          });
+        },
+        toggleActions: "play none none reverse"
+      });
+    }
 
     return () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
@@ -1376,13 +1366,13 @@ export default function HomePage(): React.JSX.Element {
     </svg>
   );
 
-  const NorthEastArrow = ({ size = 80 }: { size?: number }) => (
+  const NorthEastArrow = ({ size = 60 }: { size?: number }) => (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   );
 
-  const StraightLine = ({ size = 80 }: { size?: number }) => (
+  const StraightLine = ({ size = 60 }: { size?: number }) => (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M3 12H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
     </svg>
@@ -1734,7 +1724,7 @@ export default function HomePage(): React.JSX.Element {
           transition: background-color 0.5s ease;
           position: relative;
           z-index: 5;
-          padding: 120px 80px 80px 80px;
+          padding: 60px 80px 60px 80px;
           box-sizing: border-box;
           overflow: visible;
           border-bottom: 1px solid rgba(255,255,255,0.15);
@@ -1744,16 +1734,16 @@ export default function HomePage(): React.JSX.Element {
           width: 100%;
           display: flex;
           justify-content: flex-start;
-          margin-bottom: 80px;
+          margin-bottom: 40px;
         }
 
         .features-title {
           font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
           font-weight: 400;
-          font-size: 180px;
+          font-size: 300px;
           color: #ffffff;
           letter-spacing: -0.02em;
-          line-height: 1.1;
+          line-height: 1;
           margin: 0;
           transition: color 0.5s ease;
         }
@@ -1770,10 +1760,10 @@ export default function HomePage(): React.JSX.Element {
         .features-left-number {
           font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
           font-weight: 400;
-          font-size: 300px;
+          font-size: 180px;
           color: #ffffff;
           letter-spacing: -0.02em;
-          line-height: 1.1;
+          line-height: 1;
           margin: 0;
           transition: color 0.5s ease;
         }
@@ -1785,16 +1775,16 @@ export default function HomePage(): React.JSX.Element {
           z-index: 20;
           display: flex;
           align-items: center;
-          gap: 40px;
+          gap: 30px;
         }
 
         .features-right-text {
           font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
           font-weight: 400;
-          font-size: 300px;
+          font-size: 180px;
           color: #ffffff;
           letter-spacing: -0.02em;
-          line-height: 1.1;
+          line-height: 1;
           margin: 0;
           transition: color 0.5s ease;
           display: inline-block;
@@ -1816,11 +1806,15 @@ export default function HomePage(): React.JSX.Element {
 
         .update-number {
           font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
-          font-size: 100px;
+          font-size: 80px;
           font-weight: 400;
           color: #ffffff;
           line-height: 1;
           transition: color 0.5s ease;
+        }
+
+        .update-number sup {
+          font-size: 40px;
         }
 
         /* Arrow */
@@ -1834,8 +1828,8 @@ export default function HomePage(): React.JSX.Element {
         }
 
         .features-right-arrow svg {
-          width: 80px;
-          height: 80px;
+          width: 60px;
+          height: 60px;
           stroke: currentColor;
           transition: stroke 0.5s ease, transform 0.3s ease;
         }
@@ -1847,30 +1841,30 @@ export default function HomePage(): React.JSX.Element {
           transition: all 0.3s ease;
           display: flex;
           align-items: center;
-          gap: 16px;
-          margin-left: 16px;
+          gap: 12px;
+          margin-left: 12px;
           z-index: 2;
           position: relative;
         }
 
         .circle-img {
-          width: 80px;
-          height: 80px;
+          width: 60px;
+          height: 60px;
           border-radius: 50%;
           overflow: hidden;
           position: relative;
           transition: all 0.3s ease;
-          border: 3px solid #ffffff;
+          border: 2px solid #ffffff;
           box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
 
         /* Overlay hitam */
         .features-overlay {
           position: absolute;
-          top: -30px;
+          top: -20px;
           left: -800px;
           right: -200px;
-          bottom: -30px;
+          bottom: -20px;
           background-color: #000000;
           opacity: 0;
           pointer-events: none;
@@ -2249,7 +2243,7 @@ export default function HomePage(): React.JSX.Element {
                   
                   <div ref={updateContainerRef} className="update-container">
                     <div className="update-number">
-                      Update<sup style={{ fontSize: '60px', verticalAlign: 'super' }}>¹</sup>
+                      Update<sup>¹</sup>
                     </div>
                   </div>
                   
@@ -2258,9 +2252,9 @@ export default function HomePage(): React.JSX.Element {
                     className="features-right-arrow"
                   >
                     {noteHover ? (
-                      <StraightLine size={80} />
+                      <StraightLine size={60} />
                     ) : (
-                      <NorthEastArrow size={80} />
+                      <NorthEastArrow size={60} />
                     )}
                   </div>
                   
@@ -2333,7 +2327,7 @@ export default function HomePage(): React.JSX.Element {
                   
                   <div ref={updateContainer2Ref} className="update-container">
                     <div className="update-number">
-                      Join<sup style={{ fontSize: '60px', verticalAlign: 'super' }}>²</sup>
+                      Join<sup>²</sup>
                     </div>
                   </div>
                   
@@ -2342,9 +2336,9 @@ export default function HomePage(): React.JSX.Element {
                     className="features-right-arrow"
                   >
                     {communityHover ? (
-                      <StraightLine size={80} />
+                      <StraightLine size={60} />
                     ) : (
-                      <NorthEastArrow size={80} />
+                      <NorthEastArrow size={60} />
                     )}
                   </div>
                   
@@ -2417,7 +2411,7 @@ export default function HomePage(): React.JSX.Element {
                   
                   <div ref={updateContainer3Ref} className="update-container">
                     <div className="update-number">
-                      Schedule<sup style={{ fontSize: '60px', verticalAlign: 'super' }}>³</sup>
+                      Schedule<sup>³</sup>
                     </div>
                   </div>
                   
@@ -2426,9 +2420,9 @@ export default function HomePage(): React.JSX.Element {
                     className="features-right-arrow"
                   >
                     {calendarHover ? (
-                      <StraightLine size={80} />
+                      <StraightLine size={60} />
                     ) : (
-                      <NorthEastArrow size={80} />
+                      <NorthEastArrow size={60} />
                     )}
                   </div>
                   
@@ -2501,7 +2495,7 @@ export default function HomePage(): React.JSX.Element {
                   
                   <div ref={updateContainer4Ref} className="update-container">
                     <div className="update-number">
-                      Read<sup style={{ fontSize: '60px', verticalAlign: 'super' }}>⁴</sup>
+                      Read<sup>⁴</sup>
                     </div>
                   </div>
                   
@@ -2510,9 +2504,9 @@ export default function HomePage(): React.JSX.Element {
                     className="features-right-arrow"
                   >
                     {blogHover ? (
-                      <StraightLine size={80} />
+                      <StraightLine size={60} />
                     ) : (
-                      <NorthEastArrow size={80} />
+                      <NorthEastArrow size={60} />
                     )}
                   </div>
                   
@@ -2585,7 +2579,7 @@ export default function HomePage(): React.JSX.Element {
                   
                   <div ref={updateContainer5Ref} className="update-container">
                     <div className="update-number">
-                      Support<sup style={{ fontSize: '60px', verticalAlign: 'super' }}>⁵</sup>
+                      Support<sup>⁵</sup>
                     </div>
                   </div>
                   
@@ -2594,9 +2588,9 @@ export default function HomePage(): React.JSX.Element {
                     className="features-right-arrow"
                   >
                     {donationHover ? (
-                      <StraightLine size={80} />
+                      <StraightLine size={60} />
                     ) : (
-                      <NorthEastArrow size={80} />
+                      <NorthEastArrow size={60} />
                     )}
                   </div>
                   
@@ -2668,7 +2662,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* Bagian footer */}
+            {/* Bagian footer - HAPUS BACKGROUND HITAM PADA TEKS MENURU BESAR */}
             <div style={{
               width: '100%',
               position: 'relative',
@@ -2972,6 +2966,7 @@ export default function HomePage(): React.JSX.Element {
                   }}
                 />
                 
+                {/* Teks MENURU besar - TANPA background hitam */}
                 <span 
                   ref={menuruTextRef}
                   style={{
@@ -2991,7 +2986,8 @@ export default function HomePage(): React.JSX.Element {
                     margin: 0,
                     padding: 0,
                     transform: 'translateY(10px)',
-                    marginRight: '0'
+                    marginRight: '0',
+                    backgroundColor: 'transparent'
                   }}>
                   MENURU
                 </span>
