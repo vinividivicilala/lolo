@@ -46,9 +46,9 @@ export default function HomePage(): React.JSX.Element {
   const contactTextRef = useRef<HTMLSpanElement>(null);
   const lineRef = useRef<HTMLDivElement>(null);
   const emailRef = useRef<HTMLDivElement>(null);
-  const igRef = useRef<HTMLDivElement>(null);
-  const xRef = useRef<HTMLDivElement>(null);
-  const linkedinRef = useRef<HTMLDivElement>(null);
+  const igRef = useRef<HTMLSpanElement>(null);
+  const xRef = useRef<HTMLSpanElement>(null);
+  const linkedinRef = useRef<HTMLSpanElement>(null);
   const loadingOverlayRef = useRef<HTMLDivElement>(null);
   const callTextRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
@@ -1291,12 +1291,12 @@ export default function HomePage(): React.JSX.Element {
 
         /* SECTION FEATURES ITEMS */
         .features-item-section {
-          min-height: 20vh;
+          min-height: 15vh;
           width: 100%;
           background-color: #0000ff;
           display: flex;
           align-items: flex-end;
-          padding: 40px 80px 80px 80px;
+          padding: 30px 80px 60px 80px;
           box-sizing: border-box;
           border-bottom: 1px solid rgba(255,255,255,0.15);
         }
@@ -1328,7 +1328,7 @@ export default function HomePage(): React.JSX.Element {
           z-index: 20;
           display: flex;
           align-items: center;
-          gap: 40px;
+          gap: 30px;
         }
 
         .features-right-text {
@@ -1359,7 +1359,7 @@ export default function HomePage(): React.JSX.Element {
 
         .update-number {
           font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
-          font-size: 100px;
+          font-size: 60px;
           font-weight: 400;
           color: #ffffff;
           line-height: 1;
@@ -1377,8 +1377,8 @@ export default function HomePage(): React.JSX.Element {
         }
 
         .features-right-arrow svg {
-          width: 80px;
-          height: 80px;
+          width: 60px;
+          height: 60px;
           stroke: currentColor;
           transition: stroke 0.5s ease, transform 0.3s ease;
         }
@@ -1397,8 +1397,8 @@ export default function HomePage(): React.JSX.Element {
         }
 
         .circle-img {
-          width: 80px;
-          height: 80px;
+          width: 60px;
+          height: 60px;
           border-radius: 50%;
           overflow: hidden;
           position: relative;
@@ -1811,9 +1811,9 @@ export default function HomePage(): React.JSX.Element {
                       className="features-right-arrow"
                     >
                       {activeHover === idx ? (
-                        <StraightLine size={80} index={idx} />
+                        <StraightLine size={60} index={idx} />
                       ) : (
-                        <NorthEastArrow size={80} index={idx} />
+                        <NorthEastArrow size={60} index={idx} />
                       )}
                     </div>
                     
