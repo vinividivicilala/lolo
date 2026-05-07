@@ -1,4 +1,4 @@
-// app/page.tsx (Halaman Utama) - Features section dengan 01 dan Note di bawah teks Features
+// app/page.tsx (Halaman Utama) - Features section dengan hover effect pada Note
 
 'use client';
 
@@ -26,6 +26,7 @@ export default function HomePage(): React.JSX.Element {
   const [location, setLocation] = useState<string>("");
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [hoverActive, setHoverActive] = useState(false);
+  const [noteHover, setNoteHover] = useState(false);
   
   const acceptBtnRef = useRef<HTMLButtonElement>(null);
   const declineBtnRef = useRef<HTMLButtonElement>(null);
@@ -34,6 +35,7 @@ export default function HomePage(): React.JSX.Element {
   const mainContentRef = useRef<HTMLDivElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
+  const noteHoverRef = useRef<HTMLDivElement>(null);
   
   // Refs untuk teks yang akan di-split
   const mencatatTextRef = useRef<HTMLDivElement>(null);
@@ -62,6 +64,8 @@ export default function HomePage(): React.JSX.Element {
   const featuresTitleRef = useRef<HTMLDivElement>(null);
   const featuresLeftNumberRef = useRef<HTMLDivElement>(null);
   const featuresRightTextRef = useRef<HTMLDivElement>(null);
+  const featuresOverlayRef = useRef<HTMLDivElement>(null);
+  const featuresArrowRef = useRef<HTMLDivElement>(null);
   
   // Section TRUSTED COLLABS
   const trustedSectionRef = useRef<HTMLDivElement>(null);
@@ -269,6 +273,47 @@ export default function HomePage(): React.JSX.Element {
     });
   };
 
+  // Animasi hover untuk Note
+  const handleNoteHoverEnter = () => {
+    setNoteHover(true);
+    
+    // Munculkan overlay hitam
+    gsap.to(featuresOverlayRef.current, {
+      opacity: 1,
+      duration: 0.4,
+      ease: "power2.out"
+    });
+    
+    // Ubah panah menjadi garis lurus
+    if (featuresArrowRef.current) {
+      gsap.to(featuresArrowRef.current, {
+        rotation: 45,
+        duration: 0.3,
+        ease: "back.out(0.6)"
+      });
+    }
+  };
+
+  const handleNoteHoverLeave = () => {
+    setNoteHover(false);
+    
+    // Hilangkan overlay
+    gsap.to(featuresOverlayRef.current, {
+      opacity: 0,
+      duration: 0.3,
+      ease: "power2.in"
+    });
+    
+    // Kembalikan panah
+    if (featuresArrowRef.current) {
+      gsap.to(featuresArrowRef.current, {
+        rotation: 0,
+        duration: 0.3,
+        ease: "back.inOut(0.6)"
+      });
+    }
+  };
+
   // Scroll snapping untuk carousel horizontal
   useEffect(() => {
     if (isLoading) return;
@@ -354,11 +399,13 @@ export default function HomePage(): React.JSX.Element {
           duration: 0.5,
           ease: "power2.inOut"
         });
-        gsap.to('.features-right-arrow svg', {
-          stroke: '#ffffff',
-          duration: 0.5,
-          ease: "power2.inOut"
-        });
+        if (!noteHover) {
+          gsap.to('.features-right-arrow svg', {
+            stroke: '#ffffff',
+            duration: 0.5,
+            ease: "power2.inOut"
+          });
+        }
       } else {
         gsap.to(featuresSectionRef.current, {
           backgroundColor: '#ffffff',
@@ -370,17 +417,19 @@ export default function HomePage(): React.JSX.Element {
           duration: 0.5,
           ease: "power2.inOut"
         });
-        gsap.to('.features-right-arrow svg', {
-          stroke: '#000000',
-          duration: 0.5,
-          ease: "power2.inOut"
-        });
+        if (!noteHover) {
+          gsap.to('.features-right-arrow svg', {
+            stroke: '#000000',
+            duration: 0.5,
+            ease: "power2.inOut"
+          });
+        }
       }
     };
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [isLoading]);
+  }, [isLoading, noteHover]);
 
   // Efek scroll untuk TRUSTED COLLABS section
   useEffect(() => {
@@ -861,6 +910,12 @@ export default function HomePage(): React.JSX.Element {
     </svg>
   );
 
+  const StraightLine = ({ size = 120 }: { size?: number }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+    </svg>
+  );
+
   const days = getDaysInMonth(currentMonth);
   const weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
@@ -1196,7 +1251,7 @@ export default function HomePage(): React.JSX.Element {
           line-height: 1.3;
         }
 
-        /* SECTION FEATURES - Features di atas, 01 dan Note di bawah */
+        /* SECTION FEATURES */
         .features-section {
           min-height: 100vh;
           width: 100%;
@@ -1209,6 +1264,7 @@ export default function HomePage(): React.JSX.Element {
           z-index: 5;
           padding: 120px 80px 80px 80px;
           box-sizing: border-box;
+          overflow: hidden;
         }
 
         .features-top {
@@ -1233,6 +1289,8 @@ export default function HomePage(): React.JSX.Element {
           display: flex;
           justify-content: space-between;
           align-items: flex-end;
+          position: relative;
+          z-index: 2;
         }
 
         .features-left-number {
@@ -1250,6 +1308,7 @@ export default function HomePage(): React.JSX.Element {
           display: flex;
           align-items: center;
           gap: 24px;
+          cursor: pointer;
         }
 
         .features-right-text {
@@ -1274,6 +1333,67 @@ export default function HomePage(): React.JSX.Element {
           height: 120px;
           stroke: currentColor;
           transition: stroke 0.5s ease;
+        }
+
+        /* Hover elements for Note */
+        .note-update-text {
+          font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
+          font-size: 60px;
+          font-weight: 400;
+          color: #ffffff;
+          letter-spacing: -0.02em;
+          opacity: 0;
+          transform: translateX(-20px);
+          transition: all 0.3s ease;
+        }
+
+        .note-quote-number {
+          font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
+          font-size: 40px;
+          font-weight: 400;
+          color: #ffffff;
+          letter-spacing: -0.02em;
+          opacity: 0;
+          transform: translateY(10px);
+          transition: all 0.3s ease;
+          margin-bottom: 8px;
+        }
+
+        .features-right:hover .note-update-text {
+          opacity: 1;
+          transform: translateX(0);
+        }
+
+        .features-right:hover .note-quote-number {
+          opacity: 1;
+          transform: translateY(0);
+        }
+
+        /* Overlay hitam saat hover Note */
+        .features-overlay {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background-color: #000000;
+          opacity: 0;
+          pointer-events: none;
+          z-index: 1;
+          transition: opacity 0.3s ease;
+        }
+
+        .features-right:hover ~ .features-overlay,
+        .features-overlay:hover {
+          opacity: 1;
+        }
+
+        /* Update wrapper styling */
+        .note-update-wrapper {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          margin-left: 16px;
         }
 
         /* SECTION TRUSTED COLLABS */
@@ -1614,17 +1734,37 @@ export default function HomePage(): React.JSX.Element {
                 >
                   01
                 </div>
-                <div className="features-right">
+                <div 
+                  className="features-right"
+                  onMouseEnter={handleNoteHoverEnter}
+                  onMouseLeave={handleNoteHoverLeave}
+                >
                   <div
                     ref={featuresRightTextRef}
                     className="features-right-text"
                   >
                     Note
                   </div>
-                  <div className="features-right-arrow">
-                    <NorthEastArrow size={120} />
+                  <div className="note-update-wrapper">
+                    <div className="note-quote-number">
+                      "128"
+                    </div>
+                    <div className="note-update-text">
+                      update
+                    </div>
+                  </div>
+                  <div 
+                    ref={featuresArrowRef}
+                    className="features-right-arrow"
+                  >
+                    {noteHover ? (
+                      <StraightLine size={120} />
+                    ) : (
+                      <NorthEastArrow size={120} />
+                    )}
                   </div>
                 </div>
+                <div ref={featuresOverlayRef} className="features-overlay" />
               </div>
             </div>
 
