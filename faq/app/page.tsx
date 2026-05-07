@@ -360,9 +360,9 @@ export default function HomePage(): React.JSX.Element {
       ease: "power2.out"
     });
     
-    // Ganti warna angka 01 saat hover
+    // Ganti warna angka 01 menjadi hitam saat hover
     gsap.to(featuresLeftNumberRef.current, {
-      color: '#ffffff',
+      color: '#000000',
       duration: 0.3,
       ease: "power2.out"
     });
@@ -411,7 +411,7 @@ export default function HomePage(): React.JSX.Element {
       ease: "power2.in"
     });
     
-    // Kembalikan warna angka 01
+    // Kembalikan warna angka 01 menjadi putih
     gsap.to(featuresLeftNumberRef.current, {
       color: '#ffffff',
       duration: 0.3,
@@ -462,8 +462,9 @@ export default function HomePage(): React.JSX.Element {
       ease: "power2.out"
     });
     
+    // Ganti warna angka 02 menjadi hitam saat hover
     gsap.to(featuresLeftNumber2Ref.current, {
-      color: '#ffffff',
+      color: '#000000',
       duration: 0.3,
       ease: "power2.out"
     });
@@ -512,6 +513,7 @@ export default function HomePage(): React.JSX.Element {
       ease: "power2.in"
     });
     
+    // Kembalikan warna angka 02 menjadi putih
     gsap.to(featuresLeftNumber2Ref.current, {
       color: '#ffffff',
       duration: 0.3,
@@ -562,8 +564,9 @@ export default function HomePage(): React.JSX.Element {
       ease: "power2.out"
     });
     
+    // Ganti warna angka 03 menjadi hitam saat hover
     gsap.to(featuresLeftNumber3Ref.current, {
-      color: '#ffffff',
+      color: '#000000',
       duration: 0.3,
       ease: "power2.out"
     });
@@ -612,6 +615,7 @@ export default function HomePage(): React.JSX.Element {
       ease: "power2.in"
     });
     
+    // Kembalikan warna angka 03 menjadi putih
     gsap.to(featuresLeftNumber3Ref.current, {
       color: '#ffffff',
       duration: 0.3,
@@ -662,8 +666,9 @@ export default function HomePage(): React.JSX.Element {
       ease: "power2.out"
     });
     
+    // Ganti warna angka 04 menjadi hitam saat hover
     gsap.to(featuresLeftNumber4Ref.current, {
-      color: '#ffffff',
+      color: '#000000',
       duration: 0.3,
       ease: "power2.out"
     });
@@ -712,6 +717,7 @@ export default function HomePage(): React.JSX.Element {
       ease: "power2.in"
     });
     
+    // Kembalikan warna angka 04 menjadi putih
     gsap.to(featuresLeftNumber4Ref.current, {
       color: '#ffffff',
       duration: 0.3,
@@ -762,8 +768,9 @@ export default function HomePage(): React.JSX.Element {
       ease: "power2.out"
     });
     
+    // Ganti warna angka 05 menjadi hitam saat hover
     gsap.to(featuresLeftNumber5Ref.current, {
-      color: '#ffffff',
+      color: '#000000',
       duration: 0.3,
       ease: "power2.out"
     });
@@ -812,6 +819,7 @@ export default function HomePage(): React.JSX.Element {
       ease: "power2.in"
     });
     
+    // Kembalikan warna angka 05 menjadi putih
     gsap.to(featuresLeftNumber5Ref.current, {
       color: '#ffffff',
       duration: 0.3,
@@ -1428,13 +1436,13 @@ export default function HomePage(): React.JSX.Element {
     </svg>
   );
 
-  const NorthEastArrow = ({ size = 60 }: { size?: number }) => (
+  const NorthEastArrow = ({ size = 50 }: { size?: number }) => (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   );
 
-  const StraightLine = ({ size = 60 }: { size?: number }) => (
+  const StraightLine = ({ size = 50 }: { size?: number }) => (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M3 12H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
     </svg>
@@ -1802,7 +1810,7 @@ export default function HomePage(): React.JSX.Element {
         .features-title {
           font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
           font-weight: 400;
-          font-size: 300px;
+          font-size: 100px;
           color: #ffffff;
           letter-spacing: -0.02em;
           line-height: 1;
@@ -2359,6 +2367,14 @@ export default function HomePage(): React.JSX.Element {
                 backgroundColor: '#0000ff',
               }}
             >
+              <div className="features-top">
+                <div
+                  ref={featuresTitle2Ref}
+                  className="features-title"
+                >
+                  Features
+                </div>
+              </div>
               <div className="features-bottom">
                 <div
                   ref={featuresLeftNumber2Ref}
@@ -2435,6 +2451,14 @@ export default function HomePage(): React.JSX.Element {
                 backgroundColor: '#0000ff',
               }}
             >
+              <div className="features-top">
+                <div
+                  ref={featuresTitle3Ref}
+                  className="features-title"
+                >
+                  Features
+                </div>
+              </div>
               <div className="features-bottom">
                 <div
                   ref={featuresLeftNumber3Ref}
@@ -2511,6 +2535,14 @@ export default function HomePage(): React.JSX.Element {
                 backgroundColor: '#0000ff',
               }}
             >
+              <div className="features-top">
+                <div
+                  ref={featuresTitle4Ref}
+                  className="features-title"
+                >
+                  Features
+                </div>
+              </div>
               <div className="features-bottom">
                 <div
                   ref={featuresLeftNumber4Ref}
@@ -2587,6 +2619,14 @@ export default function HomePage(): React.JSX.Element {
                 backgroundColor: '#0000ff',
               }}
             >
+              <div className="features-top">
+                <div
+                  ref={featuresTitle5Ref}
+                  className="features-title"
+                >
+                  Features
+                </div>
+              </div>
               <div className="features-bottom">
                 <div
                   ref={featuresLeftNumber5Ref}
