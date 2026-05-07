@@ -1,4 +1,4 @@
-// app/page.tsx (Halaman Utama) - Features section lengkap dengan 5 item
+// app/page.tsx (Halaman Utama) - Features section lengkap dengan 5 item (design sama persis)
 
 'use client';
 
@@ -26,7 +26,11 @@ export default function HomePage(): React.JSX.Element {
   const [location, setLocation] = useState<string>("");
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [hoverActive, setHoverActive] = useState(false);
-  const [activeFeatureHover, setActiveFeatureHover] = useState<number | null>(null);
+  const [noteHover, setNoteHover] = useState(false);
+  const [communityHover, setCommunityHover] = useState(false);
+  const [calendarHover, setCalendarHover] = useState(false);
+  const [blogHover, setBlogHover] = useState(false);
+  const [donationHover, setDonationHover] = useState(false);
   
   const acceptBtnRef = useRef<HTMLButtonElement>(null);
   const declineBtnRef = useRef<HTMLButtonElement>(null);
@@ -58,26 +62,61 @@ export default function HomePage(): React.JSX.Element {
   const bottomLeftTextRef = useRef<HTMLDivElement>(null);
   const studioContainerRef = useRef<HTMLDivElement>(null);
   
-  // Section Features - Array untuk multiple features
-  const featuresSectionsRef = useRef<(HTMLDivElement | null)[]>([]);
-  const featuresTitlesRef = useRef<(HTMLDivElement | null)[]>([]);
-  const featuresLeftNumbersRef = useRef<(HTMLDivElement | null)[]>([]);
-  const featuresRightTextsRef = useRef<(HTMLDivElement | null)[]>([]);
-  const featuresOverlaysRef = useRef<(HTMLDivElement | null)[]>([]);
-  const featuresArrowsRef = useRef<(HTMLDivElement | null)[]>([]);
-  const featuresHoverContainersRef = useRef<(HTMLDivElement | null)[]>([]);
-  const featuresUpdateContainersRef = useRef<(HTMLDivElement | null)[]>([]);
-  const featuresCircleImagesRef = useRef<(HTMLDivElement | null)[]>([]);
-  const circleImagesRefs = useRef<(HTMLDivElement | null)[][]>([]);
+  // Section Features - 01 Note
+  const featuresSectionRef = useRef<HTMLDivElement>(null);
+  const featuresTitleRef = useRef<HTMLDivElement>(null);
+  const featuresLeftNumberRef = useRef<HTMLDivElement>(null);
+  const featuresRightTextRef = useRef<HTMLDivElement>(null);
+  const featuresOverlayRef = useRef<HTMLDivElement>(null);
+  const featuresArrowRef = useRef<HTMLDivElement>(null);
+  const hoverContainerRef = useRef<HTMLDivElement>(null);
+  const noteTextRef = useRef<HTMLDivElement>(null);
+  const updateContainerRef = useRef<HTMLDivElement>(null);
+  const circleImagesRef = useRef<HTMLDivElement>(null);
   
-  // Data features
-  const featuresData = [
-    { number: "01", title: "Note", updateText: "Update¹", hasImages: true },
-    { number: "02", title: "Community", updateText: "Join²", hasImages: true },
-    { number: "03", title: "Calendar", updateText: "Schedule³", hasImages: true },
-    { number: "04", title: "Blog", updateText: "Read⁴", hasImages: true },
-    { number: "05", title: "Donation", updateText: "Support⁵", hasImages: true }
-  ];
+  // Section Features - 02 Community
+  const featuresSection2Ref = useRef<HTMLDivElement>(null);
+  const featuresTitle2Ref = useRef<HTMLDivElement>(null);
+  const featuresLeftNumber2Ref = useRef<HTMLDivElement>(null);
+  const featuresRightText2Ref = useRef<HTMLDivElement>(null);
+  const featuresOverlay2Ref = useRef<HTMLDivElement>(null);
+  const featuresArrow2Ref = useRef<HTMLDivElement>(null);
+  const hoverContainer2Ref = useRef<HTMLDivElement>(null);
+  const updateContainer2Ref = useRef<HTMLDivElement>(null);
+  const circleImages2Ref = useRef<HTMLDivElement>(null);
+  
+  // Section Features - 03 Calendar
+  const featuresSection3Ref = useRef<HTMLDivElement>(null);
+  const featuresTitle3Ref = useRef<HTMLDivElement>(null);
+  const featuresLeftNumber3Ref = useRef<HTMLDivElement>(null);
+  const featuresRightText3Ref = useRef<HTMLDivElement>(null);
+  const featuresOverlay3Ref = useRef<HTMLDivElement>(null);
+  const featuresArrow3Ref = useRef<HTMLDivElement>(null);
+  const hoverContainer3Ref = useRef<HTMLDivElement>(null);
+  const updateContainer3Ref = useRef<HTMLDivElement>(null);
+  const circleImages3Ref = useRef<HTMLDivElement>(null);
+  
+  // Section Features - 04 Blog
+  const featuresSection4Ref = useRef<HTMLDivElement>(null);
+  const featuresTitle4Ref = useRef<HTMLDivElement>(null);
+  const featuresLeftNumber4Ref = useRef<HTMLDivElement>(null);
+  const featuresRightText4Ref = useRef<HTMLDivElement>(null);
+  const featuresOverlay4Ref = useRef<HTMLDivElement>(null);
+  const featuresArrow4Ref = useRef<HTMLDivElement>(null);
+  const hoverContainer4Ref = useRef<HTMLDivElement>(null);
+  const updateContainer4Ref = useRef<HTMLDivElement>(null);
+  const circleImages4Ref = useRef<HTMLDivElement>(null);
+  
+  // Section Features - 05 Donation
+  const featuresSection5Ref = useRef<HTMLDivElement>(null);
+  const featuresTitle5Ref = useRef<HTMLDivElement>(null);
+  const featuresLeftNumber5Ref = useRef<HTMLDivElement>(null);
+  const featuresRightText5Ref = useRef<HTMLDivElement>(null);
+  const featuresOverlay5Ref = useRef<HTMLDivElement>(null);
+  const featuresArrow5Ref = useRef<HTMLDivElement>(null);
+  const hoverContainer5Ref = useRef<HTMLDivElement>(null);
+  const updateContainer5Ref = useRef<HTMLDivElement>(null);
+  const circleImages5Ref = useRef<HTMLDivElement>(null);
   
   // Section TRUSTED COLLABS
   const trustedSectionRef = useRef<HTMLDivElement>(null);
@@ -87,8 +126,17 @@ export default function HomePage(): React.JSX.Element {
   const img1Ref = useRef<HTMLDivElement>(null);
   const img2Ref = useRef<HTMLDivElement>(null);
   
-  // Refs untuk foto bulat - array untuk setiap feature
-  const circleImgRefs = useRef<{[key: string]: (HTMLDivElement | null)[][]}>({});
+  // Refs untuk foto bulat
+  const circleImg1Ref = useRef<HTMLDivElement>(null);
+  const circleImg2Ref = useRef<HTMLDivElement>(null);
+  const circleImg1_2Ref = useRef<HTMLDivElement>(null);
+  const circleImg2_2Ref = useRef<HTMLDivElement>(null);
+  const circleImg1_3Ref = useRef<HTMLDivElement>(null);
+  const circleImg2_3Ref = useRef<HTMLDivElement>(null);
+  const circleImg1_4Ref = useRef<HTMLDivElement>(null);
+  const circleImg2_4Ref = useRef<HTMLDivElement>(null);
+  const circleImg1_5Ref = useRef<HTMLDivElement>(null);
+  const circleImg2_5Ref = useRef<HTMLDivElement>(null);
 
   // Data untuk carousel
   const carouselItems = [
@@ -288,108 +336,444 @@ export default function HomePage(): React.JSX.Element {
     });
   };
 
-  // Animasi hover untuk setiap feature
-  const handleFeatureHoverEnter = (index: number) => {
-    setActiveFeatureHover(index);
+  // Animasi hover untuk Note (01)
+  const handleNoteHoverEnter = () => {
+    setNoteHover(true);
     
-    // Munculkan overlay hitam
-    gsap.to(featuresOverlaysRef.current[index], {
+    gsap.to(featuresOverlayRef.current, {
       opacity: 1,
       duration: 0.4,
       ease: "power2.out"
     });
     
-    // Munculkan Update container
-    gsap.to(featuresUpdateContainersRef.current[index], {
+    gsap.to(updateContainerRef.current, {
       opacity: 1,
       x: 0,
       duration: 0.4,
       ease: "power2.out"
     });
     
-    // Munculkan circle images
-    gsap.to(featuresCircleImagesRef.current[index], {
+    gsap.to(circleImagesRef.current, {
       opacity: 1,
       x: 0,
       duration: 0.4,
       ease: "power2.out"
     });
     
-    // Ubah panah menjadi garis lurus dan warna menjadi putih
-    if (featuresArrowsRef.current[index]) {
-      gsap.to(featuresArrowsRef.current[index], {
+    if (featuresArrowRef.current) {
+      gsap.to(featuresArrowRef.current, {
         rotation: 0,
         duration: 0.3,
         ease: "back.out(0.6)"
       });
-      // Ubah warna stroke SVG menjadi putih
-      gsap.to(`.features-right-arrow-${index} svg`, {
+      gsap.to('.features-right-arrow svg', {
         stroke: '#ffffff',
         duration: 0.3,
         ease: "power2.out"
       });
     }
     
-    // Animasi foto bulat
-    if (circleImgRefs.current[index]) {
-      gsap.to(circleImgRefs.current[index], {
-        scale: 1.2,
-        duration: 0.4,
-        ease: "back.out(0.6)",
-        stagger: 0.1
-      });
-    }
+    gsap.to([circleImg1Ref.current, circleImg2Ref.current], {
+      scale: 1.2,
+      duration: 0.4,
+      ease: "back.out(0.6)",
+      stagger: 0.1
+    });
   };
 
-  const handleFeatureHoverLeave = (index: number) => {
-    setActiveFeatureHover(null);
+  const handleNoteHoverLeave = () => {
+    setNoteHover(false);
     
-    // Hilangkan overlay hitam
-    gsap.to(featuresOverlaysRef.current[index], {
+    gsap.to(featuresOverlayRef.current, {
       opacity: 0,
       duration: 0.3,
       ease: "power2.in"
     });
     
-    // Sembunyikan Update container
-    gsap.to(featuresUpdateContainersRef.current[index], {
+    gsap.to(updateContainerRef.current, {
       opacity: 0,
       x: 50,
       duration: 0.3,
       ease: "power2.in"
     });
     
-    // Sembunyikan circle images
-    gsap.to(featuresCircleImagesRef.current[index], {
+    gsap.to(circleImagesRef.current, {
       opacity: 0,
       x: 20,
       duration: 0.3,
       ease: "power2.in"
     });
     
-    // Kembalikan panah ke bentuk diagonal
-    if (featuresArrowsRef.current[index]) {
-      gsap.to(featuresArrowsRef.current[index], {
+    if (featuresArrowRef.current) {
+      gsap.to(featuresArrowRef.current, {
         rotation: 45,
         duration: 0.3,
         ease: "back.inOut(0.6)"
       });
-      // Kembalikan warna stroke SVG
-      gsap.to(`.features-right-arrow-${index} svg`, {
+      gsap.to('.features-right-arrow svg', {
         stroke: '#ffffff',
         duration: 0.3,
         ease: "power2.out"
       });
     }
     
-    // Animasi foto bulat kembali
-    if (circleImgRefs.current[index]) {
-      gsap.to(circleImgRefs.current[index], {
-        scale: 1,
+    gsap.to([circleImg1Ref.current, circleImg2Ref.current], {
+      scale: 1,
+      duration: 0.3,
+      ease: "power2.in"
+    });
+  };
+
+  // Animasi hover untuk Community (02)
+  const handleCommunityHoverEnter = () => {
+    setCommunityHover(true);
+    
+    gsap.to(featuresOverlay2Ref.current, {
+      opacity: 1,
+      duration: 0.4,
+      ease: "power2.out"
+    });
+    
+    gsap.to(updateContainer2Ref.current, {
+      opacity: 1,
+      x: 0,
+      duration: 0.4,
+      ease: "power2.out"
+    });
+    
+    gsap.to(circleImages2Ref.current, {
+      opacity: 1,
+      x: 0,
+      duration: 0.4,
+      ease: "power2.out"
+    });
+    
+    if (featuresArrow2Ref.current) {
+      gsap.to(featuresArrow2Ref.current, {
+        rotation: 0,
         duration: 0.3,
-        ease: "power2.in"
+        ease: "back.out(0.6)"
+      });
+      gsap.to('.features-right-arrow-2 svg', {
+        stroke: '#ffffff',
+        duration: 0.3,
+        ease: "power2.out"
       });
     }
+    
+    gsap.to([circleImg1_2Ref.current, circleImg2_2Ref.current], {
+      scale: 1.2,
+      duration: 0.4,
+      ease: "back.out(0.6)",
+      stagger: 0.1
+    });
+  };
+
+  const handleCommunityHoverLeave = () => {
+    setCommunityHover(false);
+    
+    gsap.to(featuresOverlay2Ref.current, {
+      opacity: 0,
+      duration: 0.3,
+      ease: "power2.in"
+    });
+    
+    gsap.to(updateContainer2Ref.current, {
+      opacity: 0,
+      x: 50,
+      duration: 0.3,
+      ease: "power2.in"
+    });
+    
+    gsap.to(circleImages2Ref.current, {
+      opacity: 0,
+      x: 20,
+      duration: 0.3,
+      ease: "power2.in"
+    });
+    
+    if (featuresArrow2Ref.current) {
+      gsap.to(featuresArrow2Ref.current, {
+        rotation: 45,
+        duration: 0.3,
+        ease: "back.inOut(0.6)"
+      });
+      gsap.to('.features-right-arrow-2 svg', {
+        stroke: '#ffffff',
+        duration: 0.3,
+        ease: "power2.out"
+      });
+    }
+    
+    gsap.to([circleImg1_2Ref.current, circleImg2_2Ref.current], {
+      scale: 1,
+      duration: 0.3,
+      ease: "power2.in"
+    });
+  };
+
+  // Animasi hover untuk Calendar (03)
+  const handleCalendarHoverEnter = () => {
+    setCalendarHover(true);
+    
+    gsap.to(featuresOverlay3Ref.current, {
+      opacity: 1,
+      duration: 0.4,
+      ease: "power2.out"
+    });
+    
+    gsap.to(updateContainer3Ref.current, {
+      opacity: 1,
+      x: 0,
+      duration: 0.4,
+      ease: "power2.out"
+    });
+    
+    gsap.to(circleImages3Ref.current, {
+      opacity: 1,
+      x: 0,
+      duration: 0.4,
+      ease: "power2.out"
+    });
+    
+    if (featuresArrow3Ref.current) {
+      gsap.to(featuresArrow3Ref.current, {
+        rotation: 0,
+        duration: 0.3,
+        ease: "back.out(0.6)"
+      });
+      gsap.to('.features-right-arrow-3 svg', {
+        stroke: '#ffffff',
+        duration: 0.3,
+        ease: "power2.out"
+      });
+    }
+    
+    gsap.to([circleImg1_3Ref.current, circleImg2_3Ref.current], {
+      scale: 1.2,
+      duration: 0.4,
+      ease: "back.out(0.6)",
+      stagger: 0.1
+    });
+  };
+
+  const handleCalendarHoverLeave = () => {
+    setCalendarHover(false);
+    
+    gsap.to(featuresOverlay3Ref.current, {
+      opacity: 0,
+      duration: 0.3,
+      ease: "power2.in"
+    });
+    
+    gsap.to(updateContainer3Ref.current, {
+      opacity: 0,
+      x: 50,
+      duration: 0.3,
+      ease: "power2.in"
+    });
+    
+    gsap.to(circleImages3Ref.current, {
+      opacity: 0,
+      x: 20,
+      duration: 0.3,
+      ease: "power2.in"
+    });
+    
+    if (featuresArrow3Ref.current) {
+      gsap.to(featuresArrow3Ref.current, {
+        rotation: 45,
+        duration: 0.3,
+        ease: "back.inOut(0.6)"
+      });
+      gsap.to('.features-right-arrow-3 svg', {
+        stroke: '#ffffff',
+        duration: 0.3,
+        ease: "power2.out"
+      });
+    }
+    
+    gsap.to([circleImg1_3Ref.current, circleImg2_3Ref.current], {
+      scale: 1,
+      duration: 0.3,
+      ease: "power2.in"
+    });
+  };
+
+  // Animasi hover untuk Blog (04)
+  const handleBlogHoverEnter = () => {
+    setBlogHover(true);
+    
+    gsap.to(featuresOverlay4Ref.current, {
+      opacity: 1,
+      duration: 0.4,
+      ease: "power2.out"
+    });
+    
+    gsap.to(updateContainer4Ref.current, {
+      opacity: 1,
+      x: 0,
+      duration: 0.4,
+      ease: "power2.out"
+    });
+    
+    gsap.to(circleImages4Ref.current, {
+      opacity: 1,
+      x: 0,
+      duration: 0.4,
+      ease: "power2.out"
+    });
+    
+    if (featuresArrow4Ref.current) {
+      gsap.to(featuresArrow4Ref.current, {
+        rotation: 0,
+        duration: 0.3,
+        ease: "back.out(0.6)"
+      });
+      gsap.to('.features-right-arrow-4 svg', {
+        stroke: '#ffffff',
+        duration: 0.3,
+        ease: "power2.out"
+      });
+    }
+    
+    gsap.to([circleImg1_4Ref.current, circleImg2_4Ref.current], {
+      scale: 1.2,
+      duration: 0.4,
+      ease: "back.out(0.6)",
+      stagger: 0.1
+    });
+  };
+
+  const handleBlogHoverLeave = () => {
+    setBlogHover(false);
+    
+    gsap.to(featuresOverlay4Ref.current, {
+      opacity: 0,
+      duration: 0.3,
+      ease: "power2.in"
+    });
+    
+    gsap.to(updateContainer4Ref.current, {
+      opacity: 0,
+      x: 50,
+      duration: 0.3,
+      ease: "power2.in"
+    });
+    
+    gsap.to(circleImages4Ref.current, {
+      opacity: 0,
+      x: 20,
+      duration: 0.3,
+      ease: "power2.in"
+    });
+    
+    if (featuresArrow4Ref.current) {
+      gsap.to(featuresArrow4Ref.current, {
+        rotation: 45,
+        duration: 0.3,
+        ease: "back.inOut(0.6)"
+      });
+      gsap.to('.features-right-arrow-4 svg', {
+        stroke: '#ffffff',
+        duration: 0.3,
+        ease: "power2.out"
+      });
+    }
+    
+    gsap.to([circleImg1_4Ref.current, circleImg2_4Ref.current], {
+      scale: 1,
+      duration: 0.3,
+      ease: "power2.in"
+    });
+  };
+
+  // Animasi hover untuk Donation (05)
+  const handleDonationHoverEnter = () => {
+    setDonationHover(true);
+    
+    gsap.to(featuresOverlay5Ref.current, {
+      opacity: 1,
+      duration: 0.4,
+      ease: "power2.out"
+    });
+    
+    gsap.to(updateContainer5Ref.current, {
+      opacity: 1,
+      x: 0,
+      duration: 0.4,
+      ease: "power2.out"
+    });
+    
+    gsap.to(circleImages5Ref.current, {
+      opacity: 1,
+      x: 0,
+      duration: 0.4,
+      ease: "power2.out"
+    });
+    
+    if (featuresArrow5Ref.current) {
+      gsap.to(featuresArrow5Ref.current, {
+        rotation: 0,
+        duration: 0.3,
+        ease: "back.out(0.6)"
+      });
+      gsap.to('.features-right-arrow-5 svg', {
+        stroke: '#ffffff',
+        duration: 0.3,
+        ease: "power2.out"
+      });
+    }
+    
+    gsap.to([circleImg1_5Ref.current, circleImg2_5Ref.current], {
+      scale: 1.2,
+      duration: 0.4,
+      ease: "back.out(0.6)",
+      stagger: 0.1
+    });
+  };
+
+  const handleDonationHoverLeave = () => {
+    setDonationHover(false);
+    
+    gsap.to(featuresOverlay5Ref.current, {
+      opacity: 0,
+      duration: 0.3,
+      ease: "power2.in"
+    });
+    
+    gsap.to(updateContainer5Ref.current, {
+      opacity: 0,
+      x: 50,
+      duration: 0.3,
+      ease: "power2.in"
+    });
+    
+    gsap.to(circleImages5Ref.current, {
+      opacity: 0,
+      x: 20,
+      duration: 0.3,
+      ease: "power2.in"
+    });
+    
+    if (featuresArrow5Ref.current) {
+      gsap.to(featuresArrow5Ref.current, {
+        rotation: 45,
+        duration: 0.3,
+        ease: "back.inOut(0.6)"
+      });
+      gsap.to('.features-right-arrow-5 svg', {
+        stroke: '#ffffff',
+        duration: 0.3,
+        ease: "power2.out"
+      });
+    }
+    
+    gsap.to([circleImg1_5Ref.current, circleImg2_5Ref.current], {
+      scale: 1,
+      duration: 0.3,
+      ease: "power2.in"
+    });
   };
 
   // Scroll snapping untuk carousel horizontal
@@ -452,63 +836,185 @@ export default function HomePage(): React.JSX.Element {
     };
   }, []);
 
-  // Animasi SplitText untuk setiap FEATURES section
+  // Efek scroll untuk FEATURES section - 01 Note
   useEffect(() => {
     if (isLoading) return;
 
-    featuresData.forEach((feature, idx) => {
-      const titleElement = featuresTitlesRef.current[idx];
-      const leftElement = featuresLeftNumbersRef.current[idx];
-      const rightElement = featuresRightTextsRef.current[idx];
+    const handleScroll = () => {
+      if (!featuresSectionRef.current) return;
       
-      const elements = [
-        { ref: titleElement, stagger: 0.06 },
-        { ref: leftElement, stagger: 0.04 },
-        { ref: rightElement, stagger: 0.03 }
-      ];
-
-      elements.forEach(({ ref, stagger }) => {
-        if (ref) {
-          const split = new SplitText(ref, {
-            type: "chars, words",
-            charsClass: "features-char"
-          });
-          gsap.set(split.chars, {
-            opacity: 0,
-            y: 100,
-            rotationX: -90,
-            transformPerspective: 800,
-            filter: 'blur(20px)'
-          });
-          ScrollTrigger.create({
-            trigger: featuresSectionsRef.current[idx],
-            start: "top 80%",
-            end: "bottom 20%",
-            onEnter: () => {
-              gsap.to(split.chars, {
-                opacity: 1,
-                y: 0,
-                rotationX: 0,
-                filter: 'blur(0px)',
-                duration: 1.2,
-                stagger: { each: stagger, from: "start", ease: "power2.out" },
-                ease: "back.out(0.6)"
-              });
-            },
-            onLeaveBack: () => {
-              gsap.to(split.chars, {
-                opacity: 0,
-                y: 100,
-                rotationX: -90,
-                filter: 'blur(20px)',
-                duration: 0.8,
-                stagger: { each: 0.02, from: "start" },
-              });
-            },
-            toggleActions: "play none none reverse"
+      const scrollPosition = window.scrollY;
+      const windowHeight = window.innerHeight;
+      const sectionTop = featuresSectionRef.current.offsetTop;
+      const sectionBottom = sectionTop + featuresSectionRef.current.offsetHeight;
+      
+      const isInSection = scrollPosition + windowHeight/2 >= sectionTop && scrollPosition + windowHeight/2 <= sectionBottom;
+      
+      if (isInSection) {
+        gsap.to(featuresSectionRef.current, {
+          backgroundColor: '#0000ff',
+          duration: 0.5,
+          ease: "power2.inOut"
+        });
+        gsap.to([featuresTitleRef.current, featuresLeftNumberRef.current, featuresRightTextRef.current], {
+          color: '#ffffff',
+          duration: 0.5,
+          ease: "power2.inOut"
+        });
+        gsap.to('.update-number', {
+          color: '#ffffff',
+          duration: 0.5,
+          ease: "power2.inOut"
+        });
+        if (!noteHover) {
+          gsap.to('.features-right-arrow svg', {
+            stroke: '#ffffff',
+            duration: 0.5,
+            ease: "power2.inOut"
           });
         }
-      });
+      } else {
+        gsap.to(featuresSectionRef.current, {
+          backgroundColor: '#ffffff',
+          duration: 0.5,
+          ease: "power2.inOut"
+        });
+        gsap.to([featuresTitleRef.current, featuresLeftNumberRef.current, featuresRightTextRef.current], {
+          color: '#000000',
+          duration: 0.5,
+          ease: "power2.inOut"
+        });
+        gsap.to('.update-number', {
+          color: '#000000',
+          duration: 0.5,
+          ease: "power2.inOut"
+        });
+        if (!noteHover) {
+          gsap.to('.features-right-arrow svg', {
+            stroke: '#000000',
+            duration: 0.5,
+            ease: "power2.inOut"
+          });
+        }
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [isLoading, noteHover]);
+
+  // Efek scroll untuk TRUSTED COLLABS section
+  useEffect(() => {
+    if (isLoading) return;
+
+    const handleScroll = () => {
+      if (!trustedSectionRef.current) return;
+      
+      const scrollPosition = window.scrollY;
+      const windowHeight = window.innerHeight;
+      const sectionTop = trustedSectionRef.current.offsetTop;
+      const sectionBottom = sectionTop + trustedSectionRef.current.offsetHeight;
+      
+      const isInSection = scrollPosition + windowHeight/2 >= sectionTop && scrollPosition + windowHeight/2 <= sectionBottom;
+      
+      if (isInSection) {
+        gsap.to(trustedSectionRef.current, {
+          backgroundColor: '#000000',
+          duration: 0.5,
+          ease: "power2.inOut"
+        });
+        if (trustedTextRef.current) {
+          gsap.to(trustedTextRef.current, {
+            color: '#ffffff',
+            duration: 0.5,
+            ease: "power2.inOut"
+          });
+        }
+        gsap.to('.carousel-brand, .carousel-desc', {
+          color: '#ffffff',
+          duration: 0.5,
+          ease: "power2.inOut"
+        });
+      } else {
+        gsap.to(trustedSectionRef.current, {
+          backgroundColor: '#ffffff',
+          duration: 0.5,
+          ease: "power2.inOut"
+        });
+        if (trustedTextRef.current) {
+          gsap.to(trustedTextRef.current, {
+            color: 'rgb(21, 22, 26)',
+            duration: 0.5,
+            ease: "power2.inOut"
+          });
+        }
+        gsap.to('.carousel-brand, .carousel-desc', {
+          color: 'rgb(21, 22, 26)',
+          duration: 0.5,
+          ease: "power2.inOut"
+        });
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [isLoading]);
+
+  // Animasi SplitText untuk FEATURES section - 01 Note
+  useEffect(() => {
+    if (isLoading) return;
+
+    const titleElement = featuresTitleRef.current;
+    const leftElement = featuresLeftNumberRef.current;
+    const rightElement = featuresRightTextRef.current;
+    
+    const elements = [
+      { ref: titleElement, stagger: 0.06 },
+      { ref: leftElement, stagger: 0.04 },
+      { ref: rightElement, stagger: 0.03 }
+    ];
+
+    elements.forEach(({ ref, stagger }) => {
+      if (ref) {
+        const split = new SplitText(ref, {
+          type: "chars, words",
+          charsClass: "features-char"
+        });
+        gsap.set(split.chars, {
+          opacity: 0,
+          y: 100,
+          rotationX: -90,
+          transformPerspective: 800,
+          filter: 'blur(20px)'
+        });
+        ScrollTrigger.create({
+          trigger: featuresSectionRef.current,
+          start: "top 80%",
+          end: "bottom 20%",
+          onEnter: () => {
+            gsap.to(split.chars, {
+              opacity: 1,
+              y: 0,
+              rotationX: 0,
+              filter: 'blur(0px)',
+              duration: 1.2,
+              stagger: { each: stagger, from: "start", ease: "power2.out" },
+              ease: "back.out(0.6)"
+            });
+          },
+          onLeaveBack: () => {
+            gsap.to(split.chars, {
+              opacity: 0,
+              y: 100,
+              rotationX: -90,
+              filter: 'blur(20px)',
+              duration: 0.8,
+              stagger: { each: 0.02, from: "start" },
+            });
+          },
+          toggleActions: "play none none reverse"
+        });
+      }
     });
 
     return () => {
@@ -870,14 +1376,14 @@ export default function HomePage(): React.JSX.Element {
     </svg>
   );
 
-  const NorthEastArrow = ({ size = 80, index = 0 }: { size?: number; index?: number }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={`features-right-arrow-${index}`}>
+  const NorthEastArrow = ({ size = 80 }: { size?: number }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   );
 
-  const StraightLine = ({ size = 80, index = 0 }: { size?: number; index?: number }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={`features-right-arrow-${index}`}>
+  const StraightLine = ({ size = 80 }: { size?: number }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M3 12H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
     </svg>
   );
@@ -928,7 +1434,7 @@ export default function HomePage(): React.JSX.Element {
         }
         
         #smooth-content {
-          min-height: 600vh;
+          min-height: 800vh;
           width: 100%;
           will-change: transform;
         }
@@ -1231,14 +1737,14 @@ export default function HomePage(): React.JSX.Element {
           padding: 120px 80px 80px 80px;
           box-sizing: border-box;
           overflow: visible;
-          border-bottom: 1px solid rgba(255,255,255,0.1);
+          border-bottom: 1px solid rgba(255,255,255,0.15);
         }
 
         .features-top {
           width: 100%;
           display: flex;
           justify-content: flex-start;
-          margin-bottom: 120px;
+          margin-bottom: 80px;
         }
 
         .features-title {
@@ -1704,105 +2210,425 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* SECTION FEATURES - Multiple Items */}
-            {featuresData.map((feature, idx) => (
-              <div
-                key={idx}
-                ref={(el) => { featuresSectionsRef.current[idx] = el; }}
-                className="features-section"
-                style={{
-                  backgroundColor: '#0000ff',
-                }}
-              >
-                <div className="features-top">
-                  <div
-                    ref={(el) => { featuresTitlesRef.current[idx] = el; }}
-                    className="features-title"
-                  >
-                    Features
-                  </div>
-                </div>
-                <div className="features-bottom">
-                  <div
-                    ref={(el) => { featuresLeftNumbersRef.current[idx] = el; }}
-                    className="features-left-number"
-                  >
-                    {feature.number}
-                  </div>
-                  
-                  {/* Hover Container untuk setiap feature */}
-                  <div 
-                    ref={(el) => { featuresHoverContainersRef.current[idx] = el; }}
-                    className="hover-container"
-                    onMouseEnter={() => handleFeatureHoverEnter(idx)}
-                    onMouseLeave={() => handleFeatureHoverLeave(idx)}
-                  >
-                    <div
-                      ref={(el) => { featuresRightTextsRef.current[idx] = el; }}
-                      className="features-right-text"
-                    >
-                      {feature.title}
-                    </div>
-                    
-                    {/* Update container */}
-                    <div ref={(el) => { featuresUpdateContainersRef.current[idx] = el; }} className="update-container">
-                      <div className="update-number">
-                        {feature.updateText}
-                      </div>
-                    </div>
-                    
-                    {/* Arrow */}
-                    <div 
-                      ref={(el) => { featuresArrowsRef.current[idx] = el; }}
-                      className="features-right-arrow"
-                    >
-                      {activeFeatureHover === idx ? (
-                        <StraightLine size={80} index={idx} />
-                      ) : (
-                        <NorthEastArrow size={80} index={idx} />
-                      )}
-                    </div>
-                    
-                    {/* Circle images container */}
-                    {feature.hasImages && (
-                      <div ref={(el) => { featuresCircleImagesRef.current[idx] = el; }} className="circle-images-container">
-                        <div
-                          ref={(el) => { 
-                            if (!circleImgRefs.current[idx]) circleImgRefs.current[idx] = [];
-                            circleImgRefs.current[idx][0] = el;
-                          }}
-                          className="circle-img"
-                        >
-                          <Image
-                            src="/images/lkhh.jpg"
-                            alt="circle 1"
-                            fill
-                            style={{ objectFit: 'cover' }}
-                          />
-                        </div>
-                        <div
-                          ref={(el) => { 
-                            if (!circleImgRefs.current[idx]) circleImgRefs.current[idx] = [];
-                            circleImgRefs.current[idx][1] = el;
-                          }}
-                          className="circle-img"
-                        >
-                          <Image
-                            src="/images/ai.jpg"
-                            alt="circle 2"
-                            fill
-                            style={{ objectFit: 'cover' }}
-                          />
-                        </div>
-                      </div>
-                    )}
-                    
-                    {/* Overlay hitam */}
-                    <div ref={(el) => { featuresOverlaysRef.current[idx] = el; }} className="features-overlay" />
-                  </div>
+            {/* SECTION FEATURES - 01 NOTE */}
+            <div
+              ref={featuresSectionRef}
+              className="features-section"
+              style={{
+                backgroundColor: '#0000ff',
+              }}
+            >
+              <div className="features-top">
+                <div
+                  ref={featuresTitleRef}
+                  className="features-title"
+                >
+                  Features
                 </div>
               </div>
-            ))}
+              <div className="features-bottom">
+                <div
+                  ref={featuresLeftNumberRef}
+                  className="features-left-number"
+                >
+                  01
+                </div>
+                
+                <div 
+                  ref={hoverContainerRef}
+                  className="hover-container"
+                  onMouseEnter={handleNoteHoverEnter}
+                  onMouseLeave={handleNoteHoverLeave}
+                >
+                  <div
+                    ref={featuresRightTextRef}
+                    className="features-right-text"
+                  >
+                    Note
+                  </div>
+                  
+                  <div ref={updateContainerRef} className="update-container">
+                    <div className="update-number">
+                      Update<sup style={{ fontSize: '60px', verticalAlign: 'super' }}>¹</sup>
+                    </div>
+                  </div>
+                  
+                  <div 
+                    ref={featuresArrowRef}
+                    className="features-right-arrow"
+                  >
+                    {noteHover ? (
+                      <StraightLine size={80} />
+                    ) : (
+                      <NorthEastArrow size={80} />
+                    )}
+                  </div>
+                  
+                  <div ref={circleImagesRef} className="circle-images-container">
+                    <div
+                      ref={circleImg1Ref}
+                      className="circle-img"
+                    >
+                      <Image
+                        src="/images/lkhh.jpg"
+                        alt="circle 1"
+                        fill
+                        style={{ objectFit: 'cover' }}
+                      />
+                    </div>
+                    <div
+                      ref={circleImg2Ref}
+                      className="circle-img"
+                    >
+                      <Image
+                        src="/images/ai.jpg"
+                        alt="circle 2"
+                        fill
+                        style={{ objectFit: 'cover' }}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div ref={featuresOverlayRef} className="features-overlay" />
+                </div>
+              </div>
+            </div>
+
+            {/* SECTION FEATURES - 02 COMMUNITY */}
+            <div
+              ref={featuresSection2Ref}
+              className="features-section"
+              style={{
+                backgroundColor: '#0000ff',
+              }}
+            >
+              <div className="features-top">
+                <div
+                  ref={featuresTitle2Ref}
+                  className="features-title"
+                >
+                  Features
+                </div>
+              </div>
+              <div className="features-bottom">
+                <div
+                  ref={featuresLeftNumber2Ref}
+                  className="features-left-number"
+                >
+                  02
+                </div>
+                
+                <div 
+                  ref={hoverContainer2Ref}
+                  className="hover-container"
+                  onMouseEnter={handleCommunityHoverEnter}
+                  onMouseLeave={handleCommunityHoverLeave}
+                >
+                  <div
+                    ref={featuresRightText2Ref}
+                    className="features-right-text"
+                  >
+                    Community
+                  </div>
+                  
+                  <div ref={updateContainer2Ref} className="update-container">
+                    <div className="update-number">
+                      Join<sup style={{ fontSize: '60px', verticalAlign: 'super' }}>²</sup>
+                    </div>
+                  </div>
+                  
+                  <div 
+                    ref={featuresArrow2Ref}
+                    className="features-right-arrow"
+                  >
+                    {communityHover ? (
+                      <StraightLine size={80} />
+                    ) : (
+                      <NorthEastArrow size={80} />
+                    )}
+                  </div>
+                  
+                  <div ref={circleImages2Ref} className="circle-images-container">
+                    <div
+                      ref={circleImg1_2Ref}
+                      className="circle-img"
+                    >
+                      <Image
+                        src="/images/ai.jpg"
+                        alt="circle 1"
+                        fill
+                        style={{ objectFit: 'cover' }}
+                      />
+                    </div>
+                    <div
+                      ref={circleImg2_2Ref}
+                      className="circle-img"
+                    >
+                      <Image
+                        src="/images/lkhh.jpg"
+                        alt="circle 2"
+                        fill
+                        style={{ objectFit: 'cover' }}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div ref={featuresOverlay2Ref} className="features-overlay" />
+                </div>
+              </div>
+            </div>
+
+            {/* SECTION FEATURES - 03 CALENDAR */}
+            <div
+              ref={featuresSection3Ref}
+              className="features-section"
+              style={{
+                backgroundColor: '#0000ff',
+              }}
+            >
+              <div className="features-top">
+                <div
+                  ref={featuresTitle3Ref}
+                  className="features-title"
+                >
+                  Features
+                </div>
+              </div>
+              <div className="features-bottom">
+                <div
+                  ref={featuresLeftNumber3Ref}
+                  className="features-left-number"
+                >
+                  03
+                </div>
+                
+                <div 
+                  ref={hoverContainer3Ref}
+                  className="hover-container"
+                  onMouseEnter={handleCalendarHoverEnter}
+                  onMouseLeave={handleCalendarHoverLeave}
+                >
+                  <div
+                    ref={featuresRightText3Ref}
+                    className="features-right-text"
+                  >
+                    Calendar
+                  </div>
+                  
+                  <div ref={updateContainer3Ref} className="update-container">
+                    <div className="update-number">
+                      Schedule<sup style={{ fontSize: '60px', verticalAlign: 'super' }}>³</sup>
+                    </div>
+                  </div>
+                  
+                  <div 
+                    ref={featuresArrow3Ref}
+                    className="features-right-arrow"
+                  >
+                    {calendarHover ? (
+                      <StraightLine size={80} />
+                    ) : (
+                      <NorthEastArrow size={80} />
+                    )}
+                  </div>
+                  
+                  <div ref={circleImages3Ref} className="circle-images-container">
+                    <div
+                      ref={circleImg1_3Ref}
+                      className="circle-img"
+                    >
+                      <Image
+                        src="/images/5.jpg"
+                        alt="circle 1"
+                        fill
+                        style={{ objectFit: 'cover' }}
+                      />
+                    </div>
+                    <div
+                      ref={circleImg2_3Ref}
+                      className="circle-img"
+                    >
+                      <Image
+                        src="/images/lkhh.jpg"
+                        alt="circle 2"
+                        fill
+                        style={{ objectFit: 'cover' }}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div ref={featuresOverlay3Ref} className="features-overlay" />
+                </div>
+              </div>
+            </div>
+
+            {/* SECTION FEATURES - 04 BLOG */}
+            <div
+              ref={featuresSection4Ref}
+              className="features-section"
+              style={{
+                backgroundColor: '#0000ff',
+              }}
+            >
+              <div className="features-top">
+                <div
+                  ref={featuresTitle4Ref}
+                  className="features-title"
+                >
+                  Features
+                </div>
+              </div>
+              <div className="features-bottom">
+                <div
+                  ref={featuresLeftNumber4Ref}
+                  className="features-left-number"
+                >
+                  04
+                </div>
+                
+                <div 
+                  ref={hoverContainer4Ref}
+                  className="hover-container"
+                  onMouseEnter={handleBlogHoverEnter}
+                  onMouseLeave={handleBlogHoverLeave}
+                >
+                  <div
+                    ref={featuresRightText4Ref}
+                    className="features-right-text"
+                  >
+                    Blog
+                  </div>
+                  
+                  <div ref={updateContainer4Ref} className="update-container">
+                    <div className="update-number">
+                      Read<sup style={{ fontSize: '60px', verticalAlign: 'super' }}>⁴</sup>
+                    </div>
+                  </div>
+                  
+                  <div 
+                    ref={featuresArrow4Ref}
+                    className="features-right-arrow"
+                  >
+                    {blogHover ? (
+                      <StraightLine size={80} />
+                    ) : (
+                      <NorthEastArrow size={80} />
+                    )}
+                  </div>
+                  
+                  <div ref={circleImages4Ref} className="circle-images-container">
+                    <div
+                      ref={circleImg1_4Ref}
+                      className="circle-img"
+                    >
+                      <Image
+                        src="/images/ai.jpg"
+                        alt="circle 1"
+                        fill
+                        style={{ objectFit: 'cover' }}
+                      />
+                    </div>
+                    <div
+                      ref={circleImg2_4Ref}
+                      className="circle-img"
+                    >
+                      <Image
+                        src="/images/5.jpg"
+                        alt="circle 2"
+                        fill
+                        style={{ objectFit: 'cover' }}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div ref={featuresOverlay4Ref} className="features-overlay" />
+                </div>
+              </div>
+            </div>
+
+            {/* SECTION FEATURES - 05 DONATION */}
+            <div
+              ref={featuresSection5Ref}
+              className="features-section"
+              style={{
+                backgroundColor: '#0000ff',
+              }}
+            >
+              <div className="features-top">
+                <div
+                  ref={featuresTitle5Ref}
+                  className="features-title"
+                >
+                  Features
+                </div>
+              </div>
+              <div className="features-bottom">
+                <div
+                  ref={featuresLeftNumber5Ref}
+                  className="features-left-number"
+                >
+                  05
+                </div>
+                
+                <div 
+                  ref={hoverContainer5Ref}
+                  className="hover-container"
+                  onMouseEnter={handleDonationHoverEnter}
+                  onMouseLeave={handleDonationHoverLeave}
+                >
+                  <div
+                    ref={featuresRightText5Ref}
+                    className="features-right-text"
+                  >
+                    Donation
+                  </div>
+                  
+                  <div ref={updateContainer5Ref} className="update-container">
+                    <div className="update-number">
+                      Support<sup style={{ fontSize: '60px', verticalAlign: 'super' }}>⁵</sup>
+                    </div>
+                  </div>
+                  
+                  <div 
+                    ref={featuresArrow5Ref}
+                    className="features-right-arrow"
+                  >
+                    {donationHover ? (
+                      <StraightLine size={80} />
+                    ) : (
+                      <NorthEastArrow size={80} />
+                    )}
+                  </div>
+                  
+                  <div ref={circleImages5Ref} className="circle-images-container">
+                    <div
+                      ref={circleImg1_5Ref}
+                      className="circle-img"
+                    >
+                      <Image
+                        src="/images/lkhh.jpg"
+                        alt="circle 1"
+                        fill
+                        style={{ objectFit: 'cover' }}
+                      />
+                    </div>
+                    <div
+                      ref={circleImg2_5Ref}
+                      className="circle-img"
+                    >
+                      <Image
+                        src="/images/ai.jpg"
+                        alt="circle 2"
+                        fill
+                        style={{ objectFit: 'cover' }}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div ref={featuresOverlay5Ref} className="features-overlay" />
+                </div>
+              </div>
+            </div>
 
             {/* SECTION TRUSTED COLLABS */}
             <div
@@ -1819,7 +2645,6 @@ export default function HomePage(): React.JSX.Element {
                 TRUSTED COLLABS
               </div>
 
-              {/* Carousel Horizontal */}
               <div 
                 ref={carouselRef}
                 className="carousel-container"
