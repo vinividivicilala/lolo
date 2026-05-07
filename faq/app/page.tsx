@@ -1,4 +1,4 @@
-// app/page.tsx (Halaman Utama) - Features section dengan hover effect pada Note
+// app/page.tsx (Halaman Utama) - Features section dengan hover effect yang benar
 
 'use client';
 
@@ -35,7 +35,6 @@ export default function HomePage(): React.JSX.Element {
   const mainContentRef = useRef<HTMLDivElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
-  const noteHoverRef = useRef<HTMLDivElement>(null);
   
   // Refs untuk teks yang akan di-split
   const mencatatTextRef = useRef<HTMLDivElement>(null);
@@ -66,6 +65,7 @@ export default function HomePage(): React.JSX.Element {
   const featuresRightTextRef = useRef<HTMLDivElement>(null);
   const featuresOverlayRef = useRef<HTMLDivElement>(null);
   const featuresArrowRef = useRef<HTMLDivElement>(null);
+  const hoverContainerRef = useRef<HTMLDivElement>(null);
   
   // Section TRUSTED COLLABS
   const trustedSectionRef = useRef<HTMLDivElement>(null);
@@ -74,6 +74,10 @@ export default function HomePage(): React.JSX.Element {
   // Refs untuk gambar-gambar hover
   const img1Ref = useRef<HTMLDivElement>(null);
   const img2Ref = useRef<HTMLDivElement>(null);
+  
+  // Refs untuk foto bulat
+  const circleImg1Ref = useRef<HTMLDivElement>(null);
+  const circleImg2Ref = useRef<HTMLDivElement>(null);
 
   // Data untuk carousel
   const carouselItems = [
@@ -277,7 +281,7 @@ export default function HomePage(): React.JSX.Element {
   const handleNoteHoverEnter = () => {
     setNoteHover(true);
     
-    // Munculkan overlay hitam
+    // Munculkan overlay hitam di container hover
     gsap.to(featuresOverlayRef.current, {
       opacity: 1,
       duration: 0.4,
@@ -292,6 +296,15 @@ export default function HomePage(): React.JSX.Element {
         ease: "back.out(0.6)"
       });
     }
+    
+    // Animasi foto bulat muncul
+    gsap.to([circleImg1Ref.current, circleImg2Ref.current], {
+      opacity: 1,
+      scale: 1,
+      duration: 0.4,
+      ease: "back.out(0.6)",
+      stagger: 0.1
+    });
   };
 
   const handleNoteHoverLeave = () => {
@@ -312,6 +325,14 @@ export default function HomePage(): React.JSX.Element {
         ease: "back.inOut(0.6)"
       });
     }
+    
+    // Animasi foto bulat hilang
+    gsap.to([circleImg1Ref.current, circleImg2Ref.current], {
+      opacity: 0,
+      scale: 0.8,
+      duration: 0.3,
+      ease: "power2.in"
+    });
   };
 
   // Scroll snapping untuk carousel horizontal
@@ -904,15 +925,15 @@ export default function HomePage(): React.JSX.Element {
     </svg>
   );
 
-  const NorthEastArrow = ({ size = 120 }: { size?: number }) => (
+  const NorthEastArrow = ({ size = 80 }: { size?: number }) => (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   );
 
-  const StraightLine = ({ size = 120 }: { size?: number }) => (
+  const StraightLine = ({ size = 80 }: { size?: number }) => (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+      <path d="M3 12H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
     </svg>
   );
 
@@ -1304,11 +1325,16 @@ export default function HomePage(): React.JSX.Element {
           transition: color 0.5s ease;
         }
 
+        /* Hover Container */
+        .hover-container {
+          position: relative;
+          cursor: pointer;
+        }
+
         .features-right {
           display: flex;
           align-items: center;
-          gap: 24px;
-          cursor: pointer;
+          gap: 20px;
         }
 
         .features-right-text {
@@ -1322,78 +1348,105 @@ export default function HomePage(): React.JSX.Element {
           transition: color 0.5s ease;
         }
 
-        .features-right-arrow {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
+        /* Update text dengan superscript */
+        .update-wrapper {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
         }
 
-        .features-right-arrow svg {
-          width: 120px;
-          height: 120px;
-          stroke: currentColor;
-          transition: stroke 0.5s ease;
-        }
-
-        /* Hover elements for Note */
-        .note-update-text {
+        .update-number {
           font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
-          font-size: 60px;
+          font-size: 24px;
           font-weight: 400;
           color: #ffffff;
-          letter-spacing: -0.02em;
-          opacity: 0;
-          transform: translateX(-20px);
-          transition: all 0.3s ease;
-        }
-
-        .note-quote-number {
-          font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
-          font-size: 40px;
-          font-weight: 400;
-          color: #ffffff;
-          letter-spacing: -0.02em;
+          line-height: 1;
+          margin-bottom: 4px;
           opacity: 0;
           transform: translateY(10px);
           transition: all 0.3s ease;
-          margin-bottom: 8px;
         }
 
-        .features-right:hover .note-update-text {
-          opacity: 1;
-          transform: translateX(0);
+        .update-text {
+          font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
+          font-size: 20px;
+          font-weight: 400;
+          color: #ffffff;
+          line-height: 1;
+          opacity: 0;
+          transform: translateX(-10px);
+          transition: all 0.3s ease;
         }
 
-        .features-right:hover .note-quote-number {
+        .hover-container:hover .update-number {
           opacity: 1;
           transform: translateY(0);
         }
 
-        /* Overlay hitam saat hover Note */
+        .hover-container:hover .update-text {
+          opacity: 1;
+          transform: translateX(0);
+        }
+
+        .features-right-arrow {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          transition: transform 0.3s ease;
+        }
+
+        .features-right-arrow svg {
+          width: 80px;
+          height: 80px;
+          stroke: currentColor;
+          transition: stroke 0.5s ease;
+        }
+
+        /* Circle Images */
+        .circle-images {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          margin-left: 16px;
+        }
+
+        .circle-img {
+          width: 50px;
+          height: 50px;
+          border-radius: 50%;
+          overflow: hidden;
+          position: relative;
+          opacity: 0;
+          transform: scale(0.8);
+          transition: all 0.3s ease;
+          border: 2px solid #ffffff;
+        }
+
+        .hover-container:hover .circle-img {
+          opacity: 1;
+          transform: scale(1);
+        }
+
+        /* Overlay hitam - hanya di area hover */
         .features-overlay {
           position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
+          bottom: 0;
+          right: 0;
+          width: auto;
+          min-width: 300px;
+          height: auto;
           background-color: #000000;
           opacity: 0;
           pointer-events: none;
           z-index: 1;
+          border-radius: 40px;
+          padding: 20px 40px 20px 40px;
           transition: opacity 0.3s ease;
         }
 
-        .features-right:hover ~ .features-overlay,
+        .hover-container:hover ~ .features-overlay,
         .features-overlay:hover {
           opacity: 1;
-        }
-
-        /* Update wrapper styling */
-        .note-update-wrapper {
-          display: flex;
-          flex-direction: column;
-          align-items: flex-start;
-          margin-left: 16px;
         }
 
         /* SECTION TRUSTED COLLABS */
@@ -1630,7 +1683,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* SECTION 1 - MENURU.STUDIO dengan teks IDN/MN'RU© - 26' dan hover images */}
+            {/* SECTION 1 - MENURU.STUDIO */}
             <div
               ref={studioContainerRef}
               style={{
@@ -1711,7 +1764,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* SECTION FEATURES - Features di pojok kiri atas, 01 di kiri bawah, Note + panah di kanan bawah */}
+            {/* SECTION FEATURES */}
             <div
               ref={featuresSectionRef}
               className="features-section"
@@ -1734,37 +1787,66 @@ export default function HomePage(): React.JSX.Element {
                 >
                   01
                 </div>
+                
+                {/* Hover Container untuk Note */}
                 <div 
-                  className="features-right"
+                  ref={hoverContainerRef}
+                  className="hover-container"
                   onMouseEnter={handleNoteHoverEnter}
                   onMouseLeave={handleNoteHoverLeave}
                 >
-                  <div
-                    ref={featuresRightTextRef}
-                    className="features-right-text"
-                  >
-                    Note
-                  </div>
-                  <div className="note-update-wrapper">
-                    <div className="note-quote-number">
-                      "128"
+                  <div className="features-right">
+                    <div
+                      ref={featuresRightTextRef}
+                      className="features-right-text"
+                    >
+                      Note
                     </div>
-                    <div className="note-update-text">
-                      update
+                    <div className="update-wrapper">
+                      <div className="update-number">
+                        128<span style={{ fontSize: '16px', verticalAlign: 'super' }}>+</span>
+                      </div>
+                      <div className="update-text">
+                        update
+                      </div>
+                    </div>
+                    <div 
+                      ref={featuresArrowRef}
+                      className="features-right-arrow"
+                    >
+                      {noteHover ? (
+                        <StraightLine size={80} />
+                      ) : (
+                        <NorthEastArrow size={80} />
+                      )}
+                    </div>
+                    <div className="circle-images">
+                      <div
+                        ref={circleImg1Ref}
+                        className="circle-img"
+                      >
+                        <Image
+                          src="/images/lkhh.jpg"
+                          alt="circle 1"
+                          fill
+                          style={{ objectFit: 'cover' }}
+                        />
+                      </div>
+                      <div
+                        ref={circleImg2Ref}
+                        className="circle-img"
+                      >
+                        <Image
+                          src="/images/ai.jpg"
+                          alt="circle 2"
+                          fill
+                          style={{ objectFit: 'cover' }}
+                        />
+                      </div>
                     </div>
                   </div>
-                  <div 
-                    ref={featuresArrowRef}
-                    className="features-right-arrow"
-                  >
-                    {noteHover ? (
-                      <StraightLine size={120} />
-                    ) : (
-                      <NorthEastArrow size={120} />
-                    )}
-                  </div>
+                  <div ref={featuresOverlayRef} className="features-overlay" />
                 </div>
-                <div ref={featuresOverlayRef} className="features-overlay" />
               </div>
             </div>
 
@@ -1807,7 +1889,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* Bagian footer dengan semua konten */}
+            {/* Bagian footer */}
             <div style={{
               width: '100%',
               position: 'relative',
@@ -2144,6 +2226,7 @@ export default function HomePage(): React.JSX.Element {
       {showCalendarModal && (
         <div className="calendar-modal-overlay">
           <div ref={modalRef} className="calendar-modal">
+            {/* Modal content sama seperti sebelumnya */}
             <div style={{
               display: 'flex',
               flexDirection: 'row',
