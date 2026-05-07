@@ -1,4 +1,4 @@
-// app/page.tsx (Halaman Utama) - Features section dengan 01 di kiri dan Note + panah di kanan
+// app/page.tsx (Halaman Utama) - Features section dengan 01 di kiri, Features di tengah, Note + panah di kanan
 
 'use client';
 
@@ -60,6 +60,7 @@ export default function HomePage(): React.JSX.Element {
   // Section Features
   const featuresSectionRef = useRef<HTMLDivElement>(null);
   const featuresLeftNumberRef = useRef<HTMLDivElement>(null);
+  const featuresCenterTextRef = useRef<HTMLDivElement>(null);
   const featuresRightTextRef = useRef<HTMLDivElement>(null);
   
   // Section TRUSTED COLLABS
@@ -348,8 +349,13 @@ export default function HomePage(): React.JSX.Element {
           duration: 0.5,
           ease: "power2.inOut"
         });
-        gsap.to([featuresLeftNumberRef.current, featuresRightTextRef.current], {
+        gsap.to([featuresLeftNumberRef.current, featuresCenterTextRef.current, featuresRightTextRef.current], {
           color: '#ffffff',
+          duration: 0.5,
+          ease: "power2.inOut"
+        });
+        gsap.to('.features-right-arrow svg', {
+          stroke: '#ffffff',
           duration: 0.5,
           ease: "power2.inOut"
         });
@@ -359,8 +365,13 @@ export default function HomePage(): React.JSX.Element {
           duration: 0.5,
           ease: "power2.inOut"
         });
-        gsap.to([featuresLeftNumberRef.current, featuresRightTextRef.current], {
+        gsap.to([featuresLeftNumberRef.current, featuresCenterTextRef.current, featuresRightTextRef.current], {
           color: '#000000',
+          duration: 0.5,
+          ease: "power2.inOut"
+        });
+        gsap.to('.features-right-arrow svg', {
+          stroke: '#000000',
           duration: 0.5,
           ease: "power2.inOut"
         });
@@ -428,94 +439,62 @@ export default function HomePage(): React.JSX.Element {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [isLoading]);
 
-  // Animasi SplitText untuk FEATURES - angka 01 dan Note
+  // Animasi SplitText untuk FEATURES section
   useEffect(() => {
     if (isLoading) return;
 
     const leftElement = featuresLeftNumberRef.current;
+    const centerElement = featuresCenterTextRef.current;
     const rightElement = featuresRightTextRef.current;
     
-    if (leftElement) {
-      const splitLeft = new SplitText(leftElement, {
-        type: "chars, words",
-        charsClass: "features-char"
-      });
-      gsap.set(splitLeft.chars, {
-        opacity: 0,
-        y: 100,
-        rotationX: -90,
-        transformPerspective: 800,
-        filter: 'blur(20px)'
-      });
-      ScrollTrigger.create({
-        trigger: featuresSectionRef.current,
-        start: "top 80%",
-        end: "bottom 20%",
-        onEnter: () => {
-          gsap.to(splitLeft.chars, {
-            opacity: 1,
-            y: 0,
-            rotationX: 0,
-            filter: 'blur(0px)',
-            duration: 1.2,
-            stagger: { each: 0.05, from: "start", ease: "power2.out" },
-            ease: "back.out(0.6)"
-          });
-        },
-        onLeaveBack: () => {
-          gsap.to(splitLeft.chars, {
-            opacity: 0,
-            y: 100,
-            rotationX: -90,
-            filter: 'blur(20px)',
-            duration: 0.8,
-            stagger: { each: 0.03, from: "start" },
-          });
-        },
-        toggleActions: "play none none reverse"
-      });
-    }
+    const elements = [
+      { ref: leftElement, stagger: 0.05 },
+      { ref: centerElement, stagger: 0.04 },
+      { ref: rightElement, stagger: 0.03 }
+    ];
 
-    if (rightElement) {
-      const splitRight = new SplitText(rightElement, {
-        type: "chars, words",
-        charsClass: "features-char"
-      });
-      gsap.set(splitRight.chars, {
-        opacity: 0,
-        y: 100,
-        rotationX: -90,
-        transformPerspective: 800,
-        filter: 'blur(20px)'
-      });
-      ScrollTrigger.create({
-        trigger: featuresSectionRef.current,
-        start: "top 80%",
-        end: "bottom 20%",
-        onEnter: () => {
-          gsap.to(splitRight.chars, {
-            opacity: 1,
-            y: 0,
-            rotationX: 0,
-            filter: 'blur(0px)',
-            duration: 1.2,
-            stagger: { each: 0.03, from: "start", ease: "power2.out" },
-            ease: "back.out(0.6)"
-          });
-        },
-        onLeaveBack: () => {
-          gsap.to(splitRight.chars, {
-            opacity: 0,
-            y: 100,
-            rotationX: -90,
-            filter: 'blur(20px)',
-            duration: 0.8,
-            stagger: { each: 0.02, from: "start" },
-          });
-        },
-        toggleActions: "play none none reverse"
-      });
-    }
+    elements.forEach(({ ref, stagger }) => {
+      if (ref) {
+        const split = new SplitText(ref, {
+          type: "chars, words",
+          charsClass: "features-char"
+        });
+        gsap.set(split.chars, {
+          opacity: 0,
+          y: 100,
+          rotationX: -90,
+          transformPerspective: 800,
+          filter: 'blur(20px)'
+        });
+        ScrollTrigger.create({
+          trigger: featuresSectionRef.current,
+          start: "top 80%",
+          end: "bottom 20%",
+          onEnter: () => {
+            gsap.to(split.chars, {
+              opacity: 1,
+              y: 0,
+              rotationX: 0,
+              filter: 'blur(0px)',
+              duration: 1.2,
+              stagger: { each: stagger, from: "start", ease: "power2.out" },
+              ease: "back.out(0.6)"
+            });
+          },
+          onLeaveBack: () => {
+            gsap.to(split.chars, {
+              opacity: 0,
+              y: 100,
+              rotationX: -90,
+              filter: 'blur(20px)',
+              duration: 0.8,
+              stagger: { each: 0.02, from: "start" },
+            });
+          },
+          toggleActions: "play none none reverse"
+        });
+      }
+    });
 
     return () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
@@ -1217,7 +1196,7 @@ export default function HomePage(): React.JSX.Element {
           line-height: 1.3;
         }
 
-        /* SECTION FEATURES */
+        /* SECTION FEATURES - 3 kolom */
         .features-section {
           min-height: 100vh;
           width: 100%;
@@ -1251,6 +1230,24 @@ export default function HomePage(): React.JSX.Element {
           transition: color 0.5s ease;
         }
 
+        .features-center {
+          flex: 1;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+
+        .features-center-text {
+          font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
+          font-weight: 400;
+          font-size: 300px;
+          color: #ffffff;
+          letter-spacing: -0.02em;
+          line-height: 1.1;
+          margin: 0;
+          transition: color 0.5s ease;
+        }
+
         .features-right {
           flex: 1;
           display: flex;
@@ -1274,13 +1271,13 @@ export default function HomePage(): React.JSX.Element {
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          transition: color 0.5s ease;
         }
 
         .features-right-arrow svg {
           width: 120px;
           height: 120px;
           stroke: currentColor;
+          transition: stroke 0.5s ease;
         }
 
         /* SECTION TRUSTED COLLABS */
@@ -1598,7 +1595,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* SECTION FEATURES - 01 di kiri, Note + panah di kanan */}
+            {/* SECTION FEATURES - 01 di kiri, Features di tengah, Note + panah di kanan */}
             <div
               ref={featuresSectionRef}
               className="features-section"
@@ -1612,6 +1609,14 @@ export default function HomePage(): React.JSX.Element {
                   className="features-left-number"
                 >
                   01
+                </div>
+              </div>
+              <div className="features-center">
+                <div
+                  ref={featuresCenterTextRef}
+                  className="features-center-text"
+                >
+                  Features
                 </div>
               </div>
               <div className="features-right">
