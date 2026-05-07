@@ -67,6 +67,9 @@ export default function HomePage(): React.JSX.Element {
   const featuresArrowRef = useRef<HTMLDivElement>(null);
   const hoverContainerRef = useRef<HTMLDivElement>(null);
   const noteTextRef = useRef<HTMLDivElement>(null);
+  const updateContainerRef = useRef<HTMLDivElement>(null);
+  const arrowContainerRef = useRef<HTMLDivElement>(null);
+  const circleImagesRef = useRef<HTMLDivElement>(null);
   
   // Section TRUSTED COLLABS
   const trustedSectionRef = useRef<HTMLDivElement>(null);
@@ -282,16 +285,24 @@ export default function HomePage(): React.JSX.Element {
   const handleNoteHoverEnter = () => {
     setNoteHover(true);
     
-    // Geser teks Note ke kiri
-    gsap.to(noteTextRef.current, {
-      x: -50,
+    // Munculkan Update, garis, dan foto (yang tadinya opacity 0 menjadi 1)
+    gsap.to(updateContainerRef.current, {
+      opacity: 1,
+      x: 0,
       duration: 0.4,
       ease: "power2.out"
     });
     
-    // Munculkan overlay hitam - menutupi dari 01 sampai sisi kanan
-    gsap.to(featuresOverlayRef.current, {
+    gsap.to(arrowContainerRef.current, {
       opacity: 1,
+      x: 0,
+      duration: 0.4,
+      ease: "power2.out"
+    });
+    
+    gsap.to(circleImagesRef.current, {
+      opacity: 1,
+      x: 0,
       duration: 0.4,
       ease: "power2.out"
     });
@@ -307,7 +318,6 @@ export default function HomePage(): React.JSX.Element {
     
     // Animasi foto bulat muncul dengan ukuran lebih besar
     gsap.to([circleImg1Ref.current, circleImg2Ref.current], {
-      opacity: 1,
       scale: 1.2,
       duration: 0.4,
       ease: "back.out(0.6)",
@@ -318,16 +328,24 @@ export default function HomePage(): React.JSX.Element {
   const handleNoteHoverLeave = () => {
     setNoteHover(false);
     
-    // Kembalikan teks Note ke posisi semula
-    gsap.to(noteTextRef.current, {
-      x: 0,
-      duration: 0.4,
-      ease: "power2.out"
+    // Sembunyikan Update, garis, dan foto
+    gsap.to(updateContainerRef.current, {
+      opacity: 0,
+      x: 50,
+      duration: 0.3,
+      ease: "power2.in"
     });
     
-    // Hilangkan overlay
-    gsap.to(featuresOverlayRef.current, {
+    gsap.to(arrowContainerRef.current, {
       opacity: 0,
+      x: 30,
+      duration: 0.3,
+      ease: "power2.in"
+    });
+    
+    gsap.to(circleImagesRef.current, {
+      opacity: 0,
+      x: 20,
       duration: 0.3,
       ease: "power2.in"
     });
@@ -341,10 +359,9 @@ export default function HomePage(): React.JSX.Element {
       });
     }
     
-    // Animasi foto bulat hilang
+    // Animasi foto bulat kembali
     gsap.to([circleImg1Ref.current, circleImg2Ref.current], {
-      opacity: 0,
-      scale: 0.8,
+      scale: 1,
       duration: 0.3,
       ease: "power2.in"
     });
@@ -410,7 +427,7 @@ export default function HomePage(): React.JSX.Element {
     };
   }, []);
 
-  // Efek scroll untuk FEATURES section - menjaga warna teks Note tetap hitam saat bg putih
+  // Efek scroll untuk FEATURES section - menjaga warna teks Note tetap
   useEffect(() => {
     if (isLoading) return;
 
@@ -436,12 +453,6 @@ export default function HomePage(): React.JSX.Element {
           duration: 0.5,
           ease: "power2.inOut"
         });
-        // Update text juga putih
-        gsap.to('.update-number, .update-text', {
-          color: '#ffffff',
-          duration: 0.5,
-          ease: "power2.inOut"
-        });
         if (!noteHover) {
           gsap.to('.features-right-arrow svg', {
             stroke: '#ffffff',
@@ -457,12 +468,6 @@ export default function HomePage(): React.JSX.Element {
         });
         // Teks Features, 01, Note tetap hitam saat di luar section biru
         gsap.to([featuresTitleRef.current, featuresLeftNumberRef.current, featuresRightTextRef.current], {
-          color: '#000000',
-          duration: 0.5,
-          ease: "power2.inOut"
-        });
-        // Update text juga hitam
-        gsap.to('.update-number, .update-text', {
           color: '#000000',
           duration: 0.5,
           ease: "power2.inOut"
@@ -1359,9 +1364,6 @@ export default function HomePage(): React.JSX.Element {
           position: relative;
           cursor: pointer;
           z-index: 20;
-        }
-
-        .features-right {
           display: flex;
           align-items: center;
           gap: 40px;
@@ -1375,17 +1377,19 @@ export default function HomePage(): React.JSX.Element {
           letter-spacing: -0.02em;
           line-height: 1.1;
           margin: 0;
-          transition: color 0.5s ease, transform 0.4s ease;
+          transition: color 0.5s ease;
           display: inline-block;
         }
 
-        /* Update wrapper dengan font 100px */
-        .update-wrapper {
+        /* Update container - hidden by default, muncul saat hover */
+        .update-container {
+          opacity: 0;
+          transform: translateX(50px);
+          transition: all 0.3s ease;
           display: flex;
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          gap: 0px;
         }
 
         .update-number {
@@ -1394,8 +1398,6 @@ export default function HomePage(): React.JSX.Element {
           font-weight: 400;
           color: #ffffff;
           line-height: 1;
-          opacity: 1;
-          transform: translateY(0);
           transition: color 0.5s ease;
         }
 
@@ -1405,27 +1407,31 @@ export default function HomePage(): React.JSX.Element {
           font-weight: 400;
           color: #ffffff;
           line-height: 1;
-          opacity: 1;
-          transform: translateX(0);
           transition: color 0.5s ease;
         }
 
-        .features-right-arrow {
+        /* Arrow container - hidden by default */
+        .arrow-container {
+          opacity: 0;
+          transform: translateX(30px);
+          transition: all 0.3s ease;
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          transition: transform 0.3s ease;
         }
 
         .features-right-arrow svg {
           width: 80px;
           height: 80px;
           stroke: currentColor;
-          transition: stroke 0.5s ease;
+          transition: stroke 0.5s ease, transform 0.3s ease;
         }
 
-        /* Circle Images - Ukuran lebih besar */
-        .circle-images {
+        /* Circle Images container - hidden by default */
+        .circle-images-container {
+          opacity: 0;
+          transform: translateX(20px);
+          transition: all 0.3s ease;
           display: flex;
           align-items: center;
           gap: 16px;
@@ -1438,28 +1444,43 @@ export default function HomePage(): React.JSX.Element {
           border-radius: 50%;
           overflow: hidden;
           position: relative;
-          opacity: 0;
-          transform: scale(0.8);
           transition: all 0.3s ease;
           border: 3px solid #ffffff;
           box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
 
-        /* Overlay hitam - menutupi dari 01 sampai sisi kanan, tinggi sebatas konten */
+        /* Overlay hitam - sebagai background di area 01 sampai kanan */
         .features-overlay {
           position: absolute;
-          bottom: -40px;
+          top: -20px;
+          left: -100%;
           right: -200px;
-          left: -800px;
-          width: auto;
-          height: auto;
+          bottom: -20px;
           background-color: #000000;
           opacity: 0;
           pointer-events: none;
           z-index: -1;
-          border-radius: 0px;
-          padding: 20px 0;
           transition: opacity 0.3s ease;
+        }
+
+        /* Hover container saat hover - overlay muncul */
+        .hover-container:hover .features-overlay {
+          opacity: 1;
+        }
+
+        .hover-container:hover .update-container {
+          opacity: 1;
+          transform: translateX(0);
+        }
+
+        .hover-container:hover .arrow-container {
+          opacity: 1;
+          transform: translateX(0);
+        }
+
+        .hover-container:hover .circle-images-container {
+          opacity: 1;
+          transform: translateX(0);
         }
 
         /* SECTION TRUSTED COLLABS */
@@ -1808,21 +1829,25 @@ export default function HomePage(): React.JSX.Element {
                   onMouseEnter={handleNoteHoverEnter}
                   onMouseLeave={handleNoteHoverLeave}
                 >
-                  <div className="features-right">
-                    <div
-                      ref={noteTextRef}
-                      className="features-right-text"
-                    >
-                      Note
+                  <div
+                    ref={featuresRightTextRef}
+                    className="features-right-text"
+                  >
+                    Note
+                  </div>
+                  
+                  {/* Update container - hanya muncul saat hover */}
+                  <div ref={updateContainerRef} className="update-container">
+                    <div className="update-number">
+                      Update<sup style={{ fontSize: '60px', verticalAlign: 'super' }}>¹</sup>
                     </div>
-                    <div className="update-wrapper">
-                      <div className="update-number">
-                        Update<sup style={{ fontSize: '60px', verticalAlign: 'super' }}>¹</sup>
-                      </div>
-                      <div className="update-text">
-                        note
-                      </div>
+                    <div className="update-text">
+                      note
                     </div>
+                  </div>
+                  
+                  {/* Arrow container - hanya muncul saat hover */}
+                  <div ref={arrowContainerRef} className="arrow-container">
                     <div 
                       ref={featuresArrowRef}
                       className="features-right-arrow"
@@ -1833,32 +1858,35 @@ export default function HomePage(): React.JSX.Element {
                         <NorthEastArrow size={80} />
                       )}
                     </div>
-                    <div className="circle-images">
-                      <div
-                        ref={circleImg1Ref}
-                        className="circle-img"
-                      >
-                        <Image
-                          src="/images/lkhh.jpg"
-                          alt="circle 1"
-                          fill
-                          style={{ objectFit: 'cover' }}
-                        />
-                      </div>
-                      <div
-                        ref={circleImg2Ref}
-                        className="circle-img"
-                      >
-                        <Image
-                          src="/images/ai.jpg"
-                          alt="circle 2"
-                          fill
-                          style={{ objectFit: 'cover' }}
-                        />
-                      </div>
+                  </div>
+                  
+                  {/* Circle images container - hanya muncul saat hover */}
+                  <div ref={circleImagesRef} className="circle-images-container">
+                    <div
+                      ref={circleImg1Ref}
+                      className="circle-img"
+                    >
+                      <Image
+                        src="/images/lkhh.jpg"
+                        alt="circle 1"
+                        fill
+                        style={{ objectFit: 'cover' }}
+                      />
+                    </div>
+                    <div
+                      ref={circleImg2Ref}
+                      className="circle-img"
+                    >
+                      <Image
+                        src="/images/ai.jpg"
+                        alt="circle 2"
+                        fill
+                        style={{ objectFit: 'cover' }}
+                      />
                     </div>
                   </div>
-                  {/* Overlay hitam menutupi dari 01 sampai kanan */}
+                  
+                  {/* Overlay hitam sebagai background */}
                   <div ref={featuresOverlayRef} className="features-overlay" />
                 </div>
               </div>
