@@ -284,7 +284,14 @@ export default function HomePage(): React.JSX.Element {
   const handleNoteHoverEnter = () => {
     setNoteHover(true);
     
-    // Munculkan Update dan foto (yang tadinya opacity 0 menjadi 1)
+    // Munculkan overlay hitam
+    gsap.to(featuresOverlayRef.current, {
+      opacity: 1,
+      duration: 0.4,
+      ease: "power2.out"
+    });
+    
+    // Munculkan Update dan foto
     gsap.to(updateContainerRef.current, {
       opacity: 1,
       x: 0,
@@ -299,12 +306,18 @@ export default function HomePage(): React.JSX.Element {
       ease: "power2.out"
     });
     
-    // Ubah panah menjadi garis lurus (horizontal)
+    // Ubah panah menjadi garis lurus (horizontal) dan warna menjadi putih
     if (featuresArrowRef.current) {
       gsap.to(featuresArrowRef.current, {
         rotation: 0,
         duration: 0.3,
         ease: "back.out(0.6)"
+      });
+      // Ubah warna stroke SVG menjadi putih
+      gsap.to('.features-right-arrow svg', {
+        stroke: '#ffffff',
+        duration: 0.3,
+        ease: "power2.out"
       });
     }
     
@@ -319,6 +332,13 @@ export default function HomePage(): React.JSX.Element {
 
   const handleNoteHoverLeave = () => {
     setNoteHover(false);
+    
+    // Hilangkan overlay hitam
+    gsap.to(featuresOverlayRef.current, {
+      opacity: 0,
+      duration: 0.3,
+      ease: "power2.in"
+    });
     
     // Sembunyikan Update dan foto
     gsap.to(updateContainerRef.current, {
@@ -335,12 +355,21 @@ export default function HomePage(): React.JSX.Element {
       ease: "power2.in"
     });
     
-    // Kembalikan panah ke bentuk diagonal
+    // Kembalikan panah ke bentuk diagonal dengan warna sesuai background
     if (featuresArrowRef.current) {
       gsap.to(featuresArrowRef.current, {
         rotation: 45,
         duration: 0.3,
         ease: "back.inOut(0.6)"
+      });
+      // Kembalikan warna stroke SVG
+      const isInBlueSection = window.scrollY + window.innerHeight/2 >= (featuresSectionRef.current?.offsetTop || 0) && 
+                              window.scrollY + window.innerHeight/2 <= (featuresSectionRef.current?.offsetTop || 0) + (featuresSectionRef.current?.offsetHeight || 0);
+      const strokeColor = isInBlueSection ? '#ffffff' : '#000000';
+      gsap.to('.features-right-arrow svg', {
+        stroke: strokeColor,
+        duration: 0.3,
+        ease: "power2.out"
       });
     }
     
@@ -445,12 +474,14 @@ export default function HomePage(): React.JSX.Element {
           duration: 0.5,
           ease: "power2.inOut"
         });
-        // Arrow svg menjadi putih
-        gsap.to('.features-right-arrow svg', {
-          stroke: '#ffffff',
-          duration: 0.5,
-          ease: "power2.inOut"
-        });
+        // Arrow svg menjadi putih (jika tidak dalam keadaan hover)
+        if (!noteHover) {
+          gsap.to('.features-right-arrow svg', {
+            stroke: '#ffffff',
+            duration: 0.5,
+            ease: "power2.inOut"
+          });
+        }
       } else {
         // Saat di luar section (bg putih)
         gsap.to(featuresSectionRef.current, {
@@ -470,18 +501,20 @@ export default function HomePage(): React.JSX.Element {
           duration: 0.5,
           ease: "power2.inOut"
         });
-        // Arrow svg menjadi hitam
-        gsap.to('.features-right-arrow svg', {
-          stroke: '#000000',
-          duration: 0.5,
-          ease: "power2.inOut"
-        });
+        // Arrow svg menjadi hitam (jika tidak dalam keadaan hover)
+        if (!noteHover) {
+          gsap.to('.features-right-arrow svg', {
+            stroke: '#000000',
+            duration: 0.5,
+            ease: "power2.inOut"
+          });
+        }
       }
     };
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [isLoading]);
+  }, [isLoading, noteHover]);
 
   // Efek scroll untuk TRUSTED COLLABS section
   useEffect(() => {
@@ -1376,9 +1409,11 @@ export default function HomePage(): React.JSX.Element {
           margin: 0;
           transition: color 0.5s ease;
           display: inline-block;
+          z-index: 2;
+          position: relative;
         }
 
-        /* Update container - hidden by default, muncul saat hover */
+        /* Update container - hidden by default */
         .update-container {
           opacity: 0;
           transform: translateX(50px);
@@ -1386,6 +1421,8 @@ export default function HomePage(): React.JSX.Element {
           display: flex;
           align-items: center;
           justify-content: center;
+          z-index: 2;
+          position: relative;
         }
 
         .update-number {
@@ -1403,6 +1440,8 @@ export default function HomePage(): React.JSX.Element {
           align-items: center;
           justify-content: center;
           transition: transform 0.3s ease;
+          z-index: 2;
+          position: relative;
         }
 
         .features-right-arrow svg {
@@ -1421,6 +1460,8 @@ export default function HomePage(): React.JSX.Element {
           align-items: center;
           gap: 16px;
           margin-left: 16px;
+          z-index: 2;
+          position: relative;
         }
 
         .circle-img {
@@ -1434,7 +1475,26 @@ export default function HomePage(): React.JSX.Element {
           box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
 
+        /* Overlay hitam - menutupi area dari 01 sampai kanan */
+        .features-overlay {
+          position: absolute;
+          top: -30px;
+          left: -800px;
+          right: -200px;
+          bottom: -30px;
+          background-color: #000000;
+          opacity: 0;
+          pointer-events: none;
+          z-index: 1;
+          border-radius: 0px;
+          transition: opacity 0.3s ease;
+        }
+
         /* Hover container saat hover */
+        .hover-container:hover .features-overlay {
+          opacity: 1;
+        }
+
         .hover-container:hover .update-container {
           opacity: 1;
           transform: translateX(0);
@@ -1842,6 +1902,9 @@ export default function HomePage(): React.JSX.Element {
                       />
                     </div>
                   </div>
+                  
+                  {/* Overlay hitam */}
+                  <div ref={featuresOverlayRef} className="features-overlay" />
                 </div>
               </div>
             </div>
@@ -1885,7 +1948,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* Bagian footer - sama seperti sebelumnya */}
+            {/* Bagian footer */}
             <div style={{
               width: '100%',
               position: 'relative',
