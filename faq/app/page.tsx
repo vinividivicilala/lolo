@@ -1,3 +1,5 @@
+// app/page.tsx (Halaman Utama) - Features section dengan 1 teks Features di atas dan 5 item
+
 'use client';
 
 import React, { useState, useEffect, useRef } from "react";
@@ -37,10 +39,10 @@ export default function HomePage(): React.JSX.Element {
   // Refs untuk teks yang akan di-split
   const mencatatTextRef = useRef<HTMLDivElement>(null);
   const menuruTextRef = useRef<HTMLSpanElement>(null);
-  const menuruTopTextRef = useRef<HTMLDivElement>(null);
+  const menuruTopTextRef = useRef<HTMLSpanElement>(null);
   const menuruTopMainRef = useRef<HTMLDivElement>(null);
-  const brandTextRef = useRef<HTMLDivElement>(null);
-  const yearTextRef = useRef<HTMLDivElement>(null);
+  const brandTextRef = useRef<HTMLSpanElement>(null);
+  const yearTextRef = useRef<HTMLSpanElement>(null);
   const contactTextRef = useRef<HTMLSpanElement>(null);
   const lineRef = useRef<HTMLDivElement>(null);
   const emailRef = useRef<HTMLDivElement>(null);
@@ -299,22 +301,6 @@ export default function HomePage(): React.JSX.Element {
       ease: "power2.out"
     });
     
-    // Ubah warna angka dan teks menjadi putih saat hover
-    if (featuresLeftNumbersRef.current[index]) {
-      gsap.to(featuresLeftNumbersRef.current[index], {
-        color: '#ffffff',
-        duration: 0.3,
-        ease: "power2.out"
-      });
-    }
-    if (featuresRightTextsRef.current[index]) {
-      gsap.to(featuresRightTextsRef.current[index], {
-        color: '#ffffff',
-        duration: 0.3,
-        ease: "power2.out"
-      });
-    }
-    
     // Munculkan Update container
     gsap.to(featuresUpdateContainersRef.current[index], {
       opacity: 1,
@@ -365,22 +351,6 @@ export default function HomePage(): React.JSX.Element {
       duration: 0.3,
       ease: "power2.in"
     });
-    
-    // Kembalikan warna angka dan teks menjadi putih kembali (karena background biru)
-    if (featuresLeftNumbersRef.current[index]) {
-      gsap.to(featuresLeftNumbersRef.current[index], {
-        color: '#ffffff',
-        duration: 0.3,
-        ease: "power2.out"
-      });
-    }
-    if (featuresRightTextsRef.current[index]) {
-      gsap.to(featuresRightTextsRef.current[index], {
-        color: '#ffffff',
-        duration: 0.3,
-        ease: "power2.out"
-      });
-    }
     
     // Sembunyikan Update container
     gsap.to(featuresUpdateContainersRef.current[index], {
@@ -1319,7 +1289,7 @@ export default function HomePage(): React.JSX.Element {
           margin: 0;
         }
 
-        /* SECTION FEATURES ITEMS - Ukuran teks dan angka diperkecil */
+        /* SECTION FEATURES ITEMS */
         .features-item-section {
           min-height: 20vh;
           width: 100%;
@@ -1343,12 +1313,12 @@ export default function HomePage(): React.JSX.Element {
         .features-left-number {
           font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
           font-weight: 400;
-          font-size: 120px;
+          font-size: 150px;
           color: #ffffff;
           letter-spacing: -0.02em;
           line-height: 1.1;
           margin: 0;
-          transition: color 0.3s ease;
+          transition: color 0.5s ease;
         }
 
         /* Hover Container */
@@ -1364,12 +1334,12 @@ export default function HomePage(): React.JSX.Element {
         .features-right-text {
           font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
           font-weight: 400;
-          font-size: 120px;
+          font-size: 150px;
           color: #ffffff;
           letter-spacing: -0.02em;
           line-height: 1.1;
           margin: 0;
-          transition: color 0.3s ease;
+          transition: color 0.5s ease;
           display: inline-block;
           z-index: 2;
           position: relative;
@@ -1389,7 +1359,7 @@ export default function HomePage(): React.JSX.Element {
 
         .update-number {
           font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
-          font-size: 60px;
+          font-size: 100px;
           font-weight: 400;
           color: #ffffff;
           line-height: 1;
@@ -1407,10 +1377,10 @@ export default function HomePage(): React.JSX.Element {
         }
 
         .features-right-arrow svg {
-          width: 60px;
-          height: 60px;
+          width: 80px;
+          height: 80px;
           stroke: currentColor;
-          transition: stroke 0.3s ease, transform 0.3s ease;
+          transition: stroke 0.5s ease, transform 0.3s ease;
         }
 
         /* Circle Images container */
@@ -1427,8 +1397,8 @@ export default function HomePage(): React.JSX.Element {
         }
 
         .circle-img {
-          width: 60px;
-          height: 60px;
+          width: 80px;
+          height: 80px;
           border-radius: 50%;
           overflow: hidden;
           position: relative;
@@ -1450,6 +1420,21 @@ export default function HomePage(): React.JSX.Element {
           z-index: 1;
           border-radius: 0px;
           transition: opacity 0.3s ease;
+        }
+
+        /* Hover container saat hover */
+        .hover-container:hover .features-overlay {
+          opacity: 1;
+        }
+
+        .hover-container:hover .update-container {
+          opacity: 1;
+          transform: translateX(0);
+        }
+
+        .hover-container:hover .circle-images-container {
+          opacity: 1;
+          transform: translateX(0);
         }
 
         /* SECTION TRUSTED COLLABS */
@@ -1784,7 +1769,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* FEATURES ITEMS - 01 sampai 05 dengan ukuran teks 120px */}
+            {/* FEATURES ITEMS - 01 sampai 05 */}
             {featuresItems.map((item, idx) => (
               <div
                 key={idx}
@@ -1826,9 +1811,9 @@ export default function HomePage(): React.JSX.Element {
                       className="features-right-arrow"
                     >
                       {activeHover === idx ? (
-                        <StraightLine size={60} index={idx} />
+                        <StraightLine size={80} index={idx} />
                       ) : (
-                        <NorthEastArrow size={60} index={idx} />
+                        <NorthEastArrow size={80} index={idx} />
                       )}
                     </div>
                     
