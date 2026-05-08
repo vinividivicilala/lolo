@@ -34,6 +34,7 @@ export default function HomePage(): React.JSX.Element {
   
   // State untuk warna background section Features
   const [featuresBgColor, setFeaturesBgColor] = useState('#0000ff');
+  const [featuresTextColor, setFeaturesTextColor] = useState('#ffffff');
   
   const acceptBtnRef = useRef<HTMLButtonElement>(null);
   const declineBtnRef = useRef<HTMLButtonElement>(null);
@@ -322,8 +323,66 @@ export default function HomePage(): React.JSX.Element {
     });
   };
 
+  // Fungsi untuk reset warna teks ke default berdasarkan background
+  const resetTextColorsToDefault = () => {
+    const leftNumbers = [
+      featuresLeftNumberRef.current,
+      featuresLeftNumber2Ref.current,
+      featuresLeftNumber3Ref.current,
+      featuresLeftNumber4Ref.current,
+      featuresLeftNumber5Ref.current
+    ];
+    
+    const rightTexts = [
+      featuresRightTextRef.current,
+      featuresRightText2Ref.current,
+      featuresRightText3Ref.current,
+      featuresRightText4Ref.current,
+      featuresRightText5Ref.current
+    ];
+    
+    const arrows = [
+      featuresArrowRef.current,
+      featuresArrow2Ref.current,
+      featuresArrow3Ref.current,
+      featuresArrow4Ref.current,
+      featuresArrow5Ref.current
+    ];
+    
+    const updateNumbers = document.querySelectorAll('.update-number');
+    
+    const targetColor = featuresTextColor;
+    
+    leftNumbers.forEach(num => {
+      if (num && !noteHover && !communityHover && !calendarHover && !blogHover && !donationHover) {
+        gsap.to(num, { color: targetColor, duration: 0.2 });
+      }
+    });
+    
+    rightTexts.forEach(text => {
+      if (text && !noteHover && !communityHover && !calendarHover && !blogHover && !donationHover) {
+        gsap.to(text, { color: targetColor, duration: 0.2 });
+      }
+    });
+    
+    updateNumbers.forEach(num => {
+      const element = num as HTMLElement;
+      if (!noteHover && !communityHover && !calendarHover && !blogHover && !donationHover) {
+        gsap.to(element, { color: targetColor, duration: 0.2 });
+      }
+    });
+    
+    arrows.forEach(arrow => {
+      if (arrow && !noteHover && !communityHover && !calendarHover && !blogHover && !donationHover) {
+        const svg = arrow.querySelector('svg');
+        if (svg) {
+          gsap.to(svg, { stroke: targetColor, duration: 0.2 });
+        }
+      }
+    });
+  };
+
   const handleNoteHoverEnter = () => {
-    if (featuresBgColor !== '#0000ff') return;
     setNoteHover(true);
     
     gsap.set(featuresOverlayRef.current, { opacity: 1 });
@@ -342,20 +401,21 @@ export default function HomePage(): React.JSX.Element {
       ease: "power2.out"
     });
     
+    // Saat hover, semua teks jadi putih
     gsap.to(featuresLeftNumberRef.current, {
-      color: '#000000',
+      color: '#ffffff',
       duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to('.update-number', {
-      color: '#000000',
+      color: '#ffffff',
       duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to(featuresRightTextRef.current, {
-      color: '#000000',
+      color: '#ffffff',
       duration: 0.2,
       ease: "power2.out"
     });
@@ -367,7 +427,7 @@ export default function HomePage(): React.JSX.Element {
         ease: "back.out(0.6)"
       });
       gsap.to('.features-right-arrow svg', {
-        stroke: '#000000',
+        stroke: '#ffffff',
         duration: 0.2,
         ease: "power2.out"
       });
@@ -400,20 +460,23 @@ export default function HomePage(): React.JSX.Element {
       ease: "power2.in"
     });
     
+    // Kembalikan ke warna default berdasarkan background
+    const targetColor = featuresTextColor;
+    
     gsap.to(featuresLeftNumberRef.current, {
-      color: '#ffffff',
+      color: targetColor,
       duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to('.update-number', {
-      color: '#ffffff',
+      color: targetColor,
       duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to(featuresRightTextRef.current, {
-      color: '#ffffff',
+      color: targetColor,
       duration: 0.2,
       ease: "power2.out"
     });
@@ -425,7 +488,7 @@ export default function HomePage(): React.JSX.Element {
         ease: "back.inOut(0.6)"
       });
       gsap.to('.features-right-arrow svg', {
-        stroke: '#ffffff',
+        stroke: targetColor,
         duration: 0.2,
         ease: "power2.out"
       });
@@ -439,7 +502,6 @@ export default function HomePage(): React.JSX.Element {
   };
 
   const handleCommunityHoverEnter = () => {
-    if (featuresBgColor !== '#0000ff') return;
     setCommunityHover(true);
     
     gsap.set(featuresOverlay2Ref.current, { opacity: 1 });
@@ -459,19 +521,19 @@ export default function HomePage(): React.JSX.Element {
     });
     
     gsap.to(featuresLeftNumber2Ref.current, {
-      color: '#000000',
+      color: '#ffffff',
       duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to('.update-number', {
-      color: '#000000',
+      color: '#ffffff',
       duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to(featuresRightText2Ref.current, {
-      color: '#000000',
+      color: '#ffffff',
       duration: 0.2,
       ease: "power2.out"
     });
@@ -483,7 +545,7 @@ export default function HomePage(): React.JSX.Element {
         ease: "back.out(0.6)"
       });
       gsap.to('.features-right-arrow-2 svg', {
-        stroke: '#000000',
+        stroke: '#ffffff',
         duration: 0.2,
         ease: "power2.out"
       });
@@ -516,20 +578,22 @@ export default function HomePage(): React.JSX.Element {
       ease: "power2.in"
     });
     
+    const targetColor = featuresTextColor;
+    
     gsap.to(featuresLeftNumber2Ref.current, {
-      color: '#ffffff',
+      color: targetColor,
       duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to('.update-number', {
-      color: '#ffffff',
+      color: targetColor,
       duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to(featuresRightText2Ref.current, {
-      color: '#ffffff',
+      color: targetColor,
       duration: 0.2,
       ease: "power2.out"
     });
@@ -541,7 +605,7 @@ export default function HomePage(): React.JSX.Element {
         ease: "back.inOut(0.6)"
       });
       gsap.to('.features-right-arrow-2 svg', {
-        stroke: '#ffffff',
+        stroke: targetColor,
         duration: 0.2,
         ease: "power2.out"
       });
@@ -555,7 +619,6 @@ export default function HomePage(): React.JSX.Element {
   };
 
   const handleCalendarHoverEnter = () => {
-    if (featuresBgColor !== '#0000ff') return;
     setCalendarHover(true);
     
     gsap.set(featuresOverlay3Ref.current, { opacity: 1 });
@@ -575,19 +638,19 @@ export default function HomePage(): React.JSX.Element {
     });
     
     gsap.to(featuresLeftNumber3Ref.current, {
-      color: '#000000',
+      color: '#ffffff',
       duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to('.update-number', {
-      color: '#000000',
+      color: '#ffffff',
       duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to(featuresRightText3Ref.current, {
-      color: '#000000',
+      color: '#ffffff',
       duration: 0.2,
       ease: "power2.out"
     });
@@ -599,7 +662,7 @@ export default function HomePage(): React.JSX.Element {
         ease: "back.out(0.6)"
       });
       gsap.to('.features-right-arrow-3 svg', {
-        stroke: '#000000',
+        stroke: '#ffffff',
         duration: 0.2,
         ease: "power2.out"
       });
@@ -632,20 +695,22 @@ export default function HomePage(): React.JSX.Element {
       ease: "power2.in"
     });
     
+    const targetColor = featuresTextColor;
+    
     gsap.to(featuresLeftNumber3Ref.current, {
-      color: '#ffffff',
+      color: targetColor,
       duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to('.update-number', {
-      color: '#ffffff',
+      color: targetColor,
       duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to(featuresRightText3Ref.current, {
-      color: '#ffffff',
+      color: targetColor,
       duration: 0.2,
       ease: "power2.out"
     });
@@ -657,7 +722,7 @@ export default function HomePage(): React.JSX.Element {
         ease: "back.inOut(0.6)"
       });
       gsap.to('.features-right-arrow-3 svg', {
-        stroke: '#ffffff',
+        stroke: targetColor,
         duration: 0.2,
         ease: "power2.out"
       });
@@ -671,7 +736,6 @@ export default function HomePage(): React.JSX.Element {
   };
 
   const handleBlogHoverEnter = () => {
-    if (featuresBgColor !== '#0000ff') return;
     setBlogHover(true);
     
     gsap.set(featuresOverlay4Ref.current, { opacity: 1 });
@@ -691,19 +755,19 @@ export default function HomePage(): React.JSX.Element {
     });
     
     gsap.to(featuresLeftNumber4Ref.current, {
-      color: '#000000',
+      color: '#ffffff',
       duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to('.update-number', {
-      color: '#000000',
+      color: '#ffffff',
       duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to(featuresRightText4Ref.current, {
-      color: '#000000',
+      color: '#ffffff',
       duration: 0.2,
       ease: "power2.out"
     });
@@ -715,7 +779,7 @@ export default function HomePage(): React.JSX.Element {
         ease: "back.out(0.6)"
       });
       gsap.to('.features-right-arrow-4 svg', {
-        stroke: '#000000',
+        stroke: '#ffffff',
         duration: 0.2,
         ease: "power2.out"
       });
@@ -748,20 +812,22 @@ export default function HomePage(): React.JSX.Element {
       ease: "power2.in"
     });
     
+    const targetColor = featuresTextColor;
+    
     gsap.to(featuresLeftNumber4Ref.current, {
-      color: '#ffffff',
+      color: targetColor,
       duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to('.update-number', {
-      color: '#ffffff',
+      color: targetColor,
       duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to(featuresRightText4Ref.current, {
-      color: '#ffffff',
+      color: targetColor,
       duration: 0.2,
       ease: "power2.out"
     });
@@ -773,7 +839,7 @@ export default function HomePage(): React.JSX.Element {
         ease: "back.inOut(0.6)"
       });
       gsap.to('.features-right-arrow-4 svg', {
-        stroke: '#ffffff',
+        stroke: targetColor,
         duration: 0.2,
         ease: "power2.out"
       });
@@ -787,7 +853,6 @@ export default function HomePage(): React.JSX.Element {
   };
 
   const handleDonationHoverEnter = () => {
-    if (featuresBgColor !== '#0000ff') return;
     setDonationHover(true);
     
     gsap.set(featuresOverlay5Ref.current, { opacity: 1 });
@@ -807,19 +872,19 @@ export default function HomePage(): React.JSX.Element {
     });
     
     gsap.to(featuresLeftNumber5Ref.current, {
-      color: '#000000',
+      color: '#ffffff',
       duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to('.update-number', {
-      color: '#000000',
+      color: '#ffffff',
       duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to(featuresRightText5Ref.current, {
-      color: '#000000',
+      color: '#ffffff',
       duration: 0.2,
       ease: "power2.out"
     });
@@ -831,7 +896,7 @@ export default function HomePage(): React.JSX.Element {
         ease: "back.out(0.6)"
       });
       gsap.to('.features-right-arrow-5 svg', {
-        stroke: '#000000',
+        stroke: '#ffffff',
         duration: 0.2,
         ease: "power2.out"
       });
@@ -864,20 +929,22 @@ export default function HomePage(): React.JSX.Element {
       ease: "power2.in"
     });
     
+    const targetColor = featuresTextColor;
+    
     gsap.to(featuresLeftNumber5Ref.current, {
-      color: '#ffffff',
+      color: targetColor,
       duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to('.update-number', {
-      color: '#ffffff',
+      color: targetColor,
       duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to(featuresRightText5Ref.current, {
-      color: '#ffffff',
+      color: targetColor,
       duration: 0.2,
       ease: "power2.out"
     });
@@ -889,7 +956,7 @@ export default function HomePage(): React.JSX.Element {
         ease: "back.inOut(0.6)"
       });
       gsap.to('.features-right-arrow-5 svg', {
-        stroke: '#ffffff',
+        stroke: targetColor,
         duration: 0.2,
         ease: "power2.out"
       });
@@ -1000,17 +1067,19 @@ export default function HomePage(): React.JSX.Element {
         }
       });
       
-      // Update warna background berdasarkan posisi scroll
+      // Update warna berdasarkan posisi scroll
       if (isInFeatures && isAboveTrusted) {
-        // Masih di area Features dan belum mencapai Trusted Collabs - warna biru
+        // Masih di area Features dan belum mencapai Trusted Collabs - warna biru dengan teks putih
         if (featuresBgColor !== '#0000ff') {
           setFeaturesBgColor('#0000ff');
+          setFeaturesTextColor('#ffffff');
           updateFeaturesColors('#0000ff', '#ffffff');
         }
       } else if (!isAboveTrusted || !isInFeatures) {
-        // Sudah melewati batas Trusted Collabs atau keluar area Features - warna putih
+        // Sudah melewati batas Trusted Collabs atau keluar area Features - warna putih dengan teks hitam
         if (featuresBgColor !== '#ffffff') {
           setFeaturesBgColor('#ffffff');
+          setFeaturesTextColor('#000000');
           updateFeaturesColors('#ffffff', '#000000');
         }
       }
@@ -1045,55 +1114,60 @@ export default function HomePage(): React.JSX.Element {
         });
       }
       
-      // Update teks pada Features yang tidak hover
-      if (featuresBgColor === '#ffffff') {
-        // Saat warna putih, reset warna teks menjadi hitam
-        const leftNumbers = [
-          featuresLeftNumberRef.current,
-          featuresLeftNumber2Ref.current,
-          featuresLeftNumber3Ref.current,
-          featuresLeftNumber4Ref.current,
-          featuresLeftNumber5Ref.current
-        ];
-        
-        const rightTexts = [
-          featuresRightTextRef.current,
-          featuresRightText2Ref.current,
-          featuresRightText3Ref.current,
-          featuresRightText4Ref.current,
-          featuresRightText5Ref.current
-        ];
-        
-        leftNumbers.forEach(num => {
-          if (num && !noteHover && !communityHover && !calendarHover && !blogHover && !donationHover) {
-            gsap.to(num, { color: '#000000', duration: 0.2 });
+      // Update semua teks Features (angka, teks, panah) kecuali yang sedang hover
+      const leftNumbers = [
+        featuresLeftNumberRef.current,
+        featuresLeftNumber2Ref.current,
+        featuresLeftNumber3Ref.current,
+        featuresLeftNumber4Ref.current,
+        featuresLeftNumber5Ref.current
+      ];
+      
+      const rightTexts = [
+        featuresRightTextRef.current,
+        featuresRightText2Ref.current,
+        featuresRightText3Ref.current,
+        featuresRightText4Ref.current,
+        featuresRightText5Ref.current
+      ];
+      
+      const arrows = [
+        featuresArrowRef.current,
+        featuresArrow2Ref.current,
+        featuresArrow3Ref.current,
+        featuresArrow4Ref.current,
+        featuresArrow5Ref.current
+      ];
+      
+      const updateNumbers = document.querySelectorAll('.update-number');
+      
+      leftNumbers.forEach(num => {
+        if (num && !noteHover && !communityHover && !calendarHover && !blogHover && !donationHover) {
+          gsap.to(num, { color: textColor, duration: 0.2 });
+        }
+      });
+      
+      rightTexts.forEach(text => {
+        if (text && !noteHover && !communityHover && !calendarHover && !blogHover && !donationHover) {
+          gsap.to(text, { color: textColor, duration: 0.2 });
+        }
+      });
+      
+      updateNumbers.forEach(num => {
+        const element = num as HTMLElement;
+        if (!noteHover && !communityHover && !calendarHover && !blogHover && !donationHover) {
+          gsap.to(element, { color: textColor, duration: 0.2 });
+        }
+      });
+      
+      arrows.forEach(arrow => {
+        if (arrow && !noteHover && !communityHover && !calendarHover && !blogHover && !donationHover) {
+          const svg = arrow.querySelector('svg');
+          if (svg) {
+            gsap.to(svg, { stroke: textColor, duration: 0.2 });
           }
-        });
-        
-        rightTexts.forEach(text => {
-          if (text && !noteHover && !communityHover && !calendarHover && !blogHover && !donationHover) {
-            gsap.to(text, { color: '#000000', duration: 0.2 });
-          }
-        });
-        
-        // Reset arrow color
-        const arrows = [
-          featuresArrowRef.current,
-          featuresArrow2Ref.current,
-          featuresArrow3Ref.current,
-          featuresArrow4Ref.current,
-          featuresArrow5Ref.current
-        ];
-        
-        arrows.forEach(arrow => {
-          if (arrow) {
-            gsap.to(arrow.querySelector('svg'), {
-              stroke: '#000000',
-              duration: 0.2
-            });
-          }
-        });
-      }
+        }
+      });
     };
     
     window.addEventListener('scroll', handleScroll);
@@ -1959,7 +2033,6 @@ export default function HomePage(): React.JSX.Element {
           font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
           font-weight: 400;
           font-size: 150px;
-          color: #ffffff;
           letter-spacing: -0.02em;
           line-height: 1;
           margin: 0;
@@ -1980,7 +2053,6 @@ export default function HomePage(): React.JSX.Element {
           font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
           font-weight: 400;
           font-size: 150px;
-          color: #ffffff;
           letter-spacing: -0.02em;
           line-height: 1;
           margin: 0;
@@ -2006,7 +2078,6 @@ export default function HomePage(): React.JSX.Element {
           font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
           font-size: 70px;
           font-weight: 400;
-          color: #ffffff;
           line-height: 1;
           transition: color 0.2s ease;
         }
@@ -2415,6 +2486,7 @@ export default function HomePage(): React.JSX.Element {
                 <div
                   ref={featuresTitleRef}
                   className="features-title"
+                  style={{ color: featuresTextColor }}
                 >
                   Features
                 </div>
@@ -2423,6 +2495,7 @@ export default function HomePage(): React.JSX.Element {
                 <div
                   ref={featuresLeftNumberRef}
                   className="features-left-number"
+                  style={{ color: featuresTextColor }}
                 >
                   01
                 </div>
@@ -2436,12 +2509,13 @@ export default function HomePage(): React.JSX.Element {
                   <div
                     ref={featuresRightTextRef}
                     className="features-right-text"
+                    style={{ color: featuresTextColor }}
                   >
                     Note
                   </div>
                   
                   <div ref={updateContainerRef} className="update-container">
-                    <div className="update-number">
+                    <div className="update-number" style={{ color: featuresTextColor }}>
                       Update<sup>¹</sup>
                     </div>
                   </div>
@@ -2499,6 +2573,7 @@ export default function HomePage(): React.JSX.Element {
                 <div
                   ref={featuresLeftNumber2Ref}
                   className="features-left-number"
+                  style={{ color: featuresTextColor }}
                 >
                   02
                 </div>
@@ -2512,12 +2587,13 @@ export default function HomePage(): React.JSX.Element {
                   <div
                     ref={featuresRightText2Ref}
                     className="features-right-text"
+                    style={{ color: featuresTextColor }}
                   >
                     Community
                   </div>
                   
                   <div ref={updateContainer2Ref} className="update-container">
-                    <div className="update-number">
+                    <div className="update-number" style={{ color: featuresTextColor }}>
                       Join<sup>²</sup>
                     </div>
                   </div>
@@ -2575,6 +2651,7 @@ export default function HomePage(): React.JSX.Element {
                 <div
                   ref={featuresLeftNumber3Ref}
                   className="features-left-number"
+                  style={{ color: featuresTextColor }}
                 >
                   03
                 </div>
@@ -2588,12 +2665,13 @@ export default function HomePage(): React.JSX.Element {
                   <div
                     ref={featuresRightText3Ref}
                     className="features-right-text"
+                    style={{ color: featuresTextColor }}
                   >
                     Calendar
                   </div>
                   
                   <div ref={updateContainer3Ref} className="update-container">
-                    <div className="update-number">
+                    <div className="update-number" style={{ color: featuresTextColor }}>
                       Schedule<sup>³</sup>
                     </div>
                   </div>
@@ -2651,6 +2729,7 @@ export default function HomePage(): React.JSX.Element {
                 <div
                   ref={featuresLeftNumber4Ref}
                   className="features-left-number"
+                  style={{ color: featuresTextColor }}
                 >
                   04
                 </div>
@@ -2664,12 +2743,13 @@ export default function HomePage(): React.JSX.Element {
                   <div
                     ref={featuresRightText4Ref}
                     className="features-right-text"
+                    style={{ color: featuresTextColor }}
                   >
                     Blog
                   </div>
                   
                   <div ref={updateContainer4Ref} className="update-container">
-                    <div className="update-number">
+                    <div className="update-number" style={{ color: featuresTextColor }}>
                       Read<sup>⁴</sup>
                     </div>
                   </div>
@@ -2727,6 +2807,7 @@ export default function HomePage(): React.JSX.Element {
                 <div
                   ref={featuresLeftNumber5Ref}
                   className="features-left-number"
+                  style={{ color: featuresTextColor }}
                 >
                   05
                 </div>
@@ -2740,12 +2821,13 @@ export default function HomePage(): React.JSX.Element {
                   <div
                     ref={featuresRightText5Ref}
                     className="features-right-text"
+                    style={{ color: featuresTextColor }}
                   >
                     Donation
                   </div>
                   
                   <div ref={updateContainer5Ref} className="update-container">
-                    <div className="update-number">
+                    <div className="update-number" style={{ color: featuresTextColor }}>
                       Support<sup>⁵</sup>
                     </div>
                   </div>
