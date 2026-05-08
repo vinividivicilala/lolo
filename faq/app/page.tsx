@@ -1,4 +1,4 @@
-// app/page.tsx (Halaman Utama) - Features section lengkap dengan 5 item (design sama persis)
+// app/page.tsx (Halaman Utama) - dengan efek transisi halaman saat scroll ke footer
 
 'use client';
 
@@ -36,6 +36,10 @@ export default function HomePage(): React.JSX.Element {
   const [featuresBgColor, setFeaturesBgColor] = useState('#0000ff');
   const [featuresTextColor, setFeaturesTextColor] = useState('#ffffff');
   
+  // State untuk efek transisi halaman
+  const [pageTransition, setPageTransition] = useState<'home' | 'footer'>('home');
+  const [footerBgColor, setFooterBgColor] = useState('#ffffff');
+  
   const acceptBtnRef = useRef<HTMLButtonElement>(null);
   const declineBtnRef = useRef<HTMLButtonElement>(null);
   const contactBtnRef = useRef<HTMLButtonElement>(null);
@@ -65,6 +69,11 @@ export default function HomePage(): React.JSX.Element {
   const studioTextRef = useRef<HTMLDivElement>(null);
   const bottomLeftTextRef = useRef<HTMLDivElement>(null);
   const studioContainerRef = useRef<HTMLDivElement>(null);
+  
+  // Refs untuk footer section
+  const footerSectionRef = useRef<HTMLDivElement>(null);
+  const footerContentRef = useRef<HTMLDivElement>(null);
+  const footerTextRef = useRef<HTMLSpanElement>(null);
   
   // Section Features Refs
   const featuresSectionRef = useRef<HTMLDivElement>(null);
@@ -1028,7 +1037,65 @@ export default function HomePage(): React.JSX.Element {
     };
   }, []);
 
-  // Efek scroll untuk FEATURES section - DIPERBAIKI
+  // Efek scroll untuk transisi halaman ke footer
+  useEffect(() => {
+    if (isLoading) return;
+
+    const handlePageTransition = () => {
+      if (!footerSectionRef.current) return;
+      
+      const scrollPosition = window.scrollY;
+      const windowHeight = window.innerHeight;
+      const footerTop = footerSectionRef.current.offsetTop;
+      const triggerPoint = footerTop - windowHeight * 0.3; // Mulai transisi lebih awal
+      
+      // Hitung progress transisi (0 - 1)
+      let progress = 0;
+      if (scrollPosition > triggerPoint) {
+        progress = Math.min(1, (scrollPosition - triggerPoint) / (windowHeight * 0.5));
+      }
+      
+      // Update background footer berdasarkan progress
+      const newFooterBgColor = `rgba(0, 0, 0, ${progress})`;
+      setFooterBgColor(newFooterBgColor);
+      
+      // Update state halaman
+      if (progress >= 0.5 && pageTransition !== 'footer') {
+        setPageTransition('footer');
+        // Animasi masuk ke footer mode
+        gsap.to(footerContentRef.current, {
+          opacity: 1,
+          y: 0,
+          duration: 0.5,
+          ease: "power2.out"
+        });
+      } else if (progress < 0.3 && pageTransition !== 'home') {
+        setPageTransition('home');
+        // Animasi kembali ke home mode
+        gsap.to(footerContentRef.current, {
+          opacity: 0.5,
+          y: 50,
+          duration: 0.5,
+          ease: "power2.in"
+        });
+      }
+      
+      // Efek blur pada konten utama saat transisi
+      const mainAlpha = Math.max(0, 1 - progress * 1.5);
+      if (mainContentRef.current) {
+        gsap.to(mainContentRef.current, {
+          opacity: mainAlpha,
+          duration: 0.1,
+          ease: "none"
+        });
+      }
+    };
+
+    window.addEventListener('scroll', handlePageTransition);
+    return () => window.removeEventListener('scroll', handlePageTransition);
+  }, [isLoading, pageTransition]);
+
+  // Efek scroll untuk FEATURES section
   useEffect(() => {
     if (isLoading) return;
 
@@ -1067,26 +1134,25 @@ export default function HomePage(): React.JSX.Element {
         }
       });
       
-      // Update warna berdasarkan posisi scroll
-      if (isInFeatures && isAboveTrusted) {
-        // Masih di area Features dan belum mencapai Trusted Collabs - warna biru dengan teks putih
-        if (featuresBgColor !== '#0000ff') {
-          setFeaturesBgColor('#0000ff');
-          setFeaturesTextColor('#ffffff');
-          updateFeaturesColors('#0000ff', '#ffffff');
-        }
-      } else if (!isAboveTrusted || !isInFeatures) {
-        // Sudah melewati batas Trusted Collabs atau keluar area Features - warna putih dengan teks hitam
-        if (featuresBgColor !== '#ffffff') {
-          setFeaturesBgColor('#ffffff');
-          setFeaturesTextColor('#000000');
-          updateFeaturesColors('#ffffff', '#000000');
+      // Update warna berdasarkan posisi scroll (hanya jika belum masuk mode footer)
+      if (pageTransition === 'home') {
+        if (isInFeatures && isAboveTrusted) {
+          if (featuresBgColor !== '#0000ff') {
+            setFeaturesBgColor('#0000ff');
+            setFeaturesTextColor('#ffffff');
+            updateFeaturesColors('#0000ff', '#ffffff');
+          }
+        } else if (!isAboveTrusted || !isInFeatures) {
+          if (featuresBgColor !== '#ffffff') {
+            setFeaturesBgColor('#ffffff');
+            setFeaturesTextColor('#000000');
+            updateFeaturesColors('#ffffff', '#000000');
+          }
         }
       }
     };
     
     const updateFeaturesColors = (bgColor: string, textColor: string) => {
-      // Update semua section Features
       const featuresSections = [
         featuresSectionRef.current,
         featuresSection2Ref.current,
@@ -1105,7 +1171,6 @@ export default function HomePage(): React.JSX.Element {
         }
       });
       
-      // Update title Features
       if (featuresTitleRef.current) {
         gsap.to(featuresTitleRef.current, {
           color: textColor,
@@ -1114,7 +1179,6 @@ export default function HomePage(): React.JSX.Element {
         });
       }
       
-      // Update semua teks Features (angka, teks, panah) kecuali yang sedang hover
       const leftNumbers = [
         featuresLeftNumberRef.current,
         featuresLeftNumber2Ref.current,
@@ -1171,10 +1235,10 @@ export default function HomePage(): React.JSX.Element {
     };
     
     window.addEventListener('scroll', handleScroll);
-    handleScroll(); // Panggil sekali untuk inisialisasi
+    handleScroll();
     
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [isLoading, featuresBgColor, noteHover, communityHover, calendarHover, blogHover, donationHover]);
+  }, [isLoading, featuresBgColor, noteHover, communityHover, calendarHover, blogHover, donationHover, pageTransition]);
 
   // Efek scroll untuk TRUSTED COLLABS section
   useEffect(() => {
@@ -1190,7 +1254,7 @@ export default function HomePage(): React.JSX.Element {
       
       const isInSection = scrollPosition + windowHeight/2 >= sectionTop && scrollPosition + windowHeight/2 <= sectionBottom;
       
-      if (isInSection) {
+      if (isInSection && pageTransition === 'home') {
         gsap.to(trustedSectionRef.current, {
           backgroundColor: '#000000',
           duration: 0.3,
@@ -1208,7 +1272,7 @@ export default function HomePage(): React.JSX.Element {
           duration: 0.3,
           ease: "power2.inOut"
         });
-      } else {
+      } else if (pageTransition === 'home') {
         gsap.to(trustedSectionRef.current, {
           backgroundColor: '#ffffff',
           duration: 0.3,
@@ -1231,7 +1295,7 @@ export default function HomePage(): React.JSX.Element {
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [isLoading]);
+  }, [isLoading, pageTransition]);
 
   // Animasi SplitText untuk FEATURES title
   useEffect(() => {
@@ -1825,6 +1889,11 @@ export default function HomePage(): React.JSX.Element {
           to { opacity: 1; transform: scale(1); }
         }
 
+        @keyframes footerFadeIn {
+          from { opacity: 0; transform: translateY(50px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+
         .call-farid-text {
           font-family: 'HelveticaNowDisplay', 'Arial', sans-serif;
           font-weight: 400;
@@ -2013,7 +2082,6 @@ export default function HomePage(): React.JSX.Element {
           font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
           font-weight: 400;
           font-size: 300px;
-          color: #ffffff;
           letter-spacing: -0.02em;
           line-height: 1;
           margin: 0;
@@ -2271,6 +2339,22 @@ export default function HomePage(): React.JSX.Element {
         
         .trusted-section .carousel-container::-webkit-scrollbar-thumb {
           background: rgba(255, 255, 255, 0.5);
+        }
+
+        /* FOOTER SECTION TRANSITION */
+        .footer-section {
+          position: relative;
+          width: 100%;
+          min-height: 100vh;
+          background-color: #000000;
+          transition: background-color 0.3s ease;
+          z-index: 10;
+        }
+
+        .footer-content {
+          opacity: 0.5;
+          transform: translateY(50px);
+          transition: all 0.5s ease;
         }
       `}</style>
       
@@ -2911,324 +2995,129 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* Bagian footer - hanya berisi teks MENURU besar tanpa background hitam */}
-            <div style={{
-              width: '100%',
-              position: 'relative',
-              backgroundColor: 'white',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'flex-end',
-              alignItems: 'center',
-              minHeight: '60vh'
-            }}>
-              <div
-                ref={bottomContentRef}
+            {/* FOOTER SECTION - Dengan efek transisi halaman */}
+            <div 
+              ref={footerSectionRef}
+              className="footer-section"
+              style={{
+                backgroundColor: '#000000',
+                position: 'relative',
+                zIndex: 10
+              }}
+            >
+              <div 
+                ref={footerContentRef}
+                className="footer-content"
                 style={{
                   width: '100%',
                   display: 'flex',
                   flexDirection: 'column',
-                  alignItems: 'flex-start',
-                  gap: '40px',
-                  marginBottom: '80px',
-                  paddingLeft: '80px',
-                  opacity: 0
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  minHeight: '100vh',
+                  padding: '40px 80px',
+                  boxSizing: 'border-box',
+                  opacity: 0.5,
+                  transform: 'translateY(50px)'
                 }}
               >
+                {/* Konten Halaman Baru (Footer) */}
                 <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px'
+                  textAlign: 'center',
+                  color: '#ffffff',
+                  maxWidth: '800px',
+                  margin: '0 auto'
                 }}>
-                  <div 
-                    ref={mencatatTextRef}
-                    style={{
-                      fontSize: '64px',
-                      fontFamily: 'Questrial, sans-serif',
-                      color: 'black',
-                      textAlign: 'left',
-                      fontWeight: '400',
-                      letterSpacing: '-0.02em',
-                      lineHeight: '1.2',
-                      whiteSpace: 'nowrap'
-                    }}>
-                    Mencatat apa yang kamu inginkan
-                  </div>
-                  <span style={{
+                  <h2 style={{
+                    fontFamily: 'Aeonik-Regular, Helvetica, Arial, sans-serif',
                     fontSize: '80px',
-                    color: 'black',
                     fontWeight: '400',
-                    lineHeight: '1'
-                  }}>.</span>
-                </div>
-
-                <Link href="/contact">
-                  <button
-                    ref={contactBtnRef}
-                    onClick={handleContact}
-                    className="contact-btn-effect"
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '16px',
-                      padding: '14px 36px',
-                      borderRadius: '60px',
-                      cursor: 'pointer',
-                      fontSize: '20px',
-                      fontWeight: '600',
-                      letterSpacing: '-0.01em',
-                      fontFamily: 'Questrial, sans-serif',
-                      transition: 'all 0.3s ease',
-                      position: 'relative',
-                      overflow: 'hidden',
-                      zIndex: 1,
-                      border: '1.5px solid #cccccc',
-                      backgroundColor: '#ffffff',
-                      color: '#000000'
-                    }}
-                  >
-                    <span ref={contactTextRef}>Contact</span>
-                    
-                    <div style={{
-                      position: 'relative',
-                      width: '40px',
-                      height: '40px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}>
-                      <div className="dot-small" style={{
-                        width: '8px',
-                        height: '8px',
-                        borderRadius: '50%',
-                        backgroundColor: '#000000',
-                        opacity: 1,
-                        transform: 'scale(1)',
-                        transition: 'opacity 0.3s ease, transform 0.3s ease',
-                        position: 'absolute'
-                      }}></div>
-                      
-                      <div className="circle-large-white" style={{
-                        position: 'absolute',
-                        width: '40px',
-                        height: '40px',
-                        borderRadius: '50%',
-                        backgroundColor: '#000000',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        opacity: 0,
-                        transform: 'scale(0.8)',
-                        transition: 'opacity 0.3s ease, transform 0.3s ease, background-color 0.3s ease'
-                      }}>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                      </div>
-                    </div>
-                  </button>
-                </Link>
-
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '30px',
-                  flexWrap: 'wrap',
-                  width: '100%'
-                }}>
-                  <div ref={callTextRef} className="call-farid-text">
-                    <div>Ready to surpass your</div>
-                    <div>wildest dreams?</div>
-                    <div>Call Farid.</div>
-                  </div>
-
-                  <button ref={calendarBtnRef} onClick={handleCalendarCall} className="calendar-btn">
-                    <ArrowIcon size={24} />
-                    Calendar call
-                  </button>
-                </div>
-
-                <div
-                  ref={profileRef}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'flex-start',
-                    gap: '24px',
-                    width: '100%',
-                    marginTop: '10px'
-                  }}
-                >
-                  <div style={{
-                    width: '80px',
-                    height: '100px',
-                    borderRadius: '12px',
-                    overflow: 'hidden',
-                    position: 'relative',
-                    border: '2px solid #e0e0e0'
-                  }}>
-                    <Image
-                      src="/images/5.jpg"
-                      alt="Farid Ardiansyah"
-                      fill
-                      style={{ objectFit: 'cover', objectPosition: 'center' }}
-                    />
-                  </div>
-
-                  <div style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '40px',
-                    fontWeight: '400',
-                    color: 'rgb(16, 16, 16)',
-                    letterSpacing: '-0.02em'
-                  }}>
-                    Farid Ardiansyah
-                  </div>
-
-                  <div className="badge-founder">
-                    Founder & Programmer
-                  </div>
-                </div>
-              </div>
-
-              {/* Email dan Social Media Section */}
-              <div style={{
-                position: 'relative',
-                width: '100%',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'flex-end',
-                padding: '0 80px',
-                marginBottom: '30px',
-                boxSizing: 'border-box'
-              }}>
-                <div 
-                  ref={emailRef}
-                  onClick={handleEmailClick}
-                  className="email-wrapper"
-                  style={{ marginBottom: '20px' }}
-                >
-                  <ArrowIcon size={24} />
-                  <span className="email-text">contact.menuru@gmail.com</span>
-                </div>
-
-                <div style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '8px',
-                  position: 'absolute',
-                  left: '50%',
-                  transform: 'translateX(-50%)',
-                  marginBottom: '20px'
-                }}>
-                  <div 
-                    className="social-item"
-                    style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
-                    onMouseEnter={(e) => {
-                      const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                      if (textElement) handleSocialHover(textElement, originalTexts.ig);
-                    }}
-                    onMouseLeave={(e) => {
-                      const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                      if (textElement) handleSocialLeave(textElement, originalTexts.ig);
-                    }}
-                    onClick={() => handleSocialClick('Instagram')}
-                  >
-                    <span ref={igRef} className="social-text" style={{
-                      fontFamily: "'Questrial', sans-serif",
-                      fontSize: '28px',
-                      color: '#000000',
-                      fontWeight: '400',
-                      letterSpacing: '0.02em'
-                    }}>Instagram</span>
-                  </div>
-                  
-                  <div 
-                    className="social-item"
-                    style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
-                    onMouseEnter={(e) => {
-                      const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                      if (textElement) handleSocialHover(textElement, originalTexts.x);
-                    }}
-                    onMouseLeave={(e) => {
-                      const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                      if (textElement) handleSocialLeave(textElement, originalTexts.x);
-                    }}
-                    onClick={() => handleSocialClick('X')}
-                  >
-                    <span ref={xRef} className="social-text" style={{
-                      fontFamily: "'Questrial', sans-serif",
-                      fontSize: '28px',
-                      color: '#000000',
-                      fontWeight: '400',
-                      letterSpacing: '0.02em'
-                    }}>X</span>
-                  </div>
-                  
-                  <div 
-                    className="social-item"
-                    style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
-                    onMouseEnter={(e) => {
-                      const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                      if (textElement) handleSocialHover(textElement, originalTexts.linkedin);
-                    }}
-                    onMouseLeave={(e) => {
-                      const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                      if (textElement) handleSocialLeave(textElement, originalTexts.linkedin);
-                    }}
-                    onClick={() => handleSocialClick('LinkedIn')}
-                  >
-                    <span ref={linkedinRef} className="social-text" style={{
-                      fontFamily: "'Questrial', sans-serif",
-                      fontSize: '28px',
-                      color: '#000000',
-                      fontWeight: '400',
-                      letterSpacing: '0.02em'
-                    }}>LinkedIn</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Hanya teks MENURU besar tanpa background hitam */}
-              <footer style={{
-                position: 'relative',
-                bottom: 0,
-                left: 0,
-                right: 0,
-                width: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'flex-end',
-                padding: '0 80px 0 0',
-                margin: 0,
-                pointerEvents: 'none',
-                zIndex: 1,
-                marginTop: '40px'
-              }}>
-                <span 
-                  ref={menuruTextRef}
-                  style={{
-                    fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
-                    fontWeight: 'normal',
-                    fontSize: '600px',
-                    color: '#000000',
-                    textAlign: 'right',
                     letterSpacing: '-0.02em',
-                    opacity: 1,
-                    textTransform: 'uppercase',
-                    lineHeight: '0.7',
-                    whiteSpace: 'nowrap',
-                    WebkitFontSmoothing: 'antialiased',
-                    MozOsxFontSmoothing: 'grayscale',
-                    fontKerning: 'normal',
-                    margin: 0,
-                    padding: 0,
-                    marginRight: '0',
-                    backgroundColor: 'transparent'
+                    marginBottom: '30px',
+                    color: '#ffffff'
                   }}>
-                  MENURU
-                </span>
-              </footer>
+                    Let's Create Together
+                  </h2>
+                  
+                  <p style={{
+                    fontFamily: 'Questrial, sans-serif',
+                    fontSize: '24px',
+                    lineHeight: '1.5',
+                    marginBottom: '50px',
+                    color: '#cccccc'
+                  }}>
+                    We're excited to collaborate with innovative brands and creative individuals. 
+                    Let's bring your ideas to life.
+                  </p>
+                  
+                  <div style={{
+                    display: 'flex',
+                    gap: '20px',
+                    justifyContent: 'center',
+                    flexWrap: 'wrap'
+                  }}>
+                    <button
+                      onClick={handleCalendarCall}
+                      style={{
+                        padding: '16px 40px',
+                        backgroundColor: '#c5e800',
+                        color: '#000000',
+                        border: 'none',
+                        borderRadius: '60px',
+                        cursor: 'pointer',
+                        fontFamily: 'Questrial, sans-serif',
+                        fontSize: '18px',
+                        fontWeight: '600',
+                        transition: 'all 0.3s ease'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+                      onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                    >
+                      Start a Project
+                    </button>
+                    
+                    <button
+                      onClick={handleEmailClick}
+                      style={{
+                        padding: '16px 40px',
+                        backgroundColor: 'transparent',
+                        color: '#ffffff',
+                        border: '2px solid #ffffff',
+                        borderRadius: '60px',
+                        cursor: 'pointer',
+                        fontFamily: 'Questrial, sans-serif',
+                        fontSize: '18px',
+                        fontWeight: '600',
+                        transition: 'all 0.3s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = '#ffffff';
+                        e.currentTarget.style.color = '#000000';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = 'transparent';
+                        e.currentTarget.style.color = '#ffffff';
+                      }}
+                    >
+                      Contact Us
+                    </button>
+                  </div>
+                </div>
+                
+                {/* Footer Credits */}
+                <div style={{
+                  position: 'absolute',
+                  bottom: '40px',
+                  left: '0',
+                  right: '0',
+                  textAlign: 'center',
+                  fontFamily: 'Questrial, sans-serif',
+                  fontSize: '14px',
+                  color: '#666666'
+                }}>
+                  <span ref={footerTextRef}>© 2026 MENURU.STUDIO. All rights reserved.</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
