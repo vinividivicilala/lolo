@@ -1,4 +1,4 @@
-// app/page.tsx (Halaman Utama) - dengan efek scroll yang mendorong halaman
+// app/page.tsx (Halaman Utama) - Features section lengkap dengan 5 item (design sama persis)
 
 'use client';
 
@@ -65,10 +65,6 @@ export default function HomePage(): React.JSX.Element {
   const studioTextRef = useRef<HTMLDivElement>(null);
   const bottomLeftTextRef = useRef<HTMLDivElement>(null);
   const studioContainerRef = useRef<HTMLDivElement>(null);
-  
-  // Refs untuk halaman baru
-  const newPageRef = useRef<HTMLDivElement>(null);
-  const newPageContentRef = useRef<HTMLDivElement>(null);
   
   // Section Features Refs
   const featuresSectionRef = useRef<HTMLDivElement>(null);
@@ -327,6 +323,65 @@ export default function HomePage(): React.JSX.Element {
     });
   };
 
+  // Fungsi untuk reset warna teks ke default berdasarkan background
+  const resetTextColorsToDefault = () => {
+    const leftNumbers = [
+      featuresLeftNumberRef.current,
+      featuresLeftNumber2Ref.current,
+      featuresLeftNumber3Ref.current,
+      featuresLeftNumber4Ref.current,
+      featuresLeftNumber5Ref.current
+    ];
+    
+    const rightTexts = [
+      featuresRightTextRef.current,
+      featuresRightText2Ref.current,
+      featuresRightText3Ref.current,
+      featuresRightText4Ref.current,
+      featuresRightText5Ref.current
+    ];
+    
+    const arrows = [
+      featuresArrowRef.current,
+      featuresArrow2Ref.current,
+      featuresArrow3Ref.current,
+      featuresArrow4Ref.current,
+      featuresArrow5Ref.current
+    ];
+    
+    const updateNumbers = document.querySelectorAll('.update-number');
+    
+    const targetColor = featuresTextColor;
+    
+    leftNumbers.forEach(num => {
+      if (num && !noteHover && !communityHover && !calendarHover && !blogHover && !donationHover) {
+        gsap.to(num, { color: targetColor, duration: 0.2 });
+      }
+    });
+    
+    rightTexts.forEach(text => {
+      if (text && !noteHover && !communityHover && !calendarHover && !blogHover && !donationHover) {
+        gsap.to(text, { color: targetColor, duration: 0.2 });
+      }
+    });
+    
+    updateNumbers.forEach(num => {
+      const element = num as HTMLElement;
+      if (!noteHover && !communityHover && !calendarHover && !blogHover && !donationHover) {
+        gsap.to(element, { color: targetColor, duration: 0.2 });
+      }
+    });
+    
+    arrows.forEach(arrow => {
+      if (arrow && !noteHover && !communityHover && !calendarHover && !blogHover && !donationHover) {
+        const svg = arrow.querySelector('svg');
+        if (svg) {
+          gsap.to(svg, { stroke: targetColor, duration: 0.2 });
+        }
+      }
+    });
+  };
+
   const handleNoteHoverEnter = () => {
     setNoteHover(true);
     
@@ -346,6 +401,7 @@ export default function HomePage(): React.JSX.Element {
       ease: "power2.out"
     });
     
+    // Saat hover, semua teks jadi putih
     gsap.to(featuresLeftNumberRef.current, {
       color: '#ffffff',
       duration: 0.2,
@@ -404,6 +460,7 @@ export default function HomePage(): React.JSX.Element {
       ease: "power2.in"
     });
     
+    // Kembalikan ke warna default berdasarkan background
     const targetColor = featuresTextColor;
     
     gsap.to(featuresLeftNumberRef.current, {
@@ -971,72 +1028,7 @@ export default function HomePage(): React.JSX.Element {
     };
   }, []);
 
-  // Efek scroll untuk transisi halaman dengan GSAP
-  useEffect(() => {
-    if (isLoading || !newPageRef.current || !mainContentRef.current) return;
-
-    // Setup ScrollTrigger untuk transisi halaman
-    const pageTransition = ScrollTrigger.create({
-      trigger: trustedSectionRef.current,
-      start: "bottom bottom",
-      end: "+=100%",
-      scrub: 1.5,
-      onUpdate: (self) => {
-        const progress = self.progress;
-        
-        // Halaman utama bergerak ke atas (negative translateY)
-        const mainTranslateY = -progress * 100;
-        gsap.to(mainContentRef.current, {
-          y: `${mainTranslateY}%`,
-          duration: 0.1,
-          ease: "none",
-          overwrite: true
-        });
-        
-        // Halaman baru muncul dari bawah (translateY 100% ke 0)
-        const newPageTranslateY = (1 - progress) * 100;
-        gsap.to(newPageRef.current, {
-          y: `${newPageTranslateY}%`,
-          duration: 0.1,
-          ease: "none",
-          overwrite: true
-        });
-        
-        // Animasi konten halaman baru saat muncul
-        if (newPageContentRef.current) {
-          const contentProgress = Math.max(0, (progress - 0.3) / 0.7);
-          gsap.to(newPageContentRef.current, {
-            opacity: contentProgress,
-            y: 50 - (contentProgress * 50),
-            duration: 0.1,
-            ease: "none",
-            overwrite: true
-          });
-        }
-        
-        // Update warna Features berdasarkan progress (opsional)
-        if (progress < 0.3) {
-          // Masih di halaman utama
-          if (featuresBgColor !== '#0000ff') {
-            setFeaturesBgColor('#0000ff');
-            setFeaturesTextColor('#ffffff');
-          }
-        } else if (progress > 0.7) {
-          // Sudah di halaman baru
-          if (featuresBgColor !== '#ffffff') {
-            setFeaturesBgColor('#ffffff');
-            setFeaturesTextColor('#000000');
-          }
-        }
-      }
-    });
-
-    return () => {
-      pageTransition.kill();
-    };
-  }, [isLoading, featuresBgColor]);
-
-  // Efek scroll untuk FEATURES section
+  // Efek scroll untuk FEATURES section - DIPERBAIKI
   useEffect(() => {
     if (isLoading) return;
 
@@ -1046,6 +1038,7 @@ export default function HomePage(): React.JSX.Element {
       const scrollPosition = window.scrollY;
       const windowHeight = window.innerHeight;
       
+      // Dapatkan posisi semua section Features
       const featuresSections = [
         featuresSectionRef.current,
         featuresSection2Ref.current,
@@ -1058,9 +1051,11 @@ export default function HomePage(): React.JSX.Element {
       
       if (!trustedSection) return;
       
+      // Cek apakah scroll berada di atas batas section Trusted Collabs
       const trustedTop = trustedSection.offsetTop;
       const isAboveTrusted = scrollPosition + windowHeight/2 < trustedTop;
       
+      // Cek apakah scroll berada di dalam area Features (salah satu section Features)
       let isInFeatures = false;
       featuresSections.forEach(section => {
         if (section) {
@@ -1072,13 +1067,16 @@ export default function HomePage(): React.JSX.Element {
         }
       });
       
+      // Update warna berdasarkan posisi scroll
       if (isInFeatures && isAboveTrusted) {
+        // Masih di area Features dan belum mencapai Trusted Collabs - warna biru dengan teks putih
         if (featuresBgColor !== '#0000ff') {
           setFeaturesBgColor('#0000ff');
           setFeaturesTextColor('#ffffff');
           updateFeaturesColors('#0000ff', '#ffffff');
         }
       } else if (!isAboveTrusted || !isInFeatures) {
+        // Sudah melewati batas Trusted Collabs atau keluar area Features - warna putih dengan teks hitam
         if (featuresBgColor !== '#ffffff') {
           setFeaturesBgColor('#ffffff');
           setFeaturesTextColor('#000000');
@@ -1088,6 +1086,7 @@ export default function HomePage(): React.JSX.Element {
     };
     
     const updateFeaturesColors = (bgColor: string, textColor: string) => {
+      // Update semua section Features
       const featuresSections = [
         featuresSectionRef.current,
         featuresSection2Ref.current,
@@ -1106,6 +1105,7 @@ export default function HomePage(): React.JSX.Element {
         }
       });
       
+      // Update title Features
       if (featuresTitleRef.current) {
         gsap.to(featuresTitleRef.current, {
           color: textColor,
@@ -1114,6 +1114,7 @@ export default function HomePage(): React.JSX.Element {
         });
       }
       
+      // Update semua teks Features (angka, teks, panah) kecuali yang sedang hover
       const leftNumbers = [
         featuresLeftNumberRef.current,
         featuresLeftNumber2Ref.current,
@@ -1170,7 +1171,7 @@ export default function HomePage(): React.JSX.Element {
     };
     
     window.addEventListener('scroll', handleScroll);
-    handleScroll();
+    handleScroll(); // Panggil sekali untuk inisialisasi
     
     return () => window.removeEventListener('scroll', handleScroll);
   }, [isLoading, featuresBgColor, noteHover, communityHover, calendarHover, blogHover, donationHover]);
@@ -2012,6 +2013,7 @@ export default function HomePage(): React.JSX.Element {
           font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
           font-weight: 400;
           font-size: 300px;
+          color: #ffffff;
           letter-spacing: -0.02em;
           line-height: 1;
           margin: 0;
@@ -2270,19 +2272,6 @@ export default function HomePage(): React.JSX.Element {
         .trusted-section .carousel-container::-webkit-scrollbar-thumb {
           background: rgba(255, 255, 255, 0.5);
         }
-
-        /* NEW PAGE STYLES */
-        .new-page {
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          background-color: #000000;
-          z-index: 50;
-          min-height: 100vh;
-          transform: translateY(100%);
-          overflow-y: auto;
-        }
       `}</style>
       
       {/* LOADING OVERLAY */}
@@ -2356,7 +2345,6 @@ export default function HomePage(): React.JSX.Element {
 
       <div id="smooth-wrapper">
         <div id="smooth-content">
-          {/* Halaman Utama */}
           <div 
             ref={mainContentRef}
             style={{
@@ -2373,8 +2361,7 @@ export default function HomePage(): React.JSX.Element {
               position: 'relative',
               opacity: isLoading ? 0 : 1,
               transform: isLoading ? 'translateX(100%)' : 'translateX(0)',
-              transition: 'all 0.01s ease',
-              willChange: 'transform'
+              transition: 'all 0.01s ease'
             }}
           >
             {/* HEADER SECTION - MENURU */}
@@ -3242,125 +3229,6 @@ export default function HomePage(): React.JSX.Element {
                   MENURU
                 </span>
               </footer>
-            </div>
-          </div>
-
-          {/* Halaman Baru - Muncul dari bawah dan mendorong halaman utama */}
-          <div 
-            ref={newPageRef}
-            className="new-page"
-            style={{
-              transform: 'translateY(100%)',
-              willChange: 'transform'
-            }}
-          >
-            <div 
-              ref={newPageContentRef}
-              style={{
-                opacity: 0,
-                transform: 'translateY(50px)',
-                width: '100%',
-                minHeight: '100vh',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '80px',
-                textAlign: 'center',
-                color: '#ffffff',
-                boxSizing: 'border-box'
-              }}
-            >
-              <h2 style={{
-                fontFamily: 'Aeonik-Regular, Helvetica, Arial, sans-serif',
-                fontSize: '120px',
-                fontWeight: '400',
-                letterSpacing: '-0.02em',
-                marginBottom: '40px',
-                color: '#ffffff'
-              }}>
-                New Horizon
-              </h2>
-              
-              <p style={{
-                fontFamily: 'Questrial, sans-serif',
-                fontSize: '32px',
-                lineHeight: '1.4',
-                marginBottom: '60px',
-                color: '#cccccc',
-                maxWidth: '800px',
-                marginLeft: 'auto',
-                marginRight: 'auto'
-              }}>
-                Discover what's next<br />
-                with MENURU.STUDIO
-              </p>
-              
-              <div style={{
-                display: 'flex',
-                gap: '30px',
-                justifyContent: 'center',
-                flexWrap: 'wrap'
-              }}>
-                <button
-                  onClick={handleCalendarCall}
-                  style={{
-                    padding: '18px 48px',
-                    backgroundColor: '#c5e800',
-                    color: '#000000',
-                    border: 'none',
-                    borderRadius: '60px',
-                    cursor: 'pointer',
-                    fontFamily: 'Questrial, sans-serif',
-                    fontSize: '20px',
-                    fontWeight: '600',
-                    transition: 'all 0.3s ease'
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
-                  onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                >
-                  Start Journey
-                </button>
-                
-                <button
-                  onClick={handleEmailClick}
-                  style={{
-                    padding: '18px 48px',
-                    backgroundColor: 'transparent',
-                    color: '#ffffff',
-                    border: '2px solid #ffffff',
-                    borderRadius: '60px',
-                    cursor: 'pointer',
-                    fontFamily: 'Questrial, sans-serif',
-                    fontSize: '20px',
-                    fontWeight: '600',
-                    transition: 'all 0.3s ease'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#ffffff';
-                    e.currentTarget.style.color = '#000000';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = 'transparent';
-                    e.currentTarget.style.color = '#ffffff';
-                  }}
-                >
-                  Explore More
-                </button>
-              </div>
-              
-              <div style={{
-                position: 'absolute',
-                bottom: '40px',
-                left: 0,
-                right: 0,
-                textAlign: 'center',
-                fontFamily: 'Questrial, sans-serif',
-                fontSize: '14px',
-                color: '#666666'
-              }}>
-                © 2026 MENURU.STUDIO. All rights reserved.
-              </div>
             </div>
           </div>
         </div>
