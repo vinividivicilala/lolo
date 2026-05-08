@@ -335,20 +335,19 @@ export default function HomePage(): React.JSX.Element {
   const handleNoteHoverEnter = () => {
     setNoteHover(true);
     
+    // Overlay hitam muncul
     gsap.set(featuresOverlayRef.current, { opacity: 1 });
-    gsap.to(updateContainerRef.current, { opacity: 1, x: 0, duration: 0.2, ease: "power2.out" });
-    gsap.to(circleImagesRef.current, { opacity: 1, x: 0, duration: 0.2, ease: "power2.out" });
+    gsap.to(updateContainerRef.current, { opacity: 1, x: 0, duration: 0.2 });
+    gsap.to(circleImagesRef.current, { opacity: 1, x: 0, duration: 0.2 });
     
-    // Warna saat hover: HITAM jika background biru, BIRU jika background putih
-    const hoverColor = isFeaturesWhiteBg ? '#0000ff' : '#000000';
-    
-    gsap.to(featuresLeftNumberRef.current, { color: hoverColor, duration: 0.2 });
-    gsap.to('.update-number', { color: hoverColor, duration: 0.2 });
-    gsap.to(featuresRightTextRef.current, { color: hoverColor, duration: 0.2 });
+    // Saat hover, semua teks menjadi PUTIH (karena overlay hitam)
+    gsap.to(featuresLeftNumberRef.current, { color: '#ffffff', duration: 0.2 });
+    gsap.to('.update-number', { color: '#ffffff', duration: 0.2 });
+    gsap.to(featuresRightTextRef.current, { color: '#ffffff', duration: 0.2 });
     
     if (featuresArrowRef.current) {
       gsap.to(featuresArrowRef.current, { rotation: 0, duration: 0.2 });
-      gsap.to('.features-right-arrow svg', { stroke: hoverColor, duration: 0.2 });
+      gsap.to('.features-right-arrow svg', { stroke: '#ffffff', duration: 0.2 });
     }
     
     gsap.to([circleImg1Ref.current, circleImg2Ref.current], {
@@ -363,7 +362,7 @@ export default function HomePage(): React.JSX.Element {
     gsap.to(updateContainerRef.current, { opacity: 0, x: 50, duration: 0.2 });
     gsap.to(circleImagesRef.current, { opacity: 0, x: 20, duration: 0.2 });
     
-    // Kembalikan warna ke default: PUTIH jika background biru, HITAM jika background putih
+    // Kembalikan warna ke default sesuai background
     const defaultColor = isFeaturesWhiteBg ? '#000000' : '#ffffff';
     
     gsap.to(featuresLeftNumberRef.current, { color: defaultColor, duration: 0.2 });
@@ -385,12 +384,11 @@ export default function HomePage(): React.JSX.Element {
     gsap.to(updateContainer2Ref.current, { opacity: 1, x: 0, duration: 0.2 });
     gsap.to(circleImages2Ref.current, { opacity: 1, x: 0, duration: 0.2 });
     
-    const hoverColor = isFeaturesWhiteBg ? '#0000ff' : '#000000';
-    gsap.to(featuresLeftNumber2Ref.current, { color: hoverColor, duration: 0.2 });
-    gsap.to(featuresRightText2Ref.current, { color: hoverColor, duration: 0.2 });
+    gsap.to(featuresLeftNumber2Ref.current, { color: '#ffffff', duration: 0.2 });
+    gsap.to(featuresRightText2Ref.current, { color: '#ffffff', duration: 0.2 });
     if (featuresArrow2Ref.current) {
       gsap.to(featuresArrow2Ref.current, { rotation: 0, duration: 0.2 });
-      gsap.to('.features-right-arrow-2 svg', { stroke: hoverColor, duration: 0.2 });
+      gsap.to('.features-right-arrow-2 svg', { stroke: '#ffffff', duration: 0.2 });
     }
     gsap.to([circleImg1_2Ref.current, circleImg2_2Ref.current], { scale: 1.2, duration: 0.2, stagger: 0.05 });
   };
@@ -418,12 +416,11 @@ export default function HomePage(): React.JSX.Element {
     gsap.to(updateContainer3Ref.current, { opacity: 1, x: 0, duration: 0.2 });
     gsap.to(circleImages3Ref.current, { opacity: 1, x: 0, duration: 0.2 });
     
-    const hoverColor = isFeaturesWhiteBg ? '#0000ff' : '#000000';
-    gsap.to(featuresLeftNumber3Ref.current, { color: hoverColor, duration: 0.2 });
-    gsap.to(featuresRightText3Ref.current, { color: hoverColor, duration: 0.2 });
+    gsap.to(featuresLeftNumber3Ref.current, { color: '#ffffff', duration: 0.2 });
+    gsap.to(featuresRightText3Ref.current, { color: '#ffffff', duration: 0.2 });
     if (featuresArrow3Ref.current) {
       gsap.to(featuresArrow3Ref.current, { rotation: 0, duration: 0.2 });
-      gsap.to('.features-right-arrow-3 svg', { stroke: hoverColor, duration: 0.2 });
+      gsap.to('.features-right-arrow-3 svg', { stroke: '#ffffff', duration: 0.2 });
     }
     gsap.to([circleImg1_3Ref.current, circleImg2_3Ref.current], { scale: 1.2, duration: 0.2, stagger: 0.05 });
   };
@@ -451,12 +448,11 @@ export default function HomePage(): React.JSX.Element {
     gsap.to(updateContainer4Ref.current, { opacity: 1, x: 0, duration: 0.2 });
     gsap.to(circleImages4Ref.current, { opacity: 1, x: 0, duration: 0.2 });
     
-    const hoverColor = isFeaturesWhiteBg ? '#0000ff' : '#000000';
-    gsap.to(featuresLeftNumber4Ref.current, { color: hoverColor, duration: 0.2 });
-    gsap.to(featuresRightText4Ref.current, { color: hoverColor, duration: 0.2 });
+    gsap.to(featuresLeftNumber4Ref.current, { color: '#ffffff', duration: 0.2 });
+    gsap.to(featuresRightText4Ref.current, { color: '#ffffff', duration: 0.2 });
     if (featuresArrow4Ref.current) {
       gsap.to(featuresArrow4Ref.current, { rotation: 0, duration: 0.2 });
-      gsap.to('.features-right-arrow-4 svg', { stroke: hoverColor, duration: 0.2 });
+      gsap.to('.features-right-arrow-4 svg', { stroke: '#ffffff', duration: 0.2 });
     }
     gsap.to([circleImg1_4Ref.current, circleImg2_4Ref.current], { scale: 1.2, duration: 0.2, stagger: 0.05 });
   };
@@ -484,12 +480,11 @@ export default function HomePage(): React.JSX.Element {
     gsap.to(updateContainer5Ref.current, { opacity: 1, x: 0, duration: 0.2 });
     gsap.to(circleImages5Ref.current, { opacity: 1, x: 0, duration: 0.2 });
     
-    const hoverColor = isFeaturesWhiteBg ? '#0000ff' : '#000000';
-    gsap.to(featuresLeftNumber5Ref.current, { color: hoverColor, duration: 0.2 });
-    gsap.to(featuresRightText5Ref.current, { color: hoverColor, duration: 0.2 });
+    gsap.to(featuresLeftNumber5Ref.current, { color: '#ffffff', duration: 0.2 });
+    gsap.to(featuresRightText5Ref.current, { color: '#ffffff', duration: 0.2 });
     if (featuresArrow5Ref.current) {
       gsap.to(featuresArrow5Ref.current, { rotation: 0, duration: 0.2 });
-      gsap.to('.features-right-arrow-5 svg', { stroke: hoverColor, duration: 0.2 });
+      gsap.to('.features-right-arrow-5 svg', { stroke: '#ffffff', duration: 0.2 });
     }
     gsap.to([circleImg1_5Ref.current, circleImg2_5Ref.current], { scale: 1.2, duration: 0.2, stagger: 0.05 });
   };
@@ -580,7 +575,6 @@ export default function HomePage(): React.JSX.Element {
       const scrollPosition = window.scrollY;
       const windowHeight = window.innerHeight;
       const featuresSectionBottom = featuresSectionRef.current.offsetTop + featuresSectionRef.current.offsetHeight;
-      const trustedSectionTop = trustedSectionRef.current.offsetTop;
       
       // Jika sudah melewati features section (scroll ke bawah)
       const isPastFeatures = scrollPosition + windowHeight/2 > featuresSectionBottom;
