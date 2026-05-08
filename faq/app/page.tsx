@@ -352,21 +352,21 @@ export default function HomePage(): React.JSX.Element {
       ease: "power2.out"
     });
     
-    // Warna menjadi merah (hover)
+    // Warna menjadi merah saat hover
     gsap.to(featuresLeftNumberRef.current, {
-      color: '#ff0000',
+      color: '#ff3366',
       duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to('.update-number', {
-      color: '#ff0000',
+      color: '#ff3366',
       duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to(featuresRightTextRef.current, {
-      color: '#ff0000',
+      color: '#ff3366',
       duration: 0.2,
       ease: "power2.out"
     });
@@ -378,7 +378,7 @@ export default function HomePage(): React.JSX.Element {
         ease: "back.out(0.6)"
       });
       gsap.to('.features-right-arrow svg', {
-        stroke: '#ff0000',
+        stroke: '#ff3366',
         duration: 0.2,
         ease: "power2.out"
       });
@@ -411,35 +411,24 @@ export default function HomePage(): React.JSX.Element {
       ease: "power2.in"
     });
     
-    // Kembalikan warna biru
-    gsap.to(featuresLeftNumberRef.current, {
-      color: '#0000ff',
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
-    gsap.to('.update-number', {
-      color: '#0000ff',
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
-    gsap.to(featuresRightTextRef.current, {
-      color: '#0000ff',
-      duration: 0.2,
-      ease: "power2.out"
-    });
+    // Kembalikan warna ke default (biru atau putih tergantung scroll)
+    if (isFeaturesWhiteBg) {
+      gsap.to(featuresLeftNumberRef.current, { color: '#000000', duration: 0.2 });
+      gsap.to('.update-number', { color: '#000000', duration: 0.2 });
+      gsap.to(featuresRightTextRef.current, { color: '#000000', duration: 0.2 });
+      gsap.to('.features-right-arrow svg', { stroke: '#000000', duration: 0.2 });
+    } else {
+      gsap.to(featuresLeftNumberRef.current, { color: '#ffffff', duration: 0.2 });
+      gsap.to('.update-number', { color: '#ffffff', duration: 0.2 });
+      gsap.to(featuresRightTextRef.current, { color: '#ffffff', duration: 0.2 });
+      gsap.to('.features-right-arrow svg', { stroke: '#ffffff', duration: 0.2 });
+    }
     
     if (featuresArrowRef.current) {
       gsap.to(featuresArrowRef.current, {
         rotation: 45,
         duration: 0.2,
         ease: "back.inOut(0.6)"
-      });
-      gsap.to('.features-right-arrow svg', {
-        stroke: '#0000ff',
-        duration: 0.2,
-        ease: "power2.out"
       });
     }
     
@@ -471,19 +460,19 @@ export default function HomePage(): React.JSX.Element {
     });
     
     gsap.to(featuresLeftNumber2Ref.current, {
-      color: '#ff0000',
+      color: '#ff3366',
       duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to('.update-number', {
-      color: '#ff0000',
+      color: '#ff3366',
       duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to(featuresRightText2Ref.current, {
-      color: '#ff0000',
+      color: '#ff3366',
       duration: 0.2,
       ease: "power2.out"
     });
@@ -495,7 +484,7 @@ export default function HomePage(): React.JSX.Element {
         ease: "back.out(0.6)"
       });
       gsap.to('.features-right-arrow-2 svg', {
-        stroke: '#ff0000',
+        stroke: '#ff3366',
         duration: 0.2,
         ease: "power2.out"
       });
@@ -528,34 +517,23 @@ export default function HomePage(): React.JSX.Element {
       ease: "power2.in"
     });
     
-    gsap.to(featuresLeftNumber2Ref.current, {
-      color: '#0000ff',
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
-    gsap.to('.update-number', {
-      color: '#0000ff',
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
-    gsap.to(featuresRightText2Ref.current, {
-      color: '#0000ff',
-      duration: 0.2,
-      ease: "power2.out"
-    });
+    if (isFeaturesWhiteBg) {
+      gsap.to(featuresLeftNumber2Ref.current, { color: '#000000', duration: 0.2 });
+      gsap.to('.update-number', { color: '#000000', duration: 0.2 });
+      gsap.to(featuresRightText2Ref.current, { color: '#000000', duration: 0.2 });
+      gsap.to('.features-right-arrow-2 svg', { stroke: '#000000', duration: 0.2 });
+    } else {
+      gsap.to(featuresLeftNumber2Ref.current, { color: '#ffffff', duration: 0.2 });
+      gsap.to('.update-number', { color: '#ffffff', duration: 0.2 });
+      gsap.to(featuresRightText2Ref.current, { color: '#ffffff', duration: 0.2 });
+      gsap.to('.features-right-arrow-2 svg', { stroke: '#ffffff', duration: 0.2 });
+    }
     
     if (featuresArrow2Ref.current) {
       gsap.to(featuresArrow2Ref.current, {
         rotation: 45,
         duration: 0.2,
         ease: "back.inOut(0.6)"
-      });
-      gsap.to('.features-right-arrow-2 svg', {
-        stroke: '#0000ff',
-        duration: 0.2,
-        ease: "power2.out"
       });
     }
     
@@ -587,19 +565,19 @@ export default function HomePage(): React.JSX.Element {
     });
     
     gsap.to(featuresLeftNumber3Ref.current, {
-      color: '#ff0000',
+      color: '#ff3366',
       duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to('.update-number', {
-      color: '#ff0000',
+      color: '#ff3366',
       duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to(featuresRightText3Ref.current, {
-      color: '#ff0000',
+      color: '#ff3366',
       duration: 0.2,
       ease: "power2.out"
     });
@@ -611,7 +589,7 @@ export default function HomePage(): React.JSX.Element {
         ease: "back.out(0.6)"
       });
       gsap.to('.features-right-arrow-3 svg', {
-        stroke: '#ff0000',
+        stroke: '#ff3366',
         duration: 0.2,
         ease: "power2.out"
       });
@@ -644,34 +622,23 @@ export default function HomePage(): React.JSX.Element {
       ease: "power2.in"
     });
     
-    gsap.to(featuresLeftNumber3Ref.current, {
-      color: '#0000ff',
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
-    gsap.to('.update-number', {
-      color: '#0000ff',
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
-    gsap.to(featuresRightText3Ref.current, {
-      color: '#0000ff',
-      duration: 0.2,
-      ease: "power2.out"
-    });
+    if (isFeaturesWhiteBg) {
+      gsap.to(featuresLeftNumber3Ref.current, { color: '#000000', duration: 0.2 });
+      gsap.to('.update-number', { color: '#000000', duration: 0.2 });
+      gsap.to(featuresRightText3Ref.current, { color: '#000000', duration: 0.2 });
+      gsap.to('.features-right-arrow-3 svg', { stroke: '#000000', duration: 0.2 });
+    } else {
+      gsap.to(featuresLeftNumber3Ref.current, { color: '#ffffff', duration: 0.2 });
+      gsap.to('.update-number', { color: '#ffffff', duration: 0.2 });
+      gsap.to(featuresRightText3Ref.current, { color: '#ffffff', duration: 0.2 });
+      gsap.to('.features-right-arrow-3 svg', { stroke: '#ffffff', duration: 0.2 });
+    }
     
     if (featuresArrow3Ref.current) {
       gsap.to(featuresArrow3Ref.current, {
         rotation: 45,
         duration: 0.2,
         ease: "back.inOut(0.6)"
-      });
-      gsap.to('.features-right-arrow-3 svg', {
-        stroke: '#0000ff',
-        duration: 0.2,
-        ease: "power2.out"
       });
     }
     
@@ -703,19 +670,19 @@ export default function HomePage(): React.JSX.Element {
     });
     
     gsap.to(featuresLeftNumber4Ref.current, {
-      color: '#ff0000',
+      color: '#ff3366',
       duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to('.update-number', {
-      color: '#ff0000',
+      color: '#ff3366',
       duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to(featuresRightText4Ref.current, {
-      color: '#ff0000',
+      color: '#ff3366',
       duration: 0.2,
       ease: "power2.out"
     });
@@ -727,7 +694,7 @@ export default function HomePage(): React.JSX.Element {
         ease: "back.out(0.6)"
       });
       gsap.to('.features-right-arrow-4 svg', {
-        stroke: '#ff0000',
+        stroke: '#ff3366',
         duration: 0.2,
         ease: "power2.out"
       });
@@ -760,34 +727,23 @@ export default function HomePage(): React.JSX.Element {
       ease: "power2.in"
     });
     
-    gsap.to(featuresLeftNumber4Ref.current, {
-      color: '#0000ff',
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
-    gsap.to('.update-number', {
-      color: '#0000ff',
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
-    gsap.to(featuresRightText4Ref.current, {
-      color: '#0000ff',
-      duration: 0.2,
-      ease: "power2.out"
-    });
+    if (isFeaturesWhiteBg) {
+      gsap.to(featuresLeftNumber4Ref.current, { color: '#000000', duration: 0.2 });
+      gsap.to('.update-number', { color: '#000000', duration: 0.2 });
+      gsap.to(featuresRightText4Ref.current, { color: '#000000', duration: 0.2 });
+      gsap.to('.features-right-arrow-4 svg', { stroke: '#000000', duration: 0.2 });
+    } else {
+      gsap.to(featuresLeftNumber4Ref.current, { color: '#ffffff', duration: 0.2 });
+      gsap.to('.update-number', { color: '#ffffff', duration: 0.2 });
+      gsap.to(featuresRightText4Ref.current, { color: '#ffffff', duration: 0.2 });
+      gsap.to('.features-right-arrow-4 svg', { stroke: '#ffffff', duration: 0.2 });
+    }
     
     if (featuresArrow4Ref.current) {
       gsap.to(featuresArrow4Ref.current, {
         rotation: 45,
         duration: 0.2,
         ease: "back.inOut(0.6)"
-      });
-      gsap.to('.features-right-arrow-4 svg', {
-        stroke: '#0000ff',
-        duration: 0.2,
-        ease: "power2.out"
       });
     }
     
@@ -819,19 +775,19 @@ export default function HomePage(): React.JSX.Element {
     });
     
     gsap.to(featuresLeftNumber5Ref.current, {
-      color: '#ff0000',
+      color: '#ff3366',
       duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to('.update-number', {
-      color: '#ff0000',
+      color: '#ff3366',
       duration: 0.2,
       ease: "power2.out"
     });
     
     gsap.to(featuresRightText5Ref.current, {
-      color: '#ff0000',
+      color: '#ff3366',
       duration: 0.2,
       ease: "power2.out"
     });
@@ -843,7 +799,7 @@ export default function HomePage(): React.JSX.Element {
         ease: "back.out(0.6)"
       });
       gsap.to('.features-right-arrow-5 svg', {
-        stroke: '#ff0000',
+        stroke: '#ff3366',
         duration: 0.2,
         ease: "power2.out"
       });
@@ -876,34 +832,23 @@ export default function HomePage(): React.JSX.Element {
       ease: "power2.in"
     });
     
-    gsap.to(featuresLeftNumber5Ref.current, {
-      color: '#0000ff',
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
-    gsap.to('.update-number', {
-      color: '#0000ff',
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
-    gsap.to(featuresRightText5Ref.current, {
-      color: '#0000ff',
-      duration: 0.2,
-      ease: "power2.out"
-    });
+    if (isFeaturesWhiteBg) {
+      gsap.to(featuresLeftNumber5Ref.current, { color: '#000000', duration: 0.2 });
+      gsap.to('.update-number', { color: '#000000', duration: 0.2 });
+      gsap.to(featuresRightText5Ref.current, { color: '#000000', duration: 0.2 });
+      gsap.to('.features-right-arrow-5 svg', { stroke: '#000000', duration: 0.2 });
+    } else {
+      gsap.to(featuresLeftNumber5Ref.current, { color: '#ffffff', duration: 0.2 });
+      gsap.to('.update-number', { color: '#ffffff', duration: 0.2 });
+      gsap.to(featuresRightText5Ref.current, { color: '#ffffff', duration: 0.2 });
+      gsap.to('.features-right-arrow-5 svg', { stroke: '#ffffff', duration: 0.2 });
+    }
     
     if (featuresArrow5Ref.current) {
       gsap.to(featuresArrow5Ref.current, {
         rotation: 45,
         duration: 0.2,
         ease: "back.inOut(0.6)"
-      });
-      gsap.to('.features-right-arrow-5 svg', {
-        stroke: '#0000ff',
-        duration: 0.2,
-        ease: "power2.out"
       });
     }
     
@@ -974,172 +919,141 @@ export default function HomePage(): React.JSX.Element {
     };
   }, []);
 
-  // Efek scroll untuk FEATURES section - Background putih saat di-scroll
+  // State untuk mengetahui apakah features section sedang dalam mode white bg
+  const [isFeaturesWhiteBg, setIsFeaturesWhiteBg] = useState(false);
+
+  // Efek scroll untuk FEATURES section - Background putih saat discroll melewati features
   useEffect(() => {
     if (isLoading) return;
 
-    const handleScroll = () => {
-      if (!featuresSectionRef.current) return;
-      
-      const scrollPosition = window.scrollY;
-      const windowHeight = window.innerHeight;
-      const sectionTop = featuresSectionRef.current.offsetTop;
-      const sectionBottom = sectionTop + featuresSectionRef.current.offsetHeight;
-      
-      const isInSection = scrollPosition + windowHeight/2 >= sectionTop && scrollPosition + windowHeight/2 <= sectionBottom;
-      
-      if (isInSection) {
-        gsap.to(featuresSectionRef.current, {
-          backgroundColor: '#ffffff',
-          duration: 0.3,
-          ease: "power2.inOut"
-        });
-        gsap.to(featuresTitleRef.current, {
-          color: '#000000',
-          duration: 0.3,
-          ease: "power2.inOut"
-        });
-        // Update warna default untuk elemen features menjadi biru
-        gsap.to(featuresLeftNumberRef.current, {
-          color: '#0000ff',
-          duration: 0.3,
-          ease: "power2.inOut"
-        });
-        gsap.to(featuresRightTextRef.current, {
-          color: '#0000ff',
-          duration: 0.3,
-          ease: "power2.inOut"
-        });
-        gsap.to('.update-number', {
-          color: '#0000ff',
-          duration: 0.3,
-          ease: "power2.inOut"
-        });
-        gsap.to('.features-right-arrow svg', {
-          stroke: '#0000ff',
-          duration: 0.3,
-          ease: "power2.inOut"
-        });
-        // Untuk features lainnya
-        gsap.to(featuresLeftNumber2Ref.current, {
-          color: '#0000ff',
-          duration: 0.3,
-          ease: "power2.inOut"
-        });
-        gsap.to(featuresRightText2Ref.current, {
-          color: '#0000ff',
-          duration: 0.3,
-          ease: "power2.inOut"
-        });
-        gsap.to(featuresLeftNumber3Ref.current, {
-          color: '#0000ff',
-          duration: 0.3,
-          ease: "power2.inOut"
-        });
-        gsap.to(featuresRightText3Ref.current, {
-          color: '#0000ff',
-          duration: 0.3,
-          ease: "power2.inOut"
-        });
-        gsap.to(featuresLeftNumber4Ref.current, {
-          color: '#0000ff',
-          duration: 0.3,
-          ease: "power2.inOut"
-        });
-        gsap.to(featuresRightText4Ref.current, {
-          color: '#0000ff',
-          duration: 0.3,
-          ease: "power2.inOut"
-        });
-        gsap.to(featuresLeftNumber5Ref.current, {
-          color: '#0000ff',
-          duration: 0.3,
-          ease: "power2.inOut"
-        });
-        gsap.to(featuresRightText5Ref.current, {
-          color: '#0000ff',
-          duration: 0.3,
-          ease: "power2.inOut"
-        });
-      } else {
-        gsap.to(featuresSectionRef.current, {
-          backgroundColor: '#0000ff',
-          duration: 0.3,
-          ease: "power2.inOut"
-        });
-        gsap.to(featuresTitleRef.current, {
-          color: '#ffffff',
-          duration: 0.3,
-          ease: "power2.inOut"
-        });
-        // Kembalikan warna default menjadi putih saat tidak di section
-        gsap.to(featuresLeftNumberRef.current, {
-          color: '#ffffff',
-          duration: 0.3,
-          ease: "power2.inOut"
-        });
-        gsap.to(featuresRightTextRef.current, {
-          color: '#ffffff',
-          duration: 0.3,
-          ease: "power2.inOut"
-        });
-        gsap.to('.update-number', {
-          color: '#ffffff',
-          duration: 0.3,
-          ease: "power2.inOut"
-        });
-        gsap.to('.features-right-arrow svg', {
-          stroke: '#ffffff',
-          duration: 0.3,
-          ease: "power2.inOut"
-        });
-        // Untuk features lainnya
-        gsap.to(featuresLeftNumber2Ref.current, {
-          color: '#ffffff',
-          duration: 0.3,
-          ease: "power2.inOut"
-        });
-        gsap.to(featuresRightText2Ref.current, {
-          color: '#ffffff',
-          duration: 0.3,
-          ease: "power2.inOut"
-        });
-        gsap.to(featuresLeftNumber3Ref.current, {
-          color: '#ffffff',
-          duration: 0.3,
-          ease: "power2.inOut"
-        });
-        gsap.to(featuresRightText3Ref.current, {
-          color: '#ffffff',
-          duration: 0.3,
-          ease: "power2.inOut"
-        });
-        gsap.to(featuresLeftNumber4Ref.current, {
-          color: '#ffffff',
-          duration: 0.3,
-          ease: "power2.inOut"
-        });
-        gsap.to(featuresRightText4Ref.current, {
-          color: '#ffffff',
-          duration: 0.3,
-          ease: "power2.inOut"
-        });
-        gsap.to(featuresLeftNumber5Ref.current, {
-          color: '#ffffff',
-          duration: 0.3,
-          ease: "power2.inOut"
-        });
-        gsap.to(featuresRightText5Ref.current, {
-          color: '#ffffff',
-          duration: 0.3,
-          ease: "power2.inOut"
-        });
-      }
-    };
+        const handleScroll = () => {
+          if (!featuresSectionRef.current || !trustedSectionRef.current) return;
+          
+          const scrollPosition = window.scrollY;
+          const trustedSectionTop = trustedSectionRef.current.offsetTop;
+          const trustedSectionHeight = trustedSectionRef.current.offsetHeight;
+          const featuresSectionBottom = featuresSectionRef.current.offsetTop + featuresSectionRef.current.offsetHeight;
+          
+          // Cek apakah sudah melewati features section dan masuk ke trusted section
+          const isPastFeatures = scrollPosition + window.innerHeight/2 > featuresSectionBottom;
+          const isInTrusted = scrollPosition + window.innerHeight/2 >= trustedSectionTop && 
+                               scrollPosition + window.innerHeight/2 <= trustedSectionTop + trustedSectionHeight;
+          
+          // Jika sudah melewati features atau di dalam trusted section
+          if (isPastFeatures || isInTrusted) {
+            if (!isFeaturesWhiteBg) {
+              setIsFeaturesWhiteBg(true);
+              // Ubah semua features section menjadi background putih
+              const allFeatures = [featuresSectionRef, featuresSection2Ref, featuresSection3Ref, featuresSection4Ref, featuresSection5Ref];
+              allFeatures.forEach(sectionRef => {
+                if (sectionRef.current) {
+                  gsap.to(sectionRef.current, {
+                    backgroundColor: '#ffffff',
+                    duration: 0.3,
+                    ease: "power2.inOut"
+                  });
+                }
+              });
+              // Ubah warna title menjadi hitam
+              gsap.to(featuresTitleRef.current, {
+                color: '#000000',
+                duration: 0.3,
+                ease: "power2.inOut"
+              });
+              // Ubah semua teks menjadi hitam
+              const allNumbers = [featuresLeftNumberRef, featuresLeftNumber2Ref, featuresLeftNumber3Ref, featuresLeftNumber4Ref, featuresLeftNumber5Ref];
+              allNumbers.forEach(numRef => {
+                if (numRef.current) {
+                  gsap.to(numRef.current, {
+                    color: '#000000',
+                    duration: 0.3,
+                    ease: "power2.inOut"
+                  });
+                }
+              });
+              const allTexts = [featuresRightTextRef, featuresRightText2Ref, featuresRightText3Ref, featuresRightText4Ref, featuresRightText5Ref];
+              allTexts.forEach(textRef => {
+                if (textRef.current) {
+                  gsap.to(textRef.current, {
+                    color: '#000000',
+                    duration: 0.3,
+                    ease: "power2.inOut"
+                  });
+                }
+              });
+              // Ubah warna arrow
+              gsap.to('.features-right-arrow svg, .features-right-arrow-2 svg, .features-right-arrow-3 svg, .features-right-arrow-4 svg, .features-right-arrow-5 svg', {
+                stroke: '#000000',
+                duration: 0.3,
+                ease: "power2.inOut"
+              });
+              // Ubah warna update-number
+              gsap.to('.update-number', {
+                color: '#000000',
+                duration: 0.3,
+                ease: "power2.inOut"
+              });
+            }
+          } else {
+            if (isFeaturesWhiteBg) {
+              setIsFeaturesWhiteBg(false);
+              // Kembalikan semua features section menjadi background biru
+              const allFeatures = [featuresSectionRef, featuresSection2Ref, featuresSection3Ref, featuresSection4Ref, featuresSection5Ref];
+              allFeatures.forEach(sectionRef => {
+                if (sectionRef.current) {
+                  gsap.to(sectionRef.current, {
+                    backgroundColor: '#0000ff',
+                    duration: 0.3,
+                    ease: "power2.inOut"
+                  });
+                }
+              });
+              // Ubah warna title menjadi putih
+              gsap.to(featuresTitleRef.current, {
+                color: '#ffffff',
+                duration: 0.3,
+                ease: "power2.inOut"
+              });
+              // Ubah semua teks menjadi putih
+              const allNumbers = [featuresLeftNumberRef, featuresLeftNumber2Ref, featuresLeftNumber3Ref, featuresLeftNumber4Ref, featuresLeftNumber5Ref];
+              allNumbers.forEach(numRef => {
+                if (numRef.current) {
+                  gsap.to(numRef.current, {
+                    color: '#ffffff',
+                    duration: 0.3,
+                    ease: "power2.inOut"
+                  });
+                }
+              });
+              const allTexts = [featuresRightTextRef, featuresRightText2Ref, featuresRightText3Ref, featuresRightText4Ref, featuresRightText5Ref];
+              allTexts.forEach(textRef => {
+                if (textRef.current) {
+                  gsap.to(textRef.current, {
+                    color: '#ffffff',
+                    duration: 0.3,
+                    ease: "power2.inOut"
+                  });
+                }
+              });
+              // Ubah warna arrow
+              gsap.to('.features-right-arrow svg, .features-right-arrow-2 svg, .features-right-arrow-3 svg, .features-right-arrow-4 svg, .features-right-arrow-5 svg', {
+                stroke: '#ffffff',
+                duration: 0.3,
+                ease: "power2.inOut"
+              });
+              // Ubah warna update-number
+              gsap.to('.update-number', {
+                color: '#ffffff',
+                duration: 0.3,
+                ease: "power2.inOut"
+              });
+            }
+          }
+        };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [isLoading]);
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+  }, [isLoading, isFeaturesWhiteBg]);
 
   // Efek scroll untuk TRUSTED COLLABS section
   useEffect(() => {
@@ -1953,7 +1867,6 @@ export default function HomePage(): React.JSX.Element {
 
         /* SECTION FEATURES */
         .features-section {
-          min-height: 25vh;
           width: 100%;
           background-color: #0000ff;
           display: flex;
@@ -1965,7 +1878,7 @@ export default function HomePage(): React.JSX.Element {
           padding: 40px 80px 40px 80px;
           box-sizing: border-box;
           overflow: visible;
-          border-bottom: 1px solid rgba(0,0,0,0.1);
+          border-bottom: 1px solid rgba(255,255,255,0.15);
         }
 
         .features-top {
@@ -2097,7 +2010,7 @@ export default function HomePage(): React.JSX.Element {
           box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
 
-        /* Overlay hitam - full width ke kiri mentok */
+        /* Overlay hitam */
         .features-overlay {
           position: absolute;
           top: -20px;
