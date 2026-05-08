@@ -1,4 +1,4 @@
-// app/page.tsx (Halaman Utama) - dengan efek transisi halaman dari bawah ke atas
+// app/page.tsx (Halaman Utama) - dengan efek scroll yang mendorong halaman
 
 'use client';
 
@@ -36,9 +36,6 @@ export default function HomePage(): React.JSX.Element {
   const [featuresBgColor, setFeaturesBgColor] = useState('#0000ff');
   const [featuresTextColor, setFeaturesTextColor] = useState('#ffffff');
   
-  // State untuk transisi halaman overlay
-  const [overlayProgress, setOverlayProgress] = useState(0);
-  
   const acceptBtnRef = useRef<HTMLButtonElement>(null);
   const declineBtnRef = useRef<HTMLButtonElement>(null);
   const contactBtnRef = useRef<HTMLButtonElement>(null);
@@ -69,8 +66,8 @@ export default function HomePage(): React.JSX.Element {
   const bottomLeftTextRef = useRef<HTMLDivElement>(null);
   const studioContainerRef = useRef<HTMLDivElement>(null);
   
-  // Refs untuk overlay halaman baru
-  const pageOverlayRef = useRef<HTMLDivElement>(null);
+  // Refs untuk halaman baru
+  const newPageRef = useRef<HTMLDivElement>(null);
   const newPageContentRef = useRef<HTMLDivElement>(null);
   
   // Section Features Refs
@@ -974,66 +971,70 @@ export default function HomePage(): React.JSX.Element {
     };
   }, []);
 
-  // Efek scroll untuk transisi overlay halaman baru dari bawah ke atas
+  // Efek scroll untuk transisi halaman dengan GSAP
   useEffect(() => {
-    if (isLoading) return;
+    if (isLoading || !newPageRef.current || !mainContentRef.current) return;
 
-    const handleOverlayTransition = () => {
-      if (!trustedSectionRef.current) return;
-      
-      const scrollPosition = window.scrollY;
-      const windowHeight = window.innerHeight;
-      const trustedBottom = trustedSectionRef.current.offsetTop + trustedSectionRef.current.offsetHeight;
-      
-      // Mulai transisi setelah section Trusted Collabs
-      const startTransition = trustedBottom - windowHeight * 0.3;
-      const endTransition = trustedBottom + windowHeight * 0.7;
-      
-      let progress = 0;
-      if (scrollPosition > startTransition) {
-        progress = Math.min(1, (scrollPosition - startTransition) / (endTransition - startTransition));
-      }
-      
-      setOverlayProgress(progress);
-      
-      // Update overlay transform: dari bawah (translateY 100%) ke atas (translateY 0)
-      if (pageOverlayRef.current) {
-        const translateY = (1 - progress) * 100;
-        gsap.to(pageOverlayRef.current, {
-          y: `${translateY}%`,
+    // Setup ScrollTrigger untuk transisi halaman
+    const pageTransition = ScrollTrigger.create({
+      trigger: trustedSectionRef.current,
+      start: "bottom bottom",
+      end: "+=100%",
+      scrub: 1.5,
+      onUpdate: (self) => {
+        const progress = self.progress;
+        
+        // Halaman utama bergerak ke atas (negative translateY)
+        const mainTranslateY = -progress * 100;
+        gsap.to(mainContentRef.current, {
+          y: `${mainTranslateY}%`,
           duration: 0.1,
-          ease: "none"
-        });
-      }
-      
-      // Animasi konten baru saat overlay muncul
-      if (newPageContentRef.current) {
-        const contentOpacity = Math.max(0, (progress - 0.3) / 0.7);
-        gsap.to(newPageContentRef.current, {
-          opacity: contentOpacity,
-          duration: 0.1,
-          ease: "none"
+          ease: "none",
+          overwrite: true
         });
         
-        if (contentOpacity > 0.5) {
+        // Halaman baru muncul dari bawah (translateY 100% ke 0)
+        const newPageTranslateY = (1 - progress) * 100;
+        gsap.to(newPageRef.current, {
+          y: `${newPageTranslateY}%`,
+          duration: 0.1,
+          ease: "none",
+          overwrite: true
+        });
+        
+        // Animasi konten halaman baru saat muncul
+        if (newPageContentRef.current) {
+          const contentProgress = Math.max(0, (progress - 0.3) / 0.7);
           gsap.to(newPageContentRef.current, {
-            y: 0,
+            opacity: contentProgress,
+            y: 50 - (contentProgress * 50),
             duration: 0.1,
-            ease: "none"
-          });
-        } else {
-          gsap.to(newPageContentRef.current, {
-            y: 50,
-            duration: 0.1,
-            ease: "none"
+            ease: "none",
+            overwrite: true
           });
         }
+        
+        // Update warna Features berdasarkan progress (opsional)
+        if (progress < 0.3) {
+          // Masih di halaman utama
+          if (featuresBgColor !== '#0000ff') {
+            setFeaturesBgColor('#0000ff');
+            setFeaturesTextColor('#ffffff');
+          }
+        } else if (progress > 0.7) {
+          // Sudah di halaman baru
+          if (featuresBgColor !== '#ffffff') {
+            setFeaturesBgColor('#ffffff');
+            setFeaturesTextColor('#000000');
+          }
+        }
       }
-    };
+    });
 
-    window.addEventListener('scroll', handleOverlayTransition);
-    return () => window.removeEventListener('scroll', handleOverlayTransition);
-  }, [isLoading]);
+    return () => {
+      pageTransition.kill();
+    };
+  }, [isLoading, featuresBgColor]);
 
   // Efek scroll untuk FEATURES section
   useEffect(() => {
@@ -1071,19 +1072,17 @@ export default function HomePage(): React.JSX.Element {
         }
       });
       
-      if (overlayProgress < 0.3) {
-        if (isInFeatures && isAboveTrusted) {
-          if (featuresBgColor !== '#0000ff') {
-            setFeaturesBgColor('#0000ff');
-            setFeaturesTextColor('#ffffff');
-            updateFeaturesColors('#0000ff', '#ffffff');
-          }
-        } else if (!isAboveTrusted || !isInFeatures) {
-          if (featuresBgColor !== '#ffffff') {
-            setFeaturesBgColor('#ffffff');
-            setFeaturesTextColor('#000000');
-            updateFeaturesColors('#ffffff', '#000000');
-          }
+      if (isInFeatures && isAboveTrusted) {
+        if (featuresBgColor !== '#0000ff') {
+          setFeaturesBgColor('#0000ff');
+          setFeaturesTextColor('#ffffff');
+          updateFeaturesColors('#0000ff', '#ffffff');
+        }
+      } else if (!isAboveTrusted || !isInFeatures) {
+        if (featuresBgColor !== '#ffffff') {
+          setFeaturesBgColor('#ffffff');
+          setFeaturesTextColor('#000000');
+          updateFeaturesColors('#ffffff', '#000000');
         }
       }
     };
@@ -1174,7 +1173,7 @@ export default function HomePage(): React.JSX.Element {
     handleScroll();
     
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [isLoading, featuresBgColor, noteHover, communityHover, calendarHover, blogHover, donationHover, overlayProgress]);
+  }, [isLoading, featuresBgColor, noteHover, communityHover, calendarHover, blogHover, donationHover]);
 
   // Efek scroll untuk TRUSTED COLLABS section
   useEffect(() => {
@@ -1190,7 +1189,7 @@ export default function HomePage(): React.JSX.Element {
       
       const isInSection = scrollPosition + windowHeight/2 >= sectionTop && scrollPosition + windowHeight/2 <= sectionBottom;
       
-      if (isInSection && overlayProgress < 0.3) {
+      if (isInSection) {
         gsap.to(trustedSectionRef.current, {
           backgroundColor: '#000000',
           duration: 0.3,
@@ -1208,7 +1207,7 @@ export default function HomePage(): React.JSX.Element {
           duration: 0.3,
           ease: "power2.inOut"
         });
-      } else if (overlayProgress < 0.3) {
+      } else {
         gsap.to(trustedSectionRef.current, {
           backgroundColor: '#ffffff',
           duration: 0.3,
@@ -1231,7 +1230,7 @@ export default function HomePage(): React.JSX.Element {
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [isLoading, overlayProgress]);
+  }, [isLoading]);
 
   // Animasi SplitText untuk FEATURES title
   useEffect(() => {
@@ -2272,23 +2271,17 @@ export default function HomePage(): React.JSX.Element {
           background: rgba(255, 255, 255, 0.5);
         }
 
-        /* PAGE OVERLAY TRANSITION - dari bawah ke atas */
-        .page-overlay {
+        /* NEW PAGE STYLES */
+        .new-page {
           position: fixed;
-          bottom: 0;
+          top: 0;
           left: 0;
           width: 100%;
           background-color: #000000;
-          z-index: 200;
+          z-index: 50;
+          min-height: 100vh;
           transform: translateY(100%);
-          transition: transform 0.3s ease-out;
-          overflow: hidden;
-        }
-
-        .new-page-content {
-          opacity: 0;
-          transform: translateY(50px);
-          transition: all 0.5s ease;
+          overflow-y: auto;
         }
       `}</style>
       
@@ -2363,6 +2356,7 @@ export default function HomePage(): React.JSX.Element {
 
       <div id="smooth-wrapper">
         <div id="smooth-content">
+          {/* Halaman Utama */}
           <div 
             ref={mainContentRef}
             style={{
@@ -2379,7 +2373,8 @@ export default function HomePage(): React.JSX.Element {
               position: 'relative',
               opacity: isLoading ? 0 : 1,
               transform: isLoading ? 'translateX(100%)' : 'translateX(0)',
-              transition: 'all 0.01s ease'
+              transition: 'all 0.01s ease',
+              willChange: 'transform'
             }}
           >
             {/* HEADER SECTION - MENURU */}
@@ -2929,7 +2924,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* CONTENT SETELAH TRUSTED COLLABS - Footer lama dipertahankan */}
+            {/* Bagian footer - hanya berisi teks MENURU besar tanpa background hitam */}
             <div style={{
               width: '100%',
               position: 'relative',
@@ -3249,122 +3244,124 @@ export default function HomePage(): React.JSX.Element {
               </footer>
             </div>
           </div>
-        </div>
-      </div>
 
-      {/* PAGE OVERLAY - Halaman baru yang muncul dari bawah */}
-      <div 
-        ref={pageOverlayRef}
-        className="page-overlay"
-        style={{
-          transform: `translateY(${(1 - overlayProgress) * 100}%)`,
-          minHeight: '100vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}
-      >
-        <div 
-          ref={newPageContentRef}
-          className="new-page-content"
-          style={{
-            opacity: Math.max(0, (overlayProgress - 0.3) / 0.7),
-            transform: `translateY(${overlayProgress > 0.5 ? 0 : 50}px)`,
-            width: '100%',
-            padding: '80px',
-            textAlign: 'center',
-            color: '#ffffff'
-          }}
-        >
-          <h2 style={{
-            fontFamily: 'Aeonik-Regular, Helvetica, Arial, sans-serif',
-            fontSize: '120px',
-            fontWeight: '400',
-            letterSpacing: '-0.02em',
-            marginBottom: '40px',
-            color: '#ffffff'
-          }}>
-            New Chapter
-          </h2>
-          
-          <p style={{
-            fontFamily: 'Questrial, sans-serif',
-            fontSize: '32px',
-            lineHeight: '1.4',
-            marginBottom: '60px',
-            color: '#cccccc',
-            maxWidth: '800px',
-            marginLeft: 'auto',
-            marginRight: 'auto'
-          }}>
-            Explore more possibilities<br />
-            with MENURU.STUDIO
-          </p>
-          
-          <div style={{
-            display: 'flex',
-            gap: '30px',
-            justifyContent: 'center',
-            flexWrap: 'wrap'
-          }}>
-            <button
-              onClick={handleCalendarCall}
+          {/* Halaman Baru - Muncul dari bawah dan mendorong halaman utama */}
+          <div 
+            ref={newPageRef}
+            className="new-page"
+            style={{
+              transform: 'translateY(100%)',
+              willChange: 'transform'
+            }}
+          >
+            <div 
+              ref={newPageContentRef}
               style={{
-                padding: '18px 48px',
-                backgroundColor: '#c5e800',
-                color: '#000000',
-                border: 'none',
-                borderRadius: '60px',
-                cursor: 'pointer',
-                fontFamily: 'Questrial, sans-serif',
-                fontSize: '20px',
-                fontWeight: '600',
-                transition: 'all 0.3s ease'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
-              onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-            >
-              Get Started
-            </button>
-            
-            <button
-              onClick={handleEmailClick}
-              style={{
-                padding: '18px 48px',
-                backgroundColor: 'transparent',
+                opacity: 0,
+                transform: 'translateY(50px)',
+                width: '100%',
+                minHeight: '100vh',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '80px',
+                textAlign: 'center',
                 color: '#ffffff',
-                border: '2px solid #ffffff',
-                borderRadius: '60px',
-                cursor: 'pointer',
-                fontFamily: 'Questrial, sans-serif',
-                fontSize: '20px',
-                fontWeight: '600',
-                transition: 'all 0.3s ease'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#ffffff';
-                e.currentTarget.style.color = '#000000';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'transparent';
-                e.currentTarget.style.color = '#ffffff';
+                boxSizing: 'border-box'
               }}
             >
-              Learn More
-            </button>
-          </div>
-          
-          <div style={{
-            position: 'absolute',
-            bottom: '40px',
-            left: 0,
-            right: 0,
-            textAlign: 'center',
-            fontFamily: 'Questrial, sans-serif',
-            fontSize: '14px',
-            color: '#666666'
-          }}>
-            © 2026 MENURU.STUDIO. All rights reserved.
+              <h2 style={{
+                fontFamily: 'Aeonik-Regular, Helvetica, Arial, sans-serif',
+                fontSize: '120px',
+                fontWeight: '400',
+                letterSpacing: '-0.02em',
+                marginBottom: '40px',
+                color: '#ffffff'
+              }}>
+                New Horizon
+              </h2>
+              
+              <p style={{
+                fontFamily: 'Questrial, sans-serif',
+                fontSize: '32px',
+                lineHeight: '1.4',
+                marginBottom: '60px',
+                color: '#cccccc',
+                maxWidth: '800px',
+                marginLeft: 'auto',
+                marginRight: 'auto'
+              }}>
+                Discover what's next<br />
+                with MENURU.STUDIO
+              </p>
+              
+              <div style={{
+                display: 'flex',
+                gap: '30px',
+                justifyContent: 'center',
+                flexWrap: 'wrap'
+              }}>
+                <button
+                  onClick={handleCalendarCall}
+                  style={{
+                    padding: '18px 48px',
+                    backgroundColor: '#c5e800',
+                    color: '#000000',
+                    border: 'none',
+                    borderRadius: '60px',
+                    cursor: 'pointer',
+                    fontFamily: 'Questrial, sans-serif',
+                    fontSize: '20px',
+                    fontWeight: '600',
+                    transition: 'all 0.3s ease'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+                  onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                >
+                  Start Journey
+                </button>
+                
+                <button
+                  onClick={handleEmailClick}
+                  style={{
+                    padding: '18px 48px',
+                    backgroundColor: 'transparent',
+                    color: '#ffffff',
+                    border: '2px solid #ffffff',
+                    borderRadius: '60px',
+                    cursor: 'pointer',
+                    fontFamily: 'Questrial, sans-serif',
+                    fontSize: '20px',
+                    fontWeight: '600',
+                    transition: 'all 0.3s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#ffffff';
+                    e.currentTarget.style.color = '#000000';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                    e.currentTarget.style.color = '#ffffff';
+                  }}
+                >
+                  Explore More
+                </button>
+              </div>
+              
+              <div style={{
+                position: 'absolute',
+                bottom: '40px',
+                left: 0,
+                right: 0,
+                textAlign: 'center',
+                fontFamily: 'Questrial, sans-serif',
+                fontSize: '14px',
+                color: '#666666'
+              }}>
+                © 2026 MENURU.STUDIO. All rights reserved.
+              </div>
+            </div>
           </div>
         </div>
       </div>
