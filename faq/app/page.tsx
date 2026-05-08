@@ -1,4 +1,4 @@
-// app/page.tsx (Halaman Utama) - Features section lengkap dengan 5 item
+// app/page.tsx (Halaman Utama) - Features section dengan perbaikan scroll behavior
 
 'use client';
 
@@ -42,7 +42,7 @@ export default function HomePage(): React.JSX.Element {
   
   // Refs untuk teks yang akan di-split
   const mencatatTextRef = useRef<HTMLDivElement>(null);
-  const menuruTextRef = useRef<HTMLSpanElement>(null);
+  const menuruTextRef = useRef<HTMLDivElement>(null);
   const menuruTopTextRef = useRef<HTMLDivElement>(null);
   const menuruTopMainRef = useRef<HTMLDivElement>(null);
   const brandTextRef = useRef<HTMLDivElement>(null);
@@ -332,6 +332,7 @@ export default function HomePage(): React.JSX.Element {
   };
 
   // Animasi hover untuk Note (01)
+  // UPDATE: Saat hover, overlay hitam muncul dan teks menjadi putih
   const handleNoteHoverEnter = () => {
     setNoteHover(true);
     
@@ -362,7 +363,7 @@ export default function HomePage(): React.JSX.Element {
     gsap.to(updateContainerRef.current, { opacity: 0, x: 50, duration: 0.2 });
     gsap.to(circleImagesRef.current, { opacity: 0, x: 20, duration: 0.2 });
     
-    // Kembalikan warna ke default sesuai background
+    // Kembalikan warna ke default sesuai background (biru atau putih tergantung scroll)
     const defaultColor = isFeaturesWhiteBg ? '#000000' : '#ffffff';
     
     gsap.to(featuresLeftNumberRef.current, { color: defaultColor, duration: 0.2 });
@@ -565,7 +566,9 @@ export default function HomePage(): React.JSX.Element {
     };
   }, []);
 
-  // Efek scroll untuk FEATURES section - Background berubah PUTIH saat discroll melewati section features
+  // UPDATE: Efek scroll untuk FEATURES section - Background berubah saat discroll melewati section features
+  // Saat di area features = biru (#0000ff), setelah melewati features = putih (#ffffff)
+  // Saat scroll ke atas dan masuk area features = kembali biru
   useEffect(() => {
     if (isLoading) return;
 
@@ -574,13 +577,18 @@ export default function HomePage(): React.JSX.Element {
       
       const scrollPosition = window.scrollY;
       const windowHeight = window.innerHeight;
+      const featuresSectionTop = featuresSectionRef.current.offsetTop;
       const featuresSectionBottom = featuresSectionRef.current.offsetTop + featuresSectionRef.current.offsetHeight;
       
-      // Jika sudah melewati features section (scroll ke bawah)
-      const isPastFeatures = scrollPosition + windowHeight/2 > featuresSectionBottom;
+      // Cek apakah user sedang berada di dalam area features section (dari awal features sampai awal trusted collabs)
+      // atau apakah sudah melewati features section
+      const isInFeaturesArea = scrollPosition + windowHeight/2 >= featuresSectionTop && scrollPosition + windowHeight/2 < featuresSectionBottom;
+      const isPastFeatures = scrollPosition + windowHeight/2 >= featuresSectionBottom;
       
       if (isPastFeatures && !isFeaturesWhiteBg) {
+        // Scroll ke bawah MELEWATI features section -> ubah background menjadi PUTIH
         setIsFeaturesWhiteBg(true);
+        
         // Ubah semua features section menjadi background putih
         const allFeatures = [featuresSectionRef, featuresSection2Ref, featuresSection3Ref, featuresSection4Ref, featuresSection5Ref];
         allFeatures.forEach(sectionRef => {
@@ -592,25 +600,32 @@ export default function HomePage(): React.JSX.Element {
             });
           }
         });
+        
         // Ubah warna title menjadi hitam
         gsap.to(featuresTitleRef.current, { color: '#000000', duration: 0.3 });
-        // Ubah semua teks menjadi hitam
+        
+        // Ubah semua teks menjadi hitam (angka, text, arrow, update-number)
         const allNumbers = [featuresLeftNumberRef, featuresLeftNumber2Ref, featuresLeftNumber3Ref, featuresLeftNumber4Ref, featuresLeftNumber5Ref];
         allNumbers.forEach(numRef => {
           if (numRef.current) gsap.to(numRef.current, { color: '#000000', duration: 0.3 });
         });
+        
         const allTexts = [featuresRightTextRef, featuresRightText2Ref, featuresRightText3Ref, featuresRightText4Ref, featuresRightText5Ref];
         allTexts.forEach(textRef => {
           if (textRef.current) gsap.to(textRef.current, { color: '#000000', duration: 0.3 });
         });
+        
         // Ubah warna arrow menjadi hitam
         gsap.to('.features-right-arrow svg, .features-right-arrow-2 svg, .features-right-arrow-3 svg, .features-right-arrow-4 svg, .features-right-arrow-5 svg', {
           stroke: '#000000', duration: 0.3
         });
+        
         gsap.to('.update-number', { color: '#000000', duration: 0.3 });
         
-      } else if (!isPastFeatures && isFeaturesWhiteBg) {
+      } else if (isInFeaturesArea && isFeaturesWhiteBg) {
+        // Scroll ke ATAS dan MASUK kembali ke area features section -> ubah background menjadi BIRU
         setIsFeaturesWhiteBg(false);
+        
         // Kembalikan semua features section menjadi background biru
         const allFeatures = [featuresSectionRef, featuresSection2Ref, featuresSection3Ref, featuresSection4Ref, featuresSection5Ref];
         allFeatures.forEach(sectionRef => {
@@ -622,21 +637,26 @@ export default function HomePage(): React.JSX.Element {
             });
           }
         });
+        
         // Ubah warna title menjadi putih
         gsap.to(featuresTitleRef.current, { color: '#ffffff', duration: 0.3 });
+        
         // Ubah semua teks menjadi putih
         const allNumbers = [featuresLeftNumberRef, featuresLeftNumber2Ref, featuresLeftNumber3Ref, featuresLeftNumber4Ref, featuresLeftNumber5Ref];
         allNumbers.forEach(numRef => {
           if (numRef.current) gsap.to(numRef.current, { color: '#ffffff', duration: 0.3 });
         });
+        
         const allTexts = [featuresRightTextRef, featuresRightText2Ref, featuresRightText3Ref, featuresRightText4Ref, featuresRightText5Ref];
         allTexts.forEach(textRef => {
           if (textRef.current) gsap.to(textRef.current, { color: '#ffffff', duration: 0.3 });
         });
+        
         // Ubah warna arrow menjadi putih
         gsap.to('.features-right-arrow svg, .features-right-arrow-2 svg, .features-right-arrow-3 svg, .features-right-arrow-4 svg, .features-right-arrow-5 svg', {
           stroke: '#ffffff', duration: 0.3
         });
+        
         gsap.to('.update-number', { color: '#ffffff', duration: 0.3 });
       }
     };
@@ -1602,20 +1622,6 @@ export default function HomePage(): React.JSX.Element {
           border-radius: 0px;
           transition: opacity 0.2s ease;
           width: calc(100% + 100vw + 200px);
-        }
-
-        .hover-container:hover .features-overlay {
-          opacity: 1;
-        }
-
-        .hover-container:hover .update-container {
-          opacity: 1;
-          transform: translateX(0);
-        }
-
-        .hover-container:hover .circle-images-container {
-          opacity: 1;
-          transform: translateX(0);
         }
 
         /* SECTION TRUSTED COLLABS */
