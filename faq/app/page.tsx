@@ -1,4 +1,4 @@
-// app/page.tsx (Halaman Utama) - Features section lengkap dengan 5 item (design sama persis)
+// app/page.tsx (Halaman Utama) - Dengan efek pergantian halaman saat scroll
 
 'use client';
 
@@ -32,6 +32,10 @@ export default function HomePage(): React.JSX.Element {
   const [blogHover, setBlogHover] = useState(false);
   const [donationHover, setDonationHover] = useState(false);
   
+  // State NEW untuk efek pergantian halaman
+  const [pageTransition, setPageTransition] = useState<'idle' | 'page2-sliding-up' | 'page2-active' | 'page1-sliding-down'>('idle');
+  const [showPage2, setShowPage2] = useState(false);
+  
   // State untuk warna background section Features
   const [featuresBgColor, setFeaturesBgColor] = useState('#0000ff');
   const [featuresTextColor, setFeaturesTextColor] = useState('#ffffff');
@@ -43,6 +47,12 @@ export default function HomePage(): React.JSX.Element {
   const mainContentRef = useRef<HTMLDivElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  
+  // NEW REFS untuk halaman baru
+  const page1Ref = useRef<HTMLDivElement>(null);
+  const page2Ref = useRef<HTMLDivElement>(null);
+  const newPageContentRef = useRef<HTMLDivElement>(null);
   
   // Refs untuk teks yang akan di-split
   const mencatatTextRef = useRef<HTMLDivElement>(null);
@@ -968,6 +978,113 @@ export default function HomePage(): React.JSX.Element {
       ease: "power2.in"
     });
   };
+
+  // ========== NEW EFFECT: PAGE TRANSITION ON SCROLL ==========
+  useEffect(() => {
+    if (isLoading) return;
+
+    const handleWheelTransition = (e: WheelEvent) => {
+      // Cek apakah sedang dalam transisi
+      if (pageTransition !== 'idle') return;
+
+      const delta = e.deltaY;
+      const scrollY = window.scrollY;
+      const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+      const isAtBottom = scrollY + window.innerHeight >= document.documentElement.scrollHeight - 50;
+      const isAtTop = scrollY <= 50;
+
+      // Scroll ke bawah di bagian bawah halaman utama -> tampilkan halaman baru dari bawah ke atas
+      if (delta > 0 && isAtBottom && !showPage2) {
+        e.preventDefault();
+        setPageTransition('page2-sliding-up');
+        setShowPage2(true);
+        
+        // Set initial state halaman baru di bawah
+        gsap.set(page2Ref.current, { y: '100%', visibility: 'visible' });
+        
+        // Animasi halaman baru sliding up dari bawah ke atas
+        gsap.to(page2Ref.current, {
+          y: '0%',
+          duration: 0.8,
+          ease: "power3.inOut",
+          onComplete: () => {
+            setPageTransition('page2-active');
+            // Animate content masuk
+            animateNewPageContent();
+          }
+        });
+        
+        // Animasi halaman utama sliding up keluar
+        gsap.to(page1Ref.current, {
+          y: '-100%',
+          duration: 0.8,
+          ease: "power3.inOut"
+        });
+      }
+      
+      // Scroll ke atas di bagian atas halaman baru -> kembali ke halaman utama
+      else if (delta < 0 && isAtTop && showPage2 && pageTransition === 'page2-active') {
+        e.preventDefault();
+        setPageTransition('page1-sliding-down');
+        
+        // Animasi halaman baru sliding down ke bawah
+        gsap.to(page2Ref.current, {
+          y: '100%',
+          duration: 0.8,
+          ease: "power3.inOut",
+          onComplete: () => {
+            setShowPage2(false);
+            setPageTransition('idle');
+            gsap.set(page2Ref.current, { visibility: 'hidden' });
+          }
+        });
+        
+        // Animasi halaman utama sliding down dari atas
+        gsap.to(page1Ref.current, {
+          y: '0%',
+          duration: 0.8,
+          ease: "power3.inOut"
+        });
+      }
+    };
+
+    // Animasi awal untuk halaman baru
+    const animateNewPageContent = () => {
+      if (!newPageContentRef.current) return;
+      
+      // Split text untuk judul halaman baru
+      const newPageTitle = newPageContentRef.current.querySelector('.new-page-title');
+      const newPageDesc = newPageContentRef.current.querySelector('.new-page-desc');
+      const newPageItems = newPageContentRef.current.querySelectorAll('.new-page-item');
+      
+      if (newPageTitle) {
+        gsap.fromTo(newPageTitle,
+          { opacity: 0, y: 50, filter: 'blur(10px)' },
+          { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.6, ease: "power2.out", delay: 0.2 }
+        );
+      }
+      
+      if (newPageDesc) {
+        gsap.fromTo(newPageDesc,
+          { opacity: 0, y: 30, filter: 'blur(5px)' },
+          { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.6, ease: "power2.out", delay: 0.4 }
+        );
+      }
+      
+      if (newPageItems.length) {
+        gsap.fromTo(newPageItems,
+          { opacity: 0, x: -30, filter: 'blur(5px)' },
+          { opacity: 1, x: 0, filter: 'blur(0px)', duration: 0.5, stagger: 0.1, ease: "back.out(0.6)", delay: 0.6 }
+        );
+      }
+    };
+
+    window.addEventListener('wheel', handleWheelTransition, { passive: false });
+    
+    return () => {
+      window.removeEventListener('wheel', handleWheelTransition);
+    };
+  }, [isLoading, pageTransition, showPage2]);
 
   useEffect(() => {
     if (isLoading) return;
@@ -2272,6 +2389,109 @@ export default function HomePage(): React.JSX.Element {
         .trusted-section .carousel-container::-webkit-scrollbar-thumb {
           background: rgba(255, 255, 255, 0.5);
         }
+
+        /* NEW PAGE STYLES */
+        .new-page-container {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+          z-index: 2000;
+          visibility: hidden;
+          overflow-y: auto;
+          overflow-x: hidden;
+        }
+
+        .new-page-content {
+          min-height: 100vh;
+          width: 100%;
+          padding: 120px 80px 80px 80px;
+          box-sizing: border-box;
+          position: relative;
+        }
+
+        .new-page-title {
+          font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
+          font-weight: 400;
+          font-size: 180px;
+          color: #ffffff;
+          letter-spacing: -0.02em;
+          line-height: 1;
+          margin: 0 0 40px 0;
+          text-align: center;
+        }
+
+        .new-page-desc {
+          font-family: 'Questrial', sans-serif;
+          font-size: 24px;
+          color: rgba(255,255,255,0.7);
+          text-align: center;
+          max-width: 800px;
+          margin: 0 auto 80px auto;
+          line-height: 1.6;
+        }
+
+        .new-page-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+          gap: 30px;
+          max-width: 1400px;
+          margin: 0 auto;
+        }
+
+        .new-page-item {
+          background: rgba(255,255,255,0.05);
+          backdrop-filter: blur(10px);
+          border-radius: 32px;
+          padding: 40px 30px;
+          transition: all 0.3s ease;
+          border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .new-page-item:hover {
+          transform: translateY(-10px);
+          background: rgba(255,255,255,0.1);
+          border-color: rgba(255,255,255,0.3);
+        }
+
+        .new-page-item-icon {
+          font-size: 48px;
+          margin-bottom: 20px;
+          display: inline-block;
+        }
+
+        .new-page-item-title {
+          font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
+          font-size: 32px;
+          font-weight: 500;
+          color: #ffffff;
+          margin: 0 0 16px 0;
+        }
+
+        .new-page-item-desc {
+          font-family: 'Questrial', sans-serif;
+          font-size: 16px;
+          color: rgba(255,255,255,0.6);
+          line-height: 1.6;
+        }
+
+        .scroll-indicator {
+          position: fixed;
+          bottom: 30px;
+          right: 30px;
+          z-index: 2100;
+          background: rgba(255,255,255,0.2);
+          backdrop-filter: blur(10px);
+          padding: 12px 20px;
+          border-radius: 40px;
+          font-family: 'Questrial', sans-serif;
+          font-size: 14px;
+          color: #ffffff;
+          pointer-events: none;
+          transition: opacity 0.3s ease;
+        }
       `}</style>
       
       {/* LOADING OVERLAY */}
@@ -2345,892 +2565,1017 @@ export default function HomePage(): React.JSX.Element {
 
       <div id="smooth-wrapper">
         <div id="smooth-content">
+          {/* PAGE 1 - Halaman Utama */}
           <div 
-            ref={mainContentRef}
+            ref={page1Ref}
             style={{
               minHeight: '100vh',
-              backgroundColor: 'white',
-              margin: 0,
-              padding: 0,
               width: '100%',
-              display: 'flex',
-              flexDirection: 'column',
-              fontFamily: 'Questrial, sans-serif',
-              WebkitFontSmoothing: 'antialiased',
-              MozOsxFontSmoothing: 'grayscale',
               position: 'relative',
-              opacity: isLoading ? 0 : 1,
-              transform: isLoading ? 'translateX(100%)' : 'translateX(0)',
-              transition: 'all 0.01s ease'
+              zIndex: 10,
+              backgroundColor: 'white',
             }}
           >
-            {/* HEADER SECTION - MENURU */}
-            <div style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              right: 0,
-              zIndex: 100,
-              pointerEvents: 'none',
-              padding: '20px 0 0 40px'
-            }}>
-              <div
-                ref={menuruTopMainRef}
-                style={{
-                  fontFamily: 'Inter, "Helvetica Neue", sans-serif',
-                  fontWeight: '400',
-                  fontSize: '213px',
-                  lineHeight: '213px',
-                  color: '#000000',
-                  letterSpacing: '-0.02em',
-                  textTransform: 'uppercase',
-                  whiteSpace: 'nowrap',
-                  opacity: 0,
-                  transform: 'translateX(-500px)'
-                }}
-              >
-                MENURU
-              </div>
-            </div>
-
-            {/* SECTION 1 - MENURU.STUDIO */}
-            <div
-              ref={studioContainerRef}
+            <div 
+              ref={mainContentRef}
               style={{
+                minHeight: '100vh',
+                backgroundColor: 'white',
+                margin: 0,
+                padding: 0,
+                width: '100%',
                 display: 'flex',
                 flexDirection: 'column',
-                alignItems: 'flex-end',
-                justifyContent: 'center',
-                minHeight: '100vh',
-                paddingRight: '80px',
+                fontFamily: 'Questrial, sans-serif',
+                WebkitFontSmoothing: 'antialiased',
+                MozOsxFontSmoothing: 'grayscale',
                 position: 'relative',
+                opacity: isLoading ? 0 : 1,
+                transform: isLoading ? 'translateX(100%)' : 'translateX(0)',
+                transition: 'all 0.01s ease'
               }}
             >
-              <div
-                ref={studioTextRef}
-                className="studio-text"
-                style={{
-                  textAlign: 'right',
-                  opacity: 0
-                }}
-                onMouseEnter={handleStudioHoverEnter}
-                onMouseLeave={handleStudioHoverLeave}
-              >
-                <div>MENURU.STUDIO – Jakarta UX/UI Design</div>
-                <div>Personal for Note, Donation & Calendar</div>
-              </div>
-
-              <div
-                ref={bottomLeftTextRef}
-                className="bottom-left-text"
-                style={{
-                  position: 'absolute',
-                  bottom: '5%',
-                  left: '80px',
-                  textAlign: 'left',
-                  opacity: 0,
-                }}
-              >
-                IDN
-                <br />
-                MN'RU© - 26'
-              </div>
-
-              {/* Floating Images */}
-              <div className="studio-hover-images">
+              {/* HEADER SECTION - MENURU */}
+              <div style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                zIndex: 100,
+                pointerEvents: 'none',
+                padding: '20px 0 0 40px'
+              }}>
                 <div
-                  ref={img1Ref}
-                  className="floating-img-studio"
+                  ref={menuruTopMainRef}
                   style={{
-                    left: '0%',
-                    top: '50%',
-                    transform: 'translateY(-50%)'
+                    fontFamily: 'Inter, "Helvetica Neue", sans-serif',
+                    fontWeight: '400',
+                    fontSize: '213px',
+                    lineHeight: '213px',
+                    color: '#000000',
+                    letterSpacing: '-0.02em',
+                    textTransform: 'uppercase',
+                    whiteSpace: 'nowrap',
+                    opacity: 0,
+                    transform: 'translateX(-500px)'
                   }}
                 >
-                  <Image
-                    src="/images/lkhh.jpg"
-                    alt="Gallery 1"
-                    fill
-                    style={{ objectFit: 'cover' }}
-                  />
+                  MENURU
+                </div>
+              </div>
+
+              {/* SECTION 1 - MENURU.STUDIO */}
+              <div
+                ref={studioContainerRef}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'flex-end',
+                  justifyContent: 'center',
+                  minHeight: '100vh',
+                  paddingRight: '80px',
+                  position: 'relative',
+                }}
+              >
+                <div
+                  ref={studioTextRef}
+                  className="studio-text"
+                  style={{
+                    textAlign: 'right',
+                    opacity: 0
+                  }}
+                  onMouseEnter={handleStudioHoverEnter}
+                  onMouseLeave={handleStudioHoverLeave}
+                >
+                  <div>MENURU.STUDIO – Jakarta UX/UI Design</div>
+                  <div>Personal for Note, Donation & Calendar</div>
                 </div>
 
                 <div
-                  ref={img2Ref}
-                  className="floating-img-studio"
+                  ref={bottomLeftTextRef}
+                  className="bottom-left-text"
                   style={{
-                    right: '0%',
-                    top: '50%',
-                    transform: 'translateY(-50%)'
+                    position: 'absolute',
+                    bottom: '5%',
+                    left: '80px',
+                    textAlign: 'left',
+                    opacity: 0,
                   }}
                 >
-                  <Image
-                    src="/images/ai.jpg"
-                    alt="Gallery 2"
-                    fill
-                    style={{ objectFit: 'cover' }}
-                  />
+                  IDN
+                  <br />
+                  MN'RU© - 26'
                 </div>
-              </div>
-            </div>
 
-            {/* SECTION FEATURES - 01 NOTE */}
-            <div
-              ref={featuresSectionRef}
-              className="features-section"
-              style={{
-                backgroundColor: featuresBgColor,
-              }}
-            >
-              <div className="features-top">
-                <div
-                  ref={featuresTitleRef}
-                  className="features-title"
-                  style={{ color: featuresTextColor }}
-                >
-                  Features
-                </div>
-              </div>
-              <div className="features-bottom">
-                <div
-                  ref={featuresLeftNumberRef}
-                  className="features-left-number"
-                  style={{ color: featuresTextColor }}
-                >
-                  01
-                </div>
-                
-                <div 
-                  ref={hoverContainerRef}
-                  className="hover-container"
-                  onMouseEnter={handleNoteHoverEnter}
-                  onMouseLeave={handleNoteHoverLeave}
-                >
+                {/* Floating Images */}
+                <div className="studio-hover-images">
                   <div
-                    ref={featuresRightTextRef}
-                    className="features-right-text"
-                    style={{ color: featuresTextColor }}
+                    ref={img1Ref}
+                    className="floating-img-studio"
+                    style={{
+                      left: '0%',
+                      top: '50%',
+                      transform: 'translateY(-50%)'
+                    }}
                   >
-                    Note
+                    <Image
+                      src="/images/lkhh.jpg"
+                      alt="Gallery 1"
+                      fill
+                      style={{ objectFit: 'cover' }}
+                    />
                   </div>
-                  
-                  <div ref={updateContainerRef} className="update-container">
-                    <div className="update-number" style={{ color: featuresTextColor }}>
-                      Update<sup>¹</sup>
-                    </div>
-                  </div>
-                  
-                  <div 
-                    ref={featuresArrowRef}
-                    className="features-right-arrow"
-                  >
-                    {noteHover ? (
-                      <StraightLine size={50} />
-                    ) : (
-                      <NorthEastArrow size={50} />
-                    )}
-                  </div>
-                  
-                  <div ref={circleImagesRef} className="circle-images-container">
-                    <div
-                      ref={circleImg1Ref}
-                      className="circle-img"
-                    >
-                      <Image
-                        src="/images/lkhh.jpg"
-                        alt="circle 1"
-                        fill
-                        style={{ objectFit: 'cover' }}
-                      />
-                    </div>
-                    <div
-                      ref={circleImg2Ref}
-                      className="circle-img"
-                    >
-                      <Image
-                        src="/images/ai.jpg"
-                        alt="circle 2"
-                        fill
-                        style={{ objectFit: 'cover' }}
-                      />
-                    </div>
-                  </div>
-                  
-                  <div ref={featuresOverlayRef} className="features-overlay" />
-                </div>
-              </div>
-            </div>
 
-            {/* SECTION FEATURES - 02 COMMUNITY */}
-            <div
-              ref={featuresSection2Ref}
-              className="features-section"
-              style={{
-                backgroundColor: featuresBgColor,
-              }}
-            >
-              <div className="features-bottom">
-                <div
-                  ref={featuresLeftNumber2Ref}
-                  className="features-left-number"
-                  style={{ color: featuresTextColor }}
-                >
-                  02
-                </div>
-                
-                <div 
-                  ref={hoverContainer2Ref}
-                  className="hover-container"
-                  onMouseEnter={handleCommunityHoverEnter}
-                  onMouseLeave={handleCommunityHoverLeave}
-                >
                   <div
-                    ref={featuresRightText2Ref}
-                    className="features-right-text"
-                    style={{ color: featuresTextColor }}
+                    ref={img2Ref}
+                    className="floating-img-studio"
+                    style={{
+                      right: '0%',
+                      top: '50%',
+                      transform: 'translateY(-50%)'
+                    }}
                   >
-                    Community
+                    <Image
+                      src="/images/ai.jpg"
+                      alt="Gallery 2"
+                      fill
+                      style={{ objectFit: 'cover' }}
+                    />
                   </div>
-                  
-                  <div ref={updateContainer2Ref} className="update-container">
-                    <div className="update-number" style={{ color: featuresTextColor }}>
-                      Join<sup>²</sup>
-                    </div>
-                  </div>
-                  
-                  <div 
-                    ref={featuresArrow2Ref}
-                    className="features-right-arrow"
-                  >
-                    {communityHover ? (
-                      <StraightLine size={50} />
-                    ) : (
-                      <NorthEastArrow size={50} />
-                    )}
-                  </div>
-                  
-                  <div ref={circleImages2Ref} className="circle-images-container">
-                    <div
-                      ref={circleImg1_2Ref}
-                      className="circle-img"
-                    >
-                      <Image
-                        src="/images/ai.jpg"
-                        alt="circle 1"
-                        fill
-                        style={{ objectFit: 'cover' }}
-                      />
-                    </div>
-                    <div
-                      ref={circleImg2_2Ref}
-                      className="circle-img"
-                    >
-                      <Image
-                        src="/images/lkhh.jpg"
-                        alt="circle 2"
-                        fill
-                        style={{ objectFit: 'cover' }}
-                      />
-                    </div>
-                  </div>
-                  
-                  <div ref={featuresOverlay2Ref} className="features-overlay" />
                 </div>
               </div>
-            </div>
 
-            {/* SECTION FEATURES - 03 CALENDAR */}
-            <div
-              ref={featuresSection3Ref}
-              className="features-section"
-              style={{
-                backgroundColor: featuresBgColor,
-              }}
-            >
-              <div className="features-bottom">
-                <div
-                  ref={featuresLeftNumber3Ref}
-                  className="features-left-number"
-                  style={{ color: featuresTextColor }}
-                >
-                  03
-                </div>
-                
-                <div 
-                  ref={hoverContainer3Ref}
-                  className="hover-container"
-                  onMouseEnter={handleCalendarHoverEnter}
-                  onMouseLeave={handleCalendarHoverLeave}
-                >
-                  <div
-                    ref={featuresRightText3Ref}
-                    className="features-right-text"
-                    style={{ color: featuresTextColor }}
-                  >
-                    Calendar
-                  </div>
-                  
-                  <div ref={updateContainer3Ref} className="update-container">
-                    <div className="update-number" style={{ color: featuresTextColor }}>
-                      Schedule<sup>³</sup>
-                    </div>
-                  </div>
-                  
-                  <div 
-                    ref={featuresArrow3Ref}
-                    className="features-right-arrow"
-                  >
-                    {calendarHover ? (
-                      <StraightLine size={50} />
-                    ) : (
-                      <NorthEastArrow size={50} />
-                    )}
-                  </div>
-                  
-                  <div ref={circleImages3Ref} className="circle-images-container">
-                    <div
-                      ref={circleImg1_3Ref}
-                      className="circle-img"
-                    >
-                      <Image
-                        src="/images/5.jpg"
-                        alt="circle 1"
-                        fill
-                        style={{ objectFit: 'cover' }}
-                      />
-                    </div>
-                    <div
-                      ref={circleImg2_3Ref}
-                      className="circle-img"
-                    >
-                      <Image
-                        src="/images/lkhh.jpg"
-                        alt="circle 2"
-                        fill
-                        style={{ objectFit: 'cover' }}
-                      />
-                    </div>
-                  </div>
-                  
-                  <div ref={featuresOverlay3Ref} className="features-overlay" />
-                </div>
-              </div>
-            </div>
-
-            {/* SECTION FEATURES - 04 BLOG */}
-            <div
-              ref={featuresSection4Ref}
-              className="features-section"
-              style={{
-                backgroundColor: featuresBgColor,
-              }}
-            >
-              <div className="features-bottom">
-                <div
-                  ref={featuresLeftNumber4Ref}
-                  className="features-left-number"
-                  style={{ color: featuresTextColor }}
-                >
-                  04
-                </div>
-                
-                <div 
-                  ref={hoverContainer4Ref}
-                  className="hover-container"
-                  onMouseEnter={handleBlogHoverEnter}
-                  onMouseLeave={handleBlogHoverLeave}
-                >
-                  <div
-                    ref={featuresRightText4Ref}
-                    className="features-right-text"
-                    style={{ color: featuresTextColor }}
-                  >
-                    Blog
-                  </div>
-                  
-                  <div ref={updateContainer4Ref} className="update-container">
-                    <div className="update-number" style={{ color: featuresTextColor }}>
-                      Read<sup>⁴</sup>
-                    </div>
-                  </div>
-                  
-                  <div 
-                    ref={featuresArrow4Ref}
-                    className="features-right-arrow"
-                  >
-                    {blogHover ? (
-                      <StraightLine size={50} />
-                    ) : (
-                      <NorthEastArrow size={50} />
-                    )}
-                  </div>
-                  
-                  <div ref={circleImages4Ref} className="circle-images-container">
-                    <div
-                      ref={circleImg1_4Ref}
-                      className="circle-img"
-                    >
-                      <Image
-                        src="/images/ai.jpg"
-                        alt="circle 1"
-                        fill
-                        style={{ objectFit: 'cover' }}
-                      />
-                    </div>
-                    <div
-                      ref={circleImg2_4Ref}
-                      className="circle-img"
-                    >
-                      <Image
-                        src="/images/5.jpg"
-                        alt="circle 2"
-                        fill
-                        style={{ objectFit: 'cover' }}
-                      />
-                    </div>
-                  </div>
-                  
-                  <div ref={featuresOverlay4Ref} className="features-overlay" />
-                </div>
-              </div>
-            </div>
-
-            {/* SECTION FEATURES - 05 DONATION */}
-            <div
-              ref={featuresSection5Ref}
-              className="features-section"
-              style={{
-                backgroundColor: featuresBgColor,
-              }}
-            >
-              <div className="features-bottom">
-                <div
-                  ref={featuresLeftNumber5Ref}
-                  className="features-left-number"
-                  style={{ color: featuresTextColor }}
-                >
-                  05
-                </div>
-                
-                <div 
-                  ref={hoverContainer5Ref}
-                  className="hover-container"
-                  onMouseEnter={handleDonationHoverEnter}
-                  onMouseLeave={handleDonationHoverLeave}
-                >
-                  <div
-                    ref={featuresRightText5Ref}
-                    className="features-right-text"
-                    style={{ color: featuresTextColor }}
-                  >
-                    Donation
-                  </div>
-                  
-                  <div ref={updateContainer5Ref} className="update-container">
-                    <div className="update-number" style={{ color: featuresTextColor }}>
-                      Support<sup>⁵</sup>
-                    </div>
-                  </div>
-                  
-                  <div 
-                    ref={featuresArrow5Ref}
-                    className="features-right-arrow"
-                  >
-                    {donationHover ? (
-                      <StraightLine size={50} />
-                    ) : (
-                      <NorthEastArrow size={50} />
-                    )}
-                  </div>
-                  
-                  <div ref={circleImages5Ref} className="circle-images-container">
-                    <div
-                      ref={circleImg1_5Ref}
-                      className="circle-img"
-                    >
-                      <Image
-                        src="/images/lkhh.jpg"
-                        alt="circle 1"
-                        fill
-                        style={{ objectFit: 'cover' }}
-                      />
-                    </div>
-                    <div
-                      ref={circleImg2_5Ref}
-                      className="circle-img"
-                    >
-                      <Image
-                        src="/images/ai.jpg"
-                        alt="circle 2"
-                        fill
-                        style={{ objectFit: 'cover' }}
-                      />
-                    </div>
-                  </div>
-                  
-                  <div ref={featuresOverlay5Ref} className="features-overlay" />
-                </div>
-              </div>
-            </div>
-
-            {/* SECTION TRUSTED COLLABS */}
-            <div
-              ref={trustedSectionRef}
-              className="trusted-section"
-              style={{
-                backgroundColor: '#ffffff',
-              }}
-            >
+              {/* SECTION FEATURES - 01 NOTE */}
               <div
-                ref={trustedTextRef}
-                className="trusted-text"
+                ref={featuresSectionRef}
+                className="features-section"
+                style={{
+                  backgroundColor: featuresBgColor,
+                }}
               >
-                TRUSTED COLLABS
-              </div>
-
-              <div 
-                ref={carouselRef}
-                className="carousel-container"
-              >
-                <div className="carousel-track">
-                  {carouselItems.map((item) => (
-                    <div key={item.id} className="carousel-item">
-                      <div className="carousel-image">
+                <div className="features-top">
+                  <div
+                    ref={featuresTitleRef}
+                    className="features-title"
+                    style={{ color: featuresTextColor }}
+                  >
+                    Features
+                  </div>
+                </div>
+                <div className="features-bottom">
+                  <div
+                    ref={featuresLeftNumberRef}
+                    className="features-left-number"
+                    style={{ color: featuresTextColor }}
+                  >
+                    01
+                  </div>
+                  
+                  <div 
+                    ref={hoverContainerRef}
+                    className="hover-container"
+                    onMouseEnter={handleNoteHoverEnter}
+                    onMouseLeave={handleNoteHoverLeave}
+                  >
+                    <div
+                      ref={featuresRightTextRef}
+                      className="features-right-text"
+                      style={{ color: featuresTextColor }}
+                    >
+                      Note
+                    </div>
+                    
+                    <div ref={updateContainerRef} className="update-container">
+                      <div className="update-number" style={{ color: featuresTextColor }}>
+                        Update<sup>¹</sup>
+                      </div>
+                    </div>
+                    
+                    <div 
+                      ref={featuresArrowRef}
+                      className="features-right-arrow"
+                    >
+                      {noteHover ? (
+                        <StraightLine size={50} />
+                      ) : (
+                        <NorthEastArrow size={50} />
+                      )}
+                    </div>
+                    
+                    <div ref={circleImagesRef} className="circle-images-container">
+                      <div
+                        ref={circleImg1Ref}
+                        className="circle-img"
+                      >
                         <Image
-                          src={item.image}
-                          alt={item.brand}
+                          src="/images/lkhh.jpg"
+                          alt="circle 1"
                           fill
                           style={{ objectFit: 'cover' }}
                         />
                       </div>
-                      <h3 className="carousel-brand">{item.brand}</h3>
-                      <p className="carousel-desc">{item.description}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Bagian footer - hanya berisi teks MENURU besar tanpa background hitam */}
-            <div style={{
-              width: '100%',
-              position: 'relative',
-              backgroundColor: 'white',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'flex-end',
-              alignItems: 'center',
-              minHeight: '60vh'
-            }}>
-              <div
-                ref={bottomContentRef}
-                style={{
-                  width: '100%',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'flex-start',
-                  gap: '40px',
-                  marginBottom: '80px',
-                  paddingLeft: '80px',
-                  opacity: 0
-                }}
-              >
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px'
-                }}>
-                  <div 
-                    ref={mencatatTextRef}
-                    style={{
-                      fontSize: '64px',
-                      fontFamily: 'Questrial, sans-serif',
-                      color: 'black',
-                      textAlign: 'left',
-                      fontWeight: '400',
-                      letterSpacing: '-0.02em',
-                      lineHeight: '1.2',
-                      whiteSpace: 'nowrap'
-                    }}>
-                    Mencatat apa yang kamu inginkan
-                  </div>
-                  <span style={{
-                    fontSize: '80px',
-                    color: 'black',
-                    fontWeight: '400',
-                    lineHeight: '1'
-                  }}>.</span>
-                </div>
-
-                <Link href="/contact">
-                  <button
-                    ref={contactBtnRef}
-                    onClick={handleContact}
-                    className="contact-btn-effect"
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '16px',
-                      padding: '14px 36px',
-                      borderRadius: '60px',
-                      cursor: 'pointer',
-                      fontSize: '20px',
-                      fontWeight: '600',
-                      letterSpacing: '-0.01em',
-                      fontFamily: 'Questrial, sans-serif',
-                      transition: 'all 0.3s ease',
-                      position: 'relative',
-                      overflow: 'hidden',
-                      zIndex: 1,
-                      border: '1.5px solid #cccccc',
-                      backgroundColor: '#ffffff',
-                      color: '#000000'
-                    }}
-                  >
-                    <span ref={contactTextRef}>Contact</span>
-                    
-                    <div style={{
-                      position: 'relative',
-                      width: '40px',
-                      height: '40px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}>
-                      <div className="dot-small" style={{
-                        width: '8px',
-                        height: '8px',
-                        borderRadius: '50%',
-                        backgroundColor: '#000000',
-                        opacity: 1,
-                        transform: 'scale(1)',
-                        transition: 'opacity 0.3s ease, transform 0.3s ease',
-                        position: 'absolute'
-                      }}></div>
-                      
-                      <div className="circle-large-white" style={{
-                        position: 'absolute',
-                        width: '40px',
-                        height: '40px',
-                        borderRadius: '50%',
-                        backgroundColor: '#000000',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        opacity: 0,
-                        transform: 'scale(0.8)',
-                        transition: 'opacity 0.3s ease, transform 0.3s ease, background-color 0.3s ease'
-                      }}>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
+                      <div
+                        ref={circleImg2Ref}
+                        className="circle-img"
+                      >
+                        <Image
+                          src="/images/ai.jpg"
+                          alt="circle 2"
+                          fill
+                          style={{ objectFit: 'cover' }}
+                        />
                       </div>
                     </div>
-                  </button>
-                </Link>
-
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '30px',
-                  flexWrap: 'wrap',
-                  width: '100%'
-                }}>
-                  <div ref={callTextRef} className="call-farid-text">
-                    <div>Ready to surpass your</div>
-                    <div>wildest dreams?</div>
-                    <div>Call Farid.</div>
+                    
+                    <div ref={featuresOverlayRef} className="features-overlay" />
                   </div>
+                </div>
+              </div>
 
-                  <button ref={calendarBtnRef} onClick={handleCalendarCall} className="calendar-btn">
-                    <ArrowIcon size={24} />
-                    Calendar call
-                  </button>
+              {/* SECTION FEATURES - 02 COMMUNITY */}
+              <div
+                ref={featuresSection2Ref}
+                className="features-section"
+                style={{
+                  backgroundColor: featuresBgColor,
+                }}
+              >
+                <div className="features-bottom">
+                  <div
+                    ref={featuresLeftNumber2Ref}
+                    className="features-left-number"
+                    style={{ color: featuresTextColor }}
+                  >
+                    02
+                  </div>
+                  
+                  <div 
+                    ref={hoverContainer2Ref}
+                    className="hover-container"
+                    onMouseEnter={handleCommunityHoverEnter}
+                    onMouseLeave={handleCommunityHoverLeave}
+                  >
+                    <div
+                      ref={featuresRightText2Ref}
+                      className="features-right-text"
+                      style={{ color: featuresTextColor }}
+                    >
+                      Community
+                    </div>
+                    
+                    <div ref={updateContainer2Ref} className="update-container">
+                      <div className="update-number" style={{ color: featuresTextColor }}>
+                        Join<sup>²</sup>
+                      </div>
+                    </div>
+                    
+                    <div 
+                      ref={featuresArrow2Ref}
+                      className="features-right-arrow"
+                    >
+                      {communityHover ? (
+                        <StraightLine size={50} />
+                      ) : (
+                        <NorthEastArrow size={50} />
+                      )}
+                    </div>
+                    
+                    <div ref={circleImages2Ref} className="circle-images-container">
+                      <div
+                        ref={circleImg1_2Ref}
+                        className="circle-img"
+                      >
+                        <Image
+                          src="/images/ai.jpg"
+                          alt="circle 1"
+                          fill
+                          style={{ objectFit: 'cover' }}
+                        />
+                      </div>
+                      <div
+                        ref={circleImg2_2Ref}
+                        className="circle-img"
+                      >
+                        <Image
+                          src="/images/lkhh.jpg"
+                          alt="circle 2"
+                          fill
+                          style={{ objectFit: 'cover' }}
+                        />
+                      </div>
+                    </div>
+                    
+                    <div ref={featuresOverlay2Ref} className="features-overlay" />
+                  </div>
+                </div>
+              </div>
+
+              {/* SECTION FEATURES - 03 CALENDAR */}
+              <div
+                ref={featuresSection3Ref}
+                className="features-section"
+                style={{
+                  backgroundColor: featuresBgColor,
+                }}
+              >
+                <div className="features-bottom">
+                  <div
+                    ref={featuresLeftNumber3Ref}
+                    className="features-left-number"
+                    style={{ color: featuresTextColor }}
+                  >
+                    03
+                  </div>
+                  
+                  <div 
+                    ref={hoverContainer3Ref}
+                    className="hover-container"
+                    onMouseEnter={handleCalendarHoverEnter}
+                    onMouseLeave={handleCalendarHoverLeave}
+                  >
+                    <div
+                      ref={featuresRightText3Ref}
+                      className="features-right-text"
+                      style={{ color: featuresTextColor }}
+                    >
+                      Calendar
+                    </div>
+                    
+                    <div ref={updateContainer3Ref} className="update-container">
+                      <div className="update-number" style={{ color: featuresTextColor }}>
+                        Schedule<sup>³</sup>
+                      </div>
+                    </div>
+                    
+                    <div 
+                      ref={featuresArrow3Ref}
+                      className="features-right-arrow"
+                    >
+                      {calendarHover ? (
+                        <StraightLine size={50} />
+                      ) : (
+                        <NorthEastArrow size={50} />
+                      )}
+                    </div>
+                    
+                    <div ref={circleImages3Ref} className="circle-images-container">
+                      <div
+                        ref={circleImg1_3Ref}
+                        className="circle-img"
+                      >
+                        <Image
+                          src="/images/5.jpg"
+                          alt="circle 1"
+                          fill
+                          style={{ objectFit: 'cover' }}
+                        />
+                      </div>
+                      <div
+                        ref={circleImg2_3Ref}
+                        className="circle-img"
+                      >
+                        <Image
+                          src="/images/lkhh.jpg"
+                          alt="circle 2"
+                          fill
+                          style={{ objectFit: 'cover' }}
+                        />
+                      </div>
+                    </div>
+                    
+                    <div ref={featuresOverlay3Ref} className="features-overlay" />
+                  </div>
+                </div>
+              </div>
+
+              {/* SECTION FEATURES - 04 BLOG */}
+              <div
+                ref={featuresSection4Ref}
+                className="features-section"
+                style={{
+                  backgroundColor: featuresBgColor,
+                }}
+              >
+                <div className="features-bottom">
+                  <div
+                    ref={featuresLeftNumber4Ref}
+                    className="features-left-number"
+                    style={{ color: featuresTextColor }}
+                  >
+                    04
+                  </div>
+                  
+                  <div 
+                    ref={hoverContainer4Ref}
+                    className="hover-container"
+                    onMouseEnter={handleBlogHoverEnter}
+                    onMouseLeave={handleBlogHoverLeave}
+                  >
+                    <div
+                      ref={featuresRightText4Ref}
+                      className="features-right-text"
+                      style={{ color: featuresTextColor }}
+                    >
+                      Blog
+                    </div>
+                    
+                    <div ref={updateContainer4Ref} className="update-container">
+                      <div className="update-number" style={{ color: featuresTextColor }}>
+                        Read<sup>⁴</sup>
+                      </div>
+                    </div>
+                    
+                    <div 
+                      ref={featuresArrow4Ref}
+                      className="features-right-arrow"
+                    >
+                      {blogHover ? (
+                        <StraightLine size={50} />
+                      ) : (
+                        <NorthEastArrow size={50} />
+                      )}
+                    </div>
+                    
+                    <div ref={circleImages4Ref} className="circle-images-container">
+                      <div
+                        ref={circleImg1_4Ref}
+                        className="circle-img"
+                      >
+                        <Image
+                          src="/images/ai.jpg"
+                          alt="circle 1"
+                          fill
+                          style={{ objectFit: 'cover' }}
+                        />
+                      </div>
+                      <div
+                        ref={circleImg2_4Ref}
+                        className="circle-img"
+                      >
+                        <Image
+                          src="/images/5.jpg"
+                          alt="circle 2"
+                          fill
+                          style={{ objectFit: 'cover' }}
+                        />
+                      </div>
+                    </div>
+                    
+                    <div ref={featuresOverlay4Ref} className="features-overlay" />
+                  </div>
+                </div>
+              </div>
+
+              {/* SECTION FEATURES - 05 DONATION */}
+              <div
+                ref={featuresSection5Ref}
+                className="features-section"
+                style={{
+                  backgroundColor: featuresBgColor,
+                }}
+              >
+                <div className="features-bottom">
+                  <div
+                    ref={featuresLeftNumber5Ref}
+                    className="features-left-number"
+                    style={{ color: featuresTextColor }}
+                  >
+                    05
+                  </div>
+                  
+                  <div 
+                    ref={hoverContainer5Ref}
+                    className="hover-container"
+                    onMouseEnter={handleDonationHoverEnter}
+                    onMouseLeave={handleDonationHoverLeave}
+                  >
+                    <div
+                      ref={featuresRightText5Ref}
+                      className="features-right-text"
+                      style={{ color: featuresTextColor }}
+                    >
+                      Donation
+                    </div>
+                    
+                    <div ref={updateContainer5Ref} className="update-container">
+                      <div className="update-number" style={{ color: featuresTextColor }}>
+                        Support<sup>⁵</sup>
+                      </div>
+                    </div>
+                    
+                    <div 
+                      ref={featuresArrow5Ref}
+                      className="features-right-arrow"
+                    >
+                      {donationHover ? (
+                        <StraightLine size={50} />
+                      ) : (
+                        <NorthEastArrow size={50} />
+                      )}
+                    </div>
+                    
+                    <div ref={circleImages5Ref} className="circle-images-container">
+                      <div
+                        ref={circleImg1_5Ref}
+                        className="circle-img"
+                      >
+                        <Image
+                          src="/images/lkhh.jpg"
+                          alt="circle 1"
+                          fill
+                          style={{ objectFit: 'cover' }}
+                        />
+                      </div>
+                      <div
+                        ref={circleImg2_5Ref}
+                        className="circle-img"
+                      >
+                        <Image
+                          src="/images/ai.jpg"
+                          alt="circle 2"
+                          fill
+                          style={{ objectFit: 'cover' }}
+                        />
+                      </div>
+                    </div>
+                    
+                    <div ref={featuresOverlay5Ref} className="features-overlay" />
+                  </div>
+                </div>
+              </div>
+
+              {/* SECTION TRUSTED COLLABS */}
+              <div
+                ref={trustedSectionRef}
+                className="trusted-section"
+                style={{
+                  backgroundColor: '#ffffff',
+                }}
+              >
+                <div
+                  ref={trustedTextRef}
+                  className="trusted-text"
+                >
+                  TRUSTED COLLABS
                 </div>
 
+                <div 
+                  ref={carouselRef}
+                  className="carousel-container"
+                >
+                  <div className="carousel-track">
+                    {carouselItems.map((item) => (
+                      <div key={item.id} className="carousel-item">
+                        <div className="carousel-image">
+                          <Image
+                            src={item.image}
+                            alt={item.brand}
+                            fill
+                            style={{ objectFit: 'cover' }}
+                          />
+                        </div>
+                        <h3 className="carousel-brand">{item.brand}</h3>
+                        <p className="carousel-desc">{item.description}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Bagian footer - hanya berisi teks MENURU besar tanpa background hitam */}
+              <div style={{
+                width: '100%',
+                position: 'relative',
+                backgroundColor: 'white',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'flex-end',
+                alignItems: 'center',
+                minHeight: '60vh'
+              }}>
                 <div
-                  ref={profileRef}
+                  ref={bottomContentRef}
                   style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'flex-start',
-                    gap: '24px',
                     width: '100%',
-                    marginTop: '10px'
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'flex-start',
+                    gap: '40px',
+                    marginBottom: '80px',
+                    paddingLeft: '80px',
+                    opacity: 0
                   }}
                 >
                   <div style={{
-                    width: '80px',
-                    height: '100px',
-                    borderRadius: '12px',
-                    overflow: 'hidden',
-                    position: 'relative',
-                    border: '2px solid #e0e0e0'
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
                   }}>
-                    <Image
-                      src="/images/5.jpg"
-                      alt="Farid Ardiansyah"
-                      fill
-                      style={{ objectFit: 'cover', objectPosition: 'center' }}
-                    />
+                    <div 
+                      ref={mencatatTextRef}
+                      style={{
+                        fontSize: '64px',
+                        fontFamily: 'Questrial, sans-serif',
+                        color: 'black',
+                        textAlign: 'left',
+                        fontWeight: '400',
+                        letterSpacing: '-0.02em',
+                        lineHeight: '1.2',
+                        whiteSpace: 'nowrap'
+                      }}>
+                      Mencatat apa yang kamu inginkan
+                    </div>
+                    <span style={{
+                      fontSize: '80px',
+                      color: 'black',
+                      fontWeight: '400',
+                      lineHeight: '1'
+                    }}>.</span>
+                  </div>
+
+                  <Link href="/contact">
+                    <button
+                      ref={contactBtnRef}
+                      onClick={handleContact}
+                      className="contact-btn-effect"
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '16px',
+                        padding: '14px 36px',
+                        borderRadius: '60px',
+                        cursor: 'pointer',
+                        fontSize: '20px',
+                        fontWeight: '600',
+                        letterSpacing: '-0.01em',
+                        fontFamily: 'Questrial, sans-serif',
+                        transition: 'all 0.3s ease',
+                        position: 'relative',
+                        overflow: 'hidden',
+                        zIndex: 1,
+                        border: '1.5px solid #cccccc',
+                        backgroundColor: '#ffffff',
+                        color: '#000000'
+                      }}
+                    >
+                      <span ref={contactTextRef}>Contact</span>
+                      
+                      <div style={{
+                        position: 'relative',
+                        width: '40px',
+                        height: '40px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}>
+                        <div className="dot-small" style={{
+                          width: '8px',
+                          height: '8px',
+                          borderRadius: '50%',
+                          backgroundColor: '#000000',
+                          opacity: 1,
+                          transform: 'scale(1)',
+                          transition: 'opacity 0.3s ease, transform 0.3s ease',
+                          position: 'absolute'
+                        }}></div>
+                        
+                        <div className="circle-large-white" style={{
+                          position: 'absolute',
+                          width: '40px',
+                          height: '40px',
+                          borderRadius: '50%',
+                          backgroundColor: '#000000',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          opacity: 0,
+                          transform: 'scale(0.8)',
+                          transition: 'opacity 0.3s ease, transform 0.3s ease, background-color 0.3s ease'
+                        }}>
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </div>
+                      </div>
+                    </button>
+                  </Link>
+
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '30px',
+                    flexWrap: 'wrap',
+                    width: '100%'
+                  }}>
+                    <div ref={callTextRef} className="call-farid-text">
+                      <div>Ready to surpass your</div>
+                      <div>wildest dreams?</div>
+                      <div>Call Farid.</div>
+                    </div>
+
+                    <button ref={calendarBtnRef} onClick={handleCalendarCall} className="calendar-btn">
+                      <ArrowIcon size={24} />
+                      Calendar call
+                    </button>
+                  </div>
+
+                  <div
+                    ref={profileRef}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'flex-start',
+                      gap: '24px',
+                      width: '100%',
+                      marginTop: '10px'
+                    }}
+                  >
+                    <div style={{
+                      width: '80px',
+                      height: '100px',
+                      borderRadius: '12px',
+                      overflow: 'hidden',
+                      position: 'relative',
+                      border: '2px solid #e0e0e0'
+                    }}>
+                      <Image
+                        src="/images/5.jpg"
+                        alt="Farid Ardiansyah"
+                        fill
+                        style={{ objectFit: 'cover', objectPosition: 'center' }}
+                      />
+                    </div>
+
+                    <div style={{
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '40px',
+                      fontWeight: '400',
+                      color: 'rgb(16, 16, 16)',
+                      letterSpacing: '-0.02em'
+                    }}>
+                      Farid Ardiansyah
+                    </div>
+
+                    <div className="badge-founder">
+                      Founder & Programmer
+                    </div>
+                  </div>
+                </div>
+
+                {/* Email dan Social Media Section */}
+                <div style={{
+                  position: 'relative',
+                  width: '100%',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'flex-end',
+                  padding: '0 80px',
+                  marginBottom: '30px',
+                  boxSizing: 'border-box'
+                }}>
+                  <div 
+                    ref={emailRef}
+                    onClick={handleEmailClick}
+                    className="email-wrapper"
+                    style={{ marginBottom: '20px' }}
+                  >
+                    <ArrowIcon size={24} />
+                    <span className="email-text">contact.menuru@gmail.com</span>
                   </div>
 
                   <div style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '40px',
-                    fontWeight: '400',
-                    color: 'rgb(16, 16, 16)',
-                    letterSpacing: '-0.02em'
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '8px',
+                    position: 'absolute',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    marginBottom: '20px'
                   }}>
-                    Farid Ardiansyah
-                  </div>
-
-                  <div className="badge-founder">
-                    Founder & Programmer
+                    <div 
+                      className="social-item"
+                      style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
+                      onMouseEnter={(e) => {
+                        const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
+                        if (textElement) handleSocialHover(textElement, originalTexts.ig);
+                      }}
+                      onMouseLeave={(e) => {
+                        const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
+                        if (textElement) handleSocialLeave(textElement, originalTexts.ig);
+                      }}
+                      onClick={() => handleSocialClick('Instagram')}
+                    >
+                      <span ref={igRef} className="social-text" style={{
+                        fontFamily: "'Questrial', sans-serif",
+                        fontSize: '28px',
+                        color: '#000000',
+                        fontWeight: '400',
+                        letterSpacing: '0.02em'
+                      }}>Instagram</span>
+                    </div>
+                    
+                    <div 
+                      className="social-item"
+                      style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
+                      onMouseEnter={(e) => {
+                        const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
+                        if (textElement) handleSocialHover(textElement, originalTexts.x);
+                      }}
+                      onMouseLeave={(e) => {
+                        const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
+                        if (textElement) handleSocialLeave(textElement, originalTexts.x);
+                      }}
+                      onClick={() => handleSocialClick('X')}
+                    >
+                      <span ref={xRef} className="social-text" style={{
+                        fontFamily: "'Questrial', sans-serif",
+                        fontSize: '28px',
+                        color: '#000000',
+                        fontWeight: '400',
+                        letterSpacing: '0.02em'
+                      }}>X</span>
+                    </div>
+                    
+                    <div 
+                      className="social-item"
+                      style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
+                      onMouseEnter={(e) => {
+                        const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
+                        if (textElement) handleSocialHover(textElement, originalTexts.linkedin);
+                      }}
+                      onMouseLeave={(e) => {
+                        const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
+                        if (textElement) handleSocialLeave(textElement, originalTexts.linkedin);
+                      }}
+                      onClick={() => handleSocialClick('LinkedIn')}
+                    >
+                      <span ref={linkedinRef} className="social-text" style={{
+                        fontFamily: "'Questrial', sans-serif",
+                        fontSize: '28px',
+                        color: '#000000',
+                        fontWeight: '400',
+                        letterSpacing: '0.02em'
+                      }}>LinkedIn</span>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Email dan Social Media Section */}
-              <div style={{
-                position: 'relative',
-                width: '100%',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'flex-end',
-                padding: '0 80px',
-                marginBottom: '30px',
-                boxSizing: 'border-box'
-              }}>
-                <div 
-                  ref={emailRef}
-                  onClick={handleEmailClick}
-                  className="email-wrapper"
-                  style={{ marginBottom: '20px' }}
-                >
-                  <ArrowIcon size={24} />
-                  <span className="email-text">contact.menuru@gmail.com</span>
-                </div>
-
-                <div style={{
+                {/* Hanya teks MENURU besar tanpa background hitam */}
+                <footer style={{
+                  position: 'relative',
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  width: '100%',
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '8px',
-                  position: 'absolute',
-                  left: '50%',
-                  transform: 'translateX(-50%)',
-                  marginBottom: '20px'
+                  alignItems: 'flex-end',
+                  padding: '0 80px 0 0',
+                  margin: 0,
+                  pointerEvents: 'none',
+                  zIndex: 1,
+                  marginTop: '40px'
                 }}>
-                  <div 
-                    className="social-item"
-                    style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
-                    onMouseEnter={(e) => {
-                      const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                      if (textElement) handleSocialHover(textElement, originalTexts.ig);
-                    }}
-                    onMouseLeave={(e) => {
-                      const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                      if (textElement) handleSocialLeave(textElement, originalTexts.ig);
-                    }}
-                    onClick={() => handleSocialClick('Instagram')}
-                  >
-                    <span ref={igRef} className="social-text" style={{
-                      fontFamily: "'Questrial', sans-serif",
-                      fontSize: '28px',
+                  <span 
+                    ref={menuruTextRef}
+                    style={{
+                      fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
+                      fontWeight: 'normal',
+                      fontSize: '600px',
                       color: '#000000',
-                      fontWeight: '400',
-                      letterSpacing: '0.02em'
-                    }}>Instagram</span>
-                  </div>
-                  
-                  <div 
-                    className="social-item"
-                    style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
-                    onMouseEnter={(e) => {
-                      const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                      if (textElement) handleSocialHover(textElement, originalTexts.x);
-                    }}
-                    onMouseLeave={(e) => {
-                      const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                      if (textElement) handleSocialLeave(textElement, originalTexts.x);
-                    }}
-                    onClick={() => handleSocialClick('X')}
-                  >
-                    <span ref={xRef} className="social-text" style={{
-                      fontFamily: "'Questrial', sans-serif",
-                      fontSize: '28px',
-                      color: '#000000',
-                      fontWeight: '400',
-                      letterSpacing: '0.02em'
-                    }}>X</span>
-                  </div>
-                  
-                  <div 
-                    className="social-item"
-                    style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
-                    onMouseEnter={(e) => {
-                      const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                      if (textElement) handleSocialHover(textElement, originalTexts.linkedin);
-                    }}
-                    onMouseLeave={(e) => {
-                      const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                      if (textElement) handleSocialLeave(textElement, originalTexts.linkedin);
-                    }}
-                    onClick={() => handleSocialClick('LinkedIn')}
-                  >
-                    <span ref={linkedinRef} className="social-text" style={{
-                      fontFamily: "'Questrial', sans-serif",
-                      fontSize: '28px',
-                      color: '#000000',
-                      fontWeight: '400',
-                      letterSpacing: '0.02em'
-                    }}>LinkedIn</span>
-                  </div>
+                      textAlign: 'right',
+                      letterSpacing: '-0.02em',
+                      opacity: 1,
+                      textTransform: 'uppercase',
+                      lineHeight: '0.7',
+                      whiteSpace: 'nowrap',
+                      WebkitFontSmoothing: 'antialiased',
+                      MozOsxFontSmoothing: 'grayscale',
+                      fontKerning: 'normal',
+                      margin: 0,
+                      padding: 0,
+                      marginRight: '0',
+                      backgroundColor: 'transparent'
+                    }}>
+                    MENURU
+                  </span>
+                </footer>
+              </div>
+            </div>
+          </div>
+
+          {/* PAGE 2 - Halaman Baru (muncul dari bawah ke atas saat scroll) */}
+          <div 
+            ref={page2Ref}
+            className="new-page-container"
+            style={{
+              transform: 'translateY(100%)',
+              visibility: 'hidden',
+            }}
+          >
+            <div ref={newPageContentRef} className="new-page-content">
+              <h1 className="new-page-title">Welcome to<br />Menuru 2.0</h1>
+              
+              <p className="new-page-desc">
+                Experience the next generation of digital creativity and innovation. 
+                We're redefining how you interact with design, technology, and ideas.
+              </p>
+
+              <div className="new-page-grid">
+                <div className="new-page-item">
+                  <div className="new-page-item-icon">🚀</div>
+                  <h3 className="new-page-item-title">Innovation First</h3>
+                  <p className="new-page-item-desc">
+                    We push the boundaries of what's possible, combining cutting-edge 
+                    technology with creative excellence.
+                  </p>
+                </div>
+
+                <div className="new-page-item">
+                  <div className="new-page-item-icon">🎨</div>
+                  <h3 className="new-page-item-title">Creative Studio</h3>
+                  <p className="new-page-item-desc">
+                    Our studio brings together designers, developers, and visionaries 
+                    to create amazing digital experiences.
+                  </p>
+                </div>
+
+                <div className="new-page-item">
+                  <div className="new-page-item-icon">💡</div>
+                  <h3 className="new-page-item-title">Smart Solutions</h3>
+                  <p className="new-page-item-desc">
+                    AI-powered tools and intelligent systems that adapt to your needs, 
+                    making complex tasks simple.
+                  </p>
+                </div>
+
+                <div className="new-page-item">
+                  <div className="new-page-item-icon">🌍</div>
+                  <h3 className="new-page-item-title">Global Reach</h3>
+                  <p className="new-page-item-desc">
+                    Connecting ideas across borders, building communities that 
+                    inspire and collaborate worldwide.
+                  </p>
+                </div>
+
+                <div className="new-page-item">
+                  <div className="new-page-item-icon">⚡</div>
+                  <h3 className="new-page-item-title">Lightning Fast</h3>
+                  <p className="new-page-item-desc">
+                    Optimized performance and responsive design that delivers 
+                    seamless experiences every time.
+                  </p>
+                </div>
+
+                <div className="new-page-item">
+                  <div className="new-page-item-icon">🔒</div>
+                  <h3 className="new-page-item-title">Secure & Safe</h3>
+                  <p className="new-page-item-desc">
+                    Your data and privacy are protected with enterprise-grade 
+                    security measures.
+                  </p>
                 </div>
               </div>
 
-              {/* Hanya teks MENURU besar tanpa background hitam */}
-              <footer style={{
-                position: 'relative',
-                bottom: 0,
-                left: 0,
-                right: 0,
-                width: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'flex-end',
-                padding: '0 80px 0 0',
-                margin: 0,
-                pointerEvents: 'none',
-                zIndex: 1,
-                marginTop: '40px'
-              }}>
-                <span 
-                  ref={menuruTextRef}
+              <div style={{ textAlign: 'center', marginTop: '80px' }}>
+                <button 
+                  onClick={() => {
+                    // Trigger scroll up untuk kembali ke halaman utama
+                    const event = new WheelEvent('wheel', { deltaY: -1 });
+                    window.dispatchEvent(event);
+                  }}
                   style={{
-                    fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
-                    fontWeight: 'normal',
-                    fontSize: '600px',
+                    padding: '16px 40px',
+                    backgroundColor: '#c5e800',
+                    border: 'none',
+                    borderRadius: '60px',
+                    fontFamily: 'Questrial, sans-serif',
+                    fontSize: '18px',
+                    fontWeight: '600',
                     color: '#000000',
-                    textAlign: 'right',
-                    letterSpacing: '-0.02em',
-                    opacity: 1,
-                    textTransform: 'uppercase',
-                    lineHeight: '0.7',
-                    whiteSpace: 'nowrap',
-                    WebkitFontSmoothing: 'antialiased',
-                    MozOsxFontSmoothing: 'grayscale',
-                    fontKerning: 'normal',
-                    margin: 0,
-                    padding: 0,
-                    marginRight: '0',
-                    backgroundColor: 'transparent'
-                  }}>
-                  MENURU
-                </span>
-              </footer>
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+                  onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                >
+                  ← Back to Home
+                </button>
+              </div>
             </div>
           </div>
+
+          {/* Scroll Indicator */}
+          {!showPage2 && (
+            <div className="scroll-indicator" style={{ opacity: pageTransition !== 'idle' ? 0 : 1 }}>
+              Scroll down to explore more ↓
+            </div>
+          )}
+          {showPage2 && pageTransition === 'page2-active' && (
+            <div className="scroll-indicator">
+              Scroll up to return ↑
+            </div>
+          )}
         </div>
       </div>
 
