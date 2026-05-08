@@ -1,4 +1,4 @@
-// app/page.tsx (Halaman Utama) - Features section lengkap dengan 5 item (design sama persis)
+// app/page.tsx (Halaman Utama) - Features section lengkap dengan 5 item
 
 'use client';
 
@@ -17,7 +17,6 @@ if (typeof window !== 'undefined') {
 
 export default function HomePage(): React.JSX.Element {
   const [showPopup, setShowPopup] = useState(false);
-  const [announcement, setAnnouncement] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showCalendarModal, setShowCalendarModal] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -31,6 +30,7 @@ export default function HomePage(): React.JSX.Element {
   const [calendarHover, setCalendarHover] = useState(false);
   const [blogHover, setBlogHover] = useState(false);
   const [donationHover, setDonationHover] = useState(false);
+  const [isFeaturesWhiteBg, setIsFeaturesWhiteBg] = useState(false);
   
   const acceptBtnRef = useRef<HTMLButtonElement>(null);
   const declineBtnRef = useRef<HTMLButtonElement>(null);
@@ -70,7 +70,6 @@ export default function HomePage(): React.JSX.Element {
   const featuresOverlayRef = useRef<HTMLDivElement>(null);
   const featuresArrowRef = useRef<HTMLDivElement>(null);
   const hoverContainerRef = useRef<HTMLDivElement>(null);
-  const noteTextRef = useRef<HTMLDivElement>(null);
   const updateContainerRef = useRef<HTMLDivElement>(null);
   const circleImagesRef = useRef<HTMLDivElement>(null);
   
@@ -337,58 +336,23 @@ export default function HomePage(): React.JSX.Element {
     setNoteHover(true);
     
     gsap.set(featuresOverlayRef.current, { opacity: 1 });
+    gsap.to(updateContainerRef.current, { opacity: 1, x: 0, duration: 0.2, ease: "power2.out" });
+    gsap.to(circleImagesRef.current, { opacity: 1, x: 0, duration: 0.2, ease: "power2.out" });
     
-    gsap.to(updateContainerRef.current, {
-      opacity: 1,
-      x: 0,
-      duration: 0.2,
-      ease: "power2.out"
-    });
+    // Warna saat hover: HITAM jika background biru, BIRU jika background putih
+    const hoverColor = isFeaturesWhiteBg ? '#0000ff' : '#000000';
     
-    gsap.to(circleImagesRef.current, {
-      opacity: 1,
-      x: 0,
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
-    // Warna menjadi merah saat hover
-    gsap.to(featuresLeftNumberRef.current, {
-      color: '#ff3366',
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
-    gsap.to('.update-number', {
-      color: '#ff3366',
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
-    gsap.to(featuresRightTextRef.current, {
-      color: '#ff3366',
-      duration: 0.2,
-      ease: "power2.out"
-    });
+    gsap.to(featuresLeftNumberRef.current, { color: hoverColor, duration: 0.2 });
+    gsap.to('.update-number', { color: hoverColor, duration: 0.2 });
+    gsap.to(featuresRightTextRef.current, { color: hoverColor, duration: 0.2 });
     
     if (featuresArrowRef.current) {
-      gsap.to(featuresArrowRef.current, {
-        rotation: 0,
-        duration: 0.2,
-        ease: "back.out(0.6)"
-      });
-      gsap.to('.features-right-arrow svg', {
-        stroke: '#ff3366',
-        duration: 0.2,
-        ease: "power2.out"
-      });
+      gsap.to(featuresArrowRef.current, { rotation: 0, duration: 0.2 });
+      gsap.to('.features-right-arrow svg', { stroke: hoverColor, duration: 0.2 });
     }
     
     gsap.to([circleImg1Ref.current, circleImg2Ref.current], {
-      scale: 1.2,
-      duration: 0.2,
-      ease: "back.out(0.6)",
-      stagger: 0.05
+      scale: 1.2, duration: 0.2, ease: "back.out(0.6)", stagger: 0.05
     });
   };
 
@@ -396,467 +360,154 @@ export default function HomePage(): React.JSX.Element {
     setNoteHover(false);
     
     gsap.set(featuresOverlayRef.current, { opacity: 0 });
+    gsap.to(updateContainerRef.current, { opacity: 0, x: 50, duration: 0.2 });
+    gsap.to(circleImagesRef.current, { opacity: 0, x: 20, duration: 0.2 });
     
-    gsap.to(updateContainerRef.current, {
-      opacity: 0,
-      x: 50,
-      duration: 0.2,
-      ease: "power2.in"
-    });
+    // Kembalikan warna ke default: PUTIH jika background biru, HITAM jika background putih
+    const defaultColor = isFeaturesWhiteBg ? '#000000' : '#ffffff';
     
-    gsap.to(circleImagesRef.current, {
-      opacity: 0,
-      x: 20,
-      duration: 0.2,
-      ease: "power2.in"
-    });
-    
-    // Kembalikan warna ke default (biru atau putih tergantung scroll)
-    if (isFeaturesWhiteBg) {
-      gsap.to(featuresLeftNumberRef.current, { color: '#000000', duration: 0.2 });
-      gsap.to('.update-number', { color: '#000000', duration: 0.2 });
-      gsap.to(featuresRightTextRef.current, { color: '#000000', duration: 0.2 });
-      gsap.to('.features-right-arrow svg', { stroke: '#000000', duration: 0.2 });
-    } else {
-      gsap.to(featuresLeftNumberRef.current, { color: '#ffffff', duration: 0.2 });
-      gsap.to('.update-number', { color: '#ffffff', duration: 0.2 });
-      gsap.to(featuresRightTextRef.current, { color: '#ffffff', duration: 0.2 });
-      gsap.to('.features-right-arrow svg', { stroke: '#ffffff', duration: 0.2 });
-    }
+    gsap.to(featuresLeftNumberRef.current, { color: defaultColor, duration: 0.2 });
+    gsap.to('.update-number', { color: defaultColor, duration: 0.2 });
+    gsap.to(featuresRightTextRef.current, { color: defaultColor, duration: 0.2 });
     
     if (featuresArrowRef.current) {
-      gsap.to(featuresArrowRef.current, {
-        rotation: 45,
-        duration: 0.2,
-        ease: "back.inOut(0.6)"
-      });
+      gsap.to(featuresArrowRef.current, { rotation: 45, duration: 0.2 });
+      gsap.to('.features-right-arrow svg', { stroke: defaultColor, duration: 0.2 });
     }
     
-    gsap.to([circleImg1Ref.current, circleImg2Ref.current], {
-      scale: 1,
-      duration: 0.2,
-      ease: "power2.in"
-    });
+    gsap.to([circleImg1Ref.current, circleImg2Ref.current], { scale: 1, duration: 0.2 });
   };
 
   // Animasi hover untuk Community (02)
   const handleCommunityHoverEnter = () => {
     setCommunityHover(true);
-    
     gsap.set(featuresOverlay2Ref.current, { opacity: 1 });
+    gsap.to(updateContainer2Ref.current, { opacity: 1, x: 0, duration: 0.2 });
+    gsap.to(circleImages2Ref.current, { opacity: 1, x: 0, duration: 0.2 });
     
-    gsap.to(updateContainer2Ref.current, {
-      opacity: 1,
-      x: 0,
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
-    gsap.to(circleImages2Ref.current, {
-      opacity: 1,
-      x: 0,
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
-    gsap.to(featuresLeftNumber2Ref.current, {
-      color: '#ff3366',
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
-    gsap.to('.update-number', {
-      color: '#ff3366',
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
-    gsap.to(featuresRightText2Ref.current, {
-      color: '#ff3366',
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
+    const hoverColor = isFeaturesWhiteBg ? '#0000ff' : '#000000';
+    gsap.to(featuresLeftNumber2Ref.current, { color: hoverColor, duration: 0.2 });
+    gsap.to(featuresRightText2Ref.current, { color: hoverColor, duration: 0.2 });
     if (featuresArrow2Ref.current) {
-      gsap.to(featuresArrow2Ref.current, {
-        rotation: 0,
-        duration: 0.2,
-        ease: "back.out(0.6)"
-      });
-      gsap.to('.features-right-arrow-2 svg', {
-        stroke: '#ff3366',
-        duration: 0.2,
-        ease: "power2.out"
-      });
+      gsap.to(featuresArrow2Ref.current, { rotation: 0, duration: 0.2 });
+      gsap.to('.features-right-arrow-2 svg', { stroke: hoverColor, duration: 0.2 });
     }
-    
-    gsap.to([circleImg1_2Ref.current, circleImg2_2Ref.current], {
-      scale: 1.2,
-      duration: 0.2,
-      ease: "back.out(0.6)",
-      stagger: 0.05
-    });
+    gsap.to([circleImg1_2Ref.current, circleImg2_2Ref.current], { scale: 1.2, duration: 0.2, stagger: 0.05 });
   };
 
   const handleCommunityHoverLeave = () => {
     setCommunityHover(false);
-    
     gsap.set(featuresOverlay2Ref.current, { opacity: 0 });
+    gsap.to(updateContainer2Ref.current, { opacity: 0, x: 50, duration: 0.2 });
+    gsap.to(circleImages2Ref.current, { opacity: 0, x: 20, duration: 0.2 });
     
-    gsap.to(updateContainer2Ref.current, {
-      opacity: 0,
-      x: 50,
-      duration: 0.2,
-      ease: "power2.in"
-    });
-    
-    gsap.to(circleImages2Ref.current, {
-      opacity: 0,
-      x: 20,
-      duration: 0.2,
-      ease: "power2.in"
-    });
-    
-    if (isFeaturesWhiteBg) {
-      gsap.to(featuresLeftNumber2Ref.current, { color: '#000000', duration: 0.2 });
-      gsap.to('.update-number', { color: '#000000', duration: 0.2 });
-      gsap.to(featuresRightText2Ref.current, { color: '#000000', duration: 0.2 });
-      gsap.to('.features-right-arrow-2 svg', { stroke: '#000000', duration: 0.2 });
-    } else {
-      gsap.to(featuresLeftNumber2Ref.current, { color: '#ffffff', duration: 0.2 });
-      gsap.to('.update-number', { color: '#ffffff', duration: 0.2 });
-      gsap.to(featuresRightText2Ref.current, { color: '#ffffff', duration: 0.2 });
-      gsap.to('.features-right-arrow-2 svg', { stroke: '#ffffff', duration: 0.2 });
-    }
-    
+    const defaultColor = isFeaturesWhiteBg ? '#000000' : '#ffffff';
+    gsap.to(featuresLeftNumber2Ref.current, { color: defaultColor, duration: 0.2 });
+    gsap.to(featuresRightText2Ref.current, { color: defaultColor, duration: 0.2 });
     if (featuresArrow2Ref.current) {
-      gsap.to(featuresArrow2Ref.current, {
-        rotation: 45,
-        duration: 0.2,
-        ease: "back.inOut(0.6)"
-      });
+      gsap.to(featuresArrow2Ref.current, { rotation: 45, duration: 0.2 });
+      gsap.to('.features-right-arrow-2 svg', { stroke: defaultColor, duration: 0.2 });
     }
-    
-    gsap.to([circleImg1_2Ref.current, circleImg2_2Ref.current], {
-      scale: 1,
-      duration: 0.2,
-      ease: "power2.in"
-    });
+    gsap.to([circleImg1_2Ref.current, circleImg2_2Ref.current], { scale: 1, duration: 0.2 });
   };
 
   // Animasi hover untuk Calendar (03)
   const handleCalendarHoverEnter = () => {
     setCalendarHover(true);
-    
     gsap.set(featuresOverlay3Ref.current, { opacity: 1 });
+    gsap.to(updateContainer3Ref.current, { opacity: 1, x: 0, duration: 0.2 });
+    gsap.to(circleImages3Ref.current, { opacity: 1, x: 0, duration: 0.2 });
     
-    gsap.to(updateContainer3Ref.current, {
-      opacity: 1,
-      x: 0,
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
-    gsap.to(circleImages3Ref.current, {
-      opacity: 1,
-      x: 0,
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
-    gsap.to(featuresLeftNumber3Ref.current, {
-      color: '#ff3366',
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
-    gsap.to('.update-number', {
-      color: '#ff3366',
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
-    gsap.to(featuresRightText3Ref.current, {
-      color: '#ff3366',
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
+    const hoverColor = isFeaturesWhiteBg ? '#0000ff' : '#000000';
+    gsap.to(featuresLeftNumber3Ref.current, { color: hoverColor, duration: 0.2 });
+    gsap.to(featuresRightText3Ref.current, { color: hoverColor, duration: 0.2 });
     if (featuresArrow3Ref.current) {
-      gsap.to(featuresArrow3Ref.current, {
-        rotation: 0,
-        duration: 0.2,
-        ease: "back.out(0.6)"
-      });
-      gsap.to('.features-right-arrow-3 svg', {
-        stroke: '#ff3366',
-        duration: 0.2,
-        ease: "power2.out"
-      });
+      gsap.to(featuresArrow3Ref.current, { rotation: 0, duration: 0.2 });
+      gsap.to('.features-right-arrow-3 svg', { stroke: hoverColor, duration: 0.2 });
     }
-    
-    gsap.to([circleImg1_3Ref.current, circleImg2_3Ref.current], {
-      scale: 1.2,
-      duration: 0.2,
-      ease: "back.out(0.6)",
-      stagger: 0.05
-    });
+    gsap.to([circleImg1_3Ref.current, circleImg2_3Ref.current], { scale: 1.2, duration: 0.2, stagger: 0.05 });
   };
 
   const handleCalendarHoverLeave = () => {
     setCalendarHover(false);
-    
     gsap.set(featuresOverlay3Ref.current, { opacity: 0 });
+    gsap.to(updateContainer3Ref.current, { opacity: 0, x: 50, duration: 0.2 });
+    gsap.to(circleImages3Ref.current, { opacity: 0, x: 20, duration: 0.2 });
     
-    gsap.to(updateContainer3Ref.current, {
-      opacity: 0,
-      x: 50,
-      duration: 0.2,
-      ease: "power2.in"
-    });
-    
-    gsap.to(circleImages3Ref.current, {
-      opacity: 0,
-      x: 20,
-      duration: 0.2,
-      ease: "power2.in"
-    });
-    
-    if (isFeaturesWhiteBg) {
-      gsap.to(featuresLeftNumber3Ref.current, { color: '#000000', duration: 0.2 });
-      gsap.to('.update-number', { color: '#000000', duration: 0.2 });
-      gsap.to(featuresRightText3Ref.current, { color: '#000000', duration: 0.2 });
-      gsap.to('.features-right-arrow-3 svg', { stroke: '#000000', duration: 0.2 });
-    } else {
-      gsap.to(featuresLeftNumber3Ref.current, { color: '#ffffff', duration: 0.2 });
-      gsap.to('.update-number', { color: '#ffffff', duration: 0.2 });
-      gsap.to(featuresRightText3Ref.current, { color: '#ffffff', duration: 0.2 });
-      gsap.to('.features-right-arrow-3 svg', { stroke: '#ffffff', duration: 0.2 });
-    }
-    
+    const defaultColor = isFeaturesWhiteBg ? '#000000' : '#ffffff';
+    gsap.to(featuresLeftNumber3Ref.current, { color: defaultColor, duration: 0.2 });
+    gsap.to(featuresRightText3Ref.current, { color: defaultColor, duration: 0.2 });
     if (featuresArrow3Ref.current) {
-      gsap.to(featuresArrow3Ref.current, {
-        rotation: 45,
-        duration: 0.2,
-        ease: "back.inOut(0.6)"
-      });
+      gsap.to(featuresArrow3Ref.current, { rotation: 45, duration: 0.2 });
+      gsap.to('.features-right-arrow-3 svg', { stroke: defaultColor, duration: 0.2 });
     }
-    
-    gsap.to([circleImg1_3Ref.current, circleImg2_3Ref.current], {
-      scale: 1,
-      duration: 0.2,
-      ease: "power2.in"
-    });
+    gsap.to([circleImg1_3Ref.current, circleImg2_3Ref.current], { scale: 1, duration: 0.2 });
   };
 
   // Animasi hover untuk Blog (04)
   const handleBlogHoverEnter = () => {
     setBlogHover(true);
-    
     gsap.set(featuresOverlay4Ref.current, { opacity: 1 });
+    gsap.to(updateContainer4Ref.current, { opacity: 1, x: 0, duration: 0.2 });
+    gsap.to(circleImages4Ref.current, { opacity: 1, x: 0, duration: 0.2 });
     
-    gsap.to(updateContainer4Ref.current, {
-      opacity: 1,
-      x: 0,
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
-    gsap.to(circleImages4Ref.current, {
-      opacity: 1,
-      x: 0,
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
-    gsap.to(featuresLeftNumber4Ref.current, {
-      color: '#ff3366',
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
-    gsap.to('.update-number', {
-      color: '#ff3366',
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
-    gsap.to(featuresRightText4Ref.current, {
-      color: '#ff3366',
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
+    const hoverColor = isFeaturesWhiteBg ? '#0000ff' : '#000000';
+    gsap.to(featuresLeftNumber4Ref.current, { color: hoverColor, duration: 0.2 });
+    gsap.to(featuresRightText4Ref.current, { color: hoverColor, duration: 0.2 });
     if (featuresArrow4Ref.current) {
-      gsap.to(featuresArrow4Ref.current, {
-        rotation: 0,
-        duration: 0.2,
-        ease: "back.out(0.6)"
-      });
-      gsap.to('.features-right-arrow-4 svg', {
-        stroke: '#ff3366',
-        duration: 0.2,
-        ease: "power2.out"
-      });
+      gsap.to(featuresArrow4Ref.current, { rotation: 0, duration: 0.2 });
+      gsap.to('.features-right-arrow-4 svg', { stroke: hoverColor, duration: 0.2 });
     }
-    
-    gsap.to([circleImg1_4Ref.current, circleImg2_4Ref.current], {
-      scale: 1.2,
-      duration: 0.2,
-      ease: "back.out(0.6)",
-      stagger: 0.05
-    });
+    gsap.to([circleImg1_4Ref.current, circleImg2_4Ref.current], { scale: 1.2, duration: 0.2, stagger: 0.05 });
   };
 
   const handleBlogHoverLeave = () => {
     setBlogHover(false);
-    
     gsap.set(featuresOverlay4Ref.current, { opacity: 0 });
+    gsap.to(updateContainer4Ref.current, { opacity: 0, x: 50, duration: 0.2 });
+    gsap.to(circleImages4Ref.current, { opacity: 0, x: 20, duration: 0.2 });
     
-    gsap.to(updateContainer4Ref.current, {
-      opacity: 0,
-      x: 50,
-      duration: 0.2,
-      ease: "power2.in"
-    });
-    
-    gsap.to(circleImages4Ref.current, {
-      opacity: 0,
-      x: 20,
-      duration: 0.2,
-      ease: "power2.in"
-    });
-    
-    if (isFeaturesWhiteBg) {
-      gsap.to(featuresLeftNumber4Ref.current, { color: '#000000', duration: 0.2 });
-      gsap.to('.update-number', { color: '#000000', duration: 0.2 });
-      gsap.to(featuresRightText4Ref.current, { color: '#000000', duration: 0.2 });
-      gsap.to('.features-right-arrow-4 svg', { stroke: '#000000', duration: 0.2 });
-    } else {
-      gsap.to(featuresLeftNumber4Ref.current, { color: '#ffffff', duration: 0.2 });
-      gsap.to('.update-number', { color: '#ffffff', duration: 0.2 });
-      gsap.to(featuresRightText4Ref.current, { color: '#ffffff', duration: 0.2 });
-      gsap.to('.features-right-arrow-4 svg', { stroke: '#ffffff', duration: 0.2 });
-    }
-    
+    const defaultColor = isFeaturesWhiteBg ? '#000000' : '#ffffff';
+    gsap.to(featuresLeftNumber4Ref.current, { color: defaultColor, duration: 0.2 });
+    gsap.to(featuresRightText4Ref.current, { color: defaultColor, duration: 0.2 });
     if (featuresArrow4Ref.current) {
-      gsap.to(featuresArrow4Ref.current, {
-        rotation: 45,
-        duration: 0.2,
-        ease: "back.inOut(0.6)"
-      });
+      gsap.to(featuresArrow4Ref.current, { rotation: 45, duration: 0.2 });
+      gsap.to('.features-right-arrow-4 svg', { stroke: defaultColor, duration: 0.2 });
     }
-    
-    gsap.to([circleImg1_4Ref.current, circleImg2_4Ref.current], {
-      scale: 1,
-      duration: 0.2,
-      ease: "power2.in"
-    });
+    gsap.to([circleImg1_4Ref.current, circleImg2_4Ref.current], { scale: 1, duration: 0.2 });
   };
 
   // Animasi hover untuk Donation (05)
   const handleDonationHoverEnter = () => {
     setDonationHover(true);
-    
     gsap.set(featuresOverlay5Ref.current, { opacity: 1 });
+    gsap.to(updateContainer5Ref.current, { opacity: 1, x: 0, duration: 0.2 });
+    gsap.to(circleImages5Ref.current, { opacity: 1, x: 0, duration: 0.2 });
     
-    gsap.to(updateContainer5Ref.current, {
-      opacity: 1,
-      x: 0,
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
-    gsap.to(circleImages5Ref.current, {
-      opacity: 1,
-      x: 0,
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
-    gsap.to(featuresLeftNumber5Ref.current, {
-      color: '#ff3366',
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
-    gsap.to('.update-number', {
-      color: '#ff3366',
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
-    gsap.to(featuresRightText5Ref.current, {
-      color: '#ff3366',
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
+    const hoverColor = isFeaturesWhiteBg ? '#0000ff' : '#000000';
+    gsap.to(featuresLeftNumber5Ref.current, { color: hoverColor, duration: 0.2 });
+    gsap.to(featuresRightText5Ref.current, { color: hoverColor, duration: 0.2 });
     if (featuresArrow5Ref.current) {
-      gsap.to(featuresArrow5Ref.current, {
-        rotation: 0,
-        duration: 0.2,
-        ease: "back.out(0.6)"
-      });
-      gsap.to('.features-right-arrow-5 svg', {
-        stroke: '#ff3366',
-        duration: 0.2,
-        ease: "power2.out"
-      });
+      gsap.to(featuresArrow5Ref.current, { rotation: 0, duration: 0.2 });
+      gsap.to('.features-right-arrow-5 svg', { stroke: hoverColor, duration: 0.2 });
     }
-    
-    gsap.to([circleImg1_5Ref.current, circleImg2_5Ref.current], {
-      scale: 1.2,
-      duration: 0.2,
-      ease: "back.out(0.6)",
-      stagger: 0.05
-    });
+    gsap.to([circleImg1_5Ref.current, circleImg2_5Ref.current], { scale: 1.2, duration: 0.2, stagger: 0.05 });
   };
 
   const handleDonationHoverLeave = () => {
     setDonationHover(false);
-    
     gsap.set(featuresOverlay5Ref.current, { opacity: 0 });
+    gsap.to(updateContainer5Ref.current, { opacity: 0, x: 50, duration: 0.2 });
+    gsap.to(circleImages5Ref.current, { opacity: 0, x: 20, duration: 0.2 });
     
-    gsap.to(updateContainer5Ref.current, {
-      opacity: 0,
-      x: 50,
-      duration: 0.2,
-      ease: "power2.in"
-    });
-    
-    gsap.to(circleImages5Ref.current, {
-      opacity: 0,
-      x: 20,
-      duration: 0.2,
-      ease: "power2.in"
-    });
-    
-    if (isFeaturesWhiteBg) {
-      gsap.to(featuresLeftNumber5Ref.current, { color: '#000000', duration: 0.2 });
-      gsap.to('.update-number', { color: '#000000', duration: 0.2 });
-      gsap.to(featuresRightText5Ref.current, { color: '#000000', duration: 0.2 });
-      gsap.to('.features-right-arrow-5 svg', { stroke: '#000000', duration: 0.2 });
-    } else {
-      gsap.to(featuresLeftNumber5Ref.current, { color: '#ffffff', duration: 0.2 });
-      gsap.to('.update-number', { color: '#ffffff', duration: 0.2 });
-      gsap.to(featuresRightText5Ref.current, { color: '#ffffff', duration: 0.2 });
-      gsap.to('.features-right-arrow-5 svg', { stroke: '#ffffff', duration: 0.2 });
-    }
-    
+    const defaultColor = isFeaturesWhiteBg ? '#000000' : '#ffffff';
+    gsap.to(featuresLeftNumber5Ref.current, { color: defaultColor, duration: 0.2 });
+    gsap.to(featuresRightText5Ref.current, { color: defaultColor, duration: 0.2 });
     if (featuresArrow5Ref.current) {
-      gsap.to(featuresArrow5Ref.current, {
-        rotation: 45,
-        duration: 0.2,
-        ease: "back.inOut(0.6)"
-      });
+      gsap.to(featuresArrow5Ref.current, { rotation: 45, duration: 0.2 });
+      gsap.to('.features-right-arrow-5 svg', { stroke: defaultColor, duration: 0.2 });
     }
-    
-    gsap.to([circleImg1_5Ref.current, circleImg2_5Ref.current], {
-      scale: 1,
-      duration: 0.2,
-      ease: "power2.in"
-    });
+    gsap.to([circleImg1_5Ref.current, circleImg2_5Ref.current], { scale: 1, duration: 0.2 });
   };
 
   // Scroll snapping untuk carousel horizontal
@@ -919,140 +570,85 @@ export default function HomePage(): React.JSX.Element {
     };
   }, []);
 
-  // State untuk mengetahui apakah features section sedang dalam mode white bg
-  const [isFeaturesWhiteBg, setIsFeaturesWhiteBg] = useState(false);
-
-  // Efek scroll untuk FEATURES section - Background putih saat discroll melewati features
+  // Efek scroll untuk FEATURES section - Background berubah PUTIH saat discroll melewati section features
   useEffect(() => {
     if (isLoading) return;
 
-        const handleScroll = () => {
-          if (!featuresSectionRef.current || !trustedSectionRef.current) return;
-          
-          const scrollPosition = window.scrollY;
-          const trustedSectionTop = trustedSectionRef.current.offsetTop;
-          const trustedSectionHeight = trustedSectionRef.current.offsetHeight;
-          const featuresSectionBottom = featuresSectionRef.current.offsetTop + featuresSectionRef.current.offsetHeight;
-          
-          // Cek apakah sudah melewati features section dan masuk ke trusted section
-          const isPastFeatures = scrollPosition + window.innerHeight/2 > featuresSectionBottom;
-          const isInTrusted = scrollPosition + window.innerHeight/2 >= trustedSectionTop && 
-                               scrollPosition + window.innerHeight/2 <= trustedSectionTop + trustedSectionHeight;
-          
-          // Jika sudah melewati features atau di dalam trusted section
-          if (isPastFeatures || isInTrusted) {
-            if (!isFeaturesWhiteBg) {
-              setIsFeaturesWhiteBg(true);
-              // Ubah semua features section menjadi background putih
-              const allFeatures = [featuresSectionRef, featuresSection2Ref, featuresSection3Ref, featuresSection4Ref, featuresSection5Ref];
-              allFeatures.forEach(sectionRef => {
-                if (sectionRef.current) {
-                  gsap.to(sectionRef.current, {
-                    backgroundColor: '#ffffff',
-                    duration: 0.3,
-                    ease: "power2.inOut"
-                  });
-                }
-              });
-              // Ubah warna title menjadi hitam
-              gsap.to(featuresTitleRef.current, {
-                color: '#000000',
-                duration: 0.3,
-                ease: "power2.inOut"
-              });
-              // Ubah semua teks menjadi hitam
-              const allNumbers = [featuresLeftNumberRef, featuresLeftNumber2Ref, featuresLeftNumber3Ref, featuresLeftNumber4Ref, featuresLeftNumber5Ref];
-              allNumbers.forEach(numRef => {
-                if (numRef.current) {
-                  gsap.to(numRef.current, {
-                    color: '#000000',
-                    duration: 0.3,
-                    ease: "power2.inOut"
-                  });
-                }
-              });
-              const allTexts = [featuresRightTextRef, featuresRightText2Ref, featuresRightText3Ref, featuresRightText4Ref, featuresRightText5Ref];
-              allTexts.forEach(textRef => {
-                if (textRef.current) {
-                  gsap.to(textRef.current, {
-                    color: '#000000',
-                    duration: 0.3,
-                    ease: "power2.inOut"
-                  });
-                }
-              });
-              // Ubah warna arrow
-              gsap.to('.features-right-arrow svg, .features-right-arrow-2 svg, .features-right-arrow-3 svg, .features-right-arrow-4 svg, .features-right-arrow-5 svg', {
-                stroke: '#000000',
-                duration: 0.3,
-                ease: "power2.inOut"
-              });
-              // Ubah warna update-number
-              gsap.to('.update-number', {
-                color: '#000000',
-                duration: 0.3,
-                ease: "power2.inOut"
-              });
-            }
-          } else {
-            if (isFeaturesWhiteBg) {
-              setIsFeaturesWhiteBg(false);
-              // Kembalikan semua features section menjadi background biru
-              const allFeatures = [featuresSectionRef, featuresSection2Ref, featuresSection3Ref, featuresSection4Ref, featuresSection5Ref];
-              allFeatures.forEach(sectionRef => {
-                if (sectionRef.current) {
-                  gsap.to(sectionRef.current, {
-                    backgroundColor: '#0000ff',
-                    duration: 0.3,
-                    ease: "power2.inOut"
-                  });
-                }
-              });
-              // Ubah warna title menjadi putih
-              gsap.to(featuresTitleRef.current, {
-                color: '#ffffff',
-                duration: 0.3,
-                ease: "power2.inOut"
-              });
-              // Ubah semua teks menjadi putih
-              const allNumbers = [featuresLeftNumberRef, featuresLeftNumber2Ref, featuresLeftNumber3Ref, featuresLeftNumber4Ref, featuresLeftNumber5Ref];
-              allNumbers.forEach(numRef => {
-                if (numRef.current) {
-                  gsap.to(numRef.current, {
-                    color: '#ffffff',
-                    duration: 0.3,
-                    ease: "power2.inOut"
-                  });
-                }
-              });
-              const allTexts = [featuresRightTextRef, featuresRightText2Ref, featuresRightText3Ref, featuresRightText4Ref, featuresRightText5Ref];
-              allTexts.forEach(textRef => {
-                if (textRef.current) {
-                  gsap.to(textRef.current, {
-                    color: '#ffffff',
-                    duration: 0.3,
-                    ease: "power2.inOut"
-                  });
-                }
-              });
-              // Ubah warna arrow
-              gsap.to('.features-right-arrow svg, .features-right-arrow-2 svg, .features-right-arrow-3 svg, .features-right-arrow-4 svg, .features-right-arrow-5 svg', {
-                stroke: '#ffffff',
-                duration: 0.3,
-                ease: "power2.inOut"
-              });
-              // Ubah warna update-number
-              gsap.to('.update-number', {
-                color: '#ffffff',
-                duration: 0.3,
-                ease: "power2.inOut"
-              });
-            }
+    const handleScroll = () => {
+      if (!featuresSectionRef.current || !trustedSectionRef.current) return;
+      
+      const scrollPosition = window.scrollY;
+      const windowHeight = window.innerHeight;
+      const featuresSectionBottom = featuresSectionRef.current.offsetTop + featuresSectionRef.current.offsetHeight;
+      const trustedSectionTop = trustedSectionRef.current.offsetTop;
+      
+      // Jika sudah melewati features section (scroll ke bawah)
+      const isPastFeatures = scrollPosition + windowHeight/2 > featuresSectionBottom;
+      
+      if (isPastFeatures && !isFeaturesWhiteBg) {
+        setIsFeaturesWhiteBg(true);
+        // Ubah semua features section menjadi background putih
+        const allFeatures = [featuresSectionRef, featuresSection2Ref, featuresSection3Ref, featuresSection4Ref, featuresSection5Ref];
+        allFeatures.forEach(sectionRef => {
+          if (sectionRef.current) {
+            gsap.to(sectionRef.current, {
+              backgroundColor: '#ffffff',
+              duration: 0.3,
+              ease: "power2.inOut"
+            });
           }
-        };
+        });
+        // Ubah warna title menjadi hitam
+        gsap.to(featuresTitleRef.current, { color: '#000000', duration: 0.3 });
+        // Ubah semua teks menjadi hitam
+        const allNumbers = [featuresLeftNumberRef, featuresLeftNumber2Ref, featuresLeftNumber3Ref, featuresLeftNumber4Ref, featuresLeftNumber5Ref];
+        allNumbers.forEach(numRef => {
+          if (numRef.current) gsap.to(numRef.current, { color: '#000000', duration: 0.3 });
+        });
+        const allTexts = [featuresRightTextRef, featuresRightText2Ref, featuresRightText3Ref, featuresRightText4Ref, featuresRightText5Ref];
+        allTexts.forEach(textRef => {
+          if (textRef.current) gsap.to(textRef.current, { color: '#000000', duration: 0.3 });
+        });
+        // Ubah warna arrow menjadi hitam
+        gsap.to('.features-right-arrow svg, .features-right-arrow-2 svg, .features-right-arrow-3 svg, .features-right-arrow-4 svg, .features-right-arrow-5 svg', {
+          stroke: '#000000', duration: 0.3
+        });
+        gsap.to('.update-number', { color: '#000000', duration: 0.3 });
+        
+      } else if (!isPastFeatures && isFeaturesWhiteBg) {
+        setIsFeaturesWhiteBg(false);
+        // Kembalikan semua features section menjadi background biru
+        const allFeatures = [featuresSectionRef, featuresSection2Ref, featuresSection3Ref, featuresSection4Ref, featuresSection5Ref];
+        allFeatures.forEach(sectionRef => {
+          if (sectionRef.current) {
+            gsap.to(sectionRef.current, {
+              backgroundColor: '#0000ff',
+              duration: 0.3,
+              ease: "power2.inOut"
+            });
+          }
+        });
+        // Ubah warna title menjadi putih
+        gsap.to(featuresTitleRef.current, { color: '#ffffff', duration: 0.3 });
+        // Ubah semua teks menjadi putih
+        const allNumbers = [featuresLeftNumberRef, featuresLeftNumber2Ref, featuresLeftNumber3Ref, featuresLeftNumber4Ref, featuresLeftNumber5Ref];
+        allNumbers.forEach(numRef => {
+          if (numRef.current) gsap.to(numRef.current, { color: '#ffffff', duration: 0.3 });
+        });
+        const allTexts = [featuresRightTextRef, featuresRightText2Ref, featuresRightText3Ref, featuresRightText4Ref, featuresRightText5Ref];
+        allTexts.forEach(textRef => {
+          if (textRef.current) gsap.to(textRef.current, { color: '#ffffff', duration: 0.3 });
+        });
+        // Ubah warna arrow menjadi putih
+        gsap.to('.features-right-arrow svg, .features-right-arrow-2 svg, .features-right-arrow-3 svg, .features-right-arrow-4 svg, .features-right-arrow-5 svg', {
+          stroke: '#ffffff', duration: 0.3
+        });
+        gsap.to('.update-number', { color: '#ffffff', duration: 0.3 });
+      }
+    };
 
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, [isLoading, isFeaturesWhiteBg]);
 
   // Efek scroll untuk TRUSTED COLLABS section
@@ -1610,12 +1206,6 @@ export default function HomePage(): React.JSX.Element {
           transform-style: preserve-3d;
         }
 
-        .split-line {
-          display: block;
-          overflow: hidden;
-          will-change: transform, opacity, filter;
-        }
-
         .contact-btn-effect {
           position: relative;
           isolation: isolate;
@@ -1878,7 +1468,6 @@ export default function HomePage(): React.JSX.Element {
           padding: 40px 80px 40px 80px;
           box-sizing: border-box;
           overflow: visible;
-          border-bottom: 1px solid rgba(255,255,255,0.15);
         }
 
         .features-top {
@@ -1919,7 +1508,6 @@ export default function HomePage(): React.JSX.Element {
           color: #ffffff;
         }
 
-        /* Hover Container */
         .hover-container {
           position: relative;
           cursor: pointer;
@@ -1943,7 +1531,6 @@ export default function HomePage(): React.JSX.Element {
           color: #ffffff;
         }
 
-        /* Update container */
         .update-container {
           opacity: 0;
           transform: translateX(50px);
@@ -1968,7 +1555,6 @@ export default function HomePage(): React.JSX.Element {
           font-size: 35px;
         }
 
-        /* Arrow */
         .features-right-arrow {
           display: inline-flex;
           align-items: center;
@@ -1986,7 +1572,6 @@ export default function HomePage(): React.JSX.Element {
           stroke: #ffffff;
         }
 
-        /* Circle Images container */
         .circle-images-container {
           opacity: 0;
           transform: translateX(20px);
@@ -2010,7 +1595,6 @@ export default function HomePage(): React.JSX.Element {
           box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
 
-        /* Overlay hitam */
         .features-overlay {
           position: absolute;
           top: -20px;
@@ -2026,7 +1610,6 @@ export default function HomePage(): React.JSX.Element {
           width: calc(100% + 100vw + 200px);
         }
 
-        /* Hover container saat hover */
         .hover-container:hover .features-overlay {
           opacity: 1;
         }
@@ -2072,7 +1655,6 @@ export default function HomePage(): React.JSX.Element {
           margin-bottom: 60px;
         }
 
-        /* Carousel Horizontal Styles */
         .carousel-container {
           width: 100%;
           overflow-x: auto;
@@ -2319,7 +1901,6 @@ export default function HomePage(): React.JSX.Element {
                 MN'RU© - 26'
               </div>
 
-              {/* Floating Images */}
               <div className="studio-hover-images">
                 <div
                   ref={img1Ref}
@@ -2358,407 +1939,167 @@ export default function HomePage(): React.JSX.Element {
             </div>
 
             {/* SECTION FEATURES - 01 NOTE */}
-            <div
-              ref={featuresSectionRef}
-              className="features-section"
-            >
+            <div ref={featuresSectionRef} className="features-section">
               <div className="features-top">
-                <div
-                  ref={featuresTitleRef}
-                  className="features-title"
-                >
-                  Features
-                </div>
+                <div ref={featuresTitleRef} className="features-title">Features</div>
               </div>
               <div className="features-bottom">
-                <div
-                  ref={featuresLeftNumberRef}
-                  className="features-left-number"
-                >
-                  01
-                </div>
-                
+                <div ref={featuresLeftNumberRef} className="features-left-number">01</div>
                 <div 
                   ref={hoverContainerRef}
                   className="hover-container"
                   onMouseEnter={handleNoteHoverEnter}
                   onMouseLeave={handleNoteHoverLeave}
                 >
-                  <div
-                    ref={featuresRightTextRef}
-                    className="features-right-text"
-                  >
-                    Note
-                  </div>
-                  
+                  <div ref={featuresRightTextRef} className="features-right-text">Note</div>
                   <div ref={updateContainerRef} className="update-container">
-                    <div className="update-number">
-                      Update<sup>¹</sup>
-                    </div>
+                    <div className="update-number">Update<sup>¹</sup></div>
                   </div>
-                  
-                  <div 
-                    ref={featuresArrowRef}
-                    className="features-right-arrow"
-                  >
-                    {noteHover ? (
-                      <StraightLine size={50} />
-                    ) : (
-                      <NorthEastArrow size={50} />
-                    )}
+                  <div ref={featuresArrowRef} className="features-right-arrow">
+                    {noteHover ? <StraightLine size={50} /> : <NorthEastArrow size={50} />}
                   </div>
-                  
                   <div ref={circleImagesRef} className="circle-images-container">
-                    <div
-                      ref={circleImg1Ref}
-                      className="circle-img"
-                    >
-                      <Image
-                        src="/images/lkhh.jpg"
-                        alt="circle 1"
-                        fill
-                        style={{ objectFit: 'cover' }}
-                      />
+                    <div ref={circleImg1Ref} className="circle-img">
+                      <Image src="/images/lkhh.jpg" alt="circle 1" fill style={{ objectFit: 'cover' }} />
                     </div>
-                    <div
-                      ref={circleImg2Ref}
-                      className="circle-img"
-                    >
-                      <Image
-                        src="/images/ai.jpg"
-                        alt="circle 2"
-                        fill
-                        style={{ objectFit: 'cover' }}
-                      />
+                    <div ref={circleImg2Ref} className="circle-img">
+                      <Image src="/images/ai.jpg" alt="circle 2" fill style={{ objectFit: 'cover' }} />
                     </div>
                   </div>
-                  
                   <div ref={featuresOverlayRef} className="features-overlay" />
                 </div>
               </div>
             </div>
 
             {/* SECTION FEATURES - 02 COMMUNITY */}
-            <div
-              ref={featuresSection2Ref}
-              className="features-section"
-            >
+            <div ref={featuresSection2Ref} className="features-section">
               <div className="features-bottom">
-                <div
-                  ref={featuresLeftNumber2Ref}
-                  className="features-left-number"
-                >
-                  02
-                </div>
-                
+                <div ref={featuresLeftNumber2Ref} className="features-left-number">02</div>
                 <div 
                   ref={hoverContainer2Ref}
                   className="hover-container"
                   onMouseEnter={handleCommunityHoverEnter}
                   onMouseLeave={handleCommunityHoverLeave}
                 >
-                  <div
-                    ref={featuresRightText2Ref}
-                    className="features-right-text"
-                  >
-                    Community
-                  </div>
-                  
+                  <div ref={featuresRightText2Ref} className="features-right-text">Community</div>
                   <div ref={updateContainer2Ref} className="update-container">
-                    <div className="update-number">
-                      Join<sup>²</sup>
-                    </div>
+                    <div className="update-number">Join<sup>²</sup></div>
                   </div>
-                  
-                  <div 
-                    ref={featuresArrow2Ref}
-                    className="features-right-arrow"
-                  >
-                    {communityHover ? (
-                      <StraightLine size={50} />
-                    ) : (
-                      <NorthEastArrow size={50} />
-                    )}
+                  <div ref={featuresArrow2Ref} className="features-right-arrow">
+                    {communityHover ? <StraightLine size={50} /> : <NorthEastArrow size={50} />}
                   </div>
-                  
                   <div ref={circleImages2Ref} className="circle-images-container">
-                    <div
-                      ref={circleImg1_2Ref}
-                      className="circle-img"
-                    >
-                      <Image
-                        src="/images/ai.jpg"
-                        alt="circle 1"
-                        fill
-                        style={{ objectFit: 'cover' }}
-                      />
+                    <div ref={circleImg1_2Ref} className="circle-img">
+                      <Image src="/images/ai.jpg" alt="circle 1" fill style={{ objectFit: 'cover' }} />
                     </div>
-                    <div
-                      ref={circleImg2_2Ref}
-                      className="circle-img"
-                    >
-                      <Image
-                        src="/images/lkhh.jpg"
-                        alt="circle 2"
-                        fill
-                        style={{ objectFit: 'cover' }}
-                      />
+                    <div ref={circleImg2_2Ref} className="circle-img">
+                      <Image src="/images/lkhh.jpg" alt="circle 2" fill style={{ objectFit: 'cover' }} />
                     </div>
                   </div>
-                  
                   <div ref={featuresOverlay2Ref} className="features-overlay" />
                 </div>
               </div>
             </div>
 
             {/* SECTION FEATURES - 03 CALENDAR */}
-            <div
-              ref={featuresSection3Ref}
-              className="features-section"
-            >
+            <div ref={featuresSection3Ref} className="features-section">
               <div className="features-bottom">
-                <div
-                  ref={featuresLeftNumber3Ref}
-                  className="features-left-number"
-                >
-                  03
-                </div>
-                
+                <div ref={featuresLeftNumber3Ref} className="features-left-number">03</div>
                 <div 
                   ref={hoverContainer3Ref}
                   className="hover-container"
                   onMouseEnter={handleCalendarHoverEnter}
                   onMouseLeave={handleCalendarHoverLeave}
                 >
-                  <div
-                    ref={featuresRightText3Ref}
-                    className="features-right-text"
-                  >
-                    Calendar
-                  </div>
-                  
+                  <div ref={featuresRightText3Ref} className="features-right-text">Calendar</div>
                   <div ref={updateContainer3Ref} className="update-container">
-                    <div className="update-number">
-                      Schedule<sup>³</sup>
-                    </div>
+                    <div className="update-number">Schedule<sup>³</sup></div>
                   </div>
-                  
-                  <div 
-                    ref={featuresArrow3Ref}
-                    className="features-right-arrow"
-                  >
-                    {calendarHover ? (
-                      <StraightLine size={50} />
-                    ) : (
-                      <NorthEastArrow size={50} />
-                    )}
+                  <div ref={featuresArrow3Ref} className="features-right-arrow">
+                    {calendarHover ? <StraightLine size={50} /> : <NorthEastArrow size={50} />}
                   </div>
-                  
                   <div ref={circleImages3Ref} className="circle-images-container">
-                    <div
-                      ref={circleImg1_3Ref}
-                      className="circle-img"
-                    >
-                      <Image
-                        src="/images/5.jpg"
-                        alt="circle 1"
-                        fill
-                        style={{ objectFit: 'cover' }}
-                      />
+                    <div ref={circleImg1_3Ref} className="circle-img">
+                      <Image src="/images/5.jpg" alt="circle 1" fill style={{ objectFit: 'cover' }} />
                     </div>
-                    <div
-                      ref={circleImg2_3Ref}
-                      className="circle-img"
-                    >
-                      <Image
-                        src="/images/lkhh.jpg"
-                        alt="circle 2"
-                        fill
-                        style={{ objectFit: 'cover' }}
-                      />
+                    <div ref={circleImg2_3Ref} className="circle-img">
+                      <Image src="/images/lkhh.jpg" alt="circle 2" fill style={{ objectFit: 'cover' }} />
                     </div>
                   </div>
-                  
                   <div ref={featuresOverlay3Ref} className="features-overlay" />
                 </div>
               </div>
             </div>
 
             {/* SECTION FEATURES - 04 BLOG */}
-            <div
-              ref={featuresSection4Ref}
-              className="features-section"
-            >
+            <div ref={featuresSection4Ref} className="features-section">
               <div className="features-bottom">
-                <div
-                  ref={featuresLeftNumber4Ref}
-                  className="features-left-number"
-                >
-                  04
-                </div>
-                
+                <div ref={featuresLeftNumber4Ref} className="features-left-number">04</div>
                 <div 
                   ref={hoverContainer4Ref}
                   className="hover-container"
                   onMouseEnter={handleBlogHoverEnter}
                   onMouseLeave={handleBlogHoverLeave}
                 >
-                  <div
-                    ref={featuresRightText4Ref}
-                    className="features-right-text"
-                  >
-                    Blog
-                  </div>
-                  
+                  <div ref={featuresRightText4Ref} className="features-right-text">Blog</div>
                   <div ref={updateContainer4Ref} className="update-container">
-                    <div className="update-number">
-                      Read<sup>⁴</sup>
-                    </div>
+                    <div className="update-number">Read<sup>⁴</sup></div>
                   </div>
-                  
-                  <div 
-                    ref={featuresArrow4Ref}
-                    className="features-right-arrow"
-                  >
-                    {blogHover ? (
-                      <StraightLine size={50} />
-                    ) : (
-                      <NorthEastArrow size={50} />
-                    )}
+                  <div ref={featuresArrow4Ref} className="features-right-arrow">
+                    {blogHover ? <StraightLine size={50} /> : <NorthEastArrow size={50} />}
                   </div>
-                  
                   <div ref={circleImages4Ref} className="circle-images-container">
-                    <div
-                      ref={circleImg1_4Ref}
-                      className="circle-img"
-                    >
-                      <Image
-                        src="/images/ai.jpg"
-                        alt="circle 1"
-                        fill
-                        style={{ objectFit: 'cover' }}
-                      />
+                    <div ref={circleImg1_4Ref} className="circle-img">
+                      <Image src="/images/ai.jpg" alt="circle 1" fill style={{ objectFit: 'cover' }} />
                     </div>
-                    <div
-                      ref={circleImg2_4Ref}
-                      className="circle-img"
-                    >
-                      <Image
-                        src="/images/5.jpg"
-                        alt="circle 2"
-                        fill
-                        style={{ objectFit: 'cover' }}
-                      />
+                    <div ref={circleImg2_4Ref} className="circle-img">
+                      <Image src="/images/5.jpg" alt="circle 2" fill style={{ objectFit: 'cover' }} />
                     </div>
                   </div>
-                  
                   <div ref={featuresOverlay4Ref} className="features-overlay" />
                 </div>
               </div>
             </div>
 
             {/* SECTION FEATURES - 05 DONATION */}
-            <div
-              ref={featuresSection5Ref}
-              className="features-section"
-            >
+            <div ref={featuresSection5Ref} className="features-section">
               <div className="features-bottom">
-                <div
-                  ref={featuresLeftNumber5Ref}
-                  className="features-left-number"
-                >
-                  05
-                </div>
-                
+                <div ref={featuresLeftNumber5Ref} className="features-left-number">05</div>
                 <div 
                   ref={hoverContainer5Ref}
                   className="hover-container"
                   onMouseEnter={handleDonationHoverEnter}
                   onMouseLeave={handleDonationHoverLeave}
                 >
-                  <div
-                    ref={featuresRightText5Ref}
-                    className="features-right-text"
-                  >
-                    Donation
-                  </div>
-                  
+                  <div ref={featuresRightText5Ref} className="features-right-text">Donation</div>
                   <div ref={updateContainer5Ref} className="update-container">
-                    <div className="update-number">
-                      Support<sup>⁵</sup>
-                    </div>
+                    <div className="update-number">Support<sup>⁵</sup></div>
                   </div>
-                  
-                  <div 
-                    ref={featuresArrow5Ref}
-                    className="features-right-arrow"
-                  >
-                    {donationHover ? (
-                      <StraightLine size={50} />
-                    ) : (
-                      <NorthEastArrow size={50} />
-                    )}
+                  <div ref={featuresArrow5Ref} className="features-right-arrow">
+                    {donationHover ? <StraightLine size={50} /> : <NorthEastArrow size={50} />}
                   </div>
-                  
                   <div ref={circleImages5Ref} className="circle-images-container">
-                    <div
-                      ref={circleImg1_5Ref}
-                      className="circle-img"
-                    >
-                      <Image
-                        src="/images/lkhh.jpg"
-                        alt="circle 1"
-                        fill
-                        style={{ objectFit: 'cover' }}
-                      />
+                    <div ref={circleImg1_5Ref} className="circle-img">
+                      <Image src="/images/lkhh.jpg" alt="circle 1" fill style={{ objectFit: 'cover' }} />
                     </div>
-                    <div
-                      ref={circleImg2_5Ref}
-                      className="circle-img"
-                    >
-                      <Image
-                        src="/images/ai.jpg"
-                        alt="circle 2"
-                        fill
-                        style={{ objectFit: 'cover' }}
-                      />
+                    <div ref={circleImg2_5Ref} className="circle-img">
+                      <Image src="/images/ai.jpg" alt="circle 2" fill style={{ objectFit: 'cover' }} />
                     </div>
                   </div>
-                  
                   <div ref={featuresOverlay5Ref} className="features-overlay" />
                 </div>
               </div>
             </div>
 
             {/* SECTION TRUSTED COLLABS */}
-            <div
-              ref={trustedSectionRef}
-              className="trusted-section"
-              style={{
-                backgroundColor: '#ffffff',
-              }}
-            >
-              <div
-                ref={trustedTextRef}
-                className="trusted-text"
-              >
-                TRUSTED COLLABS
-              </div>
-
-              <div 
-                ref={carouselRef}
-                className="carousel-container"
-              >
+            <div ref={trustedSectionRef} className="trusted-section" style={{ backgroundColor: '#ffffff' }}>
+              <div ref={trustedTextRef} className="trusted-text">TRUSTED COLLABS</div>
+              <div ref={carouselRef} className="carousel-container">
                 <div className="carousel-track">
                   {carouselItems.map((item) => (
                     <div key={item.id} className="carousel-item">
                       <div className="carousel-image">
-                        <Image
-                          src={item.image}
-                          alt={item.brand}
-                          fill
-                          style={{ objectFit: 'cover' }}
-                        />
+                        <Image src={item.image} alt={item.brand} fill style={{ objectFit: 'cover' }} />
                       </div>
                       <h3 className="carousel-brand">{item.brand}</h3>
                       <p className="carousel-desc">{item.description}</p>
@@ -2768,7 +2109,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* Bagian footer - hanya berisi teks MENURU besar tanpa background hitam */}
+            {/* FOOTER */}
             <div style={{
               width: '100%',
               position: 'relative',
@@ -2779,103 +2120,42 @@ export default function HomePage(): React.JSX.Element {
               alignItems: 'center',
               minHeight: '60vh'
             }}>
-              <div
-                ref={bottomContentRef}
-                style={{
-                  width: '100%',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'flex-start',
-                  gap: '40px',
-                  marginBottom: '80px',
-                  paddingLeft: '80px',
-                  opacity: 0
-                }}
-              >
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px'
-                }}>
-                  <div 
-                    ref={mencatatTextRef}
-                    style={{
-                      fontSize: '64px',
-                      fontFamily: 'Questrial, sans-serif',
-                      color: 'black',
-                      textAlign: 'left',
-                      fontWeight: '400',
-                      letterSpacing: '-0.02em',
-                      lineHeight: '1.2',
-                      whiteSpace: 'nowrap'
-                    }}>
-                    Mencatat apa yang kamu inginkan
-                  </div>
-                  <span style={{
-                    fontSize: '80px',
-                    color: 'black',
-                    fontWeight: '400',
-                    lineHeight: '1'
-                  }}>.</span>
+              <div ref={bottomContentRef} style={{
+                width: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'flex-start',
+                gap: '40px',
+                marginBottom: '80px',
+                paddingLeft: '80px',
+                opacity: 0
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <div ref={mencatatTextRef} style={{
+                    fontSize: '64px', fontFamily: 'Questrial, sans-serif', color: 'black',
+                    textAlign: 'left', fontWeight: '400', letterSpacing: '-0.02em', lineHeight: '1.2', whiteSpace: 'nowrap'
+                  }}>Mencatat apa yang kamu inginkan</div>
+                  <span style={{ fontSize: '80px', color: 'black', fontWeight: '400', lineHeight: '1' }}>.</span>
                 </div>
 
                 <Link href="/contact">
-                  <button
-                    ref={contactBtnRef}
-                    onClick={handleContact}
-                    className="contact-btn-effect"
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '16px',
-                      padding: '14px 36px',
-                      borderRadius: '60px',
-                      cursor: 'pointer',
-                      fontSize: '20px',
-                      fontWeight: '600',
-                      letterSpacing: '-0.01em',
-                      fontFamily: 'Questrial, sans-serif',
-                      transition: 'all 0.3s ease',
-                      position: 'relative',
-                      overflow: 'hidden',
-                      zIndex: 1,
-                      border: '1.5px solid #cccccc',
-                      backgroundColor: '#ffffff',
-                      color: '#000000'
-                    }}
-                  >
+                  <button ref={contactBtnRef} onClick={handleContact} className="contact-btn-effect" style={{
+                    display: 'inline-flex', alignItems: 'center', gap: '16px', padding: '14px 36px',
+                    borderRadius: '60px', cursor: 'pointer', fontSize: '20px', fontWeight: '600',
+                    letterSpacing: '-0.01em', fontFamily: 'Questrial, sans-serif', transition: 'all 0.3s ease',
+                    position: 'relative', overflow: 'hidden', zIndex: 1, border: '1.5px solid #cccccc',
+                    backgroundColor: '#ffffff', color: '#000000'
+                  }}>
                     <span ref={contactTextRef}>Contact</span>
-                    
-                    <div style={{
-                      position: 'relative',
-                      width: '40px',
-                      height: '40px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}>
+                    <div style={{ position: 'relative', width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <div className="dot-small" style={{
-                        width: '8px',
-                        height: '8px',
-                        borderRadius: '50%',
-                        backgroundColor: '#000000',
-                        opacity: 1,
-                        transform: 'scale(1)',
-                        transition: 'opacity 0.3s ease, transform 0.3s ease',
+                        width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#000000',
+                        opacity: 1, transform: 'scale(1)', transition: 'opacity 0.3s ease, transform 0.3s ease',
                         position: 'absolute'
                       }}></div>
-                      
                       <div className="circle-large-white" style={{
-                        position: 'absolute',
-                        width: '40px',
-                        height: '40px',
-                        borderRadius: '50%',
-                        backgroundColor: '#000000',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        opacity: 0,
-                        transform: 'scale(0.8)',
+                        position: 'absolute', width: '40px', height: '40px', borderRadius: '50%', backgroundColor: '#000000',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0, transform: 'scale(0.8)',
                         transition: 'opacity 0.3s ease, transform 0.3s ease, background-color 0.3s ease'
                       }}>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -2886,205 +2166,62 @@ export default function HomePage(): React.JSX.Element {
                   </button>
                 </Link>
 
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '30px',
-                  flexWrap: 'wrap',
-                  width: '100%'
-                }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '30px', flexWrap: 'wrap', width: '100%' }}>
                   <div ref={callTextRef} className="call-farid-text">
                     <div>Ready to surpass your</div>
                     <div>wildest dreams?</div>
                     <div>Call Farid.</div>
                   </div>
-
                   <button ref={calendarBtnRef} onClick={handleCalendarCall} className="calendar-btn">
-                    <ArrowIcon size={24} />
-                    Calendar call
+                    <ArrowIcon size={24} /> Calendar call
                   </button>
                 </div>
 
-                <div
-                  ref={profileRef}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'flex-start',
-                    gap: '24px',
-                    width: '100%',
-                    marginTop: '10px'
-                  }}
-                >
-                  <div style={{
-                    width: '80px',
-                    height: '100px',
-                    borderRadius: '12px',
-                    overflow: 'hidden',
-                    position: 'relative',
-                    border: '2px solid #e0e0e0'
-                  }}>
-                    <Image
-                      src="/images/5.jpg"
-                      alt="Farid Ardiansyah"
-                      fill
-                      style={{ objectFit: 'cover', objectPosition: 'center' }}
-                    />
+                <div ref={profileRef} style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: '24px', width: '100%', marginTop: '10px' }}>
+                  <div style={{ width: '80px', height: '100px', borderRadius: '12px', overflow: 'hidden', position: 'relative', border: '2px solid #e0e0e0' }}>
+                    <Image src="/images/5.jpg" alt="Farid Ardiansyah" fill style={{ objectFit: 'cover', objectPosition: 'center' }} />
                   </div>
-
-                  <div style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '40px',
-                    fontWeight: '400',
-                    color: 'rgb(16, 16, 16)',
-                    letterSpacing: '-0.02em'
-                  }}>
-                    Farid Ardiansyah
-                  </div>
-
-                  <div className="badge-founder">
-                    Founder & Programmer
-                  </div>
+                  <div style={{ fontFamily: "'Questrial', sans-serif", fontSize: '40px', fontWeight: '400', color: 'rgb(16, 16, 16)', letterSpacing: '-0.02em' }}>Farid Ardiansyah</div>
+                  <div className="badge-founder">Founder & Programmer</div>
                 </div>
               </div>
 
               {/* Email dan Social Media Section */}
-              <div style={{
-                position: 'relative',
-                width: '100%',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'flex-end',
-                padding: '0 80px',
-                marginBottom: '30px',
-                boxSizing: 'border-box'
-              }}>
-                <div 
-                  ref={emailRef}
-                  onClick={handleEmailClick}
-                  className="email-wrapper"
-                  style={{ marginBottom: '20px' }}
-                >
+              <div style={{ position: 'relative', width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', padding: '0 80px', marginBottom: '30px', boxSizing: 'border-box' }}>
+                <div ref={emailRef} onClick={handleEmailClick} className="email-wrapper" style={{ marginBottom: '20px' }}>
                   <ArrowIcon size={24} />
                   <span className="email-text">contact.menuru@gmail.com</span>
                 </div>
-
-                <div style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '8px',
-                  position: 'absolute',
-                  left: '50%',
-                  transform: 'translateX(-50%)',
-                  marginBottom: '20px'
-                }}>
-                  <div 
-                    className="social-item"
-                    style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
-                    onMouseEnter={(e) => {
-                      const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                      if (textElement) handleSocialHover(textElement, originalTexts.ig);
-                    }}
-                    onMouseLeave={(e) => {
-                      const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                      if (textElement) handleSocialLeave(textElement, originalTexts.ig);
-                    }}
-                    onClick={() => handleSocialClick('Instagram')}
-                  >
-                    <span ref={igRef} className="social-text" style={{
-                      fontFamily: "'Questrial', sans-serif",
-                      fontSize: '28px',
-                      color: '#000000',
-                      fontWeight: '400',
-                      letterSpacing: '0.02em'
-                    }}>Instagram</span>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', position: 'absolute', left: '50%', transform: 'translateX(-50%)', marginBottom: '20px' }}>
+                  <div className="social-item" style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
+                    onMouseEnter={(e) => { const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement; if (textElement) handleSocialHover(textElement, originalTexts.ig); }}
+                    onMouseLeave={(e) => { const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement; if (textElement) handleSocialLeave(textElement, originalTexts.ig); }}
+                    onClick={() => handleSocialClick('Instagram')}>
+                    <span ref={igRef} className="social-text" style={{ fontFamily: "'Questrial', sans-serif", fontSize: '28px', color: '#000000', fontWeight: '400', letterSpacing: '0.02em' }}>Instagram</span>
                   </div>
-                  
-                  <div 
-                    className="social-item"
-                    style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
-                    onMouseEnter={(e) => {
-                      const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                      if (textElement) handleSocialHover(textElement, originalTexts.x);
-                    }}
-                    onMouseLeave={(e) => {
-                      const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                      if (textElement) handleSocialLeave(textElement, originalTexts.x);
-                    }}
-                    onClick={() => handleSocialClick('X')}
-                  >
-                    <span ref={xRef} className="social-text" style={{
-                      fontFamily: "'Questrial', sans-serif",
-                      fontSize: '28px',
-                      color: '#000000',
-                      fontWeight: '400',
-                      letterSpacing: '0.02em'
-                    }}>X</span>
+                  <div className="social-item" style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
+                    onMouseEnter={(e) => { const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement; if (textElement) handleSocialHover(textElement, originalTexts.x); }}
+                    onMouseLeave={(e) => { const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement; if (textElement) handleSocialLeave(textElement, originalTexts.x); }}
+                    onClick={() => handleSocialClick('X')}>
+                    <span ref={xRef} className="social-text" style={{ fontFamily: "'Questrial', sans-serif", fontSize: '28px', color: '#000000', fontWeight: '400', letterSpacing: '0.02em' }}>X</span>
                   </div>
-                  
-                  <div 
-                    className="social-item"
-                    style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
-                    onMouseEnter={(e) => {
-                      const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                      if (textElement) handleSocialHover(textElement, originalTexts.linkedin);
-                    }}
-                    onMouseLeave={(e) => {
-                      const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                      if (textElement) handleSocialLeave(textElement, originalTexts.linkedin);
-                    }}
-                    onClick={() => handleSocialClick('LinkedIn')}
-                  >
-                    <span ref={linkedinRef} className="social-text" style={{
-                      fontFamily: "'Questrial', sans-serif",
-                      fontSize: '28px',
-                      color: '#000000',
-                      fontWeight: '400',
-                      letterSpacing: '0.02em'
-                    }}>LinkedIn</span>
+                  <div className="social-item" style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
+                    onMouseEnter={(e) => { const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement; if (textElement) handleSocialHover(textElement, originalTexts.linkedin); }}
+                    onMouseLeave={(e) => { const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement; if (textElement) handleSocialLeave(textElement, originalTexts.linkedin); }}
+                    onClick={() => handleSocialClick('LinkedIn')}>
+                    <span ref={linkedinRef} className="social-text" style={{ fontFamily: "'Questrial', sans-serif", fontSize: '28px', color: '#000000', fontWeight: '400', letterSpacing: '0.02em' }}>LinkedIn</span>
                   </div>
                 </div>
               </div>
 
-              {/* Hanya teks MENURU besar tanpa background hitam */}
-              <footer style={{
-                position: 'relative',
-                bottom: 0,
-                left: 0,
-                right: 0,
-                width: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'flex-end',
-                padding: '0 80px 0 0',
-                margin: 0,
-                pointerEvents: 'none',
-                zIndex: 1,
-                marginTop: '40px'
-              }}>
-                <span 
-                  ref={menuruTextRef}
-                  style={{
-                    fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
-                    fontWeight: 'normal',
-                    fontSize: '600px',
-                    color: '#000000',
-                    textAlign: 'right',
-                    letterSpacing: '-0.02em',
-                    opacity: 1,
-                    textTransform: 'uppercase',
-                    lineHeight: '0.7',
-                    whiteSpace: 'nowrap',
-                    WebkitFontSmoothing: 'antialiased',
-                    MozOsxFontSmoothing: 'grayscale',
-                    fontKerning: 'normal',
-                    margin: 0,
-                    padding: 0,
-                    marginRight: '0',
-                    backgroundColor: 'transparent'
-                  }}>
-                  MENURU
-                </span>
+              <footer style={{ position: 'relative', bottom: 0, left: 0, right: 0, width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', padding: '0 80px 0 0', margin: 0, pointerEvents: 'none', zIndex: 1, marginTop: '40px' }}>
+                <span ref={menuruTextRef} style={{
+                  fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
+                  fontWeight: 'normal', fontSize: '600px', color: '#000000', textAlign: 'right',
+                  letterSpacing: '-0.02em', opacity: 1, textTransform: 'uppercase', lineHeight: '0.7',
+                  whiteSpace: 'nowrap', WebkitFontSmoothing: 'antialiased', MozOsxFontSmoothing: 'grayscale',
+                  fontKerning: 'normal', margin: 0, padding: 0, marginRight: '0', backgroundColor: 'transparent'
+                }}>MENURU</span>
               </footer>
             </div>
           </div>
@@ -3095,387 +2232,94 @@ export default function HomePage(): React.JSX.Element {
       {showCalendarModal && (
         <div className="calendar-modal-overlay">
           <div ref={modalRef} className="calendar-modal">
-            <div style={{
-              display: 'flex',
-              flexDirection: 'row',
-              height: '100%',
-              minHeight: '600px'
-            }}>
-              <div style={{
-                flex: 1.2,
-                padding: '32px',
-                borderRight: '1px solid #e0e0e0',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '28px'
-              }}>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '20px',
-                  paddingBottom: '20px',
-                  borderBottom: '1px solid #e0e0e0'
-                }}>
-                  <div style={{
-                    width: '70px',
-                    height: '90px',
-                    borderRadius: '12px',
-                    overflow: 'hidden',
-                    position: 'relative',
-                    border: '2px solid #e0e0e0'
-                  }}>
-                    <Image
-                      src="/images/5.jpg"
-                      alt="Farid Ardiansyah"
-                      fill
-                      style={{ objectFit: 'cover', objectPosition: 'center' }}
-                    />
+            <div style={{ display: 'flex', flexDirection: 'row', height: '100%', minHeight: '600px' }}>
+              <div style={{ flex: 1.2, padding: '32px', borderRight: '1px solid #e0e0e0', display: 'flex', flexDirection: 'column', gap: '28px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '20px', paddingBottom: '20px', borderBottom: '1px solid #e0e0e0' }}>
+                  <div style={{ width: '70px', height: '90px', borderRadius: '12px', overflow: 'hidden', position: 'relative', border: '2px solid #e0e0e0' }}>
+                    <Image src="/images/5.jpg" alt="Farid Ardiansyah" fill style={{ objectFit: 'cover', objectPosition: 'center' }} />
                   </div>
                   <div>
-                    <div style={{
-                      fontFamily: "'Questrial', sans-serif",
-                      fontSize: '28px',
-                      fontWeight: '600',
-                      color: '#000000'
-                    }}>Farid Ardiansyah</div>
-                    <div style={{
-                      fontFamily: "'Questrial', sans-serif",
-                      fontSize: '16px',
-                      color: '#666666'
-                    }}>Founder & Programmer</div>
+                    <div style={{ fontFamily: "'Questrial', sans-serif", fontSize: '28px', fontWeight: '600', color: '#000000' }}>Farid Ardiansyah</div>
+                    <div style={{ fontFamily: "'Questrial', sans-serif", fontSize: '16px', color: '#666666' }}>Founder & Programmer</div>
                   </div>
                 </div>
-
                 <div>
-                  <div style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '18px',
-                    fontWeight: '600',
-                    color: '#000000',
-                    marginBottom: '12px'
-                  }}>📋 Tentang Kerjasama</div>
-                  <div style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '14px',
-                    color: '#666666',
-                    lineHeight: '1.6'
-                  }}>
-                    Diskusi tentang kolaborasi pengembangan website, aplikasi mobile, 
-                    atau konsultasi teknologi. Saya siap membantu mewujudkan ide digital Anda!
-                  </div>
+                  <div style={{ fontFamily: "'Questrial', sans-serif", fontSize: '18px', fontWeight: '600', color: '#000000', marginBottom: '12px' }}>📋 Tentang Kerjasama</div>
+                  <div style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', color: '#666666', lineHeight: '1.6' }}>Diskusi tentang kolaborasi pengembangan website, aplikasi mobile, atau konsultasi teknologi. Saya siap membantu mewujudkan ide digital Anda!</div>
                 </div>
-
                 <div>
-                  <div style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '16px',
-                    fontWeight: '600',
-                    color: '#000000',
-                    marginBottom: '8px'
-                  }}>⏱️ Waktu Tunggu Respon</div>
-                  <div style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '14px',
-                    color: '#c5e800',
-                    backgroundColor: '#1a1a1a',
-                    display: 'inline-block',
-                    padding: '6px 16px',
-                    borderRadius: '60px'
-                  }}>Maksimal 1x24 jam</div>
+                  <div style={{ fontFamily: "'Questrial', sans-serif", fontSize: '16px', fontWeight: '600', color: '#000000', marginBottom: '8px' }}>⏱️ Waktu Tunggu Respon</div>
+                  <div style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', color: '#c5e800', backgroundColor: '#1a1a1a', display: 'inline-block', padding: '6px 16px', borderRadius: '60px' }}>Maksimal 1x24 jam</div>
                 </div>
-
                 <div>
-                  <div style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '16px',
-                    fontWeight: '600',
-                    color: '#000000',
-                    marginBottom: '12px'
-                  }}>📍 Tipe Meeting</div>
+                  <div style={{ fontFamily: "'Questrial', sans-serif", fontSize: '16px', fontWeight: '600', color: '#000000', marginBottom: '12px' }}>📍 Tipe Meeting</div>
                   <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
                     {["Online", "Offline", "Hybrid"].map((type) => (
-                      <button
-                        key={type}
-                        onClick={() => setMeetingType(type)}
-                        style={{
-                          padding: '10px 24px',
-                          borderRadius: '60px',
-                          border: meetingType === type ? '2px solid #000000' : '1px solid #cccccc',
-                          backgroundColor: meetingType === type ? '#000000' : '#ffffff',
-                          color: meetingType === type ? '#ffffff' : '#000000',
-                          cursor: 'pointer',
-                          fontFamily: "'Questrial', sans-serif",
-                          fontSize: '14px',
-                          fontWeight: '500',
-                          transition: 'all 0.2s ease'
-                        }}
-                      >
-                        {type}
-                      </button>
+                      <button key={type} onClick={() => setMeetingType(type)} style={{
+                        padding: '10px 24px', borderRadius: '60px', border: meetingType === type ? '2px solid #000000' : '1px solid #cccccc',
+                        backgroundColor: meetingType === type ? '#000000' : '#ffffff', color: meetingType === type ? '#ffffff' : '#000000',
+                        cursor: 'pointer', fontFamily: "'Questrial', sans-serif", fontSize: '14px', fontWeight: '500', transition: 'all 0.2s ease'
+                      }}>{type}</button>
                     ))}
                   </div>
                 </div>
-
                 <div>
-                  <div style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '16px',
-                    fontWeight: '600',
-                    color: '#000000',
-                    marginBottom: '8px'
-                  }}>📍 Lokasi (opsional)</div>
-                  <input
-                    type="text"
-                    placeholder="Kota / Alamat lengkap"
-                    value={location}
-                    onChange={(e) => setLocation(e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '12px 16px',
-                      borderRadius: '12px',
-                      border: '1px solid #cccccc',
-                      fontFamily: "'Questrial', sans-serif",
-                      fontSize: '14px',
-                      outline: 'none'
-                    }}
-                  />
+                  <div style={{ fontFamily: "'Questrial', sans-serif", fontSize: '16px', fontWeight: '600', color: '#000000', marginBottom: '8px' }}>📍 Lokasi (opsional)</div>
+                  <input type="text" placeholder="Kota / Alamat lengkap" value={location} onChange={(e) => setLocation(e.target.value)} style={{
+                    width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #cccccc',
+                    fontFamily: "'Questrial', sans-serif", fontSize: '14px', outline: 'none'
+                  }} />
                 </div>
               </div>
 
-              <div style={{
-                flex: 2,
-                padding: '32px',
-                borderRight: '1px solid #e0e0e0',
-                overflowY: 'auto'
-              }}>
-                <div style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  marginBottom: '24px'
-                }}>
-                  <button
-                    onClick={() => changeMonth(-1)}
-                    style={{
-                      padding: '8px 16px',
-                      borderRadius: '8px',
-                      border: '1px solid #cccccc',
-                      backgroundColor: '#ffffff',
-                      cursor: 'pointer',
-                      fontFamily: "'Questrial', sans-serif"
-                    }}
-                  >
-                    ← Prev
-                  </button>
-                  <div style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '20px',
-                    fontWeight: '600',
-                    color: '#000000'
-                  }}>
-                    {currentMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}
-                  </div>
-                  <button
-                    onClick={() => changeMonth(1)}
-                    style={{
-                      padding: '8px 16px',
-                      borderRadius: '8px',
-                      border: '1px solid #cccccc',
-                      backgroundColor: '#ffffff',
-                      cursor: 'pointer',
-                      fontFamily: "'Questrial', sans-serif"
-                    }}
-                  >
-                    Next →
-                  </button>
+              <div style={{ flex: 2, padding: '32px', borderRight: '1px solid #e0e0e0', overflowY: 'auto' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                  <button onClick={() => changeMonth(-1)} style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid #cccccc', backgroundColor: '#ffffff', cursor: 'pointer', fontFamily: "'Questrial', sans-serif" }}>← Prev</button>
+                  <div style={{ fontFamily: "'Questrial', sans-serif", fontSize: '20px', fontWeight: '600', color: '#000000' }}>{currentMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}</div>
+                  <button onClick={() => changeMonth(1)} style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid #cccccc', backgroundColor: '#ffffff', cursor: 'pointer', fontFamily: "'Questrial', sans-serif" }}>Next →</button>
                 </div>
-
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(7, 1fr)',
-                  gap: '8px',
-                  marginBottom: '12px'
-                }}>
-                  {weekDays.map((day) => (
-                    <div key={day} style={{
-                      textAlign: 'center',
-                      fontFamily: "'Questrial', sans-serif",
-                      fontSize: '14px',
-                      fontWeight: '600',
-                      color: '#999999',
-                      padding: '8px'
-                    }}>
-                      {day}
-                    </div>
-                  ))}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '8px', marginBottom: '12px' }}>
+                  {weekDays.map((day) => (<div key={day} style={{ textAlign: 'center', fontFamily: "'Questrial', sans-serif", fontSize: '14px', fontWeight: '600', color: '#999999', padding: '8px' }}>{day}</div>))}
                 </div>
-
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(7, 1fr)',
-                  gap: '8px'
-                }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '8px' }}>
                   {days.map((date, index) => (
-                    <div
-                      key={index}
-                      onClick={() => date && handleDateSelect(date)}
-                      className="calendar-day"
-                      style={{
-                        textAlign: 'center',
-                        padding: '12px 8px',
-                        backgroundColor: date ? getDayColor(date) : 'transparent',
-                        color: date ? '#ffffff' : 'transparent',
-                        cursor: date ? 'pointer' : 'default',
-                        fontWeight: date ? '600' : 'normal',
-                        borderRadius: '12px',
-                        opacity: date ? 1 : 0.3,
-                        boxShadow: selectedDate?.toDateString() === date?.toDateString() ? '0 0 0 3px #000000' : 'none'
-                      }}
-                    >
-                      {date ? date.getDate() : ''}
-                    </div>
+                    <div key={index} onClick={() => date && handleDateSelect(date)} className="calendar-day" style={{
+                      textAlign: 'center', padding: '12px 8px', backgroundColor: date ? getDayColor(date) : 'transparent',
+                      color: date ? '#ffffff' : 'transparent', cursor: date ? 'pointer' : 'default', fontWeight: date ? '600' : 'normal',
+                      borderRadius: '12px', opacity: date ? 1 : 0.3, boxShadow: selectedDate?.toDateString() === date?.toDateString() ? '0 0 0 3px #000000' : 'none'
+                    }}>{date ? date.getDate() : ''}</div>
                   ))}
                 </div>
-
                 {selectedDate && (
                   <div style={{ marginTop: '32px' }}>
-                    <div style={{
-                      fontFamily: "'Questrial', sans-serif",
-                      fontSize: '16px',
-                      fontWeight: '600',
-                      color: '#000000',
-                      marginBottom: '16px'
-                    }}>
-                      Pilih Waktu untuk {selectedDate.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' })}
-                    </div>
+                    <div style={{ fontFamily: "'Questrial', sans-serif", fontSize: '16px', fontWeight: '600', color: '#000000', marginBottom: '16px' }}>Pilih Waktu untuk {selectedDate.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' })}</div>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
                       {timeSlots.map((time) => (
-                        <button
-                          key={time}
-                          onClick={() => setSelectedTime(time)}
-                          className="time-slot"
-                          style={{
-                            padding: '10px 20px',
-                            borderRadius: '60px',
-                            border: selectedTime === time ? '2px solid #000000' : '1px solid #cccccc',
-                            backgroundColor: selectedTime === time ? '#000000' : '#ffffff',
-                            color: selectedTime === time ? '#ffffff' : '#000000',
-                            cursor: 'pointer',
-                            fontFamily: "'Questrial', sans-serif",
-                            fontSize: '14px',
-                            fontWeight: '500'
-                          }}
-                        >
-                          {time} WIB
-                        </button>
+                        <button key={time} onClick={() => setSelectedTime(time)} className="time-slot" style={{
+                          padding: '10px 20px', borderRadius: '60px', border: selectedTime === time ? '2px solid #000000' : '1px solid #cccccc',
+                          backgroundColor: selectedTime === time ? '#000000' : '#ffffff', color: selectedTime === time ? '#ffffff' : '#000000',
+                          cursor: 'pointer', fontFamily: "'Questrial', sans-serif", fontSize: '14px', fontWeight: '500'
+                        }}>{time} WIB</button>
                       ))}
                     </div>
                   </div>
                 )}
               </div>
 
-              <div style={{
-                flex: 1,
-                padding: '32px',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '24px'
-              }}>
-                <div style={{
-                  fontFamily: "'Questrial', sans-serif",
-                  fontSize: '20px',
-                  fontWeight: '700',
-                  color: '#000000',
-                  paddingBottom: '12px',
-                  borderBottom: '2px solid #e0e0e0'
-                }}>
-                  📅 Jadwal Mendatang
+              <div style={{ flex: 1, padding: '32px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                <div style={{ fontFamily: "'Questrial', sans-serif", fontSize: '20px', fontWeight: '700', color: '#000000', paddingBottom: '12px', borderBottom: '2px solid #e0e0e0' }}>📅 Jadwal Mendatang</div>
+                <div style={{ padding: '16px', backgroundColor: '#c5e800', borderRadius: '20px', color: '#000000' }}>
+                  <div style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', fontWeight: '600', marginBottom: '8px' }}>🌟 Besok</div>
+                  <div style={{ fontFamily: "'Questrial', sans-serif", fontSize: '24px', fontWeight: '700', marginBottom: '4px' }}>{tomorrow.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</div>
+                  <div style={{ fontFamily: "'Questrial', sans-serif", fontSize: '18px', fontWeight: '500' }}>{timeSlots[2]} - {timeSlots[4]} WIB</div>
+                  <div style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', marginTop: '8px', opacity: 0.8 }}>⚡ Slot terbaik</div>
                 </div>
-
-                <div style={{
-                  padding: '16px',
-                  backgroundColor: '#c5e800',
-                  borderRadius: '20px',
-                  color: '#000000'
-                }}>
-                  <div style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    marginBottom: '8px'
-                  }}>🌟 Besok</div>
-                  <div style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '24px',
-                    fontWeight: '700',
-                    marginBottom: '4px'
-                  }}>
-                    {tomorrow.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
-                  </div>
-                  <div style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '18px',
-                    fontWeight: '500'
-                  }}>
-                    {timeSlots[2]} - {timeSlots[4]} WIB
-                  </div>
-                  <div style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '14px',
-                    marginTop: '8px',
-                    opacity: 0.8
-                  }}>⚡ Slot terbaik</div>
+                <div style={{ padding: '16px', backgroundColor: '#ff69b4', borderRadius: '20px', color: '#ffffff' }}>
+                  <div style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', fontWeight: '600', marginBottom: '8px' }}>💫 Lusa</div>
+                  <div style={{ fontFamily: "'Questrial', sans-serif", fontSize: '20px', fontWeight: '700', marginBottom: '4px' }}>{dayAfterTomorrow.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</div>
+                  <div style={{ fontFamily: "'Questrial', sans-serif", fontSize: '16px', fontWeight: '500' }}>{timeSlots[1]} - {timeSlots[3]} WIB</div>
                 </div>
-
-                <div style={{
-                  padding: '16px',
-                  backgroundColor: '#ff69b4',
-                  borderRadius: '20px',
-                  color: '#ffffff'
-                }}>
-                  <div style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    marginBottom: '8px'
-                  }}>💫 Lusa</div>
-                  <div style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '20px',
-                    fontWeight: '700',
-                    marginBottom: '4px'
-                  }}>
-                    {dayAfterTomorrow.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
-                  </div>
-                  <div style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '16px',
-                    fontWeight: '500'
-                  }}>
-                    {timeSlots[1]} - {timeSlots[3]} WIB
-                  </div>
-                </div>
-
-                <button
-                  onClick={handleScheduleMeeting}
-                  style={{
-                    marginTop: 'auto',
-                    padding: '14px 24px',
-                    backgroundColor: '#000000',
-                    color: '#ffffff',
-                    border: 'none',
-                    borderRadius: '60px',
-                    cursor: 'pointer',
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '16px',
-                    fontWeight: '600',
-                    transition: 'all 0.3s ease'
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
-                  onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
-                >
-                  Schedule Meeting →
-                </button>
+                <button onClick={handleScheduleMeeting} style={{ marginTop: 'auto', padding: '14px 24px', backgroundColor: '#000000', color: '#ffffff', border: 'none', borderRadius: '60px', cursor: 'pointer', fontFamily: "'Questrial', sans-serif", fontSize: '16px', fontWeight: '600', transition: 'all 0.3s ease' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>Schedule Meeting →</button>
               </div>
             </div>
           </div>
@@ -3484,129 +2328,20 @@ export default function HomePage(): React.JSX.Element {
 
       {/* Cookie Popup */}
       {showPopup && !isLoading && (
-        <div style={{
-          position: 'fixed',
-          bottom: '30px',
-          left: '30px',
-          right: '30px',
-          backgroundColor: '#000000',
-          color: '#ffffff',
-          borderRadius: '32px',
-          padding: '28px 40px',
-          boxShadow: '0 20px 40px rgba(0,0,0,0.3), 0 5px 12px rgba(0,0,0,0.1)',
-          zIndex: 1000,
-          fontFamily: 'Questrial, sans-serif',
-          animation: 'slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
-          border: '1px solid rgba(255,255,255,0.1)',
-          display: 'flex',
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: '40px',
-          flexWrap: 'wrap',
-        }}>
+        <div style={{ position: 'fixed', bottom: '30px', left: '30px', right: '30px', backgroundColor: '#000000', color: '#ffffff', borderRadius: '32px', padding: '28px 40px', boxShadow: '0 20px 40px rgba(0,0,0,0.3), 0 5px 12px rgba(0,0,0,0.1)', zIndex: 1000, fontFamily: 'Questrial, sans-serif', animation: 'slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1)', border: '1px solid rgba(255,255,255,0.1)', display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: '40px', flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', flex: 1 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <span style={{ fontSize: '48px', display: 'inline-block' }}>🍪</span>
-              <span style={{ 
-                fontWeight: '700', 
-                fontSize: '32px',
-                letterSpacing: '-0.02em',
-                background: 'linear-gradient(135deg, #ffffff 0%, #cccccc 100%)',
-                backgroundClip: 'text',
-                WebkitBackgroundClip: 'text',
-                color: 'transparent',
-                fontFamily: 'Questrial, sans-serif'
-              }}>Cookies Notice</span>
+              <span style={{ fontWeight: '700', fontSize: '32px', letterSpacing: '-0.02em', background: 'linear-gradient(135deg, #ffffff 0%, #cccccc 100%)', backgroundClip: 'text', WebkitBackgroundClip: 'text', color: 'transparent', fontFamily: 'Questrial, sans-serif' }}>Cookies Notice</span>
             </div>
-            
-            <p style={{
-              fontSize: '18px',
-              lineHeight: '1.5',
-              marginBottom: 0,
-              color: '#ffffff',
-              fontWeight: '400',
-              letterSpacing: '-0.01em',
-              maxWidth: '600px',
-              fontFamily: 'Questrial, sans-serif'
-            }}>
-              This site uses cookies to provide you with the best user experience. 
-              By using this website, you accept our use of cookies.
-            </p>
-            
+            <p style={{ fontSize: '18px', lineHeight: '1.5', marginBottom: 0, color: '#ffffff', fontWeight: '400', letterSpacing: '-0.01em', maxWidth: '600px', fontFamily: 'Questrial, sans-serif' }}>This site uses cookies to provide you with the best user experience. By using this website, you accept our use of cookies.</p>
             <Link href="/privacy-policy" passHref>
-              <span 
-                className="cookie-link"
-                style={{ 
-                  color: '#aaaaaa', 
-                  fontSize: '16px', 
-                  display: 'inline-flex', 
-                  alignItems: 'center', 
-                  gap: '6px',
-                  marginTop: '4px',
-                  cursor: 'pointer',
-                  textDecoration: 'underline',
-                  fontFamily: 'Questrial, sans-serif',
-                  fontWeight: '500'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.color = '#ffffff'}
-                onMouseLeave={(e) => e.currentTarget.style.color = '#aaaaaa'}
-              >
-                Show details
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </span>
+              <span className="cookie-link" style={{ color: '#aaaaaa', fontSize: '16px', display: 'inline-flex', alignItems: 'center', gap: '6px', marginTop: '4px', cursor: 'pointer', textDecoration: 'underline', fontFamily: 'Questrial, sans-serif', fontWeight: '500' }} onMouseEnter={(e) => e.currentTarget.style.color = '#ffffff'} onMouseLeave={(e) => e.currentTarget.style.color = '#aaaaaa'}>Show details<svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg></span>
             </Link>
           </div>
-          
           <div style={{ display: 'flex', gap: '16px', justifyContent: 'flex-start', flexShrink: 0 }}>
-            <button
-              ref={declineBtnRef}
-              onClick={handleDecline}
-              style={{
-                padding: '12px 28px',
-                backgroundColor: '#000000',
-                color: '#ffffff',
-                border: '1.5px solid #333333',
-                borderRadius: '60px',
-                cursor: 'pointer',
-                fontSize: '16px',
-                fontWeight: '600',
-                letterSpacing: '-0.01em',
-                fontFamily: 'Questrial, sans-serif',
-                transition: 'all 0.2s ease',
-                position: 'relative',
-                overflow: 'hidden',
-                zIndex: 1,
-                background: '#000000'
-              }}
-            >
-              Decline
-            </button>
-            <button
-              ref={acceptBtnRef}
-              onClick={handleAccept}
-              style={{
-                padding: '12px 28px',
-                backgroundColor: '#000000',
-                color: '#ffffff',
-                border: '1.5px solid #ffffff',
-                borderRadius: '60px',
-                cursor: 'pointer',
-                fontSize: '16px',
-                fontWeight: '600',
-                letterSpacing: '-0.01em',
-                fontFamily: 'Questrial, sans-serif',
-                transition: 'all 0.2s ease',
-                position: 'relative',
-                overflow: 'hidden',
-                zIndex: 1,
-                background: '#000000'
-              }}
-            >
-              Accept
-            </button>
+            <button ref={declineBtnRef} onClick={handleDecline} style={{ padding: '12px 28px', backgroundColor: '#000000', color: '#ffffff', border: '1.5px solid #333333', borderRadius: '60px', cursor: 'pointer', fontSize: '16px', fontWeight: '600', letterSpacing: '-0.01em', fontFamily: 'Questrial, sans-serif', transition: 'all 0.2s ease', position: 'relative', overflow: 'hidden', zIndex: 1, background: '#000000' }}>Decline</button>
+            <button ref={acceptBtnRef} onClick={handleAccept} style={{ padding: '12px 28px', backgroundColor: '#000000', color: '#ffffff', border: '1.5px solid #ffffff', borderRadius: '60px', cursor: 'pointer', fontSize: '16px', fontWeight: '600', letterSpacing: '-0.01em', fontFamily: 'Questrial, sans-serif', transition: 'all 0.2s ease', position: 'relative', overflow: 'hidden', zIndex: 1, background: '#000000' }}>Accept</button>
           </div>
         </div>
       )}
