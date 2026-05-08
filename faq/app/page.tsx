@@ -1,4 +1,4 @@
-// app/page.tsx (Halaman Utama) - Features section lengkap dengan 5 item (design sama persis)
+// app/page.tsx (Halaman Utama) - dengan fitur Shadow Page hitam di footer
 
 'use client';
 
@@ -35,6 +35,12 @@ export default function HomePage(): React.JSX.Element {
   // State untuk warna background section Features
   const [featuresBgColor, setFeaturesBgColor] = useState('#0000ff');
   const [featuresTextColor, setFeaturesTextColor] = useState('#ffffff');
+  
+  // State untuk Shadow Page (halaman bayangan hitam)
+  const [showShadowPage, setShowShadowPage] = useState(false);
+  const [isShadowTransitioning, setIsShadowTransitioning] = useState(false);
+  const shadowPageRef = useRef<HTMLDivElement>(null);
+  const mainContentWrapperRef = useRef<HTMLDivElement>(null);
   
   const acceptBtnRef = useRef<HTMLButtonElement>(null);
   const declineBtnRef = useRef<HTMLButtonElement>(null);
@@ -969,6 +975,76 @@ export default function HomePage(): React.JSX.Element {
     });
   };
 
+  // Effect untuk Shadow Page (deteksi scroll di bagian footer)
+  useEffect(() => {
+    if (isLoading) return;
+
+    const handleShadowPageScroll = () => {
+      if (!mainContentRef.current || !shadowPageRef.current) return;
+      
+      const scrollY = window.scrollY;
+      const windowHeight = window.innerHeight;
+      const documentHeight = document.documentElement.scrollHeight;
+      const distanceToBottom = documentHeight - (scrollY + windowHeight);
+      const threshold = 100; // Jarak threshold untuk memicu
+      
+      // Cek apakah sudah hampir sampai bawah
+      const shouldShowShadow = distanceToBottom <= threshold;
+      
+      if (shouldShowShadow && !showShadowPage && !isShadowTransitioning) {
+        // Tampilkan shadow page dengan animasi lambat
+        setIsShadowTransitioning(true);
+        setShowShadowPage(true);
+        
+        // Animate shadow page muncul dari bawah
+        gsap.set(shadowPageRef.current, { y: "100%" });
+        gsap.to(shadowPageRef.current, {
+          y: "0%",
+          duration: 0.8,
+          ease: "power3.inOut",
+          onComplete: () => {
+            setIsShadowTransitioning(false);
+          }
+        });
+        
+        // Animate main content sedikit ke atas (opsional)
+        gsap.to(mainContentRef.current, {
+          y: "-5vh",
+          duration: 0.6,
+          ease: "power2.inOut"
+        });
+        
+      } else if (!shouldShowShadow && showShadowPage && !isShadowTransitioning) {
+        // Sembunyikan shadow page dengan animasi lambat saat scroll ke atas
+        setIsShadowTransitioning(true);
+        
+        // Animate main content kembali
+        gsap.to(mainContentRef.current, {
+          y: "0%",
+          duration: 0.6,
+          ease: "power2.inOut"
+        });
+        
+        // Animate shadow page keluar
+        gsap.to(shadowPageRef.current, {
+          y: "100%",
+          duration: 0.8,
+          ease: "power3.inOut",
+          onComplete: () => {
+            setShowShadowPage(false);
+            setIsShadowTransitioning(false);
+          }
+        });
+      }
+    };
+    
+    window.addEventListener('scroll', handleShadowPageScroll);
+    
+    return () => {
+      window.removeEventListener('scroll', handleShadowPageScroll);
+    };
+  }, [isLoading, showShadowPage, isShadowTransitioning]);
+
   useEffect(() => {
     if (isLoading) return;
     
@@ -1823,6 +1899,12 @@ export default function HomePage(): React.JSX.Element {
         @keyframes modalFadeIn {
           from { opacity: 0; transform: scale(0.95); }
           to { opacity: 1; transform: scale(1); }
+        }
+
+        /* Animasi untuk Shadow Page fade in */
+        @keyframes shadowFadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
         }
 
         .call-farid-text {
@@ -3232,6 +3314,25 @@ export default function HomePage(): React.JSX.Element {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* SHADOW PAGE - Halaman bayangan hitam full tanpa design */}
+      <div
+        ref={shadowPageRef}
+        style={{
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          width: '100%',
+          height: '100vh',
+          backgroundColor: '#000000',
+          zIndex: 9998,
+          transform: 'translateY(100%)',
+          pointerEvents: showShadowPage ? 'auto' : 'none',
+        }}
+      >
+        {/* Konten shadow page bisa ditambahkan di sini jika diperlukan */}
+        {/* Biarkan kosong untuk halaman bayangan hitam penuh tanpa design */}
       </div>
 
       {/* Calendar Call Modal */}
