@@ -1,4 +1,4 @@
-// app/page.tsx (Halaman Utama) - Dengan fitur 2 halaman (Putih & Hitam)
+// app/page.tsx (Halaman Utama dengan 2 halaman: Putih & Hitam Polos)
 
 'use client';
 
@@ -32,7 +32,7 @@ export default function HomePage(): React.JSX.Element {
   const [blogHover, setBlogHover] = useState(false);
   const [donationHover, setDonationHover] = useState(false);
   
-  // NEW: State untuk mengontrol halaman mana yang aktif (putih atau hitam)
+  // State untuk mengontrol halaman mana yang aktif (putih atau hitam)
   const [isBlackPageActive, setIsBlackPageActive] = useState(false);
   
   // State untuk warna background section Features
@@ -47,7 +47,7 @@ export default function HomePage(): React.JSX.Element {
   const modalRef = useRef<HTMLDivElement>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
   
-  // NEW: Refs untuk kedua halaman
+  // Refs untuk kedua halaman
   const whitePageRef = useRef<HTMLDivElement>(null);
   const blackPageRef = useRef<HTMLDivElement>(null);
   
@@ -137,13 +137,6 @@ export default function HomePage(): React.JSX.Element {
   const circleImg2_4Ref = useRef<HTMLDivElement>(null);
   const circleImg1_5Ref = useRef<HTMLDivElement>(null);
   const circleImg2_5Ref = useRef<HTMLDivElement>(null);
-
-  // NEW: Refs untuk black page panels
-  const blackPanel1Ref = useRef<HTMLDivElement>(null);
-  const blackPanel2Ref = useRef<HTMLDivElement>(null);
-  const blackPanel3Ref = useRef<HTMLDivElement>(null);
-  const blackPanel4Ref = useRef<HTMLDivElement>(null);
-  const blackPanel5Ref = useRef<HTMLDivElement>(null);
 
   const carouselItems = [
     {
@@ -243,53 +236,57 @@ export default function HomePage(): React.JSX.Element {
     setCurrentMonth(newDate);
   };
 
-  // NEW: Fungsi untuk membuka halaman hitam (scroll ke bawah di halaman putih)
+  // Fungsi untuk membuka halaman hitam (scroll ke bawah di halaman putih)
   const openBlackPage = () => {
     if (isBlackPageActive) return;
     setIsBlackPageActive(true);
     
+    // Animasi keluar halaman putih (scroll ke bawah)
     gsap.to(whitePageRef.current, {
       y: '-100%',
-      duration: 0.8,
-      ease: "power3.inOut",
+      duration: 0.6,
+      ease: "power2.inOut",
       onComplete: () => {
         gsap.set(whitePageRef.current, { visibility: 'hidden' });
       }
     });
     
+    // Animasi masuk halaman hitam dari bawah
     gsap.set(blackPageRef.current, { visibility: 'visible', y: '100%' });
     gsap.to(blackPageRef.current, {
       y: '0%',
-      duration: 0.8,
-      ease: "power3.inOut"
+      duration: 0.6,
+      ease: "power2.inOut"
     });
   };
 
-  // NEW: Fungsi untuk menutup halaman hitam (scroll ke atas di halaman hitam)
+  // Fungsi untuk menutup halaman hitam (scroll ke atas di halaman hitam)
   const closeBlackPage = () => {
     if (!isBlackPageActive) return;
     
+    // Animasi keluar halaman hitam (turun ke bawah)
     gsap.to(blackPageRef.current, {
       y: '100%',
-      duration: 0.8,
-      ease: "power3.inOut",
+      duration: 0.6,
+      ease: "power2.inOut",
       onComplete: () => {
         gsap.set(blackPageRef.current, { visibility: 'hidden' });
       }
     });
     
+    // Animasi masuk halaman putih dari atas
     gsap.set(whitePageRef.current, { visibility: 'visible', y: '-100%' });
     gsap.to(whitePageRef.current, {
       y: '0%',
-      duration: 0.8,
-      ease: "power3.inOut",
+      duration: 0.6,
+      ease: "power2.inOut",
       onComplete: () => {
         setIsBlackPageActive(false);
       }
     });
   };
 
-  // NEW: Scroll handler untuk membuka/menutup halaman putih/hitam
+  // Scroll handler untuk membuka/menutup halaman
   useEffect(() => {
     if (isLoading) return;
     
@@ -306,7 +303,7 @@ export default function HomePage(): React.JSX.Element {
         e.preventDefault();
         isTransitioning = true;
         openBlackPage();
-        setTimeout(() => { isTransitioning = false; }, 900);
+        setTimeout(() => { isTransitioning = false; }, 700);
       }
       
       // Jika di halaman hitam (isBlackPageActive) dan scroll ke atas di bagian paling atas
@@ -314,7 +311,7 @@ export default function HomePage(): React.JSX.Element {
         e.preventDefault();
         isTransitioning = true;
         closeBlackPage();
-        setTimeout(() => { isTransitioning = false; }, 900);
+        setTimeout(() => { isTransitioning = false; }, 700);
       }
     };
     
@@ -1798,7 +1795,7 @@ export default function HomePage(): React.JSX.Element {
           will-change: transform;
         }
 
-        /* NEW: Style untuk kedua halaman */
+        /* Style untuk kedua halaman */
         .white-page {
           position: fixed;
           top: 0;
@@ -1820,65 +1817,12 @@ export default function HomePage(): React.JSX.Element {
           height: 100%;
           overflow-y: auto;
           overflow-x: hidden;
-          background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+          background-color: #000000;
           z-index: 20;
           visibility: hidden;
         }
 
-        /* NEW: Style untuk black page panels */
-        .black-panel {
-          width: 100%;
-          min-height: 100vh;
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          align-items: center;
-          padding: 60px 40px;
-          box-sizing: border-box;
-          border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-        
-        .black-panel-content {
-          max-width: 1000px;
-          text-align: center;
-          z-index: 2;
-        }
-        
-        .black-panel-number {
-          font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
-          font-size: 80px;
-          font-weight: 400;
-          color: rgba(255, 255, 255, 0.15);
-          letter-spacing: -0.02em;
-          margin-bottom: 20px;
-        }
-        
-        .black-panel-title {
-          font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
-          font-size: 56px;
-          font-weight: 400;
-          color: #ffffff;
-          letter-spacing: -0.02em;
-          line-height: 1.2;
-          margin-bottom: 24px;
-        }
-        
-        .black-panel-desc {
-          font-family: 'Questrial', sans-serif;
-          font-size: 18px;
-          color: rgba(255, 255, 255, 0.6);
-          line-height: 1.6;
-          max-width: 600px;
-          margin: 0 auto;
-        }
-        
-        .panel-gradient-1 { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); }
-        .panel-gradient-2 { background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 100%); }
-        .panel-gradient-3 { background: linear-gradient(135deg, #0a0a15 0%, #1e1e2f 100%); }
-        .panel-gradient-4 { background: linear-gradient(135deg, #0d1117 0%, #161b22 100%); }
-        .panel-gradient-5 { background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%); }
-
-        /* NEW: Scroll indicators */
+        /* Scroll indicators */
         .scroll-indicator-white {
           position: fixed;
           bottom: 30px;
@@ -2556,7 +2500,7 @@ export default function HomePage(): React.JSX.Element {
               transition: 'all 0.01s ease'
             }}
           >
-            {/* Halaman PUTIH - Konten Original */}
+            {/* Halaman PUTIH (Utama) - KONTEN ORIGINAL LENGKAP */}
             <div ref={whitePageRef} className="white-page">
               {/* HEADER SECTION - MENURU */}
               <div style={{
@@ -3383,7 +3327,7 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 </div>
 
-                {/* Hanya teks MENURU besar tanpa background hitam */}
+                {/* Hanya teks MENURU besar */}
                 <footer style={{
                   position: 'relative',
                   bottom: 0,
@@ -3427,71 +3371,28 @@ export default function HomePage(): React.JSX.Element {
 
               {/* Scroll Down Indicator di halaman putih */}
               <div className="scroll-indicator-white">
-                <span>Scroll down to explore more</span>
+                <span>Scroll down to open black page</span>
                 <div>▼</div>
               </div>
             </div>
 
-            {/* Halaman HITAM - Stacked Panels */}
+            {/* Halaman HITAM - FULL HITAM POLOS */}
             <div ref={blackPageRef} className="black-page">
-              {/* Panel 1 */}
-              <div ref={blackPanel1Ref} className="black-panel panel-gradient-1">
-                <div className="black-panel-content">
-                  <div className="black-panel-number">01</div>
-                  <div className="black-panel-title">Inovasi Tanpa Batas</div>
-                  <div className="black-panel-desc">
-                    Kami menghadirkan solusi kreatif yang mengubah ide menjadi realitas digital yang menginspirasi.
-                  </div>
-                </div>
-              </div>
-
-              {/* Panel 2 */}
-              <div ref={blackPanel2Ref} className="black-panel panel-gradient-2">
-                <div className="black-panel-content">
-                  <div className="black-panel-number">02</div>
-                  <div className="black-panel-title">Desain Eksklusif</div>
-                  <div className="black-panel-desc">
-                    Setiap detail diperhatikan dengan seksama untuk menciptakan pengalaman visual yang tak terlupakan.
-                  </div>
-                </div>
-              </div>
-
-              {/* Panel 3 */}
-              <div ref={blackPanel3Ref} className="black-panel panel-gradient-3">
-                <div className="black-panel-content">
-                  <div className="black-panel-number">03</div>
-                  <div className="black-panel-title">Kolaborasi Global</div>
-                  <div className="black-panel-desc">
-                    Bekerja sama dengan talenta terbaik dari seluruh dunia untuk menghasilkan karya yang luar biasa.
-                  </div>
-                </div>
-              </div>
-
-              {/* Panel 4 */}
-              <div ref={blackPanel4Ref} className="black-panel panel-gradient-4">
-                <div className="black-panel-content">
-                  <div className="black-panel-number">04</div>
-                  <div className="black-panel-title">Efisiensi Maksimal</div>
-                  <div className="black-panel-desc">
-                    Proses yang terstruktur dan teknologi modern untuk hasil optimal dalam waktu singkat.
-                  </div>
-                </div>
-              </div>
-
-              {/* Panel 5 */}
-              <div ref={blackPanel5Ref} className="black-panel panel-gradient-5">
-                <div className="black-panel-content">
-                  <div className="black-panel-number">05</div>
-                  <div className="black-panel-title">Masa Depan Digital</div>
-                  <div className="black-panel-desc">
-                    Bersama kita wujudkan visi digital untuk masa depan yang lebih baik dan berkelanjutan.
-                  </div>
-                </div>
+              <div style={{
+                width: '100%',
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                alignItems: 'center',
+                backgroundColor: '#000000'
+              }}>
+                {/* Kosong - Full Hitam Polos */}
               </div>
 
               {/* Scroll Up Indicator di halaman hitam */}
               <div className="scroll-indicator-black">
-                <span>Scroll up to return</span>
+                <span>Scroll up to return to white page</span>
                 <div>▲</div>
               </div>
             </div>
