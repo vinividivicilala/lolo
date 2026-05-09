@@ -1,8 +1,3 @@
-
-
-
-
-
 // app/page.tsx - dengan fitur Admin, Reply Chat, dan Warna Features
 
 'use client';
@@ -3613,7 +3608,8 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </div>
 
-      {/* SHADOW PAGE - Halaman bayangan hitam dengan Chat */}
+      
+      {/* SHADOW PAGE - Halaman bayangan hitam dengan Chat (Tanpa linebox, tanpa warna warni) */}
       <div
         ref={shadowPageRef}
         style={{
@@ -3636,7 +3632,7 @@ export default function HomePage(): React.JSX.Element {
           flexDirection: 'column',
           position: 'relative'
         }}>
-          {/* Teks MENURU besar di bawah sisi kiri - warna putih, tidak tebal */}
+          {/* Teks MENURU besar di bawah sisi kiri */}
           <div style={{
             position: 'absolute',
             bottom: '80px',
@@ -3660,7 +3656,7 @@ export default function HomePage(): React.JSX.Element {
             </span>
           </div>
 
-          {/* Tombol untuk toggle chat visibility - dengan North East Arrow */}
+          {/* Tombol untuk toggle chat visibility */}
           {!isChatVisible && (
             <button
               onClick={() => setIsChatVisible(true)}
@@ -3669,8 +3665,7 @@ export default function HomePage(): React.JSX.Element {
                 bottom: '120px',
                 right: '80px',
                 backgroundColor: 'transparent',
-                border: '1px solid rgba(255,255,255,0.3)',
-                borderRadius: '0px',
+                border: 'none',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
@@ -3694,7 +3689,7 @@ export default function HomePage(): React.JSX.Element {
             </button>
           )}
 
-          {/* Teks Let's Talk di kiri atas - font Aeonik-Regular */}
+          {/* Teks Let's Talk di kiri atas */}
           <div style={{
             position: 'absolute',
             top: '80px',
@@ -3723,7 +3718,7 @@ export default function HomePage(): React.JSX.Element {
             </div>
           </div>
 
-          {/* Chat Container */}
+          {/* Chat Container - Tanpa linebox, tanpa border radius */}
           {isChatVisible && (
             <div style={{
               position: 'absolute',
@@ -3732,20 +3727,17 @@ export default function HomePage(): React.JSX.Element {
               width: '600px',
               height: '650px',
               backgroundColor: 'rgba(0,0,0,0.95)',
-              backdropFilter: 'blur(10px)',
-              borderRadius: '0px',
-              border: '1px solid rgba(255,255,255,0.2)',
               display: 'flex',
               flexDirection: 'column',
               overflow: 'hidden',
               zIndex: 20,
-              boxShadow: '0 25px 50px rgba(0,0,0,0.5)'
+              border: 'none'
             }}>
-              {/* Header Chat - font Aeonik-Regular */}
+              {/* Header Chat */}
               <div style={{
                 padding: '24px 28px',
-                backgroundColor: 'rgba(0,0,0,0.8)',
-                borderBottom: '1px solid rgba(255,255,255,0.1)',
+                backgroundColor: 'transparent',
+                borderBottom: 'none',
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center'
@@ -3766,7 +3758,7 @@ export default function HomePage(): React.JSX.Element {
                   </span>
                   <span style={{ 
                     fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", 
-                    color: isAdmin ? '#c5e800' : 'rgba(255,255,255,0.5)', 
+                    color: 'rgba(255,255,255,0.5)', 
                     fontSize: '16px',
                     fontWeight: '300'
                   }}>
@@ -3785,13 +3777,13 @@ export default function HomePage(): React.JSX.Element {
                         fontSize: '16px',
                         fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
                         padding: '4px 8px',
-                        transition: 'color 0.2s',
+                        transition: 'opacity 0.2s',
                         display: 'flex',
                         alignItems: 'center',
                         gap: '10px'
                       }}
-                      onMouseEnter={(e) => e.currentTarget.style.color = '#ffffff'}
-                      onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255,255,255,0.7)'}
+                      onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'}
+                      onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
                     >
                       <span>LOGOUT</span>
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -3816,12 +3808,12 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </div>
 
-              {/* Reply Indicator */}
+              {/* Reply Indicator - Tanpa background berwarna */}
               {replyTo && (
                 <div style={{
                   padding: '12px 24px',
-                  backgroundColor: 'rgba(255,255,255,0.05)',
-                  borderBottom: '1px solid rgba(255,255,255,0.1)',
+                  backgroundColor: 'transparent',
+                  borderBottom: 'none',
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
@@ -3830,7 +3822,7 @@ export default function HomePage(): React.JSX.Element {
                   color: 'rgba(255,255,255,0.6)'
                 }}>
                   <span>
-                    REPLAY KE: <span style={{ color: '#c5e800' }}>{replyTo.name}</span> - "{replyTo.text.substring(0, 50)}..."
+                    REPLAY KE: <span style={{ color: '#ffffff' }}>{replyTo.name}</span> - "{replyTo.text.substring(0, 50)}..."
                   </span>
                   <button
                     onClick={cancelReply}
@@ -3847,7 +3839,7 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               )}
 
-              {/* Messages Area */}
+              {/* Messages Area - Tanpa styling berlebih */}
               <div 
                 ref={chatContainerRef}
                 className="chat-messages"
@@ -3877,16 +3869,16 @@ export default function HomePage(): React.JSX.Element {
                   const isOwnMessage = user?.uid === msg.userId;
                   const isAdminMessage = msg.isAdmin === true;
                   
-                  let bgColor = 'rgba(255,255,255,0.05)';
-                  let borderStyle = {};
-                  
-                  if (isAdminMessage) {
-                    bgColor = 'rgba(197,232,0,0.15)';
-                    borderStyle = { borderLeft: '3px solid #c5e800' };
-                  } else if (isOwnMessage) {
-                    bgColor = 'rgba(255,255,255,0.12)';
-                    borderStyle = { borderRight: '3px solid #c5e800' };
-                  }
+                  // Tanpa warna warni, hanya putih dengan opacity berbeda
+                  let messageStyle = {
+                    color: '#ffffff',
+                    padding: '14px 20px',
+                    fontSize: '16px',
+                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                    fontWeight: '300',
+                    letterSpacing: '-0.01em',
+                    lineHeight: '1.5'
+                  };
                   
                   return (
                     <div
@@ -3909,7 +3901,7 @@ export default function HomePage(): React.JSX.Element {
                         fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif"
                       }}>
                         <span style={{ 
-                          color: isAdminMessage ? '#c5e800' : '#ffffff', 
+                          color: '#ffffff', 
                           fontWeight: '300',
                           fontSize: '15px'
                         }}>
@@ -3935,7 +3927,7 @@ export default function HomePage(): React.JSX.Element {
                               gap: '5px',
                               fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif"
                             }}
-                            onMouseEnter={(e) => e.currentTarget.style.color = '#c5e800'}
+                            onMouseEnter={(e) => e.currentTarget.style.color = '#ffffff'}
                             onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255,255,255,0.4)'}
                           >
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -3946,37 +3938,22 @@ export default function HomePage(): React.JSX.Element {
                         )}
                       </div>
                       
-                      {/* Reply Preview */}
+                      {/* Reply Preview - Tanpa background berwarna */}
                       {msg.replyTo && (
                         <div style={{
                           marginBottom: '8px',
                           padding: '8px 12px',
-                          backgroundColor: 'rgba(255,255,255,0.03)',
-                          borderRadius: '0px',
+                          backgroundColor: 'transparent',
                           fontSize: '12px',
                           color: 'rgba(255,255,255,0.4)',
                           fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                          maxWidth: '100%',
-                          borderLeft: '2px solid rgba(197,232,0,0.3)'
+                          maxWidth: '100%'
                         }}>
-                          REPLAY KE <span style={{ color: '#c5e800' }}>{msg.replyTo.userName}</span>: "{msg.replyTo.text}"
+                          REPLAY KE <span style={{ color: '#ffffff' }}>{msg.replyTo.userName}</span>: "{msg.replyTo.text}"
                         </div>
                       )}
                       
-                      <div style={{
-                        backgroundColor: bgColor,
-                        color: '#ffffff',
-                        padding: '14px 20px',
-                        borderRadius: isOwnMessage ? '0px 0px 0px 8px' : '0px 8px 0px 0px',
-                        ...borderStyle,
-                        wordBreak: 'break-word',
-                        fontSize: '16px',
-                        fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                        fontWeight: '300',
-                        letterSpacing: '-0.01em',
-                        lineHeight: '1.5',
-                        width: '100%'
-                      }}>
+                      <div style={messageStyle}>
                         {msg.text}
                       </div>
                     </div>
@@ -3985,14 +3962,14 @@ export default function HomePage(): React.JSX.Element {
                 <div ref={messagesEndRef} />
               </div>
 
-              {/* Input Area - dengan North East Arrow */}
+              {/* Input Area */}
               {user ? (
                 <div style={{
                   padding: '20px 28px',
-                  borderTop: '1px solid rgba(255,255,255,0.1)',
+                  borderTop: 'none',
                   display: 'flex',
                   gap: '16px',
-                  backgroundColor: 'rgba(0,0,0,0.5)'
+                  backgroundColor: 'transparent'
                 }}>
                   <input
                     type="text"
@@ -4003,8 +3980,7 @@ export default function HomePage(): React.JSX.Element {
                     style={{
                       flex: 1,
                       backgroundColor: 'rgba(255,255,255,0.05)',
-                      border: '1px solid rgba(255,255,255,0.2)',
-                      borderRadius: '0px',
+                      border: 'none',
                       padding: '14px 20px',
                       color: '#ffffff',
                       fontSize: '16px',
@@ -4018,15 +3994,13 @@ export default function HomePage(): React.JSX.Element {
                     disabled={!newMessage.trim()}
                     style={{
                       backgroundColor: 'transparent',
-                      border: '1px solid rgba(255,255,255,0.3)',
-                      borderRadius: '0px',
+                      border: 'none',
                       padding: '10px 28px',
-                      color: '#ffffff',
+                      color: newMessage.trim() ? '#ffffff' : 'rgba(255,255,255,0.3)',
                       fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
                       fontSize: '16px',
                       fontWeight: '300',
                       cursor: newMessage.trim() ? 'pointer' : 'not-allowed',
-                      opacity: newMessage.trim() ? 1 : 0.3,
                       transition: 'opacity 0.2s',
                       display: 'flex',
                       alignItems: 'center',
@@ -4041,8 +4015,8 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               ) : (
                 <div style={{
-                padding: '20px 28px',
-                  borderTop: '1px solid rgba(255,255,255,0.1)',
+                  padding: '20px 28px',
+                  borderTop: 'none',
                   display: 'flex',
                   justifyContent: 'center'
                 }}>
@@ -4050,8 +4024,7 @@ export default function HomePage(): React.JSX.Element {
                     onClick={() => setShowAuthModal(true)}
                     style={{
                       backgroundColor: 'transparent',
-                      border: '1px solid rgba(255,255,255,0.3)',
-                      borderRadius: '0px',
+                      border: 'none',
                       padding: '14px 32px',
                       color: '#ffffff',
                       fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
@@ -4078,7 +4051,7 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </div>
 
-      {/* Auth Modal - dengan North East Arrow dan font Aeonik-Regular, warna features */}
+      {/* Auth Modal - Tanpa linebox, tanpa warna warni, hanya icon */}
       {showAuthModal && (
         <div style={{
           position: 'fixed',
@@ -4087,7 +4060,6 @@ export default function HomePage(): React.JSX.Element {
           width: '100%',
           height: '100%',
           backgroundColor: 'rgba(0,0,0,0.95)',
-          backdropFilter: 'blur(8px)',
           zIndex: 20000,
           display: 'flex',
           alignItems: 'center',
@@ -4095,8 +4067,7 @@ export default function HomePage(): React.JSX.Element {
         }}>
           <div style={{
             backgroundColor: '#000000',
-            border: '1px solid rgba(255,255,255,0.2)',
-            borderRadius: '0px',
+            border: 'none',
             padding: '60px',
             width: '90%',
             maxWidth: '550px',
@@ -4116,7 +4087,7 @@ export default function HomePage(): React.JSX.Element {
                   margin: 0, 
                   letterSpacing: '-0.02em',
                   lineHeight: '1',
-                  color: authMode === 'login' ? '#c5e800' : '#ff69b4'
+                  color: '#ffffff'
                 }}>
                   {authMode === 'login' ? 'LOGIN' : 'DAFTAR'}
                 </div>
@@ -4145,15 +4116,14 @@ export default function HomePage(): React.JSX.Element {
               </button>
             </div>
 
-            {/* Tombol Login dengan North East Arrow dan warna features */}
+            {/* Tombol Login dengan icon - Tanpa border, tanpa warna */}
             <div style={{ display: 'flex', gap: '20px', marginBottom: '50px', flexDirection: 'column' }}>
               <button
                 onClick={handleGoogleLogin}
                 style={{
                   backgroundColor: 'transparent',
                   color: '#ffffff',
-                  border: '1px solid rgba(255,255,255,0.3)',
-                  borderRadius: '0px',
+                  border: 'none',
                   padding: '18px 28px',
                   fontSize: '18px',
                   fontWeight: '300',
@@ -4162,20 +4132,18 @@ export default function HomePage(): React.JSX.Element {
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                  transition: 'all 0.2s'
+                  transition: 'opacity 0.2s'
                 }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = '#c5e800';
-                  e.currentTarget.style.color = '#c5e800';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)';
-                  e.currentTarget.style.color = '#ffffff';
-                }}
+                onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'}
+                onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
               >
                 <span>GOOGLE</span>
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" fill="#4285F4"/>
+                  <path d="M15.1 12.5c0-.4-.03-.7-.1-1H12v2h1.8c-.2.5-.6.9-1.1 1.2v1h1.8c1-.9 1.6-2.3 1.6-3.2z" fill="#34A853" fillOpacity="0.7"/>
+                  <path d="M9.6 14.3c-.3-.5-.5-1.1-.5-1.8s.2-1.3.5-1.8v-1.3H7.8c-.6 1-.9 2-.9 3.1 0 1.1.3 2.1.9 3.1l1.8-1.3z" fill="#FBBC05" fillOpacity="0.7"/>
+                  <path d="M12 5.4c.9 0 1.7.3 2.4.9l1.7-1.7C15.1 3.8 13.6 3 12 3 9.1 3 6.6 4.6 5.4 7.2l2 1.5c.5-1 1.5-1.8 2.6-2.1z" fill="#EA4335" fillOpacity="0.7"/>
+                  <path d="M3 12c0 1.1.2 2.1.6 3.1L6.5 13c-.1-.3-.1-.7-.1-1s0-.7.1-1L3.6 8.9C3.2 9.9 3 10.9 3 12z" fill="#34A853" fillOpacity="0.7"/>
                 </svg>
               </button>
               <button
@@ -4183,8 +4151,7 @@ export default function HomePage(): React.JSX.Element {
                 style={{
                   backgroundColor: 'transparent',
                   color: '#ffffff',
-                  border: '1px solid rgba(255,255,255,0.3)',
-                  borderRadius: '0px',
+                  border: 'none',
                   padding: '18px 28px',
                   fontSize: '18px',
                   fontWeight: '300',
@@ -4193,20 +4160,14 @@ export default function HomePage(): React.JSX.Element {
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                  transition: 'all 0.2s'
+                  transition: 'opacity 0.2s'
                 }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = '#ff69b4';
-                  e.currentTarget.style.color = '#ff69b4';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)';
-                  e.currentTarget.style.color = '#ffffff';
-                }}
+                onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'}
+                onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
               >
                 <span>GITHUB</span>
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 2C6.48 2 2 6.48 2 12c0 4.42 2.87 8.17 6.84 9.49.5.09.68-.21.68-.48 0-.24-.01-.88-.01-1.73-2.78.6-3.37-1.34-3.37-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.61.07-.61 1 .07 1.53 1.03 1.53 1.03.89 1.52 2.34 1.08 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02.8-.22 1.65-.33 2.5-.33.85 0 1.7.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85 0 1.34-.01 2.42-.01 2.75 0 .27.18.58.69.48C19.13 20.17 22 16.42 22 12c0-5.52-4.48-10-10-10z" fill="#ffffff" fillOpacity="0.8"/>
                 </svg>
               </button>
             </div>
@@ -4221,18 +4182,9 @@ export default function HomePage(): React.JSX.Element {
               position: 'relative'
             }}>
               <span style={{ backgroundColor: '#000000', padding: '0 20px' }}>ATAU</span>
-              <div style={{
-                position: 'absolute',
-                top: '50%',
-                left: 0,
-                right: 0,
-                height: '1px',
-                backgroundColor: 'rgba(255,255,255,0.1)',
-                zIndex: -1
-              }} />
             </div>
 
-            {/* Form Login/Register dengan North East Arrow dan warna features */}
+            {/* Form Login/Register - Tanpa border dan linebox */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
               {authMode === 'register' && (
                 <input
@@ -4241,19 +4193,18 @@ export default function HomePage(): React.JSX.Element {
                   value={authName}
                   onChange={(e) => setAuthName(e.target.value)}
                   style={{
-                    padding: '18px 24px',
-                    borderRadius: '0px',
-                    border: '1px solid rgba(255,255,255,0.2)',
+                    padding: '18px 0',
+                    border: 'none',
+                    borderBottom: '1px solid rgba(255,255,255,0.2)',
                     backgroundColor: 'transparent',
                     color: '#ffffff',
-                    fontSize: '16px',
+                    fontSize: '18px',
                     fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
                     fontWeight: '300',
-                    outline: 'none',
-                    transition: 'border-color 0.2s'
+                    outline: 'none'
                   }}
-                  onFocus={(e) => e.currentTarget.style.borderColor = '#c5e800'}
-                  onBlur={(e) => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)'}
+                  onFocus={(e) => e.currentTarget.style.borderBottomColor = '#ffffff'}
+                  onBlur={(e) => e.currentTarget.style.borderBottomColor = 'rgba(255,255,255,0.2)'}
                 />
               )}
               <input
@@ -4262,19 +4213,18 @@ export default function HomePage(): React.JSX.Element {
                 value={authEmail}
                 onChange={(e) => setAuthEmail(e.target.value)}
                 style={{
-                  padding: '18px 24px',
-                  borderRadius: '0px',
-                  border: '1px solid rgba(255,255,255,0.2)',
+                  padding: '18px 0',
+                  border: 'none',
+                  borderBottom: '1px solid rgba(255,255,255,0.2)',
                   backgroundColor: 'transparent',
                   color: '#ffffff',
-                  fontSize: '16px',
+                  fontSize: '18px',
                   fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
                   fontWeight: '300',
-                  outline: 'none',
-                  transition: 'border-color 0.2s'
+                  outline: 'none'
                 }}
-                onFocus={(e) => e.currentTarget.style.borderColor = '#ff69b4'}
-                onBlur={(e) => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)'}
+                onFocus={(e) => e.currentTarget.style.borderBottomColor = '#ffffff'}
+                onBlur={(e) => e.currentTarget.style.borderBottomColor = 'rgba(255,255,255,0.2)'}
               />
               <input
                 type="password"
@@ -4282,19 +4232,18 @@ export default function HomePage(): React.JSX.Element {
                 value={authPassword}
                 onChange={(e) => setAuthPassword(e.target.value)}
                 style={{
-                  padding: '18px 24px',
-                  borderRadius: '0px',
-                  border: '1px solid rgba(255,255,255,0.2)',
+                  padding: '18px 0',
+                  border: 'none',
+                  borderBottom: '1px solid rgba(255,255,255,0.2)',
                   backgroundColor: 'transparent',
                   color: '#ffffff',
-                  fontSize: '16px',
+                  fontSize: '18px',
                   fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
                   fontWeight: '300',
-                  outline: 'none',
-                  transition: 'border-color 0.2s'
+                  outline: 'none'
                 }}
-                onFocus={(e) => e.currentTarget.style.borderColor = '#c5e800'}
-                onBlur={(e) => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)'}
+                onFocus={(e) => e.currentTarget.style.borderBottomColor = '#ffffff'}
+                onBlur={(e) => e.currentTarget.style.borderBottomColor = 'rgba(255,255,255,0.2)'}
               />
               {authError && (
                 <div style={{ 
@@ -4303,8 +4252,7 @@ export default function HomePage(): React.JSX.Element {
                   textAlign: 'center',
                   fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
                   fontWeight: '300',
-                  padding: '10px',
-                  backgroundColor: 'rgba(255,68,68,0.1)'
+                  padding: '10px'
                 }}>
                   {authError}
                 </div>
@@ -4314,9 +4262,8 @@ export default function HomePage(): React.JSX.Element {
                 style={{
                   backgroundColor: 'transparent',
                   color: '#ffffff',
-                  border: '1px solid rgba(255,255,255,0.3)',
-                  borderRadius: '0px',
-                  padding: '18px 28px',
+                  border: 'none',
+                  padding: '18px 0',
                   fontSize: '18px',
                   fontWeight: '300',
                   cursor: 'pointer',
@@ -4325,20 +4272,16 @@ export default function HomePage(): React.JSX.Element {
                   justifyContent: 'space-between',
                   fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
                   marginTop: '10px',
-                  transition: 'all 0.2s'
+                  transition: 'opacity 0.2s',
+                  borderTop: '1px solid rgba(255,255,255,0.2)',
+                  marginTop: '30px'
                 }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = '#c5e800';
-                  e.currentTarget.style.color = '#c5e800';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)';
-                  e.currentTarget.style.color = '#ffffff';
-                }}
+                onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'}
+                onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
               >
                 <span>{authMode === 'login' ? 'LOGIN' : 'DAFTAR'}</span>
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </button>
               <button
@@ -4352,10 +4295,10 @@ export default function HomePage(): React.JSX.Element {
                   fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
                   fontWeight: '300',
                   marginTop: '10px',
-                  transition: 'color 0.2s'
+                  transition: 'opacity 0.2s'
                 }}
-                onMouseEnter={(e) => e.currentTarget.style.color = '#c5e800'}
-                onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255,255,255,0.5)'}
+                onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'}
+                onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
               >
                 {authMode === 'login' ? 'BELUM PUNYA AKUN? DAFTAR' : 'SUDAH PUNYA AKUN? LOGIN'}
               </button>
