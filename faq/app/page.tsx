@@ -1,4 +1,4 @@
-// app/page.tsx (Halaman Utama) - Full kode tanpa error
+// app/page.tsx (Halaman Utama) - Full kode yang sudah diperbaiki
 
 'use client';
 
@@ -16,6 +16,8 @@ import {
   getAuth, 
   signInWithPopup, 
   GoogleAuthProvider, 
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
   signOut,
   onAuthStateChanged 
 } from "firebase/auth";
@@ -94,6 +96,11 @@ export default function HomePage(): React.JSX.Element {
   const [newMessage, setNewMessage] = useState("");
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
+  const [emailLogin, setEmailLogin] = useState("");
+  const [passwordLogin, setPasswordLogin] = useState("");
+  const [isLoginMode, setIsLoginMode] = useState(true);
+  const [authError, setAuthError] = useState("");
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   
@@ -292,11 +299,40 @@ export default function HomePage(): React.JSX.Element {
 
   // Fungsi untuk Firebase Auth & Chat
   const handleGoogleSignIn = async () => {
+    setAuthError("");
     try {
       const result = await signInWithPopup(auth, googleProvider);
       setUser(result.user);
-    } catch (error) {
+      setIsAuthModalOpen(false);
+      setEmailLogin("");
+      setPasswordLogin("");
+    } catch (error: any) {
       console.error("Error signing in with Google:", error);
+      if (error.code === 'auth/unauthorized-domain') {
+        setAuthError("Domain tidak terdaftar. Silakan tambahkan domain ini di Firebase Console > Authentication > Settings > Authorized domains.");
+      } else {
+        setAuthError(error.message);
+      }
+    }
+  };
+
+  const handleEmailSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthError("");
+    try {
+      if (isLoginMode) {
+        const result = await signInWithEmailAndPassword(auth, emailLogin, passwordLogin);
+        setUser(result.user);
+      } else {
+        const result = await createUserWithEmailAndPassword(auth, emailLogin, passwordLogin);
+        setUser(result.user);
+      }
+      setIsAuthModalOpen(false);
+      setEmailLogin("");
+      setPasswordLogin("");
+    } catch (error: any) {
+      console.error("Error with email auth:", error);
+      setAuthError(error.message);
     }
   };
 
@@ -317,7 +353,7 @@ export default function HomePage(): React.JSX.Element {
       await addDoc(collection(db, "chats"), {
         text: newMessage.trim(),
         userId: user.uid,
-        userName: user.displayName || "Anonymous",
+        userName: user.displayName || user.email || "Anonymous",
         userPhoto: user.photoURL || null,
         timestamp: Timestamp.now()
       });
@@ -2038,8 +2074,8 @@ export default function HomePage(): React.JSX.Element {
         }
 
         @keyframes chatSlideIn {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
+          from { opacity: 0; transform: translateX(-20px); }
+          to { opacity: 1; transform: translateX(0); }
         }
 
         @keyframes chatBubbleIn {
@@ -3467,7 +3503,7 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </div>
 
-      {/* SHADOW PAGE - Halaman bayangan hitam dengan Chat */}
+      {/* SHADOW PAGE - Halaman bayangan hitam dengan Chat di sisi kiri */}
       <div
         ref={shadowPageRef}
         style={{
@@ -3482,25 +3518,24 @@ export default function HomePage(): React.JSX.Element {
           pointerEvents: showShadowPage ? 'auto' : 'none',
           display: 'flex',
           flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
+          justifyContent: 'space-between',
+          padding: '60px 80px',
+          boxSizing: 'border-box',
           overflow: 'hidden'
         }}
       >
+        {/* Konten Shadow Page - Let's Talk di kiri atas */}
         <div style={{
           width: '100%',
-          maxWidth: '800px',
-          padding: '40px',
-          animation: 'chatSlideIn 0.6s ease-out'
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start'
         }}>
-          {/* Teks Let's Talk */}
-          <div style={{
-            textAlign: 'center',
-            marginBottom: '40px'
-          }}>
+          {/* Teks Let's Talk di kiri atas */}
+          <div>
             <h1 style={{
               fontFamily: 'Aeonik-Regular, Helvetica, Arial, sans-serif',
-              fontSize: '80px',
+              fontSize: '120px',
               fontWeight: '400',
               color: '#ffffff',
               letterSpacing: '-0.02em',
@@ -3510,60 +3545,56 @@ export default function HomePage(): React.JSX.Element {
               Let's Talk
             </h1>
             <div style={{
-              width: '100px',
+              width: '150px',
               height: '2px',
               backgroundColor: '#ffffff',
-              margin: '20px auto 0',
+              marginTop: '20px',
               opacity: 0.3
             }} />
           </div>
+          
+          {/* Tombol toggle chat di kanan atas */}
+          {!isChatOpen && (
+            <button
+              onClick={() => setIsChatOpen(true)}
+              style={{
+                padding: '12px 24px',
+                backgroundColor: '#ffffff',
+                color: '#000000',
+                border: 'none',
+                borderRadius: '60px',
+                cursor: 'pointer',
+                fontFamily: 'Questrial, sans-serif',
+                fontSize: '16px',
+                fontWeight: '500',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
+              onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+            >
+              Open Chat
+            </button>
+          )}
+        </div>
 
-          {/* Tombol Chat */}
-          {!isChatOpen ? (
-            <div style={{
-              display: 'flex',
-              justifyContent: 'center'
-            }}>
-              <button
-                onClick={() => setIsChatOpen(true)}
-                style={{
-                  padding: '16px 48px',
-                  backgroundColor: '#ffffff',
-                  color: '#000000',
-                  border: 'none',
-                  borderRadius: '60px',
-                  cursor: 'pointer',
-                  fontFamily: 'Questrial, sans-serif',
-                  fontSize: '20px',
-                  fontWeight: '600',
-                  transition: 'all 0.3s ease',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'scale(1.05)';
-                  e.currentTarget.style.backgroundColor = '#e0e0e0';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'scale(1)';
-                  e.currentTarget.style.backgroundColor = '#ffffff';
-                }}
-              >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-                Start Chatting
-              </button>
-            </div>
-          ) : (
-            <div style={{
-              backgroundColor: 'rgba(255, 255, 255, 0.05)',
-              borderRadius: '24px',
-              backdropFilter: 'blur(10px)',
-              overflow: 'hidden',
-              border: '1px solid rgba(255, 255, 255, 0.1)'
-            }}>
+        {/* Chat Container - di sisi kiri, bisa buka tutup */}
+        <div style={{
+          position: 'fixed',
+          left: '80px',
+          bottom: '200px',
+          width: '450px',
+          maxHeight: isChatOpen ? '500px' : '0px',
+          opacity: isChatOpen ? 1 : 0,
+          overflow: 'hidden',
+          transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+          backgroundColor: 'rgba(255, 255, 255, 0.05)',
+          borderRadius: '24px',
+          backdropFilter: 'blur(10px)',
+          border: isChatOpen ? '1px solid rgba(255, 255, 255, 0.1)' : 'none',
+          boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)'
+        }}>
+          {isChatOpen && (
+            <>
               {/* Header Chat */}
               <div style={{
                 padding: '16px 20px',
@@ -3591,60 +3622,25 @@ export default function HomePage(): React.JSX.Element {
                     fontSize: '16px',
                     fontWeight: '500'
                   }}>
-                    Live Chat
+                    Live Chat {user ? `- ${user.displayName || user.email?.split('@')[0]}` : ''}
                   </span>
                 </div>
-                {user && (
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '16px'
-                  }}>
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px'
-                    }}>
-                      {user.photoURL && (
-                        <img
-                          src={user.photoURL}
-                          alt="Profile"
-                          style={{
-                            width: '32px',
-                            height: '32px',
-                            borderRadius: '50%',
-                            objectFit: 'cover'
-                          }}
-                        />
-                      )}
-                      <span style={{
-                        fontFamily: 'Questrial, sans-serif',
-                        color: '#ffffff',
-                        fontSize: '14px'
-                      }}>
-                        {user.displayName || user.email}
-                      </span>
-                    </div>
-                    <button
-                      onClick={handleSignOut}
-                      style={{
-                        padding: '6px 12px',
-                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                        color: '#ffffff',
-                        border: 'none',
-                        borderRadius: '60px',
-                        cursor: 'pointer',
-                        fontFamily: 'Questrial, sans-serif',
-                        fontSize: '12px',
-                        transition: 'all 0.2s ease'
-                      }}
-                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.2)'}
-                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'}
-                    >
-                      Logout
-                    </button>
-                  </div>
-                )}
+                <button
+                  onClick={() => setIsChatOpen(false)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#ffffff',
+                    cursor: 'pointer',
+                    fontSize: '20px',
+                    opacity: 0.7,
+                    transition: 'opacity 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+                  onMouseLeave={(e) => e.currentTarget.style.opacity = '0.7'}
+                >
+                  ✕
+                </button>
               </div>
 
               {/* Messages Container */}
@@ -3652,7 +3648,7 @@ export default function HomePage(): React.JSX.Element {
                 ref={chatContainerRef}
                 className="chat-messages-container"
                 style={{
-                  height: '400px',
+                  height: '380px',
                   overflowY: 'auto',
                   padding: '20px',
                   display: 'flex',
@@ -3667,45 +3663,138 @@ export default function HomePage(): React.JSX.Element {
                     alignItems: 'center',
                     justifyContent: 'center',
                     height: '100%',
-                    gap: '20px'
+                    gap: '16px'
                   }}>
-                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M20 21V19C20 16.8 18.2 15 16 15H8C5.8 15 4 16.8 4 19V21" stroke="#ffffff" strokeWidth="1.5" strokeLinecap="round"/>
                       <circle cx="12" cy="7" r="4" stroke="#ffffff" strokeWidth="1.5"/>
                     </svg>
                     <span style={{
                       fontFamily: 'Questrial, sans-serif',
                       color: '#ffffff',
-                      fontSize: '16px',
+                      fontSize: '14px',
                       opacity: 0.7
                     }}>
                       Login to start chatting
                     </span>
-                    <button
-                      onClick={handleGoogleSignIn}
-                      style={{
-                        padding: '12px 24px',
-                        backgroundColor: '#ffffff',
-                        color: '#000000',
-                        border: 'none',
-                        borderRadius: '60px',
-                        cursor: 'pointer',
-                        fontFamily: 'Questrial, sans-serif',
-                        fontSize: '14px',
-                        fontWeight: '500',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px'
-                      }}
-                    >
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-                        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-                      </svg>
-                      Sign in with Google
-                    </button>
+                    
+                    {/* Login Form */}
+                    <form onSubmit={handleEmailSignIn} style={{
+                      width: '100%',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '12px',
+                      marginTop: '8px'
+                    }}>
+                      <input
+                        type="email"
+                        placeholder="Email"
+                        value={emailLogin}
+                        onChange={(e) => setEmailLogin(e.target.value)}
+                        style={{
+                          width: '100%',
+                          padding: '10px 14px',
+                          backgroundColor: 'rgba(255,255,255,0.1)',
+                          border: '1px solid rgba(255,255,255,0.2)',
+                          borderRadius: '12px',
+                          color: '#ffffff',
+                          fontFamily: 'Questrial, sans-serif',
+                          fontSize: '14px',
+                          outline: 'none'
+                        }}
+                      />
+                      <input
+                        type="password"
+                        placeholder="Password"
+                        value={passwordLogin}
+                        onChange={(e) => setPasswordLogin(e.target.value)}
+                        style={{
+                          width: '100%',
+                          padding: '10px 14px',
+                          backgroundColor: 'rgba(255,255,255,0.1)',
+                          border: '1px solid rgba(255,255,255,0.2)',
+                          borderRadius: '12px',
+                          color: '#ffffff',
+                          fontFamily: 'Questrial, sans-serif',
+                          fontSize: '14px',
+                          outline: 'none'
+                        }}
+                      />
+                      <div style={{ display: 'flex', gap: '8px', justifyContent: 'space-between' }}>
+                        <button
+                          type="submit"
+                          style={{
+                            flex: 1,
+                            padding: '10px',
+                            backgroundColor: '#ffffff',
+                            color: '#000000',
+                            border: 'none',
+                            borderRadius: '60px',
+                            cursor: 'pointer',
+                            fontFamily: 'Questrial, sans-serif',
+                            fontSize: '14px',
+                            fontWeight: '500'
+                          }}
+                        >
+                          {isLoginMode ? 'Sign In' : 'Sign Up'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setIsLoginMode(!isLoginMode)}
+                          style={{
+                            flex: 1,
+                            padding: '10px',
+                            backgroundColor: 'transparent',
+                            color: '#ffffff',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '60px',
+                            cursor: 'pointer',
+                            fontFamily: 'Questrial, sans-serif',
+                            fontSize: '14px'
+                          }}
+                        >
+                          {isLoginMode ? 'Create Account' : 'Back to Login'}
+                        </button>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleGoogleSignIn}
+                        style={{
+                          width: '100%',
+                          padding: '10px',
+                          backgroundColor: '#4285F4',
+                          color: '#ffffff',
+                          border: 'none',
+                          borderRadius: '60px',
+                          cursor: 'pointer',
+                          fontFamily: 'Questrial, sans-serif',
+                          fontSize: '14px',
+                          fontWeight: '500',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '8px'
+                        }}
+                      >
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#ffffff"/>
+                          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#ffffff"/>
+                          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#ffffff"/>
+                          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#ffffff"/>
+                        </svg>
+                        Google
+                      </button>
+                      {authError && (
+                        <div style={{
+                          color: '#ff6b6b',
+                          fontSize: '12px',
+                          textAlign: 'center',
+                          marginTop: '8px'
+                        }}>
+                          {authError}
+                        </div>
+                      )}
+                    </form>
                   </div>
                 ) : isLoadingMessages ? (
                   <div style={{
@@ -3753,23 +3842,23 @@ export default function HomePage(): React.JSX.Element {
                           src={msg.userPhoto}
                           alt={msg.userName}
                           style={{
-                            width: '36px',
-                            height: '36px',
+                            width: '32px',
+                            height: '32px',
                             borderRadius: '50%',
                             objectFit: 'cover'
                           }}
                         />
                       ) : (
                         <div style={{
-                          width: '36px',
-                          height: '36px',
+                          width: '32px',
+                          height: '32px',
                           borderRadius: '50%',
                           backgroundColor: 'rgba(255,255,255,0.2)',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
                           fontFamily: 'Questrial, sans-serif',
-                          fontSize: '14px',
+                          fontSize: '12px',
                           color: '#ffffff'
                         }}>
                           {msg.userName.charAt(0).toUpperCase()}
@@ -3780,10 +3869,10 @@ export default function HomePage(): React.JSX.Element {
                         backgroundColor: msg.userId === user?.uid ? '#ffffff' : 'rgba(255,255,255,0.1)',
                         color: msg.userId === user?.uid ? '#000000' : '#ffffff',
                         borderRadius: msg.userId === user?.uid ? '18px 4px 18px 18px' : '4px 18px 18px 18px',
-                        padding: '10px 16px'
+                        padding: '8px 14px'
                       }}>
                         <div style={{
-                          fontSize: '12px',
+                          fontSize: '11px',
                           fontWeight: '500',
                           marginBottom: '4px',
                           opacity: 0.7,
@@ -3792,7 +3881,7 @@ export default function HomePage(): React.JSX.Element {
                           {msg.userName}
                         </div>
                         <div style={{
-                          fontSize: '14px',
+                          fontSize: '13px',
                           lineHeight: '1.4',
                           fontFamily: 'Questrial, sans-serif',
                           wordBreak: 'break-word'
@@ -3800,7 +3889,7 @@ export default function HomePage(): React.JSX.Element {
                           {msg.text}
                         </div>
                         <div style={{
-                          fontSize: '10px',
+                          fontSize: '9px',
                           marginTop: '4px',
                           opacity: 0.5,
                           fontFamily: 'Questrial, sans-serif',
@@ -3818,10 +3907,10 @@ export default function HomePage(): React.JSX.Element {
               {/* Input Area */}
               {user && (
                 <div style={{
-                  padding: '16px 20px',
+                  padding: '12px 16px',
                   borderTop: '1px solid rgba(255, 255, 255, 0.1)',
                   display: 'flex',
-                  gap: '12px'
+                  gap: '10px'
                 }}>
                   <input
                     type="text"
@@ -3831,13 +3920,13 @@ export default function HomePage(): React.JSX.Element {
                     placeholder="Type your message..."
                     style={{
                       flex: 1,
-                      padding: '12px 16px',
+                      padding: '10px 14px',
                       backgroundColor: 'rgba(255, 255, 255, 0.1)',
                       border: '1px solid rgba(255, 255, 255, 0.2)',
                       borderRadius: '60px',
                       color: '#ffffff',
                       fontFamily: 'Questrial, sans-serif',
-                      fontSize: '14px',
+                      fontSize: '13px',
                       outline: 'none'
                     }}
                   />
@@ -3845,14 +3934,14 @@ export default function HomePage(): React.JSX.Element {
                     onClick={sendMessage}
                     disabled={!newMessage.trim()}
                     style={{
-                      padding: '12px 24px',
+                      padding: '10px 20px',
                       backgroundColor: newMessage.trim() ? '#ffffff' : 'rgba(255, 255, 255, 0.3)',
                       color: newMessage.trim() ? '#000000' : '#ffffff',
                       border: 'none',
                       borderRadius: '60px',
                       cursor: newMessage.trim() ? 'pointer' : 'not-allowed',
                       fontFamily: 'Questrial, sans-serif',
-                      fontSize: '14px',
+                      fontSize: '13px',
                       fontWeight: '500',
                       transition: 'all 0.2s ease'
                     }}
@@ -3861,8 +3950,36 @@ export default function HomePage(): React.JSX.Element {
                   </button>
                 </div>
               )}
-            </div>
+            </>
           )}
+        </div>
+
+        {/* Teks MENURU besar di kiri bawah */}
+        <div style={{
+          width: '100%',
+          textAlign: 'left'
+        }}>
+          <span 
+            style={{
+              fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
+              fontWeight: 'normal',
+              fontSize: '300px',
+              color: '#ffffff',
+              textAlign: 'left',
+              letterSpacing: '-0.02em',
+              opacity: 0.15,
+              textTransform: 'uppercase',
+              lineHeight: '0.8',
+              whiteSpace: 'nowrap',
+              WebkitFontSmoothing: 'antialiased',
+              MozOsxFontSmoothing: 'grayscale',
+              fontKerning: 'normal',
+              margin: 0,
+              padding: 0,
+              pointerEvents: 'none'
+            }}>
+            MENURU
+          </span>
         </div>
       </div>
 
