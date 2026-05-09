@@ -1,4 +1,4 @@
-// app/page.tsx (Halaman Utama) - Full kode yang sudah diperbaiki
+// app/page.tsx (Halaman Utama) - Full kode dengan chat realtime permanen
 
 'use client';
 
@@ -85,7 +85,7 @@ export default function HomePage(): React.JSX.Element {
   const [featuresBgColor, setFeaturesBgColor] = useState('#0000ff');
   const [featuresTextColor, setFeaturesTextColor] = useState('#ffffff');
   
-  // State untuk Shadow Page (halaman bayangan hitam)
+  // State untuk Shadow Page
   const [showShadowPage, setShowShadowPage] = useState(false);
   const [isShadowTransitioning, setIsShadowTransitioning] = useState(false);
   const shadowPageRef = useRef<HTMLDivElement>(null);
@@ -94,13 +94,12 @@ export default function HomePage(): React.JSX.Element {
   const [user, setUser] = useState<any>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState("");
-  const [isChatOpen, setIsChatOpen] = useState(false);
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
   const [emailLogin, setEmailLogin] = useState("");
   const [passwordLogin, setPasswordLogin] = useState("");
   const [isLoginMode, setIsLoginMode] = useState(true);
   const [authError, setAuthError] = useState("");
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   
@@ -308,11 +307,7 @@ export default function HomePage(): React.JSX.Element {
       setPasswordLogin("");
     } catch (error: any) {
       console.error("Error signing in with Google:", error);
-      if (error.code === 'auth/unauthorized-domain') {
-        setAuthError("Domain tidak terdaftar. Silakan tambahkan domain ini di Firebase Console > Authentication > Settings > Authorized domains.");
-      } else {
-        setAuthError(error.message);
-      }
+      setAuthError(error.message);
     }
   };
 
@@ -340,7 +335,6 @@ export default function HomePage(): React.JSX.Element {
     try {
       await signOut(auth);
       setUser(null);
-      setIsChatOpen(false);
     } catch (error) {
       console.error("Error signing out:", error);
     }
@@ -353,26 +347,19 @@ export default function HomePage(): React.JSX.Element {
       await addDoc(collection(db, "chats"), {
         text: newMessage.trim(),
         userId: user.uid,
-        userName: user.displayName || user.email || "Anonymous",
+        userName: user.displayName || user.email?.split('@')[0] || "Anonymous",
         userPhoto: user.photoURL || null,
         timestamp: Timestamp.now()
       });
       setNewMessage("");
-      
-      setTimeout(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-      }, 100);
     } catch (error) {
       console.error("Error sending message:", error);
     }
   };
 
-  // Load messages realtime
+  // Load messages realtime - permanen
   useEffect(() => {
-    if (!user) return;
-    
-    setIsLoadingMessages(true);
-    const q = query(collection(db, "chats"), orderBy("timestamp", "asc"), limit(100));
+    const q = query(collection(db, "chats"), orderBy("timestamp", "asc"), limit(500));
     
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const loadedMessages: ChatMessage[] = [];
@@ -389,14 +376,10 @@ export default function HomePage(): React.JSX.Element {
       });
       setMessages(loadedMessages);
       setIsLoadingMessages(false);
-      
-      setTimeout(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-      }, 100);
     });
     
     return () => unsubscribe();
-  }, [user]);
+  }, []);
 
   // Monitor auth state
   useEffect(() => {
@@ -405,15 +388,6 @@ export default function HomePage(): React.JSX.Element {
     });
     return () => unsubscribe();
   }, []);
-
-  // Auto-scroll saat chat dibuka
-  useEffect(() => {
-    if (isChatOpen && messages.length > 0) {
-      setTimeout(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-      }, 300);
-    }
-  }, [isChatOpen, messages]);
 
   const getRandomChar = () => {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
@@ -509,651 +483,169 @@ export default function HomePage(): React.JSX.Element {
     });
   };
 
-  // Fungsi untuk reset warna teks ke default berdasarkan background
-  const resetTextColorsToDefault = () => {
-    const leftNumbers = [
-      featuresLeftNumberRef.current,
-      featuresLeftNumber2Ref.current,
-      featuresLeftNumber3Ref.current,
-      featuresLeftNumber4Ref.current,
-      featuresLeftNumber5Ref.current
-    ];
-    
-    const rightTexts = [
-      featuresRightTextRef.current,
-      featuresRightText2Ref.current,
-      featuresRightText3Ref.current,
-      featuresRightText4Ref.current,
-      featuresRightText5Ref.current
-    ];
-    
-    const arrows = [
-      featuresArrowRef.current,
-      featuresArrow2Ref.current,
-      featuresArrow3Ref.current,
-      featuresArrow4Ref.current,
-      featuresArrow5Ref.current
-    ];
-    
-    const updateNumbers = document.querySelectorAll('.update-number');
-    
-    const targetColor = featuresTextColor;
-    
-    leftNumbers.forEach(num => {
-      if (num && !noteHover && !communityHover && !calendarHover && !blogHover && !donationHover) {
-        gsap.to(num, { color: targetColor, duration: 0.2 });
-      }
-    });
-    
-    rightTexts.forEach(text => {
-      if (text && !noteHover && !communityHover && !calendarHover && !blogHover && !donationHover) {
-        gsap.to(text, { color: targetColor, duration: 0.2 });
-      }
-    });
-    
-    updateNumbers.forEach(num => {
-      const element = num as HTMLElement;
-      if (!noteHover && !communityHover && !calendarHover && !blogHover && !donationHover) {
-        gsap.to(element, { color: targetColor, duration: 0.2 });
-      }
-    });
-    
-    arrows.forEach(arrow => {
-      if (arrow && !noteHover && !communityHover && !calendarHover && !blogHover && !donationHover) {
-        const svg = arrow.querySelector('svg');
-        if (svg) {
-          gsap.to(svg, { stroke: targetColor, duration: 0.2 });
-        }
-      }
-    });
-  };
-
   const handleNoteHoverEnter = () => {
     setNoteHover(true);
     
     gsap.set(featuresOverlayRef.current, { opacity: 1 });
-    
-    gsap.to(updateContainerRef.current, {
-      opacity: 1,
-      x: 0,
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
-    gsap.to(circleImagesRef.current, {
-      opacity: 1,
-      x: 0,
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
-    gsap.to(featuresLeftNumberRef.current, {
-      color: '#ffffff',
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
-    gsap.to('.update-number', {
-      color: '#ffffff',
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
-    gsap.to(featuresRightTextRef.current, {
-      color: '#ffffff',
-      duration: 0.2,
-      ease: "power2.out"
-    });
+    gsap.to(updateContainerRef.current, { opacity: 1, x: 0, duration: 0.2, ease: "power2.out" });
+    gsap.to(circleImagesRef.current, { opacity: 1, x: 0, duration: 0.2, ease: "power2.out" });
+    gsap.to(featuresLeftNumberRef.current, { color: '#ffffff', duration: 0.2 });
+    gsap.to('.update-number', { color: '#ffffff', duration: 0.2 });
+    gsap.to(featuresRightTextRef.current, { color: '#ffffff', duration: 0.2 });
     
     if (featuresArrowRef.current) {
-      gsap.to(featuresArrowRef.current, {
-        rotation: 0,
-        duration: 0.2,
-        ease: "back.out(0.6)"
-      });
-      gsap.to('.features-right-arrow svg', {
-        stroke: '#ffffff',
-        duration: 0.2,
-        ease: "power2.out"
-      });
+      gsap.to(featuresArrowRef.current, { rotation: 0, duration: 0.2 });
+      gsap.to('.features-right-arrow svg', { stroke: '#ffffff', duration: 0.2 });
     }
     
-    gsap.to([circleImg1Ref.current, circleImg2Ref.current], {
-      scale: 1.2,
-      duration: 0.2,
-      ease: "back.out(0.6)",
-      stagger: 0.05
-    });
+    gsap.to([circleImg1Ref.current, circleImg2Ref.current], { scale: 1.2, duration: 0.2, stagger: 0.05 });
   };
 
   const handleNoteHoverLeave = () => {
     setNoteHover(false);
     
     gsap.set(featuresOverlayRef.current, { opacity: 0 });
-    
-    gsap.to(updateContainerRef.current, {
-      opacity: 0,
-      x: 50,
-      duration: 0.2,
-      ease: "power2.in"
-    });
-    
-    gsap.to(circleImagesRef.current, {
-      opacity: 0,
-      x: 20,
-      duration: 0.2,
-      ease: "power2.in"
-    });
+    gsap.to(updateContainerRef.current, { opacity: 0, x: 50, duration: 0.2, ease: "power2.in" });
+    gsap.to(circleImagesRef.current, { opacity: 0, x: 20, duration: 0.2, ease: "power2.in" });
     
     const targetColor = featuresTextColor;
-    
-    gsap.to(featuresLeftNumberRef.current, {
-      color: targetColor,
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
-    gsap.to('.update-number', {
-      color: targetColor,
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
-    gsap.to(featuresRightTextRef.current, {
-      color: targetColor,
-      duration: 0.2,
-      ease: "power2.out"
-    });
+    gsap.to(featuresLeftNumberRef.current, { color: targetColor, duration: 0.2 });
+    gsap.to('.update-number', { color: targetColor, duration: 0.2 });
+    gsap.to(featuresRightTextRef.current, { color: targetColor, duration: 0.2 });
     
     if (featuresArrowRef.current) {
-      gsap.to(featuresArrowRef.current, {
-        rotation: 45,
-        duration: 0.2,
-        ease: "back.inOut(0.6)"
-      });
-      gsap.to('.features-right-arrow svg', {
-        stroke: targetColor,
-        duration: 0.2,
-        ease: "power2.out"
-      });
+      gsap.to(featuresArrowRef.current, { rotation: 45, duration: 0.2 });
+      gsap.to('.features-right-arrow svg', { stroke: targetColor, duration: 0.2 });
     }
     
-    gsap.to([circleImg1Ref.current, circleImg2Ref.current], {
-      scale: 1,
-      duration: 0.2,
-      ease: "power2.in"
-    });
+    gsap.to([circleImg1Ref.current, circleImg2Ref.current], { scale: 1, duration: 0.2 });
   };
 
   const handleCommunityHoverEnter = () => {
     setCommunityHover(true);
-    
     gsap.set(featuresOverlay2Ref.current, { opacity: 1 });
-    
-    gsap.to(updateContainer2Ref.current, {
-      opacity: 1,
-      x: 0,
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
-    gsap.to(circleImages2Ref.current, {
-      opacity: 1,
-      x: 0,
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
-    gsap.to(featuresLeftNumber2Ref.current, {
-      color: '#ffffff',
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
-    gsap.to('.update-number', {
-      color: '#ffffff',
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
-    gsap.to(featuresRightText2Ref.current, {
-      color: '#ffffff',
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
+    gsap.to(updateContainer2Ref.current, { opacity: 1, x: 0, duration: 0.2 });
+    gsap.to(circleImages2Ref.current, { opacity: 1, x: 0, duration: 0.2 });
+    gsap.to(featuresLeftNumber2Ref.current, { color: '#ffffff', duration: 0.2 });
+    gsap.to('.update-number', { color: '#ffffff', duration: 0.2 });
+    gsap.to(featuresRightText2Ref.current, { color: '#ffffff', duration: 0.2 });
     if (featuresArrow2Ref.current) {
-      gsap.to(featuresArrow2Ref.current, {
-        rotation: 0,
-        duration: 0.2,
-        ease: "back.out(0.6)"
-      });
-      gsap.to('.features-right-arrow-2 svg', {
-        stroke: '#ffffff',
-        duration: 0.2,
-        ease: "power2.out"
-      });
+      gsap.to(featuresArrow2Ref.current, { rotation: 0, duration: 0.2 });
+      gsap.to('.features-right-arrow-2 svg', { stroke: '#ffffff', duration: 0.2 });
     }
-    
-    gsap.to([circleImg1_2Ref.current, circleImg2_2Ref.current], {
-      scale: 1.2,
-      duration: 0.2,
-      ease: "back.out(0.6)",
-      stagger: 0.05
-    });
+    gsap.to([circleImg1_2Ref.current, circleImg2_2Ref.current], { scale: 1.2, duration: 0.2, stagger: 0.05 });
   };
 
   const handleCommunityHoverLeave = () => {
     setCommunityHover(false);
-    
     gsap.set(featuresOverlay2Ref.current, { opacity: 0 });
-    
-    gsap.to(updateContainer2Ref.current, {
-      opacity: 0,
-      x: 50,
-      duration: 0.2,
-      ease: "power2.in"
-    });
-    
-    gsap.to(circleImages2Ref.current, {
-      opacity: 0,
-      x: 20,
-      duration: 0.2,
-      ease: "power2.in"
-    });
-    
+    gsap.to(updateContainer2Ref.current, { opacity: 0, x: 50, duration: 0.2 });
+    gsap.to(circleImages2Ref.current, { opacity: 0, x: 20, duration: 0.2 });
     const targetColor = featuresTextColor;
-    
-    gsap.to(featuresLeftNumber2Ref.current, {
-      color: targetColor,
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
-    gsap.to('.update-number', {
-      color: targetColor,
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
-    gsap.to(featuresRightText2Ref.current, {
-      color: targetColor,
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
+    gsap.to(featuresLeftNumber2Ref.current, { color: targetColor, duration: 0.2 });
+    gsap.to('.update-number', { color: targetColor, duration: 0.2 });
+    gsap.to(featuresRightText2Ref.current, { color: targetColor, duration: 0.2 });
     if (featuresArrow2Ref.current) {
-      gsap.to(featuresArrow2Ref.current, {
-        rotation: 45,
-        duration: 0.2,
-        ease: "back.inOut(0.6)"
-      });
-      gsap.to('.features-right-arrow-2 svg', {
-        stroke: targetColor,
-        duration: 0.2,
-        ease: "power2.out"
-      });
+      gsap.to(featuresArrow2Ref.current, { rotation: 45, duration: 0.2 });
+      gsap.to('.features-right-arrow-2 svg', { stroke: targetColor, duration: 0.2 });
     }
-    
-    gsap.to([circleImg1_2Ref.current, circleImg2_2Ref.current], {
-      scale: 1,
-      duration: 0.2,
-      ease: "power2.in"
-    });
+    gsap.to([circleImg1_2Ref.current, circleImg2_2Ref.current], { scale: 1, duration: 0.2 });
   };
 
   const handleCalendarHoverEnter = () => {
     setCalendarHover(true);
-    
     gsap.set(featuresOverlay3Ref.current, { opacity: 1 });
-    
-    gsap.to(updateContainer3Ref.current, {
-      opacity: 1,
-      x: 0,
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
-    gsap.to(circleImages3Ref.current, {
-      opacity: 1,
-      x: 0,
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
-    gsap.to(featuresLeftNumber3Ref.current, {
-      color: '#ffffff',
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
-    gsap.to('.update-number', {
-      color: '#ffffff',
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
-    gsap.to(featuresRightText3Ref.current, {
-      color: '#ffffff',
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
+    gsap.to(updateContainer3Ref.current, { opacity: 1, x: 0, duration: 0.2 });
+    gsap.to(circleImages3Ref.current, { opacity: 1, x: 0, duration: 0.2 });
+    gsap.to(featuresLeftNumber3Ref.current, { color: '#ffffff', duration: 0.2 });
+    gsap.to('.update-number', { color: '#ffffff', duration: 0.2 });
+    gsap.to(featuresRightText3Ref.current, { color: '#ffffff', duration: 0.2 });
     if (featuresArrow3Ref.current) {
-      gsap.to(featuresArrow3Ref.current, {
-        rotation: 0,
-        duration: 0.2,
-        ease: "back.out(0.6)"
-      });
-      gsap.to('.features-right-arrow-3 svg', {
-        stroke: '#ffffff',
-        duration: 0.2,
-        ease: "power2.out"
-      });
+      gsap.to(featuresArrow3Ref.current, { rotation: 0, duration: 0.2 });
+      gsap.to('.features-right-arrow-3 svg', { stroke: '#ffffff', duration: 0.2 });
     }
-    
-    gsap.to([circleImg1_3Ref.current, circleImg2_3Ref.current], {
-      scale: 1.2,
-      duration: 0.2,
-      ease: "back.out(0.6)",
-      stagger: 0.05
-    });
+    gsap.to([circleImg1_3Ref.current, circleImg2_3Ref.current], { scale: 1.2, duration: 0.2, stagger: 0.05 });
   };
 
   const handleCalendarHoverLeave = () => {
     setCalendarHover(false);
-    
     gsap.set(featuresOverlay3Ref.current, { opacity: 0 });
-    
-    gsap.to(updateContainer3Ref.current, {
-      opacity: 0,
-      x: 50,
-      duration: 0.2,
-      ease: "power2.in"
-    });
-    
-    gsap.to(circleImages3Ref.current, {
-      opacity: 0,
-      x: 20,
-      duration: 0.2,
-      ease: "power2.in"
-    });
-    
+    gsap.to(updateContainer3Ref.current, { opacity: 0, x: 50, duration: 0.2 });
+    gsap.to(circleImages3Ref.current, { opacity: 0, x: 20, duration: 0.2 });
     const targetColor = featuresTextColor;
-    
-    gsap.to(featuresLeftNumber3Ref.current, {
-      color: targetColor,
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
-    gsap.to('.update-number', {
-      color: targetColor,
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
-    gsap.to(featuresRightText3Ref.current, {
-      color: targetColor,
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
+    gsap.to(featuresLeftNumber3Ref.current, { color: targetColor, duration: 0.2 });
+    gsap.to('.update-number', { color: targetColor, duration: 0.2 });
+    gsap.to(featuresRightText3Ref.current, { color: targetColor, duration: 0.2 });
     if (featuresArrow3Ref.current) {
-      gsap.to(featuresArrow3Ref.current, {
-        rotation: 45,
-        duration: 0.2,
-        ease: "back.inOut(0.6)"
-      });
-      gsap.to('.features-right-arrow-3 svg', {
-        stroke: targetColor,
-        duration: 0.2,
-        ease: "power2.out"
-      });
+      gsap.to(featuresArrow3Ref.current, { rotation: 45, duration: 0.2 });
+      gsap.to('.features-right-arrow-3 svg', { stroke: targetColor, duration: 0.2 });
     }
-    
-    gsap.to([circleImg1_3Ref.current, circleImg2_3Ref.current], {
-      scale: 1,
-      duration: 0.2,
-      ease: "power2.in"
-    });
+    gsap.to([circleImg1_3Ref.current, circleImg2_3Ref.current], { scale: 1, duration: 0.2 });
   };
 
   const handleBlogHoverEnter = () => {
     setBlogHover(true);
-    
     gsap.set(featuresOverlay4Ref.current, { opacity: 1 });
-    
-    gsap.to(updateContainer4Ref.current, {
-      opacity: 1,
-      x: 0,
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
-    gsap.to(circleImages4Ref.current, {
-      opacity: 1,
-      x: 0,
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
-    gsap.to(featuresLeftNumber4Ref.current, {
-      color: '#ffffff',
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
-    gsap.to('.update-number', {
-      color: '#ffffff',
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
-    gsap.to(featuresRightText4Ref.current, {
-      color: '#ffffff',
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
+    gsap.to(updateContainer4Ref.current, { opacity: 1, x: 0, duration: 0.2 });
+    gsap.to(circleImages4Ref.current, { opacity: 1, x: 0, duration: 0.2 });
+    gsap.to(featuresLeftNumber4Ref.current, { color: '#ffffff', duration: 0.2 });
+    gsap.to('.update-number', { color: '#ffffff', duration: 0.2 });
+    gsap.to(featuresRightText4Ref.current, { color: '#ffffff', duration: 0.2 });
     if (featuresArrow4Ref.current) {
-      gsap.to(featuresArrow4Ref.current, {
-        rotation: 0,
-        duration: 0.2,
-        ease: "back.out(0.6)"
-      });
-      gsap.to('.features-right-arrow-4 svg', {
-        stroke: '#ffffff',
-        duration: 0.2,
-        ease: "power2.out"
-      });
+      gsap.to(featuresArrow4Ref.current, { rotation: 0, duration: 0.2 });
+      gsap.to('.features-right-arrow-4 svg', { stroke: '#ffffff', duration: 0.2 });
     }
-    
-    gsap.to([circleImg1_4Ref.current, circleImg2_4Ref.current], {
-      scale: 1.2,
-      duration: 0.2,
-      ease: "back.out(0.6)",
-      stagger: 0.05
-    });
+    gsap.to([circleImg1_4Ref.current, circleImg2_4Ref.current], { scale: 1.2, duration: 0.2, stagger: 0.05 });
   };
 
   const handleBlogHoverLeave = () => {
     setBlogHover(false);
-    
     gsap.set(featuresOverlay4Ref.current, { opacity: 0 });
-    
-    gsap.to(updateContainer4Ref.current, {
-      opacity: 0,
-      x: 50,
-      duration: 0.2,
-      ease: "power2.in"
-    });
-    
-    gsap.to(circleImages4Ref.current, {
-      opacity: 0,
-      x: 20,
-      duration: 0.2,
-      ease: "power2.in"
-    });
-    
+    gsap.to(updateContainer4Ref.current, { opacity: 0, x: 50, duration: 0.2 });
+    gsap.to(circleImages4Ref.current, { opacity: 0, x: 20, duration: 0.2 });
     const targetColor = featuresTextColor;
-    
-    gsap.to(featuresLeftNumber4Ref.current, {
-      color: targetColor,
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
-    gsap.to('.update-number', {
-      color: targetColor,
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
-    gsap.to(featuresRightText4Ref.current, {
-      color: targetColor,
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
+    gsap.to(featuresLeftNumber4Ref.current, { color: targetColor, duration: 0.2 });
+    gsap.to('.update-number', { color: targetColor, duration: 0.2 });
+    gsap.to(featuresRightText4Ref.current, { color: targetColor, duration: 0.2 });
     if (featuresArrow4Ref.current) {
-      gsap.to(featuresArrow4Ref.current, {
-        rotation: 45,
-        duration: 0.2,
-        ease: "back.inOut(0.6)"
-      });
-      gsap.to('.features-right-arrow-4 svg', {
-        stroke: targetColor,
-        duration: 0.2,
-        ease: "power2.out"
-      });
+      gsap.to(featuresArrow4Ref.current, { rotation: 45, duration: 0.2 });
+      gsap.to('.features-right-arrow-4 svg', { stroke: targetColor, duration: 0.2 });
     }
-    
-    gsap.to([circleImg1_4Ref.current, circleImg2_4Ref.current], {
-      scale: 1,
-      duration: 0.2,
-      ease: "power2.in"
-    });
+    gsap.to([circleImg1_4Ref.current, circleImg2_4Ref.current], { scale: 1, duration: 0.2 });
   };
 
   const handleDonationHoverEnter = () => {
     setDonationHover(true);
-    
     gsap.set(featuresOverlay5Ref.current, { opacity: 1 });
-    
-    gsap.to(updateContainer5Ref.current, {
-      opacity: 1,
-      x: 0,
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
-    gsap.to(circleImages5Ref.current, {
-      opacity: 1,
-      x: 0,
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
-    gsap.to(featuresLeftNumber5Ref.current, {
-      color: '#ffffff',
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
-    gsap.to('.update-number', {
-      color: '#ffffff',
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
-    gsap.to(featuresRightText5Ref.current, {
-      color: '#ffffff',
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
+    gsap.to(updateContainer5Ref.current, { opacity: 1, x: 0, duration: 0.2 });
+    gsap.to(circleImages5Ref.current, { opacity: 1, x: 0, duration: 0.2 });
+    gsap.to(featuresLeftNumber5Ref.current, { color: '#ffffff', duration: 0.2 });
+    gsap.to('.update-number', { color: '#ffffff', duration: 0.2 });
+    gsap.to(featuresRightText5Ref.current, { color: '#ffffff', duration: 0.2 });
     if (featuresArrow5Ref.current) {
-      gsap.to(featuresArrow5Ref.current, {
-        rotation: 0,
-        duration: 0.2,
-        ease: "back.out(0.6)"
-      });
-      gsap.to('.features-right-arrow-5 svg', {
-        stroke: '#ffffff',
-        duration: 0.2,
-        ease: "power2.out"
-      });
+      gsap.to(featuresArrow5Ref.current, { rotation: 0, duration: 0.2 });
+      gsap.to('.features-right-arrow-5 svg', { stroke: '#ffffff', duration: 0.2 });
     }
-    
-    gsap.to([circleImg1_5Ref.current, circleImg2_5Ref.current], {
-      scale: 1.2,
-      duration: 0.2,
-      ease: "back.out(0.6)",
-      stagger: 0.05
-    });
+    gsap.to([circleImg1_5Ref.current, circleImg2_5Ref.current], { scale: 1.2, duration: 0.2, stagger: 0.05 });
   };
 
   const handleDonationHoverLeave = () => {
     setDonationHover(false);
-    
     gsap.set(featuresOverlay5Ref.current, { opacity: 0 });
-    
-    gsap.to(updateContainer5Ref.current, {
-      opacity: 0,
-      x: 50,
-      duration: 0.2,
-      ease: "power2.in"
-    });
-    
-    gsap.to(circleImages5Ref.current, {
-      opacity: 0,
-      x: 20,
-      duration: 0.2,
-      ease: "power2.in"
-    });
-    
+    gsap.to(updateContainer5Ref.current, { opacity: 0, x: 50, duration: 0.2 });
+    gsap.to(circleImages5Ref.current, { opacity: 0, x: 20, duration: 0.2 });
     const targetColor = featuresTextColor;
-    
-    gsap.to(featuresLeftNumber5Ref.current, {
-      color: targetColor,
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
-    gsap.to('.update-number', {
-      color: targetColor,
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
-    gsap.to(featuresRightText5Ref.current, {
-      color: targetColor,
-      duration: 0.2,
-      ease: "power2.out"
-    });
-    
+    gsap.to(featuresLeftNumber5Ref.current, { color: targetColor, duration: 0.2 });
+    gsap.to('.update-number', { color: targetColor, duration: 0.2 });
+    gsap.to(featuresRightText5Ref.current, { color: targetColor, duration: 0.2 });
     if (featuresArrow5Ref.current) {
-      gsap.to(featuresArrow5Ref.current, {
-        rotation: 45,
-        duration: 0.2,
-        ease: "back.inOut(0.6)"
-      });
-      gsap.to('.features-right-arrow-5 svg', {
-        stroke: targetColor,
-        duration: 0.2,
-        ease: "power2.out"
-      });
+      gsap.to(featuresArrow5Ref.current, { rotation: 45, duration: 0.2 });
+      gsap.to('.features-right-arrow-5 svg', { stroke: targetColor, duration: 0.2 });
     }
-    
-    gsap.to([circleImg1_5Ref.current, circleImg2_5Ref.current], {
-      scale: 1,
-      duration: 0.2,
-      ease: "power2.in"
-    });
+    gsap.to([circleImg1_5Ref.current, circleImg2_5Ref.current], { scale: 1, duration: 0.2 });
   };
 
-  // Effect untuk Shadow Page (deteksi scroll di bagian footer)
+  // Effect untuk Shadow Page
   useEffect(() => {
     if (isLoading) return;
 
@@ -1177,25 +669,15 @@ export default function HomePage(): React.JSX.Element {
           y: "0%",
           duration: 0.8,
           ease: "power3.inOut",
-          onComplete: () => {
-            setIsShadowTransitioning(false);
-          }
+          onComplete: () => setIsShadowTransitioning(false)
         });
         
-        gsap.to(mainContentRef.current, {
-          y: "-5vh",
-          duration: 0.6,
-          ease: "power2.inOut"
-        });
+        gsap.to(mainContentRef.current, { y: "-5vh", duration: 0.6, ease: "power2.inOut" });
         
       } else if (!shouldShowShadow && showShadowPage && !isShadowTransitioning) {
         setIsShadowTransitioning(true);
         
-        gsap.to(mainContentRef.current, {
-          y: "0%",
-          duration: 0.6,
-          ease: "power2.inOut"
-        });
+        gsap.to(mainContentRef.current, { y: "0%", duration: 0.6, ease: "power2.inOut" });
         
         gsap.to(shadowPageRef.current, {
           y: "100%",
@@ -1210,10 +692,7 @@ export default function HomePage(): React.JSX.Element {
     };
     
     window.addEventListener('scroll', handleShadowPageScroll);
-    
-    return () => {
-      window.removeEventListener('scroll', handleShadowPageScroll);
-    };
+    return () => window.removeEventListener('scroll', handleShadowPageScroll);
   }, [isLoading, showShadowPage, isShadowTransitioning]);
 
   useEffect(() => {
@@ -1226,24 +705,16 @@ export default function HomePage(): React.JSX.Element {
     
     const handleWheel = (e: WheelEvent) => {
       if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
-      
       e.preventDefault();
       if (isScrolling) return;
-      
       isScrolling = true;
       const scrollAmount = e.deltaY > 0 ? 400 : -400;
       carousel.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-      
-      setTimeout(() => {
-        isScrolling = false;
-      }, 200);
+      setTimeout(() => { isScrolling = false; }, 200);
     };
     
     carousel.addEventListener('wheel', handleWheel, { passive: false });
-    
-    return () => {
-      carousel.removeEventListener('wheel', handleWheel);
-    };
+    return () => carousel.removeEventListener('wheel', handleWheel);
   }, [isLoading]);
 
   useEffect(() => {
@@ -1261,10 +732,7 @@ export default function HomePage(): React.JSX.Element {
       }
     };
 
-    const timer = setTimeout(() => {
-      initSmoother();
-    }, 100);
-
+    const timer = setTimeout(initSmoother, 100);
     return () => {
       clearTimeout(timer);
       if (smootherRef.current) {
@@ -1294,7 +762,6 @@ export default function HomePage(): React.JSX.Element {
       ].filter(Boolean);
       
       const trustedSection = trustedSectionRef.current;
-      
       if (!trustedSection) return;
       
       const trustedTop = trustedSection.offsetTop;
@@ -1315,106 +782,20 @@ export default function HomePage(): React.JSX.Element {
         if (featuresBgColor !== '#0000ff') {
           setFeaturesBgColor('#0000ff');
           setFeaturesTextColor('#ffffff');
-          updateFeaturesColors('#0000ff', '#ffffff');
         }
       } else if (!isAboveTrusted || !isInFeatures) {
         if (featuresBgColor !== '#ffffff') {
           setFeaturesBgColor('#ffffff');
           setFeaturesTextColor('#000000');
-          updateFeaturesColors('#ffffff', '#000000');
         }
       }
-    };
-    
-    const updateFeaturesColors = (bgColor: string, textColor: string) => {
-      const featuresSections = [
-        featuresSectionRef.current,
-        featuresSection2Ref.current,
-        featuresSection3Ref.current,
-        featuresSection4Ref.current,
-        featuresSection5Ref.current
-      ].filter(Boolean);
-      
-      featuresSections.forEach(section => {
-        if (section) {
-          gsap.to(section, {
-            backgroundColor: bgColor,
-            duration: 0.3,
-            ease: "power2.inOut"
-          });
-        }
-      });
-      
-      if (featuresTitleRef.current) {
-        gsap.to(featuresTitleRef.current, {
-          color: textColor,
-          duration: 0.3,
-          ease: "power2.inOut"
-        });
-      }
-      
-      const leftNumbers = [
-        featuresLeftNumberRef.current,
-        featuresLeftNumber2Ref.current,
-        featuresLeftNumber3Ref.current,
-        featuresLeftNumber4Ref.current,
-        featuresLeftNumber5Ref.current
-      ];
-      
-      const rightTexts = [
-        featuresRightTextRef.current,
-        featuresRightText2Ref.current,
-        featuresRightText3Ref.current,
-        featuresRightText4Ref.current,
-        featuresRightText5Ref.current
-      ];
-      
-      const arrows = [
-        featuresArrowRef.current,
-        featuresArrow2Ref.current,
-        featuresArrow3Ref.current,
-        featuresArrow4Ref.current,
-        featuresArrow5Ref.current
-      ];
-      
-      const updateNumbers = document.querySelectorAll('.update-number');
-      
-      leftNumbers.forEach(num => {
-        if (num && !noteHover && !communityHover && !calendarHover && !blogHover && !donationHover) {
-          gsap.to(num, { color: textColor, duration: 0.2 });
-        }
-      });
-      
-      rightTexts.forEach(text => {
-        if (text && !noteHover && !communityHover && !calendarHover && !blogHover && !donationHover) {
-          gsap.to(text, { color: textColor, duration: 0.2 });
-        }
-      });
-      
-      updateNumbers.forEach(num => {
-        const element = num as HTMLElement;
-        if (!noteHover && !communityHover && !calendarHover && !blogHover && !donationHover) {
-          gsap.to(element, { color: textColor, duration: 0.2 });
-        }
-      });
-      
-      arrows.forEach(arrow => {
-        if (arrow && !noteHover && !communityHover && !calendarHover && !blogHover && !donationHover) {
-          const svg = arrow.querySelector('svg');
-          if (svg) {
-            gsap.to(svg, { stroke: textColor, duration: 0.2 });
-          }
-        }
-      });
     };
     
     window.addEventListener('scroll', handleScroll);
     handleScroll();
-    
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [isLoading, featuresBgColor, noteHover, communityHover, calendarHover, blogHover, donationHover]);
+  }, [isLoading]);
 
-  // Efek scroll untuk TRUSTED COLLABS section
   useEffect(() => {
     if (isLoading) return;
 
@@ -1425,45 +806,16 @@ export default function HomePage(): React.JSX.Element {
       const windowHeight = window.innerHeight;
       const sectionTop = trustedSectionRef.current.offsetTop;
       const sectionBottom = sectionTop + trustedSectionRef.current.offsetHeight;
-      
       const isInSection = scrollPosition + windowHeight/2 >= sectionTop && scrollPosition + windowHeight/2 <= sectionBottom;
       
       if (isInSection) {
-        gsap.to(trustedSectionRef.current, {
-          backgroundColor: '#000000',
-          duration: 0.3,
-          ease: "power2.inOut"
-        });
-        if (trustedTextRef.current) {
-          gsap.to(trustedTextRef.current, {
-            color: '#ffffff',
-            duration: 0.3,
-            ease: "power2.inOut"
-          });
-        }
-        gsap.to('.carousel-brand, .carousel-desc', {
-          color: '#ffffff',
-          duration: 0.3,
-          ease: "power2.inOut"
-        });
+        gsap.to(trustedSectionRef.current, { backgroundColor: '#000000', duration: 0.3 });
+        if (trustedTextRef.current) gsap.to(trustedTextRef.current, { color: '#ffffff', duration: 0.3 });
+        gsap.to('.carousel-brand, .carousel-desc', { color: '#ffffff', duration: 0.3 });
       } else {
-        gsap.to(trustedSectionRef.current, {
-          backgroundColor: '#ffffff',
-          duration: 0.3,
-          ease: "power2.inOut"
-        });
-        if (trustedTextRef.current) {
-          gsap.to(trustedTextRef.current, {
-            color: 'rgb(21, 22, 26)',
-            duration: 0.3,
-            ease: "power2.inOut"
-          });
-        }
-        gsap.to('.carousel-brand, .carousel-desc', {
-          color: 'rgb(21, 22, 26)',
-          duration: 0.3,
-          ease: "power2.inOut"
-        });
+        gsap.to(trustedSectionRef.current, { backgroundColor: '#ffffff', duration: 0.3 });
+        if (trustedTextRef.current) gsap.to(trustedTextRef.current, { color: 'rgb(21, 22, 26)', duration: 0.3 });
+        gsap.to('.carousel-brand, .carousel-desc', { color: 'rgb(21, 22, 26)', duration: 0.3 });
       }
     };
 
@@ -1471,382 +823,164 @@ export default function HomePage(): React.JSX.Element {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [isLoading]);
 
-  // Animasi SplitText untuk FEATURES title
   useEffect(() => {
     if (isLoading) return;
 
     const titleElement = featuresTitleRef.current;
-    
     if (titleElement) {
-      const split = new SplitText(titleElement, {
-        type: "chars, words",
-        charsClass: "features-char"
-      });
-      gsap.set(split.chars, {
-        opacity: 0,
-        y: 100,
-        rotationX: -90,
-        transformPerspective: 800,
-        filter: 'blur(20px)'
-      });
+      const split = new SplitText(titleElement, { type: "chars, words", charsClass: "features-char" });
+      gsap.set(split.chars, { opacity: 0, y: 100, rotationX: -90, transformPerspective: 800, filter: 'blur(20px)' });
       ScrollTrigger.create({
         trigger: featuresSectionRef.current,
         start: "top 80%",
         end: "bottom 20%",
         onEnter: () => {
           gsap.to(split.chars, {
-            opacity: 1,
-            y: 0,
-            rotationX: 0,
-            filter: 'blur(0px)',
-            duration: 1.2,
-            stagger: { each: 0.06, from: "start", ease: "power2.out" },
-            ease: "back.out(0.6)"
+            opacity: 1, y: 0, rotationX: 0, filter: 'blur(0px)',
+            duration: 1.2, stagger: { each: 0.06, from: "start", ease: "power2.out" }, ease: "back.out(0.6)"
           });
         },
         onLeaveBack: () => {
           gsap.to(split.chars, {
-            opacity: 0,
-            y: 100,
-            rotationX: -90,
-            filter: 'blur(20px)',
-            duration: 0.8,
-            stagger: { each: 0.02, from: "start" },
+            opacity: 0, y: 100, rotationX: -90, filter: 'blur(20px)',
+            duration: 0.8, stagger: { each: 0.02, from: "start" }
           });
         },
         toggleActions: "play none none reverse"
       });
     }
 
-    return () => {
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
-    };
-  }, [isLoading]);
-
-  // Animasi SplitText untuk TRUSTED COLLABS
-  useEffect(() => {
-    if (isLoading) return;
-
     const trustedElement = trustedTextRef.current;
-    if (!trustedElement) return;
+    if (trustedElement) {
+      const splitTrusted = new SplitText(trustedElement, { type: "chars, words", charsClass: "trusted-char" });
+      gsap.set(splitTrusted.chars, { opacity: 0, y: 100, rotationX: -90, transformPerspective: 800, filter: 'blur(20px)' });
+      ScrollTrigger.create({
+        trigger: trustedSectionRef.current,
+        start: "top 80%",
+        end: "bottom 20%",
+        onEnter: () => {
+          gsap.to(splitTrusted.chars, {
+            opacity: 1, y: 0, rotationX: 0, filter: 'blur(0px)',
+            duration: 1.2, stagger: { each: 0.03, from: "start", ease: "power2.out" }, ease: "back.out(0.6)"
+          });
+        },
+        onLeaveBack: () => {
+          gsap.to(splitTrusted.chars, {
+            opacity: 0, y: 100, rotationX: -90, filter: 'blur(20px)',
+            duration: 0.8, stagger: { each: 0.02, from: "start" }
+          });
+        },
+        toggleActions: "play none none reverse"
+      });
+    }
 
-    const splitTrusted = new SplitText(trustedElement, {
-      type: "chars, words",
-      charsClass: "trusted-char"
-    });
-
-    gsap.set(splitTrusted.chars, {
-      opacity: 0,
-      y: 100,
-      rotationX: -90,
-      transformPerspective: 800,
-      filter: 'blur(20px)'
-    });
-
-    ScrollTrigger.create({
-      trigger: trustedSectionRef.current,
-      start: "top 80%",
-      end: "bottom 20%",
-      onEnter: () => {
-        gsap.to(splitTrusted.chars, {
-          opacity: 1,
-          y: 0,
-          rotationX: 0,
-          filter: 'blur(0px)',
-          duration: 1.2,
-          stagger: { each: 0.03, from: "start", ease: "power2.out" },
-          ease: "back.out(0.6)"
-        });
-      },
-      onLeaveBack: () => {
-        gsap.to(splitTrusted.chars, {
-          opacity: 0,
-          y: 100,
-          rotationX: -90,
-          filter: 'blur(20px)',
-          duration: 0.8,
-          stagger: { each: 0.02, from: "start" },
-        });
-      },
-      toggleActions: "play none none reverse"
-    });
-
-    return () => {
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
-    };
+    return () => { ScrollTrigger.getAll().forEach(trigger => trigger.kill()); };
   }, [isLoading]);
 
   useEffect(() => {
     if (!isLoading || !loadingOverlayRef.current) return;
 
-    const splitMenuruLoading = new SplitText(menuruTopTextRef.current, {
-      type: "chars, words",
-      charsClass: "split-char-loading"
-    });
-
-    const splitBrand = new SplitText(brandTextRef.current, {
-      type: "chars, words",
-      charsClass: "split-char-loading"
-    });
-
-    const splitYear = new SplitText(yearTextRef.current, {
-      type: "chars",
-      charsClass: "split-char-loading"
-    });
+    const splitMenuruLoading = new SplitText(menuruTopTextRef.current, { type: "chars, words", charsClass: "split-char-loading" });
+    const splitBrand = new SplitText(brandTextRef.current, { type: "chars, words", charsClass: "split-char-loading" });
+    const splitYear = new SplitText(yearTextRef.current, { type: "chars", charsClass: "split-char-loading" });
 
     if (splitMenuruLoading.chars) {
-      gsap.set(splitMenuruLoading.chars, {
-        opacity: 0,
-        y: 120,
-        rotationX: -120,
-        rotationY: 45,
-        transformPerspective: 1200,
-        filter: 'blur(25px)',
-        transformOrigin: '50% 50% -80px'
-      });
+      gsap.set(splitMenuruLoading.chars, { opacity: 0, y: 120, rotationX: -120, rotationY: 45, transformPerspective: 1200, filter: 'blur(25px)', transformOrigin: '50% 50% -80px' });
     }
-
     if (splitBrand.chars) {
-      gsap.set(splitBrand.chars, {
-        opacity: 0,
-        x: 100,
-        rotationY: 90,
-        transformPerspective: 1200,
-        filter: 'blur(20px)',
-        transformOrigin: '50% 50% -50px'
-      });
+      gsap.set(splitBrand.chars, { opacity: 0, x: 100, rotationY: 90, transformPerspective: 1200, filter: 'blur(20px)', transformOrigin: '50% 50% -50px' });
     }
-
     if (splitYear.chars) {
-      gsap.set(splitYear.chars, {
-        opacity: 0,
-        y: 80,
-        rotationX: -60,
-        transformPerspective: 1000,
-        filter: 'blur(15px)',
-        transformOrigin: '50% 50% -30px'
-      });
+      gsap.set(splitYear.chars, { opacity: 0, y: 80, rotationX: -60, transformPerspective: 1000, filter: 'blur(15px)', transformOrigin: '50% 50% -30px' });
     }
 
     const loadingTimeline = gsap.timeline({
       onComplete: () => {
         gsap.to(loadingOverlayRef.current, {
-          x: '-100%',
-          duration: 1,
-          ease: "power3.inOut",
+          x: '-100%', duration: 1, ease: "power3.inOut",
           onComplete: () => {
             setIsLoading(false);
             gsap.fromTo(mainContentRef.current,
               { x: '100%', opacity: 0.5 },
               { x: '0%', opacity: 1, duration: 1, ease: "power3.inOut" }
             );
-            animateMenuruMain();
-            animateStudioText();
-            animateBottomContent();
+            if (menuruTopMainRef.current) {
+              gsap.set(menuruTopMainRef.current, { x: -500, opacity: 0 });
+              gsap.to(menuruTopMainRef.current, { x: 0, opacity: 1, duration: 0.8, ease: "power2.out", delay: 0.1 });
+            }
+            if (studioTextRef.current) {
+              gsap.set(studioTextRef.current, { opacity: 0, y: 50 });
+              gsap.to(studioTextRef.current, { opacity: 1, y: 0, duration: 0.8, ease: "power2.out", delay: 0.3 });
+            }
+            if (bottomLeftTextRef.current) {
+              gsap.set(bottomLeftTextRef.current, { opacity: 0, y: 50 });
+              gsap.to(bottomLeftTextRef.current, { opacity: 1, y: 0, duration: 0.8, ease: "power2.out", delay: 0.45 });
+            }
+            if (bottomContentRef.current) {
+              gsap.fromTo(bottomContentRef.current,
+                { opacity: 0, y: 50, filter: 'blur(10px)' },
+                { opacity: 1, y: 0, filter: 'blur(0px)', duration: 1, ease: "power3.out", delay: 0.5 }
+              );
+            }
           }
         });
       }
     });
 
     if (splitMenuruLoading.chars) {
-      loadingTimeline.to(splitMenuruLoading.chars, {
-        opacity: 1,
-        y: 0,
-        rotationX: 0,
-        rotationY: 0,
-        filter: 'blur(0px)',
-        duration: 1.2,
-        stagger: { each: 0.05, from: "start", ease: "back.out(1.2)" },
-        ease: "back.out(0.8)"
-      }, 0);
+      loadingTimeline.to(splitMenuruLoading.chars, { opacity: 1, y: 0, rotationX: 0, rotationY: 0, filter: 'blur(0px)', duration: 1.2, stagger: { each: 0.05, from: "start", ease: "back.out(1.2)" }, ease: "back.out(0.8)" }, 0);
     }
-
     if (splitBrand.chars) {
-      loadingTimeline.to(splitBrand.chars, {
-        opacity: 1,
-        x: 0,
-        rotationY: 0,
-        filter: 'blur(0px)',
-        duration: 1,
-        stagger: { each: 0.04, from: "end", ease: "power2.out" },
-        ease: "back.out(1)"
-      }, 0.2);
+      loadingTimeline.to(splitBrand.chars, { opacity: 1, x: 0, rotationY: 0, filter: 'blur(0px)', duration: 1, stagger: { each: 0.04, from: "end", ease: "power2.out" }, ease: "back.out(1)" }, 0.2);
     }
-
     if (splitYear.chars) {
-      loadingTimeline.to(splitYear.chars, {
-        opacity: 1,
-        y: 0,
-        rotationX: 0,
-        filter: 'blur(0px)',
-        duration: 0.9,
-        stagger: { each: 0.08, from: "start", ease: "bounce.out" },
-        ease: "back.out(1.1)"
-      }, 0.4);
+      loadingTimeline.to(splitYear.chars, { opacity: 1, y: 0, rotationX: 0, filter: 'blur(0px)', duration: 0.9, stagger: { each: 0.08, from: "start", ease: "bounce.out" }, ease: "back.out(1.1)" }, 0.4);
     }
 
-    return () => {
-      loadingTimeline.kill();
-    };
+    return () => loadingTimeline.kill();
   }, [isLoading]);
-
-  const animateMenuruMain = () => {
-    if (menuruTopMainRef.current) {
-      gsap.set(menuruTopMainRef.current, { x: -500, opacity: 0 });
-      gsap.to(menuruTopMainRef.current, {
-        x: 0,
-        opacity: 1,
-        duration: 0.8,
-        ease: "power2.out",
-        delay: 0.1
-      });
-    }
-  };
-
-  const animateStudioText = () => {
-    if (studioTextRef.current) {
-      gsap.set(studioTextRef.current, { opacity: 0, y: 50 });
-      gsap.to(studioTextRef.current, {
-        opacity: 1,
-        y: 0,
-        duration: 0.8,
-        ease: "power2.out",
-        delay: 0.3
-      });
-    }
-    
-    if (bottomLeftTextRef.current) {
-      gsap.set(bottomLeftTextRef.current, { opacity: 0, y: 50 });
-      gsap.to(bottomLeftTextRef.current, {
-        opacity: 1,
-        y: 0,
-        duration: 0.8,
-        ease: "power2.out",
-        delay: 0.45
-      });
-    }
-  };
-
-  const animateBottomContent = () => {
-    if (bottomContentRef.current) {
-      gsap.fromTo(bottomContentRef.current,
-        { opacity: 0, y: 50, filter: 'blur(10px)' },
-        {
-          opacity: 1,
-          y: 0,
-          filter: 'blur(0px)',
-          duration: 1,
-          ease: "power3.out",
-          delay: 0.5
-        }
-      );
-    }
-  };
 
   useEffect(() => {
     if (isLoading) return;
 
     if (emailRef.current) {
-      const splitEmail = new SplitText(emailRef.current, {
-        type: "chars",
-        charsClass: "split-char"
-      });
-
+      const splitEmail = new SplitText(emailRef.current, { type: "chars", charsClass: "split-char" });
       gsap.fromTo(splitEmail.chars,
         { opacity: 0, x: -30, filter: 'blur(5px)' },
-        {
-          opacity: 1,
-          x: 0,
-          filter: 'blur(0px)',
-          duration: 0.8,
-          stagger: 0.02,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: emailRef.current,
-            start: "top 85%",
-            end: "bottom 70%",
-            toggleActions: "play none none reverse",
-          }
-        }
+        { opacity: 1, x: 0, filter: 'blur(0px)', duration: 0.8, stagger: 0.02, ease: "power2.out", scrollTrigger: { trigger: emailRef.current, start: "top 85%", end: "bottom 70%", toggleActions: "play none none reverse" } }
       );
     }
 
     if (menuruTextRef.current) {
-      const splitMenuru = new SplitText(menuruTextRef.current, {
-        type: "chars",
-        charsClass: "split-char-menuru"
-      });
-
-      gsap.set(splitMenuru.chars, {
-        opacity: 0,
-        y: 200,
-        rotationY: 90,
-        transformPerspective: 800,
-        filter: 'blur(20px)'
-      });
-
+      const splitMenuru = new SplitText(menuruTextRef.current, { type: "chars", charsClass: "split-char-menuru" });
+      gsap.set(splitMenuru.chars, { opacity: 0, y: 200, rotationY: 90, transformPerspective: 800, filter: 'blur(20px)' });
       gsap.to(splitMenuru.chars, {
-        opacity: 1,
-        y: 0,
-        rotationY: 0,
-        filter: 'blur(0px)',
-        duration: 1.5,
-        stagger: { each: 0.04, from: "start", ease: "power2.out" },
-        ease: "back.out(0.8)",
-        scrollTrigger: {
-          trigger: menuruTextRef.current,
-          start: "top 85%",
-          end: "bottom 65%",
-          toggleActions: "play none none reverse",
-        }
+        opacity: 1, y: 0, rotationY: 0, filter: 'blur(0px)', duration: 1.5, stagger: { each: 0.04, from: "start", ease: "power2.out" }, ease: "back.out(0.8)",
+        scrollTrigger: { trigger: menuruTextRef.current, start: "top 85%", end: "bottom 65%", toggleActions: "play none none reverse" }
       });
     }
 
     if (lineRef.current) {
       gsap.fromTo(lineRef.current,
         { width: '0%', opacity: 0, x: 100 },
-        {
-          width: '100%',
-          opacity: 1,
-          x: 0,
-          duration: 1.2,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: lineRef.current,
-            start: "top 85%",
-            end: "bottom 70%",
-            toggleActions: "play none none reverse",
-          }
-        }
+        { width: '100%', opacity: 1, x: 0, duration: 1.2, ease: "power3.out", scrollTrigger: { trigger: lineRef.current, start: "top 85%", end: "bottom 70%", toggleActions: "play none none reverse" } }
       );
     }
 
-    return () => {
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
-    };
+    return () => { ScrollTrigger.getAll().forEach(trigger => trigger.kill()); };
   }, [isLoading]);
 
   useEffect(() => {
     const consent = localStorage.getItem('cookieConsent');
-    if (consent === null) {
-      setShowPopup(true);
-    }
+    if (consent === null) setShowPopup(true);
   }, []);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
-        setShowCalendarModal(false);
-      }
+      if (modalRef.current && !modalRef.current.contains(event.target as Node)) setShowCalendarModal(false);
     };
-    
-    if (showCalendarModal) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-    
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
+    if (showCalendarModal) document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showCalendarModal]);
 
   const handleAccept = () => {
@@ -1860,16 +994,9 @@ export default function HomePage(): React.JSX.Element {
   };
 
   const handleContact = () => {};
-
-  const handleEmailClick = () => {
-    window.location.href = 'mailto:contact.menuru@gmail.com';
-  };
-
+  const handleEmailClick = () => window.location.href = 'mailto:contact.menuru@gmail.com';
   const handleSocialClick = (platform: string) => {};
-
-  const handleCalendarCall = () => {
-    setShowCalendarModal(true);
-  };
+  const handleCalendarCall = () => setShowCalendarModal(true);
 
   const ArrowIcon = ({ size = 24 }: { size?: number }) => (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1940,30 +1067,7 @@ export default function HomePage(): React.JSX.Element {
           will-change: transform;
         }
 
-        .split-char {
-          display: inline-block;
-          will-change: transform, opacity, filter;
-        }
-
-        .split-char-menuru {
-          display: inline-block;
-          will-change: transform, opacity, filter;
-          transform-style: preserve-3d;
-        }
-
-        .split-char-loading {
-          display: inline-block;
-          will-change: transform, opacity, filter;
-          transform-style: preserve-3d;
-        }
-
-        .trusted-char {
-          display: inline-block;
-          will-change: transform, opacity, filter;
-          transform-style: preserve-3d;
-        }
-
-        .features-char {
+        .split-char, .split-char-menuru, .split-char-loading, .trusted-char, .features-char {
           display: inline-block;
           will-change: transform, opacity, filter;
           transform-style: preserve-3d;
@@ -2033,7 +1137,7 @@ export default function HomePage(): React.JSX.Element {
           stroke: #000000 !important;
         }
 
-        .dot-small {
+        .dot-small, .circle-large-white {
           transition: opacity 0.3s ease, transform 0.3s ease;
         }
 
@@ -2041,12 +1145,8 @@ export default function HomePage(): React.JSX.Element {
           transition: opacity 0.3s ease, transform 0.3s ease, background-color 0.3s ease;
         }
 
-        .social-item {
+        .social-item, .cookie-link {
           transition: all 0.3s ease;
-        }
-
-        .cookie-link {
-          transition: opacity 0.3s ease;
         }
         
         .cookie-link:hover {
@@ -2063,7 +1163,6 @@ export default function HomePage(): React.JSX.Element {
           to { opacity: 1; transform: scale(1); }
         }
 
-        /* Animasi untuk Chat */
         @keyframes pulse {
           0%, 100% { opacity: 1; }
           50% { opacity: 0.5; }
@@ -2248,7 +1347,6 @@ export default function HomePage(): React.JSX.Element {
           line-height: 1.3;
         }
 
-        /* SECTION FEATURES */
         .features-section {
           min-height: 25vh;
           width: 100%;
@@ -2400,19 +1498,9 @@ export default function HomePage(): React.JSX.Element {
           width: calc(100% + 100vw + 200px);
         }
 
-        .hover-container:hover .features-overlay {
-          opacity: 1;
-        }
-
-        .hover-container:hover .update-container {
-          opacity: 1;
-          transform: translateX(0);
-        }
-
-        .hover-container:hover .circle-images-container {
-          opacity: 1;
-          transform: translateX(0);
-        }
+        .hover-container:hover .features-overlay { opacity: 1; }
+        .hover-container:hover .update-container { opacity: 1; transform: translateX(0); }
+        .hover-container:hover .circle-images-container { opacity: 1; transform: translateX(0); }
 
         .trusted-section {
           min-height: 100vh;
@@ -2453,9 +1541,7 @@ export default function HomePage(): React.JSX.Element {
           padding-bottom: 40px;
         }
         
-        .carousel-container:active {
-          cursor: grabbing;
-        }
+        .carousel-container:active { cursor: grabbing; }
         
         .carousel-track {
           display: flex;
@@ -2471,9 +1557,7 @@ export default function HomePage(): React.JSX.Element {
           transition: all 0.3s ease;
         }
         
-        .carousel-item:hover {
-          transform: translateY(-10px);
-        }
+        .carousel-item:hover { transform: translateY(-10px); }
         
         .carousel-image {
           width: 100%;
@@ -2545,68 +1629,14 @@ export default function HomePage(): React.JSX.Element {
       
       {/* LOADING OVERLAY */}
       {isLoading && (
-        <div
-          ref={loadingOverlayRef}
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            backgroundColor: '#000000',
-            zIndex: 9999,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            pointerEvents: 'auto',
-          }}
-        >
-          <div style={{
-            position: 'absolute',
-            top: '10px',
-            left: '40px',
-            fontFamily: 'Inter, "Helvetica Neue", sans-serif',
-            fontWeight: '400',
-            fontSize: '219px',
-            lineHeight: '219px',
-            color: '#ffffff',
-            letterSpacing: '-0.02em',
-            textTransform: 'uppercase',
-            whiteSpace: 'nowrap',
-          }}>
+        <div ref={loadingOverlayRef} style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: '#000000', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'auto' }}>
+          <div style={{ position: 'absolute', top: '10px', left: '40px', fontFamily: 'Inter, "Helvetica Neue", sans-serif', fontWeight: '400', fontSize: '219px', lineHeight: '219px', color: '#ffffff', letterSpacing: '-0.02em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
             <span ref={menuruTopTextRef}>MENURU</span>
           </div>
-
-          <div style={{
-            position: 'absolute',
-            top: '50%',
-            right: '60px',
-            transform: 'translateY(-50%)',
-            fontFamily: 'Inter, "Helvetica Neue", sans-serif',
-            fontWeight: '400',
-            fontSize: '219px',
-            lineHeight: '219px',
-            color: '#ffffff',
-            letterSpacing: '-0.02em',
-            textTransform: 'uppercase',
-            whiteSpace: 'nowrap',
-            textAlign: 'right',
-          }}>
+          <div style={{ position: 'absolute', top: '50%', right: '60px', transform: 'translateY(-50%)', fontFamily: 'Inter, "Helvetica Neue", sans-serif', fontWeight: '400', fontSize: '219px', lineHeight: '219px', color: '#ffffff', letterSpacing: '-0.02em', textTransform: 'uppercase', whiteSpace: 'nowrap', textAlign: 'right' }}>
             <span ref={brandTextRef}>BRAND</span>
           </div>
-
-          <div style={{
-            position: 'absolute',
-            bottom: '40px',
-            right: '60px',
-            fontFamily: 'Inter, "Helvetica Neue", sans-serif',
-            fontWeight: '400',
-            fontSize: '219px',
-            lineHeight: '219px',
-            color: '#ffffff',
-            letterSpacing: '-0.02em',
-            whiteSpace: 'nowrap',
-          }}>
+          <div style={{ position: 'absolute', bottom: '40px', right: '60px', fontFamily: 'Inter, "Helvetica Neue", sans-serif', fontWeight: '400', fontSize: '219px', lineHeight: '219px', color: '#ffffff', letterSpacing: '-0.02em', whiteSpace: 'nowrap' }}>
             <span ref={yearTextRef}>2026</span>
           </div>
         </div>
@@ -2614,564 +1644,120 @@ export default function HomePage(): React.JSX.Element {
 
       <div id="smooth-wrapper">
         <div id="smooth-content">
-          <div 
-            ref={mainContentRef}
-            style={{
-              minHeight: '100vh',
-              backgroundColor: 'white',
-              margin: 0,
-              padding: 0,
-              width: '100%',
-              display: 'flex',
-              flexDirection: 'column',
-              fontFamily: 'Questrial, sans-serif',
-              WebkitFontSmoothing: 'antialiased',
-              MozOsxFontSmoothing: 'grayscale',
-              position: 'relative',
-              opacity: isLoading ? 0 : 1,
-              transform: isLoading ? 'translateX(100%)' : 'translateX(0)',
-              transition: 'all 0.01s ease'
-            }}
-          >
+          <div ref={mainContentRef} style={{ minHeight: '100vh', backgroundColor: 'white', margin: 0, padding: 0, width: '100%', display: 'flex', flexDirection: 'column', fontFamily: 'Questrial, sans-serif', WebkitFontSmoothing: 'antialiased', MozOsxFontSmoothing: 'grayscale', position: 'relative', opacity: isLoading ? 0 : 1, transform: isLoading ? 'translateX(100%)' : 'translateX(0)', transition: 'all 0.01s ease' }}>
+            
             {/* HEADER SECTION - MENURU */}
-            <div style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              right: 0,
-              zIndex: 100,
-              pointerEvents: 'none',
-              padding: '20px 0 0 40px'
-            }}>
-              <div
-                ref={menuruTopMainRef}
-                style={{
-                  fontFamily: 'Inter, "Helvetica Neue", sans-serif',
-                  fontWeight: '400',
-                  fontSize: '213px',
-                  lineHeight: '213px',
-                  color: '#000000',
-                  letterSpacing: '-0.02em',
-                  textTransform: 'uppercase',
-                  whiteSpace: 'nowrap',
-                  opacity: 0,
-                  transform: 'translateX(-500px)'
-                }}
-              >
-                MENURU
-              </div>
+            <div style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, pointerEvents: 'none', padding: '20px 0 0 40px' }}>
+              <div ref={menuruTopMainRef} style={{ fontFamily: 'Inter, "Helvetica Neue", sans-serif', fontWeight: '400', fontSize: '213px', lineHeight: '213px', color: '#000000', letterSpacing: '-0.02em', textTransform: 'uppercase', whiteSpace: 'nowrap', opacity: 0, transform: 'translateX(-500px)' }}>MENURU</div>
             </div>
 
             {/* SECTION 1 - MENURU.STUDIO */}
-            <div
-              ref={studioContainerRef}
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'flex-end',
-                justifyContent: 'center',
-                minHeight: '100vh',
-                paddingRight: '80px',
-                position: 'relative',
-              }}
-            >
-              <div
-                ref={studioTextRef}
-                className="studio-text"
-                style={{
-                  textAlign: 'right',
-                  opacity: 0
-                }}
-                onMouseEnter={handleStudioHoverEnter}
-                onMouseLeave={handleStudioHoverLeave}
-              >
+            <div ref={studioContainerRef} style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', justifyContent: 'center', minHeight: '100vh', paddingRight: '80px', position: 'relative' }}>
+              <div ref={studioTextRef} className="studio-text" style={{ textAlign: 'right', opacity: 0 }} onMouseEnter={handleStudioHoverEnter} onMouseLeave={handleStudioHoverLeave}>
                 <div>MENURU.STUDIO – Jakarta UX/UI Design</div>
                 <div>Personal for Note, Donation & Calendar</div>
               </div>
-
-              <div
-                ref={bottomLeftTextRef}
-                className="bottom-left-text"
-                style={{
-                  position: 'absolute',
-                  bottom: '5%',
-                  left: '80px',
-                  textAlign: 'left',
-                  opacity: 0,
-                }}
-              >
-                IDN
-                <br />
-                MN'RU© - 26'
-              </div>
-
-              {/* Floating Images */}
+              <div ref={bottomLeftTextRef} className="bottom-left-text" style={{ position: 'absolute', bottom: '5%', left: '80px', textAlign: 'left', opacity: 0 }}>IDN<br />MN&apos;RU© - 26&apos;</div>
               <div className="studio-hover-images">
-                <div
-                  ref={img1Ref}
-                  className="floating-img-studio"
-                  style={{
-                    left: '0%',
-                    top: '50%',
-                    transform: 'translateY(-50%)'
-                  }}
-                >
-                  <Image
-                    src="/images/lkhh.jpg"
-                    alt="Gallery 1"
-                    fill
-                    style={{ objectFit: 'cover' }}
-                  />
-                </div>
-
-                <div
-                  ref={img2Ref}
-                  className="floating-img-studio"
-                  style={{
-                    right: '0%',
-                    top: '50%',
-                    transform: 'translateY(-50%)'
-                  }}
-                >
-                  <Image
-                    src="/images/ai.jpg"
-                    alt="Gallery 2"
-                    fill
-                    style={{ objectFit: 'cover' }}
-                  />
-                </div>
+                <div ref={img1Ref} className="floating-img-studio" style={{ left: '0%', top: '50%', transform: 'translateY(-50%)' }}><Image src="/images/lkhh.jpg" alt="Gallery 1" fill style={{ objectFit: 'cover' }}/></div>
+                <div ref={img2Ref} className="floating-img-studio" style={{ right: '0%', top: '50%', transform: 'translateY(-50%)' }}><Image src="/images/ai.jpg" alt="Gallery 2" fill style={{ objectFit: 'cover' }}/></div>
               </div>
             </div>
 
             {/* SECTION FEATURES - 01 NOTE */}
-            <div
-              ref={featuresSectionRef}
-              className="features-section"
-              style={{
-                backgroundColor: featuresBgColor,
-              }}
-            >
-              <div className="features-top">
-                <div
-                  ref={featuresTitleRef}
-                  className="features-title"
-                  style={{ color: featuresTextColor }}
-                >
-                  Features
-                </div>
-              </div>
+            <div ref={featuresSectionRef} className="features-section" style={{ backgroundColor: featuresBgColor }}>
+              <div className="features-top"><div ref={featuresTitleRef} className="features-title" style={{ color: featuresTextColor }}>Features</div></div>
               <div className="features-bottom">
-                <div
-                  ref={featuresLeftNumberRef}
-                  className="features-left-number"
-                  style={{ color: featuresTextColor }}
-                >
-                  01
-                </div>
-                
-                <div 
-                  ref={hoverContainerRef}
-                  className="hover-container"
-                  onMouseEnter={handleNoteHoverEnter}
-                  onMouseLeave={handleNoteHoverLeave}
-                >
-                  <div
-                    ref={featuresRightTextRef}
-                    className="features-right-text"
-                    style={{ color: featuresTextColor }}
-                  >
-                    Note
-                  </div>
-                  
-                  <div ref={updateContainerRef} className="update-container">
-                    <div className="update-number" style={{ color: featuresTextColor }}>
-                      Update<sup>¹</sup>
-                    </div>
-                  </div>
-                  
-                  <div 
-                    ref={featuresArrowRef}
-                    className="features-right-arrow"
-                  >
-                    {noteHover ? (
-                      <StraightLine size={50} />
-                    ) : (
-                      <NorthEastArrow size={50} />
-                    )}
-                  </div>
-                  
+                <div ref={featuresLeftNumberRef} className="features-left-number" style={{ color: featuresTextColor }}>01</div>
+                <div ref={hoverContainerRef} className="hover-container" onMouseEnter={handleNoteHoverEnter} onMouseLeave={handleNoteHoverLeave}>
+                  <div ref={featuresRightTextRef} className="features-right-text" style={{ color: featuresTextColor }}>Note</div>
+                  <div ref={updateContainerRef} className="update-container"><div className="update-number" style={{ color: featuresTextColor }}>Update<sup>¹</sup></div></div>
+                  <div ref={featuresArrowRef} className="features-right-arrow">{noteHover ? <StraightLine size={50} /> : <NorthEastArrow size={50} />}</div>
                   <div ref={circleImagesRef} className="circle-images-container">
-                    <div
-                      ref={circleImg1Ref}
-                      className="circle-img"
-                    >
-                      <Image
-                        src="/images/lkhh.jpg"
-                        alt="circle 1"
-                        fill
-                        style={{ objectFit: 'cover' }}
-                      />
-                    </div>
-                    <div
-                      ref={circleImg2Ref}
-                      className="circle-img"
-                    >
-                      <Image
-                        src="/images/ai.jpg"
-                        alt="circle 2"
-                        fill
-                        style={{ objectFit: 'cover' }}
-                      />
-                    </div>
+                    <div ref={circleImg1Ref} className="circle-img"><Image src="/images/lkhh.jpg" alt="circle 1" fill style={{ objectFit: 'cover' }}/></div>
+                    <div ref={circleImg2Ref} className="circle-img"><Image src="/images/ai.jpg" alt="circle 2" fill style={{ objectFit: 'cover' }}/></div>
                   </div>
-                  
                   <div ref={featuresOverlayRef} className="features-overlay" />
                 </div>
               </div>
             </div>
 
             {/* SECTION FEATURES - 02 COMMUNITY */}
-            <div
-              ref={featuresSection2Ref}
-              className="features-section"
-              style={{
-                backgroundColor: featuresBgColor,
-              }}
-            >
+            <div ref={featuresSection2Ref} className="features-section" style={{ backgroundColor: featuresBgColor }}>
               <div className="features-bottom">
-                <div
-                  ref={featuresLeftNumber2Ref}
-                  className="features-left-number"
-                  style={{ color: featuresTextColor }}
-                >
-                  02
-                </div>
-                
-                <div 
-                  ref={hoverContainer2Ref}
-                  className="hover-container"
-                  onMouseEnter={handleCommunityHoverEnter}
-                  onMouseLeave={handleCommunityHoverLeave}
-                >
-                  <div
-                    ref={featuresRightText2Ref}
-                    className="features-right-text"
-                    style={{ color: featuresTextColor }}
-                  >
-                    Community
-                  </div>
-                  
-                  <div ref={updateContainer2Ref} className="update-container">
-                    <div className="update-number" style={{ color: featuresTextColor }}>
-                      Join<sup>²</sup>
-                    </div>
-                  </div>
-                  
-                  <div 
-                    ref={featuresArrow2Ref}
-                    className="features-right-arrow"
-                  >
-                    {communityHover ? (
-                      <StraightLine size={50} />
-                    ) : (
-                      <NorthEastArrow size={50} />
-                    )}
-                  </div>
-                  
+                <div ref={featuresLeftNumber2Ref} className="features-left-number" style={{ color: featuresTextColor }}>02</div>
+                <div ref={hoverContainer2Ref} className="hover-container" onMouseEnter={handleCommunityHoverEnter} onMouseLeave={handleCommunityHoverLeave}>
+                  <div ref={featuresRightText2Ref} className="features-right-text" style={{ color: featuresTextColor }}>Community</div>
+                  <div ref={updateContainer2Ref} className="update-container"><div className="update-number" style={{ color: featuresTextColor }}>Join<sup>²</sup></div></div>
+                  <div ref={featuresArrow2Ref} className="features-right-arrow">{communityHover ? <StraightLine size={50} /> : <NorthEastArrow size={50} />}</div>
                   <div ref={circleImages2Ref} className="circle-images-container">
-                    <div
-                      ref={circleImg1_2Ref}
-                      className="circle-img"
-                    >
-                      <Image
-                        src="/images/ai.jpg"
-                        alt="circle 1"
-                        fill
-                        style={{ objectFit: 'cover' }}
-                      />
-                    </div>
-                    <div
-                      ref={circleImg2_2Ref}
-                      className="circle-img"
-                    >
-                      <Image
-                        src="/images/lkhh.jpg"
-                        alt="circle 2"
-                        fill
-                        style={{ objectFit: 'cover' }}
-                      />
-                    </div>
+                    <div ref={circleImg1_2Ref} className="circle-img"><Image src="/images/ai.jpg" alt="circle 1" fill style={{ objectFit: 'cover' }}/></div>
+                    <div ref={circleImg2_2Ref} className="circle-img"><Image src="/images/lkhh.jpg" alt="circle 2" fill style={{ objectFit: 'cover' }}/></div>
                   </div>
-                  
                   <div ref={featuresOverlay2Ref} className="features-overlay" />
                 </div>
               </div>
             </div>
 
             {/* SECTION FEATURES - 03 CALENDAR */}
-            <div
-              ref={featuresSection3Ref}
-              className="features-section"
-              style={{
-                backgroundColor: featuresBgColor,
-              }}
-            >
+            <div ref={featuresSection3Ref} className="features-section" style={{ backgroundColor: featuresBgColor }}>
               <div className="features-bottom">
-                <div
-                  ref={featuresLeftNumber3Ref}
-                  className="features-left-number"
-                  style={{ color: featuresTextColor }}
-                >
-                  03
-                </div>
-                
-                <div 
-                  ref={hoverContainer3Ref}
-                  className="hover-container"
-                  onMouseEnter={handleCalendarHoverEnter}
-                  onMouseLeave={handleCalendarHoverLeave}
-                >
-                  <div
-                    ref={featuresRightText3Ref}
-                    className="features-right-text"
-                    style={{ color: featuresTextColor }}
-                  >
-                    Calendar
-                  </div>
-                  
-                  <div ref={updateContainer3Ref} className="update-container">
-                    <div className="update-number" style={{ color: featuresTextColor }}>
-                      Schedule<sup>³</sup>
-                    </div>
-                  </div>
-                  
-                  <div 
-                    ref={featuresArrow3Ref}
-                    className="features-right-arrow"
-                  >
-                    {calendarHover ? (
-                      <StraightLine size={50} />
-                    ) : (
-                      <NorthEastArrow size={50} />
-                    )}
-                  </div>
-                  
+                <div ref={featuresLeftNumber3Ref} className="features-left-number" style={{ color: featuresTextColor }}>03</div>
+                <div ref={hoverContainer3Ref} className="hover-container" onMouseEnter={handleCalendarHoverEnter} onMouseLeave={handleCalendarHoverLeave}>
+                  <div ref={featuresRightText3Ref} className="features-right-text" style={{ color: featuresTextColor }}>Calendar</div>
+                  <div ref={updateContainer3Ref} className="update-container"><div className="update-number" style={{ color: featuresTextColor }}>Schedule<sup>³</sup></div></div>
+                  <div ref={featuresArrow3Ref} className="features-right-arrow">{calendarHover ? <StraightLine size={50} /> : <NorthEastArrow size={50} />}</div>
                   <div ref={circleImages3Ref} className="circle-images-container">
-                    <div
-                      ref={circleImg1_3Ref}
-                      className="circle-img"
-                    >
-                      <Image
-                        src="/images/5.jpg"
-                        alt="circle 1"
-                        fill
-                        style={{ objectFit: 'cover' }}
-                      />
-                    </div>
-                    <div
-                      ref={circleImg2_3Ref}
-                      className="circle-img"
-                    >
-                      <Image
-                        src="/images/lkhh.jpg"
-                        alt="circle 2"
-                        fill
-                        style={{ objectFit: 'cover' }}
-                      />
-                    </div>
+                    <div ref={circleImg1_3Ref} className="circle-img"><Image src="/images/5.jpg" alt="circle 1" fill style={{ objectFit: 'cover' }}/></div>
+                    <div ref={circleImg2_3Ref} className="circle-img"><Image src="/images/lkhh.jpg" alt="circle 2" fill style={{ objectFit: 'cover' }}/></div>
                   </div>
-                  
                   <div ref={featuresOverlay3Ref} className="features-overlay" />
                 </div>
               </div>
             </div>
 
             {/* SECTION FEATURES - 04 BLOG */}
-            <div
-              ref={featuresSection4Ref}
-              className="features-section"
-              style={{
-                backgroundColor: featuresBgColor,
-              }}
-            >
+            <div ref={featuresSection4Ref} className="features-section" style={{ backgroundColor: featuresBgColor }}>
               <div className="features-bottom">
-                <div
-                  ref={featuresLeftNumber4Ref}
-                  className="features-left-number"
-                  style={{ color: featuresTextColor }}
-                >
-                  04
-                </div>
-                
-                <div 
-                  ref={hoverContainer4Ref}
-                  className="hover-container"
-                  onMouseEnter={handleBlogHoverEnter}
-                  onMouseLeave={handleBlogHoverLeave}
-                >
-                  <div
-                    ref={featuresRightText4Ref}
-                    className="features-right-text"
-                    style={{ color: featuresTextColor }}
-                  >
-                    Blog
-                  </div>
-                  
-                  <div ref={updateContainer4Ref} className="update-container">
-                    <div className="update-number" style={{ color: featuresTextColor }}>
-                      Read<sup>⁴</sup>
-                    </div>
-                  </div>
-                  
-                  <div 
-                    ref={featuresArrow4Ref}
-                    className="features-right-arrow"
-                  >
-                    {blogHover ? (
-                      <StraightLine size={50} />
-                    ) : (
-                      <NorthEastArrow size={50} />
-                    )}
-                  </div>
-                  
+                <div ref={featuresLeftNumber4Ref} className="features-left-number" style={{ color: featuresTextColor }}>04</div>
+                <div ref={hoverContainer4Ref} className="hover-container" onMouseEnter={handleBlogHoverEnter} onMouseLeave={handleBlogHoverLeave}>
+                  <div ref={featuresRightText4Ref} className="features-right-text" style={{ color: featuresTextColor }}>Blog</div>
+                  <div ref={updateContainer4Ref} className="update-container"><div className="update-number" style={{ color: featuresTextColor }}>Read<sup>⁴</sup></div></div>
+                  <div ref={featuresArrow4Ref} className="features-right-arrow">{blogHover ? <StraightLine size={50} /> : <NorthEastArrow size={50} />}</div>
                   <div ref={circleImages4Ref} className="circle-images-container">
-                    <div
-                      ref={circleImg1_4Ref}
-                      className="circle-img"
-                    >
-                      <Image
-                        src="/images/ai.jpg"
-                        alt="circle 1"
-                        fill
-                        style={{ objectFit: 'cover' }}
-                      />
-                    </div>
-                    <div
-                      ref={circleImg2_4Ref}
-                      className="circle-img"
-                    >
-                      <Image
-                        src="/images/5.jpg"
-                        alt="circle 2"
-                        fill
-                        style={{ objectFit: 'cover' }}
-                      />
-                    </div>
+                    <div ref={circleImg1_4Ref} className="circle-img"><Image src="/images/ai.jpg" alt="circle 1" fill style={{ objectFit: 'cover' }}/></div>
+                    <div ref={circleImg2_4Ref} className="circle-img"><Image src="/images/5.jpg" alt="circle 2" fill style={{ objectFit: 'cover' }}/></div>
                   </div>
-                  
                   <div ref={featuresOverlay4Ref} className="features-overlay" />
                 </div>
               </div>
             </div>
 
             {/* SECTION FEATURES - 05 DONATION */}
-            <div
-              ref={featuresSection5Ref}
-              className="features-section"
-              style={{
-                backgroundColor: featuresBgColor,
-              }}
-            >
+            <div ref={featuresSection5Ref} className="features-section" style={{ backgroundColor: featuresBgColor }}>
               <div className="features-bottom">
-                <div
-                  ref={featuresLeftNumber5Ref}
-                  className="features-left-number"
-                  style={{ color: featuresTextColor }}
-                >
-                  05
-                </div>
-                
-                <div 
-                  ref={hoverContainer5Ref}
-                  className="hover-container"
-                  onMouseEnter={handleDonationHoverEnter}
-                  onMouseLeave={handleDonationHoverLeave}
-                >
-                  <div
-                    ref={featuresRightText5Ref}
-                    className="features-right-text"
-                    style={{ color: featuresTextColor }}
-                  >
-                    Donation
-                  </div>
-                  
-                  <div ref={updateContainer5Ref} className="update-container">
-                    <div className="update-number" style={{ color: featuresTextColor }}>
-                      Support<sup>⁵</sup>
-                    </div>
-                  </div>
-                  
-                  <div 
-                    ref={featuresArrow5Ref}
-                    className="features-right-arrow"
-                  >
-                    {donationHover ? (
-                      <StraightLine size={50} />
-                    ) : (
-                      <NorthEastArrow size={50} />
-                    )}
-                  </div>
-                  
+                <div ref={featuresLeftNumber5Ref} className="features-left-number" style={{ color: featuresTextColor }}>05</div>
+                <div ref={hoverContainer5Ref} className="hover-container" onMouseEnter={handleDonationHoverEnter} onMouseLeave={handleDonationHoverLeave}>
+                  <div ref={featuresRightText5Ref} className="features-right-text" style={{ color: featuresTextColor }}>Donation</div>
+                  <div ref={updateContainer5Ref} className="update-container"><div className="update-number" style={{ color: featuresTextColor }}>Support<sup>⁵</sup></div></div>
+                  <div ref={featuresArrow5Ref} className="features-right-arrow">{donationHover ? <StraightLine size={50} /> : <NorthEastArrow size={50} />}</div>
                   <div ref={circleImages5Ref} className="circle-images-container">
-                    <div
-                      ref={circleImg1_5Ref}
-                      className="circle-img"
-                    >
-                      <Image
-                        src="/images/lkhh.jpg"
-                        alt="circle 1"
-                        fill
-                        style={{ objectFit: 'cover' }}
-                      />
-                    </div>
-                    <div
-                      ref={circleImg2_5Ref}
-                      className="circle-img"
-                    >
-                      <Image
-                        src="/images/ai.jpg"
-                        alt="circle 2"
-                        fill
-                        style={{ objectFit: 'cover' }}
-                      />
-                    </div>
+                    <div ref={circleImg1_5Ref} className="circle-img"><Image src="/images/lkhh.jpg" alt="circle 1" fill style={{ objectFit: 'cover' }}/></div>
+                    <div ref={circleImg2_5Ref} className="circle-img"><Image src="/images/ai.jpg" alt="circle 2" fill style={{ objectFit: 'cover' }}/></div>
                   </div>
-                  
                   <div ref={featuresOverlay5Ref} className="features-overlay" />
                 </div>
               </div>
             </div>
 
             {/* SECTION TRUSTED COLLABS */}
-            <div
-              ref={trustedSectionRef}
-              className="trusted-section"
-              style={{
-                backgroundColor: '#ffffff',
-              }}
-            >
-              <div
-                ref={trustedTextRef}
-                className="trusted-text"
-              >
-                TRUSTED COLLABS
-              </div>
-
-              <div 
-                ref={carouselRef}
-                className="carousel-container"
-              >
+            <div ref={trustedSectionRef} className="trusted-section" style={{ backgroundColor: '#ffffff' }}>
+              <div ref={trustedTextRef} className="trusted-text">TRUSTED COLLABS</div>
+              <div ref={carouselRef} className="carousel-container">
                 <div className="carousel-track">
                   {carouselItems.map((item) => (
                     <div key={item.id} className="carousel-item">
-                      <div className="carousel-image">
-                        <Image
-                          src={item.image}
-                          alt={item.brand}
-                          fill
-                          style={{ objectFit: 'cover' }}
-                        />
-                      </div>
+                      <div className="carousel-image"><Image src={item.image} alt={item.brand} fill style={{ objectFit: 'cover' }}/></div>
                       <h3 className="carousel-brand">{item.brand}</h3>
                       <p className="carousel-desc">{item.description}</p>
                     </div>
@@ -3181,1232 +1767,184 @@ export default function HomePage(): React.JSX.Element {
             </div>
 
             {/* Bagian footer */}
-            <div style={{
-              width: '100%',
-              position: 'relative',
-              backgroundColor: 'white',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'flex-end',
-              alignItems: 'center',
-              minHeight: '60vh'
-            }}>
-              <div
-                ref={bottomContentRef}
-                style={{
-                  width: '100%',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'flex-start',
-                  gap: '40px',
-                  marginBottom: '80px',
-                  paddingLeft: '80px',
-                  opacity: 0
-                }}
-              >
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px'
-                }}>
-                  <div 
-                    ref={mencatatTextRef}
-                    style={{
-                      fontSize: '64px',
-                      fontFamily: 'Questrial, sans-serif',
-                      color: 'black',
-                      textAlign: 'left',
-                      fontWeight: '400',
-                      letterSpacing: '-0.02em',
-                      lineHeight: '1.2',
-                      whiteSpace: 'nowrap'
-                    }}>
-                    Mencatat apa yang kamu inginkan
-                  </div>
-                  <span style={{
-                    fontSize: '80px',
-                    color: 'black',
-                    fontWeight: '400',
-                    lineHeight: '1'
-                  }}>.</span>
+            <div style={{ width: '100%', position: 'relative', backgroundColor: 'white', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', alignItems: 'center', minHeight: '60vh' }}>
+              <div ref={bottomContentRef} style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '40px', marginBottom: '80px', paddingLeft: '80px', opacity: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <div ref={mencatatTextRef} style={{ fontSize: '64px', fontFamily: 'Questrial, sans-serif', color: 'black', textAlign: 'left', fontWeight: '400', letterSpacing: '-0.02em', lineHeight: '1.2', whiteSpace: 'nowrap' }}>Mencatat apa yang kamu inginkan</div>
+                  <span style={{ fontSize: '80px', color: 'black', fontWeight: '400', lineHeight: '1' }}>.</span>
                 </div>
-
                 <Link href="/contact">
-                  <button
-                    ref={contactBtnRef}
-                    onClick={handleContact}
-                    className="contact-btn-effect"
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '16px',
-                      padding: '14px 36px',
-                      borderRadius: '60px',
-                      cursor: 'pointer',
-                      fontSize: '20px',
-                      fontWeight: '600',
-                      letterSpacing: '-0.01em',
-                      fontFamily: 'Questrial, sans-serif',
-                      transition: 'all 0.3s ease',
-                      position: 'relative',
-                      overflow: 'hidden',
-                      zIndex: 1,
-                      border: '1.5px solid #cccccc',
-                      backgroundColor: '#ffffff',
-                      color: '#000000'
-                    }}
-                  >
+                  <button ref={contactBtnRef} onClick={handleContact} className="contact-btn-effect" style={{ display: 'inline-flex', alignItems: 'center', gap: '16px', padding: '14px 36px', borderRadius: '60px', cursor: 'pointer', fontSize: '20px', fontWeight: '600', letterSpacing: '-0.01em', fontFamily: 'Questrial, sans-serif', transition: 'all 0.3s ease', position: 'relative', overflow: 'hidden', zIndex: 1, border: '1.5px solid #cccccc', backgroundColor: '#ffffff', color: '#000000' }}>
                     <span ref={contactTextRef}>Contact</span>
-                    
-                    <div style={{
-                      position: 'relative',
-                      width: '40px',
-                      height: '40px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}>
-                      <div className="dot-small" style={{
-                        width: '8px',
-                        height: '8px',
-                        borderRadius: '50%',
-                        backgroundColor: '#000000',
-                        opacity: 1,
-                        transform: 'scale(1)',
-                        transition: 'opacity 0.3s ease, transform 0.3s ease',
-                        position: 'absolute'
-                      }}></div>
-                      
-                      <div className="circle-large-white" style={{
-                        position: 'absolute',
-                        width: '40px',
-                        height: '40px',
-                        borderRadius: '50%',
-                        backgroundColor: '#000000',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        opacity: 0,
-                        transform: 'scale(0.8)',
-                        transition: 'opacity 0.3s ease, transform 0.3s ease, background-color 0.3s ease'
-                      }}>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
+                    <div style={{ position: 'relative', width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <div className="dot-small" style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#000000', opacity: 1, transform: 'scale(1)', transition: 'opacity 0.3s ease, transform 0.3s ease', position: 'absolute' }}></div>
+                      <div className="circle-large-white" style={{ position: 'absolute', width: '40px', height: '40px', borderRadius: '50%', backgroundColor: '#000000', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0, transform: 'scale(0.8)', transition: 'opacity 0.3s ease, transform 0.3s ease, background-color 0.3s ease' }}>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
                       </div>
                     </div>
                   </button>
                 </Link>
-
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '30px',
-                  flexWrap: 'wrap',
-                  width: '100%'
-                }}>
-                  <div ref={callTextRef} className="call-farid-text">
-                    <div>Ready to surpass your</div>
-                    <div>wildest dreams?</div>
-                    <div>Call Farid.</div>
-                  </div>
-
-                  <button ref={calendarBtnRef} onClick={handleCalendarCall} className="calendar-btn">
-                    <ArrowIcon size={24} />
-                    Calendar call
-                  </button>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '30px', flexWrap: 'wrap', width: '100%' }}>
+                  <div ref={callTextRef} className="call-farid-text"><div>Ready to surpass your</div><div>wildest dreams?</div><div>Call Farid.</div></div>
+                  <button ref={calendarBtnRef} onClick={handleCalendarCall} className="calendar-btn"><ArrowIcon size={24} />Calendar call</button>
                 </div>
-
-                <div
-                  ref={profileRef}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'flex-start',
-                    gap: '24px',
-                    width: '100%',
-                    marginTop: '10px'
-                  }}
-                >
-                  <div style={{
-                    width: '80px',
-                    height: '100px',
-                    borderRadius: '12px',
-                    overflow: 'hidden',
-                    position: 'relative',
-                    border: '2px solid #e0e0e0'
-                  }}>
-                    <Image
-                      src="/images/5.jpg"
-                      alt="Farid Ardiansyah"
-                      fill
-                      style={{ objectFit: 'cover', objectPosition: 'center' }}
-                    />
-                  </div>
-
-                  <div style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '40px',
-                    fontWeight: '400',
-                    color: 'rgb(16, 16, 16)',
-                    letterSpacing: '-0.02em'
-                  }}>
-                    Farid Ardiansyah
-                  </div>
-
-                  <div className="badge-founder">
-                    Founder & Programmer
-                  </div>
+                <div ref={profileRef} style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: '24px', width: '100%', marginTop: '10px' }}>
+                  <div style={{ width: '80px', height: '100px', borderRadius: '12px', overflow: 'hidden', position: 'relative', border: '2px solid #e0e0e0' }}><Image src="/images/5.jpg" alt="Farid Ardiansyah" fill style={{ objectFit: 'cover', objectPosition: 'center' }}/></div>
+                  <div style={{ fontFamily: "'Questrial', sans-serif", fontSize: '40px', fontWeight: '400', color: 'rgb(16, 16, 16)', letterSpacing: '-0.02em' }}>Farid Ardiansyah</div>
+                  <div className="badge-founder">Founder & Programmer</div>
                 </div>
               </div>
 
               {/* Email dan Social Media Section */}
-              <div style={{
-                position: 'relative',
-                width: '100%',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'flex-end',
-                padding: '0 80px',
-                marginBottom: '30px',
-                boxSizing: 'border-box'
-              }}>
-                <div 
-                  ref={emailRef}
-                  onClick={handleEmailClick}
-                  className="email-wrapper"
-                  style={{ marginBottom: '20px' }}
-                >
-                  <ArrowIcon size={24} />
-                  <span className="email-text">contact.menuru@gmail.com</span>
-                </div>
-
-                <div style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '8px',
-                  position: 'absolute',
-                  left: '50%',
-                  transform: 'translateX(-50%)',
-                  marginBottom: '20px'
-                }}>
-                  <div 
-                    className="social-item"
-                    style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
-                    onMouseEnter={(e) => {
-                      const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                      if (textElement) handleSocialHover(textElement, originalTexts.ig);
-                    }}
-                    onMouseLeave={(e) => {
-                      const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                      if (textElement) handleSocialLeave(textElement, originalTexts.ig);
-                    }}
-                    onClick={() => handleSocialClick('Instagram')}
-                  >
-                    <span ref={igRef} className="social-text" style={{
-                      fontFamily: "'Questrial', sans-serif",
-                      fontSize: '28px',
-                      color: '#000000',
-                      fontWeight: '400',
-                      letterSpacing: '0.02em'
-                    }}>Instagram</span>
+              <div style={{ position: 'relative', width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', padding: '0 80px', marginBottom: '30px', boxSizing: 'border-box' }}>
+                <div ref={emailRef} onClick={handleEmailClick} className="email-wrapper" style={{ marginBottom: '20px' }}><ArrowIcon size={24} /><span className="email-text">contact.menuru@gmail.com</span></div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', position: 'absolute', left: '50%', transform: 'translateX(-50%)', marginBottom: '20px' }}>
+                  <div className="social-item" style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }} onMouseEnter={(e) => { const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement; if (textElement) handleSocialHover(textElement, originalTexts.ig); }} onMouseLeave={(e) => { const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement; if (textElement) handleSocialLeave(textElement, originalTexts.ig); }} onClick={() => handleSocialClick('Instagram')}>
+                    <span ref={igRef} className="social-text" style={{ fontFamily: "'Questrial', sans-serif", fontSize: '28px', color: '#000000', fontWeight: '400', letterSpacing: '0.02em' }}>Instagram</span>
                   </div>
-                  
-                  <div 
-                    className="social-item"
-                    style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
-                    onMouseEnter={(e) => {
-                      const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                      if (textElement) handleSocialHover(textElement, originalTexts.x);
-                    }}
-                    onMouseLeave={(e) => {
-                      const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                      if (textElement) handleSocialLeave(textElement, originalTexts.x);
-                    }}
-                    onClick={() => handleSocialClick('X')}
-                  >
-                    <span ref={xRef} className="social-text" style={{
-                      fontFamily: "'Questrial', sans-serif",
-                      fontSize: '28px',
-                      color: '#000000',
-                      fontWeight: '400',
-                      letterSpacing: '0.02em'
-                    }}>X</span>
+                  <div className="social-item" style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }} onMouseEnter={(e) => { const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement; if (textElement) handleSocialHover(textElement, originalTexts.x); }} onMouseLeave={(e) => { const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement; if (textElement) handleSocialLeave(textElement, originalTexts.x); }} onClick={() => handleSocialClick('X')}>
+                    <span ref={xRef} className="social-text" style={{ fontFamily: "'Questrial', sans-serif", fontSize: '28px', color: '#000000', fontWeight: '400', letterSpacing: '0.02em' }}>X</span>
                   </div>
-                  
-                  <div 
-                    className="social-item"
-                    style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
-                    onMouseEnter={(e) => {
-                      const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                      if (textElement) handleSocialHover(textElement, originalTexts.linkedin);
-                    }}
-                    onMouseLeave={(e) => {
-                      const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                      if (textElement) handleSocialLeave(textElement, originalTexts.linkedin);
-                    }}
-                    onClick={() => handleSocialClick('LinkedIn')}
-                  >
-                    <span ref={linkedinRef} className="social-text" style={{
-                      fontFamily: "'Questrial', sans-serif",
-                      fontSize: '28px',
-                      color: '#000000',
-                      fontWeight: '400',
-                      letterSpacing: '0.02em'
-                    }}>LinkedIn</span>
+                  <div className="social-item" style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }} onMouseEnter={(e) => { const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement; if (textElement) handleSocialHover(textElement, originalTexts.linkedin); }} onMouseLeave={(e) => { const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement; if (textElement) handleSocialLeave(textElement, originalTexts.linkedin); }} onClick={() => handleSocialClick('LinkedIn')}>
+                    <span ref={linkedinRef} className="social-text" style={{ fontFamily: "'Questrial', sans-serif", fontSize: '28px', color: '#000000', fontWeight: '400', letterSpacing: '0.02em' }}>LinkedIn</span>
                   </div>
                 </div>
               </div>
 
-              {/* Hanya teks MENURU besar */}
-              <footer style={{
-                position: 'relative',
-                bottom: 0,
-                left: 0,
-                right: 0,
-                width: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'flex-end',
-                padding: '0 80px 0 0',
-                margin: 0,
-                pointerEvents: 'none',
-                zIndex: 1,
-                marginTop: '40px'
-              }}>
-                <span 
-                  ref={menuruTextRef}
-                  style={{
-                    fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
-                    fontWeight: 'normal',
-                    fontSize: '600px',
-                    color: '#000000',
-                    textAlign: 'right',
-                    letterSpacing: '-0.02em',
-                    opacity: 1,
-                    textTransform: 'uppercase',
-                    lineHeight: '0.7',
-                    whiteSpace: 'nowrap',
-                    WebkitFontSmoothing: 'antialiased',
-                    MozOsxFontSmoothing: 'grayscale',
-                    fontKerning: 'normal',
-                    margin: 0,
-                    padding: 0,
-                    marginRight: '0',
-                    backgroundColor: 'transparent'
-                  }}>
-                  MENURU
-                </span>
+              {/* Teks MENURU besar */}
+              <footer style={{ position: 'relative', bottom: 0, left: 0, right: 0, width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', padding: '0 80px 0 0', margin: 0, pointerEvents: 'none', zIndex: 1, marginTop: '40px' }}>
+                <span ref={menuruTextRef} style={{ fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif", fontWeight: 'normal', fontSize: '600px', color: '#000000', textAlign: 'right', letterSpacing: '-0.02em', opacity: 1, textTransform: 'uppercase', lineHeight: '0.7', whiteSpace: 'nowrap', WebkitFontSmoothing: 'antialiased', MozOsxFontSmoothing: 'grayscale', fontKerning: 'normal', margin: 0, padding: 0, marginRight: '0', backgroundColor: 'transparent' }}>MENURU</span>
               </footer>
             </div>
           </div>
         </div>
       </div>
 
-      {/* SHADOW PAGE - Halaman bayangan hitam dengan Chat di sisi kiri */}
-     
+      {/* SHADOW PAGE - Halaman bayangan hitam dengan Chat Realtime */}
+      <div ref={shadowPageRef} style={{ position: 'fixed', bottom: 0, left: 0, width: '100%', height: '100vh', backgroundColor: '#000000', zIndex: 9998, transform: 'translateY(100%)', pointerEvents: showShadowPage ? 'auto' : 'none', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '60px 80px', boxSizing: 'border-box', overflow: 'hidden' }}>
+        
+        {/* Let's Talk - Kiri Atas */}
+        <div>
+          <h1 style={{ fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif", fontWeight: 'normal', fontSize: '120px', color: '#ffffff', letterSpacing: '-0.02em', margin: 0, textTransform: 'uppercase', lineHeight: '1', WebkitFontSmoothing: 'antialiased', MozOsxFontSmoothing: 'grayscale' }}>Let&apos;s Talk</h1>
+        </div>
 
-<div
-  ref={shadowPageRef}
-  style={{
-    position: 'fixed',
-    bottom: 0,
-    left: 0,
-    width: '100%',
-    height: '100vh',
-    backgroundColor: '#000000',
-    zIndex: 9998,
-    transform: 'translateY(100%)',
-    pointerEvents: showShadowPage ? 'auto' : 'none',
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'space-between',
-    padding: '60px 80px',
-    boxSizing: 'border-box',
-    overflow: 'hidden'
-  }}
->
-  {/* Konten Shadow Page - Let's Talk di kiri atas */}
-  <div style={{
-    width: '100%',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start'
-  }}>
-    {/* Teks Let's Talk di kiri atas - TIDAK BOLD */}
-    <div>
-      <h1 style={{
-        fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
-        fontWeight: 'normal',
-        fontSize: '120px',
-        color: '#ffffff',
-        letterSpacing: '-0.02em',
-        margin: 0,
-        textTransform: 'uppercase',
-        lineHeight: '1',
-        WebkitFontSmoothing: 'antialiased',
-        MozOsxFontSmoothing: 'grayscale'
-      }}>
-        Let&apos;s Talk
-      </h1>
-    </div>
-  </div>
-
-  {/* REAL CHAT CONTAINER - Full width chat yang bisa discroll */}
-  <div style={{
-    position: 'absolute',
-    left: '80px',
-    right: '80px',
-    top: '50%',
-    transform: 'translateY(-50%)',
-    height: '60%',
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: '24px',
-    backdropFilter: 'blur(10px)',
-    border: '1px solid rgba(255, 255, 255, 0.1)',
-    boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)',
-    display: 'flex',
-    flexDirection: 'column',
-    overflow: 'hidden'
-  }}>
-    {/* Header Chat */}
-    <div style={{
-      padding: '20px 24px',
-      backgroundColor: 'rgba(255, 255, 255, 0.08)',
-      borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      flexShrink: 0
-    }}>
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '12px'
-      }}>
-        <div style={{
-          width: '10px',
-          height: '10px',
-          borderRadius: '50%',
-          backgroundColor: '#4caf50',
-          animation: 'pulse 1.5s infinite'
-        }} />
-        <span style={{
-          fontFamily: 'Questrial, sans-serif',
-          color: '#ffffff',
-          fontSize: '18px',
-          fontWeight: '500'
-        }}>
-          💬 Real-time Chat {user ? `- ${user.displayName || user.email?.split('@')[0] || 'User'}` : ''}
-        </span>
-      </div>
-      {user && (
-        <button
-          onClick={handleSignOut}
-          style={{
-            padding: '8px 16px',
-            backgroundColor: 'rgba(255,255,255,0.15)',
-            color: '#ffffff',
-            border: 'none',
-            borderRadius: '60px',
-            cursor: 'pointer',
-            fontFamily: 'Questrial, sans-serif',
-            fontSize: '14px',
-            transition: 'all 0.2s ease'
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.25)'}
-          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.15)'}
-        >
-          🚪 Logout
-        </button>
-      )}
-    </div>
-
-    {/* Messages Container - Bisa scroll ke atas dan bawah untuk melihat riwayat chat */}
-    <div
-      ref={chatContainerRef}
-      className="chat-messages-container"
-      style={{
-        flex: 1,
-        overflowY: 'auto',
-        padding: '20px 24px',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '16px',
-        minHeight: 0
-      }}
-    >
-      {!user ? (
-        <div style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          height: '100%',
-          gap: '20px'
-        }}>
-          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M20 21V19C20 16.8 18.2 15 16 15H8C5.8 15 4 16.8 4 19V21" stroke="#ffffff" strokeWidth="1.5" strokeLinecap="round"/>
-            <circle cx="12" cy="7" r="4" stroke="#ffffff" strokeWidth="1.5"/>
-          </svg>
-          <span style={{
-            fontFamily: 'Questrial, sans-serif',
-            color: '#ffffff',
-            fontSize: '16px',
-            opacity: 0.7
-          }}>
-            Login to join the conversation
-          </span>
+        {/* Chat Container - Real Chat dengan Scroll Manual */}
+        <div style={{ position: 'fixed', left: '80px', top: '50%', transform: 'translateY(-50%)', width: '450px', height: '550px', backgroundColor: 'rgba(255, 255, 255, 0.05)', borderRadius: '24px', backdropFilter: 'blur(10px)', border: '1px solid rgba(255, 255, 255, 0.1)', boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
           
-          <form onSubmit={handleEmailSignIn} style={{
-            width: '100%',
-            maxWidth: '400px',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '12px',
-            marginTop: '8px'
-          }}>
-            <input
-              type="email"
-              placeholder="Email"
-              value={emailLogin}
-              onChange={(e) => setEmailLogin(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '12px 16px',
-                backgroundColor: 'rgba(255,255,255,0.1)',
-                border: '1px solid rgba(255,255,255,0.2)',
-                borderRadius: '12px',
-                color: '#ffffff',
-                fontFamily: 'Questrial, sans-serif',
-                fontSize: '14px',
-                outline: 'none'
-              }}
-            />
-            <input
-              type="password"
-              placeholder="Password"
-              value={passwordLogin}
-              onChange={(e) => setPasswordLogin(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '12px 16px',
-                backgroundColor: 'rgba(255,255,255,0.1)',
-                border: '1px solid rgba(255,255,255,0.2)',
-                borderRadius: '12px',
-                color: '#ffffff',
-                fontFamily: 'Questrial, sans-serif',
-                fontSize: '14px',
-                outline: 'none'
-              }}
-            />
-            <div style={{ display: 'flex', gap: '12px' }}>
-              <button
-                type="submit"
-                style={{
-                  flex: 1,
-                  padding: '12px',
-                  backgroundColor: '#ffffff',
-                  color: '#000000',
-                  border: 'none',
-                  borderRadius: '60px',
-                  cursor: 'pointer',
-                  fontFamily: 'Questrial, sans-serif',
-                  fontSize: '14px',
-                  fontWeight: '500'
-                }}
-              >
-                {isLoginMode ? 'Sign In' : 'Sign Up'}
-              </button>
-              <button
-                type="button"
-                onClick={() => setIsLoginMode(!isLoginMode)}
-                style={{
-                  flex: 1,
-                  padding: '12px',
-                  backgroundColor: 'transparent',
-                  color: '#ffffff',
-                  border: '1px solid rgba(255,255,255,0.3)',
-                  borderRadius: '60px',
-                  cursor: 'pointer',
-                  fontFamily: 'Questrial, sans-serif',
-                  fontSize: '14px'
-                }}
-              >
-                {isLoginMode ? 'Create Account' : 'Back to Login'}
-              </button>
+          {/* Header Chat */}
+          <div style={{ padding: '16px 20px', backgroundColor: 'rgba(255, 255, 255, 0.08)', borderBottom: '1px solid rgba(255, 255, 255, 0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#4caf50', animation: 'pulse 1.5s infinite' }} />
+              <span style={{ fontFamily: 'Questrial, sans-serif', color: '#ffffff', fontSize: '16px', fontWeight: '500' }}>Live Chat {user ? `- ${user.displayName || user.email?.split('@')[0] || 'User'}` : ''}</span>
             </div>
-            <button
-              type="button"
-              onClick={handleGoogleSignIn}
-              style={{
-                width: '100%',
-                padding: '12px',
-                backgroundColor: '#4285F4',
-                color: '#ffffff',
-                border: 'none',
-                borderRadius: '60px',
-                cursor: 'pointer',
-                fontFamily: 'Questrial, sans-serif',
-                fontSize: '14px',
-                fontWeight: '500',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px'
-              }}
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#ffffff"/>
-                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#ffffff"/>
-                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#ffffff"/>
-                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#ffffff"/>
-              </svg>
-              Sign in with Google
-            </button>
-            {authError && (
-              <div style={{
-                color: '#ff6b6b',
-                fontSize: '12px',
-                textAlign: 'center',
-                marginTop: '8px'
-              }}>
-                {authError}
-              </div>
+            {user && (
+              <button onClick={handleSignOut} style={{ padding: '6px 12px', backgroundColor: 'rgba(255,255,255,0.15)', color: '#ffffff', border: 'none', borderRadius: '60px', cursor: 'pointer', fontFamily: 'Questrial, sans-serif', fontSize: '12px', transition: 'all 0.2s ease' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.25)'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.15)'}>Logout</button>
             )}
-          </form>
-        </div>
-      ) : isLoadingMessages ? (
-        <div style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          height: '100%'
-        }}>
-          <div style={{
-            width: '40px',
-            height: '40px',
-            border: '2px solid rgba(255,255,255,0.3)',
-            borderTopColor: '#ffffff',
-            borderRadius: '50%',
-            animation: 'spin 1s linear infinite'
-          }} />
-        </div>
-      ) : messages.length === 0 ? (
-        <div style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          height: '100%',
-          fontFamily: 'Questrial, sans-serif',
-          color: '#ffffff',
-          opacity: 0.5,
-          textAlign: 'center',
-          fontSize: '16px'
-        }}>
-          💬 No messages yet.<br />Be the first to say hello!
-        </div>
-      ) : (
-        messages.map((msg) => {
-          const safeUserName = msg.userName || 'User';
-          const firstChar = safeUserName.charAt(0).toUpperCase();
-          const isOwnMessage = msg.userId === user?.uid;
-          
-          return (
-            <div
-              key={msg.id}
-              className="chat-message"
-              style={{
-                display: 'flex',
-                gap: '12px',
-                alignItems: 'flex-start',
-                justifyContent: isOwnMessage ? 'flex-end' : 'flex-start'
-              }}
-            >
-              {!isOwnMessage && (
-                <>
-                  {msg.userPhoto ? (
-                    <img
-                      src={msg.userPhoto}
-                      alt={safeUserName}
-                      style={{
-                        width: '36px',
-                        height: '36px',
-                        borderRadius: '50%',
-                        objectFit: 'cover'
-                      }}
-                    />
-                  ) : (
-                    <div style={{
-                      width: '36px',
-                      height: '36px',
-                      borderRadius: '50%',
-                      backgroundColor: 'rgba(255,255,255,0.2)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontFamily: 'Questrial, sans-serif',
-                      fontSize: '14px',
-                      fontWeight: 'bold',
-                      color: '#ffffff'
-                    }}>
-                      {firstChar}
-                    </div>
-                  )}
-                </>
-              )}
-              <div style={{
-                maxWidth: '60%',
-                backgroundColor: isOwnMessage ? '#ffffff' : 'rgba(255,255,255,0.1)',
-                color: isOwnMessage ? '#000000' : '#ffffff',
-                borderRadius: isOwnMessage ? '20px 4px 20px 20px' : '4px 20px 20px 20px',
-                padding: '10px 16px'
-              }}>
-                <div style={{
-                  fontSize: '12px',
-                  fontWeight: '500',
-                  marginBottom: '4px',
-                  opacity: 0.7,
-                  fontFamily: 'Questrial, sans-serif'
-                }}>
-                  {safeUserName} {isOwnMessage && '(You)'}
-                </div>
-                <div style={{
-                  fontSize: '14px',
-                  lineHeight: '1.5',
-                  fontFamily: 'Questrial, sans-serif',
-                  wordBreak: 'break-word'
-                }}>
-                  {msg.text}
-                </div>
-                <div style={{
-                  fontSize: '10px',
-                  marginTop: '6px',
-                  opacity: 0.5,
-                  fontFamily: 'Questrial, sans-serif',
-                  textAlign: 'right'
-                }}>
-                  {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                </div>
+          </div>
+
+          {/* Messages Container - Bisa Scroll ke Atas dan Bawah */}
+          <div ref={chatContainerRef} className="chat-messages-container" style={{ flex: 1, overflowY: 'auto', padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px', minHeight: 0 }}>
+            {!user ? (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: '16px' }}>
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M20 21V19C20 16.8 18.2 15 16 15H8C5.8 15 4 16.8 4 19V21" stroke="#ffffff" strokeWidth="1.5" strokeLinecap="round"/>
+                  <circle cx="12" cy="7" r="4" stroke="#ffffff" strokeWidth="1.5"/>
+                </svg>
+                <span style={{ fontFamily: 'Questrial, sans-serif', color: '#ffffff', fontSize: '14px', opacity: 0.7 }}>Login to start chatting</span>
+                
+                <form onSubmit={handleEmailSignIn} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '8px' }}>
+                  <input type="email" placeholder="Email" value={emailLogin} onChange={(e) => setEmailLogin(e.target.value)} style={{ width: '100%', padding: '10px 14px', backgroundColor: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '12px', color: '#ffffff', fontFamily: 'Questrial, sans-serif', fontSize: '14px', outline: 'none' }} />
+                  <input type="password" placeholder="Password" value={passwordLogin} onChange={(e) => setPasswordLogin(e.target.value)} style={{ width: '100%', padding: '10px 14px', backgroundColor: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '12px', color: '#ffffff', fontFamily: 'Questrial, sans-serif', fontSize: '14px', outline: 'none' }} />
+                  <div style={{ display: 'flex', gap: '8px', justifyContent: 'space-between' }}>
+                    <button type="submit" style={{ flex: 1, padding: '10px', backgroundColor: '#ffffff', color: '#000000', border: 'none', borderRadius: '60px', cursor: 'pointer', fontFamily: 'Questrial, sans-serif', fontSize: '14px', fontWeight: '500' }}>{isLoginMode ? 'Sign In' : 'Sign Up'}</button>
+                    <button type="button" onClick={() => setIsLoginMode(!isLoginMode)} style={{ flex: 1, padding: '10px', backgroundColor: 'transparent', color: '#ffffff', border: '1px solid rgba(255,255,255,0.3)', borderRadius: '60px', cursor: 'pointer', fontFamily: 'Questrial, sans-serif', fontSize: '14px' }}>{isLoginMode ? 'Create Account' : 'Back to Login'}</button>
+                  </div>
+                  <button type="button" onClick={handleGoogleSignIn} style={{ width: '100%', padding: '10px', backgroundColor: '#4285F4', color: '#ffffff', border: 'none', borderRadius: '60px', cursor: 'pointer', fontFamily: 'Questrial, sans-serif', fontSize: '14px', fontWeight: '500', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#ffffff"/>
+                      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#ffffff"/>
+                      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#ffffff"/>
+                      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#ffffff"/>
+                    </svg>
+                    Google
+                  </button>
+                  {authError && <div style={{ color: '#ff6b6b', fontSize: '12px', textAlign: 'center', marginTop: '8px' }}>{authError}</div>}
+                </form>
               </div>
-              {isOwnMessage && (
-                <>
-                  {msg.userPhoto ? (
-                    <img
-                      src={msg.userPhoto}
-                      alt={safeUserName}
-                      style={{
-                        width: '36px',
-                        height: '36px',
-                        borderRadius: '50%',
-                        objectFit: 'cover'
-                      }}
-                    />
-                  ) : (
-                    <div style={{
-                      width: '36px',
-                      height: '36px',
-                      borderRadius: '50%',
-                      backgroundColor: 'rgba(255,255,255,0.2)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontFamily: 'Questrial, sans-serif',
-                      fontSize: '14px',
-                      fontWeight: 'bold',
-                      color: '#ffffff'
-                    }}>
-                      {firstChar}
+            ) : isLoadingMessages ? (
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}><div style={{ width: '30px', height: '30px', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#ffffff', borderRadius: '50%', animation: 'spin 1s linear infinite' }} /></div>
+            ) : messages.length === 0 ? (
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', fontFamily: 'Questrial, sans-serif', color: '#ffffff', opacity: 0.5, textAlign: 'center' }}>No messages yet.<br />Be the first to say hello! 👋</div>
+            ) : (
+              messages.map((msg) => {
+                const safeUserName = msg.userName || 'User';
+                const firstChar = safeUserName.charAt(0).toUpperCase();
+                const isOwnMessage = msg.userId === user?.uid;
+                
+                return (
+                  <div key={msg.id} className="chat-message" style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', flexDirection: isOwnMessage ? 'row-reverse' : 'row' }}>
+                    {msg.userPhoto ? (
+                      <img src={msg.userPhoto} alt={safeUserName} style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover' }} />
+                    ) : (
+                      <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Questrial, sans-serif', fontSize: '12px', color: '#ffffff' }}>{firstChar}</div>
+                    )}
+                    <div style={{ maxWidth: '70%', backgroundColor: isOwnMessage ? '#ffffff' : 'rgba(255,255,255,0.1)', color: isOwnMessage ? '#000000' : '#ffffff', borderRadius: isOwnMessage ? '18px 4px 18px 18px' : '4px 18px 18px 18px', padding: '8px 14px' }}>
+                      <div style={{ fontSize: '11px', fontWeight: '500', marginBottom: '4px', opacity: 0.7, fontFamily: 'Questrial, sans-serif' }}>{safeUserName}</div>
+                      <div style={{ fontSize: '13px', lineHeight: '1.4', fontFamily: 'Questrial, sans-serif', wordBreak: 'break-word' }}>{msg.text}</div>
+                      <div style={{ fontSize: '9px', marginTop: '4px', opacity: 0.5, fontFamily: 'Questrial, sans-serif', textAlign: isOwnMessage ? 'right' : 'left' }}>{msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
                     </div>
-                  )}
-                </>
-              )}
+                  </div>
+                );
+              })
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+
+          {/* Input Area - Kirim Chat */}
+          {user && (
+            <div style={{ padding: '12px 16px', borderTop: '1px solid rgba(255, 255, 255, 0.1)', display: 'flex', gap: '10px', flexShrink: 0 }}>
+              <input type="text" value={newMessage} onChange={(e) => setNewMessage(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && sendMessage()} placeholder="Type your message..." style={{ flex: 1, padding: '10px 14px', backgroundColor: 'rgba(255, 255, 255, 0.1)', border: '1px solid rgba(255, 255, 255, 0.2)', borderRadius: '60px', color: '#ffffff', fontFamily: 'Questrial, sans-serif', fontSize: '13px', outline: 'none' }} />
+              <button onClick={sendMessage} disabled={!newMessage.trim()} style={{ padding: '10px 20px', backgroundColor: newMessage.trim() ? '#ffffff' : 'rgba(255, 255, 255, 0.3)', color: newMessage.trim() ? '#000000' : '#ffffff', border: 'none', borderRadius: '60px', cursor: newMessage.trim() ? 'pointer' : 'not-allowed', fontFamily: 'Questrial, sans-serif', fontSize: '13px', fontWeight: '500', transition: 'all 0.2s ease' }}>Send</button>
             </div>
-          );
-        })
-      )}
-      <div ref={messagesEndRef} />
-    </div>
+          )}
+        </div>
 
-    {/* Input Area - Kirim chat */}
-    {user && (
-      <div style={{
-        padding: '16px 24px',
-        borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-        display: 'flex',
-        gap: '12px',
-        flexShrink: 0,
-        backgroundColor: 'rgba(0,0,0,0.3)'
-      }}>
-        <input
-          type="text"
-          value={newMessage}
-          onChange={(e) => setNewMessage(e.target.value)}
-          onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-          placeholder="Type your message..."
-          style={{
-            flex: 1,
-            padding: '12px 18px',
-            backgroundColor: 'rgba(255, 255, 255, 0.1)',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
-            borderRadius: '60px',
-            color: '#ffffff',
-            fontFamily: 'Questrial, sans-serif',
-            fontSize: '14px',
-            outline: 'none',
-            transition: 'all 0.2s ease'
-          }}
-          onFocus={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.15)'}
-          onBlur={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)'}
-        />
-        <button
-          onClick={sendMessage}
-          disabled={!newMessage.trim()}
-          style={{
-            padding: '12px 28px',
-            backgroundColor: newMessage.trim() ? '#ffffff' : 'rgba(255, 255, 255, 0.3)',
-            color: newMessage.trim() ? '#000000' : '#ffffff',
-            border: 'none',
-            borderRadius: '60px',
-            cursor: newMessage.trim() ? 'pointer' : 'not-allowed',
-            fontFamily: 'Questrial, sans-serif',
-            fontSize: '14px',
-            fontWeight: '500',
-            transition: 'all 0.2s ease'
-          }}
-        >
-          Send
-        </button>
+        {/* MENURU - Kiri Bawah */}
+        <div style={{ width: '100%', textAlign: 'left' }}>
+          <span style={{ fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif", fontWeight: 'normal', fontSize: '300px', color: '#ffffff', textAlign: 'left', letterSpacing: '-0.02em', opacity: 1, textTransform: 'uppercase', lineHeight: '0.8', whiteSpace: 'nowrap', WebkitFontSmoothing: 'antialiased', MozOsxFontSmoothing: 'grayscale', fontKerning: 'normal', margin: 0, padding: 0, pointerEvents: 'none' }}>MENURU</span>
+        </div>
       </div>
-    )}
-  </div>
-
-  {/* Teks MENURU besar di kiri bawah - FONT 300px, TIDAK BOLD */}
-  <div style={{
-    width: '100%',
-    textAlign: 'left'
-  }}>
-    <span 
-      style={{
-        fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
-        fontWeight: 'normal',
-        fontSize: '300px',
-        color: '#ffffff',
-        textAlign: 'left',
-        letterSpacing: '-0.02em',
-        opacity: 1,
-        textTransform: 'uppercase',
-        lineHeight: '0.8',
-        whiteSpace: 'nowrap',
-        WebkitFontSmoothing: 'antialiased',
-        MozOsxFontSmoothing: 'grayscale',
-        fontKerning: 'normal',
-        margin: 0,
-        padding: 0,
-        pointerEvents: 'none'
-      }}>
-      MENURU
-    </span>
-  </div>
-</div>
-
-
-
-
-
-
-
-
-
-
-
-      
 
       {/* Calendar Call Modal */}
       {showCalendarModal && (
         <div className="calendar-modal-overlay">
           <div ref={modalRef} className="calendar-modal">
-            <div style={{
-              display: 'flex',
-              flexDirection: 'row',
-              height: '100%',
-              minHeight: '600px'
-            }}>
-              <div style={{
-                flex: 1.2,
-                padding: '32px',
-                borderRight: '1px solid #e0e0e0',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '28px'
-              }}>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '20px',
-                  paddingBottom: '20px',
-                  borderBottom: '1px solid #e0e0e0'
-                }}>
-                  <div style={{
-                    width: '70px',
-                    height: '90px',
-                    borderRadius: '12px',
-                    overflow: 'hidden',
-                    position: 'relative',
-                    border: '2px solid #e0e0e0'
-                  }}>
-                    <Image
-                      src="/images/5.jpg"
-                      alt="Farid Ardiansyah"
-                      fill
-                      style={{ objectFit: 'cover', objectPosition: 'center' }}
-                    />
-                  </div>
-                  <div>
-                    <div style={{
-                      fontFamily: "'Questrial', sans-serif",
-                      fontSize: '28px',
-                      fontWeight: '600',
-                      color: '#000000'
-                    }}>Farid Ardiansyah</div>
-                    <div style={{
-                      fontFamily: "'Questrial', sans-serif",
-                      fontSize: '16px',
-                      color: '#666666'
-                    }}>Founder & Programmer</div>
-                  </div>
+            <div style={{ display: 'flex', flexDirection: 'row', height: '100%', minHeight: '600px' }}>
+              <div style={{ flex: 1.2, padding: '32px', borderRight: '1px solid #e0e0e0', display: 'flex', flexDirection: 'column', gap: '28px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '20px', paddingBottom: '20px', borderBottom: '1px solid #e0e0e0' }}>
+                  <div style={{ width: '70px', height: '90px', borderRadius: '12px', overflow: 'hidden', position: 'relative', border: '2px solid #e0e0e0' }}><Image src="/images/5.jpg" alt="Farid Ardiansyah" fill style={{ objectFit: 'cover', objectPosition: 'center' }}/></div>
+                  <div><div style={{ fontFamily: "'Questrial', sans-serif", fontSize: '28px', fontWeight: '600', color: '#000000' }}>Farid Ardiansyah</div><div style={{ fontFamily: "'Questrial', sans-serif", fontSize: '16px', color: '#666666' }}>Founder & Programmer</div></div>
                 </div>
-
-                <div>
-                  <div style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '18px',
-                    fontWeight: '600',
-                    color: '#000000',
-                    marginBottom: '12px'
-                  }}>📋 Tentang Kerjasama</div>
-                  <div style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '14px',
-                    color: '#666666',
-                    lineHeight: '1.6'
-                  }}>
-                    Diskusi tentang kolaborasi pengembangan website, aplikasi mobile, 
-                    atau konsultasi teknologi. Saya siap membantu mewujudkan ide digital Anda!
-                  </div>
-                </div>
-
-                <div>
-                  <div style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '16px',
-                    fontWeight: '600',
-                    color: '#000000',
-                    marginBottom: '8px'
-                  }}>⏱️ Waktu Tunggu Respon</div>
-                  <div style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '14px',
-                    color: '#c5e800',
-                    backgroundColor: '#1a1a1a',
-                    display: 'inline-block',
-                    padding: '6px 16px',
-                    borderRadius: '60px'
-                  }}>Maksimal 1x24 jam</div>
-                </div>
-
-                <div>
-                  <div style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '16px',
-                    fontWeight: '600',
-                    color: '#000000',
-                    marginBottom: '12px'
-                  }}>📍 Tipe Meeting</div>
-                  <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                    {["Online", "Offline", "Hybrid"].map((type) => (
-                      <button
-                        key={type}
-                        onClick={() => setMeetingType(type)}
-                        style={{
-                          padding: '10px 24px',
-                          borderRadius: '60px',
-                          border: meetingType === type ? '2px solid #000000' : '1px solid #cccccc',
-                          backgroundColor: meetingType === type ? '#000000' : '#ffffff',
-                          color: meetingType === type ? '#ffffff' : '#000000',
-                          cursor: 'pointer',
-                          fontFamily: "'Questrial', sans-serif",
-                          fontSize: '14px',
-                          fontWeight: '500',
-                          transition: 'all 0.2s ease'
-                        }}
-                      >
-                        {type}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <div style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '16px',
-                    fontWeight: '600',
-                    color: '#000000',
-                    marginBottom: '8px'
-                  }}>📍 Lokasi (opsional)</div>
-                  <input
-                    type="text"
-                    placeholder="Kota / Alamat lengkap"
-                    value={location}
-                    onChange={(e) => setLocation(e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '12px 16px',
-                      borderRadius: '12px',
-                      border: '1px solid #cccccc',
-                      fontFamily: "'Questrial', sans-serif",
-                      fontSize: '14px',
-                      outline: 'none'
-                    }}
-                  />
-                </div>
+                <div><div style={{ fontFamily: "'Questrial', sans-serif", fontSize: '18px', fontWeight: '600', color: '#000000', marginBottom: '12px' }}>📋 Tentang Kerjasama</div><div style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', color: '#666666', lineHeight: '1.6' }}>Diskusi tentang kolaborasi pengembangan website, aplikasi mobile, atau konsultasi teknologi. Saya siap membantu mewujudkan ide digital Anda!</div></div>
+                <div><div style={{ fontFamily: "'Questrial', sans-serif", fontSize: '16px', fontWeight: '600', color: '#000000', marginBottom: '8px' }}>⏱️ Waktu Tunggu Respon</div><div style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', color: '#c5e800', backgroundColor: '#1a1a1a', display: 'inline-block', padding: '6px 16px', borderRadius: '60px' }}>Maksimal 1x24 jam</div></div>
+                <div><div style={{ fontFamily: "'Questrial', sans-serif", fontSize: '16px', fontWeight: '600', color: '#000000', marginBottom: '12px' }}>📍 Tipe Meeting</div><div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>{["Online", "Offline", "Hybrid"].map((type) => (<button key={type} onClick={() => setMeetingType(type)} style={{ padding: '10px 24px', borderRadius: '60px', border: meetingType === type ? '2px solid #000000' : '1px solid #cccccc', backgroundColor: meetingType === type ? '#000000' : '#ffffff', color: meetingType === type ? '#ffffff' : '#000000', cursor: 'pointer', fontFamily: "'Questrial', sans-serif", fontSize: '14px', fontWeight: '500', transition: 'all 0.2s ease' }}>{type}</button>))}</div></div>
+                <div><div style={{ fontFamily: "'Questrial', sans-serif", fontSize: '16px', fontWeight: '600', color: '#000000', marginBottom: '8px' }}>📍 Lokasi (opsional)</div><input type="text" placeholder="Kota / Alamat lengkap" value={location} onChange={(e) => setLocation(e.target.value)} style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #cccccc', fontFamily: "'Questrial', sans-serif", fontSize: '14px', outline: 'none' }} /></div>
               </div>
-
-              <div style={{
-                flex: 2,
-                padding: '32px',
-                borderRight: '1px solid #e0e0e0',
-                overflowY: 'auto'
-              }}>
-                <div style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  marginBottom: '24px'
-                }}>
-                  <button
-                    onClick={() => changeMonth(-1)}
-                    style={{
-                      padding: '8px 16px',
-                      borderRadius: '8px',
-                      border: '1px solid #cccccc',
-                      backgroundColor: '#ffffff',
-                      cursor: 'pointer',
-                      fontFamily: "'Questrial', sans-serif"
-                    }}
-                  >
-                    ← Prev
-                  </button>
-                  <div style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '20px',
-                    fontWeight: '600',
-                    color: '#000000'
-                  }}>
-                    {currentMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}
-                  </div>
-                  <button
-                    onClick={() => changeMonth(1)}
-                    style={{
-                      padding: '8px 16px',
-                      borderRadius: '8px',
-                      border: '1px solid #cccccc',
-                      backgroundColor: '#ffffff',
-                      cursor: 'pointer',
-                      fontFamily: "'Questrial', sans-serif"
-                    }}
-                  >
-                    Next →
-                  </button>
+              <div style={{ flex: 2, padding: '32px', borderRight: '1px solid #e0e0e0', overflowY: 'auto' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                  <button onClick={() => changeMonth(-1)} style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid #cccccc', backgroundColor: '#ffffff', cursor: 'pointer', fontFamily: "'Questrial', sans-serif" }}>← Prev</button>
+                  <div style={{ fontFamily: "'Questrial', sans-serif", fontSize: '20px', fontWeight: '600', color: '#000000' }}>{currentMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}</div>
+                  <button onClick={() => changeMonth(1)} style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid #cccccc', backgroundColor: '#ffffff', cursor: 'pointer', fontFamily: "'Questrial', sans-serif" }}>Next →</button>
                 </div>
-
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(7, 1fr)',
-                  gap: '8px',
-                  marginBottom: '12px'
-                }}>
-                  {weekDays.map((day) => (
-                    <div key={day} style={{
-                      textAlign: 'center',
-                      fontFamily: "'Questrial', sans-serif",
-                      fontSize: '14px',
-                      fontWeight: '600',
-                      color: '#999999',
-                      padding: '8px'
-                    }}>
-                      {day}
-                    </div>
-                  ))}
-                </div>
-
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(7, 1fr)',
-                  gap: '8px'
-                }}>
-                  {days.map((date, index) => (
-                    <div
-                      key={index}
-                      onClick={() => date && handleDateSelect(date)}
-                      className="calendar-day"
-                      style={{
-                        textAlign: 'center',
-                        padding: '12px 8px',
-                        backgroundColor: date ? getDayColor(date) : 'transparent',
-                        color: date ? '#ffffff' : 'transparent',
-                        cursor: date ? 'pointer' : 'default',
-                        fontWeight: date ? '600' : 'normal',
-                        borderRadius: '12px',
-                        opacity: date ? 1 : 0.3,
-                        boxShadow: selectedDate?.toDateString() === date?.toDateString() ? '0 0 0 3px #000000' : 'none'
-                      }}
-                    >
-                      {date ? date.getDate() : ''}
-                    </div>
-                  ))}
-                </div>
-
-                {selectedDate && (
-                  <div style={{ marginTop: '32px' }}>
-                    <div style={{
-                      fontFamily: "'Questrial', sans-serif",
-                      fontSize: '16px',
-                      fontWeight: '600',
-                      color: '#000000',
-                      marginBottom: '16px'
-                    }}>
-                      Pilih Waktu untuk {selectedDate.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' })}
-                    </div>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
-                      {timeSlots.map((time) => (
-                        <button
-                          key={time}
-                          onClick={() => setSelectedTime(time)}
-                          className="time-slot"
-                          style={{
-                            padding: '10px 20px',
-                            borderRadius: '60px',
-                            border: selectedTime === time ? '2px solid #000000' : '1px solid #cccccc',
-                            backgroundColor: selectedTime === time ? '#000000' : '#ffffff',
-                            color: selectedTime === time ? '#ffffff' : '#000000',
-                            cursor: 'pointer',
-                            fontFamily: "'Questrial', sans-serif",
-                            fontSize: '14px',
-                            fontWeight: '500'
-                          }}
-                        >
-                          {time} WIB
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '8px', marginBottom: '12px' }}>{weekDays.map((day) => (<div key={day} style={{ textAlign: 'center', fontFamily: "'Questrial', sans-serif", fontSize: '14px', fontWeight: '600', color: '#999999', padding: '8px' }}>{day}</div>))}</div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '8px' }}>{days.map((date, index) => (<div key={index} onClick={() => date && handleDateSelect(date)} className="calendar-day" style={{ textAlign: 'center', padding: '12px 8px', backgroundColor: date ? getDayColor(date) : 'transparent', color: date ? '#ffffff' : 'transparent', cursor: date ? 'pointer' : 'default', fontWeight: date ? '600' : 'normal', borderRadius: '12px', opacity: date ? 1 : 0.3, boxShadow: selectedDate?.toDateString() === date?.toDateString() ? '0 0 0 3px #000000' : 'none' }}>{date ? date.getDate() : ''}</div>))}</div>
+                {selectedDate && (<div style={{ marginTop: '32px' }}><div style={{ fontFamily: "'Questrial', sans-serif", fontSize: '16px', fontWeight: '600', color: '#000000', marginBottom: '16px' }}>Pilih Waktu untuk {selectedDate.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' })}</div><div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>{timeSlots.map((time) => (<button key={time} onClick={() => setSelectedTime(time)} className="time-slot" style={{ padding: '10px 20px', borderRadius: '60px', border: selectedTime === time ? '2px solid #000000' : '1px solid #cccccc', backgroundColor: selectedTime === time ? '#000000' : '#ffffff', color: selectedTime === time ? '#ffffff' : '#000000', cursor: 'pointer', fontFamily: "'Questrial', sans-serif", fontSize: '14px', fontWeight: '500' }}>{time} WIB</button>))}</div></div>)}
               </div>
-
-              <div style={{
-                flex: 1,
-                padding: '32px',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '24px'
-              }}>
-                <div style={{
-                  fontFamily: "'Questrial', sans-serif",
-                  fontSize: '20px',
-                  fontWeight: '700',
-                  color: '#000000',
-                  paddingBottom: '12px',
-                  borderBottom: '2px solid #e0e0e0'
-                }}>
-                  📅 Jadwal Mendatang
-                </div>
-
-                <div style={{
-                  padding: '16px',
-                  backgroundColor: '#c5e800',
-                  borderRadius: '20px',
-                  color: '#000000'
-                }}>
-                  <div style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    marginBottom: '8px'
-                  }}>🌟 Besok</div>
-                  <div style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '24px',
-                    fontWeight: '700',
-                    marginBottom: '4px'
-                  }}>
-                    {tomorrow.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
-                  </div>
-                  <div style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '18px',
-                    fontWeight: '500'
-                  }}>
-                    {timeSlots[2]} - {timeSlots[4]} WIB
-                  </div>
-                  <div style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '14px',
-                    marginTop: '8px',
-                    opacity: 0.8
-                  }}>⚡ Slot terbaik</div>
-                </div>
-
-                <div style={{
-                  padding: '16px',
-                  backgroundColor: '#ff69b4',
-                  borderRadius: '20px',
-                  color: '#ffffff'
-                }}>
-                  <div style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    marginBottom: '8px'
-                  }}>💫 Lusa</div>
-                  <div style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '20px',
-                    fontWeight: '700',
-                    marginBottom: '4px'
-                  }}>
-                    {dayAfterTomorrow.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
-                  </div>
-                  <div style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '16px',
-                    fontWeight: '500'
-                  }}>
-                    {timeSlots[1]} - {timeSlots[3]} WIB
-                  </div>
-                </div>
-
-                <button
-                  onClick={handleScheduleMeeting}
-                  style={{
-                    marginTop: 'auto',
-                    padding: '14px 24px',
-                    backgroundColor: '#000000',
-                    color: '#ffffff',
-                    border: 'none',
-                    borderRadius: '60px',
-                    cursor: 'pointer',
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '16px',
-                    fontWeight: '600',
-                    transition: 'all 0.3s ease'
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
-                  onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
-                >
-                  Schedule Meeting →
-                </button>
+              <div style={{ flex: 1, padding: '32px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                <div style={{ fontFamily: "'Questrial', sans-serif", fontSize: '20px', fontWeight: '700', color: '#000000', paddingBottom: '12px', borderBottom: '2px solid #e0e0e0' }}>📅 Jadwal Mendatang</div>
+                <div style={{ padding: '16px', backgroundColor: '#c5e800', borderRadius: '20px', color: '#000000' }}><div style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', fontWeight: '600', marginBottom: '8px' }}>🌟 Besok</div><div style={{ fontFamily: "'Questrial', sans-serif", fontSize: '24px', fontWeight: '700', marginBottom: '4px' }}>{tomorrow.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</div><div style={{ fontFamily: "'Questrial', sans-serif", fontSize: '18px', fontWeight: '500' }}>{timeSlots[2]} - {timeSlots[4]} WIB</div><div style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', marginTop: '8px', opacity: 0.8 }}>⚡ Slot terbaik</div></div>
+                <div style={{ padding: '16px', backgroundColor: '#ff69b4', borderRadius: '20px', color: '#ffffff' }}><div style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', fontWeight: '600', marginBottom: '8px' }}>💫 Lusa</div><div style={{ fontFamily: "'Questrial', sans-serif", fontSize: '20px', fontWeight: '700', marginBottom: '4px' }}>{dayAfterTomorrow.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</div><div style={{ fontFamily: "'Questrial', sans-serif", fontSize: '16px', fontWeight: '500' }}>{timeSlots[1]} - {timeSlots[3]} WIB</div></div>
+                <button onClick={handleScheduleMeeting} style={{ marginTop: 'auto', padding: '14px 24px', backgroundColor: '#000000', color: '#ffffff', border: 'none', borderRadius: '60px', cursor: 'pointer', fontFamily: "'Questrial', sans-serif", fontSize: '16px', fontWeight: '600', transition: 'all 0.3s ease' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>Schedule Meeting →</button>
               </div>
             </div>
           </div>
@@ -4415,129 +1953,15 @@ export default function HomePage(): React.JSX.Element {
 
       {/* Cookie Popup */}
       {showPopup && !isLoading && (
-        <div style={{
-          position: 'fixed',
-          bottom: '30px',
-          left: '30px',
-          right: '30px',
-          backgroundColor: '#000000',
-          color: '#ffffff',
-          borderRadius: '32px',
-          padding: '28px 40px',
-          boxShadow: '0 20px 40px rgba(0,0,0,0.3), 0 5px 12px rgba(0,0,0,0.1)',
-          zIndex: 1000,
-          fontFamily: 'Questrial, sans-serif',
-          animation: 'slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
-          border: '1px solid rgba(255,255,255,0.1)',
-          display: 'flex',
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: '40px',
-          flexWrap: 'wrap',
-        }}>
+        <div style={{ position: 'fixed', bottom: '30px', left: '30px', right: '30px', backgroundColor: '#000000', color: '#ffffff', borderRadius: '32px', padding: '28px 40px', boxShadow: '0 20px 40px rgba(0,0,0,0.3), 0 5px 12px rgba(0,0,0,0.1)', zIndex: 1000, fontFamily: 'Questrial, sans-serif', animation: 'slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1)', border: '1px solid rgba(255,255,255,0.1)', display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: '40px', flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', flex: 1 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <span style={{ fontSize: '48px', display: 'inline-block' }}>🍪</span>
-              <span style={{ 
-                fontWeight: '700', 
-                fontSize: '32px',
-                letterSpacing: '-0.02em',
-                background: 'linear-gradient(135deg, #ffffff 0%, #cccccc 100%)',
-                backgroundClip: 'text',
-                WebkitBackgroundClip: 'text',
-                color: 'transparent',
-                fontFamily: 'Questrial, sans-serif'
-              }}>Cookies Notice</span>
-            </div>
-            
-            <p style={{
-              fontSize: '18px',
-              lineHeight: '1.5',
-              marginBottom: 0,
-              color: '#ffffff',
-              fontWeight: '400',
-              letterSpacing: '-0.01em',
-              maxWidth: '600px',
-              fontFamily: 'Questrial, sans-serif'
-            }}>
-              This site uses cookies to provide you with the best user experience. 
-              By using this website, you accept our use of cookies.
-            </p>
-            
-            <Link href="/privacy-policy" passHref>
-              <span 
-                className="cookie-link"
-                style={{ 
-                  color: '#aaaaaa', 
-                  fontSize: '16px', 
-                  display: 'inline-flex', 
-                  alignItems: 'center', 
-                  gap: '6px',
-                  marginTop: '4px',
-                  cursor: 'pointer',
-                  textDecoration: 'underline',
-                  fontFamily: 'Questrial, sans-serif',
-                  fontWeight: '500'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.color = '#ffffff'}
-                onMouseLeave={(e) => e.currentTarget.style.color = '#aaaaaa'}
-              >
-                Show details
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </span>
-            </Link>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><span style={{ fontSize: '48px', display: 'inline-block' }}>🍪</span><span style={{ fontWeight: '700', fontSize: '32px', letterSpacing: '-0.02em', background: 'linear-gradient(135deg, #ffffff 0%, #cccccc 100%)', backgroundClip: 'text', WebkitBackgroundClip: 'text', color: 'transparent', fontFamily: 'Questrial, sans-serif' }}>Cookies Notice</span></div>
+            <p style={{ fontSize: '18px', lineHeight: '1.5', marginBottom: 0, color: '#ffffff', fontWeight: '400', letterSpacing: '-0.01em', maxWidth: '600px', fontFamily: 'Questrial, sans-serif' }}>This site uses cookies to provide you with the best user experience. By using this website, you accept our use of cookies.</p>
+            <Link href="/privacy-policy" passHref><span className="cookie-link" style={{ color: '#aaaaaa', fontSize: '16px', display: 'inline-flex', alignItems: 'center', gap: '6px', marginTop: '4px', cursor: 'pointer', textDecoration: 'underline', fontFamily: 'Questrial, sans-serif', fontWeight: '500' }} onMouseEnter={(e) => e.currentTarget.style.color = '#ffffff'} onMouseLeave={(e) => e.currentTarget.style.color = '#aaaaaa'}>Show details<svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg></span></Link>
           </div>
-          
           <div style={{ display: 'flex', gap: '16px', justifyContent: 'flex-start', flexShrink: 0 }}>
-            <button
-              ref={declineBtnRef}
-              onClick={handleDecline}
-              style={{
-                padding: '12px 28px',
-                backgroundColor: '#000000',
-                color: '#ffffff',
-                border: '1.5px solid #333333',
-                borderRadius: '60px',
-                cursor: 'pointer',
-                fontSize: '16px',
-                fontWeight: '600',
-                letterSpacing: '-0.01em',
-                fontFamily: 'Questrial, sans-serif',
-                transition: 'all 0.2s ease',
-                position: 'relative',
-                overflow: 'hidden',
-                zIndex: 1,
-                background: '#000000'
-              }}
-            >
-              Decline
-            </button>
-            <button
-              ref={acceptBtnRef}
-              onClick={handleAccept}
-              style={{
-                padding: '12px 28px',
-                backgroundColor: '#000000',
-                color: '#ffffff',
-                border: '1.5px solid #ffffff',
-                borderRadius: '60px',
-                cursor: 'pointer',
-                fontSize: '16px',
-                fontWeight: '600',
-                letterSpacing: '-0.01em',
-                fontFamily: 'Questrial, sans-serif',
-                transition: 'all 0.2s ease',
-                position: 'relative',
-                overflow: 'hidden',
-                zIndex: 1,
-                background: '#000000'
-              }}
-            >
-              Accept
-            </button>
+            <button ref={declineBtnRef} onClick={handleDecline} style={{ padding: '12px 28px', backgroundColor: '#000000', color: '#ffffff', border: '1.5px solid #333333', borderRadius: '60px', cursor: 'pointer', fontSize: '16px', fontWeight: '600', letterSpacing: '-0.01em', fontFamily: 'Questrial, sans-serif', transition: 'all 0.2s ease', position: 'relative', overflow: 'hidden', zIndex: 1, background: '#000000' }}>Decline</button>
+            <button ref={acceptBtnRef} onClick={handleAccept} style={{ padding: '12px 28px', backgroundColor: '#000000', color: '#ffffff', border: '1.5px solid #ffffff', borderRadius: '60px', cursor: 'pointer', fontSize: '16px', fontWeight: '600', letterSpacing: '-0.01em', fontFamily: 'Questrial, sans-serif', transition: 'all 0.2s ease', position: 'relative', overflow: 'hidden', zIndex: 1, background: '#000000' }}>Accept</button>
           </div>
         </div>
       )}
