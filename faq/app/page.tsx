@@ -1,4 +1,9 @@
-// app/page.tsx (Halaman Utama) - dengan fitur Shadow Page dan Chat
+
+
+
+
+
+// app/page.tsx - dengan fitur Admin, Reply Chat, dan Warna Features
 
 'use client';
 
@@ -34,9 +39,10 @@ import {
   serverTimestamp,
   Timestamp,
   doc,
-  getDoc,
   updateDoc,
-  limit
+  limit,
+  where,
+  getDocs
 } from "firebase/firestore";
 
 // Register GSAP plugins
@@ -80,8 +86,18 @@ interface Message {
   userId: string;
   userName: string;
   userPhoto?: string;
+  userEmail?: string;
+  isAdmin?: boolean;
+  replyTo?: {
+    messageId: string;
+    userName: string;
+    text: string;
+  };
   timestamp: Timestamp;
 }
+
+// Email Admin
+const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
 
 export default function HomePage(): React.JSX.Element {
   const [showPopup, setShowPopup] = useState(false);
@@ -111,8 +127,10 @@ export default function HomePage(): React.JSX.Element {
   
   // State untuk Chat
   const [user, setUser] = useState<User | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
+  const [replyTo, setReplyTo] = useState<{ id: string; name: string; text: string } | null>(null);
   const [isChatVisible, setIsChatVisible] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState<"login" | "register">("login");
@@ -290,9 +308,9 @@ export default function HomePage(): React.JSX.Element {
   };
 
   const getDayColor = (date: Date) => {
-    if (date.toDateString() === today.toDateString()) return "#4a90e2";
-    if (date.toDateString() === tomorrow.toDateString()) return "#c5e800";
-    return "#ff69b4";
+    if (date.toDateString() === today.toDateString()) return "#c5e800"; // Hijau stabilo
+    if (date.toDateString() === tomorrow.toDateString()) return "#ff69b4"; // Merah stabilo
+    return "#4a90e2";
   };
 
   const handleDateSelect = (date: Date) => {
@@ -333,12 +351,17 @@ export default function HomePage(): React.JSX.Element {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
-        // Load user profile jika ada
-        if (currentUser.displayName) {
-          // User sudah memiliki nama
+        // Cek apakah user adalah admin
+        const isAdminUser = currentUser.email === ADMIN_EMAIL;
+        setIsAdmin(isAdminUser);
+        
+        // Update display name jika admin
+        if (isAdminUser && !currentUser.displayName) {
+          await updateProfile(currentUser, { displayName: "ADMIN" });
         }
       } else {
         setUser(null);
+        setIsAdmin(false);
       }
     });
 
@@ -350,7 +373,7 @@ export default function HomePage(): React.JSX.Element {
     if (!db) return;
 
     const messagesRef = collection(db, "chat_messages");
-    const q = query(messagesRef, orderBy("timestamp", "asc"), limit(100));
+    const q = query(messagesRef, orderBy("timestamp", "asc"), limit(200));
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const newMessages: Message[] = [];
@@ -363,20 +386,32 @@ export default function HomePage(): React.JSX.Element {
     return () => unsubscribe();
   }, []);
 
-  // Kirim pesan
+  // Kirim pesan dengan reply
   const sendMessage = async () => {
     if (!newMessage.trim() || !user || !db) return;
 
     try {
       const messagesRef = collection(db, "chat_messages");
-      await addDoc(messagesRef, {
+      const messageData: any = {
         text: newMessage.trim(),
         userId: user.uid,
-        userName: user.displayName || user.email?.split('@')[0] || "Anonymous",
-        userPhoto: user.photoURL || null,
+        userName: isAdmin ? "ADMIN" : (user.displayName || user.email?.split('@')[0] || "User"),
+        userEmail: user.email,
+        isAdmin: isAdmin,
         timestamp: serverTimestamp(),
-      });
+      };
+      
+      if (replyTo) {
+        messageData.replyTo = {
+          messageId: replyTo.id,
+          userName: replyTo.name,
+          text: replyTo.text.substring(0, 100)
+        };
+      }
+      
+      await addDoc(messagesRef, messageData);
       setNewMessage("");
+      setReplyTo(null);
     } catch (error) {
       console.error("Error sending message:", error);
     }
@@ -388,6 +423,20 @@ export default function HomePage(): React.JSX.Element {
       e.preventDefault();
       sendMessage();
     }
+  };
+
+  // Reply to message
+  const handleReply = (message: Message) => {
+    setReplyTo({
+      id: message.id,
+      name: message.userName,
+      text: message.text
+    });
+  };
+
+  // Cancel reply
+  const cancelReply = () => {
+    setReplyTo(null);
   };
 
   // Login dengan Google
@@ -456,6 +505,7 @@ export default function HomePage(): React.JSX.Element {
     try {
       await signOut(auth);
       setIsChatVisible(false);
+      setReplyTo(null);
     } catch (error) {
       console.error("Error logging out:", error);
     }
@@ -633,7 +683,6 @@ export default function HomePage(): React.JSX.Element {
       ease: "power2.out"
     });
     
-    // Saat hover, semua teks jadi putih
     gsap.to(featuresLeftNumberRef.current, {
       color: '#ffffff',
       duration: 0.2,
@@ -692,7 +741,6 @@ export default function HomePage(): React.JSX.Element {
       ease: "power2.in"
     });
     
-    // Kembalikan ke warna default berdasarkan background
     const targetColor = featuresTextColor;
     
     gsap.to(featuresLeftNumberRef.current, {
@@ -1212,17 +1260,14 @@ export default function HomePage(): React.JSX.Element {
       const windowHeight = window.innerHeight;
       const documentHeight = document.documentElement.scrollHeight;
       const distanceToBottom = documentHeight - (scrollY + windowHeight);
-      const threshold = 100; // Jarak threshold untuk memicu
+      const threshold = 100;
       
-      // Cek apakah sudah hampir sampai bawah
       const shouldShowShadow = distanceToBottom <= threshold;
       
       if (shouldShowShadow && !showShadowPage && !isShadowTransitioning) {
-        // Tampilkan shadow page dengan animasi lambat
         setIsShadowTransitioning(true);
         setShowShadowPage(true);
         
-        // Animate shadow page muncul dari bawah
         gsap.set(shadowPageRef.current, { y: "100%" });
         gsap.to(shadowPageRef.current, {
           y: "0%",
@@ -1233,7 +1278,6 @@ export default function HomePage(): React.JSX.Element {
           }
         });
         
-        // Animate main content sedikit ke atas (opsional)
         gsap.to(mainContentRef.current, {
           y: "-5vh",
           duration: 0.6,
@@ -1241,17 +1285,14 @@ export default function HomePage(): React.JSX.Element {
         });
         
       } else if (!shouldShowShadow && showShadowPage && !isShadowTransitioning) {
-        // Sembunyikan shadow page dengan animasi lambat saat scroll ke atas
         setIsShadowTransitioning(true);
         
-        // Animate main content kembali
         gsap.to(mainContentRef.current, {
           y: "0%",
           duration: 0.6,
           ease: "power2.inOut"
         });
         
-        // Animate shadow page keluar
         gsap.to(shadowPageRef.current, {
           y: "100%",
           duration: 0.8,
@@ -1330,7 +1371,7 @@ export default function HomePage(): React.JSX.Element {
     };
   }, []);
 
-  // Efek scroll untuk FEATURES section - DIPERBAIKI
+  // Efek scroll untuk FEATURES section
   useEffect(() => {
     if (isLoading) return;
 
@@ -1340,7 +1381,6 @@ export default function HomePage(): React.JSX.Element {
       const scrollPosition = window.scrollY;
       const windowHeight = window.innerHeight;
       
-      // Dapatkan posisi semua section Features
       const featuresSections = [
         featuresSectionRef.current,
         featuresSection2Ref.current,
@@ -1353,11 +1393,9 @@ export default function HomePage(): React.JSX.Element {
       
       if (!trustedSection) return;
       
-      // Cek apakah scroll berada di atas batas section Trusted Collabs
       const trustedTop = trustedSection.offsetTop;
       const isAboveTrusted = scrollPosition + windowHeight/2 < trustedTop;
       
-      // Cek apakah scroll berada di dalam area Features (salah satu section Features)
       let isInFeatures = false;
       featuresSections.forEach(section => {
         if (section) {
@@ -1369,16 +1407,13 @@ export default function HomePage(): React.JSX.Element {
         }
       });
       
-      // Update warna berdasarkan posisi scroll
       if (isInFeatures && isAboveTrusted) {
-        // Masih di area Features dan belum mencapai Trusted Collabs - warna biru dengan teks putih
         if (featuresBgColor !== '#0000ff') {
           setFeaturesBgColor('#0000ff');
           setFeaturesTextColor('#ffffff');
           updateFeaturesColors('#0000ff', '#ffffff');
         }
       } else if (!isAboveTrusted || !isInFeatures) {
-        // Sudah melewati batas Trusted Collabs atau keluar area Features - warna putih dengan teks hitam
         if (featuresBgColor !== '#ffffff') {
           setFeaturesBgColor('#ffffff');
           setFeaturesTextColor('#000000');
@@ -1388,7 +1423,6 @@ export default function HomePage(): React.JSX.Element {
     };
     
     const updateFeaturesColors = (bgColor: string, textColor: string) => {
-      // Update semua section Features
       const featuresSections = [
         featuresSectionRef.current,
         featuresSection2Ref.current,
@@ -1407,7 +1441,6 @@ export default function HomePage(): React.JSX.Element {
         }
       });
       
-      // Update title Features
       if (featuresTitleRef.current) {
         gsap.to(featuresTitleRef.current, {
           color: textColor,
@@ -1416,7 +1449,6 @@ export default function HomePage(): React.JSX.Element {
         });
       }
       
-      // Update semua teks Features (angka, teks, panah) kecuali yang sedang hover
       const leftNumbers = [
         featuresLeftNumberRef.current,
         featuresLeftNumber2Ref.current,
@@ -1473,7 +1505,7 @@ export default function HomePage(): React.JSX.Element {
     };
     
     window.addEventListener('scroll', handleScroll);
-    handleScroll(); // Panggil sekali untuk inisialisasi
+    handleScroll();
     
     return () => window.removeEventListener('scroll', handleScroll);
   }, [isLoading, featuresBgColor, noteHover, communityHover, calendarHover, blogHover, donationHover]);
@@ -3582,644 +3614,756 @@ export default function HomePage(): React.JSX.Element {
       </div>
 
       {/* SHADOW PAGE - Halaman bayangan hitam dengan Chat */}
-
-<div
-  ref={shadowPageRef}
-  style={{
-    position: 'fixed',
-    bottom: 0,
-    left: 0,
-    width: '100%',
-    height: '100vh',
-    backgroundColor: '#000000',
-    zIndex: 9998,
-    transform: 'translateY(100%)',
-    pointerEvents: showShadowPage ? 'auto' : 'none',
-    overflow: 'hidden'
-  }}
->
-  <div style={{
-    width: '100%',
-    height: '100%',
-    display: 'flex',
-    flexDirection: 'column',
-    position: 'relative'
-  }}>
-    {/* Teks MENURU besar di bawah sisi kiri - warna putih, tidak tebal, font Aeonik-Regular */}
-    <div style={{
-      position: 'absolute',
-      bottom: '80px',
-      left: '80px',
-      width: 'auto',
-      textAlign: 'left',
-      pointerEvents: 'none',
-      zIndex: 1
-    }}>
-      <span style={{
-        fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-        fontWeight: '300',
-        fontSize: '300px',
-        color: '#ffffff',
-        letterSpacing: '-0.02em',
-        textTransform: 'uppercase',
-        lineHeight: '0.9',
-        opacity: 0.9
-      }}>
-        MENURU
-      </span>
-    </div>
-
-    {/* Tombol untuk toggle chat visibility - dengan North East Arrow */}
-    {!isChatVisible && (
-      <button
-        onClick={() => setIsChatVisible(true)}
+      <div
+        ref={shadowPageRef}
         style={{
-          position: 'absolute',
-          bottom: '120px',
-          right: '80px',
-          backgroundColor: 'transparent',
-          border: 'none',
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '12px',
-          zIndex: 10,
-          transition: 'opacity 0.3s ease',
-          fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-          fontSize: '20px',
-          color: '#ffffff',
-          letterSpacing: '-0.02em'
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          width: '100%',
+          height: '100vh',
+          backgroundColor: '#000000',
+          zIndex: 9998,
+          transform: 'translateY(100%)',
+          pointerEvents: showShadowPage ? 'auto' : 'none',
+          overflow: 'hidden'
         }}
-        onMouseEnter={(e) => e.currentTarget.style.opacity = '0.7'}
-        onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
       >
-        <span>Buka Chat</span>
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-      </button>
-    )}
-
-    {/* Teks Let's Talk di kiri atas - font Aeonik-Regular, besar, tanpa emoji */}
-    <div style={{
-      position: 'absolute',
-      top: '80px',
-      left: '80px',
-      color: '#ffffff',
-      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-      zIndex: 5
-    }}>
-      <div style={{
-        fontSize: '150px',
-        fontWeight: '300',
-        margin: 0,
-        letterSpacing: '-0.02em',
-        lineHeight: '1'
-      }}>
-        Let's
-      </div>
-      <div style={{
-        fontSize: '150px',
-        fontWeight: '300',
-        margin: 0,
-        letterSpacing: '-0.02em',
-        lineHeight: '1'
-      }}>
-        Talk
-      </div>
-    </div>
-
-    {/* Chat Container */}
-    {isChatVisible && (
-      <div style={{
-        position: 'absolute',
-        bottom: '80px',
-        right: '80px',
-        width: '500px',
-        height: '600px',
-        backgroundColor: 'rgba(0,0,0,0.9)',
-        backdropFilter: 'blur(10px)',
-        borderRadius: '0px',
-        border: '1px solid rgba(255,255,255,0.2)',
-        display: 'flex',
-        flexDirection: 'column',
-        overflow: 'hidden',
-        zIndex: 20,
-        boxShadow: '0 25px 50px rgba(0,0,0,0.5)'
-      }}>
-        {/* Header Chat - font Aeonik-Regular */}
         <div style={{
-          padding: '20px 24px',
-          backgroundColor: 'rgba(0,0,0,0.8)',
-          borderBottom: '1px solid rgba(255,255,255,0.1)',
+          width: '100%',
+          height: '100%',
           display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center'
+          flexDirection: 'column',
+          position: 'relative'
         }}>
+          {/* Teks MENURU besar di bawah sisi kiri - warna putih, tidak tebal */}
           <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '16px'
+            position: 'absolute',
+            bottom: '80px',
+            left: '80px',
+            width: 'auto',
+            textAlign: 'left',
+            pointerEvents: 'none',
+            zIndex: 1
           }}>
-            <span style={{ 
-              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", 
-              color: '#ffffff', 
-              fontWeight: '300', 
-              fontSize: '24px',
-              letterSpacing: '-0.02em'
-            }}>
-              Let's Talk
-            </span>
-            <span style={{ 
-              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", 
-              color: 'rgba(255,255,255,0.5)', 
-              fontSize: '14px',
-              fontWeight: '300'
-            }}>
-              {user ? `${user.displayName || user.email?.split('@')[0]}` : 'Belum login'}
-            </span>
-          </div>
-          <div style={{ display: 'flex', gap: '16px' }}>
-            {user && (
-              <button
-                onClick={handleLogout}
-                style={{
-                  backgroundColor: 'transparent',
-                  border: 'none',
-                  color: 'rgba(255,255,255,0.7)',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                  padding: '4px 8px',
-                  transition: 'color 0.2s',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.color = '#ffffff'}
-                onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255,255,255,0.7)'}
-              >
-                <span>Logout</span>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </button>
-            )}
-            <button
-              onClick={() => setIsChatVisible(false)}
-              style={{
-                backgroundColor: 'transparent',
-                border: 'none',
-                color: '#ffffff',
-                cursor: 'pointer',
-                fontSize: '24px',
-                padding: '0 4px',
-                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif"
-              }}
-            >
-              ✕
-            </button>
-          </div>
-        </div>
-
-        {/* Messages Area */}
-        <div 
-          ref={chatContainerRef}
-          className="chat-messages"
-          style={{
-            flex: 1,
-            overflowY: 'auto',
-            padding: '20px 24px',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '16px'
-          }}
-        >
-          {messages.length === 0 && (
-            <div style={{
-              textAlign: 'center',
-              color: 'rgba(255,255,255,0.4)',
-              padding: '60px 20px',
-              fontSize: '16px',
+            <span style={{
               fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-              fontWeight: '300'
+              fontWeight: '300',
+              fontSize: '300px',
+              color: '#ffffff',
+              letterSpacing: '-0.02em',
+              textTransform: 'uppercase',
+              lineHeight: '0.9',
+              opacity: 0.9
             }}>
-              Belum ada pesan
-            </div>
-          )}
-          
-          {messages.map((msg) => {
-            const isOwnMessage = user?.uid === msg.userId;
-            return (
-              <div
-                key={msg.id}
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: isOwnMessage ? 'flex-end' : 'flex-start',
-                  maxWidth: '85%',
-                  alignSelf: isOwnMessage ? 'flex-end' : 'flex-start'
-                }}
-              >
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  marginBottom: '6px',
-                  fontSize: '11px',
-                  color: 'rgba(255,255,255,0.5)',
-                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif"
-                }}>
-                  <span style={{ color: '#ffffff', fontWeight: '300' }}>
-                    {msg.userName}
-                  </span>
-                  <span>
-                    {msg.timestamp ? formatTime(msg.timestamp) : ''}
-                  </span>
-                  <span style={{ fontSize: '10px' }}>
-                    {msg.timestamp ? formatDate(msg.timestamp) : ''}
-                  </span>
-                </div>
-                <div style={{
-                  backgroundColor: isOwnMessage ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.05)',
-                  color: '#ffffff',
-                  padding: '12px 18px',
-                  borderRadius: isOwnMessage ? '0px 0px 0px 8px' : '0px 8px 0px 0px',
-                  borderLeft: isOwnMessage ? 'none' : '2px solid #ffffff',
-                  borderRight: isOwnMessage ? '2px solid #ffffff' : 'none',
-                  wordBreak: 'break-word',
-                  fontSize: '14px',
-                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                  fontWeight: '300',
-                  letterSpacing: '-0.01em',
-                  lineHeight: '1.4'
-                }}>
-                  {msg.text}
-                </div>
-              </div>
-            );
-          })}
-          <div ref={messagesEndRef} />
-        </div>
-
-        {/* Input Area - dengan North East Arrow */}
-        {user ? (
-          <div style={{
-            padding: '16px 24px',
-            borderTop: '1px solid rgba(255,255,255,0.1)',
-            display: 'flex',
-            gap: '12px',
-            backgroundColor: 'rgba(0,0,0,0.5)'
-          }}>
-            <input
-              type="text"
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Tulis pesan"
-              style={{
-                flex: 1,
-                backgroundColor: 'rgba(255,255,255,0.05)',
-                border: '1px solid rgba(255,255,255,0.2)',
-                borderRadius: '0px',
-                padding: '12px 16px',
-                color: '#ffffff',
-                fontSize: '14px',
-                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                fontWeight: '300',
-                outline: 'none'
-              }}
-            />
-            <button
-              onClick={sendMessage}
-              disabled={!newMessage.trim()}
-              style={{
-                backgroundColor: 'transparent',
-                border: '1px solid rgba(255,255,255,0.3)',
-                borderRadius: '0px',
-                padding: '8px 20px',
-                color: '#ffffff',
-                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                fontSize: '14px',
-                fontWeight: '300',
-                cursor: newMessage.trim() ? 'pointer' : 'not-allowed',
-                opacity: newMessage.trim() ? 1 : 0.3,
-                transition: 'opacity 0.2s',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px'
-              }}
-            >
-              <span>Kirim</span>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </button>
+              MENURU
+            </span>
           </div>
-        ) : (
-          <div style={{
-            padding: '20px 24px',
-            borderTop: '1px solid rgba(255,255,255,0.1)',
-            display: 'flex',
-            justifyContent: 'center'
-          }}>
+
+          {/* Tombol untuk toggle chat visibility - dengan North East Arrow */}
+          {!isChatVisible && (
             <button
-              onClick={() => setShowAuthModal(true)}
+              onClick={() => setIsChatVisible(true)}
               style={{
+                position: 'absolute',
+                bottom: '120px',
+                right: '80px',
                 backgroundColor: 'transparent',
                 border: '1px solid rgba(255,255,255,0.3)',
                 borderRadius: '0px',
-                padding: '12px 28px',
-                color: '#ffffff',
-                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                fontSize: '16px',
-                fontWeight: '300',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '12px',
-                transition: 'opacity 0.2s'
+                justifyContent: 'center',
+                gap: '16px',
+                padding: '16px 32px',
+                zIndex: 10,
+                transition: 'opacity 0.3s ease',
+                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                fontSize: '20px',
+                color: '#ffffff',
+                letterSpacing: '-0.02em'
               }}
               onMouseEnter={(e) => e.currentTarget.style.opacity = '0.7'}
               onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
             >
-              <span>Login untuk Chat</span>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <span>BUKA CHAT</span>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </button>
-          </div>
-        )}
-      </div>
-    )}
-  </div>
-</div>
+          )}
 
-{/* Auth Modal - dengan North East Arrow dan font Aeonik-Regular */}
-{showAuthModal && (
-  <div style={{
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    width: '100%',
-    height: '100%',
-    backgroundColor: 'rgba(0,0,0,0.95)',
-    backdropFilter: 'blur(8px)',
-    zIndex: 20000,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center'
-  }}>
-    <div style={{
-      backgroundColor: '#000000',
-      border: '1px solid rgba(255,255,255,0.2)',
-      borderRadius: '0px',
-      padding: '60px',
-      width: '90%',
-      maxWidth: '500px',
-      color: '#ffffff',
-      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif"
-    }}>
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: '50px'
-      }}>
-        <div>
-          <div style={{ 
-            fontSize: '60px', 
-            fontWeight: '300', 
-            margin: 0, 
-            letterSpacing: '-0.02em',
-            lineHeight: '1'
-          }}>
-            {authMode === 'login' ? 'Login' : 'Daftar'}
-          </div>
-          <div style={{ 
-            fontSize: '16px', 
-            fontWeight: '300', 
-            marginTop: '8px',
-            color: 'rgba(255,255,255,0.5)',
-            letterSpacing: '-0.01em'
-          }}>
-            {authMode === 'login' ? 'Masuk ke akun Anda' : 'Buat akun baru'}
-          </div>
-        </div>
-        <button
-          onClick={() => setShowAuthModal(false)}
-          style={{
-            backgroundColor: 'transparent',
-            border: 'none',
+          {/* Teks Let's Talk di kiri atas - font Aeonik-Regular */}
+          <div style={{
+            position: 'absolute',
+            top: '80px',
+            left: '80px',
             color: '#ffffff',
-            fontSize: '30px',
-            cursor: 'pointer',
-            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif"
-          }}
-        >
-          ✕
-        </button>
-      </div>
-
-      {/* Tombol Login dengan North East Arrow */}
-      <div style={{ display: 'flex', gap: '16px', marginBottom: '40px', flexDirection: 'column' }}>
-        <button
-          onClick={handleGoogleLogin}
-          style={{
-            backgroundColor: 'transparent',
-            color: '#ffffff',
-            border: '1px solid rgba(255,255,255,0.3)',
-            borderRadius: '0px',
-            padding: '16px 24px',
-            fontSize: '16px',
-            fontWeight: '300',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
             fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-            transition: 'opacity 0.2s'
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.opacity = '0.7'}
-          onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
-        >
-          <span>Google</span>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </button>
-        <button
-          onClick={handleGithubLogin}
-          style={{
-            backgroundColor: 'transparent',
-            color: '#ffffff',
-            border: '1px solid rgba(255,255,255,0.3)',
-            borderRadius: '0px',
-            padding: '16px 24px',
-            fontSize: '16px',
-            fontWeight: '300',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-            transition: 'opacity 0.2s'
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.opacity = '0.7'}
-          onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
-        >
-          <span>GitHub</span>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </button>
-      </div>
+            zIndex: 5
+          }}>
+            <div style={{
+              fontSize: '150px',
+              fontWeight: '300',
+              margin: 0,
+              letterSpacing: '-0.02em',
+              lineHeight: '1'
+            }}>
+              LET'S
+            </div>
+            <div style={{
+              fontSize: '150px',
+              fontWeight: '300',
+              margin: 0,
+              letterSpacing: '-0.02em',
+              lineHeight: '1'
+            }}>
+              TALK
+            </div>
+          </div>
 
-      <div style={{ 
-        textAlign: 'center', 
-        color: 'rgba(255,255,255,0.3)', 
-        margin: '30px 0',
-        fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-        fontSize: '14px',
-        fontWeight: '300',
-        position: 'relative'
-      }}>
-        <span style={{ backgroundColor: '#000000', padding: '0 16px' }}>atau</span>
-        <div style={{
-          position: 'absolute',
-          top: '50%',
-          left: 0,
-          right: 0,
-          height: '1px',
-          backgroundColor: 'rgba(255,255,255,0.1)',
-          zIndex: -1
-        }} />
-      </div>
-
-      {/* Form Login/Register dengan North East Arrow */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-        {authMode === 'register' && (
-          <input
-            type="text"
-            placeholder="Nama"
-            value={authName}
-            onChange={(e) => setAuthName(e.target.value)}
-            style={{
-              padding: '16px 20px',
+          {/* Chat Container */}
+          {isChatVisible && (
+            <div style={{
+              position: 'absolute',
+              bottom: '80px',
+              right: '80px',
+              width: '600px',
+              height: '650px',
+              backgroundColor: 'rgba(0,0,0,0.95)',
+              backdropFilter: 'blur(10px)',
               borderRadius: '0px',
               border: '1px solid rgba(255,255,255,0.2)',
-              backgroundColor: 'transparent',
-              color: '#ffffff',
-              fontSize: '15px',
-              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-              fontWeight: '300',
-              outline: 'none'
-            }}
-          />
-        )}
-        <input
-          type="email"
-          placeholder="Email"
-          value={authEmail}
-          onChange={(e) => setAuthEmail(e.target.value)}
-          style={{
-            padding: '16px 20px',
-            borderRadius: '0px',
-            border: '1px solid rgba(255,255,255,0.2)',
-            backgroundColor: 'transparent',
-            color: '#ffffff',
-            fontSize: '15px',
-            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-            fontWeight: '300',
-            outline: 'none'
-          }}
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={authPassword}
-          onChange={(e) => setAuthPassword(e.target.value)}
-          style={{
-            padding: '16px 20px',
-            borderRadius: '0px',
-            border: '1px solid rgba(255,255,255,0.2)',
-            backgroundColor: 'transparent',
-            color: '#ffffff',
-            fontSize: '15px',
-            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-            fontWeight: '300',
-            outline: 'none'
-          }}
-        />
-        {authError && (
-          <div style={{ 
-            color: 'rgba(255,68,68,0.8)', 
-            fontSize: '13px', 
-            textAlign: 'center',
-            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-            fontWeight: '300'
-          }}>
-            {authError}
-          </div>
-        )}
-        <button
-          onClick={authMode === 'login' ? handleEmailLogin : handleEmailRegister}
-          style={{
-            backgroundColor: 'transparent',
-            color: '#ffffff',
-            border: '1px solid rgba(255,255,255,0.3)',
-            borderRadius: '0px',
-            padding: '16px 24px',
-            fontSize: '16px',
-            fontWeight: '300',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-            marginTop: '10px',
-            transition: 'opacity 0.2s'
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.opacity = '0.7'}
-          onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
-        >
-          <span>{authMode === 'login' ? 'Login' : 'Daftar'}</span>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </button>
-        <button
-          onClick={() => setAuthMode(authMode === 'login' ? 'register' : 'login')}
-          style={{
-            backgroundColor: 'transparent',
-            border: 'none',
-            color: 'rgba(255,255,255,0.5)',
-            cursor: 'pointer',
-            fontSize: '14px',
-            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-            fontWeight: '300',
-            marginTop: '10px',
-            textDecoration: 'underline',
-            transition: 'color 0.2s'
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.color = '#ffffff'}
-          onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255,255,255,0.5)'}
-        >
-          {authMode === 'login' ? 'Belum punya akun? Daftar' : 'Sudah punya akun? Login'}
-        </button>
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'hidden',
+              zIndex: 20,
+              boxShadow: '0 25px 50px rgba(0,0,0,0.5)'
+            }}>
+              {/* Header Chat - font Aeonik-Regular */}
+              <div style={{
+                padding: '24px 28px',
+                backgroundColor: 'rgba(0,0,0,0.8)',
+                borderBottom: '1px solid rgba(255,255,255,0.1)',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '20px'
+                }}>
+                  <span style={{ 
+                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", 
+                    color: '#ffffff', 
+                    fontWeight: '300', 
+                    fontSize: '28px',
+                    letterSpacing: '-0.02em'
+                  }}>
+                    CHAT
+                  </span>
+                  <span style={{ 
+                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", 
+                    color: isAdmin ? '#c5e800' : 'rgba(255,255,255,0.5)', 
+                    fontSize: '16px',
+                    fontWeight: '300'
+                  }}>
+                    {user ? (isAdmin ? 'ADMIN' : user.displayName || user.email?.split('@')[0]) : 'BELUM LOGIN'}
+                  </span>
+                </div>
+                <div style={{ display: 'flex', gap: '20px' }}>
+                  {user && (
+                    <button
+                      onClick={handleLogout}
+                      style={{
+                        backgroundColor: 'transparent',
+                        border: 'none',
+                        color: 'rgba(255,255,255,0.7)',
+                        cursor: 'pointer',
+                        fontSize: '16px',
+                        fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                        padding: '4px 8px',
+                        transition: 'color 0.2s',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.color = '#ffffff'}
+                      onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255,255,255,0.7)'}
+                    >
+                      <span>LOGOUT</span>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </button>
+                  )}
+                  <button
+                    onClick={() => setIsChatVisible(false)}
+                    style={{
+                      backgroundColor: 'transparent',
+                      border: 'none',
+                      color: '#ffffff',
+                      cursor: 'pointer',
+                      fontSize: '28px',
+                      padding: '0 4px',
+                      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif"
+                    }}
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+
+              {/* Reply Indicator */}
+              {replyTo && (
+                <div style={{
+                  padding: '12px 24px',
+                  backgroundColor: 'rgba(255,255,255,0.05)',
+                  borderBottom: '1px solid rgba(255,255,255,0.1)',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  fontSize: '14px',
+                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                  color: 'rgba(255,255,255,0.6)'
+                }}>
+                  <span>
+                    REPLAY KE: <span style={{ color: '#c5e800' }}>{replyTo.name}</span> - "{replyTo.text.substring(0, 50)}..."
+                  </span>
+                  <button
+                    onClick={cancelReply}
+                    style={{
+                      backgroundColor: 'transparent',
+                      border: 'none',
+                      color: '#ffffff',
+                      cursor: 'pointer',
+                      fontSize: '20px'
+                    }}
+                  >
+                    ✕
+                  </button>
+                </div>
+              )}
+
+              {/* Messages Area */}
+              <div 
+                ref={chatContainerRef}
+                className="chat-messages"
+                style={{
+                  flex: 1,
+                  overflowY: 'auto',
+                  padding: '24px 28px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '20px'
+                }}
+              >
+                {messages.length === 0 && (
+                  <div style={{
+                    textAlign: 'center',
+                    color: 'rgba(255,255,255,0.4)',
+                    padding: '80px 20px',
+                    fontSize: '18px',
+                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                    fontWeight: '300'
+                  }}>
+                    BELUM ADA PESAN
+                  </div>
+                )}
+                
+                {messages.map((msg) => {
+                  const isOwnMessage = user?.uid === msg.userId;
+                  const isAdminMessage = msg.isAdmin === true;
+                  
+                  let bgColor = 'rgba(255,255,255,0.05)';
+                  let borderStyle = {};
+                  
+                  if (isAdminMessage) {
+                    bgColor = 'rgba(197,232,0,0.15)';
+                    borderStyle = { borderLeft: '3px solid #c5e800' };
+                  } else if (isOwnMessage) {
+                    bgColor = 'rgba(255,255,255,0.12)';
+                    borderStyle = { borderRight: '3px solid #c5e800' };
+                  }
+                  
+                  return (
+                    <div
+                      key={msg.id}
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: isOwnMessage ? 'flex-end' : 'flex-start',
+                        maxWidth: '90%',
+                        alignSelf: isOwnMessage ? 'flex-end' : 'flex-start'
+                      }}
+                    >
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                        marginBottom: '8px',
+                        fontSize: '13px',
+                        color: 'rgba(255,255,255,0.5)',
+                        fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif"
+                      }}>
+                        <span style={{ 
+                          color: isAdminMessage ? '#c5e800' : '#ffffff', 
+                          fontWeight: '300',
+                          fontSize: '15px'
+                        }}>
+                          {msg.userName}
+                          {isAdminMessage && ' [ADMIN]'}
+                        </span>
+                        <span>{msg.timestamp ? formatTime(msg.timestamp) : ''}</span>
+                        <span style={{ fontSize: '11px' }}>
+                          {msg.timestamp ? formatDate(msg.timestamp) : ''}
+                        </span>
+                        {/* Tombol Reply */}
+                        {user && !isOwnMessage && (
+                          <button
+                            onClick={() => handleReply(msg)}
+                            style={{
+                              backgroundColor: 'transparent',
+                              border: 'none',
+                              color: 'rgba(255,255,255,0.4)',
+                              cursor: 'pointer',
+                              fontSize: '12px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '5px',
+                              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif"
+                            }}
+                            onMouseEnter={(e) => e.currentTarget.style.color = '#c5e800'}
+                            onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255,255,255,0.4)'}
+                          >
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                            </svg>
+                            REPLY
+                          </button>
+                        )}
+                      </div>
+                      
+                      {/* Reply Preview */}
+                      {msg.replyTo && (
+                        <div style={{
+                          marginBottom: '8px',
+                          padding: '8px 12px',
+                          backgroundColor: 'rgba(255,255,255,0.03)',
+                          borderRadius: '0px',
+                          fontSize: '12px',
+                          color: 'rgba(255,255,255,0.4)',
+                          fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                          maxWidth: '100%',
+                          borderLeft: '2px solid rgba(197,232,0,0.3)'
+                        }}>
+                          REPLAY KE <span style={{ color: '#c5e800' }}>{msg.replyTo.userName}</span>: "{msg.replyTo.text}"
+                        </div>
+                      )}
+                      
+                      <div style={{
+                        backgroundColor: bgColor,
+                        color: '#ffffff',
+                        padding: '14px 20px',
+                        borderRadius: isOwnMessage ? '0px 0px 0px 8px' : '0px 8px 0px 0px',
+                        ...borderStyle,
+                        wordBreak: 'break-word',
+                        fontSize: '16px',
+                        fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                        fontWeight: '300',
+                        letterSpacing: '-0.01em',
+                        lineHeight: '1.5',
+                        width: '100%'
+                      }}>
+                        {msg.text}
+                      </div>
+                    </div>
+                  );
+                })}
+                <div ref={messagesEndRef} />
+              </div>
+
+              {/* Input Area - dengan North East Arrow */}
+              {user ? (
+                <div style={{
+                  padding: '20px 28px',
+                  borderTop: '1px solid rgba(255,255,255,0.1)',
+                  display: 'flex',
+                  gap: '16px',
+                  backgroundColor: 'rgba(0,0,0,0.5)'
+                }}>
+                  <input
+                    type="text"
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    placeholder="TULIS PESAN..."
+                    style={{
+                      flex: 1,
+                      backgroundColor: 'rgba(255,255,255,0.05)',
+                      border: '1px solid rgba(255,255,255,0.2)',
+                      borderRadius: '0px',
+                      padding: '14px 20px',
+                      color: '#ffffff',
+                      fontSize: '16px',
+                      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                      fontWeight: '300',
+                      outline: 'none'
+                    }}
+                  />
+                  <button
+                    onClick={sendMessage}
+                    disabled={!newMessage.trim()}
+                    style={{
+                      backgroundColor: 'transparent',
+                      border: '1px solid rgba(255,255,255,0.3)',
+                      borderRadius: '0px',
+                      padding: '10px 28px',
+                      color: '#ffffff',
+                      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                      fontSize: '16px',
+                      fontWeight: '300',
+                      cursor: newMessage.trim() ? 'pointer' : 'not-allowed',
+                      opacity: newMessage.trim() ? 1 : 0.3,
+                      transition: 'opacity 0.2s',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '12px'
+                    }}
+                  >
+                    <span>KIRIM</span>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </button>
+                </div>
+              ) : (
+                <div style={{
+                padding: '20px 28px',
+                  borderTop: '1px solid rgba(255,255,255,0.1)',
+                  display: 'flex',
+                  justifyContent: 'center'
+                }}>
+                  <button
+                    onClick={() => setShowAuthModal(true)}
+                    style={{
+                      backgroundColor: 'transparent',
+                      border: '1px solid rgba(255,255,255,0.3)',
+                      borderRadius: '0px',
+                      padding: '14px 32px',
+                      color: '#ffffff',
+                      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                      fontSize: '16px',
+                      fontWeight: '300',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '12px',
+                      transition: 'opacity 0.2s'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.opacity = '0.7'}
+                    onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+                  >
+                    <span>LOGIN UNTUK CHAT</span>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
-  </div>
-)}
 
+      {/* Auth Modal - dengan North East Arrow dan font Aeonik-Regular, warna features */}
+      {showAuthModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          backgroundColor: 'rgba(0,0,0,0.95)',
+          backdropFilter: 'blur(8px)',
+          zIndex: 20000,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          <div style={{
+            backgroundColor: '#000000',
+            border: '1px solid rgba(255,255,255,0.2)',
+            borderRadius: '0px',
+            padding: '60px',
+            width: '90%',
+            maxWidth: '550px',
+            color: '#ffffff',
+            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif"
+          }}>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '50px'
+            }}>
+              <div>
+                <div style={{ 
+                  fontSize: '70px', 
+                  fontWeight: '300', 
+                  margin: 0, 
+                  letterSpacing: '-0.02em',
+                  lineHeight: '1',
+                  color: authMode === 'login' ? '#c5e800' : '#ff69b4'
+                }}>
+                  {authMode === 'login' ? 'LOGIN' : 'DAFTAR'}
+                </div>
+                <div style={{ 
+                  fontSize: '18px', 
+                  fontWeight: '300', 
+                  marginTop: '12px',
+                  color: 'rgba(255,255,255,0.5)',
+                  letterSpacing: '-0.01em'
+                }}>
+                  {authMode === 'login' ? 'MASUK KE AKUN ANDA' : 'BUAT AKUN BARU'}
+                </div>
+              </div>
+              <button
+                onClick={() => setShowAuthModal(false)}
+                style={{
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                  color: '#ffffff',
+                  fontSize: '32px',
+                  cursor: 'pointer',
+                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif"
+                }}
+              >
+                ✕
+              </button>
+            </div>
 
+            {/* Tombol Login dengan North East Arrow dan warna features */}
+            <div style={{ display: 'flex', gap: '20px', marginBottom: '50px', flexDirection: 'column' }}>
+              <button
+                onClick={handleGoogleLogin}
+                style={{
+                  backgroundColor: 'transparent',
+                  color: '#ffffff',
+                  border: '1px solid rgba(255,255,255,0.3)',
+                  borderRadius: '0px',
+                  padding: '18px 28px',
+                  fontSize: '18px',
+                  fontWeight: '300',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = '#c5e800';
+                  e.currentTarget.style.color = '#c5e800';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)';
+                  e.currentTarget.style.color = '#ffffff';
+                }}
+              >
+                <span>GOOGLE</span>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+              <button
+                onClick={handleGithubLogin}
+                style={{
+                  backgroundColor: 'transparent',
+                  color: '#ffffff',
+                  border: '1px solid rgba(255,255,255,0.3)',
+                  borderRadius: '0px',
+                  padding: '18px 28px',
+                  fontSize: '18px',
+                  fontWeight: '300',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = '#ff69b4';
+                  e.currentTarget.style.color = '#ff69b4';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)';
+                  e.currentTarget.style.color = '#ffffff';
+                }}
+              >
+                <span>GITHUB</span>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+            </div>
 
+            <div style={{ 
+              textAlign: 'center', 
+              color: 'rgba(255,255,255,0.3)', 
+              margin: '30px 0',
+              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+              fontSize: '16px',
+              fontWeight: '300',
+              position: 'relative'
+            }}>
+              <span style={{ backgroundColor: '#000000', padding: '0 20px' }}>ATAU</span>
+              <div style={{
+                position: 'absolute',
+                top: '50%',
+                left: 0,
+                right: 0,
+                height: '1px',
+                backgroundColor: 'rgba(255,255,255,0.1)',
+                zIndex: -1
+              }} />
+            </div>
 
+            {/* Form Login/Register dengan North East Arrow dan warna features */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              {authMode === 'register' && (
+                <input
+                  type="text"
+                  placeholder="NAMA"
+                  value={authName}
+                  onChange={(e) => setAuthName(e.target.value)}
+                  style={{
+                    padding: '18px 24px',
+                    borderRadius: '0px',
+                    border: '1px solid rgba(255,255,255,0.2)',
+                    backgroundColor: 'transparent',
+                    color: '#ffffff',
+                    fontSize: '16px',
+                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                    fontWeight: '300',
+                    outline: 'none',
+                    transition: 'border-color 0.2s'
+                  }}
+                  onFocus={(e) => e.currentTarget.style.borderColor = '#c5e800'}
+                  onBlur={(e) => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)'}
+                />
+              )}
+              <input
+                type="email"
+                placeholder="EMAIL"
+                value={authEmail}
+                onChange={(e) => setAuthEmail(e.target.value)}
+                style={{
+                  padding: '18px 24px',
+                  borderRadius: '0px',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  backgroundColor: 'transparent',
+                  color: '#ffffff',
+                  fontSize: '16px',
+                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                  fontWeight: '300',
+                  outline: 'none',
+                  transition: 'border-color 0.2s'
+                }}
+                onFocus={(e) => e.currentTarget.style.borderColor = '#ff69b4'}
+                onBlur={(e) => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)'}
+              />
+              <input
+                type="password"
+                placeholder="PASSWORD"
+                value={authPassword}
+                onChange={(e) => setAuthPassword(e.target.value)}
+                style={{
+                  padding: '18px 24px',
+                  borderRadius: '0px',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  backgroundColor: 'transparent',
+                  color: '#ffffff',
+                  fontSize: '16px',
+                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                  fontWeight: '300',
+                  outline: 'none',
+                  transition: 'border-color 0.2s'
+                }}
+                onFocus={(e) => e.currentTarget.style.borderColor = '#c5e800'}
+                onBlur={(e) => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)'}
+              />
+              {authError && (
+                <div style={{ 
+                  color: '#ff4444', 
+                  fontSize: '14px', 
+                  textAlign: 'center',
+                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                  fontWeight: '300',
+                  padding: '10px',
+                  backgroundColor: 'rgba(255,68,68,0.1)'
+                }}>
+                  {authError}
+                </div>
+              )}
+              <button
+                onClick={authMode === 'login' ? handleEmailLogin : handleEmailRegister}
+                style={{
+                  backgroundColor: 'transparent',
+                  color: '#ffffff',
+                  border: '1px solid rgba(255,255,255,0.3)',
+                  borderRadius: '0px',
+                  padding: '18px 28px',
+                  fontSize: '18px',
+                  fontWeight: '300',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                  marginTop: '10px',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = '#c5e800';
+                  e.currentTarget.style.color = '#c5e800';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)';
+                  e.currentTarget.style.color = '#ffffff';
+                }}
+              >
+                <span>{authMode === 'login' ? 'LOGIN' : 'DAFTAR'}</span>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+              <button
+                onClick={() => setAuthMode(authMode === 'login' ? 'register' : 'login')}
+                style={{
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                  color: 'rgba(255,255,255,0.5)',
+                  cursor: 'pointer',
+                  fontSize: '16px',
+                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                  fontWeight: '300',
+                  marginTop: '10px',
+                  transition: 'color 0.2s'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.color = '#c5e800'}
+                onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255,255,255,0.5)'}
+              >
+                {authMode === 'login' ? 'BELUM PUNYA AKUN? DAFTAR' : 'SUDAH PUNYA AKUN? LOGIN'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
-
-
-      
       {/* Calendar Call Modal */}
       {showCalendarModal && (
         <div className="calendar-modal-overlay">
