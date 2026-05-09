@@ -3503,9 +3503,7 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </div>
 
-    // SHADOW PAGE - Halaman bayangan hitam dengan Chat di sisi kiri (PERBAIKAN)
 
-<div
   ref={shadowPageRef}
   style={{
     position: 'fixed',
@@ -3525,27 +3523,29 @@ export default function HomePage(): React.JSX.Element {
     overflow: 'hidden'
   }}
 >
-  {/* Konten Shadow Page - Let's Talk di kiri atas (tanpa garis bawah) */}
+  {/* Konten Shadow Page - Let's Talk di kiri atas */}
   <div style={{
     width: '100%',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'flex-start'
   }}>
-    {/* Teks Let's Talk di kiri atas - TANPA GARIS BAWAH */}
+    {/* Teks Let's Talk di kiri atas - SAMA SEPERTI MENURU */}
     <div>
       <h1 style={{
-        fontFamily: 'Aeonik-Regular, Helvetica, Arial, sans-serif',
+        fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
+        fontWeight: 'normal',
         fontSize: '120px',
-        fontWeight: '400',
         color: '#ffffff',
         letterSpacing: '-0.02em',
         margin: 0,
-        textTransform: 'uppercase'
+        textTransform: 'uppercase',
+        lineHeight: '1',
+        WebkitFontSmoothing: 'antialiased',
+        MozOsxFontSmoothing: 'grayscale'
       }}>
         Let's Talk
       </h1>
-      {/* GARIS BAWAH DIHAPUS */}
     </div>
     
     {/* Tombol toggle chat di kanan atas */}
@@ -3570,6 +3570,29 @@ export default function HomePage(): React.JSX.Element {
         Open Chat
       </button>
     )}
+    
+    {/* Tombol Close Chat jika chat terbuka */}
+    {isChatOpen && (
+      <button
+        onClick={() => setIsChatOpen(false)}
+        style={{
+          padding: '12px 24px',
+          backgroundColor: 'rgba(255,255,255,0.2)',
+          color: '#ffffff',
+          border: '1px solid rgba(255,255,255,0.3)',
+          borderRadius: '60px',
+          cursor: 'pointer',
+          fontFamily: 'Questrial, sans-serif',
+          fontSize: '16px',
+          fontWeight: '500',
+          transition: 'all 0.3s ease'
+        }}
+        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.3)'}
+        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.2)'}
+      >
+        Close Chat
+      </button>
+    )}
   </div>
 
   {/* Chat Container - di sisi kiri, bisa buka tutup */}
@@ -3578,7 +3601,7 @@ export default function HomePage(): React.JSX.Element {
     left: '80px',
     bottom: '200px',
     width: '450px',
-    maxHeight: isChatOpen ? '500px' : '0px',
+    height: isChatOpen ? '500px' : '0px',
     opacity: isChatOpen ? 1 : 0,
     overflow: 'hidden',
     transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -3586,7 +3609,9 @@ export default function HomePage(): React.JSX.Element {
     borderRadius: '24px',
     backdropFilter: 'blur(10px)',
     border: isChatOpen ? '1px solid rgba(255, 255, 255, 0.1)' : 'none',
-    boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)'
+    boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)',
+    display: 'flex',
+    flexDirection: 'column'
   }}>
     {isChatOpen && (
       <>
@@ -3597,7 +3622,8 @@ export default function HomePage(): React.JSX.Element {
           borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
           display: 'flex',
           justifyContent: 'space-between',
-          alignItems: 'center'
+          alignItems: 'center',
+          flexShrink: 0
         }}>
           <div style={{
             display: 'flex',
@@ -3620,35 +3646,40 @@ export default function HomePage(): React.JSX.Element {
               Live Chat {user ? `- ${user.displayName || user.email?.split('@')[0] || 'User'}` : ''}
             </span>
           </div>
-          <button
-            onClick={() => setIsChatOpen(false)}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: '#ffffff',
-              cursor: 'pointer',
-              fontSize: '20px',
-              opacity: 0.7,
-              transition: 'opacity 0.2s ease'
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
-            onMouseLeave={(e) => e.currentTarget.style.opacity = '0.7'}
-          >
-            ✕
-          </button>
+          {user && (
+            <button
+              onClick={handleSignOut}
+              style={{
+                padding: '6px 12px',
+                backgroundColor: 'rgba(255,255,255,0.15)',
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: '60px',
+                cursor: 'pointer',
+                fontFamily: 'Questrial, sans-serif',
+                fontSize: '12px',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.25)'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.15)'}
+            >
+              Logout
+            </button>
+          )}
         </div>
 
-        {/* Messages Container */}
+        {/* Messages Container - Bisa scroll manual */}
         <div
           ref={chatContainerRef}
           className="chat-messages-container"
           style={{
-            height: '380px',
+            flex: 1,
             overflowY: 'auto',
             padding: '20px',
             display: 'flex',
             flexDirection: 'column',
-            gap: '12px'
+            gap: '12px',
+            minHeight: 0
           }}
         >
           {!user ? (
@@ -3822,7 +3853,6 @@ export default function HomePage(): React.JSX.Element {
             </div>
           ) : (
             messages.map((msg) => {
-              // Safe check untuk userName
               const safeUserName = msg.userName || 'User';
               const firstChar = safeUserName.charAt(0).toUpperCase();
               
@@ -3905,13 +3935,14 @@ export default function HomePage(): React.JSX.Element {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Input Area */}
+        {/* Input Area - Bisa kirim chat */}
         {user && (
           <div style={{
             padding: '12px 16px',
             borderTop: '1px solid rgba(255, 255, 255, 0.1)',
             display: 'flex',
-            gap: '10px'
+            gap: '10px',
+            flexShrink: 0
           }}>
             <input
               type="text"
@@ -3955,7 +3986,7 @@ export default function HomePage(): React.JSX.Element {
     )}
   </div>
 
-  {/* Teks MENURU besar di kiri bawah - TIDAK TEBAL, WARNA PUTIH FULL */}
+  {/* Teks MENURU besar di kiri bawah - SAMA SEPERTI LET'S TALK */}
   <div style={{
     width: '100%',
     textAlign: 'left'
@@ -3964,13 +3995,13 @@ export default function HomePage(): React.JSX.Element {
       style={{
         fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
         fontWeight: 'normal',
-        fontSize: '300px',
+        fontSize: '120px',
         color: '#ffffff',
         textAlign: 'left',
         letterSpacing: '-0.02em',
         opacity: 1,
         textTransform: 'uppercase',
-        lineHeight: '0.8',
+        lineHeight: '1',
         whiteSpace: 'nowrap',
         WebkitFontSmoothing: 'antialiased',
         MozOsxFontSmoothing: 'grayscale',
