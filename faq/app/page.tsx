@@ -1,4 +1,4 @@
-// app/page.tsx (Halaman Utama) - dengan fitur Shadow Page hitam di footer
+// app/page.tsx (Halaman Utama) - dengan fitur chat realtime di shadow page
 
 'use client';
 
@@ -9,10 +9,46 @@ import { ScrollSmoother } from "gsap/ScrollSmoother";
 import { SplitText } from "gsap/SplitText";
 import Link from "next/link";
 import Image from "next/image";
+import { initializeApp } from "firebase/app";
+import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, updateDoc, getDoc, setDoc } from "firebase/firestore";
+import { getAuth, signInAnonymously, onAuthStateChanged, signOut } from "firebase/auth";
+
+// Firebase configuration
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_AUTH_DOMAIN",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_STORAGE_BUCKET",
+  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
 
 // Register GSAP plugins
 if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger, ScrollSmoother, SplitText);
+}
+
+// Interface untuk pesan
+interface ChatMessage {
+  id: string;
+  text: string;
+  userName: string;
+  userId: string;
+  timestamp: Date;
+  isAdmin: boolean;
+}
+
+// Interface untuk user online
+interface OnlineUser {
+  id: string;
+  userName: string;
+  isAdmin: boolean;
+  lastSeen: Date;
 }
 
 export default function HomePage(): React.JSX.Element {
@@ -40,7 +76,19 @@ export default function HomePage(): React.JSX.Element {
   const [showShadowPage, setShowShadowPage] = useState(false);
   const [isShadowTransitioning, setIsShadowTransitioning] = useState(false);
   const shadowPageRef = useRef<HTMLDivElement>(null);
-  const mainContentWrapperRef = useRef<HTMLDivElement>(null);
+  
+  // State untuk Chat
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [newMessage, setNewMessage] = useState("");
+  const [user, setUser] = useState<any>(null);
+  const [userName, setUserName] = useState("");
+  const [isUserNameSet, setIsUserNameSet] = useState(false);
+  const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
+  const [showChat, setShowChat] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [chatInputRef, setChatInputRef] = useState<HTMLInputElement | null>(null);
+  const chatMessagesRef = useRef<HTMLDivElement>(null);
+  const ADMIN_EMAILS = ["admin@menuru.com", "farid@menuru.com"]; // Daftar email admin
   
   const acceptBtnRef = useRef<HTMLButtonElement>(null);
   const declineBtnRef = useRef<HTMLButtonElement>(null);
@@ -136,6 +184,179 @@ export default function HomePage(): React.JSX.Element {
   const circleImg2_4Ref = useRef<HTMLDivElement>(null);
   const circleImg1_5Ref = useRef<HTMLDivElement>(null);
   const circleImg2_5Ref = useRef<HTMLDivElement>(null);
+
+  // Firebase Chat Functions
+  useEffect(() => {
+    // Sign in anonymously
+    signInAnonymously(auth).catch((error) => {
+      console.error("Error signing in:", error);
+    });
+
+    // Listen to auth state
+    const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+
+    return () => unsubscribeAuth();
+  }, []);
+
+  // Load messages from Firebase
+  useEffect(() => {
+    const messagesQuery = query(collection(db, "messages"), orderBy("timestamp", "asc"));
+    
+    const unsubscribeMessages = onSnapshot(messagesQuery, (snapshot) => {
+      const loadedMessages: ChatMessage[] = [];
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        loadedMessages.push({
+          id: doc.id,
+          text: data.text,
+          userName: data.userName,
+          userId: data.userId,
+          timestamp: data.timestamp?.toDate() || new Date(),
+          isAdmin: data.isAdmin || false,
+        });
+      });
+      setMessages(loadedMessages);
+      
+      // Scroll to bottom
+      setTimeout(() => {
+        if (chatMessagesRef.current) {
+          chatMessagesRef.current.scrollTop = chatMessagesRef.current.scrollHeight;
+        }
+      }, 100);
+    });
+
+    return () => unsubscribeMessages();
+  }, []);
+
+  // Track online users
+  useEffect(() => {
+    if (!user) return;
+
+    const userRef = doc(db, "onlineUsers", user.uid);
+    const onlineUsersQuery = query(collection(db, "onlineUsers"), orderBy("lastSeen", "desc"));
+
+    // Set user as online
+    const setUserOnline = async () => {
+      await setDoc(userRef, {
+        userId: user.uid,
+        userName: userName || "Anonymous",
+        isAdmin: isAdmin,
+        lastSeen: serverTimestamp(),
+      });
+    };
+
+    setUserOnline();
+
+    // Listen to online users
+    const unsubscribeOnline = onSnapshot(onlineUsersQuery, (snapshot) => {
+      const users: OnlineUser[] = [];
+      const now = new Date();
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        const lastSeen = data.lastSeen?.toDate() || new Date();
+        // Consider user offline if last seen > 2 minutes ago
+        const timeDiff = (now.getTime() - lastSeen.getTime()) / 1000 / 60;
+        if (timeDiff < 2) {
+          users.push({
+            id: doc.id,
+            userName: data.userName,
+            isAdmin: data.isAdmin,
+            lastSeen: lastSeen,
+          });
+        }
+      });
+      setOnlineUsers(users);
+    });
+
+    // Update last seen periodically
+    const interval = setInterval(async () => {
+      await updateDoc(userRef, {
+        lastSeen: serverTimestamp(),
+      });
+    }, 30000);
+
+    return () => {
+      clearInterval(interval);
+      unsubscribeOnline();
+      // Set user as offline when component unmounts
+      updateDoc(userRef, {
+        lastSeen: new Date(Date.now() - 5 * 60 * 1000), // 5 minutes ago
+      }).catch(() => {});
+    };
+  }, [user, userName, isAdmin]);
+
+  const sendMessage = async () => {
+    if (!newMessage.trim() || !user) return;
+    if (!userName && !isUserNameSet) {
+      alert("Please enter your name first");
+      return;
+    }
+
+    try {
+      await addDoc(collection(db, "messages"), {
+        text: newMessage,
+        userName: userName,
+        userId: user.uid,
+        timestamp: serverTimestamp(),
+        isAdmin: isAdmin,
+      });
+      setNewMessage("");
+      
+      // Focus back to input
+      if (chatInputRef) {
+        chatInputRef.focus();
+      }
+    } catch (error) {
+      console.error("Error sending message:", error);
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  };
+
+  const handleSetUserName = () => {
+    if (userName.trim()) {
+      setIsUserNameSet(true);
+      // Check if user is admin
+      setIsAdmin(ADMIN_EMAILS.includes(userName.toLowerCase()));
+    }
+  };
+
+  const handleLogout = async () => {
+    if (user) {
+      const userRef = doc(db, "onlineUsers", user.uid);
+      await updateDoc(userRef, {
+        lastSeen: new Date(Date.now() - 5 * 60 * 1000),
+      }).catch(() => {});
+    }
+    setIsUserNameSet(false);
+    setUserName("");
+    setIsAdmin(false);
+  };
+
+  const formatTime = (date: Date) => {
+    return date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+  };
+
+  const formatDate = (date: Date) => {
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    
+    if (date.toDateString() === today.toDateString()) {
+      return 'Today';
+    } else if (date.toDateString() === yesterday.toDateString()) {
+      return 'Yesterday';
+    } else {
+      return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+    }
+  };
 
   const carouselItems = [
     {
@@ -1033,6 +1254,7 @@ export default function HomePage(): React.JSX.Element {
           onComplete: () => {
             setShowShadowPage(false);
             setIsShadowTransitioning(false);
+            setShowChat(false); // Close chat when shadow page hides
           }
         });
       }
@@ -1907,6 +2129,17 @@ export default function HomePage(): React.JSX.Element {
           to { opacity: 1; }
         }
 
+        /* Chat animations */
+        @keyframes chatSlideIn {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes messageIn {
+          from { opacity: 0; transform: translateX(-20px); }
+          to { opacity: 1; transform: translateX(0); }
+        }
+
         .call-farid-text {
           font-family: 'HelveticaNowDisplay', 'Arial', sans-serif;
           font-weight: 400;
@@ -2353,6 +2586,254 @@ export default function HomePage(): React.JSX.Element {
         
         .trusted-section .carousel-container::-webkit-scrollbar-thumb {
           background: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Chat Component Styles */
+        .chat-container {
+          position: absolute;
+          bottom: 40px;
+          right: 40px;
+          width: 380px;
+          height: 600px;
+          background: white;
+          border-radius: 24px;
+          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
+          animation: chatSlideIn 0.3s ease;
+          z-index: 100;
+        }
+
+        .chat-header {
+          background: linear-gradient(135deg, #1a1a1a 0%, #000000 100%);
+          color: white;
+          padding: 20px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          cursor: pointer;
+        }
+
+        .chat-title {
+          font-size: 18px;
+          font-weight: 600;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .online-indicator {
+          width: 10px;
+          height: 10px;
+          background-color: #4caf50;
+          border-radius: 50%;
+          display: inline-block;
+          animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+          0% { opacity: 1; transform: scale(1); }
+          50% { opacity: 0.5; transform: scale(1.2); }
+          100% { opacity: 1; transform: scale(1); }
+        }
+
+        .close-chat {
+          cursor: pointer;
+          font-size: 24px;
+          line-height: 1;
+          transition: opacity 0.2s;
+        }
+
+        .close-chat:hover {
+          opacity: 0.7;
+        }
+
+        .chat-messages {
+          flex: 1;
+          overflow-y: auto;
+          padding: 20px;
+          background: #f5f5f5;
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+        }
+
+        .message {
+          max-width: 80%;
+          animation: messageIn 0.2s ease;
+        }
+
+        .message-user {
+          align-self: flex-start;
+        }
+
+        .message-admin {
+          align-self: flex-end;
+        }
+
+        .message-other {
+          align-self: flex-start;
+        }
+
+        .message-bubble {
+          padding: 10px 14px;
+          border-radius: 18px;
+          position: relative;
+          word-wrap: break-word;
+        }
+
+        .message-user .message-bubble {
+          background: white;
+          border: 1px solid #e0e0e0;
+          border-bottom-left-radius: 4px;
+        }
+
+        .message-admin .message-bubble {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: white;
+          border-bottom-right-radius: 4px;
+        }
+
+        .message-other .message-bubble {
+          background: white;
+          border: 1px solid #e0e0e0;
+          border-bottom-left-radius: 4px;
+        }
+
+        .message-name {
+          font-size: 11px;
+          font-weight: 600;
+          margin-bottom: 4px;
+          color: #666;
+        }
+
+        .message-admin .message-name {
+          color: rgba(255, 255, 255, 0.8);
+        }
+
+        .message-text {
+          font-size: 14px;
+          line-height: 1.4;
+        }
+
+        .message-time {
+          font-size: 10px;
+          margin-top: 4px;
+          opacity: 0.6;
+        }
+
+        .chat-input-area {
+          padding: 16px;
+          background: white;
+          border-top: 1px solid #e0e0e0;
+          display: flex;
+          gap: 12px;
+        }
+
+        .chat-input {
+          flex: 1;
+          padding: 10px 14px;
+          border: 1px solid #e0e0e0;
+          border-radius: 24px;
+          font-size: 14px;
+          outline: none;
+          transition: border-color 0.2s;
+        }
+
+        .chat-input:focus {
+          border-color: #667eea;
+        }
+
+        .send-button {
+          padding: 8px 20px;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: white;
+          border: none;
+          border-radius: 24px;
+          cursor: pointer;
+          font-size: 14px;
+          font-weight: 600;
+          transition: transform 0.2s, opacity 0.2s;
+        }
+
+        .send-button:hover {
+          transform: scale(1.05);
+          opacity: 0.9;
+        }
+
+        .name-input-container {
+          padding: 20px;
+          background: white;
+          border-top: 1px solid #e0e0e0;
+        }
+
+        .name-input {
+          width: 100%;
+          padding: 10px 14px;
+          border: 1px solid #e0e0e0;
+          border-radius: 24px;
+          font-size: 14px;
+          margin-bottom: 10px;
+          outline: none;
+        }
+
+        .set-name-button {
+          width: 100%;
+          padding: 10px;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: white;
+          border: none;
+          border-radius: 24px;
+          cursor: pointer;
+          font-size: 14px;
+          font-weight: 600;
+        }
+
+        .online-users {
+          padding: 12px 16px;
+          background: #f9f9f9;
+          border-bottom: 1px solid #e0e0e0;
+          font-size: 12px;
+          color: #666;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          flex-wrap: wrap;
+        }
+
+        .online-user {
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          background: white;
+          padding: 4px 10px;
+          border-radius: 20px;
+          font-size: 11px;
+        }
+
+        .admin-badge {
+          background: #764ba2;
+          color: white;
+          padding: 2px 6px;
+          border-radius: 12px;
+          font-size: 9px;
+          margin-left: 4px;
+        }
+
+        .logout-button {
+          background: rgba(255, 255, 255, 0.2);
+          border: none;
+          color: white;
+          padding: 4px 10px;
+          border-radius: 20px;
+          cursor: pointer;
+          font-size: 12px;
+          transition: background 0.2s;
+        }
+
+        .logout-button:hover {
+          background: rgba(255, 255, 255, 0.3);
         }
       `}</style>
       
@@ -3316,7 +3797,7 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </div>
 
-      {/* SHADOW PAGE - Halaman bayangan hitam full tanpa design */}
+      {/* SHADOW PAGE - Halaman bayangan hitam dengan chat */}
       <div
         ref={shadowPageRef}
         style={{
@@ -3331,8 +3812,182 @@ export default function HomePage(): React.JSX.Element {
           pointerEvents: showShadowPage ? 'auto' : 'none',
         }}
       >
-        {/* Konten shadow page bisa ditambahkan di sini jika diperlukan */}
-        {/* Biarkan kosong untuk halaman bayangan hitam penuh tanpa design */}
+        {/* Konten Shadow Page - Let's Talk dan Chat */}
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: '100vh',
+          padding: '60px',
+          boxSizing: 'border-box',
+          fontFamily: 'Questrial, sans-serif'
+        }}>
+          {/* Teks "Let's Talk" dari kiri atas */}
+          <div style={{
+            position: 'absolute',
+            top: '80px',
+            left: '80px',
+          }}>
+            <h1 style={{
+              fontSize: '80px',
+              color: '#ffffff',
+              fontFamily: 'Questrial, sans-serif',
+              fontWeight: '400',
+              letterSpacing: '-0.02em',
+              margin: 0,
+              animation: 'modalFadeIn 0.5s ease'
+            }}>
+              Let's Talk
+            </h1>
+            <div style={{
+              width: '100px',
+              height: '2px',
+              backgroundColor: '#ffffff',
+              marginTop: '20px',
+              animation: 'modalFadeIn 0.6s ease'
+            }} />
+          </div>
+
+          {/* Tombol Chat */}
+          <button
+            onClick={() => setShowChat(!showChat)}
+            style={{
+              position: 'absolute',
+              bottom: '40px',
+              right: '40px',
+              padding: '16px 32px',
+              backgroundColor: showChat ? '#ffffff' : 'transparent',
+              color: showChat ? '#000000' : '#ffffff',
+              border: showChat ? 'none' : '2px solid #ffffff',
+              borderRadius: '60px',
+              cursor: 'pointer',
+              fontSize: '18px',
+              fontWeight: '600',
+              fontFamily: 'Questrial, sans-serif',
+              transition: 'all 0.3s ease',
+              zIndex: 101,
+              backdropFilter: showChat ? 'none' : 'blur(10px)',
+            }}
+            onMouseEnter={(e) => {
+              if (!showChat) {
+                e.currentTarget.style.backgroundColor = '#ffffff';
+                e.currentTarget.style.color = '#000000';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!showChat) {
+                e.currentTarget.style.backgroundColor = 'transparent';
+                e.currentTarget.style.color = '#ffffff';
+              }
+            }}
+          >
+            {showChat ? 'Close Chat 💬' : 'Open Chat 💬'}
+          </button>
+
+          {/* Chat Component */}
+          {showChat && (
+            <div className="chat-container" style={{
+              position: 'absolute',
+              bottom: '100px',
+              right: '40px',
+            }}>
+              <div className="chat-header" onClick={() => setShowChat(false)}>
+                <div className="chat-title">
+                  <span className="online-indicator"></span>
+                  Live Chat Support
+                </div>
+                <div className="close-chat">×</div>
+              </div>
+              
+              {!isUserNameSet ? (
+                <div className="name-input-container">
+                  <input
+                    type="text"
+                    placeholder="Enter your name..."
+                    value={userName}
+                    onChange={(e) => setUserName(e.target.value)}
+                    className="name-input"
+                    onKeyPress={(e) => e.key === 'Enter' && handleSetUserName()}
+                  />
+                  <button onClick={handleSetUserName} className="set-name-button">
+                    Start Chatting
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <div className="online-users">
+                    <span>👥 Online ({onlineUsers.length}):</span>
+                    {onlineUsers.map((user, idx) => (
+                      <span key={idx} className="online-user">
+                        {user.userName}
+                        {user.isAdmin && <span className="admin-badge">Admin</span>}
+                      </span>
+                    ))}
+                    <button onClick={handleLogout} className="logout-button">
+                      Logout
+                    </button>
+                  </div>
+                  
+                  <div className="chat-messages" ref={chatMessagesRef}>
+                    {messages.map((msg) => {
+                      const isCurrentUser = msg.userId === user?.uid;
+                      const isMessageAdmin = msg.isAdmin;
+                      let messageClass = "message message-other";
+                      if (isCurrentUser) messageClass = "message message-user";
+                      else if (isMessageAdmin) messageClass = "message message-admin";
+                      
+                      // Group messages by date
+                      const showDate = messages.findIndex(m => m.id === msg.id) === 0 || 
+                        (messages[messages.findIndex(m => m.id === msg.id) - 1] && 
+                         formatDate(messages[messages.findIndex(m => m.id === msg.id) - 1].timestamp) !== formatDate(msg.timestamp));
+                      
+                      return (
+                        <div key={msg.id}>
+                          {showDate && (
+                            <div style={{
+                              textAlign: 'center',
+                              fontSize: '11px',
+                              color: '#999',
+                              margin: '10px 0',
+                            }}>
+                              {formatDate(msg.timestamp)}
+                            </div>
+                          )}
+                          <div className={messageClass}>
+                            <div className="message-bubble">
+                              <div className="message-name">
+                                {msg.userName}
+                                {msg.isAdmin && " ⭐"}
+                              </div>
+                              <div className="message-text">{msg.text}</div>
+                              <div className="message-time">{formatTime(msg.timestamp)}</div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  
+                  <div className="chat-input-area">
+                    <input
+                      type="text"
+                      placeholder="Type your message..."
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      onKeyPress={handleKeyPress}
+                      className="chat-input"
+                      ref={(input) => setChatInputRef(input)}
+                    />
+                    <button onClick={sendMessage} className="send-button">
+                      Send
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Calendar Call Modal */}
