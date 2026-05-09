@@ -3582,531 +3582,644 @@ export default function HomePage(): React.JSX.Element {
       </div>
 
       {/* SHADOW PAGE - Halaman bayangan hitam dengan Chat */}
-      <div
-        ref={shadowPageRef}
+
+<div
+  ref={shadowPageRef}
+  style={{
+    position: 'fixed',
+    bottom: 0,
+    left: 0,
+    width: '100%',
+    height: '100vh',
+    backgroundColor: '#000000',
+    zIndex: 9998,
+    transform: 'translateY(100%)',
+    pointerEvents: showShadowPage ? 'auto' : 'none',
+    overflow: 'hidden'
+  }}
+>
+  <div style={{
+    width: '100%',
+    height: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    position: 'relative'
+  }}>
+    {/* Teks MENURU besar di bawah sisi kiri - warna putih, tidak tebal, font Aeonik-Regular */}
+    <div style={{
+      position: 'absolute',
+      bottom: '80px',
+      left: '80px',
+      width: 'auto',
+      textAlign: 'left',
+      pointerEvents: 'none',
+      zIndex: 1
+    }}>
+      <span style={{
+        fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+        fontWeight: '300',
+        fontSize: '300px',
+        color: '#ffffff',
+        letterSpacing: '-0.02em',
+        textTransform: 'uppercase',
+        lineHeight: '0.9',
+        opacity: 0.9
+      }}>
+        MENURU
+      </span>
+    </div>
+
+    {/* Tombol untuk toggle chat visibility - dengan North East Arrow */}
+    {!isChatVisible && (
+      <button
+        onClick={() => setIsChatVisible(true)}
         style={{
-          position: 'fixed',
-          bottom: 0,
-          left: 0,
-          width: '100%',
-          height: '100vh',
-          backgroundColor: '#000000',
-          zIndex: 9998,
-          transform: 'translateY(100%)',
-          pointerEvents: showShadowPage ? 'auto' : 'none',
-          overflow: 'hidden'
-        }}
-      >
-        <div style={{
-          width: '100%',
-          height: '100%',
+          position: 'absolute',
+          bottom: '120px',
+          right: '80px',
+          backgroundColor: 'transparent',
+          border: 'none',
+          cursor: 'pointer',
           display: 'flex',
-          flexDirection: 'column',
-          position: 'relative'
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '12px',
+          zIndex: 10,
+          transition: 'opacity 0.3s ease',
+          fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+          fontSize: '20px',
+          color: '#ffffff',
+          letterSpacing: '-0.02em'
+        }}
+        onMouseEnter={(e) => e.currentTarget.style.opacity = '0.7'}
+        onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+      >
+        <span>Buka Chat</span>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </button>
+    )}
+
+    {/* Teks Let's Talk di kiri atas - font Aeonik-Regular, besar, tanpa emoji */}
+    <div style={{
+      position: 'absolute',
+      top: '80px',
+      left: '80px',
+      color: '#ffffff',
+      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+      zIndex: 5
+    }}>
+      <div style={{
+        fontSize: '150px',
+        fontWeight: '300',
+        margin: 0,
+        letterSpacing: '-0.02em',
+        lineHeight: '1'
+      }}>
+        Let's
+      </div>
+      <div style={{
+        fontSize: '150px',
+        fontWeight: '300',
+        margin: 0,
+        letterSpacing: '-0.02em',
+        lineHeight: '1'
+      }}>
+        Talk
+      </div>
+    </div>
+
+    {/* Chat Container */}
+    {isChatVisible && (
+      <div style={{
+        position: 'absolute',
+        bottom: '80px',
+        right: '80px',
+        width: '500px',
+        height: '600px',
+        backgroundColor: 'rgba(0,0,0,0.9)',
+        backdropFilter: 'blur(10px)',
+        borderRadius: '0px',
+        border: '1px solid rgba(255,255,255,0.2)',
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden',
+        zIndex: 20,
+        boxShadow: '0 25px 50px rgba(0,0,0,0.5)'
+      }}>
+        {/* Header Chat - font Aeonik-Regular */}
+        <div style={{
+          padding: '20px 24px',
+          backgroundColor: 'rgba(0,0,0,0.8)',
+          borderBottom: '1px solid rgba(255,255,255,0.1)',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center'
         }}>
-          {/* Tombol untuk toggle chat visibility */}
-          {!isChatVisible && (
-            <button
-              onClick={() => setIsChatVisible(true)}
-              style={{
-                position: 'absolute',
-                bottom: '30px',
-                right: '30px',
-                width: '60px',
-                height: '60px',
-                borderRadius: '50%',
-                backgroundColor: '#c5e800',
-                border: 'none',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                zIndex: 10,
-                transition: 'transform 0.3s ease',
-                boxShadow: '0 4px 20px rgba(0,0,0,0.3)'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-              onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-            >
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2">
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-              </svg>
-            </button>
-          )}
-
-          {/* Chat Container */}
-          {isChatVisible && (
-            <div style={{
-              position: 'absolute',
-              bottom: '20px',
-              right: '20px',
-              width: '400px',
-              height: '600px',
-              backgroundColor: 'rgba(0,0,0,0.95)',
-              backdropFilter: 'blur(10px)',
-              borderRadius: '24px',
-              border: '1px solid rgba(255,255,255,0.2)',
-              display: 'flex',
-              flexDirection: 'column',
-              overflow: 'hidden',
-              zIndex: 20,
-              boxShadow: '0 25px 50px rgba(0,0,0,0.5)'
-            }}>
-              {/* Header Chat */}
-              <div style={{
-                padding: '16px 20px',
-                backgroundColor: 'rgba(0,0,0,0.8)',
-                borderBottom: '1px solid rgba(255,255,255,0.1)',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center'
-              }}>
-                <div>
-                  <span style={{ color: '#c5e800', fontWeight: 'bold', fontSize: '18px' }}>💬 Let's Talk</span>
-                  <span style={{ color: '#666', fontSize: '12px', marginLeft: '10px' }}>
-                    {user ? `👤 ${user.displayName || user.email?.split('@')[0]}` : 'Belum login'}
-                  </span>
-                </div>
-                <div style={{ display: 'flex', gap: '10px' }}>
-                  {user && (
-                    <button
-                      onClick={handleLogout}
-                      style={{
-                        backgroundColor: 'transparent',
-                        border: 'none',
-                        color: '#ff4444',
-                        cursor: 'pointer',
-                        fontSize: '14px',
-                        padding: '4px 8px',
-                        borderRadius: '8px',
-                        transition: 'background 0.2s'
-                      }}
-                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,68,68,0.1)'}
-                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                    >
-                      Logout
-                    </button>
-                  )}
-                  <button
-                    onClick={() => setIsChatVisible(false)}
-                    style={{
-                      backgroundColor: 'transparent',
-                      border: 'none',
-                      color: '#fff',
-                      cursor: 'pointer',
-                      fontSize: '20px',
-                      padding: '0 4px'
-                    }}
-                  >
-                    ✕
-                  </button>
-                </div>
-              </div>
-
-              {/* Messages Area */}
-              <div 
-                ref={chatContainerRef}
-                className="chat-messages"
-                style={{
-                  flex: 1,
-                  overflowY: 'auto',
-                  padding: '16px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '12px'
-                }}
-              >
-                {messages.length === 0 && (
-                  <div style={{
-                    textAlign: 'center',
-                    color: '#666',
-                    padding: '40px 20px',
-                    fontSize: '14px'
-                  }}>
-                    Belum ada pesan. Jadilah yang pertama!
-                  </div>
-                )}
-                
-                {messages.map((msg) => {
-                  const isOwnMessage = user?.uid === msg.userId;
-                  return (
-                    <div
-                      key={msg.id}
-                      style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: isOwnMessage ? 'flex-end' : 'flex-start',
-                        maxWidth: '80%',
-                        alignSelf: isOwnMessage ? 'flex-end' : 'flex-start'
-                      }}
-                    >
-                      <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        marginBottom: '4px',
-                        fontSize: '11px',
-                        color: '#888'
-                      }}>
-                        <span style={{ fontWeight: 'bold', color: '#c5e800' }}>
-                          {msg.userName}
-                        </span>
-                        <span>
-                          {msg.timestamp ? formatTime(msg.timestamp) : ''}
-                        </span>
-                        <span style={{ fontSize: '10px' }}>
-                          {msg.timestamp ? formatDate(msg.timestamp) : ''}
-                        </span>
-                      </div>
-                      <div style={{
-                        backgroundColor: isOwnMessage ? '#c5e800' : 'rgba(255,255,255,0.1)',
-                        color: isOwnMessage ? '#000000' : '#ffffff',
-                        padding: '10px 14px',
-                        borderRadius: isOwnMessage ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
-                        wordBreak: 'break-word',
-                        fontSize: '14px',
-                        maxWidth: '100%'
-                      }}>
-                        {msg.text}
-                      </div>
-                    </div>
-                  );
-                })}
-                <div ref={messagesEndRef} />
-              </div>
-
-              {/* Input Area */}
-              {user ? (
-                <div style={{
-                  padding: '16px',
-                  borderTop: '1px solid rgba(255,255,255,0.1)',
-                  display: 'flex',
-                  gap: '12px',
-                  backgroundColor: 'rgba(0,0,0,0.5)'
-                }}>
-                  <input
-                    type="text"
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                    placeholder="Tulis pesan..."
-                    style={{
-                      flex: 1,
-                      backgroundColor: 'rgba(255,255,255,0.1)',
-                      border: 'none',
-                      borderRadius: '20px',
-                      padding: '12px 16px',
-                      color: '#fff',
-                      fontSize: '14px',
-                      outline: 'none'
-                    }}
-                  />
-                  <button
-                    onClick={sendMessage}
-                    disabled={!newMessage.trim()}
-                    style={{
-                      backgroundColor: '#c5e800',
-                      border: 'none',
-                      borderRadius: '20px',
-                      padding: '8px 20px',
-                      color: '#000',
-                      fontWeight: 'bold',
-                      cursor: newMessage.trim() ? 'pointer' : 'not-allowed',
-                      opacity: newMessage.trim() ? 1 : 0.5,
-                      transition: 'opacity 0.2s'
-                    }}
-                  >
-                    Kirim
-                  </button>
-                </div>
-              ) : (
-                <div style={{
-                  padding: '16px',
-                  borderTop: '1px solid rgba(255,255,255,0.1)',
-                  display: 'flex',
-                  justifyContent: 'center',
-                  gap: '12px',
-                  flexWrap: 'wrap'
-                }}>
-                  <button
-                    onClick={() => setShowAuthModal(true)}
-                    style={{
-                      backgroundColor: '#c5e800',
-                      border: 'none',
-                      borderRadius: '20px',
-                      padding: '10px 20px',
-                      color: '#000',
-                      fontWeight: 'bold',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    Login untuk Chat
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Teks MENURU besar di tengah shadow page */}
           <div style={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: '100%',
-            textAlign: 'center',
-            pointerEvents: 'none'
+            display: 'flex',
+            alignItems: 'center',
+            gap: '16px'
           }}>
-            <span style={{
-              fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
-              fontWeight: '300',
-              fontSize: '300px',
-              color: '#ffffff',
-              letterSpacing: '-0.02em',
-              opacity: 0.3,
-              textTransform: 'uppercase',
-              whiteSpace: 'nowrap'
-            }}>
-              MENURU
-            </span>
-          </div>
-
-          {/* Teks Let's Talk di kiri atas */}
-          <div style={{
-            position: 'absolute',
-            top: '80px',
-            left: '80px',
-            color: '#ffffff',
-            fontFamily: "'Questrial', sans-serif",
-            zIndex: 5
-          }}>
-            <h1 style={{
-              fontSize: '80px',
-              fontWeight: '400',
-              margin: 0,
+            <span style={{ 
+              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", 
+              color: '#ffffff', 
+              fontWeight: '300', 
+              fontSize: '24px',
               letterSpacing: '-0.02em'
             }}>
               Let's Talk
-            </h1>
-            <div style={{
-              marginTop: '20px'
+            </span>
+            <span style={{ 
+              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", 
+              color: 'rgba(255,255,255,0.5)', 
+              fontSize: '14px',
+              fontWeight: '300'
             }}>
+              {user ? `${user.displayName || user.email?.split('@')[0]}` : 'Belum login'}
+            </span>
+          </div>
+          <div style={{ display: 'flex', gap: '16px' }}>
+            {user && (
               <button
-                onClick={() => setIsChatVisible(!isChatVisible)}
+                onClick={handleLogout}
                 style={{
-                  backgroundColor: '#c5e800',
+                  backgroundColor: 'transparent',
                   border: 'none',
-                  borderRadius: '60px',
-                  padding: '14px 32px',
-                  fontSize: '18px',
-                  fontWeight: '600',
-                  color: '#000000',
+                  color: 'rgba(255,255,255,0.7)',
                   cursor: 'pointer',
-                  fontFamily: "'Questrial', sans-serif",
-                  transition: 'transform 0.2s ease',
-                  display: 'inline-flex',
+                  fontSize: '14px',
+                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                  padding: '4px 8px',
+                  transition: 'color 0.2s',
+                  display: 'flex',
                   alignItems: 'center',
-                  gap: '10px'
+                  gap: '8px'
                 }}
-                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
-                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                onMouseEnter={(e) => e.currentTarget.style.color = '#ffffff'}
+                onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255,255,255,0.7)'}
               >
-                {isChatVisible ? 'Tutup Chat' : 'Buka Chat'}
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                <span>Logout</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </button>
-            </div>
+            )}
+            <button
+              onClick={() => setIsChatVisible(false)}
+              style={{
+                backgroundColor: 'transparent',
+                border: 'none',
+                color: '#ffffff',
+                cursor: 'pointer',
+                fontSize: '24px',
+                padding: '0 4px',
+                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif"
+              }}
+            >
+              ✕
+            </button>
           </div>
         </div>
+
+        {/* Messages Area */}
+        <div 
+          ref={chatContainerRef}
+          className="chat-messages"
+          style={{
+            flex: 1,
+            overflowY: 'auto',
+            padding: '20px 24px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '16px'
+          }}
+        >
+          {messages.length === 0 && (
+            <div style={{
+              textAlign: 'center',
+              color: 'rgba(255,255,255,0.4)',
+              padding: '60px 20px',
+              fontSize: '16px',
+              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+              fontWeight: '300'
+            }}>
+              Belum ada pesan
+            </div>
+          )}
+          
+          {messages.map((msg) => {
+            const isOwnMessage = user?.uid === msg.userId;
+            return (
+              <div
+                key={msg.id}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: isOwnMessage ? 'flex-end' : 'flex-start',
+                  maxWidth: '85%',
+                  alignSelf: isOwnMessage ? 'flex-end' : 'flex-start'
+                }}
+              >
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  marginBottom: '6px',
+                  fontSize: '11px',
+                  color: 'rgba(255,255,255,0.5)',
+                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif"
+                }}>
+                  <span style={{ color: '#ffffff', fontWeight: '300' }}>
+                    {msg.userName}
+                  </span>
+                  <span>
+                    {msg.timestamp ? formatTime(msg.timestamp) : ''}
+                  </span>
+                  <span style={{ fontSize: '10px' }}>
+                    {msg.timestamp ? formatDate(msg.timestamp) : ''}
+                  </span>
+                </div>
+                <div style={{
+                  backgroundColor: isOwnMessage ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.05)',
+                  color: '#ffffff',
+                  padding: '12px 18px',
+                  borderRadius: isOwnMessage ? '0px 0px 0px 8px' : '0px 8px 0px 0px',
+                  borderLeft: isOwnMessage ? 'none' : '2px solid #ffffff',
+                  borderRight: isOwnMessage ? '2px solid #ffffff' : 'none',
+                  wordBreak: 'break-word',
+                  fontSize: '14px',
+                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                  fontWeight: '300',
+                  letterSpacing: '-0.01em',
+                  lineHeight: '1.4'
+                }}>
+                  {msg.text}
+                </div>
+              </div>
+            );
+          })}
+          <div ref={messagesEndRef} />
+        </div>
+
+        {/* Input Area - dengan North East Arrow */}
+        {user ? (
+          <div style={{
+            padding: '16px 24px',
+            borderTop: '1px solid rgba(255,255,255,0.1)',
+            display: 'flex',
+            gap: '12px',
+            backgroundColor: 'rgba(0,0,0,0.5)'
+          }}>
+            <input
+              type="text"
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="Tulis pesan"
+              style={{
+                flex: 1,
+                backgroundColor: 'rgba(255,255,255,0.05)',
+                border: '1px solid rgba(255,255,255,0.2)',
+                borderRadius: '0px',
+                padding: '12px 16px',
+                color: '#ffffff',
+                fontSize: '14px',
+                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                fontWeight: '300',
+                outline: 'none'
+              }}
+            />
+            <button
+              onClick={sendMessage}
+              disabled={!newMessage.trim()}
+              style={{
+                backgroundColor: 'transparent',
+                border: '1px solid rgba(255,255,255,0.3)',
+                borderRadius: '0px',
+                padding: '8px 20px',
+                color: '#ffffff',
+                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                fontSize: '14px',
+                fontWeight: '300',
+                cursor: newMessage.trim() ? 'pointer' : 'not-allowed',
+                opacity: newMessage.trim() ? 1 : 0.3,
+                transition: 'opacity 0.2s',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}
+            >
+              <span>Kirim</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+          </div>
+        ) : (
+          <div style={{
+            padding: '20px 24px',
+            borderTop: '1px solid rgba(255,255,255,0.1)',
+            display: 'flex',
+            justifyContent: 'center'
+          }}>
+            <button
+              onClick={() => setShowAuthModal(true)}
+              style={{
+                backgroundColor: 'transparent',
+                border: '1px solid rgba(255,255,255,0.3)',
+                borderRadius: '0px',
+                padding: '12px 28px',
+                color: '#ffffff',
+                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                fontSize: '16px',
+                fontWeight: '300',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                transition: 'opacity 0.2s'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.opacity = '0.7'}
+              onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+            >
+              <span>Login untuk Chat</span>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+          </div>
+        )}
+      </div>
+    )}
+  </div>
+</div>
+
+{/* Auth Modal - dengan North East Arrow dan font Aeonik-Regular */}
+{showAuthModal && (
+  <div style={{
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'rgba(0,0,0,0.95)',
+    backdropFilter: 'blur(8px)',
+    zIndex: 20000,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
+  }}>
+    <div style={{
+      backgroundColor: '#000000',
+      border: '1px solid rgba(255,255,255,0.2)',
+      borderRadius: '0px',
+      padding: '60px',
+      width: '90%',
+      maxWidth: '500px',
+      color: '#ffffff',
+      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif"
+    }}>
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: '50px'
+      }}>
+        <div>
+          <div style={{ 
+            fontSize: '60px', 
+            fontWeight: '300', 
+            margin: 0, 
+            letterSpacing: '-0.02em',
+            lineHeight: '1'
+          }}>
+            {authMode === 'login' ? 'Login' : 'Daftar'}
+          </div>
+          <div style={{ 
+            fontSize: '16px', 
+            fontWeight: '300', 
+            marginTop: '8px',
+            color: 'rgba(255,255,255,0.5)',
+            letterSpacing: '-0.01em'
+          }}>
+            {authMode === 'login' ? 'Masuk ke akun Anda' : 'Buat akun baru'}
+          </div>
+        </div>
+        <button
+          onClick={() => setShowAuthModal(false)}
+          style={{
+            backgroundColor: 'transparent',
+            border: 'none',
+            color: '#ffffff',
+            fontSize: '30px',
+            cursor: 'pointer',
+            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif"
+          }}
+        >
+          ✕
+        </button>
       </div>
 
-      {/* Auth Modal */}
-      {showAuthModal && (
+      {/* Tombol Login dengan North East Arrow */}
+      <div style={{ display: 'flex', gap: '16px', marginBottom: '40px', flexDirection: 'column' }}>
+        <button
+          onClick={handleGoogleLogin}
+          style={{
+            backgroundColor: 'transparent',
+            color: '#ffffff',
+            border: '1px solid rgba(255,255,255,0.3)',
+            borderRadius: '0px',
+            padding: '16px 24px',
+            fontSize: '16px',
+            fontWeight: '300',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+            transition: 'opacity 0.2s'
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.opacity = '0.7'}
+          onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+        >
+          <span>Google</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
+        <button
+          onClick={handleGithubLogin}
+          style={{
+            backgroundColor: 'transparent',
+            color: '#ffffff',
+            border: '1px solid rgba(255,255,255,0.3)',
+            borderRadius: '0px',
+            padding: '16px 24px',
+            fontSize: '16px',
+            fontWeight: '300',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+            transition: 'opacity 0.2s'
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.opacity = '0.7'}
+          onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+        >
+          <span>GitHub</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
+      </div>
+
+      <div style={{ 
+        textAlign: 'center', 
+        color: 'rgba(255,255,255,0.3)', 
+        margin: '30px 0',
+        fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+        fontSize: '14px',
+        fontWeight: '300',
+        position: 'relative'
+      }}>
+        <span style={{ backgroundColor: '#000000', padding: '0 16px' }}>atau</span>
         <div style={{
-          position: 'fixed',
-          top: 0,
+          position: 'absolute',
+          top: '50%',
           left: 0,
-          width: '100%',
-          height: '100%',
-          backgroundColor: 'rgba(0,0,0,0.8)',
-          backdropFilter: 'blur(8px)',
-          zIndex: 20000,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}>
-          <div style={{
-            backgroundColor: '#1a1a1a',
-            borderRadius: '32px',
-            padding: '40px',
-            width: '90%',
-            maxWidth: '450px',
-            color: '#fff',
-            fontFamily: "'Questrial', sans-serif"
+          right: 0,
+          height: '1px',
+          backgroundColor: 'rgba(255,255,255,0.1)',
+          zIndex: -1
+        }} />
+      </div>
+
+      {/* Form Login/Register dengan North East Arrow */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        {authMode === 'register' && (
+          <input
+            type="text"
+            placeholder="Nama"
+            value={authName}
+            onChange={(e) => setAuthName(e.target.value)}
+            style={{
+              padding: '16px 20px',
+              borderRadius: '0px',
+              border: '1px solid rgba(255,255,255,0.2)',
+              backgroundColor: 'transparent',
+              color: '#ffffff',
+              fontSize: '15px',
+              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+              fontWeight: '300',
+              outline: 'none'
+            }}
+          />
+        )}
+        <input
+          type="email"
+          placeholder="Email"
+          value={authEmail}
+          onChange={(e) => setAuthEmail(e.target.value)}
+          style={{
+            padding: '16px 20px',
+            borderRadius: '0px',
+            border: '1px solid rgba(255,255,255,0.2)',
+            backgroundColor: 'transparent',
+            color: '#ffffff',
+            fontSize: '15px',
+            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+            fontWeight: '300',
+            outline: 'none'
+          }}
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          value={authPassword}
+          onChange={(e) => setAuthPassword(e.target.value)}
+          style={{
+            padding: '16px 20px',
+            borderRadius: '0px',
+            border: '1px solid rgba(255,255,255,0.2)',
+            backgroundColor: 'transparent',
+            color: '#ffffff',
+            fontSize: '15px',
+            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+            fontWeight: '300',
+            outline: 'none'
+          }}
+        />
+        {authError && (
+          <div style={{ 
+            color: 'rgba(255,68,68,0.8)', 
+            fontSize: '13px', 
+            textAlign: 'center',
+            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+            fontWeight: '300'
           }}>
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: '30px'
-            }}>
-              <h2 style={{ margin: 0, fontSize: '28px', fontWeight: '400' }}>
-                {authMode === 'login' ? 'Login' : 'Daftar'}
-              </h2>
-              <button
-                onClick={() => setShowAuthModal(false)}
-                style={{
-                  backgroundColor: 'transparent',
-                  border: 'none',
-                  color: '#fff',
-                  fontSize: '24px',
-                  cursor: 'pointer'
-                }}
-              >
-                ✕
-              </button>
-            </div>
-
-            <div style={{ display: 'flex', gap: '15px', marginBottom: '30px', flexDirection: 'column' }}>
-              <button
-                onClick={handleGoogleLogin}
-                style={{
-                  backgroundColor: '#fff',
-                  color: '#000',
-                  border: 'none',
-                  borderRadius: '60px',
-                  padding: '12px',
-                  fontSize: '16px',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '10px'
-                }}
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24">
-                  <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                  <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                  <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-                  <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-                </svg>
-                Google
-              </button>
-              <button
-                onClick={handleGithubLogin}
-                style={{
-                  backgroundColor: '#333',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: '60px',
-                  padding: '12px',
-                  fontSize: '16px',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '10px'
-                }}
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
-                  <path d="M12 2C6.48 2 2 6.48 2 12c0 4.42 2.87 8.17 6.84 9.49.5.09.68-.21.68-.48 0-.24-.01-.88-.01-1.73-2.78.6-3.37-1.34-3.37-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.61.07-.61 1 .07 1.53 1.03 1.53 1.03.89 1.52 2.34 1.08 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02.8-.22 1.65-.33 2.5-.33.85 0 1.7.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85 0 1.34-.01 2.42-.01 2.75 0 .27.18.58.69.48C19.13 20.17 22 16.42 22 12c0-5.52-4.48-10-10-10z"/>
-                </svg>
-                GitHub
-              </button>
-            </div>
-
-            <div style={{ textAlign: 'center', color: '#666', margin: '20px 0' }}>atau</div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-              {authMode === 'register' && (
-                <input
-                  type="text"
-                  placeholder="Nama"
-                  value={authName}
-                  onChange={(e) => setAuthName(e.target.value)}
-                  style={{
-                    padding: '12px 16px',
-                    borderRadius: '12px',
-                    border: '1px solid #333',
-                    backgroundColor: '#2a2a2a',
-                    color: '#fff',
-                    fontSize: '14px',
-                    outline: 'none'
-                  }}
-                />
-              )}
-              <input
-                type="email"
-                placeholder="Email"
-                value={authEmail}
-                onChange={(e) => setAuthEmail(e.target.value)}
-                style={{
-                  padding: '12px 16px',
-                  borderRadius: '12px',
-                  border: '1px solid #333',
-                  backgroundColor: '#2a2a2a',
-                  color: '#fff',
-                  fontSize: '14px',
-                  outline: 'none'
-                }}
-              />
-              <input
-                type="password"
-                placeholder="Password"
-                value={authPassword}
-                onChange={(e) => setAuthPassword(e.target.value)}
-                style={{
-                  padding: '12px 16px',
-                  borderRadius: '12px',
-                  border: '1px solid #333',
-                  backgroundColor: '#2a2a2a',
-                  color: '#fff',
-                  fontSize: '14px',
-                  outline: 'none'
-                }}
-              />
-              {authError && (
-                <div style={{ color: '#ff4444', fontSize: '12px', textAlign: 'center' }}>
-                  {authError}
-                </div>
-              )}
-              <button
-                onClick={authMode === 'login' ? handleEmailLogin : handleEmailRegister}
-                style={{
-                  backgroundColor: '#c5e800',
-                  color: '#000',
-                  border: 'none',
-                  borderRadius: '60px',
-                  padding: '12px',
-                  fontSize: '16px',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  marginTop: '10px'
-                }}
-              >
-                {authMode === 'login' ? 'Login' : 'Daftar'}
-              </button>
-              <button
-                onClick={() => setAuthMode(authMode === 'login' ? 'register' : 'login')}
-                style={{
-                  backgroundColor: 'transparent',
-                  border: 'none',
-                  color: '#c5e800',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  marginTop: '10px'
-                }}
-              >
-                {authMode === 'login' ? 'Belum punya akun? Daftar' : 'Sudah punya akun? Login'}
-              </button>
-            </div>
+            {authError}
           </div>
-        </div>
-      )}
+        )}
+        <button
+          onClick={authMode === 'login' ? handleEmailLogin : handleEmailRegister}
+          style={{
+            backgroundColor: 'transparent',
+            color: '#ffffff',
+            border: '1px solid rgba(255,255,255,0.3)',
+            borderRadius: '0px',
+            padding: '16px 24px',
+            fontSize: '16px',
+            fontWeight: '300',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+            marginTop: '10px',
+            transition: 'opacity 0.2s'
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.opacity = '0.7'}
+          onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+        >
+          <span>{authMode === 'login' ? 'Login' : 'Daftar'}</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
+        <button
+          onClick={() => setAuthMode(authMode === 'login' ? 'register' : 'login')}
+          style={{
+            backgroundColor: 'transparent',
+            border: 'none',
+            color: 'rgba(255,255,255,0.5)',
+            cursor: 'pointer',
+            fontSize: '14px',
+            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+            fontWeight: '300',
+            marginTop: '10px',
+            textDecoration: 'underline',
+            transition: 'color 0.2s'
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.color = '#ffffff'}
+          onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255,255,255,0.5)'}
+        >
+          {authMode === 'login' ? 'Belum punya akun? Daftar' : 'Sudah punya akun? Login'}
+        </button>
+      </div>
+    </div>
+  </div>
+)}
 
+
+
+
+
+
+
+      
       {/* Calendar Call Modal */}
       {showCalendarModal && (
         <div className="calendar-modal-overlay">
