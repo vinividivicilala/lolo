@@ -1,4 +1,4 @@
-// app/page.tsx (Halaman Utama) - dengan fitur chat realtime di shadow page
+// app/page.tsx (Halaman Utama) - dengan fitur Shadow Page dan Chat Realtime
 
 'use client';
 
@@ -9,46 +9,58 @@ import { ScrollSmoother } from "gsap/ScrollSmoother";
 import { SplitText } from "gsap/SplitText";
 import Link from "next/link";
 import Image from "next/image";
-import { initializeApp } from "firebase/app";
-import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, updateDoc, getDoc, setDoc } from "firebase/firestore";
-import { getAuth, signInAnonymously, onAuthStateChanged, signOut } from "firebase/auth";
 
-// Firebase configuration
+// Import Firebase
+import { initializeApp, getApps } from "firebase/app";
+import { 
+  getAuth, 
+  signInWithPopup, 
+  GoogleAuthProvider, 
+  signOut,
+  onAuthStateChanged 
+} from "firebase/auth";
+import { 
+  getFirestore, 
+  collection, 
+  addDoc, 
+  query, 
+  orderBy, 
+  onSnapshot,
+  Timestamp,
+  limit
+} from "firebase/firestore";
+
+// Konfigurasi Firebase
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyD_htQZ1TClnXKZGRJ4izbMQ02y6V3aNAQ",
+  authDomain: "wawa44-58d1e.firebaseapp.com",
+  databaseURL: "https://wawa44-58d1e-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "wawa44-58d1e",
+  storageBucket: "wawa44-58d1e.firebasestorage.app",
+  messagingSenderId: "836899520599",
+  appId: "1:836899520599:web:b346e4370ecfa9bb89e312",
+  measurementId: "G-8LMP7F4BE9"
 };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApps()[0];
 const auth = getAuth(app);
+const db = getFirestore(app);
+const googleProvider = new GoogleAuthProvider();
+
+// Interface untuk message
+interface ChatMessage {
+  id: string;
+  text: string;
+  userId: string;
+  userName: string;
+  userPhoto: string | null;
+  timestamp: Date;
+}
 
 // Register GSAP plugins
 if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger, ScrollSmoother, SplitText);
-}
-
-// Interface untuk pesan
-interface ChatMessage {
-  id: string;
-  text: string;
-  userName: string;
-  userId: string;
-  timestamp: Date;
-  isAdmin: boolean;
-}
-
-// Interface untuk user online
-interface OnlineUser {
-  id: string;
-  userName: string;
-  isAdmin: boolean;
-  lastSeen: Date;
 }
 
 export default function HomePage(): React.JSX.Element {
@@ -78,17 +90,14 @@ export default function HomePage(): React.JSX.Element {
   const shadowPageRef = useRef<HTMLDivElement>(null);
   
   // State untuk Chat
+  const [user, setUser] = useState<any>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState("");
-  const [user, setUser] = useState<any>(null);
-  const [userName, setUserName] = useState("");
-  const [isUserNameSet, setIsUserNameSet] = useState(false);
-  const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
-  const [showChat, setShowChat] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [chatInputRef, setChatInputRef] = useState<HTMLInputElement | null>(null);
-  const chatMessagesRef = useRef<HTMLDivElement>(null);
-  const ADMIN_EMAILS = ["admin@menuru.com", "farid@menuru.com"]; // Daftar email admin
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isLoadingMessages, setIsLoadingMessages] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
   
   const acceptBtnRef = useRef<HTMLButtonElement>(null);
   const declineBtnRef = useRef<HTMLButtonElement>(null);
@@ -184,179 +193,6 @@ export default function HomePage(): React.JSX.Element {
   const circleImg2_4Ref = useRef<HTMLDivElement>(null);
   const circleImg1_5Ref = useRef<HTMLDivElement>(null);
   const circleImg2_5Ref = useRef<HTMLDivElement>(null);
-
-  // Firebase Chat Functions
-  useEffect(() => {
-    // Sign in anonymously
-    signInAnonymously(auth).catch((error) => {
-      console.error("Error signing in:", error);
-    });
-
-    // Listen to auth state
-    const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-    });
-
-    return () => unsubscribeAuth();
-  }, []);
-
-  // Load messages from Firebase
-  useEffect(() => {
-    const messagesQuery = query(collection(db, "messages"), orderBy("timestamp", "asc"));
-    
-    const unsubscribeMessages = onSnapshot(messagesQuery, (snapshot) => {
-      const loadedMessages: ChatMessage[] = [];
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        loadedMessages.push({
-          id: doc.id,
-          text: data.text,
-          userName: data.userName,
-          userId: data.userId,
-          timestamp: data.timestamp?.toDate() || new Date(),
-          isAdmin: data.isAdmin || false,
-        });
-      });
-      setMessages(loadedMessages);
-      
-      // Scroll to bottom
-      setTimeout(() => {
-        if (chatMessagesRef.current) {
-          chatMessagesRef.current.scrollTop = chatMessagesRef.current.scrollHeight;
-        }
-      }, 100);
-    });
-
-    return () => unsubscribeMessages();
-  }, []);
-
-  // Track online users
-  useEffect(() => {
-    if (!user) return;
-
-    const userRef = doc(db, "onlineUsers", user.uid);
-    const onlineUsersQuery = query(collection(db, "onlineUsers"), orderBy("lastSeen", "desc"));
-
-    // Set user as online
-    const setUserOnline = async () => {
-      await setDoc(userRef, {
-        userId: user.uid,
-        userName: userName || "Anonymous",
-        isAdmin: isAdmin,
-        lastSeen: serverTimestamp(),
-      });
-    };
-
-    setUserOnline();
-
-    // Listen to online users
-    const unsubscribeOnline = onSnapshot(onlineUsersQuery, (snapshot) => {
-      const users: OnlineUser[] = [];
-      const now = new Date();
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        const lastSeen = data.lastSeen?.toDate() || new Date();
-        // Consider user offline if last seen > 2 minutes ago
-        const timeDiff = (now.getTime() - lastSeen.getTime()) / 1000 / 60;
-        if (timeDiff < 2) {
-          users.push({
-            id: doc.id,
-            userName: data.userName,
-            isAdmin: data.isAdmin,
-            lastSeen: lastSeen,
-          });
-        }
-      });
-      setOnlineUsers(users);
-    });
-
-    // Update last seen periodically
-    const interval = setInterval(async () => {
-      await updateDoc(userRef, {
-        lastSeen: serverTimestamp(),
-      });
-    }, 30000);
-
-    return () => {
-      clearInterval(interval);
-      unsubscribeOnline();
-      // Set user as offline when component unmounts
-      updateDoc(userRef, {
-        lastSeen: new Date(Date.now() - 5 * 60 * 1000), // 5 minutes ago
-      }).catch(() => {});
-    };
-  }, [user, userName, isAdmin]);
-
-  const sendMessage = async () => {
-    if (!newMessage.trim() || !user) return;
-    if (!userName && !isUserNameSet) {
-      alert("Please enter your name first");
-      return;
-    }
-
-    try {
-      await addDoc(collection(db, "messages"), {
-        text: newMessage,
-        userName: userName,
-        userId: user.uid,
-        timestamp: serverTimestamp(),
-        isAdmin: isAdmin,
-      });
-      setNewMessage("");
-      
-      // Focus back to input
-      if (chatInputRef) {
-        chatInputRef.focus();
-      }
-    } catch (error) {
-      console.error("Error sending message:", error);
-    }
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
-  };
-
-  const handleSetUserName = () => {
-    if (userName.trim()) {
-      setIsUserNameSet(true);
-      // Check if user is admin
-      setIsAdmin(ADMIN_EMAILS.includes(userName.toLowerCase()));
-    }
-  };
-
-  const handleLogout = async () => {
-    if (user) {
-      const userRef = doc(db, "onlineUsers", user.uid);
-      await updateDoc(userRef, {
-        lastSeen: new Date(Date.now() - 5 * 60 * 1000),
-      }).catch(() => {});
-    }
-    setIsUserNameSet(false);
-    setUserName("");
-    setIsAdmin(false);
-  };
-
-  const formatTime = (date: Date) => {
-    return date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-  };
-
-  const formatDate = (date: Date) => {
-    const today = new Date();
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
-    
-    if (date.toDateString() === today.toDateString()) {
-      return 'Today';
-    } else if (date.toDateString() === yesterday.toDateString()) {
-      return 'Yesterday';
-    } else {
-      return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
-    }
-  };
 
   const carouselItems = [
     {
@@ -455,6 +291,98 @@ export default function HomePage(): React.JSX.Element {
     newDate.setMonth(currentMonth.getMonth() + increment);
     setCurrentMonth(newDate);
   };
+
+  // Fungsi untuk Firebase Auth & Chat
+  const handleGoogleSignIn = async () => {
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      setUser(result.user);
+      setIsAuthModalOpen(false);
+    } catch (error) {
+      console.error("Error signing in with Google:", error);
+    }
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth);
+      setUser(null);
+      setIsChatOpen(false);
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
+  };
+
+  const sendMessage = async () => {
+    if (!newMessage.trim() || !user) return;
+    
+    try {
+      await addDoc(collection(db, "chats"), {
+        text: newMessage.trim(),
+        userId: user.uid,
+        userName: user.displayName || "Anonymous",
+        userPhoto: user.photoURL || null,
+        timestamp: Timestamp.now()
+      });
+      setNewMessage("");
+      
+      // Scroll ke bawah setelah mengirim
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
+    } catch (error) {
+      console.error("Error sending message:", error);
+    }
+  };
+
+  // Load messages realtime
+  useEffect(() => {
+    if (!user) return;
+    
+    setIsLoadingMessages(true);
+    const q = query(collection(db, "chats"), orderBy("timestamp", "asc"), limit(100));
+    
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const loadedMessages: ChatMessage[] = [];
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        loadedMessages.push({
+          id: doc.id,
+          text: data.text,
+          userId: data.userId,
+          userName: data.userName,
+          userPhoto: data.userPhoto,
+          timestamp: data.timestamp?.toDate() || new Date()
+        });
+      });
+      setMessages(loadedMessages);
+      setIsLoadingMessages(false);
+      
+      // Scroll ke bawah saat ada pesan baru
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
+    });
+    
+    return () => unsubscribe();
+  }, [user]);
+
+  // Monitor auth state
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // Auto-scroll saat chat dibuka
+  useEffect(() => {
+    if (isChatOpen && messages.length > 0) {
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 300);
+    }
+  }, [isChatOpen, messages]);
 
   const getRandomChar = () => {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
@@ -1201,7 +1129,7 @@ export default function HomePage(): React.JSX.Element {
     if (isLoading) return;
 
     const handleShadowPageScroll = () => {
-      if (!mainContentRef.current || !shadowPageRef.current) return;
+      if (!mainContentRef.current) return;
       
       const scrollY = window.scrollY;
       const windowHeight = window.innerHeight;
@@ -1254,7 +1182,6 @@ export default function HomePage(): React.JSX.Element {
           onComplete: () => {
             setShowShadowPage(false);
             setIsShadowTransitioning(false);
-            setShowChat(false); // Close chat when shadow page hides
           }
         });
       }
@@ -2129,15 +2056,31 @@ export default function HomePage(): React.JSX.Element {
           to { opacity: 1; }
         }
 
-        /* Chat animations */
+        /* Animasi untuk Chat */
         @keyframes chatSlideIn {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
         }
 
-        @keyframes messageIn {
-          from { opacity: 0; transform: translateX(-20px); }
-          to { opacity: 1; transform: translateX(0); }
+        @keyframes chatBubbleIn {
+          from {
+            opacity: 0;
+            transform: scale(0.8);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+
+        .chat-message {
+          animation: chatBubbleIn 0.2s ease-out;
         }
 
         .call-farid-text {
@@ -2588,252 +2531,20 @@ export default function HomePage(): React.JSX.Element {
           background: rgba(255, 255, 255, 0.5);
         }
 
-        /* Chat Component Styles */
-        .chat-container {
-          position: absolute;
-          bottom: 40px;
-          right: 40px;
-          width: 380px;
-          height: 600px;
-          background: white;
-          border-radius: 24px;
-          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-          display: flex;
-          flex-direction: column;
-          overflow: hidden;
-          animation: chatSlideIn 0.3s ease;
-          z-index: 100;
+        /* Scrollbar untuk chat container */
+        .chat-messages-container::-webkit-scrollbar {
+          width: 4px;
+          display: block;
         }
-
-        .chat-header {
-          background: linear-gradient(135deg, #1a1a1a 0%, #000000 100%);
-          color: white;
-          padding: 20px;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          cursor: pointer;
+        
+        .chat-messages-container::-webkit-scrollbar-track {
+          background: rgba(255, 255, 255, 0.1);
+          border-radius: 10px;
         }
-
-        .chat-title {
-          font-size: 18px;
-          font-weight: 600;
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        }
-
-        .online-indicator {
-          width: 10px;
-          height: 10px;
-          background-color: #4caf50;
-          border-radius: 50%;
-          display: inline-block;
-          animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse {
-          0% { opacity: 1; transform: scale(1); }
-          50% { opacity: 0.5; transform: scale(1.2); }
-          100% { opacity: 1; transform: scale(1); }
-        }
-
-        .close-chat {
-          cursor: pointer;
-          font-size: 24px;
-          line-height: 1;
-          transition: opacity 0.2s;
-        }
-
-        .close-chat:hover {
-          opacity: 0.7;
-        }
-
-        .chat-messages {
-          flex: 1;
-          overflow-y: auto;
-          padding: 20px;
-          background: #f5f5f5;
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
-        }
-
-        .message {
-          max-width: 80%;
-          animation: messageIn 0.2s ease;
-        }
-
-        .message-user {
-          align-self: flex-start;
-        }
-
-        .message-admin {
-          align-self: flex-end;
-        }
-
-        .message-other {
-          align-self: flex-start;
-        }
-
-        .message-bubble {
-          padding: 10px 14px;
-          border-radius: 18px;
-          position: relative;
-          word-wrap: break-word;
-        }
-
-        .message-user .message-bubble {
-          background: white;
-          border: 1px solid #e0e0e0;
-          border-bottom-left-radius: 4px;
-        }
-
-        .message-admin .message-bubble {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          color: white;
-          border-bottom-right-radius: 4px;
-        }
-
-        .message-other .message-bubble {
-          background: white;
-          border: 1px solid #e0e0e0;
-          border-bottom-left-radius: 4px;
-        }
-
-        .message-name {
-          font-size: 11px;
-          font-weight: 600;
-          margin-bottom: 4px;
-          color: #666;
-        }
-
-        .message-admin .message-name {
-          color: rgba(255, 255, 255, 0.8);
-        }
-
-        .message-text {
-          font-size: 14px;
-          line-height: 1.4;
-        }
-
-        .message-time {
-          font-size: 10px;
-          margin-top: 4px;
-          opacity: 0.6;
-        }
-
-        .chat-input-area {
-          padding: 16px;
-          background: white;
-          border-top: 1px solid #e0e0e0;
-          display: flex;
-          gap: 12px;
-        }
-
-        .chat-input {
-          flex: 1;
-          padding: 10px 14px;
-          border: 1px solid #e0e0e0;
-          border-radius: 24px;
-          font-size: 14px;
-          outline: none;
-          transition: border-color 0.2s;
-        }
-
-        .chat-input:focus {
-          border-color: #667eea;
-        }
-
-        .send-button {
-          padding: 8px 20px;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          color: white;
-          border: none;
-          border-radius: 24px;
-          cursor: pointer;
-          font-size: 14px;
-          font-weight: 600;
-          transition: transform 0.2s, opacity 0.2s;
-        }
-
-        .send-button:hover {
-          transform: scale(1.05);
-          opacity: 0.9;
-        }
-
-        .name-input-container {
-          padding: 20px;
-          background: white;
-          border-top: 1px solid #e0e0e0;
-        }
-
-        .name-input {
-          width: 100%;
-          padding: 10px 14px;
-          border: 1px solid #e0e0e0;
-          border-radius: 24px;
-          font-size: 14px;
-          margin-bottom: 10px;
-          outline: none;
-        }
-
-        .set-name-button {
-          width: 100%;
-          padding: 10px;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          color: white;
-          border: none;
-          border-radius: 24px;
-          cursor: pointer;
-          font-size: 14px;
-          font-weight: 600;
-        }
-
-        .online-users {
-          padding: 12px 16px;
-          background: #f9f9f9;
-          border-bottom: 1px solid #e0e0e0;
-          font-size: 12px;
-          color: #666;
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          flex-wrap: wrap;
-        }
-
-        .online-user {
-          display: inline-flex;
-          align-items: center;
-          gap: 4px;
-          background: white;
-          padding: 4px 10px;
-          border-radius: 20px;
-          font-size: 11px;
-        }
-
-        .admin-badge {
-          background: #764ba2;
-          color: white;
-          padding: 2px 6px;
-          border-radius: 12px;
-          font-size: 9px;
-          margin-left: 4px;
-        }
-
-        .logout-button {
-          background: rgba(255, 255, 255, 0.2);
-          border: none;
-          color: white;
-          padding: 4px 10px;
-          border-radius: 20px;
-          cursor: pointer;
-          font-size: 12px;
-          transition: background 0.2s;
-        }
-
-        .logout-button:hover {
+        
+        .chat-messages-container::-webkit-scrollbar-thumb {
           background: rgba(255, 255, 255, 0.3);
+          border-radius: 10px;
         }
       `}</style>
       
@@ -3797,7 +3508,7 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </div>
 
-      {/* SHADOW PAGE - Halaman bayangan hitam dengan chat */}
+      {/* SHADOW PAGE - Halaman bayangan hitam full dengan Chat */}
       <div
         ref={shadowPageRef}
         style={{
@@ -3810,33 +3521,33 @@ export default function HomePage(): React.JSX.Element {
           zIndex: 9998,
           transform: 'translateY(100%)',
           pointerEvents: showShadowPage ? 'auto' : 'none',
-        }}
-      >
-        {/* Konten Shadow Page - Let's Talk dan Chat */}
-        <div style={{
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          minHeight: '100vh',
-          padding: '60px',
-          boxSizing: 'border-box',
-          fontFamily: 'Questrial, sans-serif'
+          overflow: 'hidden'
+        }}
+      >
+        {/* Konten Shadow Page - Let's Talk dan Chat */}
+        <div style={{
+          width: '100%',
+          maxWidth: '800px',
+          padding: '40px',
+          animation: 'chatSlideIn 0.6s ease-out'
         }}>
-          {/* Teks "Let's Talk" dari kiri atas */}
+          {/* Teks Let's Talk */}
           <div style={{
-            position: 'absolute',
-            top: '80px',
-            left: '80px',
+            textAlign: 'center',
+            marginBottom: '40px'
           }}>
             <h1 style={{
+              fontFamily: 'Aeonik-Regular, Helvetica, Arial, sans-serif',
               fontSize: '80px',
-              color: '#ffffff',
-              fontFamily: 'Questrial, sans-serif',
               fontWeight: '400',
+              color: '#ffffff',
               letterSpacing: '-0.02em',
               margin: 0,
-              animation: 'modalFadeIn 0.5s ease'
+              textTransform: 'uppercase'
             }}>
               Let's Talk
             </h1>
@@ -3844,150 +3555,373 @@ export default function HomePage(): React.JSX.Element {
               width: '100px',
               height: '2px',
               backgroundColor: '#ffffff',
-              marginTop: '20px',
-              animation: 'modalFadeIn 0.6s ease'
+              margin: '20px auto 0',
+              opacity: 0.3
             }} />
           </div>
 
           {/* Tombol Chat */}
-          <button
-            onClick={() => setShowChat(!showChat)}
-            style={{
-              position: 'absolute',
-              bottom: '40px',
-              right: '40px',
-              padding: '16px 32px',
-              backgroundColor: showChat ? '#ffffff' : 'transparent',
-              color: showChat ? '#000000' : '#ffffff',
-              border: showChat ? 'none' : '2px solid #ffffff',
-              borderRadius: '60px',
-              cursor: 'pointer',
-              fontSize: '18px',
-              fontWeight: '600',
-              fontFamily: 'Questrial, sans-serif',
-              transition: 'all 0.3s ease',
-              zIndex: 101,
-              backdropFilter: showChat ? 'none' : 'blur(10px)',
-            }}
-            onMouseEnter={(e) => {
-              if (!showChat) {
-                e.currentTarget.style.backgroundColor = '#ffffff';
-                e.currentTarget.style.color = '#000000';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (!showChat) {
-                e.currentTarget.style.backgroundColor = 'transparent';
-                e.currentTarget.style.color = '#ffffff';
-              }
-            }}
-          >
-            {showChat ? 'Close Chat 💬' : 'Open Chat 💬'}
-          </button>
-
-          {/* Chat Component */}
-          {showChat && (
-            <div className="chat-container" style={{
-              position: 'absolute',
-              bottom: '100px',
-              right: '40px',
+          {!isChatOpen ? (
+            <div style={{
+              display: 'flex',
+              justifyContent: 'center'
             }}>
-              <div className="chat-header" onClick={() => setShowChat(false)}>
-                <div className="chat-title">
-                  <span className="online-indicator"></span>
-                  Live Chat Support
+              <button
+                onClick={() => setIsChatOpen(true)}
+                style={{
+                  padding: '16px 48px',
+                  backgroundColor: '#ffffff',
+                  color: '#000000',
+                  border: 'none',
+                  borderRadius: '60px',
+                  cursor: 'pointer',
+                  fontFamily: 'Questrial, sans-serif',
+                  fontSize: '20px',
+                  fontWeight: '600',
+                  transition: 'all 0.3s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'scale(1.05)';
+                  e.currentTarget.style.backgroundColor = '#e0e0e0';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'scale(1)';
+                  e.currentTarget.style.backgroundColor = '#ffffff';
+                }}
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                Start Chatting
+              </button>
+            </div>
+          ) : (
+            <div style={{
+              backgroundColor: 'rgba(255, 255, 255, 0.05)',
+              borderRadius: '24px',
+              backdropFilter: 'blur(10px)',
+              overflow: 'hidden',
+              border: '1px solid rgba(255, 255, 255, 0.1)'
+            }}>
+              {/* Header Chat */}
+              <div style={{
+                padding: '16px 20px',
+                backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px'
+                }}>
+                  <div style={{
+                    width: '10px',
+                    height: '10px',
+                    borderRadius: '50%',
+                    backgroundColor: '#4caf50',
+                    animation: 'pulse 1.5s infinite'
+                  }} />
+                  <span style={{
+                    fontFamily: 'Questrial, sans-serif',
+                    color: '#ffffff',
+                    fontSize: '16px',
+                    fontWeight: '500'
+                  }}>
+                    Live Chat
+                  </span>
                 </div>
-                <div className="close-chat">×</div>
-              </div>
-              
-              {!isUserNameSet ? (
-                <div className="name-input-container">
-                  <input
-                    type="text"
-                    placeholder="Enter your name..."
-                    value={userName}
-                    onChange={(e) => setUserName(e.target.value)}
-                    className="name-input"
-                    onKeyPress={(e) => e.key === 'Enter' && handleSetUserName()}
-                  />
-                  <button onClick={handleSetUserName} className="set-name-button">
-                    Start Chatting
-                  </button>
-                </div>
-              ) : (
-                <>
-                  <div className="online-users">
-                    <span>👥 Online ({onlineUsers.length}):</span>
-                    {onlineUsers.map((user, idx) => (
-                      <span key={idx} className="online-user">
-                        {user.userName}
-                        {user.isAdmin && <span className="admin-badge">Admin</span>}
+                {user && (
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '16px'
+                  }}>
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px'
+                    }}>
+                      {user.photoURL && (
+                        <img
+                          src={user.photoURL}
+                          alt="Profile"
+                          style={{
+                            width: '32px',
+                            height: '32px',
+                            borderRadius: '50%',
+                            objectFit: 'cover'
+                          }}
+                        />
+                      )}
+                      <span style={{
+                        fontFamily: 'Questrial, sans-serif',
+                        color: '#ffffff',
+                        fontSize: '14px'
+                      }}>
+                        {user.displayName || user.email}
                       </span>
-                    ))}
-                    <button onClick={handleLogout} className="logout-button">
+                    </div>
+                    <button
+                      onClick={handleSignOut}
+                      style={{
+                        padding: '6px 12px',
+                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                        color: '#ffffff',
+                        border: 'none',
+                        borderRadius: '60px',
+                        cursor: 'pointer',
+                        fontFamily: 'Questrial, sans-serif',
+                        fontSize: '12px',
+                        transition: 'all 0.2s ease'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.2)'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'}
+                    >
                       Logout
                     </button>
                   </div>
-                  
-                  <div className="chat-messages" ref={chatMessagesRef}>
-                    {messages.map((msg) => {
-                      const isCurrentUser = msg.userId === user?.uid;
-                      const isMessageAdmin = msg.isAdmin;
-                      let messageClass = "message message-other";
-                      if (isCurrentUser) messageClass = "message message-user";
-                      else if (isMessageAdmin) messageClass = "message message-admin";
-                      
-                      // Group messages by date
-                      const showDate = messages.findIndex(m => m.id === msg.id) === 0 || 
-                        (messages[messages.findIndex(m => m.id === msg.id) - 1] && 
-                         formatDate(messages[messages.findIndex(m => m.id === msg.id) - 1].timestamp) !== formatDate(msg.timestamp));
-                      
-                      return (
-                        <div key={msg.id}>
-                          {showDate && (
-                            <div style={{
-                              textAlign: 'center',
-                              fontSize: '11px',
-                              color: '#999',
-                              margin: '10px 0',
-                            }}>
-                              {formatDate(msg.timestamp)}
-                            </div>
-                          )}
-                          <div className={messageClass}>
-                            <div className="message-bubble">
-                              <div className="message-name">
-                                {msg.userName}
-                                {msg.isAdmin && " ⭐"}
-                              </div>
-                              <div className="message-text">{msg.text}</div>
-                              <div className="message-time">{formatTime(msg.timestamp)}</div>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                  
-                  <div className="chat-input-area">
-                    <input
-                      type="text"
-                      placeholder="Type your message..."
-                      value={newMessage}
-                      onChange={(e) => setNewMessage(e.target.value)}
-                      onKeyPress={handleKeyPress}
-                      className="chat-input"
-                      ref={(input) => setChatInputRef(input)}
-                    />
-                    <button onClick={sendMessage} className="send-button">
-                      Send
+                )}
+              </div>
+
+              {/* Messages Container */}
+              <div
+                ref={chatContainerRef}
+                className="chat-messages-container"
+                style={{
+                  height: '400px',
+                  overflowY: 'auto',
+                  padding: '20px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '12px'
+                }}
+              >
+                {!user ? (
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    height: '100%',
+                    gap: '20px'
+                  }}>
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M20 21V19C20 16.8 18.2 15 16 15H8C5.8 15 4 16.8 4 19V21" stroke="#ffffff" strokeWidth="1.5" strokeLinecap="round"/>
+                      <circle cx="12" cy="7" r="4" stroke="#ffffff" strokeWidth="1.5"/>
+                    </svg>
+                    <span style={{
+                      fontFamily: 'Questrial, sans-serif',
+                      color: '#ffffff',
+                      fontSize: '16px',
+                      opacity: 0.7
+                    }}>
+                      Login to start chatting
+                    </span>
+                    <button
+                      onClick={handleGoogleSignIn}
+                      style={{
+                        padding: '12px 24px',
+                        backgroundColor: '#ffffff',
+                        color: '#000000',
+                        border: 'none',
+                        borderRadius: '60px',
+                        cursor: 'pointer',
+                        fontFamily: 'Questrial, sans-serif',
+                        fontSize: '14px',
+                        fontWeight: '500',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px'
+                      }}
+                    >
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                      </svg>
+                      Sign in with Google
                     </button>
                   </div>
-                </>
+                ) : isLoadingMessages ? (
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    height: '100%'
+                  }}>
+                    <div style={{
+                      width: '30px',
+                      height: '30px',
+                      border: '2px solid rgba(255,255,255,0.3)',
+                      borderTopColor: '#ffffff',
+                      borderRadius: '50%',
+                      animation: 'spin 1s linear infinite'
+                    }} />
+                  </div>
+                ) : messages.length === 0 ? (
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    height: '100%',
+                    fontFamily: 'Questrial, sans-serif',
+                    color: '#ffffff',
+                    opacity: 0.5,
+                    textAlign: 'center'
+                  }}>
+                    No messages yet.<br />Be the first to say hello! 👋
+                  </div>
+                ) : (
+                  messages.map((msg) => (
+                    <div
+                      key={msg.id}
+                      className="chat-message"
+                      style={{
+                        display: 'flex',
+                        gap: '12px',
+                        alignItems: 'flex-start',
+                        flexDirection: msg.userId === user?.uid ? 'row-reverse' : 'row'
+                      }}
+                    >
+                      {msg.userPhoto ? (
+                        <img
+                          src={msg.userPhoto}
+                          alt={msg.userName}
+                          style={{
+                            width: '36px',
+                            height: '36px',
+                            borderRadius: '50%',
+                            objectFit: 'cover'
+                          }}
+                        />
+                      ) : (
+                        <div style={{
+                          width: '36px',
+                          height: '36px',
+                          borderRadius: '50%',
+                          backgroundColor: 'rgba(255,255,255,0.2)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontFamily: 'Questrial, sans-serif',
+                          fontSize: '14px',
+                          color: '#ffffff'
+                        }}>
+                          {msg.userName.charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                      <div style={{
+                        maxWidth: '70%',
+                        backgroundColor: msg.userId === user?.uid ? '#ffffff' : 'rgba(255,255,255,0.1)',
+                        color: msg.userId === user?.uid ? '#000000' : '#ffffff',
+                        borderRadius: msg.userId === user?.uid ? '18px 4px 18px 18px' : '4px 18px 18px 18px',
+                        padding: '10px 16px'
+                      }}>
+                        <div style={{
+                          fontSize: '12px',
+                          fontWeight: '500',
+                          marginBottom: '4px',
+                          opacity: 0.7,
+                          fontFamily: 'Questrial, sans-serif'
+                        }}>
+                          {msg.userName}
+                        </div>
+                        <div style={{
+                          fontSize: '14px',
+                          lineHeight: '1.4',
+                          fontFamily: 'Questrial, sans-serif',
+                          wordBreak: 'break-word'
+                        }}>
+                          {msg.text}
+                        </div>
+                        <div style={{
+                          fontSize: '10px',
+                          marginTop: '4px',
+                          opacity: 0.5,
+                          fontFamily: 'Questrial, sans-serif',
+                          textAlign: msg.userId === user?.uid ? 'right' : 'left'
+                        }}>
+                          {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+                <div ref={messagesEndRef} />
+              </div>
+
+              {/* Input Area */}
+              {user && (
+                <div style={{
+                  padding: '16px 20px',
+                  borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+                  display: 'flex',
+                  gap: '12px'
+                }}>
+                  <input
+                    type="text"
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                    placeholder="Type your message..."
+                    style={{
+                      flex: 1,
+                      padding: '12px 16px',
+                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                      border: '1px solid rgba(255, 255, 255, 0.2)',
+                      borderRadius: '60px',
+                      color: '#ffffff',
+                      fontFamily: 'Questrial, sans-serif',
+                      fontSize: '14px',
+                      outline: 'none'
+                    }}
+                  />
+                  <button
+                    onClick={sendMessage}
+                    disabled={!newMessage.trim()}
+                    style={{
+                      padding: '12px 24px',
+                      backgroundColor: newMessage.trim() ? '#ffffff' : 'rgba(255, 255, 255, 0.3)',
+                      color: newMessage.trim() ? '#000000' : '#ffffff',
+                      border: 'none',
+                      borderRadius: '60px',
+                      cursor: newMessage.trim() ? 'pointer' : 'not-allowed',
+                      fontFamily: 'Questrial, sans-serif',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    Send
+                  </button>
+                </div>
               )}
             </div>
           )}
         </div>
+
+        <style jsx>{`
+          @keyframes pulse {
+            0%, 100% {
+              opacity: 1;
+            }
+            50% {
+              opacity: 0.5;
+            }
+          }
+          @keyframes spin {
+            to {
+              transform: rotate(360deg);
+            }
+          }
+        `}</style>
       </div>
 
       {/* Calendar Call Modal */}
