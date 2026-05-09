@@ -3503,485 +3503,486 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </div>
 
-      {/* SHADOW PAGE - Halaman bayangan hitam dengan Chat di sisi kiri */}
-      <div
-        ref={shadowPageRef}
+    // SHADOW PAGE - Halaman bayangan hitam dengan Chat di sisi kiri (PERBAIKAN)
+
+<div
+  ref={shadowPageRef}
+  style={{
+    position: 'fixed',
+    bottom: 0,
+    left: 0,
+    width: '100%',
+    height: '100vh',
+    backgroundColor: '#000000',
+    zIndex: 9998,
+    transform: 'translateY(100%)',
+    pointerEvents: showShadowPage ? 'auto' : 'none',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    padding: '60px 80px',
+    boxSizing: 'border-box',
+    overflow: 'hidden'
+  }}
+>
+  {/* Konten Shadow Page - Let's Talk di kiri atas (tanpa garis bawah) */}
+  <div style={{
+    width: '100%',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start'
+  }}>
+    {/* Teks Let's Talk di kiri atas - TANPA GARIS BAWAH */}
+    <div>
+      <h1 style={{
+        fontFamily: 'Aeonik-Regular, Helvetica, Arial, sans-serif',
+        fontSize: '120px',
+        fontWeight: '400',
+        color: '#ffffff',
+        letterSpacing: '-0.02em',
+        margin: 0,
+        textTransform: 'uppercase'
+      }}>
+        Let's Talk
+      </h1>
+      {/* GARIS BAWAH DIHAPUS */}
+    </div>
+    
+    {/* Tombol toggle chat di kanan atas */}
+    {!isChatOpen && (
+      <button
+        onClick={() => setIsChatOpen(true)}
         style={{
-          position: 'fixed',
-          bottom: 0,
-          left: 0,
-          width: '100%',
-          height: '100vh',
-          backgroundColor: '#000000',
-          zIndex: 9998,
-          transform: 'translateY(100%)',
-          pointerEvents: showShadowPage ? 'auto' : 'none',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-between',
-          padding: '60px 80px',
-          boxSizing: 'border-box',
-          overflow: 'hidden'
+          padding: '12px 24px',
+          backgroundColor: '#ffffff',
+          color: '#000000',
+          border: 'none',
+          borderRadius: '60px',
+          cursor: 'pointer',
+          fontFamily: 'Questrial, sans-serif',
+          fontSize: '16px',
+          fontWeight: '500',
+          transition: 'all 0.3s ease'
         }}
+        onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
+        onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
       >
-        {/* Konten Shadow Page - Let's Talk di kiri atas */}
+        Open Chat
+      </button>
+    )}
+  </div>
+
+  {/* Chat Container - di sisi kiri, bisa buka tutup */}
+  <div style={{
+    position: 'fixed',
+    left: '80px',
+    bottom: '200px',
+    width: '450px',
+    maxHeight: isChatOpen ? '500px' : '0px',
+    opacity: isChatOpen ? 1 : 0,
+    overflow: 'hidden',
+    transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: '24px',
+    backdropFilter: 'blur(10px)',
+    border: isChatOpen ? '1px solid rgba(255, 255, 255, 0.1)' : 'none',
+    boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)'
+  }}>
+    {isChatOpen && (
+      <>
+        {/* Header Chat */}
         <div style={{
-          width: '100%',
+          padding: '16px 20px',
+          backgroundColor: 'rgba(255, 255, 255, 0.08)',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
           display: 'flex',
           justifyContent: 'space-between',
-          alignItems: 'flex-start'
+          alignItems: 'center'
         }}>
-          {/* Teks Let's Talk di kiri atas */}
-          <div>
-            <h1 style={{
-              fontFamily: 'Aeonik-Regular, Helvetica, Arial, sans-serif',
-              fontSize: '120px',
-              fontWeight: '400',
-              color: '#ffffff',
-              letterSpacing: '-0.02em',
-              margin: 0,
-              textTransform: 'uppercase'
-            }}>
-              Let's Talk
-            </h1>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px'
+          }}>
             <div style={{
-              width: '150px',
-              height: '2px',
-              backgroundColor: '#ffffff',
-              marginTop: '20px',
-              opacity: 0.3
+              width: '10px',
+              height: '10px',
+              borderRadius: '50%',
+              backgroundColor: '#4caf50',
+              animation: 'pulse 1.5s infinite'
             }} />
+            <span style={{
+              fontFamily: 'Questrial, sans-serif',
+              color: '#ffffff',
+              fontSize: '16px',
+              fontWeight: '500'
+            }}>
+              Live Chat {user ? `- ${user.displayName || user.email?.split('@')[0] || 'User'}` : ''}
+            </span>
           </div>
-          
-          {/* Tombol toggle chat di kanan atas */}
-          {!isChatOpen && (
-            <button
-              onClick={() => setIsChatOpen(true)}
-              style={{
-                padding: '12px 24px',
-                backgroundColor: '#ffffff',
-                color: '#000000',
-                border: 'none',
-                borderRadius: '60px',
-                cursor: 'pointer',
-                fontFamily: 'Questrial, sans-serif',
-                fontSize: '16px',
-                fontWeight: '500',
-                transition: 'all 0.3s ease'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
-              onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
-            >
-              Open Chat
-            </button>
-          )}
+          <button
+            onClick={() => setIsChatOpen(false)}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#ffffff',
+              cursor: 'pointer',
+              fontSize: '20px',
+              opacity: 0.7,
+              transition: 'opacity 0.2s ease'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+            onMouseLeave={(e) => e.currentTarget.style.opacity = '0.7'}
+          >
+            ✕
+          </button>
         </div>
 
-        {/* Chat Container - di sisi kiri, bisa buka tutup */}
-        <div style={{
-          position: 'fixed',
-          left: '80px',
-          bottom: '200px',
-          width: '450px',
-          maxHeight: isChatOpen ? '500px' : '0px',
-          opacity: isChatOpen ? 1 : 0,
-          overflow: 'hidden',
-          transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-          backgroundColor: 'rgba(255, 255, 255, 0.05)',
-          borderRadius: '24px',
-          backdropFilter: 'blur(10px)',
-          border: isChatOpen ? '1px solid rgba(255, 255, 255, 0.1)' : 'none',
-          boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)'
-        }}>
-          {isChatOpen && (
-            <>
-              {/* Header Chat */}
-              <div style={{
-                padding: '16px 20px',
-                backgroundColor: 'rgba(255, 255, 255, 0.08)',
-                borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center'
+        {/* Messages Container */}
+        <div
+          ref={chatContainerRef}
+          className="chat-messages-container"
+          style={{
+            height: '380px',
+            overflowY: 'auto',
+            padding: '20px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '12px'
+          }}
+        >
+          {!user ? (
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: '100%',
+              gap: '16px'
+            }}>
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20 21V19C20 16.8 18.2 15 16 15H8C5.8 15 4 16.8 4 19V21" stroke="#ffffff" strokeWidth="1.5" strokeLinecap="round"/>
+                <circle cx="12" cy="7" r="4" stroke="#ffffff" strokeWidth="1.5"/>
+              </svg>
+              <span style={{
+                fontFamily: 'Questrial, sans-serif',
+                color: '#ffffff',
+                fontSize: '14px',
+                opacity: 0.7
               }}>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px'
-                }}>
-                  <div style={{
-                    width: '10px',
-                    height: '10px',
-                    borderRadius: '50%',
-                    backgroundColor: '#4caf50',
-                    animation: 'pulse 1.5s infinite'
-                  }} />
-                  <span style={{
-                    fontFamily: 'Questrial, sans-serif',
-                    color: '#ffffff',
-                    fontSize: '16px',
-                    fontWeight: '500'
-                  }}>
-                    Live Chat {user ? `- ${user.displayName || user.email?.split('@')[0]}` : ''}
-                  </span>
-                </div>
-                <button
-                  onClick={() => setIsChatOpen(false)}
+                Login to start chatting
+              </span>
+              
+              {/* Login Form */}
+              <form onSubmit={handleEmailSignIn} style={{
+                width: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '12px',
+                marginTop: '8px'
+              }}>
+                <input
+                  type="email"
+                  placeholder="Email"
+                  value={emailLogin}
+                  onChange={(e) => setEmailLogin(e.target.value)}
                   style={{
-                    background: 'none',
-                    border: 'none',
+                    width: '100%',
+                    padding: '10px 14px',
+                    backgroundColor: 'rgba(255,255,255,0.1)',
+                    border: '1px solid rgba(255,255,255,0.2)',
+                    borderRadius: '12px',
                     color: '#ffffff',
-                    cursor: 'pointer',
-                    fontSize: '20px',
-                    opacity: 0.7,
-                    transition: 'opacity 0.2s ease'
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
-                  onMouseLeave={(e) => e.currentTarget.style.opacity = '0.7'}
-                >
-                  ✕
-                </button>
-              </div>
-
-              {/* Messages Container */}
-              <div
-                ref={chatContainerRef}
-                className="chat-messages-container"
-                style={{
-                  height: '380px',
-                  overflowY: 'auto',
-                  padding: '20px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '12px'
-                }}
-              >
-                {!user ? (
-                  <div style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    height: '100%',
-                    gap: '16px'
-                  }}>
-                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M20 21V19C20 16.8 18.2 15 16 15H8C5.8 15 4 16.8 4 19V21" stroke="#ffffff" strokeWidth="1.5" strokeLinecap="round"/>
-                      <circle cx="12" cy="7" r="4" stroke="#ffffff" strokeWidth="1.5"/>
-                    </svg>
-                    <span style={{
-                      fontFamily: 'Questrial, sans-serif',
-                      color: '#ffffff',
-                      fontSize: '14px',
-                      opacity: 0.7
-                    }}>
-                      Login to start chatting
-                    </span>
-                    
-                    {/* Login Form */}
-                    <form onSubmit={handleEmailSignIn} style={{
-                      width: '100%',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '12px',
-                      marginTop: '8px'
-                    }}>
-                      <input
-                        type="email"
-                        placeholder="Email"
-                        value={emailLogin}
-                        onChange={(e) => setEmailLogin(e.target.value)}
-                        style={{
-                          width: '100%',
-                          padding: '10px 14px',
-                          backgroundColor: 'rgba(255,255,255,0.1)',
-                          border: '1px solid rgba(255,255,255,0.2)',
-                          borderRadius: '12px',
-                          color: '#ffffff',
-                          fontFamily: 'Questrial, sans-serif',
-                          fontSize: '14px',
-                          outline: 'none'
-                        }}
-                      />
-                      <input
-                        type="password"
-                        placeholder="Password"
-                        value={passwordLogin}
-                        onChange={(e) => setPasswordLogin(e.target.value)}
-                        style={{
-                          width: '100%',
-                          padding: '10px 14px',
-                          backgroundColor: 'rgba(255,255,255,0.1)',
-                          border: '1px solid rgba(255,255,255,0.2)',
-                          borderRadius: '12px',
-                          color: '#ffffff',
-                          fontFamily: 'Questrial, sans-serif',
-                          fontSize: '14px',
-                          outline: 'none'
-                        }}
-                      />
-                      <div style={{ display: 'flex', gap: '8px', justifyContent: 'space-between' }}>
-                        <button
-                          type="submit"
-                          style={{
-                            flex: 1,
-                            padding: '10px',
-                            backgroundColor: '#ffffff',
-                            color: '#000000',
-                            border: 'none',
-                            borderRadius: '60px',
-                            cursor: 'pointer',
-                            fontFamily: 'Questrial, sans-serif',
-                            fontSize: '14px',
-                            fontWeight: '500'
-                          }}
-                        >
-                          {isLoginMode ? 'Sign In' : 'Sign Up'}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setIsLoginMode(!isLoginMode)}
-                          style={{
-                            flex: 1,
-                            padding: '10px',
-                            backgroundColor: 'transparent',
-                            color: '#ffffff',
-                            border: '1px solid rgba(255,255,255,0.3)',
-                            borderRadius: '60px',
-                            cursor: 'pointer',
-                            fontFamily: 'Questrial, sans-serif',
-                            fontSize: '14px'
-                          }}
-                        >
-                          {isLoginMode ? 'Create Account' : 'Back to Login'}
-                        </button>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={handleGoogleSignIn}
-                        style={{
-                          width: '100%',
-                          padding: '10px',
-                          backgroundColor: '#4285F4',
-                          color: '#ffffff',
-                          border: 'none',
-                          borderRadius: '60px',
-                          cursor: 'pointer',
-                          fontFamily: 'Questrial, sans-serif',
-                          fontSize: '14px',
-                          fontWeight: '500',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          gap: '8px'
-                        }}
-                      >
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#ffffff"/>
-                          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#ffffff"/>
-                          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#ffffff"/>
-                          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#ffffff"/>
-                        </svg>
-                        Google
-                      </button>
-                      {authError && (
-                        <div style={{
-                          color: '#ff6b6b',
-                          fontSize: '12px',
-                          textAlign: 'center',
-                          marginTop: '8px'
-                        }}>
-                          {authError}
-                        </div>
-                      )}
-                    </form>
-                  </div>
-                ) : isLoadingMessages ? (
-                  <div style={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    height: '100%'
-                  }}>
-                    <div style={{
-                      width: '30px',
-                      height: '30px',
-                      border: '2px solid rgba(255,255,255,0.3)',
-                      borderTopColor: '#ffffff',
-                      borderRadius: '50%',
-                      animation: 'spin 1s linear infinite'
-                    }} />
-                  </div>
-                ) : messages.length === 0 ? (
-                  <div style={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    height: '100%',
                     fontFamily: 'Questrial, sans-serif',
+                    fontSize: '14px',
+                    outline: 'none'
+                  }}
+                />
+                <input
+                  type="password"
+                  placeholder="Password"
+                  value={passwordLogin}
+                  onChange={(e) => setPasswordLogin(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '10px 14px',
+                    backgroundColor: 'rgba(255,255,255,0.1)',
+                    border: '1px solid rgba(255,255,255,0.2)',
+                    borderRadius: '12px',
                     color: '#ffffff',
-                    opacity: 0.5,
-                    textAlign: 'center'
-                  }}>
-                    No messages yet.<br />Be the first to say hello! 👋
-                  </div>
-                ) : (
-                  messages.map((msg) => (
-                    <div
-                      key={msg.id}
-                      className="chat-message"
-                      style={{
-                        display: 'flex',
-                        gap: '12px',
-                        alignItems: 'flex-start',
-                        flexDirection: msg.userId === user?.uid ? 'row-reverse' : 'row'
-                      }}
-                    >
-                      {msg.userPhoto ? (
-                        <img
-                          src={msg.userPhoto}
-                          alt={msg.userName}
-                          style={{
-                            width: '32px',
-                            height: '32px',
-                            borderRadius: '50%',
-                            objectFit: 'cover'
-                          }}
-                        />
-                      ) : (
-                        <div style={{
-                          width: '32px',
-                          height: '32px',
-                          borderRadius: '50%',
-                          backgroundColor: 'rgba(255,255,255,0.2)',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontFamily: 'Questrial, sans-serif',
-                          fontSize: '12px',
-                          color: '#ffffff'
-                        }}>
-                          {msg.userName.charAt(0).toUpperCase()}
-                        </div>
-                      )}
-                      <div style={{
-                        maxWidth: '70%',
-                        backgroundColor: msg.userId === user?.uid ? '#ffffff' : 'rgba(255,255,255,0.1)',
-                        color: msg.userId === user?.uid ? '#000000' : '#ffffff',
-                        borderRadius: msg.userId === user?.uid ? '18px 4px 18px 18px' : '4px 18px 18px 18px',
-                        padding: '8px 14px'
-                      }}>
-                        <div style={{
-                          fontSize: '11px',
-                          fontWeight: '500',
-                          marginBottom: '4px',
-                          opacity: 0.7,
-                          fontFamily: 'Questrial, sans-serif'
-                        }}>
-                          {msg.userName}
-                        </div>
-                        <div style={{
-                          fontSize: '13px',
-                          lineHeight: '1.4',
-                          fontFamily: 'Questrial, sans-serif',
-                          wordBreak: 'break-word'
-                        }}>
-                          {msg.text}
-                        </div>
-                        <div style={{
-                          fontSize: '9px',
-                          marginTop: '4px',
-                          opacity: 0.5,
-                          fontFamily: 'Questrial, sans-serif',
-                          textAlign: msg.userId === user?.uid ? 'right' : 'left'
-                        }}>
-                          {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                )}
-                <div ref={messagesEndRef} />
-              </div>
-
-              {/* Input Area */}
-              {user && (
-                <div style={{
-                  padding: '12px 16px',
-                  borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-                  display: 'flex',
-                  gap: '10px'
-                }}>
-                  <input
-                    type="text"
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-                    placeholder="Type your message..."
+                    fontFamily: 'Questrial, sans-serif',
+                    fontSize: '14px',
+                    outline: 'none'
+                  }}
+                />
+                <div style={{ display: 'flex', gap: '8px', justifyContent: 'space-between' }}>
+                  <button
+                    type="submit"
                     style={{
                       flex: 1,
-                      padding: '10px 14px',
-                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                      border: '1px solid rgba(255, 255, 255, 0.2)',
-                      borderRadius: '60px',
-                      color: '#ffffff',
-                      fontFamily: 'Questrial, sans-serif',
-                      fontSize: '13px',
-                      outline: 'none'
-                    }}
-                  />
-                  <button
-                    onClick={sendMessage}
-                    disabled={!newMessage.trim()}
-                    style={{
-                      padding: '10px 20px',
-                      backgroundColor: newMessage.trim() ? '#ffffff' : 'rgba(255, 255, 255, 0.3)',
-                      color: newMessage.trim() ? '#000000' : '#ffffff',
+                      padding: '10px',
+                      backgroundColor: '#ffffff',
+                      color: '#000000',
                       border: 'none',
                       borderRadius: '60px',
-                      cursor: newMessage.trim() ? 'pointer' : 'not-allowed',
+                      cursor: 'pointer',
                       fontFamily: 'Questrial, sans-serif',
-                      fontSize: '13px',
-                      fontWeight: '500',
-                      transition: 'all 0.2s ease'
+                      fontSize: '14px',
+                      fontWeight: '500'
                     }}
                   >
-                    Send
+                    {isLoginMode ? 'Sign In' : 'Sign Up'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsLoginMode(!isLoginMode)}
+                    style={{
+                      flex: 1,
+                      padding: '10px',
+                      backgroundColor: 'transparent',
+                      color: '#ffffff',
+                      border: '1px solid rgba(255,255,255,0.3)',
+                      borderRadius: '60px',
+                      cursor: 'pointer',
+                      fontFamily: 'Questrial, sans-serif',
+                      fontSize: '14px'
+                    }}
+                  >
+                    {isLoginMode ? 'Create Account' : 'Back to Login'}
                   </button>
                 </div>
-              )}
-            </>
+                <button
+                  type="button"
+                  onClick={handleGoogleSignIn}
+                  style={{
+                    width: '100%',
+                    padding: '10px',
+                    backgroundColor: '#4285F4',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '60px',
+                    cursor: 'pointer',
+                    fontFamily: 'Questrial, sans-serif',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px'
+                  }}
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#ffffff"/>
+                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#ffffff"/>
+                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#ffffff"/>
+                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#ffffff"/>
+                  </svg>
+                  Google
+                </button>
+                {authError && (
+                  <div style={{
+                    color: '#ff6b6b',
+                    fontSize: '12px',
+                    textAlign: 'center',
+                    marginTop: '8px'
+                  }}>
+                    {authError}
+                  </div>
+                )}
+              </form>
+            </div>
+          ) : isLoadingMessages ? (
+            <div style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              height: '100%'
+            }}>
+              <div style={{
+                width: '30px',
+                height: '30px',
+                border: '2px solid rgba(255,255,255,0.3)',
+                borderTopColor: '#ffffff',
+                borderRadius: '50%',
+                animation: 'spin 1s linear infinite'
+              }} />
+            </div>
+          ) : messages.length === 0 ? (
+            <div style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              height: '100%',
+              fontFamily: 'Questrial, sans-serif',
+              color: '#ffffff',
+              opacity: 0.5,
+              textAlign: 'center'
+            }}>
+              No messages yet.<br />Be the first to say hello! 👋
+            </div>
+          ) : (
+            messages.map((msg) => {
+              // Safe check untuk userName
+              const safeUserName = msg.userName || 'User';
+              const firstChar = safeUserName.charAt(0).toUpperCase();
+              
+              return (
+                <div
+                  key={msg.id}
+                  className="chat-message"
+                  style={{
+                    display: 'flex',
+                    gap: '12px',
+                    alignItems: 'flex-start',
+                    flexDirection: msg.userId === user?.uid ? 'row-reverse' : 'row'
+                  }}
+                >
+                  {msg.userPhoto ? (
+                    <img
+                      src={msg.userPhoto}
+                      alt={safeUserName}
+                      style={{
+                        width: '32px',
+                        height: '32px',
+                        borderRadius: '50%',
+                        objectFit: 'cover'
+                      }}
+                    />
+                  ) : (
+                    <div style={{
+                      width: '32px',
+                      height: '32px',
+                      borderRadius: '50%',
+                      backgroundColor: 'rgba(255,255,255,0.2)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontFamily: 'Questrial, sans-serif',
+                      fontSize: '12px',
+                      color: '#ffffff'
+                    }}>
+                      {firstChar}
+                    </div>
+                  )}
+                  <div style={{
+                    maxWidth: '70%',
+                    backgroundColor: msg.userId === user?.uid ? '#ffffff' : 'rgba(255,255,255,0.1)',
+                    color: msg.userId === user?.uid ? '#000000' : '#ffffff',
+                    borderRadius: msg.userId === user?.uid ? '18px 4px 18px 18px' : '4px 18px 18px 18px',
+                    padding: '8px 14px'
+                  }}>
+                    <div style={{
+                      fontSize: '11px',
+                      fontWeight: '500',
+                      marginBottom: '4px',
+                      opacity: 0.7,
+                      fontFamily: 'Questrial, sans-serif'
+                    }}>
+                      {safeUserName}
+                    </div>
+                    <div style={{
+                      fontSize: '13px',
+                      lineHeight: '1.4',
+                      fontFamily: 'Questrial, sans-serif',
+                      wordBreak: 'break-word'
+                    }}>
+                      {msg.text}
+                    </div>
+                    <div style={{
+                      fontSize: '9px',
+                      marginTop: '4px',
+                      opacity: 0.5,
+                      fontFamily: 'Questrial, sans-serif',
+                      textAlign: msg.userId === user?.uid ? 'right' : 'left'
+                    }}>
+                      {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </div>
+                  </div>
+                </div>
+              );
+            })
           )}
+          <div ref={messagesEndRef} />
         </div>
 
-        {/* Teks MENURU besar di kiri bawah */}
-        <div style={{
-          width: '100%',
-          textAlign: 'left'
-        }}>
-          <span 
-            style={{
-              fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
-              fontWeight: 'normal',
-              fontSize: '300px',
-              color: '#ffffff',
-              textAlign: 'left',
-              letterSpacing: '-0.02em',
-              opacity: 0.15,
-              textTransform: 'uppercase',
-              lineHeight: '0.8',
-              whiteSpace: 'nowrap',
-              WebkitFontSmoothing: 'antialiased',
-              MozOsxFontSmoothing: 'grayscale',
-              fontKerning: 'normal',
-              margin: 0,
-              padding: 0,
-              pointerEvents: 'none'
-            }}>
-            MENURU
-          </span>
-        </div>
-      </div>
+        {/* Input Area */}
+        {user && (
+          <div style={{
+            padding: '12px 16px',
+            borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+            display: 'flex',
+            gap: '10px'
+          }}>
+            <input
+              type="text"
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+              placeholder="Type your message..."
+              style={{
+                flex: 1,
+                padding: '10px 14px',
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                borderRadius: '60px',
+                color: '#ffffff',
+                fontFamily: 'Questrial, sans-serif',
+                fontSize: '13px',
+                outline: 'none'
+              }}
+            />
+            <button
+              onClick={sendMessage}
+              disabled={!newMessage.trim()}
+              style={{
+                padding: '10px 20px',
+                backgroundColor: newMessage.trim() ? '#ffffff' : 'rgba(255, 255, 255, 0.3)',
+                color: newMessage.trim() ? '#000000' : '#ffffff',
+                border: 'none',
+                borderRadius: '60px',
+                cursor: newMessage.trim() ? 'pointer' : 'not-allowed',
+                fontFamily: 'Questrial, sans-serif',
+                fontSize: '13px',
+                fontWeight: '500',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              Send
+            </button>
+          </div>
+        )}
+      </>
+    )}
+  </div>
+
+  {/* Teks MENURU besar di kiri bawah - TIDAK TEBAL, WARNA PUTIH FULL */}
+  <div style={{
+    width: '100%',
+    textAlign: 'left'
+  }}>
+    <span 
+      style={{
+        fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
+        fontWeight: 'normal',
+        fontSize: '300px',
+        color: '#ffffff',
+        textAlign: 'left',
+        letterSpacing: '-0.02em',
+        opacity: 1,
+        textTransform: 'uppercase',
+        lineHeight: '0.8',
+        whiteSpace: 'nowrap',
+        WebkitFontSmoothing: 'antialiased',
+        MozOsxFontSmoothing: 'grayscale',
+        fontKerning: 'normal',
+        margin: 0,
+        padding: 0,
+        pointerEvents: 'none'
+      }}>
+      MENURU
+    </span>
+  </div>
+</div>
 
       {/* Calendar Call Modal */}
       {showCalendarModal && (
