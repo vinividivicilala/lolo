@@ -3533,44 +3533,268 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* SECTION CALENDAR SUBMISSIONS - Warna Merah Stabilo */}
-            {calendarSubmissions.length > 0 && (
-              <div className="calendar-submissions-section">
-                <div className="calendar-submissions-title">
-                  📅 CALL CALENDAR
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                  {calendarSubmissions.map((submission) => (
-                    <div key={submission.id} className="submission-card">
-                      <div className="submission-date-highlight">
-                        {submission.selectedDateFormatted || new Date(submission.selectedDate).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
-                      </div>
-                      <div className="submission-name">
-                        {submission.fullName}
-                      </div>
-                      <div className="submission-time">
-                        ⏰ {submission.selectedTime} WIB • {submission.meetingType}
-                      </div>
-                      <div className="submission-detail">
-                        <p><strong>📧 Email:</strong> {submission.email}</p>
-                        <p><strong>📱 No. HP:</strong> {submission.phoneNumber}</p>
-                        {submission.companyName && <p><strong>🏢 Perusahaan:</strong> {submission.companyName}</p>}
-                        <p><strong>💬 Alasan percaya:</strong> {submission.trustReason.substring(0, 100)}...</p>
-                        {submission.guests && submission.guests.length > 0 && (
-                          <p><strong>👥 Guest:</strong> {submission.guests.join(', ')}</p>
-                        )}
-                        <p><strong>📅 Platform:</strong> {
-                          submission.platform === 'google_meet' ? 'Google Meet' :
-                          submission.platform === 'zoom' ? 'Zoom' :
-                          submission.platform === 'tatap_muka' ? 'Tatap Muka (Offline)' :
-                          'Via HP/Telepon'
-                        }</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+        {/* SECTION CALENDAR SUBMISSIONS - Design seperti "Meeting" dengan line box */}
+{calendarSubmissions.length > 0 && (
+  <div style={{
+    width: '100%',
+    padding: '60px 80px',
+    backgroundColor: '#fff8e1',
+    borderTop: '1px solid rgba(0,0,0,0.05)',
+    boxSizing: 'border-box'
+  }}>
+    <div style={{
+      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+      fontSize: '40px',
+      fontWeight: '500',
+      color: '#ff5722',
+      marginBottom: '40px',
+      letterSpacing: '-0.02em',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '15px'
+    }}>
+      <span>📅</span>
+      <span>Meeting</span>
+      <span style={{
+        fontSize: '18px',
+        color: '#999',
+        fontWeight: '400',
+        marginLeft: '10px'
+      }}>
+        ({calendarSubmissions.length} jadwal)
+      </span>
+    </div>
+    
+    <div style={{
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '16px'
+    }}>
+      {calendarSubmissions.map((submission) => {
+        const submissionDate = new Date(submission.selectedDate);
+        const formattedDate = submissionDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+        const formattedMonth = submissionDate.toLocaleDateString('id-ID', { month: 'long' });
+        const formattedDay = submissionDate.toLocaleDateString('id-ID', { weekday: 'short' });
+        
+        return (
+          <div
+            key={submission.id}
+            style={{
+              display: 'flex',
+              alignItems: 'stretch',
+              backgroundColor: '#ffffff',
+              borderRadius: '16px',
+              overflow: 'hidden',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+              border: '1px solid rgba(255,87,34,0.2)',
+              transition: 'all 0.2s ease',
+              cursor: 'pointer'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.1)';
+              e.currentTarget.style.transform = 'translateY(-2px)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.04)';
+              e.currentTarget.style.transform = 'translateY(0)';
+            }}
+          >
+            {/* LEFT - Date Box (kotak tanggal) */}
+            <div style={{
+              width: '100px',
+              backgroundColor: '#ff5722',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '16px 12px',
+              color: '#ffffff',
+              textAlign: 'center'
+            }}>
+              <div style={{
+                fontSize: '36px',
+                fontWeight: '700',
+                lineHeight: '1',
+                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif"
+              }}>
+                {submissionDate.getDate()}
               </div>
-            )}
+              <div style={{
+                fontSize: '12px',
+                fontWeight: '500',
+                textTransform: 'uppercase',
+                marginTop: '4px',
+                fontFamily: "'Questrial', sans-serif"
+              }}>
+                {formattedMonth.substring(0, 3)}
+              </div>
+              <div style={{
+                fontSize: '10px',
+                fontWeight: '400',
+                opacity: 0.8,
+                marginTop: '2px',
+                fontFamily: "'Questrial', sans-serif"
+              }}>
+                {formattedDay}
+              </div>
+            </div>
+            
+            {/* MIDDLE - Info Meeting */}
+            <div style={{
+              flex: 1,
+              padding: '16px 20px',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              gap: '8px',
+              backgroundColor: '#ffffff'
+            }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '15px',
+                flexWrap: 'wrap'
+              }}>
+                <h3 style={{
+                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                  fontSize: '18px',
+                  fontWeight: '600',
+                  color: '#333',
+                  margin: 0,
+                  letterSpacing: '-0.01em'
+                }}>
+                  {submission.fullName}
+                </h3>
+                <span style={{
+                  fontSize: '11px',
+                  padding: '3px 10px',
+                  borderRadius: '60px',
+                  backgroundColor: '#ffeb3b',
+                  color: '#333',
+                  fontWeight: '500'
+                }}>
+                  {submission.status === 'pending' ? 'Menunggu' : submission.status}
+                </span>
+              </div>
+              
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '20px',
+                flexWrap: 'wrap',
+                fontSize: '13px',
+                color: '#666',
+                fontFamily: "'Questrial', sans-serif"
+              }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                  <span>⏰</span> {submission.selectedTime} WIB
+                </span>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                  <span>🎯</span> {submission.meetingType}
+                </span>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                  <span>💬</span> {submission.trustReason.substring(0, 40)}...
+                </span>
+              </div>
+              
+              <div style={{
+                fontSize: '12px',
+                color: '#999',
+                fontFamily: "'Questrial', sans-serif",
+                display: 'flex',
+                alignItems: 'center',
+                gap: '15px',
+                flexWrap: 'wrap'
+              }}>
+                <span>📧 {submission.email}</span>
+                <span>📱 {submission.phoneNumber}</span>
+                {submission.companyName && <span>🏢 {submission.companyName}</span>}
+              </div>
+            </div>
+            
+            {/* RIGHT - Action & Tautan Calendar */}
+            <div style={{
+              width: '120px',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '10px',
+              padding: '16px',
+              borderLeft: '1px dashed #ffeb3b',
+              backgroundColor: '#fffaf5'
+            }}>
+              <a
+                href={`https://calendar.google.com/calendar/render?action=TEMPLATE&text=Meeting+with+${encodeURIComponent(submission.fullName)}&dates=${submissionDate.toISOString().replace(/-|:|\.\d+/g, '')}/${new Date(submissionDate.getTime() + 60*60*1000).toISOString().replace(/-|:|\.\d+/g, '')}&details=${encodeURIComponent(submission.trustReason)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  fontSize: '11px',
+                  color: '#ff5722',
+                  textDecoration: 'none',
+                  fontFamily: "'Questrial', sans-serif",
+                  padding: '5px 10px',
+                  borderRadius: '20px',
+                  backgroundColor: '#fff0e6',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#ff5722';
+                  e.currentTarget.style.color = '#ffffff';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = '#fff0e6';
+                  e.currentTarget.style.color = '#ff5722';
+                }}
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M4 4H20C21.1 4 22 4.9 22 6V20C22 21.1 21.1 22 20 22H4C2.9 22 2 21.1 2 20V6C2 4.9 2.9 4 4 4Z" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+                  <path d="M8 2V6M16 2V6M3 10H21" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
+                Add to Calendar
+              </a>
+              <a
+                href={`https://calendar.google.com/calendar/u/0/r?tab=mc`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  fontSize: '11px',
+                  color: '#4a90e2',
+                  textDecoration: 'none',
+                  fontFamily: "'Questrial', sans-serif",
+                  padding: '5px 10px',
+                  borderRadius: '20px',
+                  backgroundColor: '#e8f0fe',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#4a90e2';
+                  e.currentTarget.style.color = '#ffffff';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = '#e8f0fe';
+                  e.currentTarget.style.color = '#4a90e2';
+                }}
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M18 13V16M18 22V19M18 19L15 16M18 19L21 16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                  <path d="M4 4H20C21.1 4 22 4.9 22 6V13.5M2 20V6C2 4.9 2.9 4 4 4M8 2V6M16 2V6M3 10H13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
+                View Calendar
+              </a>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  </div>
+)}
 
             {/* Bagian footer */}
             <div style={{
