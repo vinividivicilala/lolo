@@ -99,6 +99,7 @@ export default function HomePage(): React.JSX.Element {
   const [announcement, setAnnouncement] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showCalendarModal, setShowCalendarModal] = useState(false);
+  const [showFormView, setShowFormView] = useState(false); // State untuk toggle antara calendar dan form
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState<string>("");
   const [meetingType, setMeetingType] = useState<string>("Online");
@@ -115,7 +116,7 @@ export default function HomePage(): React.JSX.Element {
   const [featuresBgColor, setFeaturesBgColor] = useState('#0000ff');
   const [featuresTextColor, setFeaturesTextColor] = useState('#ffffff');
   
-  // State untuk Shadow Page (halaman bayangan hitam)
+  // State untuk Shadow Page
   const [showShadowPage, setShowShadowPage] = useState(false);
   const [isShadowTransitioning, setIsShadowTransitioning] = useState(false);
   const shadowPageRef = useRef<HTMLDivElement>(null);
@@ -144,7 +145,7 @@ export default function HomePage(): React.JSX.Element {
   const modalRef = useRef<HTMLDivElement>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
   
-  // Refs untuk teks yang akan di-split
+  // Refs untuk teks
   const mencatatTextRef = useRef<HTMLDivElement>(null);
   const menuruTextRef = useRef<HTMLSpanElement>(null);
   const menuruTopTextRef = useRef<HTMLDivElement>(null);
@@ -312,20 +313,14 @@ export default function HomePage(): React.JSX.Element {
     setSelectedDate(date);
   };
 
-  const handleScheduleMeeting = () => {
-    if (selectedDate && selectedTime) {
-      alert(`Meeting scheduled for ${selectedDate.toLocaleDateString()} at ${selectedTime}\nType: ${meetingType}\nLocation: ${location || 'Not specified'}`);
-      setShowCalendarModal(false);
-      setSelectedDate(null);
-      setSelectedTime("");
-    } else {
-      alert("Please select date and time");
-    }
+  const changeMonth = (increment: number) => {
+    const newDate = new Date(currentMonth);
+    newDate.setMonth(currentMonth.getMonth() + increment);
+    setCurrentMonth(newDate);
   };
 
-  // Fungsi baru untuk handle form confirm dengan validasi lengkap
-  const handleScheduleMeetingForm = () => {
-    // Ambil semua nilai input
+  // Fungsi untuk handle form confirm
+  const handleConfirmMeeting = () => {
     const fullName = (document.getElementById('fullName') as HTMLInputElement)?.value;
     const emailAddress = (document.getElementById('emailAddress') as HTMLInputElement)?.value;
     const locationOption = (document.getElementById('locationOption') as HTMLSelectElement)?.value;
@@ -333,9 +328,7 @@ export default function HomePage(): React.JSX.Element {
     const trustReason = (document.getElementById('trustReason') as HTMLTextAreaElement)?.value;
     const phoneNumber = (document.getElementById('phoneNumber') as HTMLInputElement)?.value;
     
-    // Validasi required fields
     const errors: string[] = [];
-    
     if (!fullName?.trim()) errors.push("Nama Lengkap");
     if (!emailAddress?.trim()) errors.push("Email Address");
     if (!locationOption) errors.push("Platform Meeting");
@@ -347,14 +340,12 @@ export default function HomePage(): React.JSX.Element {
       return;
     }
     
-    // Validasi email format
     const emailRegex = /^[^\s@]+@([^\s@.,]+\.)+[^\s@.,]{2,}$/;
     if (!emailRegex.test(emailAddress)) {
       alert("Format email tidak valid!");
       return;
     }
     
-    // Validasi nomor HP (minimal 10 digit)
     const phoneRegex = /^[0-9+\-\s()]{10,}$/;
     if (!phoneRegex.test(phoneNumber)) {
       alert("Format nomor HP tidak valid! Minimal 10 digit.");
@@ -371,7 +362,6 @@ export default function HomePage(): React.JSX.Element {
       return;
     }
     
-    // Ambil guest list
     const guestEmails: string[] = [];
     const guestItems = document.querySelectorAll('#guestList .guest-item');
     guestItems.forEach(item => {
@@ -379,33 +369,31 @@ export default function HomePage(): React.JSX.Element {
       if (email) guestEmails.push(email);
     });
     
-    // Buat pesan konfirmasi
-    let confirmMessage = `📅 JADWAL MEETING\n\n`;
-    confirmMessage += `📌 Tanggal: ${selectedDate.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}\n`;
-    confirmMessage += `⏰ Waktu: ${selectedTime} WIB\n`;
-    confirmMessage += `📋 Tipe Meeting: ${meetingType}\n\n`;
-    confirmMessage += `👤 DATA DIRI\n`;
-    confirmMessage += `• Nama: ${fullName}\n`;
-    confirmMessage += `• Email: ${emailAddress}\n`;
-    confirmMessage += `• No HP: ${phoneNumber}\n`;
-    confirmMessage += `• Platform: ${locationOption === 'google_meet' ? 'Google Meet' : locationOption === 'zoom' ? 'Zoom' : locationOption === 'tatap_muka' ? 'Tatap Muka (Offline)' : 'Via Nomor HP (Telepon/WA)'}\n`;
-    if (companyName) confirmMessage += `• Perusahaan: ${companyName}\n`;
-    confirmMessage += `• Alasan percaya: ${trustReason}\n`;
+    let confirmMessage = `JADWAL MEETING\n\n`;
+    confirmMessage += `Tanggal: ${selectedDate.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}\n`;
+    confirmMessage += `Waktu: ${selectedTime} WIB\n`;
+    confirmMessage += `Tipe Meeting: ${meetingType}\n\n`;
+    confirmMessage += `DATA DIRI\n`;
+    confirmMessage += `Nama: ${fullName}\n`;
+    confirmMessage += `Email: ${emailAddress}\n`;
+    confirmMessage += `No HP: ${phoneNumber}\n`;
+    confirmMessage += `Platform: ${locationOption === 'google_meet' ? 'Google Meet' : locationOption === 'zoom' ? 'Zoom' : locationOption === 'tatap_muka' ? 'Tatap Muka' : 'Via HP'}\n`;
+    if (companyName) confirmMessage += `Perusahaan: ${companyName}\n`;
+    confirmMessage += `Alasan percaya: ${trustReason}\n`;
     if (guestEmails.length > 0) {
-      confirmMessage += `\n👥 Guest:\n`;
+      confirmMessage += `\nGuest:\n`;
       guestEmails.forEach((email, idx) => {
         confirmMessage += `  ${idx + 1}. ${email}\n`;
       });
     }
     
-    alert(confirmMessage + `\n\n✅ Meeting request telah dikirim!\nKami akan menghubungi Anda maksimal 1x24 jam.`);
+    alert(confirmMessage + `\n\nMeeting request telah dikirim!\nKami akan menghubungi Anda maksimal 1x24 jam.`);
     
-    // Reset form dan tutup modal
     setShowCalendarModal(false);
+    setShowFormView(false);
     setSelectedDate(null);
     setSelectedTime("");
     
-    // Reset form values
     const formInputs = ['fullName', 'emailAddress', 'companyName', 'trustReason', 'phoneNumber'];
     formInputs.forEach(id => {
       const input = document.getElementById(id) as HTMLInputElement | HTMLTextAreaElement;
@@ -417,23 +405,15 @@ export default function HomePage(): React.JSX.Element {
     if (guestList) guestList.innerHTML = '';
   };
 
-  const changeMonth = (increment: number) => {
-    const newDate = new Date(currentMonth);
-    newDate.setMonth(currentMonth.getMonth() + increment);
-    setCurrentMonth(newDate);
-  };
-
   // Fungsi untuk scroll ke bottom chat
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  // Auto scroll ketika ada pesan baru
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
 
-  // Firebase Auth Listener
   useEffect(() => {
     if (!auth) return;
 
@@ -455,7 +435,6 @@ export default function HomePage(): React.JSX.Element {
     return () => unsubscribe();
   }, []);
 
-  // Firebase Messages Listener
   useEffect(() => {
     if (!db) return;
 
@@ -473,7 +452,6 @@ export default function HomePage(): React.JSX.Element {
     return () => unsubscribe();
   }, []);
 
-  // Kirim pesan dengan reply
   const sendMessage = async () => {
     if (!newMessage.trim() || !user || !db) return;
 
@@ -1327,7 +1305,6 @@ export default function HomePage(): React.JSX.Element {
     });
   };
 
-  // Effect untuk Shadow Page
   useEffect(() => {
     if (isLoading) return;
 
@@ -1390,7 +1367,6 @@ export default function HomePage(): React.JSX.Element {
     };
   }, [isLoading, showShadowPage, isShadowTransitioning]);
 
-  // Effect untuk carousel
   useEffect(() => {
     if (isLoading) return;
     
@@ -1421,7 +1397,6 @@ export default function HomePage(): React.JSX.Element {
     };
   }, [isLoading]);
 
-  // Effect untuk ScrollSmoother
   useEffect(() => {
     const initSmoother = () => {
       if (typeof window !== 'undefined' && !smootherRef.current) {
@@ -1451,7 +1426,6 @@ export default function HomePage(): React.JSX.Element {
     };
   }, []);
 
-  // Efek scroll untuk FEATURES section
   useEffect(() => {
     if (isLoading) return;
 
@@ -1590,7 +1564,6 @@ export default function HomePage(): React.JSX.Element {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [isLoading, featuresBgColor, noteHover, communityHover, calendarHover, blogHover, donationHover]);
 
-  // Efek scroll untuk TRUSTED COLLABS section
   useEffect(() => {
     if (isLoading) return;
 
@@ -1647,7 +1620,6 @@ export default function HomePage(): React.JSX.Element {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [isLoading]);
 
-  // Animasi SplitText untuk FEATURES title
   useEffect(() => {
     if (isLoading) return;
 
@@ -1699,7 +1671,6 @@ export default function HomePage(): React.JSX.Element {
     };
   }, [isLoading]);
 
-  // Animasi SplitText untuk TRUSTED COLLABS
   useEffect(() => {
     if (isLoading) return;
 
@@ -1752,7 +1723,6 @@ export default function HomePage(): React.JSX.Element {
     };
   }, [isLoading]);
 
-  // Loading animation
   useEffect(() => {
     if (!isLoading || !loadingOverlayRef.current) return;
 
@@ -1920,7 +1890,6 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Effect untuk scroll animations
   useEffect(() => {
     if (isLoading) return;
 
@@ -2004,7 +1973,6 @@ export default function HomePage(): React.JSX.Element {
     };
   }, [isLoading]);
 
-  // Cookie consent
   useEffect(() => {
     const consent = localStorage.getItem('cookieConsent');
     if (consent === null) {
@@ -2012,11 +1980,11 @@ export default function HomePage(): React.JSX.Element {
     }
   }, []);
 
-  // Click outside handler for modal
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
         setShowCalendarModal(false);
+        setShowFormView(false);
       }
     };
     
@@ -2029,9 +1997,8 @@ export default function HomePage(): React.JSX.Element {
     };
   }, [showCalendarModal]);
 
-  // Effect untuk add guest button di calendar modal
   useEffect(() => {
-    if (showCalendarModal) {
+    if (showCalendarModal && showFormView) {
       setTimeout(() => {
         const addGuestBtn = document.getElementById('addGuestBtn');
         if (addGuestBtn) {
@@ -2057,7 +2024,7 @@ export default function HomePage(): React.JSX.Element {
             const guestItem = document.createElement('div');
             guestItem.className = 'guest-item';
             guestItem.setAttribute('data-email', guestEmail);
-            guestItem.style.cssText = 'display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; background-color: #e0e0e0; border-radius: 60px; font-size: 12px;';
+            guestItem.style.cssText = 'display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; background-color: #f0f0f0; border-radius: 60px; font-size: 12px;';
             guestItem.innerHTML = `
               <span>${guestEmail}</span>
               <button class="remove-guest" style="background: none; border: none; cursor: pointer; color: #ff4444; font-size: 16px;">×</button>
@@ -2073,7 +2040,7 @@ export default function HomePage(): React.JSX.Element {
         }
       }, 100);
     }
-  }, [showCalendarModal]);
+  }, [showCalendarModal, showFormView]);
 
   const handleAccept = () => {
     localStorage.setItem('cookieConsent', 'accepted');
@@ -2095,11 +2062,20 @@ export default function HomePage(): React.JSX.Element {
 
   const handleCalendarCall = () => {
     setShowCalendarModal(true);
+    setShowFormView(false);
+    setSelectedDate(null);
+    setSelectedTime("");
   };
 
   const ArrowIcon = ({ size = 24 }: { size?: number }) => (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+
+  const NorthWestArrow = ({ size = 50 }: { size?: number }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M17 7L7 17M7 17H17M7 17V7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   );
 
@@ -2311,13 +2287,11 @@ export default function HomePage(): React.JSX.Element {
           to { opacity: 1; transform: scale(1); }
         }
 
-        /* Animasi untuk Shadow Page fade in */
         @keyframes shadowFadeIn {
           from { opacity: 0; }
           to { opacity: 1; }
         }
 
-        /* Scrollbar untuk chat */
         .chat-messages::-webkit-scrollbar {
           width: 6px;
           display: block;
@@ -2494,7 +2468,6 @@ export default function HomePage(): React.JSX.Element {
           line-height: 1.3;
         }
 
-        /* SECTION FEATURES */
         .features-section {
           min-height: 25vh;
           width: 100%;
@@ -2547,7 +2520,6 @@ export default function HomePage(): React.JSX.Element {
           transition: color 0.2s ease;
         }
 
-        /* Hover Container */
         .hover-container {
           position: relative;
           cursor: pointer;
@@ -2570,7 +2542,6 @@ export default function HomePage(): React.JSX.Element {
           position: relative;
         }
 
-        /* Update container */
         .update-container {
           opacity: 0;
           transform: translateX(50px);
@@ -2594,7 +2565,6 @@ export default function HomePage(): React.JSX.Element {
           font-size: 35px;
         }
 
-        /* Arrow */
         .features-right-arrow {
           display: inline-flex;
           align-items: center;
@@ -2611,7 +2581,6 @@ export default function HomePage(): React.JSX.Element {
           transition: stroke 0.2s ease, transform 0.2s ease;
         }
 
-        /* Circle Images container */
         .circle-images-container {
           opacity: 0;
           transform: translateX(20px);
@@ -2635,7 +2604,6 @@ export default function HomePage(): React.JSX.Element {
           box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
 
-        /* Overlay hitam - full width ke kiri mentok */
         .features-overlay {
           position: absolute;
           top: -20px;
@@ -2651,7 +2619,6 @@ export default function HomePage(): React.JSX.Element {
           width: calc(100% + 100vw + 200px);
         }
 
-        /* Hover container saat hover */
         .hover-container:hover .features-overlay {
           opacity: 1;
         }
@@ -2666,7 +2633,6 @@ export default function HomePage(): React.JSX.Element {
           transform: translateX(0);
         }
 
-        /* SECTION TRUSTED COLLABS */
         .trusted-section {
           min-height: 100vh;
           width: 100%;
@@ -2697,7 +2663,6 @@ export default function HomePage(): React.JSX.Element {
           margin-bottom: 60px;
         }
 
-        /* Carousel Horizontal Styles */
         .carousel-container {
           width: 100%;
           overflow-x: auto;
@@ -2782,7 +2747,7 @@ export default function HomePage(): React.JSX.Element {
         }
       `}</style>
       
-      {/* LOADING OVERLAY */}
+      {/* LOADING OVERLAY - Sama seperti sebelumnya */}
       {isLoading && (
         <div
           ref={loadingOverlayRef}
@@ -2944,7 +2909,6 @@ export default function HomePage(): React.JSX.Element {
                 MN'RU© - 26'
               </div>
 
-              {/* Floating Images */}
               <div className="studio-hover-images">
                 <div
                   ref={img1Ref}
@@ -2982,7 +2946,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* SECTION FEATURES - 01 NOTE */}
+            {/* SECTION FEATURES - Sama seperti sebelumnya */}
             <div
               ref={featuresSectionRef}
               className="features-section"
@@ -3069,7 +3033,6 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* SECTION FEATURES - 02 COMMUNITY */}
             <div
               ref={featuresSection2Ref}
               className="features-section"
@@ -3147,7 +3110,6 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* SECTION FEATURES - 03 CALENDAR */}
             <div
               ref={featuresSection3Ref}
               className="features-section"
@@ -3225,7 +3187,6 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* SECTION FEATURES - 04 BLOG */}
             <div
               ref={featuresSection4Ref}
               className="features-section"
@@ -3303,7 +3264,6 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* SECTION FEATURES - 05 DONATION */}
             <div
               ref={featuresSection5Ref}
               className="features-section"
@@ -3697,7 +3657,6 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </div>
 
-              {/* Teks MENURU besar */}
               <footer style={{
                 position: 'relative',
                 bottom: 0,
@@ -3742,8 +3701,7 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </div>
 
-      
-      {/* SHADOW PAGE - Halaman bayangan hitam dengan Chat */}
+      {/* SHADOW PAGE */}
       <div
         ref={shadowPageRef}
         style={{
@@ -3766,7 +3724,6 @@ export default function HomePage(): React.JSX.Element {
           flexDirection: 'column',
           position: 'relative'
         }}>
-          {/* Teks MENURU besar di bawah sisi kiri */}
           <div style={{
             position: 'absolute',
             bottom: '80px',
@@ -3790,7 +3747,6 @@ export default function HomePage(): React.JSX.Element {
             </span>
           </div>
 
-          {/* Tombol untuk toggle chat visibility */}
           {!isChatVisible && (
             <button
               onClick={() => setIsChatVisible(true)}
@@ -3823,7 +3779,6 @@ export default function HomePage(): React.JSX.Element {
             </button>
           )}
 
-          {/* Teks Let's Talk di kiri atas */}
           <div style={{
             position: 'absolute',
             top: '80px',
@@ -3852,7 +3807,6 @@ export default function HomePage(): React.JSX.Element {
             </div>
           </div>
 
-          {/* Chat Container */}
           {isChatVisible && (
             <div style={{
               position: 'absolute',
@@ -3867,7 +3821,6 @@ export default function HomePage(): React.JSX.Element {
               zIndex: 20,
               border: 'none'
             }}>
-              {/* Header Chat */}
               <div style={{
                 padding: '24px 28px',
                 backgroundColor: 'transparent',
@@ -3942,7 +3895,6 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </div>
 
-              {/* Reply Indicator */}
               {replyTo && (
                 <div style={{
                   padding: '12px 24px',
@@ -3973,7 +3925,6 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               )}
 
-              {/* Messages Area */}
               <div 
                 ref={chatContainerRef}
                 className="chat-messages"
@@ -4091,7 +4042,6 @@ export default function HomePage(): React.JSX.Element {
                 <div ref={messagesEndRef} />
               </div>
 
-              {/* Input Area */}
               {user ? (
                 <div style={{
                   padding: '20px 28px',
@@ -4434,596 +4384,775 @@ export default function HomePage(): React.JSX.Element {
         </div>
       )}
 
-      {/* Calendar Call Modal - DIPERBAIKI DENGAN FORM DATA DIRI */}
+      {/* CALENDAR CALL MODAL - Dengan toggle antara calendar dan form */}
       {showCalendarModal && (
         <div className="calendar-modal-overlay">
           <div ref={modalRef} className="calendar-modal">
-            <div style={{
-              display: 'flex',
-              flexDirection: 'row',
-              height: '100%',
-              minHeight: '700px'
-            }}>
-              {/* SISI KIRI - Info Profile */}
+            {!showFormView ? (
+              // TAMPILAN CALENDAR (View 1)
               <div style={{
-                flex: 1.2,
-                padding: '32px',
-                borderRight: '1px solid #e0e0e0',
                 display: 'flex',
-                flexDirection: 'column',
-                gap: '28px'
+                flexDirection: 'row',
+                height: '100%',
+                minHeight: '600px'
               }}>
+                {/* SISI KIRI - Info Profile */}
                 <div style={{
+                  flex: 1.2,
+                  padding: '32px',
+                  borderRight: '1px solid #e0e0e0',
                   display: 'flex',
-                  alignItems: 'center',
-                  gap: '20px',
-                  paddingBottom: '20px',
-                  borderBottom: '1px solid #e0e0e0'
+                  flexDirection: 'column',
+                  gap: '28px'
                 }}>
                   <div style={{
-                    width: '70px',
-                    height: '90px',
-                    borderRadius: '12px',
-                    overflow: 'hidden',
-                    position: 'relative',
-                    border: '2px solid #e0e0e0'
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '20px',
+                    paddingBottom: '20px',
+                    borderBottom: '1px solid #e0e0e0'
                   }}>
-                    <Image
-                      src="/images/5.jpg"
-                      alt="Farid Ardiansyah"
-                      fill
-                      style={{ objectFit: 'cover', objectPosition: 'center' }}
-                    />
+                    <div style={{
+                      width: '70px',
+                      height: '90px',
+                      borderRadius: '12px',
+                      overflow: 'hidden',
+                      position: 'relative',
+                      border: '2px solid #e0e0e0'
+                    }}>
+                      <Image
+                        src="/images/5.jpg"
+                        alt="Farid Ardiansyah"
+                        fill
+                        style={{ objectFit: 'cover', objectPosition: 'center' }}
+                      />
+                    </div>
+                    <div>
+                      <div style={{
+                        fontFamily: "'Questrial', sans-serif",
+                        fontSize: '28px',
+                        fontWeight: '600',
+                        color: '#000000'
+                      }}>Farid Ardiansyah</div>
+                      <div style={{
+                        fontFamily: "'Questrial', sans-serif",
+                        fontSize: '16px',
+                        color: '#666666'
+                      }}>Founder & Programmer</div>
+                    </div>
                   </div>
+
                   <div>
                     <div style={{
                       fontFamily: "'Questrial', sans-serif",
-                      fontSize: '28px',
+                      fontSize: '18px',
                       fontWeight: '600',
-                      color: '#000000'
-                    }}>Farid Ardiansyah</div>
+                      color: '#000000',
+                      marginBottom: '12px'
+                    }}>Tentang Kerjasama</div>
                     <div style={{
                       fontFamily: "'Questrial', sans-serif",
-                      fontSize: '16px',
-                      color: '#666666'
-                    }}>Founder & Programmer</div>
-                  </div>
-                </div>
-
-                <div>
-                  <div style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '18px',
-                    fontWeight: '600',
-                    color: '#000000',
-                    marginBottom: '12px'
-                  }}>📋 Tentang Kerjasama</div>
-                  <div style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '14px',
-                    color: '#666666',
-                    lineHeight: '1.6'
-                  }}>
-                    Diskusi tentang kolaborasi pengembangan website, aplikasi mobile, 
-                    atau konsultasi teknologi. Saya siap membantu mewujudkan ide digital Anda!
-                  </div>
-                </div>
-
-                <div>
-                  <div style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '16px',
-                    fontWeight: '600',
-                    color: '#000000',
-                    marginBottom: '8px'
-                  }}>⏱️ Waktu Tunggu Respon</div>
-                  <div style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '14px',
-                    color: '#c5e800',
-                    backgroundColor: '#1a1a1a',
-                    display: 'inline-block',
-                    padding: '6px 16px',
-                    borderRadius: '60px'
-                  }}>Maksimal 1x24 jam</div>
-                </div>
-
-                <div>
-                  <div style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '16px',
-                    fontWeight: '600',
-                    color: '#000000',
-                    marginBottom: '12px'
-                  }}>📍 Tipe Meeting</div>
-                  <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                    {["Online", "Offline", "Hybrid"].map((type) => (
-                      <button
-                        key={type}
-                        onClick={() => setMeetingType(type)}
-                        style={{
-                          padding: '10px 24px',
-                          borderRadius: '60px',
-                          border: meetingType === type ? '2px solid #000000' : '1px solid #cccccc',
-                          backgroundColor: meetingType === type ? '#000000' : '#ffffff',
-                          color: meetingType === type ? '#ffffff' : '#000000',
-                          cursor: 'pointer',
-                          fontFamily: "'Questrial', sans-serif",
-                          fontSize: '14px',
-                          fontWeight: '500',
-                          transition: 'all 0.2s ease'
-                        }}
-                      >
-                        {type}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* SISI TENGAH - Calendar */}
-              <div style={{
-                flex: 1.8,
-                padding: '32px',
-                borderRight: '1px solid #e0e0e0',
-                overflowY: 'auto'
-              }}>
-                <div style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  marginBottom: '24px'
-                }}>
-                  <button
-                    onClick={() => changeMonth(-1)}
-                    style={{
-                      padding: '8px 16px',
-                      borderRadius: '8px',
-                      border: '1px solid #cccccc',
-                      backgroundColor: '#ffffff',
-                      cursor: 'pointer',
-                      fontFamily: "'Questrial', sans-serif"
-                    }}
-                  >
-                    ← Prev
-                  </button>
-                  <div style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '20px',
-                    fontWeight: '600',
-                    color: '#000000'
-                  }}>
-                    {currentMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}
-                  </div>
-                  <button
-                    onClick={() => changeMonth(1)}
-                    style={{
-                      padding: '8px 16px',
-                      borderRadius: '8px',
-                      border: '1px solid #cccccc',
-                      backgroundColor: '#ffffff',
-                      cursor: 'pointer',
-                      fontFamily: "'Questrial', sans-serif"
-                    }}
-                  >
-                    Next →
-                  </button>
-                </div>
-
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(7, 1fr)',
-                  gap: '8px',
-                  marginBottom: '12px'
-                }}>
-                  {weekDays.map((day) => (
-                    <div key={day} style={{
-                      textAlign: 'center',
-                      fontFamily: "'Questrial', sans-serif",
                       fontSize: '14px',
-                      fontWeight: '600',
-                      color: '#999999',
-                      padding: '8px'
+                      color: '#666666',
+                      lineHeight: '1.6'
                     }}>
-                      {day}
+                      Diskusi tentang kolaborasi pengembangan website, aplikasi mobile, 
+                      atau konsultasi teknologi. Saya siap membantu mewujudkan ide digital Anda!
                     </div>
-                  ))}
-                </div>
+                  </div>
 
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(7, 1fr)',
-                  gap: '8px'
-                }}>
-                  {days.map((date, index) => (
-                    <div
-                      key={index}
-                      onClick={() => date && handleDateSelect(date)}
-                      className="calendar-day"
-                      style={{
-                        textAlign: 'center',
-                        padding: '12px 8px',
-                        backgroundColor: date ? getDayColor(date) : 'transparent',
-                        color: date ? '#ffffff' : 'transparent',
-                        cursor: date ? 'pointer' : 'default',
-                        fontWeight: date ? '600' : 'normal',
-                        borderRadius: '12px',
-                        opacity: date ? 1 : 0.3,
-                        boxShadow: selectedDate?.toDateString() === date?.toDateString() ? '0 0 0 3px #000000' : 'none'
-                      }}
-                    >
-                      {date ? date.getDate() : ''}
-                    </div>
-                  ))}
-                </div>
-
-                {selectedDate && (
-                  <div style={{ marginTop: '32px' }}>
+                  <div>
                     <div style={{
                       fontFamily: "'Questrial', sans-serif",
                       fontSize: '16px',
                       fontWeight: '600',
                       color: '#000000',
-                      marginBottom: '16px'
-                    }}>
-                      Pilih Waktu untuk {selectedDate.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' })}
-                    </div>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
-                      {timeSlots.map((time) => (
+                      marginBottom: '8px'
+                    }}>Waktu Tunggu Respon</div>
+                    <div style={{
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '14px',
+                      color: '#c5e800',
+                      backgroundColor: '#1a1a1a',
+                      display: 'inline-block',
+                      padding: '6px 16px',
+                      borderRadius: '60px'
+                    }}>Maksimal 1x24 jam</div>
+                  </div>
+
+                  <div>
+                    <div style={{
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '16px',
+                      fontWeight: '600',
+                      color: '#000000',
+                      marginBottom: '12px'
+                    }}>Tipe Meeting</div>
+                    <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                      {["Online", "Offline", "Hybrid"].map((type) => (
                         <button
-                          key={time}
-                          onClick={() => setSelectedTime(time)}
-                          className="time-slot"
+                          key={type}
+                          onClick={() => setMeetingType(type)}
                           style={{
-                            padding: '10px 20px',
+                            padding: '10px 24px',
                             borderRadius: '60px',
-                            border: selectedTime === time ? '2px solid #000000' : '1px solid #cccccc',
-                            backgroundColor: selectedTime === time ? '#000000' : '#ffffff',
-                            color: selectedTime === time ? '#ffffff' : '#000000',
+                            border: meetingType === type ? '2px solid #000000' : '1px solid #cccccc',
+                            backgroundColor: meetingType === type ? '#000000' : '#ffffff',
+                            color: meetingType === type ? '#ffffff' : '#000000',
                             cursor: 'pointer',
                             fontFamily: "'Questrial', sans-serif",
                             fontSize: '14px',
-                            fontWeight: '500'
+                            fontWeight: '500',
+                            transition: 'all 0.2s ease'
                           }}
                         >
-                          {time} WIB
+                          {type}
                         </button>
                       ))}
                     </div>
                   </div>
-                )}
-              </div>
+                </div>
 
-              {/* SISI KANAN - Form Data Diri */}
-              <div style={{
-                flex: 1.5,
-                padding: '32px',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '20px',
-                overflowY: 'auto'
-              }}>
+                {/* SISI KANAN - Calendar */}
                 <div style={{
-                  fontFamily: "'Questrial', sans-serif",
-                  fontSize: '22px',
-                  fontWeight: '700',
-                  color: '#000000',
-                  paddingBottom: '12px',
-                  borderBottom: '2px solid #e0e0e0'
+                  flex: 2.5,
+                  padding: '32px',
+                  display: 'flex',
+                  flexDirection: 'column'
                 }}>
-                  📝 Isi Data Diri
-                </div>
-
-                {/* Nama Lengkap - Required */}
-                <div>
                   <div style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    color: '#000000',
-                    marginBottom: '6px'
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: '24px'
                   }}>
-                    Nama Lengkap <span style={{ color: '#ff4444' }}>*</span>
-                  </div>
-                  <input
-                    type="text"
-                    id="fullName"
-                    placeholder="Masukkan nama lengkap Anda"
-                    style={{
-                      width: '100%',
-                      padding: '12px 14px',
-                      borderRadius: '12px',
-                      border: '1px solid #cccccc',
-                      fontFamily: "'Questrial', sans-serif",
-                      fontSize: '14px',
-                      outline: 'none',
-                      transition: 'border-color 0.2s'
-                    }}
-                    onFocus={(e) => e.currentTarget.style.borderColor = '#000000'}
-                    onBlur={(e) => e.currentTarget.style.borderColor = '#cccccc'}
-                  />
-                </div>
-
-                {/* Email Address - Required */}
-                <div>
-                  <div style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    color: '#000000',
-                    marginBottom: '6px'
-                  }}>
-                    Email Address <span style={{ color: '#ff4444' }}>*</span>
-                  </div>
-                  <input
-                    type="email"
-                    id="emailAddress"
-                    placeholder="contoh@email.com"
-                    style={{
-                      width: '100%',
-                      padding: '12px 14px',
-                      borderRadius: '12px',
-                      border: '1px solid #cccccc',
-                      fontFamily: "'Questrial', sans-serif",
-                      fontSize: '14px',
-                      outline: 'none',
-                      transition: 'border-color 0.2s'
-                    }}
-                    onFocus={(e) => e.currentTarget.style.borderColor = '#000000'}
-                    onBlur={(e) => e.currentTarget.style.borderColor = '#cccccc'}
-                  />
-                </div>
-
-                {/* Location Option - Required */}
-                <div>
-                  <div style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    color: '#000000',
-                    marginBottom: '6px'
-                  }}>
-                    Platform Meeting <span style={{ color: '#ff4444' }}>*</span>
-                  </div>
-                  <select
-                    id="locationOption"
-                    style={{
-                      width: '100%',
-                      padding: '12px 14px',
-                      borderRadius: '12px',
-                      border: '1px solid #cccccc',
-                      fontFamily: "'Questrial', sans-serif",
-                      fontSize: '14px',
-                      outline: 'none',
-                      backgroundColor: '#ffffff',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    <option value="">Pilih platform meeting</option>
-                    <option value="google_meet">Google Meet</option>
-                    <option value="zoom">Zoom</option>
-                    <option value="tatap_muka">Tatap Muka (Offline)</option>
-                    <option value="via_hp">Via Nomor HP (Telepon/WA)</option>
-                  </select>
-                </div>
-
-                {/* Nama Perusahaan */}
-                <div>
-                  <div style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    color: '#000000',
-                    marginBottom: '6px'
-                  }}>
-                    Nama Perusahaan / Instansi
-                  </div>
-                  <input
-                    type="text"
-                    id="companyName"
-                    placeholder="Masukkan nama perusahaan Anda"
-                    style={{
-                      width: '100%',
-                      padding: '12px 14px',
-                      borderRadius: '12px',
-                      border: '1px solid #cccccc',
-                      fontFamily: "'Questrial', sans-serif",
-                      fontSize: '14px',
-                      outline: 'none',
-                      transition: 'border-color 0.2s'
-                    }}
-                    onFocus={(e) => e.currentTarget.style.borderColor = '#000000'}
-                    onBlur={(e) => e.currentTarget.style.borderColor = '#cccccc'}
-                  />
-                </div>
-
-                {/* Kenapa percaya - Required */}
-                <div>
-                  <div style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    color: '#000000',
-                    marginBottom: '6px'
-                  }}>
-                    Kenapa Anda percaya dengan saya? <span style={{ color: '#ff4444' }}>*</span>
-                  </div>
-                  <textarea
-                    id="trustReason"
-                    placeholder="Ceritakan alasan Anda percaya dan ingin berkolaborasi..."
-                    rows={3}
-                    style={{
-                      width: '100%',
-                      padding: '12px 14px',
-                      borderRadius: '12px',
-                      border: '1px solid #cccccc',
-                      fontFamily: "'Questrial', sans-serif",
-                      fontSize: '14px',
-                      outline: 'none',
-                      resize: 'vertical',
-                      transition: 'border-color 0.2s'
-                    }}
-                    onFocus={(e) => e.currentTarget.style.borderColor = '#000000'}
-                    onBlur={(e) => e.currentTarget.style.borderColor = '#cccccc'}
-                  />
-                </div>
-
-                {/* Nomor HP - Required */}
-                <div>
-                  <div style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    color: '#000000',
-                    marginBottom: '6px'
-                  }}>
-                    Nomor WhatsApp / HP <span style={{ color: '#ff4444' }}>*</span>
-                  </div>
-                  <input
-                    type="tel"
-                    id="phoneNumber"
-                    placeholder="+62 xxx-xxxx-xxxx"
-                    style={{
-                      width: '100%',
-                      padding: '12px 14px',
-                      borderRadius: '12px',
-                      border: '1px solid #cccccc',
-                      fontFamily: "'Questrial', sans-serif",
-                      fontSize: '14px',
-                      outline: 'none',
-                      transition: 'border-color 0.2s'
-                    }}
-                    onFocus={(e) => e.currentTarget.style.borderColor = '#000000'}
-                    onBlur={(e) => e.currentTarget.style.borderColor = '#cccccc'}
-                  />
-                </div>
-
-                {/* Add Guest */}
-                <div>
-                  <div style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    color: '#000000',
-                    marginBottom: '6px'
-                  }}>
-                    Tambah Guest (Opsional)
-                  </div>
-                  <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                    <input
-                      type="email"
-                      id="guestEmail"
-                      placeholder="Email guest (maks 3 orang)"
+                    <button
+                      onClick={() => changeMonth(-1)}
                       style={{
-                        flex: 1,
+                        padding: '8px 16px',
+                        borderRadius: '8px',
+                        border: '1px solid #cccccc',
+                        backgroundColor: '#ffffff',
+                        cursor: 'pointer',
+                        fontFamily: "'Questrial', sans-serif"
+                      }}
+                    >
+                      ← Prev
+                    </button>
+                    <div style={{
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '20px',
+                      fontWeight: '600',
+                      color: '#000000'
+                    }}>
+                      {currentMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}
+                    </div>
+                    <button
+                      onClick={() => changeMonth(1)}
+                      style={{
+                        padding: '8px 16px',
+                        borderRadius: '8px',
+                        border: '1px solid #cccccc',
+                        backgroundColor: '#ffffff',
+                        cursor: 'pointer',
+                        fontFamily: "'Questrial', sans-serif"
+                      }}
+                    >
+                      Next →
+                    </button>
+                  </div>
+
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(7, 1fr)',
+                    gap: '8px',
+                    marginBottom: '12px'
+                  }}>
+                    {weekDays.map((day) => (
+                      <div key={day} style={{
+                        textAlign: 'center',
+                        fontFamily: "'Questrial', sans-serif",
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        color: '#999999',
+                        padding: '8px'
+                      }}>
+                        {day}
+                      </div>
+                    ))}
+                  </div>
+
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(7, 1fr)',
+                    gap: '8px'
+                  }}>
+                    {days.map((date, index) => (
+                      <div
+                        key={index}
+                        onClick={() => date && handleDateSelect(date)}
+                        className="calendar-day"
+                        style={{
+                          textAlign: 'center',
+                          padding: '12px 8px',
+                          backgroundColor: date ? getDayColor(date) : 'transparent',
+                          color: date ? '#ffffff' : 'transparent',
+                          cursor: date ? 'pointer' : 'default',
+                          fontWeight: date ? '600' : 'normal',
+                          borderRadius: '12px',
+                          opacity: date ? 1 : 0.3,
+                          boxShadow: selectedDate?.toDateString() === date?.toDateString() ? '0 0 0 3px #000000' : 'none'
+                        }}
+                      >
+                        {date ? date.getDate() : ''}
+                      </div>
+                    ))}
+                  </div>
+
+                  {selectedDate && (
+                    <div style={{ marginTop: '32px' }}>
+                      <div style={{
+                        fontFamily: "'Questrial', sans-serif",
+                        fontSize: '16px',
+                        fontWeight: '600',
+                        color: '#000000',
+                        marginBottom: '16px'
+                      }}>
+                        Pilih Waktu untuk {selectedDate.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' })}
+                      </div>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
+                        {timeSlots.map((time) => (
+                          <button
+                            key={time}
+                            onClick={() => setSelectedTime(time)}
+                            className="time-slot"
+                            style={{
+                              padding: '10px 20px',
+                              borderRadius: '60px',
+                              border: selectedTime === time ? '2px solid #000000' : '1px solid #cccccc',
+                              backgroundColor: selectedTime === time ? '#000000' : '#ffffff',
+                              color: selectedTime === time ? '#ffffff' : '#000000',
+                              cursor: 'pointer',
+                              fontFamily: "'Questrial', sans-serif",
+                              fontSize: '14px',
+                              fontWeight: '500'
+                            }}
+                          >
+                            {time} WIB
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Tombol Schedule Meeting dan Back */}
+                  <div style={{
+                    display: 'flex',
+                    gap: '16px',
+                    marginTop: '40px',
+                    justifyContent: 'flex-end'
+                  }}>
+                    <button
+                      onClick={() => setShowCalendarModal(false)}
+                      style={{
+                        padding: '14px 28px',
+                        backgroundColor: '#ffffff',
+                        color: '#000000',
+                        border: '1.5px solid #cccccc',
+                        borderRadius: '60px',
+                        cursor: 'pointer',
+                        fontFamily: "'Questrial', sans-serif",
+                        fontSize: '16px',
+                        fontWeight: '600',
+                        transition: 'all 0.2s ease',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.borderColor = '#000000';
+                        e.currentTarget.style.backgroundColor = '#f5f5f5';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.borderColor = '#cccccc';
+                        e.currentTarget.style.backgroundColor = '#ffffff';
+                      }}
+                    >
+                      <NorthWestArrow size={20} />
+                      Back
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (selectedDate && selectedTime) {
+                          setShowFormView(true);
+                        } else {
+                          alert("Silakan pilih tanggal dan waktu terlebih dahulu!");
+                        }
+                      }}
+                      style={{
+                        padding: '14px 28px',
+                        backgroundColor: '#0000ff',
+                        color: '#ffffff',
+                        border: 'none',
+                        borderRadius: '60px',
+                        cursor: 'pointer',
+                        fontFamily: "'Questrial', sans-serif",
+                        fontSize: '16px",
+                        fontWeight: '600',
+                        transition: 'all 0.2s ease',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = '#2200dd';
+                        e.currentTarget.style.transform = 'scale(1.02)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = '#0000ff';
+                        e.currentTarget.style.transform = 'scale(1)';
+                      }}
+                    >
+                      Schedule Meeting
+                      <NorthEastArrow size={20} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              // TAMPILAN FORM DATA DIRI (View 2) - Setelah klik Schedule Meeting
+              <div style={{
+                display: 'flex',
+                flexDirection: 'row',
+                height: '100%',
+                minHeight: '700px'
+              }}>
+                {/* SISI KIRI - Info Profile tetap sama */}
+                <div style={{
+                  flex: 1.2,
+                  padding: '32px',
+                  borderRight: '1px solid #e0e0e0',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '28px'
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '20px',
+                    paddingBottom: '20px',
+                    borderBottom: '1px solid #e0e0e0'
+                  }}>
+                    <div style={{
+                      width: '70px',
+                      height: '90px',
+                      borderRadius: '12px',
+                      overflow: 'hidden',
+                      position: 'relative',
+                      border: '2px solid #e0e0e0'
+                    }}>
+                      <Image
+                        src="/images/5.jpg"
+                        alt="Farid Ardiansyah"
+                        fill
+                        style={{ objectFit: 'cover', objectPosition: 'center' }}
+                      />
+                    </div>
+                    <div>
+                      <div style={{
+                        fontFamily: "'Questrial', sans-serif",
+                        fontSize: '28px',
+                        fontWeight: '600',
+                        color: '#000000'
+                      }}>Farid Ardiansyah</div>
+                      <div style={{
+                        fontFamily: "'Questrial', sans-serif",
+                        fontSize: '16px',
+                        color: '#666666'
+                      }}>Founder & Programmer</div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div style={{
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '18px',
+                      fontWeight: '600',
+                      color: '#000000',
+                      marginBottom: '12px'
+                    }}>Ringkasan Meeting</div>
+                    <div style={{
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '14px',
+                      color: '#666666',
+                      lineHeight: '1.6'
+                    }}>
+                      <div>📅 Tanggal: <strong>{selectedDate?.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</strong></div>
+                      <div>⏰ Waktu: <strong>{selectedTime} WIB</strong></div>
+                      <div>📍 Tipe: <strong>{meetingType}</strong></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div style={{
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '16px',
+                      fontWeight: '600',
+                      color: '#000000',
+                      marginBottom: '8px'
+                    }}>Waktu Tunggu Respon</div>
+                    <div style={{
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '14px',
+                      color: '#c5e800',
+                      backgroundColor: '#1a1a1a',
+                      display: 'inline-block',
+                      padding: '6px 16px',
+                      borderRadius: '60px'
+                    }}>Maksimal 1x24 jam</div>
+                  </div>
+                </div>
+
+                {/* SISI KANAN - Form Data Diri */}
+                <div style={{
+                  flex: 2.5,
+                  padding: '32px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '20px',
+                  overflowY: 'auto'
+                }}>
+                  <div style={{
+                    fontFamily: "'Questrial', sans-serif",
+                    fontSize: '22px',
+                    fontWeight: '700',
+                    color: '#000000',
+                    paddingBottom: '12px',
+                    borderBottom: '2px solid #e0e0e0'
+                  }}>
+                    Isi Data Diri
+                  </div>
+
+                  {/* Nama Lengkap - Required */}
+                  <div>
+                    <div style={{
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: '#000000',
+                      marginBottom: '6px'
+                    }}>
+                      Nama Lengkap <span style={{ color: '#ff4444' }}>*</span>
+                    </div>
+                    <input
+                      type="text"
+                      id="fullName"
+                      placeholder="Masukkan nama lengkap Anda"
+                      style={{
+                        width: '100%',
                         padding: '12px 14px',
                         borderRadius: '12px',
                         border: '1px solid #cccccc',
                         fontFamily: "'Questrial', sans-serif",
                         fontSize: '14px',
-                        outline: 'none'
+                        outline: 'none',
+                        transition: 'border-color 0.2s'
                       }}
+                      onFocus={(e) => e.currentTarget.style.borderColor = '#000000'}
+                      onBlur={(e) => e.currentTarget.style.borderColor = '#cccccc'}
                     />
-                    <button
-                      id="addGuestBtn"
+                  </div>
+
+                  {/* Email Address - Required */}
+                  <div>
+                    <div style={{
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: '#000000',
+                      marginBottom: '6px'
+                    }}>
+                      Email Address <span style={{ color: '#ff4444' }}>*</span>
+                    </div>
+                    <input
+                      type="email"
+                      id="emailAddress"
+                      placeholder="contoh@email.com"
                       style={{
-                        padding: '10px 18px',
+                        width: '100%',
+                        padding: '12px 14px',
                         borderRadius: '12px',
-                        border: '1px solid #000000',
-                        backgroundColor: '#ffffff',
-                        color: '#000000',
-                        cursor: 'pointer',
+                        border: '1px solid #cccccc',
                         fontFamily: "'Questrial', sans-serif",
                         fontSize: '14px',
-                        fontWeight: '500'
+                        outline: 'none',
+                        transition: 'border-color 0.2s'
+                      }}
+                      onFocus={(e) => e.currentTarget.style.borderColor = '#000000'}
+                      onBlur={(e) => e.currentTarget.style.borderColor = '#cccccc'}
+                    />
+                  </div>
+
+                  {/* Platform Meeting - Required */}
+                  <div>
+                    <div style={{
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: '#000000',
+                      marginBottom: '6px'
+                    }}>
+                      Platform Meeting <span style={{ color: '#ff4444' }}>*</span>
+                    </div>
+                    <select
+                      id="locationOption"
+                      style={{
+                        width: '100%',
+                        padding: '12px 14px',
+                        borderRadius: '12px',
+                        border: '1px solid #cccccc',
+                        fontFamily: "'Questrial', sans-serif",
+                        fontSize: '14px',
+                        outline: 'none',
+                        backgroundColor: '#ffffff',
+                        cursor: 'pointer'
                       }}
                     >
-                      + Add
+                      <option value="">Pilih platform meeting</option>
+                      <option value="google_meet">Google Meet</option>
+                      <option value="zoom">Zoom</option>
+                      <option value="tatap_muka">Tatap Muka (Offline)</option>
+                      <option value="via_hp">Via Nomor HP (Telepon/WA)</option>
+                    </select>
+                  </div>
+
+                  {/* Nama Perusahaan */}
+                  <div>
+                    <div style={{
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: '#000000',
+                      marginBottom: '6px'
+                    }}>
+                      Nama Perusahaan / Instansi
+                    </div>
+                    <input
+                      type="text"
+                      id="companyName"
+                      placeholder="Masukkan nama perusahaan Anda"
+                      style={{
+                        width: '100%',
+                        padding: '12px 14px',
+                        borderRadius: '12px',
+                        border: '1px solid #cccccc',
+                        fontFamily: "'Questrial', sans-serif",
+                        fontSize: '14px',
+                        outline: 'none',
+                        transition: 'border-color 0.2s'
+                      }}
+                      onFocus={(e) => e.currentTarget.style.borderColor = '#000000'}
+                      onBlur={(e) => e.currentTarget.style.borderColor = '#cccccc'}
+                    />
+                  </div>
+
+                  {/* Kenapa percaya - Required */}
+                  <div>
+                    <div style={{
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: '#000000',
+                      marginBottom: '6px'
+                    }}>
+                      Kenapa Anda percaya dengan saya? <span style={{ color: '#ff4444' }}>*</span>
+                    </div>
+                    <textarea
+                      id="trustReason"
+                      placeholder="Ceritakan alasan Anda percaya dan ingin berkolaborasi..."
+                      rows={3}
+                      style={{
+                        width: '100%',
+                        padding: '12px 14px',
+                        borderRadius: '12px',
+                        border: '1px solid #cccccc',
+                        fontFamily: "'Questrial', sans-serif",
+                        fontSize: '14px',
+                        outline: 'none',
+                        resize: 'vertical',
+                        transition: 'border-color 0.2s'
+                      }}
+                      onFocus={(e) => e.currentTarget.style.borderColor = '#000000'}
+                      onBlur={(e) => e.currentTarget.style.borderColor = '#cccccc'}
+                    />
+                  </div>
+
+                  {/* Nomor HP - Required */}
+                  <div>
+                    <div style={{
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: '#000000',
+                      marginBottom: '6px'
+                    }}>
+                      Nomor WhatsApp / HP <span style={{ color: '#ff4444' }}>*</span>
+                    </div>
+                    <input
+                      type="tel"
+                      id="phoneNumber"
+                      placeholder="+62 xxx-xxxx-xxxx"
+                      style={{
+                        width: '100%',
+                        padding: '12px 14px',
+                        borderRadius: '12px',
+                        border: '1px solid #cccccc',
+                        fontFamily: "'Questrial', sans-serif",
+                        fontSize: '14px',
+                        outline: 'none',
+                        transition: 'border-color 0.2s'
+                      }}
+                      onFocus={(e) => e.currentTarget.style.borderColor = '#000000'}
+                      onBlur={(e) => e.currentTarget.style.borderColor = '#cccccc'}
+                    />
+                  </div>
+
+                  {/* Add Guest */}
+                  <div>
+                    <div style={{
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: '#000000',
+                      marginBottom: '6px'
+                    }}>
+                      Tambah Guest (Opsional)
+                    </div>
+                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                      <input
+                        type="email"
+                        id="guestEmail"
+                        placeholder="Email guest (maks 3 orang)"
+                        style={{
+                          flex: 1,
+                          padding: '12px 14px',
+                          borderRadius: '12px',
+                          border: '1px solid #cccccc',
+                          fontFamily: "'Questrial', sans-serif",
+                          fontSize: '14px',
+                          outline: 'none'
+                        }}
+                      />
+                      <button
+                        id="addGuestBtn"
+                        style={{
+                          padding: '10px 18px',
+                          borderRadius: '12px',
+                          border: '1px solid #000000',
+                          backgroundColor: '#ffffff',
+                          color: '#000000',
+                          cursor: 'pointer',
+                          fontFamily: "'Questrial', sans-serif",
+                          fontSize: '14px',
+                          fontWeight: '500'
+                        }}
+                      >
+                        + Add
+                      </button>
+                    </div>
+                    <div id="guestList" style={{ marginTop: '8px', display: 'flex', flexWrap: 'wrap', gap: '8px' }}></div>
+                  </div>
+
+                  {/* Terms and Privacy */}
+                  <div style={{
+                    marginTop: '16px',
+                    padding: '12px',
+                    backgroundColor: '#f5f5f5',
+                    borderRadius: '12px',
+                    textAlign: 'center'
+                  }}>
+                    <span style={{
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '12px',
+                      color: '#666666'
+                    }}>
+                      By proceeding, you agree to <span style={{ color: '#000000', fontWeight: '600', cursor: 'pointer' }}>Menuru Terms</span> and 
+                      <span style={{ color: '#000000', fontWeight: '600', cursor: 'pointer' }}> Privacy Policy</span>.
+                    </span>
+                  </div>
+
+                  {/* Buttons Back & Confirm */}
+                  <div style={{
+                    display: 'flex',
+                    gap: '16px',
+                    marginTop: '8px'
+                  }}>
+                    <button
+                      onClick={() => setShowFormView(false)}
+                      style={{
+                        flex: 1,
+                        padding: '14px 20px',
+                        backgroundColor: '#ffffff',
+                        color: '#000000',
+                        border: '1.5px solid #cccccc',
+                        borderRadius: '60px',
+                        cursor: 'pointer',
+                        fontFamily: "'Questrial', sans-serif",
+                        fontSize: '16px',
+                        fontWeight: '600',
+                        transition: 'all 0.2s ease',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '12px'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.borderColor = '#000000';
+                        e.currentTarget.style.backgroundColor = '#f5f5f5';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.borderColor = '#cccccc';
+                        e.currentTarget.style.backgroundColor = '#ffffff';
+                      }}
+                    >
+                      <NorthWestArrow size={20} />
+                      Back
+                    </button>
+                    <button
+                      onClick={handleConfirmMeeting}
+                      style={{
+                        flex: 1,
+                        padding: '14px 20px',
+                        backgroundColor: '#0000ff',
+                        color: '#ffffff',
+                        border: 'none',
+                        borderRadius: '60px',
+                        cursor: 'pointer',
+                        fontFamily: "'Questrial', sans-serif",
+                        fontSize: '16px',
+                        fontWeight: '600',
+                        transition: 'all 0.2s ease',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '12px'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = '#2200dd';
+                        e.currentTarget.style.transform = 'scale(1.02)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = '#0000ff';
+                        e.currentTarget.style.transform = 'scale(1)';
+                      }}
+                    >
+                      Confirm
+                      <NorthEastArrow size={20} />
                     </button>
                   </div>
-                  <div id="guestList" style={{ marginTop: '8px', display: 'flex', flexWrap: 'wrap', gap: '8px' }}></div>
-                </div>
-
-                {/* Terms and Privacy */}
-                <div style={{
-                  marginTop: '16px',
-                  padding: '12px',
-                  backgroundColor: '#f5f5f5',
-                  borderRadius: '12px',
-                  textAlign: 'center'
-                }}>
-                  <span style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '12px',
-                    color: '#666666'
-                  }}>
-                    By proceeding, you agree to <span style={{ color: '#000000', fontWeight: '600', cursor: 'pointer' }}>Menuru Terms</span> and 
-                    <span style={{ color: '#000000', fontWeight: '600', cursor: 'pointer' }}> Privacy Policy</span>.
-                  </span>
-                </div>
-
-                {/* Buttons Back & Confirm */}
-                <div style={{
-                  display: 'flex',
-                  gap: '16px',
-                  marginTop: '8px'
-                }}>
-                  <button
-                    onClick={() => setShowCalendarModal(false)}
-                    style={{
-                      flex: 1,
-                      padding: '14px 20px',
-                      backgroundColor: '#ffffff',
-                      color: '#000000',
-                      border: '1.5px solid #cccccc',
-                      borderRadius: '60px',
-                      cursor: 'pointer',
-                      fontFamily: "'Questrial', sans-serif",
-                      fontSize: '16px',
-                      fontWeight: '600',
-                      transition: 'all 0.2s ease'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.borderColor = '#000000';
-                      e.currentTarget.style.backgroundColor = '#f5f5f5';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.borderColor = '#cccccc';
-                      e.currentTarget.style.backgroundColor = '#ffffff';
-                    }}
-                  >
-                    ← Back
-                  </button>
-                  <button
-                    id="confirmBtn"
-                    onClick={handleScheduleMeetingForm}
-                    style={{
-                      flex: 1,
-                      padding: '14px 20px',
-                      backgroundColor: '#0000ff',
-                      color: '#ffffff',
-                      border: 'none',
-                      borderRadius: '60px',
-                      cursor: 'pointer',
-                      fontFamily: "'Questrial', sans-serif",
-                      fontSize: '16px',
-                      fontWeight: '600',
-                      transition: 'all 0.2s ease'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = '#2200dd';
-                      e.currentTarget.style.transform = 'scale(1.02)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = '#0000ff';
-                      e.currentTarget.style.transform = 'scale(1)';
-                    }}
-                  >
-                    Confirm →
-                  </button>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       )}
