@@ -3533,42 +3533,52 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-        {/* SECTION CALENDAR SUBMISSIONS - Design seperti "Meeting" dengan line box */}
+
+
+
+{/* SECTION CALENDAR SUBMISSIONS - Design dengan teks besar dan NORTH EAST ARROW */}
 {calendarSubmissions.length > 0 && (
   <div style={{
     width: '100%',
-    padding: '60px 80px',
+    padding: '80px 80px',
     backgroundColor: '#fff8e1',
     borderTop: '1px solid rgba(0,0,0,0.05)',
     boxSizing: 'border-box'
   }}>
     <div style={{
       fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-      fontSize: '40px',
+      fontSize: '100px',
       fontWeight: '500',
       color: '#ff5722',
-      marginBottom: '40px',
+      marginBottom: '60px',
       letterSpacing: '-0.02em',
       display: 'flex',
       alignItems: 'center',
-      gap: '15px'
+      justifyContent: 'space-between'
     }}>
-      <span>📅</span>
-      <span>Meeting</span>
-      <span style={{
-        fontSize: '18px',
-        color: '#999',
-        fontWeight: '400',
-        marginLeft: '10px'
+      <span>MEETING</span>
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '15px'
       }}>
-        ({calendarSubmissions.length} jadwal)
-      </span>
+        <span style={{
+          fontSize: '50px',
+          color: '#ff5722',
+          fontWeight: '400'
+        }}>
+          ({calendarSubmissions.length})
+        </span>
+        <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff5722" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </div>
     </div>
     
     <div style={{
       display: 'flex',
       flexDirection: 'column',
-      gap: '16px'
+      gap: '24px'
     }}>
       {calendarSubmissions.map((submission) => {
         const submissionDate = new Date(submission.selectedDate);
@@ -3583,36 +3593,38 @@ export default function HomePage(): React.JSX.Element {
               display: 'flex',
               alignItems: 'stretch',
               backgroundColor: '#ffffff',
-              borderRadius: '16px',
+              borderRadius: '24px',
               overflow: 'hidden',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-              border: '1px solid rgba(255,87,34,0.2)',
-              transition: 'all 0.2s ease',
+              boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
+              border: '2px solid #ffeb3b',
+              transition: 'all 0.3s ease',
               cursor: 'pointer'
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.1)';
-              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.12)';
+              e.currentTarget.style.transform = 'translateY(-3px)';
+              e.currentTarget.style.borderColor = '#ff5722';
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.04)';
+              e.currentTarget.style.boxShadow = '0 2px 12px rgba(0,0,0,0.06)';
               e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.borderColor = '#ffeb3b';
             }}
           >
             {/* LEFT - Date Box (kotak tanggal) */}
             <div style={{
-              width: '100px',
+              width: '140px',
               backgroundColor: '#ff5722',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              padding: '16px 12px',
+              padding: '24px 16px',
               color: '#ffffff',
               textAlign: 'center'
             }}>
               <div style={{
-                fontSize: '36px',
+                fontSize: '70px',
                 fontWeight: '700',
                 lineHeight: '1',
                 fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif"
@@ -3620,174 +3632,197 @@ export default function HomePage(): React.JSX.Element {
                 {submissionDate.getDate()}
               </div>
               <div style={{
-                fontSize: '12px',
+                fontSize: '20px',
                 fontWeight: '500',
                 textTransform: 'uppercase',
-                marginTop: '4px',
-                fontFamily: "'Questrial', sans-serif"
+                marginTop: '8px',
+                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif"
               }}>
-                {formattedMonth.substring(0, 3)}
+                {formattedMonth}
               </div>
               <div style={{
-                fontSize: '10px',
+                fontSize: '16px',
                 fontWeight: '400',
-                opacity: 0.8,
-                marginTop: '2px',
+                opacity: 0.9,
+                marginTop: '4px',
                 fontFamily: "'Questrial', sans-serif"
               }}>
                 {formattedDay}
               </div>
             </div>
             
-            {/* MIDDLE - Info Meeting */}
+            {/* MIDDLE - Info Meeting dengan teks besar */}
             <div style={{
               flex: 1,
-              padding: '16px 20px',
+              padding: '24px 32px',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'center',
-              gap: '8px',
+              gap: '16px',
               backgroundColor: '#ffffff'
             }}>
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '15px',
+                gap: '24px',
                 flexWrap: 'wrap'
               }}>
-                <h3 style={{
+                <div style={{
                   fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                  fontSize: '18px',
+                  fontSize: '36px',
                   fontWeight: '600',
-                  color: '#333',
+                  color: '#222',
                   margin: 0,
-                  letterSpacing: '-0.01em'
+                  letterSpacing: '-0.02em'
                 }}>
                   {submission.fullName}
-                </h3>
-                <span style={{
-                  fontSize: '11px',
-                  padding: '3px 10px',
+                </div>
+                <div style={{
+                  fontSize: '18px',
+                  padding: '6px 18px',
                   borderRadius: '60px',
                   backgroundColor: '#ffeb3b',
                   color: '#333',
-                  fontWeight: '500'
+                  fontWeight: '500',
+                  fontFamily: "'Questrial', sans-serif"
                 }}>
-                  {submission.status === 'pending' ? 'Menunggu' : submission.status}
-                </span>
+                  {submission.status === 'pending' ? 'MENUNGGU' : submission.status.toUpperCase()}
+                </div>
               </div>
               
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '20px',
+                gap: '32px',
                 flexWrap: 'wrap',
-                fontSize: '13px',
+                fontSize: '20px',
                 color: '#666',
-                fontFamily: "'Questrial', sans-serif"
+                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif"
               }}>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                  <span>⏰</span> {submission.selectedTime} WIB
-                </span>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                  <span>🎯</span> {submission.meetingType}
-                </span>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                  <span>💬</span> {submission.trustReason.substring(0, 40)}...
-                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="10" stroke="#ff5722" strokeWidth="1.5"/>
+                    <path d="M12 8v4l3 3" stroke="#ff5722" strokeWidth="1.5" strokeLinecap="round"/>
+                  </svg>
+                  <span>{submission.selectedTime} WIB</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2L15 9H22L16 14L19 21L12 16.5L5 21L8 14L2 9H9L12 2Z" stroke="#ff5722" strokeWidth="1.5" fill="none"/>
+                  </svg>
+                  <span>{submission.meetingType}</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="#ff5722" strokeWidth="1.5" fill="none"/>
+                  </svg>
+                  <span>{submission.trustReason.substring(0, 60)}...</span>
+                </div>
               </div>
               
               <div style={{
-                fontSize: '12px',
-                color: '#999',
+                fontSize: '18px',
+                color: '#888',
                 fontFamily: "'Questrial', sans-serif",
                 display: 'flex',
                 alignItems: 'center',
-                gap: '15px',
+                gap: '24px',
                 flexWrap: 'wrap'
               }}>
-                <span>📧 {submission.email}</span>
-                <span>📱 {submission.phoneNumber}</span>
-                {submission.companyName && <span>🏢 {submission.companyName}</span>}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M4 4H20C21.1 4 22 4.9 22 6V20C22 21.1 21.1 22 20 22H4C2.9 22 2 21.1 2 20V6C2 4.9 2.9 4 4 4Z" stroke="#999" strokeWidth="1.5" fill="none"/>
+                    <path d="M8 2V6M16 2V6M3 10H21" stroke="#999" strokeWidth="1.5" strokeLinecap="round"/>
+                  </svg>
+                  <span>{submission.email}</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M22 16.92V19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-2.08M2 6L12 13L22 6M4 4h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" stroke="#999" strokeWidth="1.5" fill="none"/>
+                  </svg>
+                  <span>{submission.phoneNumber}</span>
+                </div>
+                {submission.companyName && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M3 9L12 3L21 9L12 15L3 9Z" stroke="#999" strokeWidth="1.5" fill="none"/>
+                      <path d="M5 11V17L12 21L19 17V11" stroke="#999" strokeWidth="1.5" fill="none"/>
+                    </svg>
+                    <span>{submission.companyName}</span>
+                  </div>
+                )}
+              </div>
+              
+              {/* Platform Meeting */}
+              <div style={{
+                fontSize: '16px',
+                color: '#ff5722',
+                fontFamily: "'Questrial', sans-serif",
+                marginTop: '4px'
+              }}>
+                Platform: {
+                  submission.platform === 'google_meet' ? 'Google Meet' :
+                  submission.platform === 'zoom' ? 'Zoom' :
+                  submission.platform === 'tatap_muka' ? 'Tatap Muka (Offline)' :
+                  'Via HP/Telepon'
+                }
               </div>
             </div>
             
-            {/* RIGHT - Action & Tautan Calendar */}
+            {/* RIGHT - Tautan ke Calendar Call dengan NORTH EAST ARROW besar */}
             <div style={{
-              width: '120px',
+              width: '180px',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: '10px',
-              padding: '16px',
-              borderLeft: '1px dashed #ffeb3b',
+              gap: '16px',
+              padding: '24px',
+              borderLeft: '2px solid #ffeb3b',
               backgroundColor: '#fffaf5'
             }}>
-              <a
-                href={`https://calendar.google.com/calendar/render?action=TEMPLATE&text=Meeting+with+${encodeURIComponent(submission.fullName)}&dates=${submissionDate.toISOString().replace(/-|:|\.\d+/g, '')}/${new Date(submissionDate.getTime() + 60*60*1000).toISOString().replace(/-|:|\.\d+/g, '')}&details=${encodeURIComponent(submission.trustReason)}`}
-                target="_blank"
-                rel="noopener noreferrer"
+              <button
+                onClick={() => {
+                  setShowCalendarModal(true);
+                  setShowFormView(false);
+                  setSelectedDate(null);
+                  setSelectedTime("");
+                }}
                 style={{
                   display: 'flex',
+                  flexDirection: 'column',
                   alignItems: 'center',
-                  gap: '6px',
-                  fontSize: '11px',
+                  gap: '12px',
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                  fontSize: '18px',
+                  fontWeight: '500',
                   color: '#ff5722',
-                  textDecoration: 'none',
-                  fontFamily: "'Questrial', sans-serif",
-                  padding: '5px 10px',
-                  borderRadius: '20px',
-                  backgroundColor: '#fff0e6',
-                  transition: 'all 0.2s ease'
+                  padding: '12px 20px',
+                  borderRadius: '60px',
+                  transition: 'all 0.3s ease',
+                  width: '100%'
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.backgroundColor = '#ff5722';
                   e.currentTarget.style.color = '#ffffff';
+                  const svg = e.currentTarget.querySelector('svg path');
+                  if (svg) svg.setAttribute('stroke', '#ffffff');
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = '#fff0e6';
+                  e.currentTarget.style.backgroundColor = 'transparent';
                   e.currentTarget.style.color = '#ff5722';
+                  const svg = e.currentTarget.querySelector('svg path');
+                  if (svg) svg.setAttribute('stroke', '#ff5722');
                 }}
               >
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M4 4H20C21.1 4 22 4.9 22 6V20C22 21.1 21.1 22 20 22H4C2.9 22 2 21.1 2 20V6C2 4.9 2.9 4 4 4Z" stroke="currentColor" strokeWidth="1.5" fill="none"/>
-                  <path d="M8 2V6M16 2V6M3 10H21" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                <span>CALENDAR CALL</span>
+                <svg width="50" height="50" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff5722" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
-                Add to Calendar
-              </a>
-              <a
-                href={`https://calendar.google.com/calendar/u/0/r?tab=mc`}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  fontSize: '11px',
-                  color: '#4a90e2',
-                  textDecoration: 'none',
-                  fontFamily: "'Questrial', sans-serif",
-                  padding: '5px 10px',
-                  borderRadius: '20px',
-                  backgroundColor: '#e8f0fe',
-                  transition: 'all 0.2s ease'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#4a90e2';
-                  e.currentTarget.style.color = '#ffffff';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = '#e8f0fe';
-                  e.currentTarget.style.color = '#4a90e2';
-                }}
-              >
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M18 13V16M18 22V19M18 19L15 16M18 19L21 16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                  <path d="M4 4H20C21.1 4 22 4.9 22 6V13.5M2 20V6C2 4.9 2.9 4 4 4M8 2V6M16 2V6M3 10H13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                </svg>
-                View Calendar
-              </a>
+              </button>
             </div>
           </div>
         );
@@ -3795,6 +3830,12 @@ export default function HomePage(): React.JSX.Element {
     </div>
   </div>
 )}
+
+
+
+
+
+            
 
             {/* Bagian footer */}
             <div style={{
