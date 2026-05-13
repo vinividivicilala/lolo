@@ -4527,458 +4527,25 @@ export default function HomePage(): React.JSX.Element {
                       fontSize: '15px',
                       fontWeight: '500',
                       transition: 'all 0.2s ease'
-                    }}
-                  >
-                    {type}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
 
-          {/* SISI TENGAH - Calendar */}
-          <div style={{
-            flex: 2,
-            padding: '40px',
-            borderRight: '1px solid #e0e0e0',
-            display: 'flex',
-            flexDirection: 'column'
-          }}>
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: '32px'
-            }}>
-              <button
-                onClick={() => changeMonth(-1)}
-                style={{
-                  padding: '10px 20px',
-                  borderRadius: '12px',
-                  border: '1px solid #cccccc',
-                  backgroundColor: '#ffffff',
-                  cursor: 'pointer',
-                  fontFamily: "'Questrial', sans-serif",
-                  fontSize: '16px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px'
-                }}
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M15 18L9 12L15 6" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-                Prev
-              </button>
-              <div style={{
-                fontFamily: "'Questrial', sans-serif",
-                fontSize: '24px',
-                fontWeight: '600',
-                color: '#000000'
-              }}>
-                {currentMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}
-              </div>
-              <button
-                onClick={() => changeMonth(1)}
-                style={{
-                  padding: '10px 20px',
-                  borderRadius: '12px',
-                  border: '1px solid #cccccc',
-                  backgroundColor: '#ffffff',
-                  cursor: 'pointer',
-                  fontFamily: "'Questrial', sans-serif",
-                  fontSize: '16px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px'
-                }}
-              >
-                Next
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M9 18L15 12L9 6" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </button>
-            </div>
 
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(7, 1fr)',
-              gap: '8px',
-              marginBottom: '16px'
-            }}>
-              {weekDays.map((day) => (
-                <div key={day} style={{
-                  textAlign: 'center',
-                  fontFamily: "'Questrial', sans-serif",
-                  fontSize: '16px',
-                  fontWeight: '600',
-                  color: '#999999',
-                  padding: '12px'
-                }}>
-                  {day}
-                </div>
-              ))}
-            </div>
 
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(7, 1fr)',
-              gap: '8px'
-            }}>
-              {days.map((date, index) => {
-                const isToday = date && date.toDateString() === today.toDateString();
-                return (
-                  <div
-                    key={index}
-                    onClick={() => date && handleDateSelect(date)}
-                    className="calendar-day"
-                    style={{
-                      textAlign: 'center',
-                      padding: '16px 8px',
-                      backgroundColor: date ? getDayColor(date) : 'transparent',
-                      color: date ? '#ffffff' : 'transparent',
-                      cursor: date ? 'pointer' : 'default',
-                      fontWeight: date ? '600' : 'normal',
-                      borderRadius: '16px',
-                      opacity: date ? 1 : 0.3,
-                      fontSize: '18px',
-                      position: 'relative',
-                      boxShadow: selectedDate?.toDateString() === date?.toDateString() ? '0 0 0 3px #000000' : 'none'
-                    }}
-                  >
-                    {date ? date.getDate() : ''}
-                    {isToday && (
-                      <div style={{
-                        position: 'absolute',
-                        bottom: '4px',
-                        left: '50%',
-                        transform: 'translateX(-50%)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '4px'
-                      }}>
-                        <span style={{
-                          display: 'inline-block',
-                          width: '8px',
-                          height: '8px',
-                          borderRadius: '50%',
-                          backgroundColor: '#ffffff',
-                          animation: 'pulse-blink 1.2s ease-in-out infinite'
-                        }}></span>
-                        <span style={{
-                          fontSize: '11px',
-                          fontWeight: '400',
-                          fontFamily: "'Questrial', sans-serif"
-                        }}>Hari Ini</span>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-
-            {selectedDate && (
-              <div style={{ marginTop: '32px' }}>
-                <div style={{
-                  fontFamily: "'Questrial', sans-serif",
-                  fontSize: '16px',
-                  fontWeight: '600',
-                  color: '#000000',
-                  marginBottom: '20px'
-                }}>
-                  Pilih Waktu - {selectedDate.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' })}
-                </div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
-                  {timeSlots.map((time) => (
-                    <button
-                      key={time}
-                      onClick={() => setSelectedTime(time)}
-                      className="time-slot"
-                      style={{
-                        padding: '12px 24px',
-                        borderRadius: '60px',
-                        border: selectedTime === time ? '2px solid #000000' : '1px solid #cccccc',
-                        backgroundColor: selectedTime === time ? '#000000' : '#ffffff',
-                        color: selectedTime === time ? '#ffffff' : '#000000',
-                        cursor: 'pointer',
-                        fontFamily: "'Questrial', sans-serif",
-                        fontSize: '15px',
-                        fontWeight: '500'
-                      }}
-                    >
-                      {time} WIB
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* SISI KANAN - Rekomendasi Jadwal */}
-          <div style={{
-            flex: 1.1,
-            padding: '40px',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '28px'
-          }}>
-            <div style={{
-              fontFamily: "'Questrial', sans-serif",
-              fontSize: '22px',
-              fontWeight: '700',
-              color: '#000000',
-              paddingBottom: '16px',
-              borderBottom: '2px solid #e0e0e0'
-            }}>
-              Rekomendasi Jadwal
-            </div>
-
-            {/* Card untuk Besok */}
-            <div
-              onClick={() => {
-                setSelectedDate(tomorrow);
-                setSelectedTime("10:00");
-              }}
-              style={{
-                padding: '24px',
-                backgroundColor: '#c5e800',
-                borderRadius: '24px',
-                color: '#000000',
-                cursor: 'pointer',
-                transition: 'transform 0.2s ease, box-shadow 0.2s ease'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'scale(1.02)';
-                e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.15)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'scale(1)';
-                e.currentTarget.style.boxShadow = 'none';
-              }}
-            >
-              <div style={{
-                fontFamily: "'Questrial', sans-serif",
-                fontSize: '16px',
-                fontWeight: '600',
-                marginBottom: '12px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px'
-              }}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 2v4M12 18v4M4 12H2M6.5 6.5L4 4M17.5 6.5L20 4M22 12h-2M17.5 17.5L20 20M6.5 17.5L4 20" stroke="#000000" strokeWidth="1.5" strokeLinecap="round"/>
-                  <circle cx="12" cy="12" r="3" fill="#000000" stroke="#000000" strokeWidth="1.5"/>
-                </svg>
-                BESOK
-              </div>
-              <div style={{
-                fontFamily: "'Questrial', sans-serif",
-                fontSize: '20px',
-                fontWeight: '700',
-                marginBottom: '10px'
-              }}>
-                {tomorrow.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' })}
-              </div>
-              <div style={{
-                fontFamily: "'Questrial', sans-serif",
-                fontSize: '16px',
-                fontWeight: '500',
-                marginBottom: '8px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px'
-              }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5"/>
-                  <path d="M12 6v6l4 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                </svg>
-                {timeSlots[2]} - {timeSlots[4]} WIB
-              </div>
-              <div style={{
-                fontFamily: "'Questrial', sans-serif",
-                fontSize: '13px',
-                opacity: 0.8,
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px'
-              }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 2v4M12 18v4M4 12H2M6.5 6.5L4 4M17.5 6.5L20 4M22 12h-2M17.5 17.5L20 20M6.5 17.5L4 20" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                  <circle cx="12" cy="12" r="3" fill="currentColor"/>
-                </svg>
-                Slot terbaik
-              </div>
-            </div>
-
-            {/* Card untuk Lusa */}
-            <div
-              onClick={() => {
-                setSelectedDate(dayAfterTomorrow);
-                setSelectedTime("13:00");
-              }}
-              style={{
-                padding: '24px',
-                backgroundColor: '#ff69b4',
-                borderRadius: '24px',
-                color: '#ffffff',
-                cursor: 'pointer',
-                transition: 'transform 0.2s ease, box-shadow 0.2s ease'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'scale(1.02)';
-                e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.15)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'scale(1)';
-                e.currentTarget.style.boxShadow = 'none';
-              }}
-            >
-              <div style={{
-                fontFamily: "'Questrial', sans-serif",
-                fontSize: '16px',
-                fontWeight: '600',
-                marginBottom: '12px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px'
-              }}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 2L15 9H22L16 14L19 21L12 16.5L5 21L8 14L2 9H9L12 2Z" stroke="#ffffff" strokeWidth="1.5" fill="none"/>
-                </svg>
-                LUSA
-              </div>
-              <div style={{
-                fontFamily: "'Questrial', sans-serif",
-                fontSize: '20px',
-                fontWeight: '700',
-                marginBottom: '10px'
-              }}>
-                {dayAfterTomorrow.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' })}
-              </div>
-              <div style={{
-                fontFamily: "'Questrial', sans-serif",
-                fontSize: '16px',
-                fontWeight: '500',
-                marginBottom: '8px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px'
-              }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5"/>
-                  <path d="M12 6v6l4 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                </svg>
-                {timeSlots[1]} - {timeSlots[3]} WIB
-              </div>
-              <div style={{
-                fontFamily: "'Questrial', sans-serif",
-                fontSize: '13px',
-                opacity: 0.8,
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px'
-              }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 2v4M12 18v4M4 12H2M6.5 6.5L4 4M17.5 6.5L20 4M22 12h-2M17.5 17.5L20 20M6.5 17.5L4 20" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                  <circle cx="12" cy="12" r="3" fill="currentColor"/>
-                </svg>
-                Paling diminati
-              </div>
-            </div>
-
-            {/* Tombol Schedule Meeting dan Back */}
-            <div style={{
-              display: 'flex',
-              gap: '16px',
-              marginTop: '20px',
-              flexDirection: 'column'
-            }}>
-              <button
-                onClick={() => setShowCalendarModal(false)}
-                style={{
-                  padding: '14px 24px',
-                  backgroundColor: '#ffffff',
-                  color: '#000000',
-                  border: '2px solid #cccccc',
-                  borderRadius: '60px',
-                  cursor: 'pointer',
-                  fontFamily: "'Questrial', sans-serif",
-                  fontSize: '16px',
-                  fontWeight: '600',
-                  transition: 'all 0.2s ease',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '12px'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = '#000000';
-                  e.currentTarget.style.backgroundColor = '#f5f5f5';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = '#cccccc';
-                  e.currentTarget.style.backgroundColor = '#ffffff';
-                }}
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M15 18L9 12L15 6" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-                Back
-              </button>
-              <button
-                onClick={() => {
-                  if (selectedDate && selectedTime) {
-                    setShowFormView(true);
-                  } else {
-                    alert("Silakan pilih tanggal dan waktu terlebih dahulu!");
-                  }
-                }}
-                style={{
-                  padding: '16px 24px',
-                  backgroundColor: '#0000ff',
-                  color: '#ffffff',
-                  border: 'none',
-                  borderRadius: '60px',
-                  cursor: 'pointer',
-                  fontFamily: "'Questrial', sans-serif",
-                  fontSize: '18px',
-                  fontWeight: '600',
-                  transition: 'all 0.2s ease',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '12px'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#2200dd';
-                  e.currentTarget.style.transform = 'scale(1.02)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = '#0000ff';
-                  e.currentTarget.style.transform = 'scale(1)';
-                }}
-              >
-                Schedule Meeting
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : (
-        // TAMPILAN FORM DATA DIRI (View 2)
+ {/* CALENDAR CALL MODAL - Dengan toggle antara calendar dan form */}
+{showCalendarModal && (
+  <div className="calendar-modal-overlay">
+    <div ref={modalRef} className="calendar-modal" style={{ maxWidth: '1300px', maxHeight: '85vh', overflow: 'auto' }}>
+      {!showFormView ? (
+        // TAMPILAN CALENDAR (View 1)
         <div style={{
           display: 'flex',
           flexDirection: 'row',
-          height: '100%',
-          minHeight: '680px'
+          height: 'auto',
+          minHeight: '620px'
         }}>
-          {/* SISI KIRI - Info Profile + Ringkasan */}
+          {/* SISI KIRI - Info Profile */}
           <div style={{
             flex: 1.1,
-            padding: '40px',
+            padding: '36px',
             borderRight: '1px solid #e0e0e0',
             display: 'flex',
             flexDirection: 'column',
@@ -4988,12 +4555,12 @@ export default function HomePage(): React.JSX.Element {
               display: 'flex',
               alignItems: 'center',
               gap: '20px',
-              paddingBottom: '24px',
+              paddingBottom: '20px',
               borderBottom: '1px solid #e0e0e0'
             }}>
               <div style={{
-                width: '80px',
-                height: '100px',
+                width: '75px',
+                height: '95px',
                 borderRadius: '16px',
                 overflow: 'hidden',
                 position: 'relative',
@@ -5009,13 +4576,13 @@ export default function HomePage(): React.JSX.Element {
               <div>
                 <div style={{
                   fontFamily: "'Questrial', sans-serif",
-                  fontSize: '28px',
+                  fontSize: '26px',
                   fontWeight: '600',
                   color: '#000000'
                 }}>Farid Ardiansyah</div>
                 <div style={{
                   fontFamily: "'Questrial', sans-serif",
-                  fontSize: '16px',
+                  fontSize: '15px',
                   color: '#666666'
                 }}>Founder & Programmer</div>
               </div>
@@ -5024,39 +4591,541 @@ export default function HomePage(): React.JSX.Element {
             <div>
               <div style={{
                 fontFamily: "'Questrial', sans-serif",
-                fontSize: '20px',
+                fontSize: '18px',
                 fontWeight: '600',
                 color: '#000000',
-                marginBottom: '16px'
-              }}>Ringkasan Meeting</div>
+                marginBottom: '10px'
+              }}>Tentang Kerjasama</div>
+              <div style={{
+                fontFamily: "'Questrial', sans-serif",
+                fontSize: '14px',
+                color: '#666666',
+                lineHeight: '1.5'
+              }}>
+                Diskusi tentang kolaborasi pengembangan website, aplikasi mobile, 
+                atau konsultasi teknologi. Saya siap membantu mewujudkan ide digital Anda!
+              </div>
+            </div>
+
+            <div>
               <div style={{
                 fontFamily: "'Questrial', sans-serif",
                 fontSize: '15px',
+                fontWeight: '600',
+                color: '#000000',
+                marginBottom: '8px'
+              }}>Waktu Tunggu Respon</div>
+              <div style={{
+                fontFamily: "'Questrial', sans-serif",
+                fontSize: '13px',
+                color: '#c5e800',
+                backgroundColor: '#1a1a1a',
+                display: 'inline-block',
+                padding: '5px 14px',
+                borderRadius: '60px'
+              }}>Maksimal 1x24 jam</div>
+            </div>
+
+            <div>
+              <div style={{
+                fontFamily: "'Questrial', sans-serif",
+                fontSize: '15px',
+                fontWeight: '600',
+                color: '#000000',
+                marginBottom: '14px'
+              }}>Tipe Meeting</div>
+              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                {["Online", "Offline", "Hybrid"].map((type) => (
+                  <button
+                    key={type}
+                    onClick={() => setMeetingType(type)}
+                    style={{
+                      padding: '8px 24px',
+                      borderRadius: '60px',
+                      border: meetingType === type ? '2px solid #000000' : '1px solid #cccccc',
+                      backgroundColor: meetingType === type ? '#000000' : '#ffffff',
+                      color: meetingType === type ? '#ffffff' : '#000000',
+                      cursor: 'pointer',
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    {type}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* SISI TENGAH - Calendar */}
+          <div style={{
+            flex: 2,
+            padding: '36px',
+            borderRight: '1px solid #e0e0e0',
+            display: 'flex',
+            flexDirection: 'column'
+          }}>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '28px'
+            }}>
+              <button
+                onClick={() => changeMonth(-1)}
+                style={{
+                  padding: '8px 18px',
+                  borderRadius: '12px',
+                  border: '1px solid #cccccc',
+                  backgroundColor: '#ffffff',
+                  cursor: 'pointer',
+                  fontFamily: "'Questrial', sans-serif",
+                  fontSize: '15px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M15 18L9 12L15 6" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                Prev
+              </button>
+              <div style={{
+                fontFamily: "'Questrial', sans-serif",
+                fontSize: '22px',
+                fontWeight: '600',
+                color: '#000000'
+              }}>
+                {currentMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}
+              </div>
+              <button
+                onClick={() => changeMonth(1)}
+                style={{
+                  padding: '8px 18px',
+                  borderRadius: '12px',
+                  border: '1px solid #cccccc',
+                  backgroundColor: '#ffffff',
+                  cursor: 'pointer',
+                  fontFamily: "'Questrial', sans-serif",
+                  fontSize: '15px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}
+              >
+                Next
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M9 18L15 12L9 6" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+            </div>
+
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(7, 1fr)',
+              gap: '6px',
+              marginBottom: '14px'
+            }}>
+              {weekDays.map((day) => (
+                <div key={day} style={{
+                  textAlign: 'center',
+                  fontFamily: "'Questrial', sans-serif",
+                  fontSize: '15px',
+                  fontWeight: '600',
+                  color: '#999999',
+                  padding: '10px'
+                }}>
+                  {day}
+                </div>
+              ))}
+            </div>
+
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(7, 1fr)',
+              gap: '6px'
+            }}>
+              {days.map((date, index) => (
+                <div
+                  key={index}
+                  onClick={() => date && handleDateSelect(date)}
+                  className="calendar-day"
+                  style={{
+                    textAlign: 'center',
+                    padding: '14px 6px',
+                    backgroundColor: date ? getDayColor(date) : 'transparent',
+                    color: date ? '#ffffff' : 'transparent',
+                    cursor: date ? 'pointer' : 'default',
+                    fontWeight: date ? '600' : 'normal',
+                    borderRadius: '14px',
+                    opacity: date ? 1 : 0.3,
+                    fontSize: '16px',
+                    boxShadow: selectedDate?.toDateString() === date?.toDateString() ? '0 0 0 2px #000000' : 'none',
+                    position: 'relative'
+                  }}
+                >
+                  {date ? date.getDate() : ''}
+                </div>
+              ))}
+            </div>
+
+            {selectedDate && (
+              <div style={{ marginTop: '28px' }}>
+                <div style={{
+                  fontFamily: "'Questrial', sans-serif",
+                  fontSize: '15px',
+                  fontWeight: '600',
+                  color: '#000000',
+                  marginBottom: '16px'
+                }}>
+                  Pilih Waktu - {selectedDate.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' })}
+                </div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+                  {timeSlots.map((time) => (
+                    <button
+                      key={time}
+                      onClick={() => setSelectedTime(time)}
+                      className="time-slot"
+                      style={{
+                        padding: '10px 22px',
+                        borderRadius: '60px',
+                        border: selectedTime === time ? '2px solid #000000' : '1px solid #cccccc',
+                        backgroundColor: selectedTime === time ? '#000000' : '#ffffff',
+                        color: selectedTime === time ? '#ffffff' : '#000000',
+                        cursor: 'pointer',
+                        fontFamily: "'Questrial', sans-serif",
+                        fontSize: '14px',
+                        fontWeight: '500'
+                      }}
+                    >
+                      {time} WIB
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* SISI KANAN - Rekomendasi Jadwal */}
+          <div style={{
+            flex: 1.1,
+            padding: '36px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '24px'
+          }}>
+            <div style={{
+              fontFamily: "'Questrial', sans-serif",
+              fontSize: '20px',
+              fontWeight: '700',
+              color: '#000000',
+              paddingBottom: '14px',
+              borderBottom: '2px solid #e0e0e0'
+            }}>
+              Rekomendasi Jadwal
+            </div>
+
+            {/* Card untuk Besok */}
+            <div
+              onClick={() => {
+                setSelectedDate(tomorrow);
+                setSelectedTime("10:00");
+              }}
+              style={{
+                padding: '22px',
+                backgroundColor: '#c5e800',
+                borderRadius: '20px',
+                color: '#000000',
+                cursor: 'pointer',
+                transition: 'transform 0.2s ease, box-shadow 0.2s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'scale(1.02)';
+                e.currentTarget.style.boxShadow = '0 6px 16px rgba(0,0,0,0.12)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'scale(1)';
+                e.currentTarget.style.boxShadow = 'none';
+              }}
+            >
+              <div style={{
+                fontFamily: "'Questrial', sans-serif",
+                fontSize: '15px',
+                fontWeight: '600',
+                marginBottom: '10px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px'
+              }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="12" cy="12" r="10" stroke="#000000" strokeWidth="1.5"/>
+                  <path d="M12 8v4l3 3" stroke="#000000" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
+                BESOK
+              </div>
+              <div style={{
+                fontFamily: "'Questrial', sans-serif",
+                fontSize: '18px',
+                fontWeight: '700',
+                marginBottom: '8px'
+              }}>
+                {tomorrow.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' })}
+              </div>
+              <div style={{
+                fontFamily: "'Questrial', sans-serif",
+                fontSize: '15px',
+                fontWeight: '500',
+                marginBottom: '6px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5"/>
+                  <path d="M12 6v6l4 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
+                {timeSlots[2]} - {timeSlots[4]} WIB
+              </div>
+              <div style={{
+                fontFamily: "'Questrial', sans-serif",
+                fontSize: '12px',
+                opacity: 0.7
+              }}>
+                Slot terbaik
+              </div>
+            </div>
+
+            {/* Card untuk Lusa */}
+            <div
+              onClick={() => {
+                setSelectedDate(dayAfterTomorrow);
+                setSelectedTime("13:00");
+              }}
+              style={{
+                padding: '22px',
+                backgroundColor: '#ff69b4',
+                borderRadius: '20px',
+                color: '#ffffff',
+                cursor: 'pointer',
+                transition: 'transform 0.2s ease, box-shadow 0.2s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'scale(1.02)';
+                e.currentTarget.style.boxShadow = '0 6px 16px rgba(0,0,0,0.12)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'scale(1)';
+                e.currentTarget.style.boxShadow = 'none';
+              }}
+            >
+              <div style={{
+                fontFamily: "'Questrial', sans-serif",
+                fontSize: '15px',
+                fontWeight: '600',
+                marginBottom: '10px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px'
+              }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 2L15 9H22L16 14L19 21L12 16.5L5 21L8 14L2 9H9L12 2Z" stroke="#ffffff" strokeWidth="1.5" fill="none"/>
+                </svg>
+                LUSA
+              </div>
+              <div style={{
+                fontFamily: "'Questrial', sans-serif",
+                fontSize: '18px',
+                fontWeight: '700',
+                marginBottom: '8px'
+              }}>
+                {dayAfterTomorrow.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' })}
+              </div>
+              <div style={{
+                fontFamily: "'Questrial', sans-serif",
+                fontSize: '15px',
+                fontWeight: '500',
+                marginBottom: '6px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5"/>
+                  <path d="M12 6v6l4 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
+                {timeSlots[1]} - {timeSlots[3]} WIB
+              </div>
+              <div style={{
+                fontFamily: "'Questrial', sans-serif",
+                fontSize: '12px',
+                opacity: 0.7
+              }}>
+                Paling diminati
+              </div>
+            </div>
+
+            {/* Tombol Back dan Schedule Meeting */}
+            <div style={{
+              display: 'flex',
+              gap: '12px',
+              marginTop: '16px',
+              flexDirection: 'column'
+            }}>
+              <button
+                onClick={() => setShowCalendarModal(false)}
+                style={{
+                  padding: '12px 20px',
+                  backgroundColor: '#ffffff',
+                  color: '#000000',
+                  border: '2px solid #cccccc',
+                  borderRadius: '60px',
+                  cursor: 'pointer',
+                  fontFamily: "'Questrial', sans-serif",
+                  fontSize: '15px',
+                  fontWeight: '600',
+                  transition: 'all 0.2s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '10px'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = '#000000';
+                  e.currentTarget.style.backgroundColor = '#f5f5f5';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = '#cccccc';
+                  e.currentTarget.style.backgroundColor = '#ffffff';
+                }}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M15 18L9 12L15 6" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                Back
+              </button>
+              <button
+                onClick={() => {
+                  if (selectedDate && selectedTime) {
+                    setShowFormView(true);
+                  } else {
+                    alert("Silakan pilih tanggal dan waktu terlebih dahulu!");
+                  }
+                }}
+                style={{
+                  padding: '14px 20px',
+                  backgroundColor: '#0000ff',
+                  color: '#ffffff',
+                  border: 'none',
+                  borderRadius: '60px',
+                  cursor: 'pointer',
+                  fontFamily: "'Questrial', sans-serif",
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  transition: 'all 0.2s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '10px'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#2200dd';
+                  e.currentTarget.style.transform = 'scale(1.02)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = '#0000ff';
+                  e.currentTarget.style.transform = 'scale(1)';
+                }}
+              >
+                Schedule Meeting
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : (
+        // TAMPILAN FORM DATA DIRI (View 2) - Bisa di-scroll
+        <div style={{
+          display: 'flex',
+          flexDirection: 'row',
+          height: 'auto',
+          minHeight: '620px',
+          maxHeight: '85vh'
+        }}>
+          {/* SISI KIRI - Info Profile + Ringkasan (Tetap) */}
+          <div style={{
+            flex: 1.1,
+            padding: '36px',
+            borderRight: '1px solid #e0e0e0',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '28px',
+            height: 'calc(85vh - 72px)',
+            overflowY: 'auto'
+          }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '20px',
+              paddingBottom: '20px',
+              borderBottom: '1px solid #e0e0e0'
+            }}>
+              <div style={{
+                width: '75px',
+                height: '95px',
+                borderRadius: '16px',
+                overflow: 'hidden',
+                position: 'relative',
+                border: '2px solid #e0e0e0'
+              }}>
+                <Image
+                  src="/images/5.jpg"
+                  alt="Farid Ardiansyah"
+                  fill
+                  style={{ objectFit: 'cover', objectPosition: 'center' }}
+                />
+              </div>
+              <div>
+                <div style={{
+                  fontFamily: "'Questrial', sans-serif",
+                  fontSize: '26px',
+                  fontWeight: '600',
+                  color: '#000000'
+                }}>Farid Ardiansyah</div>
+                <div style={{
+                  fontFamily: "'Questrial', sans-serif",
+                  fontSize: '15px',
+                  color: '#666666'
+                }}>Founder & Programmer</div>
+              </div>
+            </div>
+
+            <div>
+              <div style={{
+                fontFamily: "'Questrial', sans-serif",
+                fontSize: '18px',
+                fontWeight: '600',
+                color: '#000000',
+                marginBottom: '14px'
+              }}>Ringkasan Meeting</div>
+              <div style={{
+                fontFamily: "'Questrial', sans-serif",
+                fontSize: '14px',
                 color: '#666666',
                 lineHeight: '1.6'
               }}>
                 <div style={{ marginBottom: '8px' }}>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ display: 'inline', marginRight: '8px' }}>
-                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke="#666666" strokeWidth="1.5"/>
-                    <line x1="8" y1="2" x2="8" y2="6" stroke="#666666" strokeWidth="1.5"/>
-                    <line x1="16" y1="2" x2="16" y2="6" stroke="#666666" strokeWidth="1.5"/>
-                    <line x1="3" y1="10" x2="21" y2="10" stroke="#666666" strokeWidth="1.5"/>
-                  </svg>
                   <strong>Tanggal:</strong> {selectedDate?.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
                 </div>
                 <div style={{ marginBottom: '8px' }}>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ display: 'inline', marginRight: '8px' }}>
-                    <circle cx="12" cy="12" r="10" stroke="#666666" strokeWidth="1.5"/>
-                    <path d="M12 6v6l4 2" stroke="#666666" strokeWidth="1.5" strokeLinecap="round"/>
-                  </svg>
                   <strong>Waktu:</strong> {selectedTime} WIB
                 </div>
-                <div>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ display: 'inline', marginRight: '8px' }}>
-                    <path d="M12 2v4M12 18v4M4 12H2M6.5 6.5L4 4M17.5 6.5L20 4M22 12h-2M17.5 17.5L20 20M6.5 17.5L4 20" stroke="#666666" strokeWidth="1.5" strokeLinecap="round"/>
-                    <circle cx="12" cy="12" r="3" fill="#666666"/>
-                  </svg>
-                  <strong>Tipe:</strong> {meetingType}
+                <div style={{ marginBottom: '8px' }}>
+                  <strong>Tipe Meeting:</strong> {meetingType}
                 </div>
               </div>
             </div>
@@ -5064,39 +5133,44 @@ export default function HomePage(): React.JSX.Element {
             <div>
               <div style={{
                 fontFamily: "'Questrial', sans-serif",
-                fontSize: '16px',
+                fontSize: '15px',
                 fontWeight: '600',
                 color: '#000000',
                 marginBottom: '8px'
               }}>Waktu Tunggu Respon</div>
               <div style={{
                 fontFamily: "'Questrial', sans-serif",
-                fontSize: '14px',
+                fontSize: '13px',
                 color: '#c5e800',
                 backgroundColor: '#1a1a1a',
                 display: 'inline-block',
-                padding: '6px 16px',
+                padding: '5px 14px',
                 borderRadius: '60px'
               }}>Maksimal 1x24 jam</div>
             </div>
           </div>
 
-          {/* SISI KANAN - Form Data Diri */}
+          {/* SISI KANAN - Form Data Diri (Bisa Scroll) */}
           <div style={{
             flex: 2.2,
-            padding: '40px',
+            padding: '36px',
             display: 'flex',
             flexDirection: 'column',
-            gap: '20px',
+            gap: '18px',
+            height: 'calc(85vh - 72px)',
             overflowY: 'auto'
           }}>
             <div style={{
               fontFamily: "'Questrial', sans-serif",
-              fontSize: '24px',
+              fontSize: '22px',
               fontWeight: '700',
               color: '#000000',
-              paddingBottom: '16px',
-              borderBottom: '2px solid #e0e0e0'
+              paddingBottom: '14px',
+              borderBottom: '2px solid #e0e0e0',
+              position: 'sticky',
+              top: 0,
+              backgroundColor: '#ffffff',
+              zIndex: 10
             }}>
               Isi Data Diri
             </div>
@@ -5104,18 +5178,11 @@ export default function HomePage(): React.JSX.Element {
             <div>
               <div style={{
                 fontFamily: "'Questrial', sans-serif",
-                fontSize: '15px',
+                fontSize: '14px',
                 fontWeight: '600',
                 color: '#000000',
-                marginBottom: '6px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px'
+                marginBottom: '6px'
               }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="#000000" strokeWidth="1.5" strokeLinecap="round"/>
-                  <circle cx="12" cy="7" r="4" stroke="#000000" strokeWidth="1.5"/>
-                </svg>
                 Nama Lengkap <span style={{ color: '#ff4444' }}>*</span>
               </div>
               <input
@@ -5124,11 +5191,11 @@ export default function HomePage(): React.JSX.Element {
                 placeholder="Masukkan nama lengkap Anda"
                 style={{
                   width: '100%',
-                  padding: '14px 16px',
+                  padding: '12px 16px',
                   borderRadius: '12px',
                   border: '1px solid #cccccc',
                   fontFamily: "'Questrial', sans-serif",
-                  fontSize: '15px',
+                  fontSize: '14px',
                   outline: 'none'
                 }}
                 onFocus={(e) => e.currentTarget.style.borderColor = '#000000'}
@@ -5139,18 +5206,11 @@ export default function HomePage(): React.JSX.Element {
             <div>
               <div style={{
                 fontFamily: "'Questrial', sans-serif",
-                fontSize: '15px',
+                fontSize: '14px',
                 fontWeight: '600',
                 color: '#000000',
-                marginBottom: '6px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px'
+                marginBottom: '6px'
               }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <rect x="2" y="4" width="20" height="16" rx="2" stroke="#000000" strokeWidth="1.5"/>
-                  <path d="M2 8L12 14L22 8" stroke="#000000" strokeWidth="1.5" strokeLinecap="round"/>
-                </svg>
                 Email Address <span style={{ color: '#ff4444' }}>*</span>
               </div>
               <input
@@ -5159,11 +5219,11 @@ export default function HomePage(): React.JSX.Element {
                 placeholder="contoh@email.com"
                 style={{
                   width: '100%',
-                  padding: '14px 16px',
+                  padding: '12px 16px',
                   borderRadius: '12px',
                   border: '1px solid #cccccc',
                   fontFamily: "'Questrial', sans-serif",
-                  fontSize: '15px',
+                  fontSize: '14px',
                   outline: 'none'
                 }}
                 onFocus={(e) => e.currentTarget.style.borderColor = '#000000'}
@@ -5174,29 +5234,22 @@ export default function HomePage(): React.JSX.Element {
             <div>
               <div style={{
                 fontFamily: "'Questrial', sans-serif",
-                fontSize: '15px',
+                fontSize: '14px',
                 fontWeight: '600',
                 color: '#000000',
-                marginBottom: '6px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px'
+                marginBottom: '6px'
               }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="12" cy="12" r="10" stroke="#000000" strokeWidth="1.5"/>
-                  <path d="M12 8v4l3 3" stroke="#000000" strokeWidth="1.5" strokeLinecap="round"/>
-                </svg>
                 Platform Meeting <span style={{ color: '#ff4444' }}>*</span>
               </div>
               <select
                 id="locationOption"
                 style={{
                   width: '100%',
-                  padding: '14px 16px',
+                  padding: '12px 16px',
                   borderRadius: '12px',
                   border: '1px solid #cccccc',
                   fontFamily: "'Questrial', sans-serif",
-                  fontSize: '15px',
+                  fontSize: '14px',
                   outline: 'none',
                   backgroundColor: '#ffffff'
                 }}
@@ -5212,18 +5265,11 @@ export default function HomePage(): React.JSX.Element {
             <div>
               <div style={{
                 fontFamily: "'Questrial', sans-serif",
-                fontSize: '15px',
+                fontSize: '14px',
                 fontWeight: '600',
                 color: '#000000',
-                marginBottom: '6px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px'
+                marginBottom: '6px'
               }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <rect x="4" y="4" width="16" height="16" rx="2" stroke="#000000" strokeWidth="1.5"/>
-                  <path d="M9 9L15 15M15 9L9 15" stroke="#000000" strokeWidth="1.5" strokeLinecap="round"/>
-                </svg>
                 Nama Perusahaan / Instansi
               </div>
               <input
@@ -5232,11 +5278,11 @@ export default function HomePage(): React.JSX.Element {
                 placeholder="Masukkan nama perusahaan Anda"
                 style={{
                   width: '100%',
-                  padding: '14px 16px',
+                  padding: '12px 16px',
                   borderRadius: '12px',
                   border: '1px solid #cccccc',
                   fontFamily: "'Questrial', sans-serif",
-                  fontSize: '15px',
+                  fontSize: '14px',
                   outline: 'none'
                 }}
                 onFocus={(e) => e.currentTarget.style.borderColor = '#000000'}
@@ -5247,30 +5293,24 @@ export default function HomePage(): React.JSX.Element {
             <div>
               <div style={{
                 fontFamily: "'Questrial', sans-serif",
-                fontSize: '15px',
+                fontSize: '14px',
                 fontWeight: '600',
                 color: '#000000',
-                marginBottom: '6px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px'
+                marginBottom: '6px'
               }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 2L15 9H22L16 14L19 21L12 16.5L5 21L8 14L2 9H9L12 2Z" stroke="#000000" strokeWidth="1.5" fill="none"/>
-                </svg>
                 Kenapa Anda percaya dengan saya? <span style={{ color: '#ff4444' }}>*</span>
               </div>
               <textarea
                 id="trustReason"
-                placeholder="Ceritakan alasan Anda..."
+                placeholder="Ceritakan alasan Anda percaya dan ingin berkolaborasi..."
                 rows={3}
                 style={{
                   width: '100%',
-                  padding: '14px 16px',
+                  padding: '12px 16px',
                   borderRadius: '12px',
                   border: '1px solid #cccccc',
                   fontFamily: "'Questrial', sans-serif",
-                  fontSize: '15px',
+                  fontSize: '14px',
                   outline: 'none',
                   resize: 'vertical'
                 }}
@@ -5282,17 +5322,11 @@ export default function HomePage(): React.JSX.Element {
             <div>
               <div style={{
                 fontFamily: "'Questrial', sans-serif",
-                fontSize: '15px',
+                fontSize: '14px',
                 fontWeight: '600',
                 color: '#000000',
-                marginBottom: '6px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px'
+                marginBottom: '6px'
               }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M3 6h18M6 3v3M18 3v3M6 12h12M8 18h8" stroke="#000000" strokeWidth="1.5" strokeLinecap="round"/>
-                </svg>
                 Nomor WhatsApp / HP <span style={{ color: '#ff4444' }}>*</span>
               </div>
               <input
@@ -5301,11 +5335,11 @@ export default function HomePage(): React.JSX.Element {
                 placeholder="+62 xxx-xxxx-xxxx"
                 style={{
                   width: '100%',
-                  padding: '14px 16px',
+                  padding: '12px 16px',
                   borderRadius: '12px',
                   border: '1px solid #cccccc',
                   fontFamily: "'Questrial', sans-serif",
-                  fontSize: '15px',
+                  fontSize: '14px',
                   outline: 'none'
                 }}
                 onFocus={(e) => e.currentTarget.style.borderColor = '#000000'}
@@ -5316,89 +5350,89 @@ export default function HomePage(): React.JSX.Element {
             <div>
               <div style={{
                 fontFamily: "'Questrial', sans-serif",
-                fontSize: '15px',
+                fontSize: '14px',
                 fontWeight: '600',
                 color: '#000000',
-                marginBottom: '6px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px'
+                marginBottom: '6px'
               }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 2v4M12 18v4M4 12H2M6.5 6.5L4 4M17.5 6.5L20 4M22 12h-2M17.5 17.5L20 20M6.5 17.5L4 20" stroke="#000000" strokeWidth="1.5" strokeLinecap="round"/>
-                  <circle cx="12" cy="12" r="3" fill="none" stroke="#000000" strokeWidth="1.5"/>
-                </svg>
                 Tambah Guest (Opsional)
               </div>
-              <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+              <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                 <input
                   type="email"
                   id="guestEmail"
                   placeholder="Email guest (maks 3 orang)"
                   style={{
                     flex: 1,
-                    padding: '14px 16px',
+                    padding: '12px 16px',
                     borderRadius: '12px',
                     border: '1px solid #cccccc',
                     fontFamily: "'Questrial', sans-serif",
-                    fontSize: '15px',
+                    fontSize: '14px',
                     outline: 'none'
                   }}
                 />
                 <button
                   id="addGuestBtn"
                   style={{
-                    padding: '12px 20px',
+                    padding: '10px 20px',
                     borderRadius: '12px',
                     border: '1px solid #000000',
                     backgroundColor: '#ffffff',
                     color: '#000000',
                     cursor: 'pointer',
                     fontFamily: "'Questrial', sans-serif",
-                    fontSize: '15px',
+                    fontSize: '14px',
                     fontWeight: '500'
                   }}
                 >
                   + Add
                 </button>
               </div>
-              <div id="guestList" style={{ marginTop: '10px', display: 'flex', flexWrap: 'wrap', gap: '8px' }}></div>
+              <div id="guestList" style={{ marginTop: '8px', display: 'flex', flexWrap: 'wrap', gap: '8px' }}></div>
             </div>
 
             <div style={{
-              marginTop: '16px',
-              padding: '14px',
+              marginTop: '12px',
+              padding: '12px',
               backgroundColor: '#f5f5f5',
               borderRadius: '12px',
               textAlign: 'center'
             }}>
               <span style={{
                 fontFamily: "'Questrial', sans-serif",
-                fontSize: '13px',
+                fontSize: '12px',
                 color: '#666666'
               }}>
-                By proceeding, you agree to <span style={{ color: '#000000', fontWeight: '600' }}>Menuru Terms</span> and 
-                <span style={{ color: '#000000', fontWeight: '600' }}> Privacy Policy</span>.
+                By proceeding, you agree to <span style={{ color: '#000000', fontWeight: '600', cursor: 'pointer' }}>Menuru Terms</span> and 
+                <span style={{ color: '#000000', fontWeight: '600', cursor: 'pointer' }}> Privacy Policy</span>.
               </span>
             </div>
 
+            {/* Tombol Back dan Confirm - Sticky di bawah */}
             <div style={{
               display: 'flex',
-              gap: '16px',
-              marginTop: '8px'
+              gap: '14px',
+              marginTop: '16px',
+              marginBottom: '8px',
+              position: 'sticky',
+              bottom: 0,
+              backgroundColor: '#ffffff',
+              paddingTop: '12px',
+              paddingBottom: '8px'
             }}>
               <button
                 onClick={() => setShowFormView(false)}
                 style={{
                   flex: 1,
-                  padding: '14px 20px',
+                  padding: '12px 20px',
                   backgroundColor: '#ffffff',
                   color: '#000000',
                   border: '2px solid #cccccc',
                   borderRadius: '60px',
                   cursor: 'pointer',
                   fontFamily: "'Questrial', sans-serif",
-                  fontSize: '16px',
+                  fontSize: '15px',
                   fontWeight: '600',
                   display: 'flex',
                   alignItems: 'center',
@@ -5423,14 +5457,14 @@ export default function HomePage(): React.JSX.Element {
                 onClick={handleConfirmMeeting}
                 style={{
                   flex: 1,
-                  padding: '14px 20px',
+                  padding: '12px 20px',
                   backgroundColor: '#0000ff',
                   color: '#ffffff',
                   border: 'none',
                   borderRadius: '60px',
                   cursor: 'pointer',
                   fontFamily: "'Questrial', sans-serif",
-                  fontSize: '16px',
+                  fontSize: '15px',
                   fontWeight: '600',
                   display: 'flex',
                   alignItems: 'center',
@@ -5457,9 +5491,7 @@ export default function HomePage(): React.JSX.Element {
       )}
     </div>
   </div>
-)}
-
-
+)}                       
 
 
       
