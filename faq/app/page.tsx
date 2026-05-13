@@ -1,4 +1,4 @@
-// app/page.tsx - dengan fitur Admin, Reply Chat, dan Warna Features
+// app/page.tsx - dengan fitur Admin, Reply Chat, Warna Features, dan Calendar Submission Data
 
 'use client';
 
@@ -37,7 +37,8 @@ import {
   updateDoc,
   limit,
   where,
-  getDocs
+  getDocs,
+  deleteDoc
 } from "firebase/firestore";
 
 // Register GSAP plugins
@@ -91,6 +92,25 @@ interface Message {
   timestamp: Timestamp;
 }
 
+// Interface untuk Calendar Submission
+interface CalendarSubmission {
+  id: string;
+  fullName: string;
+  email: string;
+  phoneNumber: string;
+  companyName?: string;
+  trustReason: string;
+  meetingType: string;
+  platform: string;
+  selectedDate: string;
+  selectedTime: string;
+  guests: string[];
+  status: 'pending' | 'confirmed' | 'completed';
+  createdAt: Timestamp;
+  userId?: string;
+  userEmail?: string;
+}
+
 // Email Admin
 const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
 
@@ -99,7 +119,7 @@ export default function HomePage(): React.JSX.Element {
   const [announcement, setAnnouncement] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showCalendarModal, setShowCalendarModal] = useState(false);
-  const [showFormView, setShowFormView] = useState(false); // State untuk toggle antara calendar dan form
+  const [showFormView, setShowFormView] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState<string>("");
   const [meetingType, setMeetingType] = useState<string>("Online");
@@ -136,6 +156,10 @@ export default function HomePage(): React.JSX.Element {
   const [authError, setAuthError] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
+  
+  // State untuk Calendar Submissions
+  const [calendarSubmissions, setCalendarSubmissions] = useState<CalendarSubmission[]>([]);
+  const [showSubmissions, setShowSubmissions] = useState(false);
   
   const acceptBtnRef = useRef<HTMLButtonElement>(null);
   const declineBtnRef = useRef<HTMLButtonElement>(null);
@@ -319,8 +343,15 @@ export default function HomePage(): React.JSX.Element {
     setCurrentMonth(newDate);
   };
 
-  // Fungsi untuk handle form confirm
-  const handleConfirmMeeting = () => {
+  // North West Arrow SVG Component
+  const NorthWestArrowIcon = ({ size = 24 }: { size?: number }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M17 7L7 17M7 17H17M7 17V7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+
+  // Fungsi untuk handle form confirm dan simpan ke Firebase
+  const handleConfirmMeeting = async () => {
     const fullName = (document.getElementById('fullName') as HTMLInputElement)?.value;
     const emailAddress = (document.getElementById('emailAddress') as HTMLInputElement)?.value;
     const locationOption = (document.getElementById('locationOption') as HTMLSelectElement)?.value;
@@ -369,31 +400,66 @@ export default function HomePage(): React.JSX.Element {
       if (email) guestEmails.push(email);
     });
     
-    let confirmMessage = `JADWAL MEETING\n\n`;
-    confirmMessage += `Tanggal: ${selectedDate.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}\n`;
-    confirmMessage += `Waktu: ${selectedTime} WIB\n`;
-    confirmMessage += `Tipe Meeting: ${meetingType}\n\n`;
-    confirmMessage += `DATA DIRI\n`;
-    confirmMessage += `Nama: ${fullName}\n`;
-    confirmMessage += `Email: ${emailAddress}\n`;
-    confirmMessage += `No HP: ${phoneNumber}\n`;
-    confirmMessage += `Platform: ${locationOption === 'google_meet' ? 'Google Meet' : locationOption === 'zoom' ? 'Zoom' : locationOption === 'tatap_muka' ? 'Tatap Muka' : 'Via HP'}\n`;
-    if (companyName) confirmMessage += `Perusahaan: ${companyName}\n`;
-    confirmMessage += `Alasan percaya: ${trustReason}\n`;
-    if (guestEmails.length > 0) {
-      confirmMessage += `\nGuest:\n`;
-      guestEmails.forEach((email, idx) => {
-        confirmMessage += `  ${idx + 1}. ${email}\n`;
-      });
+    // Siapkan data untuk disimpan ke Firebase
+    const submissionData = {
+      fullName: fullName.trim(),
+      email: emailAddress.trim(),
+      phoneNumber: phoneNumber.trim(),
+      companyName: companyName?.trim() || "",
+      trustReason: trustReason.trim(),
+      meetingType: meetingType,
+      platform: locationOption,
+      selectedDate: selectedDate.toISOString(),
+      selectedDateFormatted: selectedDate.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }),
+      selectedTime: selectedTime,
+      guests: guestEmails,
+      status: 'pending',
+      createdAt: serverTimestamp(),
+      userEmail: user?.email || null,
+      userId: user?.uid || null
+    };
+    
+    try {
+      if (db) {
+        const calendarRef = collection(db, "calendar_submissions");
+        await addDoc(calendarRef, submissionData);
+        
+        alert(`JADWAL MEETING BERHASIL DISIMPAN!\n\nTanggal: ${submissionData.selectedDateFormatted}\nWaktu: ${selectedTime} WIB\n\nAdmin akan menghubungi Anda maksimal 1x24 jam.`);
+      } else {
+        // Fallback jika Firebase tidak tersedia
+        let confirmMessage = `JADWAL MEETING\n\n`;
+        confirmMessage += `Tanggal: ${selectedDate.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}\n`;
+        confirmMessage += `Waktu: ${selectedTime} WIB\n`;
+        confirmMessage += `Tipe Meeting: ${meetingType}\n\n`;
+        confirmMessage += `DATA DIRI\n`;
+        confirmMessage += `Nama: ${fullName}\n`;
+        confirmMessage += `Email: ${emailAddress}\n`;
+        confirmMessage += `No HP: ${phoneNumber}\n`;
+        confirmMessage += `Platform: ${locationOption === 'google_meet' ? 'Google Meet' : locationOption === 'zoom' ? 'Zoom' : locationOption === 'tatap_muka' ? 'Tatap Muka' : 'Via HP'}\n`;
+        if (companyName) confirmMessage += `Perusahaan: ${companyName}\n`;
+        confirmMessage += `Alasan percaya: ${trustReason}\n`;
+        if (guestEmails.length > 0) {
+          confirmMessage += `\nGuest:\n`;
+          guestEmails.forEach((email, idx) => {
+            confirmMessage += `  ${idx + 1}. ${email}\n`;
+          });
+        }
+        
+        alert(confirmMessage + `\n\nMeeting request telah dikirim!\nKami akan menghubungi Anda maksimal 1x24 jam.`);
+      }
+    } catch (error) {
+      console.error("Error saving submission:", error);
+      alert("Terjadi kesalahan saat menyimpan data. Silakan coba lagi.");
+      return;
     }
     
-    alert(confirmMessage + `\n\nMeeting request telah dikirim!\nKami akan menghubungi Anda maksimal 1x24 jam.`);
-    
+    // Reset form dan tutup modal
     setShowCalendarModal(false);
     setShowFormView(false);
     setSelectedDate(null);
     setSelectedTime("");
     
+    // Reset form inputs
     const formInputs = ['fullName', 'emailAddress', 'companyName', 'trustReason', 'phoneNumber'];
     formInputs.forEach(id => {
       const input = document.getElementById(id) as HTMLInputElement | HTMLTextAreaElement;
@@ -404,6 +470,24 @@ export default function HomePage(): React.JSX.Element {
     const guestList = document.getElementById('guestList');
     if (guestList) guestList.innerHTML = '';
   };
+
+  // Load calendar submissions from Firebase
+  useEffect(() => {
+    if (!db) return;
+
+    const submissionsRef = collection(db, "calendar_submissions");
+    const q = query(submissionsRef, orderBy("createdAt", "desc"));
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const submissions: CalendarSubmission[] = [];
+      snapshot.forEach((doc) => {
+        submissions.push({ id: doc.id, ...doc.data() } as CalendarSubmission);
+      });
+      setCalendarSubmissions(submissions);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   // Fungsi untuk scroll ke bottom chat
   const scrollToBottom = () => {
@@ -2073,12 +2157,6 @@ export default function HomePage(): React.JSX.Element {
     </svg>
   );
 
-  const NorthWestArrow = ({ size = 50 }: { size?: number }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M17 7L7 17M7 17H17M7 17V7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
-  );
-
   const NorthEastArrow = ({ size = 50 }: { size?: number }) => (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -2745,29 +2823,85 @@ export default function HomePage(): React.JSX.Element {
         .trusted-section .carousel-container::-webkit-scrollbar-thumb {
           background: rgba(255, 255, 255, 0.5);
         }
-        
-/* Tambahkan di dalam tag <style jsx global> */
-@keyframes pulse-blink {
-  0% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.3;
-    transform: scale(0.8);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
 
+        /* Style untuk Calendar Submissions Section */
+        .calendar-submissions-section {
+          width: 100%;
+          padding: 60px 80px;
+          background-color: #fff8e1;
+          border-top: 4px solid #ffeb3b;
+          box-sizing: border-box;
+        }
 
+        .calendar-submissions-title {
+          font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
+          font-size: 60px;
+          font-weight: 500;
+          color: #ff5722;
+          margin-bottom: 40px;
+          letter-spacing: -0.02em;
+          border-left: 8px solid #ffeb3b;
+          padding-left: 30px;
+        }
 
+        .submission-card {
+          background-color: #ffeb3b;
+          border-radius: 24px;
+          padding: 24px 32px;
+          margin-bottom: 20px;
+          box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+          transition: transform 0.2s ease;
+          border: 2px solid #ffc107;
+        }
+
+        .submission-card:hover {
+          transform: translateX(10px);
+        }
+
+        .submission-date-highlight {
+          background-color: #ff5722;
+          color: white;
+          display: inline-block;
+          padding: 6px 20px;
+          border-radius: 60px;
+          font-size: 14px;
+          font-weight: 600;
+          margin-bottom: 16px;
+        }
+
+        .submission-name {
+          font-size: 28px;
+          font-weight: 700;
+          color: #333;
+          margin-bottom: 8px;
+        }
+
+        .submission-time {
+          font-size: 18px;
+          color: #ff5722;
+          font-weight: 600;
+          margin-bottom: 16px;
+        }
+
+        .submission-detail {
+          margin-top: 16px;
+          padding-top: 16px;
+          border-top: 2px dashed #ff9800;
+        }
+
+        .submission-detail p {
+          margin: 8px 0;
+          font-size: 14px;
+          color: #555;
+        }
+
+        .submission-detail strong {
+          color: #d84315;
+        }
         
       `}</style>
       
-      {/* LOADING OVERLAY - Sama seperti sebelumnya */}
+      {/* LOADING OVERLAY */}
       {isLoading && (
         <div
           ref={loadingOverlayRef}
@@ -2966,7 +3100,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* SECTION FEATURES - Sama seperti sebelumnya */}
+            {/* SECTION FEATURES */}
             <div
               ref={featuresSectionRef}
               className="features-section"
@@ -3398,6 +3532,45 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </div>
             </div>
+
+            {/* SECTION CALENDAR SUBMISSIONS - Warna Merah Stabilo */}
+            {calendarSubmissions.length > 0 && (
+              <div className="calendar-submissions-section">
+                <div className="calendar-submissions-title">
+                  📅 CALL CALENDAR
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  {calendarSubmissions.map((submission) => (
+                    <div key={submission.id} className="submission-card">
+                      <div className="submission-date-highlight">
+                        {submission.selectedDateFormatted || new Date(submission.selectedDate).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+                      </div>
+                      <div className="submission-name">
+                        {submission.fullName}
+                      </div>
+                      <div className="submission-time">
+                        ⏰ {submission.selectedTime} WIB • {submission.meetingType}
+                      </div>
+                      <div className="submission-detail">
+                        <p><strong>📧 Email:</strong> {submission.email}</p>
+                        <p><strong>📱 No. HP:</strong> {submission.phoneNumber}</p>
+                        {submission.companyName && <p><strong>🏢 Perusahaan:</strong> {submission.companyName}</p>}
+                        <p><strong>💬 Alasan percaya:</strong> {submission.trustReason.substring(0, 100)}...</p>
+                        {submission.guests && submission.guests.length > 0 && (
+                          <p><strong>👥 Guest:</strong> {submission.guests.join(', ')}</p>
+                        )}
+                        <p><strong>📅 Platform:</strong> {
+                          submission.platform === 'google_meet' ? 'Google Meet' :
+                          submission.platform === 'zoom' ? 'Zoom' :
+                          submission.platform === 'tatap_muka' ? 'Tatap Muka (Offline)' :
+                          'Via HP/Telepon'
+                        }</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Bagian footer */}
             <div style={{
@@ -4404,978 +4577,964 @@ export default function HomePage(): React.JSX.Element {
         </div>
       )}
 
-
-
- {/* CALENDAR CALL MODAL - Dengan toggle antara calendar dan form */}
-{showCalendarModal && (
-  <div className="calendar-modal-overlay">
-    <div ref={modalRef} className="calendar-modal" style={{ maxWidth: '1300px', maxHeight: '85vh', overflow: 'auto' }}>
-      {!showFormView ? (
-        // TAMPILAN CALENDAR (View 1)
-        <div style={{
-          display: 'flex',
-          flexDirection: 'row',
-          height: 'auto',
-          minHeight: '620px'
-        }}>
-          {/* SISI KIRI - Info Profile */}
-          <div style={{
-            flex: 1.1,
-            padding: '36px',
-            borderRight: '1px solid #e0e0e0',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '28px'
-          }}>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '20px',
-              paddingBottom: '20px',
-              borderBottom: '1px solid #e0e0e0'
-            }}>
+      {/* CALENDAR CALL MODAL - Dengan toggle antara calendar dan form */}
+      {showCalendarModal && (
+        <div className="calendar-modal-overlay">
+          <div ref={modalRef} className="calendar-modal" style={{ maxWidth: '1300px', maxHeight: '85vh', overflow: 'auto' }}>
+            {!showFormView ? (
+              // TAMPILAN CALENDAR (View 1)
               <div style={{
-                width: '75px',
-                height: '95px',
-                borderRadius: '16px',
-                overflow: 'hidden',
-                position: 'relative',
-                border: '2px solid #e0e0e0'
+                display: 'flex',
+                flexDirection: 'row',
+                height: 'auto',
+                minHeight: '620px'
               }}>
-                <Image
-                  src="/images/5.jpg"
-                  alt="Farid Ardiansyah"
-                  fill
-                  style={{ objectFit: 'cover', objectPosition: 'center' }}
-                />
-              </div>
-              <div>
+                {/* SISI KIRI - Info Profile */}
                 <div style={{
-                  fontFamily: "'Questrial', sans-serif",
-                  fontSize: '26px',
-                  fontWeight: '600',
-                  color: '#000000'
-                }}>Farid Ardiansyah</div>
-                <div style={{
-                  fontFamily: "'Questrial', sans-serif",
-                  fontSize: '15px',
-                  color: '#666666'
-                }}>Founder & Programmer</div>
-              </div>
-            </div>
+                  flex: 1.1,
+                  padding: '36px',
+                  borderRight: '1px solid #e0e0e0',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '28px'
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '20px',
+                    paddingBottom: '20px',
+                    borderBottom: '1px solid #e0e0e0'
+                  }}>
+                    <div style={{
+                      width: '75px',
+                      height: '95px',
+                      borderRadius: '16px',
+                      overflow: 'hidden',
+                      position: 'relative',
+                      border: '2px solid #e0e0e0'
+                    }}>
+                      <Image
+                        src="/images/5.jpg"
+                        alt="Farid Ardiansyah"
+                        fill
+                        style={{ objectFit: 'cover', objectPosition: 'center' }}
+                      />
+                    </div>
+                    <div>
+                      <div style={{
+                        fontFamily: "'Questrial', sans-serif",
+                        fontSize: '26px',
+                        fontWeight: '600',
+                        color: '#000000'
+                      }}>Farid Ardiansyah</div>
+                      <div style={{
+                        fontFamily: "'Questrial', sans-serif",
+                        fontSize: '15px',
+                        color: '#666666'
+                      }}>Founder & Programmer</div>
+                    </div>
+                  </div>
 
-            <div>
-              <div style={{
-                fontFamily: "'Questrial', sans-serif",
-                fontSize: '18px',
-                fontWeight: '600',
-                color: '#000000',
-                marginBottom: '10px'
-              }}>Tentang Kerjasama</div>
-              <div style={{
-                fontFamily: "'Questrial', sans-serif",
-                fontSize: '14px',
-                color: '#666666',
-                lineHeight: '1.5'
-              }}>
-                Diskusi tentang kolaborasi pengembangan website, aplikasi mobile, 
-                atau konsultasi teknologi. Saya siap membantu mewujudkan ide digital Anda!
-              </div>
-            </div>
-
-            <div>
-              <div style={{
-                fontFamily: "'Questrial', sans-serif",
-                fontSize: '15px',
-                fontWeight: '600',
-                color: '#000000',
-                marginBottom: '8px'
-              }}>Waktu Tunggu Respon</div>
-              <div style={{
-                fontFamily: "'Questrial', sans-serif",
-                fontSize: '13px',
-                color: '#c5e800',
-                backgroundColor: '#1a1a1a',
-                display: 'inline-block',
-                padding: '5px 14px',
-                borderRadius: '60px'
-              }}>Maksimal 1x24 jam</div>
-            </div>
-
-            <div>
-              <div style={{
-                fontFamily: "'Questrial', sans-serif",
-                fontSize: '15px',
-                fontWeight: '600',
-                color: '#000000',
-                marginBottom: '14px'
-              }}>Tipe Meeting</div>
-              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                {["Online", "Offline", "Hybrid"].map((type) => (
-                  <button
-                    key={type}
-                    onClick={() => setMeetingType(type)}
-                    style={{
-                      padding: '8px 24px',
-                      borderRadius: '60px',
-                      border: meetingType === type ? '2px solid #000000' : '1px solid #cccccc',
-                      backgroundColor: meetingType === type ? '#000000' : '#ffffff',
-                      color: meetingType === type ? '#ffffff' : '#000000',
-                      cursor: 'pointer',
+                  <div>
+                    <div style={{
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '18px',
+                      fontWeight: '600',
+                      color: '#000000',
+                      marginBottom: '10px'
+                    }}>Tentang Kerjasama</div>
+                    <div style={{
                       fontFamily: "'Questrial', sans-serif",
                       fontSize: '14px',
-                      fontWeight: '500',
-                      transition: 'all 0.2s ease'
-                    }}
-                  >
-                    {type}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
+                      color: '#666666',
+                      lineHeight: '1.5'
+                    }}>
+                      Diskusi tentang kolaborasi pengembangan website, aplikasi mobile, 
+                      atau konsultasi teknologi. Saya siap membantu mewujudkan ide digital Anda!
+                    </div>
+                  </div>
 
-          {/* SISI TENGAH - Calendar */}
-          <div style={{
-            flex: 2,
-            padding: '36px',
-            borderRight: '1px solid #e0e0e0',
-            display: 'flex',
-            flexDirection: 'column'
-          }}>
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: '28px'
-            }}>
-              <button
-                onClick={() => changeMonth(-1)}
-                style={{
-                  padding: '8px 18px',
-                  borderRadius: '12px',
-                  border: '1px solid #cccccc',
-                  backgroundColor: '#ffffff',
-                  cursor: 'pointer',
-                  fontFamily: "'Questrial', sans-serif",
-                  fontSize: '15px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px'
-                }}
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M15 18L9 12L15 6" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-                Prev
-              </button>
-              <div style={{
-                fontFamily: "'Questrial', sans-serif",
-                fontSize: '22px',
-                fontWeight: '600',
-                color: '#000000'
-              }}>
-                {currentMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}
-              </div>
-              <button
-                onClick={() => changeMonth(1)}
-                style={{
-                  padding: '8px 18px',
-                  borderRadius: '12px',
-                  border: '1px solid #cccccc',
-                  backgroundColor: '#ffffff',
-                  cursor: 'pointer',
-                  fontFamily: "'Questrial', sans-serif",
-                  fontSize: '15px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px'
-                }}
-              >
-                Next
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M9 18L15 12L9 6" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </button>
-            </div>
+                  <div>
+                    <div style={{
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '15px',
+                      fontWeight: '600',
+                      color: '#000000',
+                      marginBottom: '8px'
+                    }}>Waktu Tunggu Respon</div>
+                    <div style={{
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '13px',
+                      color: '#c5e800',
+                      backgroundColor: '#1a1a1a',
+                      display: 'inline-block',
+                      padding: '5px 14px',
+                      borderRadius: '60px'
+                    }}>Maksimal 1x24 jam</div>
+                  </div>
 
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(7, 1fr)',
-              gap: '6px',
-              marginBottom: '14px'
-            }}>
-              {weekDays.map((day) => (
-                <div key={day} style={{
-                  textAlign: 'center',
-                  fontFamily: "'Questrial', sans-serif",
-                  fontSize: '15px',
-                  fontWeight: '600',
-                  color: '#999999',
-                  padding: '10px'
-                }}>
-                  {day}
+                  <div>
+                    <div style={{
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '15px',
+                      fontWeight: '600',
+                      color: '#000000',
+                      marginBottom: '14px'
+                    }}>Tipe Meeting</div>
+                    <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                      {["Online", "Offline", "Hybrid"].map((type) => (
+                        <button
+                          key={type}
+                          onClick={() => setMeetingType(type)}
+                          style={{
+                            padding: '8px 24px',
+                            borderRadius: '60px',
+                            border: meetingType === type ? '2px solid #000000' : '1px solid #cccccc',
+                            backgroundColor: meetingType === type ? '#000000' : '#ffffff',
+                            color: meetingType === type ? '#ffffff' : '#000000',
+                            cursor: 'pointer',
+                            fontFamily: "'Questrial', sans-serif",
+                            fontSize: '14px',
+                            fontWeight: '500',
+                            transition: 'all 0.2s ease'
+                          }}
+                        >
+                          {type}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
-              ))}
-            </div>
 
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(7, 1fr)',
-              gap: '6px'
-            }}>
-              {days.map((date, index) => (
-                <div
-                  key={index}
-                  onClick={() => date && handleDateSelect(date)}
-                  className="calendar-day"
-                  style={{
-                    textAlign: 'center',
-                    padding: '14px 6px',
-                    backgroundColor: date ? getDayColor(date) : 'transparent',
-                    color: date ? '#ffffff' : 'transparent',
-                    cursor: date ? 'pointer' : 'default',
-                    fontWeight: date ? '600' : 'normal',
-                    borderRadius: '14px',
-                    opacity: date ? 1 : 0.3,
-                    fontSize: '16px',
-                    boxShadow: selectedDate?.toDateString() === date?.toDateString() ? '0 0 0 2px #000000' : 'none',
-                    position: 'relative'
-                  }}
-                >
-                  {date ? date.getDate() : ''}
-                </div>
-              ))}
-            </div>
-
-            {selectedDate && (
-              <div style={{ marginTop: '28px' }}>
+                {/* SISI TENGAH - Calendar */}
                 <div style={{
-                  fontFamily: "'Questrial', sans-serif",
-                  fontSize: '15px',
-                  fontWeight: '600',
-                  color: '#000000',
-                  marginBottom: '16px'
+                  flex: 2,
+                  padding: '36px',
+                  borderRight: '1px solid #e0e0e0',
+                  display: 'flex',
+                  flexDirection: 'column'
                 }}>
-                  Pilih Waktu - {selectedDate.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' })}
-                </div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-                  {timeSlots.map((time) => (
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: '28px'
+                  }}>
                     <button
-                      key={time}
-                      onClick={() => setSelectedTime(time)}
-                      className="time-slot"
+                      onClick={() => changeMonth(-1)}
                       style={{
-                        padding: '10px 22px',
-                        borderRadius: '60px',
-                        border: selectedTime === time ? '2px solid #000000' : '1px solid #cccccc',
-                        backgroundColor: selectedTime === time ? '#000000' : '#ffffff',
-                        color: selectedTime === time ? '#ffffff' : '#000000',
+                        padding: '8px 18px',
+                        borderRadius: '12px',
+                        border: '1px solid #cccccc',
+                        backgroundColor: '#ffffff',
                         cursor: 'pointer',
                         fontFamily: "'Questrial', sans-serif",
-                        fontSize: '14px',
-                        fontWeight: '500'
+                        fontSize: '15px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px'
                       }}
                     >
-                      {time} WIB
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M15 18L9 12L15 6" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                      Prev
                     </button>
-                  ))}
+                    <div style={{
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '22px',
+                      fontWeight: '600',
+                      color: '#000000'
+                    }}>
+                      {currentMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}
+                    </div>
+                    <button
+                      onClick={() => changeMonth(1)}
+                      style={{
+                        padding: '8px 18px',
+                        borderRadius: '12px',
+                        border: '1px solid #cccccc',
+                        backgroundColor: '#ffffff',
+                        cursor: 'pointer',
+                        fontFamily: "'Questrial', sans-serif",
+                        fontSize: '15px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px'
+                      }}
+                    >
+                      Next
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 18L15 12L9 6" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </button>
+                  </div>
+
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(7, 1fr)',
+                    gap: '6px',
+                    marginBottom: '14px'
+                  }}>
+                    {weekDays.map((day) => (
+                      <div key={day} style={{
+                        textAlign: 'center',
+                        fontFamily: "'Questrial', sans-serif",
+                        fontSize: '15px',
+                        fontWeight: '600',
+                        color: '#999999',
+                        padding: '10px'
+                      }}>
+                        {day}
+                      </div>
+                    ))}
+                  </div>
+
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(7, 1fr)',
+                    gap: '6px'
+                  }}>
+                    {days.map((date, index) => (
+                      <div
+                        key={index}
+                        onClick={() => date && handleDateSelect(date)}
+                        className="calendar-day"
+                        style={{
+                          textAlign: 'center',
+                          padding: '14px 6px',
+                          backgroundColor: date ? getDayColor(date) : 'transparent',
+                          color: date ? '#ffffff' : 'transparent',
+                          cursor: date ? 'pointer' : 'default',
+                          fontWeight: date ? '600' : 'normal',
+                          borderRadius: '14px',
+                          opacity: date ? 1 : 0.3,
+                          fontSize: '16px',
+                          boxShadow: selectedDate?.toDateString() === date?.toDateString() ? '0 0 0 2px #000000' : 'none',
+                          position: 'relative'
+                        }}
+                      >
+                        {date ? date.getDate() : ''}
+                      </div>
+                    ))}
+                  </div>
+
+                  {selectedDate && (
+                    <div style={{ marginTop: '28px' }}>
+                      <div style={{
+                        fontFamily: "'Questrial', sans-serif",
+                        fontSize: '15px',
+                        fontWeight: '600',
+                        color: '#000000',
+                        marginBottom: '16px'
+                      }}>
+                        Pilih Waktu - {selectedDate.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' })}
+                      </div>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+                        {timeSlots.map((time) => (
+                          <button
+                            key={time}
+                            onClick={() => setSelectedTime(time)}
+                            className="time-slot"
+                            style={{
+                              padding: '10px 22px',
+                              borderRadius: '60px',
+                              border: selectedTime === time ? '2px solid #000000' : '1px solid #cccccc',
+                              backgroundColor: selectedTime === time ? '#000000' : '#ffffff',
+                              color: selectedTime === time ? '#ffffff' : '#000000',
+                              cursor: 'pointer',
+                              fontFamily: "'Questrial', sans-serif",
+                              fontSize: '14px',
+                              fontWeight: '500'
+                            }}
+                          >
+                            {time} WIB
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* SISI KANAN - Rekomendasi Jadwal */}
+                <div style={{
+                  flex: 1.1,
+                  padding: '36px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '24px'
+                }}>
+                  <div style={{
+                    fontFamily: "'Questrial', sans-serif",
+                    fontSize: '20px',
+                    fontWeight: '700',
+                    color: '#000000',
+                    paddingBottom: '14px',
+                    borderBottom: '2px solid #e0e0e0'
+                  }}>
+                    Rekomendasi Jadwal
+                  </div>
+
+                  {/* Card untuk Besok */}
+                  <div
+                    onClick={() => {
+                      setSelectedDate(tomorrow);
+                      setSelectedTime("10:00");
+                    }}
+                    style={{
+                      padding: '22px',
+                      backgroundColor: '#c5e800',
+                      borderRadius: '20px',
+                      color: '#000000',
+                      cursor: 'pointer',
+                      transition: 'transform 0.2s ease, box-shadow 0.2s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'scale(1.02)';
+                      e.currentTarget.style.boxShadow = '0 6px 16px rgba(0,0,0,0.12)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'scale(1)';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }}
+                  >
+                    <div style={{
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '15px',
+                      fontWeight: '600',
+                      marginBottom: '10px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '10px'
+                    }}>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="10" stroke="#000000" strokeWidth="1.5"/>
+                        <path d="M12 8v4l3 3" stroke="#000000" strokeWidth="1.5" strokeLinecap="round"/>
+                      </svg>
+                      BESOK
+                    </div>
+                    <div style={{
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '18px',
+                      fontWeight: '700',
+                      marginBottom: '8px'
+                    }}>
+                      {tomorrow.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' })}
+                    </div>
+                    <div style={{
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '15px',
+                      fontWeight: '500',
+                      marginBottom: '6px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px'
+                    }}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5"/>
+                        <path d="M12 6v6l4 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                      </svg>
+                      {timeSlots[2]} - {timeSlots[4]} WIB
+                    </div>
+                    <div style={{
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '12px',
+                      opacity: 0.7
+                    }}>
+                      Slot terbaik
+                    </div>
+                  </div>
+
+                  {/* Card untuk Lusa */}
+                  <div
+                    onClick={() => {
+                      setSelectedDate(dayAfterTomorrow);
+                      setSelectedTime("13:00");
+                    }}
+                    style={{
+                      padding: '22px',
+                      backgroundColor: '#ff69b4',
+                      borderRadius: '20px',
+                      color: '#ffffff',
+                      cursor: 'pointer',
+                      transition: 'transform 0.2s ease, box-shadow 0.2s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'scale(1.02)';
+                      e.currentTarget.style.boxShadow = '0 6px 16px rgba(0,0,0,0.12)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'scale(1)';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }}
+                  >
+                    <div style={{
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '15px',
+                      fontWeight: '600',
+                      marginBottom: '10px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '10px'
+                    }}>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2L15 9H22L16 14L19 21L12 16.5L5 21L8 14L2 9H9L12 2Z" stroke="#ffffff" strokeWidth="1.5" fill="none"/>
+                      </svg>
+                      LUSA
+                    </div>
+                    <div style={{
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '18px',
+                      fontWeight: '700',
+                      marginBottom: '8px'
+                    }}>
+                      {dayAfterTomorrow.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' })}
+                    </div>
+                    <div style={{
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '15px',
+                      fontWeight: '500',
+                      marginBottom: '6px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px'
+                    }}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5"/>
+                        <path d="M12 6v6l4 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                      </svg>
+                      {timeSlots[1]} - {timeSlots[3]} WIB
+                    </div>
+                    <div style={{
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '12px',
+                      opacity: 0.7
+                    }}>
+                      Paling diminati
+                    </div>
+                  </div>
+
+                  {/* Tombol Back dan Schedule Meeting - Back pakai North West Arrow */}
+                  <div style={{
+                    display: 'flex',
+                    gap: '12px',
+                    marginTop: '16px',
+                    flexDirection: 'column'
+                  }}>
+                    <button
+                      onClick={() => setShowCalendarModal(false)}
+                      style={{
+                        padding: '12px 20px',
+                        backgroundColor: '#ffffff',
+                        color: '#000000',
+                        border: '2px solid #cccccc',
+                        borderRadius: '60px',
+                        cursor: 'pointer',
+                        fontFamily: "'Questrial', sans-serif",
+                        fontSize: '15px',
+                        fontWeight: '600',
+                        transition: 'all 0.2s ease',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '10px'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.borderColor = '#000000';
+                        e.currentTarget.style.backgroundColor = '#f5f5f5';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.borderColor = '#cccccc';
+                        e.currentTarget.style.backgroundColor = '#ffffff';
+                      }}
+                    >
+                      <NorthWestArrowIcon size={18} />
+                      Back
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (selectedDate && selectedTime) {
+                          setShowFormView(true);
+                        } else {
+                          alert("Silakan pilih tanggal dan waktu terlebih dahulu!");
+                        }
+                      }}
+                      style={{
+                        padding: '14px 20px',
+                        backgroundColor: '#0000ff',
+                        color: '#ffffff',
+                        border: 'none',
+                        borderRadius: '60px',
+                        cursor: 'pointer',
+                        fontFamily: "'Questrial', sans-serif",
+                        fontSize: '16px',
+                        fontWeight: '600',
+                        transition: 'all 0.2s ease',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '10px'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = '#2200dd';
+                        e.currentTarget.style.transform = 'scale(1.02)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = '#0000ff';
+                        e.currentTarget.style.transform = 'scale(1)';
+                      }}
+                    >
+                      Schedule Meeting
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              // TAMPILAN FORM DATA DIRI (View 2) - Bisa di-scroll
+              <div style={{
+                display: 'flex',
+                flexDirection: 'row',
+                height: 'auto',
+                minHeight: '620px',
+                maxHeight: '85vh'
+              }}>
+                {/* SISI KIRI - Info Profile + Ringkasan (Tetap) */}
+                <div style={{
+                  flex: 1.1,
+                  padding: '36px',
+                  borderRight: '1px solid #e0e0e0',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '28px',
+                  height: 'calc(85vh - 72px)',
+                  overflowY: 'auto'
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '20px',
+                    paddingBottom: '20px',
+                    borderBottom: '1px solid #e0e0e0'
+                  }}>
+                    <div style={{
+                      width: '75px',
+                      height: '95px',
+                      borderRadius: '16px',
+                      overflow: 'hidden',
+                      position: 'relative',
+                      border: '2px solid #e0e0e0'
+                    }}>
+                      <Image
+                        src="/images/5.jpg"
+                        alt="Farid Ardiansyah"
+                        fill
+                        style={{ objectFit: 'cover', objectPosition: 'center' }}
+                      />
+                    </div>
+                    <div>
+                      <div style={{
+                        fontFamily: "'Questrial', sans-serif",
+                        fontSize: '26px',
+                        fontWeight: '600',
+                        color: '#000000'
+                      }}>Farid Ardiansyah</div>
+                      <div style={{
+                        fontFamily: "'Questrial', sans-serif",
+                        fontSize: '15px',
+                        color: '#666666'
+                      }}>Founder & Programmer</div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div style={{
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '18px',
+                      fontWeight: '600',
+                      color: '#000000',
+                      marginBottom: '14px'
+                    }}>Ringkasan Meeting</div>
+                    <div style={{
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '14px',
+                      color: '#666666',
+                      lineHeight: '1.6'
+                    }}>
+                      <div style={{ marginBottom: '8px' }}>
+                        <strong>Tanggal:</strong> {selectedDate?.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+                      </div>
+                      <div style={{ marginBottom: '8px' }}>
+                        <strong>Waktu:</strong> {selectedTime} WIB
+                      </div>
+                      <div style={{ marginBottom: '8px' }}>
+                        <strong>Tipe Meeting:</strong> {meetingType}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div style={{
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '15px',
+                      fontWeight: '600',
+                      color: '#000000',
+                      marginBottom: '8px'
+                    }}>Waktu Tunggu Respon</div>
+                    <div style={{
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '13px',
+                      color: '#c5e800',
+                      backgroundColor: '#1a1a1a',
+                      display: 'inline-block',
+                      padding: '5px 14px',
+                      borderRadius: '60px'
+                    }}>Maksimal 1x24 jam</div>
+                  </div>
+                </div>
+
+                {/* SISI KANAN - Form Data Diri (Bisa Scroll) */}
+                <div style={{
+                  flex: 2.2,
+                  padding: '36px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '18px',
+                  height: 'calc(85vh - 72px)',
+                  overflowY: 'auto'
+                }}>
+                  <div style={{
+                    fontFamily: "'Questrial', sans-serif",
+                    fontSize: '22px',
+                    fontWeight: '700',
+                    color: '#000000',
+                    paddingBottom: '14px',
+                    borderBottom: '2px solid #e0e0e0',
+                    position: 'sticky',
+                    top: 0,
+                    backgroundColor: '#ffffff',
+                    zIndex: 10
+                  }}>
+                    Isi Data Diri
+                  </div>
+
+                  <div>
+                    <div style={{
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: '#000000',
+                      marginBottom: '6px'
+                    }}>
+                      Nama Lengkap <span style={{ color: '#ff4444' }}>*</span>
+                    </div>
+                    <input
+                      type="text"
+                      id="fullName"
+                      placeholder="Masukkan nama lengkap Anda"
+                      style={{
+                        width: '100%',
+                        padding: '12px 16px',
+                        borderRadius: '12px',
+                        border: '1px solid #cccccc',
+                        fontFamily: "'Questrial', sans-serif",
+                        fontSize: '14px',
+                        outline: 'none'
+                      }}
+                      onFocus={(e) => e.currentTarget.style.borderColor = '#000000'}
+                      onBlur={(e) => e.currentTarget.style.borderColor = '#cccccc'}
+                    />
+                  </div>
+
+                  <div>
+                    <div style={{
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: '#000000',
+                      marginBottom: '6px'
+                    }}>
+                      Email Address <span style={{ color: '#ff4444' }}>*</span>
+                    </div>
+                    <input
+                      type="email"
+                      id="emailAddress"
+                      placeholder="contoh@email.com"
+                      style={{
+                        width: '100%',
+                        padding: '12px 16px',
+                        borderRadius: '12px',
+                        border: '1px solid #cccccc',
+                        fontFamily: "'Questrial', sans-serif",
+                        fontSize: '14px',
+                        outline: 'none'
+                      }}
+                      onFocus={(e) => e.currentTarget.style.borderColor = '#000000'}
+                      onBlur={(e) => e.currentTarget.style.borderColor = '#cccccc'}
+                    />
+                  </div>
+
+                  <div>
+                    <div style={{
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: '#000000',
+                      marginBottom: '6px'
+                    }}>
+                      Platform Meeting <span style={{ color: '#ff4444' }}>*</span>
+                    </div>
+                    <select
+                      id="locationOption"
+                      style={{
+                        width: '100%',
+                        padding: '12px 16px',
+                        borderRadius: '12px',
+                        border: '1px solid #cccccc',
+                        fontFamily: "'Questrial', sans-serif",
+                        fontSize: '14px',
+                        outline: 'none',
+                        backgroundColor: '#ffffff'
+                      }}
+                    >
+                      <option value="">Pilih platform meeting</option>
+                      <option value="google_meet">Google Meet</option>
+                      <option value="zoom">Zoom</option>
+                      <option value="tatap_muka">Tatap Muka (Offline)</option>
+                      <option value="via_hp">Via Nomor HP (Telepon/WA)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <div style={{
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: '#000000',
+                      marginBottom: '6px'
+                    }}>
+                      Nama Perusahaan / Instansi
+                    </div>
+                    <input
+                      type="text"
+                      id="companyName"
+                      placeholder="Masukkan nama perusahaan Anda"
+                      style={{
+                        width: '100%',
+                        padding: '12px 16px',
+                        borderRadius: '12px',
+                        border: '1px solid #cccccc',
+                        fontFamily: "'Questrial', sans-serif",
+                        fontSize: '14px',
+                        outline: 'none'
+                      }}
+                      onFocus={(e) => e.currentTarget.style.borderColor = '#000000'}
+                      onBlur={(e) => e.currentTarget.style.borderColor = '#cccccc'}
+                    />
+                  </div>
+
+                  <div>
+                    <div style={{
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: '#000000',
+                      marginBottom: '6px'
+                    }}>
+                      Kenapa Anda percaya dengan saya? <span style={{ color: '#ff4444' }}>*</span>
+                    </div>
+                    <textarea
+                      id="trustReason"
+                      placeholder="Ceritakan alasan Anda percaya dan ingin berkolaborasi..."
+                      rows={3}
+                      style={{
+                        width: '100%',
+                        padding: '12px 16px',
+                        borderRadius: '12px',
+                        border: '1px solid #cccccc',
+                        fontFamily: "'Questrial', sans-serif",
+                        fontSize: '14px',
+                        outline: 'none',
+                        resize: 'vertical'
+                      }}
+                      onFocus={(e) => e.currentTarget.style.borderColor = '#000000'}
+                      onBlur={(e) => e.currentTarget.style.borderColor = '#cccccc'}
+                    />
+                  </div>
+
+                  <div>
+                    <div style={{
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: '#000000',
+                      marginBottom: '6px'
+                    }}>
+                      Nomor WhatsApp / HP <span style={{ color: '#ff4444' }}>*</span>
+                    </div>
+                    <input
+                      type="tel"
+                      id="phoneNumber"
+                      placeholder="+62 xxx-xxxx-xxxx"
+                      style={{
+                        width: '100%',
+                        padding: '12px 16px',
+                        borderRadius: '12px',
+                        border: '1px solid #cccccc',
+                        fontFamily: "'Questrial', sans-serif",
+                        fontSize: '14px',
+                        outline: 'none'
+                      }}
+                      onFocus={(e) => e.currentTarget.style.borderColor = '#000000'}
+                      onBlur={(e) => e.currentTarget.style.borderColor = '#cccccc'}
+                    />
+                  </div>
+
+                  <div>
+                    <div style={{
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: '#000000',
+                      marginBottom: '6px'
+                    }}>
+                      Tambah Guest (Opsional)
+                    </div>
+                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                      <input
+                        type="email"
+                        id="guestEmail"
+                        placeholder="Email guest (maks 3 orang)"
+                        style={{
+                          flex: 1,
+                          padding: '12px 16px',
+                          borderRadius: '12px',
+                          border: '1px solid #cccccc',
+                          fontFamily: "'Questrial', sans-serif",
+                          fontSize: '14px',
+                          outline: 'none'
+                        }}
+                      />
+                      <button
+                        id="addGuestBtn"
+                        style={{
+                          padding: '10px 20px',
+                          borderRadius: '12px',
+                          border: '1px solid #000000',
+                          backgroundColor: '#ffffff',
+                          color: '#000000',
+                          cursor: 'pointer',
+                          fontFamily: "'Questrial', sans-serif",
+                          fontSize: '14px',
+                          fontWeight: '500'
+                        }}
+                      >
+                        + Add
+                      </button>
+                    </div>
+                    <div id="guestList" style={{ marginTop: '8px', display: 'flex', flexWrap: 'wrap', gap: '8px' }}></div>
+                  </div>
+
+                  <div style={{
+                    marginTop: '12px',
+                    padding: '12px',
+                    backgroundColor: '#f5f5f5',
+                    borderRadius: '12px',
+                    textAlign: 'center'
+                  }}>
+                    <span style={{
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '12px',
+                      color: '#666666'
+                    }}>
+                      By proceeding, you agree to <span style={{ color: '#000000', fontWeight: '600', cursor: 'pointer' }}>Menuru Terms</span> and 
+                      <span style={{ color: '#000000', fontWeight: '600', cursor: 'pointer' }}> Privacy Policy</span>.
+                    </span>
+                  </div>
+
+                  {/* Tombol Back dan Confirm - Back pakai North West Arrow */}
+                  <div style={{
+                    display: 'flex',
+                    gap: '14px',
+                    marginTop: '16px',
+                    marginBottom: '8px',
+                    position: 'sticky',
+                    bottom: 0,
+                    backgroundColor: '#ffffff',
+                    paddingTop: '12px',
+                    paddingBottom: '8px'
+                  }}>
+                    <button
+                      onClick={() => setShowFormView(false)}
+                      style={{
+                        flex: 1,
+                        padding: '12px 20px',
+                        backgroundColor: '#ffffff',
+                        color: '#000000',
+                        border: '2px solid #cccccc',
+                        borderRadius: '60px',
+                        cursor: 'pointer',
+                        fontFamily: "'Questrial', sans-serif",
+                        fontSize: '15px',
+                        fontWeight: '600',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '10px'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.borderColor = '#000000';
+                        e.currentTarget.style.backgroundColor = '#f5f5f5';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.borderColor = '#cccccc';
+                        e.currentTarget.style.backgroundColor = '#ffffff';
+                      }}
+                    >
+                      <NorthWestArrowIcon size={18} />
+                      Back
+                    </button>
+                    <button
+                      onClick={handleConfirmMeeting}
+                      style={{
+                        flex: 1,
+                        padding: '12px 20px',
+                        backgroundColor: '#0000ff',
+                        color: '#ffffff',
+                        border: 'none',
+                        borderRadius: '60px',
+                        cursor: 'pointer',
+                        fontFamily: "'Questrial', sans-serif",
+                        fontSize: '15px',
+                        fontWeight: '600',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '10px'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = '#2200dd';
+                        e.currentTarget.style.transform = 'scale(1.02)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = '#0000ff';
+                        e.currentTarget.style.transform = 'scale(1)';
+                      }}
+                    >
+                      Confirm
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
           </div>
-
-          {/* SISI KANAN - Rekomendasi Jadwal */}
-          <div style={{
-            flex: 1.1,
-            padding: '36px',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '24px'
-          }}>
-            <div style={{
-              fontFamily: "'Questrial', sans-serif",
-              fontSize: '20px',
-              fontWeight: '700',
-              color: '#000000',
-              paddingBottom: '14px',
-              borderBottom: '2px solid #e0e0e0'
-            }}>
-              Rekomendasi Jadwal
-            </div>
-
-            {/* Card untuk Besok */}
-            <div
-              onClick={() => {
-                setSelectedDate(tomorrow);
-                setSelectedTime("10:00");
-              }}
-              style={{
-                padding: '22px',
-                backgroundColor: '#c5e800',
-                borderRadius: '20px',
-                color: '#000000',
-                cursor: 'pointer',
-                transition: 'transform 0.2s ease, box-shadow 0.2s ease'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'scale(1.02)';
-                e.currentTarget.style.boxShadow = '0 6px 16px rgba(0,0,0,0.12)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'scale(1)';
-                e.currentTarget.style.boxShadow = 'none';
-              }}
-            >
-              <div style={{
-                fontFamily: "'Questrial', sans-serif",
-                fontSize: '15px',
-                fontWeight: '600',
-                marginBottom: '10px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px'
-              }}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="12" cy="12" r="10" stroke="#000000" strokeWidth="1.5"/>
-                  <path d="M12 8v4l3 3" stroke="#000000" strokeWidth="1.5" strokeLinecap="round"/>
-                </svg>
-                BESOK
-              </div>
-              <div style={{
-                fontFamily: "'Questrial', sans-serif",
-                fontSize: '18px',
-                fontWeight: '700',
-                marginBottom: '8px'
-              }}>
-                {tomorrow.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' })}
-              </div>
-              <div style={{
-                fontFamily: "'Questrial', sans-serif",
-                fontSize: '15px',
-                fontWeight: '500',
-                marginBottom: '6px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px'
-              }}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5"/>
-                  <path d="M12 6v6l4 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                </svg>
-                {timeSlots[2]} - {timeSlots[4]} WIB
-              </div>
-              <div style={{
-                fontFamily: "'Questrial', sans-serif",
-                fontSize: '12px',
-                opacity: 0.7
-              }}>
-                Slot terbaik
-              </div>
-            </div>
-
-            {/* Card untuk Lusa */}
-            <div
-              onClick={() => {
-                setSelectedDate(dayAfterTomorrow);
-                setSelectedTime("13:00");
-              }}
-              style={{
-                padding: '22px',
-                backgroundColor: '#ff69b4',
-                borderRadius: '20px',
-                color: '#ffffff',
-                cursor: 'pointer',
-                transition: 'transform 0.2s ease, box-shadow 0.2s ease'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'scale(1.02)';
-                e.currentTarget.style.boxShadow = '0 6px 16px rgba(0,0,0,0.12)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'scale(1)';
-                e.currentTarget.style.boxShadow = 'none';
-              }}
-            >
-              <div style={{
-                fontFamily: "'Questrial', sans-serif",
-                fontSize: '15px',
-                fontWeight: '600',
-                marginBottom: '10px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px'
-              }}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 2L15 9H22L16 14L19 21L12 16.5L5 21L8 14L2 9H9L12 2Z" stroke="#ffffff" strokeWidth="1.5" fill="none"/>
-                </svg>
-                LUSA
-              </div>
-              <div style={{
-                fontFamily: "'Questrial', sans-serif",
-                fontSize: '18px',
-                fontWeight: '700',
-                marginBottom: '8px'
-              }}>
-                {dayAfterTomorrow.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' })}
-              </div>
-              <div style={{
-                fontFamily: "'Questrial', sans-serif",
-                fontSize: '15px',
-                fontWeight: '500',
-                marginBottom: '6px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px'
-              }}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5"/>
-                  <path d="M12 6v6l4 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                </svg>
-                {timeSlots[1]} - {timeSlots[3]} WIB
-              </div>
-              <div style={{
-                fontFamily: "'Questrial', sans-serif",
-                fontSize: '12px',
-                opacity: 0.7
-              }}>
-                Paling diminati
-              </div>
-            </div>
-
-            {/* Tombol Back dan Schedule Meeting */}
-            <div style={{
-              display: 'flex',
-              gap: '12px',
-              marginTop: '16px',
-              flexDirection: 'column'
-            }}>
-              <button
-                onClick={() => setShowCalendarModal(false)}
-                style={{
-                  padding: '12px 20px',
-                  backgroundColor: '#ffffff',
-                  color: '#000000',
-                  border: '2px solid #cccccc',
-                  borderRadius: '60px',
-                  cursor: 'pointer',
-                  fontFamily: "'Questrial', sans-serif",
-                  fontSize: '15px',
-                  fontWeight: '600',
-                  transition: 'all 0.2s ease',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '10px'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = '#000000';
-                  e.currentTarget.style.backgroundColor = '#f5f5f5';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = '#cccccc';
-                  e.currentTarget.style.backgroundColor = '#ffffff';
-                }}
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M15 18L9 12L15 6" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-                Back
-              </button>
-              <button
-                onClick={() => {
-                  if (selectedDate && selectedTime) {
-                    setShowFormView(true);
-                  } else {
-                    alert("Silakan pilih tanggal dan waktu terlebih dahulu!");
-                  }
-                }}
-                style={{
-                  padding: '14px 20px',
-                  backgroundColor: '#0000ff',
-                  color: '#ffffff',
-                  border: 'none',
-                  borderRadius: '60px',
-                  cursor: 'pointer',
-                  fontFamily: "'Questrial', sans-serif",
-                  fontSize: '16px',
-                  fontWeight: '600',
-                  transition: 'all 0.2s ease',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '10px'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#2200dd';
-                  e.currentTarget.style.transform = 'scale(1.02)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = '#0000ff';
-                  e.currentTarget.style.transform = 'scale(1)';
-                }}
-              >
-                Schedule Meeting
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : (
-        // TAMPILAN FORM DATA DIRI (View 2) - Bisa di-scroll
-        <div style={{
-          display: 'flex',
-          flexDirection: 'row',
-          height: 'auto',
-          minHeight: '620px',
-          maxHeight: '85vh'
-        }}>
-          {/* SISI KIRI - Info Profile + Ringkasan (Tetap) */}
-          <div style={{
-            flex: 1.1,
-            padding: '36px',
-            borderRight: '1px solid #e0e0e0',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '28px',
-            height: 'calc(85vh - 72px)',
-            overflowY: 'auto'
-          }}>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '20px',
-              paddingBottom: '20px',
-              borderBottom: '1px solid #e0e0e0'
-            }}>
-              <div style={{
-                width: '75px',
-                height: '95px',
-                borderRadius: '16px',
-                overflow: 'hidden',
-                position: 'relative',
-                border: '2px solid #e0e0e0'
-              }}>
-                <Image
-                  src="/images/5.jpg"
-                  alt="Farid Ardiansyah"
-                  fill
-                  style={{ objectFit: 'cover', objectPosition: 'center' }}
-                />
-              </div>
-              <div>
-                <div style={{
-                  fontFamily: "'Questrial', sans-serif",
-                  fontSize: '26px',
-                  fontWeight: '600',
-                  color: '#000000'
-                }}>Farid Ardiansyah</div>
-                <div style={{
-                  fontFamily: "'Questrial', sans-serif",
-                  fontSize: '15px',
-                  color: '#666666'
-                }}>Founder & Programmer</div>
-              </div>
-            </div>
-
-            <div>
-              <div style={{
-                fontFamily: "'Questrial', sans-serif",
-                fontSize: '18px',
-                fontWeight: '600',
-                color: '#000000',
-                marginBottom: '14px'
-              }}>Ringkasan Meeting</div>
-              <div style={{
-                fontFamily: "'Questrial', sans-serif",
-                fontSize: '14px',
-                color: '#666666',
-                lineHeight: '1.6'
-              }}>
-                <div style={{ marginBottom: '8px' }}>
-                  <strong>Tanggal:</strong> {selectedDate?.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
-                </div>
-                <div style={{ marginBottom: '8px' }}>
-                  <strong>Waktu:</strong> {selectedTime} WIB
-                </div>
-                <div style={{ marginBottom: '8px' }}>
-                  <strong>Tipe Meeting:</strong> {meetingType}
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <div style={{
-                fontFamily: "'Questrial', sans-serif",
-                fontSize: '15px',
-                fontWeight: '600',
-                color: '#000000',
-                marginBottom: '8px'
-              }}>Waktu Tunggu Respon</div>
-              <div style={{
-                fontFamily: "'Questrial', sans-serif",
-                fontSize: '13px',
-                color: '#c5e800',
-                backgroundColor: '#1a1a1a',
-                display: 'inline-block',
-                padding: '5px 14px',
-                borderRadius: '60px'
-              }}>Maksimal 1x24 jam</div>
-            </div>
-          </div>
-
-          {/* SISI KANAN - Form Data Diri (Bisa Scroll) */}
-          <div style={{
-            flex: 2.2,
-            padding: '36px',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '18px',
-            height: 'calc(85vh - 72px)',
-            overflowY: 'auto'
-          }}>
-            <div style={{
-              fontFamily: "'Questrial', sans-serif",
-              fontSize: '22px',
-              fontWeight: '700',
-              color: '#000000',
-              paddingBottom: '14px',
-              borderBottom: '2px solid #e0e0e0',
-              position: 'sticky',
-              top: 0,
-              backgroundColor: '#ffffff',
-              zIndex: 10
-            }}>
-              Isi Data Diri
-            </div>
-
-            <div>
-              <div style={{
-                fontFamily: "'Questrial', sans-serif",
-                fontSize: '14px',
-                fontWeight: '600',
-                color: '#000000',
-                marginBottom: '6px'
-              }}>
-                Nama Lengkap <span style={{ color: '#ff4444' }}>*</span>
-              </div>
-              <input
-                type="text"
-                id="fullName"
-                placeholder="Masukkan nama lengkap Anda"
-                style={{
-                  width: '100%',
-                  padding: '12px 16px',
-                  borderRadius: '12px',
-                  border: '1px solid #cccccc',
-                  fontFamily: "'Questrial', sans-serif",
-                  fontSize: '14px',
-                  outline: 'none'
-                }}
-                onFocus={(e) => e.currentTarget.style.borderColor = '#000000'}
-                onBlur={(e) => e.currentTarget.style.borderColor = '#cccccc'}
-              />
-            </div>
-
-            <div>
-              <div style={{
-                fontFamily: "'Questrial', sans-serif",
-                fontSize: '14px',
-                fontWeight: '600',
-                color: '#000000',
-                marginBottom: '6px'
-              }}>
-                Email Address <span style={{ color: '#ff4444' }}>*</span>
-              </div>
-              <input
-                type="email"
-                id="emailAddress"
-                placeholder="contoh@email.com"
-                style={{
-                  width: '100%',
-                  padding: '12px 16px',
-                  borderRadius: '12px',
-                  border: '1px solid #cccccc',
-                  fontFamily: "'Questrial', sans-serif",
-                  fontSize: '14px',
-                  outline: 'none'
-                }}
-                onFocus={(e) => e.currentTarget.style.borderColor = '#000000'}
-                onBlur={(e) => e.currentTarget.style.borderColor = '#cccccc'}
-              />
-            </div>
-
-            <div>
-              <div style={{
-                fontFamily: "'Questrial', sans-serif",
-                fontSize: '14px',
-                fontWeight: '600',
-                color: '#000000',
-                marginBottom: '6px'
-              }}>
-                Platform Meeting <span style={{ color: '#ff4444' }}>*</span>
-              </div>
-              <select
-                id="locationOption"
-                style={{
-                  width: '100%',
-                  padding: '12px 16px',
-                  borderRadius: '12px',
-                  border: '1px solid #cccccc',
-                  fontFamily: "'Questrial', sans-serif",
-                  fontSize: '14px',
-                  outline: 'none',
-                  backgroundColor: '#ffffff'
-                }}
-              >
-                <option value="">Pilih platform meeting</option>
-                <option value="google_meet">Google Meet</option>
-                <option value="zoom">Zoom</option>
-                <option value="tatap_muka">Tatap Muka (Offline)</option>
-                <option value="via_hp">Via Nomor HP (Telepon/WA)</option>
-              </select>
-            </div>
-
-            <div>
-              <div style={{
-                fontFamily: "'Questrial', sans-serif",
-                fontSize: '14px',
-                fontWeight: '600',
-                color: '#000000',
-                marginBottom: '6px'
-              }}>
-                Nama Perusahaan / Instansi
-              </div>
-              <input
-                type="text"
-                id="companyName"
-                placeholder="Masukkan nama perusahaan Anda"
-                style={{
-                  width: '100%',
-                  padding: '12px 16px',
-                  borderRadius: '12px',
-                  border: '1px solid #cccccc',
-                  fontFamily: "'Questrial', sans-serif",
-                  fontSize: '14px',
-                  outline: 'none'
-                }}
-                onFocus={(e) => e.currentTarget.style.borderColor = '#000000'}
-                onBlur={(e) => e.currentTarget.style.borderColor = '#cccccc'}
-              />
-            </div>
-
-            <div>
-              <div style={{
-                fontFamily: "'Questrial', sans-serif",
-                fontSize: '14px',
-                fontWeight: '600',
-                color: '#000000',
-                marginBottom: '6px'
-              }}>
-                Kenapa Anda percaya dengan saya? <span style={{ color: '#ff4444' }}>*</span>
-              </div>
-              <textarea
-                id="trustReason"
-                placeholder="Ceritakan alasan Anda percaya dan ingin berkolaborasi..."
-                rows={3}
-                style={{
-                  width: '100%',
-                  padding: '12px 16px',
-                  borderRadius: '12px',
-                  border: '1px solid #cccccc',
-                  fontFamily: "'Questrial', sans-serif",
-                  fontSize: '14px',
-                  outline: 'none',
-                  resize: 'vertical'
-                }}
-                onFocus={(e) => e.currentTarget.style.borderColor = '#000000'}
-                onBlur={(e) => e.currentTarget.style.borderColor = '#cccccc'}
-              />
-            </div>
-
-            <div>
-              <div style={{
-                fontFamily: "'Questrial', sans-serif",
-                fontSize: '14px',
-                fontWeight: '600',
-                color: '#000000',
-                marginBottom: '6px'
-              }}>
-                Nomor WhatsApp / HP <span style={{ color: '#ff4444' }}>*</span>
-              </div>
-              <input
-                type="tel"
-                id="phoneNumber"
-                placeholder="+62 xxx-xxxx-xxxx"
-                style={{
-                  width: '100%',
-                  padding: '12px 16px',
-                  borderRadius: '12px',
-                  border: '1px solid #cccccc',
-                  fontFamily: "'Questrial', sans-serif",
-                  fontSize: '14px',
-                  outline: 'none'
-                }}
-                onFocus={(e) => e.currentTarget.style.borderColor = '#000000'}
-                onBlur={(e) => e.currentTarget.style.borderColor = '#cccccc'}
-              />
-            </div>
-
-            <div>
-              <div style={{
-                fontFamily: "'Questrial', sans-serif",
-                fontSize: '14px',
-                fontWeight: '600',
-                color: '#000000',
-                marginBottom: '6px'
-              }}>
-                Tambah Guest (Opsional)
-              </div>
-              <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                <input
-                  type="email"
-                  id="guestEmail"
-                  placeholder="Email guest (maks 3 orang)"
-                  style={{
-                    flex: 1,
-                    padding: '12px 16px',
-                    borderRadius: '12px',
-                    border: '1px solid #cccccc',
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '14px',
-                    outline: 'none'
-                  }}
-                />
-                <button
-                  id="addGuestBtn"
-                  style={{
-                    padding: '10px 20px',
-                    borderRadius: '12px',
-                    border: '1px solid #000000',
-                    backgroundColor: '#ffffff',
-                    color: '#000000',
-                    cursor: 'pointer',
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '14px',
-                    fontWeight: '500'
-                  }}
-                >
-                  + Add
-                </button>
-              </div>
-              <div id="guestList" style={{ marginTop: '8px', display: 'flex', flexWrap: 'wrap', gap: '8px' }}></div>
-            </div>
-
-            <div style={{
-              marginTop: '12px',
-              padding: '12px',
-              backgroundColor: '#f5f5f5',
-              borderRadius: '12px',
-              textAlign: 'center'
-            }}>
-              <span style={{
-                fontFamily: "'Questrial', sans-serif",
-                fontSize: '12px',
-                color: '#666666'
-              }}>
-                By proceeding, you agree to <span style={{ color: '#000000', fontWeight: '600', cursor: 'pointer' }}>Menuru Terms</span> and 
-                <span style={{ color: '#000000', fontWeight: '600', cursor: 'pointer' }}> Privacy Policy</span>.
-              </span>
-            </div>
-
-            {/* Tombol Back dan Confirm - Sticky di bawah */}
-            <div style={{
-              display: 'flex',
-              gap: '14px',
-              marginTop: '16px',
-              marginBottom: '8px',
-              position: 'sticky',
-              bottom: 0,
-              backgroundColor: '#ffffff',
-              paddingTop: '12px',
-              paddingBottom: '8px'
-            }}>
-              <button
-                onClick={() => setShowFormView(false)}
-                style={{
-                  flex: 1,
-                  padding: '12px 20px',
-                  backgroundColor: '#ffffff',
-                  color: '#000000',
-                  border: '2px solid #cccccc',
-                  borderRadius: '60px',
-                  cursor: 'pointer',
-                  fontFamily: "'Questrial', sans-serif",
-                  fontSize: '15px',
-                  fontWeight: '600',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '10px'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = '#000000';
-                  e.currentTarget.style.backgroundColor = '#f5f5f5';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = '#cccccc';
-                  e.currentTarget.style.backgroundColor = '#ffffff';
-                }}
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M15 18L9 12L15 6" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-                Back
-              </button>
-              <button
-                onClick={handleConfirmMeeting}
-                style={{
-                  flex: 1,
-                  padding: '12px 20px',
-                  backgroundColor: '#0000ff',
-                  color: '#ffffff',
-                  border: 'none',
-                  borderRadius: '60px',
-                  cursor: 'pointer',
-                  fontFamily: "'Questrial', sans-serif",
-                  fontSize: '15px',
-                  fontWeight: '600',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '10px'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#2200dd';
-                  e.currentTarget.style.transform = 'scale(1.02)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = '#0000ff';
-                  e.currentTarget.style.transform = 'scale(1)';
-                }}
-              >
-                Confirm
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </button>
-            </div>
-          </div>
         </div>
       )}
-    </div>
-  </div>
-)}                       
-
-
-      
-
-
-
-
-      
 
       {/* Cookie Popup */}
       {showPopup && !isLoading && (
