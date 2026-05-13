@@ -3507,349 +3507,448 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* SECTION CALENDAR SUBMISSIONS - Dengan fitur Admin Reply */}
-            {calendarSubmissions.length > 0 && (
-              <div className="calendar-submissions-section">
+          {/* SECTION CALENDAR SUBMISSIONS - Dengan desain baru */}
+{calendarSubmissions.length > 0 && (
+  <div style={{
+    width: '100%',
+    padding: '80px 80px',
+    backgroundColor: '#2196f3',
+    borderTop: '1px solid rgba(0,0,0,0.05)',
+    boxSizing: 'border-box'
+  }}>
+    <div style={{
+      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+      fontSize: '90px',
+      fontWeight: '500',
+      color: '#ffffff',
+      marginBottom: '60px',
+      letterSpacing: '-0.02em',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between'
+    }}>
+      <span>MEETING</span>
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '15px'
+      }}>
+        <span style={{
+          fontSize: '50px',
+          color: '#ffffff',
+          fontWeight: '400'
+        }}>
+          ({calendarSubmissions.length})
+        </span>
+        <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </div>
+    </div>
+    
+    <div style={{
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '24px'
+    }}>
+      {calendarSubmissions.map((submission, idx) => {
+        const submissionDate = new Date(submission.selectedDate);
+        const formattedMonth = submissionDate.toLocaleDateString('id-ID', { month: 'long' });
+        const formattedDay = submissionDate.toLocaleDateString('id-ID', { weekday: 'short' });
+        
+        // Warna berbeda untuk setiap tanggal berdasarkan index
+        const dateColors = ['#ff5722', '#2196f3', '#4caf50', '#9c27b0', '#ff9800', '#e91e63', '#00bcd4', '#795548', '#607d8b'];
+        const dateColor = dateColors[idx % dateColors.length];
+        
+        return (
+          <div
+            key={submission.id}
+            style={{
+              display: 'flex',
+              alignItems: 'stretch',
+              backgroundColor: '#ffffff',
+              borderRadius: '24px',
+              overflow: 'hidden',
+              boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
+              border: '2px solid #ffeb3b',
+              transition: 'all 0.3s ease',
+              cursor: 'pointer'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.12)';
+              e.currentTarget.style.transform = 'translateY(-3px)';
+              e.currentTarget.style.backgroundColor = '#000000';
+              const middleDiv = e.currentTarget.querySelector('.middle-info');
+              if (middleDiv) {
+                const allTexts = middleDiv.querySelectorAll('div, span, p');
+                allTexts.forEach((text: any) => {
+                  text.style.color = '#ffffff';
+                });
+              }
+              const rightDiv = e.currentTarget.querySelector('.right-section');
+              if (rightDiv) {
+                rightDiv.style.backgroundColor = '#1a1a1a';
+                rightDiv.style.borderLeftColor = '#ff5722';
+                const btnText = rightDiv.querySelector('.calendar-btn-text');
+                if (btnText) btnText.style.color = '#ffffff';
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.boxShadow = '0 2px 12px rgba(0,0,0,0.06)';
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.backgroundColor = '#ffffff';
+              const middleDiv = e.currentTarget.querySelector('.middle-info');
+              if (middleDiv) {
+                const allTexts = middleDiv.querySelectorAll('div, span, p');
+                allTexts.forEach((text: any) => {
+                  text.style.color = '';
+                });
+              }
+              const rightDiv = e.currentTarget.querySelector('.right-section');
+              if (rightDiv) {
+                rightDiv.style.backgroundColor = '#fffaf5';
+                rightDiv.style.borderLeftColor = '#ffeb3b';
+                const btnText = rightDiv.querySelector('.calendar-btn-text');
+                if (btnText) btnText.style.color = '#ff5722';
+              }
+            }}
+          >
+            {/* LEFT - Date Box dengan warna berbeda-beda */}
+            <div style={{
+              width: '140px',
+              backgroundColor: dateColor,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '24px 16px',
+              color: '#ffffff',
+              textAlign: 'center'
+            }}>
+              <div style={{
+                fontSize: '70px',
+                fontWeight: '700',
+                lineHeight: '1',
+                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif"
+              }}>
+                {submissionDate.getDate()}
+              </div>
+              <div style={{
+                fontSize: '20px',
+                fontWeight: '500',
+                textTransform: 'uppercase',
+                marginTop: '8px',
+                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif"
+              }}>
+                {formattedMonth}
+              </div>
+              <div style={{
+                fontSize: '16px',
+                fontWeight: '400',
+                opacity: 0.9,
+                marginTop: '4px',
+                fontFamily: "'Questrial', sans-serif"
+              }}>
+                {formattedDay}
+              </div>
+            </div>
+            
+            {/* MIDDLE - Info Meeting dengan teks besar dan SVG sesuai */}
+            <div className="middle-info" style={{
+              flex: 1,
+              padding: '24px 32px',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              gap: '20px',
+              backgroundColor: 'inherit',
+              transition: 'background-color 0.3s ease'
+            }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '24px',
+                flexWrap: 'wrap'
+              }}>
                 <div style={{
                   fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                  fontSize: '100px',
-                  fontWeight: '500',
-                  color: '#ff5722',
-                  marginBottom: '60px',
-                  letterSpacing: '-0.02em',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between'
+                  fontSize: '36px',
+                  fontWeight: '600',
+                  color: '#222',
+                  margin: 0,
+                  letterSpacing: '-0.02em'
                 }}>
-                  <span>MEETING</span>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '15px'
-                  }}>
-                    <span style={{
-                      fontSize: '50px',
-                      color: '#ff5722',
-                      fontWeight: '400'
-                    }}>
-                      ({calendarSubmissions.length})
-                    </span>
-                    <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff5722" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </div>
+                  {submission.fullName}
                 </div>
-                
                 <div style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '24px'
+                  fontSize: '18px',
+                  padding: '6px 18px',
+                  borderRadius: '60px',
+                  backgroundColor: submission.status === 'pending' ? '#ffeb3b' : submission.status === 'confirmed' ? '#4caf50' : '#ff9800',
+                  color: submission.status === 'pending' ? '#333' : '#fff',
+                  fontWeight: '500',
+                  fontFamily: "'Questrial', sans-serif"
                 }}>
-                  {calendarSubmissions.map((submission) => {
-                    const submissionDate = new Date(submission.selectedDate);
-                    const formattedMonth = submissionDate.toLocaleDateString('id-ID', { month: 'long' });
-                    const formattedDay = submissionDate.toLocaleDateString('id-ID', { weekday: 'short' });
-                    
-                    return (
-                      <div
-                        key={submission.id}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'stretch',
-                          backgroundColor: '#ffffff',
-                          borderRadius: '24px',
-                          overflow: 'hidden',
-                          boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
-                          border: '2px solid #ffeb3b',
-                          transition: 'all 0.3s ease',
-                          cursor: 'pointer'
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.12)';
-                          e.currentTarget.style.transform = 'translateY(-3px)';
-                          e.currentTarget.style.borderColor = '#ff5722';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.boxShadow = '0 2px 12px rgba(0,0,0,0.06)';
-                          e.currentTarget.style.transform = 'translateY(0)';
-                          e.currentTarget.style.borderColor = '#ffeb3b';
-                        }}
-                      >
-                        {/* LEFT - Date Box */}
-                        <div style={{
-                          width: '140px',
-                          backgroundColor: '#ff5722',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          padding: '24px 16px',
-                          color: '#ffffff',
-                          textAlign: 'center'
-                        }}>
-                          <div style={{
-                            fontSize: '70px',
-                            fontWeight: '700',
-                            lineHeight: '1',
-                            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif"
-                          }}>
-                            {submissionDate.getDate()}
-                          </div>
-                          <div style={{
-                            fontSize: '20px',
-                            fontWeight: '500',
-                            textTransform: 'uppercase',
-                            marginTop: '8px',
-                            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif"
-                          }}>
-                            {formattedMonth}
-                          </div>
-                          <div style={{
-                            fontSize: '16px',
-                            fontWeight: '400',
-                            opacity: 0.9,
-                            marginTop: '4px',
-                            fontFamily: "'Questrial', sans-serif"
-                          }}>
-                            {formattedDay}
-                          </div>
-                        </div>
-                        
-                        {/* MIDDLE - Info Meeting */}
-                        <div style={{
-                          flex: 1,
-                          padding: '24px 32px',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          justifyContent: 'center',
-                          gap: '16px',
-                          backgroundColor: '#ffffff'
-                        }}>
-                          <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '24px',
-                            flexWrap: 'wrap'
-                          }}>
-                            <div style={{
-                              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                              fontSize: '36px',
-                              fontWeight: '600',
-                              color: '#222',
-                              margin: 0,
-                              letterSpacing: '-0.02em'
-                            }}>
-                              {submission.fullName}
-                            </div>
-                            <div style={{
-                              fontSize: '18px',
-                              padding: '6px 18px',
-                              borderRadius: '60px',
-                              backgroundColor: submission.status === 'pending' ? '#ffeb3b' : submission.status === 'confirmed' ? '#4caf50' : '#ff9800',
-                              color: submission.status === 'pending' ? '#333' : '#fff',
-                              fontWeight: '500',
-                              fontFamily: "'Questrial', sans-serif"
-                            }}>
-                              {submission.status === 'pending' ? 'MENUNGGU' : submission.status === 'confirmed' ? 'DISETUJUI' : 'SELESAI'}
-                            </div>
-                          </div>
-                          
-                          <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '32px',
-                            flexWrap: 'wrap',
-                            fontSize: '20px',
-                            color: '#666',
-                            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif"
-                          }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <circle cx="12" cy="12" r="10" stroke="#ff5722" strokeWidth="1.5"/>
-                                <path d="M12 8v4l3 3" stroke="#ff5722" strokeWidth="1.5" strokeLinecap="round"/>
-                              </svg>
-                              <span>{submission.selectedTime} WIB</span>
-                            </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M12 2L15 9H22L16 14L19 21L12 16.5L5 21L8 14L2 9H9L12 2Z" stroke="#ff5722" strokeWidth="1.5" fill="none"/>
-                              </svg>
-                              <span>{submission.meetingType}</span>
-                            </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="#ff5722" strokeWidth="1.5" fill="none"/>
-                              </svg>
-                              <span>{submission.trustReason.substring(0, 60)}...</span>
-                            </div>
-                          </div>
-                          
-                          <div style={{
-                            fontSize: '18px',
-                            color: '#888',
-                            fontFamily: "'Questrial', sans-serif",
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '24px',
-                            flexWrap: 'wrap'
-                          }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M4 4H20C21.1 4 22 4.9 22 6V20C22 21.1 21.1 22 20 22H4C2.9 22 2 21.1 2 20V6C2 4.9 2.9 4 4 4Z" stroke="#999" strokeWidth="1.5" fill="none"/>
-                                <path d="M8 2V6M16 2V6M3 10H21" stroke="#999" strokeWidth="1.5" strokeLinecap="round"/>
-                              </svg>
-                              <span>{submission.email}</span>
-                            </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M22 16.92V19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-2.08M2 6L12 13L22 6M4 4h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" stroke="#999" strokeWidth="1.5" fill="none"/>
-                              </svg>
-                              <span>{submission.phoneNumber}</span>
-                            </div>
-                            {submission.companyName && (
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                  <path d="M3 9L12 3L21 9L12 15L3 9Z" stroke="#999" strokeWidth="1.5" fill="none"/>
-                                  <path d="M5 11V17L12 21L19 17V11" stroke="#999" strokeWidth="1.5" fill="none"/>
-                                </svg>
-                                <span>{submission.companyName}</span>
-                              </div>
-                            )}
-                          </div>
-                          
-                          {/* Admin Reply */}
-                          {submission.adminReply && (
-                            <div style={{
-                              marginTop: '12px',
-                              padding: '16px',
-                              backgroundColor: '#e8f5e9',
-                              borderRadius: '12px',
-                              borderLeft: '4px solid #4caf50'
-                            }}>
-                              <div style={{
-                                fontSize: '14px',
-                                color: '#2e7d32',
-                                fontWeight: '600',
-                                marginBottom: '8px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '8px'
-                              }}>
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="#2e7d32" strokeWidth="1.5" fill="none"/>
-                                </svg>
-                                <span>ADMIN REPLY: {submission.adminReply.repliedBy}</span>
-                              </div>
-                              <div style={{ fontSize: '16px', color: '#333', lineHeight: '1.5' }}>
-                                {submission.adminReply.text}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                        
-                        {/* RIGHT - Tautan ke Calendar Call dengan NORTH EAST ARROW & Admin Reply Button */}
-                        <div style={{
-                          width: '200px',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          gap: '16px',
-                          padding: '24px',
-                          borderLeft: '2px solid #ffeb3b',
-                          backgroundColor: '#fffaf5'
-                        }}>
-                          <button
-                            onClick={() => {
-                              setShowCalendarModal(true);
-                              setShowFormView(false);
-                              setSelectedDate(null);
-                              setSelectedTime("");
-                            }}
-                            style={{
-                              display: 'flex',
-                              flexDirection: 'column',
-                              alignItems: 'center',
-                              gap: '12px',
-                              backgroundColor: 'transparent',
-                              border: 'none',
-                              cursor: 'pointer',
-                              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                              fontSize: '16px',
-                              fontWeight: '500',
-                              color: '#ff5722',
-                              padding: '12px 20px',
-                              borderRadius: '60px',
-                              transition: 'all 0.3s ease',
-                              width: '100%'
-                            }}
-                            onMouseEnter={(e) => {
-                              e.currentTarget.style.backgroundColor = '#ff5722';
-                              e.currentTarget.style.color = '#ffffff';
-                              const svg = e.currentTarget.querySelector('svg path');
-                              if (svg) svg.setAttribute('stroke', '#ffffff');
-                            }}
-                            onMouseLeave={(e) => {
-                              e.currentTarget.style.backgroundColor = 'transparent';
-                              e.currentTarget.style.color = '#ff5722';
-                              const svg = e.currentTarget.querySelector('svg path');
-                              if (svg) svg.setAttribute('stroke', '#ff5722');
-                            }}
-                          >
-                            <span>CALENDAR CALL</span>
-                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff5722" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                            </svg>
-                          </button>
-                          
-                          {/* Admin Reply Button - Hanya muncul jika user adalah admin */}
-                          {isAdmin && (
-                            <button
-                              onClick={() => {
-                                setSelectedSubmission(submission);
-                                setReplyText(submission.adminReply?.text || "");
-                                setReplyStatus(submission.status);
-                                setShowReplyModal(true);
-                              }}
-                              style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                gap: '8px',
-                                backgroundColor: '#000000',
-                                border: 'none',
-                                cursor: 'pointer',
-                                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                                fontSize: '14px',
-                                fontWeight: '500',
-                                color: '#ffffff',
-                                padding: '10px 16px',
-                                borderRadius: '60px',
-                                transition: 'all 0.3s ease',
-                                width: '100%'
-                              }}
-                              onMouseEnter={(e) => {
-                                e.currentTarget.style.backgroundColor = '#333333';
-                                e.currentTarget.style.transform = 'scale(1.02)';
-                              }}
-                              onMouseLeave={(e) => {
-                                e.currentTarget.style.backgroundColor = '#000000';
-                                e.currentTarget.style.transform = 'scale(1)';
-                              }}
-                            >
-                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="#ffffff" strokeWidth="1.5" fill="none"/>
-                              </svg>
-                              <span>{submission.adminReply ? 'EDIT REPLY' : 'REPLY'}</span>
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
+                  {submission.status === 'pending' ? 'MENUNGGU' : submission.status === 'confirmed' ? 'DISETUJUI' : 'SELESAI'}
                 </div>
               </div>
-            )}
+              
+              {/* Waktu - icon jam */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                fontSize: '20px',
+                color: '#666',
+                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif"
+              }}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="12" cy="12" r="10" stroke="#ff5722" strokeWidth="1.5"/>
+                  <path d="M12 8v4l3 3" stroke="#ff5722" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
+                <span>{submission.selectedTime} WIB</span>
+              </div>
+              
+              {/* Tipe Meeting - icon bintang */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                fontSize: '20px',
+                color: '#666',
+                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif"
+              }}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 2L15 9H22L16 14L19 21L12 16.5L5 21L8 14L2 9H9L12 2Z" stroke="#ff5722" strokeWidth="1.5" fill="none"/>
+                </svg>
+                <span>{submission.meetingType}</span>
+              </div>
+              
+              {/* Alasan percaya - icon chat */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                fontSize: '20px',
+                color: '#666',
+                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif"
+              }}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="#ff5722" strokeWidth="1.5" fill="none"/>
+                </svg>
+                <span>{submission.trustReason.substring(0, 80)}...</span>
+              </div>
+              
+              {/* Email dan No HP - Hanya Admin yang bisa lihat lengkap */}
+              <div style={{
+                fontSize: '18px',
+                color: '#888',
+                fontFamily: "'Questrial', sans-serif",
+                display: 'flex',
+                alignItems: 'center',
+                gap: '24px',
+                flexWrap: 'wrap',
+                marginTop: '8px'
+              }}>
+                {isAdmin ? (
+                  <>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M4 4H20C21.1 4 22 4.9 22 6V20C22 21.1 21.1 22 20 22H4C2.9 22 2 21.1 2 20V6C2 4.9 2.9 4 4 4Z" stroke="#999" strokeWidth="1.5" fill="none"/>
+                        <path d="M8 2V6M16 2V6M3 10H21" stroke="#999" strokeWidth="1.5" strokeLinecap="round"/>
+                      </svg>
+                      <span>{submission.email}</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M22 16.92V19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-2.08M2 6L12 13L22 6M4 4h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" stroke="#999" strokeWidth="1.5" fill="none"/>
+                      </svg>
+                      <span>{submission.phoneNumber}</span>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M4 4H20C21.1 4 22 4.9 22 6V20C22 21.1 21.1 22 20 22H4C2.9 22 2 21.1 2 20V6C2 4.9 2.9 4 4 4Z" stroke="#999" strokeWidth="1.5" fill="none"/>
+                      </svg>
+                      <span>•••••••@{submission.email.split('@')[1] || 'email.com'}</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M22 16.92V19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-2.08M2 6L12 13L22 6M4 4h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" stroke="#999" strokeWidth="1.5" fill="none"/>
+                      </svg>
+                      <span>••••••••••</span>
+                    </div>
+                  </>
+                )}
+                {submission.companyName && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M3 9L12 3L21 9L12 15L3 9Z" stroke="#999" strokeWidth="1.5" fill="none"/>
+                      <path d="M5 11V17L12 21L19 17V11" stroke="#999" strokeWidth="1.5" fill="none"/>
+                    </svg>
+                    <span>{submission.companyName}</span>
+                  </div>
+                )}
+              </div>
+              
+              {/* Platform Meeting */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                fontSize: '16px',
+                color: '#ff5722',
+                fontFamily: "'Questrial', sans-serif",
+                marginTop: '4px'
+              }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="2" y="4" width="20" height="16" rx="2" stroke="#ff5722" strokeWidth="1.5" fill="none"/>
+                  <path d="M8 12h8M12 8v8" stroke="#ff5722" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
+                <span>Platform: {
+                  submission.platform === 'google_meet' ? 'Google Meet' :
+                  submission.platform === 'zoom' ? 'Zoom' :
+                  submission.platform === 'tatap_muka' ? 'Tatap Muka (Offline)' :
+                  'Via HP/Telepon'
+                }</span>
+              </div>
+              
+              {/* Admin Reply */}
+              {submission.adminReply && (
+                <div style={{
+                  marginTop: '12px',
+                  padding: '16px',
+                  backgroundColor: '#e8f5e9',
+                  borderRadius: '12px',
+                  borderLeft: '4px solid #4caf50'
+                }}>
+                  <div style={{
+                    fontSize: '14px',
+                    color: '#2e7d32',
+                    fontWeight: '600',
+                    marginBottom: '8px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="#2e7d32" strokeWidth="1.5" fill="none"/>
+                    </svg>
+                    <span>ADMIN REPLY: {submission.adminReply.repliedBy}</span>
+                  </div>
+                  <div style={{ fontSize: '16px', color: '#333', lineHeight: '1.5' }}>
+                    {submission.adminReply.text}
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            {/* RIGHT - Calendar Call Button dengan NORTH EAST ARROW besar */}
+            <div className="right-section" style={{
+              width: '180px',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '16px',
+              padding: '24px',
+              borderLeft: '2px solid #ffeb3b',
+              backgroundColor: '#fffaf5',
+              transition: 'all 0.3s ease'
+            }}>
+              <button
+                onClick={() => {
+                  setShowCalendarModal(true);
+                  setShowFormView(false);
+                  setSelectedDate(null);
+                  setSelectedTime("");
+                }}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '12px',
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                  fontSize: '16px',
+                  fontWeight: '500',
+                  color: '#ff5722',
+                  padding: '12px 20px',
+                  borderRadius: '60px',
+                  transition: 'all 0.3s ease',
+                  width: '100%'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#ff5722';
+                  e.currentTarget.style.color = '#ffffff';
+                  const svg = e.currentTarget.querySelector('svg path');
+                  if (svg) svg.setAttribute('stroke', '#ffffff');
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.color = '#ff5722';
+                  const svg = e.currentTarget.querySelector('svg path');
+                  if (svg) svg.setAttribute('stroke', '#ff5722');
+                }}
+              >
+                <span className="calendar-btn-text">CALENDAR CALL</span>
+                <svg width="50" height="50" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff5722" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+              
+              {/* Admin Reply Button - Hanya untuk admin */}
+              {isAdmin && (
+                <button
+                  onClick={() => {
+                    setSelectedSubmission(submission);
+                    setReplyText(submission.adminReply?.text || "");
+                    setReplyStatus(submission.status);
+                    setShowReplyModal(true);
+                  }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    backgroundColor: '#000000',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    color: '#ffffff',
+                    padding: '10px 16px',
+                    borderRadius: '60px',
+                    transition: 'all 0.3s ease',
+                    width: '100%'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#333333';
+                    e.currentTarget.style.transform = 'scale(1.02)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = '#000000';
+                    e.currentTarget.style.transform = 'scale(1)';
+                  }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="#ffffff" strokeWidth="1.5" fill="none"/>
+                  </svg>
+                  <span>{submission.adminReply ? 'EDIT REPLY' : 'REPLY'}</span>
+                </button>
+              )}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  </div>
+)}
 
             {/* REPLY MODAL FOR ADMIN */}
             {showReplyModal && selectedSubmission && (
