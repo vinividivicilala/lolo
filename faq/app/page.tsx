@@ -2745,6 +2745,26 @@ export default function HomePage(): React.JSX.Element {
         .trusted-section .carousel-container::-webkit-scrollbar-thumb {
           background: rgba(255, 255, 255, 0.5);
         }
+        
+/* Tambahkan di dalam tag <style jsx global> */
+@keyframes pulse-blink {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.3;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+
+
+        
       `}</style>
       
       {/* LOADING OVERLAY - Sama seperti sebelumnya */}
@@ -4385,38 +4405,40 @@ export default function HomePage(): React.JSX.Element {
       )}
 
 
+
+
 {/* CALENDAR CALL MODAL - Dengan toggle antara calendar dan form */}
 {showCalendarModal && (
   <div className="calendar-modal-overlay">
-    <div ref={modalRef} className="calendar-modal" style={{ maxWidth: '1100px' }}>
+    <div ref={modalRef} className="calendar-modal" style={{ maxWidth: '1300px' }}>
       {!showFormView ? (
         // TAMPILAN CALENDAR (View 1)
         <div style={{
           display: 'flex',
           flexDirection: 'row',
           height: '100%',
-          minHeight: '580px'
+          minHeight: '680px'
         }}>
           {/* SISI KIRI - Info Profile */}
           <div style={{
-            flex: 1.2,
-            padding: '28px',
+            flex: 1.1,
+            padding: '40px',
             borderRight: '1px solid #e0e0e0',
             display: 'flex',
             flexDirection: 'column',
-            gap: '24px'
+            gap: '32px'
           }}>
             <div style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '16px',
-              paddingBottom: '16px',
+              gap: '20px',
+              paddingBottom: '24px',
               borderBottom: '1px solid #e0e0e0'
             }}>
               <div style={{
-                width: '55px',
-                height: '75px',
-                borderRadius: '10px',
+                width: '80px',
+                height: '100px',
+                borderRadius: '16px',
                 overflow: 'hidden',
                 position: 'relative',
                 border: '2px solid #e0e0e0'
@@ -4431,13 +4453,13 @@ export default function HomePage(): React.JSX.Element {
               <div>
                 <div style={{
                   fontFamily: "'Questrial', sans-serif",
-                  fontSize: '20px',
+                  fontSize: '28px',
                   fontWeight: '600',
                   color: '#000000'
                 }}>Farid Ardiansyah</div>
                 <div style={{
                   fontFamily: "'Questrial', sans-serif",
-                  fontSize: '13px',
+                  fontSize: '16px',
                   color: '#666666'
                 }}>Founder & Programmer</div>
               </div>
@@ -4446,14 +4468,14 @@ export default function HomePage(): React.JSX.Element {
             <div>
               <div style={{
                 fontFamily: "'Questrial', sans-serif",
-                fontSize: '15px',
+                fontSize: '20px',
                 fontWeight: '600',
                 color: '#000000',
-                marginBottom: '8px'
+                marginBottom: '12px'
               }}>Tentang Kerjasama</div>
               <div style={{
                 fontFamily: "'Questrial', sans-serif",
-                fontSize: '12px',
+                fontSize: '15px',
                 color: '#666666',
                 lineHeight: '1.5'
               }}>
@@ -4465,18 +4487,18 @@ export default function HomePage(): React.JSX.Element {
             <div>
               <div style={{
                 fontFamily: "'Questrial', sans-serif",
-                fontSize: '13px',
+                fontSize: '16px',
                 fontWeight: '600',
                 color: '#000000',
-                marginBottom: '6px'
+                marginBottom: '8px'
               }}>Waktu Tunggu Respon</div>
               <div style={{
                 fontFamily: "'Questrial', sans-serif",
-                fontSize: '12px',
+                fontSize: '14px',
                 color: '#c5e800',
                 backgroundColor: '#1a1a1a',
                 display: 'inline-block',
-                padding: '4px 12px',
+                padding: '6px 16px',
                 borderRadius: '60px'
               }}>Maksimal 1x24 jam</div>
             </div>
@@ -4484,25 +4506,25 @@ export default function HomePage(): React.JSX.Element {
             <div>
               <div style={{
                 fontFamily: "'Questrial', sans-serif",
-                fontSize: '13px',
+                fontSize: '16px',
                 fontWeight: '600',
                 color: '#000000',
-                marginBottom: '10px'
+                marginBottom: '16px'
               }}>Tipe Meeting</div>
-              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
                 {["Online", "Offline", "Hybrid"].map((type) => (
                   <button
                     key={type}
                     onClick={() => setMeetingType(type)}
                     style={{
-                      padding: '6px 18px',
+                      padding: '10px 28px',
                       borderRadius: '60px',
                       border: meetingType === type ? '2px solid #000000' : '1px solid #cccccc',
                       backgroundColor: meetingType === type ? '#000000' : '#ffffff',
                       color: meetingType === type ? '#ffffff' : '#000000',
                       cursor: 'pointer',
                       fontFamily: "'Questrial', sans-serif",
-                      fontSize: '12px',
+                      fontSize: '15px',
                       fontWeight: '500',
                       transition: 'all 0.2s ease'
                     }}
@@ -4517,7 +4539,7 @@ export default function HomePage(): React.JSX.Element {
           {/* SISI TENGAH - Calendar */}
           <div style={{
             flex: 2,
-            padding: '28px',
+            padding: '40px',
             borderRight: '1px solid #e0e0e0',
             display: 'flex',
             flexDirection: 'column'
@@ -4526,25 +4548,31 @@ export default function HomePage(): React.JSX.Element {
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              marginBottom: '20px'
+              marginBottom: '32px'
             }}>
               <button
                 onClick={() => changeMonth(-1)}
                 style={{
-                  padding: '5px 12px',
-                  borderRadius: '8px',
+                  padding: '10px 20px',
+                  borderRadius: '12px',
                   border: '1px solid #cccccc',
                   backgroundColor: '#ffffff',
                   cursor: 'pointer',
                   fontFamily: "'Questrial', sans-serif",
-                  fontSize: '13px'
+                  fontSize: '16px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
                 }}
               >
-                ← Prev
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M15 18L9 12L15 6" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                Prev
               </button>
               <div style={{
                 fontFamily: "'Questrial', sans-serif",
-                fontSize: '17px',
+                fontSize: '24px',
                 fontWeight: '600',
                 color: '#000000'
               }}>
@@ -4553,33 +4581,39 @@ export default function HomePage(): React.JSX.Element {
               <button
                 onClick={() => changeMonth(1)}
                 style={{
-                  padding: '5px 12px',
-                  borderRadius: '8px',
+                  padding: '10px 20px',
+                  borderRadius: '12px',
                   border: '1px solid #cccccc',
                   backgroundColor: '#ffffff',
                   cursor: 'pointer',
                   fontFamily: "'Questrial', sans-serif",
-                  fontSize: '13px'
+                  fontSize: '16px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
                 }}
               >
-                Next →
+                Next
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M9 18L15 12L9 6" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
               </button>
             </div>
 
             <div style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(7, 1fr)',
-              gap: '4px',
-              marginBottom: '8px'
+              gap: '8px',
+              marginBottom: '16px'
             }}>
               {weekDays.map((day) => (
                 <div key={day} style={{
                   textAlign: 'center',
                   fontFamily: "'Questrial', sans-serif",
-                  fontSize: '11px',
+                  fontSize: '16px',
                   fontWeight: '600',
                   color: '#999999',
-                  padding: '5px'
+                  padding: '12px'
                 }}>
                   {day}
                 </div>
@@ -4589,57 +4623,87 @@ export default function HomePage(): React.JSX.Element {
             <div style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(7, 1fr)',
-              gap: '4px'
+              gap: '8px'
             }}>
-              {days.map((date, index) => (
-                <div
-                  key={index}
-                  onClick={() => date && handleDateSelect(date)}
-                  className="calendar-day"
-                  style={{
-                    textAlign: 'center',
-                    padding: '8px 4px',
-                    backgroundColor: date ? getDayColor(date) : 'transparent',
-                    color: date ? '#ffffff' : 'transparent',
-                    cursor: date ? 'pointer' : 'default',
-                    fontWeight: date ? '600' : 'normal',
-                    borderRadius: '8px',
-                    opacity: date ? 1 : 0.3,
-                    fontSize: '13px',
-                    boxShadow: selectedDate?.toDateString() === date?.toDateString() ? '0 0 0 2px #000000' : 'none'
-                  }}
-                >
-                  {date ? date.getDate() : ''}
-                </div>
-              ))}
+              {days.map((date, index) => {
+                const isToday = date && date.toDateString() === today.toDateString();
+                return (
+                  <div
+                    key={index}
+                    onClick={() => date && handleDateSelect(date)}
+                    className="calendar-day"
+                    style={{
+                      textAlign: 'center',
+                      padding: '16px 8px',
+                      backgroundColor: date ? getDayColor(date) : 'transparent',
+                      color: date ? '#ffffff' : 'transparent',
+                      cursor: date ? 'pointer' : 'default',
+                      fontWeight: date ? '600' : 'normal',
+                      borderRadius: '16px',
+                      opacity: date ? 1 : 0.3,
+                      fontSize: '18px',
+                      position: 'relative',
+                      boxShadow: selectedDate?.toDateString() === date?.toDateString() ? '0 0 0 3px #000000' : 'none'
+                    }}
+                  >
+                    {date ? date.getDate() : ''}
+                    {isToday && (
+                      <div style={{
+                        position: 'absolute',
+                        bottom: '4px',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '4px'
+                      }}>
+                        <span style={{
+                          display: 'inline-block',
+                          width: '8px',
+                          height: '8px',
+                          borderRadius: '50%',
+                          backgroundColor: '#ffffff',
+                          animation: 'pulse-blink 1.2s ease-in-out infinite'
+                        }}></span>
+                        <span style={{
+                          fontSize: '11px',
+                          fontWeight: '400',
+                          fontFamily: "'Questrial', sans-serif"
+                        }}>Hari Ini</span>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
 
             {selectedDate && (
-              <div style={{ marginTop: '20px' }}>
+              <div style={{ marginTop: '32px' }}>
                 <div style={{
                   fontFamily: "'Questrial', sans-serif",
-                  fontSize: '13px',
+                  fontSize: '16px',
                   fontWeight: '600',
                   color: '#000000',
-                  marginBottom: '10px'
+                  marginBottom: '20px'
                 }}>
                   Pilih Waktu - {selectedDate.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' })}
                 </div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
                   {timeSlots.map((time) => (
                     <button
                       key={time}
                       onClick={() => setSelectedTime(time)}
                       className="time-slot"
                       style={{
-                        padding: '6px 14px',
+                        padding: '12px 24px',
                         borderRadius: '60px',
                         border: selectedTime === time ? '2px solid #000000' : '1px solid #cccccc',
                         backgroundColor: selectedTime === time ? '#000000' : '#ffffff',
                         color: selectedTime === time ? '#ffffff' : '#000000',
                         cursor: 'pointer',
                         fontFamily: "'Questrial', sans-serif",
-                        fontSize: '12px',
+                        fontSize: '15px',
                         fontWeight: '500'
                       }}
                     >
@@ -4651,20 +4715,20 @@ export default function HomePage(): React.JSX.Element {
             )}
           </div>
 
-          {/* SISI KANAN - Rekomendasi Jadwal (Besok & Lusa) */}
+          {/* SISI KANAN - Rekomendasi Jadwal */}
           <div style={{
-            flex: 1.2,
-            padding: '28px',
+            flex: 1.1,
+            padding: '40px',
             display: 'flex',
             flexDirection: 'column',
-            gap: '20px'
+            gap: '28px'
           }}>
             <div style={{
               fontFamily: "'Questrial', sans-serif",
-              fontSize: '16px',
+              fontSize: '22px',
               fontWeight: '700',
               color: '#000000',
-              paddingBottom: '10px',
+              paddingBottom: '16px',
               borderBottom: '2px solid #e0e0e0'
             }}>
               Rekomendasi Jadwal
@@ -4677,16 +4741,16 @@ export default function HomePage(): React.JSX.Element {
                 setSelectedTime("10:00");
               }}
               style={{
-                padding: '16px',
+                padding: '24px',
                 backgroundColor: '#c5e800',
-                borderRadius: '16px',
+                borderRadius: '24px',
                 color: '#000000',
                 cursor: 'pointer',
                 transition: 'transform 0.2s ease, box-shadow 0.2s ease'
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = 'scale(1.02)';
-                e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+                e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.15)';
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.transform = 'scale(1)';
@@ -4695,37 +4759,55 @@ export default function HomePage(): React.JSX.Element {
             >
               <div style={{
                 fontFamily: "'Questrial', sans-serif",
-                fontSize: '12px',
+                fontSize: '16px',
                 fontWeight: '600',
-                marginBottom: '8px',
+                marginBottom: '12px',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '8px'
+                gap: '10px'
               }}>
-                <span>⭐</span> Besok
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 2v4M12 18v4M4 12H2M6.5 6.5L4 4M17.5 6.5L20 4M22 12h-2M17.5 17.5L20 20M6.5 17.5L4 20" stroke="#000000" strokeWidth="1.5" strokeLinecap="round"/>
+                  <circle cx="12" cy="12" r="3" fill="#000000" stroke="#000000" strokeWidth="1.5"/>
+                </svg>
+                BESOK
               </div>
               <div style={{
                 fontFamily: "'Questrial', sans-serif",
-                fontSize: '18px',
+                fontSize: '20px',
                 fontWeight: '700',
-                marginBottom: '6px'
+                marginBottom: '10px'
               }}>
                 {tomorrow.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' })}
               </div>
               <div style={{
                 fontFamily: "'Questrial', sans-serif",
-                fontSize: '14px',
+                fontSize: '16px',
                 fontWeight: '500',
-                marginBottom: '6px'
+                marginBottom: '8px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
               }}>
-                ⏰ {timeSlots[2]} - {timeSlots[4]} WIB
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5"/>
+                  <path d="M12 6v6l4 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
+                {timeSlots[2]} - {timeSlots[4]} WIB
               </div>
               <div style={{
                 fontFamily: "'Questrial', sans-serif",
-                fontSize: '11px',
-                opacity: 0.8
+                fontSize: '13px',
+                opacity: 0.8,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px'
               }}>
-                ✨ Slot terbaik
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 2v4M12 18v4M4 12H2M6.5 6.5L4 4M17.5 6.5L20 4M22 12h-2M17.5 17.5L20 20M6.5 17.5L4 20" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                  <circle cx="12" cy="12" r="3" fill="currentColor"/>
+                </svg>
+                Slot terbaik
               </div>
             </div>
 
@@ -4736,16 +4818,16 @@ export default function HomePage(): React.JSX.Element {
                 setSelectedTime("13:00");
               }}
               style={{
-                padding: '16px',
+                padding: '24px',
                 backgroundColor: '#ff69b4',
-                borderRadius: '16px',
+                borderRadius: '24px',
                 color: '#ffffff',
                 cursor: 'pointer',
                 transition: 'transform 0.2s ease, box-shadow 0.2s ease'
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = 'scale(1.02)';
-                e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+                e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.15)';
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.transform = 'scale(1)';
@@ -4754,64 +4836,81 @@ export default function HomePage(): React.JSX.Element {
             >
               <div style={{
                 fontFamily: "'Questrial', sans-serif",
-                fontSize: '12px',
+                fontSize: '16px',
                 fontWeight: '600',
-                marginBottom: '8px',
+                marginBottom: '12px',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '8px'
+                gap: '10px'
               }}>
-                <span>💫</span> Lusa
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 2L15 9H22L16 14L19 21L12 16.5L5 21L8 14L2 9H9L12 2Z" stroke="#ffffff" strokeWidth="1.5" fill="none"/>
+                </svg>
+                LUSA
               </div>
               <div style={{
                 fontFamily: "'Questrial', sans-serif",
-                fontSize: '18px',
+                fontSize: '20px',
                 fontWeight: '700',
-                marginBottom: '6px'
+                marginBottom: '10px'
               }}>
                 {dayAfterTomorrow.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' })}
               </div>
               <div style={{
                 fontFamily: "'Questrial', sans-serif",
-                fontSize: '14px',
+                fontSize: '16px',
                 fontWeight: '500',
-                marginBottom: '6px'
+                marginBottom: '8px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
               }}>
-                ⏰ {timeSlots[1]} - {timeSlots[3]} WIB
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5"/>
+                  <path d="M12 6v6l4 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
+                {timeSlots[1]} - {timeSlots[3]} WIB
               </div>
               <div style={{
                 fontFamily: "'Questrial', sans-serif",
-                fontSize: '11px',
-                opacity: 0.8
+                fontSize: '13px',
+                opacity: 0.8,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px'
               }}>
-                🌟 Paling diminati
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 2v4M12 18v4M4 12H2M6.5 6.5L4 4M17.5 6.5L20 4M22 12h-2M17.5 17.5L20 20M6.5 17.5L4 20" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                  <circle cx="12" cy="12" r="3" fill="currentColor"/>
+                </svg>
+                Paling diminati
               </div>
             </div>
 
             {/* Tombol Schedule Meeting dan Back */}
             <div style={{
               display: 'flex',
-              gap: '12px',
+              gap: '16px',
               marginTop: '20px',
               flexDirection: 'column'
             }}>
               <button
                 onClick={() => setShowCalendarModal(false)}
                 style={{
-                  padding: '10px 20px',
+                  padding: '14px 24px',
                   backgroundColor: '#ffffff',
                   color: '#000000',
-                  border: '1.5px solid #cccccc',
+                  border: '2px solid #cccccc',
                   borderRadius: '60px',
                   cursor: 'pointer',
                   fontFamily: "'Questrial', sans-serif",
-                  fontSize: '13px',
+                  fontSize: '16px',
                   fontWeight: '600',
                   transition: 'all 0.2s ease',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: '8px'
+                  gap: '12px'
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.borderColor = '#000000';
@@ -4822,7 +4921,9 @@ export default function HomePage(): React.JSX.Element {
                   e.currentTarget.style.backgroundColor = '#ffffff';
                 }}
               >
-                <NorthWestArrow size={16} />
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M15 18L9 12L15 6" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
                 Back
               </button>
               <button
@@ -4834,20 +4935,20 @@ export default function HomePage(): React.JSX.Element {
                   }
                 }}
                 style={{
-                  padding: '12px 20px',
+                  padding: '16px 24px',
                   backgroundColor: '#0000ff',
                   color: '#ffffff',
                   border: 'none',
                   borderRadius: '60px',
                   cursor: 'pointer',
                   fontFamily: "'Questrial', sans-serif",
-                  fontSize: '14px',
+                  fontSize: '18px',
                   fontWeight: '600',
                   transition: 'all 0.2s ease',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: '8px'
+                  gap: '12px'
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.backgroundColor = '#2200dd';
@@ -4859,39 +4960,41 @@ export default function HomePage(): React.JSX.Element {
                 }}
               >
                 Schedule Meeting
-                <NorthEastArrow size={16} />
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
               </button>
             </div>
           </div>
         </div>
       ) : (
-        // TAMPILAN FORM DATA DIRI (View 2) - tetap sama seperti sebelumnya
+        // TAMPILAN FORM DATA DIRI (View 2)
         <div style={{
           display: 'flex',
           flexDirection: 'row',
           height: '100%',
-          minHeight: '600px'
+          minHeight: '680px'
         }}>
           {/* SISI KIRI - Info Profile + Ringkasan */}
           <div style={{
-            flex: 1.2,
-            padding: '28px',
+            flex: 1.1,
+            padding: '40px',
             borderRight: '1px solid #e0e0e0',
             display: 'flex',
             flexDirection: 'column',
-            gap: '20px'
+            gap: '28px'
           }}>
             <div style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '16px',
-              paddingBottom: '16px',
+              gap: '20px',
+              paddingBottom: '24px',
               borderBottom: '1px solid #e0e0e0'
             }}>
               <div style={{
-                width: '55px',
-                height: '75px',
-                borderRadius: '10px',
+                width: '80px',
+                height: '100px',
+                borderRadius: '16px',
                 overflow: 'hidden',
                 position: 'relative',
                 border: '2px solid #e0e0e0'
@@ -4906,13 +5009,13 @@ export default function HomePage(): React.JSX.Element {
               <div>
                 <div style={{
                   fontFamily: "'Questrial', sans-serif",
-                  fontSize: '20px',
+                  fontSize: '28px',
                   fontWeight: '600',
                   color: '#000000'
                 }}>Farid Ardiansyah</div>
                 <div style={{
                   fontFamily: "'Questrial', sans-serif",
-                  fontSize: '13px',
+                  fontSize: '16px',
                   color: '#666666'
                 }}>Founder & Programmer</div>
               </div>
@@ -4921,38 +5024,58 @@ export default function HomePage(): React.JSX.Element {
             <div>
               <div style={{
                 fontFamily: "'Questrial', sans-serif",
-                fontSize: '15px',
+                fontSize: '20px',
                 fontWeight: '600',
                 color: '#000000',
-                marginBottom: '12px'
+                marginBottom: '16px'
               }}>Ringkasan Meeting</div>
               <div style={{
                 fontFamily: "'Questrial', sans-serif",
-                fontSize: '12px',
+                fontSize: '15px',
                 color: '#666666',
                 lineHeight: '1.6'
               }}>
-                <div>📅 Tanggal: <strong>{selectedDate?.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</strong></div>
-                <div>⏰ Waktu: <strong>{selectedTime} WIB</strong></div>
-                <div>📍 Tipe: <strong>{meetingType}</strong></div>
+                <div style={{ marginBottom: '8px' }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ display: 'inline', marginRight: '8px' }}>
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke="#666666" strokeWidth="1.5"/>
+                    <line x1="8" y1="2" x2="8" y2="6" stroke="#666666" strokeWidth="1.5"/>
+                    <line x1="16" y1="2" x2="16" y2="6" stroke="#666666" strokeWidth="1.5"/>
+                    <line x1="3" y1="10" x2="21" y2="10" stroke="#666666" strokeWidth="1.5"/>
+                  </svg>
+                  <strong>Tanggal:</strong> {selectedDate?.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+                </div>
+                <div style={{ marginBottom: '8px' }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ display: 'inline', marginRight: '8px' }}>
+                    <circle cx="12" cy="12" r="10" stroke="#666666" strokeWidth="1.5"/>
+                    <path d="M12 6v6l4 2" stroke="#666666" strokeWidth="1.5" strokeLinecap="round"/>
+                  </svg>
+                  <strong>Waktu:</strong> {selectedTime} WIB
+                </div>
+                <div>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ display: 'inline', marginRight: '8px' }}>
+                    <path d="M12 2v4M12 18v4M4 12H2M6.5 6.5L4 4M17.5 6.5L20 4M22 12h-2M17.5 17.5L20 20M6.5 17.5L4 20" stroke="#666666" strokeWidth="1.5" strokeLinecap="round"/>
+                    <circle cx="12" cy="12" r="3" fill="#666666"/>
+                  </svg>
+                  <strong>Tipe:</strong> {meetingType}
+                </div>
               </div>
             </div>
 
             <div>
               <div style={{
                 fontFamily: "'Questrial', sans-serif",
-                fontSize: '13px',
+                fontSize: '16px',
                 fontWeight: '600',
                 color: '#000000',
-                marginBottom: '6px'
+                marginBottom: '8px'
               }}>Waktu Tunggu Respon</div>
               <div style={{
                 fontFamily: "'Questrial', sans-serif",
-                fontSize: '12px',
+                fontSize: '14px',
                 color: '#c5e800',
                 backgroundColor: '#1a1a1a',
                 display: 'inline-block',
-                padding: '4px 12px',
+                padding: '6px 16px',
                 borderRadius: '60px'
               }}>Maksimal 1x24 jam</div>
             </div>
@@ -4961,18 +5084,18 @@ export default function HomePage(): React.JSX.Element {
           {/* SISI KANAN - Form Data Diri */}
           <div style={{
             flex: 2.2,
-            padding: '28px',
+            padding: '40px',
             display: 'flex',
             flexDirection: 'column',
-            gap: '14px',
+            gap: '20px',
             overflowY: 'auto'
           }}>
             <div style={{
               fontFamily: "'Questrial', sans-serif",
-              fontSize: '18px',
+              fontSize: '24px',
               fontWeight: '700',
               color: '#000000',
-              paddingBottom: '10px',
+              paddingBottom: '16px',
               borderBottom: '2px solid #e0e0e0'
             }}>
               Isi Data Diri
@@ -4981,11 +5104,18 @@ export default function HomePage(): React.JSX.Element {
             <div>
               <div style={{
                 fontFamily: "'Questrial', sans-serif",
-                fontSize: '12px',
+                fontSize: '15px',
                 fontWeight: '600',
                 color: '#000000',
-                marginBottom: '4px'
+                marginBottom: '6px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
               }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="#000000" strokeWidth="1.5" strokeLinecap="round"/>
+                  <circle cx="12" cy="7" r="4" stroke="#000000" strokeWidth="1.5"/>
+                </svg>
                 Nama Lengkap <span style={{ color: '#ff4444' }}>*</span>
               </div>
               <input
@@ -4994,11 +5124,11 @@ export default function HomePage(): React.JSX.Element {
                 placeholder="Masukkan nama lengkap Anda"
                 style={{
                   width: '100%',
-                  padding: '10px 12px',
-                  borderRadius: '10px',
+                  padding: '14px 16px',
+                  borderRadius: '12px',
                   border: '1px solid #cccccc',
                   fontFamily: "'Questrial', sans-serif",
-                  fontSize: '13px',
+                  fontSize: '15px',
                   outline: 'none'
                 }}
                 onFocus={(e) => e.currentTarget.style.borderColor = '#000000'}
@@ -5009,11 +5139,18 @@ export default function HomePage(): React.JSX.Element {
             <div>
               <div style={{
                 fontFamily: "'Questrial', sans-serif",
-                fontSize: '12px',
+                fontSize: '15px',
                 fontWeight: '600',
                 color: '#000000',
-                marginBottom: '4px'
+                marginBottom: '6px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
               }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="2" y="4" width="20" height="16" rx="2" stroke="#000000" strokeWidth="1.5"/>
+                  <path d="M2 8L12 14L22 8" stroke="#000000" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
                 Email Address <span style={{ color: '#ff4444' }}>*</span>
               </div>
               <input
@@ -5022,11 +5159,11 @@ export default function HomePage(): React.JSX.Element {
                 placeholder="contoh@email.com"
                 style={{
                   width: '100%',
-                  padding: '10px 12px',
-                  borderRadius: '10px',
+                  padding: '14px 16px',
+                  borderRadius: '12px',
                   border: '1px solid #cccccc',
                   fontFamily: "'Questrial', sans-serif",
-                  fontSize: '13px',
+                  fontSize: '15px',
                   outline: 'none'
                 }}
                 onFocus={(e) => e.currentTarget.style.borderColor = '#000000'}
@@ -5037,22 +5174,29 @@ export default function HomePage(): React.JSX.Element {
             <div>
               <div style={{
                 fontFamily: "'Questrial', sans-serif",
-                fontSize: '12px',
+                fontSize: '15px',
                 fontWeight: '600',
                 color: '#000000',
-                marginBottom: '4px'
+                marginBottom: '6px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
               }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="12" cy="12" r="10" stroke="#000000" strokeWidth="1.5"/>
+                  <path d="M12 8v4l3 3" stroke="#000000" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
                 Platform Meeting <span style={{ color: '#ff4444' }}>*</span>
               </div>
               <select
                 id="locationOption"
                 style={{
                   width: '100%',
-                  padding: '10px 12px',
-                  borderRadius: '10px',
+                  padding: '14px 16px',
+                  borderRadius: '12px',
                   border: '1px solid #cccccc',
                   fontFamily: "'Questrial', sans-serif",
-                  fontSize: '13px',
+                  fontSize: '15px',
                   outline: 'none',
                   backgroundColor: '#ffffff'
                 }}
@@ -5068,11 +5212,18 @@ export default function HomePage(): React.JSX.Element {
             <div>
               <div style={{
                 fontFamily: "'Questrial', sans-serif",
-                fontSize: '12px',
+                fontSize: '15px',
                 fontWeight: '600',
                 color: '#000000',
-                marginBottom: '4px'
+                marginBottom: '6px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
               }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="4" y="4" width="16" height="16" rx="2" stroke="#000000" strokeWidth="1.5"/>
+                  <path d="M9 9L15 15M15 9L9 15" stroke="#000000" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
                 Nama Perusahaan / Instansi
               </div>
               <input
@@ -5081,11 +5232,11 @@ export default function HomePage(): React.JSX.Element {
                 placeholder="Masukkan nama perusahaan Anda"
                 style={{
                   width: '100%',
-                  padding: '10px 12px',
-                  borderRadius: '10px',
+                  padding: '14px 16px',
+                  borderRadius: '12px',
                   border: '1px solid #cccccc',
                   fontFamily: "'Questrial', sans-serif",
-                  fontSize: '13px',
+                  fontSize: '15px',
                   outline: 'none'
                 }}
                 onFocus={(e) => e.currentTarget.style.borderColor = '#000000'}
@@ -5096,24 +5247,30 @@ export default function HomePage(): React.JSX.Element {
             <div>
               <div style={{
                 fontFamily: "'Questrial', sans-serif",
-                fontSize: '12px',
+                fontSize: '15px',
                 fontWeight: '600',
                 color: '#000000',
-                marginBottom: '4px'
+                marginBottom: '6px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
               }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 2L15 9H22L16 14L19 21L12 16.5L5 21L8 14L2 9H9L12 2Z" stroke="#000000" strokeWidth="1.5" fill="none"/>
+                </svg>
                 Kenapa Anda percaya dengan saya? <span style={{ color: '#ff4444' }}>*</span>
               </div>
               <textarea
                 id="trustReason"
                 placeholder="Ceritakan alasan Anda..."
-                rows={2}
+                rows={3}
                 style={{
                   width: '100%',
-                  padding: '10px 12px',
-                  borderRadius: '10px',
+                  padding: '14px 16px',
+                  borderRadius: '12px',
                   border: '1px solid #cccccc',
                   fontFamily: "'Questrial', sans-serif",
-                  fontSize: '13px',
+                  fontSize: '15px',
                   outline: 'none',
                   resize: 'vertical'
                 }}
@@ -5125,11 +5282,17 @@ export default function HomePage(): React.JSX.Element {
             <div>
               <div style={{
                 fontFamily: "'Questrial', sans-serif",
-                fontSize: '12px',
+                fontSize: '15px',
                 fontWeight: '600',
                 color: '#000000',
-                marginBottom: '4px'
+                marginBottom: '6px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
               }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M3 6h18M6 3v3M18 3v3M6 12h12M8 18h8" stroke="#000000" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
                 Nomor WhatsApp / HP <span style={{ color: '#ff4444' }}>*</span>
               </div>
               <input
@@ -5138,11 +5301,11 @@ export default function HomePage(): React.JSX.Element {
                 placeholder="+62 xxx-xxxx-xxxx"
                 style={{
                   width: '100%',
-                  padding: '10px 12px',
-                  borderRadius: '10px',
+                  padding: '14px 16px',
+                  borderRadius: '12px',
                   border: '1px solid #cccccc',
                   fontFamily: "'Questrial', sans-serif",
-                  fontSize: '13px',
+                  fontSize: '15px',
                   outline: 'none'
                 }}
                 onFocus={(e) => e.currentTarget.style.borderColor = '#000000'}
@@ -5153,87 +5316,94 @@ export default function HomePage(): React.JSX.Element {
             <div>
               <div style={{
                 fontFamily: "'Questrial', sans-serif",
-                fontSize: '12px',
+                fontSize: '15px',
                 fontWeight: '600',
                 color: '#000000',
-                marginBottom: '4px'
+                marginBottom: '6px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
               }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 2v4M12 18v4M4 12H2M6.5 6.5L4 4M17.5 6.5L20 4M22 12h-2M17.5 17.5L20 20M6.5 17.5L4 20" stroke="#000000" strokeWidth="1.5" strokeLinecap="round"/>
+                  <circle cx="12" cy="12" r="3" fill="none" stroke="#000000" strokeWidth="1.5"/>
+                </svg>
                 Tambah Guest (Opsional)
               </div>
-              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
                 <input
                   type="email"
                   id="guestEmail"
                   placeholder="Email guest (maks 3 orang)"
                   style={{
                     flex: 1,
-                    padding: '10px 12px',
-                    borderRadius: '10px',
+                    padding: '14px 16px',
+                    borderRadius: '12px',
                     border: '1px solid #cccccc',
                     fontFamily: "'Questrial', sans-serif",
-                    fontSize: '13px',
+                    fontSize: '15px',
                     outline: 'none'
                   }}
                 />
                 <button
                   id="addGuestBtn"
                   style={{
-                    padding: '8px 14px',
-                    borderRadius: '10px',
+                    padding: '12px 20px',
+                    borderRadius: '12px',
                     border: '1px solid #000000',
                     backgroundColor: '#ffffff',
                     color: '#000000',
                     cursor: 'pointer',
                     fontFamily: "'Questrial', sans-serif",
-                    fontSize: '12px',
+                    fontSize: '15px',
                     fontWeight: '500'
                   }}
                 >
                   + Add
                 </button>
               </div>
-              <div id="guestList" style={{ marginTop: '6px', display: 'flex', flexWrap: 'wrap', gap: '6px' }}></div>
+              <div id="guestList" style={{ marginTop: '10px', display: 'flex', flexWrap: 'wrap', gap: '8px' }}></div>
             </div>
 
             <div style={{
-              marginTop: '10px',
-              padding: '8px',
+              marginTop: '16px',
+              padding: '14px',
               backgroundColor: '#f5f5f5',
-              borderRadius: '10px',
+              borderRadius: '12px',
               textAlign: 'center'
             }}>
               <span style={{
                 fontFamily: "'Questrial', sans-serif",
-                fontSize: '10px',
+                fontSize: '13px',
                 color: '#666666'
               }}>
-                By proceeding, you agree to <span style={{ color: '#000000', fontWeight: '600' }}>Terms</span> and 
+                By proceeding, you agree to <span style={{ color: '#000000', fontWeight: '600' }}>Menuru Terms</span> and 
                 <span style={{ color: '#000000', fontWeight: '600' }}> Privacy Policy</span>.
               </span>
             </div>
 
             <div style={{
               display: 'flex',
-              gap: '12px',
-              marginTop: '6px'
+              gap: '16px',
+              marginTop: '8px'
             }}>
               <button
                 onClick={() => setShowFormView(false)}
                 style={{
                   flex: 1,
-                  padding: '10px 16px',
+                  padding: '14px 20px',
                   backgroundColor: '#ffffff',
                   color: '#000000',
-                  border: '1.5px solid #cccccc',
+                  border: '2px solid #cccccc',
                   borderRadius: '60px',
                   cursor: 'pointer',
                   fontFamily: "'Questrial', sans-serif",
-                  fontSize: '13px',
+                  fontSize: '16px',
                   fontWeight: '600',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: '8px'
+                  gap: '10px'
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.borderColor = '#000000';
@@ -5244,26 +5414,28 @@ export default function HomePage(): React.JSX.Element {
                   e.currentTarget.style.backgroundColor = '#ffffff';
                 }}
               >
-                <NorthWestArrow size={14} />
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M15 18L9 12L15 6" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
                 Back
               </button>
               <button
                 onClick={handleConfirmMeeting}
                 style={{
                   flex: 1,
-                  padding: '10px 16px',
+                  padding: '14px 20px',
                   backgroundColor: '#0000ff',
                   color: '#ffffff',
                   border: 'none',
                   borderRadius: '60px',
                   cursor: 'pointer',
                   fontFamily: "'Questrial', sans-serif",
-                  fontSize: '13px',
+                  fontSize: '16px',
                   fontWeight: '600',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: '8px'
+                  gap: '10px'
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.backgroundColor = '#2200dd';
@@ -5275,7 +5447,9 @@ export default function HomePage(): React.JSX.Element {
                 }}
               >
                 Confirm
-                <NorthEastArrow size={14} />
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
               </button>
             </div>
           </div>
@@ -5287,6 +5461,8 @@ export default function HomePage(): React.JSX.Element {
 
 
 
+
+      
 
 
 
