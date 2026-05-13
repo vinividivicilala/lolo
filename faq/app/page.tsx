@@ -4697,7 +4697,7 @@ export default function HomePage(): React.JSX.Element {
                         borderRadius: '60px',
                         cursor: 'pointer',
                         fontFamily: "'Questrial', sans-serif",
-                        fontSize: '16px",
+                        fontSize: '16px',
                         fontWeight: '600',
                         transition: 'all 0.2s ease',
                         display: 'flex',
