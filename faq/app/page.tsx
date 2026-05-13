@@ -303,8 +303,8 @@ export default function HomePage(): React.JSX.Element {
   };
 
   const getDayColor = (date: Date) => {
-    if (date.toDateString() === today.toDateString()) return "#c5e800"; // Hijau stabilo
-    if (date.toDateString() === tomorrow.toDateString()) return "#ff69b4"; // Merah stabilo
+    if (date.toDateString() === today.toDateString()) return "#c5e800";
+    if (date.toDateString() === tomorrow.toDateString()) return "#ff69b4";
     return "#4a90e2";
   };
 
@@ -321,6 +321,100 @@ export default function HomePage(): React.JSX.Element {
     } else {
       alert("Please select date and time");
     }
+  };
+
+  // Fungsi baru untuk handle form confirm dengan validasi lengkap
+  const handleScheduleMeetingForm = () => {
+    // Ambil semua nilai input
+    const fullName = (document.getElementById('fullName') as HTMLInputElement)?.value;
+    const emailAddress = (document.getElementById('emailAddress') as HTMLInputElement)?.value;
+    const locationOption = (document.getElementById('locationOption') as HTMLSelectElement)?.value;
+    const companyName = (document.getElementById('companyName') as HTMLInputElement)?.value;
+    const trustReason = (document.getElementById('trustReason') as HTMLTextAreaElement)?.value;
+    const phoneNumber = (document.getElementById('phoneNumber') as HTMLInputElement)?.value;
+    
+    // Validasi required fields
+    const errors: string[] = [];
+    
+    if (!fullName?.trim()) errors.push("Nama Lengkap");
+    if (!emailAddress?.trim()) errors.push("Email Address");
+    if (!locationOption) errors.push("Platform Meeting");
+    if (!trustReason?.trim()) errors.push("Kenapa Anda percaya dengan saya?");
+    if (!phoneNumber?.trim()) errors.push("Nomor WhatsApp / HP");
+    
+    if (errors.length > 0) {
+      alert(`Harap isi field berikut:\n- ${errors.join('\n- ')}`);
+      return;
+    }
+    
+    // Validasi email format
+    const emailRegex = /^[^\s@]+@([^\s@.,]+\.)+[^\s@.,]{2,}$/;
+    if (!emailRegex.test(emailAddress)) {
+      alert("Format email tidak valid!");
+      return;
+    }
+    
+    // Validasi nomor HP (minimal 10 digit)
+    const phoneRegex = /^[0-9+\-\s()]{10,}$/;
+    if (!phoneRegex.test(phoneNumber)) {
+      alert("Format nomor HP tidak valid! Minimal 10 digit.");
+      return;
+    }
+    
+    if (!selectedDate) {
+      alert("Silakan pilih tanggal meeting terlebih dahulu!");
+      return;
+    }
+    
+    if (!selectedTime) {
+      alert("Silakan pilih waktu meeting terlebih dahulu!");
+      return;
+    }
+    
+    // Ambil guest list
+    const guestEmails: string[] = [];
+    const guestItems = document.querySelectorAll('#guestList .guest-item');
+    guestItems.forEach(item => {
+      const email = item.getAttribute('data-email');
+      if (email) guestEmails.push(email);
+    });
+    
+    // Buat pesan konfirmasi
+    let confirmMessage = `📅 JADWAL MEETING\n\n`;
+    confirmMessage += `📌 Tanggal: ${selectedDate.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}\n`;
+    confirmMessage += `⏰ Waktu: ${selectedTime} WIB\n`;
+    confirmMessage += `📋 Tipe Meeting: ${meetingType}\n\n`;
+    confirmMessage += `👤 DATA DIRI\n`;
+    confirmMessage += `• Nama: ${fullName}\n`;
+    confirmMessage += `• Email: ${emailAddress}\n`;
+    confirmMessage += `• No HP: ${phoneNumber}\n`;
+    confirmMessage += `• Platform: ${locationOption === 'google_meet' ? 'Google Meet' : locationOption === 'zoom' ? 'Zoom' : locationOption === 'tatap_muka' ? 'Tatap Muka (Offline)' : 'Via Nomor HP (Telepon/WA)'}\n`;
+    if (companyName) confirmMessage += `• Perusahaan: ${companyName}\n`;
+    confirmMessage += `• Alasan percaya: ${trustReason}\n`;
+    if (guestEmails.length > 0) {
+      confirmMessage += `\n👥 Guest:\n`;
+      guestEmails.forEach((email, idx) => {
+        confirmMessage += `  ${idx + 1}. ${email}\n`;
+      });
+    }
+    
+    alert(confirmMessage + `\n\n✅ Meeting request telah dikirim!\nKami akan menghubungi Anda maksimal 1x24 jam.`);
+    
+    // Reset form dan tutup modal
+    setShowCalendarModal(false);
+    setSelectedDate(null);
+    setSelectedTime("");
+    
+    // Reset form values
+    const formInputs = ['fullName', 'emailAddress', 'companyName', 'trustReason', 'phoneNumber'];
+    formInputs.forEach(id => {
+      const input = document.getElementById(id) as HTMLInputElement | HTMLTextAreaElement;
+      if (input) input.value = '';
+    });
+    const locationSelect = document.getElementById('locationOption') as HTMLSelectElement;
+    if (locationSelect) locationSelect.value = '';
+    const guestList = document.getElementById('guestList');
+    if (guestList) guestList.innerHTML = '';
   };
 
   const changeMonth = (increment: number) => {
@@ -346,11 +440,9 @@ export default function HomePage(): React.JSX.Element {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
-        // Cek apakah user adalah admin
         const isAdminUser = currentUser.email === ADMIN_EMAIL;
         setIsAdmin(isAdminUser);
         
-        // Update display name jika admin
         if (isAdminUser && !currentUser.displayName) {
           await updateProfile(currentUser, { displayName: "ADMIN" });
         }
@@ -412,7 +504,6 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Handle Enter key
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -420,7 +511,6 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Reply to message
   const handleReply = (message: Message) => {
     setReplyTo({
       id: message.id,
@@ -429,12 +519,10 @@ export default function HomePage(): React.JSX.Element {
     });
   };
 
-  // Cancel reply
   const cancelReply = () => {
     setReplyTo(null);
   };
 
-  // Login dengan Google
   const handleGoogleLogin = async () => {
     if (!auth) return;
     try {
@@ -447,7 +535,6 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Login dengan Github
   const handleGithubLogin = async () => {
     if (!auth) return;
     try {
@@ -460,7 +547,6 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Login dengan Email/Password
   const handleEmailLogin = async () => {
     if (!auth) return;
     try {
@@ -475,7 +561,6 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Register dengan Email/Password
   const handleEmailRegister = async () => {
     if (!auth) return;
     try {
@@ -494,7 +579,6 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Logout
   const handleLogout = async () => {
     if (!auth) return;
     try {
@@ -600,7 +684,6 @@ export default function HomePage(): React.JSX.Element {
     });
   };
 
-  // Fungsi untuk reset warna teks ke default berdasarkan background
   const resetTextColorsToDefault = () => {
     const leftNumbers = [
       featuresLeftNumberRef.current,
@@ -1244,7 +1327,7 @@ export default function HomePage(): React.JSX.Element {
     });
   };
 
-  // Effect untuk Shadow Page (deteksi scroll di bagian footer)
+  // Effect untuk Shadow Page
   useEffect(() => {
     if (isLoading) return;
 
@@ -1307,6 +1390,7 @@ export default function HomePage(): React.JSX.Element {
     };
   }, [isLoading, showShadowPage, isShadowTransitioning]);
 
+  // Effect untuk carousel
   useEffect(() => {
     if (isLoading) return;
     
@@ -1337,6 +1421,7 @@ export default function HomePage(): React.JSX.Element {
     };
   }, [isLoading]);
 
+  // Effect untuk ScrollSmoother
   useEffect(() => {
     const initSmoother = () => {
       if (typeof window !== 'undefined' && !smootherRef.current) {
@@ -1667,6 +1752,7 @@ export default function HomePage(): React.JSX.Element {
     };
   }, [isLoading]);
 
+  // Loading animation
   useEffect(() => {
     if (!isLoading || !loadingOverlayRef.current) return;
 
@@ -1834,6 +1920,7 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
+  // Effect untuk scroll animations
   useEffect(() => {
     if (isLoading) return;
 
@@ -1917,6 +2004,7 @@ export default function HomePage(): React.JSX.Element {
     };
   }, [isLoading]);
 
+  // Cookie consent
   useEffect(() => {
     const consent = localStorage.getItem('cookieConsent');
     if (consent === null) {
@@ -1924,6 +2012,7 @@ export default function HomePage(): React.JSX.Element {
     }
   }, []);
 
+  // Click outside handler for modal
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
@@ -1938,6 +2027,52 @@ export default function HomePage(): React.JSX.Element {
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
+  }, [showCalendarModal]);
+
+  // Effect untuk add guest button di calendar modal
+  useEffect(() => {
+    if (showCalendarModal) {
+      setTimeout(() => {
+        const addGuestBtn = document.getElementById('addGuestBtn');
+        if (addGuestBtn) {
+          addGuestBtn.onclick = () => {
+            const guestEmail = (document.getElementById('guestEmail') as HTMLInputElement)?.value;
+            if (!guestEmail) {
+              alert("Masukkan email guest terlebih dahulu!");
+              return;
+            }
+            
+            const emailRegex = /^[^\s@]+@([^\s@.,]+\.)+[^\s@.,]{2,}$/;
+            if (!emailRegex.test(guestEmail)) {
+              alert("Format email guest tidak valid!");
+              return;
+            }
+            
+            const guestList = document.getElementById('guestList');
+            if (guestList && guestList.children.length >= 3) {
+              alert("Maksimal 3 guest!");
+              return;
+            }
+            
+            const guestItem = document.createElement('div');
+            guestItem.className = 'guest-item';
+            guestItem.setAttribute('data-email', guestEmail);
+            guestItem.style.cssText = 'display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; background-color: #e0e0e0; border-radius: 60px; font-size: 12px;';
+            guestItem.innerHTML = `
+              <span>${guestEmail}</span>
+              <button class="remove-guest" style="background: none; border: none; cursor: pointer; color: #ff4444; font-size: 16px;">×</button>
+            `;
+            
+            guestItem.querySelector('.remove-guest')?.addEventListener('click', () => {
+              guestItem.remove();
+            });
+            
+            guestList.appendChild(guestItem);
+            (document.getElementById('guestEmail') as HTMLInputElement).value = '';
+          };
+        }
+      }, 100);
+    }
   }, [showCalendarModal]);
 
   const handleAccept = () => {
@@ -1983,7 +2118,6 @@ export default function HomePage(): React.JSX.Element {
   const days = getDaysInMonth(currentMonth);
   const weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-  // Format timestamp untuk display
   const formatTime = (timestamp: Timestamp) => {
     if (!timestamp) return "";
     const date = timestamp.toDate();
@@ -2282,7 +2416,7 @@ export default function HomePage(): React.JSX.Element {
           background-color: #ffffff;
           border-radius: 32px;
           width: 90%;
-          max-width: 1300px;
+          max-width: 1400px;
           max-height: 85vh;
           overflow-y: auto;
           box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
@@ -3285,7 +3419,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* Bagian footer - hanya berisi teks MENURU besar tanpa background hitam */}
+            {/* Bagian footer */}
             <div style={{
               width: '100%',
               position: 'relative',
@@ -3563,7 +3697,7 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </div>
 
-              {/* Hanya teks MENURU besar tanpa background hitam */}
+              {/* Teks MENURU besar */}
               <footer style={{
                 position: 'relative',
                 bottom: 0,
@@ -3609,7 +3743,7 @@ export default function HomePage(): React.JSX.Element {
       </div>
 
       
-      {/* SHADOW PAGE - Halaman bayangan hitam dengan Chat (Tanpa linebox, tanpa warna warni) */}
+      {/* SHADOW PAGE - Halaman bayangan hitam dengan Chat */}
       <div
         ref={shadowPageRef}
         style={{
@@ -3718,7 +3852,7 @@ export default function HomePage(): React.JSX.Element {
             </div>
           </div>
 
-          {/* Chat Container - Tanpa linebox, tanpa border radius */}
+          {/* Chat Container */}
           {isChatVisible && (
             <div style={{
               position: 'absolute',
@@ -3808,7 +3942,7 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </div>
 
-              {/* Reply Indicator - Tanpa background berwarna */}
+              {/* Reply Indicator */}
               {replyTo && (
                 <div style={{
                   padding: '12px 24px',
@@ -3839,7 +3973,7 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               )}
 
-              {/* Messages Area - Tanpa styling berlebih */}
+              {/* Messages Area */}
               <div 
                 ref={chatContainerRef}
                 className="chat-messages"
@@ -3868,17 +4002,6 @@ export default function HomePage(): React.JSX.Element {
                 {messages.map((msg) => {
                   const isOwnMessage = user?.uid === msg.userId;
                   const isAdminMessage = msg.isAdmin === true;
-                  
-                  // Tanpa warna warni, hanya putih dengan opacity berbeda
-                  let messageStyle = {
-                    color: '#ffffff',
-                    padding: '14px 20px',
-                    fontSize: '16px',
-                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                    fontWeight: '300',
-                    letterSpacing: '-0.01em',
-                    lineHeight: '1.5'
-                  };
                   
                   return (
                     <div
@@ -3912,7 +4035,6 @@ export default function HomePage(): React.JSX.Element {
                         <span style={{ fontSize: '11px' }}>
                           {msg.timestamp ? formatDate(msg.timestamp) : ''}
                         </span>
-                        {/* Tombol Reply */}
                         {user && !isOwnMessage && (
                           <button
                             onClick={() => handleReply(msg)}
@@ -3938,7 +4060,6 @@ export default function HomePage(): React.JSX.Element {
                         )}
                       </div>
                       
-                      {/* Reply Preview - Tanpa background berwarna */}
                       {msg.replyTo && (
                         <div style={{
                           marginBottom: '8px',
@@ -3953,7 +4074,15 @@ export default function HomePage(): React.JSX.Element {
                         </div>
                       )}
                       
-                      <div style={messageStyle}>
+                      <div style={{
+                        color: '#ffffff',
+                        padding: '14px 20px',
+                        fontSize: '16px',
+                        fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                        fontWeight: '300',
+                        letterSpacing: '-0.01em',
+                        lineHeight: '1.5'
+                      }}>
                         {msg.text}
                       </div>
                     </div>
@@ -4051,7 +4180,7 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </div>
 
-      {/* Auth Modal - Tanpa linebox, tanpa warna warni, hanya icon */}
+      {/* Auth Modal */}
       {showAuthModal && (
         <div style={{
           position: 'fixed',
@@ -4116,7 +4245,6 @@ export default function HomePage(): React.JSX.Element {
               </button>
             </div>
 
-            {/* Tombol Login dengan icon - Tanpa border, tanpa warna */}
             <div style={{ display: 'flex', gap: '20px', marginBottom: '50px', flexDirection: 'column' }}>
               <button
                 onClick={handleGoogleLogin}
@@ -4184,7 +4312,6 @@ export default function HomePage(): React.JSX.Element {
               <span style={{ backgroundColor: '#000000', padding: '0 20px' }}>ATAU</span>
             </div>
 
-            {/* Form Login/Register - Tanpa border dan linebox */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
               {authMode === 'register' && (
                 <input
@@ -4307,7 +4434,7 @@ export default function HomePage(): React.JSX.Element {
         </div>
       )}
 
-      {/* Calendar Call Modal */}
+      {/* Calendar Call Modal - DIPERBAIKI DENGAN FORM DATA DIRI */}
       {showCalendarModal && (
         <div className="calendar-modal-overlay">
           <div ref={modalRef} className="calendar-modal">
@@ -4315,8 +4442,9 @@ export default function HomePage(): React.JSX.Element {
               display: 'flex',
               flexDirection: 'row',
               height: '100%',
-              minHeight: '600px'
+              minHeight: '700px'
             }}>
+              {/* SISI KIRI - Info Profile */}
               <div style={{
                 flex: 1.2,
                 padding: '32px',
@@ -4431,35 +4559,11 @@ export default function HomePage(): React.JSX.Element {
                     ))}
                   </div>
                 </div>
-
-                <div>
-                  <div style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '16px',
-                    fontWeight: '600',
-                    color: '#000000',
-                    marginBottom: '8px'
-                  }}>📍 Lokasi (opsional)</div>
-                  <input
-                    type="text"
-                    placeholder="Kota / Alamat lengkap"
-                    value={location}
-                    onChange={(e) => setLocation(e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '12px 16px',
-                      borderRadius: '12px',
-                      border: '1px solid #cccccc',
-                      fontFamily: "'Questrial', sans-serif",
-                      fontSize: '14px',
-                      outline: 'none'
-                    }}
-                  />
-                </div>
               </div>
 
+              {/* SISI TENGAH - Calendar */}
               <div style={{
-                flex: 2,
+                flex: 1.8,
                 padding: '32px',
                 borderRight: '1px solid #e0e0e0',
                 overflowY: 'auto'
@@ -4590,108 +4694,334 @@ export default function HomePage(): React.JSX.Element {
                 )}
               </div>
 
+              {/* SISI KANAN - Form Data Diri */}
               <div style={{
-                flex: 1,
+                flex: 1.5,
                 padding: '32px',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '24px'
+                gap: '20px',
+                overflowY: 'auto'
               }}>
                 <div style={{
                   fontFamily: "'Questrial', sans-serif",
-                  fontSize: '20px',
+                  fontSize: '22px',
                   fontWeight: '700',
                   color: '#000000',
                   paddingBottom: '12px',
                   borderBottom: '2px solid #e0e0e0'
                 }}>
-                  📅 Jadwal Mendatang
+                  📝 Isi Data Diri
                 </div>
 
+                {/* Nama Lengkap - Required */}
+                <div>
+                  <div style={{
+                    fontFamily: "'Questrial', sans-serif",
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: '#000000',
+                    marginBottom: '6px'
+                  }}>
+                    Nama Lengkap <span style={{ color: '#ff4444' }}>*</span>
+                  </div>
+                  <input
+                    type="text"
+                    id="fullName"
+                    placeholder="Masukkan nama lengkap Anda"
+                    style={{
+                      width: '100%',
+                      padding: '12px 14px',
+                      borderRadius: '12px',
+                      border: '1px solid #cccccc',
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '14px',
+                      outline: 'none',
+                      transition: 'border-color 0.2s'
+                    }}
+                    onFocus={(e) => e.currentTarget.style.borderColor = '#000000'}
+                    onBlur={(e) => e.currentTarget.style.borderColor = '#cccccc'}
+                  />
+                </div>
+
+                {/* Email Address - Required */}
+                <div>
+                  <div style={{
+                    fontFamily: "'Questrial', sans-serif",
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: '#000000',
+                    marginBottom: '6px'
+                  }}>
+                    Email Address <span style={{ color: '#ff4444' }}>*</span>
+                  </div>
+                  <input
+                    type="email"
+                    id="emailAddress"
+                    placeholder="contoh@email.com"
+                    style={{
+                      width: '100%',
+                      padding: '12px 14px',
+                      borderRadius: '12px',
+                      border: '1px solid #cccccc',
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '14px',
+                      outline: 'none',
+                      transition: 'border-color 0.2s'
+                    }}
+                    onFocus={(e) => e.currentTarget.style.borderColor = '#000000'}
+                    onBlur={(e) => e.currentTarget.style.borderColor = '#cccccc'}
+                  />
+                </div>
+
+                {/* Location Option - Required */}
+                <div>
+                  <div style={{
+                    fontFamily: "'Questrial', sans-serif",
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: '#000000',
+                    marginBottom: '6px'
+                  }}>
+                    Platform Meeting <span style={{ color: '#ff4444' }}>*</span>
+                  </div>
+                  <select
+                    id="locationOption"
+                    style={{
+                      width: '100%',
+                      padding: '12px 14px',
+                      borderRadius: '12px',
+                      border: '1px solid #cccccc',
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '14px',
+                      outline: 'none',
+                      backgroundColor: '#ffffff',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <option value="">Pilih platform meeting</option>
+                    <option value="google_meet">Google Meet</option>
+                    <option value="zoom">Zoom</option>
+                    <option value="tatap_muka">Tatap Muka (Offline)</option>
+                    <option value="via_hp">Via Nomor HP (Telepon/WA)</option>
+                  </select>
+                </div>
+
+                {/* Nama Perusahaan */}
+                <div>
+                  <div style={{
+                    fontFamily: "'Questrial', sans-serif",
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: '#000000',
+                    marginBottom: '6px'
+                  }}>
+                    Nama Perusahaan / Instansi
+                  </div>
+                  <input
+                    type="text"
+                    id="companyName"
+                    placeholder="Masukkan nama perusahaan Anda"
+                    style={{
+                      width: '100%',
+                      padding: '12px 14px',
+                      borderRadius: '12px',
+                      border: '1px solid #cccccc',
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '14px',
+                      outline: 'none',
+                      transition: 'border-color 0.2s'
+                    }}
+                    onFocus={(e) => e.currentTarget.style.borderColor = '#000000'}
+                    onBlur={(e) => e.currentTarget.style.borderColor = '#cccccc'}
+                  />
+                </div>
+
+                {/* Kenapa percaya - Required */}
+                <div>
+                  <div style={{
+                    fontFamily: "'Questrial', sans-serif",
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: '#000000',
+                    marginBottom: '6px'
+                  }}>
+                    Kenapa Anda percaya dengan saya? <span style={{ color: '#ff4444' }}>*</span>
+                  </div>
+                  <textarea
+                    id="trustReason"
+                    placeholder="Ceritakan alasan Anda percaya dan ingin berkolaborasi..."
+                    rows={3}
+                    style={{
+                      width: '100%',
+                      padding: '12px 14px',
+                      borderRadius: '12px',
+                      border: '1px solid #cccccc',
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '14px',
+                      outline: 'none',
+                      resize: 'vertical',
+                      transition: 'border-color 0.2s'
+                    }}
+                    onFocus={(e) => e.currentTarget.style.borderColor = '#000000'}
+                    onBlur={(e) => e.currentTarget.style.borderColor = '#cccccc'}
+                  />
+                </div>
+
+                {/* Nomor HP - Required */}
+                <div>
+                  <div style={{
+                    fontFamily: "'Questrial', sans-serif",
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: '#000000',
+                    marginBottom: '6px'
+                  }}>
+                    Nomor WhatsApp / HP <span style={{ color: '#ff4444' }}>*</span>
+                  </div>
+                  <input
+                    type="tel"
+                    id="phoneNumber"
+                    placeholder="+62 xxx-xxxx-xxxx"
+                    style={{
+                      width: '100%',
+                      padding: '12px 14px',
+                      borderRadius: '12px',
+                      border: '1px solid #cccccc',
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '14px',
+                      outline: 'none',
+                      transition: 'border-color 0.2s'
+                    }}
+                    onFocus={(e) => e.currentTarget.style.borderColor = '#000000'}
+                    onBlur={(e) => e.currentTarget.style.borderColor = '#cccccc'}
+                  />
+                </div>
+
+                {/* Add Guest */}
+                <div>
+                  <div style={{
+                    fontFamily: "'Questrial', sans-serif",
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: '#000000',
+                    marginBottom: '6px'
+                  }}>
+                    Tambah Guest (Opsional)
+                  </div>
+                  <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                    <input
+                      type="email"
+                      id="guestEmail"
+                      placeholder="Email guest (maks 3 orang)"
+                      style={{
+                        flex: 1,
+                        padding: '12px 14px',
+                        borderRadius: '12px',
+                        border: '1px solid #cccccc',
+                        fontFamily: "'Questrial', sans-serif",
+                        fontSize: '14px',
+                        outline: 'none'
+                      }}
+                    />
+                    <button
+                      id="addGuestBtn"
+                      style={{
+                        padding: '10px 18px',
+                        borderRadius: '12px',
+                        border: '1px solid #000000',
+                        backgroundColor: '#ffffff',
+                        color: '#000000',
+                        cursor: 'pointer',
+                        fontFamily: "'Questrial', sans-serif",
+                        fontSize: '14px',
+                        fontWeight: '500'
+                      }}
+                    >
+                      + Add
+                    </button>
+                  </div>
+                  <div id="guestList" style={{ marginTop: '8px', display: 'flex', flexWrap: 'wrap', gap: '8px' }}></div>
+                </div>
+
+                {/* Terms and Privacy */}
                 <div style={{
-                  padding: '16px',
-                  backgroundColor: '#c5e800',
-                  borderRadius: '20px',
-                  color: '#000000'
+                  marginTop: '16px',
+                  padding: '12px',
+                  backgroundColor: '#f5f5f5',
+                  borderRadius: '12px',
+                  textAlign: 'center'
                 }}>
-                  <div style={{
+                  <span style={{
                     fontFamily: "'Questrial', sans-serif",
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    marginBottom: '8px'
-                  }}>🌟 Besok</div>
-                  <div style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '24px',
-                    fontWeight: '700',
-                    marginBottom: '4px'
+                    fontSize: '12px',
+                    color: '#666666'
                   }}>
-                    {tomorrow.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
-                  </div>
-                  <div style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '18px',
-                    fontWeight: '500'
-                  }}>
-                    {timeSlots[2]} - {timeSlots[4]} WIB
-                  </div>
-                  <div style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '14px',
-                    marginTop: '8px',
-                    opacity: 0.8
-                  }}>⚡ Slot terbaik</div>
+                    By proceeding, you agree to <span style={{ color: '#000000', fontWeight: '600', cursor: 'pointer' }}>Menuru Terms</span> and 
+                    <span style={{ color: '#000000', fontWeight: '600', cursor: 'pointer' }}> Privacy Policy</span>.
+                  </span>
                 </div>
 
+                {/* Buttons Back & Confirm */}
                 <div style={{
-                  padding: '16px',
-                  backgroundColor: '#ff69b4',
-                  borderRadius: '20px',
-                  color: '#ffffff'
+                  display: 'flex',
+                  gap: '16px',
+                  marginTop: '8px'
                 }}>
-                  <div style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    marginBottom: '8px'
-                  }}>💫 Lusa</div>
-                  <div style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '20px',
-                    fontWeight: '700',
-                    marginBottom: '4px'
-                  }}>
-                    {dayAfterTomorrow.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
-                  </div>
-                  <div style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '16px',
-                    fontWeight: '500'
-                  }}>
-                    {timeSlots[1]} - {timeSlots[3]} WIB
-                  </div>
+                  <button
+                    onClick={() => setShowCalendarModal(false)}
+                    style={{
+                      flex: 1,
+                      padding: '14px 20px',
+                      backgroundColor: '#ffffff',
+                      color: '#000000',
+                      border: '1.5px solid #cccccc',
+                      borderRadius: '60px',
+                      cursor: 'pointer',
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '16px',
+                      fontWeight: '600',
+                      transition: 'all 0.2s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = '#000000';
+                      e.currentTarget.style.backgroundColor = '#f5f5f5';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = '#cccccc';
+                      e.currentTarget.style.backgroundColor = '#ffffff';
+                    }}
+                  >
+                    ← Back
+                  </button>
+                  <button
+                    id="confirmBtn"
+                    onClick={handleScheduleMeetingForm}
+                    style={{
+                      flex: 1,
+                      padding: '14px 20px',
+                      backgroundColor: '#0000ff',
+                      color: '#ffffff',
+                      border: 'none',
+                      borderRadius: '60px',
+                      cursor: 'pointer',
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '16px',
+                      fontWeight: '600',
+                      transition: 'all 0.2s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = '#2200dd';
+                      e.currentTarget.style.transform = 'scale(1.02)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = '#0000ff';
+                      e.currentTarget.style.transform = 'scale(1)';
+                    }}
+                  >
+                    Confirm →
+                  </button>
                 </div>
-
-                <button
-                  onClick={handleScheduleMeeting}
-                  style={{
-                    marginTop: 'auto',
-                    padding: '14px 24px',
-                    backgroundColor: '#000000',
-                    color: '#ffffff',
-                    border: 'none',
-                    borderRadius: '60px',
-                    cursor: 'pointer',
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '16px',
-                    fontWeight: '600',
-                    transition: 'all 0.3s ease'
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
-                  onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
-                >
-                  Schedule Meeting →
-                </button>
               </div>
             </div>
           </div>
