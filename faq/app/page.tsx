@@ -244,40 +244,9 @@ export default function HomePage(): React.JSX.Element {
   const [replyText, setReplyText] = useState("");
   const [replyStatus, setReplyStatus] = useState<"pending" | "confirmed" | "completed" | "rejected">("confirmed");
   
-  // ===== UNTUK STACKED CARDS SECTION =====
+  // ===== REFS UNTUK STACKED CARDS =====
   const stackedSectionRef = useRef<HTMLDivElement>(null);
-  const stackedTitleRef = useRef<HTMLDivElement>(null);
-  const stickyContainerRef = useRef<HTMLDivElement>(null);
-  const cardsWrapperRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
-  
-  // Data untuk 4 card
-  const stackedCards = [
-    {
-      id: 1,
-      title: 'Initial Consultation',
-      description: 'We\'ll have a meeting to discuss the project details, goals, expectations, and deadlines. During this meeting, we\'ll chat about everything in a relaxed manner, making sure all your questions are answered and that we\'re all set to move forward together.',
-      link: '#'
-    },
-    {
-      id: 2,
-      title: 'Design Review',
-      description: 'I\'ll go through your designs to fully understand your vision. Once I have a clear understanding of your ideas, I\'ll analyze them in detail, considering all aspects and enhancements to ensure the final product aligns perfectly with your goals and expectations.',
-      link: '#'
-    },
-    {
-      id: 3,
-      title: 'Development',
-      description: 'I\'ll code the site using the best web development practices to ensure optimal performance and responsive design. I\'ll make sure it\'s accessible on all devices, providing a smooth user experience, with modern techniques for a beautiful interface.',
-      link: '#'
-    },
-    {
-      id: 4,
-      title: 'Review and Testing',
-      description: 'Once the site is completed, we\'ll go through a testing phase to make sure everything works perfectly across all devices and browsers. I\'ll assist with launching and provide support to address any issues that might arise after the launch.',
-      link: '#'
-    }
-  ];
   
   const acceptBtnRef = useRef<HTMLButtonElement>(null);
   const declineBtnRef = useRef<HTMLButtonElement>(null);
@@ -1629,83 +1598,109 @@ export default function HomePage(): React.JSX.Element {
     };
   }, []);
 
-  // ===== GSAP STACKED CARDS ANIMATION =====
+  // ===== GSAP STACKED CARDS ANIMATION (LINEBOX STYLE) =====
   useEffect(() => {
     if (isLoading) return;
 
-    // Animasi title section
-    if (stackedTitleRef.current) {
-      gsap.fromTo(stackedTitleRef.current,
-        { opacity: 0, x: -50 },
-        {
-          opacity: 1,
-          x: 0,
-          duration: 0.8,
-          scrollTrigger: {
-            trigger: stackedSectionRef.current,
-            start: 'top 80%',
-            toggleActions: 'play none none reverse',
-          },
-        }
-      );
+    // Kill existing ScrollTriggers untuk section ini
+    ScrollTrigger.getAll().forEach(trigger => {
+      if (trigger.vars.trigger === stackedSectionRef.current) trigger.kill();
+    });
+
+    const cards = cardRefs.current;
+    if (!cards.length || !cards[0]) return;
+
+    // Set initial state untuk semua card
+    gsap.set(cards[0], { opacity: 1, y: 0, zIndex: 1 });
+    for (let i = 1; i < cards.length; i++) {
+      gsap.set(cards[i], { opacity: 0, y: '100%', zIndex: i + 1 });
     }
 
-    // Animasi stacked cards
-    cardRefs.current.forEach((card, index) => {
+    const totalCards = cards.length;
+    const startOffset = 10; // mulai dari 10% scroll section
+    const cardDuration = 22; // setiap card membutuhkan 22% scroll
+    
+    cards.forEach((card, idx) => {
       if (!card) return;
-
-      // Set initial state
-      gsap.set(card, { opacity: 0, scale: 0.9, y: 100, zIndex: index });
-
-      // ScrollTrigger untuk setiap card
-      ScrollTrigger.create({
-        trigger: stackedSectionRef.current,
-        start: `top ${20 + index * 15}%`,
-        end: `+=${(cardRefs.current.length - index) * 30}%`,
-        scrub: 1.2,
-        onUpdate: (self) => {
-          const progress = self.progress;
-          // Card masuk saat progress 0-0.4, kemudian diam sampai card berikutnya
-          if (progress < 0.4) {
-            const cardProgress = progress / 0.4; // 0 -> 1
-            gsap.to(card, {
-              opacity: cardProgress,
-              scale: 0.95 + cardProgress * 0.05,
-              y: 50 - cardProgress * 50,
-              duration: 0.1,
-              overwrite: true,
-            });
-          } else {
-            // Menjaga card tetap terlihat
-            gsap.to(card, { opacity: 1, scale: 1, y: 0, duration: 0.1, overwrite: true });
+      
+      const startPercent = startOffset + (idx * cardDuration);
+      const endPercent = startOffset + ((idx + 1) * cardDuration);
+      
+      // Untuk card pertama, langsung muncul
+      if (idx === 0) {
+        ScrollTrigger.create({
+          trigger: stackedSectionRef.current,
+          start: `${startPercent}%`,
+          end: `${endPercent + 15}%`,
+          scrub: 1.5,
+          onUpdate: (self) => {
+            const progress = self.progress;
+            // Card 1 mulai menghilang setelah progress 60% dari rentangnya
+            if (progress > 0.6 && idx < totalCards - 1) {
+              const fadeProgress = (progress - 0.6) / 0.4;
+              gsap.to(card, {
+                opacity: 1 - fadeProgress,
+                duration: 0.1,
+                overwrite: true
+              });
+            } else {
+              gsap.to(card, { opacity: 1, duration: 0.1, overwrite: true });
+            }
           }
-
-          // Efek stack: card pertama agak ke belakang, card terakhir paling depan
-          const zIndexVal = Math.floor(progress * (cardRefs.current.length - index));
-          gsap.set(card, { zIndex: index + zIndexVal });
-        },
-      });
-
-      // Animasi keluar card saat scroll lanjut (untuk memberi ruang card berikutnya)
-      ScrollTrigger.create({
-        trigger: stackedSectionRef.current,
-        start: `top ${25 + index * 15}%`,
-        end: `+=${(cardRefs.current.length - index) * 40}%`,
-        scrub: 1.5,
-        onUpdate: (self) => {
-          const progress = self.progress;
-          if (progress > 0.7 && index < cardRefs.current.length - 1) {
-            const exitProgress = (progress - 0.7) / 0.3;
+        });
+      } 
+      // Untuk card selanjutnya
+      else {
+        ScrollTrigger.create({
+          trigger: stackedSectionRef.current,
+          start: `${startPercent}%`,
+          end: `${endPercent}%`,
+          scrub: 1.5,
+          onUpdate: (self) => {
+            const progress = self.progress;
+            // Card muncul dari bawah (y: 100% -> 0%)
+            const yProgress = Math.min(1, progress * 1.5);
+            const newY = 100 - (yProgress * 100);
             gsap.to(card, {
-              opacity: 1 - exitProgress,
-              scale: 0.95 - exitProgress * 0.05,
-              y: -exitProgress * 80,
+              opacity: yProgress,
+              y: `${newY}%`,
               duration: 0.1,
-              overwrite: true,
+              overwrite: true
             });
+            
+            // Card sebelumnya mulai menghilang saat card baru sudah 60% muncul
+            if (idx > 0 && cards[idx - 1]) {
+              const prevCardFade = Math.min(1, Math.max(0, (progress - 0.5) / 0.5));
+              if (progress > 0.5) {
+                gsap.to(cards[idx - 1], {
+                  opacity: 1 - prevCardFade,
+                  duration: 0.1,
+                  overwrite: true
+                });
+              }
+            }
           }
-        },
-      });
+        });
+      }
+    });
+    
+    // Card terakhir tetap full di akhir
+    ScrollTrigger.create({
+      trigger: stackedSectionRef.current,
+      start: `${startOffset + ((totalCards - 1) * cardDuration)}%`,
+      end: `100%`,
+      scrub: 1,
+      onUpdate: (self) => {
+        const lastCard = cards[totalCards - 1];
+        if (lastCard) {
+          gsap.to(lastCard, {
+            opacity: 1,
+            y: '0%',
+            duration: 0.1,
+            overwrite: true
+          });
+        }
+      }
     });
 
     return () => {
@@ -3081,6 +3076,11 @@ export default function HomePage(): React.JSX.Element {
           color: #000000;
         }
         
+        /* Stacked Cards Container */
+        .stacked-card {
+          will-change: transform, opacity;
+        }
+        
       `}</style>
       
       {/* LOADING OVERLAY */}
@@ -3282,7 +3282,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* SECTION FEATURES - Sama seperti sebelumnya */}
+            {/* SECTION FEATURES */}
             <div
               ref={featuresSectionRef}
               className="features-section"
@@ -3715,149 +3715,325 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* ============ START: STACKED CARDS SECTION (GSAP SCROLLTRIGGER) ============ */}
+            {/* ============ START: STACKED CARDS SECTION (LINEBOX STYLE) ============ */}
             <div
               ref={stackedSectionRef}
-              className="stacked-section"
               style={{
                 position: 'relative',
                 width: '100%',
-                minHeight: '100vh',
-                backgroundColor: '#f5f5f5',
-                padding: '120px 80px',
+                backgroundColor: '#ffffff',
+                padding: '120px 0',
                 boxSizing: 'border-box',
                 fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif"
               }}
             >
-              {/* Section Title */}
-              <div
-                ref={stackedTitleRef}
-                style={{
-                  fontSize: '120px',
-                  fontWeight: '400',
-                  letterSpacing: '-0.02em',
-                  color: '#000000',
-                  marginBottom: '60px',
-                  lineHeight: '1',
-                  borderBottom: '1px solid #000000',
-                  display: 'inline-block',
-                  paddingBottom: '20px'
-                }}
-              >
-                SELECTED WORKS
-              </div>
-
-              {/* Sticky Container untuk Stacked Cards */}
-              <div ref={stickyContainerRef} style={{ position: 'relative', height: '300vh' }}>
-                {/* Cards Wrapper - akan di-pin */}
+              {/* Container dengan tinggi total untuk scroll effect */}
+              <div style={{ position: 'relative', height: '400vh' }}>
+                {/* Sticky container yang akan di-pin */}
                 <div
-                  ref={cardsWrapperRef}
                   style={{
                     position: 'sticky',
-                    top: '10%',
+                    top: '5%',
                     width: '100%',
-                    height: '80vh',
+                    height: '90vh',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center'
+                    justifyContent: 'center',
+                    overflow: 'hidden'
                   }}
                 >
-                  {/* Map 4 Cards */}
-                  {stackedCards.map((card, idx) => (
-                    <div
-                      key={card.id}
-                      ref={(el) => { cardRefs.current[idx] = el; }}
-                      className="stacked-card"
-                      style={{
-                        position: 'absolute',
-                        width: '70%',
-                        maxWidth: '900px',
-                        backgroundColor: '#ffffff',
-                        borderRadius: '32px',
-                        boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)',
-                        padding: '48px',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '24px',
-                        opacity: 0,
-                        transform: 'scale(0.95) translateY(50px)',
-                        transition: 'box-shadow 0.3s ease',
-                        border: '1px solid #e0e0e0'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.boxShadow = '0 35px 60px -15px rgba(0,0,0,0.3)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.boxShadow = '0 25px 50px -12px rgba(0,0,0,0.25)';
-                      }}
-                    >
-                      {/* Card Number */}
-                      <div
-                        style={{
-                          fontSize: '60px',
-                          fontWeight: '400',
-                          color: '#000000',
-                          opacity: 0.3,
-                          letterSpacing: '-0.02em'
-                        }}
-                      >
-                        .{String(card.id).padStart(2, '0')}
-                      </div>
-
-                      {/* Card Title */}
-                      <div
-                        style={{
-                          fontSize: '48px',
-                          fontWeight: '500',
-                          color: '#000000',
-                          letterSpacing: '-0.02em',
-                          lineHeight: '1.2'
-                        }}
-                      >
-                        {card.title}
-                      </div>
-
-                      {/* Card Description */}
-                      <div
-                        style={{
-                          fontSize: '18px',
-                          color: '#333333',
-                          lineHeight: '1.5',
-                          opacity: 0.8
-                        }}
-                      >
-                        {card.description}
-                      </div>
-
-                      {/* Optional: Arrow or Icon */}
-                      <div
-                        style={{
-                          marginTop: '20px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '12px',
-                          fontSize: '16px',
-                          fontWeight: '500',
-                          color: '#000000',
-                          borderTop: '1px solid #e0e0e0',
-                          paddingTop: '24px',
-                          cursor: 'pointer'
-                        }}
-                        onClick={() => window.open(card.link, '_blank')}
-                      >
-                        <span>EXPLORE PROJECT</span>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                      </div>
+                  {/* Card 1 - Paling bawah */}
+                  <div
+                    ref={(el) => { if (el) cardRefs.current[0] = el; }}
+                    className="stacked-card"
+                    style={{
+                      position: 'absolute',
+                      width: '90%',
+                      maxWidth: '1400px',
+                      backgroundColor: '#ffffff',
+                      border: '2px solid #000000',
+                      padding: '80px 100px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '32px',
+                      opacity: 1,
+                      zIndex: 1,
+                      transition: 'box-shadow 0.3s ease',
+                      boxSizing: 'border-box'
+                    }}
+                  >
+                    <div style={{
+                      fontSize: '80px',
+                      fontWeight: '400',
+                      color: '#000000',
+                      letterSpacing: '-0.02em',
+                      borderBottom: '2px solid #000000',
+                      paddingBottom: '20px',
+                      display: 'inline-block',
+                      width: 'fit-content'
+                    }}>
+                      .01
                     </div>
-                  ))}
+                    <div style={{
+                      fontSize: '64px',
+                      fontWeight: '500',
+                      color: '#000000',
+                      letterSpacing: '-0.02em',
+                      lineHeight: '1.2'
+                    }}>
+                      Initial Consultation
+                    </div>
+                    <div style={{
+                      fontSize: '24px',
+                      color: '#333333',
+                      lineHeight: '1.6',
+                      maxWidth: '80%'
+                    }}>
+                      We'll have a meeting to discuss the project details, goals, expectations, and deadlines. 
+                      During this meeting, we'll chat about everything in a relaxed manner, making sure all 
+                      your questions are answered and that we're all set to move forward together.
+                    </div>
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '16px',
+                        fontSize: '18px',
+                        fontWeight: '500',
+                        color: '#000000',
+                        marginTop: '20px',
+                        cursor: 'pointer'
+                      }}
+                      onClick={() => window.open('#', '_blank')}
+                    >
+                      <span>EXPLORE PROJECT</span>
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </div>
+                  </div>
+
+                  {/* Card 2 */}
+                  <div
+                    ref={(el) => { if (el) cardRefs.current[1] = el; }}
+                    className="stacked-card"
+                    style={{
+                      position: 'absolute',
+                      width: '90%',
+                      maxWidth: '1400px',
+                      backgroundColor: '#ffffff',
+                      border: '2px solid #000000',
+                      padding: '80px 100px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '32px',
+                      opacity: 0,
+                      zIndex: 2,
+                      transform: 'translateY(100%)',
+                      transition: 'box-shadow 0.3s ease',
+                      boxSizing: 'border-box'
+                    }}
+                  >
+                    <div style={{
+                      fontSize: '80px',
+                      fontWeight: '400',
+                      color: '#000000',
+                      letterSpacing: '-0.02em',
+                      borderBottom: '2px solid #000000',
+                      paddingBottom: '20px',
+                      display: 'inline-block',
+                      width: 'fit-content'
+                    }}>
+                      .02
+                    </div>
+                    <div style={{
+                      fontSize: '64px',
+                      fontWeight: '500',
+                      color: '#000000',
+                      letterSpacing: '-0.02em',
+                      lineHeight: '1.2'
+                    }}>
+                      Design Review
+                    </div>
+                    <div style={{
+                      fontSize: '24px',
+                      color: '#333333',
+                      lineHeight: '1.6',
+                      maxWidth: '80%'
+                    }}>
+                      I'll go through your designs to fully understand your vision. Once I have a clear 
+                      understanding of your ideas, I'll analyze them in detail, considering all aspects 
+                      and enhancements to ensure the final product aligns perfectly with your goals and expectations.
+                    </div>
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '16px',
+                        fontSize: '18px',
+                        fontWeight: '500',
+                        color: '#000000',
+                        marginTop: '20px',
+                        cursor: 'pointer'
+                      }}
+                      onClick={() => window.open('#', '_blank')}
+                    >
+                      <span>EXPLORE PROJECT</span>
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </div>
+                  </div>
+
+                  {/* Card 3 */}
+                  <div
+                    ref={(el) => { if (el) cardRefs.current[2] = el; }}
+                    className="stacked-card"
+                    style={{
+                      position: 'absolute',
+                      width: '90%',
+                      maxWidth: '1400px',
+                      backgroundColor: '#ffffff',
+                      border: '2px solid #000000',
+                      padding: '80px 100px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '32px',
+                      opacity: 0,
+                      zIndex: 3,
+                      transform: 'translateY(100%)',
+                      transition: 'box-shadow 0.3s ease',
+                      boxSizing: 'border-box'
+                    }}
+                  >
+                    <div style={{
+                      fontSize: '80px',
+                      fontWeight: '400',
+                      color: '#000000',
+                      letterSpacing: '-0.02em',
+                      borderBottom: '2px solid #000000',
+                      paddingBottom: '20px',
+                      display: 'inline-block',
+                      width: 'fit-content'
+                    }}>
+                      .03
+                    </div>
+                    <div style={{
+                      fontSize: '64px',
+                      fontWeight: '500',
+                      color: '#000000',
+                      letterSpacing: '-0.02em',
+                      lineHeight: '1.2'
+                    }}>
+                      Development
+                    </div>
+                    <div style={{
+                      fontSize: '24px',
+                      color: '#333333',
+                      lineHeight: '1.6',
+                      maxWidth: '80%'
+                    }}>
+                      I'll code the site using the best web development practices to ensure optimal performance 
+                      and responsive design. I'll make sure it's accessible on all devices, providing a smooth 
+                      user experience, with modern techniques for a beautiful interface.
+                    </div>
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '16px',
+                        fontSize: '18px',
+                        fontWeight: '500',
+                        color: '#000000',
+                        marginTop: '20px',
+                        cursor: 'pointer'
+                      }}
+                      onClick={() => window.open('#', '_blank')}
+                    >
+                      <span>EXPLORE PROJECT</span>
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </div>
+                  </div>
+
+                  {/* Card 4 - Paling atas (full di akhir scroll) */}
+                  <div
+                    ref={(el) => { if (el) cardRefs.current[3] = el; }}
+                    className="stacked-card"
+                    style={{
+                      position: 'absolute',
+                      width: '90%',
+                      maxWidth: '1400px',
+                      backgroundColor: '#ffffff',
+                      border: '2px solid #000000',
+                      padding: '80px 100px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '32px',
+                      opacity: 0,
+                      zIndex: 4,
+                      transform: 'translateY(100%)',
+                      transition: 'box-shadow 0.3s ease',
+                      boxSizing: 'border-box'
+                    }}
+                  >
+                    <div style={{
+                      fontSize: '80px',
+                      fontWeight: '400',
+                      color: '#000000',
+                      letterSpacing: '-0.02em',
+                      borderBottom: '2px solid #000000',
+                      paddingBottom: '20px',
+                      display: 'inline-block',
+                      width: 'fit-content'
+                    }}>
+                      .04
+                    </div>
+                    <div style={{
+                      fontSize: '64px',
+                      fontWeight: '500',
+                      color: '#000000',
+                      letterSpacing: '-0.02em',
+                      lineHeight: '1.2'
+                    }}>
+                      Review and Testing
+                    </div>
+                    <div style={{
+                      fontSize: '24px',
+                      color: '#333333',
+                      lineHeight: '1.6',
+                      maxWidth: '80%'
+                    }}>
+                      Once the site is completed, we'll go through a testing phase to make sure everything 
+                      works perfectly across all devices and browsers. I'll assist with launching and provide 
+                      support to address any issues that might arise after the launch.
+                    </div>
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '16px',
+                        fontSize: '18px',
+                        fontWeight: '500',
+                        color: '#000000',
+                        marginTop: '20px',
+                        cursor: 'pointer'
+                      }}
+                      onClick={() => window.open('#', '_blank')}
+                    >
+                      <span>EXPLORE PROJECT</span>
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
             {/* ============ END: STACKED CARDS SECTION ============ */}
 
-            {/* CALENDAR SUBMISSIONS SECTION - tetap seperti semula */}
+            {/* CALENDAR SUBMISSIONS SECTION */}
             {calendarSubmissions.length > 0 && (
               <div className="calendar-submissions-section" style={{
                 width: '100%',
@@ -3898,13 +4074,13 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 </div>
                 
-                {/* Daftar submission - tanpa card, tanpa hover, tanpa linebox (tanpa border) */}
+                {/* Daftar submission */}
                 <div style={{
                   display: 'flex',
                   flexDirection: 'column',
                   gap: '80px'
                 }}>
-                  {calendarSubmissions.map((submission, index) => {
+                  {calendarSubmissions.map((submission) => {
                     const dateParts = getDateParts(submission.selectedDate);
                     
                     return (
@@ -3917,7 +4093,7 @@ export default function HomePage(): React.JSX.Element {
                           gap: '80px'
                         }}
                       >
-                        {/* LEFT - Tanggal dipisah: Day, Month, Year - font besar */}
+                        {/* LEFT - Tanggal */}
                         <div style={{
                           width: '200px',
                           flexShrink: 0,
@@ -4001,7 +4177,6 @@ export default function HomePage(): React.JSX.Element {
                             flexWrap: 'wrap'
                           }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                              {/* Clock SVG */}
                               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <circle cx="12" cy="12" r="10" stroke="#000000" strokeWidth="1.5"/>
                                 <polyline points="12 6 12 12 16 14" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -4015,7 +4190,6 @@ export default function HomePage(): React.JSX.Element {
                               </span>
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                              {/* Calendar SVG */}
                               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke="#000000" strokeWidth="1.5"/>
                                 <line x1="8" y1="2" x2="8" y2="6" stroke="#000000" strokeWidth="1.5" strokeLinecap="round"/>
@@ -4031,7 +4205,6 @@ export default function HomePage(): React.JSX.Element {
                               </span>
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                              {/* Platform SVG */}
                               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="#000000" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
                               </svg>
@@ -4047,7 +4220,7 @@ export default function HomePage(): React.JSX.Element {
                             </div>
                           </div>
                           
-                          {/* Alasan Percaya - deskripsi besar */}
+                          {/* Alasan Percaya */}
                           <div style={{
                             marginTop: '16px'
                           }}>
@@ -4073,7 +4246,7 @@ export default function HomePage(): React.JSX.Element {
                             </div>
                           </div>
                           
-                          {/* Kontak: Email, Phone, Company */}
+                          {/* Kontak */}
                           <div style={{
                             display: 'flex',
                             alignItems: 'center',
@@ -4163,7 +4336,7 @@ export default function HomePage(): React.JSX.Element {
                           )}
                         </div>
                         
-                        {/* RIGHT - Tombol dengan NORTH EAST ARROW dan NORTH WEST ARROW 50px */}
+                        {/* RIGHT - Tombol */}
                         <div style={{
                           width: '220px',
                           flexShrink: 0,
@@ -4197,13 +4370,11 @@ export default function HomePage(): React.JSX.Element {
                             }}
                           >
                             <span>BOOK CALL</span>
-                            {/* NORTH EAST ARROW - 24px */}
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                               <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                             </svg>
                           </button>
                           
-                          {/* Admin Reply Button */}
                           {isAdmin && (
                             <button
                               onClick={() => {
@@ -4230,7 +4401,6 @@ export default function HomePage(): React.JSX.Element {
                               }}
                             >
                               <span>{submission.adminReply ? 'EDIT REPLY' : 'REPLY'}</span>
-                              {/* NORTH WEST ARROW - 20px */}
                               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M17 7L7 17M7 17H17M7 17V7" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                               </svg>
@@ -5417,7 +5587,7 @@ export default function HomePage(): React.JSX.Element {
         </div>
       )}
 
-      {/* CALENDAR CALL MODAL - Dengan toggle antara calendar dan form */}
+      {/* CALENDAR CALL MODAL */}
       {showCalendarModal && (
         <div className="calendar-modal-overlay">
           <div ref={modalRef} className="calendar-modal" style={{ maxWidth: '1300px', maxHeight: '85vh', overflow: 'auto' }}>
@@ -5429,7 +5599,7 @@ export default function HomePage(): React.JSX.Element {
                 height: 'auto',
                 minHeight: '620px'
               }}>
-                {/* SISI KIRI - Info Profile dengan nama user/admin */}
+                {/* SISI KIRI - Info Profile */}
                 <div style={{
                   flex: 1.1,
                   padding: '36px',
@@ -5858,7 +6028,7 @@ export default function HomePage(): React.JSX.Element {
                     </div>
                   </div>
 
-                  {/* Tombol Back dan Schedule Meeting - Back pakai North West Arrow */}
+                  {/* Tombol Back dan Schedule Meeting */}
                   <div style={{
                     display: 'flex',
                     gap: '12px',
