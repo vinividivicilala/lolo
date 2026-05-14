@@ -325,6 +325,10 @@ export default function HomePage(): React.JSX.Element {
   const trustedSectionRef = useRef<HTMLDivElement>(null);
   const trustedTextRef = useRef<HTMLDivElement>(null);
   
+  // Refs untuk Stack Card
+  const stackCardsRef = useRef<HTMLDivElement>(null);
+  const stackCardRefs = useRef<(HTMLDivElement | null)[]>([]);
+  
   const img1Ref = useRef<HTMLDivElement>(null);
   const img2Ref = useRef<HTMLDivElement>(null);
   
@@ -375,6 +379,42 @@ export default function HomePage(): React.JSX.Element {
       image: "/images/5.jpg",
       brand: "Delta Creative",
       description: "Content creation and digital marketing."
+    }
+  ];
+
+  // Stack Card Items
+  const stackCardItems = [
+    {
+      id: 1,
+      title: "DESIGN SYSTEM",
+      subtitle: "Scalable UI Framework",
+      description: "Build consistent interfaces across all platforms with our comprehensive design system.",
+      image: "/images/lkhh.jpg",
+      color: "#000000"
+    },
+    {
+      id: 2,
+      title: "MOTION DESIGN",
+      subtitle: "Interactive Animations",
+      description: "Engage users with smooth, meaningful animations that enhance user experience.",
+      image: "/images/ai.jpg",
+      color: "#1a1a1a"
+    },
+    {
+      id: 3,
+      title: "USER RESEARCH",
+      subtitle: "Data-Driven Insights",
+      description: "Understand your audience through in-depth research and usability testing.",
+      image: "/images/5.jpg",
+      color: "#2a2a2a"
+    },
+    {
+      id: 4,
+      title: "PROTOTYPING",
+      subtitle: "Rapid Iteration",
+      description: "Test ideas quickly with high-fidelity prototypes and user feedback loops.",
+      image: "/images/lkhh.jpg",
+      color: "#333333"
     }
   ];
 
@@ -1562,6 +1602,53 @@ export default function HomePage(): React.JSX.Element {
     
     return () => {
       carousel.removeEventListener('wheel', handleWheel);
+    };
+  }, [isLoading]);
+
+  // Stack Card Scroll Effect
+  useEffect(() => {
+    if (isLoading) return;
+
+    const cards = stackCardRefs.current.filter(card => card !== null);
+    
+    cards.forEach((card, index) => {
+      const isLastCard = index === cards.length - 1;
+      
+      ScrollTrigger.create({
+        trigger: card,
+        start: "top bottom",
+        end: isLastCard ? "bottom top" : "top center",
+        onUpdate: (self) => {
+          const progress = self.progress;
+          // Stack effect: move up and scale
+          if (progress > 0) {
+            const translateY = -progress * (index * 50);
+            const scale = 1 - (progress * 0.05);
+            const opacity = 1 - (progress * 0.3);
+            
+            gsap.to(card, {
+              y: translateY,
+              scale: scale,
+              opacity: opacity,
+              duration: 0.1,
+              ease: "none"
+            });
+          } else {
+            gsap.to(card, {
+              y: 0,
+              scale: 1,
+              opacity: 1,
+              duration: 0.1
+            });
+          }
+        },
+        scrub: 1,
+        invalidateOnRefresh: true
+      });
+    });
+
+    return () => {
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
   }, [isLoading]);
 
@@ -2912,6 +2999,115 @@ export default function HomePage(): React.JSX.Element {
           background: rgba(255, 255, 255, 0.5);
         }
 
+        /* Stack Card Styles */
+        .stack-cards-section {
+          width: 100%;
+          padding: 120px 80px;
+          background-color: #f5f5f5;
+          box-sizing: border-box;
+          position: relative;
+        }
+
+        .stack-cards-container {
+          max-width: 1400px;
+          margin: 0 auto;
+        }
+
+        .stack-cards-header {
+          margin-bottom: 80px;
+          text-align: left;
+        }
+
+        .stack-cards-title {
+          font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
+          font-size: 100px;
+          font-weight: 400;
+          color: #000000;
+          letter-spacing: -0.02em;
+          line-height: 1;
+          margin: 0 0 20px 0;
+        }
+
+        .stack-cards-subtitle {
+          font-family: 'Questrial', sans-serif;
+          font-size: 20px;
+          color: #666666;
+          max-width: 600px;
+        }
+
+        .stack-card-wrapper {
+          position: relative;
+          margin-bottom: 30px;
+        }
+
+        .stack-card {
+          background-color: #ffffff;
+          border-radius: 32px;
+          padding: 48px;
+          min-height: 400px;
+          display: flex;
+          flex-direction: row;
+          gap: 60px;
+          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+          position: relative;
+          z-index: 1;
+          transition: all 0.3s ease;
+          border: 1px solid #e0e0e0;
+        }
+
+        .stack-card-left {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+        }
+
+        .stack-card-number {
+          font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
+          font-size: 60px;
+          font-weight: 400;
+          color: #cccccc;
+          margin-bottom: 24px;
+        }
+
+        .stack-card-title {
+          font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
+          font-size: 48px;
+          font-weight: 500;
+          color: #000000;
+          letter-spacing: -0.02em;
+          margin-bottom: 16px;
+        }
+
+        .stack-card-subtitle {
+          font-family: 'Questrial', sans-serif;
+          font-size: 20px;
+          color: #666666;
+          margin-bottom: 24px;
+        }
+
+        .stack-card-description {
+          font-family: 'Questrial', sans-serif;
+          font-size: 18px;
+          color: #888888;
+          line-height: 1.6;
+        }
+
+        .stack-card-right {
+          flex: 1;
+          position: relative;
+          border-radius: 24px;
+          overflow: hidden;
+          min-height: 350px;
+        }
+
+        .stack-card-image {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          border-radius: 24px;
+        }
+
         /* Style untuk Calendar Submissions Section - Minimalis Hitam Putih */
         .calendar-submissions-section {
           width: 100%;
@@ -3594,399 +3790,438 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
+            {/* STACK CARD SECTION - SCROLL EFFECT */}
+            <div className="stack-cards-section">
+              <div className="stack-cards-container">
+                <div className="stack-cards-header">
+                  <h2 className="stack-cards-title">SCROLL STACK</h2>
+                  <p className="stack-cards-subtitle">Experience the smooth stacking card effect as you scroll</p>
+                </div>
+                
+                <div ref={stackCardsRef}>
+                  {stackCardItems.map((item, index) => (
+                    <div
+                      key={item.id}
+                      ref={el => { stackCardRefs.current[index] = el; }}
+                      className="stack-card-wrapper"
+                    >
+                      <div 
+                        className="stack-card"
+                        style={{
+                          backgroundColor: '#ffffff',
+                          transformOrigin: 'center top'
+                        }}
+                      >
+                        <div className="stack-card-left">
+                          <div className="stack-card-number">
+                            {String(item.id).padStart(2, '0')}
+                          </div>
+                          <h3 className="stack-card-title">{item.title}</h3>
+                          <p className="stack-card-subtitle">{item.subtitle}</p>
+                          <p className="stack-card-description">{item.description}</p>
+                        </div>
+                        <div className="stack-card-right">
+                          <Image
+                            src={item.image}
+                            alt={item.title}
+                            fill
+                            className="stack-card-image"
+                            style={{ objectFit: 'cover' }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
 
-{calendarSubmissions.length > 0 && (
-  <div className="calendar-submissions-section" style={{
-    width: '100%',
-    padding: '120px 80px',
-    backgroundColor: '#ffffff',
-    boxSizing: 'border-box'
-  }}>
-    {/* Header dengan font 300px dan panah SVG 100px - tanpa garis bawah */}
-    <div style={{
-      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-      fontSize: '190px',
-      fontWeight: '400',
-      color: '#000000',
-      letterSpacing: '-0.02em',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      marginBottom: '100px',
-      lineHeight: '1'
-    }}>
-      <span>MEETING SCHEDULE</span>
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '30px'
-      }}>
-        <span style={{
-          fontSize: '100px',
-          color: '#000000',
-          fontWeight: '400'
-        }}>
-          ({calendarSubmissions.length})
-        </span>
-        {/* NORTH EAST ARROW - 100px */}
-        <svg width="100" height="100" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-      </div>
-    </div>
-    
-    {/* Daftar submission - tanpa card, tanpa hover, tanpa linebox (tanpa border) */}
-    <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '80px'
-    }}>
-      {calendarSubmissions.map((submission, index) => {
-        const dateParts = getDateParts(submission.selectedDate);
-        
-        return (
-          <div
-            key={submission.id}
-            style={{
-              display: 'flex',
-              flexDirection: 'row',
-              alignItems: 'flex-start',
-              gap: '80px'
-            }}
-          >
-            {/* LEFT - Tanggal dipisah: Day, Month, Year - font besar */}
-            <div style={{
-              width: '200px',
-              flexShrink: 0,
-              textAlign: 'left'
-            }}>
-              <div style={{
-                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                fontSize: '100px',
-                fontWeight: '400',
-                color: '#000000',
-                lineHeight: '1',
-                letterSpacing: '-0.02em'
+            {/* CALENDAR SUBMISSIONS SECTION */}
+            {calendarSubmissions.length > 0 && (
+              <div className="calendar-submissions-section" style={{
+                width: '100%',
+                padding: '120px 80px',
+                backgroundColor: '#ffffff',
+                boxSizing: 'border-box'
               }}>
-                {dateParts.day}
-              </div>
-              <div style={{
-                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                fontSize: '40px',
-                fontWeight: '400',
-                color: '#000000',
-                letterSpacing: '-0.02em',
-                marginTop: '12px'
-              }}>
-                {dateParts.month}
-              </div>
-              <div style={{
-                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                fontSize: '24px',
-                fontWeight: '400',
-                color: '#666666',
-                marginTop: '8px'
-              }}>
-                {dateParts.year}
-              </div>
-            </div>
-            
-            {/* MIDDLE - Informasi lengkap */}
-            <div style={{
-              flex: 1,
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '32px'
-            }}>
-              {/* Nama dan Status */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '40px',
-                flexWrap: 'wrap'
-              }}>
+                {/* Header dengan font 300px dan panah SVG 100px - tanpa garis bawah */}
                 <div style={{
                   fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                  fontSize: '48px',
+                  fontSize: '190px',
                   fontWeight: '400',
                   color: '#000000',
-                  letterSpacing: '-0.02em'
-                }}>
-                  {submission.fullName}
-                </div>
-                <div style={{
-                  fontSize: '20px',
-                  padding: '6px 24px',
-                  border: '1px solid #000000',
-                  backgroundColor: 'transparent',
-                  color: '#000000',
-                  fontWeight: '400',
-                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                  letterSpacing: '0.02em'
-                }}>
-                  {submission.status === 'pending' ? 'PENDING' : 
-                   submission.status === 'confirmed' ? 'CONFIRMED' : 
-                   submission.status === 'completed' ? 'COMPLETED' : 'REJECTED'}
-                </div>
-              </div>
-              
-              {/* Waktu dan Tipe Meeting */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '60px',
-                flexWrap: 'wrap'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                  {/* Clock SVG */}
-                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="12" cy="12" r="10" stroke="#000000" strokeWidth="1.5"/>
-                    <polyline points="12 6 12 12 16 14" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                  <span style={{
-                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                    fontSize: '28px',
-                    color: '#000000'
-                  }}>
-                    {submission.selectedTime} WIB
-                  </span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                  {/* Calendar SVG */}
-                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke="#000000" strokeWidth="1.5"/>
-                    <line x1="8" y1="2" x2="8" y2="6" stroke="#000000" strokeWidth="1.5" strokeLinecap="round"/>
-                    <line x1="16" y1="2" x2="16" y2="6" stroke="#000000" strokeWidth="1.5" strokeLinecap="round"/>
-                    <line x1="3" y1="10" x2="21" y2="10" stroke="#000000" strokeWidth="1.5" strokeLinecap="round"/>
-                  </svg>
-                  <span style={{
-                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                    fontSize: '28px',
-                    color: '#000000'
-                  }}>
-                    {submission.meetingType}
-                  </span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                  {/* Platform SVG */}
-                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="#000000" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                  <span style={{
-                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                    fontSize: '28px',
-                    color: '#000000'
-                  }}>
-                    {submission.platform === 'google_meet' ? 'Google Meet' : 
-                     submission.platform === 'zoom' ? 'Zoom' :
-                     submission.platform === 'tatap_muka' ? 'Offline' : 'Via HP'}
-                  </span>
-                </div>
-              </div>
-              
-              {/* Alasan Percaya - deskripsi besar */}
-              <div style={{
-                marginTop: '16px'
-              }}>
-                <div style={{
-                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                  fontSize: '20px',
-                  fontWeight: '400',
-                  color: '#999999',
-                  marginBottom: '20px',
-                  letterSpacing: '0.05em'
-                }}>
-                  REASON TO TRUST
-                </div>
-                <div style={{
-                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                  fontSize: '32px',
-                  fontWeight: '400',
-                  color: '#000000',
-                  lineHeight: '1.4',
-                  letterSpacing: '-0.01em'
-                }}>
-                  "{submission.trustReason}"
-                </div>
-              </div>
-              
-              {/* Kontak: Email, Phone, Company */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '48px',
-                flexWrap: 'wrap',
-                marginTop: '16px'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="2" y="4" width="20" height="16" rx="2" ry="2" stroke="#000000" strokeWidth="1.5"/>
-                    <polyline points="22 7 12 13 2 7" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                  <span style={{
-                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                    fontSize: '22px',
-                    color: '#000000'
-                  }}>
-                    {submission.email}
-                  </span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" stroke="#000000" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                  <span style={{
-                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                    fontSize: '22px',
-                    color: '#000000'
-                  }}>
-                    {submission.phoneNumber}
-                  </span>
-                </div>
-                {submission.companyName && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <rect x="4" y="4" width="16" height="16" rx="2" ry="2" stroke="#000000" strokeWidth="1.5"/>
-                      <line x1="9" y1="4" x2="9" y2="20" stroke="#000000" strokeWidth="1.5"/>
-                      <line x1="15" y1="4" x2="15" y2="20" stroke="#000000" strokeWidth="1.5"/>
-                      <line x1="4" y1="9" x2="20" y2="9" stroke="#000000" strokeWidth="1.5"/>
-                      <line x1="4" y1="15" x2="20" y2="15" stroke="#000000" strokeWidth="1.5"/>
-                    </svg>
-                    <span style={{
-                      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                      fontSize: '22px',
-                      color: '#000000'
-                    }}>
-                      {submission.companyName}
-                    </span>
-                  </div>
-                )}
-              </div>
-              
-              {/* Admin Reply */}
-              {submission.adminReply && (
-                <div style={{
-                  marginTop: '24px'
-                }}>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '14px',
-                    marginBottom: '16px'
-                  }}>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="#000000" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                    <span style={{
-                      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                      fontSize: '18px',
-                      fontWeight: '400',
-                      color: '#999999',
-                      letterSpacing: '0.05em'
-                    }}>
-                      ADMIN REPLY · {submission.adminReply.repliedBy}
-                    </span>
-                  </div>
-                  <div style={{
-                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                    fontSize: '24px',
-                    color: '#000000',
-                    lineHeight: '1.4',
-                    paddingLeft: '38px'
-                  }}>
-                    {submission.adminReply.text}
-                  </div>
-                </div>
-              )}
-            </div>
-            
-            {/* RIGHT - Tombol dengan NORTH EAST ARROW dan NORTH WEST ARROW 50px */}
-            <div style={{
-              width: '220px',
-              flexShrink: 0,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'flex-end',
-              gap: '24px'
-            }}>
-              <button
-                onClick={() => {
-                  setShowCalendarModal(true);
-                  setShowFormView(false);
-                  setSelectedDate(null);
-                  setSelectedTime("");
-                }}
-                style={{
+                  letterSpacing: '-0.02em',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  gap: '20px',
-                  backgroundColor: 'transparent',
-                  border: '1px solid #000000',
-                  cursor: 'pointer',
-                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                  fontSize: '20px',
-                  fontWeight: '400',
-                  color: '#000000',
-                  padding: '16px 28px',
-                  borderRadius: '0',
-                  width: '100%'
-                }}
-              >
-                <span>BOOK CALL</span>
-                {/* NORTH EAST ARROW - 24px */}
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </button>
-              
-              {/* Admin Reply Button */}
-              {isAdmin && (
-                <button
-                  onClick={() => {
-                    setSelectedSubmission(submission);
-                    setReplyText(submission.adminReply?.text || "");
-                    setReplyStatus(submission.status);
-                    setShowReplyModal(true);
-                  }}
-                  style={{
+                  marginBottom: '100px',
+                  lineHeight: '1'
+                }}>
+                  <span>MEETING SCHEDULE</span>
+                  <div style={{
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'space-between',
-                    gap: '20px',
-                    backgroundColor: 'transparent',
-                    border: '1px solid #000000',
-                    cursor: 'pointer',
-                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                    fontSize: '18px',
-                    fontWeight: '400',
-                    color: '#000000',
-                    padding: '14px 24px',
-                    borderRadius: '0',
-                    width: '100%'
-                  }}
-                >
-                  <span>{submission.adminReply ? 'EDIT REPLY' : 'REPLY'}</span>
-                  {/* NORTH WEST ARROW - 20px */}
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M17 7L7 17M7 17H17M7 17V7" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </button>
-              )}
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  </div>
-)}
-
-
-
-
-            
-
-            
+                    gap: '30px'
+                  }}>
+                    <span style={{
+                      fontSize: '100px',
+                      color: '#000000',
+                      fontWeight: '400'
+                    }}>
+                      ({calendarSubmissions.length})
+                    </span>
+                    {/* NORTH EAST ARROW - 100px */}
+                    <svg width="100" height="100" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                </div>
+                
+                {/* Daftar submission - tanpa card, tanpa hover, tanpa linebox (tanpa border) */}
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '80px'
+                }}>
+                  {calendarSubmissions.map((submission, index) => {
+                    const dateParts = getDateParts(submission.selectedDate);
+                    
+                    return (
+                      <div
+                        key={submission.id}
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'row',
+                          alignItems: 'flex-start',
+                          gap: '80px'
+                        }}
+                      >
+                        {/* LEFT - Tanggal dipisah: Day, Month, Year - font besar */}
+                        <div style={{
+                          width: '200px',
+                          flexShrink: 0,
+                          textAlign: 'left'
+                        }}>
+                          <div style={{
+                            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                            fontSize: '100px',
+                            fontWeight: '400',
+                            color: '#000000',
+                            lineHeight: '1',
+                            letterSpacing: '-0.02em'
+                          }}>
+                            {dateParts.day}
+                          </div>
+                          <div style={{
+                            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                            fontSize: '40px',
+                            fontWeight: '400',
+                            color: '#000000',
+                            letterSpacing: '-0.02em',
+                            marginTop: '12px'
+                          }}>
+                            {dateParts.month}
+                          </div>
+                          <div style={{
+                            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                            fontSize: '24px',
+                            fontWeight: '400',
+                            color: '#666666',
+                            marginTop: '8px'
+                          }}>
+                            {dateParts.year}
+                          </div>
+                        </div>
+                        
+                        {/* MIDDLE - Informasi lengkap */}
+                        <div style={{
+                          flex: 1,
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '32px'
+                        }}>
+                          {/* Nama dan Status */}
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '40px',
+                            flexWrap: 'wrap'
+                          }}>
+                            <div style={{
+                              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                              fontSize: '48px',
+                              fontWeight: '400',
+                              color: '#000000',
+                              letterSpacing: '-0.02em'
+                            }}>
+                              {submission.fullName}
+                            </div>
+                            <div style={{
+                              fontSize: '20px',
+                              padding: '6px 24px',
+                              border: '1px solid #000000',
+                              backgroundColor: 'transparent',
+                              color: '#000000',
+                              fontWeight: '400',
+                              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                              letterSpacing: '0.02em'
+                            }}>
+                              {submission.status === 'pending' ? 'PENDING' : 
+                               submission.status === 'confirmed' ? 'CONFIRMED' : 
+                               submission.status === 'completed' ? 'COMPLETED' : 'REJECTED'}
+                            </div>
+                          </div>
+                          
+                          {/* Waktu dan Tipe Meeting */}
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '60px',
+                            flexWrap: 'wrap'
+                          }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                              {/* Clock SVG */}
+                              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="12" cy="12" r="10" stroke="#000000" strokeWidth="1.5"/>
+                                <polyline points="12 6 12 12 16 14" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                              </svg>
+                              <span style={{
+                                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                                fontSize: '28px',
+                                color: '#000000'
+                              }}>
+                                {submission.selectedTime} WIB
+                              </span>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                              {/* Calendar SVG */}
+                              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke="#000000" strokeWidth="1.5"/>
+                                <line x1="8" y1="2" x2="8" y2="6" stroke="#000000" strokeWidth="1.5" strokeLinecap="round"/>
+                                <line x1="16" y1="2" x2="16" y2="6" stroke="#000000" strokeWidth="1.5" strokeLinecap="round"/>
+                                <line x1="3" y1="10" x2="21" y2="10" stroke="#000000" strokeWidth="1.5" strokeLinecap="round"/>
+                              </svg>
+                              <span style={{
+                                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                                fontSize: '28px',
+                                color: '#000000'
+                              }}>
+                                {submission.meetingType}
+                              </span>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                              {/* Platform SVG */}
+                              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="#000000" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                              </svg>
+                              <span style={{
+                                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                                fontSize: '28px',
+                                color: '#000000'
+                              }}>
+                                {submission.platform === 'google_meet' ? 'Google Meet' : 
+                                 submission.platform === 'zoom' ? 'Zoom' :
+                                 submission.platform === 'tatap_muka' ? 'Offline' : 'Via HP'}
+                              </span>
+                            </div>
+                          </div>
+                          
+                          {/* Alasan Percaya - deskripsi besar */}
+                          <div style={{
+                            marginTop: '16px'
+                          }}>
+                            <div style={{
+                              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                              fontSize: '20px',
+                              fontWeight: '400',
+                              color: '#999999',
+                              marginBottom: '20px',
+                              letterSpacing: '0.05em'
+                            }}>
+                              REASON TO TRUST
+                            </div>
+                            <div style={{
+                              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                              fontSize: '32px',
+                              fontWeight: '400',
+                              color: '#000000',
+                              lineHeight: '1.4',
+                              letterSpacing: '-0.01em'
+                            }}>
+                              "{submission.trustReason}"
+                            </div>
+                          </div>
+                          
+                          {/* Kontak: Email, Phone, Company */}
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '48px',
+                            flexWrap: 'wrap',
+                            marginTop: '16px'
+                          }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect x="2" y="4" width="20" height="16" rx="2" ry="2" stroke="#000000" strokeWidth="1.5"/>
+                                <polyline points="22 7 12 13 2 7" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                              </svg>
+                              <span style={{
+                                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                                fontSize: '22px',
+                                color: '#000000'
+                              }}>
+                                {submission.email}
+                              </span>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" stroke="#000000" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                              </svg>
+                              <span style={{
+                                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                                fontSize: '22px',
+                                color: '#000000'
+                              }}>
+                                {submission.phoneNumber}
+                              </span>
+                            </div>
+                            {submission.companyName && (
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <rect x="4" y="4" width="16" height="16" rx="2" ry="2" stroke="#000000" strokeWidth="1.5"/>
+                                  <line x1="9" y1="4" x2="9" y2="20" stroke="#000000" strokeWidth="1.5"/>
+                                  <line x1="15" y1="4" x2="15" y2="20" stroke="#000000" strokeWidth="1.5"/>
+                                  <line x1="4" y1="9" x2="20" y2="9" stroke="#000000" strokeWidth="1.5"/>
+                                  <line x1="4" y1="15" x2="20" y2="15" stroke="#000000" strokeWidth="1.5"/>
+                                </svg>
+                                <span style={{
+                                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                                  fontSize: '22px',
+                                  color: '#000000'
+                                }}>
+                                  {submission.companyName}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                          
+                          {/* Admin Reply */}
+                          {submission.adminReply && (
+                            <div style={{
+                              marginTop: '24px'
+                            }}>
+                              <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '14px',
+                                marginBottom: '16px'
+                              }}>
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="#000000" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                                <span style={{
+                                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                                  fontSize: '18px',
+                                  fontWeight: '400',
+                                  color: '#999999',
+                                  letterSpacing: '0.05em'
+                                }}>
+                                  ADMIN REPLY · {submission.adminReply.repliedBy}
+                                </span>
+                              </div>
+                              <div style={{
+                                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                                fontSize: '24px',
+                                color: '#000000',
+                                lineHeight: '1.4',
+                                paddingLeft: '38px'
+                              }}>
+                                {submission.adminReply.text}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                        
+                        {/* RIGHT - Tombol dengan NORTH EAST ARROW dan NORTH WEST ARROW 50px */}
+                        <div style={{
+                          width: '220px',
+                          flexShrink: 0,
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'flex-end',
+                          gap: '24px'
+                        }}>
+                          <button
+                            onClick={() => {
+                              setShowCalendarModal(true);
+                              setShowFormView(false);
+                              setSelectedDate(null);
+                              setSelectedTime("");
+                            }}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              gap: '20px',
+                              backgroundColor: 'transparent',
+                              border: '1px solid #000000',
+                              cursor: 'pointer',
+                              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                              fontSize: '20px',
+                              fontWeight: '400',
+                              color: '#000000',
+                              padding: '16px 28px',
+                              borderRadius: '0',
+                              width: '100%'
+                            }}
+                          >
+                            <span>BOOK CALL</span>
+                            {/* NORTH EAST ARROW - 24px */}
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                          </button>
+                          
+                          {/* Admin Reply Button */}
+                          {isAdmin && (
+                            <button
+                              onClick={() => {
+                                setSelectedSubmission(submission);
+                                setReplyText(submission.adminReply?.text || "");
+                                setReplyStatus(submission.status);
+                                setShowReplyModal(true);
+                              }}
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                gap: '20px',
+                                backgroundColor: 'transparent',
+                                border: '1px solid #000000',
+                                cursor: 'pointer',
+                                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                                fontSize: '18px',
+                                fontWeight: '400',
+                                color: '#000000',
+                                padding: '14px 24px',
+                                borderRadius: '0',
+                                width: '100%'
+                              }}
+                            >
+                              <span>{submission.adminReply ? 'EDIT REPLY' : 'REPLY'}</span>
+                              {/* NORTH WEST ARROW - 20px */}
+                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M17 7L7 17M7 17H17M7 17V7" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                              </svg>
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             {/* REPLY MODAL FOR ADMIN */}
             {showReplyModal && selectedSubmission && (
