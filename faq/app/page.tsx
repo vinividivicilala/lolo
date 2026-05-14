@@ -3594,357 +3594,401 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* SECTION CALENDAR SUBMISSIONS - Style minimalis hitam putih, font Aeonik 100px, tanpa card, tanpa hover, tanpa warna-warni */}
-            {calendarSubmissions.length > 0 && (
-              <div className="calendar-submissions-section">
-                {/* Header dengan font 100px dan panah SVG */}
+
+// SECTION CALENDAR SUBMISSIONS - Style minimalis hitam putih, font besar, panah 100px
+
+{calendarSubmissions.length > 0 && (
+  <div className="calendar-submissions-section" style={{
+    width: '100%',
+    padding: '120px 80px',
+    backgroundColor: '#ffffff',
+    boxSizing: 'border-box'
+  }}>
+    {/* Header dengan font 300px dan panah SVG 100px - tanpa garis bawah */}
+    <div style={{
+      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+      fontSize: '300px',
+      fontWeight: '400',
+      color: '#000000',
+      letterSpacing: '-0.02em',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: '100px',
+      lineHeight: '1'
+    }}>
+      <span>MEETING SCHEDULE</span>
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '30px'
+      }}>
+        <span style={{
+          fontSize: '100px',
+          color: '#000000',
+          fontWeight: '400'
+        }}>
+          ({calendarSubmissions.length})
+        </span>
+        {/* NORTH EAST ARROW - 100px */}
+        <svg width="100" height="100" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </div>
+    </div>
+    
+    {/* Daftar submission - tanpa card, tanpa hover, tanpa linebox (tanpa border) */}
+    <div style={{
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '80px'
+    }}>
+      {calendarSubmissions.map((submission, index) => {
+        const dateParts = getDateParts(submission.selectedDate);
+        
+        return (
+          <div
+            key={submission.id}
+            style={{
+              display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'flex-start',
+              gap: '80px'
+            }}
+          >
+            {/* LEFT - Tanggal dipisah: Day, Month, Year - font besar */}
+            <div style={{
+              width: '200px',
+              flexShrink: 0,
+              textAlign: 'left'
+            }}>
+              <div style={{
+                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                fontSize: '100px',
+                fontWeight: '400',
+                color: '#000000',
+                lineHeight: '1',
+                letterSpacing: '-0.02em'
+              }}>
+                {dateParts.day}
+              </div>
+              <div style={{
+                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                fontSize: '40px',
+                fontWeight: '400',
+                color: '#000000',
+                letterSpacing: '-0.02em',
+                marginTop: '12px'
+              }}>
+                {dateParts.month}
+              </div>
+              <div style={{
+                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                fontSize: '24px',
+                fontWeight: '400',
+                color: '#666666',
+                marginTop: '8px'
+              }}>
+                {dateParts.year}
+              </div>
+            </div>
+            
+            {/* MIDDLE - Informasi lengkap */}
+            <div style={{
+              flex: 1,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '32px'
+            }}>
+              {/* Nama dan Status */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '40px',
+                flexWrap: 'wrap'
+              }}>
                 <div style={{
                   fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                  fontSize: '100px',
+                  fontSize: '48px',
                   fontWeight: '400',
                   color: '#000000',
-                  marginBottom: '80px',
-                  letterSpacing: '-0.02em',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  borderBottom: '1px solid #000000',
-                  paddingBottom: '40px'
+                  letterSpacing: '-0.02em'
                 }}>
-                  <span>MEETING SCHEDULE</span>
+                  {submission.fullName}
+                </div>
+                <div style={{
+                  fontSize: '20px',
+                  padding: '6px 24px',
+                  border: '1px solid #000000',
+                  backgroundColor: 'transparent',
+                  color: '#000000',
+                  fontWeight: '400',
+                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                  letterSpacing: '0.02em'
+                }}>
+                  {submission.status === 'pending' ? 'PENDING' : 
+                   submission.status === 'confirmed' ? 'CONFIRMED' : 
+                   submission.status === 'completed' ? 'COMPLETED' : 'REJECTED'}
+                </div>
+              </div>
+              
+              {/* Waktu dan Tipe Meeting */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '60px',
+                flexWrap: 'wrap'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  {/* Clock SVG */}
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="10" stroke="#000000" strokeWidth="1.5"/>
+                    <polyline points="12 6 12 12 16 14" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  <span style={{
+                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                    fontSize: '28px',
+                    color: '#000000'
+                  }}>
+                    {submission.selectedTime} WIB
+                  </span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  {/* Calendar SVG */}
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke="#000000" strokeWidth="1.5"/>
+                    <line x1="8" y1="2" x2="8" y2="6" stroke="#000000" strokeWidth="1.5" strokeLinecap="round"/>
+                    <line x1="16" y1="2" x2="16" y2="6" stroke="#000000" strokeWidth="1.5" strokeLinecap="round"/>
+                    <line x1="3" y1="10" x2="21" y2="10" stroke="#000000" strokeWidth="1.5" strokeLinecap="round"/>
+                  </svg>
+                  <span style={{
+                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                    fontSize: '28px',
+                    color: '#000000'
+                  }}>
+                    {submission.meetingType}
+                  </span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  {/* Platform SVG */}
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="#000000" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  <span style={{
+                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                    fontSize: '28px',
+                    color: '#000000'
+                  }}>
+                    {submission.platform === 'google_meet' ? 'Google Meet' : 
+                     submission.platform === 'zoom' ? 'Zoom' :
+                     submission.platform === 'tatap_muka' ? 'Offline' : 'Via HP'}
+                  </span>
+                </div>
+              </div>
+              
+              {/* Alasan Percaya - deskripsi besar */}
+              <div style={{
+                marginTop: '16px'
+              }}>
+                <div style={{
+                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                  fontSize: '20px',
+                  fontWeight: '400',
+                  color: '#999999',
+                  marginBottom: '20px',
+                  letterSpacing: '0.05em'
+                }}>
+                  REASON TO TRUST
+                </div>
+                <div style={{
+                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                  fontSize: '32px',
+                  fontWeight: '400',
+                  color: '#000000',
+                  lineHeight: '1.4',
+                  letterSpacing: '-0.01em'
+                }}>
+                  "{submission.trustReason}"
+                </div>
+              </div>
+              
+              {/* Kontak: Email, Phone, Company */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '48px',
+                flexWrap: 'wrap',
+                marginTop: '16px'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="2" y="4" width="20" height="16" rx="2" ry="2" stroke="#000000" strokeWidth="1.5"/>
+                    <polyline points="22 7 12 13 2 7" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  <span style={{
+                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                    fontSize: '22px',
+                    color: '#000000'
+                  }}>
+                    {submission.email}
+                  </span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" stroke="#000000" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  <span style={{
+                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                    fontSize: '22px',
+                    color: '#000000'
+                  }}>
+                    {submission.phoneNumber}
+                  </span>
+                </div>
+                {submission.companyName && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <rect x="4" y="4" width="16" height="16" rx="2" ry="2" stroke="#000000" strokeWidth="1.5"/>
+                      <line x1="9" y1="4" x2="9" y2="20" stroke="#000000" strokeWidth="1.5"/>
+                      <line x1="15" y1="4" x2="15" y2="20" stroke="#000000" strokeWidth="1.5"/>
+                      <line x1="4" y1="9" x2="20" y2="9" stroke="#000000" strokeWidth="1.5"/>
+                      <line x1="4" y1="15" x2="20" y2="15" stroke="#000000" strokeWidth="1.5"/>
+                    </svg>
+                    <span style={{
+                      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                      fontSize: '22px',
+                      color: '#000000'
+                    }}>
+                      {submission.companyName}
+                    </span>
+                  </div>
+                )}
+              </div>
+              
+              {/* Admin Reply */}
+              {submission.adminReply && (
+                <div style={{
+                  marginTop: '24px'
+                }}>
                   <div style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '20px'
+                    gap: '14px',
+                    marginBottom: '16px'
                   }}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="#000000" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
                     <span style={{
-                      fontSize: '60px',
-                      color: '#000000',
-                      fontWeight: '400'
+                      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                      fontSize: '18px',
+                      fontWeight: '400',
+                      color: '#999999',
+                      letterSpacing: '0.05em'
                     }}>
-                      ({calendarSubmissions.length})
+                      ADMIN REPLY · {submission.adminReply.repliedBy}
                     </span>
-                    <NorthEastArrowIcon size={60} />
+                  </div>
+                  <div style={{
+                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                    fontSize: '24px',
+                    color: '#000000',
+                    lineHeight: '1.4',
+                    paddingLeft: '38px'
+                  }}>
+                    {submission.adminReply.text}
                   </div>
                 </div>
-                
-                {/* Daftar submission - tanpa card, tanpa hover, border bottom saja */}
-                <div style={{
+              )}
+            </div>
+            
+            {/* RIGHT - Tombol dengan NORTH EAST ARROW dan NORTH WEST ARROW 50px */}
+            <div style={{
+              width: '220px',
+              flexShrink: 0,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'flex-end',
+              gap: '24px'
+            }}>
+              <button
+                onClick={() => {
+                  setShowCalendarModal(true);
+                  setShowFormView(false);
+                  setSelectedDate(null);
+                  setSelectedTime("");
+                }}
+                style={{
                   display: 'flex',
-                  flexDirection: 'column'
-                }}>
-                  {calendarSubmissions.map((submission, index) => {
-                    const dateParts = getDateParts(submission.selectedDate);
-                    
-                    return (
-                      <div
-                        key={submission.id}
-                        className="submission-item"
-                        style={{
-                          display: 'flex',
-                          flexDirection: 'row',
-                          alignItems: 'flex-start',
-                          gap: '60px',
-                          padding: '60px 0',
-                          borderBottom: index !== calendarSubmissions.length - 1 ? '1px solid #e0e0e0' : 'none'
-                        }}
-                      >
-                        {/* LEFT - Tanggal dipisah: Day, Month, Year - font besar */}
-                        <div style={{
-                          width: '180px',
-                          flexShrink: 0,
-                          textAlign: 'left'
-                        }}>
-                          <div style={{
-                            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                            fontSize: '80px',
-                            fontWeight: '400',
-                            color: '#000000',
-                            lineHeight: '1',
-                            letterSpacing: '-0.02em'
-                          }}>
-                            {dateParts.day}
-                          </div>
-                          <div style={{
-                            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                            fontSize: '32px',
-                            fontWeight: '400',
-                            color: '#000000',
-                            letterSpacing: '-0.02em',
-                            marginTop: '8px'
-                          }}>
-                            {dateParts.month}
-                          </div>
-                          <div style={{
-                            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                            fontSize: '18px',
-                            fontWeight: '400',
-                            color: '#666666',
-                            marginTop: '4px'
-                          }}>
-                            {dateParts.year}
-                          </div>
-                        </div>
-                        
-                        {/* MIDDLE - Informasi lengkap dengan font Aeonik, hitam putih */}
-                        <div style={{
-                          flex: 1,
-                          display: 'flex',
-                          flexDirection: 'column',
-                          gap: '24px'
-                        }}>
-                          {/* Nama dan Status */}
-                          <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '24px',
-                            flexWrap: 'wrap'
-                          }}>
-                            <div style={{
-                              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                              fontSize: '36px',
-                              fontWeight: '400',
-                              color: '#000000',
-                              letterSpacing: '-0.02em'
-                            }}>
-                              {submission.fullName}
-                            </div>
-                            <div style={{
-                              fontSize: '16px',
-                              padding: '4px 16px',
-                              border: '1px solid #000000',
-                              backgroundColor: 'transparent',
-                              color: '#000000',
-                              fontWeight: '400',
-                              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                              letterSpacing: '0.02em'
-                            }}>
-                              {submission.status === 'pending' ? 'PENDING' : submission.status === 'confirmed' ? 'CONFIRMED' : submission.status === 'completed' ? 'COMPLETED' : 'REJECTED'}
-                            </div>
-                          </div>
-                          
-                          {/* Waktu dan Tipe Meeting */}
-                          <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '40px',
-                            flexWrap: 'wrap'
-                          }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                              <ClockIcon size={20} />
-                              <span style={{
-                                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                                fontSize: '20px',
-                                color: '#000000'
-                              }}>
-                                {submission.selectedTime} WIB
-                              </span>
-                            </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                              <CalendarIcon size={20} />
-                              <span style={{
-                                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                                fontSize: '20px',
-                                color: '#000000'
-                              }}>
-                                {submission.meetingType}
-                              </span>
-                            </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                              <StatusIcon status={submission.status} />
-                              <span style={{
-                                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                                fontSize: '20px',
-                                color: '#000000'
-                              }}>
-                                {submission.platform === 'google_meet' ? 'Google Meet' : 
-                                 submission.platform === 'zoom' ? 'Zoom' :
-                                 submission.platform === 'tatap_muka' ? 'Offline' : 'Via HP'}
-                              </span>
-                            </div>
-                          </div>
-                          
-                          {/* Alasan Percaya - deskripsi besar */}
-                          <div style={{
-                            marginTop: '8px',
-                            paddingTop: '16px'
-                          }}>
-                            <div style={{
-                              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                              fontSize: '16px',
-                              fontWeight: '400',
-                              color: '#666666',
-                              marginBottom: '12px',
-                              letterSpacing: '0.02em'
-                            }}>
-                              REASON TO TRUST
-                            </div>
-                            <div style={{
-                              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                              fontSize: '22px',
-                              fontWeight: '400',
-                              color: '#000000',
-                              lineHeight: '1.4',
-                              letterSpacing: '-0.01em'
-                            }}>
-                              "{submission.trustReason}"
-                            </div>
-                          </div>
-                          
-                          {/* Kontak: Email, Phone, Company */}
-                          <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '32px',
-                            flexWrap: 'wrap',
-                            marginTop: '8px',
-                            paddingTop: '16px',
-                            borderTop: '1px solid #e0e0e0'
-                          }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                              <MailIcon size={18} />
-                              <span style={{
-                                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                                fontSize: '16px',
-                                color: '#000000'
-                              }}>
-                                {submission.email}
-                              </span>
-                            </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                              <PhoneIcon size={18} />
-                              <span style={{
-                                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                                fontSize: '16px',
-                                color: '#000000'
-                              }}>
-                                {submission.phoneNumber}
-                              </span>
-                            </div>
-                            {submission.companyName && (
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                <CompanyIcon size={18} />
-                                <span style={{
-                                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                                  fontSize: '16px',
-                                  color: '#000000'
-                                }}>
-                                  {submission.companyName}
-                                </span>
-                              </div>
-                            )}
-                          </div>
-                          
-                          {/* Admin Reply - tanpa background warna-warni */}
-                          {submission.adminReply && (
-                            <div style={{
-                              marginTop: '20px',
-                              paddingTop: '20px',
-                              borderTop: '1px solid #e0e0e0'
-                            }}>
-                              <div style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '10px',
-                                marginBottom: '12px'
-                              }}>
-                                <MessageIcon size={18} />
-                                <span style={{
-                                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                                  fontSize: '14px',
-                                  fontWeight: '400',
-                                  color: '#666666',
-                                  letterSpacing: '0.02em'
-                                }}>
-                                  ADMIN REPLY · {submission.adminReply.repliedBy}
-                                </span>
-                              </div>
-                              <div style={{
-                                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                                fontSize: '18px',
-                                color: '#000000',
-                                lineHeight: '1.4'
-                              }}>
-                                {submission.adminReply.text}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                        
-                        {/* RIGHT - Tombol dengan panah NORTH EAST ARROW dan NORTH WEST ARROW, tanpa hover efek */}
-                        <div style={{
-                          width: '200px',
-                          flexShrink: 0,
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'flex-end',
-                          gap: '20px'
-                        }}>
-                          <button
-                            onClick={() => {
-                              setShowCalendarModal(true);
-                              setShowFormView(false);
-                              setSelectedDate(null);
-                              setSelectedTime("");
-                            }}
-                            style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'space-between',
-                              gap: '16px',
-                              backgroundColor: 'transparent',
-                              border: '1px solid #000000',
-                              cursor: 'pointer',
-                              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                              fontSize: '16px',
-                              fontWeight: '400',
-                              color: '#000000',
-                              padding: '12px 24px',
-                              borderRadius: '0',
-                              width: '100%'
-                            }}
-                          >
-                            <span>BOOK CALL</span>
-                            <NorthEastArrowIcon size={18} />
-                          </button>
-                          
-                          {/* Admin Reply Button - hanya jika admin */}
-                          {isAdmin && (
-                            <button
-                              onClick={() => {
-                                setSelectedSubmission(submission);
-                                setReplyText(submission.adminReply?.text || "");
-                                setReplyStatus(submission.status);
-                                setShowReplyModal(true);
-                              }}
-                              style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'space-between',
-                                gap: '16px',
-                                backgroundColor: 'transparent',
-                                border: '1px solid #000000',
-                                cursor: 'pointer',
-                                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                                fontSize: '14px',
-                                fontWeight: '400',
-                                color: '#000000',
-                                padding: '10px 20px',
-                                borderRadius: '0',
-                                width: '100%'
-                              }}
-                            >
-                              <span>{submission.adminReply ? 'EDIT REPLY' : 'REPLY'}</span>
-                              <NorthWestArrowIcon size={16} />
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '20px',
+                  backgroundColor: 'transparent',
+                  border: '1px solid #000000',
+                  cursor: 'pointer',
+                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                  fontSize: '20px',
+                  fontWeight: '400',
+                  color: '#000000',
+                  padding: '16px 28px',
+                  borderRadius: '0',
+                  width: '100%'
+                }}
+              >
+                <span>BOOK CALL</span>
+                {/* NORTH EAST ARROW - 24px */}
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+              
+              {/* Admin Reply Button */}
+              {isAdmin && (
+                <button
+                  onClick={() => {
+                    setSelectedSubmission(submission);
+                    setReplyText(submission.adminReply?.text || "");
+                    setReplyStatus(submission.status);
+                    setShowReplyModal(true);
+                  }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '20px',
+                    backgroundColor: 'transparent',
+                    border: '1px solid #000000',
+                    cursor: 'pointer',
+                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                    fontSize: '18px',
+                    fontWeight: '400',
+                    color: '#000000',
+                    padding: '14px 24px',
+                    borderRadius: '0',
+                    width: '100%'
+                  }}
+                >
+                  <span>{submission.adminReply ? 'EDIT REPLY' : 'REPLY'}</span>
+                  {/* NORTH WEST ARROW - 20px */}
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M17 7L7 17M7 17H17M7 17V7" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
+              )}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  </div>
+)}
+
+
+
+
+            
+
+            
 
             {/* REPLY MODAL FOR ADMIN */}
             {showReplyModal && selectedSubmission && (
