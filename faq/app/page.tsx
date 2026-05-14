@@ -1,4 +1,4 @@
-// app/page.tsx - Bagian Calendar Submissions dengan gaya minimalis hitam putih
+// app/page.tsx - Bagian Calendar Submissions dengan gaya seperti section Features
 
 'use client';
 
@@ -129,7 +129,7 @@ const NorthEastArrowIcon = ({ size = 24 }: { size?: number }) => (
 
 const NorthWestArrowIcon = ({ size = 24 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M17 7L7 17M7 17H17M7 17V7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M17 7L7 17M7 17H17M17 17V7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 
@@ -185,15 +185,6 @@ const MessageIcon = ({ size = 24 }: { size?: number }) => (
   </svg>
 );
 
-const StatusIcon = ({ status }: { status: string }) => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    {status === 'pending' && <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" fill="none"/>}
-    {status === 'confirmed' && <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>}
-    {status === 'completed' && <><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" fill="none"/><path d="M12 8v4l3 3" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round"/></>}
-    {status === 'rejected' && <><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" fill="none"/><line x1="8" y1="8" x2="16" y2="16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/><line x1="16" y1="8" x2="8" y2="16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></>}
-  </svg>
-);
-
 export default function HomePage(): React.JSX.Element {
   const [showPopup, setShowPopup] = useState(false);
   const [announcement, setAnnouncement] = useState<string | null>(null);
@@ -213,8 +204,8 @@ export default function HomePage(): React.JSX.Element {
   const [donationHover, setDonationHover] = useState(false);
   
   // State untuk warna background section Features
-  const [featuresBgColor, setFeaturesBgColor] = useState('#0000ff');
-  const [featuresTextColor, setFeaturesTextColor] = useState('#ffffff');
+  const [featuresBgColor, setFeaturesBgColor] = useState('#8ad000');
+  const [featuresTextColor, setFeaturesTextColor] = useState('#000000');
   
   // State untuk Shadow Page
   const [showShadowPage, setShowShadowPage] = useState(false);
@@ -411,8 +402,8 @@ export default function HomePage(): React.JSX.Element {
   };
 
   const getDayColor = (date: Date) => {
-    if (date.toDateString() === today.toDateString()) return "#c5e800";
-    if (date.toDateString() === tomorrow.toDateString()) return "#ff69b4";
+    if (date.toDateString() === today.toDateString()) return "#8ad000";
+    if (date.toDateString() === tomorrow.toDateString()) return "#f38630";
     return "#4a90e2";
   };
 
@@ -1630,10 +1621,10 @@ export default function HomePage(): React.JSX.Element {
       });
       
       if (isInFeatures && isAboveTrusted) {
-        if (featuresBgColor !== '#0000ff') {
-          setFeaturesBgColor('#0000ff');
-          setFeaturesTextColor('#ffffff');
-          updateFeaturesColors('#0000ff', '#ffffff');
+        if (featuresBgColor !== '#8ad000') {
+          setFeaturesBgColor('#8ad000');
+          setFeaturesTextColor('#000000');
+          updateFeaturesColors('#8ad000', '#000000');
         }
       } else if (!isAboveTrusted || !isInFeatures) {
         if (featuresBgColor !== '#ffffff') {
@@ -2508,7 +2499,7 @@ export default function HomePage(): React.JSX.Element {
           align-items: center;
           gap: 8px;
           padding: 12px 28px;
-          background-color: #c5e800;
+          background-color: #8ad000;
           border: none;
           border-radius: 60px;
           cursor: pointer;
@@ -2521,7 +2512,7 @@ export default function HomePage(): React.JSX.Element {
         }
         
         .calendar-btn:hover {
-          background-color: #b0d100;
+          background-color: #7abf00;
           transform: scale(1.02);
         }
 
@@ -2660,7 +2651,7 @@ export default function HomePage(): React.JSX.Element {
           font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
           font-weight: 400;
           font-size: 300px;
-          color: #ffffff;
+          color: #000000;
           letter-spacing: -0.02em;
           line-height: 1;
           margin: 0;
@@ -2912,22 +2903,46 @@ export default function HomePage(): React.JSX.Element {
           background: rgba(255, 255, 255, 0.5);
         }
 
-        /* Style untuk Calendar Submissions Section - Minimalis Hitam Putih */
+        /* Style untuk Calendar Submissions Section - seperti section features */
         .calendar-submissions-section {
           width: 100%;
           padding: 80px 80px;
-          background-color: #ffffff;
-          border-top: 1px solid #e0e0e0;
+          background-color: #8ad000;
           box-sizing: border-box;
         }
 
         .submission-item {
-          border-bottom: 1px solid #e0e0e0;
-          padding: 48px 0;
+          padding: 60px 0;
         }
 
         .submission-item:last-child {
-          border-bottom: none;
+          padding-bottom: 0;
+        }
+
+        .date-day {
+          font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
+          font-size: 100px;
+          font-weight: 400;
+          color: #f38630;
+          line-height: 1;
+          letter-spacing: -0.02em;
+        }
+
+        .date-month {
+          font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
+          font-size: 40px;
+          font-weight: 400;
+          color: #f38630;
+          letter-spacing: -0.02em;
+          margin-top: 8px;
+        }
+
+        .date-year {
+          font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
+          font-size: 20px;
+          font-weight: 400;
+          color: #f38630;
+          margin-top: 4px;
         }
 
         .reply-modal-overlay {
@@ -2951,13 +2966,6 @@ export default function HomePage(): React.JSX.Element {
           max-width: 600px;
           padding: 40px;
           box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
-        }
-        
-        /* Font Aeonik untuk semua teks */
-        .aeonik-text {
-          font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
-          font-weight: 400;
-          color: #000000;
         }
         
       `}</style>
@@ -3161,7 +3169,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* SECTION FEATURES - Sama seperti sebelumnya */}
+            {/* SECTION FEATURES */}
             <div
               ref={featuresSectionRef}
               className="features-section"
@@ -3594,450 +3602,335 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-
-
-            // SECTION CALENDAR SUBMISSIONS - Dengan perbaikan sesuai permintaan
-{calendarSubmissions.length > 0 && (
-  <div className="calendar-submissions-section">
-    {/* Header dengan font 100px dan panah SVG besar */}
-    <div style={{
-      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-      fontSize: '100px',
-      fontWeight: '400',
-      color: '#000000',
-      marginBottom: '80px',
-      letterSpacing: '-0.02em',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      borderBottom: '1px solid #000000',
-      paddingBottom: '40px'
-    }}>
-      <span>MEETING SCHEDULE</span>
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '20px'
-      }}>
-        <span style={{
-          fontSize: '60px',
-          color: '#000000',
-          fontWeight: '400'
-        }}>
-          ({calendarSubmissions.length})
-        </span>
-        {/* Panah SVG besar */}
-        <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-      </div>
-    </div>
-    
-    {/* Daftar submission */}
-    <div style={{
-      display: 'flex',
-      flexDirection: 'column'
-    }}>
-      {calendarSubmissions.map((submission, index) => {
-        const dateParts = getDateParts(submission.selectedDate);
-        
-        // Platform icon berdasarkan pilihan
-        const getPlatformIcon = (platform: string) => {
-          switch(platform) {
-            case 'google_meet':
-              return (
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" fill="#4285F4"/>
-                  <path d="M15.1 12.5c0-.4-.03-.7-.1-1H12v2h1.8c-.2.5-.6.9-1.1 1.2v1h1.8c1-.9 1.6-2.3 1.6-3.2z" fill="#34A853" fillOpacity="0.7"/>
-                  <path d="M9.6 14.3c-.3-.5-.5-1.1-.5-1.8s.2-1.3.5-1.8v-1.3H7.8c-.6 1-.9 2-.9 3.1 0 1.1.3 2.1.9 3.1l1.8-1.3z" fill="#FBBC05" fillOpacity="0.7"/>
-                  <path d="M12 5.4c.9 0 1.7.3 2.4.9l1.7-1.7C15.1 3.8 13.6 3 12 3 9.1 3 6.6 4.6 5.4 7.2l2 1.5c.5-1 1.5-1.8 2.6-2.1z" fill="#EA4335" fillOpacity="0.7"/>
-                </svg>
-              );
-            case 'zoom':
-              return (
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M16 4H8C5.79 4 4 5.79 4 8v8c0 2.21 1.79 4 4 4h8c2.21 0 4-1.79 4-4V8c0-2.21-1.79-4-4-4z" fill="#2D8CFF"/>
-                  <path d="M14.5 10.5L18 8v8l-3.5-2.5" stroke="#ffffff" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
-                  <path d="M12 15c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z" fill="#ffffff"/>
-                </svg>
-              );
-            case 'tatap_muka':
-              return (
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M3 9L12 3L21 9L12 15L3 9Z" stroke="#000000" strokeWidth="1.5" fill="none"/>
-                  <path d="M5 11V17L12 21L19 17V11" stroke="#000000" strokeWidth="1.5" fill="none"/>
-                  <circle cx="12" cy="12" r="2" fill="#000000"/>
-                </svg>
-              );
-            case 'via_hp':
-              return (
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" stroke="#000000" strokeWidth="1.5" fill="none"/>
-                </svg>
-              );
-            default:
-              return null;
-          }
-        };
-        
-        const getPlatformName = (platform: string) => {
-          switch(platform) {
-            case 'google_meet': return 'Google Meet';
-            case 'zoom': return 'Zoom';
-            case 'tatap_muka': return 'Offline Meeting';
-            case 'via_hp': return 'Via WhatsApp/Telepon';
-            default: return platform;
-          }
-        };
-        
-        return (
-          <div
-            key={submission.id}
-            style={{
-              display: 'flex',
-              flexDirection: 'row',
-              alignItems: 'flex-start',
-              gap: '60px',
-              padding: '60px 0',
-              borderBottom: index !== calendarSubmissions.length - 1 ? '1px solid #e0e0e0' : 'none'
-            }}
-          >
-            {/* LEFT - Tanggal dipisah: Day, Month, Year - font besar */}
-            <div style={{
-              width: '200px',
-              flexShrink: 0,
-              textAlign: 'left'
-            }}>
-              <div style={{
-                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                fontSize: '100px',
-                fontWeight: '400',
-                color: '#000000',
-                lineHeight: '1',
-                letterSpacing: '-0.02em'
-              }}>
-                {dateParts.day}
-              </div>
-              <div style={{
-                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                fontSize: '40px',
-                fontWeight: '400',
-                color: '#000000',
-                letterSpacing: '-0.02em',
-                marginTop: '8px'
-              }}>
-                {dateParts.month}
-              </div>
-              <div style={{
-                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                fontSize: '24px',
-                fontWeight: '400',
-                color: '#666666',
-                marginTop: '4px'
-              }}>
-                {dateParts.year}
-              </div>
-            </div>
-            
-            {/* MIDDLE - Informasi lengkap */}
-            <div style={{
-              flex: 1,
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '28px'
-            }}>
-              {/* Nama dan Status - Status dengan stabilo warna */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '24px',
-                flexWrap: 'wrap'
-              }}>
+            {/* SECTION CALENDAR SUBMISSIONS - Style seperti section features */}
+            {calendarSubmissions.length > 0 && (
+              <div className="calendar-submissions-section">
+                {/* Header dengan font 300px dan panah SVG besar */}
                 <div style={{
                   fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                  fontSize: '48px',
-                  fontWeight: '500',
-                  color: '#000000',
-                  letterSpacing: '-0.02em'
-                }}>
-                  {submission.fullName}
-                </div>
-                <div style={{
-                  fontSize: '18px',
-                  padding: '8px 24px',
-                  borderRadius: '60px',
-                  backgroundColor: submission.status === 'pending' ? '#ffeb3b' : 
-                                 submission.status === 'confirmed' ? '#4caf50' : 
-                                 submission.status === 'completed' ? '#2196f3' : '#f44336',
-                  color: submission.status === 'pending' ? '#000000' : '#ffffff',
-                  fontWeight: '600',
-                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                  letterSpacing: '0.02em'
-                }}>
-                  {submission.status === 'pending' ? 'MENUNGGU' : 
-                   submission.status === 'confirmed' ? 'DISETUJUI' : 
-                   submission.status === 'completed' ? 'SELESAI' : 'DITOLAK'}
-                </div>
-              </div>
-              
-              {/* Waktu dan Platform Meeting dengan icon SVG */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '48px',
-                flexWrap: 'wrap'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="12" cy="12" r="10" stroke="#000000" strokeWidth="1.5"/>
-                    <path d="M12 8v4l3 3" stroke="#000000" strokeWidth="1.5" strokeLinecap="round"/>
-                  </svg>
-                  <span style={{
-                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                    fontSize: '24px',
-                    color: '#000000'
-                  }}>
-                    {submission.selectedTime} WIB
-                  </span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  {getPlatformIcon(submission.platform)}
-                  <span style={{
-                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                    fontSize: '24px',
-                    color: '#000000'
-                  }}>
-                    {getPlatformName(submission.platform)}
-                  </span>
-                </div>
-              </div>
-              
-              {/* Alasan Percaya - teks besar */}
-              <div style={{
-                marginTop: '8px',
-                padding: '20px',
-                backgroundColor: '#f5f5f5',
-                borderLeft: '4px solid #ffeb3b'
-              }}>
-                <div style={{
-                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                  fontSize: '16px',
-                  fontWeight: '500',
-                  color: '#666666',
-                  marginBottom: '12px',
-                  letterSpacing: '0.03em'
-                }}>
-                  REASON TO TRUST
-                </div>
-                <div style={{
-                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                  fontSize: '28px',
+                  fontSize: '300px',
                   fontWeight: '400',
                   color: '#000000',
-                  lineHeight: '1.4',
-                  letterSpacing: '-0.01em'
-                }}>
-                  "{submission.trustReason}"
-                </div>
-              </div>
-              
-              {/* Kontak: Email, Phone, Company */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '40px',
-                flexWrap: 'wrap',
-                marginTop: '8px',
-                paddingTop: '16px',
-                borderTop: '1px solid #e0e0e0'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="2" y="4" width="20" height="16" rx="2" ry="2" stroke="#000000" strokeWidth="1.5" fill="none"/>
-                    <polyline points="22 7 12 13 2 7" stroke="#000000" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
-                  </svg>
-                  <span style={{
-                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                    fontSize: '20px',
-                    color: '#000000'
-                  }}>
-                    {submission.email}
-                  </span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" stroke="#000000" strokeWidth="1.5" fill="none"/>
-                  </svg>
-                  <span style={{
-                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                    fontSize: '20px',
-                    color: '#000000'
-                  }}>
-                    {submission.phoneNumber}
-                  </span>
-                </div>
-                {submission.companyName && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <rect x="4" y="4" width="16" height="16" rx="2" ry="2" stroke="#000000" strokeWidth="1.5" fill="none"/>
-                      <line x1="9" y1="4" x2="9" y2="20" stroke="#000000" strokeWidth="1.5"/>
-                      <line x1="15" y1="4" x2="15" y2="20" stroke="#000000" strokeWidth="1.5"/>
-                      <line x1="4" y1="9" x2="20" y2="9" stroke="#000000" strokeWidth="1.5"/>
-                      <line x1="4" y1="15" x2="20" y2="15" stroke="#000000" strokeWidth="1.5"/>
-                    </svg>
-                    <span style={{
-                      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                      fontSize: '20px',
-                      color: '#000000'
-                    }}>
-                      {submission.companyName}
-                    </span>
-                  </div>
-                )}
-              </div>
-              
-              {/* Admin Reply - dengan warna stabilo kuning untuk highlight */}
-              {submission.adminReply && (
-                <div style={{
-                  marginTop: '20px',
-                  padding: '24px',
-                  backgroundColor: '#fffde7',
-                  borderLeft: '6px solid #ffeb3b'
-                }}>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px',
-                    marginBottom: '12px'
-                  }}>
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="#000000" strokeWidth="1.5" fill="none"/>
-                    </svg>
-                    <span style={{
-                      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                      fontSize: '16px',
-                      fontWeight: '600',
-                      color: '#000000',
-                      letterSpacing: '0.02em'
-                    }}>
-                      ADMIN REPLY · {submission.adminReply.repliedBy}
-                    </span>
-                  </div>
-                  <div style={{
-                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                    fontSize: '22px',
-                    color: '#000000',
-                    lineHeight: '1.4'
-                  }}>
-                    {submission.adminReply.text}
-                  </div>
-                </div>
-              )}
-            </div>
-            
-            {/* RIGHT - Tombol dengan panah SVG besar dan warna stabilo */}
-            <div style={{
-              width: '240px',
-              flexShrink: 0,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'flex-end',
-              gap: '20px'
-            }}>
-              <button
-                onClick={() => {
-                  setShowCalendarModal(true);
-                  setShowFormView(false);
-                  setSelectedDate(null);
-                  setSelectedTime("");
-                }}
-                style={{
+                  letterSpacing: '-0.02em',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  gap: '16px',
-                  backgroundColor: '#ffeb3b',
-                  border: 'none',
-                  cursor: 'pointer',
-                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                  fontSize: '24px',
-                  fontWeight: '600',
-                  color: '#000000',
-                  padding: '18px 28px',
-                  borderRadius: '0',
-                  width: '100%',
-                  transition: 'transform 0.2s ease'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'scale(1.02)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'scale(1)';
-                }}
-              >
-                <span>BOOK CALL</span>
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </button>
-              
-              {/* Admin Reply Button - hanya jika admin */}
-              {isAdmin && (
-                <button
-                  onClick={() => {
-                    setSelectedSubmission(submission);
-                    setReplyText(submission.adminReply?.text || "");
-                    setReplyStatus(submission.status);
-                    setShowReplyModal(true);
-                  }}
-                  style={{
+                  marginBottom: '80px'
+                }}>
+                  <span>MEETING SCHEDULE</span>
+                  <div style={{
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'space-between',
-                    gap: '16px',
-                    backgroundColor: '#e0e0e0',
-                    border: 'none',
-                    cursor: 'pointer',
-                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                    fontSize: '18px',
-                    fontWeight: '500',
-                    color: '#000000',
-                    padding: '14px 24px',
-                    borderRadius: '0',
-                    width: '100%',
-                    transition: 'transform 0.2s ease'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#d0d0d0';
-                    e.currentTarget.style.transform = 'scale(1.02)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = '#e0e0e0';
-                    e.currentTarget.style.transform = 'scale(1)';
-                  }}
-                >
-                  <span>{submission.adminReply ? 'EDIT REPLY' : 'REPLY'}</span>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M17 7L7 17M7 17H17M7 17V7" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </button>
-              )}
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  </div>
-)}
-
-
-
-
-
-
-
-
-            
+                    gap: '30px'
+                  }}>
+                    <span style={{
+                      fontSize: '100px',
+                      color: '#000000',
+                      fontWeight: '400'
+                    }}>
+                      ({calendarSubmissions.length})
+                    </span>
+                    <NorthEastArrowIcon size={100} />
+                  </div>
+                </div>
+                
+                {/* Daftar submission - tanpa border, tanpa linebox */}
+                <div>
+                  {calendarSubmissions.map((submission, index) => {
+                    const dateParts = getDateParts(submission.selectedDate);
+                    // Pilih warna status: CONFIRMED warna #8ad000, PENDING warna #f38630, lainnya hitam
+                    const getStatusColor = (status: string) => {
+                      if (status === 'confirmed') return '#8ad000';
+                      if (status === 'pending') return '#f38630';
+                      return '#000000';
+                    };
+                    
+                    return (
+                      <div
+                        key={submission.id}
+                        className="submission-item"
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'row',
+                          alignItems: 'flex-start',
+                          gap: '80px'
+                        }}
+                      >
+                        {/* LEFT - Tanggal dengan warna #f38630, font besar */}
+                        <div style={{
+                          width: '200px',
+                          flexShrink: 0,
+                          textAlign: 'left'
+                        }}>
+                          <div className="date-day">
+                            {dateParts.day}
+                          </div>
+                          <div className="date-month">
+                            {dateParts.month}
+                          </div>
+                          <div className="date-year">
+                            {dateParts.year}
+                          </div>
+                        </div>
+                        
+                        {/* MIDDLE - Informasi lengkap */}
+                        <div style={{
+                          flex: 1,
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '30px'
+                        }}>
+                          {/* Nama dan Status */}
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '30px',
+                            flexWrap: 'wrap'
+                          }}>
+                            <div style={{
+                              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                              fontSize: '50px',
+                              fontWeight: '400',
+                              color: '#000000',
+                              letterSpacing: '-0.02em'
+                            }}>
+                              {submission.fullName}
+                            </div>
+                            <div style={{
+                              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                              fontSize: '20px',
+                              padding: '6px 20px',
+                              border: `2px solid ${getStatusColor(submission.status)}`,
+                              backgroundColor: 'transparent',
+                              color: getStatusColor(submission.status),
+                              fontWeight: '400',
+                              letterSpacing: '0.02em'
+                            }}>
+                              {submission.status === 'pending' ? 'PENDING' : 
+                               submission.status === 'confirmed' ? 'CONFIRMED' : 
+                               submission.status === 'completed' ? 'COMPLETED' : 'REJECTED'}
+                            </div>
+                          </div>
+                          
+                          {/* Waktu dan Tipe Meeting */}
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '50px',
+                            flexWrap: 'wrap'
+                          }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                              <ClockIcon size={24} />
+                              <span style={{
+                                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                                fontSize: '24px',
+                                color: '#000000'
+                              }}>
+                                {submission.selectedTime} WIB
+                              </span>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                              <CalendarIcon size={24} />
+                              <span style={{
+                                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                                fontSize: '24px',
+                                color: '#000000'
+                              }}>
+                                {submission.meetingType}
+                              </span>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                              <span style={{
+                                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                                fontSize: '24px',
+                                color: '#000000'
+                              }}>
+                                {submission.platform === 'google_meet' ? 'Google Meet' : 
+                                 submission.platform === 'zoom' ? 'Zoom' :
+                                 submission.platform === 'tatap_muka' ? 'Offline' : 'Via HP'}
+                              </span>
+                            </div>
+                          </div>
+                          
+                          {/* Alasan Percaya - deskripsi besar */}
+                          <div style={{
+                            marginTop: '10px',
+                            paddingTop: '20px'
+                          }}>
+                            <div style={{
+                              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                              fontSize: '18px',
+                              fontWeight: '400',
+                              color: '#000000',
+                              marginBottom: '15px',
+                              letterSpacing: '0.02em',
+                              opacity: 0.6
+                            }}>
+                              REASON TO TRUST
+                            </div>
+                            <div style={{
+                              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                              fontSize: '28px',
+                              fontWeight: '400',
+                              color: '#000000',
+                              lineHeight: '1.4',
+                              letterSpacing: '-0.01em'
+                            }}>
+                              "{submission.trustReason}"
+                            </div>
+                          </div>
+                          
+                          {/* Kontak: Email, Phone, Company */}
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '40px',
+                            flexWrap: 'wrap',
+                            marginTop: '10px',
+                            paddingTop: '20px'
+                          }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                              <MailIcon size={20} />
+                              <span style={{
+                                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                                fontSize: '18px',
+                                color: '#000000'
+                              }}>
+                                {submission.email}
+                              </span>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                              <PhoneIcon size={20} />
+                              <span style={{
+                                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                                fontSize: '18px',
+                                color: '#000000'
+                              }}>
+                                {submission.phoneNumber}
+                              </span>
+                            </div>
+                            {submission.companyName && (
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                <CompanyIcon size={20} />
+                                <span style={{
+                                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                                  fontSize: '18px',
+                                  color: '#000000'
+                                }}>
+                                  {submission.companyName}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                          
+                          {/* Admin Reply */}
+                          {submission.adminReply && (
+                            <div style={{
+                              marginTop: '20px',
+                              paddingTop: '20px'
+                            }}>
+                              <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '12px',
+                                marginBottom: '15px'
+                              }}>
+                                <MessageIcon size={20} />
+                                <span style={{
+                                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                                  fontSize: '16px',
+                                  fontWeight: '400',
+                                  color: '#000000',
+                                  letterSpacing: '0.02em',
+                                  opacity: 0.6
+                                }}>
+                                  ADMIN REPLY · {submission.adminReply.repliedBy}
+                                </span>
+                              </div>
+                              <div style={{
+                                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                                fontSize: '22px',
+                                color: '#000000',
+                                lineHeight: '1.4'
+                              }}>
+                                {submission.adminReply.text}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                        
+                        {/* RIGHT - Tombol */}
+                        <div style={{
+                          width: '220px',
+                          flexShrink: 0,
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'flex-end',
+                          gap: '20px'
+                        }}>
+                          <button
+                            onClick={() => {
+                              setShowCalendarModal(true);
+                              setShowFormView(false);
+                              setSelectedDate(null);
+                              setSelectedTime("");
+                            }}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              gap: '20px',
+                              backgroundColor: 'transparent',
+                              border: '2px solid #000000',
+                              cursor: 'pointer',
+                              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                              fontSize: '18px',
+                              fontWeight: '400',
+                              color: '#000000',
+                              padding: '14px 28px',
+                              width: '100%'
+                            }}
+                          >
+                            <span>BOOK CALL</span>
+                            <NorthEastArrowIcon size={24} />
+                          </button>
+                          
+                          {/* Admin Reply Button - hanya jika admin */}
+                          {isAdmin && (
+                            <button
+                              onClick={() => {
+                                setSelectedSubmission(submission);
+                                setReplyText(submission.adminReply?.text || "");
+                                setReplyStatus(submission.status);
+                                setShowReplyModal(true);
+                              }}
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                gap: '20px',
+                                backgroundColor: 'transparent',
+                                border: '2px solid #000000',
+                                cursor: 'pointer',
+                                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                                fontSize: '16px',
+                                fontWeight: '400',
+                                color: '#000000',
+                                padding: '12px 24px',
+                                width: '100%'
+                              }}
+                            >
+                              <span>{submission.adminReply ? 'EDIT REPLY' : 'REPLY'}</span>
+                              <NorthWestArrowIcon size={20} />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             {/* REPLY MODAL FOR ADMIN */}
             {showReplyModal && selectedSubmission && (
@@ -4048,12 +3941,11 @@ export default function HomePage(): React.JSX.Element {
                     justifyContent: 'space-between',
                     alignItems: 'center',
                     marginBottom: '32px',
-                    borderBottom: '1px solid #e0e0e0',
                     paddingBottom: '20px'
                   }}>
                     <h2 style={{
                       fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                      fontSize: '28px',
+                      fontSize: '32px',
                       fontWeight: '400',
                       color: '#000000',
                       margin: 0,
@@ -4070,7 +3962,7 @@ export default function HomePage(): React.JSX.Element {
                       style={{
                         background: 'none',
                         border: 'none',
-                        fontSize: '28px',
+                        fontSize: '32px',
                         cursor: 'pointer',
                         color: '#000000'
                       }}
@@ -4080,47 +3972,47 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                   
                   <div style={{
-                    marginBottom: '24px',
-                    padding: '20px',
-                    backgroundColor: '#f5f5f5',
-                    borderRadius: '0'
+                    marginBottom: '28px',
+                    padding: '24px',
+                    backgroundColor: '#f5f5f5'
                   }}>
                     <div style={{
                       fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                      fontSize: '14px',
-                      color: '#666666',
-                      marginBottom: '8px'
+                      fontSize: '16px',
+                      color: '#000000',
+                      marginBottom: '10px',
+                      opacity: 0.6
                     }}>
                       FROM: {selectedSubmission.fullName} ({selectedSubmission.email})
                     </div>
                     <div style={{
                       fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                      fontSize: '14px',
-                      color: '#666666',
-                      marginBottom: '8px'
+                      fontSize: '16px',
+                      color: '#000000',
+                      marginBottom: '10px',
+                      opacity: 0.6
                     }}>
                       DATE: {selectedSubmission.selectedDateFormatted} - {selectedSubmission.selectedTime} WIB
                     </div>
                     <div style={{
                       fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                      fontSize: '14px',
+                      fontSize: '18px',
                       color: '#000000',
-                      marginTop: '12px',
-                      paddingTop: '12px',
-                      borderTop: '1px solid #cccccc'
+                      marginTop: '15px',
+                      paddingTop: '15px'
                     }}>
                       "{selectedSubmission.trustReason}"
                     </div>
                   </div>
                   
-                  <div style={{ marginBottom: '24px' }}>
+                  <div style={{ marginBottom: '28px' }}>
                     <label style={{
                       fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                      fontSize: '14px',
+                      fontSize: '16px',
                       fontWeight: '400',
                       color: '#000000',
                       display: 'block',
-                      marginBottom: '8px'
+                      marginBottom: '10px'
                     }}>
                       MEETING STATUS
                     </label>
@@ -4129,11 +4021,10 @@ export default function HomePage(): React.JSX.Element {
                       onChange={(e) => setReplyStatus(e.target.value as any)}
                       style={{
                         width: '100%',
-                        padding: '12px 16px',
-                        borderRadius: '0',
-                        border: '1px solid #cccccc',
+                        padding: '14px 18px',
+                        border: '2px solid #000000',
                         fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                        fontSize: '14px',
+                        fontSize: '16px',
                         backgroundColor: '#ffffff'
                       }}
                     >
@@ -4144,14 +4035,14 @@ export default function HomePage(): React.JSX.Element {
                     </select>
                   </div>
                   
-                  <div style={{ marginBottom: '28px' }}>
+                  <div style={{ marginBottom: '32px' }}>
                     <label style={{
                       fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                      fontSize: '14px',
+                      fontSize: '16px',
                       fontWeight: '400',
                       color: '#000000',
                       display: 'block',
-                      marginBottom: '8px'
+                      marginBottom: '10px'
                     }}>
                       REPLY MESSAGE
                     </label>
@@ -4162,18 +4053,17 @@ export default function HomePage(): React.JSX.Element {
                       rows={5}
                       style={{
                         width: '100%',
-                        padding: '12px 16px',
-                        borderRadius: '0',
-                        border: '1px solid #cccccc',
+                        padding: '14px 18px',
+                        border: '2px solid #000000',
                         fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                        fontSize: '14px',
+                        fontSize: '16px',
                         resize: 'vertical',
                         backgroundColor: '#ffffff'
                       }}
                     />
                   </div>
                   
-                  <div style={{ display: 'flex', gap: '16px' }}>
+                  <div style={{ display: 'flex', gap: '20px' }}>
                     <button
                       onClick={() => {
                         setShowReplyModal(false);
@@ -4182,13 +4072,12 @@ export default function HomePage(): React.JSX.Element {
                       }}
                       style={{
                         flex: 1,
-                        padding: '14px',
-                        borderRadius: '0',
-                        border: '1px solid #000000',
+                        padding: '16px',
+                        border: '2px solid #000000',
                         backgroundColor: 'transparent',
                         color: '#000000',
                         fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                        fontSize: '16px',
+                        fontSize: '18px',
                         fontWeight: '400',
                         cursor: 'pointer'
                       }}
@@ -4199,13 +4088,12 @@ export default function HomePage(): React.JSX.Element {
                       onClick={handleAdminReply}
                       style={{
                         flex: 1,
-                        padding: '14px',
-                        borderRadius: '0',
-                        border: '1px solid #000000',
+                        padding: '16px',
+                        border: '2px solid #000000',
                         backgroundColor: '#000000',
                         color: '#ffffff',
                         fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                        fontSize: '16px',
+                        fontSize: '18px',
                         fontWeight: '400',
                         cursor: 'pointer'
                       }}
@@ -4217,7 +4105,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             )}
 
-            {/* Bagian footer */}
+            {/* Bagian footer - sama seperti sebelumnya */}
             <div style={{
               width: '100%',
               position: 'relative',
@@ -5212,7 +5100,7 @@ export default function HomePage(): React.JSX.Element {
         </div>
       )}
 
-      {/* CALENDAR CALL MODAL - Dengan toggle antara calendar dan form */}
+      {/* CALENDAR CALL MODAL */}
       {showCalendarModal && (
         <div className="calendar-modal-overlay">
           <div ref={modalRef} className="calendar-modal" style={{ maxWidth: '1300px', maxHeight: '85vh', overflow: 'auto' }}>
@@ -5224,7 +5112,7 @@ export default function HomePage(): React.JSX.Element {
                 height: 'auto',
                 minHeight: '620px'
               }}>
-                {/* SISI KIRI - Info Profile dengan nama user/admin */}
+                {/* SISI KIRI - Info Profile */}
                 <div style={{
                   flex: 1.1,
                   padding: '36px',
@@ -5304,7 +5192,7 @@ export default function HomePage(): React.JSX.Element {
                     <div style={{
                       fontFamily: "'Questrial', sans-serif",
                       fontSize: '13px',
-                      color: '#c5e800',
+                      color: '#8ad000',
                       backgroundColor: '#1a1a1a',
                       display: 'inline-block',
                       padding: '5px 14px',
@@ -5522,7 +5410,7 @@ export default function HomePage(): React.JSX.Element {
                     }}
                     style={{
                       padding: '22px',
-                      backgroundColor: '#c5e800',
+                      backgroundColor: '#8ad000',
                       borderRadius: '20px',
                       color: '#000000',
                       cursor: 'pointer',
@@ -5592,7 +5480,7 @@ export default function HomePage(): React.JSX.Element {
                     }}
                     style={{
                       padding: '22px',
-                      backgroundColor: '#ff69b4',
+                      backgroundColor: '#f38630',
                       borderRadius: '20px',
                       color: '#ffffff',
                       cursor: 'pointer',
@@ -5653,7 +5541,7 @@ export default function HomePage(): React.JSX.Element {
                     </div>
                   </div>
 
-                  {/* Tombol Back dan Schedule Meeting - Back pakai North West Arrow */}
+                  {/* Tombol Back dan Schedule Meeting */}
                   <div style={{
                     display: 'flex',
                     gap: '12px',
@@ -5700,7 +5588,7 @@ export default function HomePage(): React.JSX.Element {
                       }}
                       style={{
                         padding: '14px 20px',
-                        backgroundColor: '#0000ff',
+                        backgroundColor: '#000000',
                         color: '#ffffff',
                         border: 'none',
                         borderRadius: '60px',
@@ -5715,11 +5603,11 @@ export default function HomePage(): React.JSX.Element {
                         gap: '10px'
                       }}
                       onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = '#2200dd';
+                        e.currentTarget.style.backgroundColor = '#333333';
                         e.currentTarget.style.transform = 'scale(1.02)';
                       }}
                       onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = '#0000ff';
+                        e.currentTarget.style.backgroundColor = '#000000';
                         e.currentTarget.style.transform = 'scale(1)';
                       }}
                     >
@@ -5823,7 +5711,7 @@ export default function HomePage(): React.JSX.Element {
                     <div style={{
                       fontFamily: "'Questrial', sans-serif",
                       fontSize: '13px',
-                      color: '#c5e800',
+                      color: '#8ad000',
                       backgroundColor: '#1a1a1a',
                       display: 'inline-block',
                       padding: '5px 14px',
@@ -6140,7 +6028,7 @@ export default function HomePage(): React.JSX.Element {
                       style={{
                         flex: 1,
                         padding: '12px 20px',
-                        backgroundColor: '#0000ff',
+                        backgroundColor: '#000000',
                         color: '#ffffff',
                         border: 'none',
                         borderRadius: '60px',
@@ -6154,11 +6042,11 @@ export default function HomePage(): React.JSX.Element {
                         gap: '10px'
                       }}
                       onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = '#2200dd';
+                        e.currentTarget.style.backgroundColor = '#333333';
                         e.currentTarget.style.transform = 'scale(1.02)';
                       }}
                       onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = '#0000ff';
+                        e.currentTarget.style.backgroundColor = '#000000';
                         e.currentTarget.style.transform = 'scale(1)';
                       }}
                     >
