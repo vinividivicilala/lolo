@@ -325,14 +325,6 @@ export default function HomePage(): React.JSX.Element {
   const trustedSectionRef = useRef<HTMLDivElement>(null);
   const trustedTextRef = useRef<HTMLDivElement>(null);
   
-  // Refs untuk Stack Card Scroll Effect (menumpuk di atas Card 1)
-  const stackCardsWrapperRef = useRef<HTMLDivElement>(null);
-  const stackCardsPinTriggerRef = useRef<HTMLDivElement>(null);
-  const stackCard1Ref = useRef<HTMLDivElement>(null);
-  const stackCard2Ref = useRef<HTMLDivElement>(null);
-  const stackCard3Ref = useRef<HTMLDivElement>(null);
-  const stackCard4Ref = useRef<HTMLDivElement>(null);
-  
   const img1Ref = useRef<HTMLDivElement>(null);
   const img2Ref = useRef<HTMLDivElement>(null);
   
@@ -383,42 +375,6 @@ export default function HomePage(): React.JSX.Element {
       image: "/images/5.jpg",
       brand: "Delta Creative",
       description: "Content creation and digital marketing."
-    }
-  ];
-
-  // Stack Card Items
-  const stackCardItems = [
-    {
-      id: 1,
-      title: "DESIGN SYSTEM",
-      subtitle: "Scalable UI Framework",
-      description: "Build consistent interfaces across all platforms with our comprehensive design system. From component libraries to design tokens, everything is perfectly organized.",
-      image: "/images/lkhh.jpg",
-      bgColor: "#ffffff"
-    },
-    {
-      id: 2,
-      title: "MOTION DESIGN",
-      subtitle: "Interactive Animations",
-      description: "Engage users with smooth, meaningful animations that enhance user experience. Bring your interface to life with purposeful motion.",
-      image: "/images/ai.jpg",
-      bgColor: "#f8f8f8"
-    },
-    {
-      id: 3,
-      title: "USER RESEARCH",
-      subtitle: "Data-Driven Insights",
-      description: "Understand your audience through in-depth research and usability testing. Make informed decisions based on real user data.",
-      image: "/images/5.jpg",
-      bgColor: "#f0f0f0"
-    },
-    {
-      id: 4,
-      title: "PROTOTYPING",
-      subtitle: "Rapid Iteration",
-      description: "Test ideas quickly with high-fidelity prototypes and user feedback loops. Iterate faster and validate concepts before development.",
-      image: "/images/lkhh.jpg",
-      bgColor: "#e8e8e8"
     }
   ];
 
@@ -520,6 +476,7 @@ export default function HomePage(): React.JSX.Element {
       if (email) guestEmails.push(email);
     });
     
+    // Siapkan data untuk disimpan ke Firebase
     const submissionData = {
       fullName: fullName.trim(),
       email: emailAddress.trim(),
@@ -555,11 +512,13 @@ export default function HomePage(): React.JSX.Element {
       return;
     }
     
+    // Reset form dan tutup modal
     setShowCalendarModal(false);
     setShowFormView(false);
     setSelectedDate(null);
     setSelectedTime("");
     
+    // Reset form inputs
     const formInputs = ['fullName', 'emailAddress', 'companyName', 'trustReason', 'phoneNumber'];
     formInputs.forEach(id => {
       const input = document.getElementById(id) as HTMLInputElement | HTMLTextAreaElement;
@@ -571,6 +530,7 @@ export default function HomePage(): React.JSX.Element {
     if (guestList) guestList.innerHTML = '';
   };
 
+  // Fungsi untuk admin reply
   const handleAdminReply = async () => {
     if (!selectedSubmission || !replyText.trim() || !isAdmin) return;
     
@@ -595,6 +555,7 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
+  // Load calendar submissions from Firebase
   useEffect(() => {
     if (!db) return;
 
@@ -612,6 +573,7 @@ export default function HomePage(): React.JSX.Element {
     return () => unsubscribe();
   }, []);
 
+  // Fungsi untuk scroll ke bottom chat
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -1511,142 +1473,6 @@ export default function HomePage(): React.JSX.Element {
     });
   };
 
-  // ========== GSAP STACK CARD SCROLL EFFECT ==========
-  // Card 2,3,4 menumpuk di atas Card 1 (menutupi Card 1)
-  // Saat scroll ke bawah: Card 2 muncul (menutupi Card 1), lalu Card 3 muncul (menutupi Card 2), lalu Card 4 muncul (menutupi Card 3)
-  // Saat scroll ke atas: kebalikannya
-  useEffect(() => {
-    if (isLoading) return;
-    
-    const card1 = stackCard1Ref.current;
-    const card2 = stackCard2Ref.current;
-    const card3 = stackCard3Ref.current;
-    const card4 = stackCard4Ref.current;
-    const wrapper = stackCardsWrapperRef.current;
-    const pinTrigger = stackCardsPinTriggerRef.current;
-    
-    if (!wrapper || !card1 || !card2 || !card3 || !card4) return;
-
-    // Dapatkan tinggi card
-    const cardHeight = card1.offsetHeight;
-    
-    // Set initial positions - SEMUA CARD DI POSISI YANG SAMA (BERTUMPUK DI ATAS CARD 1)
-    // Card 1 di posisi 0 (paling bawah)
-    // Card 2,3,4 juga di posisi 0 tapi dengan z-index lebih tinggi (menutupi Card 1)
-    gsap.set(card1, { y: 0, zIndex: 10, opacity: 1 });
-    gsap.set(card2, { y: 0, zIndex: 11, opacity: 0, visibility: "hidden" });
-    gsap.set(card3, { y: 0, zIndex: 12, opacity: 0, visibility: "hidden" });
-    gsap.set(card4, { y: 0, zIndex: 13, opacity: 0, visibility: "hidden" });
-    
-    // Total scroll distance (3 stage untuk 3 card tambahan)
-    const totalScrollDistance = cardHeight * 2.5;
-    
-    // Buat ScrollTrigger untuk efek stack (card bergantian muncul menutupi)
-    ScrollTrigger.create({
-      trigger: pinTrigger,
-      start: "top top",
-      end: `+=${totalScrollDistance}`,
-      pin: wrapper,
-      pinSpacing: true,
-      scrub: 0.8,
-      invalidateOnRefresh: true,
-      onUpdate: (self) => {
-        const progress = self.progress; // 0 - 1
-        
-        // Stage untuk setiap card (masing-masing 0.33 progress)
-        // Stage 0-0.33: Card 2 muncul
-        // Stage 0.33-0.66: Card 3 muncul
-        // Stage 0.66-1: Card 4 muncul
-        
-        const stage2 = Math.min(1, Math.max(0, progress * 3));           // 0-1 untuk card2
-        const stage3 = Math.min(1, Math.max(0, (progress - 0.333) * 3)); // 0-1 untuk card3
-        const stage4 = Math.min(1, Math.max(0, (progress - 0.666) * 3)); // 0-1 untuk card4
-        
-        // CARD 2: muncul dari transparan menjadi solid
-        if (stage2 > 0) {
-          gsap.set(card2, { visibility: "visible" });
-          gsap.to(card2, {
-            opacity: stage2,
-            duration: 0.1,
-            ease: "none",
-            overwrite: true
-          });
-          // Efek scale sedikit saat muncul
-          if (stage2 < 0.3) {
-            gsap.to(card2, { scale: 0.98, duration: 0.1, ease: "none" });
-          } else {
-            gsap.to(card2, { scale: 1, duration: 0.1, ease: "none" });
-          }
-        } else {
-          gsap.set(card2, { visibility: "hidden", opacity: 0 });
-        }
-        
-        // CARD 3: muncul setelah card2 selesai (stage 0.33-0.66)
-        if (stage3 > 0) {
-          gsap.set(card3, { visibility: "visible" });
-          gsap.to(card3, {
-            opacity: stage3,
-            duration: 0.1,
-            ease: "none",
-            overwrite: true
-          });
-          if (stage3 < 0.3) {
-            gsap.to(card3, { scale: 0.98, duration: 0.1, ease: "none" });
-          } else {
-            gsap.to(card3, { scale: 1, duration: 0.1, ease: "none" });
-          }
-        } else {
-          gsap.set(card3, { visibility: "hidden", opacity: 0 });
-        }
-        
-        // CARD 4: muncul setelah card3 selesai (stage 0.66-1)
-        if (stage4 > 0) {
-          gsap.set(card4, { visibility: "visible" });
-          gsap.to(card4, {
-            opacity: stage4,
-            duration: 0.1,
-            ease: "none",
-            overwrite: true
-          });
-          if (stage4 < 0.3) {
-            gsap.to(card4, { scale: 0.98, duration: 0.1, ease: "none" });
-          } else {
-            gsap.to(card4, { scale: 1, duration: 0.1, ease: "none" });
-          }
-        } else {
-          gsap.set(card4, { visibility: "hidden", opacity: 0 });
-        }
-        
-        // Update z-index agar card yang aktif berada di atas
-        if (stage2 > 0.3) {
-          gsap.set(card2, { zIndex: 20 });
-        } else {
-          gsap.set(card2, { zIndex: 11 });
-        }
-        
-        if (stage3 > 0.3) {
-          gsap.set(card3, { zIndex: 21 });
-        } else {
-          gsap.set(card3, { zIndex: 12 });
-        }
-        
-        if (stage4 > 0.3) {
-          gsap.set(card4, { zIndex: 22 });
-        } else {
-          gsap.set(card4, { zIndex: 13 });
-        }
-      }
-    });
-
-    return () => {
-      ScrollTrigger.getAll().forEach(trigger => {
-        if (trigger.vars.trigger === pinTrigger) {
-          trigger.kill();
-        }
-      });
-    };
-  }, [isLoading]);
-
   useEffect(() => {
     if (isLoading) return;
 
@@ -2446,6 +2272,7 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
+  // Fungsi untuk memisahkan tanggal (day, month, year)
   const getDateParts = (dateString: string) => {
     const date = new Date(dateString);
     return {
@@ -3085,121 +2912,6 @@ export default function HomePage(): React.JSX.Element {
           background: rgba(255, 255, 255, 0.5);
         }
 
-        /* Stack Card Scroll Effect Styles */
-        .stack-cards-scroll-section {
-          width: 100%;
-          background-color: #ffffff;
-          position: relative;
-          z-index: 10;
-          padding: 100px 0;
-        }
-
-        .stack-cards-scroll-container {
-          width: 100%;
-          max-width: 1400px;
-          margin: 0 auto;
-          padding: 0 80px;
-          box-sizing: border-box;
-        }
-
-        .stack-cards-scroll-header {
-          margin-bottom: 80px;
-          text-align: left;
-        }
-
-        .stack-cards-scroll-title {
-          font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
-          font-size: 100px;
-          font-weight: 400;
-          color: #000000;
-          letter-spacing: -0.02em;
-          line-height: 1;
-          margin: 0 0 20px 0;
-        }
-
-        .stack-cards-scroll-subtitle {
-          font-family: 'Questrial', sans-serif;
-          font-size: 20px;
-          color: #666666;
-          max-width: 600px;
-        }
-
-        .stack-cards-wrapper {
-          position: relative;
-          min-height: 600px;
-          width: 100%;
-        }
-
-        .stack-card {
-          width: 100%;
-          background-color: #ffffff;
-          border-radius: 32px;
-          padding: 48px;
-          display: flex;
-          flex-direction: row;
-          gap: 60px;
-          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
-          border: 1px solid #e0e0e0;
-          transition: all 0.3s ease;
-          box-sizing: border-box;
-          position: absolute;
-          top: 0;
-          left: 0;
-        }
-
-        .stack-card-left {
-          flex: 1;
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-        }
-
-        .stack-card-number {
-          font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
-          font-size: 60px;
-          font-weight: 400;
-          color: #cccccc;
-          margin-bottom: 24px;
-        }
-
-        .stack-card-title {
-          font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
-          font-size: 48px;
-          font-weight: 500;
-          color: #000000;
-          letter-spacing: -0.02em;
-          margin-bottom: 16px;
-        }
-
-        .stack-card-subtitle {
-          font-family: 'Questrial', sans-serif;
-          font-size: 20px;
-          color: #666666;
-          margin-bottom: 24px;
-        }
-
-        .stack-card-description {
-          font-family: 'Questrial', sans-serif;
-          font-size: 18px;
-          color: #888888;
-          line-height: 1.6;
-        }
-
-        .stack-card-right {
-          flex: 1;
-          position: relative;
-          border-radius: 24px;
-          overflow: hidden;
-          min-height: 350px;
-        }
-
-        .stack-card-image {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          border-radius: 24px;
-        }
-
         /* Style untuk Calendar Submissions Section - Minimalis Hitam Putih */
         .calendar-submissions-section {
           width: 100%;
@@ -3449,508 +3161,832 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* SECTION FEATURES - (dipangkas karena sama dengan sebelumnya) */}
-            {/* ... features section 1-5 ... */}
-            
-            {/* Untuk menjaga agar kode tidak terlalu panjang, bagian Features Section 1-5, Trusted Collabs, 
-                Calendar Submissions, Reply Modal, Footer, Shadow Page, Auth Modal, Calendar Modal, Cookie Popup 
-                tetap sama seperti kode asli Anda. */}
-
-            {/* STACK CARD SCROLL EFFECT SECTION - 4 CARD MENUMPUK DI ATAS CARD 1 */}
-            <div className="stack-cards-scroll-section">
-              <div className="stack-cards-scroll-container">
-                <div className="stack-cards-scroll-header">
-                  <h2 className="stack-cards-scroll-title">STACKING CARDS</h2>
-                  <p className="stack-cards-scroll-subtitle">Scroll down - Cards stack on top of each other, each card covers the previous one</p>
+            {/* SECTION FEATURES - Sama seperti sebelumnya */}
+            <div
+              ref={featuresSectionRef}
+              className="features-section"
+              style={{
+                backgroundColor: featuresBgColor,
+              }}
+            >
+              <div className="features-top">
+                <div
+                  ref={featuresTitleRef}
+                  className="features-title"
+                  style={{ color: featuresTextColor }}
+                >
+                  Features
+                </div>
+              </div>
+              <div className="features-bottom">
+                <div
+                  ref={featuresLeftNumberRef}
+                  className="features-left-number"
+                  style={{ color: featuresTextColor }}
+                >
+                  01
                 </div>
                 
-                <div ref={stackCardsPinTriggerRef} className="stack-cards-wrapper">
-                  <div ref={stackCardsWrapperRef} style={{ position: 'relative', width: '100%', minHeight: '600px' }}>
-                    {/* Card 1 - Base Card (paling bawah) */}
-                    <div 
-                      ref={stackCard1Ref}
-                      className="stack-card"
-                      style={{ 
-                        backgroundColor: stackCardItems[0].bgColor,
-                        zIndex: 10,
-                        opacity: 1
-                      }}
-                    >
-                      <div className="stack-card-left">
-                        <div className="stack-card-number">01</div>
-                        <h3 className="stack-card-title">{stackCardItems[0].title}</h3>
-                        <p className="stack-card-subtitle">{stackCardItems[0].subtitle}</p>
-                        <p className="stack-card-description">{stackCardItems[0].description}</p>
-                      </div>
-                      <div className="stack-card-right">
-                        <Image
-                          src={stackCardItems[0].image}
-                          alt={stackCardItems[0].title}
-                          fill
-                          className="stack-card-image"
-                          style={{ objectFit: 'cover' }}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Card 2 - Akan muncul menutupi Card 1 */}
-                    <div 
-                      ref={stackCard2Ref}
-                      className="stack-card"
-                      style={{ 
-                        backgroundColor: stackCardItems[1].bgColor,
-                        zIndex: 11,
-                        opacity: 0,
-                        visibility: "hidden"
-                      }}
-                    >
-                      <div className="stack-card-left">
-                        <div className="stack-card-number">02</div>
-                        <h3 className="stack-card-title">{stackCardItems[1].title}</h3>
-                        <p className="stack-card-subtitle">{stackCardItems[1].subtitle}</p>
-                        <p className="stack-card-description">{stackCardItems[1].description}</p>
-                      </div>
-                      <div className="stack-card-right">
-                        <Image
-                          src={stackCardItems[1].image}
-                          alt={stackCardItems[1].title}
-                          fill
-                          className="stack-card-image"
-                          style={{ objectFit: 'cover' }}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Card 3 - Akan muncul menutupi Card 2 */}
-                    <div 
-                      ref={stackCard3Ref}
-                      className="stack-card"
-                      style={{ 
-                        backgroundColor: stackCardItems[2].bgColor,
-                        zIndex: 12,
-                        opacity: 0,
-                        visibility: "hidden"
-                      }}
-                    >
-                      <div className="stack-card-left">
-                        <div className="stack-card-number">03</div>
-                        <h3 className="stack-card-title">{stackCardItems[2].title}</h3>
-                        <p className="stack-card-subtitle">{stackCardItems[2].subtitle}</p>
-                        <p className="stack-card-description">{stackCardItems[2].description}</p>
-                      </div>
-                      <div className="stack-card-right">
-                        <Image
-                          src={stackCardItems[2].image}
-                          alt={stackCardItems[2].title}
-                          fill
-                          className="stack-card-image"
-                          style={{ objectFit: 'cover' }}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Card 4 - Akan muncul menutupi Card 3 */}
-                    <div 
-                      ref={stackCard4Ref}
-                      className="stack-card"
-                      style={{ 
-                        backgroundColor: stackCardItems[3].bgColor,
-                        zIndex: 13,
-                        opacity: 0,
-                        visibility: "hidden"
-                      }}
-                    >
-                      <div className="stack-card-left">
-                        <div className="stack-card-number">04</div>
-                        <h3 className="stack-card-title">{stackCardItems[3].title}</h3>
-                        <p className="stack-card-subtitle">{stackCardItems[3].subtitle}</p>
-                        <p className="stack-card-description">{stackCardItems[3].description}</p>
-                      </div>
-                      <div className="stack-card-right">
-                        <Image
-                          src={stackCardItems[3].image}
-                          alt={stackCardItems[3].title}
-                          fill
-                          className="stack-card-image"
-                          style={{ objectFit: 'cover' }}
-                        />
-                      </div>
+                <div 
+                  ref={hoverContainerRef}
+                  className="hover-container"
+                  onMouseEnter={handleNoteHoverEnter}
+                  onMouseLeave={handleNoteHoverLeave}
+                >
+                  <div
+                    ref={featuresRightTextRef}
+                    className="features-right-text"
+                    style={{ color: featuresTextColor }}
+                  >
+                    Note
+                  </div>
+                  
+                  <div ref={updateContainerRef} className="update-container">
+                    <div className="update-number" style={{ color: featuresTextColor }}>
+                      Update<sup>¹</sup>
                     </div>
                   </div>
+                  
+                  <div 
+                    ref={featuresArrowRef}
+                    className="features-right-arrow"
+                  >
+                    {noteHover ? (
+                      <StraightLine size={50} />
+                    ) : (
+                      <NorthEastArrowIcon size={50} />
+                    )}
+                  </div>
+                  
+                  <div ref={circleImagesRef} className="circle-images-container">
+                    <div
+                      ref={circleImg1Ref}
+                      className="circle-img"
+                    >
+                      <Image
+                        src="/images/lkhh.jpg"
+                        alt="circle 1"
+                        fill
+                        style={{ objectFit: 'cover' }}
+                      />
+                    </div>
+                    <div
+                      ref={circleImg2Ref}
+                      className="circle-img"
+                    >
+                      <Image
+                        src="/images/ai.jpg"
+                        alt="circle 2"
+                        fill
+                        style={{ objectFit: 'cover' }}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div ref={featuresOverlayRef} className="features-overlay" />
                 </div>
               </div>
             </div>
 
-        
-            {/* CALENDAR SUBMISSIONS SECTION */}
-            {calendarSubmissions.length > 0 && (
-              <div className="calendar-submissions-section" style={{
-                width: '100%',
-                padding: '120px 80px',
+            <div
+              ref={featuresSection2Ref}
+              className="features-section"
+              style={{
+                backgroundColor: featuresBgColor,
+              }}
+            >
+              <div className="features-bottom">
+                <div
+                  ref={featuresLeftNumber2Ref}
+                  className="features-left-number"
+                  style={{ color: featuresTextColor }}
+                >
+                  02
+                </div>
+                
+                <div 
+                  ref={hoverContainer2Ref}
+                  className="hover-container"
+                  onMouseEnter={handleCommunityHoverEnter}
+                  onMouseLeave={handleCommunityHoverLeave}
+                >
+                  <div
+                    ref={featuresRightText2Ref}
+                    className="features-right-text"
+                    style={{ color: featuresTextColor }}
+                  >
+                    Community
+                  </div>
+                  
+                  <div ref={updateContainer2Ref} className="update-container">
+                    <div className="update-number" style={{ color: featuresTextColor }}>
+                      Join<sup>²</sup>
+                    </div>
+                  </div>
+                  
+                  <div 
+                    ref={featuresArrow2Ref}
+                    className="features-right-arrow"
+                  >
+                    {communityHover ? (
+                      <StraightLine size={50} />
+                    ) : (
+                      <NorthEastArrowIcon size={50} />
+                    )}
+                  </div>
+                  
+                  <div ref={circleImages2Ref} className="circle-images-container">
+                    <div
+                      ref={circleImg1_2Ref}
+                      className="circle-img"
+                    >
+                      <Image
+                        src="/images/ai.jpg"
+                        alt="circle 1"
+                        fill
+                        style={{ objectFit: 'cover' }}
+                      />
+                    </div>
+                    <div
+                      ref={circleImg2_2Ref}
+                      className="circle-img"
+                    >
+                      <Image
+                        src="/images/lkhh.jpg"
+                        alt="circle 2"
+                        fill
+                        style={{ objectFit: 'cover' }}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div ref={featuresOverlay2Ref} className="features-overlay" />
+                </div>
+              </div>
+            </div>
+
+            <div
+              ref={featuresSection3Ref}
+              className="features-section"
+              style={{
+                backgroundColor: featuresBgColor,
+              }}
+            >
+              <div className="features-bottom">
+                <div
+                  ref={featuresLeftNumber3Ref}
+                  className="features-left-number"
+                  style={{ color: featuresTextColor }}
+                >
+                  03
+                </div>
+                
+                <div 
+                  ref={hoverContainer3Ref}
+                  className="hover-container"
+                  onMouseEnter={handleCalendarHoverEnter}
+                  onMouseLeave={handleCalendarHoverLeave}
+                >
+                  <div
+                    ref={featuresRightText3Ref}
+                    className="features-right-text"
+                    style={{ color: featuresTextColor }}
+                  >
+                    Calendar
+                  </div>
+                  
+                  <div ref={updateContainer3Ref} className="update-container">
+                    <div className="update-number" style={{ color: featuresTextColor }}>
+                      Schedule<sup>³</sup>
+                    </div>
+                  </div>
+                  
+                  <div 
+                    ref={featuresArrow3Ref}
+                    className="features-right-arrow"
+                  >
+                    {calendarHover ? (
+                      <StraightLine size={50} />
+                    ) : (
+                      <NorthEastArrowIcon size={50} />
+                    )}
+                  </div>
+                  
+                  <div ref={circleImages3Ref} className="circle-images-container">
+                    <div
+                      ref={circleImg1_3Ref}
+                      className="circle-img"
+                    >
+                      <Image
+                        src="/images/5.jpg"
+                        alt="circle 1"
+                        fill
+                        style={{ objectFit: 'cover' }}
+                      />
+                    </div>
+                    <div
+                      ref={circleImg2_3Ref}
+                      className="circle-img"
+                    >
+                      <Image
+                        src="/images/lkhh.jpg"
+                        alt="circle 2"
+                        fill
+                        style={{ objectFit: 'cover' }}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div ref={featuresOverlay3Ref} className="features-overlay" />
+                </div>
+              </div>
+            </div>
+
+            <div
+              ref={featuresSection4Ref}
+              className="features-section"
+              style={{
+                backgroundColor: featuresBgColor,
+              }}
+            >
+              <div className="features-bottom">
+                <div
+                  ref={featuresLeftNumber4Ref}
+                  className="features-left-number"
+                  style={{ color: featuresTextColor }}
+                >
+                  04
+                </div>
+                
+                <div 
+                  ref={hoverContainer4Ref}
+                  className="hover-container"
+                  onMouseEnter={handleBlogHoverEnter}
+                  onMouseLeave={handleBlogHoverLeave}
+                >
+                  <div
+                    ref={featuresRightText4Ref}
+                    className="features-right-text"
+                    style={{ color: featuresTextColor }}
+                  >
+                    Blog
+                  </div>
+                  
+                  <div ref={updateContainer4Ref} className="update-container">
+                    <div className="update-number" style={{ color: featuresTextColor }}>
+                      Read<sup>⁴</sup>
+                    </div>
+                  </div>
+                  
+                  <div 
+                    ref={featuresArrow4Ref}
+                    className="features-right-arrow"
+                  >
+                    {blogHover ? (
+                      <StraightLine size={50} />
+                    ) : (
+                      <NorthEastArrowIcon size={50} />
+                    )}
+                  </div>
+                  
+                  <div ref={circleImages4Ref} className="circle-images-container">
+                    <div
+                      ref={circleImg1_4Ref}
+                      className="circle-img"
+                    >
+                      <Image
+                        src="/images/ai.jpg"
+                        alt="circle 1"
+                        fill
+                        style={{ objectFit: 'cover' }}
+                      />
+                    </div>
+                    <div
+                      ref={circleImg2_4Ref}
+                      className="circle-img"
+                    >
+                      <Image
+                        src="/images/5.jpg"
+                        alt="circle 2"
+                        fill
+                        style={{ objectFit: 'cover' }}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div ref={featuresOverlay4Ref} className="features-overlay" />
+                </div>
+              </div>
+            </div>
+
+            <div
+              ref={featuresSection5Ref}
+              className="features-section"
+              style={{
+                backgroundColor: featuresBgColor,
+              }}
+            >
+              <div className="features-bottom">
+                <div
+                  ref={featuresLeftNumber5Ref}
+                  className="features-left-number"
+                  style={{ color: featuresTextColor }}
+                >
+                  05
+                </div>
+                
+                <div 
+                  ref={hoverContainer5Ref}
+                  className="hover-container"
+                  onMouseEnter={handleDonationHoverEnter}
+                  onMouseLeave={handleDonationHoverLeave}
+                >
+                  <div
+                    ref={featuresRightText5Ref}
+                    className="features-right-text"
+                    style={{ color: featuresTextColor }}
+                  >
+                    Donation
+                  </div>
+                  
+                  <div ref={updateContainer5Ref} className="update-container">
+                    <div className="update-number" style={{ color: featuresTextColor }}>
+                      Support<sup>⁵</sup>
+                    </div>
+                  </div>
+                  
+                  <div 
+                    ref={featuresArrow5Ref}
+                    className="features-right-arrow"
+                  >
+                    {donationHover ? (
+                      <StraightLine size={50} />
+                    ) : (
+                      <NorthEastArrowIcon size={50} />
+                    )}
+                  </div>
+                  
+                  <div ref={circleImages5Ref} className="circle-images-container">
+                    <div
+                      ref={circleImg1_5Ref}
+                      className="circle-img"
+                    >
+                      <Image
+                        src="/images/lkhh.jpg"
+                        alt="circle 1"
+                        fill
+                        style={{ objectFit: 'cover' }}
+                      />
+                    </div>
+                    <div
+                      ref={circleImg2_5Ref}
+                      className="circle-img"
+                    >
+                      <Image
+                        src="/images/ai.jpg"
+                        alt="circle 2"
+                        fill
+                        style={{ objectFit: 'cover' }}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div ref={featuresOverlay5Ref} className="features-overlay" />
+                </div>
+              </div>
+            </div>
+
+            {/* SECTION TRUSTED COLLABS */}
+            <div
+              ref={trustedSectionRef}
+              className="trusted-section"
+              style={{
                 backgroundColor: '#ffffff',
-                boxSizing: 'border-box'
+              }}
+            >
+              <div
+                ref={trustedTextRef}
+                className="trusted-text"
+              >
+                TRUSTED COLLABS
+              </div>
+
+              <div 
+                ref={carouselRef}
+                className="carousel-container"
+              >
+                <div className="carousel-track">
+                  {carouselItems.map((item) => (
+                    <div key={item.id} className="carousel-item">
+                      <div className="carousel-image">
+                        <Image
+                          src={item.image}
+                          alt={item.brand}
+                          fill
+                          style={{ objectFit: 'cover' }}
+                        />
+                      </div>
+                      <h3 className="carousel-brand">{item.brand}</h3>
+                      <p className="carousel-desc">{item.description}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+
+{calendarSubmissions.length > 0 && (
+  <div className="calendar-submissions-section" style={{
+    width: '100%',
+    padding: '120px 80px',
+    backgroundColor: '#ffffff',
+    boxSizing: 'border-box'
+  }}>
+    {/* Header dengan font 300px dan panah SVG 100px - tanpa garis bawah */}
+    <div style={{
+      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+      fontSize: '190px',
+      fontWeight: '400',
+      color: '#000000',
+      letterSpacing: '-0.02em',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: '100px',
+      lineHeight: '1'
+    }}>
+      <span>MEETING SCHEDULE</span>
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '30px'
+      }}>
+        <span style={{
+          fontSize: '100px',
+          color: '#000000',
+          fontWeight: '400'
+        }}>
+          ({calendarSubmissions.length})
+        </span>
+        {/* NORTH EAST ARROW - 100px */}
+        <svg width="100" height="100" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </div>
+    </div>
+    
+    {/* Daftar submission - tanpa card, tanpa hover, tanpa linebox (tanpa border) */}
+    <div style={{
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '80px'
+    }}>
+      {calendarSubmissions.map((submission, index) => {
+        const dateParts = getDateParts(submission.selectedDate);
+        
+        return (
+          <div
+            key={submission.id}
+            style={{
+              display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'flex-start',
+              gap: '80px'
+            }}
+          >
+            {/* LEFT - Tanggal dipisah: Day, Month, Year - font besar */}
+            <div style={{
+              width: '200px',
+              flexShrink: 0,
+              textAlign: 'left'
+            }}>
+              <div style={{
+                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                fontSize: '100px',
+                fontWeight: '400',
+                color: '#000000',
+                lineHeight: '1',
+                letterSpacing: '-0.02em'
+              }}>
+                {dateParts.day}
+              </div>
+              <div style={{
+                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                fontSize: '40px',
+                fontWeight: '400',
+                color: '#000000',
+                letterSpacing: '-0.02em',
+                marginTop: '12px'
+              }}>
+                {dateParts.month}
+              </div>
+              <div style={{
+                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                fontSize: '24px',
+                fontWeight: '400',
+                color: '#666666',
+                marginTop: '8px'
+              }}>
+                {dateParts.year}
+              </div>
+            </div>
+            
+            {/* MIDDLE - Informasi lengkap */}
+            <div style={{
+              flex: 1,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '32px'
+            }}>
+              {/* Nama dan Status */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '40px',
+                flexWrap: 'wrap'
               }}>
                 <div style={{
                   fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                  fontSize: '190px',
+                  fontSize: '48px',
                   fontWeight: '400',
                   color: '#000000',
-                  letterSpacing: '-0.02em',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  marginBottom: '100px',
-                  lineHeight: '1'
+                  letterSpacing: '-0.02em'
                 }}>
-                  <span>MEETING SCHEDULE</span>
+                  {submission.fullName}
+                </div>
+                <div style={{
+                  fontSize: '20px',
+                  padding: '6px 24px',
+                  border: '1px solid #000000',
+                  backgroundColor: 'transparent',
+                  color: '#000000',
+                  fontWeight: '400',
+                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                  letterSpacing: '0.02em'
+                }}>
+                  {submission.status === 'pending' ? 'PENDING' : 
+                   submission.status === 'confirmed' ? 'CONFIRMED' : 
+                   submission.status === 'completed' ? 'COMPLETED' : 'REJECTED'}
+                </div>
+              </div>
+              
+              {/* Waktu dan Tipe Meeting */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '60px',
+                flexWrap: 'wrap'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  {/* Clock SVG */}
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="10" stroke="#000000" strokeWidth="1.5"/>
+                    <polyline points="12 6 12 12 16 14" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  <span style={{
+                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                    fontSize: '28px',
+                    color: '#000000'
+                  }}>
+                    {submission.selectedTime} WIB
+                  </span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  {/* Calendar SVG */}
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke="#000000" strokeWidth="1.5"/>
+                    <line x1="8" y1="2" x2="8" y2="6" stroke="#000000" strokeWidth="1.5" strokeLinecap="round"/>
+                    <line x1="16" y1="2" x2="16" y2="6" stroke="#000000" strokeWidth="1.5" strokeLinecap="round"/>
+                    <line x1="3" y1="10" x2="21" y2="10" stroke="#000000" strokeWidth="1.5" strokeLinecap="round"/>
+                  </svg>
+                  <span style={{
+                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                    fontSize: '28px',
+                    color: '#000000'
+                  }}>
+                    {submission.meetingType}
+                  </span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  {/* Platform SVG */}
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="#000000" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  <span style={{
+                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                    fontSize: '28px',
+                    color: '#000000'
+                  }}>
+                    {submission.platform === 'google_meet' ? 'Google Meet' : 
+                     submission.platform === 'zoom' ? 'Zoom' :
+                     submission.platform === 'tatap_muka' ? 'Offline' : 'Via HP'}
+                  </span>
+                </div>
+              </div>
+              
+              {/* Alasan Percaya - deskripsi besar */}
+              <div style={{
+                marginTop: '16px'
+              }}>
+                <div style={{
+                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                  fontSize: '20px',
+                  fontWeight: '400',
+                  color: '#999999',
+                  marginBottom: '20px',
+                  letterSpacing: '0.05em'
+                }}>
+                  REASON TO TRUST
+                </div>
+                <div style={{
+                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                  fontSize: '32px',
+                  fontWeight: '400',
+                  color: '#000000',
+                  lineHeight: '1.4',
+                  letterSpacing: '-0.01em'
+                }}>
+                  "{submission.trustReason}"
+                </div>
+              </div>
+              
+              {/* Kontak: Email, Phone, Company */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '48px',
+                flexWrap: 'wrap',
+                marginTop: '16px'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="2" y="4" width="20" height="16" rx="2" ry="2" stroke="#000000" strokeWidth="1.5"/>
+                    <polyline points="22 7 12 13 2 7" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  <span style={{
+                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                    fontSize: '22px',
+                    color: '#000000'
+                  }}>
+                    {submission.email}
+                  </span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" stroke="#000000" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  <span style={{
+                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                    fontSize: '22px',
+                    color: '#000000'
+                  }}>
+                    {submission.phoneNumber}
+                  </span>
+                </div>
+                {submission.companyName && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <rect x="4" y="4" width="16" height="16" rx="2" ry="2" stroke="#000000" strokeWidth="1.5"/>
+                      <line x1="9" y1="4" x2="9" y2="20" stroke="#000000" strokeWidth="1.5"/>
+                      <line x1="15" y1="4" x2="15" y2="20" stroke="#000000" strokeWidth="1.5"/>
+                      <line x1="4" y1="9" x2="20" y2="9" stroke="#000000" strokeWidth="1.5"/>
+                      <line x1="4" y1="15" x2="20" y2="15" stroke="#000000" strokeWidth="1.5"/>
+                    </svg>
+                    <span style={{
+                      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                      fontSize: '22px',
+                      color: '#000000'
+                    }}>
+                      {submission.companyName}
+                    </span>
+                  </div>
+                )}
+              </div>
+              
+              {/* Admin Reply */}
+              {submission.adminReply && (
+                <div style={{
+                  marginTop: '24px'
+                }}>
                   <div style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '30px'
+                    gap: '14px',
+                    marginBottom: '16px'
                   }}>
-                    <span style={{
-                      fontSize: '100px',
-                      color: '#000000',
-                      fontWeight: '400'
-                    }}>
-                      ({calendarSubmissions.length})
-                    </span>
-                    <svg width="100" height="100" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="#000000" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
+                    <span style={{
+                      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                      fontSize: '18px',
+                      fontWeight: '400',
+                      color: '#999999',
+                      letterSpacing: '0.05em'
+                    }}>
+                      ADMIN REPLY · {submission.adminReply.repliedBy}
+                    </span>
+                  </div>
+                  <div style={{
+                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                    fontSize: '24px',
+                    color: '#000000',
+                    lineHeight: '1.4',
+                    paddingLeft: '38px'
+                  }}>
+                    {submission.adminReply.text}
                   </div>
                 </div>
-                
-                <div style={{
+              )}
+            </div>
+            
+            {/* RIGHT - Tombol dengan NORTH EAST ARROW dan NORTH WEST ARROW 50px */}
+            <div style={{
+              width: '220px',
+              flexShrink: 0,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'flex-end',
+              gap: '24px'
+            }}>
+              <button
+                onClick={() => {
+                  setShowCalendarModal(true);
+                  setShowFormView(false);
+                  setSelectedDate(null);
+                  setSelectedTime("");
+                }}
+                style={{
                   display: 'flex',
-                  flexDirection: 'column',
-                  gap: '80px'
-                }}>
-                  {calendarSubmissions.map((submission) => {
-                    const dateParts = getDateParts(submission.selectedDate);
-                    
-                    return (
-                      <div
-                        key={submission.id}
-                        style={{
-                          display: 'flex',
-                          flexDirection: 'row',
-                          alignItems: 'flex-start',
-                          gap: '80px'
-                        }}
-                      >
-                        <div style={{
-                          width: '200px',
-                          flexShrink: 0,
-                          textAlign: 'left'
-                        }}>
-                          <div style={{
-                            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                            fontSize: '100px',
-                            fontWeight: '400',
-                            color: '#000000',
-                            lineHeight: '1',
-                            letterSpacing: '-0.02em'
-                          }}>
-                            {dateParts.day}
-                          </div>
-                          <div style={{
-                            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                            fontSize: '40px',
-                            fontWeight: '400',
-                            color: '#000000',
-                            letterSpacing: '-0.02em',
-                            marginTop: '12px'
-                          }}>
-                            {dateParts.month}
-                          </div>
-                          <div style={{
-                            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                            fontSize: '24px',
-                            fontWeight: '400',
-                            color: '#666666',
-                            marginTop: '8px'
-                          }}>
-                            {dateParts.year}
-                          </div>
-                        </div>
-                        
-                        <div style={{
-                          flex: 1,
-                          display: 'flex',
-                          flexDirection: 'column',
-                          gap: '32px'
-                        }}>
-                          <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '40px',
-                            flexWrap: 'wrap'
-                          }}>
-                            <div style={{
-                              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                              fontSize: '48px',
-                              fontWeight: '400',
-                              color: '#000000',
-                              letterSpacing: '-0.02em'
-                            }}>
-                              {submission.fullName}
-                            </div>
-                            <div style={{
-                              fontSize: '20px',
-                              padding: '6px 24px',
-                              border: '1px solid #000000',
-                              backgroundColor: 'transparent',
-                              color: '#000000',
-                              fontWeight: '400',
-                              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                              letterSpacing: '0.02em'
-                            }}>
-                              {submission.status === 'pending' ? 'PENDING' : 
-                               submission.status === 'confirmed' ? 'CONFIRMED' : 
-                               submission.status === 'completed' ? 'COMPLETED' : 'REJECTED'}
-                            </div>
-                          </div>
-                          
-                          <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '60px',
-                            flexWrap: 'wrap'
-                          }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <circle cx="12" cy="12" r="10" stroke="#000000" strokeWidth="1.5"/>
-                                <polyline points="12 6 12 12 16 14" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                              </svg>
-                              <span style={{
-                                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                                fontSize: '28px',
-                                color: '#000000'
-                              }}>
-                                {submission.selectedTime} WIB
-                              </span>
-                            </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke="#000000" strokeWidth="1.5"/>
-                                <line x1="8" y1="2" x2="8" y2="6" stroke="#000000" strokeWidth="1.5" strokeLinecap="round"/>
-                                <line x1="16" y1="2" x2="16" y2="6" stroke="#000000" strokeWidth="1.5" strokeLinecap="round"/>
-                                <line x1="3" y1="10" x2="21" y2="10" stroke="#000000" strokeWidth="1.5" strokeLinecap="round"/>
-                              </svg>
-                              <span style={{
-                                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                                fontSize: '28px',
-                                color: '#000000'
-                              }}>
-                                {submission.meetingType}
-                              </span>
-                            </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="#000000" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-                              </svg>
-                              <span style={{
-                                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                                fontSize: '28px',
-                                color: '#000000'
-                              }}>
-                                {submission.platform === 'google_meet' ? 'Google Meet' : 
-                                 submission.platform === 'zoom' ? 'Zoom' :
-                                 submission.platform === 'tatap_muka' ? 'Offline' : 'Via HP'}
-                              </span>
-                            </div>
-                          </div>
-                          
-                          <div style={{
-                            marginTop: '16px'
-                          }}>
-                            <div style={{
-                              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                              fontSize: '20px',
-                              fontWeight: '400',
-                              color: '#999999',
-                              marginBottom: '20px',
-                              letterSpacing: '0.05em'
-                            }}>
-                              REASON TO TRUST
-                            </div>
-                            <div style={{
-                              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                              fontSize: '32px',
-                              fontWeight: '400',
-                              color: '#000000',
-                              lineHeight: '1.4',
-                              letterSpacing: '-0.01em'
-                            }}>
-                              "{submission.trustReason}"
-                            </div>
-                          </div>
-                          
-                          <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '48px',
-                            flexWrap: 'wrap',
-                            marginTop: '16px'
-                          }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <rect x="2" y="4" width="20" height="16" rx="2" ry="2" stroke="#000000" strokeWidth="1.5"/>
-                                <polyline points="22 7 12 13 2 7" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                              </svg>
-                              <span style={{
-                                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                                fontSize: '22px',
-                                color: '#000000'
-                              }}>
-                                {submission.email}
-                              </span>
-                            </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" stroke="#000000" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-                              </svg>
-                              <span style={{
-                                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                                fontSize: '22px',
-                                color: '#000000'
-                              }}>
-                                {submission.phoneNumber}
-                              </span>
-                            </div>
-                            {submission.companyName && (
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                  <rect x="4" y="4" width="16" height="16" rx="2" ry="2" stroke="#000000" strokeWidth="1.5"/>
-                                  <line x1="9" y1="4" x2="9" y2="20" stroke="#000000" strokeWidth="1.5"/>
-                                  <line x1="15" y1="4" x2="15" y2="20" stroke="#000000" strokeWidth="1.5"/>
-                                  <line x1="4" y1="9" x2="20" y2="9" stroke="#000000" strokeWidth="1.5"/>
-                                  <line x1="4" y1="15" x2="20" y2="15" stroke="#000000" strokeWidth="1.5"/>
-                                </svg>
-                                <span style={{
-                                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                                  fontSize: '22px',
-                                  color: '#000000'
-                                }}>
-                                  {submission.companyName}
-                                </span>
-                              </div>
-                            )}
-                          </div>
-                          
-                          {submission.adminReply && (
-                            <div style={{
-                              marginTop: '24px'
-                            }}>
-                              <div style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '14px',
-                                marginBottom: '16px'
-                              }}>
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="#000000" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-                                </svg>
-                                <span style={{
-                                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                                  fontSize: '18px',
-                                  fontWeight: '400',
-                                  color: '#999999',
-                                  letterSpacing: '0.05em'
-                                }}>
-                                  ADMIN REPLY · {submission.adminReply.repliedBy}
-                                </span>
-                              </div>
-                              <div style={{
-                                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                                fontSize: '24px',
-                                color: '#000000',
-                                lineHeight: '1.4',
-                                paddingLeft: '38px'
-                              }}>
-                                {submission.adminReply.text}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                        
-                        <div style={{
-                          width: '220px',
-                          flexShrink: 0,
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'flex-end',
-                          gap: '24px'
-                        }}>
-                          <button
-                            onClick={() => {
-                              setShowCalendarModal(true);
-                              setShowFormView(false);
-                              setSelectedDate(null);
-                              setSelectedTime("");
-                            }}
-                            style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'space-between',
-                              gap: '20px',
-                              backgroundColor: 'transparent',
-                              border: '1px solid #000000',
-                              cursor: 'pointer',
-                              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                              fontSize: '20px',
-                              fontWeight: '400',
-                              color: '#000000',
-                              padding: '16px 28px',
-                              borderRadius: '0',
-                              width: '100%'
-                            }}
-                          >
-                            <span>BOOK CALL</span>
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                            </svg>
-                          </button>
-                          
-                          {isAdmin && (
-                            <button
-                              onClick={() => {
-                                setSelectedSubmission(submission);
-                                setReplyText(submission.adminReply?.text || "");
-                                setReplyStatus(submission.status);
-                                setShowReplyModal(true);
-                              }}
-                              style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'space-between',
-                                gap: '20px',
-                                backgroundColor: 'transparent',
-                                border: '1px solid #000000',
-                                cursor: 'pointer',
-                                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                                fontSize: '18px',
-                                fontWeight: '400',
-                                color: '#000000',
-                                padding: '14px 24px',
-                                borderRadius: '0',
-                                width: '100%'
-                              }}
-                            >
-                              <span>{submission.adminReply ? 'EDIT REPLY' : 'REPLY'}</span>
-                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M17 7L7 17M7 17H17M7 17V7" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                              </svg>
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '20px',
+                  backgroundColor: 'transparent',
+                  border: '1px solid #000000',
+                  cursor: 'pointer',
+                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                  fontSize: '20px',
+                  fontWeight: '400',
+                  color: '#000000',
+                  padding: '16px 28px',
+                  borderRadius: '0',
+                  width: '100%'
+                }}
+              >
+                <span>BOOK CALL</span>
+                {/* NORTH EAST ARROW - 24px */}
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+              
+              {/* Admin Reply Button */}
+              {isAdmin && (
+                <button
+                  onClick={() => {
+                    setSelectedSubmission(submission);
+                    setReplyText(submission.adminReply?.text || "");
+                    setReplyStatus(submission.status);
+                    setShowReplyModal(true);
+                  }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '20px',
+                    backgroundColor: 'transparent',
+                    border: '1px solid #000000',
+                    cursor: 'pointer',
+                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                    fontSize: '18px',
+                    fontWeight: '400',
+                    color: '#000000',
+                    padding: '14px 24px',
+                    borderRadius: '0',
+                    width: '100%'
+                  }}
+                >
+                  <span>{submission.adminReply ? 'EDIT REPLY' : 'REPLY'}</span>
+                  {/* NORTH WEST ARROW - 20px */}
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M17 7L7 17M7 17H17M7 17V7" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
+              )}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  </div>
+)}
+
+
+
+
+            
+
+            
 
             {/* REPLY MODAL FOR ADMIN */}
             {showReplyModal && selectedSubmission && (
@@ -4452,7 +4488,6 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </div>
 
-  
       {/* SHADOW PAGE */}
       <div
         ref={shadowPageRef}
@@ -5131,14 +5166,14 @@ export default function HomePage(): React.JSX.Element {
         <div className="calendar-modal-overlay">
           <div ref={modalRef} className="calendar-modal" style={{ maxWidth: '1300px', maxHeight: '85vh', overflow: 'auto' }}>
             {!showFormView ? (
-              // TAMPILAN CALENDAR (View 1) - sama seperti sebelumnya
+              // TAMPILAN CALENDAR (View 1)
               <div style={{
                 display: 'flex',
                 flexDirection: 'row',
                 height: 'auto',
                 minHeight: '620px'
               }}>
-                {/* SISI KIRI - Info Profile */}
+                {/* SISI KIRI - Info Profile dengan nama user/admin */}
                 <div style={{
                   flex: 1.1,
                   padding: '36px',
@@ -5567,7 +5602,7 @@ export default function HomePage(): React.JSX.Element {
                     </div>
                   </div>
 
-                  {/* Tombol Back dan Schedule Meeting */}
+                  {/* Tombol Back dan Schedule Meeting - Back pakai North West Arrow */}
                   <div style={{
                     display: 'flex',
                     gap: '12px',
@@ -5644,7 +5679,7 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </div>
             ) : (
-              // TAMPILAN FORM DATA DIRI (View 2) - sama seperti sebelumnya
+              // TAMPILAN FORM DATA DIRI (View 2)
               <div style={{
                 display: 'flex',
                 flexDirection: 'row',
