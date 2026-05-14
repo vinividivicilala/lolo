@@ -1,4 +1,4 @@
-// app/page.tsx - dengan fitur Admin Calendar Call Reply
+// app/page.tsx - Bagian Calendar Submissions dengan gaya minimalis hitam putih
 
 'use client';
 
@@ -119,6 +119,80 @@ interface CalendarSubmission {
 
 // Email Admin
 const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
+
+// SVG Components
+const NorthEastArrowIcon = ({ size = 24 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+const NorthWestArrowIcon = ({ size = 24 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M17 7L7 17M7 17H17M7 17V7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+const CalendarIcon = ({ size = 24 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+    <line x1="8" y1="2" x2="8" y2="6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    <line x1="16" y1="2" x2="16" y2="6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    <line x1="3" y1="10" x2="21" y2="10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+  </svg>
+);
+
+const ClockIcon = ({ size = 24 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+    <polyline points="12 6 12 12 16 14" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+const UserIcon = ({ size = 24 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+    <circle cx="12" cy="7" r="4" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+  </svg>
+);
+
+const MailIcon = ({ size = 24 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="2" y="4" width="20" height="16" rx="2" ry="2" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+    <polyline points="22 7 12 13 2 7" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+const PhoneIcon = ({ size = 24 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+const CompanyIcon = ({ size = 24 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="4" y="4" width="16" height="16" rx="2" ry="2" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+    <line x1="9" y1="4" x2="9" y2="20" stroke="currentColor" strokeWidth="1.5"/>
+    <line x1="15" y1="4" x2="15" y2="20" stroke="currentColor" strokeWidth="1.5"/>
+    <line x1="4" y1="9" x2="20" y2="9" stroke="currentColor" strokeWidth="1.5"/>
+    <line x1="4" y1="15" x2="20" y2="15" stroke="currentColor" strokeWidth="1.5"/>
+  </svg>
+);
+
+const MessageIcon = ({ size = 24 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+const StatusIcon = ({ status }: { status: string }) => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    {status === 'pending' && <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" fill="none"/>}
+    {status === 'confirmed' && <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>}
+    {status === 'completed' && <><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" fill="none"/><path d="M12 8v4l3 3" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round"/></>}
+    {status === 'rejected' && <><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" fill="none"/><line x1="8" y1="8" x2="16" y2="16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/><line x1="16" y1="8" x2="8" y2="16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></>}
+  </svg>
+);
 
 export default function HomePage(): React.JSX.Element {
   const [showPopup, setShowPopup] = useState(false);
@@ -351,13 +425,6 @@ export default function HomePage(): React.JSX.Element {
     newDate.setMonth(currentMonth.getMonth() + increment);
     setCurrentMonth(newDate);
   };
-
-  // North West Arrow SVG Component
-  const NorthWestArrowIcon = ({ size = 24 }: { size?: number }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M17 7L7 17M7 17H17M7 17V7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
-  );
 
   // Fungsi untuk handle form confirm dan simpan ke Firebase
   const handleConfirmMeeting = async () => {
@@ -2174,12 +2241,6 @@ export default function HomePage(): React.JSX.Element {
     </svg>
   );
 
-  const NorthEastArrow = ({ size = 50 }: { size?: number }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
-  );
-
   const StraightLine = ({ size = 50 }: { size?: number }) => (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M3 12H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
@@ -2209,6 +2270,16 @@ export default function HomePage(): React.JSX.Element {
     } else {
       return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
     }
+  };
+
+  // Fungsi untuk memisahkan tanggal (day, month, year)
+  const getDateParts = (dateString: string) => {
+    const date = new Date(dateString);
+    return {
+      day: date.getDate(),
+      month: date.toLocaleDateString('id-ID', { month: 'short' }).toUpperCase(),
+      year: date.getFullYear()
+    };
   };
 
   return (
@@ -2841,13 +2912,22 @@ export default function HomePage(): React.JSX.Element {
           background: rgba(255, 255, 255, 0.5);
         }
 
-        /* Style untuk Calendar Submissions Section */
+        /* Style untuk Calendar Submissions Section - Minimalis Hitam Putih */
         .calendar-submissions-section {
           width: 100%;
           padding: 80px 80px;
-          background-color: #fff8e1;
-          border-top: 1px solid rgba(0,0,0,0.05);
+          background-color: #ffffff;
+          border-top: 1px solid #e0e0e0;
           box-sizing: border-box;
+        }
+
+        .submission-item {
+          border-bottom: 1px solid #e0e0e0;
+          padding: 48px 0;
+        }
+
+        .submission-item:last-child {
+          border-bottom: none;
         }
 
         .reply-modal-overlay {
@@ -2871,6 +2951,13 @@ export default function HomePage(): React.JSX.Element {
           max-width: 600px;
           padding: 40px;
           box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+        }
+        
+        /* Font Aeonik untuk semua teks */
+        .aeonik-text {
+          font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
+          font-weight: 400;
+          color: #000000;
         }
         
       `}</style>
@@ -3127,7 +3214,7 @@ export default function HomePage(): React.JSX.Element {
                     {noteHover ? (
                       <StraightLine size={50} />
                     ) : (
-                      <NorthEastArrow size={50} />
+                      <NorthEastArrowIcon size={50} />
                     )}
                   </div>
                   
@@ -3204,7 +3291,7 @@ export default function HomePage(): React.JSX.Element {
                     {communityHover ? (
                       <StraightLine size={50} />
                     ) : (
-                      <NorthEastArrow size={50} />
+                      <NorthEastArrowIcon size={50} />
                     )}
                   </div>
                   
@@ -3281,7 +3368,7 @@ export default function HomePage(): React.JSX.Element {
                     {calendarHover ? (
                       <StraightLine size={50} />
                     ) : (
-                      <NorthEastArrow size={50} />
+                      <NorthEastArrowIcon size={50} />
                     )}
                   </div>
                   
@@ -3358,7 +3445,7 @@ export default function HomePage(): React.JSX.Element {
                     {blogHover ? (
                       <StraightLine size={50} />
                     ) : (
-                      <NorthEastArrow size={50} />
+                      <NorthEastArrowIcon size={50} />
                     )}
                   </div>
                   
@@ -3435,7 +3522,7 @@ export default function HomePage(): React.JSX.Element {
                     {donationHover ? (
                       <StraightLine size={50} />
                     ) : (
-                      <NorthEastArrow size={50} />
+                      <NorthEastArrowIcon size={50} />
                     )}
                   </div>
                   
@@ -3507,124 +3594,106 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* SECTION CALENDAR SUBMISSIONS - Dengan fitur Admin Reply */}
+            {/* SECTION CALENDAR SUBMISSIONS - Style minimalis hitam putih, font Aeonik 100px, tanpa card, tanpa hover, tanpa warna-warni */}
             {calendarSubmissions.length > 0 && (
               <div className="calendar-submissions-section">
+                {/* Header dengan font 100px dan panah SVG */}
                 <div style={{
                   fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
                   fontSize: '100px',
-                  fontWeight: '500',
-                  color: '#ff5722',
-                  marginBottom: '60px',
+                  fontWeight: '400',
+                  color: '#000000',
+                  marginBottom: '80px',
                   letterSpacing: '-0.02em',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'space-between'
+                  justifyContent: 'space-between',
+                  borderBottom: '1px solid #000000',
+                  paddingBottom: '40px'
                 }}>
-                  <span>MEETING</span>
+                  <span>MEETING SCHEDULE</span>
                   <div style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '15px'
+                    gap: '20px'
                   }}>
                     <span style={{
-                      fontSize: '50px',
-                      color: '#ff5722',
+                      fontSize: '60px',
+                      color: '#000000',
                       fontWeight: '400'
                     }}>
                       ({calendarSubmissions.length})
                     </span>
-                    <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff5722" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
+                    <NorthEastArrowIcon size={60} />
                   </div>
                 </div>
                 
+                {/* Daftar submission - tanpa card, tanpa hover, border bottom saja */}
                 <div style={{
                   display: 'flex',
-                  flexDirection: 'column',
-                  gap: '24px'
+                  flexDirection: 'column'
                 }}>
-                  {calendarSubmissions.map((submission) => {
-                    const submissionDate = new Date(submission.selectedDate);
-                    const formattedMonth = submissionDate.toLocaleDateString('id-ID', { month: 'long' });
-                    const formattedDay = submissionDate.toLocaleDateString('id-ID', { weekday: 'short' });
+                  {calendarSubmissions.map((submission, index) => {
+                    const dateParts = getDateParts(submission.selectedDate);
                     
                     return (
                       <div
                         key={submission.id}
+                        className="submission-item"
                         style={{
                           display: 'flex',
-                          alignItems: 'stretch',
-                          backgroundColor: '#ffffff',
-                          borderRadius: '24px',
-                          overflow: 'hidden',
-                          boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
-                          border: '2px solid #ffeb3b',
-                          transition: 'all 0.3s ease',
-                          cursor: 'pointer'
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.12)';
-                          e.currentTarget.style.transform = 'translateY(-3px)';
-                          e.currentTarget.style.borderColor = '#ff5722';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.boxShadow = '0 2px 12px rgba(0,0,0,0.06)';
-                          e.currentTarget.style.transform = 'translateY(0)';
-                          e.currentTarget.style.borderColor = '#ffeb3b';
+                          flexDirection: 'row',
+                          alignItems: 'flex-start',
+                          gap: '60px',
+                          padding: '60px 0',
+                          borderBottom: index !== calendarSubmissions.length - 1 ? '1px solid #e0e0e0' : 'none'
                         }}
                       >
-                        {/* LEFT - Date Box */}
+                        {/* LEFT - Tanggal dipisah: Day, Month, Year - font besar */}
                         <div style={{
-                          width: '140px',
-                          backgroundColor: '#ff5722',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          padding: '24px 16px',
-                          color: '#ffffff',
-                          textAlign: 'center'
+                          width: '180px',
+                          flexShrink: 0,
+                          textAlign: 'left'
                         }}>
                           <div style={{
-                            fontSize: '70px',
-                            fontWeight: '700',
-                            lineHeight: '1',
-                            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif"
-                          }}>
-                            {submissionDate.getDate()}
-                          </div>
-                          <div style={{
-                            fontSize: '20px',
-                            fontWeight: '500',
-                            textTransform: 'uppercase',
-                            marginTop: '8px',
-                            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif"
-                          }}>
-                            {formattedMonth}
-                          </div>
-                          <div style={{
-                            fontSize: '16px',
+                            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                            fontSize: '80px',
                             fontWeight: '400',
-                            opacity: 0.9,
-                            marginTop: '4px',
-                            fontFamily: "'Questrial', sans-serif"
+                            color: '#000000',
+                            lineHeight: '1',
+                            letterSpacing: '-0.02em'
                           }}>
-                            {formattedDay}
+                            {dateParts.day}
+                          </div>
+                          <div style={{
+                            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                            fontSize: '32px',
+                            fontWeight: '400',
+                            color: '#000000',
+                            letterSpacing: '-0.02em',
+                            marginTop: '8px'
+                          }}>
+                            {dateParts.month}
+                          </div>
+                          <div style={{
+                            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                            fontSize: '18px',
+                            fontWeight: '400',
+                            color: '#666666',
+                            marginTop: '4px'
+                          }}>
+                            {dateParts.year}
                           </div>
                         </div>
                         
-                        {/* MIDDLE - Info Meeting */}
+                        {/* MIDDLE - Informasi lengkap dengan font Aeonik, hitam putih */}
                         <div style={{
                           flex: 1,
-                          padding: '24px 32px',
                           display: 'flex',
                           flexDirection: 'column',
-                          justifyContent: 'center',
-                          gap: '16px',
-                          backgroundColor: '#ffffff'
+                          gap: '24px'
                         }}>
+                          {/* Nama dan Status */}
                           <div style={{
                             display: 'flex',
                             alignItems: 'center',
@@ -3634,130 +3703,182 @@ export default function HomePage(): React.JSX.Element {
                             <div style={{
                               fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
                               fontSize: '36px',
-                              fontWeight: '600',
-                              color: '#222',
-                              margin: 0,
+                              fontWeight: '400',
+                              color: '#000000',
                               letterSpacing: '-0.02em'
                             }}>
                               {submission.fullName}
                             </div>
                             <div style={{
-                              fontSize: '18px',
-                              padding: '6px 18px',
-                              borderRadius: '60px',
-                              backgroundColor: submission.status === 'pending' ? '#ffeb3b' : submission.status === 'confirmed' ? '#4caf50' : '#ff9800',
-                              color: submission.status === 'pending' ? '#333' : '#fff',
-                              fontWeight: '500',
-                              fontFamily: "'Questrial', sans-serif"
+                              fontSize: '16px',
+                              padding: '4px 16px',
+                              border: '1px solid #000000',
+                              backgroundColor: 'transparent',
+                              color: '#000000',
+                              fontWeight: '400',
+                              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                              letterSpacing: '0.02em'
                             }}>
-                              {submission.status === 'pending' ? 'MENUNGGU' : submission.status === 'confirmed' ? 'DISETUJUI' : 'SELESAI'}
+                              {submission.status === 'pending' ? 'PENDING' : submission.status === 'confirmed' ? 'CONFIRMED' : submission.status === 'completed' ? 'COMPLETED' : 'REJECTED'}
                             </div>
                           </div>
                           
+                          {/* Waktu dan Tipe Meeting */}
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '40px',
+                            flexWrap: 'wrap'
+                          }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                              <ClockIcon size={20} />
+                              <span style={{
+                                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                                fontSize: '20px',
+                                color: '#000000'
+                              }}>
+                                {submission.selectedTime} WIB
+                              </span>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                              <CalendarIcon size={20} />
+                              <span style={{
+                                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                                fontSize: '20px',
+                                color: '#000000'
+                              }}>
+                                {submission.meetingType}
+                              </span>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                              <StatusIcon status={submission.status} />
+                              <span style={{
+                                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                                fontSize: '20px',
+                                color: '#000000'
+                              }}>
+                                {submission.platform === 'google_meet' ? 'Google Meet' : 
+                                 submission.platform === 'zoom' ? 'Zoom' :
+                                 submission.platform === 'tatap_muka' ? 'Offline' : 'Via HP'}
+                              </span>
+                            </div>
+                          </div>
+                          
+                          {/* Alasan Percaya - deskripsi besar */}
+                          <div style={{
+                            marginTop: '8px',
+                            paddingTop: '16px'
+                          }}>
+                            <div style={{
+                              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                              fontSize: '16px',
+                              fontWeight: '400',
+                              color: '#666666',
+                              marginBottom: '12px',
+                              letterSpacing: '0.02em'
+                            }}>
+                              REASON TO TRUST
+                            </div>
+                            <div style={{
+                              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                              fontSize: '22px',
+                              fontWeight: '400',
+                              color: '#000000',
+                              lineHeight: '1.4',
+                              letterSpacing: '-0.01em'
+                            }}>
+                              "{submission.trustReason}"
+                            </div>
+                          </div>
+                          
+                          {/* Kontak: Email, Phone, Company */}
                           <div style={{
                             display: 'flex',
                             alignItems: 'center',
                             gap: '32px',
                             flexWrap: 'wrap',
-                            fontSize: '20px',
-                            color: '#666',
-                            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif"
+                            marginTop: '8px',
+                            paddingTop: '16px',
+                            borderTop: '1px solid #e0e0e0'
                           }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <circle cx="12" cy="12" r="10" stroke="#ff5722" strokeWidth="1.5"/>
-                                <path d="M12 8v4l3 3" stroke="#ff5722" strokeWidth="1.5" strokeLinecap="round"/>
-                              </svg>
-                              <span>{submission.selectedTime} WIB</span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                              <MailIcon size={18} />
+                              <span style={{
+                                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                                fontSize: '16px',
+                                color: '#000000'
+                              }}>
+                                {submission.email}
+                              </span>
                             </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M12 2L15 9H22L16 14L19 21L12 16.5L5 21L8 14L2 9H9L12 2Z" stroke="#ff5722" strokeWidth="1.5" fill="none"/>
-                              </svg>
-                              <span>{submission.meetingType}</span>
-                            </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="#ff5722" strokeWidth="1.5" fill="none"/>
-                              </svg>
-                              <span>{submission.trustReason.substring(0, 60)}...</span>
-                            </div>
-                          </div>
-                          
-                          <div style={{
-                            fontSize: '18px',
-                            color: '#888',
-                            fontFamily: "'Questrial', sans-serif",
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '24px',
-                            flexWrap: 'wrap'
-                          }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M4 4H20C21.1 4 22 4.9 22 6V20C22 21.1 21.1 22 20 22H4C2.9 22 2 21.1 2 20V6C2 4.9 2.9 4 4 4Z" stroke="#999" strokeWidth="1.5" fill="none"/>
-                                <path d="M8 2V6M16 2V6M3 10H21" stroke="#999" strokeWidth="1.5" strokeLinecap="round"/>
-                              </svg>
-                              <span>{submission.email}</span>
-                            </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M22 16.92V19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-2.08M2 6L12 13L22 6M4 4h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" stroke="#999" strokeWidth="1.5" fill="none"/>
-                              </svg>
-                              <span>{submission.phoneNumber}</span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                              <PhoneIcon size={18} />
+                              <span style={{
+                                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                                fontSize: '16px',
+                                color: '#000000'
+                              }}>
+                                {submission.phoneNumber}
+                              </span>
                             </div>
                             {submission.companyName && (
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                  <path d="M3 9L12 3L21 9L12 15L3 9Z" stroke="#999" strokeWidth="1.5" fill="none"/>
-                                  <path d="M5 11V17L12 21L19 17V11" stroke="#999" strokeWidth="1.5" fill="none"/>
-                                </svg>
-                                <span>{submission.companyName}</span>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <CompanyIcon size={18} />
+                                <span style={{
+                                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                                  fontSize: '16px',
+                                  color: '#000000'
+                                }}>
+                                  {submission.companyName}
+                                </span>
                               </div>
                             )}
                           </div>
                           
-                          {/* Admin Reply */}
+                          {/* Admin Reply - tanpa background warna-warni */}
                           {submission.adminReply && (
                             <div style={{
-                              marginTop: '12px',
-                              padding: '16px',
-                              backgroundColor: '#e8f5e9',
-                              borderRadius: '12px',
-                              borderLeft: '4px solid #4caf50'
+                              marginTop: '20px',
+                              paddingTop: '20px',
+                              borderTop: '1px solid #e0e0e0'
                             }}>
                               <div style={{
-                                fontSize: '14px',
-                                color: '#2e7d32',
-                                fontWeight: '600',
-                                marginBottom: '8px',
                                 display: 'flex',
                                 alignItems: 'center',
-                                gap: '8px'
+                                gap: '10px',
+                                marginBottom: '12px'
                               }}>
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="#2e7d32" strokeWidth="1.5" fill="none"/>
-                                </svg>
-                                <span>ADMIN REPLY: {submission.adminReply.repliedBy}</span>
+                                <MessageIcon size={18} />
+                                <span style={{
+                                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                                  fontSize: '14px',
+                                  fontWeight: '400',
+                                  color: '#666666',
+                                  letterSpacing: '0.02em'
+                                }}>
+                                  ADMIN REPLY · {submission.adminReply.repliedBy}
+                                </span>
                               </div>
-                              <div style={{ fontSize: '16px', color: '#333', lineHeight: '1.5' }}>
+                              <div style={{
+                                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                                fontSize: '18px',
+                                color: '#000000',
+                                lineHeight: '1.4'
+                              }}>
                                 {submission.adminReply.text}
                               </div>
                             </div>
                           )}
                         </div>
                         
-                        {/* RIGHT - Tautan ke Calendar Call dengan NORTH EAST ARROW & Admin Reply Button */}
+                        {/* RIGHT - Tombol dengan panah NORTH EAST ARROW dan NORTH WEST ARROW, tanpa hover efek */}
                         <div style={{
                           width: '200px',
+                          flexShrink: 0,
                           display: 'flex',
                           flexDirection: 'column',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          gap: '16px',
-                          padding: '24px',
-                          borderLeft: '2px solid #ffeb3b',
-                          backgroundColor: '#fffaf5'
+                          alignItems: 'flex-end',
+                          gap: '20px'
                         }}>
                           <button
                             onClick={() => {
@@ -3768,41 +3889,26 @@ export default function HomePage(): React.JSX.Element {
                             }}
                             style={{
                               display: 'flex',
-                              flexDirection: 'column',
                               alignItems: 'center',
-                              gap: '12px',
+                              justifyContent: 'space-between',
+                              gap: '16px',
                               backgroundColor: 'transparent',
-                              border: 'none',
+                              border: '1px solid #000000',
                               cursor: 'pointer',
                               fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
                               fontSize: '16px',
-                              fontWeight: '500',
-                              color: '#ff5722',
-                              padding: '12px 20px',
-                              borderRadius: '60px',
-                              transition: 'all 0.3s ease',
+                              fontWeight: '400',
+                              color: '#000000',
+                              padding: '12px 24px',
+                              borderRadius: '0',
                               width: '100%'
                             }}
-                            onMouseEnter={(e) => {
-                              e.currentTarget.style.backgroundColor = '#ff5722';
-                              e.currentTarget.style.color = '#ffffff';
-                              const svg = e.currentTarget.querySelector('svg path');
-                              if (svg) svg.setAttribute('stroke', '#ffffff');
-                            }}
-                            onMouseLeave={(e) => {
-                              e.currentTarget.style.backgroundColor = 'transparent';
-                              e.currentTarget.style.color = '#ff5722';
-                              const svg = e.currentTarget.querySelector('svg path');
-                              if (svg) svg.setAttribute('stroke', '#ff5722');
-                            }}
                           >
-                            <span>CALENDAR CALL</span>
-                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff5722" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                            </svg>
+                            <span>BOOK CALL</span>
+                            <NorthEastArrowIcon size={18} />
                           </button>
                           
-                          {/* Admin Reply Button - Hanya muncul jika user adalah admin */}
+                          {/* Admin Reply Button - hanya jika admin */}
                           {isAdmin && (
                             <button
                               onClick={() => {
@@ -3814,33 +3920,22 @@ export default function HomePage(): React.JSX.Element {
                               style={{
                                 display: 'flex',
                                 alignItems: 'center',
-                                justifyContent: 'center',
-                                gap: '8px',
-                                backgroundColor: '#000000',
-                                border: 'none',
+                                justifyContent: 'space-between',
+                                gap: '16px',
+                                backgroundColor: 'transparent',
+                                border: '1px solid #000000',
                                 cursor: 'pointer',
                                 fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
                                 fontSize: '14px',
-                                fontWeight: '500',
-                                color: '#ffffff',
-                                padding: '10px 16px',
-                                borderRadius: '60px',
-                                transition: 'all 0.3s ease',
+                                fontWeight: '400',
+                                color: '#000000',
+                                padding: '10px 20px',
+                                borderRadius: '0',
                                 width: '100%'
                               }}
-                              onMouseEnter={(e) => {
-                                e.currentTarget.style.backgroundColor = '#333333';
-                                e.currentTarget.style.transform = 'scale(1.02)';
-                              }}
-                              onMouseLeave={(e) => {
-                                e.currentTarget.style.backgroundColor = '#000000';
-                                e.currentTarget.style.transform = 'scale(1)';
-                              }}
                             >
-                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="#ffffff" strokeWidth="1.5" fill="none"/>
-                              </svg>
                               <span>{submission.adminReply ? 'EDIT REPLY' : 'REPLY'}</span>
+                              <NorthWestArrowIcon size={16} />
                             </button>
                           )}
                         </div>
@@ -3859,16 +3954,19 @@ export default function HomePage(): React.JSX.Element {
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    marginBottom: '24px'
+                    marginBottom: '32px',
+                    borderBottom: '1px solid #e0e0e0',
+                    paddingBottom: '20px'
                   }}>
                     <h2 style={{
                       fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                      fontSize: '32px',
-                      fontWeight: '500',
-                      color: '#ff5722',
-                      margin: 0
+                      fontSize: '28px',
+                      fontWeight: '400',
+                      color: '#000000',
+                      margin: 0,
+                      letterSpacing: '-0.02em'
                     }}>
-                      BALAS MEETING
+                      REPLY TO MEETING
                     </h2>
                     <button
                       onClick={() => {
@@ -3881,7 +3979,7 @@ export default function HomePage(): React.JSX.Element {
                         border: 'none',
                         fontSize: '28px',
                         cursor: 'pointer',
-                        color: '#999'
+                        color: '#000000'
                       }}
                     >
                       ✕
@@ -3889,49 +3987,49 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                   
                   <div style={{
-                    marginBottom: '20px',
-                    padding: '16px',
-                    backgroundColor: '#fff8e1',
-                    borderRadius: '16px'
+                    marginBottom: '24px',
+                    padding: '20px',
+                    backgroundColor: '#f5f5f5',
+                    borderRadius: '0'
                   }}>
                     <div style={{
-                      fontFamily: "'Questrial', sans-serif",
+                      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
                       fontSize: '14px',
-                      color: '#666',
+                      color: '#666666',
                       marginBottom: '8px'
                     }}>
-                      Dari: {selectedSubmission.fullName} ({selectedSubmission.email})
+                      FROM: {selectedSubmission.fullName} ({selectedSubmission.email})
                     </div>
                     <div style={{
-                      fontFamily: "'Questrial', sans-serif",
+                      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
                       fontSize: '14px',
-                      color: '#666',
+                      color: '#666666',
                       marginBottom: '8px'
                     }}>
-                      Tanggal: {selectedSubmission.selectedDateFormatted} - {selectedSubmission.selectedTime} WIB
+                      DATE: {selectedSubmission.selectedDateFormatted} - {selectedSubmission.selectedTime} WIB
                     </div>
                     <div style={{
-                      fontFamily: "'Questrial', sans-serif",
+                      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
                       fontSize: '14px',
-                      color: '#ff5722',
-                      marginTop: '8px',
-                      paddingTop: '8px',
-                      borderTop: '1px solid #ffeb3b'
+                      color: '#000000',
+                      marginTop: '12px',
+                      paddingTop: '12px',
+                      borderTop: '1px solid #cccccc'
                     }}>
-                      "{selectedSubmission.trustReason.substring(0, 100)}..."
+                      "{selectedSubmission.trustReason}"
                     </div>
                   </div>
                   
-                  <div style={{ marginBottom: '20px' }}>
+                  <div style={{ marginBottom: '24px' }}>
                     <label style={{
-                      fontFamily: "'Questrial', sans-serif",
+                      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
                       fontSize: '14px',
-                      fontWeight: '600',
-                      color: '#333',
+                      fontWeight: '400',
+                      color: '#000000',
                       display: 'block',
                       marginBottom: '8px'
                     }}>
-                      Status Meeting
+                      MEETING STATUS
                     </label>
                     <select
                       value={replyStatus}
@@ -3939,48 +4037,50 @@ export default function HomePage(): React.JSX.Element {
                       style={{
                         width: '100%',
                         padding: '12px 16px',
-                        borderRadius: '12px',
-                        border: '1px solid #ccc',
-                        fontFamily: "'Questrial', sans-serif",
-                        fontSize: '14px'
+                        borderRadius: '0',
+                        border: '1px solid #cccccc',
+                        fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                        fontSize: '14px',
+                        backgroundColor: '#ffffff'
                       }}
                     >
-                      <option value="pending">Menunggu</option>
-                      <option value="confirmed">Disetujui</option>
-                      <option value="completed">Selesai</option>
-                      <option value="rejected">Ditolak</option>
+                      <option value="pending">PENDING</option>
+                      <option value="confirmed">CONFIRMED</option>
+                      <option value="completed">COMPLETED</option>
+                      <option value="rejected">REJECTED</option>
                     </select>
                   </div>
                   
-                  <div style={{ marginBottom: '24px' }}>
+                  <div style={{ marginBottom: '28px' }}>
                     <label style={{
-                      fontFamily: "'Questrial', sans-serif",
+                      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
                       fontSize: '14px',
-                      fontWeight: '600',
-                      color: '#333',
+                      fontWeight: '400',
+                      color: '#000000',
                       display: 'block',
                       marginBottom: '8px'
                     }}>
-                      Pesan Balasan
+                      REPLY MESSAGE
                     </label>
                     <textarea
                       value={replyText}
                       onChange={(e) => setReplyText(e.target.value)}
-                      placeholder="Tulis balasan untuk user..."
+                      placeholder="Write your reply here..."
                       rows={5}
                       style={{
                         width: '100%',
                         padding: '12px 16px',
-                        borderRadius: '12px',
-                        border: '1px solid #ccc',
-                        fontFamily: "'Questrial', sans-serif",
+                        borderRadius: '0',
+                        border: '1px solid #cccccc',
+                        fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
                         fontSize: '14px',
-                        resize: 'vertical'
+                        resize: 'vertical',
+                        backgroundColor: '#ffffff'
                       }}
                     />
                   </div>
                   
-                  <div style={{ display: 'flex', gap: '12px' }}>
+                  <div style={{ display: 'flex', gap: '16px' }}>
                     <button
                       onClick={() => {
                         setShowReplyModal(false);
@@ -3990,36 +4090,34 @@ export default function HomePage(): React.JSX.Element {
                       style={{
                         flex: 1,
                         padding: '14px',
-                        borderRadius: '60px',
-                        border: '2px solid #ccc',
-                        backgroundColor: '#fff',
-                        color: '#333',
+                        borderRadius: '0',
+                        border: '1px solid #000000',
+                        backgroundColor: 'transparent',
+                        color: '#000000',
                         fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
                         fontSize: '16px',
-                        fontWeight: '500',
+                        fontWeight: '400',
                         cursor: 'pointer'
                       }}
                     >
-                      BATAL
+                      CANCEL
                     </button>
                     <button
                       onClick={handleAdminReply}
                       style={{
                         flex: 1,
                         padding: '14px',
-                        borderRadius: '60px',
-                        border: 'none',
-                        backgroundColor: '#ff5722',
-                        color: '#fff',
+                        borderRadius: '0',
+                        border: '1px solid #000000',
+                        backgroundColor: '#000000',
+                        color: '#ffffff',
                         fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
                         fontSize: '16px',
-                        fontWeight: '500',
+                        fontWeight: '400',
                         cursor: 'pointer'
                       }}
-                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e64a19'}
-                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ff5722'}
                     >
-                      KIRIM BALASAN
+                      SEND REPLY
                     </button>
                   </div>
                 </div>
@@ -4420,9 +4518,7 @@ export default function HomePage(): React.JSX.Element {
               onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
             >
               <span>BUKA CHAT</span>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
+              <NorthEastArrowIcon size={24} />
             </button>
           )}
 
@@ -4520,9 +4616,7 @@ export default function HomePage(): React.JSX.Element {
                       onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
                     >
                       <span>LOGOUT</span>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
+                      <NorthEastArrowIcon size={16} />
                     </button>
                   )}
                   <button
@@ -4734,9 +4828,7 @@ export default function HomePage(): React.JSX.Element {
                     }}
                   >
                     <span>KIRIM</span>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
+                    <NorthEastArrowIcon size={16} />
                   </button>
                 </div>
               ) : (
@@ -4766,9 +4858,7 @@ export default function HomePage(): React.JSX.Element {
                     onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
                   >
                     <span>LOGIN UNTUK CHAT</span>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
+                    <NorthEastArrowIcon size={18} />
                   </button>
                 </div>
               )}
@@ -5004,9 +5094,7 @@ export default function HomePage(): React.JSX.Element {
                 onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
               >
                 <span>{authMode === 'login' ? 'LOGIN' : 'DAFTAR'}</span>
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
+                <NorthEastArrowIcon size={20} />
               </button>
               <button
                 onClick={() => setAuthMode(authMode === 'login' ? 'register' : 'login')}
@@ -5543,9 +5631,7 @@ export default function HomePage(): React.JSX.Element {
                       }}
                     >
                       Schedule Meeting
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
+                      <NorthEastArrowIcon size={18} />
                     </button>
                   </div>
                 </div>
@@ -5984,9 +6070,7 @@ export default function HomePage(): React.JSX.Element {
                       }}
                     >
                       Confirm
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
+                      <NorthEastArrowIcon size={18} />
                     </button>
                   </div>
                 </div>
@@ -6067,9 +6151,7 @@ export default function HomePage(): React.JSX.Element {
                 onMouseLeave={(e) => e.currentTarget.style.color = '#aaaaaa'}
               >
                 Show details
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
+                <NorthEastArrowIcon size={14} />
               </span>
             </Link>
           </div>
