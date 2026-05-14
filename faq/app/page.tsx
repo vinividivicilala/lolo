@@ -1,4 +1,4 @@
-// app/page.tsx - Bagian Calendar Submissions dengan gaya seperti section Features
+// app/page.tsx - Bagian Calendar Submissions dengan gaya minimalis hitam putih
 
 'use client';
 
@@ -129,7 +129,7 @@ const NorthEastArrowIcon = ({ size = 24 }: { size?: number }) => (
 
 const NorthWestArrowIcon = ({ size = 24 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M17 7L7 17M7 17H17M17 17V7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M17 7L7 17M7 17H17M7 17V7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 
@@ -185,6 +185,15 @@ const MessageIcon = ({ size = 24 }: { size?: number }) => (
   </svg>
 );
 
+const StatusIcon = ({ status }: { status: string }) => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    {status === 'pending' && <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" fill="none"/>}
+    {status === 'confirmed' && <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>}
+    {status === 'completed' && <><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" fill="none"/><path d="M12 8v4l3 3" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round"/></>}
+    {status === 'rejected' && <><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" fill="none"/><line x1="8" y1="8" x2="16" y2="16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/><line x1="16" y1="8" x2="8" y2="16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></>}
+  </svg>
+);
+
 export default function HomePage(): React.JSX.Element {
   const [showPopup, setShowPopup] = useState(false);
   const [announcement, setAnnouncement] = useState<string | null>(null);
@@ -204,8 +213,8 @@ export default function HomePage(): React.JSX.Element {
   const [donationHover, setDonationHover] = useState(false);
   
   // State untuk warna background section Features
-  const [featuresBgColor, setFeaturesBgColor] = useState('#8ad000');
-  const [featuresTextColor, setFeaturesTextColor] = useState('#000000');
+  const [featuresBgColor, setFeaturesBgColor] = useState('#0000ff');
+  const [featuresTextColor, setFeaturesTextColor] = useState('#ffffff');
   
   // State untuk Shadow Page
   const [showShadowPage, setShowShadowPage] = useState(false);
@@ -402,8 +411,8 @@ export default function HomePage(): React.JSX.Element {
   };
 
   const getDayColor = (date: Date) => {
-    if (date.toDateString() === today.toDateString()) return "#8ad000";
-    if (date.toDateString() === tomorrow.toDateString()) return "#f38630";
+    if (date.toDateString() === today.toDateString()) return "#c5e800";
+    if (date.toDateString() === tomorrow.toDateString()) return "#ff69b4";
     return "#4a90e2";
   };
 
@@ -1621,10 +1630,10 @@ export default function HomePage(): React.JSX.Element {
       });
       
       if (isInFeatures && isAboveTrusted) {
-        if (featuresBgColor !== '#8ad000') {
-          setFeaturesBgColor('#8ad000');
-          setFeaturesTextColor('#000000');
-          updateFeaturesColors('#8ad000', '#000000');
+        if (featuresBgColor !== '#0000ff') {
+          setFeaturesBgColor('#0000ff');
+          setFeaturesTextColor('#ffffff');
+          updateFeaturesColors('#0000ff', '#ffffff');
         }
       } else if (!isAboveTrusted || !isInFeatures) {
         if (featuresBgColor !== '#ffffff') {
@@ -2499,7 +2508,7 @@ export default function HomePage(): React.JSX.Element {
           align-items: center;
           gap: 8px;
           padding: 12px 28px;
-          background-color: #8ad000;
+          background-color: #c5e800;
           border: none;
           border-radius: 60px;
           cursor: pointer;
@@ -2512,7 +2521,7 @@ export default function HomePage(): React.JSX.Element {
         }
         
         .calendar-btn:hover {
-          background-color: #7abf00;
+          background-color: #b0d100;
           transform: scale(1.02);
         }
 
@@ -2651,7 +2660,7 @@ export default function HomePage(): React.JSX.Element {
           font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
           font-weight: 400;
           font-size: 300px;
-          color: #000000;
+          color: #ffffff;
           letter-spacing: -0.02em;
           line-height: 1;
           margin: 0;
@@ -2903,46 +2912,22 @@ export default function HomePage(): React.JSX.Element {
           background: rgba(255, 255, 255, 0.5);
         }
 
-        /* Style untuk Calendar Submissions Section - seperti section features */
+        /* Style untuk Calendar Submissions Section - Minimalis Hitam Putih */
         .calendar-submissions-section {
           width: 100%;
           padding: 80px 80px;
-          background-color: #8ad000;
+          background-color: #ffffff;
+          border-top: 1px solid #e0e0e0;
           box-sizing: border-box;
         }
 
         .submission-item {
-          padding: 60px 0;
+          border-bottom: 1px solid #e0e0e0;
+          padding: 48px 0;
         }
 
         .submission-item:last-child {
-          padding-bottom: 0;
-        }
-
-        .date-day {
-          font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
-          font-size: 100px;
-          font-weight: 400;
-          color: #f38630;
-          line-height: 1;
-          letter-spacing: -0.02em;
-        }
-
-        .date-month {
-          font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
-          font-size: 40px;
-          font-weight: 400;
-          color: #f38630;
-          letter-spacing: -0.02em;
-          margin-top: 8px;
-        }
-
-        .date-year {
-          font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
-          font-size: 20px;
-          font-weight: 400;
-          color: #f38630;
-          margin-top: 4px;
+          border-bottom: none;
         }
 
         .reply-modal-overlay {
@@ -2966,6 +2951,13 @@ export default function HomePage(): React.JSX.Element {
           max-width: 600px;
           padding: 40px;
           box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+        }
+        
+        /* Font Aeonik untuk semua teks */
+        .aeonik-text {
+          font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
+          font-weight: 400;
+          color: #000000;
         }
         
       `}</style>
@@ -3169,7 +3161,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* SECTION FEATURES */}
+            {/* SECTION FEATURES - Sama seperti sebelumnya */}
             <div
               ref={featuresSectionRef}
               className="features-section"
@@ -3602,48 +3594,47 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* SECTION CALENDAR SUBMISSIONS - Style seperti section features */}
+            {/* SECTION CALENDAR SUBMISSIONS - Style minimalis hitam putih, font Aeonik 100px, tanpa card, tanpa hover, tanpa warna-warni */}
             {calendarSubmissions.length > 0 && (
               <div className="calendar-submissions-section">
-                {/* Header dengan font 300px dan panah SVG besar */}
+                {/* Header dengan font 100px dan panah SVG */}
                 <div style={{
                   fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                  fontSize: '300px',
+                  fontSize: '100px',
                   fontWeight: '400',
                   color: '#000000',
+                  marginBottom: '80px',
                   letterSpacing: '-0.02em',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  marginBottom: '80px'
+                  borderBottom: '1px solid #000000',
+                  paddingBottom: '40px'
                 }}>
                   <span>MEETING SCHEDULE</span>
                   <div style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '30px'
+                    gap: '20px'
                   }}>
                     <span style={{
-                      fontSize: '100px',
+                      fontSize: '60px',
                       color: '#000000',
                       fontWeight: '400'
                     }}>
                       ({calendarSubmissions.length})
                     </span>
-                    <NorthEastArrowIcon size={100} />
+                    <NorthEastArrowIcon size={60} />
                   </div>
                 </div>
                 
-                {/* Daftar submission - tanpa border, tanpa linebox */}
-                <div>
+                {/* Daftar submission - tanpa card, tanpa hover, border bottom saja */}
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column'
+                }}>
                   {calendarSubmissions.map((submission, index) => {
                     const dateParts = getDateParts(submission.selectedDate);
-                    // Pilih warna status: CONFIRMED warna #8ad000, PENDING warna #f38630, lainnya hitam
-                    const getStatusColor = (status: string) => {
-                      if (status === 'confirmed') return '#8ad000';
-                      if (status === 'pending') return '#f38630';
-                      return '#000000';
-                    };
                     
                     return (
                       <div
@@ -3653,43 +3644,65 @@ export default function HomePage(): React.JSX.Element {
                           display: 'flex',
                           flexDirection: 'row',
                           alignItems: 'flex-start',
-                          gap: '80px'
+                          gap: '60px',
+                          padding: '60px 0',
+                          borderBottom: index !== calendarSubmissions.length - 1 ? '1px solid #e0e0e0' : 'none'
                         }}
                       >
-                        {/* LEFT - Tanggal dengan warna #f38630, font besar */}
+                        {/* LEFT - Tanggal dipisah: Day, Month, Year - font besar */}
                         <div style={{
-                          width: '200px',
+                          width: '180px',
                           flexShrink: 0,
                           textAlign: 'left'
                         }}>
-                          <div className="date-day">
+                          <div style={{
+                            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                            fontSize: '80px',
+                            fontWeight: '400',
+                            color: '#000000',
+                            lineHeight: '1',
+                            letterSpacing: '-0.02em'
+                          }}>
                             {dateParts.day}
                           </div>
-                          <div className="date-month">
+                          <div style={{
+                            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                            fontSize: '32px',
+                            fontWeight: '400',
+                            color: '#000000',
+                            letterSpacing: '-0.02em',
+                            marginTop: '8px'
+                          }}>
                             {dateParts.month}
                           </div>
-                          <div className="date-year">
+                          <div style={{
+                            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                            fontSize: '18px',
+                            fontWeight: '400',
+                            color: '#666666',
+                            marginTop: '4px'
+                          }}>
                             {dateParts.year}
                           </div>
                         </div>
                         
-                        {/* MIDDLE - Informasi lengkap */}
+                        {/* MIDDLE - Informasi lengkap dengan font Aeonik, hitam putih */}
                         <div style={{
                           flex: 1,
                           display: 'flex',
                           flexDirection: 'column',
-                          gap: '30px'
+                          gap: '24px'
                         }}>
                           {/* Nama dan Status */}
                           <div style={{
                             display: 'flex',
                             alignItems: 'center',
-                            gap: '30px',
+                            gap: '24px',
                             flexWrap: 'wrap'
                           }}>
                             <div style={{
                               fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                              fontSize: '50px',
+                              fontSize: '36px',
                               fontWeight: '400',
                               color: '#000000',
                               letterSpacing: '-0.02em'
@@ -3697,18 +3710,16 @@ export default function HomePage(): React.JSX.Element {
                               {submission.fullName}
                             </div>
                             <div style={{
-                              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                              fontSize: '20px',
-                              padding: '6px 20px',
-                              border: `2px solid ${getStatusColor(submission.status)}`,
+                              fontSize: '16px',
+                              padding: '4px 16px',
+                              border: '1px solid #000000',
                               backgroundColor: 'transparent',
-                              color: getStatusColor(submission.status),
+                              color: '#000000',
                               fontWeight: '400',
+                              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
                               letterSpacing: '0.02em'
                             }}>
-                              {submission.status === 'pending' ? 'PENDING' : 
-                               submission.status === 'confirmed' ? 'CONFIRMED' : 
-                               submission.status === 'completed' ? 'COMPLETED' : 'REJECTED'}
+                              {submission.status === 'pending' ? 'PENDING' : submission.status === 'confirmed' ? 'CONFIRMED' : submission.status === 'completed' ? 'COMPLETED' : 'REJECTED'}
                             </div>
                           </div>
                           
@@ -3716,33 +3727,34 @@ export default function HomePage(): React.JSX.Element {
                           <div style={{
                             display: 'flex',
                             alignItems: 'center',
-                            gap: '50px',
+                            gap: '40px',
                             flexWrap: 'wrap'
                           }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                              <ClockIcon size={24} />
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                              <ClockIcon size={20} />
                               <span style={{
                                 fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                                fontSize: '24px',
+                                fontSize: '20px',
                                 color: '#000000'
                               }}>
                                 {submission.selectedTime} WIB
                               </span>
                             </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                              <CalendarIcon size={24} />
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                              <CalendarIcon size={20} />
                               <span style={{
                                 fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                                fontSize: '24px',
+                                fontSize: '20px',
                                 color: '#000000'
                               }}>
                                 {submission.meetingType}
                               </span>
                             </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                              <StatusIcon status={submission.status} />
                               <span style={{
                                 fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                                fontSize: '24px',
+                                fontSize: '20px',
                                 color: '#000000'
                               }}>
                                 {submission.platform === 'google_meet' ? 'Google Meet' : 
@@ -3754,23 +3766,22 @@ export default function HomePage(): React.JSX.Element {
                           
                           {/* Alasan Percaya - deskripsi besar */}
                           <div style={{
-                            marginTop: '10px',
-                            paddingTop: '20px'
+                            marginTop: '8px',
+                            paddingTop: '16px'
                           }}>
                             <div style={{
                               fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                              fontSize: '18px',
+                              fontSize: '16px',
                               fontWeight: '400',
-                              color: '#000000',
-                              marginBottom: '15px',
-                              letterSpacing: '0.02em',
-                              opacity: 0.6
+                              color: '#666666',
+                              marginBottom: '12px',
+                              letterSpacing: '0.02em'
                             }}>
                               REASON TO TRUST
                             </div>
                             <div style={{
                               fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                              fontSize: '28px',
+                              fontSize: '22px',
                               fontWeight: '400',
                               color: '#000000',
                               lineHeight: '1.4',
@@ -3784,37 +3795,38 @@ export default function HomePage(): React.JSX.Element {
                           <div style={{
                             display: 'flex',
                             alignItems: 'center',
-                            gap: '40px',
+                            gap: '32px',
                             flexWrap: 'wrap',
-                            marginTop: '10px',
-                            paddingTop: '20px'
+                            marginTop: '8px',
+                            paddingTop: '16px',
+                            borderTop: '1px solid #e0e0e0'
                           }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                              <MailIcon size={20} />
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                              <MailIcon size={18} />
                               <span style={{
                                 fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                                fontSize: '18px',
+                                fontSize: '16px',
                                 color: '#000000'
                               }}>
                                 {submission.email}
                               </span>
                             </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                              <PhoneIcon size={20} />
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                              <PhoneIcon size={18} />
                               <span style={{
                                 fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                                fontSize: '18px',
+                                fontSize: '16px',
                                 color: '#000000'
                               }}>
                                 {submission.phoneNumber}
                               </span>
                             </div>
                             {submission.companyName && (
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                <CompanyIcon size={20} />
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <CompanyIcon size={18} />
                                 <span style={{
                                   fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                                  fontSize: '18px',
+                                  fontSize: '16px',
                                   color: '#000000'
                                 }}>
                                   {submission.companyName}
@@ -3823,33 +3835,33 @@ export default function HomePage(): React.JSX.Element {
                             )}
                           </div>
                           
-                          {/* Admin Reply */}
+                          {/* Admin Reply - tanpa background warna-warni */}
                           {submission.adminReply && (
                             <div style={{
                               marginTop: '20px',
-                              paddingTop: '20px'
+                              paddingTop: '20px',
+                              borderTop: '1px solid #e0e0e0'
                             }}>
                               <div style={{
                                 display: 'flex',
                                 alignItems: 'center',
-                                gap: '12px',
-                                marginBottom: '15px'
+                                gap: '10px',
+                                marginBottom: '12px'
                               }}>
-                                <MessageIcon size={20} />
+                                <MessageIcon size={18} />
                                 <span style={{
                                   fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                                  fontSize: '16px',
+                                  fontSize: '14px',
                                   fontWeight: '400',
-                                  color: '#000000',
-                                  letterSpacing: '0.02em',
-                                  opacity: 0.6
+                                  color: '#666666',
+                                  letterSpacing: '0.02em'
                                 }}>
                                   ADMIN REPLY · {submission.adminReply.repliedBy}
                                 </span>
                               </div>
                               <div style={{
                                 fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                                fontSize: '22px',
+                                fontSize: '18px',
                                 color: '#000000',
                                 lineHeight: '1.4'
                               }}>
@@ -3859,9 +3871,9 @@ export default function HomePage(): React.JSX.Element {
                           )}
                         </div>
                         
-                        {/* RIGHT - Tombol */}
+                        {/* RIGHT - Tombol dengan panah NORTH EAST ARROW dan NORTH WEST ARROW, tanpa hover efek */}
                         <div style={{
-                          width: '220px',
+                          width: '200px',
                           flexShrink: 0,
                           display: 'flex',
                           flexDirection: 'column',
@@ -3879,20 +3891,21 @@ export default function HomePage(): React.JSX.Element {
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'space-between',
-                              gap: '20px',
+                              gap: '16px',
                               backgroundColor: 'transparent',
-                              border: '2px solid #000000',
+                              border: '1px solid #000000',
                               cursor: 'pointer',
                               fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                              fontSize: '18px',
+                              fontSize: '16px',
                               fontWeight: '400',
                               color: '#000000',
-                              padding: '14px 28px',
+                              padding: '12px 24px',
+                              borderRadius: '0',
                               width: '100%'
                             }}
                           >
                             <span>BOOK CALL</span>
-                            <NorthEastArrowIcon size={24} />
+                            <NorthEastArrowIcon size={18} />
                           </button>
                           
                           {/* Admin Reply Button - hanya jika admin */}
@@ -3908,20 +3921,21 @@ export default function HomePage(): React.JSX.Element {
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'space-between',
-                                gap: '20px',
+                                gap: '16px',
                                 backgroundColor: 'transparent',
-                                border: '2px solid #000000',
+                                border: '1px solid #000000',
                                 cursor: 'pointer',
                                 fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                                fontSize: '16px',
+                                fontSize: '14px',
                                 fontWeight: '400',
                                 color: '#000000',
-                                padding: '12px 24px',
+                                padding: '10px 20px',
+                                borderRadius: '0',
                                 width: '100%'
                               }}
                             >
                               <span>{submission.adminReply ? 'EDIT REPLY' : 'REPLY'}</span>
-                              <NorthWestArrowIcon size={20} />
+                              <NorthWestArrowIcon size={16} />
                             </button>
                           )}
                         </div>
@@ -3941,11 +3955,12 @@ export default function HomePage(): React.JSX.Element {
                     justifyContent: 'space-between',
                     alignItems: 'center',
                     marginBottom: '32px',
+                    borderBottom: '1px solid #e0e0e0',
                     paddingBottom: '20px'
                   }}>
                     <h2 style={{
                       fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                      fontSize: '32px',
+                      fontSize: '28px',
                       fontWeight: '400',
                       color: '#000000',
                       margin: 0,
@@ -3962,7 +3977,7 @@ export default function HomePage(): React.JSX.Element {
                       style={{
                         background: 'none',
                         border: 'none',
-                        fontSize: '32px',
+                        fontSize: '28px',
                         cursor: 'pointer',
                         color: '#000000'
                       }}
@@ -3972,47 +3987,47 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                   
                   <div style={{
-                    marginBottom: '28px',
-                    padding: '24px',
-                    backgroundColor: '#f5f5f5'
+                    marginBottom: '24px',
+                    padding: '20px',
+                    backgroundColor: '#f5f5f5',
+                    borderRadius: '0'
                   }}>
                     <div style={{
                       fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                      fontSize: '16px',
-                      color: '#000000',
-                      marginBottom: '10px',
-                      opacity: 0.6
+                      fontSize: '14px',
+                      color: '#666666',
+                      marginBottom: '8px'
                     }}>
                       FROM: {selectedSubmission.fullName} ({selectedSubmission.email})
                     </div>
                     <div style={{
                       fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                      fontSize: '16px',
-                      color: '#000000',
-                      marginBottom: '10px',
-                      opacity: 0.6
+                      fontSize: '14px',
+                      color: '#666666',
+                      marginBottom: '8px'
                     }}>
                       DATE: {selectedSubmission.selectedDateFormatted} - {selectedSubmission.selectedTime} WIB
                     </div>
                     <div style={{
                       fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                      fontSize: '18px',
+                      fontSize: '14px',
                       color: '#000000',
-                      marginTop: '15px',
-                      paddingTop: '15px'
+                      marginTop: '12px',
+                      paddingTop: '12px',
+                      borderTop: '1px solid #cccccc'
                     }}>
                       "{selectedSubmission.trustReason}"
                     </div>
                   </div>
                   
-                  <div style={{ marginBottom: '28px' }}>
+                  <div style={{ marginBottom: '24px' }}>
                     <label style={{
                       fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                      fontSize: '16px',
+                      fontSize: '14px',
                       fontWeight: '400',
                       color: '#000000',
                       display: 'block',
-                      marginBottom: '10px'
+                      marginBottom: '8px'
                     }}>
                       MEETING STATUS
                     </label>
@@ -4021,10 +4036,11 @@ export default function HomePage(): React.JSX.Element {
                       onChange={(e) => setReplyStatus(e.target.value as any)}
                       style={{
                         width: '100%',
-                        padding: '14px 18px',
-                        border: '2px solid #000000',
+                        padding: '12px 16px',
+                        borderRadius: '0',
+                        border: '1px solid #cccccc',
                         fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                        fontSize: '16px',
+                        fontSize: '14px',
                         backgroundColor: '#ffffff'
                       }}
                     >
@@ -4035,14 +4051,14 @@ export default function HomePage(): React.JSX.Element {
                     </select>
                   </div>
                   
-                  <div style={{ marginBottom: '32px' }}>
+                  <div style={{ marginBottom: '28px' }}>
                     <label style={{
                       fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                      fontSize: '16px',
+                      fontSize: '14px',
                       fontWeight: '400',
                       color: '#000000',
                       display: 'block',
-                      marginBottom: '10px'
+                      marginBottom: '8px'
                     }}>
                       REPLY MESSAGE
                     </label>
@@ -4053,17 +4069,18 @@ export default function HomePage(): React.JSX.Element {
                       rows={5}
                       style={{
                         width: '100%',
-                        padding: '14px 18px',
-                        border: '2px solid #000000',
+                        padding: '12px 16px',
+                        borderRadius: '0',
+                        border: '1px solid #cccccc',
                         fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                        fontSize: '16px',
+                        fontSize: '14px',
                         resize: 'vertical',
                         backgroundColor: '#ffffff'
                       }}
                     />
                   </div>
                   
-                  <div style={{ display: 'flex', gap: '20px' }}>
+                  <div style={{ display: 'flex', gap: '16px' }}>
                     <button
                       onClick={() => {
                         setShowReplyModal(false);
@@ -4072,12 +4089,13 @@ export default function HomePage(): React.JSX.Element {
                       }}
                       style={{
                         flex: 1,
-                        padding: '16px',
-                        border: '2px solid #000000',
+                        padding: '14px',
+                        borderRadius: '0',
+                        border: '1px solid #000000',
                         backgroundColor: 'transparent',
                         color: '#000000',
                         fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                        fontSize: '18px',
+                        fontSize: '16px',
                         fontWeight: '400',
                         cursor: 'pointer'
                       }}
@@ -4088,12 +4106,13 @@ export default function HomePage(): React.JSX.Element {
                       onClick={handleAdminReply}
                       style={{
                         flex: 1,
-                        padding: '16px',
-                        border: '2px solid #000000',
+                        padding: '14px',
+                        borderRadius: '0',
+                        border: '1px solid #000000',
                         backgroundColor: '#000000',
                         color: '#ffffff',
                         fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                        fontSize: '18px',
+                        fontSize: '16px',
                         fontWeight: '400',
                         cursor: 'pointer'
                       }}
@@ -4105,7 +4124,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             )}
 
-            {/* Bagian footer - sama seperti sebelumnya */}
+            {/* Bagian footer */}
             <div style={{
               width: '100%',
               position: 'relative',
@@ -5100,7 +5119,7 @@ export default function HomePage(): React.JSX.Element {
         </div>
       )}
 
-      {/* CALENDAR CALL MODAL */}
+      {/* CALENDAR CALL MODAL - Dengan toggle antara calendar dan form */}
       {showCalendarModal && (
         <div className="calendar-modal-overlay">
           <div ref={modalRef} className="calendar-modal" style={{ maxWidth: '1300px', maxHeight: '85vh', overflow: 'auto' }}>
@@ -5112,7 +5131,7 @@ export default function HomePage(): React.JSX.Element {
                 height: 'auto',
                 minHeight: '620px'
               }}>
-                {/* SISI KIRI - Info Profile */}
+                {/* SISI KIRI - Info Profile dengan nama user/admin */}
                 <div style={{
                   flex: 1.1,
                   padding: '36px',
@@ -5192,7 +5211,7 @@ export default function HomePage(): React.JSX.Element {
                     <div style={{
                       fontFamily: "'Questrial', sans-serif",
                       fontSize: '13px',
-                      color: '#8ad000',
+                      color: '#c5e800',
                       backgroundColor: '#1a1a1a',
                       display: 'inline-block',
                       padding: '5px 14px',
@@ -5410,7 +5429,7 @@ export default function HomePage(): React.JSX.Element {
                     }}
                     style={{
                       padding: '22px',
-                      backgroundColor: '#8ad000',
+                      backgroundColor: '#c5e800',
                       borderRadius: '20px',
                       color: '#000000',
                       cursor: 'pointer',
@@ -5480,7 +5499,7 @@ export default function HomePage(): React.JSX.Element {
                     }}
                     style={{
                       padding: '22px',
-                      backgroundColor: '#f38630',
+                      backgroundColor: '#ff69b4',
                       borderRadius: '20px',
                       color: '#ffffff',
                       cursor: 'pointer',
@@ -5541,7 +5560,7 @@ export default function HomePage(): React.JSX.Element {
                     </div>
                   </div>
 
-                  {/* Tombol Back dan Schedule Meeting */}
+                  {/* Tombol Back dan Schedule Meeting - Back pakai North West Arrow */}
                   <div style={{
                     display: 'flex',
                     gap: '12px',
@@ -5588,7 +5607,7 @@ export default function HomePage(): React.JSX.Element {
                       }}
                       style={{
                         padding: '14px 20px',
-                        backgroundColor: '#000000',
+                        backgroundColor: '#0000ff',
                         color: '#ffffff',
                         border: 'none',
                         borderRadius: '60px',
@@ -5603,11 +5622,11 @@ export default function HomePage(): React.JSX.Element {
                         gap: '10px'
                       }}
                       onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = '#333333';
+                        e.currentTarget.style.backgroundColor = '#2200dd';
                         e.currentTarget.style.transform = 'scale(1.02)';
                       }}
                       onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = '#000000';
+                        e.currentTarget.style.backgroundColor = '#0000ff';
                         e.currentTarget.style.transform = 'scale(1)';
                       }}
                     >
@@ -5711,7 +5730,7 @@ export default function HomePage(): React.JSX.Element {
                     <div style={{
                       fontFamily: "'Questrial', sans-serif",
                       fontSize: '13px',
-                      color: '#8ad000',
+                      color: '#c5e800',
                       backgroundColor: '#1a1a1a',
                       display: 'inline-block',
                       padding: '5px 14px',
@@ -6028,7 +6047,7 @@ export default function HomePage(): React.JSX.Element {
                       style={{
                         flex: 1,
                         padding: '12px 20px',
-                        backgroundColor: '#000000',
+                        backgroundColor: '#0000ff',
                         color: '#ffffff',
                         border: 'none',
                         borderRadius: '60px',
@@ -6042,11 +6061,11 @@ export default function HomePage(): React.JSX.Element {
                         gap: '10px'
                       }}
                       onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = '#333333';
+                        e.currentTarget.style.backgroundColor = '#2200dd';
                         e.currentTarget.style.transform = 'scale(1.02)';
                       }}
                       onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = '#000000';
+                        e.currentTarget.style.backgroundColor = '#0000ff';
                         e.currentTarget.style.transform = 'scale(1)';
                       }}
                     >
