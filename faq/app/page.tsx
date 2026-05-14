@@ -3595,8 +3595,6 @@ export default function HomePage(): React.JSX.Element {
             </div>
 
 
-// SECTION CALENDAR SUBMISSIONS - Style minimalis hitam putih, font besar, panah 100px
-
 {calendarSubmissions.length > 0 && (
   <div className="calendar-submissions-section" style={{
     width: '100%',
@@ -3607,7 +3605,7 @@ export default function HomePage(): React.JSX.Element {
     {/* Header dengan font 300px dan panah SVG 100px - tanpa garis bawah */}
     <div style={{
       fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-      fontSize: '300px',
+      fontSize: '190px',
       fontWeight: '400',
       color: '#000000',
       letterSpacing: '-0.02em',
