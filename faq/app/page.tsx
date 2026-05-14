@@ -244,10 +244,6 @@ export default function HomePage(): React.JSX.Element {
   const [replyText, setReplyText] = useState("");
   const [replyStatus, setReplyStatus] = useState<"pending" | "confirmed" | "completed" | "rejected">("confirmed");
   
-  // ===== REFS UNTUK STACKED CARDS =====
-  const stackedSectionRef = useRef<HTMLDivElement>(null);
-  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
-  
   const acceptBtnRef = useRef<HTMLButtonElement>(null);
   const declineBtnRef = useRef<HTMLButtonElement>(null);
   const contactBtnRef = useRef<HTMLButtonElement>(null);
@@ -1597,118 +1593,6 @@ export default function HomePage(): React.JSX.Element {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
   }, []);
-
-  // ===== GSAP STACKED CARDS ANIMATION (LINEBOX STYLE) =====
-  useEffect(() => {
-    if (isLoading) return;
-
-    // Kill existing ScrollTriggers untuk section ini
-    ScrollTrigger.getAll().forEach(trigger => {
-      if (trigger.vars.trigger === stackedSectionRef.current) trigger.kill();
-    });
-
-    const cards = cardRefs.current;
-    if (!cards.length || !cards[0]) return;
-
-    // Set initial state untuk semua card
-    gsap.set(cards[0], { opacity: 1, y: 0, zIndex: 1 });
-    for (let i = 1; i < cards.length; i++) {
-      gsap.set(cards[i], { opacity: 0, y: '100%', zIndex: i + 1 });
-    }
-
-    const totalCards = cards.length;
-    const startOffset = 10; // mulai dari 10% scroll section
-    const cardDuration = 22; // setiap card membutuhkan 22% scroll
-    
-    cards.forEach((card, idx) => {
-      if (!card) return;
-      
-      const startPercent = startOffset + (idx * cardDuration);
-      const endPercent = startOffset + ((idx + 1) * cardDuration);
-      
-      // Untuk card pertama, langsung muncul
-      if (idx === 0) {
-        ScrollTrigger.create({
-          trigger: stackedSectionRef.current,
-          start: `${startPercent}%`,
-          end: `${endPercent + 15}%`,
-          scrub: 1.5,
-          onUpdate: (self) => {
-            const progress = self.progress;
-            // Card 1 mulai menghilang setelah progress 60% dari rentangnya
-            if (progress > 0.6 && idx < totalCards - 1) {
-              const fadeProgress = (progress - 0.6) / 0.4;
-              gsap.to(card, {
-                opacity: 1 - fadeProgress,
-                duration: 0.1,
-                overwrite: true
-              });
-            } else {
-              gsap.to(card, { opacity: 1, duration: 0.1, overwrite: true });
-            }
-          }
-        });
-      } 
-      // Untuk card selanjutnya
-      else {
-        ScrollTrigger.create({
-          trigger: stackedSectionRef.current,
-          start: `${startPercent}%`,
-          end: `${endPercent}%`,
-          scrub: 1.5,
-          onUpdate: (self) => {
-            const progress = self.progress;
-            // Card muncul dari bawah (y: 100% -> 0%)
-            const yProgress = Math.min(1, progress * 1.5);
-            const newY = 100 - (yProgress * 100);
-            gsap.to(card, {
-              opacity: yProgress,
-              y: `${newY}%`,
-              duration: 0.1,
-              overwrite: true
-            });
-            
-            // Card sebelumnya mulai menghilang saat card baru sudah 60% muncul
-            if (idx > 0 && cards[idx - 1]) {
-              const prevCardFade = Math.min(1, Math.max(0, (progress - 0.5) / 0.5));
-              if (progress > 0.5) {
-                gsap.to(cards[idx - 1], {
-                  opacity: 1 - prevCardFade,
-                  duration: 0.1,
-                  overwrite: true
-                });
-              }
-            }
-          }
-        });
-      }
-    });
-    
-    // Card terakhir tetap full di akhir
-    ScrollTrigger.create({
-      trigger: stackedSectionRef.current,
-      start: `${startOffset + ((totalCards - 1) * cardDuration)}%`,
-      end: `100%`,
-      scrub: 1,
-      onUpdate: (self) => {
-        const lastCard = cards[totalCards - 1];
-        if (lastCard) {
-          gsap.to(lastCard, {
-            opacity: 1,
-            y: '0%',
-            duration: 0.1,
-            overwrite: true
-          });
-        }
-      }
-    });
-
-    return () => {
-      ScrollTrigger.getAll().forEach(trigger => {
-        if (trigger.vars.trigger === stackedSectionRef.current) trigger.kill();
-      });
-    };
-  }, [isLoading]);
 
   useEffect(() => {
     if (isLoading) return;
@@ -3076,11 +2960,6 @@ export default function HomePage(): React.JSX.Element {
           color: #000000;
         }
         
-        /* Stacked Cards Container */
-        .stacked-card {
-          will-change: transform, opacity;
-        }
-        
       `}</style>
       
       {/* LOADING OVERLAY */}
@@ -3282,7 +3161,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* SECTION FEATURES */}
+            {/* SECTION FEATURES - Sama seperti sebelumnya */}
             <div
               ref={featuresSectionRef}
               className="features-section"
@@ -3715,704 +3594,399 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* ============ START: STACKED CARDS SECTION (LINEBOX STYLE) ============ */}
-            <div
-              ref={stackedSectionRef}
-              style={{
-                position: 'relative',
-                width: '100%',
-                backgroundColor: '#ffffff',
-                padding: '120px 0',
-                boxSizing: 'border-box',
-                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif"
-              }}
-            >
-              {/* Container dengan tinggi total untuk scroll effect */}
-              <div style={{ position: 'relative', height: '400vh' }}>
-                {/* Sticky container yang akan di-pin */}
-                <div
-                  style={{
-                    position: 'sticky',
-                    top: '5%',
-                    width: '100%',
-                    height: '90vh',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    overflow: 'hidden'
-                  }}
-                >
-                  {/* Card 1 - Paling bawah */}
-                  <div
-                    ref={(el) => { if (el) cardRefs.current[0] = el; }}
-                    className="stacked-card"
-                    style={{
-                      position: 'absolute',
-                      width: '90%',
-                      maxWidth: '1400px',
-                      backgroundColor: '#ffffff',
-                      border: '2px solid #000000',
-                      padding: '80px 100px',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '32px',
-                      opacity: 1,
-                      zIndex: 1,
-                      transition: 'box-shadow 0.3s ease',
-                      boxSizing: 'border-box'
-                    }}
-                  >
-                    <div style={{
-                      fontSize: '80px',
-                      fontWeight: '400',
-                      color: '#000000',
-                      letterSpacing: '-0.02em',
-                      borderBottom: '2px solid #000000',
-                      paddingBottom: '20px',
-                      display: 'inline-block',
-                      width: 'fit-content'
-                    }}>
-                      .01
-                    </div>
-                    <div style={{
-                      fontSize: '64px',
-                      fontWeight: '500',
-                      color: '#000000',
-                      letterSpacing: '-0.02em',
-                      lineHeight: '1.2'
-                    }}>
-                      Initial Consultation
-                    </div>
-                    <div style={{
-                      fontSize: '24px',
-                      color: '#333333',
-                      lineHeight: '1.6',
-                      maxWidth: '80%'
-                    }}>
-                      We'll have a meeting to discuss the project details, goals, expectations, and deadlines. 
-                      During this meeting, we'll chat about everything in a relaxed manner, making sure all 
-                      your questions are answered and that we're all set to move forward together.
-                    </div>
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '16px',
-                        fontSize: '18px',
-                        fontWeight: '500',
-                        color: '#000000',
-                        marginTop: '20px',
-                        cursor: 'pointer'
-                      }}
-                      onClick={() => window.open('#', '_blank')}
-                    >
-                      <span>EXPLORE PROJECT</span>
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </div>
-                  </div>
 
-                  {/* Card 2 */}
-                  <div
-                    ref={(el) => { if (el) cardRefs.current[1] = el; }}
-                    className="stacked-card"
-                    style={{
-                      position: 'absolute',
-                      width: '90%',
-                      maxWidth: '1400px',
-                      backgroundColor: '#ffffff',
-                      border: '2px solid #000000',
-                      padding: '80px 100px',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '32px',
-                      opacity: 0,
-                      zIndex: 2,
-                      transform: 'translateY(100%)',
-                      transition: 'box-shadow 0.3s ease',
-                      boxSizing: 'border-box'
-                    }}
-                  >
-                    <div style={{
-                      fontSize: '80px',
-                      fontWeight: '400',
-                      color: '#000000',
-                      letterSpacing: '-0.02em',
-                      borderBottom: '2px solid #000000',
-                      paddingBottom: '20px',
-                      display: 'inline-block',
-                      width: 'fit-content'
-                    }}>
-                      .02
-                    </div>
-                    <div style={{
-                      fontSize: '64px',
-                      fontWeight: '500',
-                      color: '#000000',
-                      letterSpacing: '-0.02em',
-                      lineHeight: '1.2'
-                    }}>
-                      Design Review
-                    </div>
-                    <div style={{
-                      fontSize: '24px',
-                      color: '#333333',
-                      lineHeight: '1.6',
-                      maxWidth: '80%'
-                    }}>
-                      I'll go through your designs to fully understand your vision. Once I have a clear 
-                      understanding of your ideas, I'll analyze them in detail, considering all aspects 
-                      and enhancements to ensure the final product aligns perfectly with your goals and expectations.
-                    </div>
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '16px',
-                        fontSize: '18px',
-                        fontWeight: '500',
-                        color: '#000000',
-                        marginTop: '20px',
-                        cursor: 'pointer'
-                      }}
-                      onClick={() => window.open('#', '_blank')}
-                    >
-                      <span>EXPLORE PROJECT</span>
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </div>
-                  </div>
-
-                  {/* Card 3 */}
-                  <div
-                    ref={(el) => { if (el) cardRefs.current[2] = el; }}
-                    className="stacked-card"
-                    style={{
-                      position: 'absolute',
-                      width: '90%',
-                      maxWidth: '1400px',
-                      backgroundColor: '#ffffff',
-                      border: '2px solid #000000',
-                      padding: '80px 100px',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '32px',
-                      opacity: 0,
-                      zIndex: 3,
-                      transform: 'translateY(100%)',
-                      transition: 'box-shadow 0.3s ease',
-                      boxSizing: 'border-box'
-                    }}
-                  >
-                    <div style={{
-                      fontSize: '80px',
-                      fontWeight: '400',
-                      color: '#000000',
-                      letterSpacing: '-0.02em',
-                      borderBottom: '2px solid #000000',
-                      paddingBottom: '20px',
-                      display: 'inline-block',
-                      width: 'fit-content'
-                    }}>
-                      .03
-                    </div>
-                    <div style={{
-                      fontSize: '64px',
-                      fontWeight: '500',
-                      color: '#000000',
-                      letterSpacing: '-0.02em',
-                      lineHeight: '1.2'
-                    }}>
-                      Development
-                    </div>
-                    <div style={{
-                      fontSize: '24px',
-                      color: '#333333',
-                      lineHeight: '1.6',
-                      maxWidth: '80%'
-                    }}>
-                      I'll code the site using the best web development practices to ensure optimal performance 
-                      and responsive design. I'll make sure it's accessible on all devices, providing a smooth 
-                      user experience, with modern techniques for a beautiful interface.
-                    </div>
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '16px',
-                        fontSize: '18px',
-                        fontWeight: '500',
-                        color: '#000000',
-                        marginTop: '20px',
-                        cursor: 'pointer'
-                      }}
-                      onClick={() => window.open('#', '_blank')}
-                    >
-                      <span>EXPLORE PROJECT</span>
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </div>
-                  </div>
-
-                  {/* Card 4 - Paling atas (full di akhir scroll) */}
-                  <div
-                    ref={(el) => { if (el) cardRefs.current[3] = el; }}
-                    className="stacked-card"
-                    style={{
-                      position: 'absolute',
-                      width: '90%',
-                      maxWidth: '1400px',
-                      backgroundColor: '#ffffff',
-                      border: '2px solid #000000',
-                      padding: '80px 100px',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '32px',
-                      opacity: 0,
-                      zIndex: 4,
-                      transform: 'translateY(100%)',
-                      transition: 'box-shadow 0.3s ease',
-                      boxSizing: 'border-box'
-                    }}
-                  >
-                    <div style={{
-                      fontSize: '80px',
-                      fontWeight: '400',
-                      color: '#000000',
-                      letterSpacing: '-0.02em',
-                      borderBottom: '2px solid #000000',
-                      paddingBottom: '20px',
-                      display: 'inline-block',
-                      width: 'fit-content'
-                    }}>
-                      .04
-                    </div>
-                    <div style={{
-                      fontSize: '64px',
-                      fontWeight: '500',
-                      color: '#000000',
-                      letterSpacing: '-0.02em',
-                      lineHeight: '1.2'
-                    }}>
-                      Review and Testing
-                    </div>
-                    <div style={{
-                      fontSize: '24px',
-                      color: '#333333',
-                      lineHeight: '1.6',
-                      maxWidth: '80%'
-                    }}>
-                      Once the site is completed, we'll go through a testing phase to make sure everything 
-                      works perfectly across all devices and browsers. I'll assist with launching and provide 
-                      support to address any issues that might arise after the launch.
-                    </div>
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '16px',
-                        fontSize: '18px',
-                        fontWeight: '500',
-                        color: '#000000',
-                        marginTop: '20px',
-                        cursor: 'pointer'
-                      }}
-                      onClick={() => window.open('#', '_blank')}
-                    >
-                      <span>EXPLORE PROJECT</span>
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </div>
-                  </div>
-                </div>
+{calendarSubmissions.length > 0 && (
+  <div className="calendar-submissions-section" style={{
+    width: '100%',
+    padding: '120px 80px',
+    backgroundColor: '#ffffff',
+    boxSizing: 'border-box'
+  }}>
+    {/* Header dengan font 300px dan panah SVG 100px - tanpa garis bawah */}
+    <div style={{
+      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+      fontSize: '190px',
+      fontWeight: '400',
+      color: '#000000',
+      letterSpacing: '-0.02em',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: '100px',
+      lineHeight: '1'
+    }}>
+      <span>MEETING SCHEDULE</span>
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '30px'
+      }}>
+        <span style={{
+          fontSize: '100px',
+          color: '#000000',
+          fontWeight: '400'
+        }}>
+          ({calendarSubmissions.length})
+        </span>
+        {/* NORTH EAST ARROW - 100px */}
+        <svg width="100" height="100" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </div>
+    </div>
+    
+    {/* Daftar submission - tanpa card, tanpa hover, tanpa linebox (tanpa border) */}
+    <div style={{
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '80px'
+    }}>
+      {calendarSubmissions.map((submission, index) => {
+        const dateParts = getDateParts(submission.selectedDate);
+        
+        return (
+          <div
+            key={submission.id}
+            style={{
+              display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'flex-start',
+              gap: '80px'
+            }}
+          >
+            {/* LEFT - Tanggal dipisah: Day, Month, Year - font besar */}
+            <div style={{
+              width: '200px',
+              flexShrink: 0,
+              textAlign: 'left'
+            }}>
+              <div style={{
+                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                fontSize: '100px',
+                fontWeight: '400',
+                color: '#000000',
+                lineHeight: '1',
+                letterSpacing: '-0.02em'
+              }}>
+                {dateParts.day}
+              </div>
+              <div style={{
+                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                fontSize: '40px',
+                fontWeight: '400',
+                color: '#000000',
+                letterSpacing: '-0.02em',
+                marginTop: '12px'
+              }}>
+                {dateParts.month}
+              </div>
+              <div style={{
+                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                fontSize: '24px',
+                fontWeight: '400',
+                color: '#666666',
+                marginTop: '8px'
+              }}>
+                {dateParts.year}
               </div>
             </div>
-            {/* ============ END: STACKED CARDS SECTION ============ */}
-
-            {/* CALENDAR SUBMISSIONS SECTION */}
-            {calendarSubmissions.length > 0 && (
-              <div className="calendar-submissions-section" style={{
-                width: '100%',
-                padding: '120px 80px',
-                backgroundColor: '#ffffff',
-                boxSizing: 'border-box'
+            
+            {/* MIDDLE - Informasi lengkap */}
+            <div style={{
+              flex: 1,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '32px'
+            }}>
+              {/* Nama dan Status */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '40px',
+                flexWrap: 'wrap'
               }}>
-                {/* Header dengan font 300px dan panah SVG 100px - tanpa garis bawah */}
                 <div style={{
                   fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                  fontSize: '190px',
+                  fontSize: '48px',
                   fontWeight: '400',
                   color: '#000000',
-                  letterSpacing: '-0.02em',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  marginBottom: '100px',
-                  lineHeight: '1'
+                  letterSpacing: '-0.02em'
                 }}>
-                  <span>MEETING SCHEDULE</span>
+                  {submission.fullName}
+                </div>
+                <div style={{
+                  fontSize: '20px',
+                  padding: '6px 24px',
+                  border: '1px solid #000000',
+                  backgroundColor: 'transparent',
+                  color: '#000000',
+                  fontWeight: '400',
+                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                  letterSpacing: '0.02em'
+                }}>
+                  {submission.status === 'pending' ? 'PENDING' : 
+                   submission.status === 'confirmed' ? 'CONFIRMED' : 
+                   submission.status === 'completed' ? 'COMPLETED' : 'REJECTED'}
+                </div>
+              </div>
+              
+              {/* Waktu dan Tipe Meeting */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '60px',
+                flexWrap: 'wrap'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  {/* Clock SVG */}
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="10" stroke="#000000" strokeWidth="1.5"/>
+                    <polyline points="12 6 12 12 16 14" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  <span style={{
+                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                    fontSize: '28px',
+                    color: '#000000'
+                  }}>
+                    {submission.selectedTime} WIB
+                  </span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  {/* Calendar SVG */}
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke="#000000" strokeWidth="1.5"/>
+                    <line x1="8" y1="2" x2="8" y2="6" stroke="#000000" strokeWidth="1.5" strokeLinecap="round"/>
+                    <line x1="16" y1="2" x2="16" y2="6" stroke="#000000" strokeWidth="1.5" strokeLinecap="round"/>
+                    <line x1="3" y1="10" x2="21" y2="10" stroke="#000000" strokeWidth="1.5" strokeLinecap="round"/>
+                  </svg>
+                  <span style={{
+                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                    fontSize: '28px',
+                    color: '#000000'
+                  }}>
+                    {submission.meetingType}
+                  </span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  {/* Platform SVG */}
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="#000000" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  <span style={{
+                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                    fontSize: '28px',
+                    color: '#000000'
+                  }}>
+                    {submission.platform === 'google_meet' ? 'Google Meet' : 
+                     submission.platform === 'zoom' ? 'Zoom' :
+                     submission.platform === 'tatap_muka' ? 'Offline' : 'Via HP'}
+                  </span>
+                </div>
+              </div>
+              
+              {/* Alasan Percaya - deskripsi besar */}
+              <div style={{
+                marginTop: '16px'
+              }}>
+                <div style={{
+                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                  fontSize: '20px',
+                  fontWeight: '400',
+                  color: '#999999',
+                  marginBottom: '20px',
+                  letterSpacing: '0.05em'
+                }}>
+                  REASON TO TRUST
+                </div>
+                <div style={{
+                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                  fontSize: '32px',
+                  fontWeight: '400',
+                  color: '#000000',
+                  lineHeight: '1.4',
+                  letterSpacing: '-0.01em'
+                }}>
+                  "{submission.trustReason}"
+                </div>
+              </div>
+              
+              {/* Kontak: Email, Phone, Company */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '48px',
+                flexWrap: 'wrap',
+                marginTop: '16px'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="2" y="4" width="20" height="16" rx="2" ry="2" stroke="#000000" strokeWidth="1.5"/>
+                    <polyline points="22 7 12 13 2 7" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  <span style={{
+                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                    fontSize: '22px',
+                    color: '#000000'
+                  }}>
+                    {submission.email}
+                  </span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" stroke="#000000" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  <span style={{
+                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                    fontSize: '22px',
+                    color: '#000000'
+                  }}>
+                    {submission.phoneNumber}
+                  </span>
+                </div>
+                {submission.companyName && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <rect x="4" y="4" width="16" height="16" rx="2" ry="2" stroke="#000000" strokeWidth="1.5"/>
+                      <line x1="9" y1="4" x2="9" y2="20" stroke="#000000" strokeWidth="1.5"/>
+                      <line x1="15" y1="4" x2="15" y2="20" stroke="#000000" strokeWidth="1.5"/>
+                      <line x1="4" y1="9" x2="20" y2="9" stroke="#000000" strokeWidth="1.5"/>
+                      <line x1="4" y1="15" x2="20" y2="15" stroke="#000000" strokeWidth="1.5"/>
+                    </svg>
+                    <span style={{
+                      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                      fontSize: '22px',
+                      color: '#000000'
+                    }}>
+                      {submission.companyName}
+                    </span>
+                  </div>
+                )}
+              </div>
+              
+              {/* Admin Reply */}
+              {submission.adminReply && (
+                <div style={{
+                  marginTop: '24px'
+                }}>
                   <div style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '30px'
+                    gap: '14px',
+                    marginBottom: '16px'
                   }}>
-                    <span style={{
-                      fontSize: '100px',
-                      color: '#000000',
-                      fontWeight: '400'
-                    }}>
-                      ({calendarSubmissions.length})
-                    </span>
-                    {/* NORTH EAST ARROW - 100px */}
-                    <svg width="100" height="100" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="#000000" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
+                    <span style={{
+                      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                      fontSize: '18px',
+                      fontWeight: '400',
+                      color: '#999999',
+                      letterSpacing: '0.05em'
+                    }}>
+                      ADMIN REPLY · {submission.adminReply.repliedBy}
+                    </span>
+                  </div>
+                  <div style={{
+                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                    fontSize: '24px',
+                    color: '#000000',
+                    lineHeight: '1.4',
+                    paddingLeft: '38px'
+                  }}>
+                    {submission.adminReply.text}
                   </div>
                 </div>
-                
-                {/* Daftar submission */}
-                <div style={{
+              )}
+            </div>
+            
+            {/* RIGHT - Tombol dengan NORTH EAST ARROW dan NORTH WEST ARROW 50px */}
+            <div style={{
+              width: '220px',
+              flexShrink: 0,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'flex-end',
+              gap: '24px'
+            }}>
+              <button
+                onClick={() => {
+                  setShowCalendarModal(true);
+                  setShowFormView(false);
+                  setSelectedDate(null);
+                  setSelectedTime("");
+                }}
+                style={{
                   display: 'flex',
-                  flexDirection: 'column',
-                  gap: '80px'
-                }}>
-                  {calendarSubmissions.map((submission) => {
-                    const dateParts = getDateParts(submission.selectedDate);
-                    
-                    return (
-                      <div
-                        key={submission.id}
-                        style={{
-                          display: 'flex',
-                          flexDirection: 'row',
-                          alignItems: 'flex-start',
-                          gap: '80px'
-                        }}
-                      >
-                        {/* LEFT - Tanggal */}
-                        <div style={{
-                          width: '200px',
-                          flexShrink: 0,
-                          textAlign: 'left'
-                        }}>
-                          <div style={{
-                            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                            fontSize: '100px',
-                            fontWeight: '400',
-                            color: '#000000',
-                            lineHeight: '1',
-                            letterSpacing: '-0.02em'
-                          }}>
-                            {dateParts.day}
-                          </div>
-                          <div style={{
-                            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                            fontSize: '40px',
-                            fontWeight: '400',
-                            color: '#000000',
-                            letterSpacing: '-0.02em',
-                            marginTop: '12px'
-                          }}>
-                            {dateParts.month}
-                          </div>
-                          <div style={{
-                            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                            fontSize: '24px',
-                            fontWeight: '400',
-                            color: '#666666',
-                            marginTop: '8px'
-                          }}>
-                            {dateParts.year}
-                          </div>
-                        </div>
-                        
-                        {/* MIDDLE - Informasi lengkap */}
-                        <div style={{
-                          flex: 1,
-                          display: 'flex',
-                          flexDirection: 'column',
-                          gap: '32px'
-                        }}>
-                          {/* Nama dan Status */}
-                          <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '40px',
-                            flexWrap: 'wrap'
-                          }}>
-                            <div style={{
-                              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                              fontSize: '48px',
-                              fontWeight: '400',
-                              color: '#000000',
-                              letterSpacing: '-0.02em'
-                            }}>
-                              {submission.fullName}
-                            </div>
-                            <div style={{
-                              fontSize: '20px',
-                              padding: '6px 24px',
-                              border: '1px solid #000000',
-                              backgroundColor: 'transparent',
-                              color: '#000000',
-                              fontWeight: '400',
-                              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                              letterSpacing: '0.02em'
-                            }}>
-                              {submission.status === 'pending' ? 'PENDING' : 
-                               submission.status === 'confirmed' ? 'CONFIRMED' : 
-                               submission.status === 'completed' ? 'COMPLETED' : 'REJECTED'}
-                            </div>
-                          </div>
-                          
-                          {/* Waktu dan Tipe Meeting */}
-                          <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '60px',
-                            flexWrap: 'wrap'
-                          }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <circle cx="12" cy="12" r="10" stroke="#000000" strokeWidth="1.5"/>
-                                <polyline points="12 6 12 12 16 14" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                              </svg>
-                              <span style={{
-                                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                                fontSize: '28px',
-                                color: '#000000'
-                              }}>
-                                {submission.selectedTime} WIB
-                              </span>
-                            </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke="#000000" strokeWidth="1.5"/>
-                                <line x1="8" y1="2" x2="8" y2="6" stroke="#000000" strokeWidth="1.5" strokeLinecap="round"/>
-                                <line x1="16" y1="2" x2="16" y2="6" stroke="#000000" strokeWidth="1.5" strokeLinecap="round"/>
-                                <line x1="3" y1="10" x2="21" y2="10" stroke="#000000" strokeWidth="1.5" strokeLinecap="round"/>
-                              </svg>
-                              <span style={{
-                                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                                fontSize: '28px',
-                                color: '#000000'
-                              }}>
-                                {submission.meetingType}
-                              </span>
-                            </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="#000000" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-                              </svg>
-                              <span style={{
-                                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                                fontSize: '28px',
-                                color: '#000000'
-                              }}>
-                                {submission.platform === 'google_meet' ? 'Google Meet' : 
-                                 submission.platform === 'zoom' ? 'Zoom' :
-                                 submission.platform === 'tatap_muka' ? 'Offline' : 'Via HP'}
-                              </span>
-                            </div>
-                          </div>
-                          
-                          {/* Alasan Percaya */}
-                          <div style={{
-                            marginTop: '16px'
-                          }}>
-                            <div style={{
-                              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                              fontSize: '20px',
-                              fontWeight: '400',
-                              color: '#999999',
-                              marginBottom: '20px',
-                              letterSpacing: '0.05em'
-                            }}>
-                              REASON TO TRUST
-                            </div>
-                            <div style={{
-                              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                              fontSize: '32px',
-                              fontWeight: '400',
-                              color: '#000000',
-                              lineHeight: '1.4',
-                              letterSpacing: '-0.01em'
-                            }}>
-                              "{submission.trustReason}"
-                            </div>
-                          </div>
-                          
-                          {/* Kontak */}
-                          <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '48px',
-                            flexWrap: 'wrap',
-                            marginTop: '16px'
-                          }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <rect x="2" y="4" width="20" height="16" rx="2" ry="2" stroke="#000000" strokeWidth="1.5"/>
-                                <polyline points="22 7 12 13 2 7" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                              </svg>
-                              <span style={{
-                                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                                fontSize: '22px',
-                                color: '#000000'
-                              }}>
-                                {submission.email}
-                              </span>
-                            </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" stroke="#000000" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-                              </svg>
-                              <span style={{
-                                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                                fontSize: '22px',
-                                color: '#000000'
-                              }}>
-                                {submission.phoneNumber}
-                              </span>
-                            </div>
-                            {submission.companyName && (
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                  <rect x="4" y="4" width="16" height="16" rx="2" ry="2" stroke="#000000" strokeWidth="1.5"/>
-                                  <line x1="9" y1="4" x2="9" y2="20" stroke="#000000" strokeWidth="1.5"/>
-                                  <line x1="15" y1="4" x2="15" y2="20" stroke="#000000" strokeWidth="1.5"/>
-                                  <line x1="4" y1="9" x2="20" y2="9" stroke="#000000" strokeWidth="1.5"/>
-                                  <line x1="4" y1="15" x2="20" y2="15" stroke="#000000" strokeWidth="1.5"/>
-                                </svg>
-                                <span style={{
-                                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                                  fontSize: '22px',
-                                  color: '#000000'
-                                }}>
-                                  {submission.companyName}
-                                </span>
-                              </div>
-                            )}
-                          </div>
-                          
-                          {/* Admin Reply */}
-                          {submission.adminReply && (
-                            <div style={{
-                              marginTop: '24px'
-                            }}>
-                              <div style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '14px',
-                                marginBottom: '16px'
-                              }}>
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="#000000" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-                                </svg>
-                                <span style={{
-                                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                                  fontSize: '18px',
-                                  fontWeight: '400',
-                                  color: '#999999',
-                                  letterSpacing: '0.05em'
-                                }}>
-                                  ADMIN REPLY · {submission.adminReply.repliedBy}
-                                </span>
-                              </div>
-                              <div style={{
-                                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                                fontSize: '24px',
-                                color: '#000000',
-                                lineHeight: '1.4',
-                                paddingLeft: '38px'
-                              }}>
-                                {submission.adminReply.text}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                        
-                        {/* RIGHT - Tombol */}
-                        <div style={{
-                          width: '220px',
-                          flexShrink: 0,
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'flex-end',
-                          gap: '24px'
-                        }}>
-                          <button
-                            onClick={() => {
-                              setShowCalendarModal(true);
-                              setShowFormView(false);
-                              setSelectedDate(null);
-                              setSelectedTime("");
-                            }}
-                            style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'space-between',
-                              gap: '20px',
-                              backgroundColor: 'transparent',
-                              border: '1px solid #000000',
-                              cursor: 'pointer',
-                              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                              fontSize: '20px',
-                              fontWeight: '400',
-                              color: '#000000',
-                              padding: '16px 28px',
-                              borderRadius: '0',
-                              width: '100%'
-                            }}
-                          >
-                            <span>BOOK CALL</span>
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                            </svg>
-                          </button>
-                          
-                          {isAdmin && (
-                            <button
-                              onClick={() => {
-                                setSelectedSubmission(submission);
-                                setReplyText(submission.adminReply?.text || "");
-                                setReplyStatus(submission.status);
-                                setShowReplyModal(true);
-                              }}
-                              style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'space-between',
-                                gap: '20px',
-                                backgroundColor: 'transparent',
-                                border: '1px solid #000000',
-                                cursor: 'pointer',
-                                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                                fontSize: '18px',
-                                fontWeight: '400',
-                                color: '#000000',
-                                padding: '14px 24px',
-                                borderRadius: '0',
-                                width: '100%'
-                              }}
-                            >
-                              <span>{submission.adminReply ? 'EDIT REPLY' : 'REPLY'}</span>
-                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M17 7L7 17M7 17H17M7 17V7" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                              </svg>
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '20px',
+                  backgroundColor: 'transparent',
+                  border: '1px solid #000000',
+                  cursor: 'pointer',
+                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                  fontSize: '20px',
+                  fontWeight: '400',
+                  color: '#000000',
+                  padding: '16px 28px',
+                  borderRadius: '0',
+                  width: '100%'
+                }}
+              >
+                <span>BOOK CALL</span>
+                {/* NORTH EAST ARROW - 24px */}
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+              
+              {/* Admin Reply Button */}
+              {isAdmin && (
+                <button
+                  onClick={() => {
+                    setSelectedSubmission(submission);
+                    setReplyText(submission.adminReply?.text || "");
+                    setReplyStatus(submission.status);
+                    setShowReplyModal(true);
+                  }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '20px',
+                    backgroundColor: 'transparent',
+                    border: '1px solid #000000',
+                    cursor: 'pointer',
+                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                    fontSize: '18px',
+                    fontWeight: '400',
+                    color: '#000000',
+                    padding: '14px 24px',
+                    borderRadius: '0',
+                    width: '100%'
+                  }}
+                >
+                  <span>{submission.adminReply ? 'EDIT REPLY' : 'REPLY'}</span>
+                  {/* NORTH WEST ARROW - 20px */}
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M17 7L7 17M7 17H17M7 17V7" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
+              )}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  </div>
+)}
+
+
+
+
+            
+
+            
 
             {/* REPLY MODAL FOR ADMIN */}
             {showReplyModal && selectedSubmission && (
@@ -5587,7 +5161,7 @@ export default function HomePage(): React.JSX.Element {
         </div>
       )}
 
-      {/* CALENDAR CALL MODAL */}
+      {/* CALENDAR CALL MODAL - Dengan toggle antara calendar dan form */}
       {showCalendarModal && (
         <div className="calendar-modal-overlay">
           <div ref={modalRef} className="calendar-modal" style={{ maxWidth: '1300px', maxHeight: '85vh', overflow: 'auto' }}>
@@ -5599,7 +5173,7 @@ export default function HomePage(): React.JSX.Element {
                 height: 'auto',
                 minHeight: '620px'
               }}>
-                {/* SISI KIRI - Info Profile */}
+                {/* SISI KIRI - Info Profile dengan nama user/admin */}
                 <div style={{
                   flex: 1.1,
                   padding: '36px',
@@ -6028,7 +5602,7 @@ export default function HomePage(): React.JSX.Element {
                     </div>
                   </div>
 
-                  {/* Tombol Back dan Schedule Meeting */}
+                  {/* Tombol Back dan Schedule Meeting - Back pakai North West Arrow */}
                   <div style={{
                     display: 'flex',
                     gap: '12px',
