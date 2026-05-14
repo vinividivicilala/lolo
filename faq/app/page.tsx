@@ -325,13 +325,13 @@ export default function HomePage(): React.JSX.Element {
   const trustedSectionRef = useRef<HTMLDivElement>(null);
   const trustedTextRef = useRef<HTMLDivElement>(null);
   
-  // Refs untuk Stack Card Scroll Effect - 4 card berjejer ke bawah
+  // Refs untuk Stack Card Scroll Effect
   const stackCardsWrapperRef = useRef<HTMLDivElement>(null);
-  const stackCardsTriggerRef = useRef<HTMLDivElement>(null);
-  const card1Ref = useRef<HTMLDivElement>(null);
-  const card2Ref = useRef<HTMLDivElement>(null);
-  const card3Ref = useRef<HTMLDivElement>(null);
-  const card4Ref = useRef<HTMLDivElement>(null);
+  const stackCardsPinTriggerRef = useRef<HTMLDivElement>(null);
+  const stackCard1Ref = useRef<HTMLDivElement>(null);
+  const stackCard2Ref = useRef<HTMLDivElement>(null);
+  const stackCard3Ref = useRef<HTMLDivElement>(null);
+  const stackCard4Ref = useRef<HTMLDivElement>(null);
   
   const img1Ref = useRef<HTMLDivElement>(null);
   const img2Ref = useRef<HTMLDivElement>(null);
@@ -386,7 +386,7 @@ export default function HomePage(): React.JSX.Element {
     }
   ];
 
-  // Stack Card Items
+  // Stack Card Items untuk Scroll Effect
   const stackCardItems = [
     {
       id: 1,
@@ -1511,56 +1511,58 @@ export default function HomePage(): React.JSX.Element {
     });
   };
 
-  // GSAP STACK CARD SCROLL EFFECT - 4 CARD BERJEJER KE BAWAH
-  // Saat scroll ke bawah, card 2,3,4 bergerak dari bawah ke posisi card 1 secara bergantian
+  // ========== GSAP STACK CARD SCROLL EFFECT ==========
+  // Card 2,3,4 bergerak dari bawah ke atas menuju posisi Card 1 saat scroll ke bawah
+  // Saat scroll ke atas, mereka kembali ke posisi aslinya (bergerak ke bawah)
   useEffect(() => {
     if (isLoading) return;
     
-    const card1 = card1Ref.current;
-    const card2 = card2Ref.current;
-    const card3 = card3Ref.current;
-    const card4 = card4Ref.current;
+    const card1 = stackCard1Ref.current;
+    const card2 = stackCard2Ref.current;
+    const card3 = stackCard3Ref.current;
+    const card4 = stackCard4Ref.current;
     const wrapper = stackCardsWrapperRef.current;
-    const trigger = stackCardsTriggerRef.current;
+    const pinTrigger = stackCardsPinTriggerRef.current;
     
     if (!wrapper || !card1 || !card2 || !card3 || !card4) return;
 
-    // Set initial positions - semua card di posisi aslinya (berjejer ke bawah)
-    // Posisi card2, card3, card4 berada di bawah card1 (di luar viewport)
-    const cardHeight = card1.offsetHeight || 500;
-    const gap = 30; // jarak antar card
+    // Dapatkan tinggi card (semua card memiliki ukuran yang sama)
+    const cardHeight = card1.offsetHeight;
+    const gap = 40; // jarak antar card saat berjejer
     
-    gsap.set(card1, { y: 0, opacity: 1 });
-    gsap.set(card2, { y: cardHeight + gap, opacity: 1 });
-    gsap.set(card3, { y: (cardHeight + gap) * 2, opacity: 1 });
-    gsap.set(card4, { y: (cardHeight + gap) * 3, opacity: 1 });
+    // Set initial positions - semua card berjejer ke bawah
+    // Card 1 di posisi 0
+    // Card 2 di bawah card 1 (cardHeight + gap)
+    // Card 3 di bawah card 2 (cardHeight + gap)
+    // Card 4 di bawah card 3 (cardHeight + gap)
+    gsap.set(card1, { y: 0 });
+    gsap.set(card2, { y: cardHeight + gap });
+    gsap.set(card3, { y: (cardHeight + gap) * 2 });
+    gsap.set(card4, { y: (cardHeight + gap) * 3 });
     
-    // Total scroll distance untuk menaikkan semua card ke posisi card1
-    const totalDistance = (cardHeight + gap) * 3;
+    // Total jarak yang harus ditempuh setiap card untuk mencapai posisi card 1
+    const distanceToTop = cardHeight + gap;
+    const totalScrollDistance = distanceToTop * 3;
     
-    // ScrollTrigger untuk efek scroll - fokus hanya di area wrapper
+    // Buat ScrollTrigger untuk efek stack
     ScrollTrigger.create({
-      trigger: trigger,
+      trigger: pinTrigger,
       start: "top top",
-      end: `+=${totalDistance + 200}`,
-      scrub: 1,
+      end: `+=${totalScrollDistance + 200}`,
       pin: wrapper,
       pinSpacing: true,
+      scrub: 1,
       invalidateOnRefresh: true,
       onUpdate: (self) => {
         const progress = self.progress; // 0 - 1
         
-        // Progress untuk setiap card
-        // Card 2: progress 0 - 0.33
-        // Card 3: progress 0.33 - 0.66
-        // Card 4: progress 0.66 - 1
+        // Stage untuk setiap card (0-0.33 untuk card2, 0.33-0.66 untuk card3, 0.66-1 untuk card4)
+        const stage2 = Math.min(1, Math.max(0, progress * 3));           // 0-1 untuk card2
+        const stage3 = Math.min(1, Math.max(0, (progress - 0.333) * 3)); // 0-1 untuk card3
+        const stage4 = Math.min(1, Math.max(0, (progress - 0.666) * 3)); // 0-1 untuk card4
         
-        const card2Progress = Math.min(1, Math.max(0, progress * 3));
-        const card3Progress = Math.min(1, Math.max(0, (progress - 0.333) * 3));
-        const card4Progress = Math.min(1, Math.max(0, (progress - 0.666) * 3));
-        
-        // Gerakkan Card 2 dari bawah ke posisi card 1
-        const card2TargetY = (cardHeight + gap) * (1 - card2Progress);
+        // Card 2: bergerak dari bawah ke posisi card 1
+        const card2TargetY = (cardHeight + gap) * (1 - stage2);
         gsap.to(card2, {
           y: card2TargetY,
           duration: 0.1,
@@ -1568,8 +1570,9 @@ export default function HomePage(): React.JSX.Element {
           overwrite: true
         });
         
-        // Gerakkan Card 3 dari bawah ke posisi card 1
-        const card3TargetY = (cardHeight + gap) * (2 - (card3Progress * 2));
+        // Card 3: bergerak dari bawah ke posisi card 1
+        // Posisi awal: 2 * distance, target: 0
+        const card3TargetY = (cardHeight + gap) * (2 - (stage3 * 2));
         gsap.to(card3, {
           y: card3TargetY,
           duration: 0.1,
@@ -1577,8 +1580,9 @@ export default function HomePage(): React.JSX.Element {
           overwrite: true
         });
         
-        // Gerakkan Card 4 dari bawah ke posisi card 1
-        const card4TargetY = (cardHeight + gap) * (3 - (card4Progress * 3));
+        // Card 4: bergerak dari bawah ke posisi card 1
+        // Posisi awal: 3 * distance, target: 0
+        const card4TargetY = (cardHeight + gap) * (3 - (stage4 * 3));
         gsap.to(card4, {
           y: card4TargetY,
           duration: 0.1,
@@ -1586,20 +1590,20 @@ export default function HomePage(): React.JSX.Element {
           overwrite: true
         });
         
-        // Update z-index agar card yang aktif berada di atas
-        if (card2Progress > 0.5) {
+        // Update z-index agar card yang muncul berada di atas
+        if (stage2 > 0.3) {
           gsap.set(card2, { zIndex: 15 });
         } else {
           gsap.set(card2, { zIndex: 5 });
         }
         
-        if (card3Progress > 0.5) {
+        if (stage3 > 0.3) {
           gsap.set(card3, { zIndex: 16 });
         } else {
           gsap.set(card3, { zIndex: 5 });
         }
         
-        if (card4Progress > 0.5) {
+        if (stage4 > 0.3) {
           gsap.set(card4, { zIndex: 17 });
         } else {
           gsap.set(card4, { zIndex: 5 });
@@ -1609,7 +1613,7 @@ export default function HomePage(): React.JSX.Element {
 
     return () => {
       ScrollTrigger.getAll().forEach(trigger => {
-        if (trigger.vars.trigger === trigger) {
+        if (trigger.vars.trigger === pinTrigger) {
           trigger.kill();
         }
       });
@@ -3111,8 +3115,7 @@ export default function HomePage(): React.JSX.Element {
           border: 1px solid #e0e0e0;
           transition: all 0.3s ease;
           box-sizing: border-box;
-          position: relative;
-          margin-bottom: 30px;
+          margin-bottom: 0;
         }
 
         .stack-card-left {
@@ -3850,19 +3853,19 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* STACK CARD SCROLL EFFECT SECTION - 4 CARD BERJEJER KE BAWAH */}
+            {/* STACK CARD SCROLL EFFECT SECTION - 4 CARD */}
             <div className="stack-cards-scroll-section">
               <div className="stack-cards-scroll-container">
                 <div className="stack-cards-scroll-header">
                   <h2 className="stack-cards-scroll-title">SCROLL STACK</h2>
-                  <p className="stack-cards-scroll-subtitle">Scroll down to see cards move up from bottom to top position</p>
+                  <p className="stack-cards-scroll-subtitle">Scroll down to see cards move up - Card 2, 3, 4 will slide up to Card 1 position</p>
                 </div>
                 
-                <div ref={stackCardsTriggerRef} className="stack-cards-wrapper">
+                <div ref={stackCardsPinTriggerRef} className="stack-cards-wrapper">
                   <div ref={stackCardsWrapperRef} style={{ position: 'relative', width: '100%' }}>
-                    {/* Card 1 */}
+                    {/* Card 1 - Base Card */}
                     <div 
-                      ref={card1Ref}
+                      ref={stackCard1Ref}
                       className="stack-card"
                       style={{ 
                         backgroundColor: stackCardItems[0].bgColor,
@@ -3887,9 +3890,9 @@ export default function HomePage(): React.JSX.Element {
                       </div>
                     </div>
 
-                    {/* Card 2 - akan bergerak dari bawah */}
+                    {/* Card 2 - akan bergerak dari bawah ke posisi Card 1 */}
                     <div 
-                      ref={card2Ref}
+                      ref={stackCard2Ref}
                       className="stack-card"
                       style={{ 
                         backgroundColor: stackCardItems[1].bgColor,
@@ -3914,9 +3917,9 @@ export default function HomePage(): React.JSX.Element {
                       </div>
                     </div>
 
-                    {/* Card 3 - akan bergerak dari bawah */}
+                    {/* Card 3 - akan bergerak dari bawah ke posisi Card 1 */}
                     <div 
-                      ref={card3Ref}
+                      ref={stackCard3Ref}
                       className="stack-card"
                       style={{ 
                         backgroundColor: stackCardItems[2].bgColor,
@@ -3941,9 +3944,9 @@ export default function HomePage(): React.JSX.Element {
                       </div>
                     </div>
 
-                    {/* Card 4 - akan bergerak dari bawah */}
+                    {/* Card 4 - akan bergerak dari bawah ke posisi Card 1 */}
                     <div 
-                      ref={card4Ref}
+                      ref={stackCard4Ref}
                       className="stack-card"
                       style={{ 
                         backgroundColor: stackCardItems[3].bgColor,
@@ -4842,6 +4845,7 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </div>
 
+  
       {/* SHADOW PAGE */}
       <div
         ref={shadowPageRef}
