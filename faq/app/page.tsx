@@ -1521,11 +1521,10 @@ export default function HomePage(): React.JSX.Element {
     });
   };
 
-  // GSAP STACK CARD PINNED EFFECT
+  // GSAP STACK CARD PINNED EFFECT - SEMUA CARD DI TENGAH, CARD 2-4 MENUTUPI CARD 1
   useEffect(() => {
     if (isLoading) return;
     
-    // Setup Stack Card Pinned Effect
     const card1 = card1Ref.current;
     const card2 = card2Ref.current;
     const card3 = card3Ref.current;
@@ -1535,22 +1534,45 @@ export default function HomePage(): React.JSX.Element {
     
     if (!container || !card1 || !card2 || !card3 || !card4) return;
 
-    // Set initial positions - semua card di posisi yang sama (stack)
-    gsap.set([card2, card3, card4], {
-      y: 0,
-      scale: 1,
-      opacity: 1
+    // Set semua card di posisi yang sama (center, stack menumpuk)
+    gsap.set([card1, card2, card3, card4], {
+      position: 'relative',
+      width: '100%'
     });
     
-    gsap.set(card1, { zIndex: 20 });
-    gsap.set(card2, { zIndex: 19 });
-    gsap.set(card3, { zIndex: 18 });
-    gsap.set(card4, { zIndex: 17 });
+    // Card 1 sebagai base (paling bawah)
+    gsap.set(card1, { zIndex: 10 });
+    // Card 2 di atas card 1
+    gsap.set(card2, { 
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      zIndex: 11,
+      opacity: 0,
+      visibility: 'hidden'
+    });
+    // Card 3 di atas card 2
+    gsap.set(card3, { 
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      zIndex: 12,
+      opacity: 0,
+      visibility: 'hidden'
+    });
+    // Card 4 di atas card 3
+    gsap.set(card4, { 
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      zIndex: 13,
+      opacity: 0,
+      visibility: 'hidden'
+    });
 
     // Hitung tinggi total yang dibutuhkan untuk pin
     const cardHeight = card1.offsetHeight || 500;
-    const pinSpacing = cardHeight * 0.8;
-    const totalPinHeight = 3 * pinSpacing + 200;
+    const totalPinHeight = cardHeight * 1.5 + 200;
 
     // Pin trigger untuk container
     ScrollTrigger.create({
@@ -1559,75 +1581,78 @@ export default function HomePage(): React.JSX.Element {
       end: `+=${totalPinHeight}`,
       pin: container,
       pinSpacing: true,
-      scrub: 1,
+      scrub: 0.8,
       invalidateOnRefresh: true,
       onUpdate: (self) => {
         const progress = self.progress;
         // Progress 0-1 untuk 4 card
-        // Stage 0-0.33: card2 masuk, stage 0.33-0.66: card3 masuk, stage 0.66-1: card4 masuk
-        const stage = progress * 3;
+        // Stage 0-0.33: card2 muncul (menutupi card1)
+        // Stage 0.33-0.66: card3 muncul (menutupi card2)
+        // Stage 0.66-1: card4 muncul (menutupi card3)
         
-        // Animasi untuk card 2 (stage 0 - 1)
-        if (stage > 0) {
-          const card2Progress = Math.min(1, Math.max(0, stage / 1));
-          const translateY = -card2Progress * pinSpacing;
-          const scaleVal = 1 - (card2Progress * 0.03);
-          gsap.to(card2, {
-            y: translateY,
-            scale: scaleVal,
-            duration: 0.1,
-            ease: "none",
-            overwrite: true
-          });
-          if (card2Progress >= 0.5) {
-            gsap.set(card2, { zIndex: 25 });
+        const stage = progress * 3; // 0 - 3
+        
+        // CARD 2 (stage 0 - 1)
+        if (stage >= 0 && stage <= 1) {
+          const card2Progress = stage;
+          if (card2Progress > 0) {
+            gsap.set(card2, { 
+              visibility: 'visible',
+              opacity: card2Progress,
+              scale: 1 - (card2Progress * 0.02)
+            });
           } else {
-            gsap.set(card2, { zIndex: 19 });
+            gsap.set(card2, { visibility: 'hidden', opacity: 0, scale: 1 });
           }
-        } else {
-          gsap.to(card2, { y: 0, scale: 1, duration: 0.1, ease: "none" });
+        } else if (stage > 1) {
+          gsap.set(card2, { visibility: 'visible', opacity: 1, scale: 0.98 });
         }
         
-        // Animasi untuk card 3 (stage 1 - 2)
-        if (stage > 1) {
-          const card3Progress = Math.min(1, Math.max(0, (stage - 1) / 1));
-          const translateY = -card3Progress * pinSpacing;
-          const scaleVal = 1 - (card3Progress * 0.03);
-          gsap.to(card3, {
-            y: translateY,
-            scale: scaleVal,
-            duration: 0.1,
-            ease: "none",
-            overwrite: true
-          });
-          if (card3Progress >= 0.5) {
-            gsap.set(card3, { zIndex: 26 });
+        // CARD 3 (stage 1 - 2)
+        if (stage >= 1 && stage <= 2) {
+          const card3Progress = (stage - 1);
+          if (card3Progress > 0) {
+            gsap.set(card3, { 
+              visibility: 'visible',
+              opacity: card3Progress,
+              scale: 1 - (card3Progress * 0.02)
+            });
           } else {
-            gsap.set(card3, { zIndex: 18 });
+            gsap.set(card3, { visibility: 'hidden', opacity: 0, scale: 1 });
           }
-        } else {
-          gsap.to(card3, { y: 0, scale: 1, duration: 0.1, ease: "none" });
+        } else if (stage > 2) {
+          gsap.set(card3, { visibility: 'visible', opacity: 1, scale: 0.96 });
+        } else if (stage < 1) {
+          gsap.set(card3, { visibility: 'hidden', opacity: 0, scale: 1 });
         }
         
-        // Animasi untuk card 4 (stage 2 - 3)
-        if (stage > 2) {
-          const card4Progress = Math.min(1, Math.max(0, (stage - 2) / 1));
-          const translateY = -card4Progress * pinSpacing;
-          const scaleVal = 1 - (card4Progress * 0.03);
-          gsap.to(card4, {
-            y: translateY,
-            scale: scaleVal,
-            duration: 0.1,
-            ease: "none",
-            overwrite: true
-          });
-          if (card4Progress >= 0.5) {
-            gsap.set(card4, { zIndex: 27 });
+        // CARD 4 (stage 2 - 3)
+        if (stage >= 2 && stage <= 3) {
+          const card4Progress = (stage - 2);
+          if (card4Progress > 0) {
+            gsap.set(card4, { 
+              visibility: 'visible',
+              opacity: card4Progress,
+              scale: 1 - (card4Progress * 0.02)
+            });
           } else {
-            gsap.set(card4, { zIndex: 17 });
+            gsap.set(card4, { visibility: 'hidden', opacity: 0, scale: 1 });
           }
+        } else if (stage >= 3) {
+          gsap.set(card4, { visibility: 'visible', opacity: 1, scale: 0.94 });
         } else {
-          gsap.to(card4, { y: 0, scale: 1, duration: 0.1, ease: "none" });
+          gsap.set(card4, { visibility: 'hidden', opacity: 0, scale: 1 });
+        }
+        
+        // Update z-index untuk stacking order yang benar
+        if (stage >= 0.5) {
+          gsap.set(card2, { zIndex: 15 });
+        }
+        if (stage >= 1.5) {
+          gsap.set(card3, { zIndex: 16 });
+        }
+        if (stage >= 2.5) {
+          gsap.set(card4, { zIndex: 17 });
         }
       }
     });
@@ -3086,13 +3111,14 @@ export default function HomePage(): React.JSX.Element {
           background-color: #ffffff;
           position: relative;
           z-index: 10;
+          padding: 100px 0;
         }
 
         .stack-cards-pin-container {
           width: 100%;
           max-width: 1400px;
           margin: 0 auto;
-          padding: 100px 80px;
+          padding: 0 80px;
           box-sizing: border-box;
         }
 
@@ -3121,10 +3147,10 @@ export default function HomePage(): React.JSX.Element {
         .stack-cards-pin-wrapper {
           position: relative;
           min-height: 600px;
+          width: 100%;
         }
 
         .stack-card-pin {
-          position: relative;
           width: 100%;
           background-color: #ffffff;
           border-radius: 32px;
@@ -3135,7 +3161,7 @@ export default function HomePage(): React.JSX.Element {
           box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
           border: 1px solid #e0e0e0;
           transition: all 0.3s ease;
-          margin-bottom: 30px;
+          box-sizing: border-box;
         }
 
         .stack-card-pin-left {
@@ -3873,25 +3899,25 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* STACK CARD PINNED EFFECT SECTION - 4 CARDS */}
+            {/* STACK CARD PINNED EFFECT SECTION - 4 CARDS SEMUA DI TENGAH, CARD 2-4 MENUTUPI CARD 1 */}
             <div className="stack-cards-pin-section">
               <div className="stack-cards-pin-container">
                 <div className="stack-cards-pin-header">
                   <h2 className="stack-cards-pin-title">PINNED STACK</h2>
-                  <p className="stack-cards-pin-subtitle">Scroll to see the stacking card effect - each card becomes the main focus</p>
+                  <p className="stack-cards-pin-subtitle">Scroll to see the stacking card effect - each card appears on top of the previous one</p>
                 </div>
                 
                 {/* Trigger untuk pin */}
-                <div ref={stackPinTriggerRef} style={{ position: 'relative', width: '100%' }}>
-                  <div ref={stackCardsContainerRef} style={{ position: 'relative', width: '100%', minHeight: '500px' }}>
-                    {/* Card 1 - Master Card (Default Pinned Position) */}
+                <div ref={stackPinTriggerRef} className="stack-cards-pin-wrapper">
+                  <div ref={stackCardsContainerRef} style={{ position: 'relative', width: '100%', minHeight: '600px' }}>
+                    {/* Card 1 - Base Card (paling bawah) */}
                     <div 
                       ref={card1Ref}
                       className="stack-card-pin"
                       style={{ 
                         backgroundColor: stackCardItems[0].bgColor,
                         position: 'relative',
-                        zIndex: 20
+                        zIndex: 10
                       }}
                     >
                       <div className="stack-card-pin-left">
@@ -3911,7 +3937,7 @@ export default function HomePage(): React.JSX.Element {
                       </div>
                     </div>
 
-                    {/* Card 2 */}
+                    {/* Card 2 - Menutupi card 1 saat scroll */}
                     <div 
                       ref={card2Ref}
                       className="stack-card-pin"
@@ -3920,8 +3946,9 @@ export default function HomePage(): React.JSX.Element {
                         position: 'absolute',
                         top: 0,
                         left: 0,
-                        width: '100%',
-                        zIndex: 19
+                        zIndex: 11,
+                        opacity: 0,
+                        visibility: 'hidden'
                       }}
                     >
                       <div className="stack-card-pin-left">
@@ -3941,7 +3968,7 @@ export default function HomePage(): React.JSX.Element {
                       </div>
                     </div>
 
-                    {/* Card 3 */}
+                    {/* Card 3 - Menutupi card 2 saat scroll */}
                     <div 
                       ref={card3Ref}
                       className="stack-card-pin"
@@ -3950,8 +3977,9 @@ export default function HomePage(): React.JSX.Element {
                         position: 'absolute',
                         top: 0,
                         left: 0,
-                        width: '100%',
-                        zIndex: 18
+                        zIndex: 12,
+                        opacity: 0,
+                        visibility: 'hidden'
                       }}
                     >
                       <div className="stack-card-pin-left">
@@ -3971,7 +3999,7 @@ export default function HomePage(): React.JSX.Element {
                       </div>
                     </div>
 
-                    {/* Card 4 */}
+                    {/* Card 4 - Menutupi card 3 saat scroll */}
                     <div 
                       ref={card4Ref}
                       className="stack-card-pin"
@@ -3980,8 +4008,9 @@ export default function HomePage(): React.JSX.Element {
                         position: 'absolute',
                         top: 0,
                         left: 0,
-                        width: '100%',
-                        zIndex: 17
+                        zIndex: 13,
+                        opacity: 0,
+                        visibility: 'hidden'
                       }}
                     >
                       <div className="stack-card-pin-left">
@@ -4013,7 +4042,7 @@ export default function HomePage(): React.JSX.Element {
                 backgroundColor: '#ffffff',
                 boxSizing: 'border-box'
               }}>
-                {/* Header dengan font 300px dan panah SVG 100px */}
+                {/* Header */}
                 <div style={{
                   fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
                   fontSize: '190px',
@@ -5558,14 +5587,14 @@ export default function HomePage(): React.JSX.Element {
         <div className="calendar-modal-overlay">
           <div ref={modalRef} className="calendar-modal" style={{ maxWidth: '1300px', maxHeight: '85vh', overflow: 'auto' }}>
             {!showFormView ? (
-              // TAMPILAN CALENDAR (View 1)
+              // TAMPILAN CALENDAR (View 1) - sama seperti sebelumnya
               <div style={{
                 display: 'flex',
                 flexDirection: 'row',
                 height: 'auto',
                 minHeight: '620px'
               }}>
-                {/* SISI KIRI - Info Profile dengan nama user/admin */}
+                {/* SISI KIRI - Info Profile */}
                 <div style={{
                   flex: 1.1,
                   padding: '36px',
@@ -5994,7 +6023,7 @@ export default function HomePage(): React.JSX.Element {
                     </div>
                   </div>
 
-                  {/* Tombol Back dan Schedule Meeting - Back pakai North West Arrow */}
+                  {/* Tombol Back dan Schedule Meeting */}
                   <div style={{
                     display: 'flex',
                     gap: '12px',
@@ -6071,7 +6100,7 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </div>
             ) : (
-              // TAMPILAN FORM DATA DIRI (View 2)
+              // TAMPILAN FORM DATA DIRI (View 2) - sama seperti sebelumnya
               <div style={{
                 display: 'flex',
                 flexDirection: 'row',
