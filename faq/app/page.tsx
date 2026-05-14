@@ -325,9 +325,13 @@ export default function HomePage(): React.JSX.Element {
   const trustedSectionRef = useRef<HTMLDivElement>(null);
   const trustedTextRef = useRef<HTMLDivElement>(null);
   
-  // Refs untuk Stack Card
-  const stackCardsRef = useRef<HTMLDivElement>(null);
-  const stackCardRefs = useRef<(HTMLDivElement | null)[]>([]);
+  // Refs untuk Stack Card Pinned Effect
+  const stackCardsContainerRef = useRef<HTMLDivElement>(null);
+  const card1Ref = useRef<HTMLDivElement>(null);
+  const card2Ref = useRef<HTMLDivElement>(null);
+  const card3Ref = useRef<HTMLDivElement>(null);
+  const card4Ref = useRef<HTMLDivElement>(null);
+  const stackPinTriggerRef = useRef<HTMLDivElement>(null);
   
   const img1Ref = useRef<HTMLDivElement>(null);
   const img2Ref = useRef<HTMLDivElement>(null);
@@ -382,39 +386,43 @@ export default function HomePage(): React.JSX.Element {
     }
   ];
 
-  // Stack Card Items
+  // Stack Card Items untuk Pinned Effect
   const stackCardItems = [
     {
       id: 1,
       title: "DESIGN SYSTEM",
       subtitle: "Scalable UI Framework",
-      description: "Build consistent interfaces across all platforms with our comprehensive design system.",
+      description: "Build consistent interfaces across all platforms with our comprehensive design system. From component libraries to design tokens, everything is perfectly organized.",
       image: "/images/lkhh.jpg",
-      color: "#000000"
+      color: "#000000",
+      bgColor: "#ffffff"
     },
     {
       id: 2,
       title: "MOTION DESIGN",
       subtitle: "Interactive Animations",
-      description: "Engage users with smooth, meaningful animations that enhance user experience.",
+      description: "Engage users with smooth, meaningful animations that enhance user experience. Bring your interface to life with purposeful motion.",
       image: "/images/ai.jpg",
-      color: "#1a1a1a"
+      color: "#111111",
+      bgColor: "#f8f8f8"
     },
     {
       id: 3,
       title: "USER RESEARCH",
       subtitle: "Data-Driven Insights",
-      description: "Understand your audience through in-depth research and usability testing.",
+      description: "Understand your audience through in-depth research and usability testing. Make informed decisions based on real user data.",
       image: "/images/5.jpg",
-      color: "#2a2a2a"
+      color: "#222222",
+      bgColor: "#f0f0f0"
     },
     {
       id: 4,
       title: "PROTOTYPING",
       subtitle: "Rapid Iteration",
-      description: "Test ideas quickly with high-fidelity prototypes and user feedback loops.",
+      description: "Test ideas quickly with high-fidelity prototypes and user feedback loops. Iterate faster and validate concepts before development.",
       image: "/images/lkhh.jpg",
-      color: "#333333"
+      color: "#333333",
+      bgColor: "#e8e8e8"
     }
   ];
 
@@ -1513,6 +1521,126 @@ export default function HomePage(): React.JSX.Element {
     });
   };
 
+  // GSAP STACK CARD PINNED EFFECT
+  useEffect(() => {
+    if (isLoading) return;
+    
+    // Setup Stack Card Pinned Effect
+    const card1 = card1Ref.current;
+    const card2 = card2Ref.current;
+    const card3 = card3Ref.current;
+    const card4 = card4Ref.current;
+    const container = stackCardsContainerRef.current;
+    const pinTrigger = stackPinTriggerRef.current;
+    
+    if (!container || !card1 || !card2 || !card3 || !card4) return;
+
+    // Set initial positions - semua card di posisi yang sama (stack)
+    gsap.set([card2, card3, card4], {
+      y: 0,
+      scale: 1,
+      opacity: 1
+    });
+    
+    gsap.set(card1, { zIndex: 20 });
+    gsap.set(card2, { zIndex: 19 });
+    gsap.set(card3, { zIndex: 18 });
+    gsap.set(card4, { zIndex: 17 });
+
+    // Hitung tinggi total yang dibutuhkan untuk pin
+    const cardHeight = card1.offsetHeight || 500;
+    const pinSpacing = cardHeight * 0.8;
+    const totalPinHeight = 3 * pinSpacing + 200;
+
+    // Pin trigger untuk container
+    ScrollTrigger.create({
+      trigger: pinTrigger,
+      start: "top top",
+      end: `+=${totalPinHeight}`,
+      pin: container,
+      pinSpacing: true,
+      scrub: 1,
+      invalidateOnRefresh: true,
+      onUpdate: (self) => {
+        const progress = self.progress;
+        // Progress 0-1 untuk 4 card
+        // Stage 0-0.33: card2 masuk, stage 0.33-0.66: card3 masuk, stage 0.66-1: card4 masuk
+        const stage = progress * 3;
+        
+        // Animasi untuk card 2 (stage 0 - 1)
+        if (stage > 0) {
+          const card2Progress = Math.min(1, Math.max(0, stage / 1));
+          const translateY = -card2Progress * pinSpacing;
+          const scaleVal = 1 - (card2Progress * 0.03);
+          gsap.to(card2, {
+            y: translateY,
+            scale: scaleVal,
+            duration: 0.1,
+            ease: "none",
+            overwrite: true
+          });
+          if (card2Progress >= 0.5) {
+            gsap.set(card2, { zIndex: 25 });
+          } else {
+            gsap.set(card2, { zIndex: 19 });
+          }
+        } else {
+          gsap.to(card2, { y: 0, scale: 1, duration: 0.1, ease: "none" });
+        }
+        
+        // Animasi untuk card 3 (stage 1 - 2)
+        if (stage > 1) {
+          const card3Progress = Math.min(1, Math.max(0, (stage - 1) / 1));
+          const translateY = -card3Progress * pinSpacing;
+          const scaleVal = 1 - (card3Progress * 0.03);
+          gsap.to(card3, {
+            y: translateY,
+            scale: scaleVal,
+            duration: 0.1,
+            ease: "none",
+            overwrite: true
+          });
+          if (card3Progress >= 0.5) {
+            gsap.set(card3, { zIndex: 26 });
+          } else {
+            gsap.set(card3, { zIndex: 18 });
+          }
+        } else {
+          gsap.to(card3, { y: 0, scale: 1, duration: 0.1, ease: "none" });
+        }
+        
+        // Animasi untuk card 4 (stage 2 - 3)
+        if (stage > 2) {
+          const card4Progress = Math.min(1, Math.max(0, (stage - 2) / 1));
+          const translateY = -card4Progress * pinSpacing;
+          const scaleVal = 1 - (card4Progress * 0.03);
+          gsap.to(card4, {
+            y: translateY,
+            scale: scaleVal,
+            duration: 0.1,
+            ease: "none",
+            overwrite: true
+          });
+          if (card4Progress >= 0.5) {
+            gsap.set(card4, { zIndex: 27 });
+          } else {
+            gsap.set(card4, { zIndex: 17 });
+          }
+        } else {
+          gsap.to(card4, { y: 0, scale: 1, duration: 0.1, ease: "none" });
+        }
+      }
+    });
+
+    return () => {
+      ScrollTrigger.getAll().forEach(trigger => {
+        if (trigger.vars.trigger === pinTrigger) {
+          trigger.kill();
+        }
+      });
+    };
+  }, [isLoading]);
+
   useEffect(() => {
     if (isLoading) return;
 
@@ -1602,53 +1730,6 @@ export default function HomePage(): React.JSX.Element {
     
     return () => {
       carousel.removeEventListener('wheel', handleWheel);
-    };
-  }, [isLoading]);
-
-  // Stack Card Scroll Effect
-  useEffect(() => {
-    if (isLoading) return;
-
-    const cards = stackCardRefs.current.filter(card => card !== null);
-    
-    cards.forEach((card, index) => {
-      const isLastCard = index === cards.length - 1;
-      
-      ScrollTrigger.create({
-        trigger: card,
-        start: "top bottom",
-        end: isLastCard ? "bottom top" : "top center",
-        onUpdate: (self) => {
-          const progress = self.progress;
-          // Stack effect: move up and scale
-          if (progress > 0) {
-            const translateY = -progress * (index * 50);
-            const scale = 1 - (progress * 0.05);
-            const opacity = 1 - (progress * 0.3);
-            
-            gsap.to(card, {
-              y: translateY,
-              scale: scale,
-              opacity: opacity,
-              duration: 0.1,
-              ease: "none"
-            });
-          } else {
-            gsap.to(card, {
-              y: 0,
-              scale: 1,
-              opacity: 1,
-              duration: 0.1
-            });
-          }
-        },
-        scrub: 1,
-        invalidateOnRefresh: true
-      });
-    });
-
-    return () => {
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
   }, [isLoading]);
 
@@ -2999,26 +3080,28 @@ export default function HomePage(): React.JSX.Element {
           background: rgba(255, 255, 255, 0.5);
         }
 
-        /* Stack Card Styles */
-        .stack-cards-section {
+        /* Stack Card Pinned Effect Styles */
+        .stack-cards-pin-section {
           width: 100%;
-          padding: 120px 80px;
-          background-color: #f5f5f5;
-          box-sizing: border-box;
+          background-color: #ffffff;
           position: relative;
+          z-index: 10;
         }
 
-        .stack-cards-container {
+        .stack-cards-pin-container {
+          width: 100%;
           max-width: 1400px;
           margin: 0 auto;
+          padding: 100px 80px;
+          box-sizing: border-box;
         }
 
-        .stack-cards-header {
+        .stack-cards-pin-header {
           margin-bottom: 80px;
           text-align: left;
         }
 
-        .stack-cards-title {
+        .stack-cards-pin-title {
           font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
           font-size: 100px;
           font-weight: 400;
@@ -3028,41 +3111,41 @@ export default function HomePage(): React.JSX.Element {
           margin: 0 0 20px 0;
         }
 
-        .stack-cards-subtitle {
+        .stack-cards-pin-subtitle {
           font-family: 'Questrial', sans-serif;
           font-size: 20px;
           color: #666666;
           max-width: 600px;
         }
 
-        .stack-card-wrapper {
+        .stack-cards-pin-wrapper {
           position: relative;
-          margin-bottom: 30px;
+          min-height: 600px;
         }
 
-        .stack-card {
+        .stack-card-pin {
+          position: relative;
+          width: 100%;
           background-color: #ffffff;
           border-radius: 32px;
           padding: 48px;
-          min-height: 400px;
           display: flex;
           flex-direction: row;
           gap: 60px;
           box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
-          position: relative;
-          z-index: 1;
-          transition: all 0.3s ease;
           border: 1px solid #e0e0e0;
+          transition: all 0.3s ease;
+          margin-bottom: 30px;
         }
 
-        .stack-card-left {
+        .stack-card-pin-left {
           flex: 1;
           display: flex;
           flex-direction: column;
           justify-content: center;
         }
 
-        .stack-card-number {
+        .stack-card-pin-number {
           font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
           font-size: 60px;
           font-weight: 400;
@@ -3070,7 +3153,7 @@ export default function HomePage(): React.JSX.Element {
           margin-bottom: 24px;
         }
 
-        .stack-card-title {
+        .stack-card-pin-title {
           font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
           font-size: 48px;
           font-weight: 500;
@@ -3079,21 +3162,21 @@ export default function HomePage(): React.JSX.Element {
           margin-bottom: 16px;
         }
 
-        .stack-card-subtitle {
+        .stack-card-pin-subtitle {
           font-family: 'Questrial', sans-serif;
           font-size: 20px;
           color: #666666;
           margin-bottom: 24px;
         }
 
-        .stack-card-description {
+        .stack-card-pin-description {
           font-family: 'Questrial', sans-serif;
           font-size: 18px;
           color: #888888;
           line-height: 1.6;
         }
 
-        .stack-card-right {
+        .stack-card-pin-right {
           flex: 1;
           position: relative;
           border-radius: 24px;
@@ -3101,7 +3184,7 @@ export default function HomePage(): React.JSX.Element {
           min-height: 350px;
         }
 
-        .stack-card-image {
+        .stack-card-pin-image {
           width: 100%;
           height: 100%;
           object-fit: cover;
@@ -3357,7 +3440,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* SECTION FEATURES - Sama seperti sebelumnya */}
+            {/* SECTION FEATURES */}
             <div
               ref={featuresSectionRef}
               className="features-section"
@@ -3790,48 +3873,134 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* STACK CARD SECTION - SCROLL EFFECT */}
-            <div className="stack-cards-section">
-              <div className="stack-cards-container">
-                <div className="stack-cards-header">
-                  <h2 className="stack-cards-title">SCROLL STACK</h2>
-                  <p className="stack-cards-subtitle">Experience the smooth stacking card effect as you scroll</p>
+            {/* STACK CARD PINNED EFFECT SECTION - 4 CARDS */}
+            <div className="stack-cards-pin-section">
+              <div className="stack-cards-pin-container">
+                <div className="stack-cards-pin-header">
+                  <h2 className="stack-cards-pin-title">PINNED STACK</h2>
+                  <p className="stack-cards-pin-subtitle">Scroll to see the stacking card effect - each card becomes the main focus</p>
                 </div>
                 
-                <div ref={stackCardsRef}>
-                  {stackCardItems.map((item, index) => (
-                    <div
-                      key={item.id}
-                      ref={el => { stackCardRefs.current[index] = el; }}
-                      className="stack-card-wrapper"
+                {/* Trigger untuk pin */}
+                <div ref={stackPinTriggerRef} style={{ position: 'relative', width: '100%' }}>
+                  <div ref={stackCardsContainerRef} style={{ position: 'relative', width: '100%', minHeight: '500px' }}>
+                    {/* Card 1 - Master Card (Default Pinned Position) */}
+                    <div 
+                      ref={card1Ref}
+                      className="stack-card-pin"
+                      style={{ 
+                        backgroundColor: stackCardItems[0].bgColor,
+                        position: 'relative',
+                        zIndex: 20
+                      }}
                     >
-                      <div 
-                        className="stack-card"
-                        style={{
-                          backgroundColor: '#ffffff',
-                          transformOrigin: 'center top'
-                        }}
-                      >
-                        <div className="stack-card-left">
-                          <div className="stack-card-number">
-                            {String(item.id).padStart(2, '0')}
-                          </div>
-                          <h3 className="stack-card-title">{item.title}</h3>
-                          <p className="stack-card-subtitle">{item.subtitle}</p>
-                          <p className="stack-card-description">{item.description}</p>
-                        </div>
-                        <div className="stack-card-right">
-                          <Image
-                            src={item.image}
-                            alt={item.title}
-                            fill
-                            className="stack-card-image"
-                            style={{ objectFit: 'cover' }}
-                          />
-                        </div>
+                      <div className="stack-card-pin-left">
+                        <div className="stack-card-pin-number">01</div>
+                        <h3 className="stack-card-pin-title">{stackCardItems[0].title}</h3>
+                        <p className="stack-card-pin-subtitle">{stackCardItems[0].subtitle}</p>
+                        <p className="stack-card-pin-description">{stackCardItems[0].description}</p>
+                      </div>
+                      <div className="stack-card-pin-right">
+                        <Image
+                          src={stackCardItems[0].image}
+                          alt={stackCardItems[0].title}
+                          fill
+                          className="stack-card-pin-image"
+                          style={{ objectFit: 'cover' }}
+                        />
                       </div>
                     </div>
-                  ))}
+
+                    {/* Card 2 */}
+                    <div 
+                      ref={card2Ref}
+                      className="stack-card-pin"
+                      style={{ 
+                        backgroundColor: stackCardItems[1].bgColor,
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        zIndex: 19
+                      }}
+                    >
+                      <div className="stack-card-pin-left">
+                        <div className="stack-card-pin-number">02</div>
+                        <h3 className="stack-card-pin-title">{stackCardItems[1].title}</h3>
+                        <p className="stack-card-pin-subtitle">{stackCardItems[1].subtitle}</p>
+                        <p className="stack-card-pin-description">{stackCardItems[1].description}</p>
+                      </div>
+                      <div className="stack-card-pin-right">
+                        <Image
+                          src={stackCardItems[1].image}
+                          alt={stackCardItems[1].title}
+                          fill
+                          className="stack-card-pin-image"
+                          style={{ objectFit: 'cover' }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Card 3 */}
+                    <div 
+                      ref={card3Ref}
+                      className="stack-card-pin"
+                      style={{ 
+                        backgroundColor: stackCardItems[2].bgColor,
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        zIndex: 18
+                      }}
+                    >
+                      <div className="stack-card-pin-left">
+                        <div className="stack-card-pin-number">03</div>
+                        <h3 className="stack-card-pin-title">{stackCardItems[2].title}</h3>
+                        <p className="stack-card-pin-subtitle">{stackCardItems[2].subtitle}</p>
+                        <p className="stack-card-pin-description">{stackCardItems[2].description}</p>
+                      </div>
+                      <div className="stack-card-pin-right">
+                        <Image
+                          src={stackCardItems[2].image}
+                          alt={stackCardItems[2].title}
+                          fill
+                          className="stack-card-pin-image"
+                          style={{ objectFit: 'cover' }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Card 4 */}
+                    <div 
+                      ref={card4Ref}
+                      className="stack-card-pin"
+                      style={{ 
+                        backgroundColor: stackCardItems[3].bgColor,
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        zIndex: 17
+                      }}
+                    >
+                      <div className="stack-card-pin-left">
+                        <div className="stack-card-pin-number">04</div>
+                        <h3 className="stack-card-pin-title">{stackCardItems[3].title}</h3>
+                        <p className="stack-card-pin-subtitle">{stackCardItems[3].subtitle}</p>
+                        <p className="stack-card-pin-description">{stackCardItems[3].description}</p>
+                      </div>
+                      <div className="stack-card-pin-right">
+                        <Image
+                          src={stackCardItems[3].image}
+                          alt={stackCardItems[3].title}
+                          fill
+                          className="stack-card-pin-image"
+                          style={{ objectFit: 'cover' }}
+                        />
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -3844,7 +4013,7 @@ export default function HomePage(): React.JSX.Element {
                 backgroundColor: '#ffffff',
                 boxSizing: 'border-box'
               }}>
-                {/* Header dengan font 300px dan panah SVG 100px - tanpa garis bawah */}
+                {/* Header dengan font 300px dan panah SVG 100px */}
                 <div style={{
                   fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
                   fontSize: '190px',
@@ -3870,20 +4039,19 @@ export default function HomePage(): React.JSX.Element {
                     }}>
                       ({calendarSubmissions.length})
                     </span>
-                    {/* NORTH EAST ARROW - 100px */}
                     <svg width="100" height="100" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                   </div>
                 </div>
                 
-                {/* Daftar submission - tanpa card, tanpa hover, tanpa linebox (tanpa border) */}
+                {/* Daftar submission */}
                 <div style={{
                   display: 'flex',
                   flexDirection: 'column',
                   gap: '80px'
                 }}>
-                  {calendarSubmissions.map((submission, index) => {
+                  {calendarSubmissions.map((submission) => {
                     const dateParts = getDateParts(submission.selectedDate);
                     
                     return (
@@ -3896,7 +4064,7 @@ export default function HomePage(): React.JSX.Element {
                           gap: '80px'
                         }}
                       >
-                        {/* LEFT - Tanggal dipisah: Day, Month, Year - font besar */}
+                        {/* LEFT - Tanggal */}
                         <div style={{
                           width: '200px',
                           flexShrink: 0,
@@ -3940,7 +4108,6 @@ export default function HomePage(): React.JSX.Element {
                           flexDirection: 'column',
                           gap: '32px'
                         }}>
-                          {/* Nama dan Status */}
                           <div style={{
                             display: 'flex',
                             alignItems: 'center',
@@ -3972,7 +4139,6 @@ export default function HomePage(): React.JSX.Element {
                             </div>
                           </div>
                           
-                          {/* Waktu dan Tipe Meeting */}
                           <div style={{
                             display: 'flex',
                             alignItems: 'center',
@@ -3980,7 +4146,6 @@ export default function HomePage(): React.JSX.Element {
                             flexWrap: 'wrap'
                           }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                              {/* Clock SVG */}
                               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <circle cx="12" cy="12" r="10" stroke="#000000" strokeWidth="1.5"/>
                                 <polyline points="12 6 12 12 16 14" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -3994,7 +4159,6 @@ export default function HomePage(): React.JSX.Element {
                               </span>
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                              {/* Calendar SVG */}
                               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke="#000000" strokeWidth="1.5"/>
                                 <line x1="8" y1="2" x2="8" y2="6" stroke="#000000" strokeWidth="1.5" strokeLinecap="round"/>
@@ -4010,7 +4174,6 @@ export default function HomePage(): React.JSX.Element {
                               </span>
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                              {/* Platform SVG */}
                               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="#000000" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
                               </svg>
@@ -4026,7 +4189,6 @@ export default function HomePage(): React.JSX.Element {
                             </div>
                           </div>
                           
-                          {/* Alasan Percaya - deskripsi besar */}
                           <div style={{
                             marginTop: '16px'
                           }}>
@@ -4052,7 +4214,6 @@ export default function HomePage(): React.JSX.Element {
                             </div>
                           </div>
                           
-                          {/* Kontak: Email, Phone, Company */}
                           <div style={{
                             display: 'flex',
                             alignItems: 'center',
@@ -4105,7 +4266,6 @@ export default function HomePage(): React.JSX.Element {
                             )}
                           </div>
                           
-                          {/* Admin Reply */}
                           {submission.adminReply && (
                             <div style={{
                               marginTop: '24px'
@@ -4142,7 +4302,7 @@ export default function HomePage(): React.JSX.Element {
                           )}
                         </div>
                         
-                        {/* RIGHT - Tombol dengan NORTH EAST ARROW dan NORTH WEST ARROW 50px */}
+                        {/* RIGHT - Tombol */}
                         <div style={{
                           width: '220px',
                           flexShrink: 0,
@@ -4176,13 +4336,11 @@ export default function HomePage(): React.JSX.Element {
                             }}
                           >
                             <span>BOOK CALL</span>
-                            {/* NORTH EAST ARROW - 24px */}
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                               <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                             </svg>
                           </button>
                           
-                          {/* Admin Reply Button */}
                           {isAdmin && (
                             <button
                               onClick={() => {
@@ -4209,7 +4367,6 @@ export default function HomePage(): React.JSX.Element {
                               }}
                             >
                               <span>{submission.adminReply ? 'EDIT REPLY' : 'REPLY'}</span>
-                              {/* NORTH WEST ARROW - 20px */}
                               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M17 7L7 17M7 17H17M7 17V7" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                               </svg>
