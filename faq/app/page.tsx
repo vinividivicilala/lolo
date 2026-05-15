@@ -1600,6 +1600,7 @@ export default function HomePage(): React.JSX.Element {
   }, []);
 
 
+
 useEffect(() => {
   if (isLoading) return;
 
@@ -1626,9 +1627,10 @@ useEffect(() => {
 
     if (!section || !pinWrap) return;
 
+    // Set posisi awal - card 2 dan 3 di BAWAH card 1
     gsap.set(card1Ref, { y: 0, zIndex: 5 });
-    gsap.set(card2Ref, { y: 140, zIndex: 6 });
-    gsap.set(card3Ref, { y: 280, zIndex: 7 });
+    gsap.set(card2Ref, { y: 160, zIndex: 6 });
+    gsap.set(card3Ref, { y: 320, zIndex: 7 });
 
     ScrollTrigger.getAll().forEach(trigger => {
       if (trigger.vars && trigger.trigger === section) {
@@ -1640,7 +1642,7 @@ useEffect(() => {
       scrollTrigger: {
         trigger: section,
         start: "top top",
-        end: "+=200%",
+        end: "+=250%",
         pin: pinWrap,
         scrub: 1.5,
         anticipatePin: 1,
@@ -1648,10 +1650,18 @@ useEffect(() => {
       }
     });
 
-    // Card 2 bergerak ke atas (Y=140px ke Y=0)
-    tl.to(card2Ref, { y: 0, duration: 1, ease: "power2.inOut" }, 0)
-      // Card 3 bergerak ke atas (Y=280px ke Y=140)
-      .to(card3Ref, { y: 140, duration: 1, ease: "power2.inOut" }, 0.4);
+    // Card 2 bergerak dari Y=160px ke Y=0 (menumpuk ke Card 1)
+    tl.to(card2Ref, { 
+      y: 0, 
+      duration: 1, 
+      ease: "power2.inOut" 
+    }, 0)
+    // Card 3 bergerak dari Y=320px ke Y=160 (menumpuk ke Card 2)
+    .to(card3Ref, { 
+      y: 160, 
+      duration: 1, 
+      ease: "power2.inOut" 
+    }, 0.5);
 
     setHasCardsAnimated(true);
   }
@@ -1666,6 +1676,12 @@ useEffect(() => {
   };
 }, [isLoading, card1Ref, card2Ref, card3Ref]);
 
+
+
+
+
+
+  
   
 
   useEffect(() => {
@@ -3661,12 +3677,18 @@ useEffect(() => {
             </div>
 
 
+
+
+
+            // STACKED CARDS SECTION - VERSI FINAL DENGAN TINGGI YANG DIPERBESAR
+// Letakkan setelah Features Section dan sebelum TRUSTED COLLABS
+
 {!isLoading && (
   <div
     ref={cardsSectionRef}
     style={{
       width: '100%',
-      minHeight: '300vh',
+      minHeight: '350vh',
       position: 'relative',
       backgroundColor: '#f5f5f5',
     }}
@@ -3687,11 +3709,11 @@ useEffect(() => {
         position: 'relative',
         width: '100%',
         maxWidth: '1200px',
-        height: '70vh',
+        height: '75vh',
         margin: '0 auto',
       }}>
         
-        {/* CARD 1 - PALING ATAS */}
+        {/* CARD 1 - PALING ATAS (Base Card) */}
         <div
           ref={(el) => setCard1Ref(el)}
           style={{
@@ -3715,18 +3737,17 @@ useEffect(() => {
         >
           {/* Header dengan linebox dan judul besar */}
           <div style={{
-            padding: '40px 48px 0 48px',
+            padding: '45px 55px 0 55px',
             borderBottom: '2px solid #000000',
-            marginBottom: '0',
           }}>
             <div style={{
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'flex-end',
-              marginBottom: '30px',
+              marginBottom: '35px',
             }}>
               <div style={{
-                fontSize: '90px',
+                fontSize: '95px',
                 fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
                 fontWeight: '400',
                 letterSpacing: '-0.02em',
@@ -3738,16 +3759,15 @@ useEffect(() => {
               <button style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '12px',
+                gap: '14px',
                 background: 'transparent',
-                border: 'none',
+                border: '1.5px solid #000000',
                 cursor: 'pointer',
                 fontSize: '16px',
                 fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
                 color: '#000000',
-                padding: '12px 24px',
-                border: '1.5px solid #000000',
-                marginBottom: '10px',
+                padding: '14px 28px',
+                marginBottom: '12px',
                 transition: 'all 0.2s ease',
               }}
               onMouseEnter={(e) => {
@@ -3766,7 +3786,7 @@ useEffect(() => {
           
           {/* Konten bawah */}
           <div style={{
-            padding: '48px',
+            padding: '55px 55px 45px 55px',
             flex: 1,
             display: 'flex',
             flexDirection: 'column',
@@ -3778,7 +3798,7 @@ useEffect(() => {
                 fontSize: '18px',
                 lineHeight: '1.6',
                 color: '#333333',
-                marginBottom: '30px',
+                marginBottom: '35px',
                 maxWidth: '70%',
               }}>
                 Award-winning UX/UI design studio crafting digital experiences 
@@ -3786,15 +3806,15 @@ useEffect(() => {
                 serving global clients since 2020.
               </p>
               <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
-                <span style={{ padding: '6px 20px', background: '#f0f0f0', fontSize: '13px', fontFamily: "'Questrial', sans-serif" }}>UX Research</span>
-                <span style={{ padding: '6px 20px', background: '#f0f0f0', fontSize: '13px', fontFamily: "'Questrial', sans-serif" }}>UI Design</span>
-                <span style={{ padding: '6px 20px', background: '#f0f0f0', fontSize: '13px', fontFamily: "'Questrial', sans-serif" }}>Prototyping</span>
-                <span style={{ padding: '6px 20px', background: '#f0f0f0', fontSize: '13px', fontFamily: "'Questrial', sans-serif" }}>Design System</span>
+                <span style={{ padding: '6px 22px', background: '#f0f0f0', fontSize: '13px', fontFamily: "'Questrial', sans-serif" }}>UX Research</span>
+                <span style={{ padding: '6px 22px', background: '#f0f0f0', fontSize: '13px', fontFamily: "'Questrial', sans-serif" }}>UI Design</span>
+                <span style={{ padding: '6px 22px', background: '#f0f0f0', fontSize: '13px', fontFamily: "'Questrial', sans-serif" }}>Prototyping</span>
+                <span style={{ padding: '6px 22px', background: '#f0f0f0', fontSize: '13px', fontFamily: "'Questrial', sans-serif" }}>Design System</span>
               </div>
             </div>
             <div style={{
-              marginTop: '40px',
-              paddingTop: '24px',
+              marginTop: '45px',
+              paddingTop: '25px',
               borderTop: '1px solid #e0e0e0',
               display: 'flex',
               justifyContent: 'space-between',
@@ -3806,14 +3826,14 @@ useEffect(() => {
           </div>
         </div>
 
-        {/* CARD 2 - TENGAH */}
+        {/* CARD 2 - TENGAH (Akan bergerak ke atas) */}
         <div
           ref={(el) => setCard2Ref(el)}
           style={{
             position: 'absolute',
             top: '50%',
             left: '50%',
-            transform: 'translate(-50%, -50%) translateY(140px)',
+            transform: 'translate(-50%, -50%) translateY(160px)',
             width: '94%',
             height: '94%',
             backgroundColor: '#ffffff',
@@ -3829,18 +3849,17 @@ useEffect(() => {
           }}
         >
           <div style={{
-            padding: '35px 44px 0 44px',
+            padding: '38px 50px 0 50px',
             borderBottom: '2px solid #000000',
-            marginBottom: '0',
           }}>
             <div style={{
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'flex-end',
-              marginBottom: '25px',
+              marginBottom: '28px',
             }}>
               <div style={{
-                fontSize: '80px',
+                fontSize: '85px',
                 fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
                 fontWeight: '400',
                 letterSpacing: '-0.02em',
@@ -3859,8 +3878,8 @@ useEffect(() => {
                 fontSize: '15px',
                 fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
                 color: '#000000',
-                padding: '10px 22px',
-                marginBottom: '8px',
+                padding: '12px 25px',
+                marginBottom: '10px',
                 transition: 'all 0.2s ease',
               }}
               onMouseEnter={(e) => {
@@ -3878,7 +3897,7 @@ useEffect(() => {
           </div>
           
           <div style={{
-            padding: '42px 44px',
+            padding: '48px 50px 40px 50px',
             flex: 1,
             display: 'flex',
             flexDirection: 'column',
@@ -3890,22 +3909,22 @@ useEffect(() => {
                 fontSize: '17px',
                 lineHeight: '1.6',
                 color: '#333333',
-                marginBottom: '25px',
+                marginBottom: '28px',
                 maxWidth: '65%',
               }}>
                 Harnessing artificial intelligence to revolutionize creative workflows, 
                 from generative design to intelligent automation and predictive analytics.
               </p>
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                <span style={{ padding: '5px 18px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Machine Learning</span>
-                <span style={{ padding: '5px 18px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Generative AI</span>
-                <span style={{ padding: '5px 18px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Computer Vision</span>
-                <span style={{ padding: '5px 18px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>NLP</span>
+                <span style={{ padding: '5px 20px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Machine Learning</span>
+                <span style={{ padding: '5px 20px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Generative AI</span>
+                <span style={{ padding: '5px 20px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Computer Vision</span>
+                <span style={{ padding: '5px 20px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>NLP</span>
               </div>
             </div>
             <div style={{
-              marginTop: '35px',
-              paddingTop: '20px',
+              marginTop: '38px',
+              paddingTop: '22px',
               borderTop: '1px solid #e0e0e0',
               display: 'flex',
               justifyContent: 'space-between',
@@ -3917,14 +3936,14 @@ useEffect(() => {
           </div>
         </div>
 
-        {/* CARD 3 - PALING BAWAH */}
+        {/* CARD 3 - PALING BAWAH (Akan bergerak ke atas) */}
         <div
           ref={(el) => setCard3Ref(el)}
           style={{
             position: 'absolute',
             top: '50%',
             left: '50%',
-            transform: 'translate(-50%, -50%) translateY(280px)',
+            transform: 'translate(-50%, -50%) translateY(320px)',
             width: '88%',
             height: '88%',
             backgroundColor: '#ffffff',
@@ -3940,18 +3959,17 @@ useEffect(() => {
           }}
         >
           <div style={{
-            padding: '30px 40px 0 40px',
+            padding: '32px 45px 0 45px',
             borderBottom: '2px solid #000000',
-            marginBottom: '0',
           }}>
             <div style={{
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'flex-end',
-              marginBottom: '22px',
+              marginBottom: '24px',
             }}>
               <div style={{
-                fontSize: '70px',
+                fontSize: '75px',
                 fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
                 fontWeight: '400',
                 letterSpacing: '-0.02em',
@@ -3963,15 +3981,15 @@ useEffect(() => {
               <button style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '10px',
+                gap: '11px',
                 background: 'transparent',
                 border: '1.5px solid #000000',
                 cursor: 'pointer',
                 fontSize: '14px',
                 fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
                 color: '#000000',
-                padding: '9px 20px',
-                marginBottom: '6px',
+                padding: '10px 22px',
+                marginBottom: '8px',
                 transition: 'all 0.2s ease',
               }}
               onMouseEnter={(e) => {
@@ -3989,7 +4007,7 @@ useEffect(() => {
           </div>
           
           <div style={{
-            padding: '38px 40px',
+            padding: '42px 45px 38px 45px',
             flex: 1,
             display: 'flex',
             flexDirection: 'column',
@@ -4001,7 +4019,7 @@ useEffect(() => {
                 fontSize: '16px',
                 lineHeight: '1.6',
                 color: '#333333',
-                marginBottom: '22px',
+                marginBottom: '24px',
                 maxWidth: '60%',
               }}>
                 Join thousands of creative professionals sharing insights, 
@@ -4009,15 +4027,15 @@ useEffect(() => {
                 growing design community.
               </p>
               <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                <span style={{ padding: '5px 16px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>10k+ Members</span>
-                <span style={{ padding: '5px 16px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Weekly Events</span>
-                <span style={{ padding: '5px 16px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Mentorship</span>
-                <span style={{ padding: '5px 16px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Job Board</span>
+                <span style={{ padding: '5px 18px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>10k+ Members</span>
+                <span style={{ padding: '5px 18px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Weekly Events</span>
+                <span style={{ padding: '5px 18px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Mentorship</span>
+                <span style={{ padding: '5px 18px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Job Board</span>
               </div>
             </div>
             <div style={{
-              marginTop: '30px',
-              paddingTop: '18px',
+              marginTop: '32px',
+              paddingTop: '20px',
               borderTop: '1px solid #e0e0e0',
               display: 'flex',
               justifyContent: 'space-between',
@@ -4033,7 +4051,6 @@ useEffect(() => {
     </div>
   </div>
 )}
-
 
             
 
