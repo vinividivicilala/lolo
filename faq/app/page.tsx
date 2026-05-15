@@ -1633,7 +1633,7 @@ useEffect(() => {
 
     if (!section || !pinWrap) return;
 
-    // Set posisi awal - semua card di bawah card 1
+    // Set posisi awal
     gsap.set(card1Ref, { y: 0, zIndex: 5 });
     gsap.set(card2Ref, { y: 200, zIndex: 6 });
     gsap.set(card3Ref, { y: 400, zIndex: 7 });
@@ -1651,7 +1651,7 @@ useEffect(() => {
       scrollTrigger: {
         trigger: section,
         start: "top top",
-        end: "+=1200%", // Ditingkatkan untuk 6 card
+        end: "+=700%", // Ditingkatkan dari 600% ke 700%
         pin: pinWrap,
         scrub: 1.5,
         anticipatePin: 1,
@@ -1661,10 +1661,10 @@ useEffect(() => {
 
     // Animasi bertahap untuk 6 card
     tl.to(card2Ref, { y: 0, duration: 1, ease: "power2.inOut" }, 0)
-      .to(card3Ref, { y: 200, duration: 1, ease: "power2.inOut" }, 0.3)
-      .to(card4Ref, { y: 400, duration: 1, ease: "power2.inOut" }, 0.6)
-      .to(card5Ref, { y: 600, duration: 1, ease: "power2.inOut" }, 0.9)
-      .to(card6Ref, { y: 800, duration: 1, ease: "power2.inOut" }, 1.2);
+      .to(card3Ref, { y: 200, duration: 1, ease: "power2.inOut" }, 0.4)
+      .to(card4Ref, { y: 400, duration: 1, ease: "power2.inOut" }, 0.8)
+      .to(card5Ref, { y: 600, duration: 1, ease: "power2.inOut" }, 1.2)
+      .to(card6Ref, { y: 800, duration: 1, ease: "power2.inOut" }, 1.6);
 
     setHasCardsAnimated(true);
   }
@@ -1680,9 +1680,11 @@ useEffect(() => {
 }, [isLoading, card1Ref, card2Ref, card3Ref, card4Ref, card5Ref, card6Ref]);
 
 
+
+
+
+
   
-
-
   
   
 
@@ -3680,13 +3682,15 @@ useEffect(() => {
 
 
 
+// STACKED CARDS SECTION - DENGAN JUDUL "COMMUNITY" 200px + PANAH SVG
+// Letakkan setelah Features Section dan sebelum TRUSTED COLLABS
 
 {!isLoading && (
   <div
     ref={cardsSectionRef}
     style={{
       width: '100%',
-      minHeight: '880vh', // DITINGKATKAN untuk 6 card (dari 420vh ke 580vh)
+      minHeight: '750vh', // DITINGKATKAN LAGI dari 580vh ke 750vh untuk 6 card
       position: 'relative',
       backgroundColor: '#f5f5f5',
       marginBottom: '0',
@@ -3707,11 +3711,10 @@ useEffect(() => {
         justifyContent: 'space-between',
         alignItems: 'flex-end',
         paddingBottom: '30px',
-        // borderBottom dihapus
       }}>
         <div style={{
           fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-          fontSize: '200px', // DARI 300px KE 200px
+          fontSize: '200px',
           fontWeight: '400',
           letterSpacing: '-0.02em',
           lineHeight: '0.9',
@@ -3741,14 +3744,15 @@ useEffect(() => {
         alignItems: 'center',
         justifyContent: 'center',
         overflow: 'visible',
-        marginTop: '50px',
+        marginTop: '80px',
+        marginBottom: '100px', // Tambahan margin bottom
       }}
     >
       <div style={{
         position: 'relative',
         width: '100%',
         maxWidth: '1200px',
-        height: '80vh',
+        height: '85vh',
         margin: '0 auto',
       }}>
         
@@ -3870,8 +3874,8 @@ useEffect(() => {
             top: '50%',
             left: '50%',
             transform: 'translate(-50%, -50%) translateY(200px)',
-            width: '96%',
-            height: '96%',
+            width: '97%',
+            height: '97%',
             backgroundColor: '#ffffff',
             border: '2px solid #000000',
             borderRadius: '0px',
@@ -3980,8 +3984,8 @@ useEffect(() => {
             top: '50%',
             left: '50%',
             transform: 'translate(-50%, -50%) translateY(400px)',
-            width: '92%',
-            height: '92%',
+            width: '94%',
+            height: '94%',
             backgroundColor: '#ffffff',
             border: '2px solid #000000',
             borderRadius: '0px',
@@ -4083,16 +4087,16 @@ useEffect(() => {
           </div>
         </div>
 
-        {/* CARD 4 - BARU */}
+        {/* CARD 4 */}
         <div
-          ref={(el) => setCard4Ref && setCard4Ref(el)}
+          ref={(el) => setCard4Ref(el)}
           style={{
             position: 'absolute',
             top: '50%',
             left: '50%',
             transform: 'translate(-50%, -50%) translateY(600px)',
-            width: '88%',
-            height: '88%',
+            width: '91%',
+            height: '91%',
             backgroundColor: '#ffffff',
             border: '2px solid #000000',
             borderRadius: '0px',
@@ -4193,16 +4197,16 @@ useEffect(() => {
           </div>
         </div>
 
-        {/* CARD 5 - BARU */}
+        {/* CARD 5 */}
         <div
-          ref={(el) => setCard5Ref && setCard5Ref(el)}
+          ref={(el) => setCard5Ref(el)}
           style={{
             position: 'absolute',
             top: '50%',
             left: '50%',
             transform: 'translate(-50%, -50%) translateY(800px)',
-            width: '84%',
-            height: '84%',
+            width: '88%',
+            height: '88%',
             backgroundColor: '#ffffff',
             border: '2px solid #000000',
             borderRadius: '0px',
@@ -4303,16 +4307,16 @@ useEffect(() => {
           </div>
         </div>
 
-        {/* CARD 6 - BARU (PALING BAWAH) */}
+        {/* CARD 6 - PALING BAWAH */}
         <div
-          ref={(el) => setCard6Ref && setCard6Ref(el)}
+          ref={(el) => setCard6Ref(el)}
           style={{
             position: 'absolute',
             top: '50%',
             left: '50%',
             transform: 'translate(-50%, -50%) translateY(1000px)',
-            width: '80%',
-            height: '80%',
+            width: '85%',
+            height: '85%',
             backgroundColor: '#ffffff',
             border: '2px solid #000000',
             borderRadius: '0px',
@@ -4418,9 +4422,13 @@ useEffect(() => {
   </div>
 )}
 
+
+
+
+
+
+
             
-
-
             
 
             {/* SECTION TRUSTED COLLABS */}
