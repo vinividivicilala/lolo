@@ -1606,9 +1606,7 @@ const [card6Ref, setCard6Ref] = useState<HTMLDivElement | null>(null);
 
 
 
-
-// Update useEffect untuk animasi cards
-useEffect(() => {
+  useEffect(() => {
   if (isLoading) return;
 
   const lenis = new Lenis({
@@ -1634,13 +1632,13 @@ useEffect(() => {
 
     if (!section || !pinWrap) return;
 
-    // Set posisi awal - semua card di bawah dengan efek tangga
+    // Set posisi awal - card 2,3,4,5,6 di BAWAH card 1
     gsap.set(card1Ref, { y: 0, zIndex: 10 });
-    gsap.set(card2Ref, { y: 30, zIndex: 9 });
-    gsap.set(card3Ref, { y: 60, zIndex: 8 });
-    gsap.set(card4Ref, { y: 90, zIndex: 7 });
-    gsap.set(card5Ref, { y: 120, zIndex: 6 });
-    gsap.set(card6Ref, { y: 150, zIndex: 5 });
+    gsap.set(card2Ref, { y: 220, zIndex: 9 });
+    gsap.set(card3Ref, { y: 440, zIndex: 8 });
+    gsap.set(card4Ref, { y: 660, zIndex: 7 });
+    gsap.set(card5Ref, { y: 880, zIndex: 6 });
+    gsap.set(card6Ref, { y: 1100, zIndex: 5 });
 
     ScrollTrigger.getAll().forEach(trigger => {
       if (trigger.vars && trigger.trigger === section) {
@@ -1652,7 +1650,7 @@ useEffect(() => {
       scrollTrigger: {
         trigger: section,
         start: "top top",
-        end: "+=600%",
+        end: "+=800%",
         pin: pinWrap,
         scrub: 1.5,
         anticipatePin: 1,
@@ -1660,13 +1658,13 @@ useEffect(() => {
       }
     });
 
-    // Animasi: card 2-6 bergerak ke bawah (semakin menjauhi card 1)
-    // Fokus tetap pada card 1
-    tl.to(card2Ref, { y: 300, duration: 1.2, ease: "power2.inOut" }, 0)
-      .to(card3Ref, { y: 450, duration: 1.2, ease: "power2.inOut" }, 0.3)
-      .to(card4Ref, { y: 600, duration: 1.2, ease: "power2.inOut" }, 0.6)
-      .to(card5Ref, { y: 750, duration: 1.2, ease: "power2.inOut" }, 0.9)
-      .to(card6Ref, { y: 900, duration: 1.2, ease: "power2.inOut" }, 1.2);
+    // Animasi: Card 2 bergerak dari Y=220px ke Y=0
+    // Card 3 dari Y=440px ke Y=220, dst.
+    tl.to(card2Ref, { y: 0, duration: 1, ease: "power2.inOut" }, 0)
+      .to(card3Ref, { y: 220, duration: 1, ease: "power2.inOut" }, 0.4)
+      .to(card4Ref, { y: 440, duration: 1, ease: "power2.inOut" }, 0.8)
+      .to(card5Ref, { y: 660, duration: 1, ease: "power2.inOut" }, 1.2)
+      .to(card6Ref, { y: 880, duration: 1, ease: "power2.inOut" }, 1.6);
 
     setHasCardsAnimated(true);
   }
@@ -1680,9 +1678,6 @@ useEffect(() => {
     });
   };
 }, [isLoading, card1Ref, card2Ref, card3Ref, card4Ref, card5Ref, card6Ref]);
-
-
-
 
 
 
@@ -3684,7 +3679,6 @@ useEffect(() => {
 
 
 
-
 {/* STACKED CARDS SECTION - DENGAN JUDUL "COMMUNITY" 200px + PANAH BESAR */}
 {/* Letakkan setelah Features Section dan sebelum TRUSTED COLLABS */}
 
@@ -3693,7 +3687,7 @@ useEffect(() => {
     ref={cardsSectionRef}
     style={{
       width: '100%',
-      minHeight: '550vh',
+      minHeight: '500vh',
       position: 'relative',
       backgroundColor: '#f5f5f5',
       marginBottom: '0',
@@ -3706,14 +3700,15 @@ useEffect(() => {
       zIndex: 20,
       width: '100%',
       backgroundColor: '#f5f5f5',
-      padding: '60px 80px 0 80px',
+      padding: '80px 80px 0 80px',
       boxSizing: 'border-box',
     }}>
       <div style={{
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'flex-end',
-        paddingBottom: '0px',
+        borderBottom: 'none',
+        paddingBottom: '0',
       }}>
         <div style={{
           fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
@@ -3736,7 +3731,7 @@ useEffect(() => {
       </div>
     </div>
 
-    {/* STACKED CARDS CONTAINER - KARDS BERADA LEBIH DEKAT KE JUDUL */}
+    {/* STACKED CARDS CONTAINER */}
     <div
       ref={cardsPinnedRef}
       style={{
@@ -3747,7 +3742,7 @@ useEffect(() => {
         alignItems: 'center',
         justifyContent: 'center',
         overflow: 'visible',
-        marginTop: '20px',
+        marginTop: '50px',
       }}
     >
       <div style={{
@@ -3758,7 +3753,7 @@ useEffect(() => {
         margin: '0 auto',
       }}>
         
-        {/* CARD 1 - PALING DEPAN (Fokus Utama) - Paling besar */}
+        {/* CARD 1 - PALING ATAS (Tidak bergerak) */}
         <div
           ref={(el) => setCard1Ref(el)}
           style={{
@@ -3771,9 +3766,9 @@ useEffect(() => {
             backgroundColor: '#ffffff',
             border: '2px solid #000000',
             borderRadius: '0px',
-            boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
+            boxShadow: 'none',
             overflow: 'hidden',
-            zIndex: 10,
+            zIndex: 5,
             display: 'flex',
             flexDirection: 'column',
             color: '#000000',
@@ -3868,22 +3863,22 @@ useEffect(() => {
           </div>
         </div>
 
-        {/* CARD 2 - Sedikit terlihat di bawah card 1 (posisi Y: 30px, ukuran lebih kecil) */}
+        {/* CARD 2 - Akan bergerak dari bawah ke atas */}
         <div
           ref={(el) => setCard2Ref(el)}
           style={{
             position: 'absolute',
             top: '50%',
             left: '50%',
-            transform: 'translate(-50%, -50%) translateY(30px)',
-            width: '97%',
-            height: '97%',
+            transform: 'translate(-50%, -50%) translateY(220px)',
+            width: '94%',
+            height: '94%',
             backgroundColor: '#ffffff',
             border: '2px solid #000000',
             borderRadius: '0px',
-            boxShadow: '0 15px 35px rgba(0,0,0,0.08)',
+            boxShadow: 'none',
             overflow: 'hidden',
-            zIndex: 9,
+            zIndex: 6,
             display: 'flex',
             flexDirection: 'column',
             color: '#000000',
@@ -3891,18 +3886,17 @@ useEffect(() => {
           }}
         >
           <div style={{
-            padding: '42px 52px 0 52px',
+            padding: '38px 50px 0 50px',
             borderBottom: '2px solid #000000',
-            opacity: 0.85,
           }}>
             <div style={{
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'flex-end',
-              marginBottom: '32px',
+              marginBottom: '28px',
             }}>
               <div style={{
-                fontSize: '88px',
+                fontSize: '85px',
                 fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
                 fontWeight: '400',
                 letterSpacing: '-0.02em',
@@ -3914,15 +3908,15 @@ useEffect(() => {
               <button style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '13px',
+                gap: '12px',
                 background: 'transparent',
                 border: '1.5px solid #000000',
                 cursor: 'pointer',
                 fontSize: '15px',
                 fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
                 color: '#000000',
-                padding: '13px 26px',
-                marginBottom: '11px',
+                padding: '12px 25px',
+                marginBottom: '10px',
                 transition: 'all 0.2s ease',
               }}>
                 <span>VIEW ONLINE</span>
@@ -3932,12 +3926,11 @@ useEffect(() => {
           </div>
           
           <div style={{
-            padding: '50px 52px 42px 52px',
+            padding: '48px 50px 40px 50px',
             flex: 1,
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between',
-            opacity: 0.85,
           }}>
             <div>
               <p style={{
@@ -3945,7 +3938,7 @@ useEffect(() => {
                 fontSize: '17px',
                 lineHeight: '1.6',
                 color: '#333333',
-                marginBottom: '30px',
+                marginBottom: '28px',
                 maxWidth: '65%',
               }}>
                 Harnessing artificial intelligence to revolutionize creative workflows, 
@@ -3959,8 +3952,8 @@ useEffect(() => {
               </div>
             </div>
             <div style={{
-              marginTop: '40px',
-              paddingTop: '24px',
+              marginTop: '38px',
+              paddingTop: '22px',
               borderTop: '1px solid #e0e0e0',
               display: 'flex',
               justifyContent: 'space-between',
@@ -3972,22 +3965,22 @@ useEffect(() => {
           </div>
         </div>
 
-        {/* CARD 3 - Terlihat di bawah card 2 (posisi Y: 60px) */}
+        {/* CARD 3 - Akan bergerak dari bawah ke atas */}
         <div
           ref={(el) => setCard3Ref(el)}
           style={{
             position: 'absolute',
             top: '50%',
             left: '50%',
-            transform: 'translate(-50%, -50%) translateY(60px)',
-            width: '94%',
-            height: '94%',
+            transform: 'translate(-50%, -50%) translateY(440px)',
+            width: '88%',
+            height: '88%',
             backgroundColor: '#ffffff',
             border: '2px solid #000000',
             borderRadius: '0px',
-            boxShadow: '0 10px 30px rgba(0,0,0,0.06)',
+            boxShadow: 'none',
             overflow: 'hidden',
-            zIndex: 8,
+            zIndex: 7,
             display: 'flex',
             flexDirection: 'column',
             color: '#000000',
@@ -3995,18 +3988,17 @@ useEffect(() => {
           }}
         >
           <div style={{
-            padding: '38px 48px 0 48px',
+            padding: '32px 45px 0 45px',
             borderBottom: '2px solid #000000',
-            opacity: 0.75,
           }}>
             <div style={{
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'flex-end',
-              marginBottom: '28px',
+              marginBottom: '24px',
             }}>
               <div style={{
-                fontSize: '80px',
+                fontSize: '75px',
                 fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
                 fontWeight: '400',
                 letterSpacing: '-0.02em',
@@ -4018,15 +4010,15 @@ useEffect(() => {
               <button style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '12px',
+                gap: '11px',
                 background: 'transparent',
                 border: '1.5px solid #000000',
                 cursor: 'pointer',
                 fontSize: '14px',
                 fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
                 color: '#000000',
-                padding: '11px 24px',
-                marginBottom: '9px',
+                padding: '10px 22px',
+                marginBottom: '8px',
                 transition: 'all 0.2s ease',
               }}>
                 <span>VIEW ONLINE</span>
@@ -4036,12 +4028,11 @@ useEffect(() => {
           </div>
           
           <div style={{
-            padding: '45px 48px 40px 48px',
+            padding: '42px 45px 38px 45px',
             flex: 1,
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between',
-            opacity: 0.75,
           }}>
             <div>
               <p style={{
@@ -4049,8 +4040,8 @@ useEffect(() => {
                 fontSize: '16px',
                 lineHeight: '1.6',
                 color: '#333333',
-                marginBottom: '26px',
-                maxWidth: '62%',
+                marginBottom: '24px',
+                maxWidth: '60%',
               }}>
                 Join thousands of creative professionals sharing insights, 
                 opportunities, and inspiration in Southeast Asia's fastest 
@@ -4064,8 +4055,8 @@ useEffect(() => {
               </div>
             </div>
             <div style={{
-              marginTop: '35px',
-              paddingTop: '22px',
+              marginTop: '32px',
+              paddingTop: '20px',
               borderTop: '1px solid #e0e0e0',
               display: 'flex',
               justifyContent: 'space-between',
@@ -4077,22 +4068,22 @@ useEffect(() => {
           </div>
         </div>
 
-        {/* CARD 4 - Terlihat di bawah card 3 (posisi Y: 90px) */}
+        {/* CARD 4 - Akan bergerak dari bawah ke atas */}
         <div
           ref={(el) => setCard4Ref ? setCard4Ref(el) : null}
           style={{
             position: 'absolute',
             top: '50%',
             left: '50%',
-            transform: 'translate(-50%, -50%) translateY(90px)',
-            width: '91%',
-            height: '91%',
+            transform: 'translate(-50%, -50%) translateY(660px)',
+            width: '82%',
+            height: '82%',
             backgroundColor: '#ffffff',
             border: '2px solid #000000',
             borderRadius: '0px',
-            boxShadow: '0 8px 25px rgba(0,0,0,0.05)',
+            boxShadow: 'none',
             overflow: 'hidden',
-            zIndex: 7,
+            zIndex: 8,
             display: 'flex',
             flexDirection: 'column',
             color: '#000000',
@@ -4100,18 +4091,17 @@ useEffect(() => {
           }}
         >
           <div style={{
-            padding: '34px 44px 0 44px',
+            padding: '28px 40px 0 40px',
             borderBottom: '2px solid #000000',
-            opacity: 0.65,
           }}>
             <div style={{
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'flex-end',
-              marginBottom: '24px',
+              marginBottom: '20px',
             }}>
               <div style={{
-                fontSize: '72px',
+                fontSize: '65px',
                 fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
                 fontWeight: '400',
                 letterSpacing: '-0.02em',
@@ -4123,15 +4113,15 @@ useEffect(() => {
               <button style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '11px',
+                gap: '10px',
                 background: 'transparent',
                 border: '1.5px solid #000000',
                 cursor: 'pointer',
                 fontSize: '13px',
                 fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
                 color: '#000000',
-                padding: '10px 22px',
-                marginBottom: '8px',
+                padding: '9px 20px',
+                marginBottom: '6px',
                 transition: 'all 0.2s ease',
               }}>
                 <span>VIEW ONLINE</span>
@@ -4141,12 +4131,11 @@ useEffect(() => {
           </div>
           
           <div style={{
-            padding: '40px 44px 36px 44px',
+            padding: '38px 40px 35px 40px',
             flex: 1,
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between',
-            opacity: 0.65,
           }}>
             <div>
               <p style={{
@@ -4154,8 +4143,8 @@ useEffect(() => {
                 fontSize: '15px',
                 lineHeight: '1.6',
                 color: '#333333',
-                marginBottom: '22px',
-                maxWidth: '58%',
+                marginBottom: '20px',
+                maxWidth: '55%',
               }}>
                 Full-service branding agency helping companies define, launch, 
                 and scale their identity across all digital touchpoints.
@@ -4167,8 +4156,8 @@ useEffect(() => {
               </div>
             </div>
             <div style={{
-              marginTop: '30px',
-              paddingTop: '20px',
+              marginTop: '28px',
+              paddingTop: '18px',
               borderTop: '1px solid #e0e0e0',
               display: 'flex',
               justifyContent: 'space-between',
@@ -4180,22 +4169,22 @@ useEffect(() => {
           </div>
         </div>
 
-        {/* CARD 5 - Terlihat di bawah card 4 (posisi Y: 120px) */}
+        {/* CARD 5 - Akan bergerak dari bawah ke atas */}
         <div
           ref={(el) => setCard5Ref ? setCard5Ref(el) : null}
           style={{
             position: 'absolute',
             top: '50%',
             left: '50%',
-            transform: 'translate(-50%, -50%) translateY(120px)',
-            width: '88%',
-            height: '88%',
+            transform: 'translate(-50%, -50%) translateY(880px)',
+            width: '76%',
+            height: '76%',
             backgroundColor: '#ffffff',
             border: '2px solid #000000',
             borderRadius: '0px',
-            boxShadow: '0 5px 20px rgba(0,0,0,0.04)',
+            boxShadow: 'none',
             overflow: 'hidden',
-            zIndex: 6,
+            zIndex: 9,
             display: 'flex',
             flexDirection: 'column',
             color: '#000000',
@@ -4203,18 +4192,17 @@ useEffect(() => {
           }}
         >
           <div style={{
-            padding: '30px 40px 0 40px',
+            padding: '24px 35px 0 35px',
             borderBottom: '2px solid #000000',
-            opacity: 0.55,
           }}>
             <div style={{
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'flex-end',
-              marginBottom: '20px',
+              marginBottom: '18px',
             }}>
               <div style={{
-                fontSize: '64px',
+                fontSize: '55px',
                 fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
                 fontWeight: '400',
                 letterSpacing: '-0.02em',
@@ -4226,15 +4214,15 @@ useEffect(() => {
               <button style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '10px',
+                gap: '9px',
                 background: 'transparent',
                 border: '1.5px solid #000000',
                 cursor: 'pointer',
                 fontSize: '12px',
                 fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
                 color: '#000000',
-                padding: '9px 20px',
-                marginBottom: '6px',
+                padding: '8px 18px',
+                marginBottom: '5px',
                 transition: 'all 0.2s ease',
               }}>
                 <span>VIEW ONLINE</span>
@@ -4244,12 +4232,11 @@ useEffect(() => {
           </div>
           
           <div style={{
-            padding: '35px 40px 32px 40px',
+            padding: '32px 35px 30px 35px',
             flex: 1,
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between',
-            opacity: 0.55,
           }}>
             <div>
               <p style={{
@@ -4257,8 +4244,8 @@ useEffect(() => {
                 fontSize: '14px',
                 lineHeight: '1.6',
                 color: '#333333',
-                marginBottom: '20px',
-                maxWidth: '56%',
+                marginBottom: '18px',
+                maxWidth: '55%',
               }}>
                 Technology incubator supporting early-stage startups with 
                 mentorship, resources, and access to Southeast Asian markets.
@@ -4270,8 +4257,8 @@ useEffect(() => {
               </div>
             </div>
             <div style={{
-              marginTop: '26px',
-              paddingTop: '18px',
+              marginTop: '24px',
+              paddingTop: '16px',
               borderTop: '1px solid #e0e0e0',
               display: 'flex',
               justifyContent: 'space-between',
@@ -4283,22 +4270,22 @@ useEffect(() => {
           </div>
         </div>
 
-        {/* CARD 6 - Paling bawah (posisi Y: 150px) */}
+        {/* CARD 6 - Akan bergerak dari bawah ke atas */}
         <div
           ref={(el) => setCard6Ref ? setCard6Ref(el) : null}
           style={{
             position: 'absolute',
             top: '50%',
             left: '50%',
-            transform: 'translate(-50%, -50%) translateY(150px)',
-            width: '85%',
-            height: '85%',
+            transform: 'translate(-50%, -50%) translateY(1100px)',
+            width: '70%',
+            height: '70%',
             backgroundColor: '#ffffff',
             border: '2px solid #000000',
             borderRadius: '0px',
-            boxShadow: '0 3px 15px rgba(0,0,0,0.03)',
+            boxShadow: 'none',
             overflow: 'hidden',
-            zIndex: 5,
+            zIndex: 10,
             display: 'flex',
             flexDirection: 'column',
             color: '#000000',
@@ -4306,18 +4293,17 @@ useEffect(() => {
           }}
         >
           <div style={{
-            padding: '26px 36px 0 36px',
+            padding: '20px 30px 0 30px',
             borderBottom: '2px solid #000000',
-            opacity: 0.45,
           }}>
             <div style={{
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'flex-end',
-              marginBottom: '18px',
+              marginBottom: '15px',
             }}>
               <div style={{
-                fontSize: '56px',
+                fontSize: '48px',
                 fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
                 fontWeight: '400',
                 letterSpacing: '-0.02em',
@@ -4329,15 +4315,15 @@ useEffect(() => {
               <button style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '9px',
+                gap: '8px',
                 background: 'transparent',
                 border: '1.5px solid #000000',
                 cursor: 'pointer',
                 fontSize: '11px',
                 fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
                 color: '#000000',
-                padding: '8px 18px',
-                marginBottom: '5px',
+                padding: '7px 16px',
+                marginBottom: '4px',
                 transition: 'all 0.2s ease',
               }}>
                 <span>VIEW ONLINE</span>
@@ -4347,12 +4333,11 @@ useEffect(() => {
           </div>
           
           <div style={{
-            padding: '30px 36px 28px 36px',
+            padding: '28px 30px 25px 30px',
             flex: 1,
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between',
-            opacity: 0.45,
           }}>
             <div>
               <p style={{
@@ -4360,8 +4345,8 @@ useEffect(() => {
                 fontSize: '13px',
                 lineHeight: '1.6',
                 color: '#333333',
-                marginBottom: '18px',
-                maxWidth: '54%',
+                marginBottom: '16px',
+                maxWidth: '55%',
               }}>
                 Curated community of independent creators, designers, and 
                 artists collaborating on meaningful projects worldwide.
@@ -4373,8 +4358,8 @@ useEffect(() => {
               </div>
             </div>
             <div style={{
-              marginTop: '22px',
-              paddingTop: '16px',
+              marginTop: '20px',
+              paddingTop: '14px',
               borderTop: '1px solid #e0e0e0',
               display: 'flex',
               justifyContent: 'space-between',
@@ -4390,9 +4375,19 @@ useEffect(() => {
     </div>
   </div>
 )}
+
+
+
+
+
+
+
+
+
+
+
+
             
-
-
             
 
             {/* SECTION TRUSTED COLLABS */}
