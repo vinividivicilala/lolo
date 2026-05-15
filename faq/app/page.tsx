@@ -1602,102 +1602,116 @@ export default function HomePage(): React.JSX.Element {
     };
   }, []);
 
-  // Stacked Cards Animation dengan Lenis + GSAP
-  useEffect(() => {
-    if (isLoading) return;
+// Ganti useEffect Stacked Cards Animation dengan yang ini:
 
-    // Inisialisasi Lenis untuk smooth scroll
-    const lenis = new Lenis({
-      duration: 1.2,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      direction: 'vertical',
-      gestureDirection: 'vertical',
-      smooth: true,
-      smoothTouch: false,
-      touchMultiplier: 1.5,
+useEffect(() => {
+  if (isLoading) return;
+
+  // Inisialisasi Lenis untuk smooth scroll
+  const lenis = new Lenis({
+    duration: 1.2,
+    easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+    direction: 'vertical',
+    gestureDirection: 'vertical',
+    smooth: true,
+    smoothTouch: false,
+    touchMultiplier: 1.5,
+  });
+
+  function raf(time: number) {
+    lenis.raf(time);
+    requestAnimationFrame(raf);
+  }
+
+  requestAnimationFrame(raf);
+
+  // Stacked Cards Animation - PERBAIKAN
+  if (cardsPinnedRef.current && card1Ref && card2Ref && card3Ref) {
+    const section = cardsSectionRef.current;
+    const pinWrap = cardsPinnedRef.current;
+
+    if (!section || !pinWrap) return;
+
+    // Set initial positions - card 2 dan 3 di bawah
+    gsap.set(card2Ref, { 
+      y: 0,
+      scale: 0.95,
+      opacity: 0.9
+    });
+    gsap.set(card3Ref, { 
+      y: 0,
+      scale: 0.9,
+      opacity: 0.7
     });
 
-    function raf(time: number) {
-      lenis.raf(time);
-      requestAnimationFrame(raf);
-    }
+    // Kill existing ScrollTrigger jika ada
+    ScrollTrigger.getAll().forEach(trigger => {
+      if (trigger.vars && trigger.trigger === section) {
+        trigger.kill();
+      }
+    });
 
-    requestAnimationFrame(raf);
+    // Create ScrollTrigger untuk stacked cards
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: section,
+        start: "top top",
+        end: "+=150%",
+        pin: pinWrap,
+        scrub: 1.5,
+        anticipatePin: 1,
+        invalidateOnRefresh: true,
+      }
+    });
 
-    // Stacked Cards Animation
-    if (cardsPinnedRef.current && card1Ref && card2Ref && card3Ref) {
-      const section = cardsSectionRef.current;
-      const pinWrap = cardsPinnedRef.current;
+    // ANIMASI SCROLL KE BAWAH:
+    // Card 2 bergerak dari bawah ke atas, menumpuk ke posisi Card 1
+    tl.to(card2Ref, {
+      y: -window.innerHeight * 0.35,
+      scale: 1,
+      opacity: 1,
+      duration: 1,
+      ease: "power2.inOut",
+    }, 0)
+    // Card 1 sedikit mengecil untuk memberi efek stacking
+    .to(card1Ref, {
+      scale: 0.98,
+      boxShadow: "0 20px 40px -10px rgba(0,0,0,0.2)",
+      duration: 0.5,
+      ease: "power2.out",
+    }, 0)
+    // Card 3 bergerak dari bawah ke atas, menumpuk di atas Card 2
+    .to(card3Ref, {
+      y: -window.innerHeight * 0.65,
+      scale: 1,
+      opacity: 1,
+      duration: 1,
+      ease: "power2.inOut",
+    }, 0.4)
+    // Card 1 dan Card 2 semakin mengecil saat Card 3 naik
+    .to(card1Ref, {
+      scale: 0.95,
+      duration: 0.5,
+      ease: "power2.out",
+    }, 0.4)
+    .to(card2Ref, {
+      scale: 0.97,
+      duration: 0.4,
+      ease: "power2.out",
+    }, 0.4);
 
-      if (!section || !pinWrap) return;
+    setHasCardsAnimated(true);
+  }
 
-      // Set initial positions
-      gsap.set(card2Ref, { y: 0 });
-      gsap.set(card3Ref, { y: 0 });
-
-      // Create ScrollTrigger for stacked cards
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: section,
-          start: "top top",
-          end: "+=200%",
-          pin: pinWrap,
-          scrub: 1.2,
-          anticipatePin: 1,
-          invalidateOnRefresh: true,
-        }
-      });
-
-      // Card 2 moves up and stacks on Card 1
-      tl.fromTo(card2Ref,
-        { y: 0, scale: 0.98, opacity: 0.8 },
-        {
-          y: -window.innerHeight * 0.15,
-          scale: 1,
-          opacity: 1,
-          duration: 1,
-          ease: "power2.inOut"
-        },
-        0
-      )
-      // Card 1 becomes focused
-      .to(card1Ref, {
-        scale: 1,
-        boxShadow: "0 25px 50px -12px rgba(0,0,0,0.25)",
-        duration: 0.5,
-        ease: "power2.out"
-      }, 0)
-      // Card 3 moves up and stacks on Card 2
-      .fromTo(card3Ref,
-        { y: 0, scale: 0.96, opacity: 0.6 },
-        {
-          y: -window.innerHeight * 0.3,
-          scale: 1,
-          opacity: 1,
-          duration: 1,
-          ease: "power2.inOut"
-        },
-        0.5
-      )
-      // Make Card 1 slightly scale down when Card 3 approaches
-      .to(card1Ref, {
-        scale: 0.98,
-        duration: 0.5,
-        ease: "power2.out"
-      }, 0.5);
-
-      setHasCardsAnimated(true);
-    }
-
-    return () => {
-      lenis.destroy();
-      ScrollTrigger.getAll().forEach(trigger => {
-        if (trigger.vars && trigger.vars.trigger === cardsSectionRef.current) {
-          trigger.kill();
-        }
-      });
-    };
-  }, [isLoading, card1Ref, card2Ref, card3Ref]);
+  return () => {
+    lenis.destroy();
+    ScrollTrigger.getAll().forEach(trigger => {
+      if (trigger.vars && trigger.trigger === cardsSectionRef.current) {
+        trigger.kill();
+      }
+    });
+  };
+}, [isLoading, card1Ref, card2Ref, card3Ref]);
 
   // Set z-index untuk stacked cards
   useEffect(() => {
@@ -3697,376 +3711,430 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* STACKED CARDS SECTION */}
-            {!isLoading && (
-              <div
-                ref={cardsSectionRef}
-                style={{
-                  width: '100%',
-                  minHeight: '200vh',
-                  position: 'relative',
-                  backgroundColor: '#f5f5f5',
-                }}
-              >
-                <div
-                  ref={cardsPinnedRef}
-                  style={{
-                    width: '100%',
-                    height: '100vh',
-                    position: 'relative',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    overflow: 'hidden',
-                  }}
-                >
-                  <div style={{
-                    position: 'relative',
-                    width: '100%',
-                    maxWidth: '1200px',
-                    height: '80vh',
-                    margin: '0 auto',
-                  }}>
-
-                    {/* CARD 1 - Default / Fokus Utama */}
-                    <div
-                      ref={(el) => setCard1Ref(el)}
-                      style={{
-                        position: 'absolute',
-                        top: '50%',
-                        left: '50%',
-                        transform: 'translate(-50%, -50%)',
-                        width: '100%',
-                        height: '100%',
-                        backgroundColor: '#ffffff',
-                        borderRadius: '32px',
-                        boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
-                        overflow: 'hidden',
-                        transition: 'all 0.3s ease',
-                        display: 'flex',
-                        flexDirection: 'column',
-                      }}
-                    >
-                      <div style={{
-                        height: '40%',
-                        backgroundColor: '#000000',
-                        position: 'relative',
-                        overflow: 'hidden',
-                      }}>
-                        <Image
-                          src="/images/lkhh.jpg"
-                          alt="Card 1 Background"
-                          fill
-                          style={{ objectFit: 'cover', opacity: 0.8 }}
-                        />
-                        <div style={{
-                          position: 'absolute',
-                          bottom: '30px',
-                          left: '40px',
-                          color: '#ffffff',
-                          fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                        }}>
-                          <div style={{ fontSize: '14px', letterSpacing: '2px', marginBottom: '8px' }}>FEATURED</div>
-                          <div style={{ fontSize: '48px', fontWeight: '400', letterSpacing: '-0.02em' }}>Creative Direction</div>
-                        </div>
-                      </div>
-                      <div style={{
-                        padding: '48px',
-                        flex: 1,
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'space-between',
-                      }}>
-                        <div>
-                          <h2 style={{
-                            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                            fontSize: '32px',
-                            fontWeight: '400',
-                            color: '#000000',
-                            marginBottom: '16px',
-                            letterSpacing: '-0.02em',
-                          }}>
-                            MENURU STUDIO
-                          </h2>
-                          <p style={{
-                            fontFamily: "'Questrial', sans-serif",
-                            fontSize: '18px',
-                            color: '#666666',
-                            lineHeight: '1.6',
-                            marginBottom: '24px',
-                          }}>
-                            Jakarta-based UX/UI design studio focusing on digital products,
-                            branding, and creative technology solutions.
-                          </p>
-                          <div style={{
-                            display: 'flex',
-                            gap: '12px',
-                            flexWrap: 'wrap',
-                          }}>
-                            <span style={{
-                              padding: '6px 16px',
-                              backgroundColor: '#f0f0f0',
-                              borderRadius: '60px',
-                              fontSize: '14px',
-                              fontFamily: "'Questrial', sans-serif",
-                            }}>UX Research</span>
-                            <span style={{
-                              padding: '6px 16px',
-                              backgroundColor: '#f0f0f0',
-                              borderRadius: '60px',
-                              fontSize: '14px',
-                              fontFamily: "'Questrial', sans-serif",
-                            }}>UI Design</span>
-                            <span style={{
-                              padding: '6px 16px',
-                              backgroundColor: '#f0f0f0',
-                              borderRadius: '60px',
-                              fontSize: '14px',
-                              fontFamily: "'Questrial', sans-serif",
-                            }}>Prototyping</span>
-                          </div>
-                        </div>
-                        <div style={{
-                          marginTop: '32px',
-                          paddingTop: '24px',
-                          borderTop: '1px solid #e0e0e0',
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                        }}>
-                          <span style={{
-                            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                            fontSize: '14px',
-                            color: '#999999',
-                            letterSpacing: '1px',
-                          }}>01 / 03</span>
-                          <button style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '12px',
-                            backgroundColor: 'transparent',
-                            border: 'none',
-                            cursor: 'pointer',
-                            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                            fontSize: '16px',
-                            fontWeight: '400',
-                            color: '#000000',
-                          }}>
-                            <span>VIEW PROJECT</span>
-                            <NorthEastArrowIcon size={18} />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* CARD 2 - Berada di bawah Card 1 */}
-                    <div
-                      ref={(el) => setCard2Ref(el)}
-                      style={{
-                        position: 'absolute',
-                        top: '50%',
-                        left: '50%',
-                        transform: 'translate(-50%, -50%) translateY(5%)',
-                        width: '95%',
-                        height: '95%',
-                        backgroundColor: '#ffffff',
-                        borderRadius: '28px',
-                        boxShadow: '0 10px 30px rgba(0,0,0,0.08)',
-                        overflow: 'hidden',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        willChange: 'transform',
-                      }}
-                    >
-                      <div style={{
-                        height: '35%',
-                        backgroundColor: '#1a1a1a',
-                        position: 'relative',
-                        overflow: 'hidden',
-                      }}>
-                        <Image
-                          src="/images/ai.jpg"
-                          alt="Card 2 Background"
-                          fill
-                          style={{ objectFit: 'cover', opacity: 0.7 }}
-                        />
-                        <div style={{
-                          position: 'absolute',
-                          bottom: '30px',
-                          left: '40px',
-                          color: '#ffffff',
-                          fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                        }}>
-                          <div style={{ fontSize: '14px', letterSpacing: '2px', marginBottom: '8px' }}>SERVICES</div>
-                          <div style={{ fontSize: '40px', fontWeight: '400', letterSpacing: '-0.02em' }}>AI Integration</div>
-                        </div>
-                      </div>
-                      <div style={{
-                        padding: '40px',
-                        flex: 1,
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'space-between',
-                      }}>
-                        <div>
-                          <h2 style={{
-                            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                            fontSize: '28px',
-                            fontWeight: '400',
-                            color: '#000000',
-                            marginBottom: '14px',
-                            letterSpacing: '-0.02em',
-                          }}>
-                            AI Creative Solutions
-                          </h2>
-                          <p style={{
-                            fontFamily: "'Questrial', sans-serif",
-                            fontSize: '16px',
-                            color: '#666666',
-                            lineHeight: '1.6',
-                          }}>
-                            Leveraging artificial intelligence to transform business processes
-                            and create innovative digital experiences.
-                          </p>
-                        </div>
-                        <div style={{
-                          marginTop: '24px',
-                          paddingTop: '20px',
-                          borderTop: '1px solid #e0e0e0',
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                        }}>
-                          <span style={{
-                            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                            fontSize: '14px',
-                            color: '#999999',
-                            letterSpacing: '1px',
-                          }}>02 / 03</span>
-                          <button style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '10px',
-                            backgroundColor: 'transparent',
-                            border: 'none',
-                            cursor: 'pointer',
-                            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                            fontSize: '15px',
-                            color: '#000000',
-                          }}>
-                            <span>LEARN MORE</span>
-                            <NorthEastArrowIcon size={16} />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* CARD 3 - Berada di bawah Card 2 */}
-                    <div
-                      ref={(el) => setCard3Ref(el)}
-                      style={{
-                        position: 'absolute',
-                        top: '50%',
-                        left: '50%',
-                        transform: 'translate(-50%, -50%) translateY(10%)',
-                        width: '90%',
-                        height: '90%',
-                        backgroundColor: '#ffffff',
-                        borderRadius: '24px',
-                        boxShadow: '0 8px 25px rgba(0,0,0,0.06)',
-                        overflow: 'hidden',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        willChange: 'transform',
-                      }}
-                    >
-                      <div style={{
-                        height: '32%',
-                        backgroundColor: '#2a2a2a',
-                        position: 'relative',
-                        overflow: 'hidden',
-                      }}>
-                        <Image
-                          src="/images/5.jpg"
-                          alt="Card 3 Background"
-                          fill
-                          style={{ objectFit: 'cover', opacity: 0.75 }}
-                        />
-                        <div style={{
-                          position: 'absolute',
-                          bottom: '30px',
-                          left: '40px',
-                          color: '#ffffff',
-                          fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                        }}>
-                          <div style={{ fontSize: '14px', letterSpacing: '2px', marginBottom: '8px' }}>COMMUNITY</div>
-                          <div style={{ fontSize: '36px', fontWeight: '400', letterSpacing: '-0.02em' }}>Design Network</div>
-                        </div>
-                      </div>
-                      <div style={{
-                        padding: '36px',
-                        flex: 1,
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'space-between',
-                      }}>
-                        <div>
-                          <h2 style={{
-                            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                            fontSize: '26px',
-                            fontWeight: '400',
-                            color: '#000000',
-                            marginBottom: '12px',
-                            letterSpacing: '-0.02em',
-                          }}>
-                            Global Design Community
-                          </h2>
-                          <p style={{
-                            fontFamily: "'Questrial', sans-serif",
-                            fontSize: '15px',
-                            color: '#666666',
-                            lineHeight: '1.6',
-                          }}>
-                            Join our growing network of designers, developers, and creative
-                            professionals sharing knowledge and opportunities.
-                          </p>
-                        </div>
-                        <div style={{
-                          marginTop: '20px',
-                          paddingTop: '18px',
-                          borderTop: '1px solid #e0e0e0',
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                        }}>
-                          <span style={{
-                            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                            fontSize: '14px',
-                            color: '#999999',
-                            letterSpacing: '1px',
-                          }}>03 / 03</span>
-                          <button style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '10px',
-                            backgroundColor: 'transparent',
-                            border: 'none',
-                            cursor: 'pointer',
-                            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                            fontSize: '15px',
-                            color: '#000000',
-                          }}>
-                            <span>JOIN NOW</span>
-                            <NorthEastArrowIcon size={16} />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-
-                  </div>
-                </div>
+{!isLoading && (
+  <div
+    ref={cardsSectionRef}
+    style={{
+      width: '100%',
+      minHeight: '200vh',
+      position: 'relative',
+      backgroundColor: '#e8e8e8',
+    }}
+  >
+    <div
+      ref={cardsPinnedRef}
+      style={{
+        width: '100%',
+        height: '100vh',
+        position: 'relative',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        overflow: 'visible',
+      }}
+    >
+      {/* Container untuk ketiga card dengan posisi absolute stacking */}
+      <div style={{
+        position: 'relative',
+        width: '100%',
+        maxWidth: '1100px',
+        height: '70vh',
+        margin: '0 auto',
+      }}>
+        
+        {/* CARD 1 - Biru - Card Utama yang selalu terlihat */}
+        <div
+          ref={(el) => setCard1Ref(el)}
+          style={{
+            position: 'absolute',
+            bottom: '0',
+            left: '0',
+            right: '0',
+            width: '100%',
+            height: '100%',
+            backgroundColor: '#1a1a2e',
+            borderRadius: '32px',
+            boxShadow: '0 25px 50px -12px rgba(0,0,0,0.3)',
+            overflow: 'hidden',
+            zIndex: 10,
+            transition: 'all 0.3s ease',
+            display: 'flex',
+            flexDirection: 'row',
+            color: '#ffffff',
+          }}
+        >
+          {/* Sisi Kiri Card 1 - Gambar */}
+          <div style={{
+            width: '45%',
+            position: 'relative',
+            overflow: 'hidden',
+            backgroundColor: '#16213e',
+          }}>
+            <Image
+              src="/images/lkhh.jpg"
+              alt="Studio Design"
+              fill
+              style={{ objectFit: 'cover', opacity: 0.9 }}
+            />
+            <div style={{
+              position: 'absolute',
+              bottom: '30px',
+              left: '30px',
+              background: 'rgba(0,0,0,0.6)',
+              padding: '8px 20px',
+              borderRadius: '40px',
+              backdropFilter: 'blur(10px)',
+            }}>
+              <span style={{ fontSize: '14px', letterSpacing: '2px' }}>EST. 2024</span>
+            </div>
+          </div>
+          
+          {/* Sisi Kanan Card 1 - Konten */}
+          <div style={{
+            width: '55%',
+            padding: '50px 48px',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            backgroundColor: '#1a1a2e',
+          }}>
+            <div>
+              <div style={{
+                fontSize: '14px',
+                letterSpacing: '3px',
+                color: '#e94560',
+                marginBottom: '20px',
+                textTransform: 'uppercase',
+              }}>Featured Studio</div>
+              <h2 style={{
+                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                fontSize: '42px',
+                fontWeight: '400',
+                marginBottom: '20px',
+                letterSpacing: '-0.02em',
+                lineHeight: '1.2',
+              }}>
+                MENURU STUDIO
+              </h2>
+              <p style={{
+                fontFamily: "'Questrial', sans-serif",
+                fontSize: '18px',
+                lineHeight: '1.6',
+                opacity: 0.8,
+                marginBottom: '30px',
+              }}>
+                Jakarta-based creative studio specializing in UX/UI design, 
+                branding, and digital product development. We help brands 
+                create meaningful digital experiences.
+              </p>
+              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                <span style={{
+                  padding: '6px 18px',
+                  background: 'rgba(255,255,255,0.1)',
+                  borderRadius: '40px',
+                  fontSize: '13px',
+                }}>UI/UX Design</span>
+                <span style={{
+                  padding: '6px 18px',
+                  background: 'rgba(255,255,255,0.1)',
+                  borderRadius: '40px',
+                  fontSize: '13px',
+                }}>Brand Identity</span>
+                <span style={{
+                  padding: '6px 18px',
+                  background: 'rgba(255,255,255,0.1)',
+                  borderRadius: '40px',
+                  fontSize: '13px',
+                }}>Web Development</span>
               </div>
-            )}
+            </div>
+            <div style={{
+              marginTop: '40px',
+              paddingTop: '24px',
+              borderTop: '1px solid rgba(255,255,255,0.15)',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}>
+              <span style={{ fontSize: '14px', opacity: 0.5 }}>01</span>
+              <button style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                background: 'transparent',
+                border: 'none',
+                color: '#e94560',
+                cursor: 'pointer',
+                fontSize: '15px',
+              }}>
+                Explore Studio <NorthEastArrowIcon size={18} />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* CARD 2 - Merah Muda - Berada di bawah Card 1, akan bergerak ke atas saat scroll */}
+        <div
+          ref={(el) => setCard2Ref(el)}
+          style={{
+            position: 'absolute',
+            bottom: '-15%',
+            left: '5%',
+            right: '5%',
+            width: '90%',
+            height: '85%',
+            backgroundColor: '#ff6b6b',
+            borderRadius: '28px',
+            boxShadow: '0 15px 35px rgba(0,0,0,0.2)',
+            overflow: 'hidden',
+            zIndex: 5,
+            display: 'flex',
+            flexDirection: 'row',
+            color: '#ffffff',
+            willChange: 'transform',
+          }}
+        >
+          {/* Sisi Kiri Card 2 - Gambar */}
+          <div style={{
+            width: '40%',
+            position: 'relative',
+            overflow: 'hidden',
+            backgroundColor: '#c92a2a',
+          }}>
+            <Image
+              src="/images/ai.jpg"
+              alt="AI Creative"
+              fill
+              style={{ objectFit: 'cover' }}
+            />
+            <div style={{
+              position: 'absolute',
+              bottom: '30px',
+              left: '30px',
+              background: 'rgba(0,0,0,0.5)',
+              padding: '6px 16px',
+              borderRadius: '40px',
+              fontSize: '12px',
+            }}>
+              AI INNOVATION
+            </div>
+          </div>
+          
+          {/* Sisi Kanan Card 2 - Konten */}
+          <div style={{
+            width: '60%',
+            padding: '45px 42px',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            backgroundColor: '#ff6b6b',
+          }}>
+            <div>
+              <div style={{
+                fontSize: '13px',
+                letterSpacing: '3px',
+                color: '#fff5f5',
+                marginBottom: '16px',
+                textTransform: 'uppercase',
+                opacity: 0.8,
+              }}>AI Integration</div>
+              <h2 style={{
+                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                fontSize: '36px',
+                fontWeight: '400',
+                marginBottom: '16px',
+                letterSpacing: '-0.02em',
+              }}>
+                AI Creative Lab
+              </h2>
+              <p style={{
+                fontFamily: "'Questrial', sans-serif",
+                fontSize: '16px',
+                lineHeight: '1.6',
+                opacity: 0.85,
+                marginBottom: '24px',
+              }}>
+                Leveraging cutting-edge artificial intelligence to transform 
+                creative processes. From generative design to smart automation, 
+                we integrate AI solutions that elevate your brand.
+              </p>
+              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                <span style={{
+                  padding: '5px 16px',
+                  background: 'rgba(255,255,255,0.15)',
+                  borderRadius: '40px',
+                  fontSize: '12px',
+                }}>Machine Learning</span>
+                <span style={{
+                  padding: '5px 16px',
+                  background: 'rgba(255,255,255,0.15)',
+                  borderRadius: '40px',
+                  fontSize: '12px',
+                }}>Computer Vision</span>
+                <span style={{
+                  padding: '5px 16px',
+                  background: 'rgba(255,255,255,0.15)',
+                  borderRadius: '40px',
+                  fontSize: '12px',
+                }}>NLP</span>
+              </div>
+            </div>
+            <div style={{
+              marginTop: '30px',
+              paddingTop: '20px',
+              borderTop: '1px solid rgba(255,255,255,0.2)',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}>
+              <span style={{ fontSize: '14px', opacity: 0.6 }}>02</span>
+              <button style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                background: 'transparent',
+                border: 'none',
+                color: '#ffffff',
+                cursor: 'pointer',
+                fontSize: '14px',
+              }}>
+                Learn More <NorthEastArrowIcon size={16} />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* CARD 3 - Hijau - Berada di bawah Card 2, akan bergerak ke atas menumpuk */}
+        <div
+          ref={(el) => setCard3Ref(el)}
+          style={{
+            position: 'absolute',
+            bottom: '-30%',
+            left: '10%',
+            right: '10%',
+            width: '80%',
+            height: '75%',
+            backgroundColor: '#20c997',
+            borderRadius: '24px',
+            boxShadow: '0 10px 30px rgba(0,0,0,0.15)',
+            overflow: 'hidden',
+            zIndex: 1,
+            display: 'flex',
+            flexDirection: 'row',
+            color: '#ffffff',
+            willChange: 'transform',
+          }}
+        >
+          {/* Sisi Kiri Card 3 - Gambar */}
+          <div style={{
+            width: '35%',
+            position: 'relative',
+            overflow: 'hidden',
+            backgroundColor: '#0b5e42',
+          }}>
+            <Image
+              src="/images/5.jpg"
+              alt="Community Network"
+              fill
+              style={{ objectFit: 'cover' }}
+            />
+          </div>
+          
+          {/* Sisi Kanan Card 3 - Konten */}
+          <div style={{
+            width: '65%',
+            padding: '40px 40px',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            backgroundColor: '#20c997',
+          }}>
+            <div>
+              <div style={{
+                fontSize: '13px',
+                letterSpacing: '3px',
+                color: '#e8f5e9',
+                marginBottom: '14px',
+                textTransform: 'uppercase',
+                opacity: 0.8,
+              }}>Global Community</div>
+              <h2 style={{
+                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                fontSize: '32px',
+                fontWeight: '400',
+                marginBottom: '14px',
+                letterSpacing: '-0.02em',
+              }}>
+                Design Network Hub
+              </h2>
+              <p style={{
+                fontFamily: "'Questrial', sans-serif",
+                fontSize: '15px',
+                lineHeight: '1.6',
+                opacity: 0.85,
+                marginBottom: '20px',
+              }}>
+                Join thousands of designers, developers, and creative professionals 
+                sharing knowledge, opportunities, and inspiration. Be part of the 
+                fastest growing creative community in Southeast Asia.
+              </p>
+              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                <span style={{
+                  padding: '5px 14px',
+                  background: 'rgba(255,255,255,0.15)',
+                  borderRadius: '40px',
+                  fontSize: '12px',
+                }}>10k+ Members</span>
+                <span style={{
+                  padding: '5px 14px',
+                  background: 'rgba(255,255,255,0.15)',
+                  borderRadius: '40px',
+                  fontSize: '12px',
+                }}>Weekly Events</span>
+                <span style={{
+                  padding: '5px 14px',
+                  background: 'rgba(255,255,255,0.15)',
+                  borderRadius: '40px',
+                  fontSize: '12px',
+                }}>Mentorship</span>
+              </div>
+            </div>
+            <div style={{
+              marginTop: '25px',
+              paddingTop: '18px',
+              borderTop: '1px solid rgba(255,255,255,0.2)',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}>
+              <span style={{ fontSize: '14px', opacity: 0.6 }}>03</span>
+              <button style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                background: 'transparent',
+                border: 'none',
+                color: '#ffffff',
+                cursor: 'pointer',
+                fontSize: '14px',
+              }}>
+                Join Community <NorthEastArrowIcon size={16} />
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+)}
+
+
+
+
+
+
+            
 
             {/* SECTION TRUSTED COLLABS */}
             <div
