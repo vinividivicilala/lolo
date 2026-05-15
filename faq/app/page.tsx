@@ -248,9 +248,6 @@ export default function HomePage(): React.JSX.Element {
   const [card1Ref, setCard1Ref] = useState<HTMLDivElement | null>(null);
   const [card2Ref, setCard2Ref] = useState<HTMLDivElement | null>(null);
   const [card3Ref, setCard3Ref] = useState<HTMLDivElement | null>(null);
-const [card4Ref, setCard4Ref] = useState<HTMLDivElement | null>(null);
-const [card5Ref, setCard5Ref] = useState<HTMLDivElement | null>(null);
-const [card6Ref, setCard6Ref] = useState<HTMLDivElement | null>(null);
   const [hasCardsAnimated, setHasCardsAnimated] = useState(false);
   const cardsSectionRef = useRef<HTMLDivElement>(null);
   const cardsPinnedRef = useRef<HTMLDivElement>(null);
@@ -1604,9 +1601,7 @@ const [card6Ref, setCard6Ref] = useState<HTMLDivElement | null>(null);
 
 
 
-
-
-  useEffect(() => {
+useEffect(() => {
   if (isLoading) return;
 
   const lenis = new Lenis({
@@ -1626,19 +1621,16 @@ const [card6Ref, setCard6Ref] = useState<HTMLDivElement | null>(null);
 
   requestAnimationFrame(raf);
 
-  if (cardsPinnedRef.current && card1Ref && card2Ref && card3Ref && card4Ref && card5Ref && card6Ref) {
+  if (cardsPinnedRef.current && card1Ref && card2Ref && card3Ref) {
     const section = cardsSectionRef.current;
     const pinWrap = cardsPinnedRef.current;
 
     if (!section || !pinWrap) return;
 
-    // Set posisi awal - card 2,3,4,5,6 di BAWAH card 1
-    gsap.set(card1Ref, { y: 0, zIndex: 10 });
-    gsap.set(card2Ref, { y: 220, zIndex: 9 });
-    gsap.set(card3Ref, { y: 440, zIndex: 8 });
-    gsap.set(card4Ref, { y: 660, zIndex: 7 });
-    gsap.set(card5Ref, { y: 880, zIndex: 6 });
-    gsap.set(card6Ref, { y: 1100, zIndex: 5 });
+    // Set posisi awal - card 2 dan 3 di BAWAH card 1
+    gsap.set(card1Ref, { y: 0, zIndex: 5 });
+    gsap.set(card2Ref, { y: 200, zIndex: 6 });
+    gsap.set(card3Ref, { y: 400, zIndex: 7 });
 
     ScrollTrigger.getAll().forEach(trigger => {
       if (trigger.vars && trigger.trigger === section) {
@@ -1650,7 +1642,7 @@ const [card6Ref, setCard6Ref] = useState<HTMLDivElement | null>(null);
       scrollTrigger: {
         trigger: section,
         start: "top top",
-        end: "+=800%",
+        end: "+=300%",
         pin: pinWrap,
         scrub: 1.5,
         anticipatePin: 1,
@@ -1658,13 +1650,18 @@ const [card6Ref, setCard6Ref] = useState<HTMLDivElement | null>(null);
       }
     });
 
-    // Animasi: Card 2 bergerak dari Y=220px ke Y=0
-    // Card 3 dari Y=440px ke Y=220, dst.
-    tl.to(card2Ref, { y: 0, duration: 1, ease: "power2.inOut" }, 0)
-      .to(card3Ref, { y: 220, duration: 1, ease: "power2.inOut" }, 0.4)
-      .to(card4Ref, { y: 440, duration: 1, ease: "power2.inOut" }, 0.8)
-      .to(card5Ref, { y: 660, duration: 1, ease: "power2.inOut" }, 1.2)
-      .to(card6Ref, { y: 880, duration: 1, ease: "power2.inOut" }, 1.6);
+    // Card 2 bergerak dari Y=200px ke Y=0
+    tl.to(card2Ref, { 
+      y: 0, 
+      duration: 1, 
+      ease: "power2.inOut" 
+    }, 0)
+    // Card 3 bergerak dari Y=400px ke Y=200
+    .to(card3Ref, { 
+      y: 200, 
+      duration: 1, 
+      ease: "power2.inOut" 
+    }, 0.5);
 
     setHasCardsAnimated(true);
   }
@@ -1677,9 +1674,15 @@ const [card6Ref, setCard6Ref] = useState<HTMLDivElement | null>(null);
       }
     });
   };
-}, [isLoading, card1Ref, card2Ref, card3Ref, card4Ref, card5Ref, card6Ref]);
+}, [isLoading, card1Ref, card2Ref, card3Ref]);
 
 
+
+
+
+
+
+  
 
 
   
@@ -3678,22 +3681,21 @@ const [card6Ref, setCard6Ref] = useState<HTMLDivElement | null>(null);
             </div>
 
 
-
-{/* STACKED CARDS SECTION - DENGAN JUDUL "COMMUNITY" 200px + PANAH BESAR */}
-{/* Letakkan setelah Features Section dan sebelum TRUSTED COLLABS */}
+// STACKED CARDS SECTION - DENGAN JUDUL "COMMUNITY" 300px + PANAH SVG
+// Letakkan setelah Features Section dan sebelum TRUSTED COLLABS
 
 {!isLoading && (
   <div
     ref={cardsSectionRef}
     style={{
       width: '100%',
-      minHeight: '500vh',
+      minHeight: '420vh',
       position: 'relative',
       backgroundColor: '#f5f5f5',
       marginBottom: '0',
     }}
   >
-    {/* JUDUL COMMUNITY 200px + PANAH BESAR - TANPA GARIS BAWAH */}
+    {/* JUDUL COMMUNITY 300px + PANAH SVG */}
     <div style={{
       position: 'sticky',
       top: '0',
@@ -3707,12 +3709,12 @@ const [card6Ref, setCard6Ref] = useState<HTMLDivElement | null>(null);
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'flex-end',
-        borderBottom: 'none',
-        paddingBottom: '0',
+        borderBottom: '2px solid #000000',
+        paddingBottom: '30px',
       }}>
         <div style={{
           fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-          fontSize: '200px',
+          fontSize: '300px',
           fontWeight: '400',
           letterSpacing: '-0.02em',
           lineHeight: '0.9',
@@ -3724,7 +3726,7 @@ const [card6Ref, setCard6Ref] = useState<HTMLDivElement | null>(null);
         <div style={{
           marginBottom: '20px',
         }}>
-          <svg width="100" height="100" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </div>
@@ -3858,19 +3860,19 @@ const [card6Ref, setCard6Ref] = useState<HTMLDivElement | null>(null);
               alignItems: 'center',
             }}>
               <span style={{ fontSize: '14px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>MENURU STUDIO — Since 2020</span>
-              <span style={{ fontSize: '14px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>01 / 06</span>
+              <span style={{ fontSize: '14px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>01 / 03</span>
             </div>
           </div>
         </div>
 
-        {/* CARD 2 - Akan bergerak dari bawah ke atas */}
+        {/* CARD 2 - TENGAH (Akan bergerak dari bawah ke atas) */}
         <div
           ref={(el) => setCard2Ref(el)}
           style={{
             position: 'absolute',
             top: '50%',
             left: '50%',
-            transform: 'translate(-50%, -50%) translateY(220px)',
+            transform: 'translate(-50%, -50%) translateY(200px)',
             width: '94%',
             height: '94%',
             backgroundColor: '#ffffff',
@@ -3918,6 +3920,14 @@ const [card6Ref, setCard6Ref] = useState<HTMLDivElement | null>(null);
                 padding: '12px 25px',
                 marginBottom: '10px',
                 transition: 'all 0.2s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#000000';
+                e.currentTarget.style.color = '#ffffff';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+                e.currentTarget.style.color = '#000000';
               }}>
                 <span>VIEW ONLINE</span>
                 <NorthEastArrowIcon size={17} />
@@ -3960,19 +3970,19 @@ const [card6Ref, setCard6Ref] = useState<HTMLDivElement | null>(null);
               alignItems: 'center',
             }}>
               <span style={{ fontSize: '13px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>AI INNOVATION DIVISION</span>
-              <span style={{ fontSize: '13px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>02 / 06</span>
+              <span style={{ fontSize: '13px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>02 / 03</span>
             </div>
           </div>
         </div>
 
-        {/* CARD 3 - Akan bergerak dari bawah ke atas */}
+        {/* CARD 3 - PALING BAWAH (Akan bergerak dari bawah ke atas) */}
         <div
           ref={(el) => setCard3Ref(el)}
           style={{
             position: 'absolute',
             top: '50%',
             left: '50%',
-            transform: 'translate(-50%, -50%) translateY(440px)',
+            transform: 'translate(-50%, -50%) translateY(400px)',
             width: '88%',
             height: '88%',
             backgroundColor: '#ffffff',
@@ -4020,6 +4030,14 @@ const [card6Ref, setCard6Ref] = useState<HTMLDivElement | null>(null);
                 padding: '10px 22px',
                 marginBottom: '8px',
                 transition: 'all 0.2s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#000000';
+                e.currentTarget.style.color = '#ffffff';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+                e.currentTarget.style.color = '#000000';
               }}>
                 <span>VIEW ONLINE</span>
                 <NorthEastArrowIcon size={16} />
@@ -4063,310 +4081,7 @@ const [card6Ref, setCard6Ref] = useState<HTMLDivElement | null>(null);
               alignItems: 'center',
             }}>
               <span style={{ fontSize: '13px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>GLOBAL COMMUNITY HUB</span>
-              <span style={{ fontSize: '13px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>03 / 06</span>
-            </div>
-          </div>
-        </div>
-
-        {/* CARD 4 - Akan bergerak dari bawah ke atas */}
-        <div
-          ref={(el) => setCard4Ref ? setCard4Ref(el) : null}
-          style={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%) translateY(660px)',
-            width: '82%',
-            height: '82%',
-            backgroundColor: '#ffffff',
-            border: '2px solid #000000',
-            borderRadius: '0px',
-            boxShadow: 'none',
-            overflow: 'hidden',
-            zIndex: 8,
-            display: 'flex',
-            flexDirection: 'column',
-            color: '#000000',
-            willChange: 'transform',
-          }}
-        >
-          <div style={{
-            padding: '28px 40px 0 40px',
-            borderBottom: '2px solid #000000',
-          }}>
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'flex-end',
-              marginBottom: '20px',
-            }}>
-              <div style={{
-                fontSize: '65px',
-                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                fontWeight: '400',
-                letterSpacing: '-0.02em',
-                lineHeight: '1',
-                color: '#000000',
-              }}>
-                BRAND<br />STUDIO
-              </div>
-              <button style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px',
-                background: 'transparent',
-                border: '1.5px solid #000000',
-                cursor: 'pointer',
-                fontSize: '13px',
-                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                color: '#000000',
-                padding: '9px 20px',
-                marginBottom: '6px',
-                transition: 'all 0.2s ease',
-              }}>
-                <span>VIEW ONLINE</span>
-                <NorthEastArrowIcon size={15} />
-              </button>
-            </div>
-          </div>
-          
-          <div style={{
-            padding: '38px 40px 35px 40px',
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-          }}>
-            <div>
-              <p style={{
-                fontFamily: "'Questrial', sans-serif",
-                fontSize: '15px',
-                lineHeight: '1.6',
-                color: '#333333',
-                marginBottom: '20px',
-                maxWidth: '55%',
-              }}>
-                Full-service branding agency helping companies define, launch, 
-                and scale their identity across all digital touchpoints.
-              </p>
-              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '11px', fontFamily: "'Questrial', sans-serif" }}>Brand Strategy</span>
-                <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '11px', fontFamily: "'Questrial', sans-serif" }}>Visual Identity</span>
-                <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '11px', fontFamily: "'Questrial', sans-serif" }}>Motion Design</span>
-              </div>
-            </div>
-            <div style={{
-              marginTop: '28px',
-              paddingTop: '18px',
-              borderTop: '1px solid #e0e0e0',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}>
-              <span style={{ fontSize: '12px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>BRAND INNOVATION LAB</span>
-              <span style={{ fontSize: '12px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>04 / 06</span>
-            </div>
-          </div>
-        </div>
-
-        {/* CARD 5 - Akan bergerak dari bawah ke atas */}
-        <div
-          ref={(el) => setCard5Ref ? setCard5Ref(el) : null}
-          style={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%) translateY(880px)',
-            width: '76%',
-            height: '76%',
-            backgroundColor: '#ffffff',
-            border: '2px solid #000000',
-            borderRadius: '0px',
-            boxShadow: 'none',
-            overflow: 'hidden',
-            zIndex: 9,
-            display: 'flex',
-            flexDirection: 'column',
-            color: '#000000',
-            willChange: 'transform',
-          }}
-        >
-          <div style={{
-            padding: '24px 35px 0 35px',
-            borderBottom: '2px solid #000000',
-          }}>
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'flex-end',
-              marginBottom: '18px',
-            }}>
-              <div style={{
-                fontSize: '55px',
-                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                fontWeight: '400',
-                letterSpacing: '-0.02em',
-                lineHeight: '1',
-                color: '#000000',
-              }}>
-                TECH<br />HUB
-              </div>
-              <button style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '9px',
-                background: 'transparent',
-                border: '1.5px solid #000000',
-                cursor: 'pointer',
-                fontSize: '12px',
-                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                color: '#000000',
-                padding: '8px 18px',
-                marginBottom: '5px',
-                transition: 'all 0.2s ease',
-              }}>
-                <span>VIEW ONLINE</span>
-                <NorthEastArrowIcon size={14} />
-              </button>
-            </div>
-          </div>
-          
-          <div style={{
-            padding: '32px 35px 30px 35px',
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-          }}>
-            <div>
-              <p style={{
-                fontFamily: "'Questrial', sans-serif",
-                fontSize: '14px',
-                lineHeight: '1.6',
-                color: '#333333',
-                marginBottom: '18px',
-                maxWidth: '55%',
-              }}>
-                Technology incubator supporting early-stage startups with 
-                mentorship, resources, and access to Southeast Asian markets.
-              </p>
-              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                <span style={{ padding: '4px 14px', background: '#f0f0f0', fontSize: '11px', fontFamily: "'Questrial', sans-serif" }}>Startup Mentoring</span>
-                <span style={{ padding: '4px 14px', background: '#f0f0f0', fontSize: '11px', fontFamily: "'Questrial', sans-serif" }}>Investment</span>
-                <span style={{ padding: '4px 14px', background: '#f0f0f0', fontSize: '11px', fontFamily: "'Questrial', sans-serif" }}>Networking</span>
-              </div>
-            </div>
-            <div style={{
-              marginTop: '24px',
-              paddingTop: '16px',
-              borderTop: '1px solid #e0e0e0',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}>
-              <span style={{ fontSize: '11px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>STARTUP ECOSYSTEM</span>
-              <span style={{ fontSize: '11px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>05 / 06</span>
-            </div>
-          </div>
-        </div>
-
-        {/* CARD 6 - Akan bergerak dari bawah ke atas */}
-        <div
-          ref={(el) => setCard6Ref ? setCard6Ref(el) : null}
-          style={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%) translateY(1100px)',
-            width: '70%',
-            height: '70%',
-            backgroundColor: '#ffffff',
-            border: '2px solid #000000',
-            borderRadius: '0px',
-            boxShadow: 'none',
-            overflow: 'hidden',
-            zIndex: 10,
-            display: 'flex',
-            flexDirection: 'column',
-            color: '#000000',
-            willChange: 'transform',
-          }}
-        >
-          <div style={{
-            padding: '20px 30px 0 30px',
-            borderBottom: '2px solid #000000',
-          }}>
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'flex-end',
-              marginBottom: '15px',
-            }}>
-              <div style={{
-                fontSize: '48px',
-                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                fontWeight: '400',
-                letterSpacing: '-0.02em',
-                lineHeight: '1',
-                color: '#000000',
-              }}>
-                CREATIVE<br />COLLECTIVE
-              </div>
-              <button style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                background: 'transparent',
-                border: '1.5px solid #000000',
-                cursor: 'pointer',
-                fontSize: '11px',
-                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                color: '#000000',
-                padding: '7px 16px',
-                marginBottom: '4px',
-                transition: 'all 0.2s ease',
-              }}>
-                <span>VIEW ONLINE</span>
-                <NorthEastArrowIcon size={13} />
-              </button>
-            </div>
-          </div>
-          
-          <div style={{
-            padding: '28px 30px 25px 30px',
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-          }}>
-            <div>
-              <p style={{
-                fontFamily: "'Questrial', sans-serif",
-                fontSize: '13px',
-                lineHeight: '1.6',
-                color: '#333333',
-                marginBottom: '16px',
-                maxWidth: '55%',
-              }}>
-                Curated community of independent creators, designers, and 
-                artists collaborating on meaningful projects worldwide.
-              </p>
-              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                <span style={{ padding: '3px 12px', background: '#f0f0f0', fontSize: '10px', fontFamily: "'Questrial', sans-serif" }}>Artist Network</span>
-                <span style={{ padding: '3px 12px', background: '#f0f0f0', fontSize: '10px', fontFamily: "'Questrial', sans-serif" }}>Residencies</span>
-                <span style={{ padding: '3px 12px', background: '#f0f0f0', fontSize: '10px', fontFamily: "'Questrial', sans-serif" }}>Exhibitions</span>
-              </div>
-            </div>
-            <div style={{
-              marginTop: '20px',
-              paddingTop: '14px',
-              borderTop: '1px solid #e0e0e0',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}>
-              <span style={{ fontSize: '10px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>GLOBAL CREATIVE NETWORK</span>
-              <span style={{ fontSize: '10px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>06 / 06</span>
+              <span style={{ fontSize: '13px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>03 / 03</span>
             </div>
           </div>
         </div>
@@ -4378,16 +4093,6 @@ const [card6Ref, setCard6Ref] = useState<HTMLDivElement | null>(null);
 
 
 
-
-
-
-
-
-
-
-
-
-            
             
 
             {/* SECTION TRUSTED COLLABS */}
