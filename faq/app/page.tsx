@@ -1601,9 +1601,6 @@ export default function HomePage(): React.JSX.Element {
 
 
 
-
-// Ganti kedua useEffect Stacked Cards dengan kode ini:
-
 useEffect(() => {
   if (isLoading) return;
 
@@ -1632,21 +1629,17 @@ useEffect(() => {
 
     if (!section || !pinWrap) return;
 
-    // Set posisi awal yang benar - card 2 dan 3 di BAWAH card 1
-    // Card 1: posisi tengah
-    // Card 2: di bawah card 1 (translateY 80px)
-    // Card 3: di bawah card 2 (translateY 160px)
-    
+    // Set posisi awal - card 2 dan 3 di BAWAH card 1 (seperti anak tangga)
     gsap.set(card1Ref, { 
       y: 0,
       zIndex: 5
     });
     gsap.set(card2Ref, { 
-      y: 80,
+      y: 120,
       zIndex: 6
     });
     gsap.set(card3Ref, { 
-      y: 160,
+      y: 240,
       zIndex: 7
     });
 
@@ -1662,7 +1655,7 @@ useEffect(() => {
       scrollTrigger: {
         trigger: section,
         start: "top top",
-        end: "+=150%",
+        end: "+=200%",
         pin: pinWrap,
         scrub: 1.5,
         anticipatePin: 1,
@@ -1671,19 +1664,19 @@ useEffect(() => {
     });
 
     // ANIMASI SCROLL KE BAWAH:
-    // Card 2 bergerak dari Y=80px ke Y=0 (menumpuk di atas Card 1)
+    // Card 2 bergerak dari Y=120px ke Y=0 (menumpuk di atas Card 1)
     tl.to(card2Ref, {
       y: 0,
       duration: 1,
       ease: "power2.inOut",
     }, 0)
-    // Card 3 bergerak dari Y=160px ke Y=80px (menumpuk di atas Card 2)
+    // Card 3 bergerak dari Y=240px ke Y=120 (menumpuk di atas Card 2)
     .to(card3Ref, {
-      y: 80,
+      y: 120,
       duration: 1,
       ease: "power2.inOut",
     }, 0.4)
-    // Efek visual saat menumpuk
+    // Efek shadow saat menumpuk
     .to(card1Ref, {
       boxShadow: "0 35px 60px -20px rgba(0,0,0,0.5)",
       duration: 0.3,
@@ -1709,10 +1702,6 @@ useEffect(() => {
     });
   };
 }, [isLoading, card1Ref, card2Ref, card3Ref]);
-
-
-
-
 
 
 
@@ -3110,6 +3099,11 @@ useEffect(() => {
         .lenis.lenis-stopped {
           overflow: hidden;
         }
+
+        
+
+
+        
       `}</style>
 
       {/* LOADING OVERLAY */}
@@ -3707,15 +3701,13 @@ useEffect(() => {
             </div>
 
 
- // STACKED CARDS SECTION - VERSI BENAR (3 card terlihat semua seperti anak tangga)
-// Letakkan setelah Features Section dan sebelum TRUSTED COLLABS
-
+            
 {!isLoading && (
   <div
     ref={cardsSectionRef}
     style={{
       width: '100%',
-      minHeight: '250vh',
+      minHeight: '300vh',
       position: 'relative',
       backgroundColor: '#e8e8e8',
     }}
@@ -3740,7 +3732,7 @@ useEffect(() => {
         margin: '0 auto',
       }}>
         
-        {/* CARD 1 - PALING BAWAH (Base Card) */}
+        {/* CARD 1 - PALING ATAS (Akan terlihat penuh saat scroll) */}
         <div
           ref={(el) => setCard1Ref(el)}
           style={{
@@ -3780,6 +3772,7 @@ useEffect(() => {
               padding: '6px 16px',
               borderRadius: '40px',
               fontSize: '12px',
+              backdropFilter: 'blur(5px)',
             }}>
               FEATURED STUDIO
             </div>
@@ -3842,7 +3835,7 @@ useEffect(() => {
           </div>
         </div>
 
-        {/* CARD 2 - TENGAH (Akan naik ke atas Card 1) */}
+        {/* CARD 2 - TENGAH (Akan bergerak ke atas saat scroll) */}
         <div
           ref={(el) => setCard2Ref(el)}
           style={{
@@ -3883,6 +3876,7 @@ useEffect(() => {
               padding: '6px 16px',
               borderRadius: '40px',
               fontSize: '12px',
+              backdropFilter: 'blur(5px)',
             }}>
               AI INNOVATION
             </div>
@@ -3945,7 +3939,7 @@ useEffect(() => {
           </div>
         </div>
 
-        {/* CARD 3 - PALING ATAS (Akan naik ke atas Card 2) */}
+        {/* CARD 3 - PALING BAWAH (Akan bergerak ke atas saat scroll) */}
         <div
           ref={(el) => setCard3Ref(el)}
           style={{
@@ -3986,6 +3980,7 @@ useEffect(() => {
               padding: '6px 16px',
               borderRadius: '40px',
               fontSize: '12px',
+              backdropFilter: 'blur(5px)',
             }}>
               GLOBAL COMMUNITY
             </div>
@@ -4052,9 +4047,10 @@ useEffect(() => {
       </div>
     </div>
   </div>
-)} 
+)}
 
 
+            
 
             
 
