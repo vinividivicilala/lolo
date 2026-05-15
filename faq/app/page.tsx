@@ -1605,7 +1605,9 @@ const [card6Ref, setCard6Ref] = useState<HTMLDivElement | null>(null);
 
 
 
-// Update useEffect untuk animasi cards (sekitar baris 1300-1380)
+
+
+// Update useEffect untuk animasi cards
 useEffect(() => {
   if (isLoading) return;
 
@@ -1632,13 +1634,13 @@ useEffect(() => {
 
     if (!section || !pinWrap) return;
 
-    // Set posisi awal - semua card di BAWAH
-    gsap.set(card1Ref, { y: 0, zIndex: 5 });
-    gsap.set(card2Ref, { y: 220, zIndex: 6 });
-    gsap.set(card3Ref, { y: 440, zIndex: 7 });
-    gsap.set(card4Ref, { y: 660, zIndex: 8 });
-    gsap.set(card5Ref, { y: 880, zIndex: 9 });
-    gsap.set(card6Ref, { y: 1100, zIndex: 10 });
+    // Set posisi awal - semua card di bawah dengan efek tangga
+    gsap.set(card1Ref, { y: 0, zIndex: 10 });
+    gsap.set(card2Ref, { y: 30, zIndex: 9 });
+    gsap.set(card3Ref, { y: 60, zIndex: 8 });
+    gsap.set(card4Ref, { y: 90, zIndex: 7 });
+    gsap.set(card5Ref, { y: 120, zIndex: 6 });
+    gsap.set(card6Ref, { y: 150, zIndex: 5 });
 
     ScrollTrigger.getAll().forEach(trigger => {
       if (trigger.vars && trigger.trigger === section) {
@@ -1650,7 +1652,7 @@ useEffect(() => {
       scrollTrigger: {
         trigger: section,
         start: "top top",
-        end: "+=800%",
+        end: "+=600%",
         pin: pinWrap,
         scrub: 1.5,
         anticipatePin: 1,
@@ -1658,12 +1660,13 @@ useEffect(() => {
       }
     });
 
-    // Animasi semua card bergerak berurutan
-    tl.to(card2Ref, { y: 0, duration: 1, ease: "power2.inOut" }, 0)
-      .to(card3Ref, { y: 0, duration: 1, ease: "power2.inOut" }, 0.4)
-      .to(card4Ref, { y: 0, duration: 1, ease: "power2.inOut" }, 0.8)
-      .to(card5Ref, { y: 0, duration: 1, ease: "power2.inOut" }, 1.2)
-      .to(card6Ref, { y: 0, duration: 1, ease: "power2.inOut" }, 1.6);
+    // Animasi: card 2-6 bergerak ke bawah (semakin menjauhi card 1)
+    // Fokus tetap pada card 1
+    tl.to(card2Ref, { y: 300, duration: 1.2, ease: "power2.inOut" }, 0)
+      .to(card3Ref, { y: 450, duration: 1.2, ease: "power2.inOut" }, 0.3)
+      .to(card4Ref, { y: 600, duration: 1.2, ease: "power2.inOut" }, 0.6)
+      .to(card5Ref, { y: 750, duration: 1.2, ease: "power2.inOut" }, 0.9)
+      .to(card6Ref, { y: 900, duration: 1.2, ease: "power2.inOut" }, 1.2);
 
     setHasCardsAnimated(true);
   }
@@ -1678,7 +1681,10 @@ useEffect(() => {
   };
 }, [isLoading, card1Ref, card2Ref, card3Ref, card4Ref, card5Ref, card6Ref]);
 
-  
+
+
+
+
 
 
   
@@ -3678,6 +3684,7 @@ useEffect(() => {
 
 
 
+
 {/* STACKED CARDS SECTION - DENGAN JUDUL "COMMUNITY" 200px + PANAH BESAR */}
 {/* Letakkan setelah Features Section dan sebelum TRUSTED COLLABS */}
 
@@ -3686,28 +3693,27 @@ useEffect(() => {
     ref={cardsSectionRef}
     style={{
       width: '100%',
-      minHeight: '580vh',
+      minHeight: '550vh',
       position: 'relative',
       backgroundColor: '#f5f5f5',
       marginBottom: '0',
     }}
   >
-    {/* JUDUL COMMUNITY 200px + PANAH SVG BESAR */}
+    {/* JUDUL COMMUNITY 200px + PANAH BESAR - TANPA GARIS BAWAH */}
     <div style={{
       position: 'sticky',
       top: '0',
       zIndex: 20,
       width: '100%',
       backgroundColor: '#f5f5f5',
-      padding: '80px 80px 0 80px',
+      padding: '60px 80px 0 80px',
       boxSizing: 'border-box',
     }}>
       <div style={{
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'flex-end',
-        borderBottom: '2px solid #000000',
-        paddingBottom: '30px',
+        paddingBottom: '0px',
       }}>
         <div style={{
           fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
@@ -3730,7 +3736,7 @@ useEffect(() => {
       </div>
     </div>
 
-    {/* STACKED CARDS CONTAINER */}
+    {/* STACKED CARDS CONTAINER - KARDS BERADA LEBIH DEKAT KE JUDUL */}
     <div
       ref={cardsPinnedRef}
       style={{
@@ -3741,7 +3747,7 @@ useEffect(() => {
         alignItems: 'center',
         justifyContent: 'center',
         overflow: 'visible',
-        marginTop: '80px',
+        marginTop: '20px',
       }}
     >
       <div style={{
@@ -3752,7 +3758,7 @@ useEffect(() => {
         margin: '0 auto',
       }}>
         
-        {/* CARD 1 - PALING ATAS (Statis / Tidak bergerak) */}
+        {/* CARD 1 - PALING DEPAN (Fokus Utama) - Paling besar */}
         <div
           ref={(el) => setCard1Ref(el)}
           style={{
@@ -3765,9 +3771,9 @@ useEffect(() => {
             backgroundColor: '#ffffff',
             border: '2px solid #000000',
             borderRadius: '0px',
-            boxShadow: 'none',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
             overflow: 'hidden',
-            zIndex: 5,
+            zIndex: 10,
             display: 'flex',
             flexDirection: 'column',
             color: '#000000',
@@ -3862,22 +3868,22 @@ useEffect(() => {
           </div>
         </div>
 
-        {/* CARD 2 - Akan bergerak dari bawah ke atas */}
+        {/* CARD 2 - Sedikit terlihat di bawah card 1 (posisi Y: 30px, ukuran lebih kecil) */}
         <div
           ref={(el) => setCard2Ref(el)}
           style={{
             position: 'absolute',
             top: '50%',
             left: '50%',
-            transform: 'translate(-50%, -50%) translateY(220px)',
-            width: '96%',
-            height: '96%',
+            transform: 'translate(-50%, -50%) translateY(30px)',
+            width: '97%',
+            height: '97%',
             backgroundColor: '#ffffff',
             border: '2px solid #000000',
             borderRadius: '0px',
-            boxShadow: 'none',
+            boxShadow: '0 15px 35px rgba(0,0,0,0.08)',
             overflow: 'hidden',
-            zIndex: 6,
+            zIndex: 9,
             display: 'flex',
             flexDirection: 'column',
             color: '#000000',
@@ -3887,6 +3893,7 @@ useEffect(() => {
           <div style={{
             padding: '42px 52px 0 52px',
             borderBottom: '2px solid #000000',
+            opacity: 0.85,
           }}>
             <div style={{
               display: 'flex',
@@ -3917,14 +3924,6 @@ useEffect(() => {
                 padding: '13px 26px',
                 marginBottom: '11px',
                 transition: 'all 0.2s ease',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#000000';
-                e.currentTarget.style.color = '#ffffff';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'transparent';
-                e.currentTarget.style.color = '#000000';
               }}>
                 <span>VIEW ONLINE</span>
                 <NorthEastArrowIcon size={17} />
@@ -3938,6 +3937,7 @@ useEffect(() => {
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between',
+            opacity: 0.85,
           }}>
             <div>
               <p style={{
@@ -3972,22 +3972,22 @@ useEffect(() => {
           </div>
         </div>
 
-        {/* CARD 3 - Akan bergerak dari bawah ke atas */}
+        {/* CARD 3 - Terlihat di bawah card 2 (posisi Y: 60px) */}
         <div
           ref={(el) => setCard3Ref(el)}
           style={{
             position: 'absolute',
             top: '50%',
             left: '50%',
-            transform: 'translate(-50%, -50%) translateY(440px)',
-            width: '92%',
-            height: '92%',
+            transform: 'translate(-50%, -50%) translateY(60px)',
+            width: '94%',
+            height: '94%',
             backgroundColor: '#ffffff',
             border: '2px solid #000000',
             borderRadius: '0px',
-            boxShadow: 'none',
+            boxShadow: '0 10px 30px rgba(0,0,0,0.06)',
             overflow: 'hidden',
-            zIndex: 7,
+            zIndex: 8,
             display: 'flex',
             flexDirection: 'column',
             color: '#000000',
@@ -3997,6 +3997,7 @@ useEffect(() => {
           <div style={{
             padding: '38px 48px 0 48px',
             borderBottom: '2px solid #000000',
+            opacity: 0.75,
           }}>
             <div style={{
               display: 'flex',
@@ -4027,14 +4028,6 @@ useEffect(() => {
                 padding: '11px 24px',
                 marginBottom: '9px',
                 transition: 'all 0.2s ease',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#000000';
-                e.currentTarget.style.color = '#ffffff';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'transparent';
-                e.currentTarget.style.color = '#000000';
               }}>
                 <span>VIEW ONLINE</span>
                 <NorthEastArrowIcon size={16} />
@@ -4048,6 +4041,7 @@ useEffect(() => {
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between',
+            opacity: 0.75,
           }}>
             <div>
               <p style={{
@@ -4083,22 +4077,22 @@ useEffect(() => {
           </div>
         </div>
 
-        {/* CARD 4 - Akan bergerak dari bawah ke atas */}
+        {/* CARD 4 - Terlihat di bawah card 3 (posisi Y: 90px) */}
         <div
           ref={(el) => setCard4Ref ? setCard4Ref(el) : null}
           style={{
             position: 'absolute',
             top: '50%',
             left: '50%',
-            transform: 'translate(-50%, -50%) translateY(660px)',
-            width: '88%',
-            height: '88%',
+            transform: 'translate(-50%, -50%) translateY(90px)',
+            width: '91%',
+            height: '91%',
             backgroundColor: '#ffffff',
             border: '2px solid #000000',
             borderRadius: '0px',
-            boxShadow: 'none',
+            boxShadow: '0 8px 25px rgba(0,0,0,0.05)',
             overflow: 'hidden',
-            zIndex: 8,
+            zIndex: 7,
             display: 'flex',
             flexDirection: 'column',
             color: '#000000',
@@ -4108,6 +4102,7 @@ useEffect(() => {
           <div style={{
             padding: '34px 44px 0 44px',
             borderBottom: '2px solid #000000',
+            opacity: 0.65,
           }}>
             <div style={{
               display: 'flex',
@@ -4138,14 +4133,6 @@ useEffect(() => {
                 padding: '10px 22px',
                 marginBottom: '8px',
                 transition: 'all 0.2s ease',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#000000';
-                e.currentTarget.style.color = '#ffffff';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'transparent';
-                e.currentTarget.style.color = '#000000';
               }}>
                 <span>VIEW ONLINE</span>
                 <NorthEastArrowIcon size={15} />
@@ -4159,6 +4146,7 @@ useEffect(() => {
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between',
+            opacity: 0.65,
           }}>
             <div>
               <p style={{
@@ -4192,22 +4180,22 @@ useEffect(() => {
           </div>
         </div>
 
-        {/* CARD 5 - Akan bergerak dari bawah ke atas */}
+        {/* CARD 5 - Terlihat di bawah card 4 (posisi Y: 120px) */}
         <div
           ref={(el) => setCard5Ref ? setCard5Ref(el) : null}
           style={{
             position: 'absolute',
             top: '50%',
             left: '50%',
-            transform: 'translate(-50%, -50%) translateY(880px)',
-            width: '84%',
-            height: '84%',
+            transform: 'translate(-50%, -50%) translateY(120px)',
+            width: '88%',
+            height: '88%',
             backgroundColor: '#ffffff',
             border: '2px solid #000000',
             borderRadius: '0px',
-            boxShadow: 'none',
+            boxShadow: '0 5px 20px rgba(0,0,0,0.04)',
             overflow: 'hidden',
-            zIndex: 9,
+            zIndex: 6,
             display: 'flex',
             flexDirection: 'column',
             color: '#000000',
@@ -4217,6 +4205,7 @@ useEffect(() => {
           <div style={{
             padding: '30px 40px 0 40px',
             borderBottom: '2px solid #000000',
+            opacity: 0.55,
           }}>
             <div style={{
               display: 'flex',
@@ -4247,14 +4236,6 @@ useEffect(() => {
                 padding: '9px 20px',
                 marginBottom: '6px',
                 transition: 'all 0.2s ease',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#000000';
-                e.currentTarget.style.color = '#ffffff';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'transparent';
-                e.currentTarget.style.color = '#000000';
               }}>
                 <span>VIEW ONLINE</span>
                 <NorthEastArrowIcon size={14} />
@@ -4268,6 +4249,7 @@ useEffect(() => {
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between',
+            opacity: 0.55,
           }}>
             <div>
               <p style={{
@@ -4301,22 +4283,22 @@ useEffect(() => {
           </div>
         </div>
 
-        {/* CARD 6 - Akan bergerak dari bawah ke atas */}
+        {/* CARD 6 - Paling bawah (posisi Y: 150px) */}
         <div
           ref={(el) => setCard6Ref ? setCard6Ref(el) : null}
           style={{
             position: 'absolute',
             top: '50%',
             left: '50%',
-            transform: 'translate(-50%, -50%) translateY(1100px)',
-            width: '80%',
-            height: '80%',
+            transform: 'translate(-50%, -50%) translateY(150px)',
+            width: '85%',
+            height: '85%',
             backgroundColor: '#ffffff',
             border: '2px solid #000000',
             borderRadius: '0px',
-            boxShadow: 'none',
+            boxShadow: '0 3px 15px rgba(0,0,0,0.03)',
             overflow: 'hidden',
-            zIndex: 10,
+            zIndex: 5,
             display: 'flex',
             flexDirection: 'column',
             color: '#000000',
@@ -4326,6 +4308,7 @@ useEffect(() => {
           <div style={{
             padding: '26px 36px 0 36px',
             borderBottom: '2px solid #000000',
+            opacity: 0.45,
           }}>
             <div style={{
               display: 'flex',
@@ -4356,14 +4339,6 @@ useEffect(() => {
                 padding: '8px 18px',
                 marginBottom: '5px',
                 transition: 'all 0.2s ease',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#000000';
-                e.currentTarget.style.color = '#ffffff';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'transparent';
-                e.currentTarget.style.color = '#000000';
               }}>
                 <span>VIEW ONLINE</span>
                 <NorthEastArrowIcon size={13} />
@@ -4377,6 +4352,7 @@ useEffect(() => {
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between',
+            opacity: 0.45,
           }}>
             <div>
               <p style={{
@@ -4414,10 +4390,6 @@ useEffect(() => {
     </div>
   </div>
 )}
-
-
-
-
             
 
 
