@@ -1651,7 +1651,7 @@ useEffect(() => {
       scrollTrigger: {
         trigger: section,
         start: "top top",
-        end: "+=600%", // Ditingkatkan untuk 6 card
+        end: "+=1200%", // Ditingkatkan untuk 6 card
         pin: pinWrap,
         scrub: 1.5,
         anticipatePin: 1,
@@ -3686,7 +3686,7 @@ useEffect(() => {
     ref={cardsSectionRef}
     style={{
       width: '100%',
-      minHeight: '580vh', // DITINGKATKAN untuk 6 card (dari 420vh ke 580vh)
+      minHeight: '880vh', // DITINGKATKAN untuk 6 card (dari 420vh ke 580vh)
       position: 'relative',
       backgroundColor: '#f5f5f5',
       marginBottom: '0',
