@@ -1,6 +1,3 @@
-// app/page.tsx - Bagian Calendar Submissions dengan gaya minimalis hitam putih
-// Dilengkapi dengan Stacked Card Scroll Animation (GSAP + Lenis)
-
 'use client';
 
 import React, { useState, useEffect, useRef } from "react";
@@ -1602,7 +1599,9 @@ export default function HomePage(): React.JSX.Element {
     };
   }, []);
 
-// Ganti useEffect Stacked Cards Animation dengan yang ini:
+
+
+  // Ganti useEffect Stacked Cards Animation dengan yang ini:
 
 useEffect(() => {
   if (isLoading) return;
@@ -1625,80 +1624,77 @@ useEffect(() => {
 
   requestAnimationFrame(raf);
 
-  // Stacked Cards Animation - PERBAIKAN
+  // Stacked Cards Animation - Card bergerak dari bawah ke atas menumpuk
   if (cardsPinnedRef.current && card1Ref && card2Ref && card3Ref) {
     const section = cardsSectionRef.current;
     const pinWrap = cardsPinnedRef.current;
 
     if (!section || !pinWrap) return;
 
-    // Set initial positions - card 2 dan 3 di bawah
+    // Reset posisi awal - semua card di posisi bawah masing-masing
+    gsap.set(card1Ref, { 
+      y: 0,
+      scale: 1,
+      zIndex: 5
+    });
     gsap.set(card2Ref, { 
       y: 0,
-      scale: 0.95,
-      opacity: 0.9
+      scale: 1,
+      zIndex: 6
     });
     gsap.set(card3Ref, { 
       y: 0,
-      scale: 0.9,
-      opacity: 0.7
+      scale: 1,
+      zIndex: 7
     });
 
-    // Kill existing ScrollTrigger jika ada
+    // Kill existing ScrollTrigger
     ScrollTrigger.getAll().forEach(trigger => {
       if (trigger.vars && trigger.trigger === section) {
         trigger.kill();
       }
     });
 
+    // Hitung jarak perpindahan untuk setiap card
+    const moveDistance1 = 0; // Card 1 tetap di tempat
+    const moveDistance2 = -window.innerHeight * 0.18; // Card 2 naik 18% viewport
+    const moveDistance3 = -window.innerHeight * 0.36; // Card 3 naik 36% viewport
+
     // Create ScrollTrigger untuk stacked cards
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: section,
         start: "top top",
-        end: "+=150%",
+        end: "+=130%",
         pin: pinWrap,
-        scrub: 1.5,
+        scrub: 1.2,
         anticipatePin: 1,
         invalidateOnRefresh: true,
       }
     });
 
     // ANIMASI SCROLL KE BAWAH:
-    // Card 2 bergerak dari bawah ke atas, menumpuk ke posisi Card 1
+    // Card 2 bergerak dari bawah ke ATAS Card 1
     tl.to(card2Ref, {
-      y: -window.innerHeight * 0.35,
-      scale: 1,
-      opacity: 1,
+      y: moveDistance2,
       duration: 1,
       ease: "power2.inOut",
     }, 0)
-    // Card 1 sedikit mengecil untuk memberi efek stacking
-    .to(card1Ref, {
-      scale: 0.98,
-      boxShadow: "0 20px 40px -10px rgba(0,0,0,0.2)",
-      duration: 0.5,
-      ease: "power2.out",
-    }, 0)
-    // Card 3 bergerak dari bawah ke atas, menumpuk di atas Card 2
+    // Card 3 bergerak dari bawah ke ATAS Card 1 dan Card 2
     .to(card3Ref, {
-      y: -window.innerHeight * 0.65,
-      scale: 1,
-      opacity: 1,
+      y: moveDistance3,
       duration: 1,
       ease: "power2.inOut",
-    }, 0.4)
-    // Card 1 dan Card 2 semakin mengecil saat Card 3 naik
+    }, 0.3)
+    // Efek shadow saat card menumpuk
     .to(card1Ref, {
-      scale: 0.95,
-      duration: 0.5,
-      ease: "power2.out",
-    }, 0.4)
+      boxShadow: "0 30px 60px -20px rgba(0,0,0,0.4)",
+      duration: 0.3,
+    }, 0)
     .to(card2Ref, {
-      scale: 0.97,
-      duration: 0.4,
-      ease: "power2.out",
-    }, 0.4);
+      boxShadow: "0 25px 50px -15px rgba(0,0,0,0.35)",
+      duration: 0.3,
+    }, 0.1);
 
     setHasCardsAnimated(true);
   }
@@ -1712,6 +1708,9 @@ useEffect(() => {
     });
   };
 }, [isLoading, card1Ref, card2Ref, card3Ref]);
+
+
+  
 
   // Set z-index untuk stacked cards
   useEffect(() => {
@@ -3711,6 +3710,9 @@ useEffect(() => {
               </div>
             </div>
 
+
+  
+
 {!isLoading && (
   <div
     ref={cardsSectionRef}
@@ -3718,7 +3720,7 @@ useEffect(() => {
       width: '100%',
       minHeight: '200vh',
       position: 'relative',
-      backgroundColor: '#e8e8e8',
+      backgroundColor: '#f0f0f0',
     }}
   >
     <div
@@ -3733,16 +3735,15 @@ useEffect(() => {
         overflow: 'visible',
       }}
     >
-      {/* Container untuk ketiga card dengan posisi absolute stacking */}
       <div style={{
         position: 'relative',
         width: '100%',
         maxWidth: '1100px',
-        height: '70vh',
+        height: '75vh',
         margin: '0 auto',
       }}>
         
-        {/* CARD 1 - Biru - Card Utama yang selalu terlihat */}
+        {/* CARD 1 - Biru Tua - Card Utama / Paling Bawah */}
         <div
           ref={(el) => setCard1Ref(el)}
           style={{
@@ -3752,63 +3753,48 @@ useEffect(() => {
             right: '0',
             width: '100%',
             height: '100%',
-            backgroundColor: '#1a1a2e',
-            borderRadius: '32px',
-            boxShadow: '0 25px 50px -12px rgba(0,0,0,0.3)',
+            backgroundColor: '#0f172a',
+            borderRadius: '28px',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.25)',
             overflow: 'hidden',
-            zIndex: 10,
-            transition: 'all 0.3s ease',
+            zIndex: 5,
             display: 'flex',
             flexDirection: 'row',
             color: '#ffffff',
           }}
         >
-          {/* Sisi Kiri Card 1 - Gambar */}
           <div style={{
             width: '45%',
             position: 'relative',
             overflow: 'hidden',
-            backgroundColor: '#16213e',
+            backgroundColor: '#1e293b',
           }}>
             <Image
               src="/images/lkhh.jpg"
-              alt="Studio Design"
+              alt="Creative Studio"
               fill
-              style={{ objectFit: 'cover', opacity: 0.9 }}
+              style={{ objectFit: 'cover' }}
             />
-            <div style={{
-              position: 'absolute',
-              bottom: '30px',
-              left: '30px',
-              background: 'rgba(0,0,0,0.6)',
-              padding: '8px 20px',
-              borderRadius: '40px',
-              backdropFilter: 'blur(10px)',
-            }}>
-              <span style={{ fontSize: '14px', letterSpacing: '2px' }}>EST. 2024</span>
-            </div>
           </div>
-          
-          {/* Sisi Kanan Card 1 - Konten */}
           <div style={{
             width: '55%',
-            padding: '50px 48px',
+            padding: '48px 44px',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between',
-            backgroundColor: '#1a1a2e',
+            backgroundColor: '#0f172a',
           }}>
             <div>
               <div style={{
-                fontSize: '14px',
-                letterSpacing: '3px',
-                color: '#e94560',
-                marginBottom: '20px',
+                fontSize: '12px',
+                letterSpacing: '4px',
+                color: '#38bdf8',
+                marginBottom: '16px',
                 textTransform: 'uppercase',
-              }}>Featured Studio</div>
+              }}>Creative Studio</div>
               <h2 style={{
                 fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                fontSize: '42px',
+                fontSize: '44px',
                 fontWeight: '400',
                 marginBottom: '20px',
                 letterSpacing: '-0.02em',
@@ -3821,85 +3807,59 @@ useEffect(() => {
                 fontSize: '18px',
                 lineHeight: '1.6',
                 opacity: 0.8,
-                marginBottom: '30px',
+                marginBottom: '28px',
               }}>
-                Jakarta-based creative studio specializing in UX/UI design, 
-                branding, and digital product development. We help brands 
-                create meaningful digital experiences.
+                Award-winning UX/UI design studio crafting digital experiences 
+                that blend creativity with functionality.
               </p>
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                <span style={{
-                  padding: '6px 18px',
-                  background: 'rgba(255,255,255,0.1)',
-                  borderRadius: '40px',
-                  fontSize: '13px',
-                }}>UI/UX Design</span>
-                <span style={{
-                  padding: '6px 18px',
-                  background: 'rgba(255,255,255,0.1)',
-                  borderRadius: '40px',
-                  fontSize: '13px',
-                }}>Brand Identity</span>
-                <span style={{
-                  padding: '6px 18px',
-                  background: 'rgba(255,255,255,0.1)',
-                  borderRadius: '40px',
-                  fontSize: '13px',
-                }}>Web Development</span>
+                <span style={{ padding: '6px 18px', background: 'rgba(255,255,255,0.1)', borderRadius: '40px', fontSize: '13px' }}>UX Research</span>
+                <span style={{ padding: '6px 18px', background: 'rgba(255,255,255,0.1)', borderRadius: '40px', fontSize: '13px' }}>UI Design</span>
+                <span style={{ padding: '6px 18px', background: 'rgba(255,255,255,0.1)', borderRadius: '40px', fontSize: '13px' }}>Prototyping</span>
               </div>
             </div>
             <div style={{
-              marginTop: '40px',
-              paddingTop: '24px',
-              borderTop: '1px solid rgba(255,255,255,0.15)',
+              marginTop: '36px',
+              paddingTop: '20px',
+              borderTop: '1px solid rgba(255,255,255,0.1)',
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
             }}>
-              <span style={{ fontSize: '14px', opacity: 0.5 }}>01</span>
-              <button style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                background: 'transparent',
-                border: 'none',
-                color: '#e94560',
-                cursor: 'pointer',
-                fontSize: '15px',
-              }}>
-                Explore Studio <NorthEastArrowIcon size={18} />
+              <span style={{ fontSize: '14px', opacity: 0.4 }}>BASE</span>
+              <button style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'transparent', border: 'none', color: '#38bdf8', cursor: 'pointer' }}>
+                View Portfolio <NorthEastArrowIcon size={16} />
               </button>
             </div>
           </div>
         </div>
 
-        {/* CARD 2 - Merah Muda - Berada di bawah Card 1, akan bergerak ke atas saat scroll */}
+        {/* CARD 2 - Merah - Akan bergerak dari bawah ke atas, menumpuk DI ATAS Card 1 */}
         <div
           ref={(el) => setCard2Ref(el)}
           style={{
             position: 'absolute',
-            bottom: '-15%',
-            left: '5%',
-            right: '5%',
-            width: '90%',
-            height: '85%',
-            backgroundColor: '#ff6b6b',
-            borderRadius: '28px',
+            bottom: '-60px',
+            left: '30px',
+            right: '30px',
+            width: 'calc(100% - 60px)',
+            height: '95%',
+            backgroundColor: '#be123c',
+            borderRadius: '24px',
             boxShadow: '0 15px 35px rgba(0,0,0,0.2)',
             overflow: 'hidden',
-            zIndex: 5,
+            zIndex: 6,
             display: 'flex',
             flexDirection: 'row',
             color: '#ffffff',
             willChange: 'transform',
           }}
         >
-          {/* Sisi Kiri Card 2 - Gambar */}
           <div style={{
             width: '40%',
             position: 'relative',
             overflow: 'hidden',
-            backgroundColor: '#c92a2a',
+            backgroundColor: '#881337',
           }}>
             <Image
               src="/images/ai.jpg"
@@ -3907,45 +3867,32 @@ useEffect(() => {
               fill
               style={{ objectFit: 'cover' }}
             />
-            <div style={{
-              position: 'absolute',
-              bottom: '30px',
-              left: '30px',
-              background: 'rgba(0,0,0,0.5)',
-              padding: '6px 16px',
-              borderRadius: '40px',
-              fontSize: '12px',
-            }}>
-              AI INNOVATION
-            </div>
           </div>
-          
-          {/* Sisi Kanan Card 2 - Konten */}
           <div style={{
             width: '60%',
-            padding: '45px 42px',
+            padding: '42px 40px',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between',
-            backgroundColor: '#ff6b6b',
+            backgroundColor: '#be123c',
           }}>
             <div>
               <div style={{
-                fontSize: '13px',
-                letterSpacing: '3px',
-                color: '#fff5f5',
-                marginBottom: '16px',
+                fontSize: '12px',
+                letterSpacing: '4px',
+                color: '#fecdd3',
+                marginBottom: '14px',
                 textTransform: 'uppercase',
                 opacity: 0.8,
-              }}>AI Integration</div>
+              }}>AI Innovation</div>
               <h2 style={{
                 fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                fontSize: '36px',
+                fontSize: '38px',
                 fontWeight: '400',
                 marginBottom: '16px',
                 letterSpacing: '-0.02em',
               }}>
-                AI Creative Lab
+                AI CREATIVE LAB
               </h2>
               <p style={{
                 fontFamily: "'Questrial', sans-serif",
@@ -3954,83 +3901,56 @@ useEffect(() => {
                 opacity: 0.85,
                 marginBottom: '24px',
               }}>
-                Leveraging cutting-edge artificial intelligence to transform 
-                creative processes. From generative design to smart automation, 
-                we integrate AI solutions that elevate your brand.
+                Harnessing artificial intelligence to revolutionize creative workflows, 
+                from generative design to intelligent automation.
               </p>
               <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                <span style={{
-                  padding: '5px 16px',
-                  background: 'rgba(255,255,255,0.15)',
-                  borderRadius: '40px',
-                  fontSize: '12px',
-                }}>Machine Learning</span>
-                <span style={{
-                  padding: '5px 16px',
-                  background: 'rgba(255,255,255,0.15)',
-                  borderRadius: '40px',
-                  fontSize: '12px',
-                }}>Computer Vision</span>
-                <span style={{
-                  padding: '5px 16px',
-                  background: 'rgba(255,255,255,0.15)',
-                  borderRadius: '40px',
-                  fontSize: '12px',
-                }}>NLP</span>
+                <span style={{ padding: '5px 16px', background: 'rgba(255,255,255,0.15)', borderRadius: '40px', fontSize: '12px' }}>Machine Learning</span>
+                <span style={{ padding: '5px 16px', background: 'rgba(255,255,255,0.15)', borderRadius: '40px', fontSize: '12px' }}>Generative AI</span>
               </div>
             </div>
             <div style={{
-              marginTop: '30px',
-              paddingTop: '20px',
-              borderTop: '1px solid rgba(255,255,255,0.2)',
+              marginTop: '28px',
+              paddingTop: '18px',
+              borderTop: '1px solid rgba(255,255,255,0.15)',
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
             }}>
-              <span style={{ fontSize: '14px', opacity: 0.6 }}>02</span>
-              <button style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px',
-                background: 'transparent',
-                border: 'none',
-                color: '#ffffff',
-                cursor: 'pointer',
-                fontSize: '14px',
-              }}>
-                Learn More <NorthEastArrowIcon size={16} />
+              <span style={{ fontSize: '14px', opacity: 0.5 }}>LAYER 2</span>
+              <button style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'transparent', border: 'none', color: '#fecdd3', cursor: 'pointer' }}>
+                Discover AI <NorthEastArrowIcon size={16} />
               </button>
             </div>
           </div>
         </div>
 
-        {/* CARD 3 - Hijau - Berada di bawah Card 2, akan bergerak ke atas menumpuk */}
+        {/* CARD 3 - Hijau - Akan bergerak dari bawah ke atas, menumpuk DI ATAS Card 1 dan Card 2 */}
         <div
           ref={(el) => setCard3Ref(el)}
           style={{
             position: 'absolute',
-            bottom: '-30%',
-            left: '10%',
-            right: '10%',
-            width: '80%',
-            height: '75%',
-            backgroundColor: '#20c997',
-            borderRadius: '24px',
+            bottom: '-120px',
+            left: '60px',
+            right: '60px',
+            width: 'calc(100% - 120px)',
+            height: '90%',
+            backgroundColor: '#059669',
+            borderRadius: '20px',
             boxShadow: '0 10px 30px rgba(0,0,0,0.15)',
             overflow: 'hidden',
-            zIndex: 1,
+            zIndex: 7,
             display: 'flex',
             flexDirection: 'row',
             color: '#ffffff',
             willChange: 'transform',
           }}
         >
-          {/* Sisi Kiri Card 3 - Gambar */}
           <div style={{
             width: '35%',
             position: 'relative',
             overflow: 'hidden',
-            backgroundColor: '#0b5e42',
+            backgroundColor: '#064e3b',
           }}>
             <Image
               src="/images/5.jpg"
@@ -4039,33 +3959,30 @@ useEffect(() => {
               style={{ objectFit: 'cover' }}
             />
           </div>
-          
-          {/* Sisi Kanan Card 3 - Konten */}
           <div style={{
             width: '65%',
-            padding: '40px 40px',
+            padding: '38px 38px',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between',
-            backgroundColor: '#20c997',
+            backgroundColor: '#059669',
           }}>
             <div>
               <div style={{
-                fontSize: '13px',
-                letterSpacing: '3px',
-                color: '#e8f5e9',
-                marginBottom: '14px',
+                fontSize: '12px',
+                letterSpacing: '4px',
+                color: '#a7f3d0',
+                marginBottom: '12px',
                 textTransform: 'uppercase',
-                opacity: 0.8,
               }}>Global Community</div>
               <h2 style={{
                 fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                fontSize: '32px',
+                fontSize: '34px',
                 fontWeight: '400',
                 marginBottom: '14px',
                 letterSpacing: '-0.02em',
               }}>
-                Design Network Hub
+                DESIGN NETWORK
               </h2>
               <p style={{
                 fontFamily: "'Questrial', sans-serif",
@@ -4074,51 +3991,27 @@ useEffect(() => {
                 opacity: 0.85,
                 marginBottom: '20px',
               }}>
-                Join thousands of designers, developers, and creative professionals 
-                sharing knowledge, opportunities, and inspiration. Be part of the 
-                fastest growing creative community in Southeast Asia.
+                Join thousands of creative professionals sharing insights, 
+                opportunities, and inspiration in Southeast Asia's fastest 
+                growing design community.
               </p>
               <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                <span style={{
-                  padding: '5px 14px',
-                  background: 'rgba(255,255,255,0.15)',
-                  borderRadius: '40px',
-                  fontSize: '12px',
-                }}>10k+ Members</span>
-                <span style={{
-                  padding: '5px 14px',
-                  background: 'rgba(255,255,255,0.15)',
-                  borderRadius: '40px',
-                  fontSize: '12px',
-                }}>Weekly Events</span>
-                <span style={{
-                  padding: '5px 14px',
-                  background: 'rgba(255,255,255,0.15)',
-                  borderRadius: '40px',
-                  fontSize: '12px',
-                }}>Mentorship</span>
+                <span style={{ padding: '5px 14px', background: 'rgba(255,255,255,0.15)', borderRadius: '40px', fontSize: '12px' }}>10k+ Members</span>
+                <span style={{ padding: '5px 14px', background: 'rgba(255,255,255,0.15)', borderRadius: '40px', fontSize: '12px' }}>Weekly Events</span>
+                <span style={{ padding: '5px 14px', background: 'rgba(255,255,255,0.15)', borderRadius: '40px', fontSize: '12px' }}>Mentorship</span>
               </div>
             </div>
             <div style={{
-              marginTop: '25px',
-              paddingTop: '18px',
-              borderTop: '1px solid rgba(255,255,255,0.2)',
+              marginTop: '24px',
+              paddingTop: '16px',
+              borderTop: '1px solid rgba(255,255,255,0.15)',
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
             }}>
-              <span style={{ fontSize: '14px', opacity: 0.6 }}>03</span>
-              <button style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px',
-                background: 'transparent',
-                border: 'none',
-                color: '#ffffff',
-                cursor: 'pointer',
-                fontSize: '14px',
-              }}>
-                Join Community <NorthEastArrowIcon size={16} />
+              <span style={{ fontSize: '14px', opacity: 0.5 }}>LAYER 3</span>
+              <button style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'transparent', border: 'none', color: '#a7f3d0', cursor: 'pointer' }}>
+                Join Now <NorthEastArrowIcon size={16} />
               </button>
             </div>
           </div>
@@ -4128,8 +4021,6 @@ useEffect(() => {
     </div>
   </div>
 )}
-
-
 
 
 
