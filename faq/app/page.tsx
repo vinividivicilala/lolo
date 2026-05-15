@@ -1600,6 +1600,7 @@ export default function HomePage(): React.JSX.Element {
   }, []);
 
 
+
 useEffect(() => {
   if (isLoading) return;
 
@@ -1626,10 +1627,10 @@ useEffect(() => {
 
     if (!section || !pinWrap) return;
 
-    // Set posisi awal - card 2 dan 3 di BAWAH card 1 dengan jarak
+    // Set posisi awal - card 2 dan 3 di BAWAH card 1
     gsap.set(card1Ref, { y: 0, zIndex: 5 });
-    gsap.set(card2Ref, { y: 180, zIndex: 6 });
-    gsap.set(card3Ref, { y: 360, zIndex: 7 });
+    gsap.set(card2Ref, { y: 200, zIndex: 6 });
+    gsap.set(card3Ref, { y: 400, zIndex: 7 });
 
     ScrollTrigger.getAll().forEach(trigger => {
       if (trigger.vars && trigger.trigger === section) {
@@ -1649,15 +1650,15 @@ useEffect(() => {
       }
     });
 
-    // Card 2 bergerak dari Y=180px ke Y=0 (naik ke posisi Card 1)
+    // Card 2 bergerak dari Y=200px ke Y=0
     tl.to(card2Ref, { 
       y: 0, 
       duration: 1, 
       ease: "power2.inOut" 
     }, 0)
-    // Card 3 bergerak dari Y=360px ke Y=180 (naik ke posisi Card 2)
+    // Card 3 bergerak dari Y=400px ke Y=200
     .to(card3Ref, { 
-      y: 180, 
+      y: 200, 
       duration: 1, 
       ease: "power2.inOut" 
     }, 0.5);
@@ -1675,6 +1676,13 @@ useEffect(() => {
   };
 }, [isLoading, card1Ref, card2Ref, card3Ref]);
 
+
+
+
+
+
+
+  
 
 
   
@@ -3673,20 +3681,59 @@ useEffect(() => {
             </div>
 
 
-
-
+// STACKED CARDS SECTION - DENGAN JUDUL "COMMUNITY" 300px + PANAH SVG
+// Letakkan setelah Features Section dan sebelum TRUSTED COLLABS
 
 {!isLoading && (
   <div
     ref={cardsSectionRef}
     style={{
       width: '100%',
-      minHeight: '400vh',
+      minHeight: '420vh',
       position: 'relative',
       backgroundColor: '#f5f5f5',
       marginBottom: '0',
     }}
   >
+    {/* JUDUL COMMUNITY 300px + PANAH SVG */}
+    <div style={{
+      position: 'sticky',
+      top: '0',
+      zIndex: 20,
+      width: '100%',
+      backgroundColor: '#f5f5f5',
+      padding: '80px 80px 0 80px',
+      boxSizing: 'border-box',
+    }}>
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'flex-end',
+        borderBottom: '2px solid #000000',
+        paddingBottom: '30px',
+      }}>
+        <div style={{
+          fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+          fontSize: '300px',
+          fontWeight: '400',
+          letterSpacing: '-0.02em',
+          lineHeight: '0.9',
+          color: '#000000',
+          textTransform: 'uppercase',
+        }}>
+          COMMUNITY
+        </div>
+        <div style={{
+          marginBottom: '20px',
+        }}>
+          <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    {/* STACKED CARDS CONTAINER */}
     <div
       ref={cardsPinnedRef}
       style={{
@@ -3697,6 +3744,7 @@ useEffect(() => {
         alignItems: 'center',
         justifyContent: 'center',
         overflow: 'visible',
+        marginTop: '50px',
       }}
     >
       <div style={{
@@ -3824,7 +3872,7 @@ useEffect(() => {
             position: 'absolute',
             top: '50%',
             left: '50%',
-            transform: 'translate(-50%, -50%) translateY(180px)',
+            transform: 'translate(-50%, -50%) translateY(200px)',
             width: '94%',
             height: '94%',
             backgroundColor: '#ffffff',
@@ -3934,7 +3982,7 @@ useEffect(() => {
             position: 'absolute',
             top: '50%',
             left: '50%',
-            transform: 'translate(-50%, -50%) translateY(360px)',
+            transform: 'translate(-50%, -50%) translateY(400px)',
             width: '88%',
             height: '88%',
             backgroundColor: '#ffffff',
@@ -4042,7 +4090,8 @@ useEffect(() => {
     </div>
   </div>
 )}
-            
+
+
 
             
 
