@@ -1601,7 +1601,8 @@ export default function HomePage(): React.JSX.Element {
 
 
 
-  // Ganti useEffect Stacked Cards Animation dengan yang ini:
+
+// Ganti kedua useEffect Stacked Cards dengan kode ini:
 
 useEffect(() => {
   if (isLoading) return;
@@ -1624,27 +1625,28 @@ useEffect(() => {
 
   requestAnimationFrame(raf);
 
-  // Stacked Cards Animation - Card bergerak dari bawah ke atas menumpuk
+  // Stacked Cards Animation
   if (cardsPinnedRef.current && card1Ref && card2Ref && card3Ref) {
     const section = cardsSectionRef.current;
     const pinWrap = cardsPinnedRef.current;
 
     if (!section || !pinWrap) return;
 
-    // Reset posisi awal - semua card di posisi bawah masing-masing
+    // Set posisi awal yang benar - card 2 dan 3 di BAWAH card 1
+    // Card 1: posisi tengah
+    // Card 2: di bawah card 1 (translateY 80px)
+    // Card 3: di bawah card 2 (translateY 160px)
+    
     gsap.set(card1Ref, { 
       y: 0,
-      scale: 1,
       zIndex: 5
     });
     gsap.set(card2Ref, { 
-      y: 0,
-      scale: 1,
+      y: 80,
       zIndex: 6
     });
     gsap.set(card3Ref, { 
-      y: 0,
-      scale: 1,
+      y: 160,
       zIndex: 7
     });
 
@@ -1655,46 +1657,45 @@ useEffect(() => {
       }
     });
 
-    // Hitung jarak perpindahan untuk setiap card
-    const moveDistance1 = 0; // Card 1 tetap di tempat
-    const moveDistance2 = -window.innerHeight * 0.18; // Card 2 naik 18% viewport
-    const moveDistance3 = -window.innerHeight * 0.36; // Card 3 naik 36% viewport
-
     // Create ScrollTrigger untuk stacked cards
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: section,
         start: "top top",
-        end: "+=130%",
+        end: "+=150%",
         pin: pinWrap,
-        scrub: 1.2,
+        scrub: 1.5,
         anticipatePin: 1,
         invalidateOnRefresh: true,
       }
     });
 
     // ANIMASI SCROLL KE BAWAH:
-    // Card 2 bergerak dari bawah ke ATAS Card 1
+    // Card 2 bergerak dari Y=80px ke Y=0 (menumpuk di atas Card 1)
     tl.to(card2Ref, {
-      y: moveDistance2,
+      y: 0,
       duration: 1,
       ease: "power2.inOut",
     }, 0)
-    // Card 3 bergerak dari bawah ke ATAS Card 1 dan Card 2
+    // Card 3 bergerak dari Y=160px ke Y=80px (menumpuk di atas Card 2)
     .to(card3Ref, {
-      y: moveDistance3,
+      y: 80,
       duration: 1,
       ease: "power2.inOut",
-    }, 0.3)
-    // Efek shadow saat card menumpuk
+    }, 0.4)
+    // Efek visual saat menumpuk
     .to(card1Ref, {
-      boxShadow: "0 30px 60px -20px rgba(0,0,0,0.4)",
+      boxShadow: "0 35px 60px -20px rgba(0,0,0,0.5)",
       duration: 0.3,
     }, 0)
     .to(card2Ref, {
-      boxShadow: "0 25px 50px -15px rgba(0,0,0,0.35)",
+      boxShadow: "0 30px 50px -15px rgba(0,0,0,0.4)",
       duration: 0.3,
-    }, 0.1);
+    }, 0.1)
+    .to(card3Ref, {
+      boxShadow: "0 25px 40px -15px rgba(0,0,0,0.35)",
+      duration: 0.3,
+    }, 0.2);
 
     setHasCardsAnimated(true);
   }
@@ -1710,18 +1711,13 @@ useEffect(() => {
 }, [isLoading, card1Ref, card2Ref, card3Ref]);
 
 
+
+
+
+
+
+
   
-
-  // Set z-index untuk stacked cards
-  useEffect(() => {
-    if (!hasCardsAnimated) return;
-
-    if (card1Ref && card2Ref && card3Ref) {
-      gsap.set(card1Ref, { zIndex: 3, position: 'relative' });
-      gsap.set(card2Ref, { zIndex: 2, position: 'relative' });
-      gsap.set(card3Ref, { zIndex: 1, position: 'relative' });
-    }
-  }, [hasCardsAnimated, card1Ref, card2Ref, card3Ref]);
 
   useEffect(() => {
     if (isLoading) return;
@@ -3712,317 +3708,6 @@ useEffect(() => {
 
 
   
-
-{!isLoading && (
-  <div
-    ref={cardsSectionRef}
-    style={{
-      width: '100%',
-      minHeight: '200vh',
-      position: 'relative',
-      backgroundColor: '#f0f0f0',
-    }}
-  >
-    <div
-      ref={cardsPinnedRef}
-      style={{
-        width: '100%',
-        height: '100vh',
-        position: 'relative',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        overflow: 'visible',
-      }}
-    >
-      <div style={{
-        position: 'relative',
-        width: '100%',
-        maxWidth: '1100px',
-        height: '75vh',
-        margin: '0 auto',
-      }}>
-        
-        {/* CARD 1 - Biru Tua - Card Utama / Paling Bawah */}
-        <div
-          ref={(el) => setCard1Ref(el)}
-          style={{
-            position: 'absolute',
-            bottom: '0',
-            left: '0',
-            right: '0',
-            width: '100%',
-            height: '100%',
-            backgroundColor: '#0f172a',
-            borderRadius: '28px',
-            boxShadow: '0 20px 40px rgba(0,0,0,0.25)',
-            overflow: 'hidden',
-            zIndex: 5,
-            display: 'flex',
-            flexDirection: 'row',
-            color: '#ffffff',
-          }}
-        >
-          <div style={{
-            width: '45%',
-            position: 'relative',
-            overflow: 'hidden',
-            backgroundColor: '#1e293b',
-          }}>
-            <Image
-              src="/images/lkhh.jpg"
-              alt="Creative Studio"
-              fill
-              style={{ objectFit: 'cover' }}
-            />
-          </div>
-          <div style={{
-            width: '55%',
-            padding: '48px 44px',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-            backgroundColor: '#0f172a',
-          }}>
-            <div>
-              <div style={{
-                fontSize: '12px',
-                letterSpacing: '4px',
-                color: '#38bdf8',
-                marginBottom: '16px',
-                textTransform: 'uppercase',
-              }}>Creative Studio</div>
-              <h2 style={{
-                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                fontSize: '44px',
-                fontWeight: '400',
-                marginBottom: '20px',
-                letterSpacing: '-0.02em',
-                lineHeight: '1.2',
-              }}>
-                MENURU STUDIO
-              </h2>
-              <p style={{
-                fontFamily: "'Questrial', sans-serif",
-                fontSize: '18px',
-                lineHeight: '1.6',
-                opacity: 0.8,
-                marginBottom: '28px',
-              }}>
-                Award-winning UX/UI design studio crafting digital experiences 
-                that blend creativity with functionality.
-              </p>
-              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                <span style={{ padding: '6px 18px', background: 'rgba(255,255,255,0.1)', borderRadius: '40px', fontSize: '13px' }}>UX Research</span>
-                <span style={{ padding: '6px 18px', background: 'rgba(255,255,255,0.1)', borderRadius: '40px', fontSize: '13px' }}>UI Design</span>
-                <span style={{ padding: '6px 18px', background: 'rgba(255,255,255,0.1)', borderRadius: '40px', fontSize: '13px' }}>Prototyping</span>
-              </div>
-            </div>
-            <div style={{
-              marginTop: '36px',
-              paddingTop: '20px',
-              borderTop: '1px solid rgba(255,255,255,0.1)',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}>
-              <span style={{ fontSize: '14px', opacity: 0.4 }}>BASE</span>
-              <button style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'transparent', border: 'none', color: '#38bdf8', cursor: 'pointer' }}>
-                View Portfolio <NorthEastArrowIcon size={16} />
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* CARD 2 - Merah - Akan bergerak dari bawah ke atas, menumpuk DI ATAS Card 1 */}
-        <div
-          ref={(el) => setCard2Ref(el)}
-          style={{
-            position: 'absolute',
-            bottom: '-60px',
-            left: '30px',
-            right: '30px',
-            width: 'calc(100% - 60px)',
-            height: '95%',
-            backgroundColor: '#be123c',
-            borderRadius: '24px',
-            boxShadow: '0 15px 35px rgba(0,0,0,0.2)',
-            overflow: 'hidden',
-            zIndex: 6,
-            display: 'flex',
-            flexDirection: 'row',
-            color: '#ffffff',
-            willChange: 'transform',
-          }}
-        >
-          <div style={{
-            width: '40%',
-            position: 'relative',
-            overflow: 'hidden',
-            backgroundColor: '#881337',
-          }}>
-            <Image
-              src="/images/ai.jpg"
-              alt="AI Creative"
-              fill
-              style={{ objectFit: 'cover' }}
-            />
-          </div>
-          <div style={{
-            width: '60%',
-            padding: '42px 40px',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-            backgroundColor: '#be123c',
-          }}>
-            <div>
-              <div style={{
-                fontSize: '12px',
-                letterSpacing: '4px',
-                color: '#fecdd3',
-                marginBottom: '14px',
-                textTransform: 'uppercase',
-                opacity: 0.8,
-              }}>AI Innovation</div>
-              <h2 style={{
-                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                fontSize: '38px',
-                fontWeight: '400',
-                marginBottom: '16px',
-                letterSpacing: '-0.02em',
-              }}>
-                AI CREATIVE LAB
-              </h2>
-              <p style={{
-                fontFamily: "'Questrial', sans-serif",
-                fontSize: '16px',
-                lineHeight: '1.6',
-                opacity: 0.85,
-                marginBottom: '24px',
-              }}>
-                Harnessing artificial intelligence to revolutionize creative workflows, 
-                from generative design to intelligent automation.
-              </p>
-              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                <span style={{ padding: '5px 16px', background: 'rgba(255,255,255,0.15)', borderRadius: '40px', fontSize: '12px' }}>Machine Learning</span>
-                <span style={{ padding: '5px 16px', background: 'rgba(255,255,255,0.15)', borderRadius: '40px', fontSize: '12px' }}>Generative AI</span>
-              </div>
-            </div>
-            <div style={{
-              marginTop: '28px',
-              paddingTop: '18px',
-              borderTop: '1px solid rgba(255,255,255,0.15)',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}>
-              <span style={{ fontSize: '14px', opacity: 0.5 }}>LAYER 2</span>
-              <button style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'transparent', border: 'none', color: '#fecdd3', cursor: 'pointer' }}>
-                Discover AI <NorthEastArrowIcon size={16} />
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* CARD 3 - Hijau - Akan bergerak dari bawah ke atas, menumpuk DI ATAS Card 1 dan Card 2 */}
-        <div
-          ref={(el) => setCard3Ref(el)}
-          style={{
-            position: 'absolute',
-            bottom: '-120px',
-            left: '60px',
-            right: '60px',
-            width: 'calc(100% - 120px)',
-            height: '90%',
-            backgroundColor: '#059669',
-            borderRadius: '20px',
-            boxShadow: '0 10px 30px rgba(0,0,0,0.15)',
-            overflow: 'hidden',
-            zIndex: 7,
-            display: 'flex',
-            flexDirection: 'row',
-            color: '#ffffff',
-            willChange: 'transform',
-          }}
-        >
-          <div style={{
-            width: '35%',
-            position: 'relative',
-            overflow: 'hidden',
-            backgroundColor: '#064e3b',
-          }}>
-            <Image
-              src="/images/5.jpg"
-              alt="Community Network"
-              fill
-              style={{ objectFit: 'cover' }}
-            />
-          </div>
-          <div style={{
-            width: '65%',
-            padding: '38px 38px',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-            backgroundColor: '#059669',
-          }}>
-            <div>
-              <div style={{
-                fontSize: '12px',
-                letterSpacing: '4px',
-                color: '#a7f3d0',
-                marginBottom: '12px',
-                textTransform: 'uppercase',
-              }}>Global Community</div>
-              <h2 style={{
-                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                fontSize: '34px',
-                fontWeight: '400',
-                marginBottom: '14px',
-                letterSpacing: '-0.02em',
-              }}>
-                DESIGN NETWORK
-              </h2>
-              <p style={{
-                fontFamily: "'Questrial', sans-serif",
-                fontSize: '15px',
-                lineHeight: '1.6',
-                opacity: 0.85,
-                marginBottom: '20px',
-              }}>
-                Join thousands of creative professionals sharing insights, 
-                opportunities, and inspiration in Southeast Asia's fastest 
-                growing design community.
-              </p>
-              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                <span style={{ padding: '5px 14px', background: 'rgba(255,255,255,0.15)', borderRadius: '40px', fontSize: '12px' }}>10k+ Members</span>
-                <span style={{ padding: '5px 14px', background: 'rgba(255,255,255,0.15)', borderRadius: '40px', fontSize: '12px' }}>Weekly Events</span>
-                <span style={{ padding: '5px 14px', background: 'rgba(255,255,255,0.15)', borderRadius: '40px', fontSize: '12px' }}>Mentorship</span>
-              </div>
-            </div>
-            <div style={{
-              marginTop: '24px',
-              paddingTop: '16px',
-              borderTop: '1px solid rgba(255,255,255,0.15)',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}>
-              <span style={{ fontSize: '14px', opacity: 0.5 }}>LAYER 3</span>
-              <button style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'transparent', border: 'none', color: '#a7f3d0', cursor: 'pointer' }}>
-                Join Now <NorthEastArrowIcon size={16} />
-              </button>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  </div>
-)}
-
-
 
 
             
