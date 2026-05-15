@@ -1600,7 +1600,6 @@ export default function HomePage(): React.JSX.Element {
   }, []);
 
 
-
 useEffect(() => {
   if (isLoading) return;
 
@@ -1627,10 +1626,10 @@ useEffect(() => {
 
     if (!section || !pinWrap) return;
 
-    // Set posisi awal - card 2 dan 3 di BAWAH card 1
+    // Set posisi awal - card 2 dan 3 di BAWAH card 1 dengan jarak
     gsap.set(card1Ref, { y: 0, zIndex: 5 });
-    gsap.set(card2Ref, { y: 160, zIndex: 6 });
-    gsap.set(card3Ref, { y: 320, zIndex: 7 });
+    gsap.set(card2Ref, { y: 180, zIndex: 6 });
+    gsap.set(card3Ref, { y: 360, zIndex: 7 });
 
     ScrollTrigger.getAll().forEach(trigger => {
       if (trigger.vars && trigger.trigger === section) {
@@ -1642,7 +1641,7 @@ useEffect(() => {
       scrollTrigger: {
         trigger: section,
         start: "top top",
-        end: "+=250%",
+        end: "+=300%",
         pin: pinWrap,
         scrub: 1.5,
         anticipatePin: 1,
@@ -1650,15 +1649,15 @@ useEffect(() => {
       }
     });
 
-    // Card 2 bergerak dari Y=160px ke Y=0 (menumpuk ke Card 1)
+    // Card 2 bergerak dari Y=180px ke Y=0 (naik ke posisi Card 1)
     tl.to(card2Ref, { 
       y: 0, 
       duration: 1, 
       ease: "power2.inOut" 
     }, 0)
-    // Card 3 bergerak dari Y=320px ke Y=160 (menumpuk ke Card 2)
+    // Card 3 bergerak dari Y=360px ke Y=180 (naik ke posisi Card 2)
     .to(card3Ref, { 
-      y: 160, 
+      y: 180, 
       duration: 1, 
       ease: "power2.inOut" 
     }, 0.5);
@@ -1675,9 +1674,6 @@ useEffect(() => {
     });
   };
 }, [isLoading, card1Ref, card2Ref, card3Ref]);
-
-
-
 
 
 
@@ -3680,17 +3676,15 @@ useEffect(() => {
 
 
 
-            // STACKED CARDS SECTION - VERSI FINAL DENGAN TINGGI YANG DIPERBESAR
-// Letakkan setelah Features Section dan sebelum TRUSTED COLLABS
-
 {!isLoading && (
   <div
     ref={cardsSectionRef}
     style={{
       width: '100%',
-      minHeight: '350vh',
+      minHeight: '400vh',
       position: 'relative',
       backgroundColor: '#f5f5f5',
+      marginBottom: '0',
     }}
   >
     <div
@@ -3709,11 +3703,11 @@ useEffect(() => {
         position: 'relative',
         width: '100%',
         maxWidth: '1200px',
-        height: '75vh',
+        height: '80vh',
         margin: '0 auto',
       }}>
         
-        {/* CARD 1 - PALING ATAS (Base Card) */}
+        {/* CARD 1 - PALING ATAS (Tidak bergerak) */}
         <div
           ref={(el) => setCard1Ref(el)}
           style={{
@@ -3732,10 +3726,8 @@ useEffect(() => {
             display: 'flex',
             flexDirection: 'column',
             color: '#000000',
-            transition: 'all 0.3s ease',
           }}
         >
-          {/* Header dengan linebox dan judul besar */}
           <div style={{
             padding: '45px 55px 0 55px',
             borderBottom: '2px solid #000000',
@@ -3784,7 +3776,6 @@ useEffect(() => {
             </div>
           </div>
           
-          {/* Konten bawah */}
           <div style={{
             padding: '55px 55px 45px 55px',
             flex: 1,
@@ -3826,14 +3817,14 @@ useEffect(() => {
           </div>
         </div>
 
-        {/* CARD 2 - TENGAH (Akan bergerak ke atas) */}
+        {/* CARD 2 - TENGAH (Akan bergerak dari bawah ke atas) */}
         <div
           ref={(el) => setCard2Ref(el)}
           style={{
             position: 'absolute',
             top: '50%',
             left: '50%',
-            transform: 'translate(-50%, -50%) translateY(160px)',
+            transform: 'translate(-50%, -50%) translateY(180px)',
             width: '94%',
             height: '94%',
             backgroundColor: '#ffffff',
@@ -3936,14 +3927,14 @@ useEffect(() => {
           </div>
         </div>
 
-        {/* CARD 3 - PALING BAWAH (Akan bergerak ke atas) */}
+        {/* CARD 3 - PALING BAWAH (Akan bergerak dari bawah ke atas) */}
         <div
           ref={(el) => setCard3Ref(el)}
           style={{
             position: 'absolute',
             top: '50%',
             left: '50%',
-            transform: 'translate(-50%, -50%) translateY(320px)',
+            transform: 'translate(-50%, -50%) translateY(360px)',
             width: '88%',
             height: '88%',
             backgroundColor: '#ffffff',
@@ -4051,9 +4042,6 @@ useEffect(() => {
     </div>
   </div>
 )}
-
-            
-
             
 
             
