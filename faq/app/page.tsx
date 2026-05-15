@@ -1605,7 +1605,6 @@ const [card6Ref, setCard6Ref] = useState<HTMLDivElement | null>(null); // BARU
 
 
 
-
 useEffect(() => {
   if (isLoading) return;
 
@@ -1632,13 +1631,13 @@ useEffect(() => {
 
     if (!section || !pinWrap) return;
 
-    // Set posisi awal - jarak antar card 250px
+    // Set posisi awal - jarak antar card 300px
     gsap.set(card1Ref, { y: 0, zIndex: 5 });
-    gsap.set(card2Ref, { y: 250, zIndex: 6 });
-    gsap.set(card3Ref, { y: 500, zIndex: 7 });
-    gsap.set(card4Ref, { y: 750, zIndex: 8 });
-    gsap.set(card5Ref, { y: 1000, zIndex: 9 });
-    gsap.set(card6Ref, { y: 1250, zIndex: 10 });
+    gsap.set(card2Ref, { y: 300, zIndex: 6 });
+    gsap.set(card3Ref, { y: 600, zIndex: 7 });
+    gsap.set(card4Ref, { y: 900, zIndex: 8 });
+    gsap.set(card5Ref, { y: 1200, zIndex: 9 });
+    gsap.set(card6Ref, { y: 1500, zIndex: 10 });
 
     ScrollTrigger.getAll().forEach(trigger => {
       if (trigger.vars && trigger.trigger === section) {
@@ -1650,7 +1649,7 @@ useEffect(() => {
       scrollTrigger: {
         trigger: section,
         start: "top top",
-        end: "+=900%", // Ditingkatkan dari 700% ke 900%
+        end: "+=1200%", // Ditingkatkan dari 900% ke 1200%
         pin: pinWrap,
         scrub: 1.5,
         anticipatePin: 1,
@@ -1658,12 +1657,12 @@ useEffect(() => {
       }
     });
 
-    // Animasi bertahap
+    // Animasi bertahap untuk 6 card
     tl.to(card2Ref, { y: 0, duration: 1.2, ease: "power2.inOut" }, 0)
-      .to(card3Ref, { y: 250, duration: 1.2, ease: "power2.inOut" }, 0.5)
-      .to(card4Ref, { y: 500, duration: 1.2, ease: "power2.inOut" }, 1.0)
-      .to(card5Ref, { y: 750, duration: 1.2, ease: "power2.inOut" }, 1.5)
-      .to(card6Ref, { y: 1000, duration: 1.2, ease: "power2.inOut" }, 2.0);
+      .to(card3Ref, { y: 300, duration: 1.2, ease: "power2.inOut" }, 0.5)
+      .to(card4Ref, { y: 600, duration: 1.2, ease: "power2.inOut" }, 1.0)
+      .to(card5Ref, { y: 900, duration: 1.2, ease: "power2.inOut" }, 1.5)
+      .to(card6Ref, { y: 1200, duration: 1.2, ease: "power2.inOut" }, 2.0);
 
     setHasCardsAnimated(true);
   }
@@ -1677,6 +1676,13 @@ useEffect(() => {
     });
   };
 }, [isLoading, card1Ref, card2Ref, card3Ref, card4Ref, card5Ref, card6Ref]);
+
+
+
+
+
+
+
 
   
   
@@ -3676,15 +3682,12 @@ useEffect(() => {
 
 
 
-
-
-
 {!isLoading && (
   <div
     ref={cardsSectionRef}
     style={{
       width: '100%',
-      minHeight: '850vh', // DITINGKATKAN LAGI dari 750vh ke 850vh
+      minHeight: '1100vh', // DITINGKATKAN DRAMATIS dari 900vh ke 1100vh
       position: 'relative',
       backgroundColor: '#f5f5f5',
       marginBottom: '0',
@@ -3739,7 +3742,7 @@ useEffect(() => {
         justifyContent: 'center',
         overflow: 'visible',
         marginTop: '80px',
-        marginBottom: '150px', // Ditambah margin bottom
+        marginBottom: '200px', // Ditambah margin bottom lebih besar
       }}
     >
       <div style={{
@@ -3867,7 +3870,7 @@ useEffect(() => {
             position: 'absolute',
             top: '50%',
             left: '50%',
-            transform: 'translate(-50%, -50%) translateY(250px)',
+            transform: 'translate(-50%, -50%) translateY(300px)',
             width: '97%',
             height: '97%',
             backgroundColor: '#ffffff',
@@ -3977,7 +3980,7 @@ useEffect(() => {
             position: 'absolute',
             top: '50%',
             left: '50%',
-            transform: 'translate(-50%, -50%) translateY(500px)',
+            transform: 'translate(-50%, -50%) translateY(600px)',
             width: '94%',
             height: '94%',
             backgroundColor: '#ffffff',
@@ -4088,7 +4091,7 @@ useEffect(() => {
             position: 'absolute',
             top: '50%',
             left: '50%',
-            transform: 'translate(-50%, -50%) translateY(750px)',
+            transform: 'translate(-50%, -50%) translateY(900px)',
             width: '91%',
             height: '91%',
             backgroundColor: '#ffffff',
@@ -4198,7 +4201,7 @@ useEffect(() => {
             position: 'absolute',
             top: '50%',
             left: '50%',
-            transform: 'translate(-50%, -50%) translateY(1000px)',
+            transform: 'translate(-50%, -50%) translateY(1200px)',
             width: '88%',
             height: '88%',
             backgroundColor: '#ffffff',
@@ -4308,7 +4311,7 @@ useEffect(() => {
             position: 'absolute',
             top: '50%',
             left: '50%',
-            transform: 'translate(-50%, -50%) translateY(1250px)',
+            transform: 'translate(-50%, -50%) translateY(1500px)',
             width: '85%',
             height: '85%',
             backgroundColor: '#ffffff',
@@ -4415,9 +4418,6 @@ useEffect(() => {
     </div>
   </div>
 )}
-
-
-
 
             
             
