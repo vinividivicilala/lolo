@@ -3707,8 +3707,356 @@ useEffect(() => {
             </div>
 
 
-  
+ // STACKED CARDS SECTION - VERSI BENAR (3 card terlihat semua seperti anak tangga)
+// Letakkan setelah Features Section dan sebelum TRUSTED COLLABS
 
+{!isLoading && (
+  <div
+    ref={cardsSectionRef}
+    style={{
+      width: '100%',
+      minHeight: '250vh',
+      position: 'relative',
+      backgroundColor: '#e8e8e8',
+    }}
+  >
+    <div
+      ref={cardsPinnedRef}
+      style={{
+        width: '100%',
+        height: '100vh',
+        position: 'relative',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        overflow: 'visible',
+      }}
+    >
+      <div style={{
+        position: 'relative',
+        width: '100%',
+        maxWidth: '1100px',
+        height: '80vh',
+        margin: '0 auto',
+      }}>
+        
+        {/* CARD 1 - PALING BAWAH (Base Card) */}
+        <div
+          ref={(el) => setCard1Ref(el)}
+          style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%) translateY(0px)',
+            width: '100%',
+            height: '100%',
+            backgroundColor: '#0f172a',
+            borderRadius: '28px',
+            boxShadow: '0 25px 50px -12px rgba(0,0,0,0.3)',
+            overflow: 'hidden',
+            zIndex: 5,
+            display: 'flex',
+            flexDirection: 'row',
+            color: '#ffffff',
+          }}
+        >
+          <div style={{
+            width: '45%',
+            position: 'relative',
+            overflow: 'hidden',
+            backgroundColor: '#1e293b',
+          }}>
+            <Image
+              src="/images/lkhh.jpg"
+              alt="Creative Studio"
+              fill
+              style={{ objectFit: 'cover' }}
+            />
+            <div style={{
+              position: 'absolute',
+              bottom: '30px',
+              left: '30px',
+              background: 'rgba(0,0,0,0.5)',
+              padding: '6px 16px',
+              borderRadius: '40px',
+              fontSize: '12px',
+            }}>
+              FEATURED STUDIO
+            </div>
+          </div>
+          <div style={{
+            width: '55%',
+            padding: '48px 44px',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            backgroundColor: '#0f172a',
+          }}>
+            <div>
+              <div style={{
+                fontSize: '12px',
+                letterSpacing: '4px',
+                color: '#38bdf8',
+                marginBottom: '16px',
+                textTransform: 'uppercase',
+              }}>Creative Studio</div>
+              <h2 style={{
+                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                fontSize: '44px',
+                fontWeight: '400',
+                marginBottom: '20px',
+                letterSpacing: '-0.02em',
+                lineHeight: '1.2',
+              }}>
+                MENURU STUDIO
+              </h2>
+              <p style={{
+                fontFamily: "'Questrial', sans-serif",
+                fontSize: '18px',
+                lineHeight: '1.6',
+                opacity: 0.8,
+                marginBottom: '28px',
+              }}>
+                Award-winning UX/UI design studio crafting digital experiences 
+                that blend creativity with functionality.
+              </p>
+              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                <span style={{ padding: '6px 18px', background: 'rgba(255,255,255,0.1)', borderRadius: '40px', fontSize: '13px' }}>UX Research</span>
+                <span style={{ padding: '6px 18px', background: 'rgba(255,255,255,0.1)', borderRadius: '40px', fontSize: '13px' }}>UI Design</span>
+                <span style={{ padding: '6px 18px', background: 'rgba(255,255,255,0.1)', borderRadius: '40px', fontSize: '13px' }}>Prototyping</span>
+              </div>
+            </div>
+            <div style={{
+              marginTop: '36px',
+              paddingTop: '20px',
+              borderTop: '1px solid rgba(255,255,255,0.1)',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}>
+              <span style={{ fontSize: '14px', opacity: 0.4 }}>01 / 03</span>
+              <button style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'transparent', border: 'none', color: '#38bdf8', cursor: 'pointer' }}>
+                View Portfolio <NorthEastArrowIcon size={16} />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* CARD 2 - TENGAH (Akan naik ke atas Card 1) */}
+        <div
+          ref={(el) => setCard2Ref(el)}
+          style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%) translateY(120px)',
+            width: '92%',
+            height: '92%',
+            backgroundColor: '#be123c',
+            borderRadius: '24px',
+            boxShadow: '0 15px 35px rgba(0,0,0,0.2)',
+            overflow: 'hidden',
+            zIndex: 6,
+            display: 'flex',
+            flexDirection: 'row',
+            color: '#ffffff',
+            willChange: 'transform',
+          }}
+        >
+          <div style={{
+            width: '40%',
+            position: 'relative',
+            overflow: 'hidden',
+            backgroundColor: '#881337',
+          }}>
+            <Image
+              src="/images/ai.jpg"
+              alt="AI Creative"
+              fill
+              style={{ objectFit: 'cover' }}
+            />
+            <div style={{
+              position: 'absolute',
+              bottom: '30px',
+              left: '30px',
+              background: 'rgba(0,0,0,0.5)',
+              padding: '6px 16px',
+              borderRadius: '40px',
+              fontSize: '12px',
+            }}>
+              AI INNOVATION
+            </div>
+          </div>
+          <div style={{
+            width: '60%',
+            padding: '42px 40px',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            backgroundColor: '#be123c',
+          }}>
+            <div>
+              <div style={{
+                fontSize: '12px',
+                letterSpacing: '4px',
+                color: '#fecdd3',
+                marginBottom: '14px',
+                textTransform: 'uppercase',
+                opacity: 0.8,
+              }}>AI Innovation</div>
+              <h2 style={{
+                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                fontSize: '38px',
+                fontWeight: '400',
+                marginBottom: '16px',
+                letterSpacing: '-0.02em',
+              }}>
+                AI CREATIVE LAB
+              </h2>
+              <p style={{
+                fontFamily: "'Questrial', sans-serif",
+                fontSize: '16px',
+                lineHeight: '1.6',
+                opacity: 0.85,
+                marginBottom: '24px',
+              }}>
+                Harnessing artificial intelligence to revolutionize creative workflows, 
+                from generative design to intelligent automation.
+              </p>
+              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                <span style={{ padding: '5px 16px', background: 'rgba(255,255,255,0.15)', borderRadius: '40px', fontSize: '12px' }}>Machine Learning</span>
+                <span style={{ padding: '5px 16px', background: 'rgba(255,255,255,0.15)', borderRadius: '40px', fontSize: '12px' }}>Generative AI</span>
+                <span style={{ padding: '5px 16px', background: 'rgba(255,255,255,0.15)', borderRadius: '40px', fontSize: '12px' }}>Computer Vision</span>
+              </div>
+            </div>
+            <div style={{
+              marginTop: '28px',
+              paddingTop: '18px',
+              borderTop: '1px solid rgba(255,255,255,0.15)',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}>
+              <span style={{ fontSize: '14px', opacity: 0.5 }}>02 / 03</span>
+              <button style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'transparent', border: 'none', color: '#fecdd3', cursor: 'pointer' }}>
+                Discover AI <NorthEastArrowIcon size={16} />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* CARD 3 - PALING ATAS (Akan naik ke atas Card 2) */}
+        <div
+          ref={(el) => setCard3Ref(el)}
+          style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%) translateY(240px)',
+            width: '84%',
+            height: '84%',
+            backgroundColor: '#059669',
+            borderRadius: '20px',
+            boxShadow: '0 10px 30px rgba(0,0,0,0.15)',
+            overflow: 'hidden',
+            zIndex: 7,
+            display: 'flex',
+            flexDirection: 'row',
+            color: '#ffffff',
+            willChange: 'transform',
+          }}
+        >
+          <div style={{
+            width: '35%',
+            position: 'relative',
+            overflow: 'hidden',
+            backgroundColor: '#064e3b',
+          }}>
+            <Image
+              src="/images/5.jpg"
+              alt="Community Network"
+              fill
+              style={{ objectFit: 'cover' }}
+            />
+            <div style={{
+              position: 'absolute',
+              bottom: '30px',
+              left: '30px',
+              background: 'rgba(0,0,0,0.5)',
+              padding: '6px 16px',
+              borderRadius: '40px',
+              fontSize: '12px',
+            }}>
+              GLOBAL COMMUNITY
+            </div>
+          </div>
+          <div style={{
+            width: '65%',
+            padding: '38px 38px',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            backgroundColor: '#059669',
+          }}>
+            <div>
+              <div style={{
+                fontSize: '12px',
+                letterSpacing: '4px',
+                color: '#a7f3d0',
+                marginBottom: '12px',
+                textTransform: 'uppercase',
+              }}>Global Community</div>
+              <h2 style={{
+                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                fontSize: '34px',
+                fontWeight: '400',
+                marginBottom: '14px',
+                letterSpacing: '-0.02em',
+              }}>
+                DESIGN NETWORK
+              </h2>
+              <p style={{
+                fontFamily: "'Questrial', sans-serif",
+                fontSize: '15px',
+                lineHeight: '1.6',
+                opacity: 0.85,
+                marginBottom: '20px',
+              }}>
+                Join thousands of creative professionals sharing insights, 
+                opportunities, and inspiration in Southeast Asia's fastest 
+                growing design community.
+              </p>
+              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                <span style={{ padding: '5px 14px', background: 'rgba(255,255,255,0.15)', borderRadius: '40px', fontSize: '12px' }}>10k+ Members</span>
+                <span style={{ padding: '5px 14px', background: 'rgba(255,255,255,0.15)', borderRadius: '40px', fontSize: '12px' }}>Weekly Events</span>
+                <span style={{ padding: '5px 14px', background: 'rgba(255,255,255,0.15)', borderRadius: '40px', fontSize: '12px' }}>Mentorship</span>
+                <span style={{ padding: '5px 14px', background: 'rgba(255,255,255,0.15)', borderRadius: '40px', fontSize: '12px' }}>Job Board</span>
+              </div>
+            </div>
+            <div style={{
+              marginTop: '24px',
+              paddingTop: '16px',
+              borderTop: '1px solid rgba(255,255,255,0.15)',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}>
+              <span style={{ fontSize: '14px', opacity: 0.5 }}>03 / 03</span>
+              <button style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'transparent', border: 'none', color: '#a7f3d0', cursor: 'pointer' }}>
+                Join Now <NorthEastArrowIcon size={16} />
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+)} 
+
+
+
+            
 
             
 
