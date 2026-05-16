@@ -4396,145 +4396,144 @@ useEffect(() => {
           </div>
         </div>
 
-        {/* CARD 5 - KEBERSIHAN / CLEANLINESS */}
-        <div
-          ref={(el) => setCard5Ref(el)}
-          style={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%) translateY(1600px)',
-            width: '88%',
-            height: '88%',
-            backgroundColor: '#ffffff',
-            border: '2px solid #000000',
-            borderRadius: '0px',
-            boxShadow: 'none',
-            overflow: 'hidden',
-            zIndex: 9,
-            display: 'flex',
-            flexDirection: 'column',
+       {/* CARD 5 - KEBERSIHAN / CLEANLINESS */}
+<div
+  ref={(el) => setCard5Ref(el)}
+  style={{
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%) translateY(1600px)',
+    width: '88%',
+    height: '88%',
+    backgroundColor: '#ffffff',
+    border: '2px solid #000000',
+    borderRadius: '0px',
+    boxShadow: 'none',
+    overflow: 'hidden',
+    zIndex: 9,
+    display: 'flex',
+    flexDirection: 'column',
+    color: '#000000',
+    willChange: 'transform',
+  }}
+>
+  <div style={{
+    padding: '32px 42px 0 42px',
+    borderBottom: '2px solid #000000',
+  }}>
+    <div style={{
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: '22px',
+    }}>
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '30px',
+      }}>
+        <div style={{
+          fontSize: '60px',
+          fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+          fontWeight: '400',
+          letterSpacing: '-0.02em',
+          lineHeight: '1',
+          color: '#000000',
+          opacity: 0.5,
+        }}>
+          05
+        </div>
+        <div>
+          <div style={{
+            fontSize: '50px',
+            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+            fontWeight: '400',
+            letterSpacing: '-0.02em',
+            lineHeight: '1',
             color: '#000000',
-            willChange: 'transform',
-          }}
-        >
-          <div style={{
-            padding: '32px 42px 0 42px',
-            borderBottom: '2px solid #000000',
           }}>
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: '22px',
-            }}>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '30px',
-              }}>
-                <div style={{
-                  fontSize: '60px',
-                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                  fontWeight: '400',
-                  letterSpacing: '-0.02em',
-                  lineHeight: '1',
-                  color: '#000000',
-                  opacity: 0.5,
-                }}>
-                  05
-                </div>
-                <div>
-                  <div style={{
-                    fontSize: '50px',
-                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                    fontWeight: '400',
-                    letterSpacing: '-0.02em',
-                    lineHeight: '1',
-                    color: '#000000',
-                  }}>
-                    KEBERSIHAN
-                  </div>
-                  <div style={{
-                    fontSize: '20px',
-                    fontFamily: "'Questrial', sans-serif",
-                    fontWeight: '400',
-                    letterSpacing: '-0.01em',
-                    color: '#666666',
-                    marginTop: '8px',
-                  }}>
-                    CLEANLINESS
-                  </div>
-                </div>
-              </div>
-              <button style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px',
-                background: 'transparent',
-                border: '1.5px solid #000000',
-                cursor: 'pointer',
-                fontSize: '13px',
-                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                color: '#000000',
-                padding: '10px 20px',
-                marginBottom: '8px',
-                transition: 'all 0.2s ease',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#000000';
-                e.currentTarget.style.color = '#ffffff';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'transparent';
-                e.currentTarget.style.color = '#000000';
-              }}>
-                <span>VIEW ONLINE</span>
-                <NorthEastArrowIcon size={14} />
-              </button>
-            </div>
+            KEBERSIHAN
           </div>
-          
           <div style={{
-            padding: '38px 42px 32px 42px',
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
+            fontSize: '20px',
+            fontFamily: "'Questrial', sans-serif",
+            fontWeight: '400',
+            letterSpacing: '-0.01em',
+            color: '#666666',
+            marginTop: '8px',
           }}>
-            <div>
-              <p style={{
-                fontFamily: "'Questrial', sans-serif",
-                fontSize: '15px',
-                lineHeight: '1.6',
-                color: '#000000',
-                marginBottom: '22px',
-                maxWidth: '65%',
-              }}>
-                Gerakan peduli lingkungan untuk Indonesia yang lebih bersih. Aksi bersih-bersih, 
-                daur ulang sampah, dan edukasi tentang hidup sehat.
-              </p>
-              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '11px', fontFamily: "'Questrial', sans-serif", color: '#000000' }}>Clean Action</span>
-                <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '11px', fontFamily: "'Questrial', sans-serif", color: '#000000' }}>Recycling</span>
-                <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '11px', fontFamily: "'Questrial', sans-serif", color: '#000000' }}>Green Living</span>
-                <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '11px', fontFamily: "'Questrial', sans-serif", color: '#000000' }}">Edukasi</span>
-              </div>
-            </div>
-            <div style={{
-              marginTop: '28px',
-              paddingTop: '18px',
-              borderTop: '1px solid #e0e0e0',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}>
-              <span style={{ fontSize: '12px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>INDONESIA BERSIH</span>
-              <span style={{ fontSize: '12px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>05 / 06</span>
-            </div>
+            CLEANLINESS
           </div>
         </div>
-
+      </div>
+      <button style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '10px',
+        background: 'transparent',
+        border: '1.5px solid #000000',
+        cursor: 'pointer',
+        fontSize: '13px',
+        fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+        color: '#000000',
+        padding: '10px 20px',
+        marginBottom: '8px',
+        transition: 'all 0.2s ease',
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.backgroundColor = '#000000';
+        e.currentTarget.style.color = '#ffffff';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.backgroundColor = 'transparent';
+        e.currentTarget.style.color = '#000000';
+      }}>
+        <span>VIEW ONLINE</span>
+        <NorthEastArrowIcon size={14} />
+      </button>
+    </div>
+  </div>
+  
+  <div style={{
+    padding: '38px 42px 32px 42px',
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+  }}>
+    <div>
+      <p style={{
+        fontFamily: "'Questrial', sans-serif",
+        fontSize: '15px',
+        lineHeight: '1.6',
+        color: '#000000',
+        marginBottom: '22px',
+        maxWidth: '65%',
+      }}>
+        Gerakan peduli lingkungan untuk Indonesia yang lebih bersih. Aksi bersih-bersih, 
+        daur ulang sampah, dan edukasi tentang hidup sehat.
+      </p>
+      <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+        <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '11px', fontFamily: "'Questrial', sans-serif", color: '#000000' }}>Clean Action</span>
+        <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '11px', fontFamily: "'Questrial', sans-serif", color: '#000000' }}>Recycling</span>
+        <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '11px', fontFamily: "'Questrial', sans-serif", color: '#000000' }}>Green Living</span>
+        <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '11px', fontFamily: "'Questrial', sans-serif", color: '#000000' }}>Edukasi</span>
+      </div>
+    </div>
+    <div style={{
+      marginTop: '28px',
+      paddingTop: '18px',
+      borderTop: '1px solid #e0e0e0',
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    }}>
+      <span style={{ fontSize: '12px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>INDONESIA BERSIH</span>
+      <span style={{ fontSize: '12px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>05 / 06</span>
+    </div>
+  </div>
+</div>
         {/* CARD 6 - UMUM / GENERAL */}
         <div
           ref={(el) => setCard6Ref(el)}
