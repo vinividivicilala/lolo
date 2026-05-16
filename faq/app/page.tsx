@@ -3666,7 +3666,7 @@ export default function HomePage(): React.JSX.Element {
     ref={cardsSectionRef}
     style={{
       width: '100%',
-      minHeight: '300vh',
+      minHeight: '500vh',
       position: 'relative',
       backgroundColor: '#f5f5f5',
       marginBottom: '0',
@@ -3721,7 +3721,7 @@ export default function HomePage(): React.JSX.Element {
         justifyContent: 'center',
         overflow: 'visible',
         marginTop: '40px',
-        marginBottom: '150px',
+        marginBottom: '0',
       }}
     >
       <div style={{
@@ -4396,47 +4396,8 @@ export default function HomePage(): React.JSX.Element {
       </div>
     </div>
 
-    {/* UJUNG SECTION - INDICATOR BAWAH */}
-    <div style={{
-      width: '100%',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      padding: '100px 0 120px 0',
-      backgroundColor: '#f5f5f5',
-    }}>
-      <div style={{
-        width: '60px',
-        height: '60px',
-        borderRadius: '50%',
-        border: '2px solid #000000',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        opacity: 0.4,
-        transition: 'opacity 0.3s ease, transform 0.3s ease',
-        cursor: 'pointer',
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.opacity = '1';
-        e.currentTarget.style.transform = 'scale(1.1)';
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.opacity = '0.4';
-        e.currentTarget.style.transform = 'scale(1)';
-      }}>
-        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M12 5V19M12 19L5 12M12 19L19 12" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-      </div>
-    </div>
-
   </div>
 )}
-
-
-
-
 
 
 
