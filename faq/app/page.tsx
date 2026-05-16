@@ -1677,7 +1677,43 @@ useEffect(() => {
 }, [isLoading, card1Ref, card2Ref, card3Ref, card4Ref, card5Ref, card6Ref]);
 
 
+useEffect(() => {
+  if (isLoading) return;
 
+  const handleScroll = () => {
+    if (!cardsSectionRef.current) return;
+
+    const scrollPosition = window.scrollY;
+    const sectionTop = cardsSectionRef.current.offsetTop;
+    const sectionHeight = cardsSectionRef.current.offsetHeight;
+    const windowHeight = window.innerHeight;
+
+    const scrollProgress = (scrollPosition - sectionTop + windowHeight) / (sectionHeight + windowHeight);
+    
+    if (scrollProgress > 0.2) {
+      gsap.to(cardsSectionRef.current, {
+        backgroundColor: '#a2ea13',
+        duration: 0.3,
+        ease: "power2.inOut"
+      });
+    } else {
+      gsap.to(cardsSectionRef.current, {
+        backgroundColor: '#ffffff',
+        duration: 0.3,
+        ease: "power2.inOut"
+      });
+    }
+  };
+
+  window.addEventListener('scroll', handleScroll);
+  handleScroll();
+
+  return () => window.removeEventListener('scroll', handleScroll);
+}, [isLoading]);
+
+
+
+  
   
 
 
@@ -3666,6 +3702,7 @@ useEffect(() => {
             </div>
 
 
+
 {/* STACKED CARDS SECTION - 6 CARD */}
 {!isLoading && (
   <div
@@ -3674,8 +3711,9 @@ useEffect(() => {
       width: '100%',
       minHeight: '900vh',
       position: 'relative',
-      backgroundColor: '#f5f5f5',
+      backgroundColor: '#ffffff',
       marginBottom: '0',
+      transition: 'background-color 0.3s ease',
     }}
   >
     {/* JUDUL COMMUNITY 200px + PANAH SVG */}
@@ -3684,7 +3722,7 @@ useEffect(() => {
       top: '0',
       zIndex: 20,
       width: '100%',
-      backgroundColor: '#f5f5f5',
+      backgroundColor: 'transparent',
       padding: '80px 80px 0 80px',
       boxSizing: 'border-box',
     }}>
@@ -3738,7 +3776,7 @@ useEffect(() => {
         margin: '0 auto',
       }}>
         
-        {/* CARD 1 */}
+        {/* CARD 1 - 01 PENDIDIKAN */}
         <div
           ref={(el) => setCard1Ref(el)}
           style={{
@@ -3769,15 +3807,28 @@ useEffect(() => {
               alignItems: 'flex-end',
               marginBottom: '35px',
             }}>
-              <div style={{
-                fontSize: '95px',
-                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                fontWeight: '400',
-                letterSpacing: '-0.02em',
-                lineHeight: '1',
-                color: '#000000',
-              }}>
-                CREATIVE<br />STUDIO
+              <div>
+                <div style={{
+                  fontSize: '80px',
+                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                  fontWeight: '400',
+                  letterSpacing: '-0.02em',
+                  lineHeight: '1',
+                  color: '#999999',
+                  marginBottom: '20px',
+                }}>
+                  01
+                </div>
+                <div style={{
+                  fontSize: '80px',
+                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                  fontWeight: '700',
+                  letterSpacing: '-0.02em',
+                  lineHeight: '1',
+                  color: '#000000',
+                }}>
+                  PENDIDIKAN
+                </div>
               </div>
               <button style={{
                 display: 'flex',
@@ -3823,15 +3874,14 @@ useEffect(() => {
                 marginBottom: '35px',
                 maxWidth: '70%',
               }}>
-                Award-winning UX/UI design studio crafting digital experiences 
-                that blend creativity with functionality. Based in Jakarta, 
-                serving global clients since 2020.
+                Membangun generasi cerdas melalui akses pendidikan berkualitas untuk semua. 
+                Mari bersama mencerdaskan kehidupan bangsa dengan program belajar yang inovatif dan mudah dijangkau.
               </p>
               <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
-                <span style={{ padding: '6px 22px', background: '#f0f0f0', fontSize: '13px', fontFamily: "'Questrial', sans-serif" }}>UX Research</span>
-                <span style={{ padding: '6px 22px', background: '#f0f0f0', fontSize: '13px', fontFamily: "'Questrial', sans-serif" }}>UI Design</span>
-                <span style={{ padding: '6px 22px', background: '#f0f0f0', fontSize: '13px', fontFamily: "'Questrial', sans-serif" }}>Prototyping</span>
-                <span style={{ padding: '6px 22px', background: '#f0f0f0', fontSize: '13px', fontFamily: "'Questrial', sans-serif" }}>Design System</span>
+                <span style={{ padding: '6px 22px', background: '#f0f0f0', fontSize: '13px', fontFamily: "'Questrial', sans-serif" }}>Beasiswa</span>
+                <span style={{ padding: '6px 22px', background: '#f0f0f0', fontSize: '13px', fontFamily: "'Questrial', sans-serif" }}>Pelatihan</span>
+                <span style={{ padding: '6px 22px', background: '#f0f0f0', fontSize: '13px', fontFamily: "'Questrial', sans-serif" }}>Kursus Online</span>
+                <span style={{ padding: '6px 22px', background: '#f0f0f0', fontSize: '13px', fontFamily: "'Questrial', sans-serif" }}>Mentoring</span>
               </div>
             </div>
             <div style={{
@@ -3842,13 +3892,13 @@ useEffect(() => {
               justifyContent: 'space-between',
               alignItems: 'center',
             }}>
-              <span style={{ fontSize: '14px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>MENURU STUDIO — Since 2020</span>
+              <span style={{ fontSize: '14px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>MENURU COMMUNITY — Pendidikan</span>
               <span style={{ fontSize: '14px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>01 / 06</span>
             </div>
           </div>
         </div>
 
-        {/* CARD 2 */}
+        {/* CARD 2 - 02 PEMROGRAMAN */}
         <div
           ref={(el) => setCard2Ref(el)}
           style={{
@@ -3880,15 +3930,28 @@ useEffect(() => {
               alignItems: 'flex-end',
               marginBottom: '32px',
             }}>
-              <div style={{
-                fontSize: '88px',
-                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                fontWeight: '400',
-                letterSpacing: '-0.02em',
-                lineHeight: '1',
-                color: '#000000',
-              }}>
-                AI CREATIVE<br />LAB
+              <div>
+                <div style={{
+                  fontSize: '80px',
+                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                  fontWeight: '400',
+                  letterSpacing: '-0.02em',
+                  lineHeight: '1',
+                  color: '#999999',
+                  marginBottom: '20px',
+                }}>
+                  02
+                </div>
+                <div style={{
+                  fontSize: '80px',
+                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                  fontWeight: '700',
+                  letterSpacing: '-0.02em',
+                  lineHeight: '1',
+                  color: '#000000',
+                }}>
+                  PEMROGRAMAN
+                </div>
               </div>
               <button style={{
                 display: 'flex',
@@ -3928,20 +3991,20 @@ useEffect(() => {
             <div>
               <p style={{
                 fontFamily: "'Questrial', sans-serif",
-                fontSize: '17px',
+                fontSize: '18px',
                 lineHeight: '1.6',
                 color: '#333333',
                 marginBottom: '30px',
-                maxWidth: '68%',
+                maxWidth: '70%',
               }}>
-                Harnessing artificial intelligence to revolutionize creative workflows, 
-                from generative design to intelligent automation and predictive analytics.
+                Belajar coding dari nol hingga mahir. Komunitas programmer Indonesia 
+                yang siap membantu mengasah skill pemrogramanmu dari dasar hingga tingkat lanjut.
               </p>
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                <span style={{ padding: '5px 20px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Machine Learning</span>
-                <span style={{ padding: '5px 20px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Generative AI</span>
-                <span style={{ padding: '5px 20px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Computer Vision</span>
-                <span style={{ padding: '5px 20px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>NLP</span>
+                <span style={{ padding: '6px 22px', background: '#f0f0f0', fontSize: '13px', fontFamily: "'Questrial', sans-serif" }}>JavaScript</span>
+                <span style={{ padding: '6px 22px', background: '#f0f0f0', fontSize: '13px', fontFamily: "'Questrial', sans-serif" }}>Python</span>
+                <span style={{ padding: '6px 22px', background: '#f0f0f0', fontSize: '13px', fontFamily: "'Questrial', sans-serif" }}>React</span>
+                <span style={{ padding: '6px 22px', background: '#f0f0f0', fontSize: '13px', fontFamily: "'Questrial', sans-serif" }}>Next.js</span>
               </div>
             </div>
             <div style={{
@@ -3952,13 +4015,13 @@ useEffect(() => {
               justifyContent: 'space-between',
               alignItems: 'center',
             }}>
-              <span style={{ fontSize: '13px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>AI INNOVATION DIVISION</span>
+              <span style={{ fontSize: '13px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>MENURU COMMUNITY — Pemrograman</span>
               <span style={{ fontSize: '13px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>02 / 06</span>
             </div>
           </div>
         </div>
 
-        {/* CARD 3 */}
+        {/* CARD 3 - 03 PERSIB */}
         <div
           ref={(el) => setCard3Ref(el)}
           style={{
@@ -3990,15 +4053,28 @@ useEffect(() => {
               alignItems: 'flex-end',
               marginBottom: '28px',
             }}>
-              <div style={{
-                fontSize: '80px',
-                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                fontWeight: '400',
-                letterSpacing: '-0.02em',
-                lineHeight: '1',
-                color: '#000000',
-              }}>
-                DESIGN<br />NETWORK
+              <div>
+                <div style={{
+                  fontSize: '80px',
+                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                  fontWeight: '400',
+                  letterSpacing: '-0.02em',
+                  lineHeight: '1',
+                  color: '#999999',
+                  marginBottom: '20px',
+                }}>
+                  03
+                </div>
+                <div style={{
+                  fontSize: '80px',
+                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                  fontWeight: '700',
+                  letterSpacing: '-0.02em',
+                  lineHeight: '1',
+                  color: '#000000',
+                }}>
+                  PERSIB
+                </div>
               </div>
               <button style={{
                 display: 'flex',
@@ -4038,21 +4114,20 @@ useEffect(() => {
             <div>
               <p style={{
                 fontFamily: "'Questrial', sans-serif",
-                fontSize: '16px',
+                fontSize: '18px',
                 lineHeight: '1.6',
                 color: '#333333',
                 marginBottom: '28px',
-                maxWidth: '65%',
+                maxWidth: '70%',
               }}>
-                Join thousands of creative professionals sharing insights, 
-                opportunities, and inspiration in Southeast Asia's fastest 
-                growing design community.
+                Rumah bagi Bobotoh dan pecinta PERSIB se-Indonesia. Berbagi kabar terbaru, 
+                jadwal pertandingan, dan semangat kebersamaan untuk Maung Bandung tercinta.
               </p>
               <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                <span style={{ padding: '5px 18px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>10k+ Members</span>
-                <span style={{ padding: '5px 18px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Weekly Events</span>
-                <span style={{ padding: '5px 18px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Mentorship</span>
-                <span style={{ padding: '5px 18px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Job Board</span>
+                <span style={{ padding: '6px 22px', background: '#f0f0f0', fontSize: '13px', fontFamily: "'Questrial', sans-serif" }}>Jadwal</span>
+                <span style={{ padding: '6px 22px', background: '#f0f0f0', fontSize: '13px', fontFamily: "'Questrial', sans-serif" }}>Bobotoh</span>
+                <span style={{ padding: '6px 22px', background: '#f0f0f0', fontSize: '13px', fontFamily: "'Questrial', sans-serif" }}>Maung Bandung</span>
+                <span style={{ padding: '6px 22px', background: '#f0f0f0', fontSize: '13px', fontFamily: "'Questrial', sans-serif" }}>Liga 1</span>
               </div>
             </div>
             <div style={{
@@ -4063,13 +4138,13 @@ useEffect(() => {
               justifyContent: 'space-between',
               alignItems: 'center',
             }}>
-              <span style={{ fontSize: '13px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>GLOBAL COMMUNITY HUB</span>
+              <span style={{ fontSize: '13px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>MENURU COMMUNITY — Persib</span>
               <span style={{ fontSize: '13px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>03 / 06</span>
             </div>
           </div>
         </div>
 
-        {/* CARD 4 */}
+        {/* CARD 4 - 04 POINT BLANK */}
         <div
           ref={(el) => setCard4Ref(el)}
           style={{
@@ -4101,15 +4176,28 @@ useEffect(() => {
               alignItems: 'flex-end',
               marginBottom: '25px',
             }}>
-              <div style={{
-                fontSize: '75px',
-                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                fontWeight: '400',
-                letterSpacing: '-0.02em',
-                lineHeight: '1',
-                color: '#000000',
-              }}>
-                DIGITAL<br />INNOVATION
+              <div>
+                <div style={{
+                  fontSize: '80px',
+                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                  fontWeight: '400',
+                  letterSpacing: '-0.02em',
+                  lineHeight: '1',
+                  color: '#999999',
+                  marginBottom: '20px',
+                }}>
+                  04
+                </div>
+                <div style={{
+                  fontSize: '80px',
+                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                  fontWeight: '700',
+                  letterSpacing: '-0.02em',
+                  lineHeight: '1',
+                  color: '#000000',
+                }}>
+                  POINT BLANK
+                </div>
               </div>
               <button style={{
                 display: 'flex',
@@ -4149,20 +4237,20 @@ useEffect(() => {
             <div>
               <p style={{
                 fontFamily: "'Questrial', sans-serif",
-                fontSize: '16px',
+                fontSize: '18px',
                 lineHeight: '1.6',
                 color: '#333333',
                 marginBottom: '25px',
-                maxWidth: '65%',
+                maxWidth: '70%',
               }}>
-                Driving digital transformation through cutting-edge technology, 
-                helping businesses adapt and thrive in the rapidly evolving digital landscape.
+                Komunitas gamers Point Blank Indonesia. Temukan teman bermain, tournament seru, 
+                dan update terbaru tentang game FPS legendaris yang masih eksis hingga kini.
               </p>
               <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                <span style={{ padding: '5px 18px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Digital Strategy</span>
-                <span style={{ padding: '5px 18px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Cloud Computing</span>
-                <span style={{ padding: '5px 18px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>IoT Solutions</span>
-                <span style={{ padding: '5px 18px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Blockchain</span>
+                <span style={{ padding: '6px 22px', background: '#f0f0f0', fontSize: '13px', fontFamily: "'Questrial', sans-serif" }}>Tournament</span>
+                <span style={{ padding: '6px 22px', background: '#f0f0f0', fontSize: '13px', fontFamily: "'Questrial', sans-serif" }}>Clan War</span>
+                <span style={{ padding: '6px 22px', background: '#f0f0f0', fontSize: '13px', fontFamily: "'Questrial', sans-serif" }}>Tips & Trik</span>
+                <span style={{ padding: '6px 22px', background: '#f0f0f0', fontSize: '13px', fontFamily: "'Questrial', sans-serif" }}>Update</span>
               </div>
             </div>
             <div style={{
@@ -4173,13 +4261,13 @@ useEffect(() => {
               justifyContent: 'space-between',
               alignItems: 'center',
             }}>
-              <span style={{ fontSize: '13px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>TECH INNOVATION LAB</span>
+              <span style={{ fontSize: '13px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>MENURU COMMUNITY — Point Blank</span>
               <span style={{ fontSize: '13px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>04 / 06</span>
             </div>
           </div>
         </div>
 
-        {/* CARD 5 */}
+        {/* CARD 5 - 05 KEBERSIHAN */}
         <div
           ref={(el) => setCard5Ref(el)}
           style={{
@@ -4211,15 +4299,28 @@ useEffect(() => {
               alignItems: 'flex-end',
               marginBottom: '22px',
             }}>
-              <div style={{
-                fontSize: '70px',
-                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                fontWeight: '400',
-                letterSpacing: '-0.02em',
-                lineHeight: '1',
-                color: '#000000',
-              }}>
-                CREATIVE<br />WORKSHOP
+              <div>
+                <div style={{
+                  fontSize: '80px',
+                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                  fontWeight: '400',
+                  letterSpacing: '-0.02em',
+                  lineHeight: '1',
+                  color: '#999999',
+                  marginBottom: '20px',
+                }}>
+                  05
+                </div>
+                <div style={{
+                  fontSize: '80px',
+                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                  fontWeight: '700',
+                  letterSpacing: '-0.02em',
+                  lineHeight: '1',
+                  color: '#000000',
+                }}>
+                  KEBERSIHAN
+                </div>
               </div>
               <button style={{
                 display: 'flex',
@@ -4259,20 +4360,20 @@ useEffect(() => {
             <div>
               <p style={{
                 fontFamily: "'Questrial', sans-serif",
-                fontSize: '15px',
+                fontSize: '18px',
                 lineHeight: '1.6',
                 color: '#333333',
                 marginBottom: '22px',
-                maxWidth: '65%',
+                maxWidth: '70%',
               }}>
-                Hands-on creative workshops and bootcamps designed to unlock your 
-                team's potential, fostering innovation and collaborative problem-solving.
+                Gerakan peduli lingkungan untuk bumi yang lebih bersih dan sehat. 
+                Aksi nyata mengurangi sampah plastik, penghijauan, dan edukasi kebersihan.
               </p>
               <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '11px', fontFamily: "'Questrial', sans-serif" }}>Workshops</span>
-                <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '11px', fontFamily: "'Questrial', sans-serif" }}>Bootcamps</span>
-                <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '11px', fontFamily: "'Questrial', sans-serif" }}>Team Building</span>
-                <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '11px', fontFamily: "'Questrial', sans-serif" }}>Skill Training</span>
+                <span style={{ padding: '6px 22px', background: '#f0f0f0', fontSize: '13px', fontFamily: "'Questrial', sans-serif" }}>Recycling</span>
+                <span style={{ padding: '6px 22px', background: '#f0f0f0', fontSize: '13px', fontFamily: "'Questrial', sans-serif" }}>Penghijauan</span>
+                <span style={{ padding: '6px 22px', background: '#f0f0f0', fontSize: '13px', fontFamily: "'Questrial', sans-serif" }}>Edukasi</span>
+                <span style={{ padding: '6px 22px', background: '#f0f0f0', fontSize: '13px', fontFamily: "'Questrial', sans-serif" }}>Bersih-Bersih</span>
               </div>
             </div>
             <div style={{
@@ -4283,13 +4384,13 @@ useEffect(() => {
               justifyContent: 'space-between',
               alignItems: 'center',
             }}>
-              <span style={{ fontSize: '12px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>CREATIVE LEARNING HUB</span>
+              <span style={{ fontSize: '12px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>MENURU COMMUNITY — Kebersihan</span>
               <span style={{ fontSize: '12px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>05 / 06</span>
             </div>
           </div>
         </div>
 
-        {/* CARD 6 */}
+        {/* CARD 6 - 06 UMUM */}
         <div
           ref={(el) => setCard6Ref(el)}
           style={{
@@ -4321,15 +4422,28 @@ useEffect(() => {
               alignItems: 'flex-end',
               marginBottom: '20px',
             }}>
-              <div style={{
-                fontSize: '65px',
-                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                fontWeight: '400',
-                letterSpacing: '-0.02em',
-                lineHeight: '1',
-                color: '#000000',
-              }}>
-                DESIGN<br />LEADERSHIP
+              <div>
+                <div style={{
+                  fontSize: '80px',
+                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                  fontWeight: '400',
+                  letterSpacing: '-0.02em',
+                  lineHeight: '1',
+                  color: '#999999',
+                  marginBottom: '20px',
+                }}>
+                  06
+                </div>
+                <div style={{
+                  fontSize: '80px',
+                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                  fontWeight: '700',
+                  letterSpacing: '-0.02em',
+                  lineHeight: '1',
+                  color: '#000000',
+                }}>
+                  UMUM
+                </div>
               </div>
               <button style={{
                 display: 'flex',
@@ -4369,20 +4483,20 @@ useEffect(() => {
             <div>
               <p style={{
                 fontFamily: "'Questrial', sans-serif",
-                fontSize: '15px',
+                fontSize: '18px',
                 lineHeight: '1.6',
                 color: '#333333',
                 marginBottom: '22px',
-                maxWidth: '65%',
+                maxWidth: '70%',
               }}>
-                Empowering design leaders to drive organizational change, 
-                build high-performing teams, and create lasting impact through strategic design thinking.
+                Ruang diskusi umum untuk semua topik menarik. Curhat, berbagi cerita, 
+                dan terhubung dengan sesama anggota komunitas MENURU dari berbagai latar belakang.
               </p>
               <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '11px', fontFamily: "'Questrial', sans-serif" }}>Leadership Training</span>
-                <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '11px', fontFamily: "'Questrial', sans-serif" }}>Strategy</span>
-                <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '11px', fontFamily: "'Questrial', sans-serif" }}>Mentorship</span>
-                <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '11px', fontFamily: "'Questrial', sans-serif" }}>Career Growth</span>
+                <span style={{ padding: '6px 22px', background: '#f0f0f0', fontSize: '13px', fontFamily: "'Questrial', sans-serif" }}>Diskusi</span>
+                <span style={{ padding: '6px 22px', background: '#f0f0f0', fontSize: '13px', fontFamily: "'Questrial', sans-serif" }}>Curhat</span>
+                <span style={{ padding: '6px 22px', background: '#f0f0f0', fontSize: '13px', fontFamily: "'Questrial', sans-serif" }}>Sharing</span>
+                <span style={{ padding: '6px 22px', background: '#f0f0f0', fontSize: '13px', fontFamily: "'Questrial', sans-serif" }}>Networking</span>
               </div>
             </div>
             <div style={{
@@ -4393,7 +4507,7 @@ useEffect(() => {
               justifyContent: 'space-between',
               alignItems: 'center',
             }}>
-              <span style={{ fontSize: '12px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>LEADERSHIP ACADEMY</span>
+              <span style={{ fontSize: '12px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>MENURU COMMUNITY — Umum</span>
               <span style={{ fontSize: '12px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>06 / 06</span>
             </div>
           </div>
@@ -4402,13 +4516,19 @@ useEffect(() => {
       </div>
     </div>
 
-    {/* SPACER BAWAH AGAR TRUSTED COLLABS TIDAK NABRAK DAN WARNA FULL */}
-    <div style={{ height: '400px', backgroundColor: '#f5f5f5' }} />
+    {/* SPACER BAWAH AGAR TRUSTED COLLABS TIDAK NABRAK */}
+    <div style={{ height: '400px', backgroundColor: 'transparent' }} />
 
   </div>
 )}
 
 
+
+
+
+
+
+            
 
             
 
