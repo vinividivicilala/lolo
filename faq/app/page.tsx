@@ -3661,14 +3661,13 @@ export default function HomePage(): React.JSX.Element {
 
 
 
-
-// STACKED CARDS SECTION - 6 CARD
+{/* STACKED CARDS SECTION - 6 CARD */}
 {!isLoading && (
   <div
     ref={cardsSectionRef}
     style={{
       width: '100%',
-      minHeight: '300vh', // Increased to ensure all 6 cards finish before Trusted Collabs
+      minHeight: '300vh',
       position: 'relative',
       backgroundColor: '#f5f5f5',
       marginBottom: '0',
@@ -3723,7 +3722,7 @@ export default function HomePage(): React.JSX.Element {
         justifyContent: 'center',
         overflow: 'visible',
         marginTop: '40px',
-        marginBottom: '150px', // Added more bottom margin
+        marginBottom: '200px',
       }}
     >
       <div style={{
@@ -4398,938 +4397,750 @@ export default function HomePage(): React.JSX.Element {
       </div>
     </div>
 
-    {/* Spacer div to ensure Trusted Collabs starts after all cards are done */}
-    <div style={{ height: '1px', opacity: 0 }} />
+    {/* Extra spacer to push down Trusted Collabs */}
+    <div style={{ height: '300px' }} />
   </div>
 )}
 
+{/* WRAPPER UNTUK SEMUA SECTION SETELAH COMMUNITY */}
+<div style={{ marginTop: '400px' }}>
+  
+  {/* SECTION TRUSTED COLLABS */}
+  <div
+    ref={trustedSectionRef}
+    className="trusted-section"
+    style={{
+      backgroundColor: '#ffffff',
+    }}
+  >
+    <div
+      ref={trustedTextRef}
+      className="trusted-text"
+    >
+      TRUSTED COLLABS
+    </div>
 
+    <div
+      ref={carouselRef}
+      className="carousel-container"
+    >
+      <div className="carousel-track">
+        {carouselItems.map((item) => (
+          <div key={item.id} className="carousel-item">
+            <div className="carousel-image">
+              <Image
+                src={item.image}
+                alt={item.brand}
+                fill
+                style={{ objectFit: 'cover' }}
+              />
+            </div>
+            <h3 className="carousel-brand">{item.brand}</h3>
+            <p className="carousel-desc">{item.description}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
 
-            
+  {/* CALENDAR SUBMISSIONS SECTION */}
+  {calendarSubmissions.length > 0 && (
+    <div className="calendar-submissions-section" style={{
+      width: '100%',
+      padding: '120px 80px',
+      backgroundColor: '#ffffff',
+      boxSizing: 'border-box',
+    }}>
+      <div style={{
+        fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+        fontSize: '190px',
+        fontWeight: '400',
+        color: '#000000',
+        letterSpacing: '-0.02em',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginBottom: '100px',
+        lineHeight: '1'
+      }}>
+        <span>MEETING SCHEDULE</span>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '30px'
+        }}>
+          <span style={{
+            fontSize: '100px',
+            color: '#000000',
+            fontWeight: '400'
+          }}>
+            ({calendarSubmissions.length})
+          </span>
+          <svg width="100" height="100" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </div>
+      </div>
 
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '80px'
+      }}>
+        {calendarSubmissions.map((submission, index) => {
+          const dateParts = getDateParts(submission.selectedDate);
 
-
-            
-
-
-
-
-
-
-
-
-
-
-
-            
-
-            {/* SECTION TRUSTED COLLABS */}
+          return (
             <div
-              ref={trustedSectionRef}
-              className="trusted-section"
+              key={submission.id}
               style={{
-                backgroundColor: '#ffffff',
+                display: 'flex',
+                flexDirection: 'row',
+                alignItems: 'flex-start',
+                gap: '80px'
               }}
             >
-              <div
-                ref={trustedTextRef}
-                className="trusted-text"
-              >
-                TRUSTED COLLABS
-              </div>
-
-              <div
-                ref={carouselRef}
-                className="carousel-container"
-              >
-                <div className="carousel-track">
-                  {carouselItems.map((item) => (
-                    <div key={item.id} className="carousel-item">
-                      <div className="carousel-image">
-                        <Image
-                          src={item.image}
-                          alt={item.brand}
-                          fill
-                          style={{ objectFit: 'cover' }}
-                        />
-                      </div>
-                      <h3 className="carousel-brand">{item.brand}</h3>
-                      <p className="carousel-desc">{item.description}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* CALENDAR SUBMISSIONS SECTION */}
-            {calendarSubmissions.length > 0 && (
-              <div className="calendar-submissions-section" style={{
-                width: '100%',
-                padding: '120px 80px',
-                backgroundColor: '#ffffff',
-                boxSizing: 'border-box'
+              <div style={{
+                width: '200px',
+                flexShrink: 0,
+                textAlign: 'left'
               }}>
                 <div style={{
                   fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                  fontSize: '190px',
+                  fontSize: '100px',
+                  fontWeight: '400',
+                  color: '#000000',
+                  lineHeight: '1',
+                  letterSpacing: '-0.02em'
+                }}>
+                  {dateParts.day}
+                </div>
+                <div style={{
+                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                  fontSize: '40px',
                   fontWeight: '400',
                   color: '#000000',
                   letterSpacing: '-0.02em',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  marginBottom: '100px',
-                  lineHeight: '1'
+                  marginTop: '12px'
                 }}>
-                  <span>MEETING SCHEDULE</span>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '30px'
-                  }}>
-                    <span style={{
-                      fontSize: '100px',
-                      color: '#000000',
-                      fontWeight: '400'
-                    }}>
-                      ({calendarSubmissions.length})
-                    </span>
-                    <svg width="100" height="100" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </div>
+                  {dateParts.month}
                 </div>
+                <div style={{
+                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                  fontSize: '24px',
+                  fontWeight: '400',
+                  color: '#666666',
+                  marginTop: '8px'
+                }}>
+                  {dateParts.year}
+                </div>
+              </div>
 
+              <div style={{
+                flex: 1,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '32px'
+              }}>
                 <div style={{
                   display: 'flex',
-                  flexDirection: 'column',
-                  gap: '80px'
-                }}>
-                  {calendarSubmissions.map((submission, index) => {
-                    const dateParts = getDateParts(submission.selectedDate);
-
-                    return (
-                      <div
-                        key={submission.id}
-                        style={{
-                          display: 'flex',
-                          flexDirection: 'row',
-                          alignItems: 'flex-start',
-                          gap: '80px'
-                        }}
-                      >
-                        <div style={{
-                          width: '200px',
-                          flexShrink: 0,
-                          textAlign: 'left'
-                        }}>
-                          <div style={{
-                            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                            fontSize: '100px',
-                            fontWeight: '400',
-                            color: '#000000',
-                            lineHeight: '1',
-                            letterSpacing: '-0.02em'
-                          }}>
-                            {dateParts.day}
-                          </div>
-                          <div style={{
-                            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                            fontSize: '40px',
-                            fontWeight: '400',
-                            color: '#000000',
-                            letterSpacing: '-0.02em',
-                            marginTop: '12px'
-                          }}>
-                            {dateParts.month}
-                          </div>
-                          <div style={{
-                            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                            fontSize: '24px',
-                            fontWeight: '400',
-                            color: '#666666',
-                            marginTop: '8px'
-                          }}>
-                            {dateParts.year}
-                          </div>
-                        </div>
-
-                        <div style={{
-                          flex: 1,
-                          display: 'flex',
-                          flexDirection: 'column',
-                          gap: '32px'
-                        }}>
-                          <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '40px',
-                            flexWrap: 'wrap'
-                          }}>
-                            <div style={{
-                              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                              fontSize: '48px',
-                              fontWeight: '400',
-                              color: '#000000',
-                              letterSpacing: '-0.02em'
-                            }}>
-                              {submission.fullName}
-                            </div>
-                            <div style={{
-                              fontSize: '20px',
-                              padding: '6px 24px',
-                              border: '1px solid #000000',
-                              backgroundColor: 'transparent',
-                              color: '#000000',
-                              fontWeight: '400',
-                              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                              letterSpacing: '0.02em'
-                            }}>
-                              {submission.status === 'pending' ? 'PENDING' :
-                               submission.status === 'confirmed' ? 'CONFIRMED' :
-                               submission.status === 'completed' ? 'COMPLETED' : 'REJECTED'}
-                            </div>
-                          </div>
-
-                          <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '60px',
-                            flexWrap: 'wrap'
-                          }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <circle cx="12" cy="12" r="10" stroke="#000000" strokeWidth="1.5"/>
-                                <polyline points="12 6 12 12 16 14" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                              </svg>
-                              <span style={{
-                                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                                fontSize: '28px',
-                                color: '#000000'
-                              }}>
-                                {submission.selectedTime} WIB
-                              </span>
-                            </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke="#000000" strokeWidth="1.5"/>
-                                <line x1="8" y1="2" x2="8" y2="6" stroke="#000000" strokeWidth="1.5" strokeLinecap="round"/>
-                                <line x1="16" y1="2" x2="16" y2="6" stroke="#000000" strokeWidth="1.5" strokeLinecap="round"/>
-                                <line x1="3" y1="10" x2="21" y2="10" stroke="#000000" strokeWidth="1.5" strokeLinecap="round"/>
-                              </svg>
-                              <span style={{
-                                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                                fontSize: '28px',
-                                color: '#000000'
-                              }}>
-                                {submission.meetingType}
-                              </span>
-                            </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="#000000" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-                              </svg>
-                              <span style={{
-                                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                                fontSize: '28px',
-                                color: '#000000'
-                              }}>
-                                {submission.platform === 'google_meet' ? 'Google Meet' :
-                                 submission.platform === 'zoom' ? 'Zoom' :
-                                 submission.platform === 'tatap_muka' ? 'Offline' : 'Via HP'}
-                              </span>
-                            </div>
-                          </div>
-
-                          <div style={{
-                            marginTop: '16px'
-                          }}>
-                            <div style={{
-                              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                              fontSize: '20px',
-                              fontWeight: '400',
-                              color: '#999999',
-                              marginBottom: '20px',
-                              letterSpacing: '0.05em'
-                            }}>
-                              REASON TO TRUST
-                            </div>
-                            <div style={{
-                              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                              fontSize: '32px',
-                              fontWeight: '400',
-                              color: '#000000',
-                              lineHeight: '1.4',
-                              letterSpacing: '-0.01em'
-                            }}>
-                              "{submission.trustReason}"
-                            </div>
-                          </div>
-
-                          <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '48px',
-                            flexWrap: 'wrap',
-                            marginTop: '16px'
-                          }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <rect x="2" y="4" width="20" height="16" rx="2" ry="2" stroke="#000000" strokeWidth="1.5"/>
-                                <polyline points="22 7 12 13 2 7" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                              </svg>
-                              <span style={{
-                                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                                fontSize: '22px',
-                                color: '#000000'
-                              }}>
-                                {submission.email}
-                              </span>
-                            </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" stroke="#000000" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-                              </svg>
-                              <span style={{
-                                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                                fontSize: '22px',
-                                color: '#000000'
-                              }}>
-                                {submission.phoneNumber}
-                              </span>
-                            </div>
-                            {submission.companyName && (
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                  <rect x="4" y="4" width="16" height="16" rx="2" ry="2" stroke="#000000" strokeWidth="1.5"/>
-                                  <line x1="9" y1="4" x2="9" y2="20" stroke="#000000" strokeWidth="1.5"/>
-                                  <line x1="15" y1="4" x2="15" y2="20" stroke="#000000" strokeWidth="1.5"/>
-                                  <line x1="4" y1="9" x2="20" y2="9" stroke="#000000" strokeWidth="1.5"/>
-                                  <line x1="4" y1="15" x2="20" y2="15" stroke="#000000" strokeWidth="1.5"/>
-                                </svg>
-                                <span style={{
-                                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                                  fontSize: '22px',
-                                  color: '#000000'
-                                }}>
-                                  {submission.companyName}
-                                </span>
-                              </div>
-                            )}
-                          </div>
-
-                          {submission.adminReply && (
-                            <div style={{
-                              marginTop: '24px'
-                            }}>
-                              <div style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '14px',
-                                marginBottom: '16px'
-                              }}>
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="#000000" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-                                </svg>
-                                <span style={{
-                                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                                  fontSize: '18px',
-                                  fontWeight: '400',
-                                  color: '#999999',
-                                  letterSpacing: '0.05em'
-                                }}>
-                                  ADMIN REPLY · {submission.adminReply.repliedBy}
-                                </span>
-                              </div>
-                              <div style={{
-                                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                                fontSize: '24px',
-                                color: '#000000',
-                                lineHeight: '1.4',
-                                paddingLeft: '38px'
-                              }}>
-                                {submission.adminReply.text}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-
-                        <div style={{
-                          width: '220px',
-                          flexShrink: 0,
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'flex-end',
-                          gap: '24px'
-                        }}>
-                          <button
-                            onClick={() => {
-                              setShowCalendarModal(true);
-                              setShowFormView(false);
-                              setSelectedDate(null);
-                              setSelectedTime("");
-                            }}
-                            style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'space-between',
-                              gap: '20px',
-                              backgroundColor: 'transparent',
-                              border: '1px solid #000000',
-                              cursor: 'pointer',
-                              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                              fontSize: '20px',
-                              fontWeight: '400',
-                              color: '#000000',
-                              padding: '16px 28px',
-                              borderRadius: '0',
-                              width: '100%'
-                            }}
-                          >
-                            <span>BOOK CALL</span>
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                            </svg>
-                          </button>
-
-                          {isAdmin && (
-                            <button
-                              onClick={() => {
-                                setSelectedSubmission(submission);
-                                setReplyText(submission.adminReply?.text || "");
-                                setReplyStatus(submission.status);
-                                setShowReplyModal(true);
-                              }}
-                              style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'space-between',
-                                gap: '20px',
-                                backgroundColor: 'transparent',
-                                border: '1px solid #000000',
-                                cursor: 'pointer',
-                                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                                fontSize: '18px',
-                                fontWeight: '400',
-                                color: '#000000',
-                                padding: '14px 24px',
-                                borderRadius: '0',
-                                width: '100%'
-                              }}
-                            >
-                              <span>{submission.adminReply ? 'EDIT REPLY' : 'REPLY'}</span>
-                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M17 7L7 17M7 17H17M7 17V7" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                              </svg>
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* REPLY MODAL FOR ADMIN */}
-            {showReplyModal && selectedSubmission && (
-              <div className="reply-modal-overlay">
-                <div className="reply-modal">
-                  <div style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    marginBottom: '32px',
-                    borderBottom: '1px solid #e0e0e0',
-                    paddingBottom: '20px'
-                  }}>
-                    <h2 style={{
-                      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                      fontSize: '28px',
-                      fontWeight: '400',
-                      color: '#000000',
-                      margin: 0,
-                      letterSpacing: '-0.02em'
-                    }}>
-                      REPLY TO MEETING
-                    </h2>
-                    <button
-                      onClick={() => {
-                        setShowReplyModal(false);
-                        setSelectedSubmission(null);
-                        setReplyText("");
-                      }}
-                      style={{
-                        background: 'none',
-                        border: 'none',
-                        fontSize: '28px',
-                        cursor: 'pointer',
-                        color: '#000000'
-                      }}
-                    >
-                      ✕
-                    </button>
-                  </div>
-
-                  <div style={{
-                    marginBottom: '24px',
-                    padding: '20px',
-                    backgroundColor: '#f5f5f5',
-                    borderRadius: '0'
-                  }}>
-                    <div style={{
-                      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                      fontSize: '14px',
-                      color: '#666666',
-                      marginBottom: '8px'
-                    }}>
-                      FROM: {selectedSubmission.fullName} ({selectedSubmission.email})
-                    </div>
-                    <div style={{
-                      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                      fontSize: '14px',
-                      color: '#666666',
-                      marginBottom: '8px'
-                    }}>
-                      DATE: {selectedSubmission.selectedDateFormatted} - {selectedSubmission.selectedTime} WIB
-                    </div>
-                    <div style={{
-                      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                      fontSize: '14px',
-                      color: '#000000',
-                      marginTop: '12px',
-                      paddingTop: '12px',
-                      borderTop: '1px solid #cccccc'
-                    }}>
-                      "{selectedSubmission.trustReason}"
-                    </div>
-                  </div>
-
-                  <div style={{ marginBottom: '24px' }}>
-                    <label style={{
-                      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                      fontSize: '14px',
-                      fontWeight: '400',
-                      color: '#000000',
-                      display: 'block',
-                      marginBottom: '8px'
-                    }}>
-                      MEETING STATUS
-                    </label>
-                    <select
-                      value={replyStatus}
-                      onChange={(e) => setReplyStatus(e.target.value as any)}
-                      style={{
-                        width: '100%',
-                        padding: '12px 16px',
-                        borderRadius: '0',
-                        border: '1px solid #cccccc',
-                        fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                        fontSize: '14px',
-                        backgroundColor: '#ffffff'
-                      }}
-                    >
-                      <option value="pending">PENDING</option>
-                      <option value="confirmed">CONFIRMED</option>
-                      <option value="completed">COMPLETED</option>
-                      <option value="rejected">REJECTED</option>
-                    </select>
-                  </div>
-
-                  <div style={{ marginBottom: '28px' }}>
-                    <label style={{
-                      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                      fontSize: '14px',
-                      fontWeight: '400',
-                      color: '#000000',
-                      display: 'block',
-                      marginBottom: '8px'
-                    }}>
-                      REPLY MESSAGE
-                    </label>
-                    <textarea
-                      value={replyText}
-                      onChange={(e) => setReplyText(e.target.value)}
-                      placeholder="Write your reply here..."
-                      rows={5}
-                      style={{
-                        width: '100%',
-                        padding: '12px 16px',
-                        borderRadius: '0',
-                        border: '1px solid #cccccc',
-                        fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                        fontSize: '14px',
-                        resize: 'vertical',
-                        backgroundColor: '#ffffff'
-                      }}
-                    />
-                  </div>
-
-                  <div style={{ display: 'flex', gap: '16px' }}>
-                    <button
-                      onClick={() => {
-                        setShowReplyModal(false);
-                        setSelectedSubmission(null);
-                        setReplyText("");
-                      }}
-                      style={{
-                        flex: 1,
-                        padding: '14px',
-                        borderRadius: '0',
-                        border: '1px solid #000000',
-                        backgroundColor: 'transparent',
-                        color: '#000000',
-                        fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                        fontSize: '16px',
-                        fontWeight: '400',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      CANCEL
-                    </button>
-                    <button
-                      onClick={handleAdminReply}
-                      style={{
-                        flex: 1,
-                        padding: '14px',
-                        borderRadius: '0',
-                        border: '1px solid #000000',
-                        backgroundColor: '#000000',
-                        color: '#ffffff',
-                        fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                        fontSize: '16px',
-                        fontWeight: '400',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      SEND REPLY
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Bagian footer */}
-            <div style={{
-              width: '100%',
-              position: 'relative',
-              backgroundColor: 'white',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'flex-end',
-              alignItems: 'center',
-              minHeight: '60vh'
-            }}>
-              <div
-                ref={bottomContentRef}
-                style={{
-                  width: '100%',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'flex-start',
+                  alignItems: 'center',
                   gap: '40px',
-                  marginBottom: '80px',
-                  paddingLeft: '80px',
-                  opacity: 0
-                }}
-              >
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px'
+                  flexWrap: 'wrap'
                 }}>
-                  <div
-                    ref={mencatatTextRef}
-                    style={{
-                      fontSize: '64px',
-                      fontFamily: 'Questrial, sans-serif',
-                      color: 'black',
-                      textAlign: 'left',
-                      fontWeight: '400',
-                      letterSpacing: '-0.02em',
-                      lineHeight: '1.2',
-                      whiteSpace: 'nowrap'
-                    }}>
-                    Mencatat apa yang kamu inginkan
-                  </div>
-                  <span style={{
-                    fontSize: '80px',
-                    color: 'black',
-                    fontWeight: '400',
-                    lineHeight: '1'
-                  }}>.</span>
-                </div>
-
-                <Link href="/contact">
-                  <button
-                    ref={contactBtnRef}
-                    onClick={handleContact}
-                    className="contact-btn-effect"
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '16px',
-                      padding: '14px 36px',
-                      borderRadius: '60px',
-                      cursor: 'pointer',
-                      fontSize: '20px',
-                      fontWeight: '600',
-                      letterSpacing: '-0.01em',
-                      fontFamily: 'Questrial, sans-serif',
-                      transition: 'all 0.3s ease',
-                      position: 'relative',
-                      overflow: 'hidden',
-                      zIndex: 1,
-                      border: '1.5px solid #cccccc',
-                      backgroundColor: '#ffffff',
-                      color: '#000000'
-                    }}
-                  >
-                    <span ref={contactTextRef}>Contact</span>
-
-                    <div style={{
-                      position: 'relative',
-                      width: '40px',
-                      height: '40px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}>
-                      <div className="dot-small" style={{
-                        width: '8px',
-                        height: '8px',
-                        borderRadius: '50%',
-                        backgroundColor: '#000000',
-                        opacity: 1,
-                        transform: 'scale(1)',
-                        transition: 'opacity 0.3s ease, transform 0.3s ease',
-                        position: 'absolute'
-                      }}></div>
-
-                      <div className="circle-large-white" style={{
-                        position: 'absolute',
-                        width: '40px',
-                        height: '40px',
-                        borderRadius: '50%',
-                        backgroundColor: '#000000',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        opacity: 0,
-                        transform: 'scale(0.8)',
-                        transition: 'opacity 0.3s ease, transform 0.3s ease, background-color 0.3s ease'
-                      }}>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                      </div>
-                    </div>
-                  </button>
-                </Link>
-
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '30px',
-                  flexWrap: 'wrap',
-                  width: '100%'
-                }}>
-                  <div ref={callTextRef} className="call-farid-text">
-                    <div>Ready to surpass your</div>
-                    <div>wildest dreams?</div>
-                    <div>Call Farid.</div>
-                  </div>
-
-                  <button ref={calendarBtnRef} onClick={handleCalendarCall} className="calendar-btn">
-                    <ArrowIcon size={24} />
-                    Calendar call
-                  </button>
-                </div>
-
-                <div
-                  ref={profileRef}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'flex-start',
-                    gap: '24px',
-                    width: '100%',
-                    marginTop: '10px'
-                  }}
-                >
                   <div style={{
-                    width: '80px',
-                    height: '100px',
-                    borderRadius: '12px',
-                    overflow: 'hidden',
-                    position: 'relative',
-                    border: '2px solid #e0e0e0'
-                  }}>
-                    <Image
-                      src="/images/5.jpg"
-                      alt="Farid Ardiansyah"
-                      fill
-                      style={{ objectFit: 'cover', objectPosition: 'center' }}
-                    />
-                  </div>
-
-                  <div style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '40px',
+                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                    fontSize: '48px',
                     fontWeight: '400',
-                    color: 'rgb(16, 16, 16)',
+                    color: '#000000',
                     letterSpacing: '-0.02em'
                   }}>
-                    Farid Ardiansyah
+                    {submission.fullName}
                   </div>
-
-                  <div className="badge-founder">
-                    Founder & Programmer
+                  <div style={{
+                    fontSize: '20px',
+                    padding: '6px 24px',
+                    border: '1px solid #000000',
+                    backgroundColor: 'transparent',
+                    color: '#000000',
+                    fontWeight: '400',
+                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                    letterSpacing: '0.02em'
+                  }}>
+                    {submission.status === 'pending' ? 'PENDING' :
+                     submission.status === 'confirmed' ? 'CONFIRMED' :
+                     submission.status === 'completed' ? 'COMPLETED' : 'REJECTED'}
                   </div>
-                </div>
-              </div>
-
-              {/* Email dan Social Media Section */}
-              <div style={{
-                position: 'relative',
-                width: '100%',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'flex-end',
-                padding: '0 80px',
-                marginBottom: '30px',
-                boxSizing: 'border-box'
-              }}>
-                <div
-                  ref={emailRef}
-                  onClick={handleEmailClick}
-                  className="email-wrapper"
-                  style={{ marginBottom: '20px' }}
-                >
-                  <ArrowIcon size={24} />
-                  <span className="email-text">contact.menuru@gmail.com</span>
                 </div>
 
                 <div style={{
                   display: 'flex',
-                  flexDirection: 'column',
-                  gap: '8px',
-                  position: 'absolute',
-                  left: '50%',
-                  transform: 'translateX(-50%)',
-                  marginBottom: '20px'
+                  alignItems: 'center',
+                  gap: '60px',
+                  flexWrap: 'wrap'
                 }}>
-                  <div
-                    className="social-item"
-                    style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
-                    onMouseEnter={(e) => {
-                      const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                      if (textElement) handleSocialHover(textElement, originalTexts.ig);
-                    }}
-                    onMouseLeave={(e) => {
-                      const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                      if (textElement) handleSocialLeave(textElement, originalTexts.ig);
-                    }}
-                    onClick={() => handleSocialClick('Instagram')}
-                  >
-                    <span ref={igRef} className="social-text" style={{
-                      fontFamily: "'Questrial', sans-serif",
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="12" cy="12" r="10" stroke="#000000" strokeWidth="1.5"/>
+                      <polyline points="12 6 12 12 16 14" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    <span style={{
+                      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
                       fontSize: '28px',
-                      color: '#000000',
-                      fontWeight: '400',
-                      letterSpacing: '0.02em'
-                    }}>Instagram</span>
+                      color: '#000000'
+                    }}>
+                      {submission.selectedTime} WIB
+                    </span>
                   </div>
-
-                  <div
-                    className="social-item"
-                    style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
-                    onMouseEnter={(e) => {
-                      const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                      if (textElement) handleSocialHover(textElement, originalTexts.x);
-                    }}
-                    onMouseLeave={(e) => {
-                      const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                      if (textElement) handleSocialLeave(textElement, originalTexts.x);
-                    }}
-                    onClick={() => handleSocialClick('X')}
-                  >
-                    <span ref={xRef} className="social-text" style={{
-                      fontFamily: "'Questrial', sans-serif",
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke="#000000" strokeWidth="1.5"/>
+                      <line x1="8" y1="2" x2="8" y2="6" stroke="#000000" strokeWidth="1.5" strokeLinecap="round"/>
+                      <line x1="16" y1="2" x2="16" y2="6" stroke="#000000" strokeWidth="1.5" strokeLinecap="round"/>
+                      <line x1="3" y1="10" x2="21" y2="10" stroke="#000000" strokeWidth="1.5" strokeLinecap="round"/>
+                    </svg>
+                    <span style={{
+                      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
                       fontSize: '28px',
-                      color: '#000000',
-                      fontWeight: '400',
-                      letterSpacing: '0.02em'
-                    }}>X</span>
+                      color: '#000000'
+                    }}>
+                      {submission.meetingType}
+                    </span>
                   </div>
-
-                  <div
-                    className="social-item"
-                    style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
-                    onMouseEnter={(e) => {
-                      const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                      if (textElement) handleSocialHover(textElement, originalTexts.linkedin);
-                    }}
-                    onMouseLeave={(e) => {
-                      const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                      if (textElement) handleSocialLeave(textElement, originalTexts.linkedin);
-                    }}
-                    onClick={() => handleSocialClick('LinkedIn')}
-                  >
-                    <span ref={linkedinRef} className="social-text" style={{
-                      fontFamily: "'Questrial', sans-serif",
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="#000000" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    <span style={{
+                      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
                       fontSize: '28px',
-                      color: '#000000',
-                      fontWeight: '400',
-                      letterSpacing: '0.02em'
-                    }}>LinkedIn</span>
+                      color: '#000000'
+                    }}>
+                      {submission.platform === 'google_meet' ? 'Google Meet' :
+                       submission.platform === 'zoom' ? 'Zoom' :
+                       submission.platform === 'tatap_muka' ? 'Offline' : 'Via HP'}
+                    </span>
                   </div>
                 </div>
+
+                <div style={{
+                  marginTop: '16px'
+                }}>
+                  <div style={{
+                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                    fontSize: '20px',
+                    fontWeight: '400',
+                    color: '#999999',
+                    marginBottom: '20px',
+                    letterSpacing: '0.05em'
+                  }}>
+                    REASON TO TRUST
+                  </div>
+                  <div style={{
+                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                    fontSize: '32px',
+                    fontWeight: '400',
+                    color: '#000000',
+                    lineHeight: '1.4',
+                    letterSpacing: '-0.01em'
+                  }}>
+                    "{submission.trustReason}"
+                  </div>
+                </div>
+
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '48px',
+                  flexWrap: 'wrap',
+                  marginTop: '16px'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <rect x="2" y="4" width="20" height="16" rx="2" ry="2" stroke="#000000" strokeWidth="1.5"/>
+                      <polyline points="22 7 12 13 2 7" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    <span style={{
+                      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                      fontSize: '22px',
+                      color: '#000000'
+                    }}>
+                      {submission.email}
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" stroke="#000000" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    <span style={{
+                      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                      fontSize: '22px',
+                      color: '#000000'
+                    }}>
+                      {submission.phoneNumber}
+                    </span>
+                  </div>
+                  {submission.companyName && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="4" y="4" width="16" height="16" rx="2" ry="2" stroke="#000000" strokeWidth="1.5"/>
+                        <line x1="9" y1="4" x2="9" y2="20" stroke="#000000" strokeWidth="1.5"/>
+                        <line x1="15" y1="4" x2="15" y2="20" stroke="#000000" strokeWidth="1.5"/>
+                        <line x1="4" y1="9" x2="20" y2="9" stroke="#000000" strokeWidth="1.5"/>
+                        <line x1="4" y1="15" x2="20" y2="15" stroke="#000000" strokeWidth="1.5"/>
+                      </svg>
+                      <span style={{
+                        fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                        fontSize: '22px',
+                        color: '#000000'
+                      }}>
+                        {submission.companyName}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                {submission.adminReply && (
+                  <div style={{
+                    marginTop: '24px'
+                  }}>
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '14px',
+                      marginBottom: '16px'
+                    }}>
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="#000000" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                      <span style={{
+                        fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                        fontSize: '18px',
+                        fontWeight: '400',
+                        color: '#999999',
+                        letterSpacing: '0.05em'
+                      }}>
+                        ADMIN REPLY · {submission.adminReply.repliedBy}
+                      </span>
+                    </div>
+                    <div style={{
+                      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                      fontSize: '24px',
+                      color: '#000000',
+                      lineHeight: '1.4',
+                      paddingLeft: '38px'
+                    }}>
+                      {submission.adminReply.text}
+                    </div>
+                  </div>
+                )}
               </div>
 
-              <footer style={{
-                position: 'relative',
-                bottom: 0,
-                left: 0,
-                right: 0,
-                width: '100%',
+              <div style={{
+                width: '220px',
+                flexShrink: 0,
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'flex-end',
-                padding: '0 80px 0 0',
-                margin: 0,
-                pointerEvents: 'none',
-                zIndex: 1,
-                marginTop: '40px'
+                gap: '24px'
               }}>
-                <span
-                  ref={menuruTextRef}
+                <button
+                  onClick={() => {
+                    setShowCalendarModal(true);
+                    setShowFormView(false);
+                    setSelectedDate(null);
+                    setSelectedTime("");
+                  }}
                   style={{
-                    fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
-                    fontWeight: 'normal',
-                    fontSize: '600px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '20px',
+                    backgroundColor: 'transparent',
+                    border: '1px solid #000000',
+                    cursor: 'pointer',
+                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                    fontSize: '20px',
+                    fontWeight: '400',
                     color: '#000000',
-                    textAlign: 'right',
-                    letterSpacing: '-0.02em',
-                    opacity: 1,
-                    textTransform: 'uppercase',
-                    lineHeight: '0.7',
-                    whiteSpace: 'nowrap',
-                    WebkitFontSmoothing: 'antialiased',
-                    MozOsxFontSmoothing: 'grayscale',
-                    fontKerning: 'normal',
-                    margin: 0,
-                    padding: 0,
-                    marginRight: '0',
-                    backgroundColor: 'transparent'
-                  }}>
-                  MENURU
-                </span>
-              </footer>
+                    padding: '16px 28px',
+                    borderRadius: '0',
+                    width: '100%'
+                  }}
+                >
+                  <span>BOOK CALL</span>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
+
+                {isAdmin && (
+                  <button
+                    onClick={() => {
+                      setSelectedSubmission(submission);
+                      setReplyText(submission.adminReply?.text || "");
+                      setReplyStatus(submission.status);
+                      setShowReplyModal(true);
+                    }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: '20px',
+                      backgroundColor: 'transparent',
+                      border: '1px solid #000000',
+                      cursor: 'pointer',
+                      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                      fontSize: '18px',
+                      fontWeight: '400',
+                      color: '#000000',
+                      padding: '14px 24px',
+                      borderRadius: '0',
+                      width: '100%'
+                    }}
+                  >
+                    <span>{submission.adminReply ? 'EDIT REPLY' : 'REPLY'}</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M17 7L7 17M7 17H17M7 17V7" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </button>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  )}
+
+  {/* Bagian footer */}
+  <div style={{
+    width: '100%',
+    position: 'relative',
+    backgroundColor: 'white',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    minHeight: '60vh',
+  }}>
+    <div
+      ref={bottomContentRef}
+      style={{
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'flex-start',
+        gap: '40px',
+        marginBottom: '80px',
+        paddingLeft: '80px',
+        opacity: 0
+      }}
+    >
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '4px'
+      }}>
+        <div
+          ref={mencatatTextRef}
+          style={{
+            fontSize: '64px',
+            fontFamily: 'Questrial, sans-serif',
+            color: 'black',
+            textAlign: 'left',
+            fontWeight: '400',
+            letterSpacing: '-0.02em',
+            lineHeight: '1.2',
+            whiteSpace: 'nowrap'
+          }}>
+          Mencatat apa yang kamu inginkan
+        </div>
+        <span style={{
+          fontSize: '80px',
+          color: 'black',
+          fontWeight: '400',
+          lineHeight: '1'
+        }}>.</span>
+      </div>
+
+      <Link href="/contact">
+        <button
+          ref={contactBtnRef}
+          onClick={handleContact}
+          className="contact-btn-effect"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '16px',
+            padding: '14px 36px',
+            borderRadius: '60px',
+            cursor: 'pointer',
+            fontSize: '20px',
+            fontWeight: '600',
+            letterSpacing: '-0.01em',
+            fontFamily: 'Questrial, sans-serif',
+            transition: 'all 0.3s ease',
+            position: 'relative',
+            overflow: 'hidden',
+            zIndex: 1,
+            border: '1.5px solid #cccccc',
+            backgroundColor: '#ffffff',
+            color: '#000000'
+          }}
+        >
+          <span ref={contactTextRef}>Contact</span>
+
+          <div style={{
+            position: 'relative',
+            width: '40px',
+            height: '40px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <div className="dot-small" style={{
+              width: '8px',
+              height: '8px',
+              borderRadius: '50%',
+              backgroundColor: '#000000',
+              opacity: 1,
+              transform: 'scale(1)',
+              transition: 'opacity 0.3s ease, transform 0.3s ease',
+              position: 'absolute'
+            }}></div>
+
+            <div className="circle-large-white" style={{
+              position: 'absolute',
+              width: '40px',
+              height: '40px',
+              borderRadius: '50%',
+              backgroundColor: '#000000',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              opacity: 0,
+              transform: 'scale(0.8)',
+              transition: 'opacity 0.3s ease, transform 0.3s ease, background-color 0.3s ease'
+            }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
             </div>
           </div>
+        </button>
+      </Link>
+
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '30px',
+        flexWrap: 'wrap',
+        width: '100%'
+      }}>
+        <div ref={callTextRef} className="call-farid-text">
+          <div>Ready to surpass your</div>
+          <div>wildest dreams?</div>
+          <div>Call Farid.</div>
+        </div>
+
+        <button ref={calendarBtnRef} onClick={handleCalendarCall} className="calendar-btn">
+          <ArrowIcon size={24} />
+          Calendar call
+        </button>
+      </div>
+
+      <div
+        ref={profileRef}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'flex-start',
+          gap: '24px',
+          width: '100%',
+          marginTop: '10px'
+        }}
+      >
+        <div style={{
+          width: '80px',
+          height: '100px',
+          borderRadius: '12px',
+          overflow: 'hidden',
+          position: 'relative',
+          border: '2px solid #e0e0e0'
+        }}>
+          <Image
+            src="/images/5.jpg"
+            alt="Farid Ardiansyah"
+            fill
+            style={{ objectFit: 'cover', objectPosition: 'center' }}
+          />
+        </div>
+
+        <div style={{
+          fontFamily: "'Questrial', sans-serif",
+          fontSize: '40px',
+          fontWeight: '400',
+          color: 'rgb(16, 16, 16)',
+          letterSpacing: '-0.02em'
+        }}>
+          Farid Ardiansyah
+        </div>
+
+        <div className="badge-founder">
+          Founder & Programmer
         </div>
       </div>
+    </div>
+
+    {/* Email dan Social Media Section */}
+    <div style={{
+      position: 'relative',
+      width: '100%',
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'flex-end',
+      padding: '0 80px',
+      marginBottom: '30px',
+      boxSizing: 'border-box'
+    }}>
+      <div
+        ref={emailRef}
+        onClick={handleEmailClick}
+        className="email-wrapper"
+        style={{ marginBottom: '20px' }}
+      >
+        <ArrowIcon size={24} />
+        <span className="email-text">contact.menuru@gmail.com</span>
+      </div>
+
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '8px',
+        position: 'absolute',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        marginBottom: '20px'
+      }}>
+        <div
+          className="social-item"
+          style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
+          onMouseEnter={(e) => {
+            const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
+            if (textElement) handleSocialHover(textElement, originalTexts.ig);
+          }}
+          onMouseLeave={(e) => {
+            const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
+            if (textElement) handleSocialLeave(textElement, originalTexts.ig);
+          }}
+          onClick={() => handleSocialClick('Instagram')}
+        >
+          <span ref={igRef} className="social-text" style={{
+            fontFamily: "'Questrial', sans-serif",
+            fontSize: '28px',
+            color: '#000000',
+            fontWeight: '400',
+            letterSpacing: '0.02em'
+          }}>Instagram</span>
+        </div>
+
+        <div
+          className="social-item"
+          style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
+          onMouseEnter={(e) => {
+            const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
+            if (textElement) handleSocialHover(textElement, originalTexts.x);
+          }}
+          onMouseLeave={(e) => {
+            const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
+            if (textElement) handleSocialLeave(textElement, originalTexts.x);
+          }}
+          onClick={() => handleSocialClick('X')}
+        >
+          <span ref={xRef} className="social-text" style={{
+            fontFamily: "'Questrial', sans-serif",
+            fontSize: '28px',
+            color: '#000000',
+            fontWeight: '400',
+            letterSpacing: '0.02em'
+          }}>X</span>
+        </div>
+
+        <div
+          className="social-item"
+          style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
+          onMouseEnter={(e) => {
+            const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
+            if (textElement) handleSocialHover(textElement, originalTexts.linkedin);
+          }}
+          onMouseLeave={(e) => {
+            const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
+            if (textElement) handleSocialLeave(textElement, originalTexts.linkedin);
+          }}
+          onClick={() => handleSocialClick('LinkedIn')}
+        >
+          <span ref={linkedinRef} className="social-text" style={{
+            fontFamily: "'Questrial', sans-serif",
+            fontSize: '28px',
+            color: '#000000',
+            fontWeight: '400',
+            letterSpacing: '0.02em'
+          }}>LinkedIn</span>
+        </div>
+      </div>
+    </div>
+
+    <footer style={{
+      position: 'relative',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      width: '100%',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'flex-end',
+      padding: '0 80px 0 0',
+      margin: 0,
+      pointerEvents: 'none',
+      zIndex: 1,
+      marginTop: '40px'
+    }}>
+      <span
+        ref={menuruTextRef}
+        style={{
+          fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
+          fontWeight: 'normal',
+          fontSize: '600px',
+          color: '#000000',
+          textAlign: 'right',
+          letterSpacing: '-0.02em',
+          opacity: 1,
+          textTransform: 'uppercase',
+          lineHeight: '0.7',
+          whiteSpace: 'nowrap',
+          WebkitFontSmoothing: 'antialiased',
+          MozOsxFontSmoothing: 'grayscale',
+          fontKerning: 'normal',
+          margin: 0,
+          padding: 0,
+          marginRight: '0',
+          backgroundColor: 'transparent'
+        }}>
+        MENURU
+      </span>
+    </footer>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+      
 
       {/* SHADOW PAGE */}
       <div
