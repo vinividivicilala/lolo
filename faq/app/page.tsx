@@ -4813,327 +4813,329 @@ export default function HomePage(): React.JSX.Element {
     </div>
   )}
 
-  {/* Bagian footer */}
-  <div style={{
-    width: '100%',
-    position: 'relative',
-    backgroundColor: 'white',
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    minHeight: '60vh',
-  }}>
-    <div
-      ref={bottomContentRef}
-      style={{
-        width: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'flex-start',
-        gap: '40px',
-        marginBottom: '80px',
-        paddingLeft: '80px',
-        opacity: 0
-      }}
-    >
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '4px'
-      }}>
-        <div
-          ref={mencatatTextRef}
-          style={{
-            fontSize: '64px',
-            fontFamily: 'Questrial, sans-serif',
-            color: 'black',
-            textAlign: 'left',
-            fontWeight: '400',
-            letterSpacing: '-0.02em',
-            lineHeight: '1.2',
-            whiteSpace: 'nowrap'
-          }}>
-          Mencatat apa yang kamu inginkan
-        </div>
-        <span style={{
-          fontSize: '80px',
-          color: 'black',
-          fontWeight: '400',
-          lineHeight: '1'
-        }}>.</span>
-      </div>
-
-      <Link href="/contact">
-        <button
-          ref={contactBtnRef}
-          onClick={handleContact}
-          className="contact-btn-effect"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '16px',
-            padding: '14px 36px',
-            borderRadius: '60px',
-            cursor: 'pointer',
-            fontSize: '20px',
-            fontWeight: '600',
-            letterSpacing: '-0.01em',
-            fontFamily: 'Questrial, sans-serif',
-            transition: 'all 0.3s ease',
-            position: 'relative',
-            overflow: 'hidden',
-            zIndex: 1,
-            border: '1.5px solid #cccccc',
-            backgroundColor: '#ffffff',
-            color: '#000000'
-          }}
-        >
-          <span ref={contactTextRef}>Contact</span>
-
+           {/* Bagian footer */}
           <div style={{
+            width: '100%',
             position: 'relative',
-            width: '40px',
-            height: '40px',
+            backgroundColor: 'white',
             display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'flex-end',
             alignItems: 'center',
-            justifyContent: 'center'
+            minHeight: '60vh',
           }}>
-            <div className="dot-small" style={{
-              width: '8px',
-              height: '8px',
-              borderRadius: '50%',
-              backgroundColor: '#000000',
-              opacity: 1,
-              transform: 'scale(1)',
-              transition: 'opacity 0.3s ease, transform 0.3s ease',
-              position: 'absolute'
-            }}></div>
+            <div
+              ref={bottomContentRef}
+              style={{
+                width: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'flex-start',
+                gap: '40px',
+                marginBottom: '80px',
+                paddingLeft: '80px',
+                opacity: 0
+              }}
+            >
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px'
+              }}>
+                <div
+                  ref={mencatatTextRef}
+                  style={{
+                    fontSize: '64px',
+                    fontFamily: 'Questrial, sans-serif',
+                    color: 'black',
+                    textAlign: 'left',
+                    fontWeight: '400',
+                    letterSpacing: '-0.02em',
+                    lineHeight: '1.2',
+                    whiteSpace: 'nowrap'
+                  }}>
+                  Mencatat apa yang kamu inginkan
+                </div>
+                <span style={{
+                  fontSize: '80px',
+                  color: 'black',
+                  fontWeight: '400',
+                  lineHeight: '1'
+                }}>.</span>
+              </div>
 
-            <div className="circle-large-white" style={{
-              position: 'absolute',
-              width: '40px',
-              height: '40px',
-              borderRadius: '50%',
-              backgroundColor: '#000000',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              opacity: 0,
-              transform: 'scale(0.8)',
-              transition: 'opacity 0.3s ease, transform 0.3s ease, background-color 0.3s ease'
-            }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
+              <Link href="/contact">
+                <button
+                  ref={contactBtnRef}
+                  onClick={handleContact}
+                  className="contact-btn-effect"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '16px',
+                    padding: '14px 36px',
+                    borderRadius: '60px',
+                    cursor: 'pointer',
+                    fontSize: '20px',
+                    fontWeight: '600',
+                    letterSpacing: '-0.01em',
+                    fontFamily: 'Questrial, sans-serif',
+                    transition: 'all 0.3s ease',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    zIndex: 1,
+                    border: '1.5px solid #cccccc',
+                    backgroundColor: '#ffffff',
+                    color: '#000000'
+                  }}
+                >
+                  <span ref={contactTextRef}>Contact</span>
+
+                  <div style={{
+                    position: 'relative',
+                    width: '40px',
+                    height: '40px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    <div className="dot-small" style={{
+                      width: '8px',
+                      height: '8px',
+                      borderRadius: '50%',
+                      backgroundColor: '#000000',
+                      opacity: 1,
+                      transform: 'scale(1)',
+                      transition: 'opacity 0.3s ease, transform 0.3s ease',
+                      position: 'absolute'
+                    }}></div>
+
+                    <div className="circle-large-white" style={{
+                      position: 'absolute',
+                      width: '40px',
+                      height: '40px',
+                      borderRadius: '50%',
+                      backgroundColor: '#000000',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      opacity: 0,
+                      transform: 'scale(0.8)',
+                      transition: 'opacity 0.3s ease, transform 0.3s ease, background-color 0.3s ease'
+                    }}>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </div>
+                  </div>
+                </button>
+              </Link>
+
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '30px',
+                flexWrap: 'wrap',
+                width: '100%'
+              }}>
+                <div ref={callTextRef} className="call-farid-text">
+                  <div>Ready to surpass your</div>
+                  <div>wildest dreams?</div>
+                  <div>Call Farid.</div>
+                </div>
+
+                <button ref={calendarBtnRef} onClick={handleCalendarCall} className="calendar-btn">
+                  <ArrowIcon size={24} />
+                  Calendar call
+                </button>
+              </div>
+
+              <div
+                ref={profileRef}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'flex-start',
+                  gap: '24px',
+                  width: '100%',
+                  marginTop: '10px'
+                }}
+              >
+                <div style={{
+                  width: '80px',
+                  height: '100px',
+                  borderRadius: '12px',
+                  overflow: 'hidden',
+                  position: 'relative',
+                  border: '2px solid #e0e0e0'
+                }}>
+                  <Image
+                    src="/images/5.jpg"
+                    alt="Farid Ardiansyah"
+                    fill
+                    style={{ objectFit: 'cover', objectPosition: 'center' }}
+                  />
+                </div>
+
+                <div style={{
+                  fontFamily: "'Questrial', sans-serif",
+                  fontSize: '40px',
+                  fontWeight: '400',
+                  color: 'rgb(16, 16, 16)',
+                  letterSpacing: '-0.02em'
+                }}>
+                  Farid Ardiansyah
+                </div>
+
+                <div className="badge-founder">
+                  Founder & Programmer
+                </div>
+              </div>
             </div>
+
+            {/* Email dan Social Media Section */}
+            <div style={{
+              position: 'relative',
+              width: '100%',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'flex-end',
+              padding: '0 80px',
+              marginBottom: '30px',
+              boxSizing: 'border-box'
+            }}>
+              <div
+                ref={emailRef}
+                onClick={handleEmailClick}
+                className="email-wrapper"
+                style={{ marginBottom: '20px' }}
+              >
+                <ArrowIcon size={24} />
+                <span className="email-text">contact.menuru@gmail.com</span>
+              </div>
+
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '8px',
+                position: 'absolute',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                marginBottom: '20px'
+              }}>
+                <div
+                  className="social-item"
+                  style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
+                  onMouseEnter={(e) => {
+                    const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
+                    if (textElement) handleSocialHover(textElement, originalTexts.ig);
+                  }}
+                  onMouseLeave={(e) => {
+                    const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
+                    if (textElement) handleSocialLeave(textElement, originalTexts.ig);
+                  }}
+                  onClick={() => handleSocialClick('Instagram')}
+                >
+                  <span ref={igRef} className="social-text" style={{
+                    fontFamily: "'Questrial', sans-serif",
+                    fontSize: '28px',
+                    color: '#000000',
+                    fontWeight: '400',
+                    letterSpacing: '0.02em'
+                  }}>Instagram</span>
+                </div>
+
+                <div
+                  className="social-item"
+                  style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
+                  onMouseEnter={(e) => {
+                    const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
+                    if (textElement) handleSocialHover(textElement, originalTexts.x);
+                  }}
+                  onMouseLeave={(e) => {
+                    const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
+                    if (textElement) handleSocialLeave(textElement, originalTexts.x);
+                  }}
+                  onClick={() => handleSocialClick('X')}
+                >
+                  <span ref={xRef} className="social-text" style={{
+                    fontFamily: "'Questrial', sans-serif",
+                    fontSize: '28px',
+                    color: '#000000',
+                    fontWeight: '400',
+                    letterSpacing: '0.02em'
+                  }}>X</span>
+                </div>
+
+                <div
+                  className="social-item"
+                  style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
+                  onMouseEnter={(e) => {
+                    const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
+                    if (textElement) handleSocialHover(textElement, originalTexts.linkedin);
+                  }}
+                  onMouseLeave={(e) => {
+                    const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
+                    if (textElement) handleSocialLeave(textElement, originalTexts.linkedin);
+                  }}
+                  onClick={() => handleSocialClick('LinkedIn')}
+                >
+                  <span ref={linkedinRef} className="social-text" style={{
+                    fontFamily: "'Questrial', sans-serif",
+                    fontSize: '28px',
+                    color: '#000000',
+                    fontWeight: '400',
+                    letterSpacing: '0.02em'
+                  }}>LinkedIn</span>
+                </div>
+              </div>
+            </div>
+
+            <footer style={{
+              position: 'relative',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              width: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'flex-end',
+              padding: '0 80px 0 0',
+              margin: 0,
+              pointerEvents: 'none',
+              zIndex: 1,
+              marginTop: '40px'
+            }}>
+              <span
+                ref={menuruTextRef}
+                style={{
+                  fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
+                  fontWeight: 'normal',
+                  fontSize: '600px',
+                  color: '#000000',
+                  textAlign: 'right',
+                  letterSpacing: '-0.02em',
+                  opacity: 1,
+                  textTransform: 'uppercase',
+                  lineHeight: '0.7',
+                  whiteSpace: 'nowrap',
+                  WebkitFontSmoothing: 'antialiased',
+                  MozOsxFontSmoothing: 'grayscale',
+                  fontKerning: 'normal',
+                  margin: 0,
+                  padding: 0,
+                  marginRight: '0',
+                  backgroundColor: 'transparent'
+                }}>
+                MENURU
+              </span>
+            </footer>
           </div>
-        </button>
-      </Link>
-
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '30px',
-        flexWrap: 'wrap',
-        width: '100%'
-      }}>
-        <div ref={callTextRef} className="call-farid-text">
-          <div>Ready to surpass your</div>
-          <div>wildest dreams?</div>
-          <div>Call Farid.</div>
-        </div>
-
-        <button ref={calendarBtnRef} onClick={handleCalendarCall} className="calendar-btn">
-          <ArrowIcon size={24} />
-          Calendar call
-        </button>
-      </div>
-
-      <div
-        ref={profileRef}
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'flex-start',
-          gap: '24px',
-          width: '100%',
-          marginTop: '10px'
-        }}
-      >
-        <div style={{
-          width: '80px',
-          height: '100px',
-          borderRadius: '12px',
-          overflow: 'hidden',
-          position: 'relative',
-          border: '2px solid #e0e0e0'
-        }}>
-          <Image
-            src="/images/5.jpg"
-            alt="Farid Ardiansyah"
-            fill
-            style={{ objectFit: 'cover', objectPosition: 'center' }}
-          />
-        </div>
-
-        <div style={{
-          fontFamily: "'Questrial', sans-serif",
-          fontSize: '40px',
-          fontWeight: '400',
-          color: 'rgb(16, 16, 16)',
-          letterSpacing: '-0.02em'
-        }}>
-          Farid Ardiansyah
-        </div>
-
-        <div className="badge-founder">
-          Founder & Programmer
         </div>
       </div>
     </div>
-
-    {/* Email dan Social Media Section */}
-    <div style={{
-      position: 'relative',
-      width: '100%',
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'flex-end',
-      padding: '0 80px',
-      marginBottom: '30px',
-      boxSizing: 'border-box'
-    }}>
-      <div
-        ref={emailRef}
-        onClick={handleEmailClick}
-        className="email-wrapper"
-        style={{ marginBottom: '20px' }}
-      >
-        <ArrowIcon size={24} />
-        <span className="email-text">contact.menuru@gmail.com</span>
-      </div>
-
-      <div style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '8px',
-        position: 'absolute',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        marginBottom: '20px'
-      }}>
-        <div
-          className="social-item"
-          style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
-          onMouseEnter={(e) => {
-            const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-            if (textElement) handleSocialHover(textElement, originalTexts.ig);
-          }}
-          onMouseLeave={(e) => {
-            const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-            if (textElement) handleSocialLeave(textElement, originalTexts.ig);
-          }}
-          onClick={() => handleSocialClick('Instagram')}
-        >
-          <span ref={igRef} className="social-text" style={{
-            fontFamily: "'Questrial', sans-serif",
-            fontSize: '28px',
-            color: '#000000',
-            fontWeight: '400',
-            letterSpacing: '0.02em'
-          }}>Instagram</span>
-        </div>
-
-        <div
-          className="social-item"
-          style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
-          onMouseEnter={(e) => {
-            const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-            if (textElement) handleSocialHover(textElement, originalTexts.x);
-          }}
-          onMouseLeave={(e) => {
-            const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-            if (textElement) handleSocialLeave(textElement, originalTexts.x);
-          }}
-          onClick={() => handleSocialClick('X')}
-        >
-          <span ref={xRef} className="social-text" style={{
-            fontFamily: "'Questrial', sans-serif",
-            fontSize: '28px',
-            color: '#000000',
-            fontWeight: '400',
-            letterSpacing: '0.02em'
-          }}>X</span>
-        </div>
-
-        <div
-          className="social-item"
-          style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
-          onMouseEnter={(e) => {
-            const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-            if (textElement) handleSocialHover(textElement, originalTexts.linkedin);
-          }}
-          onMouseLeave={(e) => {
-            const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-            if (textElement) handleSocialLeave(textElement, originalTexts.linkedin);
-          }}
-          onClick={() => handleSocialClick('LinkedIn')}
-        >
-          <span ref={linkedinRef} className="social-text" style={{
-            fontFamily: "'Questrial', sans-serif",
-            fontSize: '28px',
-            color: '#000000',
-            fontWeight: '400',
-            letterSpacing: '0.02em'
-          }}>LinkedIn</span>
-        </div>
-      </div>
-    </div>
-
-    <footer style={{
-      position: 'relative',
-      bottom: 0,
-      left: 0,
-      right: 0,
-      width: '100%',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'flex-end',
-      padding: '0 80px 0 0',
-      margin: 0,
-      pointerEvents: 'none',
-      zIndex: 1,
-      marginTop: '40px'
-    }}>
-      <span
-        ref={menuruTextRef}
-        style={{
-          fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
-          fontWeight: 'normal',
-          fontSize: '600px',
-          color: '#000000',
-          textAlign: 'right',
-          letterSpacing: '-0.02em',
-          opacity: 1,
-          textTransform: 'uppercase',
-          lineHeight: '0.7',
-          whiteSpace: 'nowrap',
-          WebkitFontSmoothing: 'antialiased',
-          MozOsxFontSmoothing: 'grayscale',
-          fontKerning: 'normal',
-          margin: 0,
-          padding: 0,
-          marginRight: '0',
-          backgroundColor: 'transparent'
-        }}>
-        MENURU
-      </span>
-    </footer>
-  </div>
-</div>
-
-
+  </>
+);
 
 
 
