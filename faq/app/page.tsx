@@ -3657,1485 +3657,1659 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-
-
-
-
-{/* STACKED CARDS SECTION - 6 CARD */}
-{!isLoading && (
-  <div
-    ref={cardsSectionRef}
-    style={{
-      width: '100%',
-      minHeight: '300vh',
-      position: 'relative',
-      backgroundColor: '#f5f5f5',
-      marginBottom: '0',
-    }}
-  >
-    {/* JUDUL COMMUNITY 200px + PANAH SVG */}
-    <div style={{
-      position: 'sticky',
-      top: '0',
-      zIndex: 20,
-      width: '100%',
-      backgroundColor: '#f5f5f5',
-      padding: '80px 80px 0 80px',
-      boxSizing: 'border-box',
-    }}>
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'flex-end',
-        paddingBottom: '30px',
-      }}>
-        <div style={{
-          fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-          fontSize: '200px',
-          fontWeight: '400',
-          letterSpacing: '-0.02em',
-          lineHeight: '0.9',
-          color: '#000000',
-          textTransform: 'uppercase',
-        }}>
-          COMMUNITY
-        </div>
-        <div style={{
-          marginBottom: '20px',
-        }}>
-          <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </div>
-      </div>
-    </div>
-
-    {/* STACKED CARDS CONTAINER */}
-    <div
-      ref={cardsPinnedRef}
-      style={{
-        width: '100%',
-        height: '100vh',
-        position: 'relative',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        overflow: 'visible',
-        marginTop: '40px',
-        marginBottom: '200px',
-      }}
-    >
-      <div style={{
-        position: 'relative',
-        width: '100%',
-        maxWidth: '1200px',
-        height: '85vh',
-        margin: '0 auto',
-      }}>
-        
-        {/* CARD 1 - Full size */}
-        <div
-          ref={(el) => setCard1Ref(el)}
-          style={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%) translateY(0px)',
-            width: '100%',
-            height: '100%',
-            backgroundColor: '#ffffff',
-            border: '2px solid #000000',
-            borderRadius: '0px',
-            boxShadow: 'none',
-            overflow: 'hidden',
-            zIndex: 5,
-            display: 'flex',
-            flexDirection: 'column',
-            color: '#000000',
-          }}
-        >
-          <div style={{
-            padding: '45px 55px 0 55px',
-            borderBottom: '2px solid #000000',
-          }}>
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'flex-end',
-              marginBottom: '35px',
-            }}>
-              <div style={{
-                fontSize: '95px',
-                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                fontWeight: '400',
-                letterSpacing: '-0.02em',
-                lineHeight: '1',
-                color: '#000000',
-              }}>
-                CREATIVE<br />STUDIO
-              </div>
-              <button style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '14px',
-                background: 'transparent',
-                border: '1.5px solid #000000',
-                cursor: 'pointer',
-                fontSize: '16px',
-                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                color: '#000000',
-                padding: '14px 28px',
-                marginBottom: '12px',
-                transition: 'all 0.2s ease',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#000000';
-                e.currentTarget.style.color = '#ffffff';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'transparent';
-                e.currentTarget.style.color = '#000000';
-              }}>
-                <span>VIEW ONLINE</span>
-                <NorthEastArrowIcon size={18} />
-              </button>
-            </div>
-          </div>
-          
-          <div style={{
-            padding: '55px 55px 45px 55px',
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-          }}>
-            <div>
-              <p style={{
-                fontFamily: "'Questrial', sans-serif",
-                fontSize: '18px',
-                lineHeight: '1.6',
-                color: '#333333',
-                marginBottom: '35px',
-                maxWidth: '70%',
-              }}>
-                Award-winning UX/UI design studio crafting digital experiences 
-                that blend creativity with functionality. Based in Jakarta, 
-                serving global clients since 2020.
-              </p>
-              <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
-                <span style={{ padding: '6px 22px', background: '#f0f0f0', fontSize: '13px', fontFamily: "'Questrial', sans-serif" }}>UX Research</span>
-                <span style={{ padding: '6px 22px', background: '#f0f0f0', fontSize: '13px', fontFamily: "'Questrial', sans-serif" }}>UI Design</span>
-                <span style={{ padding: '6px 22px', background: '#f0f0f0', fontSize: '13px', fontFamily: "'Questrial', sans-serif" }}>Prototyping</span>
-                <span style={{ padding: '6px 22px', background: '#f0f0f0', fontSize: '13px', fontFamily: "'Questrial', sans-serif" }}>Design System</span>
-              </div>
-            </div>
-            <div style={{
-              marginTop: '45px',
-              paddingTop: '25px',
-              borderTop: '1px solid #e0e0e0',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}>
-              <span style={{ fontSize: '14px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>MENURU STUDIO — Since 2020</span>
-              <span style={{ fontSize: '14px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>01 / 06</span>
-            </div>
-          </div>
-        </div>
-
-        {/* CARD 2 */}
-        <div
-          ref={(el) => setCard2Ref(el)}
-          style={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%) translateY(250px)',
-            width: '97%',
-            height: '97%',
-            backgroundColor: '#ffffff',
-            border: '2px solid #000000',
-            borderRadius: '0px',
-            boxShadow: 'none',
-            overflow: 'hidden',
-            zIndex: 6,
-            display: 'flex',
-            flexDirection: 'column',
-            color: '#000000',
-            willChange: 'transform',
-          }}
-        >
-          <div style={{
-            padding: '42px 52px 0 52px',
-            borderBottom: '2px solid #000000',
-          }}>
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'flex-end',
-              marginBottom: '32px',
-            }}>
-              <div style={{
-                fontSize: '88px',
-                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                fontWeight: '400',
-                letterSpacing: '-0.02em',
-                lineHeight: '1',
-                color: '#000000',
-              }}>
-                AI CREATIVE<br />LAB
-              </div>
-              <button style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '13px',
-                background: 'transparent',
-                border: '1.5px solid #000000',
-                cursor: 'pointer',
-                fontSize: '15px',
-                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                color: '#000000',
-                padding: '13px 26px',
-                marginBottom: '11px',
-                transition: 'all 0.2s ease',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#000000';
-                e.currentTarget.style.color = '#ffffff';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'transparent';
-                e.currentTarget.style.color = '#000000';
-              }}>
-                <span>VIEW ONLINE</span>
-                <NorthEastArrowIcon size={17} />
-              </button>
-            </div>
-          </div>
-          
-          <div style={{
-            padding: '50px 52px 42px 52px',
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-          }}>
-            <div>
-              <p style={{
-                fontFamily: "'Questrial', sans-serif",
-                fontSize: '17px',
-                lineHeight: '1.6',
-                color: '#333333',
-                marginBottom: '30px',
-                maxWidth: '68%',
-              }}>
-                Harnessing artificial intelligence to revolutionize creative workflows, 
-                from generative design to intelligent automation and predictive analytics.
-              </p>
-              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                <span style={{ padding: '5px 20px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Machine Learning</span>
-                <span style={{ padding: '5px 20px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Generative AI</span>
-                <span style={{ padding: '5px 20px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Computer Vision</span>
-                <span style={{ padding: '5px 20px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>NLP</span>
-              </div>
-            </div>
-            <div style={{
-              marginTop: '40px',
-              paddingTop: '23px',
-              borderTop: '1px solid #e0e0e0',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}>
-              <span style={{ fontSize: '13px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>AI INNOVATION DIVISION</span>
-              <span style={{ fontSize: '13px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>02 / 06</span>
-            </div>
-          </div>
-        </div>
-
-        {/* CARD 3 */}
-        <div
-          ref={(el) => setCard3Ref(el)}
-          style={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%) translateY(500px)',
-            width: '94%',
-            height: '94%',
-            backgroundColor: '#ffffff',
-            border: '2px solid #000000',
-            borderRadius: '0px',
-            boxShadow: 'none',
-            overflow: 'hidden',
-            zIndex: 7,
-            display: 'flex',
-            flexDirection: 'column',
-            color: '#000000',
-            willChange: 'transform',
-          }}
-        >
-          <div style={{
-            padding: '38px 48px 0 48px',
-            borderBottom: '2px solid #000000',
-          }}>
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'flex-end',
-              marginBottom: '28px',
-            }}>
-              <div style={{
-                fontSize: '80px',
-                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                fontWeight: '400',
-                letterSpacing: '-0.02em',
-                lineHeight: '1',
-                color: '#000000',
-              }}>
-                DESIGN<br />NETWORK
-              </div>
-              <button style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                background: 'transparent',
-                border: '1.5px solid #000000',
-                cursor: 'pointer',
-                fontSize: '14px',
-                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                color: '#000000',
-                padding: '12px 24px',
-                marginBottom: '10px',
-                transition: 'all 0.2s ease',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#000000';
-                e.currentTarget.style.color = '#ffffff';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'transparent';
-                e.currentTarget.style.color = '#000000';
-              }}>
-                <span>VIEW ONLINE</span>
-                <NorthEastArrowIcon size={16} />
-              </button>
-            </div>
-          </div>
-          
-          <div style={{
-            padding: '45px 48px 38px 48px',
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-          }}>
-            <div>
-              <p style={{
-                fontFamily: "'Questrial', sans-serif",
-                fontSize: '16px',
-                lineHeight: '1.6',
-                color: '#333333',
-                marginBottom: '28px',
-                maxWidth: '65%',
-              }}>
-                Join thousands of creative professionals sharing insights, 
-                opportunities, and inspiration in Southeast Asia's fastest 
-                growing design community.
-              </p>
-              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                <span style={{ padding: '5px 18px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>10k+ Members</span>
-                <span style={{ padding: '5px 18px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Weekly Events</span>
-                <span style={{ padding: '5px 18px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Mentorship</span>
-                <span style={{ padding: '5px 18px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Job Board</span>
-              </div>
-            </div>
-            <div style={{
-              marginTop: '35px',
-              paddingTop: '22px',
-              borderTop: '1px solid #e0e0e0',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}>
-              <span style={{ fontSize: '13px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>GLOBAL COMMUNITY HUB</span>
-              <span style={{ fontSize: '13px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>03 / 06</span>
-            </div>
-          </div>
-        </div>
-
-        {/* CARD 4 */}
-        <div
-          ref={(el) => setCard4Ref(el)}
-          style={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%) translateY(750px)',
-            width: '91%',
-            height: '91%',
-            backgroundColor: '#ffffff',
-            border: '2px solid #000000',
-            borderRadius: '0px',
-            boxShadow: 'none',
-            overflow: 'hidden',
-            zIndex: 8,
-            display: 'flex',
-            flexDirection: 'column',
-            color: '#000000',
-            willChange: 'transform',
-          }}
-        >
-          <div style={{
-            padding: '35px 45px 0 45px',
-            borderBottom: '2px solid #000000',
-          }}>
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'flex-end',
-              marginBottom: '25px',
-            }}>
-              <div style={{
-                fontSize: '75px',
-                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                fontWeight: '400',
-                letterSpacing: '-0.02em',
-                lineHeight: '1',
-                color: '#000000',
-              }}>
-                DIGITAL<br />INNOVATION
-              </div>
-              <button style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '11px',
-                background: 'transparent',
-                border: '1.5px solid #000000',
-                cursor: 'pointer',
-                fontSize: '14px',
-                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                color: '#000000',
-                padding: '11px 22px',
-                marginBottom: '9px',
-                transition: 'all 0.2s ease',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#000000';
-                e.currentTarget.style.color = '#ffffff';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'transparent';
-                e.currentTarget.style.color = '#000000';
-              }}>
-                <span>VIEW ONLINE</span>
-                <NorthEastArrowIcon size={15} />
-              </button>
-            </div>
-          </div>
-          
-          <div style={{
-            padding: '42px 45px 35px 45px',
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-          }}>
-            <div>
-              <p style={{
-                fontFamily: "'Questrial', sans-serif",
-                fontSize: '16px',
-                lineHeight: '1.6',
-                color: '#333333',
-                marginBottom: '25px',
-                maxWidth: '65%',
-              }}>
-                Driving digital transformation through cutting-edge technology, 
-                helping businesses adapt and thrive in the rapidly evolving digital landscape.
-              </p>
-              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                <span style={{ padding: '5px 18px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Digital Strategy</span>
-                <span style={{ padding: '5px 18px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Cloud Computing</span>
-                <span style={{ padding: '5px 18px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>IoT Solutions</span>
-                <span style={{ padding: '5px 18px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Blockchain</span>
-              </div>
-            </div>
-            <div style={{
-              marginTop: '32px',
-              paddingTop: '20px',
-              borderTop: '1px solid #e0e0e0',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}>
-              <span style={{ fontSize: '13px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>TECH INNOVATION LAB</span>
-              <span style={{ fontSize: '13px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>04 / 06</span>
-            </div>
-          </div>
-        </div>
-
-        {/* CARD 5 */}
-        <div
-          ref={(el) => setCard5Ref(el)}
-          style={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%) translateY(1000px)',
-            width: '88%',
-            height: '88%',
-            backgroundColor: '#ffffff',
-            border: '2px solid #000000',
-            borderRadius: '0px',
-            boxShadow: 'none',
-            overflow: 'hidden',
-            zIndex: 9,
-            display: 'flex',
-            flexDirection: 'column',
-            color: '#000000',
-            willChange: 'transform',
-          }}
-        >
-          <div style={{
-            padding: '32px 42px 0 42px',
-            borderBottom: '2px solid #000000',
-          }}>
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'flex-end',
-              marginBottom: '22px',
-            }}>
-              <div style={{
-                fontSize: '70px',
-                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                fontWeight: '400',
-                letterSpacing: '-0.02em',
-                lineHeight: '1',
-                color: '#000000',
-              }}>
-                CREATIVE<br />WORKSHOP
-              </div>
-              <button style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px',
-                background: 'transparent',
-                border: '1.5px solid #000000',
-                cursor: 'pointer',
-                fontSize: '13px',
-                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                color: '#000000',
-                padding: '10px 20px',
-                marginBottom: '8px',
-                transition: 'all 0.2s ease',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#000000';
-                e.currentTarget.style.color = '#ffffff';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'transparent';
-                e.currentTarget.style.color = '#000000';
-              }}>
-                <span>VIEW ONLINE</span>
-                <NorthEastArrowIcon size={14} />
-              </button>
-            </div>
-          </div>
-          
-          <div style={{
-            padding: '38px 42px 32px 42px',
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-          }}>
-            <div>
-              <p style={{
-                fontFamily: "'Questrial', sans-serif",
-                fontSize: '15px',
-                lineHeight: '1.6',
-                color: '#333333',
-                marginBottom: '22px',
-                maxWidth: '65%',
-              }}>
-                Hands-on creative workshops and bootcamps designed to unlock your 
-                team's potential, fostering innovation and collaborative problem-solving.
-              </p>
-              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '11px', fontFamily: "'Questrial', sans-serif" }}>Workshops</span>
-                <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '11px', fontFamily: "'Questrial', sans-serif" }}>Bootcamps</span>
-                <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '11px', fontFamily: "'Questrial', sans-serif" }}>Team Building</span>
-                <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '11px', fontFamily: "'Questrial', sans-serif" }}>Skill Training</span>
-              </div>
-            </div>
-            <div style={{
-              marginTop: '28px',
-              paddingTop: '18px',
-              borderTop: '1px solid #e0e0e0',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}>
-              <span style={{ fontSize: '12px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>CREATIVE LEARNING HUB</span>
-              <span style={{ fontSize: '12px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>05 / 06</span>
-            </div>
-          </div>
-        </div>
-
-        {/* CARD 6 */}
-        <div
-          ref={(el) => setCard6Ref(el)}
-          style={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%) translateY(1250px)',
-            width: '85%',
-            height: '85%',
-            backgroundColor: '#ffffff',
-            border: '2px solid #000000',
-            borderRadius: '0px',
-            boxShadow: 'none',
-            overflow: 'hidden',
-            zIndex: 10,
-            display: 'flex',
-            flexDirection: 'column',
-            color: '#000000',
-            willChange: 'transform',
-          }}
-        >
-          <div style={{
-            padding: '28px 38px 0 38px',
-            borderBottom: '2px solid #000000',
-          }}>
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'flex-end',
-              marginBottom: '20px',
-            }}>
-              <div style={{
-                fontSize: '65px',
-                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                fontWeight: '400',
-                letterSpacing: '-0.02em',
-                lineHeight: '1',
-                color: '#000000',
-              }}>
-                DESIGN<br />LEADERSHIP
-              </div>
-              <button style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px',
-                background: 'transparent',
-                border: '1.5px solid #000000',
-                cursor: 'pointer',
-                fontSize: '13px',
-                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                color: '#000000',
-                padding: '9px 18px',
-                marginBottom: '7px',
-                transition: 'all 0.2s ease',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#000000';
-                e.currentTarget.style.color = '#ffffff';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'transparent';
-                e.currentTarget.style.color = '#000000';
-              }}>
-                <span>VIEW ONLINE</span>
-                <NorthEastArrowIcon size={13} />
-              </button>
-            </div>
-          </div>
-          
-          <div style={{
-            padding: '35px 38px 28px 38px',
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-          }}>
-            <div>
-              <p style={{
-                fontFamily: "'Questrial', sans-serif",
-                fontSize: '15px',
-                lineHeight: '1.6',
-                color: '#333333',
-                marginBottom: '22px',
-                maxWidth: '65%',
-              }}>
-                Empowering design leaders to drive organizational change, 
-                build high-performing teams, and create lasting impact through strategic design thinking.
-              </p>
-              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '11px', fontFamily: "'Questrial', sans-serif" }}>Leadership Training</span>
-                <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '11px', fontFamily: "'Questrial', sans-serif" }}>Strategy</span>
-                <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '11px', fontFamily: "'Questrial', sans-serif" }}>Mentorship</span>
-                <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '11px', fontFamily: "'Questrial', sans-serif" }}>Career Growth</span>
-              </div>
-            </div>
-            <div style={{
-              marginTop: '25px',
-              paddingTop: '16px',
-              borderTop: '1px solid #e0e0e0',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}>
-              <span style={{ fontSize: '12px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>LEADERSHIP ACADEMY</span>
-              <span style={{ fontSize: '12px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>06 / 06</span>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-
-    {/* Extra spacer to push down Trusted Collabs */}
-    <div style={{ height: '300px' }} />
-  </div>
-)}
-
-{/* WRAPPER UNTUK SEMUA SECTION SETELAH COMMUNITY */}
-<div style={{ marginTop: '400px' }}>
-  
-  {/* SECTION TRUSTED COLLABS */}
-  <div
-    ref={trustedSectionRef}
-    className="trusted-section"
-    style={{
-      backgroundColor: '#ffffff',
-    }}
-  >
-    <div
-      ref={trustedTextRef}
-      className="trusted-text"
-    >
-      TRUSTED COLLABS
-    </div>
-
-    <div
-      ref={carouselRef}
-      className="carousel-container"
-    >
-      <div className="carousel-track">
-        {carouselItems.map((item) => (
-          <div key={item.id} className="carousel-item">
-            <div className="carousel-image">
-              <Image
-                src={item.image}
-                alt={item.brand}
-                fill
-                style={{ objectFit: 'cover' }}
-              />
-            </div>
-            <h3 className="carousel-brand">{item.brand}</h3>
-            <p className="carousel-desc">{item.description}</p>
-          </div>
-        ))}
-      </div>
-    </div>
-  </div>
-
-  {/* CALENDAR SUBMISSIONS SECTION */}
-  {calendarSubmissions.length > 0 && (
-    <div className="calendar-submissions-section" style={{
-      width: '100%',
-      padding: '120px 80px',
-      backgroundColor: '#ffffff',
-      boxSizing: 'border-box',
-    }}>
-      <div style={{
-        fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-        fontSize: '190px',
-        fontWeight: '400',
-        color: '#000000',
-        letterSpacing: '-0.02em',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        marginBottom: '100px',
-        lineHeight: '1'
-      }}>
-        <span>MEETING SCHEDULE</span>
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '30px'
-        }}>
-          <span style={{
-            fontSize: '100px',
-            color: '#000000',
-            fontWeight: '400'
-          }}>
-            ({calendarSubmissions.length})
-          </span>
-          <svg width="100" height="100" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </div>
-      </div>
-
-      <div style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '80px'
-      }}>
-        {calendarSubmissions.map((submission, index) => {
-          const dateParts = getDateParts(submission.selectedDate);
-
-          return (
-            <div
-              key={submission.id}
-              style={{
-                display: 'flex',
-                flexDirection: 'row',
-                alignItems: 'flex-start',
-                gap: '80px'
-              }}
-            >
-              <div style={{
-                width: '200px',
-                flexShrink: 0,
-                textAlign: 'left'
-              }}>
+            {/* STACKED CARDS SECTION - 6 CARD */}
+            {!isLoading && (
+              <div
+                ref={cardsSectionRef}
+                style={{
+                  width: '100%',
+                  minHeight: '300vh', // Tinggi sangat besar untuk 6 card
+                  position: 'relative',
+                  backgroundColor: '#f5f5f5',
+                  marginBottom: '0',
+                }}
+              >
+                {/* JUDUL COMMUNITY 200px + PANAH SVG */}
                 <div style={{
-                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                  fontSize: '100px',
-                  fontWeight: '400',
-                  color: '#000000',
-                  lineHeight: '1',
-                  letterSpacing: '-0.02em'
-                }}>
-                  {dateParts.day}
-                </div>
-                <div style={{
-                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                  fontSize: '40px',
-                  fontWeight: '400',
-                  color: '#000000',
-                  letterSpacing: '-0.02em',
-                  marginTop: '12px'
-                }}>
-                  {dateParts.month}
-                </div>
-                <div style={{
-                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                  fontSize: '24px',
-                  fontWeight: '400',
-                  color: '#666666',
-                  marginTop: '8px'
-                }}>
-                  {dateParts.year}
-                </div>
-              </div>
-
-              <div style={{
-                flex: 1,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '32px'
-              }}>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '40px',
-                  flexWrap: 'wrap'
+                  position: 'sticky',
+                  top: '0',
+                  zIndex: 20,
+                  width: '100%',
+                  backgroundColor: '#f5f5f5',
+                  padding: '80px 80px 0 80px',
+                  boxSizing: 'border-box',
                 }}>
                   <div style={{
-                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                    fontSize: '48px',
-                    fontWeight: '400',
-                    color: '#000000',
-                    letterSpacing: '-0.02em'
-                  }}>
-                    {submission.fullName}
-                  </div>
-                  <div style={{
-                    fontSize: '20px',
-                    padding: '6px 24px',
-                    border: '1px solid #000000',
-                    backgroundColor: 'transparent',
-                    color: '#000000',
-                    fontWeight: '400',
-                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                    letterSpacing: '0.02em'
-                  }}>
-                    {submission.status === 'pending' ? 'PENDING' :
-                     submission.status === 'confirmed' ? 'CONFIRMED' :
-                     submission.status === 'completed' ? 'COMPLETED' : 'REJECTED'}
-                  </div>
-                </div>
-
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '60px',
-                  flexWrap: 'wrap'
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <circle cx="12" cy="12" r="10" stroke="#000000" strokeWidth="1.5"/>
-                      <polyline points="12 6 12 12 16 14" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                    <span style={{
-                      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                      fontSize: '28px',
-                      color: '#000000'
-                    }}>
-                      {submission.selectedTime} WIB
-                    </span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke="#000000" strokeWidth="1.5"/>
-                      <line x1="8" y1="2" x2="8" y2="6" stroke="#000000" strokeWidth="1.5" strokeLinecap="round"/>
-                      <line x1="16" y1="2" x2="16" y2="6" stroke="#000000" strokeWidth="1.5" strokeLinecap="round"/>
-                      <line x1="3" y1="10" x2="21" y2="10" stroke="#000000" strokeWidth="1.5" strokeLinecap="round"/>
-                    </svg>
-                    <span style={{
-                      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                      fontSize: '28px',
-                      color: '#000000'
-                    }}>
-                      {submission.meetingType}
-                    </span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="#000000" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                    <span style={{
-                      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                      fontSize: '28px',
-                      color: '#000000'
-                    }}>
-                      {submission.platform === 'google_meet' ? 'Google Meet' :
-                       submission.platform === 'zoom' ? 'Zoom' :
-                       submission.platform === 'tatap_muka' ? 'Offline' : 'Via HP'}
-                    </span>
-                  </div>
-                </div>
-
-                <div style={{
-                  marginTop: '16px'
-                }}>
-                  <div style={{
-                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                    fontSize: '20px',
-                    fontWeight: '400',
-                    color: '#999999',
-                    marginBottom: '20px',
-                    letterSpacing: '0.05em'
-                  }}>
-                    REASON TO TRUST
-                  </div>
-                  <div style={{
-                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                    fontSize: '32px',
-                    fontWeight: '400',
-                    color: '#000000',
-                    lineHeight: '1.4',
-                    letterSpacing: '-0.01em'
-                  }}>
-                    "{submission.trustReason}"
-                  </div>
-                </div>
-
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '48px',
-                  flexWrap: 'wrap',
-                  marginTop: '16px'
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <rect x="2" y="4" width="20" height="16" rx="2" ry="2" stroke="#000000" strokeWidth="1.5"/>
-                      <polyline points="22 7 12 13 2 7" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                    <span style={{
-                      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                      fontSize: '22px',
-                      color: '#000000'
-                    }}>
-                      {submission.email}
-                    </span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" stroke="#000000" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                    <span style={{
-                      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                      fontSize: '22px',
-                      color: '#000000'
-                    }}>
-                      {submission.phoneNumber}
-                    </span>
-                  </div>
-                  {submission.companyName && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <rect x="4" y="4" width="16" height="16" rx="2" ry="2" stroke="#000000" strokeWidth="1.5"/>
-                        <line x1="9" y1="4" x2="9" y2="20" stroke="#000000" strokeWidth="1.5"/>
-                        <line x1="15" y1="4" x2="15" y2="20" stroke="#000000" strokeWidth="1.5"/>
-                        <line x1="4" y1="9" x2="20" y2="9" stroke="#000000" strokeWidth="1.5"/>
-                        <line x1="4" y1="15" x2="20" y2="15" stroke="#000000" strokeWidth="1.5"/>
-                      </svg>
-                      <span style={{
-                        fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                        fontSize: '22px',
-                        color: '#000000'
-                      }}>
-                        {submission.companyName}
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                {submission.adminReply && (
-                  <div style={{
-                    marginTop: '24px'
-                  }}>
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '14px',
-                      marginBottom: '16px'
-                    }}>
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="#000000" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                      <span style={{
-                        fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                        fontSize: '18px',
-                        fontWeight: '400',
-                        color: '#999999',
-                        letterSpacing: '0.05em'
-                      }}>
-                        ADMIN REPLY · {submission.adminReply.repliedBy}
-                      </span>
-                    </div>
-                    <div style={{
-                      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                      fontSize: '24px',
-                      color: '#000000',
-                      lineHeight: '1.4',
-                      paddingLeft: '38px'
-                    }}>
-                      {submission.adminReply.text}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <div style={{
-                width: '220px',
-                flexShrink: 0,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'flex-end',
-                gap: '24px'
-              }}>
-                <button
-                  onClick={() => {
-                    setShowCalendarModal(true);
-                    setShowFormView(false);
-                    setSelectedDate(null);
-                    setSelectedTime("");
-                  }}
-                  style={{
                     display: 'flex',
-                    alignItems: 'center',
                     justifyContent: 'space-between',
-                    gap: '20px',
-                    backgroundColor: 'transparent',
-                    border: '1px solid #000000',
-                    cursor: 'pointer',
-                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                    fontSize: '20px',
-                    fontWeight: '400',
-                    color: '#000000',
-                    padding: '16px 28px',
-                    borderRadius: '0',
-                    width: '100%'
-                  }}
-                >
-                  <span>BOOK CALL</span>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </button>
-
-                {isAdmin && (
-                  <button
-                    onClick={() => {
-                      setSelectedSubmission(submission);
-                      setReplyText(submission.adminReply?.text || "");
-                      setReplyStatus(submission.status);
-                      setShowReplyModal(true);
-                    }}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      gap: '20px',
-                      backgroundColor: 'transparent',
-                      border: '1px solid #000000',
-                      cursor: 'pointer',
+                    alignItems: 'flex-end',
+                    paddingBottom: '30px',
+                  }}>
+                    <div style={{
                       fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                      fontSize: '18px',
+                      fontSize: '200px',
                       fontWeight: '400',
+                      letterSpacing: '-0.02em',
+                      lineHeight: '0.9',
                       color: '#000000',
-                      padding: '14px 24px',
-                      borderRadius: '0',
-                      width: '100%'
-                    }}
-                  >
-                    <span>{submission.adminReply ? 'EDIT REPLY' : 'REPLY'}</span>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M17 7L7 17M7 17H17M7 17V7" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </button>
-                )}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  )}
-
-           {/* Bagian footer */}
-          <div style={{
-            width: '100%',
-            position: 'relative',
-            backgroundColor: 'white',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'flex-end',
-            alignItems: 'center',
-            minHeight: '60vh',
-          }}>
-            <div
-              ref={bottomContentRef}
-              style={{
-                width: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'flex-start',
-                gap: '40px',
-                marginBottom: '80px',
-                paddingLeft: '80px',
-                opacity: 0
-              }}
-            >
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px'
-              }}>
-                <div
-                  ref={mencatatTextRef}
-                  style={{
-                    fontSize: '64px',
-                    fontFamily: 'Questrial, sans-serif',
-                    color: 'black',
-                    textAlign: 'left',
-                    fontWeight: '400',
-                    letterSpacing: '-0.02em',
-                    lineHeight: '1.2',
-                    whiteSpace: 'nowrap'
-                  }}>
-                  Mencatat apa yang kamu inginkan
-                </div>
-                <span style={{
-                  fontSize: '80px',
-                  color: 'black',
-                  fontWeight: '400',
-                  lineHeight: '1'
-                }}>.</span>
-              </div>
-
-              <Link href="/contact">
-                <button
-                  ref={contactBtnRef}
-                  onClick={handleContact}
-                  className="contact-btn-effect"
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '16px',
-                    padding: '14px 36px',
-                    borderRadius: '60px',
-                    cursor: 'pointer',
-                    fontSize: '20px',
-                    fontWeight: '600',
-                    letterSpacing: '-0.01em',
-                    fontFamily: 'Questrial, sans-serif',
-                    transition: 'all 0.3s ease',
-                    position: 'relative',
-                    overflow: 'hidden',
-                    zIndex: 1,
-                    border: '1.5px solid #cccccc',
-                    backgroundColor: '#ffffff',
-                    color: '#000000'
-                  }}
-                >
-                  <span ref={contactTextRef}>Contact</span>
-
-                  <div style={{
-                    position: 'relative',
-                    width: '40px',
-                    height: '40px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}>
-                    <div className="dot-small" style={{
-                      width: '8px',
-                      height: '8px',
-                      borderRadius: '50%',
-                      backgroundColor: '#000000',
-                      opacity: 1,
-                      transform: 'scale(1)',
-                      transition: 'opacity 0.3s ease, transform 0.3s ease',
-                      position: 'absolute'
-                    }}></div>
-
-                    <div className="circle-large-white" style={{
-                      position: 'absolute',
-                      width: '40px',
-                      height: '40px',
-                      borderRadius: '50%',
-                      backgroundColor: '#000000',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      opacity: 0,
-                      transform: 'scale(0.8)',
-                      transition: 'opacity 0.3s ease, transform 0.3s ease, background-color 0.3s ease'
+                      textTransform: 'uppercase',
                     }}>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                      COMMUNITY
+                    </div>
+                    <div style={{
+                      marginBottom: '20px',
+                    }}>
+                      <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
                     </div>
                   </div>
-                </button>
-              </Link>
-
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '30px',
-                flexWrap: 'wrap',
-                width: '100%'
-              }}>
-                <div ref={callTextRef} className="call-farid-text">
-                  <div>Ready to surpass your</div>
-                  <div>wildest dreams?</div>
-                  <div>Call Farid.</div>
                 </div>
 
-                <button ref={calendarBtnRef} onClick={handleCalendarCall} className="calendar-btn">
-                  <ArrowIcon size={24} />
-                  Calendar call
-                </button>
+                {/* STACKED CARDS CONTAINER */}
+                <div
+                  ref={cardsPinnedRef}
+                  style={{
+                    width: '100%',
+                    height: '100vh',
+                    position: 'relative',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    overflow: 'visible',
+                    marginTop: '80px',
+                    marginBottom: '200px',
+                  }}
+                >
+                  <div style={{
+                    position: 'relative',
+                    width: '100%',
+                    maxWidth: '1200px',
+                    height: '85vh',
+                    margin: '0 auto',
+                  }}>
+                    
+                    {/* CARD 1 */}
+                    <div
+                      ref={(el) => setCard1Ref(el)}
+                      style={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%) translateY(0px)',
+                        width: '100%',
+                        height: '100%',
+                        backgroundColor: '#ffffff',
+                        border: '2px solid #000000',
+                        borderRadius: '0px',
+                        boxShadow: 'none',
+                        overflow: 'hidden',
+                        zIndex: 5,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        color: '#000000',
+                      }}
+                    >
+                      <div style={{
+                        padding: '45px 55px 0 55px',
+                        borderBottom: '2px solid #000000',
+                      }}>
+                        <div style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'flex-end',
+                          marginBottom: '35px',
+                        }}>
+                          <div style={{
+                            fontSize: '95px',
+                            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                            fontWeight: '400',
+                            letterSpacing: '-0.02em',
+                            lineHeight: '1',
+                            color: '#000000',
+                          }}>
+                            CREATIVE<br />STUDIO
+                          </div>
+                          <button style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '14px',
+                            background: 'transparent',
+                            border: '1.5px solid #000000',
+                            cursor: 'pointer',
+                            fontSize: '16px',
+                            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                            color: '#000000',
+                            padding: '14px 28px',
+                            marginBottom: '12px',
+                            transition: 'all 0.2s ease',
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = '#000000';
+                            e.currentTarget.style.color = '#ffffff';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = 'transparent';
+                            e.currentTarget.style.color = '#000000';
+                          }}>
+                            <span>VIEW ONLINE</span>
+                            <NorthEastArrowIcon size={18} />
+                          </button>
+                        </div>
+                      </div>
+                      
+                      <div style={{
+                        padding: '55px 55px 45px 55px',
+                        flex: 1,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'space-between',
+                      }}>
+                        <div>
+                          <p style={{
+                            fontFamily: "'Questrial', sans-serif",
+                            fontSize: '18px',
+                            lineHeight: '1.6',
+                            color: '#333333',
+                            marginBottom: '35px',
+                            maxWidth: '70%',
+                          }}>
+                            Award-winning UX/UI design studio crafting digital experiences 
+                            that blend creativity with functionality. Based in Jakarta, 
+                            serving global clients since 2020.
+                          </p>
+                          <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
+                            <span style={{ padding: '6px 22px', background: '#f0f0f0', fontSize: '13px', fontFamily: "'Questrial', sans-serif" }}>UX Research</span>
+                            <span style={{ padding: '6px 22px', background: '#f0f0f0', fontSize: '13px', fontFamily: "'Questrial', sans-serif" }}>UI Design</span>
+                            <span style={{ padding: '6px 22px', background: '#f0f0f0', fontSize: '13px', fontFamily: "'Questrial', sans-serif" }}>Prototyping</span>
+                            <span style={{ padding: '6px 22px', background: '#f0f0f0', fontSize: '13px', fontFamily: "'Questrial', sans-serif" }}>Design System</span>
+                          </div>
+                        </div>
+                        <div style={{
+                          marginTop: '45px',
+                          paddingTop: '25px',
+                          borderTop: '1px solid #e0e0e0',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                        }}>
+                          <span style={{ fontSize: '14px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>MENURU STUDIO — Since 2020</span>
+                          <span style={{ fontSize: '14px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>01 / 06</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* CARD 2 */}
+                    <div
+                      ref={(el) => setCard2Ref(el)}
+                      style={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%) translateY(250px)',
+                        width: '97%',
+                        height: '97%',
+                        backgroundColor: '#ffffff',
+                        border: '2px solid #000000',
+                        borderRadius: '0px',
+                        boxShadow: 'none',
+                        overflow: 'hidden',
+                        zIndex: 6,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        color: '#000000',
+                        willChange: 'transform',
+                      }}
+                    >
+                      <div style={{
+                        padding: '42px 52px 0 52px',
+                        borderBottom: '2px solid #000000',
+                      }}>
+                        <div style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'flex-end',
+                          marginBottom: '32px',
+                        }}>
+                          <div style={{
+                            fontSize: '88px',
+                            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                            fontWeight: '400',
+                            letterSpacing: '-0.02em',
+                            lineHeight: '1',
+                            color: '#000000',
+                          }}>
+                            AI CREATIVE<br />LAB
+                          </div>
+                          <button style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '13px',
+                            background: 'transparent',
+                            border: '1.5px solid #000000',
+                            cursor: 'pointer',
+                            fontSize: '15px',
+                            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                            color: '#000000',
+                            padding: '13px 26px',
+                            marginBottom: '11px',
+                            transition: 'all 0.2s ease',
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = '#000000';
+                            e.currentTarget.style.color = '#ffffff';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = 'transparent';
+                            e.currentTarget.style.color = '#000000';
+                          }}>
+                            <span>VIEW ONLINE</span>
+                            <NorthEastArrowIcon size={17} />
+                          </button>
+                        </div>
+                      </div>
+                      
+                      <div style={{
+                        padding: '50px 52px 42px 52px',
+                        flex: 1,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'space-between',
+                      }}>
+                        <div>
+                          <p style={{
+                            fontFamily: "'Questrial', sans-serif",
+                            fontSize: '17px',
+                            lineHeight: '1.6',
+                            color: '#333333',
+                            marginBottom: '30px',
+                            maxWidth: '68%',
+                          }}>
+                            Harnessing artificial intelligence to revolutionize creative workflows, 
+                            from generative design to intelligent automation and predictive analytics.
+                          </p>
+                          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                            <span style={{ padding: '5px 20px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Machine Learning</span>
+                            <span style={{ padding: '5px 20px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Generative AI</span>
+                            <span style={{ padding: '5px 20px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Computer Vision</span>
+                            <span style={{ padding: '5px 20px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>NLP</span>
+                          </div>
+                        </div>
+                        <div style={{
+                          marginTop: '40px',
+                          paddingTop: '23px',
+                          borderTop: '1px solid #e0e0e0',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                        }}>
+                          <span style={{ fontSize: '13px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>AI INNOVATION DIVISION</span>
+                          <span style={{ fontSize: '13px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>02 / 06</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* CARD 3 */}
+                    <div
+                      ref={(el) => setCard3Ref(el)}
+                      style={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%) translateY(500px)',
+                        width: '94%',
+                        height: '94%',
+                        backgroundColor: '#ffffff',
+                        border: '2px solid #000000',
+                        borderRadius: '0px',
+                        boxShadow: 'none',
+                        overflow: 'hidden',
+                        zIndex: 7,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        color: '#000000',
+                        willChange: 'transform',
+                      }}
+                    >
+                      <div style={{
+                        padding: '38px 48px 0 48px',
+                        borderBottom: '2px solid #000000',
+                      }}>
+                        <div style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'flex-end',
+                          marginBottom: '28px',
+                        }}>
+                          <div style={{
+                            fontSize: '80px',
+                            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                            fontWeight: '400',
+                            letterSpacing: '-0.02em',
+                            lineHeight: '1',
+                            color: '#000000',
+                          }}>
+                            DESIGN<br />NETWORK
+                          </div>
+                          <button style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '12px',
+                            background: 'transparent',
+                            border: '1.5px solid #000000',
+                            cursor: 'pointer',
+                            fontSize: '14px',
+                            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                            color: '#000000',
+                            padding: '12px 24px',
+                            marginBottom: '10px',
+                            transition: 'all 0.2s ease',
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = '#000000';
+                            e.currentTarget.style.color = '#ffffff';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = 'transparent';
+                            e.currentTarget.style.color = '#000000';
+                          }}>
+                            <span>VIEW ONLINE</span>
+                            <NorthEastArrowIcon size={16} />
+                          </button>
+                        </div>
+                      </div>
+                      
+                      <div style={{
+                        padding: '45px 48px 38px 48px',
+                        flex: 1,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'space-between',
+                      }}>
+                        <div>
+                          <p style={{
+                            fontFamily: "'Questrial', sans-serif",
+                            fontSize: '16px',
+                            lineHeight: '1.6',
+                            color: '#333333',
+                            marginBottom: '28px',
+                            maxWidth: '65%',
+                          }}>
+                            Join thousands of creative professionals sharing insights, 
+                            opportunities, and inspiration in Southeast Asia's fastest 
+                            growing design community.
+                          </p>
+                          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                            <span style={{ padding: '5px 18px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>10k+ Members</span>
+                            <span style={{ padding: '5px 18px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Weekly Events</span>
+                            <span style={{ padding: '5px 18px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Mentorship</span>
+                            <span style={{ padding: '5px 18px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Job Board</span>
+                          </div>
+                        </div>
+                        <div style={{
+                          marginTop: '35px',
+                          paddingTop: '22px',
+                          borderTop: '1px solid #e0e0e0',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                        }}>
+                          <span style={{ fontSize: '13px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>GLOBAL COMMUNITY HUB</span>
+                          <span style={{ fontSize: '13px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>03 / 06</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* CARD 4 */}
+                    <div
+                      ref={(el) => setCard4Ref(el)}
+                      style={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%) translateY(750px)',
+                        width: '91%',
+                        height: '91%',
+                        backgroundColor: '#ffffff',
+                        border: '2px solid #000000',
+                        borderRadius: '0px',
+                        boxShadow: 'none',
+                        overflow: 'hidden',
+                        zIndex: 8,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        color: '#000000',
+                        willChange: 'transform',
+                      }}
+                    >
+                      <div style={{
+                        padding: '35px 45px 0 45px',
+                        borderBottom: '2px solid #000000',
+                      }}>
+                        <div style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'flex-end',
+                          marginBottom: '25px',
+                        }}>
+                          <div style={{
+                            fontSize: '75px',
+                            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                            fontWeight: '400',
+                            letterSpacing: '-0.02em',
+                            lineHeight: '1',
+                            color: '#000000',
+                          }}>
+                            DIGITAL<br />INNOVATION
+                          </div>
+                          <button style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '11px',
+                            background: 'transparent',
+                            border: '1.5px solid #000000',
+                            cursor: 'pointer',
+                            fontSize: '14px',
+                            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                            color: '#000000',
+                            padding: '11px 22px',
+                            marginBottom: '9px',
+                            transition: 'all 0.2s ease',
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = '#000000';
+                            e.currentTarget.style.color = '#ffffff';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = 'transparent';
+                            e.currentTarget.style.color = '#000000';
+                          }}>
+                            <span>VIEW ONLINE</span>
+                            <NorthEastArrowIcon size={15} />
+                          </button>
+                        </div>
+                      </div>
+                      
+                      <div style={{
+                        padding: '42px 45px 35px 45px',
+                        flex: 1,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'space-between',
+                      }}>
+                        <div>
+                          <p style={{
+                            fontFamily: "'Questrial', sans-serif",
+                            fontSize: '16px',
+                            lineHeight: '1.6',
+                            color: '#333333',
+                            marginBottom: '25px',
+                            maxWidth: '65%',
+                          }}>
+                            Driving digital transformation through cutting-edge technology, 
+                            helping businesses adapt and thrive in the rapidly evolving digital landscape.
+                          </p>
+                          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                            <span style={{ padding: '5px 18px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Digital Strategy</span>
+                            <span style={{ padding: '5px 18px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Cloud Computing</span>
+                            <span style={{ padding: '5px 18px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>IoT Solutions</span>
+                            <span style={{ padding: '5px 18px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Blockchain</span>
+                          </div>
+                        </div>
+                        <div style={{
+                          marginTop: '32px',
+                          paddingTop: '20px',
+                          borderTop: '1px solid #e0e0e0',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                        }}>
+                          <span style={{ fontSize: '13px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>TECH INNOVATION LAB</span>
+                          <span style={{ fontSize: '13px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>04 / 06</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* CARD 5 */}
+                    <div
+                      ref={(el) => setCard5Ref(el)}
+                      style={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%) translateY(1000px)',
+                        width: '88%',
+                        height: '88%',
+                        backgroundColor: '#ffffff',
+                        border: '2px solid #000000',
+                        borderRadius: '0px',
+                        boxShadow: 'none',
+                        overflow: 'hidden',
+                        zIndex: 9,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        color: '#000000',
+                        willChange: 'transform',
+                      }}
+                    >
+                      <div style={{
+                        padding: '32px 42px 0 42px',
+                        borderBottom: '2px solid #000000',
+                      }}>
+                        <div style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'flex-end',
+                          marginBottom: '22px',
+                        }}>
+                          <div style={{
+                            fontSize: '70px',
+                            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                            fontWeight: '400',
+                            letterSpacing: '-0.02em',
+                            lineHeight: '1',
+                            color: '#000000',
+                          }}>
+                            CREATIVE<br />WORKSHOP
+                          </div>
+                          <button style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '10px',
+                            background: 'transparent',
+                            border: '1.5px solid #000000',
+                            cursor: 'pointer',
+                            fontSize: '13px',
+                            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                            color: '#000000',
+                            padding: '10px 20px',
+                            marginBottom: '8px',
+                            transition: 'all 0.2s ease',
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = '#000000';
+                            e.currentTarget.style.color = '#ffffff';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = 'transparent';
+                            e.currentTarget.style.color = '#000000';
+                          }}>
+                            <span>VIEW ONLINE</span>
+                            <NorthEastArrowIcon size={14} />
+                          </button>
+                        </div>
+                      </div>
+                      
+                      <div style={{
+                        padding: '38px 42px 32px 42px',
+                        flex: 1,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'space-between',
+                      }}>
+                        <div>
+                          <p style={{
+                            fontFamily: "'Questrial', sans-serif",
+                            fontSize: '15px',
+                            lineHeight: '1.6',
+                            color: '#333333',
+                            marginBottom: '22px',
+                            maxWidth: '65%',
+                          }}>
+                            Hands-on creative workshops and bootcamps designed to unlock your 
+                            team's potential, fostering innovation and collaborative problem-solving.
+                          </p>
+                          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                            <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '11px', fontFamily: "'Questrial', sans-serif" }}>Workshops</span>
+                            <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '11px', fontFamily: "'Questrial', sans-serif" }}>Bootcamps</span>
+                            <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '11px', fontFamily: "'Questrial', sans-serif" }}>Team Building</span>
+                            <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '11px', fontFamily: "'Questrial', sans-serif" }}>Skill Training</span>
+                          </div>
+                        </div>
+                        <div style={{
+                          marginTop: '28px',
+                          paddingTop: '18px',
+                          borderTop: '1px solid #e0e0e0',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                        }}>
+                          <span style={{ fontSize: '12px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>CREATIVE LEARNING HUB</span>
+                          <span style={{ fontSize: '12px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>05 / 06</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* CARD 6 */}
+                    <div
+                      ref={(el) => setCard6Ref(el)}
+                      style={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%) translateY(1250px)',
+                        width: '85%',
+                        height: '85%',
+                        backgroundColor: '#ffffff',
+                        border: '2px solid #000000',
+                        borderRadius: '0px',
+                        boxShadow: 'none',
+                        overflow: 'hidden',
+                        zIndex: 10,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        color: '#000000',
+                        willChange: 'transform',
+                      }}
+                    >
+                      <div style={{
+                        padding: '28px 38px 0 38px',
+                        borderBottom: '2px solid #000000',
+                      }}>
+                        <div style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'flex-end',
+                          marginBottom: '20px',
+                        }}>
+                          <div style={{
+                            fontSize: '65px',
+                            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                            fontWeight: '400',
+                            letterSpacing: '-0.02em',
+                            lineHeight: '1',
+                            color: '#000000',
+                          }}>
+                            DESIGN<br />LEADERSHIP
+                          </div>
+                          <button style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '10px',
+                            background: 'transparent',
+                            border: '1.5px solid #000000',
+                            cursor: 'pointer',
+                            fontSize: '13px',
+                            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                            color: '#000000',
+                            padding: '9px 18px',
+                            marginBottom: '7px',
+                            transition: 'all 0.2s ease',
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = '#000000';
+                            e.currentTarget.style.color = '#ffffff';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = 'transparent';
+                            e.currentTarget.style.color = '#000000';
+                          }}>
+                            <span>VIEW ONLINE</span>
+                            <NorthEastArrowIcon size={13} />
+                          </button>
+                        </div>
+                      </div>
+                      
+                      <div style={{
+                        padding: '35px 38px 28px 38px',
+                        flex: 1,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'space-between',
+                      }}>
+                        <div>
+                          <p style={{
+                            fontFamily: "'Questrial', sans-serif",
+                            fontSize: '15px',
+                            lineHeight: '1.6',
+                            color: '#333333',
+                            marginBottom: '22px',
+                            maxWidth: '65%',
+                          }}>
+                            Empowering design leaders to drive organizational change, 
+                            build high-performing teams, and create lasting impact through strategic design thinking.
+                          </p>
+                          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                            <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '11px', fontFamily: "'Questrial', sans-serif" }}>Leadership Training</span>
+                            <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '11px', fontFamily: "'Questrial', sans-serif" }}>Strategy</span>
+                            <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '11px', fontFamily: "'Questrial', sans-serif" }}>Mentorship</span>
+                            <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '11px', fontFamily: "'Questrial', sans-serif" }}>Career Growth</span>
+                          </div>
+                        </div>
+                        <div style={{
+                          marginTop: '25px',
+                          paddingTop: '16px',
+                          borderTop: '1px solid #e0e0e0',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                        }}>
+                          <span style={{ fontSize: '12px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>LEADERSHIP ACADEMY</span>
+                          <span style={{ fontSize: '12px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>06 / 06</span>
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* WRAPPER UNTUK SEMUA SECTION SETELAH COMMUNITY - TURUNKAN KE BAWAH */}
+<div style={{ marginTop: '500px' }}>  {/* ← TAMBAHKAN INI */}
+            {/* SECTION TRUSTED COLLABS */}
+            <div
+              ref={trustedSectionRef}
+              className="trusted-section"
+              style={{
+                backgroundColor: '#ffffff',
+              }}
+            >
+              <div
+                ref={trustedTextRef}
+                className="trusted-text"
+              >
+                TRUSTED COLLABS
               </div>
 
               <div
-                ref={profileRef}
-                style={{
+                ref={carouselRef}
+                className="carousel-container"
+              >
+                <div className="carousel-track">
+                  {carouselItems.map((item) => (
+                    <div key={item.id} className="carousel-item">
+                      <div className="carousel-image">
+                        <Image
+                          src={item.image}
+                          alt={item.brand}
+                          fill
+                          style={{ objectFit: 'cover' }}
+                        />
+                      </div>
+                      <h3 className="carousel-brand">{item.brand}</h3>
+                      <p className="carousel-desc">{item.description}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* CALENDAR SUBMISSIONS SECTION */}
+            {calendarSubmissions.length > 0 && (
+              <div className="calendar-submissions-section" style={{
+                width: '100%',
+                padding: '120px 80px',
+                backgroundColor: '#ffffff',
+                boxSizing: 'border-box'
+              }}>
+                <div style={{
+                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                  fontSize: '190px',
+                  fontWeight: '400',
+                  color: '#000000',
+                  letterSpacing: '-0.02em',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'flex-start',
-                  gap: '24px',
+                  justifyContent: 'space-between',
+                  marginBottom: '100px',
+                  lineHeight: '1'
+                }}>
+                  <span>MEETING SCHEDULE</span>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '30px'
+                  }}>
+                    <span style={{
+                      fontSize: '100px',
+                      color: '#000000',
+                      fontWeight: '400'
+                    }}>
+                      ({calendarSubmissions.length})
+                    </span>
+                    <svg width="100" height="100" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                </div>
+
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '80px'
+                }}>
+                  {calendarSubmissions.map((submission, index) => {
+                    const dateParts = getDateParts(submission.selectedDate);
+
+                    return (
+                      <div
+                        key={submission.id}
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'row',
+                          alignItems: 'flex-start',
+                          gap: '80px'
+                        }}
+                      >
+                        <div style={{
+                          width: '200px',
+                          flexShrink: 0,
+                          textAlign: 'left'
+                        }}>
+                          <div style={{
+                            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                            fontSize: '100px',
+                            fontWeight: '400',
+                            color: '#000000',
+                            lineHeight: '1',
+                            letterSpacing: '-0.02em'
+                          }}>
+                            {dateParts.day}
+                          </div>
+                          <div style={{
+                            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                            fontSize: '40px',
+                            fontWeight: '400',
+                            color: '#000000',
+                            letterSpacing: '-0.02em',
+                            marginTop: '12px'
+                          }}>
+                            {dateParts.month}
+                          </div>
+                          <div style={{
+                            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                            fontSize: '24px',
+                            fontWeight: '400',
+                            color: '#666666',
+                            marginTop: '8px'
+                          }}>
+                            {dateParts.year}
+                          </div>
+                        </div>
+
+                        <div style={{
+                          flex: 1,
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '32px'
+                        }}>
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '40px',
+                            flexWrap: 'wrap'
+                          }}>
+                            <div style={{
+                              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                              fontSize: '48px',
+                              fontWeight: '400',
+                              color: '#000000',
+                              letterSpacing: '-0.02em'
+                            }}>
+                              {submission.fullName}
+                            </div>
+                            <div style={{
+                              fontSize: '20px',
+                              padding: '6px 24px',
+                              border: '1px solid #000000',
+                              backgroundColor: 'transparent',
+                              color: '#000000',
+                              fontWeight: '400',
+                              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                              letterSpacing: '0.02em'
+                            }}>
+                              {submission.status === 'pending' ? 'PENDING' :
+                               submission.status === 'confirmed' ? 'CONFIRMED' :
+                               submission.status === 'completed' ? 'COMPLETED' : 'REJECTED'}
+                            </div>
+                          </div>
+
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '60px',
+                            flexWrap: 'wrap'
+                          }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="12" cy="12" r="10" stroke="#000000" strokeWidth="1.5"/>
+                                <polyline points="12 6 12 12 16 14" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                              </svg>
+                              <span style={{
+                                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                                fontSize: '28px',
+                                color: '#000000'
+                              }}>
+                                {submission.selectedTime} WIB
+                              </span>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke="#000000" strokeWidth="1.5"/>
+                                <line x1="8" y1="2" x2="8" y2="6" stroke="#000000" strokeWidth="1.5" strokeLinecap="round"/>
+                                <line x1="16" y1="2" x2="16" y2="6" stroke="#000000" strokeWidth="1.5" strokeLinecap="round"/>
+                                <line x1="3" y1="10" x2="21" y2="10" stroke="#000000" strokeWidth="1.5" strokeLinecap="round"/>
+                              </svg>
+                              <span style={{
+                                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                                fontSize: '28px',
+                                color: '#000000'
+                              }}>
+                                {submission.meetingType}
+                              </span>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="#000000" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                              </svg>
+                              <span style={{
+                                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                                fontSize: '28px',
+                                color: '#000000'
+                              }}>
+                                {submission.platform === 'google_meet' ? 'Google Meet' :
+                                 submission.platform === 'zoom' ? 'Zoom' :
+                                 submission.platform === 'tatap_muka' ? 'Offline' : 'Via HP'}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div style={{
+                            marginTop: '16px'
+                          }}>
+                            <div style={{
+                              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                              fontSize: '20px',
+                              fontWeight: '400',
+                              color: '#999999',
+                              marginBottom: '20px',
+                              letterSpacing: '0.05em'
+                            }}>
+                              REASON TO TRUST
+                            </div>
+                            <div style={{
+                              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                              fontSize: '32px',
+                              fontWeight: '400',
+                              color: '#000000',
+                              lineHeight: '1.4',
+                              letterSpacing: '-0.01em'
+                            }}>
+                              "{submission.trustReason}"
+                            </div>
+                          </div>
+
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '48px',
+                            flexWrap: 'wrap',
+                            marginTop: '16px'
+                          }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect x="2" y="4" width="20" height="16" rx="2" ry="2" stroke="#000000" strokeWidth="1.5"/>
+                                <polyline points="22 7 12 13 2 7" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                              </svg>
+                              <span style={{
+                                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                                fontSize: '22px',
+                                color: '#000000'
+                              }}>
+                                {submission.email}
+                              </span>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" stroke="#000000" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                              </svg>
+                              <span style={{
+                                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                                fontSize: '22px',
+                                color: '#000000'
+                              }}>
+                                {submission.phoneNumber}
+                              </span>
+                            </div>
+                            {submission.companyName && (
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <rect x="4" y="4" width="16" height="16" rx="2" ry="2" stroke="#000000" strokeWidth="1.5"/>
+                                  <line x1="9" y1="4" x2="9" y2="20" stroke="#000000" strokeWidth="1.5"/>
+                                  <line x1="15" y1="4" x2="15" y2="20" stroke="#000000" strokeWidth="1.5"/>
+                                  <line x1="4" y1="9" x2="20" y2="9" stroke="#000000" strokeWidth="1.5"/>
+                                  <line x1="4" y1="15" x2="20" y2="15" stroke="#000000" strokeWidth="1.5"/>
+                                </svg>
+                                <span style={{
+                                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                                  fontSize: '22px',
+                                  color: '#000000'
+                                }}>
+                                  {submission.companyName}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+
+                          {submission.adminReply && (
+                            <div style={{
+                              marginTop: '24px'
+                            }}>
+                              <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '14px',
+                                marginBottom: '16px'
+                              }}>
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="#000000" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                                <span style={{
+                                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                                  fontSize: '18px',
+                                  fontWeight: '400',
+                                  color: '#999999',
+                                  letterSpacing: '0.05em'
+                                }}>
+                                  ADMIN REPLY · {submission.adminReply.repliedBy}
+                                </span>
+                              </div>
+                              <div style={{
+                                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                                fontSize: '24px',
+                                color: '#000000',
+                                lineHeight: '1.4',
+                                paddingLeft: '38px'
+                              }}>
+                                {submission.adminReply.text}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        <div style={{
+                          width: '220px',
+                          flexShrink: 0,
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'flex-end',
+                          gap: '24px'
+                        }}>
+                          <button
+                            onClick={() => {
+                              setShowCalendarModal(true);
+                              setShowFormView(false);
+                              setSelectedDate(null);
+                              setSelectedTime("");
+                            }}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              gap: '20px',
+                              backgroundColor: 'transparent',
+                              border: '1px solid #000000',
+                              cursor: 'pointer',
+                              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                              fontSize: '20px',
+                              fontWeight: '400',
+                              color: '#000000',
+                              padding: '16px 28px',
+                              borderRadius: '0',
+                              width: '100%'
+                            }}
+                          >
+                            <span>BOOK CALL</span>
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                          </button>
+
+                          {isAdmin && (
+                            <button
+                              onClick={() => {
+                                setSelectedSubmission(submission);
+                                setReplyText(submission.adminReply?.text || "");
+                                setReplyStatus(submission.status);
+                                setShowReplyModal(true);
+                              }}
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                gap: '20px',
+                                backgroundColor: 'transparent',
+                                border: '1px solid #000000',
+                                cursor: 'pointer',
+                                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                                fontSize: '18px',
+                                fontWeight: '400',
+                                color: '#000000',
+                                padding: '14px 24px',
+                                borderRadius: '0',
+                                width: '100%'
+                              }}
+                            >
+                              <span>{submission.adminReply ? 'EDIT REPLY' : 'REPLY'}</span>
+                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M17 7L7 17M7 17H17M7 17V7" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                              </svg>
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* REPLY MODAL FOR ADMIN */}
+            {showReplyModal && selectedSubmission && (
+              <div className="reply-modal-overlay">
+                <div className="reply-modal">
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: '32px',
+                    borderBottom: '1px solid #e0e0e0',
+                    paddingBottom: '20px'
+                  }}>
+                    <h2 style={{
+                      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                      fontSize: '28px',
+                      fontWeight: '400',
+                      color: '#000000',
+                      margin: 0,
+                      letterSpacing: '-0.02em'
+                    }}>
+                      REPLY TO MEETING
+                    </h2>
+                    <button
+                      onClick={() => {
+                        setShowReplyModal(false);
+                        setSelectedSubmission(null);
+                        setReplyText("");
+                      }}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        fontSize: '28px',
+                        cursor: 'pointer',
+                        color: '#000000'
+                      }}
+                    >
+                      ✕
+                    </button>
+                  </div>
+
+                  <div style={{
+                    marginBottom: '24px',
+                    padding: '20px',
+                    backgroundColor: '#f5f5f5',
+                    borderRadius: '0'
+                  }}>
+                    <div style={{
+                      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                      fontSize: '14px',
+                      color: '#666666',
+                      marginBottom: '8px'
+                    }}>
+                      FROM: {selectedSubmission.fullName} ({selectedSubmission.email})
+                    </div>
+                    <div style={{
+                      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                      fontSize: '14px',
+                      color: '#666666',
+                      marginBottom: '8px'
+                    }}>
+                      DATE: {selectedSubmission.selectedDateFormatted} - {selectedSubmission.selectedTime} WIB
+                    </div>
+                    <div style={{
+                      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                      fontSize: '14px',
+                      color: '#000000',
+                      marginTop: '12px',
+                      paddingTop: '12px',
+                      borderTop: '1px solid #cccccc'
+                    }}>
+                      "{selectedSubmission.trustReason}"
+                    </div>
+                  </div>
+
+                  <div style={{ marginBottom: '24px' }}>
+                    <label style={{
+                      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                      fontSize: '14px',
+                      fontWeight: '400',
+                      color: '#000000',
+                      display: 'block',
+                      marginBottom: '8px'
+                    }}>
+                      MEETING STATUS
+                    </label>
+                    <select
+                      value={replyStatus}
+                      onChange={(e) => setReplyStatus(e.target.value as any)}
+                      style={{
+                        width: '100%',
+                        padding: '12px 16px',
+                        borderRadius: '0',
+                        border: '1px solid #cccccc',
+                        fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                        fontSize: '14px',
+                        backgroundColor: '#ffffff'
+                      }}
+                    >
+                      <option value="pending">PENDING</option>
+                      <option value="confirmed">CONFIRMED</option>
+                      <option value="completed">COMPLETED</option>
+                      <option value="rejected">REJECTED</option>
+                    </select>
+                  </div>
+
+                  <div style={{ marginBottom: '28px' }}>
+                    <label style={{
+                      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                      fontSize: '14px',
+                      fontWeight: '400',
+                      color: '#000000',
+                      display: 'block',
+                      marginBottom: '8px'
+                    }}>
+                      REPLY MESSAGE
+                    </label>
+                    <textarea
+                      value={replyText}
+                      onChange={(e) => setReplyText(e.target.value)}
+                      placeholder="Write your reply here..."
+                      rows={5}
+                      style={{
+                        width: '100%',
+                        padding: '12px 16px',
+                        borderRadius: '0',
+                        border: '1px solid #cccccc',
+                        fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                        fontSize: '14px',
+                        resize: 'vertical',
+                        backgroundColor: '#ffffff'
+                      }}
+                    />
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '16px' }}>
+                    <button
+                      onClick={() => {
+                        setShowReplyModal(false);
+                        setSelectedSubmission(null);
+                        setReplyText("");
+                      }}
+                      style={{
+                        flex: 1,
+                        padding: '14px',
+                        borderRadius: '0',
+                        border: '1px solid #000000',
+                        backgroundColor: 'transparent',
+                        color: '#000000',
+                        fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                        fontSize: '16px',
+                        fontWeight: '400',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      CANCEL
+                    </button>
+                    <button
+                      onClick={handleAdminReply}
+                      style={{
+                        flex: 1,
+                        padding: '14px',
+                        borderRadius: '0',
+                        border: '1px solid #000000',
+                        backgroundColor: '#000000',
+                        color: '#ffffff',
+                        fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                        fontSize: '16px',
+                        fontWeight: '400',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      SEND REPLY
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Bagian footer */}
+            <div style={{
+              width: '100%',
+              position: 'relative',
+              backgroundColor: 'white',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'flex-end',
+              alignItems: 'center',
+              minHeight: '60vh'
+            }}>
+              <div
+                ref={bottomContentRef}
+                style={{
                   width: '100%',
-                  marginTop: '10px'
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'flex-start',
+                  gap: '40px',
+                  marginBottom: '80px',
+                  paddingLeft: '80px',
+                  opacity: 0
                 }}
               >
                 <div style={{
-                  width: '80px',
-                  height: '100px',
-                  borderRadius: '12px',
-                  overflow: 'hidden',
-                  position: 'relative',
-                  border: '2px solid #e0e0e0'
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px'
                 }}>
-                  <Image
-                    src="/images/5.jpg"
-                    alt="Farid Ardiansyah"
-                    fill
-                    style={{ objectFit: 'cover', objectPosition: 'center' }}
-                  />
+                  <div
+                    ref={mencatatTextRef}
+                    style={{
+                      fontSize: '64px',
+                      fontFamily: 'Questrial, sans-serif',
+                      color: 'black',
+                      textAlign: 'left',
+                      fontWeight: '400',
+                      letterSpacing: '-0.02em',
+                      lineHeight: '1.2',
+                      whiteSpace: 'nowrap'
+                    }}>
+                    Mencatat apa yang kamu inginkan
+                  </div>
+                  <span style={{
+                    fontSize: '80px',
+                    color: 'black',
+                    fontWeight: '400',
+                    lineHeight: '1'
+                  }}>.</span>
+                </div>
+
+                <Link href="/contact">
+                  <button
+                    ref={contactBtnRef}
+                    onClick={handleContact}
+                    className="contact-btn-effect"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '16px',
+                      padding: '14px 36px',
+                      borderRadius: '60px',
+                      cursor: 'pointer',
+                      fontSize: '20px',
+                      fontWeight: '600',
+                      letterSpacing: '-0.01em',
+                      fontFamily: 'Questrial, sans-serif',
+                      transition: 'all 0.3s ease',
+                      position: 'relative',
+                      overflow: 'hidden',
+                      zIndex: 1,
+                      border: '1.5px solid #cccccc',
+                      backgroundColor: '#ffffff',
+                      color: '#000000'
+                    }}
+                  >
+                    <span ref={contactTextRef}>Contact</span>
+
+                    <div style={{
+                      position: 'relative',
+                      width: '40px',
+                      height: '40px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
+                      <div className="dot-small" style={{
+                        width: '8px',
+                        height: '8px',
+                        borderRadius: '50%',
+                        backgroundColor: '#000000',
+                        opacity: 1,
+                        transform: 'scale(1)',
+                        transition: 'opacity 0.3s ease, transform 0.3s ease',
+                        position: 'absolute'
+                      }}></div>
+
+                      <div className="circle-large-white" style={{
+                        position: 'absolute',
+                        width: '40px',
+                        height: '40px',
+                        borderRadius: '50%',
+                        backgroundColor: '#000000',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        opacity: 0,
+                        transform: 'scale(0.8)',
+                        transition: 'opacity 0.3s ease, transform 0.3s ease, background-color 0.3s ease'
+                      }}>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </div>
+                    </div>
+                  </button>
+                </Link>
+
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '30px',
+                  flexWrap: 'wrap',
+                  width: '100%'
+                }}>
+                  <div ref={callTextRef} className="call-farid-text">
+                    <div>Ready to surpass your</div>
+                    <div>wildest dreams?</div>
+                    <div>Call Farid.</div>
+                  </div>
+
+                  <button ref={calendarBtnRef} onClick={handleCalendarCall} className="calendar-btn">
+                    <ArrowIcon size={24} />
+                    Calendar call
+                  </button>
+                </div>
+
+                <div
+                  ref={profileRef}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'flex-start',
+                    gap: '24px',
+                    width: '100%',
+                    marginTop: '10px'
+                  }}
+                >
+                  <div style={{
+                    width: '80px',
+                    height: '100px',
+                    borderRadius: '12px',
+                    overflow: 'hidden',
+                    position: 'relative',
+                    border: '2px solid #e0e0e0'
+                  }}>
+                    <Image
+                      src="/images/5.jpg"
+                      alt="Farid Ardiansyah"
+                      fill
+                      style={{ objectFit: 'cover', objectPosition: 'center' }}
+                    />
+                  </div>
+
+                  <div style={{
+                    fontFamily: "'Questrial', sans-serif",
+                    fontSize: '40px',
+                    fontWeight: '400',
+                    color: 'rgb(16, 16, 16)',
+                    letterSpacing: '-0.02em'
+                  }}>
+                    Farid Ardiansyah
+                  </div>
+
+                  <div className="badge-founder">
+                    Founder & Programmer
+                  </div>
+                </div>
+              </div>
+
+              {/* Email dan Social Media Section */}
+              <div style={{
+                position: 'relative',
+                width: '100%',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'flex-end',
+                padding: '0 80px',
+                marginBottom: '30px',
+                boxSizing: 'border-box'
+              }}>
+                <div
+                  ref={emailRef}
+                  onClick={handleEmailClick}
+                  className="email-wrapper"
+                  style={{ marginBottom: '20px' }}
+                >
+                  <ArrowIcon size={24} />
+                  <span className="email-text">contact.menuru@gmail.com</span>
                 </div>
 
                 <div style={{
-                  fontFamily: "'Questrial', sans-serif",
-                  fontSize: '40px',
-                  fontWeight: '400',
-                  color: 'rgb(16, 16, 16)',
-                  letterSpacing: '-0.02em'
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '8px',
+                  position: 'absolute',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  marginBottom: '20px'
                 }}>
-                  Farid Ardiansyah
-                </div>
+                  <div
+                    className="social-item"
+                    style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
+                    onMouseEnter={(e) => {
+                      const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
+                      if (textElement) handleSocialHover(textElement, originalTexts.ig);
+                    }}
+                    onMouseLeave={(e) => {
+                      const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
+                      if (textElement) handleSocialLeave(textElement, originalTexts.ig);
+                    }}
+                    onClick={() => handleSocialClick('Instagram')}
+                  >
+                    <span ref={igRef} className="social-text" style={{
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '28px',
+                      color: '#000000',
+                      fontWeight: '400',
+                      letterSpacing: '0.02em'
+                    }}>Instagram</span>
+                  </div>
 
-                <div className="badge-founder">
-                  Founder & Programmer
+                  <div
+                    className="social-item"
+                    style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
+                    onMouseEnter={(e) => {
+                      const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
+                      if (textElement) handleSocialHover(textElement, originalTexts.x);
+                    }}
+                    onMouseLeave={(e) => {
+                      const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
+                      if (textElement) handleSocialLeave(textElement, originalTexts.x);
+                    }}
+                    onClick={() => handleSocialClick('X')}
+                  >
+                    <span ref={xRef} className="social-text" style={{
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '28px',
+                      color: '#000000',
+                      fontWeight: '400',
+                      letterSpacing: '0.02em'
+                    }}>X</span>
+                  </div>
+
+                  <div
+                    className="social-item"
+                    style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
+                    onMouseEnter={(e) => {
+                      const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
+                      if (textElement) handleSocialHover(textElement, originalTexts.linkedin);
+                    }}
+                    onMouseLeave={(e) => {
+                      const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
+                      if (textElement) handleSocialLeave(textElement, originalTexts.linkedin);
+                    }}
+                    onClick={() => handleSocialClick('LinkedIn')}
+                  >
+                    <span ref={linkedinRef} className="social-text" style={{
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '28px',
+                      color: '#000000',
+                      fontWeight: '400',
+                      letterSpacing: '0.02em'
+                    }}>LinkedIn</span>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Email dan Social Media Section */}
-            <div style={{
-              position: 'relative',
-              width: '100%',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'flex-end',
-              padding: '0 80px',
-              marginBottom: '30px',
-              boxSizing: 'border-box'
-            }}>
-              <div
-                ref={emailRef}
-                onClick={handleEmailClick}
-                className="email-wrapper"
-                style={{ marginBottom: '20px' }}
-              >
-                <ArrowIcon size={24} />
-                <span className="email-text">contact.menuru@gmail.com</span>
-              </div>
-
-              <div style={{
+              <footer style={{
+                position: 'relative',
+                bottom: 0,
+                left: 0,
+                right: 0,
+                width: '100%',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '8px',
-                position: 'absolute',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                marginBottom: '20px'
+                alignItems: 'flex-end',
+                padding: '0 80px 0 0',
+                margin: 0,
+                pointerEvents: 'none',
+                zIndex: 1,
+                marginTop: '40px'
               }}>
-                <div
-                  className="social-item"
-                  style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
-                  onMouseEnter={(e) => {
-                    const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                    if (textElement) handleSocialHover(textElement, originalTexts.ig);
-                  }}
-                  onMouseLeave={(e) => {
-                    const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                    if (textElement) handleSocialLeave(textElement, originalTexts.ig);
-                  }}
-                  onClick={() => handleSocialClick('Instagram')}
-                >
-                  <span ref={igRef} className="social-text" style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '28px',
+                <span
+                  ref={menuruTextRef}
+                  style={{
+                    fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
+                    fontWeight: 'normal',
+                    fontSize: '600px',
                     color: '#000000',
-                    fontWeight: '400',
-                    letterSpacing: '0.02em'
-                  }}>Instagram</span>
-                </div>
-
-                <div
-                  className="social-item"
-                  style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
-                  onMouseEnter={(e) => {
-                    const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                    if (textElement) handleSocialHover(textElement, originalTexts.x);
-                  }}
-                  onMouseLeave={(e) => {
-                    const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                    if (textElement) handleSocialLeave(textElement, originalTexts.x);
-                  }}
-                  onClick={() => handleSocialClick('X')}
-                >
-                  <span ref={xRef} className="social-text" style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '28px',
-                    color: '#000000',
-                    fontWeight: '400',
-                    letterSpacing: '0.02em'
-                  }}>X</span>
-                </div>
-
-                <div
-                  className="social-item"
-                  style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
-                  onMouseEnter={(e) => {
-                    const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                    if (textElement) handleSocialHover(textElement, originalTexts.linkedin);
-                  }}
-                  onMouseLeave={(e) => {
-                    const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                    if (textElement) handleSocialLeave(textElement, originalTexts.linkedin);
-                  }}
-                  onClick={() => handleSocialClick('LinkedIn')}
-                >
-                  <span ref={linkedinRef} className="social-text" style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '28px',
-                    color: '#000000',
-                    fontWeight: '400',
-                    letterSpacing: '0.02em'
-                  }}>LinkedIn</span>
-                </div>
-              </div>
+                    textAlign: 'right',
+                    letterSpacing: '-0.02em',
+                    opacity: 1,
+                    textTransform: 'uppercase',
+                    lineHeight: '0.7',
+                    whiteSpace: 'nowrap',
+                    WebkitFontSmoothing: 'antialiased',
+                    MozOsxFontSmoothing: 'grayscale',
+                    fontKerning: 'normal',
+                    margin: 0,
+                    padding: 0,
+                    marginRight: '0',
+                    backgroundColor: 'transparent'
+                  }}>
+                  MENURU
+                </span>
+              </footer>
             </div>
-
-            <footer style={{
-              position: 'relative',
-              bottom: 0,
-              left: 0,
-              right: 0,
-              width: '100%',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'flex-end',
-              padding: '0 80px 0 0',
-              margin: 0,
-              pointerEvents: 'none',
-              zIndex: 1,
-              marginTop: '40px'
-            }}>
-              <span
-                ref={menuruTextRef}
-                style={{
-                  fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
-                  fontWeight: 'normal',
-                  fontSize: '600px',
-                  color: '#000000',
-                  textAlign: 'right',
-                  letterSpacing: '-0.02em',
-                  opacity: 1,
-                  textTransform: 'uppercase',
-                  lineHeight: '0.7',
-                  whiteSpace: 'nowrap',
-                  WebkitFontSmoothing: 'antialiased',
-                  MozOsxFontSmoothing: 'grayscale',
-                  fontKerning: 'normal',
-                  margin: 0,
-                  padding: 0,
-                  marginRight: '0',
-                  backgroundColor: 'transparent'
-                }}>
-                MENURU
-              </span>
-            </footer>
           </div>
         </div>
       </div>
-    </div>
-  </>
-);
+        </div>  {/* TUTUP WRAPPER */}
+
+
+
+
+
 
 
 
