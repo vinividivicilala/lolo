@@ -1602,6 +1602,8 @@ export default function HomePage(): React.JSX.Element {
     };
   }, []);
 
+  
+
   useEffect(() => {
     if (isLoading) return;
 
@@ -1646,7 +1648,7 @@ export default function HomePage(): React.JSX.Element {
         scrollTrigger: {
           trigger: section,
           start: "top top",
-          end: "+=1500%", // Scroll sangat panjang untuk 6 card
+          end: "+=2000%", // Scroll sangat panjang untuk 6 card
           pin: pinWrap,
           scrub: 1.5,
           anticipatePin: 1,
@@ -3663,10 +3665,10 @@ export default function HomePage(): React.JSX.Element {
                 ref={cardsSectionRef}
                 style={{
                   width: '100%',
-                  minHeight: '1200vh', // Tinggi sangat besar untuk 6 card
+                  minHeight: '1800vh', // Tinggi sangat besar untuk 6 card
                   position: 'relative',
                   backgroundColor: '#f5f5f5',
-                  marginBottom: '0',
+                  marginBottom: '20',
                 }}
               >
                 {/* JUDUL COMMUNITY 200px + PANAH SVG */}
@@ -4394,6 +4396,13 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </div>
             )}
+
+
+
+
+
+
+            
 
             {/* SECTION TRUSTED COLLABS */}
             <div
