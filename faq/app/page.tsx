@@ -1602,6 +1602,9 @@ export default function HomePage(): React.JSX.Element {
     };
   }, []);
 
+
+
+
 useEffect(() => {
   if (isLoading) return;
 
@@ -1634,18 +1637,19 @@ useEffect(() => {
       }
     });
 
+    // Set initial positions
     gsap.set(card1Ref, { y: 0, zIndex: 5 });
-    gsap.set(card2Ref, { y: 250, zIndex: 6 });
-    gsap.set(card3Ref, { y: 500, zIndex: 7 });
-    gsap.set(card4Ref, { y: 750, zIndex: 8 });
-    gsap.set(card5Ref, { y: 1000, zIndex: 9 });
-    gsap.set(card6Ref, { y: 1250, zIndex: 10 });
+    gsap.set(card2Ref, { y: 200, zIndex: 6 });
+    gsap.set(card3Ref, { y: 400, zIndex: 7 });
+    gsap.set(card4Ref, { y: 600, zIndex: 8 });
+    gsap.set(card5Ref, { y: 800, zIndex: 9 });
+    gsap.set(card6Ref, { y: 1000, zIndex: 10 });
 
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: section,
         start: "top top",
-        end: "+=2000",
+        end: "+=2500",
         pin: pinWrap,
         scrub: 1.5,
         anticipatePin: 1,
@@ -1653,11 +1657,12 @@ useEffect(() => {
       }
     });
 
+    // Animate all 6 cards
     tl.to(card2Ref, { y: 0, duration: 1, ease: "power2.inOut" }, 0)
-      .to(card3Ref, { y: 250, duration: 1, ease: "power2.inOut" }, 0.4)
-      .to(card4Ref, { y: 500, duration: 1, ease: "power2.inOut" }, 0.8)
-      .to(card5Ref, { y: 750, duration: 1, ease: "power2.inOut" }, 1.2)
-      .to(card6Ref, { y: 1000, duration: 1, ease: "power2.inOut" }, 1.6);
+      .to(card3Ref, { y: 200, duration: 1, ease: "power2.inOut" }, 0.3)
+      .to(card4Ref, { y: 400, duration: 1, ease: "power2.inOut" }, 0.6)
+      .to(card5Ref, { y: 600, duration: 1, ease: "power2.inOut" }, 0.9)
+      .to(card6Ref, { y: 800, duration: 1, ease: "power2.inOut" }, 1.2);
 
     setHasCardsAnimated(true);
   }
@@ -1671,6 +1676,13 @@ useEffect(() => {
     });
   };
 }, [isLoading, card1Ref, card2Ref, card3Ref, card4Ref, card5Ref, card6Ref]);
+
+
+
+
+
+
+  
 
 
   
@@ -3659,19 +3671,20 @@ useEffect(() => {
 
 
 
+
 {/* STACKED CARDS SECTION - 6 CARD */}
 {!isLoading && (
   <div
     ref={cardsSectionRef}
     style={{
       width: '100%',
-      minHeight: '400vh',
+      minHeight: '600vh',
       position: 'relative',
       backgroundColor: '#f5f5f5',
       marginBottom: '0',
     }}
   >
-    {/* JUDUL COMMUNITY 200px + PANAH SVG */}
+    {/* JUDUL COMMUNITY 200px + PANAH SVG - Sticky */}
     <div style={{
       position: 'sticky',
       top: '0',
@@ -3708,7 +3721,7 @@ useEffect(() => {
       </div>
     </div>
 
-    {/* STACKED CARDS CONTAINER */}
+    {/* STACKED CARDS CONTAINER - PINNED */}
     <div
       ref={cardsPinnedRef}
       style={{
@@ -3719,8 +3732,8 @@ useEffect(() => {
         alignItems: 'center',
         justifyContent: 'center',
         overflow: 'visible',
-        marginTop: '80px',
-        marginBottom: '200px',
+        marginTop: '0',
+        marginBottom: '0',
       }}
     >
       <div style={{
@@ -3848,7 +3861,7 @@ useEffect(() => {
             position: 'absolute',
             top: '50%',
             left: '50%',
-            transform: 'translate(-50%, -50%) translateY(250px)',
+            transform: 'translate(-50%, -50%) translateY(200px)',
             width: '97%',
             height: '97%',
             backgroundColor: '#ffffff',
@@ -3958,7 +3971,7 @@ useEffect(() => {
             position: 'absolute',
             top: '50%',
             left: '50%',
-            transform: 'translate(-50%, -50%) translateY(500px)',
+            transform: 'translate(-50%, -50%) translateY(400px)',
             width: '94%',
             height: '94%',
             backgroundColor: '#ffffff',
@@ -4069,7 +4082,7 @@ useEffect(() => {
             position: 'absolute',
             top: '50%',
             left: '50%',
-            transform: 'translate(-50%, -50%) translateY(750px)',
+            transform: 'translate(-50%, -50%) translateY(600px)',
             width: '91%',
             height: '91%',
             backgroundColor: '#ffffff',
@@ -4179,7 +4192,7 @@ useEffect(() => {
             position: 'absolute',
             top: '50%',
             left: '50%',
-            transform: 'translate(-50%, -50%) translateY(1000px)',
+            transform: 'translate(-50%, -50%) translateY(800px)',
             width: '88%',
             height: '88%',
             backgroundColor: '#ffffff',
@@ -4289,7 +4302,7 @@ useEffect(() => {
             position: 'absolute',
             top: '50%',
             left: '50%',
-            transform: 'translate(-50%, -50%) translateY(1250px)',
+            transform: 'translate(-50%, -50%) translateY(1000px)',
             width: '85%',
             height: '85%',
             backgroundColor: '#ffffff',
@@ -4395,18 +4408,11 @@ useEffect(() => {
       </div>
     </div>
 
-    {/* SPACER AGAR TRUSTED COLLABS TIDAK NABRAK */}
-    <div style={{ height: '200px', backgroundColor: '#f5f5f5' }} />
+    {/* SPACER BAWAH AGAR TRUSTED COLLABS TIDAK NABRAK DAN WARNA FULL */}
+    <div style={{ height: '300px', backgroundColor: '#f5f5f5' }} />
 
   </div>
 )}
-
-
-
-
-
-
-
 
 
 
