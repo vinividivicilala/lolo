@@ -3946,32 +3946,6 @@ useEffect(() => {
                   EDUCATION
                 </div>
               </div>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '30px',
-              }}>
-                <button style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '20px',
-                  background: 'transparent',
-                  border: 'none',
-                  cursor: 'pointer',
-                  fontSize: '20px',
-                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                  color: '#000000',
-                  padding: '0',
-                  transition: 'opacity 0.2s ease',
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'}
-                onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>
-                  <span>VIEW ONLINE</span>
-                  <svg width="90" height="90" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </button>
-              </div>
             </div>
           </div>
           
@@ -3980,38 +3954,24 @@ useEffect(() => {
             flex: 1,
             display: 'flex',
             flexDirection: 'column',
-            justifyContent: 'space-between',
+            justifyContent: 'center',
+            alignItems: 'center',
+            textAlign: 'center',
           }}>
-            <div>
-              <p style={{
-                fontFamily: "'Questrial', sans-serif",
-                fontSize: '18px',
-                lineHeight: '1.6',
-                color: '#000000',
-                marginBottom: '35px',
-                maxWidth: '70%',
-              }}>
-                Membangun generasi cerdas melalui akses pendidikan berkualitas. 
-                Program beasiswa, pelatihan guru, dan pengembangan kurikulum untuk masa depan yang lebih baik.
-              </p>
-              <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
-                <span style={{ padding: '6px 22px', background: '#f0f0f0', fontSize: '13px', fontFamily: "'Questrial', sans-serif", color: '#000000' }}>Beasiswa</span>
-                <span style={{ padding: '6px 22px', background: '#f0f0f0', fontSize: '13px', fontFamily: "'Questrial', sans-serif", color: '#000000' }}>Pelatihan Guru</span>
-                <span style={{ padding: '6px 22px', background: '#f0f0f0', fontSize: '13px', fontFamily: "'Questrial', sans-serif", color: '#000000' }}>Kurikulum</span>
-                <span style={{ padding: '6px 22px', background: '#f0f0f0', fontSize: '13px', fontFamily: "'Questrial', sans-serif", color: '#000000' }}>Perpustakaan Digital</span>
-              </div>
-            </div>
             <div style={{
-              marginTop: '45px',
-              paddingTop: '25px',
-              borderTop: '1px solid #e0e0e0',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
+              fontSize: '90px',
+              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+              fontWeight: '400',
+              letterSpacing: '-0.02em',
+              lineHeight: '1.2',
+              color: '#000000',
+              marginBottom: '40px',
             }}>
-              <span style={{ fontSize: '14px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>MENURU COMMUNITY — Education First</span>
-              <span style={{ fontSize: '14px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>01 / 06</span>
+              Mari Bergabung Bersama<br />di Komunitas Kami
             </div>
+            <svg width="90" height="90" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M17 7L7 17M7 17H17M7 17V7" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
           </div>
         </div>
 
@@ -4063,32 +4023,6 @@ useEffect(() => {
                   PROGRAMMING
                 </div>
               </div>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '30px',
-              }}>
-                <button style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '20px',
-                  background: 'transparent',
-                  border: 'none',
-                  cursor: 'pointer',
-                  fontSize: '20px',
-                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                  color: '#000000',
-                  padding: '0',
-                  transition: 'opacity 0.2s ease',
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'}
-                onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>
-                  <span>VIEW ONLINE</span>
-                  <svg width="85" height="85" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </button>
-              </div>
             </div>
           </div>
           
@@ -4097,38 +4031,24 @@ useEffect(() => {
             flex: 1,
             display: 'flex',
             flexDirection: 'column',
-            justifyContent: 'space-between',
+            justifyContent: 'center',
+            alignItems: 'center',
+            textAlign: 'center',
           }}>
-            <div>
-              <p style={{
-                fontFamily: "'Questrial', sans-serif",
-                fontSize: '17px',
-                lineHeight: '1.6',
-                color: '#000000',
-                marginBottom: '30px',
-                maxWidth: '68%',
-              }}>
-                Belajar coding dari dasar hingga mahir. Komunitas programmer Indonesia 
-                berbagi pengetahuan, proyek open source, dan peluang karir di bidang teknologi.
-              </p>
-              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                <span style={{ padding: '5px 20px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif", color: '#000000' }}>Web Development</span>
-                <span style={{ padding: '5px 20px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif", color: '#000000' }}>Mobile Apps</span>
-                <span style={{ padding: '5px 20px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif", color: '#000000' }}>Data Science</span>
-                <span style={{ padding: '5px 20px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif", color: '#000000' }}>AI/ML</span>
-              </div>
-            </div>
             <div style={{
-              marginTop: '40px',
-              paddingTop: '23px',
-              borderTop: '1px solid #e0e0e0',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
+              fontSize: '85px',
+              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+              fontWeight: '400',
+              letterSpacing: '-0.02em',
+              lineHeight: '1.2',
+              color: '#000000',
+              marginBottom: '40px',
             }}>
-              <span style={{ fontSize: '13px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>CODE COMMUNITY INDONESIA</span>
-              <span style={{ fontSize: '13px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>02 / 06</span>
+              Mari Bergabung Bersama<br />di Komunitas Kami
             </div>
+            <svg width="85" height="85" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M17 7L7 17M7 17H17M7 17V7" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
           </div>
         </div>
 
@@ -4180,32 +4100,6 @@ useEffect(() => {
                   PERSIB
                 </div>
               </div>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '30px',
-              }}>
-                <button style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '20px',
-                  background: 'transparent',
-                  border: 'none',
-                  cursor: 'pointer',
-                  fontSize: '20px',
-                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                  color: '#000000',
-                  padding: '0',
-                  transition: 'opacity 0.2s ease',
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'}
-                onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>
-                  <span>VIEW ONLINE</span>
-                  <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </button>
-              </div>
             </div>
           </div>
           
@@ -4214,38 +4108,24 @@ useEffect(() => {
             flex: 1,
             display: 'flex',
             flexDirection: 'column',
-            justifyContent: 'space-between',
+            justifyContent: 'center',
+            alignItems: 'center',
+            textAlign: 'center',
           }}>
-            <div>
-              <p style={{
-                fontFamily: "'Questrial', sans-serif",
-                fontSize: '16px',
-                lineHeight: '1.6',
-                color: '#000000',
-                marginBottom: '28px',
-                maxWidth: '65%',
-              }}>
-                Rumah bagi Bobotoh dan pecinta PERSIB. Diskusi pertandingan, berita terbaru, 
-                dan kebersamaan dalam mendukung kebanggaan Jawa Barat.
-              </p>
-              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                <span style={{ padding: '5px 18px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif", color: '#000000' }}>Match Discussion</span>
-                <span style={{ padding: '5px 18px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif", color: '#000000' }}>Player News</span>
-                <span style={{ padding: '5px 18px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif", color: '#000000' }}>Merchandise</span>
-                <span style={{ padding: '5px 18px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif", color: '#000000' }}>Community Gathering</span>
-              </div>
-            </div>
             <div style={{
-              marginTop: '35px',
-              paddingTop: '22px',
-              borderTop: '1px solid #e0e0e0',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
+              fontSize: '80px',
+              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+              fontWeight: '400',
+              letterSpacing: '-0.02em',
+              lineHeight: '1.2',
+              color: '#000000',
+              marginBottom: '40px',
             }}>
-              <span style={{ fontSize: '13px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>BOBOTOH UNITED</span>
-              <span style={{ fontSize: '13px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>03 / 06</span>
+              Mari Bergabung Bersama<br />di Komunitas Kami
             </div>
+            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M17 7L7 17M7 17H17M7 17V7" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
           </div>
         </div>
 
@@ -4297,32 +4177,6 @@ useEffect(() => {
                   POINT BLANK
                 </div>
               </div>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '30px',
-              }}>
-                <button style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '20px',
-                  background: 'transparent',
-                  border: 'none',
-                  cursor: 'pointer',
-                  fontSize: '20px',
-                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                  color: '#000000',
-                  padding: '0',
-                  transition: 'opacity 0.2s ease',
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'}
-                onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>
-                  <span>VIEW ONLINE</span>
-                  <svg width="75" height="75" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </button>
-              </div>
             </div>
           </div>
           
@@ -4331,38 +4185,24 @@ useEffect(() => {
             flex: 1,
             display: 'flex',
             flexDirection: 'column',
-            justifyContent: 'space-between',
+            justifyContent: 'center',
+            alignItems: 'center',
+            textAlign: 'center',
           }}>
-            <div>
-              <p style={{
-                fontFamily: "'Questrial', sans-serif",
-                fontSize: '16px',
-                lineHeight: '1.6',
-                color: '#000000',
-                marginBottom: '25px',
-                maxWidth: '65%',
-              }}>
-                Komunitas gamers Point Blank Indonesia. Turnamen rutin, diskusi strategi, 
-                dan berbagi pengalaman untuk meningkatkan skill bermain.
-              </p>
-              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                <span style={{ padding: '5px 18px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif", color: '#000000' }}>Tournament</span>
-                <span style={{ padding: '5px 18px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif", color: '#000000' }}>Strategy Guide</span>
-                <span style={{ padding: '5px 18px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif", color: '#000000' }}>Pro Player</span>
-                <span style={{ padding: '5px 18px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif", color: '#000000' }}>Live Streaming</span>
-              </div>
-            </div>
             <div style={{
-              marginTop: '32px',
-              paddingTop: '20px',
-              borderTop: '1px solid #e0e0e0',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
+              fontSize: '70px',
+              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+              fontWeight: '400',
+              letterSpacing: '-0.02em',
+              lineHeight: '1.2',
+              color: '#000000',
+              marginBottom: '40px',
             }}>
-              <span style={{ fontSize: '13px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>PB GAMER INDONESIA</span>
-              <span style={{ fontSize: '13px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>04 / 06</span>
+              Mari Bergabung Bersama<br />di Komunitas Kami
             </div>
+            <svg width="75" height="75" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M17 7L7 17M7 17H17M7 17V7" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
           </div>
         </div>
 
@@ -4414,32 +4254,6 @@ useEffect(() => {
                   CLEANLINESS
                 </div>
               </div>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '30px',
-              }}>
-                <button style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '20px',
-                  background: 'transparent',
-                  border: 'none',
-                  cursor: 'pointer',
-                  fontSize: '20px',
-                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                  color: '#000000',
-                  padding: '0',
-                  transition: 'opacity 0.2s ease',
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'}
-                onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>
-                  <span>VIEW ONLINE</span>
-                  <svg width="70" height="70" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </button>
-              </div>
             </div>
           </div>
           
@@ -4448,38 +4262,24 @@ useEffect(() => {
             flex: 1,
             display: 'flex',
             flexDirection: 'column',
-            justifyContent: 'space-between',
+            justifyContent: 'center',
+            alignItems: 'center',
+            textAlign: 'center',
           }}>
-            <div>
-              <p style={{
-                fontFamily: "'Questrial', sans-serif",
-                fontSize: '15px',
-                lineHeight: '1.6',
-                color: '#000000',
-                marginBottom: '22px',
-                maxWidth: '65%',
-              }}>
-                Gerakan peduli lingkungan untuk Indonesia yang lebih bersih. Aksi bersih-bersih, 
-                daur ulang sampah, dan edukasi tentang hidup sehat.
-              </p>
-              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '11px', fontFamily: "'Questrial', sans-serif", color: '#000000' }}>Clean Action</span>
-                <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '11px', fontFamily: "'Questrial', sans-serif", color: '#000000' }}>Recycling</span>
-                <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '11px', fontFamily: "'Questrial', sans-serif", color: '#000000' }}>Green Living</span>
-                <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '11px', fontFamily: "'Questrial', sans-serif", color: '#000000' }}>Edukasi</span>
-              </div>
-            </div>
             <div style={{
-              marginTop: '28px',
-              paddingTop: '18px',
-              borderTop: '1px solid #e0e0e0',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
+              fontSize: '65px',
+              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+              fontWeight: '400',
+              letterSpacing: '-0.02em',
+              lineHeight: '1.2',
+              color: '#000000',
+              marginBottom: '40px',
             }}>
-              <span style={{ fontSize: '12px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>INDONESIA BERSIH</span>
-              <span style={{ fontSize: '12px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>05 / 06</span>
+              Mari Bergabung Bersama<br />di Komunitas Kami
             </div>
+            <svg width="70" height="70" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M17 7L7 17M7 17H17M7 17V7" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
           </div>
         </div>
 
@@ -4531,32 +4331,6 @@ useEffect(() => {
                   GENERAL
                 </div>
               </div>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '30px',
-              }}>
-                <button style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '20px',
-                  background: 'transparent',
-                  border: 'none',
-                  cursor: 'pointer',
-                  fontSize: '20px',
-                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                  color: '#000000',
-                  padding: '0',
-                  transition: 'opacity 0.2s ease',
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'}
-                onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>
-                  <span>VIEW ONLINE</span>
-                  <svg width="65" height="65" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </button>
-              </div>
             </div>
           </div>
           
@@ -4565,38 +4339,24 @@ useEffect(() => {
             flex: 1,
             display: 'flex',
             flexDirection: 'column',
-            justifyContent: 'space-between',
+            justifyContent: 'center',
+            alignItems: 'center',
+            textAlign: 'center',
           }}>
-            <div>
-              <p style={{
-                fontFamily: "'Questrial', sans-serif",
-                fontSize: '15px',
-                lineHeight: '1.6',
-                color: '#000000',
-                marginBottom: '22px',
-                maxWidth: '65%',
-              }}>
-                Ruang diskusi untuk segala topik. Curhat, berbagi cerita, bertanya, 
-                dan bersosialisasi dengan anggota komunitas lainnya.
-              </p>
-              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '11px', fontFamily: "'Questrial', sans-serif", color: '#000000' }}>Discussion</span>
-                <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '11px', fontFamily: "'Questrial', sans-serif", color: '#000000' }}>Q&A</span>
-                <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '11px', fontFamily: "'Questrial', sans-serif", color: '#000000' }}>Story Sharing</span>
-                <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '11px', fontFamily: "'Questrial', sans-serif", color: '#000000' }}>Networking</span>
-              </div>
-            </div>
             <div style={{
-              marginTop: '25px',
-              paddingTop: '16px',
-              borderTop: '1px solid #e0e0e0',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
+              fontSize: '60px',
+              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+              fontWeight: '400',
+              letterSpacing: '-0.02em',
+              lineHeight: '1.2',
+              color: '#000000',
+              marginBottom: '40px',
             }}>
-              <span style={{ fontSize: '12px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>MENURU GENERAL HUB</span>
-              <span style={{ fontSize: '12px', fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", color: '#999999' }}>06 / 06</span>
+              Mari Bergabung Bersama<br />di Komunitas Kami
             </div>
+            <svg width="65" height="65" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M17 7L7 17M7 17H17M7 17V7" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
           </div>
         </div>
 
@@ -4611,6 +4371,9 @@ useEffect(() => {
 
 
 
+
+
+            
 
 
 
