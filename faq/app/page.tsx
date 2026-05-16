@@ -3658,13 +3658,17 @@ export default function HomePage(): React.JSX.Element {
             </div>
 
 
+
+
+
+
 // STACKED CARDS SECTION - 6 CARD
 {!isLoading && (
   <div
     ref={cardsSectionRef}
     style={{
       width: '100%',
-      minHeight: '200vh', // Reduced height to prevent overlap
+      minHeight: '300vh', // Increased to ensure all 6 cards finish before Trusted Collabs
       position: 'relative',
       backgroundColor: '#f5f5f5',
       marginBottom: '0',
@@ -3719,7 +3723,7 @@ export default function HomePage(): React.JSX.Element {
         justifyContent: 'center',
         overflow: 'visible',
         marginTop: '40px',
-        marginBottom: '100px',
+        marginBottom: '150px', // Added more bottom margin
       }}
     >
       <div style={{
@@ -3730,7 +3734,7 @@ export default function HomePage(): React.JSX.Element {
         margin: '0 auto',
       }}>
         
-        {/* CARD 1 */}
+        {/* CARD 1 - Full size */}
         <div
           ref={(el) => setCard1Ref(el)}
           style={{
@@ -4393,14 +4397,15 @@ export default function HomePage(): React.JSX.Element {
 
       </div>
     </div>
+
+    {/* Spacer div to ensure Trusted Collabs starts after all cards are done */}
+    <div style={{ height: '1px', opacity: 0 }} />
   </div>
 )}
 
 
 
-
-
-
+            
 
 
 
