@@ -5787,8 +5787,7 @@ useEffect(() => {
           </div>
         </div>
       </div>
-        </div>  {/* TUTUP WRAPPER */}
-
+        </div>  
 
 
 
