@@ -4413,7 +4413,9 @@ useEffect(() => {
   </div>
 )}
 
-{/* DONATION SECTION - NEW */}
+
+
+{/* DONATION SECTION - FIXED */}
 {!isLoading && (
   <div
     ref={donationSectionRef}
@@ -4424,13 +4426,13 @@ useEffect(() => {
       boxSizing: 'border-box',
     }}
   >
-    {/* JUDUL DONATUR */}
+    {/* JUDUL DONATUR dengan Total Donasi Otomatis */}
     <div style={{
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'flex-end',
       marginBottom: '80px',
-     borderBottom: '1px solid rgba(0,0,0,0.1)',
+      borderBottom: '1px solid rgba(0,0,0,0.1)',
       paddingBottom: '40px',
     }}>
       <div style={{
@@ -4466,7 +4468,7 @@ useEffect(() => {
       </div>
     </div>
 
-    {/* DONATION CARD - AWARDS MINIMALIST DESIGN */}
+    {/* DONATION CARD - HANYA 1 DONASI TERBARU */}
     {donations && donations.length > 0 ? (
       <div style={{
         marginBottom: '80px',
@@ -4484,7 +4486,9 @@ useEffect(() => {
           01
         </div>
 
-        {donations.slice(0, 1).map((donation) => {
+        {/* Ambil hanya 1 donasi terbaru */}
+        {(() => {
+          const donation = donations[0];
           const donationDate = donation.createdAt ? donation.createdAt.toDate() : new Date();
           
           return (
@@ -4493,7 +4497,7 @@ useEffect(() => {
               padding: '60px',
               marginBottom: '60px',
             }}>
-              {/* Title - Nama Panti Asuhan 50px */}
+              {/* Nama Panti Asuhan - font 50px */}
               <div style={{
                 fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
                 fontSize: '50px',
@@ -4505,7 +4509,7 @@ useEffect(() => {
                 Panti Asuhan Yatim & Dhuafa Al-Farid
               </div>
               
-              {/* Date and Donor Name - 30px */}
+              {/* Tanggal dan Nama Donatur - font 30px sejajar dengan verified badge */}
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -4537,7 +4541,7 @@ useEffect(() => {
                 </div>
               </div>
               
-              {/* Description */}
+              {/* Deskripsi Donasi - Persib Juara 23 Mei 2026 */}
               <div style={{
                 fontFamily: "'Questrial', sans-serif",
                 fontSize: '24px',
@@ -4551,14 +4555,14 @@ useEffect(() => {
                 dapat dirasakan oleh anak-anak yatim dan dhuafa.
               </div>
               
-              {/* 4 Photos */}
+              {/* 4 Foto yang bisa diklik */}
               <div style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(4, 1fr)',
                 gap: '20px',
                 marginBottom: '40px',
               }}>
-                {donation.photos && donation.photos.map((photo, idx) => (
+                {(donation.photos || samplePhotos).map((photo, idx) => (
                   <div
                     key={idx}
                     style={{
@@ -4584,7 +4588,7 @@ useEffect(() => {
                 ))}
               </div>
               
-              {/* Comment Section */}
+              {/* Section Komentar dengan nama pengirim foto (nama donatur) */}
               <div style={{
                 borderTop: '1px solid rgba(0,0,0,0.1)',
                 paddingTop: '30px',
@@ -4643,6 +4647,7 @@ useEffect(() => {
                             }}>
                               {comment.userName}
                             </span>
+                            {/* Verified badge otomatis untuk admin */}
                             {comment.userEmail === ADMIN_EMAIL && <VerifiedBadge size={16} />}
                             <span style={{
                               fontSize: '12px',
@@ -4665,7 +4670,7 @@ useEffect(() => {
                   </div>
                 )}
                 
-                {/* Add Comment */}
+                {/* Form Komentar - menampilkan nama pengirim (nama donatur) */}
                 {donationCommentTarget === donation.id ? (
                   <div style={{
                     display: 'flex',
@@ -4735,6 +4740,7 @@ useEffect(() => {
                     onClick={() => {
                       if (user) {
                         setDonationCommentTarget(donation.id);
+                        setCommentText("");
                       } else {
                         alert("Silakan login untuk berkomentar");
                         setShowAuthModal(true);
@@ -4762,10 +4768,22 @@ useEffect(() => {
                     <NorthEastArrowIcon size={16} />
                   </button>
                 )}
+                
+                {/* Nama pengirim komentar akan ditampilkan sebagai nama donatur yang login */}
+                {user && donationCommentTarget !== donation.id && (
+                  <div style={{
+                    marginTop: '12px',
+                    fontSize: '12px',
+                    color: '#999999',
+                    fontFamily: "'Questrial', sans-serif",
+                  }}>
+                    Komentar akan muncul sebagai <strong>{user.displayName || user.email?.split('@')[0] || 'User'}</strong>
+                  </div>
+                )}
               </div>
             </div>
           );
-        })}
+        })()}
       </div>
     ) : (
       <div style={{
@@ -4793,7 +4811,7 @@ useEffect(() => {
       </div>
     )}
 
-    {/* Donation Button */}
+    {/* Tombol Donasi */}
     <div style={{
       display: 'flex',
       justifyContent: 'center',
@@ -4832,246 +4850,8 @@ useEffect(() => {
   </div>
 )}
 
-{/* DONATION MODAL */}
-{showDonationModal && (
-  <div style={{
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    width: '100%',
-    height: '100%',
-    backgroundColor: 'rgba(0,0,0,0.9)',
-    backdropFilter: 'blur(10px)',
-    zIndex: 20002,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  }}>
-    <div style={{
-      backgroundColor: '#ffffff',
-      borderRadius: '32px',
-      width: '90%',
-      maxWidth: '550px',
-      padding: '50px',
-      maxHeight: '85vh',
-      overflowY: 'auto',
-    }}>
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: '40px',
-      }}>
-        <div>
-          <div style={{
-            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-            fontSize: '40px',
-            fontWeight: '400',
-            color: '#000000',
-            letterSpacing: '-0.02em',
-          }}>
-            FORM DONASI
-          </div>
-          <div style={{
-            fontFamily: "'Questrial', sans-serif",
-            fontSize: '16px',
-            color: '#666666',
-            marginTop: '8px',
-          }}>
-            Berikan donasi Anda untuk panti asuhan
-          </div>
-        </div>
-        <button
-          onClick={() => setShowDonationModal(false)}
-          style={{
-            background: 'none',
-            border: 'none',
-            fontSize: '32px',
-            cursor: 'pointer',
-            color: '#000000',
-          }}
-        >
-          ✕
-        </button>
-      </div>
 
-      <div style={{ marginBottom: '25px' }}>
-        <label style={{
-          fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-          fontSize: '14px',
-          fontWeight: '500',
-          color: '#000000',
-          display: 'block',
-          marginBottom: '8px',
-        }}>
-          Nominal Donasi (Rp)
-        </label>
-        <input
-          type="number"
-          value={donationAmount}
-          onChange={(e) => setDonationAmount(e.target.value)}
-          placeholder="Minimal Rp 10.000"
-          style={{
-            width: '100%',
-            padding: '14px 16px',
-            borderRadius: '12px',
-            border: '1px solid #cccccc',
-            fontFamily: "'Questrial', sans-serif",
-            fontSize: '16px',
-            outline: 'none',
-          }}
-        />
-      </div>
 
-      <div style={{ marginBottom: '25px' }}>
-        <label style={{
-          fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-          fontSize: '14px',
-          fontWeight: '500',
-          color: '#000000',
-          display: 'block',
-          marginBottom: '8px',
-        }}>
-          Pesan (Opsional)
-        </label>
-        <textarea
-          value={donationMessage}
-          onChange={(e) => setDonationMessage(e.target.value)}
-          placeholder="Tulis pesan donasi Anda..."
-          rows={4}
-          style={{
-            width: '100%',
-            padding: '14px 16px',
-            borderRadius: '12px',
-            border: '1px solid #cccccc',
-            fontFamily: "'Questrial', sans-serif",
-            fontSize: '14px',
-            resize: 'vertical',
-            outline: 'none',
-          }}
-        />
-      </div>
-
-      <div style={{ marginBottom: '30px' }}>
-        <label style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '12px',
-          cursor: 'pointer',
-        }}>
-          <input
-            type="checkbox"
-            checked={donationIsAnonymous}
-            onChange={(e) => setDonationIsAnonymous(e.target.checked)}
-            style={{
-              width: '20px',
-              height: '20px',
-              cursor: 'pointer',
-            }}
-          />
-          <span style={{
-            fontFamily: "'Questrial', sans-serif",
-            fontSize: '16px',
-            color: '#333333',
-          }}>
-            Donasi secara anonim (nama tidak ditampilkan)
-          </span>
-        </label>
-      </div>
-
-      <button
-        onClick={handleDonationSubmit}
-        style={{
-          width: '100%',
-          padding: '16px',
-          backgroundColor: '#000000',
-          color: '#ffffff',
-          border: 'none',
-          borderRadius: '60px',
-          cursor: 'pointer',
-          fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-          fontSize: '18px',
-          fontWeight: '500',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '12px',
-          transition: 'opacity 0.2s',
-        }}
-        onMouseEnter={(e) => e.currentTarget.style.opacity = '0.9'}
-        onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
-      >
-        <span>KIRIM DONASI</span>
-        <NorthEastArrowIcon size={20} />
-      </button>
-    </div>
-  </div>
-)}
-
-{/* DONATION DETAIL MODAL FOR PHOTO VIEW */}
-{selectedDonation && (
-  <div style={{
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    width: '100%',
-    height: '100%',
-    backgroundColor: 'rgba(0,0,0,0.95)',
-    backdropFilter: 'blur(10px)',
-    zIndex: 20003,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    cursor: 'pointer',
-  }} onClick={() => setSelectedDonation(null)}>
-    <div style={{
-      maxWidth: '90%',
-      maxHeight: '90%',
-      position: 'relative',
-    }} onClick={(e) => e.stopPropagation()}>
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(2, 1fr)',
-        gap: '20px',
-        maxHeight: '80vh',
-        overflow: 'auto',
-        padding: '20px',
-      }}>
-        {selectedDonation.photos && selectedDonation.photos.map((photo, idx) => (
-          <div key={idx} style={{
-            position: 'relative',
-            width: '300px',
-            height: '300px',
-            borderRadius: '16px',
-            overflow: 'hidden',
-          }}>
-            <Image
-              src={photo}
-              alt={`Donation photo ${idx + 1}`}
-              fill
-              style={{ objectFit: 'cover' }}
-            />
-          </div>
-        ))}
-      </div>
-      <button
-        onClick={() => setSelectedDonation(null)}
-        style={{
-          position: 'absolute',
-          top: '-40px',
-          right: '-40px',
-          background: 'none',
-          border: 'none',
-          fontSize: '32px',
-          cursor: 'pointer',
-          color: '#ffffff',
-        }}
-      >
-        ✕
-      </button>
-    </div>
-  </div>
-)}
 
             
 
