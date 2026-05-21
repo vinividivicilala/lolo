@@ -1830,6 +1830,7 @@ useEffect(() => {
   
 
 
+
   
   useEffect(() => {
     if (isLoading) return;
@@ -2519,6 +2520,16 @@ useEffect(() => {
       year: date.getFullYear()
     };
   };
+
+  // Data komunitas
+  const communityData = [
+    { id: "01", name: "EDUCATION" },
+    { id: "02", name: "PROGRAMMING" },
+    { id: "03", name: "PERSIB" },
+    { id: "04", name: "POINT BLANK" },
+    { id: "05", name: "CLEANLINESS" },
+    { id: "06", name: "GENERAL" }
+  ];
 
   return (
     <>
@@ -3824,17 +3835,16 @@ useEffect(() => {
     ref={cardsSectionRef}
     style={{
       width: '100%',
-      minHeight: '900vh',
+      minHeight: '100vh',
       position: 'relative',
       backgroundColor: '#a2ea13',
       marginBottom: '0',
       transition: 'background-color 0.3s ease',
     }}
   >
-    {/* JUDUL COMMUNITY 260px - Tanpa border bottom */}
+    {/* JUDUL COMMUNITY - Tanpa border bottom */}
     <div style={{
-      position: 'sticky',
-      top: '0',
+      position: 'relative',
       zIndex: 20,
       width: '100%',
       backgroundColor: '#a2ea13',
@@ -3851,18 +3861,33 @@ useEffect(() => {
         paddingBottom: '30px',
       }}>
         <div style={{
-          fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-          fontSize: '260px',
-          fontWeight: '400',
-          letterSpacing: '-0.02em',
-          lineHeight: '0.9',
-          color: '#000000',
-          textTransform: 'uppercase',
-          transition: 'color 0.3s ease',
-        }}
-        id="community-title"
-        >
-          COMMUNITY
+          display: 'flex',
+          alignItems: 'baseline',
+          gap: '30px',
+        }}>
+          <div style={{
+            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+            fontSize: '260px',
+            fontWeight: '400',
+            letterSpacing: '-0.02em',
+            lineHeight: '0.9',
+            color: '#000000',
+            textTransform: 'uppercase',
+            transition: 'color 0.3s ease',
+          }}
+          id="community-title"
+          >
+            COMMUNITY
+          </div>
+          <div style={{
+            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+            fontSize: '100px',
+            fontWeight: '400',
+            color: '#000000',
+            lineHeight: '0.9',
+          }}>
+            ({communityData.length})
+          </div>
         </div>
         <div style={{
           marginBottom: '40px',
@@ -3876,516 +3901,74 @@ useEffect(() => {
       </div>
     </div>
 
-    {/* STACKED CARDS CONTAINER */}
-    <div
-      ref={cardsPinnedRef}
-      style={{
-        width: '100%',
-        height: '100vh',
-        position: 'relative',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        overflow: 'visible',
-        marginTop: '0',
-        marginBottom: '0',
-      }}
-    >
-      <div style={{
-        position: 'relative',
-        width: '100%',
-        maxWidth: '1200px',
-        height: '85vh',
-        margin: '0 auto',
-      }}>
-        
-        {/* CARD 1 - EDUCATION */}
+    {/* LIST KOMUNITAS - 3 KOLOM: Angka | Nama | Arrow */}
+    <div style={{
+      padding: '60px 80px 120px 80px',
+      backgroundColor: '#a2ea13',
+      transition: 'background-color 0.3s ease',
+    }}>
+      {communityData.map((community) => (
         <div
-          ref={(el) => setCard1Ref(el)}
+          key={community.id}
           style={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%) translateY(0px)',
-            width: '100%',
-            height: '100%',
-            backgroundColor: '#ffffff',
-            border: '2px solid #000000',
-            borderRadius: '0px',
-            boxShadow: 'none',
-            overflow: 'hidden',
-            zIndex: 5,
             display: 'flex',
-            flexDirection: 'column',
-            color: '#000000',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: '40px 0',
+            borderBottom: '1px solid rgba(0,0,0,0.1)',
           }}
         >
+          {/* Kiri: Angka 01, 02, dst */}
           <div style={{
-            padding: '45px 55px 0 55px',
-            borderBottom: '2px solid #000000',
+            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+            fontSize: '90px',
+            fontWeight: '400',
+            color: '#000000',
+            letterSpacing: '-0.02em',
+            lineHeight: '1',
+            width: '150px',
           }}>
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: '35px',
-            }}>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '30px',
-              }}>
-                <div style={{
-                  fontSize: '90px',
-                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                  fontWeight: '400',
-                  letterSpacing: '-0.02em',
-                  lineHeight: '1',
-                  color: '#000000',
-                }}>
-                  EDUCATION
-                </div>
-              </div>
-            </div>
+            {community.id}
           </div>
-          
+
+          {/* Tengah: Nama Community */}
           <div style={{
-            padding: '55px 55px 45px 55px',
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
+            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+            fontSize: '90px',
+            fontWeight: '400',
+            color: '#000000',
+            letterSpacing: '-0.02em',
+            lineHeight: '1',
             textAlign: 'center',
+            flex: 1,
           }}>
-            <div style={{
-              fontSize: '90px',
-              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-              fontWeight: '400',
-              letterSpacing: '-0.02em',
-              lineHeight: '1.2',
-              color: '#000000',
-              marginBottom: '40px',
-            }}>
-              Mari Bergabung Bersama<br />di Komunitas Kami
-            </div>
+            {community.name}
+          </div>
+
+          {/* Kanan: SVG Arrow */}
+          <div style={{
+            width: '150px',
+            display: 'flex',
+            justifyContent: 'flex-end',
+          }}>
             <svg width="90" height="90" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M17 7L7 17M7 17H17M7 17V7" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </div>
         </div>
-
-        {/* CARD 2 - PROGRAMMING */}
-        <div
-          ref={(el) => setCard2Ref(el)}
-          style={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%) translateY(400px)',
-            width: '97%',
-            height: '97%',
-            backgroundColor: '#ffffff',
-            border: '2px solid #000000',
-            borderRadius: '0px',
-            boxShadow: 'none',
-            overflow: 'hidden',
-            zIndex: 6,
-            display: 'flex',
-            flexDirection: 'column',
-            color: '#000000',
-            willChange: 'transform',
-          }}
-        >
-          <div style={{
-            padding: '42px 52px 0 52px',
-            borderBottom: '2px solid #000000',
-          }}>
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: '32px',
-            }}>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '30px',
-              }}>
-                <div style={{
-                  fontSize: '85px',
-                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                  fontWeight: '400',
-                  letterSpacing: '-0.02em',
-                  lineHeight: '1',
-                  color: '#000000',
-                }}>
-                  PROGRAMMING
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <div style={{
-            padding: '50px 52px 42px 52px',
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-            textAlign: 'center',
-          }}>
-            <div style={{
-              fontSize: '85px',
-              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-              fontWeight: '400',
-              letterSpacing: '-0.02em',
-              lineHeight: '1.2',
-              color: '#000000',
-              marginBottom: '40px',
-            }}>
-              Mari Bergabung Bersama<br />di Komunitas Kami
-            </div>
-            <svg width="85" height="85" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M17 7L7 17M7 17H17M7 17V7" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </div>
-        </div>
-
-        {/* CARD 3 - PERSIB */}
-        <div
-          ref={(el) => setCard3Ref(el)}
-          style={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%) translateY(800px)',
-            width: '94%',
-            height: '94%',
-            backgroundColor: '#ffffff',
-            border: '2px solid #000000',
-            borderRadius: '0px',
-            boxShadow: 'none',
-            overflow: 'hidden',
-            zIndex: 7,
-            display: 'flex',
-            flexDirection: 'column',
-            color: '#000000',
-            willChange: 'transform',
-          }}
-        >
-          <div style={{
-            padding: '38px 48px 0 48px',
-            borderBottom: '2px solid #000000',
-          }}>
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: '28px',
-            }}>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '30px',
-              }}>
-                <div style={{
-                  fontSize: '80px',
-                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                  fontWeight: '400',
-                  letterSpacing: '-0.02em',
-                  lineHeight: '1',
-                  color: '#000000',
-                }}>
-                  PERSIB
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <div style={{
-            padding: '45px 48px 38px 48px',
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-            textAlign: 'center',
-          }}>
-            <div style={{
-              fontSize: '80px',
-              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-              fontWeight: '400',
-              letterSpacing: '-0.02em',
-              lineHeight: '1.2',
-              color: '#000000',
-              marginBottom: '40px',
-            }}>
-              Mari Bergabung Bersama<br />di Komunitas Kami
-            </div>
-            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M17 7L7 17M7 17H17M7 17V7" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </div>
-        </div>
-
-        {/* CARD 4 - POINT BLANK */}
-        <div
-          ref={(el) => setCard4Ref(el)}
-          style={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%) translateY(1200px)',
-            width: '91%',
-            height: '91%',
-            backgroundColor: '#ffffff',
-            border: '2px solid #000000',
-            borderRadius: '0px',
-            boxShadow: 'none',
-            overflow: 'hidden',
-            zIndex: 8,
-            display: 'flex',
-            flexDirection: 'column',
-            color: '#000000',
-            willChange: 'transform',
-          }}
-        >
-          <div style={{
-            padding: '35px 45px 0 45px',
-            borderBottom: '2px solid #000000',
-          }}>
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: '25px',
-            }}>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '30px',
-              }}>
-                <div style={{
-                  fontSize: '70px',
-                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                  fontWeight: '400',
-                  letterSpacing: '-0.02em',
-                  lineHeight: '1',
-                  color: '#000000',
-                }}>
-                  POINT BLANK
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <div style={{
-            padding: '42px 45px 35px 45px',
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-            textAlign: 'center',
-          }}>
-            <div style={{
-              fontSize: '70px',
-              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-              fontWeight: '400',
-              letterSpacing: '-0.02em',
-              lineHeight: '1.2',
-              color: '#000000',
-              marginBottom: '40px',
-            }}>
-              Mari Bergabung Bersama<br />di Komunitas Kami
-            </div>
-            <svg width="75" height="75" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M17 7L7 17M7 17H17M7 17V7" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </div>
-        </div>
-
-        {/* CARD 5 - CLEANLINESS */}
-        <div
-          ref={(el) => setCard5Ref(el)}
-          style={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%) translateY(1600px)',
-            width: '88%',
-            height: '88%',
-            backgroundColor: '#ffffff',
-            border: '2px solid #000000',
-            borderRadius: '0px',
-            boxShadow: 'none',
-            overflow: 'hidden',
-            zIndex: 9,
-            display: 'flex',
-            flexDirection: 'column',
-            color: '#000000',
-            willChange: 'transform',
-          }}
-        >
-          <div style={{
-            padding: '32px 42px 0 42px',
-            borderBottom: '2px solid #000000',
-          }}>
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: '22px',
-            }}>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '30px',
-              }}>
-                <div style={{
-                  fontSize: '65px',
-                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                  fontWeight: '400',
-                  letterSpacing: '-0.02em',
-                  lineHeight: '1',
-                  color: '#000000',
-                }}>
-                  CLEANLINESS
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <div style={{
-            padding: '38px 42px 32px 42px',
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-            textAlign: 'center',
-          }}>
-            <div style={{
-              fontSize: '65px',
-              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-              fontWeight: '400',
-              letterSpacing: '-0.02em',
-              lineHeight: '1.2',
-              color: '#000000',
-              marginBottom: '40px',
-            }}>
-              Mari Bergabung Bersama<br />di Komunitas Kami
-            </div>
-            <svg width="70" height="70" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M17 7L7 17M7 17H17M7 17V7" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </div>
-        </div>
-
-        {/* CARD 6 - GENERAL */}
-        <div
-          ref={(el) => setCard6Ref(el)}
-          style={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%) translateY(2000px)',
-            width: '85%',
-            height: '85%',
-            backgroundColor: '#ffffff',
-            border: '2px solid #000000',
-            borderRadius: '0px',
-            boxShadow: 'none',
-            overflow: 'hidden',
-            zIndex: 10,
-            display: 'flex',
-            flexDirection: 'column',
-            color: '#000000',
-            willChange: 'transform',
-          }}
-        >
-          <div style={{
-            padding: '28px 38px 0 38px',
-            borderBottom: '2px solid #000000',
-          }}>
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: '20px',
-            }}>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '30px',
-              }}>
-                <div style={{
-                  fontSize: '60px',
-                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                  fontWeight: '400',
-                  letterSpacing: '-0.02em',
-                  lineHeight: '1',
-                  color: '#000000',
-                }}>
-                  GENERAL
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <div style={{
-            padding: '35px 38px 28px 38px',
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-            textAlign: 'center',
-          }}>
-            <div style={{
-              fontSize: '60px',
-              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-              fontWeight: '400',
-              letterSpacing: '-0.02em',
-              lineHeight: '1.2',
-              color: '#000000',
-              marginBottom: '40px',
-            }}>
-              Mari Bergabung Bersama<br />di Komunitas Kami
-            </div>
-            <svg width="65" height="65" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M17 7L7 17M7 17H17M7 17V7" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </div>
-        </div>
-
-      </div>
+      ))}
     </div>
 
     {/* SPACER BAWAH */}
-    <div style={{ height: '400px', backgroundColor: '#a2ea13' }} />
+    <div style={{ height: '200px', backgroundColor: '#a2ea13' }} />
 
   </div>
 )}
 
-
-
-
-
-            
-
-
-
-
-
-
-
-            
-            
+             
 
             {/* WRAPPER UNTUK SEMUA SECTION SETELAH COMMUNITY - TURUNKAN KE BAWAH */}
-<div style={{ marginTop: '500px' }}>  {/* ← TAMBAHKAN INI */}
+<div style={{ marginTop: '0px' }}>  {/* ← TAMBAHKAN INI */}
             {/* SECTION TRUSTED COLLABS */}
             <div
               ref={trustedSectionRef}
@@ -5294,17 +4877,6 @@ useEffect(() => {
         </div>
       </div>
         </div>  {/* TUTUP WRAPPER */}
-
-
-
-
-
-
-
-
-
-
-
       
 
       {/* SHADOW PAGE */}
