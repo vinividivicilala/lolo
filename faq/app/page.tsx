@@ -118,6 +118,20 @@ interface CalendarSubmission {
   userEmail?: string;
 }
 
+// Interface untuk Donation
+interface Donation {
+  id: string;
+  donorName: string;
+  amount: number;
+  location: string;
+  date: Timestamp;
+  description: string;
+  photos: string[];
+  userId?: string;
+  userEmail?: string;
+  createdAt: Timestamp;
+}
+
 // Interface untuk Community Member
 interface CommunityMember {
   userId: string;
@@ -138,28 +152,6 @@ interface Community {
   createdAt: Timestamp;
 }
 
-// Interface untuk Donation
-interface Donation {
-  id: string;
-  orphanageName: string;
-  donorName: string;
-  amount: number;
-  date: Timestamp;
-  message: string;
-  photos: string[];
-  createdAt: Timestamp;
-}
-
-// Interface untuk Comment pada Foto Donasi
-interface PhotoComment {
-  id: string;
-  photoIndex: number;
-  userName: string;
-  userPhoto?: string;
-  text: string;
-  timestamp: Timestamp;
-}
-
 // Email Admin
 const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
 
@@ -173,16 +165,33 @@ const defaultCommunities = [
   { id: "general", name: "GENERAL", description: "Komunitas umum untuk diskusi ringan, hiburan, dan berbagi cerita sehari-hari.", link: "/community/general" }
 ];
 
-// Data donasi contoh (hanya 1 donasi)
-const defaultDonation = {
-  id: "1",
-  orphanageName: "Panti Asuhan Al-Falah",
-  donorName: "Farid Ardiansyah",
-  amount: 10000000,
-  date: new Date(2026, 4, 23),
-  message: "Sebagai rasa syukur kepada Allah SWT atas kebahagiaan yang telah diberikan. PERSIB Bandung telah menjadi juara HATTRICK Liga 1 Indonesia pada tanggal 23 Mei 2026. Kemenangan ini membawa kebahagiaan yang luar biasa bagi seluruh bobotoh. Semoga donasi ini bermanfaat untuk anak-anak di Panti Asuhan Al-Falah.",
-  photos: ["/images/lkhh.jpg", "/images/ai.jpg", "/images/5.jpg", "/images/lkhh.jpg"]
-};
+// Data donasi default
+const defaultDonations = [
+  {
+    donorName: "Farid Ardiansyah",
+    amount: 5000000,
+    location: "Jakarta, Indonesia",
+    date: new Date(2026, 4, 15),
+    description: "Donasi untuk pembangunan fasilitas belajar di daerah terpencil. Semoga bermanfaat untuk anak-anak Indonesia.",
+    photos: ["/images/lkhh.jpg", "/images/ai.jpg", "/images/5.jpg", "/images/lkhh.jpg"]
+  },
+  {
+    donorName: "Budi Santoso",
+    amount: 2500000,
+    location: "Bandung, Indonesia",
+    date: new Date(2026, 4, 10),
+    description: "Mendukung program edukasi untuk anak-anak kurang mampu. Terus berkarya untuk negeri!",
+    photos: ["/images/ai.jpg", "/images/5.jpg", "/images/lkhh.jpg", "/images/ai.jpg"]
+  },
+  {
+    donorName: "Siti Nurhaliza",
+    amount: 1000000,
+    location: "Surabaya, Indonesia",
+    date: new Date(2026, 4, 5),
+    description: "Donasi untuk korban bencana alam. Semoga cepat pulih kembali.",
+    photos: ["/images/5.jpg", "/images/lkhh.jpg", "/images/ai.jpg", "/images/5.jpg"]
+  }
+];
 
 // SVG Components
 const NorthEastArrowIcon = ({ size = 24 }: { size?: number }) => (
@@ -258,14 +267,6 @@ const StatusIcon = ({ status }: { status: string }) => (
   </svg>
 );
 
-// Verified Badge Component
-const VerifiedBadge = ({ size = 20 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M22.5 12.5C22.5 13.6 22.4 14.7 22.2 15.8C21.9 17.3 20.9 18.6 19.5 19.3C18.1 20 16.5 20.1 15 19.6C14.5 19.4 14 19.1 13.5 18.8C12.9 18.4 12.2 18.2 11.5 18.2C10.8 18.2 10.1 18.4 9.5 18.8C9 19.1 8.5 19.4 8 19.6C6.5 20.1 4.9 20 3.5 19.3C2.1 18.6 1.1 17.3 0.8 15.8C0.6 14.7 0.5 13.6 0.5 12.5C0.5 11.4 0.6 10.3 0.8 9.2C1.1 7.7 2.1 6.4 3.5 5.7C4.9 5 6.5 4.9 8 5.4C8.5 5.6 9 5.9 9.5 6.2C10.1 6.6 10.8 6.8 11.5 6.8C12.2 6.8 12.9 6.6 13.5 6.2C14 5.9 14.5 5.6 15 5.4C16.5 4.9 18.1 5 19.5 5.7C20.9 6.4 21.9 7.7 22.2 9.2C22.4 10.3 22.5 11.4 22.5 12.5Z" fill="#1DA1F2" stroke="white" strokeWidth="1.5"/>
-    <path d="M7.5 12L10.5 15L16.5 9" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
-
 export default function HomePage(): React.JSX.Element {
   const [showPopup, setShowPopup] = useState(false);
   const [announcement, setAnnouncement] = useState<string | null>(null);
@@ -320,13 +321,8 @@ export default function HomePage(): React.JSX.Element {
   const [communities, setCommunities] = useState<Community[]>([]);
   const [openCommunityId, setOpenCommunityId] = useState<string | null>(null);
 
-  // State untuk Donations
-  const [donation, setDonation] = useState<Donation | null>(null);
-  const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(null);
-  const [photoComments, setPhotoComments] = useState<{ [key: number]: PhotoComment[] }>({});
-  const [newCommentText, setNewCommentText] = useState("");
-  const [showCommentModal, setShowCommentModal] = useState(false);
-  const [currentCommentPhotoIndex, setCurrentCommentPhotoIndex] = useState<number>(0);
+  // State untuk Donation
+  const [donations, setDonations] = useState<Donation[]>([]);
 
   // State untuk Stacked Cards
   const [cardsContainer, setCardsContainer] = useState<HTMLDivElement | null>(null);
@@ -666,6 +662,47 @@ export default function HomePage(): React.JSX.Element {
     return () => unsubscribe();
   }, []);
 
+  // Load donations from Firebase
+  useEffect(() => {
+    if (!db) return;
+
+    const loadDonations = async () => {
+      try {
+        const donationsRef = collection(db, "donations");
+        const q = query(donationsRef, orderBy("date", "desc"));
+        const snapshot = await getDocs(q);
+        
+        if (snapshot.empty) {
+          // Create default donations
+          for (const don of defaultDonations) {
+            await addDoc(donationsRef, {
+              ...don,
+              date: serverTimestamp(),
+              createdAt: serverTimestamp()
+            });
+          }
+          // Reload after creation
+          const newSnapshot = await getDocs(q);
+          const loadedDonations: Donation[] = [];
+          newSnapshot.forEach((doc) => {
+            loadedDonations.push({ id: doc.id, ...doc.data() } as Donation);
+          });
+          setDonations(loadedDonations);
+        } else {
+          const loadedDonations: Donation[] = [];
+          snapshot.forEach((doc) => {
+            loadedDonations.push({ id: doc.id, ...doc.data() } as Donation);
+          });
+          setDonations(loadedDonations);
+        }
+      } catch (error) {
+        console.error("Error loading donations:", error);
+      }
+    };
+
+    loadDonations();
+  }, []);
+
   // Load communities from Firebase
   useEffect(() => {
     if (!db) return;
@@ -708,85 +745,6 @@ export default function HomePage(): React.JSX.Element {
     loadCommunities();
   }, []);
 
-  // Load donation from Firebase
-  useEffect(() => {
-    if (!db) return;
-
-    const loadDonation = async () => {
-      try {
-        const donationsRef = collection(db, "donations");
-        const q = query(donationsRef, orderBy("createdAt", "desc"), limit(1));
-        const snapshot = await getDocs(q);
-        
-        if (snapshot.empty) {
-          // Create default donation
-          const donationData = {
-            ...defaultDonation,
-            date: serverTimestamp(),
-            createdAt: serverTimestamp()
-          };
-          await addDoc(donationsRef, donationData);
-          setDonation({ ...defaultDonation, id: "1", date: defaultDonation.date as any });
-        } else {
-          const docData = snapshot.docs[0];
-          setDonation({ id: docData.id, ...docData.data() } as Donation);
-        }
-      } catch (error) {
-        console.error("Error loading donation:", error);
-        setDonation({ ...defaultDonation, id: "1" });
-      }
-    };
-
-    loadDonation();
-  }, []);
-
-  // Load photo comments from Firebase
-  useEffect(() => {
-    if (!db || !donation) return;
-
-    const commentsRef = collection(db, "donation_comments");
-    const q = query(commentsRef, orderBy("timestamp", "asc"));
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const commentsByPhoto: { [key: number]: PhotoComment[] } = {};
-      snapshot.forEach((doc) => {
-        const comment = { id: doc.id, ...doc.data() } as PhotoComment;
-        if (!commentsByPhoto[comment.photoIndex]) {
-          commentsByPhoto[comment.photoIndex] = [];
-        }
-        commentsByPhoto[comment.photoIndex].push(comment);
-      });
-      setPhotoComments(commentsByPhoto);
-    });
-
-    return () => unsubscribe();
-  }, [donation]);
-
-  // Add comment function
-  const addComment = async () => {
-    if (!newCommentText.trim() || !user) {
-      alert("Silakan login terlebih dahulu untuk berkomentar!");
-      setShowAuthModal(true);
-      return;
-    }
-
-    try {
-      const commentsRef = collection(db, "donation_comments");
-      await addDoc(commentsRef, {
-        photoIndex: currentCommentPhotoIndex,
-        userName: user.displayName || user.email?.split('@')[0] || "User",
-        userPhoto: user.photoURL || null,
-        text: newCommentText.trim(),
-        timestamp: serverTimestamp()
-      });
-      setNewCommentText("");
-      setShowCommentModal(false);
-    } catch (error) {
-      console.error("Error adding comment:", error);
-      alert("Gagal menambahkan komentar.");
-    }
-  };
-
   // Join community function
   const joinCommunity = async (communityId: string, communityName: string) => {
     if (!user) {
@@ -796,7 +754,6 @@ export default function HomePage(): React.JSX.Element {
     }
 
     try {
-      const communityRef = doc(db, "communities", communityId);
       const communityDoc = await getDocs(query(collection(db, "communities"), where("name", "==", communityName)));
       
       if (!communityDoc.empty) {
@@ -2773,16 +2730,17 @@ useEffect(() => {
     };
   };
 
-  // Format currency
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount);
+  const formatDonationDate = (date: Date | Timestamp) => {
+    if (!date) return "";
+    const d = date instanceof Date ? date : date.toDate();
+    return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
   };
 
   // Data komunitas untuk ditampilkan
   const displayCommunities = communities.length > 0 ? communities : defaultCommunities.map((c, idx) => ({ ...c, id: idx.toString(), members: [], memberCount: 0 }));
-  
-  // Data donasi
-  const displayDonation = donation;
+
+  // Data donasi untuk ditampilkan
+  const displayDonations = donations.length > 0 ? donations : defaultDonations.map((d, idx) => ({ ...d, id: idx.toString() }));
 
   return (
     <>
@@ -3484,51 +3442,6 @@ useEffect(() => {
         .lenis.lenis-stopped {
           overflow: hidden;
         }
-        
-        /* Modal untuk foto dan komentar */
-        .photo-modal-overlay {
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background-color: rgba(0, 0, 0, 0.9);
-          z-index: 20002;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-        }
-        
-        .photo-modal {
-          max-width: 90vw;
-          max-height: 90vh;
-          position: relative;
-          cursor: default;
-        }
-        
-        .comment-modal-overlay {
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background-color: rgba(0, 0, 0, 0.8);
-          backdrop-filter: blur(8px);
-          z-index: 20003;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-        
-        .comment-modal {
-          background-color: #ffffff;
-          border-radius: 32px;
-          width: 90%;
-          max-width: 500px;
-          padding: 40px;
-          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-        }
       `}</style>
 
       {/* LOADING OVERLAY */}
@@ -4127,7 +4040,7 @@ useEffect(() => {
 
 
 
-{/* COMMUNITY SECTION - DENGAN EXPANDABLE DESCRIPTION DAN MEMBER LIST */}
+{/* COMMUNITY SECTION */}
 {!isLoading && (
   <div
     ref={cardsSectionRef}
@@ -4167,9 +4080,9 @@ useEffect(() => {
             fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
             fontSize: '260px',
             fontWeight: '400',
-            color: '#000000',
             letterSpacing: '-0.02em',
             lineHeight: '0.9',
+            color: '#000000',
             textTransform: 'uppercase',
             transition: 'color 0.3s ease',
           }}
@@ -4201,7 +4114,7 @@ useEffect(() => {
 
     {/* LIST KOMUNITAS */}
     <div style={{
-      padding: '60px 80px 80px 80px',
+      padding: '60px 80px 120px 80px',
       backgroundColor: '#a2ea13',
       transition: 'background-color 0.3s ease',
     }}>
@@ -4449,22 +4362,22 @@ useEffect(() => {
         );
       })}
     </div>
-
   </div>
 )}
 
-{/* DONATUR SECTION - AWARDS MINIMALIST STYLE - HANYA 1 DONASI */}
-{!isLoading && displayDonation && (
+{/* DONATUR SECTION - BARU */}
+{!isLoading && (
   <div
     style={{
       width: '100%',
       position: 'relative',
       backgroundColor: '#ffffff',
+      marginTop: '0',
       padding: '120px 80px',
       boxSizing: 'border-box',
     }}
   >
-    {/* JUDUL DONATUR 300px dengan counter (hanya 1) */}
+    {/* JUDUL DONATUR dengan counter */}
     <div style={{
       display: 'flex',
       justifyContent: 'space-between',
@@ -4475,7 +4388,7 @@ useEffect(() => {
       <div style={{
         display: 'flex',
         alignItems: 'baseline',
-        gap: '30px',
+        gap: '40px',
         flexWrap: 'wrap',
       }}>
         <div style={{
@@ -4490,386 +4403,178 @@ useEffect(() => {
           DONATUR
         </div>
         <div style={{
-          fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-          fontSize: '100px',
-          fontWeight: '400',
-          color: '#000000',
-          lineHeight: '0.9',
-        }}>
-          (1)
-        </div>
-      </div>
-      <div style={{
-        marginBottom: '20px',
-      }}>
-        <svg width="100" height="100" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-      </div>
-    </div>
-
-    {/* SINGLE DONATION CARD - MINIMALIST AWARDS STYLE */}
-    <div>
-      {/* Angka 01 */}
-      <div style={{
-        fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-        fontSize: '90px',
-        fontWeight: '400',
-        color: '#000000',
-        letterSpacing: '-0.02em',
-        lineHeight: '1',
-        marginBottom: '50px',
-      }}>
-        01
-      </div>
-
-      {/* Nama Panti Asuhan - font 50px */}
-      <div style={{
-        fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-        fontSize: '50px',
-        fontWeight: '400',
-        color: '#000000',
-        letterSpacing: '-0.02em',
-        lineHeight: '1.2',
-        marginBottom: '40px',
-      }}>
-        {displayDonation.orphanageName}
-      </div>
-
-      {/* Tanggal dan Nama Donatur - sejajar, font 30px dengan verified badge */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: '60px',
-        flexWrap: 'wrap',
-        gap: '20px',
-      }}>
-        <div style={{
-          fontFamily: "'Questrial', sans-serif",
-          fontSize: '30px',
-          fontWeight: '400',
-          color: '#000000',
-          letterSpacing: '-0.01em',
-        }}>
-          {displayDonation.date instanceof Date ? displayDonation.date.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : 
-           displayDonation.date?.toDate ? displayDonation.date.toDate().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : 
-           "23 Mei 2026"}
-        </div>
-        <div style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '12px',
+          gap: '20px',
         }}>
-          <span style={{
-            fontFamily: "'Questrial', sans-serif",
-            fontSize: '30px',
+          <div style={{
+            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+            fontSize: '100px',
             fontWeight: '400',
             color: '#000000',
-            letterSpacing: '-0.01em',
+            lineHeight: '1',
           }}>
-            {displayDonation.donorName}
-          </span>
-          <VerifiedBadge size={28} />
+            ({displayDonations.length})
+          </div>
+          <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
         </div>
       </div>
-
-      {/* Deskripsi Donasi - tentang syukur kepada Allah dan PERSIB juara hattrick 23 Mei 2026 */}
-      <div style={{
-        fontFamily: "'Questrial', sans-serif",
-        fontSize: '24px',
-        fontWeight: '400',
-        color: '#333333',
-        letterSpacing: '-0.01em',
-        lineHeight: '1.5',
-        marginBottom: '70px',
-        maxWidth: '80%',
-      }}>
-        {displayDonation.message}
-      </div>
-
-      {/* 4 Foto - grid 4 kolom, bisa diklik */}
-<div style={{
-  display: 'grid',
-  gridTemplateColumns: 'repeat(4, 1fr)',
-  gap: '30px',
-}}>
-  {(displayDonation?.photos || defaultDonation.photos).map((photo, idx) => (
-    <div key={idx} style={{ position: 'relative' }}>
-      <div
-        style={{
-          width: '100%',
-          aspectRatio: '1 / 1',
-          position: 'relative',
-          overflow: 'hidden',
-          backgroundColor: '#f0f0f0',
-          cursor: 'pointer',
-          transition: 'transform 0.3s ease',
-        }}
-        onClick={() => setSelectedPhotoIndex(idx)}
-        onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
-        onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-      >
-        <Image
-          src={photo}
-          alt={`Donation photo ${idx + 1}`}
-          fill
-          style={{ objectFit: 'cover' }}
-        />
-      </div>
-      {/* Tombol komentar di bawah foto */}
-      <button
-        onClick={() => {
-          setCurrentCommentPhotoIndex(idx);
-          setShowCommentModal(true);
-        }}
-        style={{
-          marginTop: '12px',
-          backgroundColor: 'transparent',
-          border: 'none',
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-          padding: '8px 12px',
-          borderRadius: '60px',
-          transition: 'background-color 0.2s',
-          fontSize: '14px',
-          color: '#666666',
-          fontFamily: "'Questrial', sans-serif",
-        }}
-        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f5f5f5'}
-        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-      >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="currentColor" strokeWidth="1.5" fill="none"/>
-        </svg>
-        <span>{photoComments[idx]?.length || 0} komentar</span>
-      </button>
     </div>
-  ))}
-</div>
 
-   
-
-{/* Photo Modal untuk preview foto */}
-{selectedPhotoIndex !== null && donation && (
-  <div
-    className="photo-modal-overlay"
-    onClick={() => setSelectedPhotoIndex(null)}
-  >
-    <div className="photo-modal" onClick={(e) => e.stopPropagation()}>
-      <div style={{
-        position: 'relative',
-        width: '80vw',
-        height: '80vh',
-      }}>
-        <Image
-          src={donation.photos[selectedPhotoIndex]}
-          alt={`Donation photo ${selectedPhotoIndex + 1}`}
-          fill
-          style={{ objectFit: 'contain' }}
-        />
-        <button
-          onClick={() => setSelectedPhotoIndex(null)}
-          style={{
-            position: 'absolute',
-            top: '-40px',
-            right: '-40px',
-            background: 'none',
-            border: 'none',
-            color: '#ffffff',
-            fontSize: '32px',
-            cursor: 'pointer',
-          }}
-        >
-          ✕
-        </button>
-      </div>
-    </div>
-  </div>
-)}
-
-{/* Comment Modal */}
-{showCommentModal && donation && (
-  <div className="comment-modal-overlay" onClick={() => setShowCommentModal(false)}>
-    <div className="comment-modal" onClick={(e) => e.stopPropagation()}>
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: '24px',
-        borderBottom: '1px solid #e0e0e0',
-        paddingBottom: '16px',
-      }}>
-        <h3 style={{
-          fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-          fontSize: '24px',
-          fontWeight: '400',
-          margin: 0,
+    {/* LIST DONASI */}
+    <div style={{
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '100px',
+    }}>
+      {displayDonations.map((donation, idx) => (
+        <div key={donation.id} style={{
+          borderBottom: idx !== displayDonations.length - 1 ? '1px solid rgba(0,0,0,0.1)' : 'none',
+          paddingBottom: idx !== displayDonations.length - 1 ? '80px' : '0',
         }}>
-          Komentar Foto
-        </h3>
-        <button
-          onClick={() => setShowCommentModal(false)}
-          style={{
-            background: 'none',
-            border: 'none',
-            fontSize: '24px',
-            cursor: 'pointer',
-          }}
-        >
-          ✕
-        </button>
-      </div>
+          {/* Nomor Urut Donasi */}
+          <div style={{
+            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+            fontSize: '180px',
+            fontWeight: '400',
+            color: '#000000',
+            letterSpacing: '-0.02em',
+            lineHeight: '1',
+            marginBottom: '40px',
+          }}>
+            {String(idx + 1).padStart(2, '0')}
+          </div>
 
-      {/* Daftar komentar */}
-      <div style={{
-        maxHeight: '300px',
-        overflowY: 'auto',
-        marginBottom: '24px',
-      }}>
-        {photoComments[currentCommentPhotoIndex]?.length > 0 ? (
-          photoComments[currentCommentPhotoIndex].map((comment) => (
-            <div key={comment.id} style={{
-              padding: '12px 0',
-              borderBottom: '1px solid #f0f0f0',
+          {/* Info Donasi: Tanggal, Daerah, Nama Donatur dengan Arrow */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            marginBottom: '40px',
+          }}>
+            <div style={{
               display: 'flex',
-              alignItems: 'flex-start',
-              gap: '12px',
+              alignItems: 'baseline',
+              gap: '60px',
+              flexWrap: 'wrap',
             }}>
               <div style={{
-                width: '36px',
-                height: '36px',
-                borderRadius: '50%',
-                backgroundColor: '#000000',
+                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                fontSize: '48px',
+                fontWeight: '400',
+                color: '#666666',
+                letterSpacing: '-0.02em',
+              }}>
+                {formatDonationDate(donation.date)}
+              </div>
+              <div style={{
+                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                fontSize: '48px',
+                fontWeight: '400',
+                color: '#666666',
+                letterSpacing: '-0.02em',
+              }}>
+                {donation.location}
+              </div>
+              <div style={{
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center',
-                color: '#ffffff',
-                fontSize: '16px',
-                fontWeight: '500',
-                flexShrink: 0,
+                gap: '20px',
               }}>
-                {comment.userName.charAt(0).toUpperCase()}
-              </div>
-              <div style={{ flex: 1 }}>
                 <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  marginBottom: '4px',
+                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                  fontSize: '48px',
+                  fontWeight: '400',
+                  color: '#000000',
+                  letterSpacing: '-0.02em',
                 }}>
-                  <span style={{
-                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    color: '#000000',
-                  }}>
-                    {comment.userName}
-                  </span>
-                  <span style={{
-                    fontSize: '11px',
-                    color: '#999999',
-                  }}>
-                    {comment.timestamp?.toDate ? new Date(comment.timestamp.toDate()).toLocaleDateString('id-ID') : 'Baru saja'}
-                  </span>
+                  {donation.donorName}
                 </div>
-                <p style={{
-                  fontFamily: "'Questrial', sans-serif",
-                  fontSize: '14px',
-                  color: '#333333',
-                  margin: 0,
-                  lineHeight: '1.4',
-                }}>
-                  {comment.text}
-                </p>
+                <NorthEastArrowIcon size={40} />
               </div>
             </div>
-          ))
-        ) : (
-          <div style={{
-            textAlign: 'center',
-            color: '#999999',
-            padding: '40px',
-            fontFamily: "'Questrial', sans-serif",
-          }}>
-            Belum ada komentar. Jadilah yang pertama!
           </div>
-        )}
-      </div>
 
-      {/* Form komentar */}
-      {user ? (
-        <div>
-          <textarea
-            value={newCommentText}
-            onChange={(e) => setNewCommentText(e.target.value)}
-            placeholder="Tulis komentar Anda..."
-            rows={3}
-            style={{
-              width: '100%',
-              padding: '12px 16px',
-              borderRadius: '16px',
-              border: '1px solid #e0e0e0',
-              fontFamily: "'Questrial', sans-serif",
-              fontSize: '14px',
-              resize: 'vertical',
-              marginBottom: '16px',
-            }}
-          />
-          <button
-            onClick={addComment}
-            style={{
-              padding: '12px 24px',
-              backgroundColor: '#000000',
-              color: '#ffffff',
-              border: 'none',
-              borderRadius: '60px',
-              cursor: 'pointer',
-              fontFamily: "'Questrial', sans-serif",
-              fontSize: '14px',
-              fontWeight: '500',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px',
-            }}
-          >
-            <span>Kirim Komentar</span>
-            <NorthEastArrowIcon size={16} />
-          </button>
-        </div>
-      ) : (
-        <div style={{
-          textAlign: 'center',
-          padding: '20px',
-          backgroundColor: '#f5f5f5',
-          borderRadius: '16px',
-        }}>
-          <span style={{
+          {/* Deskripsi Donasi */}
+          <div style={{
             fontFamily: "'Questrial', sans-serif",
-            fontSize: '14px',
-            color: '#666666',
+            fontSize: '32px',
+            fontWeight: '400',
+            color: '#333333',
+            letterSpacing: '-0.01em',
+            lineHeight: '1.4',
+            marginBottom: '50px',
+            maxWidth: '80%',
           }}>
-            Silakan login untuk berkomentar
-          </span>
-          <button
-            onClick={() => setShowAuthModal(true)}
-            style={{
-              marginLeft: '12px',
-              padding: '6px 16px',
-              backgroundColor: '#000000',
-              color: '#ffffff',
-              border: 'none',
-              borderRadius: '60px',
-              cursor: 'pointer',
-              fontSize: '12px',
-            }}
-          >
-            Login
-          </button>
+            {donation.description}
+          </div>
+
+          {/* 4 Foto Donasi */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(4, 1fr)',
+            gap: '20px',
+            marginBottom: '40px',
+          }}>
+            {donation.photos && donation.photos.slice(0, 4).map((photo, photoIdx) => (
+              <div key={photoIdx} style={{
+                aspectRatio: '1 / 1',
+                position: 'relative',
+                overflow: 'hidden',
+                backgroundColor: '#f0f0f0',
+              }}>
+                <Image
+                  src={photo}
+                  alt={`Donation ${idx + 1} photo ${photoIdx + 1}`}
+                  fill
+                  style={{ objectFit: 'cover' }}
+                />
+              </div>
+            ))}
+          </div>
         </div>
-      )}
+      ))}
+    </div>
+
+    {/* Tombol ke Halaman Donasi */}
+    <div style={{
+      display: 'flex',
+      justifyContent: 'center',
+      marginTop: '100px',
+    }}>
+      <Link href="/donation">
+        <button
+          style={{
+            padding: '18px 48px',
+            backgroundColor: '#000000',
+            color: '#ffffff',
+            border: 'none',
+            borderRadius: '60px',
+            cursor: 'pointer',
+            fontFamily: "'Questrial', sans-serif",
+            fontSize: '24px',
+            fontWeight: '500',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '16px',
+            transition: 'opacity 0.2s, transform 0.2s',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.opacity = '0.8';
+            e.currentTarget.style.transform = 'scale(1.02)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.opacity = '1';
+            e.currentTarget.style.transform = 'scale(1)';
+          }}
+        >
+          <span>VIEW ALL DONATIONS</span>
+          <NorthEastArrowIcon size={28} />
+        </button>
+      </Link>
     </div>
   </div>
 )}
@@ -4878,7 +4583,7 @@ useEffect(() => {
 
             
 
-            {/* WRAPPER UNTUK SEMUA SECTION SETELAH COMMUNITY */}
+            {/* WRAPPER UNTUK SEMUA SECTION SETELAH DONATUR */}
 <div style={{ marginTop: '0px' }}>
             {/* SECTION TRUSTED COLLABS */}
             <div
@@ -5787,7 +5492,8 @@ useEffect(() => {
           </div>
         </div>
       </div>
-    
+        </div>  {/* TUTUP WRAPPER */}
+
 
 
 
