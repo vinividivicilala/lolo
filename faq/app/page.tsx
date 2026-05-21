@@ -4588,70 +4588,69 @@ useEffect(() => {
         {displayDonation.message}
       </div>
 
-      {/* 4 Foto - grid 2x2 atau 4 kolom, bisa diklik */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(4, 1fr)',
-        gap: '30px',
-      }}>
-        {displayDonation.photos.map((photo, idx) => (
-          <div key={idx} style={{ position: 'relative' }}>
-            <div
-              style={{
-                width: '100%',
-                aspectRatio: '1 / 1',
-                position: 'relative',
-                overflow: 'hidden',
-                backgroundColor: '#f0f0f0',
-                cursor: 'pointer',
-                transition: 'transform 0.3s ease',
-              }}
-              onClick={() => setSelectedPhotoIndex(idx)}
-              onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
-              onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-            >
-              <Image
-                src={photo}
-                alt={`Donation photo ${idx + 1}`}
-                fill
-                style={{ objectFit: 'cover' }}
-              />
-            </div>
-            {/* Tombol komentar di bawah foto */}
-            <button
-              onClick={() => {
-                setCurrentCommentPhotoIndex(idx);
-                setShowCommentModal(true);
-              }}
-              style={{
-                marginTop: '12px',
-                backgroundColor: 'transparent',
-                border: 'none',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '8px 12px',
-                borderRadius: '60px',
-                transition: 'background-color 0.2s',
-                fontSize: '14px',
-                color: '#666666',
-                fontFamily: "'Questrial', sans-serif",
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f5f5f5'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="currentColor" strokeWidth="1.5" fill="none"/>
-              </svg>
-              <span>{photoComments[idx]?.length || 0} komentar</span>
-            </button>
-          </div>
-        ))}
+      {/* 4 Foto - grid 4 kolom, bisa diklik */}
+<div style={{
+  display: 'grid',
+  gridTemplateColumns: 'repeat(4, 1fr)',
+  gap: '30px',
+}}>
+  {(displayDonation?.photos || defaultDonation.photos).map((photo, idx) => (
+    <div key={idx} style={{ position: 'relative' }}>
+      <div
+        style={{
+          width: '100%',
+          aspectRatio: '1 / 1',
+          position: 'relative',
+          overflow: 'hidden',
+          backgroundColor: '#f0f0f0',
+          cursor: 'pointer',
+          transition: 'transform 0.3s ease',
+        }}
+        onClick={() => setSelectedPhotoIndex(idx)}
+        onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
+        onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+      >
+        <Image
+          src={photo}
+          alt={`Donation photo ${idx + 1}`}
+          fill
+          style={{ objectFit: 'cover' }}
+        />
       </div>
+      {/* Tombol komentar di bawah foto */}
+      <button
+        onClick={() => {
+          setCurrentCommentPhotoIndex(idx);
+          setShowCommentModal(true);
+        }}
+        style={{
+          marginTop: '12px',
+          backgroundColor: 'transparent',
+          border: 'none',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          padding: '8px 12px',
+          borderRadius: '60px',
+          transition: 'background-color 0.2s',
+          fontSize: '14px',
+          color: '#666666',
+          fontFamily: "'Questrial', sans-serif",
+        }}
+        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f5f5f5'}
+        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+        </svg>
+        <span>{photoComments[idx]?.length || 0} komentar</span>
+      </button>
     </div>
-  </div>
-)}
+  ))}
+</div>
+
+   
 
 {/* Photo Modal untuk preview foto */}
 {selectedPhotoIndex !== null && donation && (
