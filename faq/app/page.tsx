@@ -134,20 +134,21 @@ interface Community {
   description: string;
   members: CommunityMember[];
   memberCount: number;
+  link?: string;
   createdAt: Timestamp;
 }
 
 // Email Admin
 const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
 
-// Data komunitas default
+// Data komunitas default dengan link
 const defaultCommunities = [
-  { id: "education", name: "EDUCATION", description: "Tempat belajar bersama tentang perkembangan teknologi, desain, dan inovasi digital. Diskusi tentang tools terbaru, sharing knowledge, dan mentorship." },
-  { id: "programming", name: "PROGRAMMING", description: "Komunitas untuk para developer dan programmer. Share code, diskusi framework, problem solving, dan kolaborasi project open source." },
-  { id: "persib", name: "PERSIB", description: "Komunitas Bobotoh Persib Bandung. Diskusi pertandingan, transfer pemain, dan kegiatan suporter." },
-  { id: "pointblank", name: "POINT BLANK", description: "Komunitas gamer Point Blank. Diskusi strategi, turnamen, dan update game terbaru." },
-  { id: "cleanliness", name: "CLEANLINESS", description: "Komunitas peduli kebersihan lingkungan. Aksi bersih-bersih, edukasi, dan kampanye go green." },
-  { id: "general", name: "GENERAL", description: "Komunitas umum untuk diskusi ringan, hiburan, dan berbagi cerita sehari-hari." }
+  { id: "education", name: "EDUCATION", description: "Tempat belajar bersama tentang perkembangan teknologi, desain, dan inovasi digital. Diskusi tentang tools terbaru, sharing knowledge, dan mentorship.", link: "/community/education" },
+  { id: "programming", name: "PROGRAMMING", description: "Komunitas untuk para developer dan programmer. Share code, diskusi framework, problem solving, dan kolaborasi project open source.", link: "/community/programming" },
+  { id: "persib", name: "PERSIB", description: "Komunitas Bobotoh Persib Bandung. Diskusi pertandingan, transfer pemain, dan kegiatan suporter.", link: "/community/persib" },
+  { id: "pointblank", name: "POINT BLANK", description: "Komunitas gamer Point Blank. Diskusi strategi, turnamen, dan update game terbaru.", link: "/community/pointblank" },
+  { id: "cleanliness", name: "CLEANLINESS", description: "Komunitas peduli kebersihan lingkungan. Aksi bersih-bersih, edukasi, dan kampanye go green.", link: "/community/cleanliness" },
+  { id: "general", name: "GENERAL", description: "Komunitas umum untuk diskusi ringan, hiburan, dan berbagi cerita sehari-hari.", link: "/community/general" }
 ];
 
 // SVG Components
@@ -3945,7 +3946,7 @@ useEffect(() => {
 
 
 
-{/* COMMUNITY SECTION - TANPA CARD, TAMPILAN LIST KOMUNITAS */}
+{/* COMMUNITY SECTION - DENGAN EXPANDABLE DESCRIPTION DAN MEMBER LIST */}
 {!isLoading && (
   <div
     ref={cardsSectionRef}
@@ -4017,7 +4018,7 @@ useEffect(() => {
       </div>
     </div>
 
-    {/* LIST KOMUNITAS - 3 KOLOM: Angka | Nama + Deskripsi | Arrow */}
+    {/* LIST KOMUNITAS */}
     <div style={{
       padding: '60px 80px 120px 80px',
       backgroundColor: '#a2ea13',
@@ -4029,6 +4030,7 @@ useEffect(() => {
         
         return (
           <div key={community.id}>
+            {/* BARIS UTAMA: Angka | Nama Community + Link Arrow | Arrow */}
             <div
               style={{
                 display: 'flex',
@@ -4053,10 +4055,13 @@ useEffect(() => {
                 {String(idx + 1).padStart(2, '0')}
               </div>
 
-              {/* Tengah: Nama Community + Deskripsi singkat */}
+              {/* Tengah: Nama Community dengan Link */}
               <div style={{
                 flex: 1,
                 paddingLeft: '40px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '30px',
               }}>
                 <div style={{
                   fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
@@ -4069,20 +4074,33 @@ useEffect(() => {
                 }}>
                   {community.name}
                 </div>
-                <div style={{
-                  fontFamily: "'Questrial', sans-serif",
-                  fontSize: '50px',
-                  fontWeight: '400',
-                  color: '#666666',
-                  letterSpacing: '-0.01em',
-                  marginTop: '20px',
-                  textAlign: 'left',
-                }}>
-                  {community.description}
-                </div>
+                {/* Link Arrow ke halaman community */}
+                <Link href={community.link || `/community/${community.name.toLowerCase()}`}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '12px',
+                      cursor: 'pointer',
+                      transition: 'opacity 0.2s',
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                    onMouseEnter={(e) => e.currentTarget.style.opacity = '0.7'}
+                    onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+                  >
+                    <span style={{
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '30px',
+                      color: '#000000',
+                    }}>
+                      Kunjungi
+                    </span>
+                    <NorthEastArrowIcon size={36} />
+                  </div>
+                </Link>
               </div>
 
-              {/* Kanan: SVG Arrow */}
+              {/* Kanan: SVG Arrow untuk Expand/Collapse */}
               <div style={{
                 width: '150px',
                 display: 'flex',
@@ -4096,12 +4114,26 @@ useEffect(() => {
               </div>
             </div>
 
-            {/* EXPANDED CONTENT - TAMPILAN MEMBER YANG SUDAH JOIN */}
+            {/* EXPANDED CONTENT - DESKRIPSI dan MEMBER */}
             {isOpen && (
               <div style={{
                 padding: '40px 0 60px 190px',
                 borderBottom: '1px solid rgba(0,0,0,0.1)',
               }}>
+                {/* Deskripsi Community - Font 50px */}
+                <div style={{
+                  fontFamily: "'Questrial', sans-serif",
+                  fontSize: '50px',
+                  fontWeight: '400',
+                  color: '#000000',
+                  letterSpacing: '-0.01em',
+                  lineHeight: '1.3',
+                  marginBottom: '50px',
+                }}>
+                  {community.description}
+                </div>
+
+                {/* MEMBER SECTION */}
                 <div style={{
                   fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
                   fontSize: '30px',
@@ -4117,9 +4149,10 @@ useEffect(() => {
                     display: 'flex',
                     flexWrap: 'wrap',
                     gap: '20px',
+                    marginBottom: '40px',
                   }}>
-                    {memberNames.map((name, idx) => (
-                      <div key={idx} style={{
+                    {memberNames.map((name, memberIdx) => (
+                      <div key={memberIdx} style={{
                         display: 'flex',
                         alignItems: 'center',
                         gap: '12px',
@@ -4163,12 +4196,12 @@ useEffect(() => {
                   </div>
                 )}
                 
-                {/* Tombol Join Community */}
-                {user && (
+                {/* Tombol Join Community dengan Arrow */}
+                {user ? (
                   <button
                     onClick={() => joinCommunity(community.id, community.name)}
                     style={{
-                      marginTop: '40px',
+                      marginTop: '20px',
                       padding: '14px 32px',
                       backgroundColor: '#000000',
                       color: '#ffffff',
@@ -4178,7 +4211,7 @@ useEffect(() => {
                       fontFamily: "'Questrial', sans-serif",
                       fontSize: '20px',
                       fontWeight: '500',
-                      display: 'flex',
+                      display: 'inline-flex',
                       alignItems: 'center',
                       gap: '12px',
                       transition: 'opacity 0.2s',
@@ -4189,15 +4222,16 @@ useEffect(() => {
                     <span>JOIN COMMUNITY</span>
                     <NorthEastArrowIcon size={20} />
                   </button>
-                )}
-                
-                {!user && (
+                ) : (
                   <div style={{
-                    marginTop: '40px',
+                    marginTop: '20px',
                     padding: '20px',
                     backgroundColor: 'rgba(0,0,0,0.05)',
                     borderRadius: '16px',
                     textAlign: 'center',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '16px',
                   }}>
                     <span style={{
                       fontFamily: "'Questrial', sans-serif",
@@ -4206,6 +4240,26 @@ useEffect(() => {
                     }}>
                       Silakan login terlebih dahulu untuk bergabung ke komunitas
                     </span>
+                    <button
+                      onClick={() => setShowAuthModal(true)}
+                      style={{
+                        padding: '8px 24px',
+                        backgroundColor: '#000000',
+                        color: '#ffffff',
+                        border: 'none',
+                        borderRadius: '60px',
+                        cursor: 'pointer',
+                        fontFamily: "'Questrial', sans-serif",
+                        fontSize: '16px',
+                        fontWeight: '500',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                      }}
+                    >
+                      <span>LOGIN</span>
+                      <NorthEastArrowIcon size={16} />
+                    </button>
                   </div>
                 )}
               </div>
@@ -4222,7 +4276,7 @@ useEffect(() => {
 
             
 
-            {/* WRAPPER UNTUK SEMUA SECTION SETELAH COMMUNITY - TURUNKAN KE BAWAH */}
+            {/* WRAPPER UNTUK SEMUA SECTION SETELAH COMMUNITY */}
 <div style={{ marginTop: '0px' }}>
             {/* SECTION TRUSTED COLLABS */}
             <div
