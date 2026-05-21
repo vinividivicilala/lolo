@@ -4430,7 +4430,7 @@ useEffect(() => {
       justifyContent: 'space-between',
       alignItems: 'flex-end',
       marginBottom: '80px',
-      borderBottom: '1px solid rgba(0,0,0,0.1)",
+     borderBottom: '1px solid rgba(0,0,0,0.1)',
       paddingBottom: '40px',
     }}>
       <div style={{
