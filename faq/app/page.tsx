@@ -37,7 +37,9 @@ import {
   limit,
   where,
   getDocs,
-  deleteDoc
+  deleteDoc,
+  arrayUnion,
+  arrayRemove
 } from "firebase/firestore";
 
 // Register GSAP plugins
@@ -116,8 +118,37 @@ interface CalendarSubmission {
   userEmail?: string;
 }
 
+// Interface untuk Community Member
+interface CommunityMember {
+  userId: string;
+  userName: string;
+  userEmail: string;
+  userPhoto?: string;
+  joinedAt: Timestamp;
+}
+
+// Interface untuk Community
+interface Community {
+  id: string;
+  name: string;
+  description: string;
+  members: CommunityMember[];
+  memberCount: number;
+  createdAt: Timestamp;
+}
+
 // Email Admin
 const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
+
+// Data komunitas default
+const defaultCommunities = [
+  { id: "education", name: "EDUCATION", description: "Tempat belajar bersama tentang perkembangan teknologi, desain, dan inovasi digital. Diskusi tentang tools terbaru, sharing knowledge, dan mentorship." },
+  { id: "programming", name: "PROGRAMMING", description: "Komunitas untuk para developer dan programmer. Share code, diskusi framework, problem solving, dan kolaborasi project open source." },
+  { id: "persib", name: "PERSIB", description: "Komunitas Bobotoh Persib Bandung. Diskusi pertandingan, transfer pemain, dan kegiatan suporter." },
+  { id: "pointblank", name: "POINT BLANK", description: "Komunitas gamer Point Blank. Diskusi strategi, turnamen, dan update game terbaru." },
+  { id: "cleanliness", name: "CLEANLINESS", description: "Komunitas peduli kebersihan lingkungan. Aksi bersih-bersih, edukasi, dan kampanye go green." },
+  { id: "general", name: "GENERAL", description: "Komunitas umum untuk diskusi ringan, hiburan, dan berbagi cerita sehari-hari." }
+];
 
 // SVG Components
 const NorthEastArrowIcon = ({ size = 24 }: { size?: number }) => (
@@ -242,6 +273,10 @@ export default function HomePage(): React.JSX.Element {
   const [selectedSubmission, setSelectedSubmission] = useState<CalendarSubmission | null>(null);
   const [replyText, setReplyText] = useState("");
   const [replyStatus, setReplyStatus] = useState<"pending" | "confirmed" | "completed" | "rejected">("confirmed");
+
+  // State untuk Community
+  const [communities, setCommunities] = useState<Community[]>([]);
+  const [openCommunityId, setOpenCommunityId] = useState<string | null>(null);
 
   // State untuk Stacked Cards
   const [cardsContainer, setCardsContainer] = useState<HTMLDivElement | null>(null);
@@ -580,6 +615,94 @@ export default function HomePage(): React.JSX.Element {
 
     return () => unsubscribe();
   }, []);
+
+  // Load communities from Firebase
+  useEffect(() => {
+    if (!db) return;
+
+    const loadCommunities = async () => {
+      try {
+        const communitiesRef = collection(db, "communities");
+        const q = query(communitiesRef);
+        const snapshot = await getDocs(q);
+        
+        if (snapshot.empty) {
+          // Create default communities
+          for (const comm of defaultCommunities) {
+            await addDoc(communitiesRef, {
+              ...comm,
+              members: [],
+              memberCount: 0,
+              createdAt: serverTimestamp()
+            });
+          }
+          // Reload after creation
+          const newSnapshot = await getDocs(q);
+          const loadedCommunities: Community[] = [];
+          newSnapshot.forEach((doc) => {
+            loadedCommunities.push({ id: doc.id, ...doc.data() } as Community);
+          });
+          setCommunities(loadedCommunities);
+        } else {
+          const loadedCommunities: Community[] = [];
+          snapshot.forEach((doc) => {
+            loadedCommunities.push({ id: doc.id, ...doc.data() } as Community);
+          });
+          setCommunities(loadedCommunities);
+        }
+      } catch (error) {
+        console.error("Error loading communities:", error);
+      }
+    };
+
+    loadCommunities();
+  }, []);
+
+  // Join community function
+  const joinCommunity = async (communityId: string, communityName: string) => {
+    if (!user) {
+      alert("Silakan login terlebih dahulu untuk bergabung ke komunitas!");
+      setShowAuthModal(true);
+      return;
+    }
+
+    try {
+      const communityRef = doc(db, "communities", communityId);
+      const communityDoc = await getDocs(query(collection(db, "communities"), where("name", "==", communityName)));
+      
+      if (!communityDoc.empty) {
+        const docId = communityDoc.docs[0].id;
+        const docRef = doc(db, "communities", docId);
+        const currentCommunity = communityDoc.docs[0].data() as Community;
+        
+        // Check if user already joined
+        const isJoined = currentCommunity.members?.some(m => m.userId === user.uid);
+        
+        if (isJoined) {
+          alert(`Anda sudah bergabung di komunitas ${communityName}`);
+          return;
+        }
+        
+        const newMember: CommunityMember = {
+          userId: user.uid,
+          userName: user.displayName || user.email?.split('@')[0] || "User",
+          userEmail: user.email || "",
+          userPhoto: user.photoURL || undefined,
+          joinedAt: serverTimestamp() as Timestamp
+        };
+        
+        await updateDoc(docRef, {
+          members: arrayUnion(newMember),
+          memberCount: (currentCommunity.memberCount || 0) + 1
+        });
+        
+        alert(`Selamat! Anda telah bergabung ke komunitas ${communityName}`);
+      }
+    } catch (error) {
+      console.error("Error joining community:", error);
+      alert("Gagal bergabung ke komunitas. Silakan coba lagi.");
+    }
+  };
 
   // Fungsi untuk scroll ke bottom chat
   const scrollToBottom = () => {
@@ -2521,15 +2644,8 @@ useEffect(() => {
     };
   };
 
-  // Data komunitas
-  const communityData = [
-    { id: "01", name: "EDUCATION" },
-    { id: "02", name: "PROGRAMMING" },
-    { id: "03", name: "PERSIB" },
-    { id: "04", name: "POINT BLANK" },
-    { id: "05", name: "CLEANLINESS" },
-    { id: "06", name: "GENERAL" }
-  ];
+  // Data komunitas untuk ditampilkan
+  const displayCommunities = communities.length > 0 ? communities : defaultCommunities.map((c, idx) => ({ ...c, id: idx.toString(), members: [], memberCount: 0 }));
 
   return (
     <>
@@ -3829,7 +3945,7 @@ useEffect(() => {
 
 
 
-{/* STACKED CARDS SECTION - 6 CARD */}
+{/* COMMUNITY SECTION - TANPA CARD, TAMPILAN LIST KOMUNITAS */}
 {!isLoading && (
   <div
     ref={cardsSectionRef}
@@ -3842,7 +3958,7 @@ useEffect(() => {
       transition: 'background-color 0.3s ease',
     }}
   >
-    {/* JUDUL COMMUNITY - Tanpa border bottom */}
+    {/* JUDUL COMMUNITY */}
     <div style={{
       position: 'relative',
       zIndex: 20,
@@ -3886,7 +4002,7 @@ useEffect(() => {
             color: '#000000',
             lineHeight: '0.9',
           }}>
-            ({communityData.length})
+            ({displayCommunities.length})
           </div>
         </div>
         <div style={{
@@ -3901,74 +4017,213 @@ useEffect(() => {
       </div>
     </div>
 
-    {/* LIST KOMUNITAS - 3 KOLOM: Angka | Nama | Arrow */}
+    {/* LIST KOMUNITAS - 3 KOLOM: Angka | Nama + Deskripsi | Arrow */}
     <div style={{
       padding: '60px 80px 120px 80px',
       backgroundColor: '#a2ea13',
       transition: 'background-color 0.3s ease',
     }}>
-      {communityData.map((community) => (
-        <div
-          key={community.id}
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            padding: '40px 0',
-            borderBottom: '1px solid rgba(0,0,0,0.1)',
-          }}
-        >
-          {/* Kiri: Angka 01, 02, dst */}
-          <div style={{
-            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-            fontSize: '90px',
-            fontWeight: '400',
-            color: '#000000',
-            letterSpacing: '-0.02em',
-            lineHeight: '1',
-            width: '150px',
-          }}>
-            {community.id}
-          </div>
+      {displayCommunities.map((community, idx) => {
+        const isOpen = openCommunityId === community.id;
+        const memberNames = community.members?.map(m => m.userName) || [];
+        
+        return (
+          <div key={community.id}>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                padding: '30px 0',
+                borderBottom: '1px solid rgba(0,0,0,0.1)',
+                cursor: 'pointer',
+              }}
+              onClick={() => setOpenCommunityId(isOpen ? null : community.id)}
+            >
+              {/* Kiri: Angka 01, 02, dst */}
+              <div style={{
+                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                fontSize: '90px',
+                fontWeight: '400',
+                color: '#000000',
+                letterSpacing: '-0.02em',
+                lineHeight: '1',
+                width: '150px',
+              }}>
+                {String(idx + 1).padStart(2, '0')}
+              </div>
 
-          {/* Tengah: Nama Community */}
-          <div style={{
-            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-            fontSize: '90px',
-            fontWeight: '400',
-            color: '#000000',
-            letterSpacing: '-0.02em',
-            lineHeight: '1',
-            textAlign: 'center',
-            flex: 1,
-          }}>
-            {community.name}
-          </div>
+              {/* Tengah: Nama Community + Deskripsi singkat */}
+              <div style={{
+                flex: 1,
+                paddingLeft: '40px',
+              }}>
+                <div style={{
+                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                  fontSize: '90px',
+                  fontWeight: '400',
+                  color: '#000000',
+                  letterSpacing: '-0.02em',
+                  lineHeight: '1',
+                  textAlign: 'left',
+                }}>
+                  {community.name}
+                </div>
+                <div style={{
+                  fontFamily: "'Questrial', sans-serif",
+                  fontSize: '50px',
+                  fontWeight: '400',
+                  color: '#666666',
+                  letterSpacing: '-0.01em',
+                  marginTop: '20px',
+                  textAlign: 'left',
+                }}>
+                  {community.description}
+                </div>
+              </div>
 
-          {/* Kanan: SVG Arrow */}
-          <div style={{
-            width: '150px',
-            display: 'flex',
-            justifyContent: 'flex-end',
-          }}>
-            <svg width="90" height="90" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M17 7L7 17M7 17H17M7 17V7" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
+              {/* Kanan: SVG Arrow */}
+              <div style={{
+                width: '150px',
+                display: 'flex',
+                justifyContent: 'flex-end',
+                transition: 'transform 0.3s ease',
+                transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)',
+              }}>
+                <svg width="90" height="90" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M9 18L15 12L9 6" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+            </div>
+
+            {/* EXPANDED CONTENT - TAMPILAN MEMBER YANG SUDAH JOIN */}
+            {isOpen && (
+              <div style={{
+                padding: '40px 0 60px 190px',
+                borderBottom: '1px solid rgba(0,0,0,0.1)',
+              }}>
+                <div style={{
+                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                  fontSize: '30px',
+                  fontWeight: '400',
+                  color: '#000000',
+                  marginBottom: '30px',
+                }}>
+                  MEMBERS ({memberNames.length})
+                </div>
+                
+                {memberNames.length > 0 ? (
+                  <div style={{
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    gap: '20px',
+                  }}>
+                    {memberNames.map((name, idx) => (
+                      <div key={idx} style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                        padding: '10px 24px',
+                        backgroundColor: 'rgba(0,0,0,0.05)',
+                        borderRadius: '60px',
+                      }}>
+                        <div style={{
+                          width: '40px',
+                          height: '40px',
+                          borderRadius: '50%',
+                          backgroundColor: '#000000',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          color: '#ffffff',
+                          fontSize: '20px',
+                          fontWeight: '500',
+                        }}>
+                          {name.charAt(0).toUpperCase()}
+                        </div>
+                        <span style={{
+                          fontFamily: "'Questrial', sans-serif",
+                          fontSize: '24px',
+                          color: '#000000',
+                        }}>
+                          {name}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div style={{
+                    fontFamily: "'Questrial', sans-serif",
+                    fontSize: '24px',
+                    color: '#999999',
+                    padding: '40px 0',
+                    textAlign: 'center',
+                  }}>
+                    Belum ada member yang bergabung. Jadilah yang pertama!
+                  </div>
+                )}
+                
+                {/* Tombol Join Community */}
+                {user && (
+                  <button
+                    onClick={() => joinCommunity(community.id, community.name)}
+                    style={{
+                      marginTop: '40px',
+                      padding: '14px 32px',
+                      backgroundColor: '#000000',
+                      color: '#ffffff',
+                      border: 'none',
+                      borderRadius: '60px',
+                      cursor: 'pointer',
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '20px',
+                      fontWeight: '500',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '12px',
+                      transition: 'opacity 0.2s',
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
+                    onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+                  >
+                    <span>JOIN COMMUNITY</span>
+                    <NorthEastArrowIcon size={20} />
+                  </button>
+                )}
+                
+                {!user && (
+                  <div style={{
+                    marginTop: '40px',
+                    padding: '20px',
+                    backgroundColor: 'rgba(0,0,0,0.05)',
+                    borderRadius: '16px',
+                    textAlign: 'center',
+                  }}>
+                    <span style={{
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '20px',
+                      color: '#666666',
+                    }}>
+                      Silakan login terlebih dahulu untuk bergabung ke komunitas
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
-
-    {/* SPACER BAWAH */}
-    <div style={{ height: '200px', backgroundColor: '#a2ea13' }} />
 
   </div>
 )}
 
-             
+            
+
+            
 
             {/* WRAPPER UNTUK SEMUA SECTION SETELAH COMMUNITY - TURUNKAN KE BAWAH */}
-<div style={{ marginTop: '0px' }}>  {/* ← TAMBAHKAN INI */}
+<div style={{ marginTop: '0px' }}>
             {/* SECTION TRUSTED COLLABS */}
             <div
               ref={trustedSectionRef}
@@ -4877,6 +5132,15 @@ useEffect(() => {
         </div>
       </div>
         </div>  {/* TUTUP WRAPPER */}
+
+
+
+
+
+
+
+
+
       
 
       {/* SHADOW PAGE */}
