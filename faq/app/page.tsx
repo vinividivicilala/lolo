@@ -174,6 +174,14 @@ const defaultCommunities = [
   { id: "general", name: "GENERAL", description: "Komunitas umum untuk diskusi ringan, hiburan, dan berbagi cerita sehari-hari.", link: "/community/general" }
 ];
 
+// Sample donation photos
+const samplePhotos = [
+  "/images/donation1.jpg",
+  "/images/donation2.jpg",
+  "/images/donation3.jpg",
+  "/images/donation4.jpg"
+];
+
 // SVG Components
 const NorthEastArrowIcon = ({ size = 24 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -311,9 +319,9 @@ export default function HomePage(): React.JSX.Element {
   const [donationAmount, setDonationAmount] = useState("");
   const [donationMessage, setDonationMessage] = useState("");
   const [donationIsAnonymous, setDonationIsAnonymous] = useState(false);
-  const [donationPhotos, setDonationPhotos] = useState<string[]>([]);
   const [selectedDonation, setSelectedDonation] = useState<Donation | null>(null);
   const [commentText, setCommentText] = useState("");
+  const [donationCommentTarget, setDonationCommentTarget] = useState<string | null>(null);
 
   // State untuk Community
   const [communities, setCommunities] = useState<Community[]>([]);
@@ -479,14 +487,6 @@ export default function HomePage(): React.JSX.Element {
   dayAfterTomorrow.setDate(today.getDate() + 2);
 
   const timeSlots = ["09:00", "10:00", "11:00", "13:00", "14:00", "15:00", "16:00"];
-
-  // Sample donation photos
-  const samplePhotos = [
-    "/images/donation1.jpg",
-    "/images/donation2.jpg",
-    "/images/donation3.jpg",
-    "/images/donation4.jpg"
-  ];
 
   const getDaysInMonth = (date: Date) => {
     const year = date.getFullYear();
@@ -676,7 +676,12 @@ export default function HomePage(): React.JSX.Element {
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const loadedDonations: Donation[] = [];
       snapshot.forEach((doc) => {
-        loadedDonations.push({ id: doc.id, ...doc.data(), comments: doc.data().comments || [] } as Donation);
+        const data = doc.data();
+        loadedDonations.push({ 
+          id: doc.id, 
+          ...data, 
+          comments: data.comments || [] 
+        } as Donation);
       });
       setDonations(loadedDonations);
     });
@@ -706,7 +711,7 @@ export default function HomePage(): React.JSX.Element {
         message: donationMessage,
         isAnonymous: donationIsAnonymous,
         verified: user.email === ADMIN_EMAIL,
-        photos: donationPhotos.length > 0 ? donationPhotos : samplePhotos,
+        photos: samplePhotos,
         createdAt: serverTimestamp(),
         comments: []
       });
@@ -716,7 +721,6 @@ export default function HomePage(): React.JSX.Element {
       setDonationAmount("");
       setDonationMessage("");
       setDonationIsAnonymous(false);
-      setDonationPhotos([]);
     } catch (error) {
       console.error("Error submitting donation:", error);
       alert("Gagal mengirim donasi. Silakan coba lagi.");
@@ -745,6 +749,7 @@ export default function HomePage(): React.JSX.Element {
       const updatedComments = [...(donation?.comments || []), newComment];
       await updateDoc(donationRef, { comments: updatedComments });
       setCommentText("");
+      setDonationCommentTarget(null);
     } catch (error) {
       console.error("Error adding comment:", error);
     }
@@ -2782,7 +2787,7 @@ useEffect(() => {
   const displayCommunities = communities.length > 0 ? communities : defaultCommunities.map((c, idx) => ({ ...c, id: idx.toString(), members: [], memberCount: 0 }));
 
   // Hitung total donasi
-  const totalDonations = donations.reduce((sum, d) => sum + d.amount, 0);
+  const totalDonations = donations.reduce((sum, d) => sum + (d.amount || 0), 0);
 
   return (
     <>
@@ -4425,7 +4430,7 @@ useEffect(() => {
       justifyContent: 'space-between',
       alignItems: 'flex-end',
       marginBottom: '80px',
-      borderBottom: '1px solid rgba(0,0,0,0.1)',
+      borderBottom: '1px solid rgba(0,0,0,0.1)",
       paddingBottom: '40px',
     }}>
       <div style={{
@@ -4462,7 +4467,7 @@ useEffect(() => {
     </div>
 
     {/* DONATION CARD - AWARDS MINIMALIST DESIGN */}
-    {donations.length > 0 && (
+    {donations && donations.length > 0 ? (
       <div style={{
         marginBottom: '80px',
       }}>
@@ -4553,7 +4558,7 @@ useEffect(() => {
                 gap: '20px',
                 marginBottom: '40px',
               }}>
-                {donation.photos.map((photo, idx) => (
+                {donation.photos && donation.photos.map((photo, idx) => (
                   <div
                     key={idx}
                     style={{
@@ -4661,7 +4666,7 @@ useEffect(() => {
                 )}
                 
                 {/* Add Comment */}
-                {user ? (
+                {donationCommentTarget === donation.id ? (
                   <div style={{
                     display: 'flex',
                     gap: '15px',
@@ -4686,6 +4691,7 @@ useEffect(() => {
                           addComment(donation.id);
                         }
                       }}
+                      autoFocus
                     />
                     <button
                       onClick={() => addComment(donation.id)}
@@ -4708,42 +4714,82 @@ useEffect(() => {
                       <span>KIRIM</span>
                       <NorthEastArrowIcon size={16} />
                     </button>
-                  </div>
-                ) : (
-                  <div style={{
-                    padding: '15px 20px',
-                    backgroundColor: '#f0f0f0',
-                    borderRadius: '60px',
-                    textAlign: 'center',
-                  }}>
-                    <span style={{
-                      fontFamily: "'Questrial', sans-serif",
-                      fontSize: '14px',
-                      color: '#666666',
-                    }}>
-                      Silakan login untuk memberikan komentar
-                    </span>
                     <button
-                      onClick={() => setShowAuthModal(true)}
+                      onClick={() => setDonationCommentTarget(null)}
                       style={{
-                        marginLeft: '15px',
-                        padding: '5px 15px',
-                        backgroundColor: '#000000',
-                        color: '#ffffff',
-                        border: 'none',
+                        padding: '10px 20px',
                         borderRadius: '60px',
+                        border: '1px solid #cccccc',
+                        backgroundColor: 'transparent',
+                        color: '#666666',
                         cursor: 'pointer',
-                        fontSize: '12px',
+                        fontFamily: "'Questrial', sans-serif",
+                        fontSize: '14px',
                       }}
                     >
-                      LOGIN
+                      Batal
                     </button>
                   </div>
+                ) : (
+                  <button
+                    onClick={() => {
+                      if (user) {
+                        setDonationCommentTarget(donation.id);
+                      } else {
+                        alert("Silakan login untuk berkomentar");
+                        setShowAuthModal(true);
+                      }
+                    }}
+                    style={{
+                      padding: '12px 24px',
+                      borderRadius: '60px',
+                      border: '1px solid #000000',
+                      backgroundColor: 'transparent',
+                      color: '#000000',
+                      cursor: 'pointer',
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      transition: 'opacity 0.2s',
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.opacity = '0.7'}
+                    onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+                  >
+                    <span>TULIS KOMENTAR</span>
+                    <NorthEastArrowIcon size={16} />
+                  </button>
                 )}
               </div>
             </div>
           );
         })}
+      </div>
+    ) : (
+      <div style={{
+        textAlign: 'center',
+        padding: '80px',
+        backgroundColor: '#f5f5f5',
+        marginBottom: '60px',
+      }}>
+        <div style={{
+          fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+          fontSize: '40px',
+          fontWeight: '400',
+          color: '#000000',
+          marginBottom: '20px',
+        }}>
+          Belum Ada Donasi
+        </div>
+        <div style={{
+          fontFamily: "'Questrial', sans-serif",
+          fontSize: '20px',
+          color: '#666666',
+        }}>
+          Jadilah donatur pertama untuk panti asuhan
+        </div>
       </div>
     )}
 
@@ -4991,7 +5037,7 @@ useEffect(() => {
         overflow: 'auto',
         padding: '20px',
       }}>
-        {selectedDonation.photos.map((photo, idx) => (
+        {selectedDonation.photos && selectedDonation.photos.map((photo, idx) => (
           <div key={idx} style={{
             position: 'relative',
             width: '300px',
