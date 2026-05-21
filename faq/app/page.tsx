@@ -138,6 +138,18 @@ interface Community {
   createdAt: Timestamp;
 }
 
+// Interface untuk Donation
+interface Donation {
+  id: string;
+  donorName: string;
+  amount: number;
+  date: Timestamp;
+  location?: string;
+  message?: string;
+  photos?: string[];
+  createdAt: Timestamp;
+}
+
 // Email Admin
 const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
 
@@ -149,6 +161,19 @@ const defaultCommunities = [
   { id: "pointblank", name: "POINT BLANK", description: "Komunitas gamer Point Blank. Diskusi strategi, turnamen, dan update game terbaru.", link: "/community/pointblank" },
   { id: "cleanliness", name: "CLEANLINESS", description: "Komunitas peduli kebersihan lingkungan. Aksi bersih-bersih, edukasi, dan kampanye go green.", link: "/community/cleanliness" },
   { id: "general", name: "GENERAL", description: "Komunitas umum untuk diskusi ringan, hiburan, dan berbagi cerita sehari-hari.", link: "/community/general" }
+];
+
+// Data donasi contoh
+const defaultDonations = [
+  {
+    id: "1",
+    donorName: "Farid Ardiansyah",
+    amount: 1000000,
+    date: new Date(),
+    location: "Jakarta, Indonesia",
+    message: "Mendukung program edukasi dan pengembangan teknologi untuk generasi muda.",
+    photos: ["/images/lkhh.jpg", "/images/ai.jpg", "/images/5.jpg", "/images/lkhh.jpg"]
+  }
 ];
 
 // SVG Components
@@ -278,6 +303,10 @@ export default function HomePage(): React.JSX.Element {
   // State untuk Community
   const [communities, setCommunities] = useState<Community[]>([]);
   const [openCommunityId, setOpenCommunityId] = useState<string | null>(null);
+
+  // State untuk Donations
+  const [donations, setDonations] = useState<Donation[]>([]);
+  const [totalDonations, setTotalDonations] = useState(0);
 
   // State untuk Stacked Cards
   const [cardsContainer, setCardsContainer] = useState<HTMLDivElement | null>(null);
@@ -657,6 +686,52 @@ export default function HomePage(): React.JSX.Element {
     };
 
     loadCommunities();
+  }, []);
+
+  // Load donations from Firebase
+  useEffect(() => {
+    if (!db) return;
+
+    const loadDonations = async () => {
+      try {
+        const donationsRef = collection(db, "donations");
+        const q = query(donationsRef, orderBy("createdAt", "desc"));
+        const snapshot = await getDocs(q);
+        
+        if (snapshot.empty) {
+          // Create default donations
+          for (const donation of defaultDonations) {
+            await addDoc(donationsRef, {
+              ...donation,
+              createdAt: serverTimestamp()
+            });
+          }
+          const newSnapshot = await getDocs(q);
+          const loadedDonations: Donation[] = [];
+          newSnapshot.forEach((doc) => {
+            loadedDonations.push({ id: doc.id, ...doc.data() } as Donation);
+          });
+          setDonations(loadedDonations);
+          const total = loadedDonations.reduce((sum, d) => sum + d.amount, 0);
+          setTotalDonations(total);
+        } else {
+          const loadedDonations: Donation[] = [];
+          snapshot.forEach((doc) => {
+            loadedDonations.push({ id: doc.id, ...doc.data() } as Donation);
+          });
+          setDonations(loadedDonations);
+          const total = loadedDonations.reduce((sum, d) => sum + d.amount, 0);
+          setTotalDonations(total);
+        }
+      } catch (error) {
+        console.error("Error loading donations:", error);
+        // Use default data if Firebase fails
+        setDonations(defaultDonations.map((d, idx) => ({ ...d, id: idx.toString() })));
+        setTotalDonations(defaultDonations.reduce((sum, d) => sum + d.amount, 0));
+      }
+    };
+
+    loadDonations();
   }, []);
 
   // Join community function
@@ -2645,8 +2720,16 @@ useEffect(() => {
     };
   };
 
+  // Format currency
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount);
+  };
+
   // Data komunitas untuk ditampilkan
   const displayCommunities = communities.length > 0 ? communities : defaultCommunities.map((c, idx) => ({ ...c, id: idx.toString(), members: [], memberCount: 0 }));
+  
+  // Data donasi untuk ditampilkan
+  const displayDonations = donations.length > 0 ? donations : defaultDonations.map((d, idx) => ({ ...d, id: idx.toString() }));
 
   return (
     <>
@@ -3952,7 +4035,7 @@ useEffect(() => {
     ref={cardsSectionRef}
     style={{
       width: '100%',
-      minHeight: '100vh',
+      minHeight: 'auto',
       position: 'relative',
       backgroundColor: '#a2ea13',
       marginBottom: '0',
@@ -4020,7 +4103,7 @@ useEffect(() => {
 
     {/* LIST KOMUNITAS */}
     <div style={{
-      padding: '60px 80px 120px 80px',
+      padding: '60px 80px 80px 80px',
       backgroundColor: '#a2ea13',
       transition: 'background-color 0.3s ease',
     }}>
@@ -4269,6 +4352,175 @@ useEffect(() => {
       })}
     </div>
 
+  </div>
+)}
+
+{/* DONATUR SECTION - BARU */}
+{!isLoading && (
+  <div
+    style={{
+      width: '100%',
+      position: 'relative',
+      backgroundColor: '#ffffff',
+      padding: '120px 80px',
+      boxSizing: 'border-box',
+    }}
+  >
+    {/* JUDUL DONATUR 300px dengan counter */}
+    <div style={{
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'flex-end',
+      marginBottom: '80px',
+      flexWrap: 'wrap',
+    }}>
+      <div style={{
+        display: 'flex',
+        alignItems: 'baseline',
+        gap: '30px',
+        flexWrap: 'wrap',
+      }}>
+        <div style={{
+          fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+          fontSize: '300px',
+          fontWeight: '400',
+          color: '#000000',
+          letterSpacing: '-0.02em',
+          lineHeight: '0.9',
+          textTransform: 'uppercase',
+        }}>
+          DONATUR
+        </div>
+        <div style={{
+          fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+          fontSize: '100px',
+          fontWeight: '400',
+          color: '#000000',
+          lineHeight: '0.9',
+        }}>
+          ({displayDonations.length})
+        </div>
+      </div>
+      <div style={{
+        marginBottom: '20px',
+      }}>
+        <svg width="100" height="100" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </div>
+    </div>
+
+    {/* LIST DONATUR */}
+    {displayDonations.map((donation, idx) => {
+      const donationDate = donation.date instanceof Timestamp ? donation.date.toDate() : new Date(donation.date);
+      const formattedDate = donationDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+      
+      return (
+        <div key={donation.id} style={{
+          marginBottom: idx === displayDonations.length - 1 ? 0 : '100px',
+        }}>
+          {/* Angka 01, 02, dst */}
+          <div style={{
+            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+            fontSize: '90px',
+            fontWeight: '400',
+            color: '#000000',
+            letterSpacing: '-0.02em',
+            lineHeight: '1',
+            marginBottom: '40px',
+          }}>
+            {String(idx + 1).padStart(2, '0')}
+          </div>
+
+          {/* Judul Besar 180px - Date, Location, Donor Name */}
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '60px',
+            flexWrap: 'wrap',
+          }}>
+            <div style={{
+              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+              fontSize: '180px',
+              fontWeight: '400',
+              color: '#000000',
+              letterSpacing: '-0.02em',
+              lineHeight: '1',
+            }}>
+              {formattedDate}
+            </div>
+            <div style={{
+              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+              fontSize: '180px',
+              fontWeight: '400',
+              color: '#000000',
+              letterSpacing: '-0.02em',
+              lineHeight: '1',
+            }}>
+              {donation.location || "Jakarta, Indonesia"}
+            </div>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '30px',
+            }}>
+              <div style={{
+                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                fontSize: '180px',
+                fontWeight: '400',
+                color: '#000000',
+                letterSpacing: '-0.02em',
+                lineHeight: '1',
+              }}>
+                {donation.donorName}
+              </div>
+              <svg width="100" height="100" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+          </div>
+
+          {/* Deskripsi */}
+          <div style={{
+            fontFamily: "'Questrial', sans-serif",
+            fontSize: '50px',
+            fontWeight: '400',
+            color: '#000000',
+            letterSpacing: '-0.01em',
+            lineHeight: '1.3',
+            marginBottom: '60px',
+            maxWidth: '80%',
+          }}>
+            {donation.message || "Mendukung program edukasi dan pengembangan teknologi untuk generasi muda. Terima kasih atas dukungannya!"}
+          </div>
+
+          {/* 4 Foto */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(4, 1fr)',
+            gap: '30px',
+          }}>
+            {(donation.photos || ["/images/lkhh.jpg", "/images/ai.jpg", "/images/5.jpg", "/images/lkhh.jpg"]).map((photo, photoIdx) => (
+              <div key={photoIdx} style={{
+                width: '100%',
+                aspectRatio: '1 / 1',
+                position: 'relative',
+                overflow: 'hidden',
+                backgroundColor: '#f0f0f0',
+              }}>
+                <Image
+                  src={photo}
+                  alt={`Donation ${idx + 1} photo ${photoIdx + 1}`}
+                  fill
+                  style={{ objectFit: 'cover' }}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    })}
   </div>
 )}
 
