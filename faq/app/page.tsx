@@ -662,46 +662,57 @@ export default function HomePage(): React.JSX.Element {
     return () => unsubscribe();
   }, []);
 
-  // Load donations from Firebase
-  useEffect(() => {
-    if (!db) return;
 
-    const loadDonations = async () => {
-      try {
-        const donationsRef = collection(db, "donations");
-        const q = query(donationsRef, orderBy("date", "desc"));
-        const snapshot = await getDocs(q);
-        
-        if (snapshot.empty) {
-          // Create default donations
-          for (const don of defaultDonations) {
-            await addDoc(donationsRef, {
-              ...don,
-              date: serverTimestamp(),
-              createdAt: serverTimestamp()
-            });
-          }
-          // Reload after creation
-          const newSnapshot = await getDocs(q);
-          const loadedDonations: Donation[] = [];
-          newSnapshot.forEach((doc) => {
-            loadedDonations.push({ id: doc.id, ...doc.data() } as Donation);
+// Update the donations loading useEffect to properly handle dates
+useEffect(() => {
+  if (!db) return;
+
+  const loadDonations = async () => {
+    try {
+      const donationsRef = collection(db, "donations");
+      const q = query(donationsRef, orderBy("date", "desc"));
+      const snapshot = await getDocs(q);
+      
+      if (snapshot.empty) {
+        // Create default donations - use serverTimestamp() for date
+        for (const don of defaultDonations) {
+          await addDoc(donationsRef, {
+            donorName: don.donorName,
+            amount: don.amount,
+            location: don.location,
+            date: serverTimestamp(), // Use serverTimestamp() instead of Date object
+            description: don.description,
+            photos: don.photos,
+            createdAt: serverTimestamp()
           });
-          setDonations(loadedDonations);
-        } else {
-          const loadedDonations: Donation[] = [];
-          snapshot.forEach((doc) => {
-            loadedDonations.push({ id: doc.id, ...doc.data() } as Donation);
-          });
-          setDonations(loadedDonations);
         }
-      } catch (error) {
-        console.error("Error loading donations:", error);
+        // Reload after creation
+        const newSnapshot = await getDocs(q);
+        const loadedDonations: Donation[] = [];
+        newSnapshot.forEach((doc) => {
+          loadedDonations.push({ id: doc.id, ...doc.data() } as Donation);
+        });
+        setDonations(loadedDonations);
+      } else {
+        const loadedDonations: Donation[] = [];
+        snapshot.forEach((doc) => {
+          loadedDonations.push({ id: doc.id, ...doc.data() } as Donation);
+        });
+        setDonations(loadedDonations);
       }
-    };
+    } catch (error) {
+      console.error("Error loading donations:", error);
+    }
+  };
 
-    loadDonations();
-  }, []);
+  loadDonations();
+}, []);
+
+
+
+
+
+  
 
   // Load communities from Firebase
   useEffect(() => {
@@ -2730,12 +2741,22 @@ useEffect(() => {
     };
   };
 
-  const formatDonationDate = (date: Date | Timestamp) => {
-    if (!date) return "";
-    const d = date instanceof Date ? date : date.toDate();
-    return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
-  };
+  // Replace the formatDonationDate function with this updated version
+const formatDonationDate = (date: Date | Timestamp) => {
+  if (!date) return "";
+  // Check if it's a Firestore Timestamp (has toDate method)
+  let d: Date;
+  if (typeof date.toDate === 'function') {
+    d = date.toDate();
+  } else if (date instanceof Date) {
+    d = date;
+  } else {
+    return "";
+  }
+  return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+};
 
+  
   // Data komunitas untuk ditampilkan
   const displayCommunities = communities.length > 0 ? communities : defaultCommunities.map((c, idx) => ({ ...c, id: idx.toString(), members: [], memberCount: 0 }));
 
@@ -4365,6 +4386,7 @@ useEffect(() => {
   </div>
 )}
 
+
 {/* DONATUR SECTION - BARU */}
 {!isLoading && (
   <div
@@ -4429,114 +4451,127 @@ useEffect(() => {
       flexDirection: 'column',
       gap: '100px',
     }}>
-      {displayDonations.map((donation, idx) => (
-        <div key={donation.id} style={{
-          borderBottom: idx !== displayDonations.length - 1 ? '1px solid rgba(0,0,0,0.1)' : 'none',
-          paddingBottom: idx !== displayDonations.length - 1 ? '80px' : '0',
-        }}>
-          {/* Nomor Urut Donasi */}
-          <div style={{
-            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-            fontSize: '180px',
-            fontWeight: '400',
-            color: '#000000',
-            letterSpacing: '-0.02em',
-            lineHeight: '1',
-            marginBottom: '40px',
+      {displayDonations.map((donation, idx) => {
+        // Format date safely
+        let formattedDate = '';
+        if (donation.date) {
+          if (typeof donation.date.toDate === 'function') {
+            const d = donation.date.toDate();
+            formattedDate = d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+          } else if (donation.date instanceof Date) {
+            formattedDate = donation.date.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+          }
+        }
+        
+        return (
+          <div key={donation.id} style={{
+            borderBottom: idx !== displayDonations.length - 1 ? '1px solid rgba(0,0,0,0.1)' : 'none',
+            paddingBottom: idx !== displayDonations.length - 1 ? '80px' : '0',
           }}>
-            {String(idx + 1).padStart(2, '0')}
-          </div>
+            {/* Nomor Urut Donasi */}
+            <div style={{
+              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+              fontSize: '180px',
+              fontWeight: '400',
+              color: '#000000',
+              letterSpacing: '-0.02em',
+              lineHeight: '1',
+              marginBottom: '40px',
+            }}>
+              {String(idx + 1).padStart(2, '0')}
+            </div>
 
-          {/* Info Donasi: Tanggal, Daerah, Nama Donatur dengan Arrow */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            marginBottom: '40px',
-          }}>
+            {/* Info Donasi: Tanggal, Daerah, Nama Donatur dengan Arrow */}
             <div style={{
               display: 'flex',
-              alignItems: 'baseline',
-              gap: '60px',
+              alignItems: 'center',
+              justifyContent: 'space-between',
               flexWrap: 'wrap',
+              marginBottom: '40px',
             }}>
               <div style={{
-                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                fontSize: '48px',
-                fontWeight: '400',
-                color: '#666666',
-                letterSpacing: '-0.02em',
-              }}>
-                {formatDonationDate(donation.date)}
-              </div>
-              <div style={{
-                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                fontSize: '48px',
-                fontWeight: '400',
-                color: '#666666',
-                letterSpacing: '-0.02em',
-              }}>
-                {donation.location}
-              </div>
-              <div style={{
                 display: 'flex',
-                alignItems: 'center',
-                gap: '20px',
+                alignItems: 'baseline',
+                gap: '60px',
+                flexWrap: 'wrap',
               }}>
                 <div style={{
                   fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
                   fontSize: '48px',
                   fontWeight: '400',
-                  color: '#000000',
+                  color: '#666666',
                   letterSpacing: '-0.02em',
                 }}>
-                  {donation.donorName}
+                  {formattedDate}
                 </div>
-                <NorthEastArrowIcon size={40} />
+                <div style={{
+                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                  fontSize: '48px',
+                  fontWeight: '400',
+                  color: '#666666',
+                  letterSpacing: '-0.02em',
+                }}>
+                  {donation.location}
+                </div>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '20px',
+                }}>
+                  <div style={{
+                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                    fontSize: '48px',
+                    fontWeight: '400',
+                    color: '#000000',
+                    letterSpacing: '-0.02em',
+                  }}>
+                    {donation.donorName}
+                  </div>
+                  <NorthEastArrowIcon size={40} />
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Deskripsi Donasi */}
-          <div style={{
-            fontFamily: "'Questrial', sans-serif",
-            fontSize: '32px',
-            fontWeight: '400',
-            color: '#333333',
-            letterSpacing: '-0.01em',
-            lineHeight: '1.4',
-            marginBottom: '50px',
-            maxWidth: '80%',
-          }}>
-            {donation.description}
-          </div>
+            {/* Deskripsi Donasi */}
+            <div style={{
+              fontFamily: "'Questrial', sans-serif",
+              fontSize: '32px',
+              fontWeight: '400',
+              color: '#333333',
+              letterSpacing: '-0.01em',
+              lineHeight: '1.4',
+              marginBottom: '50px',
+              maxWidth: '80%',
+            }}>
+              {donation.description}
+            </div>
 
-          {/* 4 Foto Donasi */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(4, 1fr)',
-            gap: '20px',
-            marginBottom: '40px',
-          }}>
-            {donation.photos && donation.photos.slice(0, 4).map((photo, photoIdx) => (
-              <div key={photoIdx} style={{
-                aspectRatio: '1 / 1',
-                position: 'relative',
-                overflow: 'hidden',
-                backgroundColor: '#f0f0f0',
-              }}>
-                <Image
-                  src={photo}
-                  alt={`Donation ${idx + 1} photo ${photoIdx + 1}`}
-                  fill
-                  style={{ objectFit: 'cover' }}
-                />
-              </div>
-            ))}
+            {/* 4 Foto Donasi */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(4, 1fr)',
+              gap: '20px',
+              marginBottom: '40px',
+            }}>
+              {donation.photos && donation.photos.slice(0, 4).map((photo, photoIdx) => (
+                <div key={photoIdx} style={{
+                  aspectRatio: '1 / 1',
+                  position: 'relative',
+                  overflow: 'hidden',
+                  backgroundColor: '#f0f0f0',
+                }}>
+                  <Image
+                    src={photo}
+                    alt={`Donation ${idx + 1} photo ${photoIdx + 1}`}
+                    fill
+                    style={{ objectFit: 'cover' }}
+                  />
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
 
     {/* Tombol ke Halaman Donasi */}
@@ -4579,6 +4614,10 @@ useEffect(() => {
   </div>
 )}
 
+
+
+
+            
             
 
             
