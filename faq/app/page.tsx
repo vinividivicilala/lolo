@@ -4426,7 +4426,7 @@ useEffect(() => {
       marginTop: '0px',
     }}
   >
-    {/* HEADER: Angka 01 dan DONATUR sejajar */}
+    {/* JUDUL SECTION: DONATUR + jumlah upload donasi (bukan uang) + tanda panah */}
     <div style={{
       display: 'flex',
       justifyContent: 'space-between',
@@ -4435,7 +4435,6 @@ useEffect(() => {
       borderBottom: '1px solid rgba(0,0,0,0.1)',
       paddingBottom: '40px',
     }}>
-      {/* Angka 01 - sejajar dengan DONATUR */}
       <div style={{
         fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
         fontSize: '300px',
@@ -4443,35 +4442,23 @@ useEffect(() => {
         color: '#000000',
         letterSpacing: '-0.02em',
         lineHeight: '0.9',
+        textTransform: 'uppercase',
       }}>
-        01
+        DONATUR
       </div>
-
-      {/* DONATUR + Tanda panah SVG + total donasi otomatis */}
       <div style={{
         display: 'flex',
-        alignItems: 'baseline',
+        alignItems: 'center',
         gap: '30px',
       }}>
         <div style={{
           fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-          fontSize: '300px',
-          fontWeight: '400',
-          letterSpacing: '-0.02em',
-          lineHeight: '0.9',
-          color: '#000000',
-          textTransform: 'uppercase',
-        }}>
-          DONATUR
-        </div>
-        <div style={{
-          fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-          fontSize: '100px',
+          fontSize: '80px',
           fontWeight: '400',
           color: '#000000',
-          lineHeight: '0.9',
+          lineHeight: '1',
         }}>
-          (Rp {totalDonations.toLocaleString('id-ID')})
+          ({donations.length})
         </div>
         <div>
           <svg width="100" height="100" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -4481,19 +4468,22 @@ useEffect(() => {
       </div>
     </div>
 
-    {/* DONASI CARD - HANYA 1 DONASI DARI FIREBASE */}
+    {/* LOOP DONASI - Angka dan konten donasi sejajar */}
     {donations && donations.length > 0 ? (
       <div>
-        {(() => {
-          // Ambil hanya donasi pertama/terbaru
-          const donation = donations[0];
+        {donations.slice(0, 1).map((donation, idx) => {
           const donationDate = donation.createdAt ? donation.createdAt.toDate() : new Date();
           const donorName = donation.isAnonymous ? 'Anonymous' : donation.donorName;
           const isVerified = donation.verified || donation.donorEmail === ADMIN_EMAIL;
           
           return (
-            <div key={donation.id}>
-              {/* JUDUL BESAR 180px */}
+            <div key={donation.id} style={{
+              display: 'flex',
+              gap: '80px',
+              marginBottom: '100px',
+              alignItems: 'flex-start',
+            }}>
+              {/* ANGKA 01, 02, dst - sejajar dengan konten */}
               <div style={{
                 fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
                 fontSize: '180px',
@@ -4501,25 +4491,33 @@ useEffect(() => {
                 color: '#000000',
                 letterSpacing: '-0.02em',
                 lineHeight: '1',
-                marginBottom: '40px',
+                minWidth: '200px',
               }}>
-                PANTI ASUHAN
+                {String(idx + 1).padStart(2, '0')}
               </div>
-              
-              {/* TANGGAL, DAERAH, NAMA DONATUR dengan Tanda panah SVG */}
+
+              {/* KONTEN DONASI */}
               <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                flexWrap: 'wrap',
-                marginBottom: '60px',
-                paddingBottom: '20px',
-                borderBottom: '1px solid rgba(0,0,0,0.05)',
+                flex: 1,
               }}>
+                {/* Nama Panti Asuhan - font 50px */}
+                <div style={{
+                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                  fontSize: '50px',
+                  fontWeight: '400',
+                  color: '#000000',
+                  letterSpacing: '-0.02em',
+                  marginBottom: '30px',
+                }}>
+                  Panti Asuhan Yatim & Dhuafa Al-Farid
+                </div>
+
+                {/* Tanggal dan Nama Donatur - font 30px sejajar dengan badge */}
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '50px',
+                  gap: '40px',
+                  marginBottom: '40px',
                   flexWrap: 'wrap',
                 }}>
                   <div style={{
@@ -4528,13 +4526,6 @@ useEffect(() => {
                     color: '#666666',
                   }}>
                     {donationDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
-                  </div>
-                  <div style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '30px',
-                    color: '#666666',
-                  }}>
-                    Jakarta, Indonesia
                   </div>
                   <div style={{
                     display: 'flex',
@@ -4552,316 +4543,91 @@ useEffect(() => {
                     {isVerified && <VerifiedBadge size={28} />}
                   </div>
                 </div>
-                <div>
-                  <svg width="50" height="50" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </div>
-              </div>
-              
-              {/* DESKRIPSI - Persib Juara 23 Mei 2026 */}
-              <div style={{
-                fontFamily: "'Questrial', sans-serif",
-                fontSize: '24px',
-                color: '#333333',
-                lineHeight: '1.6',
-                marginBottom: '60px',
-                maxWidth: '900px',
-              }}>
-                Donasi ini sebagai rasa terima kasih kepada Allah SWT yang telah memberikan kebahagiaan berupa 
-                PERSIB Juara Hattrick atau Juara Liga 1 Indonesia pada tanggal 23 Mei 2026. Semoga keberkahan ini 
-                dapat dirasakan oleh anak-anak yatim dan dhuafa di Panti Asuhan Yatim & Dhuafa Al-Farid.
-              </div>
-              
-              {/* 4 FOTO - bisa diklik */}
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(4, 1fr)',
-                gap: '20px',
-                marginBottom: '60px',
-              }}>
-                {(donation.photos && donation.photos.length > 0 ? donation.photos : samplePhotos).map((photo, idx) => (
-                  <div
-                    key={idx}
-                    style={{
-                      aspectRatio: '1/1',
-                      backgroundColor: '#e0e0e0',
-                      borderRadius: '16px',
-                      overflow: 'hidden',
-                      position: 'relative',
-                      cursor: 'pointer',
-                      transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-                    }}
-                    onClick={() => setSelectedDonation(donation)}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = 'scale(1.03)';
-                      e.currentTarget.style.boxShadow = '0 10px 30px rgba(0,0,0,0.15)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = 'scale(1)';
-                      e.currentTarget.style.boxShadow = 'none';
-                    }}
-                  >
-                    <Image
-                      src={photo}
-                      alt={`Donation photo ${idx + 1}`}
-                      fill
-                      style={{ objectFit: 'cover' }}
-                    />
-                    {/* Overlay nama donatur di foto */}
-                    <div style={{
-                      position: 'absolute',
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                      backgroundColor: 'rgba(0,0,0,0.6)',
-                      padding: '8px 12px',
-                      fontSize: '12px',
-                      color: '#ffffff',
-                      fontFamily: "'Questrial', sans-serif",
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                    }}>
-                      <span>📷</span>
-                      <span>{donorName}</span>
-                      {isVerified && <VerifiedBadge size={14} />}
-                    </div>
-                  </div>
-                ))}
-              </div>
-              
-              {/* KOMENTAR SECTION */}
-              <div style={{
-                borderTop: '1px solid rgba(0,0,0,0.1)',
-                paddingTop: '40px',
-              }}>
+
+                {/* Deskripsi - font hitam 50px, rata kanan */}
                 <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  marginBottom: '30px',
+                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                  fontSize: '50px',
+                  fontWeight: '400',
+                  color: '#000000',
+                  letterSpacing: '-0.02em',
+                  lineHeight: '1.3',
+                  textAlign: 'right',
+                  marginBottom: '60px',
                 }}>
-                  <div style={{
-                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                    fontSize: '24px',
-                    fontWeight: '400',
-                    color: '#000000',
-                  }}>
-                    KOMENTAR ({donation.comments?.length || 0})
-                  </div>
-                  <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="#000000" strokeWidth="1.5" fill="none"/>
-                  </svg>
+                  Sebagai rasa terima kasih kepada Allah SWT<br />
+                  atas kebahagiaan PERSIB Juara Hattrick<br />
+                  Liga 1 Indonesia, 23 Mei 2026
                 </div>
-                
-                {/* DAFTAR KOMENTAR */}
-                {donation.comments && donation.comments.length > 0 && (
-                  <div style={{
-                    marginBottom: '30px',
-                    maxHeight: '400px',
-                    overflowY: 'auto',
-                  }}>
-                    {donation.comments.map((comment) => (
-                      <div key={comment.id} style={{
-                        display: 'flex',
-                        alignItems: 'flex-start',
-                        gap: '15px',
-                        padding: '20px 0',
-                        borderBottom: '1px solid rgba(0,0,0,0.05)',
-                      }}>
-                        {/* Avatar */}
-                        <div style={{
-                          width: '45px',
-                          height: '45px',
-                          borderRadius: '50%',
-                          backgroundColor: '#000000',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          color: '#ffffff',
-                          fontSize: '20px',
-                          fontWeight: '500',
-                          flexShrink: 0,
-                        }}>
-                          {comment.userName.charAt(0).toUpperCase()}
-                        </div>
-                        {/* Konten komentar */}
-                        <div style={{ flex: 1 }}>
-                          <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '12px',
-                            marginBottom: '8px',
-                            flexWrap: 'wrap',
-                          }}>
-                            <span style={{
-                              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                              fontSize: '16px',
-                              fontWeight: '600',
-                              color: '#000000',
-                            }}>
-                              {comment.userName}
-                            </span>
-                            {comment.userEmail === ADMIN_EMAIL && <VerifiedBadge size={16} />}
-                            <span style={{
-                              fontSize: '12px',
-                              color: '#999999',
-                              fontFamily: "'Questrial', sans-serif",
-                            }}>
-                              {comment.createdAt ? formatTime(comment.createdAt) : ''}
-                            </span>
-                          </div>
-                          <div style={{
-                            fontFamily: "'Questrial', sans-serif",
-                            fontSize: '15px',
-                            color: '#333333',
-                            lineHeight: '1.5',
-                          }}>
-                            {comment.text}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                
-                {/* FORM TAMBAH KOMENTAR */}
-                {donationCommentTarget === donation.id ? (
-                  <div style={{
-                    display: 'flex',
-                    gap: '15px',
-                    alignItems: 'flex-start',
-                    flexWrap: 'wrap',
-                  }}>
-                    <input
-                      type="text"
-                      value={commentText}
-                      onChange={(e) => setCommentText(e.target.value)}
-                      placeholder="Tulis komentar Anda..."
+
+                {/* 4 Foto - bisa diklik */}
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(4, 1fr)',
+                  gap: '20px',
+                  marginBottom: '40px',
+                }}>
+                  {(donation.photos && donation.photos.length > 0 ? donation.photos : samplePhotos).map((photo, photoIdx) => (
+                    <div
+                      key={photoIdx}
                       style={{
-                        flex: 1,
-                        padding: '14px 20px',
-                        borderRadius: '60px',
-                        border: '1px solid #cccccc',
-                        fontFamily: "'Questrial', sans-serif",
-                        fontSize: '14px',
-                        outline: 'none',
-                        minWidth: '200px',
+                        aspectRatio: '1/1',
+                        backgroundColor: '#e0e0e0',
+                        borderRadius: '16px',
+                        overflow: 'hidden',
+                        position: 'relative',
+                        cursor: 'pointer',
+                        transition: 'transform 0.3s ease, box-shadow 0.3s ease',
                       }}
-                      onKeyPress={(e) => {
-                        if (e.key === 'Enter') {
-                          addComment(donation.id);
-                        }
+                      onClick={() => setSelectedDonation(donation)}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = 'scale(1.03)';
+                        e.currentTarget.style.boxShadow = '0 10px 30px rgba(0,0,0,0.15)';
                       }}
-                      autoFocus
-                    />
-                    <button
-                      onClick={() => addComment(donation.id)}
-                      disabled={!commentText.trim()}
-                      style={{
-                        padding: '12px 32px',
-                        borderRadius: '60px',
-                        border: 'none',
-                        backgroundColor: commentText.trim() ? '#000000' : '#cccccc',
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = 'scale(1)';
+                        e.currentTarget.style.boxShadow = 'none';
+                      }}
+                    >
+                      <Image
+                        src={photo}
+                        alt={`Donation photo ${photoIdx + 1}`}
+                        fill
+                        style={{ objectFit: 'cover' }}
+                      />
+                      {/* Overlay nama donatur di foto */}
+                      <div style={{
+                        position: 'absolute',
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        backgroundColor: 'rgba(0,0,0,0.6)',
+                        padding: '8px 12px',
+                        fontSize: '12px',
                         color: '#ffffff',
-                        cursor: commentText.trim() ? 'pointer' : 'not-allowed',
                         fontFamily: "'Questrial', sans-serif",
-                        fontSize: '14px',
-                        fontWeight: '500',
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '10px',
-                      }}
-                    >
-                      <span>KIRIM</span>
-                      <NorthEastArrowIcon size={16} />
-                    </button>
-                    <button
-                      onClick={() => setDonationCommentTarget(null)}
-                      style={{
-                        padding: '12px 24px',
-                        borderRadius: '60px',
-                        border: '1px solid #cccccc',
-                        backgroundColor: 'transparent',
-                        color: '#666666',
-                        cursor: 'pointer',
-                        fontFamily: "'Questrial', sans-serif",
-                        fontSize: '14px',
-                      }}
-                    >
-                      Batal
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => {
-                      if (user) {
-                        setDonationCommentTarget(donation.id);
-                        setCommentText("");
-                      } else {
-                        alert("Silakan login terlebih dahulu untuk berkomentar");
-                        setShowAuthModal(true);
-                      }
-                    }}
-                    style={{
-                      padding: '14px 32px',
-                      borderRadius: '60px',
-                      border: '1px solid #000000',
-                      backgroundColor: 'transparent',
-                      color: '#000000',
-                      cursor: 'pointer',
-                      fontFamily: "'Questrial', sans-serif",
-                      fontSize: '15px',
-                      fontWeight: '500',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '12px',
-                      transition: 'all 0.2s ease',
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = '#000000';
-                      e.currentTarget.style.color = '#ffffff';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = 'transparent';
-                      e.currentTarget.style.color = '#000000';
-                    }}
-                  >
-                    <span>TULIS KOMENTAR</span>
-                    <MessageIcon size={18} />
-                  </button>
-                )}
-                
-                {/* Informasi nama pengirim komentar */}
-                {user && donationCommentTarget !== donation.id && (
-                  <div style={{
-                    marginTop: '15px',
-                    fontSize: '13px',
-                    color: '#999999',
-                    fontFamily: "'Questrial', sans-serif",
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                  }}>
-                    <span>💬</span>
-                    <span>Komentar akan muncul sebagai <strong>{user.displayName || user.email?.split('@')[0] || 'User'}</strong></span>
-                    {user.email === ADMIN_EMAIL && <VerifiedBadge size={14} />}
-                  </div>
-                )}
+                        gap: '6px',
+                      }}>
+                        <span>📷</span>
+                        <span>{donorName}</span>
+                        {isVerified && <VerifiedBadge size={14} />}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           );
-        })()}
+        })}
       </div>
     ) : (
-      /* TAMPILAN JIKA BELUM ADA DONASI */
       <div style={{
         textAlign: 'center',
         padding: '100px',
         backgroundColor: '#f5f5f5',
         borderRadius: '24px',
-        marginTop: '40px',
       }}>
         <div style={{
           fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
@@ -4885,51 +4651,387 @@ useEffect(() => {
           fontFamily: "'Questrial', sans-serif",
           fontSize: '18px',
           color: '#666666',
-          marginBottom: '30px',
         }}>
-          Jadilah donatur pertama untuk panti asuhan
+          Jadilah donatur pertama
         </div>
       </div>
     )}
 
-    {/* TOMBOL DONASI */}
+    {/* TOMBOL DONASI - Link ke halaman /donatur */}
     <div style={{
       display: 'flex',
       justifyContent: 'center',
       marginTop: '80px',
     }}>
-      <button
-        onClick={() => setShowDonationModal(true)}
-        style={{
-          padding: '20px 70px',
-          backgroundColor: '#000000',
-          color: '#ffffff',
-          border: 'none',
-          borderRadius: '60px',
-          cursor: 'pointer',
-          fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-          fontSize: '24px',
-          fontWeight: '500',
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '15px',
-          transition: 'transform 0.2s, opacity 0.2s',
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.transform = 'scale(1.02)';
-          e.currentTarget.style.opacity = '0.9';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.transform = 'scale(1)';
-          e.currentTarget.style.opacity = '1';
-        }}
-      >
-        <span>DONASI SEKARANG</span>
-        <NorthEastArrowIcon size={28} />
-      </button>
+      <Link href="/donatur">
+        <button
+          style={{
+            padding: '20px 70px',
+            backgroundColor: '#000000',
+            color: '#ffffff',
+            border: 'none',
+            borderRadius: '60px',
+            cursor: 'pointer',
+            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+            fontSize: '24px',
+            fontWeight: '500',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '15px',
+            transition: 'transform 0.2s, opacity 0.2s',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'scale(1.02)';
+            e.currentTarget.style.opacity = '0.9';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'scale(1)';
+            e.currentTarget.style.opacity = '1';
+          }}
+        >
+          <span>DONASI SEKARANG</span>
+          <NorthEastArrowIcon size={28} />
+        </button>
+      </Link>
     </div>
   </div>
 )}
+
+{/* MODAL UNTUK FOTO DENGAN KOMENTAR DI DALAMNYA */}
+{selectedDonation && (
+  <div style={{
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'rgba(0,0,0,0.95)',
+    backdropFilter: 'blur(10px)',
+    zIndex: 20003,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '40px',
+    boxSizing: 'border-box',
+  }} onClick={() => setSelectedDonation(null)}>
+    <div style={{
+      maxWidth: '90%',
+      maxHeight: '90%',
+      width: '100%',
+      backgroundColor: '#ffffff',
+      borderRadius: '24px',
+      overflow: 'hidden',
+      display: 'flex',
+      flexDirection: 'column',
+    }} onClick={(e) => e.stopPropagation()}>
+      
+      {/* Header Modal */}
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: '20px 30px',
+        borderBottom: '1px solid #e0e0e0',
+      }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '15px',
+        }}>
+          <div style={{
+            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+            fontSize: '24px',
+            fontWeight: '500',
+            color: '#000000',
+          }}>
+            Galeri Donasi
+          </div>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+          }}>
+            <span style={{
+              fontFamily: "'Questrial', sans-serif",
+              fontSize: '16px',
+              color: '#666666',
+            }}>
+              {selectedDonation.donorName}
+            </span>
+            {selectedDonation.verified && <VerifiedBadge size={18} />}
+          </div>
+        </div>
+        <button
+          onClick={() => setSelectedDonation(null)}
+          style={{
+            background: 'none',
+            border: 'none',
+            fontSize: '28px',
+            cursor: 'pointer',
+            color: '#000000',
+          }}
+        >
+          ✕
+        </button>
+      </div>
+
+      {/* Grid Foto */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(2, 1fr)',
+        gap: '20px',
+        padding: '30px',
+        maxHeight: '50vh',
+        overflowY: 'auto',
+        backgroundColor: '#f5f5f5',
+      }}>
+        {(selectedDonation.photos && selectedDonation.photos.length > 0 ? selectedDonation.photos : samplePhotos).map((photo, idx) => (
+          <div key={idx} style={{
+            position: 'relative',
+            width: '100%',
+            aspectRatio: '1/1',
+            borderRadius: '16px',
+            overflow: 'hidden',
+            backgroundColor: '#e0e0e0',
+          }}>
+            <Image
+              src={photo}
+              alt={`Donation photo ${idx + 1}`}
+              fill
+              style={{ objectFit: 'cover' }}
+            />
+            <div style={{
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              backgroundColor: 'rgba(0,0,0,0.5)',
+              padding: '6px 10px',
+              fontSize: '11px',
+              color: '#ffffff',
+              fontFamily: "'Questrial', sans-serif",
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+            }}>
+              <span>📷</span>
+              <span>{selectedDonation.donorName}</span>
+              {selectedDonation.verified && <VerifiedBadge size={12} />}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Komentar di dalam Modal */}
+      <div style={{
+        padding: '30px',
+        borderTop: '1px solid #e0e0e0',
+        backgroundColor: '#ffffff',
+      }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginBottom: '20px',
+        }}>
+          <div style={{
+            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+            fontSize: '18px',
+            fontWeight: '500',
+            color: '#000000',
+          }}>
+            KOMENTAR ({selectedDonation.comments?.length || 0})
+          </div>
+          <MessageIcon size={20} />
+        </div>
+
+        {/* Daftar Komentar */}
+        {selectedDonation.comments && selectedDonation.comments.length > 0 && (
+          <div style={{
+            marginBottom: '20px',
+            maxHeight: '200px',
+            overflowY: 'auto',
+          }}>
+            {selectedDonation.comments.map((comment) => (
+              <div key={comment.id} style={{
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: '12px',
+                padding: '12px 0',
+                borderBottom: '1px solid #f0f0f0',
+              }}>
+                <div style={{
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '50%',
+                  backgroundColor: '#000000',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#ffffff',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  flexShrink: 0,
+                }}>
+                  {comment.userName.charAt(0).toUpperCase()}
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    marginBottom: '4px',
+                    flexWrap: 'wrap',
+                  }}>
+                    <span style={{
+                      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                      fontSize: '13px',
+                      fontWeight: '600',
+                      color: '#000000',
+                    }}>
+                      {comment.userName}
+                    </span>
+                    {comment.userEmail === ADMIN_EMAIL && <VerifiedBadge size={12} />}
+                    <span style={{
+                      fontSize: '10px',
+                      color: '#999999',
+                    }}>
+                      {comment.createdAt ? formatTime(comment.createdAt) : ''}
+                    </span>
+                  </div>
+                  <div style={{
+                    fontFamily: "'Questrial', sans-serif",
+                    fontSize: '13px',
+                    color: '#333333',
+                    lineHeight: '1.4',
+                  }}>
+                    {comment.text}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Form Komentar di Modal */}
+        {donationCommentTarget === selectedDonation.id ? (
+          <div style={{
+            display: 'flex',
+            gap: '10px',
+            alignItems: 'center',
+          }}>
+            <input
+              type="text"
+              value={commentText}
+              onChange={(e) => setCommentText(e.target.value)}
+              placeholder="Tulis komentar..."
+              style={{
+                flex: 1,
+                padding: '10px 16px',
+                borderRadius: '60px',
+                border: '1px solid #cccccc',
+                fontFamily: "'Questrial', sans-serif",
+                fontSize: '13px',
+                outline: 'none',
+              }}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') {
+                  addComment(selectedDonation.id);
+                }
+              }}
+              autoFocus
+            />
+            <button
+              onClick={() => addComment(selectedDonation.id)}
+              disabled={!commentText.trim()}
+              style={{
+                padding: '8px 20px',
+                borderRadius: '60px',
+                border: 'none',
+                backgroundColor: commentText.trim() ? '#000000' : '#cccccc',
+                color: '#ffffff',
+                cursor: commentText.trim() ? 'pointer' : 'not-allowed',
+                fontFamily: "'Questrial', sans-serif",
+                fontSize: '12px',
+                fontWeight: '500',
+              }}
+            >
+              Kirim
+            </button>
+            <button
+              onClick={() => setDonationCommentTarget(null)}
+              style={{
+                padding: '8px 16px',
+                borderRadius: '60px',
+                border: '1px solid #cccccc',
+                backgroundColor: 'transparent',
+                color: '#666666',
+                cursor: 'pointer',
+                fontSize: '12px',
+              }}
+            >
+              Batal
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={() => {
+              if (user) {
+                setDonationCommentTarget(selectedDonation.id);
+                setCommentText("");
+              } else {
+                alert("Silakan login untuk berkomentar");
+                setShowAuthModal(true);
+              }
+            }}
+            style={{
+              width: '100%',
+              padding: '12px',
+              borderRadius: '60px',
+              border: '1px solid #000000',
+              backgroundColor: 'transparent',
+              color: '#000000',
+              cursor: 'pointer',
+              fontFamily: "'Questrial', sans-serif",
+              fontSize: '14px',
+              fontWeight: '500',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              transition: 'all 0.2s ease',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#000000';
+              e.currentTarget.style.color = '#ffffff';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+              e.currentTarget.style.color = '#000000';
+            }}
+          >
+            <MessageIcon size={16} />
+            <span>TULIS KOMENTAR</span>
+          </button>
+        )}
+      </div>
+    </div>
+  </div>
+)}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
             
 
