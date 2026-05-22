@@ -729,9 +729,7 @@ export default function HomePage(): React.JSX.Element {
 
 
 
-
-
-// Add comment to donation - FIXED with proper Timestamp
+// Add comment to donation - WITHOUT serverTimestamp (use manual timestamp)
 const addComment = async (donationId: string) => {
   if (!commentText.trim() || !user) {
     if (!user) alert("Silakan login untuk berkomentar");
@@ -747,19 +745,18 @@ const addComment = async (donationId: string) => {
       return;
     }
     
-    // Buat comment object dengan Timestamp dari server
-    const newComment: DonationComment = {
+    // Buat comment object dengan manual timestamp (bukan serverTimestamp)
+    const now = new Date();
+    const newComment = {
       id: Date.now().toString(),
       userId: user.uid,
       userName: user.displayName || user.email?.split('@')[0] || "User",
       text: commentText.trim(),
-      createdAt: serverTimestamp() as Timestamp
+      createdAt: {
+        seconds: Math.floor(now.getTime() / 1000),
+        nanoseconds: 0
+      }
     };
-    
-    // Hanya tambahkan userPhoto jika ada (optional)
-    if (user.photoURL) {
-      newComment.userPhoto = user.photoURL;
-    }
 
     const currentComments = donation.comments || [];
     const updatedComments = [...currentComments, newComment];
@@ -4440,6 +4437,7 @@ useEffect(() => {
 
 
 
+
 {/* DONATION SECTION - FIXED VERSION */}
 {!isLoading && (
   <div
@@ -4559,7 +4557,7 @@ useEffect(() => {
                   Jakarta, Indonesia
                 </div>
 
-                {/* Tanggal dan Nama Donatur - HITAM */}
+                {/* Tanggal dan Nama Donatur - HITAM FULL */}
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -4743,7 +4741,7 @@ useEffect(() => {
   </div>
 )}
 
-{/* MODAL UNTUK FOTO DENGAN KOMENTAR */}
+{/* MODAL UNTUK FOTO - dengan judul Galeri Donasi */}
 {selectedDonation && (
   <div style={{
     position: 'fixed',
@@ -4772,14 +4770,14 @@ useEffect(() => {
       flexDirection: 'column',
     }} onClick={(e) => e.stopPropagation()}>
       
-      {/* Header Modal - Nama Donatur font 60px + label Donatur */}
+      {/* Header Modal - Judul Galeri Donasi */}
       <div style={{
         padding: '30px 30px 20px 30px',
         borderBottom: '1px solid #e0e0e0',
       }}>
         <div style={{
           display: 'flex',
-          alignItems: 'baseline',
+          alignItems: 'center',
           justifyContent: 'space-between',
           flexWrap: 'wrap',
           gap: '20px',
@@ -4787,21 +4785,34 @@ useEffect(() => {
           <div>
             <div style={{
               fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-              fontSize: '60px',
+              fontSize: '36px',
               fontWeight: '500',
               color: '#000000',
               letterSpacing: '-0.02em',
-              lineHeight: '1.1',
             }}>
-              Farid Ardiansyah
+              Galeri Donasi
             </div>
             <div style={{
-              fontFamily: "'Questrial', sans-serif",
-              fontSize: '20px',
-              color: '#999999',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
               marginTop: '8px',
             }}>
-              Donatur
+              <span style={{
+                fontFamily: "'Questrial', sans-serif",
+                fontSize: '18px',
+                color: '#000000',
+              }}>
+                Farid Ardiansyah
+              </span>
+              <VerifiedBadge size={20} />
+              <span style={{
+                fontFamily: "'Questrial', sans-serif",
+                fontSize: '16px',
+                color: '#999999',
+              }}>
+                (Donatur)
+              </span>
             </div>
           </div>
           <button
@@ -4852,7 +4863,7 @@ useEffect(() => {
         ))}
       </div>
 
-      {/* Komentar di dalam Modal */}
+      {/* Komentar di dalam Modal - FIXED tanpa serverTimestamp */}
       <div style={{
         padding: '30px',
         borderTop: '1px solid #e0e0e0',
@@ -4943,7 +4954,7 @@ useEffect(() => {
           </div>
         )}
 
-        {/* Form Komentar di Modal */}
+        {/* Form Komentar di Modal - TANPA serverTimestamp di array */}
         {donationCommentTarget === selectedDonation.id ? (
           <div style={{
             display: 'flex',
@@ -5051,6 +5062,9 @@ useEffect(() => {
 
 
 
+
+
+            
             
 
             
