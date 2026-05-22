@@ -728,7 +728,10 @@ export default function HomePage(): React.JSX.Element {
   };
 
 
-// Add comment to donation - FIXED (tanpa serverTimestamp di array)
+
+
+
+// Add comment to donation - FIXED with proper Timestamp
 const addComment = async (donationId: string) => {
   if (!commentText.trim() || !user) {
     if (!user) alert("Silakan login untuk berkomentar");
@@ -738,20 +741,31 @@ const addComment = async (donationId: string) => {
   try {
     const donationRef = doc(db, "donations", donationId);
     const donation = donations.find(d => d.id === donationId);
+    
+    if (!donation) {
+      alert("Donasi tidak ditemukan");
+      return;
+    }
+    
+    // Buat comment object dengan Timestamp dari server
     const newComment: DonationComment = {
       id: Date.now().toString(),
       userId: user.uid,
       userName: user.displayName || user.email?.split('@')[0] || "User",
-      userPhoto: user.photoURL || undefined,
       text: commentText.trim(),
-      createdAt: {
-        seconds: Math.floor(Date.now() / 1000),
-        nanoseconds: 0
-      } as Timestamp
+      createdAt: serverTimestamp() as Timestamp
     };
+    
+    // Hanya tambahkan userPhoto jika ada (optional)
+    if (user.photoURL) {
+      newComment.userPhoto = user.photoURL;
+    }
 
-    const updatedComments = [...(donation?.comments || []), newComment];
+    const currentComments = donation.comments || [];
+    const updatedComments = [...currentComments, newComment];
+    
     await updateDoc(donationRef, { comments: updatedComments });
+    
     setCommentText("");
     setDonationCommentTarget(null);
   } catch (error) {
@@ -759,11 +773,6 @@ const addComment = async (donationId: string) => {
     alert("Gagal menambahkan komentar. Silakan coba lagi.");
   }
 };
-
-
-
-
-
 
 
 
@@ -4431,7 +4440,6 @@ useEffect(() => {
 
 
 
-
 {/* DONATION SECTION - FIXED VERSION */}
 {!isLoading && (
   <div
@@ -4490,7 +4498,7 @@ useEffect(() => {
     {donations && donations.length > 0 ? (
       <div>
         {donations.slice(0, 1).map((donation, idx) => {
-          // FIX: handle toDate error - check if createdAt has toDate method
+          // Handle toDate error
           let donationDate = new Date();
           if (donation.createdAt) {
             if (typeof donation.createdAt.toDate === 'function') {
@@ -4502,9 +4510,8 @@ useEffect(() => {
             }
           }
           
-          // FIX: Always use Farid Ardiansyah as donor name (ignore Anonymous)
           const donorName = 'Farid Ardiansyah';
-          const isVerified = true; // Always verified for Farid Ardiansyah
+          const isVerified = true;
           
           return (
             <div key={donation.id} style={{
@@ -4614,7 +4621,7 @@ useEffect(() => {
                   </div>
                 </div>
 
-                {/* 4 FOTO - Tanpa potongan, object-fit contain */}
+                {/* 4 FOTO PORTRAIT - ukuran normal (aspect ratio 3/4) */}
                 <div style={{
                   display: 'grid',
                   gridTemplateColumns: 'repeat(4, 1fr)',
@@ -4629,16 +4636,13 @@ useEffect(() => {
                     <div
                       key={photoIdx}
                       style={{
-                        aspectRatio: '1/1',
+                        aspectRatio: '3/4',
                         backgroundColor: '#f0f0f0',
                         borderRadius: '16px',
                         overflow: 'hidden',
                         position: 'relative',
                         cursor: 'pointer',
                         transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
                       }}
                       onClick={() => setSelectedDonation(donation)}
                       onMouseEnter={(e) => {
@@ -4654,7 +4658,7 @@ useEffect(() => {
                         src={photo}
                         alt={`Donation photo ${photoIdx + 1}`}
                         fill
-                        style={{ objectFit: 'contain' }}
+                        style={{ objectFit: 'cover' }}
                       />
                     </div>
                   ))}
@@ -4739,7 +4743,7 @@ useEffect(() => {
   </div>
 )}
 
-{/* MODAL UNTUK FOTO DENGAN KOMENTAR DI DALAMNYA */}
+{/* MODAL UNTUK FOTO DENGAN KOMENTAR */}
 {selectedDonation && (
   <div style={{
     position: 'fixed',
@@ -4768,64 +4772,60 @@ useEffect(() => {
       flexDirection: 'column',
     }} onClick={(e) => e.stopPropagation()}>
       
-      {/* Header Modal */}
+      {/* Header Modal - Nama Donatur font 60px + label Donatur */}
       <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: '20px 30px',
+        padding: '30px 30px 20px 30px',
         borderBottom: '1px solid #e0e0e0',
       }}>
         <div style={{
           display: 'flex',
-          alignItems: 'center',
-          gap: '15px',
+          alignItems: 'baseline',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '20px',
         }}>
-          <div style={{
-            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-            fontSize: '24px',
-            fontWeight: '500',
-            color: '#000000',
-          }}>
-            Galeri Donasi
-          </div>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-          }}>
-            <span style={{
-              fontFamily: "'Questrial', sans-serif",
-              fontSize: '16px',
-              color: '#666666',
+          <div>
+            <div style={{
+              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+              fontSize: '60px',
+              fontWeight: '500',
+              color: '#000000',
+              letterSpacing: '-0.02em',
+              lineHeight: '1.1',
             }}>
               Farid Ardiansyah
-            </span>
-            <VerifiedBadge size={18} />
+            </div>
+            <div style={{
+              fontFamily: "'Questrial', sans-serif",
+              fontSize: '20px',
+              color: '#999999',
+              marginTop: '8px',
+            }}>
+              Donatur
+            </div>
           </div>
+          <button
+            onClick={() => setSelectedDonation(null)}
+            style={{
+              background: 'none',
+              border: 'none',
+              fontSize: '32px',
+              cursor: 'pointer',
+              color: '#000000',
+              padding: '8px',
+            }}
+          >
+            ✕
+          </button>
         </div>
-        <button
-          onClick={() => setSelectedDonation(null)}
-          style={{
-            background: 'none',
-            border: 'none',
-            fontSize: '28px',
-            cursor: 'pointer',
-            color: '#000000',
-          }}
-        >
-          ✕
-        </button>
       </div>
 
-      {/* Grid Foto - Tanpa potongan, object-fit contain */}
+      {/* Grid Foto Portrait - 4 foto, aspect ratio 3/4 */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(2, 1fr)',
+        gridTemplateColumns: 'repeat(4, 1fr)',
         gap: '20px',
         padding: '30px',
-        maxHeight: '50vh',
-        overflowY: 'auto',
         backgroundColor: '#f5f5f5',
       }}>
         {[
@@ -4837,19 +4837,16 @@ useEffect(() => {
           <div key={idx} style={{
             position: 'relative',
             width: '100%',
-            aspectRatio: '1/1',
+            aspectRatio: '3/4',
             borderRadius: '16px',
             overflow: 'hidden',
             backgroundColor: '#e0e0e0',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
           }}>
             <Image
               src={photo}
               alt={`Donation photo ${idx + 1}`}
               fill
-              style={{ objectFit: 'contain' }}
+              style={{ objectFit: 'cover' }}
             />
           </div>
         ))}
@@ -4869,13 +4866,13 @@ useEffect(() => {
         }}>
           <div style={{
             fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-            fontSize: '18px',
+            fontSize: '20px',
             fontWeight: '500',
             color: '#000000',
           }}>
             KOMENTAR ({selectedDonation.comments?.length || 0})
           </div>
-          <MessageIcon size={20} />
+          <MessageIcon size={22} />
         </div>
 
         {/* Daftar Komentar */}
@@ -4894,15 +4891,15 @@ useEffect(() => {
                 borderBottom: '1px solid #f0f0f0',
               }}>
                 <div style={{
-                  width: '32px',
-                  height: '32px',
+                  width: '36px',
+                  height: '36px',
                   borderRadius: '50%',
                   backgroundColor: '#000000',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   color: '#ffffff',
-                  fontSize: '14px',
+                  fontSize: '16px',
                   fontWeight: '500',
                   flexShrink: 0,
                 }}>
@@ -4912,21 +4909,21 @@ useEffect(() => {
                   <div style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '8px',
-                    marginBottom: '4px',
+                    gap: '10px',
+                    marginBottom: '6px',
                     flexWrap: 'wrap',
                   }}>
                     <span style={{
                       fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                      fontSize: '13px',
+                      fontSize: '14px',
                       fontWeight: '600',
                       color: '#000000',
                     }}>
                       {comment.userName || 'User'}
                     </span>
-                    <VerifiedBadge size={12} />
+                    <VerifiedBadge size={14} />
                     <span style={{
-                      fontSize: '10px',
+                      fontSize: '11px',
                       color: '#999999',
                     }}>
                       {comment.createdAt ? (typeof comment.createdAt.toDate === 'function' ? formatTime(comment.createdAt) : '') : ''}
@@ -4934,7 +4931,7 @@ useEffect(() => {
                   </div>
                   <div style={{
                     fontFamily: "'Questrial', sans-serif",
-                    fontSize: '13px',
+                    fontSize: '14px',
                     color: '#333333',
                     lineHeight: '1.4',
                   }}>
@@ -4950,7 +4947,7 @@ useEffect(() => {
         {donationCommentTarget === selectedDonation.id ? (
           <div style={{
             display: 'flex',
-            gap: '10px',
+            gap: '12px',
             alignItems: 'center',
           }}>
             <input
@@ -4960,11 +4957,11 @@ useEffect(() => {
               placeholder="Tulis komentar..."
               style={{
                 flex: 1,
-                padding: '10px 16px',
+                padding: '12px 20px',
                 borderRadius: '60px',
                 border: '1px solid #cccccc',
                 fontFamily: "'Questrial', sans-serif",
-                fontSize: '13px',
+                fontSize: '14px',
                 outline: 'none',
               }}
               onKeyPress={(e) => {
@@ -4978,14 +4975,14 @@ useEffect(() => {
               onClick={() => addComment(selectedDonation.id)}
               disabled={!commentText.trim()}
               style={{
-                padding: '8px 20px',
+                padding: '10px 24px',
                 borderRadius: '60px',
                 border: 'none',
                 backgroundColor: commentText.trim() ? '#000000' : '#cccccc',
                 color: '#ffffff',
                 cursor: commentText.trim() ? 'pointer' : 'not-allowed',
                 fontFamily: "'Questrial', sans-serif",
-                fontSize: '12px',
+                fontSize: '13px',
                 fontWeight: '500',
               }}
             >
@@ -4994,13 +4991,13 @@ useEffect(() => {
             <button
               onClick={() => setDonationCommentTarget(null)}
               style={{
-                padding: '8px 16px',
+                padding: '10px 20px',
                 borderRadius: '60px',
                 border: '1px solid #cccccc',
                 backgroundColor: 'transparent',
                 color: '#666666',
                 cursor: 'pointer',
-                fontSize: '12px',
+                fontSize: '13px',
               }}
             >
               Batal
@@ -5019,19 +5016,19 @@ useEffect(() => {
             }}
             style={{
               width: '100%',
-              padding: '12px',
+              padding: '14px',
               borderRadius: '60px',
               border: '1px solid #000000',
               backgroundColor: 'transparent',
               color: '#000000',
               cursor: 'pointer',
               fontFamily: "'Questrial', sans-serif",
-              fontSize: '14px',
+              fontSize: '15px',
               fontWeight: '500',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: '8px',
+              gap: '10px',
               transition: 'all 0.2s ease',
             }}
             onMouseEnter={(e) => {
@@ -5043,18 +5040,14 @@ useEffect(() => {
               e.currentTarget.style.color = '#000000';
             }}
           >
-            <MessageIcon size={16} />
+            <MessageIcon size={18} />
             <span>TULIS KOMENTAR</span>
           </button>
         )}
       </div>
     </div>
   </div>
-)}            
-
-
-            
-
+)}
 
 
 
