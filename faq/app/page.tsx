@@ -4490,9 +4490,21 @@ useEffect(() => {
     {donations && donations.length > 0 ? (
       <div>
         {donations.slice(0, 1).map((donation, idx) => {
-          const donationDate = donation.createdAt ? donation.createdAt.toDate() : new Date();
-          const donorName = donation.isAnonymous ? 'Anonymous' : (donation.donorName || 'Farid Ardiansyah');
-          const isVerified = donation.verified || donation.donorEmail === ADMIN_EMAIL || donorName === 'Farid Ardiansyah';
+          // FIX: handle toDate error - check if createdAt has toDate method
+          let donationDate = new Date();
+          if (donation.createdAt) {
+            if (typeof donation.createdAt.toDate === 'function') {
+              donationDate = donation.createdAt.toDate();
+            } else if (donation.createdAt.seconds) {
+              donationDate = new Date(donation.createdAt.seconds * 1000);
+            } else {
+              donationDate = new Date(donation.createdAt);
+            }
+          }
+          
+          // FIX: Always use Farid Ardiansyah as donor name (ignore Anonymous)
+          const donorName = 'Farid Ardiansyah';
+          const isVerified = true; // Always verified for Farid Ardiansyah
           
           return (
             <div key={donation.id} style={{
@@ -4568,7 +4580,7 @@ useEffect(() => {
                     }}>
                       {donorName}
                     </div>
-                    {isVerified && <VerifiedBadge size={28} />}
+                    <VerifiedBadge size={28} />
                   </div>
                 </div>
 
@@ -4787,7 +4799,7 @@ useEffect(() => {
               fontSize: '16px',
               color: '#666666',
             }}>
-              {selectedDonation.donorName || 'Farid Ardiansyah'}
+              Farid Ardiansyah
             </span>
             <VerifiedBadge size={18} />
           </div>
@@ -4894,7 +4906,7 @@ useEffect(() => {
                   fontWeight: '500',
                   flexShrink: 0,
                 }}>
-                  {comment.userName.charAt(0).toUpperCase()}
+                  {comment.userName?.charAt(0).toUpperCase() || 'U'}
                 </div>
                 <div style={{ flex: 1 }}>
                   <div style={{
@@ -4910,14 +4922,14 @@ useEffect(() => {
                       fontWeight: '600',
                       color: '#000000',
                     }}>
-                      {comment.userName}
+                      {comment.userName || 'User'}
                     </span>
                     <VerifiedBadge size={12} />
                     <span style={{
                       fontSize: '10px',
                       color: '#999999',
                     }}>
-                      {comment.createdAt ? formatTime(comment.createdAt) : ''}
+                      {comment.createdAt ? (typeof comment.createdAt.toDate === 'function' ? formatTime(comment.createdAt) : '') : ''}
                     </span>
                   </div>
                   <div style={{
@@ -5038,9 +5050,7 @@ useEffect(() => {
       </div>
     </div>
   </div>
-)}
-
-
+)}            
 
 
             
