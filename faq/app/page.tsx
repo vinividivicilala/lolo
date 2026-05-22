@@ -4414,6 +4414,9 @@ useEffect(() => {
 )}
 
 
+
+            
+
 {/* DONATION SECTION - FIXED VERSION */}
 {!isLoading && (
   <div
@@ -4468,7 +4471,7 @@ useEffect(() => {
       </div>
     </div>
 
-    {/* LOOP DONASI - Angka dan konten donasi sejajar */}
+    {/* LOOP DONASI - Hanya 1 donasi terbaru */}
     {donations && donations.length > 0 ? (
       <div>
         {donations.slice(0, 1).map((donation, idx) => {
@@ -4544,34 +4547,47 @@ useEffect(() => {
                   </div>
                 </div>
 
-                {/* Deskripsi - font hitam 50px, rata kanan */}
+                {/* DESKRIPSI - SISI KIRI dengan tanda panah */}
                 <div style={{
-                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                  fontSize: '50px',
-                  fontWeight: '400',
-                  color: '#000000',
-                  letterSpacing: '-0.02em',
-                  lineHeight: '1.3',
-                  textAlign: 'right',
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: '30px',
                   marginBottom: '60px',
                 }}>
-                  Sebagai rasa terima kasih kepada Allah SWT<br />
-                  atas kebahagiaan PERSIB Juara Hattrick<br />
-                  Liga 1 Indonesia, 23 Mei 2026
+                  <div style={{
+                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                    fontSize: '50px',
+                    fontWeight: '400',
+                    color: '#000000',
+                    letterSpacing: '-0.02em',
+                    lineHeight: '1.3',
+                    flex: 1,
+                  }}>
+                    Sebagai rasa terima kasih kepada Allah SWT<br />
+                    atas kebahagiaan PERSIB Juara Hattrick<br />
+                    Liga 1 Indonesia, 23 Mei 2026
+                  </div>
+                  {/* Tanda panah di samping deskripsi */}
+                  <div style={{
+                    flexShrink: 0,
+                  }}>
+                    <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
                 </div>
 
-                {/* 4 Foto - bisa diklik */}
+                {/* 4 FOTO - Portrait seperti di Trusted Collabs */}
                 <div style={{
                   display: 'grid',
                   gridTemplateColumns: 'repeat(4, 1fr)',
                   gap: '20px',
-                  marginBottom: '40px',
                 }}>
                   {(donation.photos && donation.photos.length > 0 ? donation.photos : samplePhotos).map((photo, photoIdx) => (
                     <div
                       key={photoIdx}
                       style={{
-                        aspectRatio: '1/1',
+                        aspectRatio: '3/4',
                         backgroundColor: '#e0e0e0',
                         borderRadius: '16px',
                         overflow: 'hidden',
@@ -4581,11 +4597,11 @@ useEffect(() => {
                       }}
                       onClick={() => setSelectedDonation(donation)}
                       onMouseEnter={(e) => {
-                        e.currentTarget.style.transform = 'scale(1.03)';
-                        e.currentTarget.style.boxShadow = '0 10px 30px rgba(0,0,0,0.15)';
+                        e.currentTarget.style.transform = 'translateY(-8px)';
+                        e.currentTarget.style.boxShadow = '0 15px 30px rgba(0,0,0,0.15)';
                       }}
                       onMouseLeave={(e) => {
-                        e.currentTarget.style.transform = 'scale(1)';
+                        e.currentTarget.style.transform = 'translateY(0)';
                         e.currentTarget.style.boxShadow = 'none';
                       }}
                     >
@@ -4595,25 +4611,6 @@ useEffect(() => {
                         fill
                         style={{ objectFit: 'cover' }}
                       />
-                      {/* Overlay nama donatur di foto */}
-                      <div style={{
-                        position: 'absolute',
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        backgroundColor: 'rgba(0,0,0,0.6)',
-                        padding: '8px 12px',
-                        fontSize: '12px',
-                        color: '#ffffff',
-                        fontFamily: "'Questrial', sans-serif",
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                      }}>
-                        <span>📷</span>
-                        <span>{donorName}</span>
-                        {isVerified && <VerifiedBadge size={14} />}
-                      </div>
                     </div>
                   ))}
                 </div>
@@ -4775,10 +4772,10 @@ useEffect(() => {
         </button>
       </div>
 
-      {/* Grid Foto */}
+      {/* Grid Foto Portrait */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(2, 1fr)',
+        gridTemplateColumns: 'repeat(4, 1fr)',
         gap: '20px',
         padding: '30px',
         maxHeight: '50vh',
@@ -4789,7 +4786,7 @@ useEffect(() => {
           <div key={idx} style={{
             position: 'relative',
             width: '100%',
-            aspectRatio: '1/1',
+            aspectRatio: '3/4',
             borderRadius: '16px',
             overflow: 'hidden',
             backgroundColor: '#e0e0e0',
@@ -4800,24 +4797,6 @@ useEffect(() => {
               fill
               style={{ objectFit: 'cover' }}
             />
-            <div style={{
-              position: 'absolute',
-              bottom: 0,
-              left: 0,
-              right: 0,
-              backgroundColor: 'rgba(0,0,0,0.5)',
-              padding: '6px 10px',
-              fontSize: '11px',
-              color: '#ffffff',
-              fontFamily: "'Questrial', sans-serif",
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-            }}>
-              <span>📷</span>
-              <span>{selectedDonation.donorName}</span>
-              {selectedDonation.verified && <VerifiedBadge size={12} />}
-            </div>
           </div>
         ))}
       </div>
@@ -5018,10 +4997,6 @@ useEffect(() => {
     </div>
   </div>
 )}
-
-
-
-
 
 
 
