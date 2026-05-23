@@ -4436,7 +4436,6 @@ useEffect(() => {
 )}
 
 
-
 {/* DONATION SECTION - FIXED VERSION */}
 {!isLoading && (
   <div
@@ -4519,6 +4518,20 @@ useEffect(() => {
           ];
           const totalSembako = sembakoItems.reduce((sum, item) => sum + item.price, 0);
           
+          // Data lagu Persib
+          const persibSongs = [
+            {
+              title: "Persib Bandung - Hattrick Juara",
+              artist: "Viking Persib Club",
+              lyrics: "Kami pendukung Persib, setia selamanya\nHattrick juara, kebanggaan kita\nPersib di hati, Persib di jiwa\nBobotoh bersatu, untuk Persib tercinta!"
+            },
+            {
+              title: "Bobotoh Sejati",
+              artist: "Persib Mania",
+              lyrics: "Bobotoh sejati, tak pernah lelah\nMendukung Persib di setiap laga\nHattrick juara, mimpi jadi nyata\nTerima kasih Persib, kebanggaan bangsa!"
+            }
+          ];
+          
           return (
             <div key={donation.id} style={{
               display: 'flex',
@@ -4543,16 +4556,53 @@ useEffect(() => {
               <div style={{
                 flex: 1,
               }}>
-                {/* Nama Panti Asuhan - font 50px */}
+                {/* Nama Panti Asuhan + hashtag #hattrickjuara */}
                 <div style={{
-                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                  fontSize: '50px',
-                  fontWeight: '400',
-                  color: '#000000',
-                  letterSpacing: '-0.02em',
+                  display: 'flex',
+                  alignItems: 'center',
+                  flexWrap: 'wrap',
+                  gap: '20px',
                   marginBottom: '15px',
                 }}>
-                  Panti Asuhan Yatim & Dhuafa Al-Farid
+                  <div style={{
+                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                    fontSize: '50px',
+                    fontWeight: '400',
+                    color: '#000000',
+                    letterSpacing: '-0.02em',
+                  }}>
+                    Panti Asuhan Yatim & Dhuafa Al-Farid
+                  </div>
+                  <Link href="https://twitter.com/search?q=%23hattrickjuara&src=typed_query" target="_blank">
+                    <div style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '8px 20px',
+                      backgroundColor: '#1DA1F2',
+                      borderRadius: '60px',
+                      cursor: 'pointer',
+                      transition: 'transform 0.2s, opacity 0.2s',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'scale(1.05)';
+                      e.currentTarget.style.opacity = '0.9';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'scale(1)';
+                      e.currentTarget.style.opacity = '1';
+                    }}>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z" fill="white" stroke="white" strokeWidth="2"/>
+                      </svg>
+                      <span style={{
+                        fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                        fontSize: '20px',
+                        fontWeight: '500',
+                        color: '#ffffff',
+                      }}>#hattrickjuara</span>
+                    </div>
+                  </Link>
                 </div>
 
                 {/* Lokasi Panti Asuhan - HITAM */}
@@ -4686,7 +4736,6 @@ useEffect(() => {
                       </div>
                     ))}
                     
-                    {/* Total */}
                     <div style={{
                       display: 'flex',
                       justifyContent: 'space-between',
@@ -4712,6 +4761,100 @@ useEffect(() => {
                         Rp {totalSembako.toLocaleString('id-ID')}
                       </div>
                     </div>
+                  </div>
+                </div>
+
+                {/* SPOTIFY LAGU PERSIB + LIRIK OTOMATIS */}
+                <div style={{
+                  marginBottom: '50px',
+                  padding: '30px',
+                  backgroundColor: '#191414',
+                  borderRadius: '20px',
+                  color: '#ffffff',
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '15px',
+                    marginBottom: '25px',
+                  }}>
+                    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.59 14.46c-.23.37-.71.48-1.08.25-2.93-1.77-6.6-2.16-10.92-1.18-.42.11-.84-.14-.95-.56-.11-.42.14-.84.56-.95 4.64-1.06 8.64-.61 11.87 1.32.38.22.49.69.27 1.07zm1.39-2.77c-.29.45-.88.6-1.33.31-3.34-2.03-8.43-2.63-12.38-1.44-.48.15-.99-.13-1.13-.61-.15-.48.13-.99.61-1.13 4.43-1.36 9.91-.73 13.65 1.53.45.28.6.87.32 1.33zm.07-2.89c-3.97-2.35-10.47-2.56-14.21-1.41-.57.18-1.18-.14-1.36-.71-.18-.57.14-1.18.71-1.36 4.29-1.33 11.44-1.1 15.98 1.6.52.31.69.98.38 1.5-.31.52-.98.69-1.5.38z" fill="#1DB954"/>
+                    </svg>
+                    <div style={{
+                      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                      fontSize: '24px',
+                      fontWeight: '600',
+                      color: '#ffffff',
+                    }}>
+                      Lagu Persib Juara Hattrick
+                    </div>
+                  </div>
+                  
+                  {/* Spotify Embed */}
+                  <div style={{
+                    marginBottom: '30px',
+                    borderRadius: '12px',
+                    overflow: 'hidden',
+                  }}>
+                    <iframe 
+                      src="https://open.spotify.com/embed/track/2vNpRmfhKttYho1Gv2lIx0?utm_source=generator" 
+                      width="100%" 
+                      height="80" 
+                      frameBorder="0" 
+                      allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                      loading="lazy"
+                      style={{ borderRadius: '12px' }}
+                    />
+                  </div>
+                  
+                  {/* Lirik Lagu */}
+                  <div style={{
+                    marginTop: '20px',
+                  }}>
+                    <div style={{
+                      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                      fontSize: '18px',
+                      fontWeight: '500',
+                      color: '#1DB954',
+                      marginBottom: '15px',
+                    }}>
+                      🎵 LIRIK LAGU 🎵
+                    </div>
+                    {persibSongs.map((song, songIdx) => (
+                      <div key={songIdx} style={{
+                        marginBottom: songIdx < persibSongs.length - 1 ? '25px' : '0',
+                        paddingBottom: songIdx < persibSongs.length - 1 ? '20px' : '0',
+                        borderBottom: songIdx < persibSongs.length - 1 ? '1px solid rgba(255,255,255,0.1)' : 'none',
+                      }}>
+                        <div style={{
+                          fontFamily: "'Questrial', sans-serif",
+                          fontSize: '16px',
+                          fontWeight: '500',
+                          color: '#ffffff',
+                          marginBottom: '5px',
+                        }}>
+                          {song.title}
+                        </div>
+                        <div style={{
+                          fontFamily: "'Questrial', sans-serif",
+                          fontSize: '13px',
+                          color: '#b3b3b3',
+                          marginBottom: '12px',
+                        }}>
+                          {song.artist}
+                        </div>
+                        <div style={{
+                          fontFamily: "'Questrial', sans-serif",
+                          fontSize: '14px',
+                          color: '#e0e0e0',
+                          lineHeight: '1.6',
+                          whiteSpace: 'pre-line',
+                        }}>
+                          {song.lyrics}
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
 
@@ -4836,8 +4979,6 @@ useEffect(() => {
     </div>
   </div>
 )}
-
-
 
 
 
