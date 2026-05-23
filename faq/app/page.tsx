@@ -4436,8 +4436,7 @@ useEffect(() => {
 )}
 
 
-
-{/* DONATION SECTION - FIXED VERSION dengan styled-jsx yang benar */}
+{/* DONATION SECTION - FIXED VERSION (Tanpa Nested Styled-JSX) */}
 {!isLoading && (
   <div
     ref={donationSectionRef}
@@ -4529,7 +4528,6 @@ useEffect(() => {
               id: 1,
               title: "We Will Stay Behind You", 
               artist: "Kuburan",
-              url: "https://open.spotify.com/embed/track/3hcuqSKnNdruDRwcAJLWj9?utm_source=generator",
               trackUrl: "https://open.spotify.com/track/3hcuqSKnNdruDRwcAJLWj9",
               duration: "4:20"
             },
@@ -4537,7 +4535,6 @@ useEffect(() => {
               id: 2,
               title: "Bobotoh Gerot Persib", 
               artist: "Onto Hood",
-              url: "https://open.spotify.com/embed/track/5yXHxXX4hQ22nBwK2ROyMY?utm_source=generator",
               trackUrl: "https://open.spotify.com/track/5yXHxXX4hQ22nBwK2ROyMY",
               duration: "3:45"
             }
@@ -4696,7 +4693,7 @@ useEffect(() => {
                   </div>
                 </div>
 
-                {/* MINIMALIST PLAYLIST + NOW PLAYING INDICATOR */}
+                {/* MINIMALIST PLAYLIST + NOW PLAYING INDICATOR (tanpa styled-jsx) */}
                 <div style={{
                   marginBottom: '50px',
                 }}>
@@ -4711,9 +4708,9 @@ useEffect(() => {
                     — PLAYLIST —
                   </div>
                   
-                  {/* Now Playing Indicator - Realtime */}
+                  {/* Now Playing Indicator - Realtime (tanpa animasi CSS kompleks) */}
                   {nowPlaying && (
-                    <div className="now-playing-indicator" style={{
+                    <div style={{
                       display: 'flex',
                       alignItems: 'center',
                       gap: '15px',
@@ -4721,8 +4718,14 @@ useEffect(() => {
                       backgroundColor: '#1DB954',
                       borderRadius: '12px',
                       marginBottom: '20px',
+                      transition: 'all 0.3s ease',
                     }}>
-                      <div className="pulse-dot" />
+                      <div style={{
+                        width: '12px',
+                        height: '12px',
+                        borderRadius: '50%',
+                        backgroundColor: '#ffffff',
+                      }} />
                       <div style={{
                         fontFamily: "'Questrial', sans-serif",
                         fontSize: '14px',
@@ -5042,37 +5045,8 @@ useEffect(() => {
         </button>
       </Link>
     </div>
-
-    {/* STYLED-JSX UNTUK ANIMASI - DILUAR LOOP (tidak nested) */}
-    <style jsx>{`
-      .now-playing-indicator {
-        animation: pulse 1.5s infinite;
-      }
-      .pulse-dot {
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-        background-color: #ffffff;
-        animation: blink 1s infinite;
-      }
-      @keyframes pulse {
-        0% { opacity: 0.7; }
-        50% { opacity: 1; }
-        100% { opacity: 0.7; }
-      }
-      @keyframes blink {
-        0% { opacity: 1; }
-        50% { opacity: 0.3; }
-        100% { opacity: 1; }
-      }
-    `}</style>
   </div>
 )}
-            
-
-
-
-
 
             
             
