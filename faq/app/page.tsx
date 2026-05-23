@@ -161,6 +161,17 @@ interface Community {
   createdAt: Timestamp;
 }
 
+// Interface untuk Play History
+interface PlayHistoryItem {
+  id: string;
+  userName: string;
+  userEmail: string;
+  userPhoto?: string;
+  songTitle: string;
+  songArtist: string;
+  timestamp: Timestamp;
+}
+
 // Email Admin
 const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
 
@@ -438,6 +449,12 @@ export default function HomePage(): React.JSX.Element {
   // Tambahkan di bagian state (bersama dengan state lainnya)
 const [nowPlaying, setNowPlaying] = useState<string | null>(null);
 const [nowPlayingUser, setNowPlayingUser] = useState<string | null>(null);
+  // State untuk Play History dari Firebase
+const [playHistory, setPlayHistory] = useState<PlayHistoryItem[]>([]);
+
+
+
+  
 
   const carouselItems = [
     {
@@ -651,6 +668,54 @@ const [nowPlayingUser, setNowPlayingUser] = useState<string | null>(null);
       alert("Gagal mengirim balasan.");
     }
   };
+
+
+  // Fungsi untuk menyimpan riwayat pemutaran ke Firebase
+const savePlayHistory = async (songTitle: string, songArtist: string) => {
+  if (!user) {
+    alert("Silakan login untuk memutar lagu");
+    setShowAuthModal(true);
+    return;
+  }
+
+  try {
+    const playHistoryRef = collection(db, "play_history");
+    await addDoc(playHistoryRef, {
+      userName: user.displayName || user.email?.split('@')[0] || "User",
+      userEmail: user.email,
+      userPhoto: user.photoURL || null,
+      songTitle: songTitle,
+      songArtist: songArtist,
+      timestamp: serverTimestamp(),
+    });
+    
+    // Set now playing state
+    setNowPlaying(songTitle);
+    setNowPlayingUser(user.displayName || user.email?.split('@')[0] || "User");
+  } catch (error) {
+    console.error("Error saving play history:", error);
+  }
+};
+
+// Load play history dari Firebase
+useEffect(() => {
+  if (!db) return;
+
+  const playHistoryRef = collection(db, "play_history");
+  const q = query(playHistoryRef, orderBy("timestamp", "desc"), limit(20));
+
+  const unsubscribe = onSnapshot(q, (snapshot) => {
+    const history: PlayHistoryItem[] = [];
+    snapshot.forEach((doc) => {
+      history.push({ id: doc.id, ...doc.data() } as PlayHistoryItem);
+    });
+    setPlayHistory(history);
+  });
+
+  return () => unsubscribe();
+}, []);
+
+  
 
   // Load calendar submissions from Firebase
   useEffect(() => {
@@ -4441,7 +4506,9 @@ useEffect(() => {
 
 
 
-{/* DONATION SECTION - WITH SPOTIFY EMBED & PERSISTENT NOW PLAYING (Tanpa Nested Styled-JSX) */}
+
+
+{/* DONATION SECTION - WITH FIREBASE PLAY HISTORY */}
 {!isLoading && (
   <div
     ref={donationSectionRef}
@@ -4523,7 +4590,7 @@ useEffect(() => {
           ];
           const totalSembako = sembakoItems.reduce((sum, item) => sum + item.price, 0);
           
-          // Data playlist lagu Persib dengan Embed URL (bisa diputar langsung)
+          // Data playlist lagu Persib
           const persibPlaylist = [
             { 
               id: 1,
@@ -4678,7 +4745,6 @@ useEffect(() => {
                     atas kebahagiaan PERSIB Juara Hattrick<br />
                     Liga 1 Indonesia, 23 Mei 2026
                   </div>
-                  {/* Tanda panah di samping deskripsi */}
                   <div style={{
                     flexShrink: 0,
                   }}>
@@ -4688,7 +4754,7 @@ useEffect(() => {
                   </div>
                 </div>
 
-                {/* SPOTIFY TRACKS - DENGAN PLAYER LANGSUNG & PERSISTENT NOW PLAYING */}
+                {/* SPOTIFY TRACKS - DENGAN FIREBASE PLAY HISTORY */}
                 <div style={{
                   marginBottom: '50px',
                 }}>
@@ -4703,13 +4769,13 @@ useEffect(() => {
                     — PLAYLIST —
                   </div>
                   
-                  {/* Now Playing Indicator - PERSISTENT (tidak hilang) - tanpa animasi */}
+                  {/* Now Playing Indicator - Dari Firebase */}
                   {nowPlaying && (
                     <div style={{
                       display: 'flex',
                       alignItems: 'center',
                       gap: '12px',
-                      padding: '10px 16px',
+                      padding: '12px 20px',
                       backgroundColor: '#1DB954',
                       borderRadius: '40px',
                       marginBottom: '20px',
@@ -4726,19 +4792,18 @@ useEffect(() => {
                         fontSize: '14px',
                         color: '#ffffff',
                       }}>
-                        🎵 {nowPlayingUser || 'Farid Ardiansyah'} sedang memutar: <strong>{nowPlaying}</strong>
+                        🎵 <strong>{nowPlayingUser || 'Farid Ardiansyah'}</strong> sedang memutar: <strong>{nowPlaying}</strong>
                       </div>
                     </div>
                   )}
                   
-                  {/* Daftar Lagu dengan Player Langsung */}
+                  {/* Daftar Lagu dengan Player */}
                   {persibPlaylist.map((song) => (
                     <div key={song.id} style={{
                       marginBottom: '25px',
                       padding: '20px',
                       backgroundColor: '#f8f8f8',
                       borderRadius: '16px',
-                      transition: 'all 0.3s ease',
                     }}>
                       <div style={{
                         display: 'flex',
@@ -4782,9 +4847,7 @@ useEffect(() => {
                         </div>
                         <button
                           onClick={() => {
-                            // Set now playing state (PERSISTENT, tidak hilang)
-                            setNowPlaying(song.title);
-                            setNowPlayingUser(user?.displayName || user?.email?.split('@')[0] || 'Farid Ardiansyah');
+                            savePlayHistory(song.title, song.artist);
                           }}
                           style={{
                             background: 'none',
@@ -4792,7 +4855,6 @@ useEffect(() => {
                             cursor: 'pointer',
                             padding: '8px 20px',
                             borderRadius: '40px',
-                            transition: 'all 0.2s',
                             display: 'flex',
                             alignItems: 'center',
                             gap: '8px',
@@ -4801,13 +4863,11 @@ useEffect(() => {
                           onMouseEnter={(e) => {
                             if (nowPlaying !== song.title) {
                               e.currentTarget.style.backgroundColor = '#1DB954';
-                              e.currentTarget.style.color = '#ffffff';
                             }
                           }}
                           onMouseLeave={(e) => {
                             if (nowPlaying !== song.title) {
                               e.currentTarget.style.backgroundColor = 'transparent';
-                              e.currentTarget.style.color = '#000000';
                             }
                           }}
                         >
@@ -4825,7 +4885,7 @@ useEffect(() => {
                         </button>
                       </div>
                       
-                      {/* Spotify Embed Player - Bisa diputar langsung di halaman */}
+                      {/* Spotify Embed Player */}
                       <div style={{
                         borderRadius: '12px',
                         overflow: 'hidden',
@@ -4842,6 +4902,118 @@ useEffect(() => {
                       </div>
                     </div>
                   ))}
+                  
+                  {/* HISTORY DARI FIREBASE - Semua user yang pernah memutar lagu */}
+                  {playHistory.length > 0 && (
+                    <div style={{
+                      marginTop: '30px',
+                      padding: '20px',
+                      backgroundColor: '#f0f0f0',
+                      borderRadius: '16px',
+                    }}>
+                      <div style={{
+                        fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                        fontSize: '16px',
+                        fontWeight: '600',
+                        color: '#333333',
+                        marginBottom: '15px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                      }}>
+                        <span>📜</span>
+                        <span>RIWAYAT PUTAR LAGU</span>
+                        <span style={{
+                          fontSize: '12px',
+                          color: '#999999',
+                          fontWeight: '400',
+                        }}>(tersimpan di Firebase)</span>
+                      </div>
+                      <div style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '10px',
+                        maxHeight: '300px',
+                        overflowY: 'auto',
+                      }}>
+                        {playHistory.map((item) => {
+                          const itemDate = item.timestamp?.toDate ? item.timestamp.toDate() : new Date();
+                          return (
+                            <div key={item.id} style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              padding: '10px 15px',
+                              backgroundColor: '#ffffff',
+                              borderRadius: '12px',
+                              border: '1px solid #e0e0e0',
+                            }}>
+                              <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '12px',
+                              }}>
+                                {item.userPhoto ? (
+                                  <div style={{
+                                    width: '32px',
+                                    height: '32px',
+                                    borderRadius: '50%',
+                                    overflow: 'hidden',
+                                    position: 'relative',
+                                  }}>
+                                    <Image src={item.userPhoto} alt={item.userName} fill style={{ objectFit: 'cover' }} />
+                                  </div>
+                                ) : (
+                                  <div style={{
+                                    width: '32px',
+                                    height: '32px',
+                                    borderRadius: '50%',
+                                    backgroundColor: '#1DB954',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    color: '#ffffff',
+                                    fontSize: '14px',
+                                    fontWeight: '600',
+                                  }}>
+                                    {item.userName.charAt(0).toUpperCase()}
+                                  </div>
+                                )}
+                                <div>
+                                  <div style={{
+                                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                                    fontSize: '14px',
+                                    fontWeight: '600',
+                                    color: '#000000',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '6px',
+                                  }}>
+                                    {item.userName}
+                                    {item.userEmail === ADMIN_EMAIL && <VerifiedBadge size={14} />}
+                                  </div>
+                                  <div style={{
+                                    fontFamily: "'Questrial', sans-serif",
+                                    fontSize: '12px',
+                                    color: '#999999',
+                                  }}>
+                                    memutar: {item.songTitle} — {item.songArtist}
+                                  </div>
+                                </div>
+                              </div>
+                              <div style={{
+                                fontFamily: "'Questrial', sans-serif",
+                                fontSize: '11px',
+                                color: '#999999',
+                              }}>
+                                {itemDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })} • {itemDate.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* RINCIAN DONASI - Rp 100.000 + Daftar Sembako */}
@@ -5052,6 +5224,15 @@ useEffect(() => {
     </div>
   </div>
 )}
+
+
+
+
+
+
+
+
+            
             
 
 {/* MODAL UNTUK FOTO - dengan judul Galeri Donasi */}
