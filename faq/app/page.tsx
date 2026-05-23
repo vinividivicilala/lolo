@@ -4441,7 +4441,7 @@ useEffect(() => {
 
 
 
-{/* DONATION SECTION - WITH SPOTIFY EMBED & PERSISTENT NOW PLAYING */}
+{/* DONATION SECTION - WITH SPOTIFY EMBED & PERSISTENT NOW PLAYING (Tanpa Nested Styled-JSX) */}
 {!isLoading && (
   <div
     ref={donationSectionRef}
@@ -4703,7 +4703,7 @@ useEffect(() => {
                     — PLAYLIST —
                   </div>
                   
-                  {/* Now Playing Indicator - PERSISTENT (tidak hilang) */}
+                  {/* Now Playing Indicator - PERSISTENT (tidak hilang) - tanpa animasi */}
                   {nowPlaying && (
                     <div style={{
                       display: 'flex',
@@ -4720,7 +4720,6 @@ useEffect(() => {
                         height: '10px',
                         borderRadius: '50%',
                         backgroundColor: '#ffffff',
-                        animation: 'pulse 1.5s infinite',
                       }} />
                       <div style={{
                         fontFamily: "'Questrial', sans-serif",
@@ -5051,20 +5050,8 @@ useEffect(() => {
         </button>
       </Link>
     </div>
-
-    {/* Animasi CSS untuk now playing indicator */}
-    <style jsx>{`
-      @keyframes pulse {
-        0% { opacity: 0.7; }
-        50% { opacity: 1; }
-        100% { opacity: 0.7; }
-      }
-    `}</style>
   </div>
 )}
-
-
-            
             
 
 {/* MODAL UNTUK FOTO - dengan judul Galeri Donasi */}
