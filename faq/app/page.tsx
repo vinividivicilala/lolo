@@ -4521,31 +4521,27 @@ useEffect(() => {
           ];
           const totalSembako = sembakoItems.reduce((sum, item) => sum + item.price, 0);
           
-          // Daftar playlist lagu Persib
+          // State untuk now playing
+          const [nowPlaying, setNowPlaying] = useState<string | null>(null);
+          const [nowPlayingUser, setNowPlayingUser] = useState<string | null>(null);
+          
+          // Daftar playlist lagu Persib (2 lagu)
           const persibPlaylist = [
             { 
-              title: "Persib Bandung - Hattrick Juara", 
-              artist: "Viking Persib Club",
-              url: "https://open.spotify.com/track/2vNpRmfhKttYho1Gv2lIx0",
+              id: 1,
+              title: "We Will Stay Behind You", 
+              artist: "Kuburan",
+              url: "https://open.spotify.com/embed/track/3hcuqSKnNdruDRwcAJLWj9?utm_source=generator",
+              trackUrl: "https://open.spotify.com/track/3hcuqSKnNdruDRwcAJLWj9",
+              duration: "4:20"
+            },
+            { 
+              id: 2,
+              title: "Bobotoh Gerot Persib", 
+              artist: "Onto Hood",
+              url: "https://open.spotify.com/embed/track/5yXHxXX4hQ22nBwK2ROyMY?utm_source=generator",
+              trackUrl: "https://open.spotify.com/track/5yXHxXX4hQ22nBwK2ROyMY",
               duration: "3:45"
-            },
-            { 
-              title: "Bobotoh Sejati", 
-              artist: "Persib Mania",
-              url: "https://open.spotify.com/track/1aBcCwKkR1pVnqZQGqTqL",
-              duration: "4:12"
-            },
-            { 
-              title: "Kebanggaan Bandung", 
-              artist: "Viking Persib Club",
-              url: "https://open.spotify.com/track/2bNcD9W8pD3rFhJqXpQnK",
-              duration: "3:58"
-            },
-            { 
-              title: "Persib Juara Liga 1", 
-              artist: "Bobotoh Mania",
-              url: "https://open.spotify.com/track/3cEeJqGgPcJQkQqLpFqM",
-              duration: "4:05"
             }
           ];
           
@@ -4573,7 +4569,7 @@ useEffect(() => {
               <div style={{
                 flex: 1,
               }}>
-                {/* Nama Panti Asuhan + hashtag #hattrickjuara + Playlist */}
+                {/* Nama Panti Asuhan + hashtag #hattrickjuara */}
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -4628,101 +4624,9 @@ useEffect(() => {
                       </div>
                     </Link>
                   </div>
-
-                  {/* DAFTAR PLAYLIST LAGU PERSIB */}
-                  <div style={{
-                    backgroundColor: '#191414',
-                    borderRadius: '16px',
-                    padding: '15px 20px',
-                    minWidth: '300px',
-                  }}>
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '10px',
-                      marginBottom: '12px',
-                    }}>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.59 14.46c-.23.37-.71.48-1.08.25-2.93-1.77-6.6-2.16-10.92-1.18-.42.11-.84-.14-.95-.56-.11-.42.14-.84.56-.95 4.64-1.06 8.64-.61 11.87 1.32.38.22.49.69.27 1.07zm1.39-2.77c-.29.45-.88.6-1.33.31-3.34-2.03-8.43-2.63-12.38-1.44-.48.15-.99-.13-1.13-.61-.15-.48.13-.99.61-1.13 4.43-1.36 9.91-.73 13.65 1.53.45.28.6.87.32 1.33zm.07-2.89c-3.97-2.35-10.47-2.56-14.21-1.41-.57.18-1.18-.14-1.36-.71-.18-.57.14-1.18.71-1.36 4.29-1.33 11.44-1.1 15.98 1.6.52.31.69.98.38 1.5-.31.52-.98.69-1.5.38z" fill="#1DB954"/>
-                        <circle cx="12" cy="12" r="10" stroke="#1DB954" strokeWidth="1.5" fill="none"/>
-                        <polyline points="12 6 12 12 16 14" stroke="#1DB954" strokeWidth="1.5" fill="none"/>
-                      </svg>
-                      <span style={{
-                        fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                        fontSize: '14px',
-                        fontWeight: '600',
-                        color: '#1DB954',
-                      }}>PLAYLIST PERSIB</span>
-                    </div>
-                    {persibPlaylist.map((song, songIdx) => (
-                      <Link key={songIdx} href={song.url} target="_blank">
-                        <div style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          padding: '10px 0',
-                          borderBottom: songIdx < persibPlaylist.length - 1 ? '1px solid rgba(255,255,255,0.1)' : 'none',
-                          cursor: 'pointer',
-                          transition: 'opacity 0.2s',
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.opacity = '0.7';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.opacity = '1';
-                        }}>
-                          <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '12px',
-                            flex: 1,
-                          }}>
-                            <div style={{
-                              width: '32px',
-                              height: '32px',
-                              backgroundColor: '#1DB954',
-                              borderRadius: '8px',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              fontSize: '12px',
-                              fontWeight: 'bold',
-                              color: '#000000',
-                            }}>
-                              {String(songIdx + 1).padStart(2, '0')}
-                            </div>
-                            <div>
-                              <div style={{
-                                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                                fontSize: '14px',
-                                fontWeight: '500',
-                                color: '#ffffff',
-                              }}>
-                                {song.title}
-                              </div>
-                              <div style={{
-                                fontFamily: "'Questrial', sans-serif",
-                                fontSize: '11px',
-                                color: '#b3b3b3',
-                              }}>
-                                {song.artist}
-                              </div>
-                            </div>
-                          </div>
-                          <div style={{
-                            fontFamily: "'Questrial', sans-serif",
-                            fontSize: '11px',
-                            color: '#b3b3b3',
-                          }}>
-                            {song.duration}
-                          </div>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
                 </div>
 
-                {/* Lokasi Panti Asuhan - HITAM */}
+                {/* Lokasi Panti Asuhan */}
                 <div style={{
                   fontFamily: "'Questrial', sans-serif",
                   fontSize: '24px',
@@ -4733,7 +4637,7 @@ useEffect(() => {
                   Jakarta, Indonesia
                 </div>
 
-                {/* Tanggal dan Nama Donatur - HITAM FULL */}
+                {/* Tanggal dan Nama Donatur */}
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -4765,7 +4669,7 @@ useEffect(() => {
                   </div>
                 </div>
 
-                {/* DESKRIPSI - SISI KIRI dengan tanda panah */}
+                {/* DESKRIPSI dengan tanda panah */}
                 <div style={{
                   display: 'flex',
                   alignItems: 'flex-start',
@@ -4785,13 +4689,174 @@ useEffect(() => {
                     atas kebahagiaan PERSIB Juara Hattrick<br />
                     Liga 1 Indonesia, 23 Mei 2026
                   </div>
-                  {/* Tanda panah di samping deskripsi */}
                   <div style={{
                     flexShrink: 0,
                   }}>
                     <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
+                  </div>
+                </div>
+
+                {/* MINIMALIST PLAYLIST + NOW PLAYING INDICATOR */}
+                <div style={{
+                  marginBottom: '50px',
+                }}>
+                  <div style={{
+                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                    fontSize: '18px',
+                    fontWeight: '500',
+                    color: '#666666',
+                    marginBottom: '20px',
+                    letterSpacing: '2px',
+                  }}>
+                    — PLAYLIST —
+                  </div>
+                  
+                  {/* Now Playing Indicator - Realtime */}
+                  {nowPlaying && (
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '15px',
+                      padding: '12px 20px',
+                      backgroundColor: '#1DB954',
+                      borderRadius: '12px',
+                      marginBottom: '20px',
+                      animation: 'pulse 1.5s infinite',
+                    }}>
+                      <div style={{
+                        width: '12px',
+                        height: '12px',
+                        borderRadius: '50%',
+                        backgroundColor: '#ffffff',
+                        animation: 'blink 1s infinite',
+                      }} />
+                      <div style={{
+                        fontFamily: "'Questrial', sans-serif",
+                        fontSize: '14px',
+                        color: '#ffffff',
+                      }}>
+                        🎵 {nowPlayingUser || 'Someone'} is now playing: <strong>{nowPlaying}</strong>
+                      </div>
+                    </div>
+                  )}
+                  
+                  <style jsx>{`
+                    @keyframes pulse {
+                      0% { opacity: 0.7; }
+                      50% { opacity: 1; }
+                      100% { opacity: 0.7; }
+                    }
+                    @keyframes blink {
+                      0% { opacity: 1; }
+                      50% { opacity: 0.3; }
+                      100% { opacity: 1; }
+                    }
+                  `}</style>
+                  
+                  {/* Daftar Lagu Minimalist */}
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '15px',
+                  }}>
+                    {persibPlaylist.map((song) => (
+                      <div key={song.id} style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '15px 0',
+                        borderBottom: '1px solid #f0f0f0',
+                      }}>
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '20px',
+                          flex: 1,
+                        }}>
+                          <div style={{
+                            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                            fontSize: '16px',
+                            fontWeight: '500',
+                            color: '#333333',
+                            minWidth: '40px',
+                          }}>
+                            {String(song.id).padStart(2, '0')}
+                          </div>
+                          <div>
+                            <div style={{
+                              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                              fontSize: '18px',
+                              fontWeight: '500',
+                              color: '#000000',
+                            }}>
+                              {song.title}
+                            </div>
+                            <div style={{
+                              fontFamily: "'Questrial', sans-serif",
+                              fontSize: '14px',
+                              color: '#999999',
+                            }}>
+                              {song.artist}
+                            </div>
+                          </div>
+                        </div>
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '20px',
+                        }}>
+                          <div style={{
+                            fontFamily: "'Questrial', sans-serif",
+                            fontSize: '14px',
+                            color: '#999999',
+                          }}>
+                            {song.duration}
+                          </div>
+                          <button
+                            onClick={() => {
+                              setNowPlaying(song.title);
+                              setNowPlayingUser(user?.displayName || user?.email?.split('@')[0] || 'Farid Ardiansyah');
+                              // Open Spotify in new tab
+                              window.open(song.trackUrl, '_blank');
+                              // Reset after 5 seconds
+                              setTimeout(() => {
+                                setNowPlaying(null);
+                                setNowPlayingUser(null);
+                              }, 5000);
+                            }}
+                            style={{
+                              background: 'none',
+                              border: 'none',
+                              cursor: 'pointer',
+                              padding: '8px',
+                              borderRadius: '50%',
+                              transition: 'all 0.2s',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '8px',
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.backgroundColor = '#f0f0f0';
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.backgroundColor = 'transparent';
+                            }}
+                          >
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <circle cx="12" cy="12" r="10" stroke="#000000" strokeWidth="1.5" fill="none"/>
+                              <polygon points="10,8 16,12 10,16" fill="#000000"/>
+                            </svg>
+                            <span style={{
+                              fontFamily: "'Questrial', sans-serif",
+                              fontSize: '13px',
+                              color: '#000000',
+                            }}>Play</span>
+                          </button>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
 
@@ -4882,7 +4947,7 @@ useEffect(() => {
                   </div>
                 </div>
 
-                {/* 4 FOTO PORTRAIT - ukuran normal (aspect ratio 3/4) */}
+                {/* 4 FOTO PORTRAIT */}
                 <div style={{
                   display: 'grid',
                   gridTemplateColumns: 'repeat(4, 1fr)',
@@ -4964,7 +5029,7 @@ useEffect(() => {
       </div>
     )}
 
-    {/* TOMBOL DONASI - Link ke halaman /donatur */}
+    {/* TOMBOL DONASI */}
     <div style={{
       display: 'flex',
       justifyContent: 'center',
@@ -5003,8 +5068,6 @@ useEffect(() => {
     </div>
   </div>
 )}
-
-
 
 
 
