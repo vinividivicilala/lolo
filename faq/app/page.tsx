@@ -4437,7 +4437,6 @@ useEffect(() => {
 
 
 
-
 {/* DONATION SECTION - FIXED VERSION */}
 {!isLoading && (
   <div
@@ -4510,6 +4509,15 @@ useEffect(() => {
           
           const donorName = 'Farid Ardiansyah';
           const isVerified = true;
+          
+          // Data sembako untuk donasi Rp 100.000
+          const sembakoItems = [
+            { name: "Beras 5kg", price: 65000 },
+            { name: "Minyak Goreng 1L", price: 15000 },
+            { name: "Gula Pasir 1kg", price: 14000 },
+            { name: "Telur 1kg", price: 6000 }
+          ];
+          const totalSembako = sembakoItems.reduce((sum, item) => sum + item.price, 0);
           
           return (
             <div key={donation.id} style={{
@@ -4594,7 +4602,7 @@ useEffect(() => {
                   display: 'flex',
                   alignItems: 'flex-start',
                   gap: '30px',
-                  marginBottom: '60px',
+                  marginBottom: '40px',
                 }}>
                   <div style={{
                     fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
@@ -4616,6 +4624,94 @@ useEffect(() => {
                     <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
+                  </div>
+                </div>
+
+                {/* RINCIAN DONASI - Rp 100.000 + Daftar Sembako */}
+                <div style={{
+                  marginBottom: '50px',
+                  padding: '30px',
+                  backgroundColor: '#f8f8f8',
+                  borderRadius: '20px',
+                }}>
+                  <div style={{
+                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                    fontSize: '28px',
+                    fontWeight: '500',
+                    color: '#000000',
+                    marginBottom: '20px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '15px',
+                  }}>
+                    <span>💰</span>
+                    <span>Donasi Rp 100.000</span>
+                    <span style={{
+                      fontSize: '20px',
+                      color: '#666666',
+                      fontWeight: '400',
+                    }}>
+                      (Total Sembako)
+                    </span>
+                  </div>
+                  
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '12px',
+                  }}>
+                    {sembakoItems.map((item, itemIdx) => (
+                      <div key={itemIdx} style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        padding: '12px 0',
+                        borderBottom: itemIdx < sembakoItems.length - 1 ? '1px solid #e0e0e0' : 'none',
+                      }}>
+                        <div style={{
+                          fontFamily: "'Questrial', sans-serif",
+                          fontSize: '20px',
+                          color: '#333333',
+                        }}>
+                          {item.name}
+                        </div>
+                        <div style={{
+                          fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                          fontSize: '20px',
+                          fontWeight: '500',
+                          color: '#000000',
+                        }}>
+                          Rp {item.price.toLocaleString('id-ID')}
+                        </div>
+                      </div>
+                    ))}
+                    
+                    {/* Total */}
+                    <div style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      padding: '15px 0 5px 0',
+                      marginTop: '5px',
+                      borderTop: '2px solid #000000',
+                    }}>
+                      <div style={{
+                        fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                        fontSize: '22px',
+                        fontWeight: '600',
+                        color: '#000000',
+                      }}>
+                        TOTAL
+                      </div>
+                      <div style={{
+                        fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                        fontSize: '22px',
+                        fontWeight: '700',
+                        color: '#000000',
+                      }}>
+                        Rp {totalSembako.toLocaleString('id-ID')}
+                      </div>
+                    </div>
                   </div>
                 </div>
 
@@ -4740,6 +4836,8 @@ useEffect(() => {
     </div>
   </div>
 )}
+
+            
 
 {/* MODAL UNTUK FOTO - dengan judul Galeri Donasi */}
 {selectedDonation && (
