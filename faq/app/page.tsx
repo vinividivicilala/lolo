@@ -4437,9 +4437,7 @@ useEffect(() => {
 
 
 
-
-
-{/* DONATION SECTION - FIXED VERSION */}
+{/* DONATION SECTION - FIXED VERSION dengan styled-jsx yang benar */}
 {!isLoading && (
   <div
     ref={donationSectionRef}
@@ -4715,7 +4713,7 @@ useEffect(() => {
                   
                   {/* Now Playing Indicator - Realtime */}
                   {nowPlaying && (
-                    <div style={{
+                    <div className="now-playing-indicator" style={{
                       display: 'flex',
                       alignItems: 'center',
                       gap: '15px',
@@ -4723,15 +4721,8 @@ useEffect(() => {
                       backgroundColor: '#1DB954',
                       borderRadius: '12px',
                       marginBottom: '20px',
-                      animation: 'pulse 1.5s infinite',
                     }}>
-                      <div style={{
-                        width: '12px',
-                        height: '12px',
-                        borderRadius: '50%',
-                        backgroundColor: '#ffffff',
-                        animation: 'blink 1s infinite',
-                      }} />
+                      <div className="pulse-dot" />
                       <div style={{
                         fontFamily: "'Questrial', sans-serif",
                         fontSize: '14px',
@@ -4741,19 +4732,6 @@ useEffect(() => {
                       </div>
                     </div>
                   )}
-                  
-                  <style jsx>{`
-                    @keyframes pulse {
-                      0% { opacity: 0.7; }
-                      50% { opacity: 1; }
-                      100% { opacity: 0.7; }
-                    }
-                    @keyframes blink {
-                      0% { opacity: 1; }
-                      50% { opacity: 0.3; }
-                      100% { opacity: 1; }
-                    }
-                  `}</style>
                   
                   {/* Daftar Lagu Minimalist */}
                   <div style={{
@@ -4818,9 +4796,7 @@ useEffect(() => {
                             onClick={() => {
                               setNowPlaying(song.title);
                               setNowPlayingUser(user?.displayName || user?.email?.split('@')[0] || 'Farid Ardiansyah');
-                              // Open Spotify in new tab
                               window.open(song.trackUrl, '_blank');
-                              // Reset after 5 seconds
                               setTimeout(() => {
                                 setNowPlaying(null);
                                 setNowPlayingUser(null);
@@ -5066,11 +5042,32 @@ useEffect(() => {
         </button>
       </Link>
     </div>
+
+    {/* STYLED-JSX UNTUK ANIMASI - DILUAR LOOP (tidak nested) */}
+    <style jsx>{`
+      .now-playing-indicator {
+        animation: pulse 1.5s infinite;
+      }
+      .pulse-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background-color: #ffffff;
+        animation: blink 1s infinite;
+      }
+      @keyframes pulse {
+        0% { opacity: 0.7; }
+        50% { opacity: 1; }
+        100% { opacity: 0.7; }
+      }
+      @keyframes blink {
+        0% { opacity: 1; }
+        50% { opacity: 0.3; }
+        100% { opacity: 1; }
+      }
+    `}</style>
   </div>
 )}
-
-
-
             
 
 
