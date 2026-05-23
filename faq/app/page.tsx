@@ -4441,8 +4441,7 @@ useEffect(() => {
 
 
 
-
-{/* DONATION SECTION - WITH SPOTIFY TRACKS & NOW PLAYING */}
+{/* DONATION SECTION - WITH SPOTIFY EMBED & PERSISTENT NOW PLAYING */}
 {!isLoading && (
   <div
     ref={donationSectionRef}
@@ -4524,7 +4523,7 @@ useEffect(() => {
           ];
           const totalSembako = sembakoItems.reduce((sum, item) => sum + item.price, 0);
           
-          // Data playlist lagu Persib (2 lagu dari Spotify)
+          // Data playlist lagu Persib dengan Embed URL (bisa diputar langsung)
           const persibPlaylist = [
             { 
               id: 1,
@@ -4689,10 +4688,9 @@ useEffect(() => {
                   </div>
                 </div>
 
-                {/* SPOTIFY TRACKS - MINIMALIST DESIGN & NOW PLAYING */}
+                {/* SPOTIFY TRACKS - DENGAN PLAYER LANGSUNG & PERSISTENT NOW PLAYING */}
                 <div style={{
                   marginBottom: '50px',
-                  padding: '0px',
                 }}>
                   <div style={{
                     fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
@@ -4705,7 +4703,7 @@ useEffect(() => {
                     — PLAYLIST —
                   </div>
                   
-                  {/* Now Playing Indicator - Realtime */}
+                  {/* Now Playing Indicator - PERSISTENT (tidak hilang) */}
                   {nowPlaying && (
                     <div style={{
                       display: 'flex',
@@ -4716,49 +4714,51 @@ useEffect(() => {
                       borderRadius: '40px',
                       marginBottom: '20px',
                       width: 'fit-content',
-                      transition: 'all 0.3s ease',
                     }}>
                       <div style={{
                         width: '10px',
                         height: '10px',
                         borderRadius: '50%',
                         backgroundColor: '#ffffff',
+                        animation: 'pulse 1.5s infinite',
                       }} />
                       <div style={{
                         fontFamily: "'Questrial', sans-serif",
                         fontSize: '14px',
                         color: '#ffffff',
                       }}>
-                        🎵 {nowPlayingUser || 'Someone'} is now playing: <strong>{nowPlaying}</strong>
+                        🎵 {nowPlayingUser || 'Farid Ardiansyah'} sedang memutar: <strong>{nowPlaying}</strong>
                       </div>
                     </div>
                   )}
                   
-                  {/* Daftar Lagu Minimalis dengan Tombol Play */}
-                  <div style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '15px',
-                  }}>
-                    {persibPlaylist.map((song) => (
-                      <div key={song.id} style={{
+                  {/* Daftar Lagu dengan Player Langsung */}
+                  {persibPlaylist.map((song) => (
+                    <div key={song.id} style={{
+                      marginBottom: '25px',
+                      padding: '20px',
+                      backgroundColor: '#f8f8f8',
+                      borderRadius: '16px',
+                      transition: 'all 0.3s ease',
+                    }}>
+                      <div style={{
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'space-between',
-                        padding: '15px 0',
-                        borderBottom: '1px solid #f0f0f0',
+                        marginBottom: '15px',
+                        flexWrap: 'wrap',
+                        gap: '15px',
                       }}>
                         <div style={{
                           display: 'flex',
                           alignItems: 'center',
-                          gap: '20px',
-                          flex: 1,
+                          gap: '15px',
                         }}>
                           <div style={{
                             fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                            fontSize: '16px',
-                            fontWeight: '500',
-                            color: '#333333',
+                            fontSize: '20px',
+                            fontWeight: '600',
+                            color: '#000000',
                             minWidth: '40px',
                           }}>
                             {String(song.id).padStart(2, '0')}
@@ -4777,102 +4777,72 @@ useEffect(() => {
                               fontSize: '14px',
                               color: '#999999',
                             }}>
-                              {song.artist}
+                              {song.artist} • {song.duration}
                             </div>
                           </div>
                         </div>
-                        <div style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '20px',
-                        }}>
-                          <div style={{
+                        <button
+                          onClick={() => {
+                            // Set now playing state (PERSISTENT, tidak hilang)
+                            setNowPlaying(song.title);
+                            setNowPlayingUser(user?.displayName || user?.email?.split('@')[0] || 'Farid Ardiansyah');
+                          }}
+                          style={{
+                            background: 'none',
+                            border: '1px solid #1DB954',
+                            cursor: 'pointer',
+                            padding: '8px 20px',
+                            borderRadius: '40px',
+                            transition: 'all 0.2s',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            backgroundColor: nowPlaying === song.title ? '#1DB954' : 'transparent',
+                          }}
+                          onMouseEnter={(e) => {
+                            if (nowPlaying !== song.title) {
+                              e.currentTarget.style.backgroundColor = '#1DB954';
+                              e.currentTarget.style.color = '#ffffff';
+                            }
+                          }}
+                          onMouseLeave={(e) => {
+                            if (nowPlaying !== song.title) {
+                              e.currentTarget.style.backgroundColor = 'transparent';
+                              e.currentTarget.style.color = '#000000';
+                            }
+                          }}
+                        >
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="12" cy="12" r="10" stroke={nowPlaying === song.title ? '#ffffff' : '#1DB954'} strokeWidth="1.5" fill="none"/>
+                            <polygon points="10,8 16,12 10,16" fill={nowPlaying === song.title ? '#ffffff' : '#1DB954'}/>
+                          </svg>
+                          <span style={{
                             fontFamily: "'Questrial', sans-serif",
-                            fontSize: '14px',
-                            color: '#999999',
+                            fontSize: '13px',
+                            color: nowPlaying === song.title ? '#ffffff' : '#1DB954',
                           }}>
-                            {song.duration}
-                          </div>
-                          <button
-                            onClick={() => {
-                              // Set now playing state
-                              setNowPlaying(song.title);
-                              setNowPlayingUser(user?.displayName || user?.email?.split('@')[0] || 'Farid Ardiansyah');
-                              // Open Spotify in new tab
-                              window.open(song.trackUrl, '_blank');
-                              // Reset now playing after 5 seconds
-                              setTimeout(() => {
-                                setNowPlaying(null);
-                                setNowPlayingUser(null);
-                              }, 5000);
-                            }}
-                            style={{
-                              background: 'none',
-                              border: 'none',
-                              cursor: 'pointer',
-                              padding: '8px 16px',
-                              borderRadius: '40px',
-                              transition: 'all 0.2s',
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '8px',
-                              backgroundColor: '#f5f5f5',
-                            }}
-                            onMouseEnter={(e) => {
-                              e.currentTarget.style.backgroundColor = '#e0e0e0';
-                            }}
-                            onMouseLeave={(e) => {
-                              e.currentTarget.style.backgroundColor = '#f5f5f5';
-                            }}
-                          >
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <circle cx="12" cy="12" r="10" stroke="#000000" strokeWidth="1.5" fill="none"/>
-                              <polygon points="10,8 16,12 10,16" fill="#000000"/>
-                            </svg>
-                            <span style={{
-                              fontFamily: "'Questrial', sans-serif",
-                              fontSize: '13px',
-                              color: '#000000',
-                            }}>Play on Spotify</span>
-                          </button>
-                        </div>
+                            {nowPlaying === song.title ? 'PLAYING' : 'PLAY'}
+                          </span>
+                        </button>
                       </div>
-                    ))}
-                  </div>
-                  
-                  {/* Spotify Embed Player untuk preview (opsional, bisa dihapus) */}
-                  <div style={{
-                    marginTop: '25px',
-                    padding: '16px',
-                    backgroundColor: '#191414',
-                    borderRadius: '16px',
-                  }}>
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '10px',
-                      marginBottom: '12px',
-                    }}>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.59 14.46c-.23.37-.71.48-1.08.25-2.93-1.77-6.6-2.16-10.92-1.18-.42.11-.84-.14-.95-.56-.11-.42.14-.84.56-.95 4.64-1.06 8.64-.61 11.87 1.32.38.22.49.69.27 1.07zm1.39-2.77c-.29.45-.88.6-1.33.31-3.34-2.03-8.43-2.63-12.38-1.44-.48.15-.99-.13-1.13-.61-.15-.48.13-.99.61-1.13 4.43-1.36 9.91-.73 13.65 1.53.45.28.6.87.32 1.33zm.07-2.89c-3.97-2.35-10.47-2.56-14.21-1.41-.57.18-1.18-.14-1.36-.71-.18-.57.14-1.18.71-1.36 4.29-1.33 11.44-1.1 15.98 1.6.52.31.69.98.38 1.5-.31.52-.98.69-1.5.38z" fill="#1DB954"/>
-                      </svg>
-                      <span style={{
-                        fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                        fontSize: '14px',
-                        fontWeight: '500',
-                        color: '#ffffff',
-                      }}>Putar langsung di Spotify</span>
+                      
+                      {/* Spotify Embed Player - Bisa diputar langsung di halaman */}
+                      <div style={{
+                        borderRadius: '12px',
+                        overflow: 'hidden',
+                      }}>
+                        <iframe 
+                          src={song.embedUrl}
+                          width="100%" 
+                          height="80" 
+                          frameBorder="0" 
+                          allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                          loading="lazy"
+                          style={{ borderRadius: '12px' }}
+                        />
+                      </div>
                     </div>
-                    <iframe 
-                      src={persibPlaylist[0].embedUrl}
-                      width="100%" 
-                      height="80" 
-                      frameBorder="0" 
-                      allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                      loading="lazy"
-                      style={{ borderRadius: '12px' }}
-                    />
-                  </div>
+                  ))}
                 </div>
 
                 {/* RINCIAN DONASI - Rp 100.000 + Daftar Sembako */}
@@ -5081,9 +5051,17 @@ useEffect(() => {
         </button>
       </Link>
     </div>
+
+    {/* Animasi CSS untuk now playing indicator */}
+    <style jsx>{`
+      @keyframes pulse {
+        0% { opacity: 0.7; }
+        50% { opacity: 1; }
+        100% { opacity: 0.7; }
+      }
+    `}</style>
   </div>
 )}
-
 
 
             
