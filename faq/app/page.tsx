@@ -4504,9 +4504,7 @@ useEffect(() => {
   </div>
 )}
 
-
-
-{/* DONATION SECTION - DENGAN VERIFIED BADGE BARU */}
+{/* DONATION SECTION - DENGAN VERIFIED BADGE BARU + HOVER TOOLTIP */}
 {!isLoading && (
   <div
     ref={donationSectionRef}
@@ -4564,7 +4562,6 @@ useEffect(() => {
     {donations && donations.length > 0 ? (
       <div>
         {donations.slice(0, 1).map((donation, idx) => {
-          // Handle toDate error
           let donationDate = new Date();
           if (donation.createdAt) {
             if (typeof donation.createdAt.toDate === 'function') {
@@ -4577,8 +4574,6 @@ useEffect(() => {
           }
           
           const donorName = 'Farid Ardiansyah';
-          
-          // Data sembako
           const sembakoItems = [
             { name: "Beras 5kg", price: 65000 },
             { name: "Minyak Goreng 1L", price: 15000 },
@@ -4612,8 +4607,6 @@ useEffect(() => {
                 }}>
                   {String(idx + 1).padStart(2, '0')}
                 </div>
-                
-                {/* TANGGAL DONASI */}
                 <div style={{
                   display: 'inline-block',
                   padding: '12px 24px',
@@ -4694,7 +4687,7 @@ useEffect(() => {
                   Jakarta, Indonesia
                 </div>
 
-                {/* Tanggal dan Nama Donatur + VERIFIED BADGE BARU */}
+                {/* Tanggal dan Nama Donatur + VERIFIED BADGE + TOOLTIP */}
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -4713,6 +4706,7 @@ useEffect(() => {
                     display: 'flex',
                     alignItems: 'center',
                     gap: '12px',
+                    position: 'relative',
                   }}>
                     <div style={{
                       fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
@@ -4723,23 +4717,76 @@ useEffect(() => {
                       {donorName}
                     </div>
                     
-                    {/* ✅ VERIFIED BADGE BARU - Biru dengan Centang Hitam */}
-                    <svg 
-                      width="28" 
-                      height="28" 
-                      viewBox="0 0 24 24" 
-                      xmlns="http://www.w3.org/2000/svg"
-                      style={{ display: 'inline-block', verticalAlign: 'middle' }}
-                    >
-                      <path 
-                        fill="#1D9BF0" 
-                        d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.71-3.998-3.818-3.998-.47 0-.92.084-1.336.25C14.818 2.415 13.51 1.5 12 1.5s-2.816.917-3.437 2.25c-.415-.165-.866-.25-1.336-.25-2.11 0-3.818 1.79-3.818 4 0 .495.083.965.238 1.4-1.272.65-2.147 2.018-2.147 3.6 0 1.495.782 2.798 1.942 3.486-.02.17-.032.34-.032.514 0 2.21 1.708 4 3.818 4 .47 0 .92-.086 1.335-.25.62 1.334 1.926 2.25 3.437 2.25 1.512 0 2.818-.916 3.437-2.25.415.163.865.248 1.336.248 2.11 0 3.818-1.79 3.818-4 0-.174-.012-.344-.033-.513 1.158-.687 1.943-1.99 1.943-3.484z"
-                      />
-                      <path 
-                        fill="#000000" 
-                        d="M9.5 16.5L5 12l1.5-1.5 3 3 7-7 1.5 1.5-8.5 8.5z"
-                      />
-                    </svg>
+                    {/* ✅ VERIFIED BADGE BARU + HOVER TOOLTIP "akun resmi" */}
+                    <div style={{
+                      position: 'relative',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      cursor: 'help',
+                    }}>
+                      <svg 
+                        width="36" 
+                        height="36" 
+                        viewBox="0 0 24 24" 
+                        xmlns="http://www.w3.org/2000/svg"
+                        style={{ display: 'inline-block', verticalAlign: 'middle' }}
+                      >
+                        <path 
+                          fill="#1D9BF0" 
+                          d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.71-3.998-3.818-3.998-.47 0-.92.084-1.336.25C14.818 2.415 13.51 1.5 12 1.5s-2.816.917-3.437 2.25c-.415-.165-.866-.25-1.336-.25-2.11 0-3.818 1.79-3.818 4 0 .495.083.965.238 1.4-1.272.65-2.147 2.018-2.147 3.6 0 1.495.782 2.798 1.942 3.486-.02.17-.032.34-.032.514 0 2.21 1.708 4 3.818 4 .47 0 .92-.086 1.335-.25.62 1.334 1.926 2.25 3.437 2.25 1.512 0 2.818-.916 3.437-2.25.415.163.865.248 1.336.248 2.11 0 3.818-1.79 3.818-4 0-.174-.012-.344-.033-.513 1.158-.687 1.943-1.99 1.943-3.484z"
+                        />
+                        <path 
+                          fill="#000000" 
+                          d="M9.5 16.5L5 12l1.5-1.5 3 3 7-7 1.5 1.5-8.5 8.5z"
+                        />
+                      </svg>
+                      
+                      {/* Tooltip "akun resmi" */}
+                      <div style={{
+                        position: 'absolute',
+                        bottom: '100%',
+                        left: '50%',
+                        transform: 'translateX(-50%) translateY(-8px)',
+                        backgroundColor: '#000000',
+                        color: '#ffffff',
+                        padding: '6px 14px',
+                        borderRadius: '8px',
+                        fontSize: '12px',
+                        fontFamily: "'Questrial', sans-serif",
+                        fontWeight: '500',
+                        whiteSpace: 'nowrap',
+                        opacity: '0',
+                        visibility: 'hidden',
+                        transition: 'opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease',
+                        pointerEvents: 'none',
+                        zIndex: '100',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.opacity = '1';
+                        e.currentTarget.style.visibility = 'visible';
+                        e.currentTarget.style.transform = 'translateX(-50%) translateY(-12px)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.opacity = '0';
+                        e.currentTarget.style.visibility = 'hidden';
+                        e.currentTarget.style.transform = 'translateX(-50%) translateY(-8px)';
+                      }}
+                      >
+                        akun resmi
+                        {/* Arrow kecil di bawah tooltip */}
+                        <div style={{
+                          position: 'absolute',
+                          top: '100%',
+                          left: '50%',
+                          transform: 'translateX(-50%)',
+                          width: '0',
+                          height: '0',
+                          borderLeft: '5px solid transparent',
+                          borderRight: '5px solid transparent',
+                          borderTop: '5px solid #000000',
+                        }}></div>
+                      </div>
+                    </div>
                     
                   </div>
                 </div>
@@ -4917,8 +4964,6 @@ useEffect(() => {
     </div>
   </div>
 )}
-
-
 
 
 
