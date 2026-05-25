@@ -4506,8 +4506,7 @@ useEffect(() => {
 
 
 
-
-{/* DONATION SECTION - TANPA LAGU, DENGAN TANGGAL DONASI */}
+{/* DONATION SECTION - DENGAN VERIFIED BADGE BARU */}
 {!isLoading && (
   <div
     ref={donationSectionRef}
@@ -4519,7 +4518,7 @@ useEffect(() => {
       marginTop: '0px',
     }}
   >
-    {/* JUDUL SECTION: DONATUR + jumlah upload donasi (bukan uang) + tanda panah */}
+    {/* JUDUL SECTION */}
     <div style={{
       display: 'flex',
       justifyContent: 'space-between',
@@ -4561,7 +4560,7 @@ useEffect(() => {
       </div>
     </div>
 
-    {/* LOOP DONASI - Hanya 1 donasi terbaru */}
+    {/* LOOP DONASI */}
     {donations && donations.length > 0 ? (
       <div>
         {donations.slice(0, 1).map((donation, idx) => {
@@ -4578,9 +4577,8 @@ useEffect(() => {
           }
           
           const donorName = 'Farid Ardiansyah';
-          const isVerified = true;
           
-          // Data sembako untuk donasi Rp 100.000
+          // Data sembako
           const sembakoItems = [
             { name: "Beras 5kg", price: 65000 },
             { name: "Minyak Goreng 1L", price: 15000 },
@@ -4596,7 +4594,7 @@ useEffect(() => {
               marginBottom: '100px',
               alignItems: 'flex-start',
             }}>
-              {/* ANGKA 01 */}
+              {/* ANGKA 01 + TANGGAL */}
               <div style={{
                 display: 'flex',
                 flexDirection: 'column',
@@ -4615,7 +4613,7 @@ useEffect(() => {
                   {String(idx + 1).padStart(2, '0')}
                 </div>
                 
-                {/* TANGGAL DONASI - 30 Mei 2026 dengan background biru */}
+                {/* TANGGAL DONASI */}
                 <div style={{
                   display: 'inline-block',
                   padding: '12px 24px',
@@ -4636,10 +4634,8 @@ useEffect(() => {
               </div>
 
               {/* KONTEN DONASI */}
-              <div style={{
-                flex: 1,
-              }}>
-                {/* Nama Panti Asuhan + hashtag #hattrickjuara */}
+              <div style={{ flex: 1 }}>
+                {/* Nama Panti + Hashtag */}
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -4688,7 +4684,7 @@ useEffect(() => {
                   </Link>
                 </div>
 
-                {/* Lokasi Panti Asuhan */}
+                {/* Lokasi */}
                 <div style={{
                   fontFamily: "'Questrial', sans-serif",
                   fontSize: '24px',
@@ -4698,7 +4694,7 @@ useEffect(() => {
                   Jakarta, Indonesia
                 </div>
 
-                {/* Tanggal dan Nama Donatur */}
+                {/* Tanggal dan Nama Donatur + VERIFIED BADGE BARU */}
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -4726,11 +4722,29 @@ useEffect(() => {
                     }}>
                       {donorName}
                     </div>
-                    <VerifiedBadge size={28} />
+                    
+                    {/* ✅ VERIFIED BADGE BARU - Biru dengan Centang Hitam */}
+                    <svg 
+                      width="28" 
+                      height="28" 
+                      viewBox="0 0 24 24" 
+                      xmlns="http://www.w3.org/2000/svg"
+                      style={{ display: 'inline-block', verticalAlign: 'middle' }}
+                    >
+                      <path 
+                        fill="#1D9BF0" 
+                        d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.71-3.998-3.818-3.998-.47 0-.92.084-1.336.25C14.818 2.415 13.51 1.5 12 1.5s-2.816.917-3.437 2.25c-.415-.165-.866-.25-1.336-.25-2.11 0-3.818 1.79-3.818 4 0 .495.083.965.238 1.4-1.272.65-2.147 2.018-2.147 3.6 0 1.495.782 2.798 1.942 3.486-.02.17-.032.34-.032.514 0 2.21 1.708 4 3.818 4 .47 0 .92-.086 1.335-.25.62 1.334 1.926 2.25 3.437 2.25 1.512 0 2.818-.916 3.437-2.25.415.163.865.248 1.336.248 2.11 0 3.818-1.79 3.818-4 0-.174-.012-.344-.033-.513 1.158-.687 1.943-1.99 1.943-3.484z"
+                      />
+                      <path 
+                        fill="#000000" 
+                        d="M9.5 16.5L5 12l1.5-1.5 3 3 7-7 1.5 1.5-8.5 8.5z"
+                      />
+                    </svg>
+                    
                   </div>
                 </div>
 
-                {/* DESKRIPSI dengan tanda panah */}
+                {/* DESKRIPSI */}
                 <div style={{
                   display: 'flex',
                   alignItems: 'flex-start',
@@ -4750,17 +4764,14 @@ useEffect(() => {
                     atas kebahagiaan PERSIB Juara Hattrick<br />
                     Liga 1 Indonesia, 23 Mei 2026
                   </div>
-                  {/* Tanda panah di samping deskripsi */}
-                  <div style={{
-                    flexShrink: 0,
-                  }}>
+                  <div style={{ flexShrink: 0 }}>
                     <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                   </div>
                 </div>
 
-                {/* RINCIAN DONASI - Rp 100.000 + Daftar Sembako */}
+                {/* RINCIAN DONASI */}
                 <div style={{
                   marginBottom: '50px',
                   padding: '30px',
@@ -4779,20 +4790,12 @@ useEffect(() => {
                   }}>
                     <span>💰</span>
                     <span>Donasi Rp 100.000</span>
-                    <span style={{
-                      fontSize: '20px',
-                      color: '#666666',
-                      fontWeight: '400',
-                    }}>
+                    <span style={{ fontSize: '20px', color: '#666666', fontWeight: '400' }}>
                       (Total Sembako)
                     </span>
                   </div>
                   
-                  <div style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '12px',
-                  }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                     {sembakoItems.map((item, itemIdx) => (
                       <div key={itemIdx} style={{
                         display: 'flex',
@@ -4801,19 +4804,10 @@ useEffect(() => {
                         padding: '12px 0',
                         borderBottom: itemIdx < sembakoItems.length - 1 ? '1px solid #e0e0e0' : 'none',
                       }}>
-                        <div style={{
-                          fontFamily: "'Questrial', sans-serif",
-                          fontSize: '20px',
-                          color: '#333333',
-                        }}>
+                        <div style={{ fontFamily: "'Questrial', sans-serif", fontSize: '20px', color: '#333333' }}>
                           {item.name}
                         </div>
-                        <div style={{
-                          fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                          fontSize: '20px',
-                          fontWeight: '500',
-                          color: '#000000',
-                        }}>
+                        <div style={{ fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", fontSize: '20px', fontWeight: '500', color: '#000000' }}>
                           Rp {item.price.toLocaleString('id-ID')}
                         </div>
                       </div>
@@ -4827,32 +4821,18 @@ useEffect(() => {
                       marginTop: '5px',
                       borderTop: '2px solid #000000',
                     }}>
-                      <div style={{
-                        fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                        fontSize: '22px',
-                        fontWeight: '600',
-                        color: '#000000',
-                      }}>
+                      <div style={{ fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", fontSize: '22px', fontWeight: '600', color: '#000000' }}>
                         TOTAL
                       </div>
-                      <div style={{
-                        fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                        fontSize: '22px',
-                        fontWeight: '700',
-                        color: '#000000',
-                      }}>
+                      <div style={{ fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", fontSize: '22px', fontWeight: '700', color: '#000000' }}>
                         Rp {totalSembako.toLocaleString('id-ID')}
                       </div>
                     </div>
                   </div>
                 </div>
 
-                {/* 4 FOTO PORTRAIT */}
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(4, 1fr)',
-                  gap: '20px',
-                }}>
+                {/* 4 FOTO */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px' }}>
                   {[
                     "/images/lkhh.jpg",
                     "/images/ai.jpg",
@@ -4880,12 +4860,7 @@ useEffect(() => {
                         e.currentTarget.style.boxShadow = 'none';
                       }}
                     >
-                      <Image
-                        src={photo}
-                        alt={`Donation photo ${photoIdx + 1}`}
-                        fill
-                        style={{ objectFit: 'cover' }}
-                      />
+                      <Image src={photo} alt={`Donation photo ${photoIdx + 1}`} fill style={{ objectFit: 'cover' }} />
                     </div>
                   ))}
                 </div>
@@ -4901,40 +4876,14 @@ useEffect(() => {
         backgroundColor: '#f5f5f5',
         borderRadius: '24px',
       }}>
-        <div style={{
-          fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-          fontSize: '60px',
-          fontWeight: '400',
-          color: '#000000',
-          marginBottom: '20px',
-        }}>
-          ✨
-        </div>
-        <div style={{
-          fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-          fontSize: '32px',
-          fontWeight: '400',
-          color: '#000000',
-          marginBottom: '15px',
-        }}>
-          Belum Ada Donasi
-        </div>
-        <div style={{
-          fontFamily: "'Questrial', sans-serif",
-          fontSize: '18px',
-          color: '#666666',
-        }}>
-          Jadilah donatur pertama
-        </div>
+        <div style={{ fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", fontSize: '60px', fontWeight: '400', color: '#000000', marginBottom: '20px' }}>✨</div>
+        <div style={{ fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", fontSize: '32px', fontWeight: '400', color: '#000000', marginBottom: '15px' }}>Belum Ada Donasi</div>
+        <div style={{ fontFamily: "'Questrial', sans-serif", fontSize: '18px', color: '#666666' }}>Jadilah donatur pertama</div>
       </div>
     )}
 
-    {/* TOMBOL DONASI - Link ke halaman /donatur */}
-    <div style={{
-      display: 'flex',
-      justifyContent: 'center',
-      marginTop: '80px',
-    }}>
+    {/* TOMBOL DONASI */}
+    <div style={{ display: 'flex', justifyContent: 'center', marginTop: '80px' }}>
       <Link href="/donatur">
         <button
           style={{
@@ -4968,9 +4917,6 @@ useEffect(() => {
     </div>
   </div>
 )}
-
-
-
 
 
 
