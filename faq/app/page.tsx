@@ -4506,9 +4506,7 @@ useEffect(() => {
 
 
 
-
-
-{/* DONATION SECTION - WITH FIREBASE PLAY HISTORY */}
+{/* DONATION SECTION - TANPA LAGU, DENGAN TANGGAL DONASI */}
 {!isLoading && (
   <div
     ref={donationSectionRef}
@@ -4590,26 +4588,6 @@ useEffect(() => {
           ];
           const totalSembako = sembakoItems.reduce((sum, item) => sum + item.price, 0);
           
-          // Data playlist lagu Persib
-          const persibPlaylist = [
-            { 
-              id: 1,
-              title: "We Will Stay Behind You", 
-              artist: "Kuburan",
-              embedUrl: "https://open.spotify.com/embed/track/3hcuqSKnNdruDRwcAJLWj9?utm_source=generator",
-              trackUrl: "https://open.spotify.com/track/3hcuqSKnNdruDRwcAJLWj9",
-              duration: "4:20"
-            },
-            { 
-              id: 2,
-              title: "Bobotoh Gerot Persib", 
-              artist: "Onto Hood",
-              embedUrl: "https://open.spotify.com/embed/track/5yXHxXX4hQ22nBwK2ROyMY?utm_source=generator",
-              trackUrl: "https://open.spotify.com/track/5yXHxXX4hQ22nBwK2ROyMY",
-              duration: "3:45"
-            }
-          ];
-          
           return (
             <div key={donation.id} style={{
               display: 'flex',
@@ -4619,15 +4597,41 @@ useEffect(() => {
             }}>
               {/* ANGKA 01 */}
               <div style={{
-                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                fontSize: '180px',
-                fontWeight: '400',
-                color: '#000000',
-                letterSpacing: '-0.02em',
-                lineHeight: '1',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'flex-start',
+                gap: '20px',
                 minWidth: '200px',
               }}>
-                {String(idx + 1).padStart(2, '0')}
+                <div style={{
+                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                  fontSize: '180px',
+                  fontWeight: '400',
+                  color: '#000000',
+                  letterSpacing: '-0.02em',
+                  lineHeight: '1',
+                }}>
+                  {String(idx + 1).padStart(2, '0')}
+                </div>
+                
+                {/* TANGGAL DONASI - 30 Mei 2026 dengan background biru */}
+                <div style={{
+                  display: 'inline-block',
+                  padding: '12px 24px',
+                  backgroundColor: '#2563EB',
+                  borderRadius: '40px',
+                  marginTop: '10px',
+                }}>
+                  <div style={{
+                    fontFamily: "'Questrial', sans-serif",
+                    fontSize: '18px",
+                    fontWeight: '600',
+                    color: '#ffffff',
+                    letterSpacing: '0.5px',
+                  }}>
+                    30 Mei 2026
+                  </div>
+                </div>
               </div>
 
               {/* KONTEN DONASI */}
@@ -4745,6 +4749,7 @@ useEffect(() => {
                     atas kebahagiaan PERSIB Juara Hattrick<br />
                     Liga 1 Indonesia, 23 Mei 2026
                   </div>
+                  {/* Tanda panah di samping deskripsi */}
                   <div style={{
                     flexShrink: 0,
                   }}>
@@ -4752,268 +4757,6 @@ useEffect(() => {
                       <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                   </div>
-                </div>
-
-                {/* SPOTIFY TRACKS - DENGAN FIREBASE PLAY HISTORY */}
-                <div style={{
-                  marginBottom: '50px',
-                }}>
-                  <div style={{
-                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                    fontSize: '18px',
-                    fontWeight: '500',
-                    color: '#666666',
-                    marginBottom: '20px',
-                    letterSpacing: '2px',
-                  }}>
-                    — PLAYLIST —
-                  </div>
-                  
-                  {/* Now Playing Indicator - Dari Firebase */}
-                  {nowPlaying && (
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '12px',
-                      padding: '12px 20px',
-                      backgroundColor: '#1DB954',
-                      borderRadius: '40px',
-                      marginBottom: '20px',
-                      width: 'fit-content',
-                    }}>
-                      <div style={{
-                        width: '10px',
-                        height: '10px',
-                        borderRadius: '50%',
-                        backgroundColor: '#ffffff',
-                      }} />
-                      <div style={{
-                        fontFamily: "'Questrial', sans-serif",
-                        fontSize: '14px',
-                        color: '#ffffff',
-                      }}>
-                        🎵 <strong>{nowPlayingUser || 'Farid Ardiansyah'}</strong> sedang memutar: <strong>{nowPlaying}</strong>
-                      </div>
-                    </div>
-                  )}
-                  
-                  {/* Daftar Lagu dengan Player */}
-                  {persibPlaylist.map((song) => (
-                    <div key={song.id} style={{
-                      marginBottom: '25px',
-                      padding: '20px',
-                      backgroundColor: '#f8f8f8',
-                      borderRadius: '16px',
-                    }}>
-                      <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        marginBottom: '15px',
-                        flexWrap: 'wrap',
-                        gap: '15px',
-                      }}>
-                        <div style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '15px',
-                        }}>
-                          <div style={{
-                            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                            fontSize: '20px',
-                            fontWeight: '600',
-                            color: '#000000',
-                            minWidth: '40px',
-                          }}>
-                            {String(song.id).padStart(2, '0')}
-                          </div>
-                          <div>
-                            <div style={{
-                              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                              fontSize: '18px',
-                              fontWeight: '500',
-                              color: '#000000',
-                            }}>
-                              {song.title}
-                            </div>
-                            <div style={{
-                              fontFamily: "'Questrial', sans-serif",
-                              fontSize: '14px',
-                              color: '#999999',
-                            }}>
-                              {song.artist} • {song.duration}
-                            </div>
-                          </div>
-                        </div>
-                        <button
-                          onClick={() => {
-                            savePlayHistory(song.title, song.artist);
-                          }}
-                          style={{
-                            background: 'none',
-                            border: '1px solid #1DB954',
-                            cursor: 'pointer',
-                            padding: '8px 20px',
-                            borderRadius: '40px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px',
-                            backgroundColor: nowPlaying === song.title ? '#1DB954' : 'transparent',
-                          }}
-                          onMouseEnter={(e) => {
-                            if (nowPlaying !== song.title) {
-                              e.currentTarget.style.backgroundColor = '#1DB954';
-                            }
-                          }}
-                          onMouseLeave={(e) => {
-                            if (nowPlaying !== song.title) {
-                              e.currentTarget.style.backgroundColor = 'transparent';
-                            }
-                          }}
-                        >
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <circle cx="12" cy="12" r="10" stroke={nowPlaying === song.title ? '#ffffff' : '#1DB954'} strokeWidth="1.5" fill="none"/>
-                            <polygon points="10,8 16,12 10,16" fill={nowPlaying === song.title ? '#ffffff' : '#1DB954'}/>
-                          </svg>
-                          <span style={{
-                            fontFamily: "'Questrial', sans-serif",
-                            fontSize: '13px',
-                            color: nowPlaying === song.title ? '#ffffff' : '#1DB954',
-                          }}>
-                            {nowPlaying === song.title ? 'PLAYING' : 'PLAY'}
-                          </span>
-                        </button>
-                      </div>
-                      
-                      {/* Spotify Embed Player */}
-                      <div style={{
-                        borderRadius: '12px',
-                        overflow: 'hidden',
-                      }}>
-                        <iframe 
-                          src={song.embedUrl}
-                          width="100%" 
-                          height="80" 
-                          frameBorder="0" 
-                          allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                          loading="lazy"
-                          style={{ borderRadius: '12px' }}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                  
-                  {/* HISTORY DARI FIREBASE - Semua user yang pernah memutar lagu */}
-                  {playHistory.length > 0 && (
-                    <div style={{
-                      marginTop: '30px',
-                      padding: '20px',
-                      backgroundColor: '#f0f0f0',
-                      borderRadius: '16px',
-                    }}>
-                      <div style={{
-                        fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                        fontSize: '16px',
-                        fontWeight: '600',
-                        color: '#333333',
-                        marginBottom: '15px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                      }}>
-                        <span>📜</span>
-                        <span>RIWAYAT PUTAR LAGU</span>
-                        <span style={{
-                          fontSize: '12px',
-                          color: '#999999',
-                          fontWeight: '400',
-                        }}>(tersimpan di Firebase)</span>
-                      </div>
-                      <div style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '10px',
-                        maxHeight: '300px',
-                        overflowY: 'auto',
-                      }}>
-                        {playHistory.map((item) => {
-                          const itemDate = item.timestamp?.toDate ? item.timestamp.toDate() : new Date();
-                          return (
-                            <div key={item.id} style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'space-between',
-                              padding: '10px 15px',
-                              backgroundColor: '#ffffff',
-                              borderRadius: '12px',
-                              border: '1px solid #e0e0e0',
-                            }}>
-                              <div style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '12px',
-                              }}>
-                                {item.userPhoto ? (
-                                  <div style={{
-                                    width: '32px',
-                                    height: '32px',
-                                    borderRadius: '50%',
-                                    overflow: 'hidden',
-                                    position: 'relative',
-                                  }}>
-                                    <Image src={item.userPhoto} alt={item.userName} fill style={{ objectFit: 'cover' }} />
-                                  </div>
-                                ) : (
-                                  <div style={{
-                                    width: '32px',
-                                    height: '32px',
-                                    borderRadius: '50%',
-                                    backgroundColor: '#1DB954',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    color: '#ffffff',
-                                    fontSize: '14px',
-                                    fontWeight: '600',
-                                  }}>
-                                    {item.userName.charAt(0).toUpperCase()}
-                                  </div>
-                                )}
-                                <div>
-                                  <div style={{
-                                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                                    fontSize: '14px',
-                                    fontWeight: '600',
-                                    color: '#000000',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '6px',
-                                  }}>
-                                    {item.userName}
-                                    {item.userEmail === ADMIN_EMAIL && <VerifiedBadge size={14} />}
-                                  </div>
-                                  <div style={{
-                                    fontFamily: "'Questrial', sans-serif",
-                                    fontSize: '12px',
-                                    color: '#999999',
-                                  }}>
-                                    memutar: {item.songTitle} — {item.songArtist}
-                                  </div>
-                                </div>
-                              </div>
-                              <div style={{
-                                fontFamily: "'Questrial', sans-serif",
-                                fontSize: '11px',
-                                color: '#999999',
-                              }}>
-                                {itemDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })} • {itemDate.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
                 </div>
 
                 {/* RINCIAN DONASI - Rp 100.000 + Daftar Sembako */}
@@ -5185,7 +4928,7 @@ useEffect(() => {
       </div>
     )}
 
-    {/* TOMBOL DONASI */}
+    {/* TOMBOL DONASI - Link ke halaman /donatur */}
     <div style={{
       display: 'flex',
       justifyContent: 'center',
@@ -5224,11 +4967,6 @@ useEffect(() => {
     </div>
   </div>
 )}
-
-
-
-
-
 
 
 
