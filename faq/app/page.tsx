@@ -4506,6 +4506,7 @@ useEffect(() => {
 
 
 
+
 {/* DONATION SECTION - TANPA LAGU, DENGAN TANGGAL DONASI */}
 {!isLoading && (
   <div
@@ -4624,7 +4625,7 @@ useEffect(() => {
                 }}>
                   <div style={{
                     fontFamily: "'Questrial', sans-serif",
-                    fontSize: '18px",
+                    fontSize: '18px',
                     fontWeight: '600',
                     color: '#ffffff',
                     letterSpacing: '0.5px',
@@ -4970,6 +4971,15 @@ useEffect(() => {
 
 
 
+
+
+
+
+
+
+
+
+            
             
             
 
