@@ -4251,8 +4251,8 @@ export default function HomePage(): React.JSX.Element {
     {/* TEXT ABOUT - 15px */}
     <div
       style={{
-        fontSize: '10px',
-        fontWeight: 500,
+        fontSize: '18px',
+        fontWeight: 600,
         color: '#000000',
         letterSpacing: '0.08em',
         textTransform: 'uppercase',
@@ -4268,7 +4268,7 @@ export default function HomePage(): React.JSX.Element {
       style={{
         fontSize: '30px',
         lineHeight: '1.4',
-        fontWeight: 400,
+        fontWeight: 500,
         color: '#000000',
         letterSpacing: '-0.02em',
         fontFamily: 'Questrial, sans-serif',
