@@ -4262,6 +4262,7 @@ export default function HomePage(): React.JSX.Element {
       I am a developer based in Manchester, UK focused on creating interactive digital experiences on the web, working with brands and industry leaders such as Google Fonts, Paystack, Heva Health, Disney, Jelly, and Null amongst others to achieve this.
     </div>
   </div>
+  </div>
 
 
               
