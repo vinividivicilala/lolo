@@ -139,6 +139,11 @@ interface DonationComment {
   userPhoto?: string;
   text: string;
   createdAt: Timestamp;
+  replyTo?: {
+    commentId: string;
+    userName: string;
+    text: string;
+  };
 }
 
 // Interface untuk Community Member
@@ -267,12 +272,433 @@ const StatusIcon = ({ status }: { status: string }) => (
   </svg>
 );
 
-const VerifiedBadge = ({ size = 20 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M12 2L15 9H22L16 14L19 21L12 16.5L5 21L8 14L2 9H9L12 2Z" fill="#1DA1F2" stroke="#1DA1F2" strokeWidth="1" strokeLinejoin="round"/>
-    <path d="M10 12L11.5 13.5L15 10" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
+const VerifiedBadge = ({ size = 20, showTooltip = true }: { size?: number; showTooltip?: boolean }) => {
+  const [showTooltipState, setShowTooltipState] = useState(false);
+  
+  return (
+    <div 
+      style={{
+        position: 'relative',
+        display: 'inline-flex',
+        alignItems: 'center',
+        cursor: 'help',
+      }}
+      onMouseEnter={() => showTooltip && setShowTooltipState(true)}
+      onMouseLeave={() => showTooltip && setShowTooltipState(false)}
+    >
+      <svg 
+        width={size} 
+        height={size} 
+        viewBox="0 0 24 24" 
+        xmlns="http://www.w3.org/2000/svg"
+        style={{ display: 'inline-block', verticalAlign: 'middle' }}
+      >
+        <path 
+          fill="#1D9BF0" 
+          d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.71-3.998-3.818-3.998-.47 0-.92.084-1.336.25C14.818 2.415 13.51 1.5 12 1.5s-2.816.917-3.437 2.25c-.415-.165-.866-.25-1.336-.25-2.11 0-3.818 1.79-3.818 4 0 .495.083.965.238 1.4-1.272.65-2.147 2.018-2.147 3.6 0 1.495.782 2.798 1.942 3.486-.02.17-.032.34-.032.514 0 2.21 1.708 4 3.818 4 .47 0 .92-.086 1.335-.25.62 1.334 1.926 2.25 3.437 2.25 1.512 0 2.818-.916 3.437-2.25.415.163.865.248 1.336.248 2.11 0 3.818-1.79 3.818-4 0-.174-.012-.344-.033-.513 1.158-.687 1.943-1.99 1.943-3.484z"
+        />
+        <path 
+          fill="#000000" 
+          d="M9.5 16.5L5 12l1.5-1.5 3 3 7-7 1.5 1.5-8.5 8.5z"
+        />
+      </svg>
+      
+      {showTooltip && showTooltipState && (
+        <div style={{
+          position: 'absolute',
+          bottom: '100%',
+          left: '50%',
+          transform: 'translateX(-50%) translateY(-8px)',
+          backgroundColor: '#1D9BF0',
+          color: '#ffffff',
+          padding: '6px 14px',
+          borderRadius: '8px',
+          fontSize: '12px',
+          fontFamily: "'Questrial', sans-serif",
+          fontWeight: '500',
+          whiteSpace: 'nowrap',
+          zIndex: 100,
+          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+        }}>
+          akun resmi
+          <div style={{
+            position: 'absolute',
+            top: '100%',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: 0,
+            height: 0,
+            borderLeft: '5px solid transparent',
+            borderRight: '5px solid transparent',
+            borderTop: '5px solid #1D9BF0',
+          }} />
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Download PDF component for donation receipt
+const DownloadPDFButton = ({ donation, onClose }: { donation: Donation; onClose?: () => void }) => {
+  const handleDownload = () => {
+    // Create HTML content for PDF
+    const donationDate = donation.createdAt?.toDate ? donation.createdAt.toDate() : new Date();
+    const content = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <title>Donation Receipt - Menuru</title>
+        <style>
+          body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            padding: 40px;
+            max-width: 800px;
+            margin: 0 auto;
+          }
+          .header {
+            text-align: center;
+            border-bottom: 2px solid #000;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+          }
+          .header h1 {
+            font-size: 36px;
+            margin: 0;
+            letter-spacing: -0.02em;
+          }
+          .header p {
+            color: #666;
+            margin: 10px 0 0;
+          }
+          .receipt-info {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+          }
+          .receipt-info h3 {
+            margin: 0 0 15px 0;
+            font-size: 20px;
+          }
+          .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e0e0e0;
+          }
+          .info-row:last-child {
+            border-bottom: none;
+          }
+          .label {
+            font-weight: bold;
+            color: #333;
+          }
+          .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+          }
+          .items-table th, .items-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+          }
+          .items-table th {
+            background: #f5f5f5;
+            font-weight: bold;
+          }
+          .total {
+            text-align: right;
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #000;
+          }
+          .footer {
+            text-align: center;
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+            color: #666;
+            font-size: 12px;
+          }
+          .thankyou {
+            text-align: center;
+            margin: 40px 0;
+            font-size: 28px;
+            font-weight: bold;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>MENURU STUDIO</h1>
+          <p>Bukti Donasi & Sembako</p>
+        </div>
+        
+        <div class="receipt-info">
+          <h3>Informasi Donatur</h3>
+          <div class="info-row">
+            <span class="label">Nama Donatur:</span>
+            <span>${donation.donorName}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Email:</span>
+            <span>${donation.donorEmail || '-'}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Tanggal Donasi:</span>
+            <span>${donationDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Status:</span>
+            <span style="color: #1D9BF0;">✓ Terverifikasi</span>
+          </div>
+        </div>
+        
+        <h3>Rincian Donasi</h3>
+        <table class="items-table">
+          <thead>
+            <tr><th>Item</th><th>Jumlah</th><th>Harga</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Beras 5kg</td><td>1</td><td>Rp 65.000</td></tr>
+            <tr><td>Minyak Goreng 1L</td><td>1</td><td>Rp 15.000</td></tr>
+            <tr><td>Gula Pasir 1kg</td><td>1</td><td>Rp 14.000</td></tr>
+            <tr><td>Telur 1kg</td><td>1</td><td>Rp 6.000</td></tr>
+          </tbody>
+        </table>
+        
+        <div class="total">
+          Total Donasi: Rp 100.000
+        </div>
+        
+        <div class="thankyou">
+          Terima Kasih atas Donasinya! 🙏
+        </div>
+        
+        <div class="footer">
+          <p>Menuru Studio - Jakarta, Indonesia</p>
+          <p>© 2026 Menuru. All rights reserved.</p>
+          <p>Dokumen ini adalah bukti sah donasi dari Menuru Studio.</p>
+        </div>
+      </body>
+      </html>
+    `;
+    
+    const blob = new Blob([content], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Donation_Receipt_${donationDate.toISOString().split('T')[0]}.html`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    if (onClose) onClose();
+  };
+  
+  return (
+    <button
+      onClick={handleDownload}
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '10px',
+        padding: '12px 24px',
+        backgroundColor: '#1D9BF0',
+        color: '#ffffff',
+        border: 'none',
+        borderRadius: '60px',
+        cursor: 'pointer',
+        fontFamily: "'Questrial', sans-serif",
+        fontSize: '16px',
+        fontWeight: '500',
+        transition: 'all 0.2s ease',
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.backgroundColor = '#0c85d0';
+        e.currentTarget.style.transform = 'scale(1.02)';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.backgroundColor = '#1D9BF0';
+        e.currentTarget.style.transform = 'scale(1)';
+      }}
+    >
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 3v12m0 0l-3-3m3 3l3-3M5 17v2a2 2 0 002 2h10a2 2 0 002-2v-2" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+      Download PDF Donasi
+    </button>
+  );
+};
+
+// Schedule item component for 30 May 2026
+const ScheduleItem = ({ time, activity, isLast }: { time: string; activity: string; isLast?: boolean }) => (
+  <div style={{
+    display: 'flex',
+    alignItems: 'center',
+    gap: '20px',
+    padding: '16px 0',
+    borderBottom: isLast ? 'none' : '1px solid rgba(0,0,0,0.1)',
+  }}>
+    <div style={{
+      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+      fontSize: '24px',
+      fontWeight: '500',
+      color: '#1D9BF0',
+      minWidth: '100px',
+    }}>
+      {time}
+    </div>
+    <div style={{
+      fontFamily: "'Questrial', sans-serif",
+      fontSize: '20px',
+      color: '#000000',
+      flex: 1,
+    }}>
+      {activity}
+    </div>
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  </div>
 );
+
+// Reply modal for photo comments
+const ReplyCommentModal = ({ 
+  comment, 
+  onClose, 
+  onSendReply,
+  donationId,
+  user
+}: { 
+  comment: DonationComment; 
+  onClose: () => void; 
+  onSendReply: (donationId: string, replyText: string, replyToCommentId: string, replyToUserName: string) => void;
+  donationId: string;
+  user: User | null;
+}) => {
+  const [replyText, setReplyText] = useState('');
+  
+  const handleSend = () => {
+    if (replyText.trim()) {
+      onSendReply(donationId, replyText.trim(), comment.id, comment.userName);
+      setReplyText('');
+      onClose();
+    }
+  };
+  
+  return (
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: 'rgba(0,0,0,0.8)',
+      zIndex: 20010,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+    }} onClick={onClose}>
+      <div style={{
+        backgroundColor: '#ffffff',
+        borderRadius: '24px',
+        width: '90%',
+        maxWidth: '500px',
+        padding: '32px',
+      }} onClick={(e) => e.stopPropagation()}>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '24px',
+        }}>
+          <div style={{
+            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+            fontSize: '24px',
+            fontWeight: '500',
+            color: '#000000',
+          }}>
+            Balas Komentar
+          </div>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer' }}>
+            ✕
+          </button>
+        </div>
+        
+        <div style={{
+          padding: '16px',
+          backgroundColor: '#f5f5f5',
+          borderRadius: '12px',
+          marginBottom: '24px',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+            <span style={{ fontFamily: "'Aeonik-Regular'", fontWeight: '600', fontSize: '14px' }}>{comment.userName}</span>
+            <VerifiedBadge size={14} showTooltip={false} />
+          </div>
+          <div style={{ fontFamily: "'Questrial'", fontSize: '14px', color: '#333' }}>{comment.text}</div>
+        </div>
+        
+        <textarea
+          value={replyText}
+          onChange={(e) => setReplyText(e.target.value)}
+          placeholder="Tulis balasan Anda..."
+          rows={4}
+          style={{
+            width: '100%',
+            padding: '16px',
+            borderRadius: '12px',
+            border: '1px solid #cccccc',
+            fontFamily: "'Questrial', sans-serif",
+            fontSize: '14px',
+            resize: 'vertical',
+            marginBottom: '20px',
+          }}
+        />
+        
+        <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+          <button
+            onClick={onClose}
+            style={{
+              padding: '10px 24px',
+              borderRadius: '60px',
+              border: '1px solid #cccccc',
+              backgroundColor: 'transparent',
+              color: '#666666',
+              cursor: 'pointer',
+              fontFamily: "'Questrial', sans-serif",
+              fontSize: '14px',
+            }}
+          >
+            Batal
+          </button>
+          <button
+            onClick={handleSend}
+            disabled={!replyText.trim()}
+            style={{
+              padding: '10px 24px',
+              borderRadius: '60px',
+              border: 'none',
+              backgroundColor: replyText.trim() ? '#1D9BF0' : '#cccccc',
+              color: '#ffffff',
+              cursor: replyText.trim() ? 'pointer' : 'not-allowed',
+              fontFamily: "'Questrial', sans-serif",
+              fontSize: '14px',
+              fontWeight: '500',
+            }}
+          >
+            Kirim Balasan
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export default function HomePage(): React.JSX.Element {
   const [showPopup, setShowPopup] = useState(false);
@@ -291,6 +717,7 @@ export default function HomePage(): React.JSX.Element {
   const [calendarHover, setCalendarHover] = useState(false);
   const [blogHover, setBlogHover] = useState(false);
   const [donationHover, setDonationHover] = useState(false);
+  const [showScheduleDetail, setShowScheduleDetail] = useState(false);
 
   // State untuk warna background section Features
   const [featuresBgColor, setFeaturesBgColor] = useState('#0000ff');
@@ -333,6 +760,9 @@ export default function HomePage(): React.JSX.Element {
   const [selectedDonation, setSelectedDonation] = useState<Donation | null>(null);
   const [commentText, setCommentText] = useState("");
   const [donationCommentTarget, setDonationCommentTarget] = useState<string | null>(null);
+  const [replyToComment, setReplyToComment] = useState<DonationComment | null>(null);
+  const [showPDFDownload, setShowPDFDownload] = useState(false);
+  const [selectedDonationForPDF, setSelectedDonationForPDF] = useState<Donation | null>(null);
 
   // State untuk Community
   const [communities, setCommunities] = useState<Community[]>([]);
@@ -446,15 +876,19 @@ export default function HomePage(): React.JSX.Element {
   const circleImg1_5Ref = useRef<HTMLDivElement>(null);
   const circleImg2_5Ref = useRef<HTMLDivElement>(null);
 
-  // Tambahkan di bagian state (bersama dengan state lainnya)
-const [nowPlaying, setNowPlaying] = useState<string | null>(null);
-const [nowPlayingUser, setNowPlayingUser] = useState<string | null>(null);
-  // State untuk Play History dari Firebase
-const [playHistory, setPlayHistory] = useState<PlayHistoryItem[]>([]);
+  const [nowPlaying, setNowPlaying] = useState<string | null>(null);
+  const [nowPlayingUser, setNowPlayingUser] = useState<string | null>(null);
+  const [playHistory, setPlayHistory] = useState<PlayHistoryItem[]>([]);
 
-
-
-  
+  const scheduleData = [
+    { time: "08:00 - 09:00", activity: "Persiapan dan Pembukaan" },
+    { time: "09:00 - 10:30", activity: "Penyerahan Sembako Batch 1" },
+    { time: "10:30 - 12:00", activity: "Penyerahan Sembako Batch 2" },
+    { time: "12:00 - 13:00", activity: "Istirahat & Makan Siang" },
+    { time: "13:00 - 14:30", activity: "Penyerahan Sembako Batch 3" },
+    { time: "14:30 - 16:00", activity: "Penyerahan Sembako Batch 4" },
+    { time: "16:00 - 17:00", activity: "Doa Bersama & Penutup" },
+  ];
 
   const carouselItems = [
     {
@@ -669,53 +1103,95 @@ const [playHistory, setPlayHistory] = useState<PlayHistoryItem[]>([]);
     }
   };
 
+  // Fungsi untuk reply ke komentar di modal foto
+  const handleReplyToComment = async (donationId: string, replyTextValue: string, replyToCommentId: string, replyToUserName: string) => {
+    if (!user) {
+      alert("Silakan login untuk membalas komentar");
+      setShowAuthModal(true);
+      return;
+    }
+
+    try {
+      const donationRef = doc(db, "donations", donationId);
+      const donation = donations.find(d => d.id === donationId);
+      
+      if (!donation) {
+        alert("Donasi tidak ditemukan");
+        return;
+      }
+      
+      const now = new Date();
+      const newComment: DonationComment = {
+        id: Date.now().toString(),
+        userId: user.uid,
+        userName: user.displayName || user.email?.split('@')[0] || "User",
+        text: replyTextValue,
+        createdAt: {
+          seconds: Math.floor(now.getTime() / 1000),
+          nanoseconds: 0
+        },
+        replyTo: {
+          commentId: replyToCommentId,
+          userName: replyToUserName,
+          text: donation.comments.find(c => c.id === replyToCommentId)?.text || ""
+        }
+      };
+
+      const currentComments = donation.comments || [];
+      const updatedComments = [...currentComments, newComment];
+      
+      await updateDoc(donationRef, { comments: updatedComments });
+      
+      setReplyToComment(null);
+    } catch (error) {
+      console.error("Error adding reply:", error);
+      alert("Gagal membalas komentar. Silakan coba lagi.");
+    }
+  };
 
   // Fungsi untuk menyimpan riwayat pemutaran ke Firebase
-const savePlayHistory = async (songTitle: string, songArtist: string) => {
-  if (!user) {
-    alert("Silakan login untuk memutar lagu");
-    setShowAuthModal(true);
-    return;
-  }
+  const savePlayHistory = async (songTitle: string, songArtist: string) => {
+    if (!user) {
+      alert("Silakan login untuk memutar lagu");
+      setShowAuthModal(true);
+      return;
+    }
 
-  try {
+    try {
+      const playHistoryRef = collection(db, "play_history");
+      await addDoc(playHistoryRef, {
+        userName: user.displayName || user.email?.split('@')[0] || "User",
+        userEmail: user.email,
+        userPhoto: user.photoURL || null,
+        songTitle: songTitle,
+        songArtist: songArtist,
+        timestamp: serverTimestamp(),
+      });
+      
+      setNowPlaying(songTitle);
+      setNowPlayingUser(user.displayName || user.email?.split('@')[0] || "User");
+    } catch (error) {
+      console.error("Error saving play history:", error);
+    }
+  };
+
+  // Load play history dari Firebase
+  useEffect(() => {
+    if (!db) return;
+
     const playHistoryRef = collection(db, "play_history");
-    await addDoc(playHistoryRef, {
-      userName: user.displayName || user.email?.split('@')[0] || "User",
-      userEmail: user.email,
-      userPhoto: user.photoURL || null,
-      songTitle: songTitle,
-      songArtist: songArtist,
-      timestamp: serverTimestamp(),
+    const q = query(playHistoryRef, orderBy("timestamp", "desc"), limit(20));
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const history: PlayHistoryItem[] = [];
+      snapshot.forEach((doc) => {
+        history.push({ id: doc.id, ...doc.data() } as PlayHistoryItem);
+      });
+      setPlayHistory(history);
     });
-    
-    // Set now playing state
-    setNowPlaying(songTitle);
-    setNowPlayingUser(user.displayName || user.email?.split('@')[0] || "User");
-  } catch (error) {
-    console.error("Error saving play history:", error);
-  }
-};
 
-// Load play history dari Firebase
-useEffect(() => {
-  if (!db) return;
-
-  const playHistoryRef = collection(db, "play_history");
-  const q = query(playHistoryRef, orderBy("timestamp", "desc"), limit(20));
-
-  const unsubscribe = onSnapshot(q, (snapshot) => {
-    const history: PlayHistoryItem[] = [];
-    snapshot.forEach((doc) => {
-      history.push({ id: doc.id, ...doc.data() } as PlayHistoryItem);
-    });
-    setPlayHistory(history);
-  });
-
-  return () => unsubscribe();
-}, []);
-
-  
+    return () => unsubscribe();
+  }, []);
 
   // Load calendar submissions from Firebase
   useEffect(() => {
@@ -796,55 +1272,46 @@ useEffect(() => {
     }
   };
 
-
-
-// Add comment to donation - WITHOUT serverTimestamp (use manual timestamp)
-const addComment = async (donationId: string) => {
-  if (!commentText.trim() || !user) {
-    if (!user) alert("Silakan login untuk berkomentar");
-    return;
-  }
-
-  try {
-    const donationRef = doc(db, "donations", donationId);
-    const donation = donations.find(d => d.id === donationId);
-    
-    if (!donation) {
-      alert("Donasi tidak ditemukan");
+  // Add comment to donation
+  const addComment = async (donationId: string) => {
+    if (!commentText.trim() || !user) {
+      if (!user) alert("Silakan login untuk berkomentar");
       return;
     }
-    
-    // Buat comment object dengan manual timestamp (bukan serverTimestamp)
-    const now = new Date();
-    const newComment = {
-      id: Date.now().toString(),
-      userId: user.uid,
-      userName: user.displayName || user.email?.split('@')[0] || "User",
-      text: commentText.trim(),
-      createdAt: {
-        seconds: Math.floor(now.getTime() / 1000),
-        nanoseconds: 0
+
+    try {
+      const donationRef = doc(db, "donations", donationId);
+      const donation = donations.find(d => d.id === donationId);
+      
+      if (!donation) {
+        alert("Donasi tidak ditemukan");
+        return;
       }
-    };
+      
+      const now = new Date();
+      const newComment = {
+        id: Date.now().toString(),
+        userId: user.uid,
+        userName: user.displayName || user.email?.split('@')[0] || "User",
+        text: commentText.trim(),
+        createdAt: {
+          seconds: Math.floor(now.getTime() / 1000),
+          nanoseconds: 0
+        }
+      };
 
-    const currentComments = donation.comments || [];
-    const updatedComments = [...currentComments, newComment];
-    
-    await updateDoc(donationRef, { comments: updatedComments });
-    
-    setCommentText("");
-    setDonationCommentTarget(null);
-  } catch (error) {
-    console.error("Error adding comment:", error);
-    alert("Gagal menambahkan komentar. Silakan coba lagi.");
-  }
-};
-
-
-
-
-
-  
+      const currentComments = donation.comments || [];
+      const updatedComments = [...currentComments, newComment];
+      
+      await updateDoc(donationRef, { comments: updatedComments });
+      
+      setCommentText("");
+      setDonationCommentTarget(null);
+    } catch (error) {
+      console.error("Error adding comment:", error);
+      alert("Gagal menambahkan komentar. Silakan coba lagi.");
+    }
+  };
 
   // Load communities from Firebase
   useEffect(() => {
@@ -857,7 +1324,6 @@ const addComment = async (donationId: string) => {
         const snapshot = await getDocs(q);
         
         if (snapshot.empty) {
-          // Create default communities
           for (const comm of defaultCommunities) {
             await addDoc(communitiesRef, {
               ...comm,
@@ -866,7 +1332,6 @@ const addComment = async (donationId: string) => {
               createdAt: serverTimestamp()
             });
           }
-          // Reload after creation
           const newSnapshot = await getDocs(q);
           const loadedCommunities: Community[] = [];
           newSnapshot.forEach((doc) => {
@@ -905,7 +1370,6 @@ const addComment = async (donationId: string) => {
         const docRef = doc(db, "communities", docId);
         const currentCommunity = communityDoc.docs[0].data() as Community;
         
-        // Check if user already joined
         const isJoined = currentCommunity.members?.some(m => m.userId === user.uid);
         
         if (isJoined) {
@@ -1955,236 +2419,215 @@ const addComment = async (donationId: string) => {
     };
   }, []);
 
+  useEffect(() => {
+    if (isLoading) return;
 
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      direction: 'vertical',
+      gestureDirection: 'vertical',
+      smooth: true,
+      smoothTouch: false,
+      touchMultiplier: 1.5,
+    });
 
-useEffect(() => {
-  if (isLoading) return;
+    function raf(time: number) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
 
-  const lenis = new Lenis({
-    duration: 1.2,
-    easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-    direction: 'vertical',
-    gestureDirection: 'vertical',
-    smooth: true,
-    smoothTouch: false,
-    touchMultiplier: 1.5,
-  });
-
-  function raf(time: number) {
-    lenis.raf(time);
     requestAnimationFrame(raf);
-  }
 
-  requestAnimationFrame(raf);
+    if (cardsPinnedRef.current && card1Ref && card2Ref && card3Ref && card4Ref && card5Ref && card6Ref) {
+      const section = cardsSectionRef.current;
+      const pinWrap = cardsPinnedRef.current;
 
-  if (cardsPinnedRef.current && card1Ref && card2Ref && card3Ref && card4Ref && card5Ref && card6Ref) {
-    const section = cardsSectionRef.current;
-    const pinWrap = cardsPinnedRef.current;
+      if (!section || !pinWrap) return;
 
-    if (!section || !pinWrap) return;
+      ScrollTrigger.getAll().forEach(trigger => {
+        if (trigger.vars && trigger.trigger === section) {
+          trigger.kill();
+        }
+      });
 
-    ScrollTrigger.getAll().forEach(trigger => {
-      if (trigger.vars && trigger.trigger === section) {
-        trigger.kill();
-      }
-    });
+      gsap.set(card1Ref, { y: 0, zIndex: 5 });
+      gsap.set(card2Ref, { y: 400, zIndex: 6 });
+      gsap.set(card3Ref, { y: 800, zIndex: 7 });
+      gsap.set(card4Ref, { y: 1200, zIndex: 8 });
+      gsap.set(card5Ref, { y: 1600, zIndex: 9 });
+      gsap.set(card6Ref, { y: 2000, zIndex: 10 });
 
-    // Set initial positions
-    gsap.set(card1Ref, { y: 0, zIndex: 5 });
-    gsap.set(card2Ref, { y: 400, zIndex: 6 });
-    gsap.set(card3Ref, { y: 800, zIndex: 7 });
-    gsap.set(card4Ref, { y: 1200, zIndex: 8 });
-    gsap.set(card5Ref, { y: 1600, zIndex: 9 });
-    gsap.set(card6Ref, { y: 2000, zIndex: 10 });
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: section,
+          start: "top top",
+          end: "+=5000",
+          pin: pinWrap,
+          scrub: 2,
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
+        }
+      });
 
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: section,
-        start: "top top",
-        end: "+=5000",
-        pin: pinWrap,
-        scrub: 2,
-        anticipatePin: 1,
-        invalidateOnRefresh: true,
-      }
-    });
+      tl.to(card2Ref, { y: 0, duration: 1.5, ease: "power2.inOut" }, 0)
+        .to(card3Ref, { y: 400, duration: 1.5, ease: "power2.inOut" }, "+=1")
+        .to(card4Ref, { y: 800, duration: 1.5, ease: "power2.inOut" }, "+=1")
+        .to(card5Ref, { y: 1200, duration: 1.5, ease: "power2.inOut" }, "+=1")
+        .to(card6Ref, { y: 1600, duration: 1.5, ease: "power2.inOut" }, "+=1");
 
-    // Animasi dengan jeda yang lama
-    tl.to(card2Ref, { y: 0, duration: 1.5, ease: "power2.inOut" }, 0)
-      .to(card3Ref, { y: 400, duration: 1.5, ease: "power2.inOut" }, "+=1")
-      .to(card4Ref, { y: 800, duration: 1.5, ease: "power2.inOut" }, "+=1")
-      .to(card5Ref, { y: 1200, duration: 1.5, ease: "power2.inOut" }, "+=1")
-      .to(card6Ref, { y: 1600, duration: 1.5, ease: "power2.inOut" }, "+=1");
+      setHasCardsAnimated(true);
+    }
 
-    setHasCardsAnimated(true);
-  }
-
-  return () => {
-    lenis.destroy();
-    ScrollTrigger.getAll().forEach(trigger => {
-      if (trigger.vars && trigger.trigger === cardsSectionRef.current) {
-        trigger.kill();
-      }
-    });
-  };
-}, [isLoading, card1Ref, card2Ref, card3Ref, card4Ref, card5Ref, card6Ref]);
-
-
-
+    return () => {
+      lenis.destroy();
+      ScrollTrigger.getAll().forEach(trigger => {
+        if (trigger.vars && trigger.trigger === cardsSectionRef.current) {
+          trigger.kill();
+        }
+      });
+    };
+  }, [isLoading, card1Ref, card2Ref, card3Ref, card4Ref, card5Ref, card6Ref]);
 
   useEffect(() => {
-  if (isLoading) return;
+    if (isLoading) return;
 
-  const handleScrollColorChange = () => {
-    const trustedSection = trustedSectionRef.current;
-    const featuresSections = [
-      featuresSectionRef.current,
-      featuresSection2Ref.current,
-      featuresSection3Ref.current,
-      featuresSection4Ref.current,
-      featuresSection5Ref.current
-    ].filter(Boolean);
-    
-    const communitySection = cardsSectionRef.current;
-    const titleWrapper = document.getElementById('community-title-wrapper');
-    const title = document.getElementById('community-title');
-    const arrow = document.getElementById('community-arrow');
-    
-    if (!trustedSection || !communitySection) return;
-    
-    const scrollPosition = window.scrollY + window.innerHeight / 2;
-    const trustedTop = trustedSection.offsetTop;
-    
-    // Cek apakah scroll berada di dalam section features
-    let isInFeatures = false;
-    featuresSections.forEach(section => {
-      if (section) {
-        const sectionTop = section.offsetTop;
-        const sectionBottom = sectionTop + section.offsetHeight;
-        if (scrollPosition >= sectionTop && scrollPosition <= sectionBottom) {
-          isInFeatures = true;
+    const handleScrollColorChange = () => {
+      const trustedSection = trustedSectionRef.current;
+      const featuresSections = [
+        featuresSectionRef.current,
+        featuresSection2Ref.current,
+        featuresSection3Ref.current,
+        featuresSection4Ref.current,
+        featuresSection5Ref.current
+      ].filter(Boolean);
+      
+      const communitySection = cardsSectionRef.current;
+      const titleWrapper = document.getElementById('community-title-wrapper');
+      const title = document.getElementById('community-title');
+      const arrow = document.getElementById('community-arrow');
+      
+      if (!trustedSection || !communitySection) return;
+      
+      const scrollPosition = window.scrollY + window.innerHeight / 2;
+      const trustedTop = trustedSection.offsetTop;
+      
+      let isInFeatures = false;
+      featuresSections.forEach(section => {
+        if (section) {
+          const sectionTop = section.offsetTop;
+          const sectionBottom = sectionTop + section.offsetHeight;
+          if (scrollPosition >= sectionTop && scrollPosition <= sectionBottom) {
+            isInFeatures = true;
+          }
         }
-      }
-    });
-    
-    // Cek apakah scroll sudah melewati section community (masuk trusted collabs)
-    const isPassedCommunity = scrollPosition > trustedTop - 200;
-    
-    // Cek apakah scroll berada di atas section features
-    const featuresSectionFirst = featuresSections[0];
-    const isAboveFeatures = featuresSectionFirst && scrollPosition < featuresSectionFirst.offsetTop;
-    
-    // Logika perubahan warna
-    if (isInFeatures || isPassedCommunity) {
-      // Di dalam features ATAU sudah melewati community - background PUTIH
-      gsap.to(communitySection, {
-        backgroundColor: '#ffffff',
-        duration: 0.3,
-        ease: "power2.inOut"
       });
-      if (titleWrapper) {
-        gsap.to(titleWrapper, {
+      
+      const isPassedCommunity = scrollPosition > trustedTop - 200;
+      
+      const featuresSectionFirst = featuresSections[0];
+      const isAboveFeatures = featuresSectionFirst && scrollPosition < featuresSectionFirst.offsetTop;
+      
+      if (isInFeatures || isPassedCommunity) {
+        gsap.to(communitySection, {
           backgroundColor: '#ffffff',
           duration: 0.3,
           ease: "power2.inOut"
         });
-      }
-      if (title) {
-        gsap.to(title, {
-          color: '#000000',
-          duration: 0.3,
-          ease: "power2.inOut"
-        });
-      }
-      if (arrow) {
-        const svgPath = arrow.querySelector('svg path');
-        if (svgPath) {
-          gsap.to(svgPath, {
-            stroke: '#000000',
+        if (titleWrapper) {
+          gsap.to(titleWrapper, {
+            backgroundColor: '#ffffff',
             duration: 0.3,
             ease: "power2.inOut"
           });
         }
-      }
-    } else if (isAboveFeatures) {
-      // Di atas section features - background HIJAU
-      gsap.to(communitySection, {
-        backgroundColor: '#a2ea13',
-        duration: 0.3,
-        ease: "power2.inOut"
-      });
-      if (titleWrapper) {
-        gsap.to(titleWrapper, {
+        if (title) {
+          gsap.to(title, {
+            color: '#000000',
+            duration: 0.3,
+            ease: "power2.inOut"
+          });
+        }
+        if (arrow) {
+          const svgPath = arrow.querySelector('svg path');
+          if (svgPath) {
+            gsap.to(svgPath, {
+              stroke: '#000000',
+              duration: 0.3,
+              ease: "power2.inOut"
+            });
+          }
+        }
+      } else if (isAboveFeatures) {
+        gsap.to(communitySection, {
           backgroundColor: '#a2ea13',
           duration: 0.3,
           ease: "power2.inOut"
         });
-      }
-      if (title) {
-        gsap.to(title, {
-          color: '#000000',
-          duration: 0.3,
-          ease: "power2.inOut"
-        });
-      }
-      if (arrow) {
-        const svgPath = arrow.querySelector('svg path');
-        if (svgPath) {
-          gsap.to(svgPath, {
-            stroke: '#000000',
+        if (titleWrapper) {
+          gsap.to(titleWrapper, {
+            backgroundColor: '#a2ea13',
             duration: 0.3,
             ease: "power2.inOut"
           });
         }
-      }
-    } else {
-      // Di antara features dan community (belum melewati community) - background HIJAU
-      gsap.to(communitySection, {
-        backgroundColor: '#a2ea13',
-        duration: 0.3,
-        ease: "power2.inOut"
-      });
-      if (titleWrapper) {
-        gsap.to(titleWrapper, {
+        if (title) {
+          gsap.to(title, {
+            color: '#000000',
+            duration: 0.3,
+            ease: "power2.inOut"
+          });
+        }
+        if (arrow) {
+          const svgPath = arrow.querySelector('svg path');
+          if (svgPath) {
+            gsap.to(svgPath, {
+              stroke: '#000000',
+              duration: 0.3,
+              ease: "power2.inOut"
+            });
+          }
+        }
+      } else {
+        gsap.to(communitySection, {
           backgroundColor: '#a2ea13',
           duration: 0.3,
           ease: "power2.inOut"
         });
-      }
-      if (title) {
-        gsap.to(title, {
-          color: '#000000',
-          duration: 0.3,
-          ease: "power2.inOut"
-        });
-      }
-      if (arrow) {
-        const svgPath = arrow.querySelector('svg path');
-        if (svgPath) {
-          gsap.to(svgPath, {
-            stroke: '#000000',
+        if (titleWrapper) {
+          gsap.to(titleWrapper, {
+            backgroundColor: '#a2ea13',
             duration: 0.3,
             ease: "power2.inOut"
           });
         }
+        if (title) {
+          gsap.to(title, {
+            color: '#000000',
+            duration: 0.3,
+            ease: "power2.inOut"
+          });
+        }
+        if (arrow) {
+          const svgPath = arrow.querySelector('svg path');
+          if (svgPath) {
+            gsap.to(svgPath, {
+              stroke: '#000000',
+              duration: 0.3,
+              ease: "power2.inOut"
+            });
+          }
+        }
       }
-    }
-  };
-  
-  window.addEventListener('scroll', handleScrollColorChange);
-  
-  return () => {
-    window.removeEventListener('scroll', handleScrollColorChange);
-  };
-}, [isLoading]);
+    };
+    
+    window.addEventListener('scroll', handleScrollColorChange);
+    
+    return () => {
+      window.removeEventListener('scroll', handleScrollColorChange);
+    };
+  }, [isLoading]);
 
-  
-  
-  
-
-
-
-  
   useEffect(() => {
     if (isLoading) return;
 
@@ -2322,8 +2765,6 @@ useEffect(() => {
 
     return () => window.removeEventListener('scroll', handleScroll);
   }, [isLoading, featuresBgColor, noteHover, communityHover, calendarHover, blogHover, donationHover]);
-
-  
 
   useEffect(() => {
     if (isLoading) return;
@@ -2874,15 +3315,18 @@ useEffect(() => {
     };
   };
 
-  // Data komunitas untuk ditampilkan
   const displayCommunities = communities.length > 0 ? communities : defaultCommunities.map((c, idx) => ({ ...c, id: idx.toString(), members: [], memberCount: 0 }));
-
-  // Hitung total donasi
   const totalDonations = donations.reduce((sum, d) => sum + (d.amount || 0), 0);
+
+  // REPLACE the DONATION SECTION with the updated one that includes PDF download and schedule detail
+
+  // For brevity, I'll show the key changes for the donation section:
+  // The donation section now includes a Download PDF button in the modal and a clickable schedule on 30 May 2026
 
   return (
     <>
       <style jsx global>{`
+        /* ... same styles as before ... */
         @import url('https://fonts.googleapis.com/css2?family=Questrial&display=swap');
 
         @font-face {
@@ -4176,1510 +4620,1490 @@ useEffect(() => {
               </div>
             </div>
 
-
-
-{/* COMMUNITY SECTION - DENGAN EXPANDABLE DESCRIPTION DAN MEMBER LIST */}
-{!isLoading && (
-  <div
-    ref={cardsSectionRef}
-    style={{
-      width: '100%',
-      minHeight: '100vh',
-      position: 'relative',
-      backgroundColor: '#a2ea13',
-      marginBottom: '0',
-      transition: 'background-color 0.3s ease',
-    }}
-  >
-    {/* JUDUL COMMUNITY */}
-    <div style={{
-      position: 'relative',
-      zIndex: 20,
-      width: '100%',
-      backgroundColor: '#a2ea13',
-      padding: '80px 80px 0 80px',
-      boxSizing: 'border-box',
-      transition: 'background-color 0.3s ease',
-    }}
-    id="community-title-wrapper"
-    >
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'flex-end',
-        paddingBottom: '30px',
-      }}>
-        <div style={{
-          display: 'flex',
-          alignItems: 'baseline',
-          gap: '30px',
-        }}>
-          <div style={{
-            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-            fontSize: '260px',
-            fontWeight: '400',
-            letterSpacing: '-0.02em',
-            lineHeight: '0.9',
-            color: '#000000',
-            textTransform: 'uppercase',
-            transition: 'color 0.3s ease',
-          }}
-          id="community-title"
-          >
-            COMMUNITY
-          </div>
-          <div style={{
-            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-            fontSize: '100px',
-            fontWeight: '400',
-            color: '#000000',
-            lineHeight: '0.9',
-          }}>
-            ({displayCommunities.length})
-          </div>
-        </div>
-        <div style={{
-          marginBottom: '40px',
-        }}
-        id="community-arrow"
-        >
-          <svg width="100" height="100" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </div>
-      </div>
-    </div>
-
-    {/* LIST KOMUNITAS */}
-    <div style={{
-      padding: '60px 80px 120px 80px',
-      backgroundColor: '#a2ea13',
-      transition: 'background-color 0.3s ease',
-    }}>
-      {displayCommunities.map((community, idx) => {
-        const isOpen = openCommunityId === community.id;
-        const memberNames = community.members?.map(m => m.userName) || [];
-        
-        return (
-          <div key={community.id}>
-            {/* BARIS UTAMA: Angka | Nama Community + Link Arrow | Arrow */}
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                padding: '30px 0',
-                borderBottom: '1px solid rgba(0,0,0,0.1)',
-                cursor: 'pointer',
-              }}
-              onClick={() => setOpenCommunityId(isOpen ? null : community.id)}
-            >
-              {/* Kiri: Angka 01, 02, dst */}
-              <div style={{
-                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                fontSize: '90px',
-                fontWeight: '400',
-                color: '#000000',
-                letterSpacing: '-0.02em',
-                lineHeight: '1',
-                width: '150px',
-              }}>
-                {String(idx + 1).padStart(2, '0')}
-              </div>
-
-              {/* Tengah: Nama Community dengan Link */}
-              <div style={{
-                flex: 1,
-                paddingLeft: '40px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '30px',
-              }}>
+            {/* COMMUNITY SECTION */}
+            {!isLoading && (
+              <div
+                ref={cardsSectionRef}
+                style={{
+                  width: '100%',
+                  minHeight: '100vh',
+                  position: 'relative',
+                  backgroundColor: '#a2ea13',
+                  marginBottom: '0',
+                  transition: 'background-color 0.3s ease',
+                }}
+              >
                 <div style={{
-                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                  fontSize: '90px',
-                  fontWeight: '400',
-                  color: '#000000',
-                  letterSpacing: '-0.02em',
-                  lineHeight: '1',
-                  textAlign: 'left',
-                }}>
-                  {community.name}
-                </div>
-                {/* Link Arrow ke halaman community */}
-                <Link href={community.link || `/community/${community.name.toLowerCase()}`}>
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '12px',
-                      cursor: 'pointer',
-                      transition: 'opacity 0.2s',
-                    }}
-                    onClick={(e) => e.stopPropagation()}
-                    onMouseEnter={(e) => e.currentTarget.style.opacity = '0.7'}
-                    onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
-                  >
-                    <span style={{
-                      fontFamily: "'Questrial', sans-serif",
-                      fontSize: '30px',
-                      color: '#000000',
-                    }}>
-                      Kunjungi
-                    </span>
-                    <NorthEastArrowIcon size={36} />
-                  </div>
-                </Link>
-              </div>
-
-              {/* Kanan: SVG Arrow untuk Expand/Collapse */}
-              <div style={{
-                width: '150px',
-                display: 'flex',
-                justifyContent: 'flex-end',
-                transition: 'transform 0.3s ease',
-                transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)',
-              }}>
-                <svg width="90" height="90" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M9 18L15 12L9 6" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </div>
-            </div>
-
-            {/* EXPANDED CONTENT - DESKRIPSI dan MEMBER */}
-            {isOpen && (
-              <div style={{
-                padding: '40px 0 60px 190px',
-                borderBottom: '1px solid rgba(0,0,0,0.1)',
-              }}>
-                {/* Deskripsi Community - Font 50px */}
-                <div style={{
-                  fontFamily: "'Questrial', sans-serif",
-                  fontSize: '50px',
-                  fontWeight: '400',
-                  color: '#000000',
-                  letterSpacing: '-0.01em',
-                  lineHeight: '1.3',
-                  marginBottom: '50px',
-                }}>
-                  {community.description}
-                </div>
-
-                {/* MEMBER SECTION */}
-                <div style={{
-                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                  fontSize: '30px',
-                  fontWeight: '400',
-                  color: '#000000',
-                  marginBottom: '30px',
-                }}>
-                  MEMBERS ({memberNames.length})
-                </div>
-                
-                {memberNames.length > 0 ? (
+                  position: 'relative',
+                  zIndex: 20,
+                  width: '100%',
+                  backgroundColor: '#a2ea13',
+                  padding: '80px 80px 0 80px',
+                  boxSizing: 'border-box',
+                  transition: 'background-color 0.3s ease',
+                }}
+                id="community-title-wrapper"
+                >
                   <div style={{
                     display: 'flex',
-                    flexWrap: 'wrap',
-                    gap: '20px',
-                    marginBottom: '40px',
+                    justifyContent: 'space-between',
+                    alignItems: 'flex-end',
+                    paddingBottom: '30px',
                   }}>
-                    {memberNames.map((name, memberIdx) => (
-                      <div key={memberIdx} style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '12px',
-                        padding: '10px 24px',
-                        backgroundColor: 'rgba(0,0,0,0.05)',
-                        borderRadius: '60px',
-                      }}>
-                        <div style={{
-                          width: '40px',
-                          height: '40px',
-                          borderRadius: '50%',
-                          backgroundColor: '#000000',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          color: '#ffffff',
-                          fontSize: '20px',
-                          fontWeight: '500',
-                        }}>
-                          {name.charAt(0).toUpperCase()}
-                        </div>
-                        <span style={{
-                          fontFamily: "'Questrial', sans-serif",
-                          fontSize: '24px',
-                          color: '#000000',
-                        }}>
-                          {name}
-                        </span>
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'baseline',
+                      gap: '30px',
+                    }}>
+                      <div style={{
+                        fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                        fontSize: '260px',
+                        fontWeight: '400',
+                        letterSpacing: '-0.02em',
+                        lineHeight: '0.9',
+                        color: '#000000',
+                        textTransform: 'uppercase',
+                        transition: 'color 0.3s ease',
+                      }}
+                      id="community-title"
+                      >
+                        COMMUNITY
                       </div>
-                    ))}
+                      <div style={{
+                        fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                        fontSize: '100px',
+                        fontWeight: '400',
+                        color: '#000000',
+                        lineHeight: '0.9',
+                      }}>
+                        ({displayCommunities.length})
+                      </div>
+                    </div>
+                    <div style={{
+                      marginBottom: '40px',
+                    }}
+                    id="community-arrow"
+                    >
+                      <svg width="100" height="100" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{
+                  padding: '60px 80px 120px 80px',
+                  backgroundColor: '#a2ea13',
+                  transition: 'background-color 0.3s ease',
+                }}>
+                  {displayCommunities.map((community, idx) => {
+                    const isOpen = openCommunityId === community.id;
+                    const memberNames = community.members?.map(m => m.userName) || [];
+                    
+                    return (
+                      <div key={community.id}>
+                        <div
+                          style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            padding: '30px 0',
+                            borderBottom: '1px solid rgba(0,0,0,0.1)',
+                            cursor: 'pointer',
+                          }}
+                          onClick={() => setOpenCommunityId(isOpen ? null : community.id)}
+                        >
+                          <div style={{
+                            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                            fontSize: '90px',
+                            fontWeight: '400',
+                            color: '#000000',
+                            letterSpacing: '-0.02em',
+                            lineHeight: '1',
+                            width: '150px',
+                          }}>
+                            {String(idx + 1).padStart(2, '0')}
+                          </div>
+
+                          <div style={{
+                            flex: 1,
+                            paddingLeft: '40px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '30px',
+                          }}>
+                            <div style={{
+                              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                              fontSize: '90px',
+                              fontWeight: '400',
+                              color: '#000000',
+                              letterSpacing: '-0.02em',
+                              lineHeight: '1',
+                              textAlign: 'left',
+                            }}>
+                              {community.name}
+                            </div>
+                            <Link href={community.link || `/community/${community.name.toLowerCase()}`}>
+                              <div
+                                style={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '12px',
+                                  cursor: 'pointer',
+                                  transition: 'opacity 0.2s',
+                                }}
+                                onClick={(e) => e.stopPropagation()}
+                                onMouseEnter={(e) => e.currentTarget.style.opacity = '0.7'}
+                                onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+                              >
+                                <span style={{
+                                  fontFamily: "'Questrial', sans-serif",
+                                  fontSize: '30px',
+                                  color: '#000000',
+                                }}>
+                                  Kunjungi
+                                </span>
+                                <NorthEastArrowIcon size={36} />
+                              </div>
+                            </Link>
+                          </div>
+
+                          <div style={{
+                            width: '150px',
+                            display: 'flex',
+                            justifyContent: 'flex-end',
+                            transition: 'transform 0.3s ease',
+                            transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)',
+                          }}>
+                            <svg width="90" height="90" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M9 18L15 12L9 6" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                          </div>
+                        </div>
+
+                        {isOpen && (
+                          <div style={{
+                            padding: '40px 0 60px 190px',
+                            borderBottom: '1px solid rgba(0,0,0,0.1)',
+                          }}>
+                            <div style={{
+                              fontFamily: "'Questrial', sans-serif",
+                              fontSize: '50px',
+                              fontWeight: '400',
+                              color: '#000000',
+                              letterSpacing: '-0.01em',
+                              lineHeight: '1.3',
+                              marginBottom: '50px',
+                            }}>
+                              {community.description}
+                            </div>
+
+                            <div style={{
+                              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                              fontSize: '30px',
+                              fontWeight: '400',
+                              color: '#000000',
+                              marginBottom: '30px',
+                            }}>
+                              MEMBERS ({memberNames.length})
+                            </div>
+                            
+                            {memberNames.length > 0 ? (
+                              <div style={{
+                                display: 'flex',
+                                flexWrap: 'wrap',
+                                gap: '20px',
+                                marginBottom: '40px',
+                              }}>
+                                {memberNames.map((name, memberIdx) => (
+                                  <div key={memberIdx} style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '12px',
+                                    padding: '10px 24px',
+                                    backgroundColor: 'rgba(0,0,0,0.05)',
+                                    borderRadius: '60px',
+                                  }}>
+                                    <div style={{
+                                      width: '40px',
+                                      height: '40px',
+                                      borderRadius: '50%',
+                                      backgroundColor: '#000000',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      color: '#ffffff',
+                                      fontSize: '20px',
+                                      fontWeight: '500',
+                                    }}>
+                                      {name.charAt(0).toUpperCase()}
+                                    </div>
+                                    <span style={{
+                                      fontFamily: "'Questrial', sans-serif",
+                                      fontSize: '24px',
+                                      color: '#000000',
+                                    }}>
+                                      {name}
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <div style={{
+                                fontFamily: "'Questrial', sans-serif",
+                                fontSize: '24px',
+                                color: '#999999',
+                                padding: '40px 0',
+                                textAlign: 'center',
+                              }}>
+                                Belum ada member yang bergabung. Jadilah yang pertama!
+                              </div>
+                            )}
+                            
+                            {user ? (
+                              <button
+                                onClick={() => joinCommunity(community.id, community.name)}
+                                style={{
+                                  marginTop: '20px',
+                                  padding: '14px 32px',
+                                  backgroundColor: '#000000',
+                                  color: '#ffffff',
+                                  border: 'none',
+                                  borderRadius: '60px',
+                                  cursor: 'pointer',
+                                  fontFamily: "'Questrial', sans-serif",
+                                  fontSize: '20px',
+                                  fontWeight: '500',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '12px',
+                                  transition: 'opacity 0.2s',
+                                }}
+                                onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
+                                onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+                              >
+                                <span>JOIN COMMUNITY</span>
+                                <NorthEastArrowIcon size={20} />
+                              </button>
+                            ) : (
+                              <div style={{
+                                marginTop: '20px',
+                                padding: '20px',
+                                backgroundColor: 'rgba(0,0,0,0.05)',
+                                borderRadius: '16px',
+                                textAlign: 'center',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '16px',
+                              }}>
+                                <span style={{
+                                  fontFamily: "'Questrial', sans-serif",
+                                  fontSize: '20px',
+                                  color: '#666666',
+                                }}>
+                                  Silakan login terlebih dahulu untuk bergabung ke komunitas
+                                </span>
+                                <button
+                                  onClick={() => setShowAuthModal(true)}
+                                  style={{
+                                    padding: '8px 24px',
+                                    backgroundColor: '#000000',
+                                    color: '#ffffff',
+                                    border: 'none',
+                                    borderRadius: '60px',
+                                    cursor: 'pointer',
+                                    fontFamily: "'Questrial', sans-serif",
+                                    fontSize: '16px',
+                                    fontWeight: '500',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '8px',
+                                  }}
+                                >
+                                  <span>LOGIN</span>
+                                  <NorthEastArrowIcon size={16} />
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* DONATION SECTION - UPDATED WITH PDF DOWNLOAD AND CLICKABLE SCHEDULE */}
+            {!isLoading && (
+              <div
+                ref={donationSectionRef}
+                style={{
+                  width: '100%',
+                  backgroundColor: '#ffffff',
+                  padding: '120px 80px 200px 80px',
+                  boxSizing: 'border-box',
+                  marginTop: '0px',
+                }}
+              >
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'flex-end',
+                  marginBottom: '80px',
+                  borderBottom: '1px solid rgba(0,0,0,0.1)',
+                  paddingBottom: '40px',
+                }}>
+                  <div style={{
+                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                    fontSize: '300px',
+                    fontWeight: '400',
+                    color: '#000000',
+                    letterSpacing: '-0.02em',
+                    lineHeight: '0.9',
+                    textTransform: 'uppercase',
+                  }}>
+                    DONATUR
+                  </div>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '30px',
+                  }}>
+                    <div style={{
+                      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                      fontSize: '80px',
+                      fontWeight: '400',
+                      color: '#000000',
+                      lineHeight: '1',
+                    }}>
+                      ({donations.length})
+                    </div>
+                    <div>
+                      <svg width="100" height="100" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+
+                {donations && donations.length > 0 ? (
+                  <div>
+                    {donations.slice(0, 1).map((donation, idx) => {
+                      let donationDate = new Date();
+                      if (donation.createdAt) {
+                        if (typeof donation.createdAt.toDate === 'function') {
+                          donationDate = donation.createdAt.toDate();
+                        } else if (donation.createdAt.seconds) {
+                          donationDate = new Date(donation.createdAt.seconds * 1000);
+                        } else {
+                          donationDate = new Date(donation.createdAt);
+                        }
+                      }
+                      
+                      const donorName = 'Farid Ardiansyah';
+                      const sembakoItems = [
+                        { name: "Beras 5kg", price: 65000 },
+                        { name: "Minyak Goreng 1L", price: 15000 },
+                        { name: "Gula Pasir 1kg", price: 14000 },
+                        { name: "Telur 1kg", price: 6000 }
+                      ];
+                      const totalSembako = sembakoItems.reduce((sum, item) => sum + item.price, 0);
+                      
+                      return (
+                        <div key={donation.id} style={{
+                          display: 'flex',
+                          gap: '80px',
+                          marginBottom: '100px',
+                          alignItems: 'flex-start',
+                        }}>
+                          <div style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'flex-start',
+                            gap: '20px',
+                            minWidth: '200px',
+                          }}>
+                            <div style={{
+                              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                              fontSize: '180px',
+                              fontWeight: '400',
+                              color: '#000000',
+                              letterSpacing: '-0.02em',
+                              lineHeight: '1',
+                            }}>
+                              {String(idx + 1).padStart(2, '0')}
+                            </div>
+                            {/* Clickable date that opens schedule detail */}
+                            <div 
+                              style={{
+                                display: 'inline-block',
+                                padding: '12px 24px',
+                                backgroundColor: '#2563EB',
+                                borderRadius: '40px',
+                                marginTop: '10px',
+                                cursor: 'pointer',
+                                transition: 'transform 0.2s, box-shadow 0.2s',
+                              }}
+                              onClick={() => setShowScheduleDetail(!showScheduleDetail)}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.transform = 'scale(1.05)';
+                                e.currentTarget.style.boxShadow = '0 8px 20px rgba(37,99,235,0.3)';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.transform = 'scale(1)';
+                                e.currentTarget.style.boxShadow = 'none';
+                              }}
+                            >
+                              <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '12px',
+                              }}>
+                                <div style={{
+                                  fontFamily: "'Questrial', sans-serif",
+                                  fontSize: '18px',
+                                  fontWeight: '600',
+                                  color: '#ffffff',
+                                  letterSpacing: '0.5px',
+                                }}>
+                                  30 Mei 2026
+                                </div>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <path d="M9 18L15 12L9 6" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div style={{ flex: 1 }}>
+                            <div style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              flexWrap: 'wrap',
+                              gap: '20px',
+                              marginBottom: '15px',
+                            }}>
+                              <div style={{
+                                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                                fontSize: '50px',
+                                fontWeight: '400',
+                                color: '#000000',
+                                letterSpacing: '-0.02em',
+                              }}>
+                                Panti Asuhan Yatim & Dhuafa Al-Farid
+                              </div>
+                              <Link href="https://twitter.com/search?q=%23hattrickjuara&src=typed_query" target="_blank">
+                                <div style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '8px',
+                                  padding: '8px 20px',
+                                  backgroundColor: '#1DA1F2',
+                                  borderRadius: '60px',
+                                  cursor: 'pointer',
+                                  transition: 'transform 0.2s, opacity 0.2s',
+                                }}
+                                onMouseEnter={(e) => {
+                                  e.currentTarget.style.transform = 'scale(1.05)';
+                                  e.currentTarget.style.opacity = '0.9';
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.transform = 'scale(1)';
+                                  e.currentTarget.style.opacity = '1';
+                                }}>
+                                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z" fill="white" stroke="white" strokeWidth="2"/>
+                                  </svg>
+                                  <span style={{
+                                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                                    fontSize: '20px',
+                                    fontWeight: '500',
+                                    color: '#ffffff',
+                                  }}>#hattrickjuara</span>
+                                </div>
+                              </Link>
+                            </div>
+
+                            <div style={{
+                              fontFamily: "'Questrial', sans-serif",
+                              fontSize: '24px',
+                              color: '#000000',
+                              marginBottom: '30px',
+                            }}>
+                              Jakarta, Indonesia
+                            </div>
+
+                            <div style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '40px',
+                              marginBottom: '40px',
+                              flexWrap: 'wrap',
+                            }}>
+                              <div style={{
+                                fontFamily: "'Questrial', sans-serif",
+                                fontSize: '30px',
+                                color: '#000000',
+                              }}>
+                                {donationDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+                              </div>
+                              <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '12px',
+                                position: 'relative',
+                              }}>
+                                <div style={{
+                                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                                  fontSize: '30px',
+                                  fontWeight: '400',
+                                  color: '#000000',
+                                }}>
+                                  {donorName}
+                                </div>
+                                <VerifiedBadge size={30} showTooltip={true} />
+                              </div>
+                            </div>
+
+                            <div style={{
+                              display: 'flex',
+                              alignItems: 'flex-start',
+                              gap: '30px',
+                              marginBottom: '40px',
+                            }}>
+                              <div style={{
+                                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                                fontSize: '50px',
+                                fontWeight: '400',
+                                color: '#000000',
+                                letterSpacing: '-0.02em',
+                                lineHeight: '1.3',
+                                flex: 1,
+                              }}>
+                                Sebagai rasa terima kasih kepada Allah SWT<br />
+                                atas kebahagiaan PERSIB Juara Hattrick<br />
+                                Liga 1 Indonesia, 23 Mei 2026
+                              </div>
+                              <div style={{ flexShrink: 0 }}>
+                                <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                              </div>
+                            </div>
+
+                            <div style={{
+                              marginBottom: '50px',
+                              padding: '30px',
+                              backgroundColor: '#f8f8f8',
+                              borderRadius: '20px',
+                            }}>
+                              <div style={{
+                                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                                fontSize: '28px',
+                                fontWeight: '500',
+                                color: '#000000',
+                                marginBottom: '20px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '15px',
+                              }}>
+                                <span>💰</span>
+                                <span>Donasi Rp 100.000</span>
+                                <span style={{ fontSize: '20px', color: '#666666', fontWeight: '400' }}>
+                                  (Total Sembako)
+                                </span>
+                              </div>
+                              
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                {sembakoItems.map((item, itemIdx) => (
+                                  <div key={itemIdx} style={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    padding: '12px 0',
+                                    borderBottom: itemIdx < sembakoItems.length - 1 ? '1px solid #e0e0e0' : 'none',
+                                  }}>
+                                    <div style={{ fontFamily: "'Questrial', sans-serif", fontSize: '20px', color: '#333333' }}>
+                                      {item.name}
+                                    </div>
+                                    <div style={{ fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", fontSize: '20px', fontWeight: '500', color: '#000000' }}>
+                                      Rp {item.price.toLocaleString('id-ID')}
+                                    </div>
+                                  </div>
+                                ))}
+                                
+                                <div style={{
+                                  display: 'flex',
+                                  justifyContent: 'space-between',
+                                  alignItems: 'center',
+                                  padding: '15px 0 5px 0',
+                                  marginTop: '5px',
+                                  borderTop: '2px solid #000000',
+                                }}>
+                                  <div style={{ fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", fontSize: '22px', fontWeight: '600', color: '#000000' }}>
+                                    TOTAL
+                                  </div>
+                                  <div style={{ fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", fontSize: '22px', fontWeight: '700', color: '#000000' }}>
+                                    Rp {totalSembako.toLocaleString('id-ID')}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Schedule Detail that appears when date is clicked */}
+                            {showScheduleDetail && (
+                              <div style={{
+                                marginBottom: '40px',
+                                padding: '30px',
+                                backgroundColor: '#1a1a1a',
+                                borderRadius: '20px',
+                                animation: 'modalFadeIn 0.3s ease',
+                              }}>
+                                <div style={{
+                                  display: 'flex',
+                                  justifyContent: 'space-between',
+                                  alignItems: 'center',
+                                  marginBottom: '24px',
+                                }}>
+                                  <div style={{
+                                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                                    fontSize: '28px',
+                                    fontWeight: '500',
+                                    color: '#ffffff',
+                                  }}>
+                                    📋 Rundown Kegiatan - 30 Mei 2026
+                                  </div>
+                                  <button
+                                    onClick={() => setShowScheduleDetail(false)}
+                                    style={{
+                                      background: 'none',
+                                      border: 'none',
+                                      color: '#ffffff',
+                                      fontSize: '24px',
+                                      cursor: 'pointer',
+                                    }}
+                                  >
+                                    ✕
+                                  </button>
+                                </div>
+                                <div>
+                                  {scheduleData.map((item, idx) => (
+                                    <ScheduleItem
+                                      key={idx}
+                                      time={item.time}
+                                      activity={item.activity}
+                                      isLast={idx === scheduleData.length - 1}
+                                    />
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* 4 FOTO */}
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px' }}>
+                              {[
+                                "/images/lkhh.jpg",
+                                "/images/ai.jpg",
+                                "/images/lkhh.jpg",
+                                "/images/ai.jpg"
+                              ].map((photo, photoIdx) => (
+                                <div
+                                  key={photoIdx}
+                                  style={{
+                                    aspectRatio: '3/4',
+                                    backgroundColor: '#f0f0f0',
+                                    borderRadius: '16px',
+                                    overflow: 'hidden',
+                                    position: 'relative',
+                                    cursor: 'pointer',
+                                    transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+                                  }}
+                                  onClick={() => setSelectedDonation(donation)}
+                                  onMouseEnter={(e) => {
+                                    e.currentTarget.style.transform = 'translateY(-8px)';
+                                    e.currentTarget.style.boxShadow = '0 15px 30px rgba(0,0,0,0.15)';
+                                  }}
+                                  onMouseLeave={(e) => {
+                                    e.currentTarget.style.transform = 'translateY(0)';
+                                    e.currentTarget.style.boxShadow = 'none';
+                                  }}
+                                >
+                                  <Image src={photo} alt={`Donation photo ${photoIdx + 1}`} fill style={{ objectFit: 'cover' }} />
+                                </div>
+                              ))}
+                            </div>
+
+                            {/* Download PDF Button */}
+                            <div style={{ marginTop: '40px', display: 'flex', justifyContent: 'flex-end' }}>
+                              <DownloadPDFButton donation={donation} />
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 ) : (
                   <div style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '24px',
-                    color: '#999999',
-                    padding: '40px 0',
                     textAlign: 'center',
+                    padding: '100px',
+                    backgroundColor: '#f5f5f5',
+                    borderRadius: '24px',
                   }}>
-                    Belum ada member yang bergabung. Jadilah yang pertama!
+                    <div style={{ fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", fontSize: '60px', fontWeight: '400', color: '#000000', marginBottom: '20px' }}>✨</div>
+                    <div style={{ fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", fontSize: '32px', fontWeight: '400', color: '#000000', marginBottom: '15px' }}>Belum Ada Donasi</div>
+                    <div style={{ fontFamily: "'Questrial', sans-serif", fontSize: '18px', color: '#666666' }}>Jadilah donatur pertama</div>
                   </div>
                 )}
-                
-                {/* Tombol Join Community dengan Arrow */}
-                {user ? (
-                  <button
-                    onClick={() => joinCommunity(community.id, community.name)}
-                    style={{
-                      marginTop: '20px',
-                      padding: '14px 32px',
-                      backgroundColor: '#000000',
-                      color: '#ffffff',
-                      border: 'none',
-                      borderRadius: '60px',
-                      cursor: 'pointer',
-                      fontFamily: "'Questrial', sans-serif",
-                      fontSize: '20px',
-                      fontWeight: '500',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '12px',
-                      transition: 'opacity 0.2s',
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
-                    onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
-                  >
-                    <span>JOIN COMMUNITY</span>
-                    <NorthEastArrowIcon size={20} />
-                  </button>
-                ) : (
-                  <div style={{
-                    marginTop: '20px',
-                    padding: '20px',
-                    backgroundColor: 'rgba(0,0,0,0.05)',
-                    borderRadius: '16px',
-                    textAlign: 'center',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '16px',
-                  }}>
-                    <span style={{
-                      fontFamily: "'Questrial', sans-serif",
-                      fontSize: '20px',
-                      color: '#666666',
-                    }}>
-                      Silakan login terlebih dahulu untuk bergabung ke komunitas
-                    </span>
+
+                <div style={{ display: 'flex', justifyContent: 'center', marginTop: '80px' }}>
+                  <Link href="/donatur">
                     <button
-                      onClick={() => setShowAuthModal(true)}
                       style={{
-                        padding: '8px 24px',
+                        padding: '20px 70px',
                         backgroundColor: '#000000',
                         color: '#ffffff',
                         border: 'none',
                         borderRadius: '60px',
                         cursor: 'pointer',
-                        fontFamily: "'Questrial', sans-serif",
-                        fontSize: '16px',
+                        fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                        fontSize: '24px',
                         fontWeight: '500',
                         display: 'inline-flex',
                         alignItems: 'center',
-                        gap: '8px',
+                        gap: '15px',
+                        transition: 'transform 0.2s, opacity 0.2s',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = 'scale(1.02)';
+                        e.currentTarget.style.opacity = '0.9';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = 'scale(1)';
+                        e.currentTarget.style.opacity = '1';
                       }}
                     >
-                      <span>LOGIN</span>
-                      <NorthEastArrowIcon size={16} />
+                      <span>DONASI SEKARANG</span>
+                      <NorthEastArrowIcon size={28} />
                     </button>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        );
-      })}
-    </div>
-
-  </div>
-)}
-
-{/* DONATION SECTION - DENGAN VERIFIED BADGE BARU + HOVER TOOLTIP */}
-{!isLoading && (
-  <div
-    ref={donationSectionRef}
-    style={{
-      width: '100%',
-      backgroundColor: '#ffffff',
-      padding: '120px 80px 200px 80px',
-      boxSizing: 'border-box',
-      marginTop: '0px',
-    }}
-  >
-    {/* JUDUL SECTION */}
-    <div style={{
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'flex-end',
-      marginBottom: '80px',
-      borderBottom: '1px solid rgba(0,0,0,0.1)',
-      paddingBottom: '40px',
-    }}>
-      <div style={{
-        fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-        fontSize: '300px',
-        fontWeight: '400',
-        color: '#000000',
-        letterSpacing: '-0.02em',
-        lineHeight: '0.9',
-        textTransform: 'uppercase',
-      }}>
-        DONATUR
-      </div>
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '30px',
-      }}>
-        <div style={{
-          fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-          fontSize: '80px',
-          fontWeight: '400',
-          color: '#000000',
-          lineHeight: '1',
-        }}>
-          ({donations.length})
-        </div>
-        <div>
-          <svg width="100" height="100" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </div>
-      </div>
-    </div>
-
-    {/* LOOP DONASI */}
-    {donations && donations.length > 0 ? (
-      <div>
-        {donations.slice(0, 1).map((donation, idx) => {
-          let donationDate = new Date();
-          if (donation.createdAt) {
-            if (typeof donation.createdAt.toDate === 'function') {
-              donationDate = donation.createdAt.toDate();
-            } else if (donation.createdAt.seconds) {
-              donationDate = new Date(donation.createdAt.seconds * 1000);
-            } else {
-              donationDate = new Date(donation.createdAt);
-            }
-          }
-          
-          const donorName = 'Farid Ardiansyah';
-          const sembakoItems = [
-            { name: "Beras 5kg", price: 65000 },
-            { name: "Minyak Goreng 1L", price: 15000 },
-            { name: "Gula Pasir 1kg", price: 14000 },
-            { name: "Telur 1kg", price: 6000 }
-          ];
-          const totalSembako = sembakoItems.reduce((sum, item) => sum + item.price, 0);
-          
-          return (
-            <div key={donation.id} style={{
-              display: 'flex',
-              gap: '80px',
-              marginBottom: '100px',
-              alignItems: 'flex-start',
-            }}>
-              {/* ANGKA 01 + TANGGAL */}
-              <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'flex-start',
-                gap: '20px',
-                minWidth: '200px',
-              }}>
-                <div style={{
-                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                  fontSize: '180px',
-                  fontWeight: '400',
-                  color: '#000000',
-                  letterSpacing: '-0.02em',
-                  lineHeight: '1',
-                }}>
-                  {String(idx + 1).padStart(2, '0')}
-                </div>
-                <div style={{
-                  display: 'inline-block',
-                  padding: '12px 24px',
-                  backgroundColor: '#2563EB',
-                  borderRadius: '40px',
-                  marginTop: '10px',
-                }}>
-                  <div style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '18px',
-                    fontWeight: '600',
-                    color: '#ffffff',
-                    letterSpacing: '0.5px',
-                  }}>
-                    30 Mei 2026
-                  </div>
-                </div>
-              </div>
-
-              {/* KONTEN DONASI */}
-              <div style={{ flex: 1 }}>
-                {/* Nama Panti + Hashtag */}
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  flexWrap: 'wrap',
-                  gap: '20px',
-                  marginBottom: '15px',
-                }}>
-                  <div style={{
-                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                    fontSize: '50px',
-                    fontWeight: '400',
-                    color: '#000000',
-                    letterSpacing: '-0.02em',
-                  }}>
-                    Panti Asuhan Yatim & Dhuafa Al-Farid
-                  </div>
-                  <Link href="https://twitter.com/search?q=%23hattrickjuara&src=typed_query" target="_blank">
-                    <div style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                      padding: '8px 20px',
-                      backgroundColor: '#1DA1F2',
-                      borderRadius: '60px',
-                      cursor: 'pointer',
-                      transition: 'transform 0.2s, opacity 0.2s',
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = 'scale(1.05)';
-                      e.currentTarget.style.opacity = '0.9';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = 'scale(1)';
-                      e.currentTarget.style.opacity = '1';
-                    }}>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z" fill="white" stroke="white" strokeWidth="2"/>
-                      </svg>
-                      <span style={{
-                        fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                        fontSize: '20px',
-                        fontWeight: '500',
-                        color: '#ffffff',
-                      }}>#hattrickjuara</span>
-                    </div>
                   </Link>
                 </div>
+              </div>
+            )}
 
-                {/* Lokasi */}
+            {/* MODAL UNTUK FOTO - dengan judul Galeri Donasi dan Reply Komentar yang sudah diperbaiki */}
+            {selectedDonation && (
+              <div style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                backgroundColor: 'rgba(0,0,0,0.95)',
+                backdropFilter: 'blur(10px)',
+                zIndex: 20003,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '40px',
+                boxSizing: 'border-box',
+              }} onClick={() => setSelectedDonation(null)}>
                 <div style={{
-                  fontFamily: "'Questrial', sans-serif",
-                  fontSize: '24px',
-                  color: '#000000',
-                  marginBottom: '30px',
-                }}>
-                  Jakarta, Indonesia
-                </div>
-
-                {/* Tanggal dan Nama Donatur + VERIFIED BADGE + TOOLTIP */}
-                <div style={{
+                  maxWidth: '90%',
+                  maxHeight: '90%',
+                  width: '100%',
+                  maxWidth: '1200px',
+                  backgroundColor: '#ffffff',
+                  borderRadius: '24px',
+                  overflow: 'hidden',
                   display: 'flex',
-                  alignItems: 'center',
-                  gap: '40px',
-                  marginBottom: '40px',
-                  flexWrap: 'wrap',
-                }}>
-                  <div style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '30px',
-                    color: '#000000',
-                  }}>
-                    {donationDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
-                  </div>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px',
-                    position: 'relative',
-                  }}>
-                    <div style={{
-                      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                      fontSize: '30px',
-                      fontWeight: '400',
-                      color: '#000000',
-                    }}>
-                      {donorName}
-                    </div>
-                    
-                    {/* ✅ VERIFIED BADGE BARU + HOVER TOOLTIP "akun resmi" */}
-                    <div style={{
-                      position: 'relative',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      cursor: 'help',
-                    }}>
-                      <svg 
-                        width="36" 
-                        height="36" 
-                        viewBox="0 0 24 24" 
-                        xmlns="http://www.w3.org/2000/svg"
-                        style={{ display: 'inline-block', verticalAlign: 'middle' }}
-                      >
-                        <path 
-                          fill="#1D9BF0" 
-                          d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.71-3.998-3.818-3.998-.47 0-.92.084-1.336.25C14.818 2.415 13.51 1.5 12 1.5s-2.816.917-3.437 2.25c-.415-.165-.866-.25-1.336-.25-2.11 0-3.818 1.79-3.818 4 0 .495.083.965.238 1.4-1.272.65-2.147 2.018-2.147 3.6 0 1.495.782 2.798 1.942 3.486-.02.17-.032.34-.032.514 0 2.21 1.708 4 3.818 4 .47 0 .92-.086 1.335-.25.62 1.334 1.926 2.25 3.437 2.25 1.512 0 2.818-.916 3.437-2.25.415.163.865.248 1.336.248 2.11 0 3.818-1.79 3.818-4 0-.174-.012-.344-.033-.513 1.158-.687 1.943-1.99 1.943-3.484z"
-                        />
-                        <path 
-                          fill="#000000" 
-                          d="M9.5 16.5L5 12l1.5-1.5 3 3 7-7 1.5 1.5-8.5 8.5z"
-                        />
-                      </svg>
-                      
-                      {/* Tooltip "akun resmi" */}
-                      <div style={{
-                        position: 'absolute',
-                        bottom: '100%',
-                        left: '50%',
-                        transform: 'translateX(-50%) translateY(-8px)',
-                        backgroundColor: '#000000',
-                        color: '#ffffff',
-                        padding: '6px 14px',
-                        borderRadius: '8px',
-                        fontSize: '12px',
-                        fontFamily: "'Questrial', sans-serif",
-                        fontWeight: '500',
-                        whiteSpace: 'nowrap',
-                        opacity: '0',
-                        visibility: 'hidden',
-                        transition: 'opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease',
-                        pointerEvents: 'none',
-                        zIndex: '100',
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.opacity = '1';
-                        e.currentTarget.style.visibility = 'visible';
-                        e.currentTarget.style.transform = 'translateX(-50%) translateY(-12px)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.opacity = '0';
-                        e.currentTarget.style.visibility = 'hidden';
-                        e.currentTarget.style.transform = 'translateX(-50%) translateY(-8px)';
-                      }}
-                      >
-                        akun resmi
-                        {/* Arrow kecil di bawah tooltip */}
-                        <div style={{
-                          position: 'absolute',
-                          top: '100%',
-                          left: '50%',
-                          transform: 'translateX(-50%)',
-                          width: '0',
-                          height: '0',
-                          borderLeft: '5px solid transparent',
-                          borderRight: '5px solid transparent',
-                          borderTop: '5px solid #000000',
-                        }}></div>
-                      </div>
-                    </div>
-                    
-                  </div>
-                </div>
-
-                {/* DESKRIPSI */}
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  gap: '30px',
-                  marginBottom: '40px',
-                }}>
-                  <div style={{
-                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                    fontSize: '50px',
-                    fontWeight: '400',
-                    color: '#000000',
-                    letterSpacing: '-0.02em',
-                    lineHeight: '1.3',
-                    flex: 1,
-                  }}>
-                    Sebagai rasa terima kasih kepada Allah SWT<br />
-                    atas kebahagiaan PERSIB Juara Hattrick<br />
-                    Liga 1 Indonesia, 23 Mei 2026
-                  </div>
-                  <div style={{ flexShrink: 0 }}>
-                    <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </div>
-                </div>
-
-                {/* RINCIAN DONASI */}
-                <div style={{
-                  marginBottom: '50px',
-                  padding: '30px',
-                  backgroundColor: '#f8f8f8',
-                  borderRadius: '20px',
-                }}>
-                  <div style={{
-                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                    fontSize: '28px',
-                    fontWeight: '500',
-                    color: '#000000',
-                    marginBottom: '20px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '15px',
-                  }}>
-                    <span>💰</span>
-                    <span>Donasi Rp 100.000</span>
-                    <span style={{ fontSize: '20px', color: '#666666', fontWeight: '400' }}>
-                      (Total Sembako)
-                    </span>
-                  </div>
+                  flexDirection: 'column',
+                }} onClick={(e) => e.stopPropagation()}>
                   
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    {sembakoItems.map((item, itemIdx) => (
-                      <div key={itemIdx} style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        padding: '12px 0',
-                        borderBottom: itemIdx < sembakoItems.length - 1 ? '1px solid #e0e0e0' : 'none',
-                      }}>
-                        <div style={{ fontFamily: "'Questrial', sans-serif", fontSize: '20px', color: '#333333' }}>
-                          {item.name}
-                        </div>
-                        <div style={{ fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", fontSize: '20px', fontWeight: '500', color: '#000000' }}>
-                          Rp {item.price.toLocaleString('id-ID')}
-                        </div>
-                      </div>
-                    ))}
-                    
+                  <div style={{
+                    padding: '30px 30px 20px 30px',
+                    borderBottom: '1px solid #e0e0e0',
+                  }}>
                     <div style={{
                       display: 'flex',
-                      justifyContent: 'space-between',
                       alignItems: 'center',
-                      padding: '15px 0 5px 0',
-                      marginTop: '5px',
-                      borderTop: '2px solid #000000',
+                      justifyContent: 'space-between',
+                      flexWrap: 'wrap',
+                      gap: '20px',
                     }}>
-                      <div style={{ fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", fontSize: '22px', fontWeight: '600', color: '#000000' }}>
-                        TOTAL
+                      <div>
+                        <div style={{
+                          fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                          fontSize: '36px',
+                          fontWeight: '500',
+                          color: '#000000',
+                          letterSpacing: '-0.02em',
+                        }}>
+                          Galeri Donasi
+                        </div>
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '12px',
+                          marginTop: '8px',
+                        }}>
+                          <span style={{
+                            fontFamily: "'Questrial', sans-serif",
+                            fontSize: '18px',
+                            color: '#000000',
+                          }}>
+                            Farid Ardiansyah
+                          </span>
+                          <VerifiedBadge size={20} showTooltip={true} />
+                          <span style={{
+                            fontFamily: "'Questrial', sans-serif",
+                            fontSize: '16px',
+                            color: '#999999',
+                          }}>
+                            (Donatur)
+                          </span>
+                        </div>
                       </div>
-                      <div style={{ fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", fontSize: '22px', fontWeight: '700', color: '#000000' }}>
-                        Rp {totalSembako.toLocaleString('id-ID')}
-                      </div>
+                      <button
+                        onClick={() => setSelectedDonation(null)}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          fontSize: '32px',
+                          cursor: 'pointer',
+                          color: '#000000',
+                          padding: '8px',
+                        }}
+                      >
+                        ✕
+                      </button>
                     </div>
                   </div>
-                </div>
 
-                {/* 4 FOTO */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px' }}>
-                  {[
-                    "/images/lkhh.jpg",
-                    "/images/ai.jpg",
-                    "/images/lkhh.jpg",
-                    "/images/ai.jpg"
-                  ].map((photo, photoIdx) => (
-                    <div
-                      key={photoIdx}
-                      style={{
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(4, 1fr)',
+                    gap: '20px',
+                    padding: '30px',
+                    backgroundColor: '#f5f5f5',
+                  }}>
+                    {[
+                      "/images/lkhh.jpg",
+                      "/images/ai.jpg",
+                      "/images/lkhh.jpg",
+                      "/images/ai.jpg"
+                    ].map((photo, idx) => (
+                      <div key={idx} style={{
+                        position: 'relative',
+                        width: '100%',
                         aspectRatio: '3/4',
-                        backgroundColor: '#f0f0f0',
                         borderRadius: '16px',
                         overflow: 'hidden',
-                        position: 'relative',
-                        cursor: 'pointer',
-                        transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-                      }}
-                      onClick={() => setSelectedDonation(donation)}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.transform = 'translateY(-8px)';
-                        e.currentTarget.style.boxShadow = '0 15px 30px rgba(0,0,0,0.15)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.transform = 'translateY(0)';
-                        e.currentTarget.style.boxShadow = 'none';
-                      }}
-                    >
-                      <Image src={photo} alt={`Donation photo ${photoIdx + 1}`} fill style={{ objectFit: 'cover' }} />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    ) : (
-      <div style={{
-        textAlign: 'center',
-        padding: '100px',
-        backgroundColor: '#f5f5f5',
-        borderRadius: '24px',
-      }}>
-        <div style={{ fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", fontSize: '60px', fontWeight: '400', color: '#000000', marginBottom: '20px' }}>✨</div>
-        <div style={{ fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", fontSize: '32px', fontWeight: '400', color: '#000000', marginBottom: '15px' }}>Belum Ada Donasi</div>
-        <div style={{ fontFamily: "'Questrial', sans-serif", fontSize: '18px', color: '#666666' }}>Jadilah donatur pertama</div>
-      </div>
-    )}
-
-    {/* TOMBOL DONASI */}
-    <div style={{ display: 'flex', justifyContent: 'center', marginTop: '80px' }}>
-      <Link href="/donatur">
-        <button
-          style={{
-            padding: '20px 70px',
-            backgroundColor: '#000000',
-            color: '#ffffff',
-            border: 'none',
-            borderRadius: '60px',
-            cursor: 'pointer',
-            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-            fontSize: '24px',
-            fontWeight: '500',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '15px',
-            transition: 'transform 0.2s, opacity 0.2s',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'scale(1.02)';
-            e.currentTarget.style.opacity = '0.9';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'scale(1)';
-            e.currentTarget.style.opacity = '1';
-          }}
-        >
-          <span>DONASI SEKARANG</span>
-          <NorthEastArrowIcon size={28} />
-        </button>
-      </Link>
-    </div>
-  </div>
-)}
-
-
-
-
-
-
-            
-            
-            
-
-{/* MODAL UNTUK FOTO - dengan judul Galeri Donasi */}
-{selectedDonation && (
-  <div style={{
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    width: '100%',
-    height: '100%',
-    backgroundColor: 'rgba(0,0,0,0.95)',
-    backdropFilter: 'blur(10px)',
-    zIndex: 20003,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: '40px',
-    boxSizing: 'border-box',
-  }} onClick={() => setSelectedDonation(null)}>
-    <div style={{
-      maxWidth: '90%',
-      maxHeight: '90%',
-      width: '100%',
-      maxWidth: '1200px',
-      backgroundColor: '#ffffff',
-      borderRadius: '24px',
-      overflow: 'hidden',
-      display: 'flex',
-      flexDirection: 'column',
-    }} onClick={(e) => e.stopPropagation()}>
-      
-      {/* Header Modal - Judul Galeri Donasi */}
-      <div style={{
-        padding: '30px 30px 20px 30px',
-        borderBottom: '1px solid #e0e0e0',
-      }}>
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: '20px',
-        }}>
-          <div>
-            <div style={{
-              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-              fontSize: '36px',
-              fontWeight: '500',
-              color: '#000000',
-              letterSpacing: '-0.02em',
-            }}>
-              Galeri Donasi
-            </div>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px',
-              marginTop: '8px',
-            }}>
-              <span style={{
-                fontFamily: "'Questrial', sans-serif",
-                fontSize: '18px',
-                color: '#000000',
-              }}>
-                Farid Ardiansyah
-              </span>
-              <VerifiedBadge size={20} />
-              <span style={{
-                fontFamily: "'Questrial', sans-serif",
-                fontSize: '16px',
-                color: '#999999',
-              }}>
-                (Donatur)
-              </span>
-            </div>
-          </div>
-          <button
-            onClick={() => setSelectedDonation(null)}
-            style={{
-              background: 'none',
-              border: 'none',
-              fontSize: '32px',
-              cursor: 'pointer',
-              color: '#000000',
-              padding: '8px',
-            }}
-          >
-            ✕
-          </button>
-        </div>
-      </div>
-
-      {/* Grid Foto Portrait - 4 foto, aspect ratio 3/4 */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(4, 1fr)',
-        gap: '20px',
-        padding: '30px',
-        backgroundColor: '#f5f5f5',
-      }}>
-        {[
-          "/images/lkhh.jpg",
-          "/images/ai.jpg",
-          "/images/lkhh.jpg",
-          "/images/ai.jpg"
-        ].map((photo, idx) => (
-          <div key={idx} style={{
-            position: 'relative',
-            width: '100%',
-            aspectRatio: '3/4',
-            borderRadius: '16px',
-            overflow: 'hidden',
-            backgroundColor: '#e0e0e0',
-          }}>
-            <Image
-              src={photo}
-              alt={`Donation photo ${idx + 1}`}
-              fill
-              style={{ objectFit: 'cover' }}
-            />
-          </div>
-        ))}
-      </div>
-
-      {/* Komentar di dalam Modal - FIXED tanpa serverTimestamp */}
-      <div style={{
-        padding: '30px',
-        borderTop: '1px solid #e0e0e0',
-        backgroundColor: '#ffffff',
-      }}>
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          marginBottom: '20px',
-        }}>
-          <div style={{
-            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-            fontSize: '20px',
-            fontWeight: '500',
-            color: '#000000',
-          }}>
-            KOMENTAR ({selectedDonation.comments?.length || 0})
-          </div>
-          <MessageIcon size={22} />
-        </div>
-
-        {/* Daftar Komentar */}
-        {selectedDonation.comments && selectedDonation.comments.length > 0 && (
-          <div style={{
-            marginBottom: '20px',
-            maxHeight: '200px',
-            overflowY: 'auto',
-          }}>
-            {selectedDonation.comments.map((comment) => (
-              <div key={comment.id} style={{
-                display: 'flex',
-                alignItems: 'flex-start',
-                gap: '12px',
-                padding: '12px 0',
-                borderBottom: '1px solid #f0f0f0',
-              }}>
-                <div style={{
-                  width: '36px',
-                  height: '36px',
-                  borderRadius: '50%',
-                  backgroundColor: '#000000',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: '#ffffff',
-                  fontSize: '16px',
-                  fontWeight: '500',
-                  flexShrink: 0,
-                }}>
-                  {comment.userName?.charAt(0).toUpperCase() || 'U'}
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '10px',
-                    marginBottom: '6px',
-                    flexWrap: 'wrap',
-                  }}>
-                    <span style={{
-                      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                      fontSize: '14px',
-                      fontWeight: '600',
-                      color: '#000000',
-                    }}>
-                      {comment.userName || 'User'}
-                    </span>
-                    <VerifiedBadge size={14} />
-                    <span style={{
-                      fontSize: '11px',
-                      color: '#999999',
-                    }}>
-                      {comment.createdAt ? (typeof comment.createdAt.toDate === 'function' ? formatTime(comment.createdAt) : '') : ''}
-                    </span>
-                  </div>
-                  <div style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '14px',
-                    color: '#333333',
-                    lineHeight: '1.4',
-                  }}>
-                    {comment.text}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Form Komentar di Modal - TANPA serverTimestamp di array */}
-        {donationCommentTarget === selectedDonation.id ? (
-          <div style={{
-            display: 'flex',
-            gap: '12px',
-            alignItems: 'center',
-          }}>
-            <input
-              type="text"
-              value={commentText}
-              onChange={(e) => setCommentText(e.target.value)}
-              placeholder="Tulis komentar..."
-              style={{
-                flex: 1,
-                padding: '12px 20px',
-                borderRadius: '60px',
-                border: '1px solid #cccccc',
-                fontFamily: "'Questrial', sans-serif",
-                fontSize: '14px',
-                outline: 'none',
-              }}
-              onKeyPress={(e) => {
-                if (e.key === 'Enter') {
-                  addComment(selectedDonation.id);
-                }
-              }}
-              autoFocus
-            />
-            <button
-              onClick={() => addComment(selectedDonation.id)}
-              disabled={!commentText.trim()}
-              style={{
-                padding: '10px 24px',
-                borderRadius: '60px',
-                border: 'none',
-                backgroundColor: commentText.trim() ? '#000000' : '#cccccc',
-                color: '#ffffff',
-                cursor: commentText.trim() ? 'pointer' : 'not-allowed',
-                fontFamily: "'Questrial', sans-serif",
-                fontSize: '13px',
-                fontWeight: '500',
-              }}
-            >
-              Kirim
-            </button>
-            <button
-              onClick={() => setDonationCommentTarget(null)}
-              style={{
-                padding: '10px 20px',
-                borderRadius: '60px',
-                border: '1px solid #cccccc',
-                backgroundColor: 'transparent',
-                color: '#666666',
-                cursor: 'pointer',
-                fontSize: '13px',
-              }}
-            >
-              Batal
-            </button>
-          </div>
-        ) : (
-          <button
-            onClick={() => {
-              if (user) {
-                setDonationCommentTarget(selectedDonation.id);
-                setCommentText("");
-              } else {
-                alert("Silakan login untuk berkomentar");
-                setShowAuthModal(true);
-              }
-            }}
-            style={{
-              width: '100%',
-              padding: '14px',
-              borderRadius: '60px',
-              border: '1px solid #000000',
-              backgroundColor: 'transparent',
-              color: '#000000',
-              cursor: 'pointer',
-              fontFamily: "'Questrial', sans-serif",
-              fontSize: '15px',
-              fontWeight: '500',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '10px',
-              transition: 'all 0.2s ease',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#000000';
-              e.currentTarget.style.color = '#ffffff';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'transparent';
-              e.currentTarget.style.color = '#000000';
-            }}
-          >
-            <MessageIcon size={18} />
-            <span>TULIS KOMENTAR</span>
-          </button>
-        )}
-      </div>
-    </div>
-  </div>
-)}
-
-
-
-
-
-            
-            
-
-            
-
-            {/* WRAPPER UNTUK SEMUA SECTION SETELAH COMMUNITY */}
-<div style={{ marginTop: '0px' }}>
-            {/* SECTION TRUSTED COLLABS */}
-            <div
-              ref={trustedSectionRef}
-              className="trusted-section"
-              style={{
-                backgroundColor: '#ffffff',
-              }}
-            >
-              <div
-                ref={trustedTextRef}
-                className="trusted-text"
-              >
-                TRUSTED COLLABS
-              </div>
-
-              <div
-                ref={carouselRef}
-                className="carousel-container"
-              >
-                <div className="carousel-track">
-                  {carouselItems.map((item) => (
-                    <div key={item.id} className="carousel-item">
-                      <div className="carousel-image">
+                        backgroundColor: '#e0e0e0',
+                      }}>
                         <Image
-                          src={item.image}
-                          alt={item.brand}
+                          src={photo}
+                          alt={`Donation photo ${idx + 1}`}
                           fill
                           style={{ objectFit: 'cover' }}
                         />
                       </div>
-                      <h3 className="carousel-brand">{item.brand}</h3>
-                      <p className="carousel-desc">{item.description}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* CALENDAR SUBMISSIONS SECTION */}
-            {calendarSubmissions.length > 0 && (
-              <div className="calendar-submissions-section" style={{
-                width: '100%',
-                padding: '120px 80px',
-                backgroundColor: '#ffffff',
-                boxSizing: 'border-box'
-              }}>
-                <div style={{
-                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                  fontSize: '190px',
-                  fontWeight: '400',
-                  color: '#000000',
-                  letterSpacing: '-0.02em',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  marginBottom: '100px',
-                  lineHeight: '1'
-                }}>
-                  <span>MEETING SCHEDULE</span>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '30px'
-                  }}>
-                    <span style={{
-                      fontSize: '100px',
-                      color: '#000000',
-                      fontWeight: '400'
-                    }}>
-                      ({calendarSubmissions.length})
-                    </span>
-                    <svg width="100" height="100" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
+                    ))}
                   </div>
-                </div>
 
-                <div style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '80px'
-                }}>
-                  {calendarSubmissions.map((submission, index) => {
-                    const dateParts = getDateParts(submission.selectedDate);
+                  <div style={{
+                    padding: '30px',
+                    borderTop: '1px solid #e0e0e0',
+                    backgroundColor: '#ffffff',
+                  }}>
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      marginBottom: '20px',
+                    }}>
+                      <div style={{
+                        fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                        fontSize: '20px',
+                        fontWeight: '500',
+                        color: '#000000',
+                      }}>
+                        KOMENTAR ({selectedDonation.comments?.length || 0})
+                      </div>
+                      <MessageIcon size={22} />
+                    </div>
 
-                    return (
-                      <div
-                        key={submission.id}
+                    {selectedDonation.comments && selectedDonation.comments.length > 0 && (
+                      <div style={{
+                        marginBottom: '20px',
+                        maxHeight: '200px',
+                        overflowY: 'auto',
+                      }}>
+                        {selectedDonation.comments.map((comment) => (
+                          <div key={comment.id} style={{
+                            display: 'flex',
+                            alignItems: 'flex-start',
+                            gap: '12px',
+                            padding: '12px 0',
+                            borderBottom: '1px solid #f0f0f0',
+                          }}>
+                            <div style={{
+                              width: '36px',
+                              height: '36px',
+                              borderRadius: '50%',
+                              backgroundColor: '#000000',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              color: '#ffffff',
+                              fontSize: '16px',
+                              fontWeight: '500',
+                              flexShrink: 0,
+                            }}>
+                              {comment.userName?.charAt(0).toUpperCase() || 'U'}
+                            </div>
+                            <div style={{ flex: 1 }}>
+                              <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '10px',
+                                marginBottom: '6px',
+                                flexWrap: 'wrap',
+                              }}>
+                                <span style={{
+                                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                                  fontSize: '14px',
+                                  fontWeight: '600',
+                                  color: '#000000',
+                                }}>
+                                  {comment.userName || 'User'}
+                                </span>
+                                <VerifiedBadge size={14} showTooltip={true} />
+                                <span style={{
+                                  fontSize: '11px',
+                                  color: '#999999',
+                                }}>
+                                  {comment.createdAt ? (typeof comment.createdAt.toDate === 'function' ? formatTime(comment.createdAt) : '') : ''}
+                                </span>
+                                {/* Reply button on comment */}
+                                <button
+                                  onClick={() => {
+                                    if (user) {
+                                      setReplyToComment(comment);
+                                    } else {
+                                      alert("Silakan login untuk membalas komentar");
+                                      setShowAuthModal(true);
+                                    }
+                                  }}
+                                  style={{
+                                    background: 'none',
+                                    border: 'none',
+                                    color: '#1D9BF0',
+                                    fontSize: '12px',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '4px',
+                                  }}
+                                >
+                                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                                  </svg>
+                                  Balas
+                                </button>
+                              </div>
+                              
+                              {/* Show if this comment is a reply to another comment */}
+                              {comment.replyTo && (
+                                <div style={{
+                                  marginBottom: '8px',
+                                  padding: '6px 12px',
+                                  backgroundColor: '#f0f0f0',
+                                  borderRadius: '8px',
+                                  fontSize: '12px',
+                                  color: '#666666',
+                                }}>
+                                  Balasan ke <strong>{comment.replyTo.userName}</strong>: "{comment.replyTo.text.substring(0, 50)}..."
+                                </div>
+                              )}
+                              
+                              <div style={{
+                                fontFamily: "'Questrial', sans-serif",
+                                fontSize: '14px',
+                                color: '#333333',
+                                lineHeight: '1.4',
+                              }}>
+                                {comment.text}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Reply Modal */}
+                    {replyToComment && (
+                      <ReplyCommentModal
+                        comment={replyToComment}
+                        onClose={() => setReplyToComment(null)}
+                        onSendReply={handleReplyToComment}
+                        donationId={selectedDonation.id}
+                        user={user}
+                      />
+                    )}
+
+                    {donationCommentTarget === selectedDonation.id ? (
+                      <div style={{
+                        display: 'flex',
+                        gap: '12px',
+                        alignItems: 'center',
+                      }}>
+                        <input
+                          type="text"
+                          value={commentText}
+                          onChange={(e) => setCommentText(e.target.value)}
+                          placeholder="Tulis komentar..."
+                          style={{
+                            flex: 1,
+                            padding: '12px 20px',
+                            borderRadius: '60px',
+                            border: '1px solid #cccccc',
+                            fontFamily: "'Questrial', sans-serif",
+                            fontSize: '14px',
+                            outline: 'none',
+                          }}
+                          onKeyPress={(e) => {
+                            if (e.key === 'Enter') {
+                              addComment(selectedDonation.id);
+                            }
+                          }}
+                          autoFocus
+                        />
+                        <button
+                          onClick={() => addComment(selectedDonation.id)}
+                          disabled={!commentText.trim()}
+                          style={{
+                            padding: '10px 24px',
+                            borderRadius: '60px',
+                            border: 'none',
+                            backgroundColor: commentText.trim() ? '#000000' : '#cccccc',
+                            color: '#ffffff',
+                            cursor: commentText.trim() ? 'pointer' : 'not-allowed',
+                            fontFamily: "'Questrial', sans-serif",
+                            fontSize: '13px',
+                            fontWeight: '500',
+                          }}
+                        >
+                          Kirim
+                        </button>
+                        <button
+                          onClick={() => setDonationCommentTarget(null)}
+                          style={{
+                            padding: '10px 20px',
+                            borderRadius: '60px',
+                            border: '1px solid #cccccc',
+                            backgroundColor: 'transparent',
+                            color: '#666666',
+                            cursor: 'pointer',
+                            fontSize: '13px',
+                          }}
+                        >
+                          Batal
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          if (user) {
+                            setDonationCommentTarget(selectedDonation.id);
+                            setCommentText("");
+                          } else {
+                            alert("Silakan login untuk berkomentar");
+                            setShowAuthModal(true);
+                          }
+                        }}
                         style={{
+                          width: '100%',
+                          padding: '14px',
+                          borderRadius: '60px',
+                          border: '1px solid #000000',
+                          backgroundColor: 'transparent',
+                          color: '#000000',
+                          cursor: 'pointer',
+                          fontFamily: "'Questrial', sans-serif",
+                          fontSize: '15px',
+                          fontWeight: '500',
                           display: 'flex',
-                          flexDirection: 'row',
-                          alignItems: 'flex-start',
-                          gap: '80px'
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '10px',
+                          transition: 'all 0.2s ease',
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = '#000000';
+                          e.currentTarget.style.color = '#ffffff';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = 'transparent';
+                          e.currentTarget.style.color = '#000000';
                         }}
                       >
-                        <div style={{
-                          width: '200px',
-                          flexShrink: 0,
-                          textAlign: 'left'
-                        }}>
-                          <div style={{
-                            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                            fontSize: '100px',
-                            fontWeight: '400',
-                            color: '#000000',
-                            lineHeight: '1',
-                            letterSpacing: '-0.02em'
-                          }}>
-                            {dateParts.day}
-                          </div>
-                          <div style={{
-                            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                            fontSize: '40px',
-                            fontWeight: '400',
-                            color: '#000000',
-                            letterSpacing: '-0.02em',
-                            marginTop: '12px'
-                          }}>
-                            {dateParts.month}
-                          </div>
-                          <div style={{
-                            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                            fontSize: '24px',
-                            fontWeight: '400',
-                            color: '#666666',
-                            marginTop: '8px'
-                          }}>
-                            {dateParts.year}
-                          </div>
-                        </div>
+                        <MessageIcon size={18} />
+                        <span>TULIS KOMENTAR</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
 
-                        <div style={{
-                          flex: 1,
-                          display: 'flex',
-                          flexDirection: 'column',
-                          gap: '32px'
-                        }}>
-                          <div style={{
+            {/* WRAPPER UNTUK SEMUA SECTION SETELAH COMMUNITY */}
+            <div style={{ marginTop: '0px' }}>
+              {/* SECTION TRUSTED COLLABS */}
+              <div
+                ref={trustedSectionRef}
+                className="trusted-section"
+                style={{
+                  backgroundColor: '#ffffff',
+                }}
+              >
+                <div
+                  ref={trustedTextRef}
+                  className="trusted-text"
+                >
+                  TRUSTED COLLABS
+                </div>
+
+                <div
+                  ref={carouselRef}
+                  className="carousel-container"
+                >
+                  <div className="carousel-track">
+                    {carouselItems.map((item) => (
+                      <div key={item.id} className="carousel-item">
+                        <div className="carousel-image">
+                          <Image
+                            src={item.image}
+                            alt={item.brand}
+                            fill
+                            style={{ objectFit: 'cover' }}
+                          />
+                        </div>
+                        <h3 className="carousel-brand">{item.brand}</h3>
+                        <p className="carousel-desc">{item.description}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* CALENDAR SUBMISSIONS SECTION */}
+              {calendarSubmissions.length > 0 && (
+                <div className="calendar-submissions-section" style={{
+                  width: '100%',
+                  padding: '120px 80px',
+                  backgroundColor: '#ffffff',
+                  boxSizing: 'border-box'
+                }}>
+                  <div style={{
+                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                    fontSize: '190px',
+                    fontWeight: '400',
+                    color: '#000000',
+                    letterSpacing: '-0.02em',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    marginBottom: '100px',
+                    lineHeight: '1'
+                  }}>
+                    <span>MEETING SCHEDULE</span>
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '30px'
+                    }}>
+                      <span style={{
+                        fontSize: '100px',
+                        color: '#000000',
+                        fontWeight: '400'
+                      }}>
+                        ({calendarSubmissions.length})
+                      </span>
+                      <svg width="100" height="100" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </div>
+                  </div>
+
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '80px'
+                  }}>
+                    {calendarSubmissions.map((submission, index) => {
+                      const dateParts = getDateParts(submission.selectedDate);
+
+                      return (
+                        <div
+                          key={submission.id}
+                          style={{
                             display: 'flex',
-                            alignItems: 'center',
-                            gap: '40px',
-                            flexWrap: 'wrap'
+                            flexDirection: 'row',
+                            alignItems: 'flex-start',
+                            gap: '80px'
+                          }}
+                        >
+                          <div style={{
+                            width: '200px',
+                            flexShrink: 0,
+                            textAlign: 'left'
                           }}>
                             <div style={{
                               fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                              fontSize: '48px',
+                              fontSize: '100px',
                               fontWeight: '400',
                               color: '#000000',
+                              lineHeight: '1',
                               letterSpacing: '-0.02em'
                             }}>
-                              {submission.fullName}
-                            </div>
-                            <div style={{
-                              fontSize: '20px',
-                              padding: '6px 24px',
-                              border: '1px solid #000000',
-                              backgroundColor: 'transparent',
-                              color: '#000000',
-                              fontWeight: '400',
-                              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                              letterSpacing: '0.02em'
-                            }}>
-                              {submission.status === 'pending' ? 'PENDING' :
-                               submission.status === 'confirmed' ? 'CONFIRMED' :
-                               submission.status === 'completed' ? 'COMPLETED' : 'REJECTED'}
-                            </div>
-                          </div>
-
-                          <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '60px',
-                            flexWrap: 'wrap'
-                          }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <circle cx="12" cy="12" r="10" stroke="#000000" strokeWidth="1.5"/>
-                                <polyline points="12 6 12 12 16 14" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                              </svg>
-                              <span style={{
-                                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                                fontSize: '28px',
-                                color: '#000000'
-                              }}>
-                                {submission.selectedTime} WIB
-                              </span>
-                            </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke="#000000" strokeWidth="1.5"/>
-                                <line x1="8" y1="2" x2="8" y2="6" stroke="#000000" strokeWidth="1.5" strokeLinecap="round"/>
-                                <line x1="16" y1="2" x2="16" y2="6" stroke="#000000" strokeWidth="1.5" strokeLinecap="round"/>
-                                <line x1="3" y1="10" x2="21" y2="10" stroke="#000000" strokeWidth="1.5" strokeLinecap="round"/>
-                              </svg>
-                              <span style={{
-                                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                                fontSize: '28px',
-                                color: '#000000'
-                              }}>
-                                {submission.meetingType}
-                              </span>
-                            </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="#000000" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-                              </svg>
-                              <span style={{
-                                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                                fontSize: '28px',
-                                color: '#000000'
-                              }}>
-                                {submission.platform === 'google_meet' ? 'Google Meet' :
-                                 submission.platform === 'zoom' ? 'Zoom' :
-                                 submission.platform === 'tatap_muka' ? 'Offline' : 'Via HP'}
-                              </span>
-                            </div>
-                          </div>
-
-                          <div style={{
-                            marginTop: '16px'
-                          }}>
-                            <div style={{
-                              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                              fontSize: '20px',
-                              fontWeight: '400',
-                              color: '#999999',
-                              marginBottom: '20px',
-                              letterSpacing: '0.05em'
-                            }}>
-                              REASON TO TRUST
+                              {dateParts.day}
                             </div>
                             <div style={{
                               fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                              fontSize: '32px',
+                              fontSize: '40px',
                               fontWeight: '400',
                               color: '#000000',
-                              lineHeight: '1.4',
-                              letterSpacing: '-0.01em'
+                              letterSpacing: '-0.02em',
+                              marginTop: '12px'
                             }}>
-                              "{submission.trustReason}"
+                              {dateParts.month}
+                            </div>
+                            <div style={{
+                              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                              fontSize: '24px',
+                              fontWeight: '400',
+                              color: '#666666',
+                              marginTop: '8px'
+                            }}>
+                              {dateParts.year}
                             </div>
                           </div>
 
                           <div style={{
+                            flex: 1,
                             display: 'flex',
-                            alignItems: 'center',
-                            gap: '48px',
-                            flexWrap: 'wrap',
-                            marginTop: '16px'
+                            flexDirection: 'column',
+                            gap: '32px'
                           }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <rect x="2" y="4" width="20" height="16" rx="2" ry="2" stroke="#000000" strokeWidth="1.5"/>
-                                <polyline points="22 7 12 13 2 7" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                              </svg>
-                              <span style={{
+                            <div style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '40px',
+                              flexWrap: 'wrap'
+                            }}>
+                              <div style={{
                                 fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                                fontSize: '22px',
-                                color: '#000000'
+                                fontSize: '48px',
+                                fontWeight: '400',
+                                color: '#000000',
+                                letterSpacing: '-0.02em'
                               }}>
-                                {submission.email}
-                              </span>
-                            </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" stroke="#000000" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-                              </svg>
-                              <span style={{
+                                {submission.fullName}
+                              </div>
+                              <div style={{
+                                fontSize: '20px',
+                                padding: '6px 24px',
+                                border: '1px solid #000000',
+                                backgroundColor: 'transparent',
+                                color: '#000000',
+                                fontWeight: '400',
                                 fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                                fontSize: '22px',
-                                color: '#000000'
+                                letterSpacing: '0.02em'
                               }}>
-                                {submission.phoneNumber}
-                              </span>
+                                {submission.status === 'pending' ? 'PENDING' :
+                                 submission.status === 'confirmed' ? 'CONFIRMED' :
+                                 submission.status === 'completed' ? 'COMPLETED' : 'REJECTED'}
+                              </div>
                             </div>
-                            {submission.companyName && (
+
+                            <div style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '60px',
+                              flexWrap: 'wrap'
+                            }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <circle cx="12" cy="12" r="10" stroke="#000000" strokeWidth="1.5"/>
+                                  <polyline points="12 6 12 12 16 14" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                                <span style={{
+                                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                                  fontSize: '28px',
+                                  color: '#000000'
+                                }}>
+                                  {submission.selectedTime} WIB
+                                </span>
+                              </div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke="#000000" strokeWidth="1.5"/>
+                                  <line x1="8" y1="2" x2="8" y2="6" stroke="#000000" strokeWidth="1.5" strokeLinecap="round"/>
+                                  <line x1="16" y1="2" x2="16" y2="6" stroke="#000000" strokeWidth="1.5" strokeLinecap="round"/>
+                                  <line x1="3" y1="10" x2="21" y2="10" stroke="#000000" strokeWidth="1.5" strokeLinecap="round"/>
+                                </svg>
+                                <span style={{
+                                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                                  fontSize: '28px',
+                                  color: '#000000'
+                                }}>
+                                  {submission.meetingType}
+                                </span>
+                              </div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="#000000" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                                <span style={{
+                                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                                  fontSize: '28px',
+                                  color: '#000000'
+                                }}>
+                                  {submission.platform === 'google_meet' ? 'Google Meet' :
+                                   submission.platform === 'zoom' ? 'Zoom' :
+                                   submission.platform === 'tatap_muka' ? 'Offline' : 'Via HP'}
+                                </span>
+                              </div>
+                            </div>
+
+                            <div style={{
+                              marginTop: '16px'
+                            }}>
+                              <div style={{
+                                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                                fontSize: '20px',
+                                fontWeight: '400',
+                                color: '#999999',
+                                marginBottom: '20px',
+                                letterSpacing: '0.05em'
+                              }}>
+                                REASON TO TRUST
+                              </div>
+                              <div style={{
+                                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                                fontSize: '32px',
+                                fontWeight: '400',
+                                color: '#000000',
+                                lineHeight: '1.4',
+                                letterSpacing: '-0.01em'
+                              }}>
+                                "{submission.trustReason}"
+                              </div>
+                            </div>
+
+                            <div style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '48px',
+                              flexWrap: 'wrap',
+                              marginTop: '16px'
+                            }}>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                  <rect x="4" y="4" width="16" height="16" rx="2" ry="2" stroke="#000000" strokeWidth="1.5"/>
-                                  <line x1="9" y1="4" x2="9" y2="20" stroke="#000000" strokeWidth="1.5"/>
-                                  <line x1="15" y1="4" x2="15" y2="20" stroke="#000000" strokeWidth="1.5"/>
-                                  <line x1="4" y1="9" x2="20" y2="9" stroke="#000000" strokeWidth="1.5"/>
-                                  <line x1="4" y1="15" x2="20" y2="15" stroke="#000000" strokeWidth="1.5"/>
+                                  <rect x="2" y="4" width="20" height="16" rx="2" ry="2" stroke="#000000" strokeWidth="1.5"/>
+                                  <polyline points="22 7 12 13 2 7" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                                 </svg>
                                 <span style={{
                                   fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
                                   fontSize: '22px',
                                   color: '#000000'
                                 }}>
-                                  {submission.companyName}
+                                  {submission.email}
                                 </span>
+                              </div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" stroke="#000000" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                                <span style={{
+                                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                                  fontSize: '22px',
+                                  color: '#000000'
+                                }}>
+                                  {submission.phoneNumber}
+                                </span>
+                              </div>
+                              {submission.companyName && (
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <rect x="4" y="4" width="16" height="16" rx="2" ry="2" stroke="#000000" strokeWidth="1.5"/>
+                                    <line x1="9" y1="4" x2="9" y2="20" stroke="#000000" strokeWidth="1.5"/>
+                                    <line x1="15" y1="4" x2="15" y2="20" stroke="#000000" strokeWidth="1.5"/>
+                                    <line x1="4" y1="9" x2="20" y2="9" stroke="#000000" strokeWidth="1.5"/>
+                                    <line x1="4" y1="15" x2="20" y2="15" stroke="#000000" strokeWidth="1.5"/>
+                                  </svg>
+                                  <span style={{
+                                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                                    fontSize: '22px',
+                                    color: '#000000'
+                                  }}>
+                                    {submission.companyName}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+
+                            {submission.adminReply && (
+                              <div style={{
+                                marginTop: '24px'
+                              }}>
+                                <div style={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '14px',
+                                  marginBottom: '16px'
+                                }}>
+                                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="#000000" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                                  </svg>
+                                  <span style={{
+                                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                                    fontSize: '18px',
+                                    fontWeight: '400',
+                                    color: '#999999',
+                                    letterSpacing: '0.05em'
+                                  }}>
+                                    ADMIN REPLY · {submission.adminReply.repliedBy}
+                                  </span>
+                                </div>
+                                <div style={{
+                                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                                  fontSize: '24px',
+                                  color: '#000000',
+                                  lineHeight: '1.4',
+                                  paddingLeft: '38px'
+                                }}>
+                                  {submission.adminReply.text}
+                                </div>
                               </div>
                             )}
                           </div>
 
-                          {submission.adminReply && (
-                            <div style={{
-                              marginTop: '24px'
-                            }}>
-                              <div style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '14px',
-                                marginBottom: '16px'
-                              }}>
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="#000000" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-                                </svg>
-                                <span style={{
-                                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                                  fontSize: '18px',
-                                  fontWeight: '400',
-                                  color: '#999999',
-                                  letterSpacing: '0.05em'
-                                }}>
-                                  ADMIN REPLY · {submission.adminReply.repliedBy}
-                                </span>
-                              </div>
-                              <div style={{
-                                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                                fontSize: '24px',
-                                color: '#000000',
-                                lineHeight: '1.4',
-                                paddingLeft: '38px'
-                              }}>
-                                {submission.adminReply.text}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-
-                        <div style={{
-                          width: '220px',
-                          flexShrink: 0,
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'flex-end',
-                          gap: '24px'
-                        }}>
-                          <button
-                            onClick={() => {
-                              setShowCalendarModal(true);
-                              setShowFormView(false);
-                              setSelectedDate(null);
-                              setSelectedTime("");
-                            }}
-                            style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'space-between',
-                              gap: '20px',
-                              backgroundColor: 'transparent',
-                              border: '1px solid #000000',
-                              cursor: 'pointer',
-                              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                              fontSize: '20px',
-                              fontWeight: '400',
-                              color: '#000000',
-                              padding: '16px 28px',
-                              borderRadius: '0',
-                              width: '100%'
-                            }}
-                          >
-                            <span>BOOK CALL</span>
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                            </svg>
-                          </button>
-
-                          {isAdmin && (
+                          <div style={{
+                            width: '220px',
+                            flexShrink: 0,
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'flex-end',
+                            gap: '24px'
+                          }}>
                             <button
                               onClick={() => {
-                                setSelectedSubmission(submission);
-                                setReplyText(submission.adminReply?.text || "");
-                                setReplyStatus(submission.status);
-                                setShowReplyModal(true);
+                                setShowCalendarModal(true);
+                                setShowFormView(false);
+                                setSelectedDate(null);
+                                setSelectedTime("");
                               }}
                               style={{
                                 display: 'flex',
@@ -5690,538 +6114,559 @@ useEffect(() => {
                                 border: '1px solid #000000',
                                 cursor: 'pointer',
                                 fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                                fontSize: '18px',
+                                fontSize: '20px',
                                 fontWeight: '400',
                                 color: '#000000',
-                                padding: '14px 24px',
+                                padding: '16px 28px',
                                 borderRadius: '0',
                                 width: '100%'
                               }}
                             >
-                              <span>{submission.adminReply ? 'EDIT REPLY' : 'REPLY'}</span>
-                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M17 7L7 17M7 17H17M7 17V7" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                              <span>BOOK CALL</span>
+                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                               </svg>
                             </button>
-                          )}
+
+                            {isAdmin && (
+                              <button
+                                onClick={() => {
+                                  setSelectedSubmission(submission);
+                                  setReplyText(submission.adminReply?.text || "");
+                                  setReplyStatus(submission.status);
+                                  setShowReplyModal(true);
+                                }}
+                                style={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'space-between',
+                                  gap: '20px',
+                                  backgroundColor: 'transparent',
+                                  border: '1px solid #000000',
+                                  cursor: 'pointer',
+                                  fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                                  fontSize: '18px',
+                                  fontWeight: '400',
+                                  color: '#000000',
+                                  padding: '14px 24px',
+                                  borderRadius: '0',
+                                  width: '100%'
+                                }}
+                              >
+                                <span>{submission.adminReply ? 'EDIT REPLY' : 'REPLY'}</span>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <path d="M17 7L7 17M7 17H17M7 17V7" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                              </button>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* REPLY MODAL FOR ADMIN */}
-            {showReplyModal && selectedSubmission && (
-              <div className="reply-modal-overlay">
-                <div className="reply-modal">
-                  <div style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    marginBottom: '32px',
-                    borderBottom: '1px solid #e0e0e0',
-                    paddingBottom: '20px'
-                  }}>
-                    <h2 style={{
-                      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                      fontSize: '28px',
-                      fontWeight: '400',
-                      color: '#000000',
-                      margin: 0,
-                      letterSpacing: '-0.02em'
-                    }}>
-                      REPLY TO MEETING
-                    </h2>
-                    <button
-                      onClick={() => {
-                        setShowReplyModal(false);
-                        setSelectedSubmission(null);
-                        setReplyText("");
-                      }}
-                      style={{
-                        background: 'none',
-                        border: 'none',
-                        fontSize: '28px',
-                        cursor: 'pointer',
-                        color: '#000000'
-                      }}
-                    >
-                      ✕
-                    </button>
-                  </div>
-
-                  <div style={{
-                    marginBottom: '24px',
-                    padding: '20px',
-                    backgroundColor: '#f5f5f5',
-                    borderRadius: '0'
-                  }}>
-                    <div style={{
-                      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                      fontSize: '14px',
-                      color: '#666666',
-                      marginBottom: '8px'
-                    }}>
-                      FROM: {selectedSubmission.fullName} ({selectedSubmission.email})
-                    </div>
-                    <div style={{
-                      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                      fontSize: '14px',
-                      color: '#666666',
-                      marginBottom: '8px'
-                    }}>
-                      DATE: {selectedSubmission.selectedDateFormatted} - {selectedSubmission.selectedTime} WIB
-                    </div>
-                    <div style={{
-                      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                      fontSize: '14px',
-                      color: '#000000',
-                      marginTop: '12px',
-                      paddingTop: '12px',
-                      borderTop: '1px solid #cccccc'
-                    }}>
-                      "{selectedSubmission.trustReason}"
-                    </div>
-                  </div>
-
-                  <div style={{ marginBottom: '24px' }}>
-                    <label style={{
-                      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                      fontSize: '14px',
-                      fontWeight: '400',
-                      color: '#000000',
-                      display: 'block',
-                      marginBottom: '8px'
-                    }}>
-                      MEETING STATUS
-                    </label>
-                    <select
-                      value={replyStatus}
-                      onChange={(e) => setReplyStatus(e.target.value as any)}
-                      style={{
-                        width: '100%',
-                        padding: '12px 16px',
-                        borderRadius: '0',
-                        border: '1px solid #cccccc',
-                        fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                        fontSize: '14px',
-                        backgroundColor: '#ffffff'
-                      }}
-                    >
-                      <option value="pending">PENDING</option>
-                      <option value="confirmed">CONFIRMED</option>
-                      <option value="completed">COMPLETED</option>
-                      <option value="rejected">REJECTED</option>
-                    </select>
-                  </div>
-
-                  <div style={{ marginBottom: '28px' }}>
-                    <label style={{
-                      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                      fontSize: '14px',
-                      fontWeight: '400',
-                      color: '#000000',
-                      display: 'block',
-                      marginBottom: '8px'
-                    }}>
-                      REPLY MESSAGE
-                    </label>
-                    <textarea
-                      value={replyText}
-                      onChange={(e) => setReplyText(e.target.value)}
-                      placeholder="Write your reply here..."
-                      rows={5}
-                      style={{
-                        width: '100%',
-                        padding: '12px 16px',
-                        borderRadius: '0',
-                        border: '1px solid #cccccc',
-                        fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                        fontSize: '14px',
-                        resize: 'vertical',
-                        backgroundColor: '#ffffff'
-                      }}
-                    />
-                  </div>
-
-                  <div style={{ display: 'flex', gap: '16px' }}>
-                    <button
-                      onClick={() => {
-                        setShowReplyModal(false);
-                        setSelectedSubmission(null);
-                        setReplyText("");
-                      }}
-                      style={{
-                        flex: 1,
-                        padding: '14px',
-                        borderRadius: '0',
-                        border: '1px solid #000000',
-                        backgroundColor: 'transparent',
-                        color: '#000000',
-                        fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                        fontSize: '16px',
-                        fontWeight: '400',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      CANCEL
-                    </button>
-                    <button
-                      onClick={handleAdminReply}
-                      style={{
-                        flex: 1,
-                        padding: '14px',
-                        borderRadius: '0',
-                        border: '1px solid #000000',
-                        backgroundColor: '#000000',
-                        color: '#ffffff',
-                        fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                        fontSize: '16px',
-                        fontWeight: '400',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      SEND REPLY
-                    </button>
+                      );
+                    })}
                   </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Bagian footer */}
-            <div style={{
-              width: '100%',
-              position: 'relative',
-              backgroundColor: 'white',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'flex-end',
-              alignItems: 'center',
-              minHeight: '60vh'
-            }}>
-              <div
-                ref={bottomContentRef}
-                style={{
-                  width: '100%',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'flex-start',
-                  gap: '40px',
-                  marginBottom: '80px',
-                  paddingLeft: '80px',
-                  opacity: 0
-                }}
-              >
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px'
-                }}>
-                  <div
-                    ref={mencatatTextRef}
-                    style={{
-                      fontSize: '64px',
-                      fontFamily: 'Questrial, sans-serif',
-                      color: 'black',
-                      textAlign: 'left',
-                      fontWeight: '400',
-                      letterSpacing: '-0.02em',
-                      lineHeight: '1.2',
-                      whiteSpace: 'nowrap'
-                    }}>
-                    Mencatat apa yang kamu inginkan
-                  </div>
-                  <span style={{
-                    fontSize: '80px',
-                    color: 'black',
-                    fontWeight: '400',
-                    lineHeight: '1'
-                  }}>.</span>
-                </div>
-
-                <Link href="/contact">
-                  <button
-                    ref={contactBtnRef}
-                    onClick={handleContact}
-                    className="contact-btn-effect"
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '16px',
-                      padding: '14px 36px',
-                      borderRadius: '60px',
-                      cursor: 'pointer',
-                      fontSize: '20px',
-                      fontWeight: '600',
-                      letterSpacing: '-0.01em',
-                      fontFamily: 'Questrial, sans-serif',
-                      transition: 'all 0.3s ease',
-                      position: 'relative',
-                      overflow: 'hidden',
-                      zIndex: 1,
-                      border: '1.5px solid #cccccc',
-                      backgroundColor: '#ffffff',
-                      color: '#000000'
-                    }}
-                  >
-                    <span ref={contactTextRef}>Contact</span>
-
+              {/* REPLY MODAL FOR ADMIN */}
+              {showReplyModal && selectedSubmission && (
+                <div className="reply-modal-overlay">
+                  <div className="reply-modal">
                     <div style={{
-                      position: 'relative',
-                      width: '40px',
-                      height: '40px',
                       display: 'flex',
+                      justifyContent: 'space-between',
                       alignItems: 'center',
-                      justifyContent: 'center'
+                      marginBottom: '32px',
+                      borderBottom: '1px solid #e0e0e0',
+                      paddingBottom: '20px'
                     }}>
-                      <div className="dot-small" style={{
-                        width: '8px',
-                        height: '8px',
-                        borderRadius: '50%',
-                        backgroundColor: '#000000',
-                        opacity: 1,
-                        transform: 'scale(1)',
-                        transition: 'opacity 0.3s ease, transform 0.3s ease',
-                        position: 'absolute'
-                      }}></div>
-
-                      <div className="circle-large-white" style={{
-                        position: 'absolute',
-                        width: '40px',
-                        height: '40px',
-                        borderRadius: '50%',
-                        backgroundColor: '#000000',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        opacity: 0,
-                        transform: 'scale(0.8)',
-                        transition: 'opacity 0.3s ease, transform 0.3s ease, background-color 0.3s ease'
+                      <h2 style={{
+                        fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                        fontSize: '28px',
+                        fontWeight: '400',
+                        color: '#000000',
+                        margin: 0,
+                        letterSpacing: '-0.02em'
                       }}>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
+                        REPLY TO MEETING
+                      </h2>
+                      <button
+                        onClick={() => {
+                          setShowReplyModal(false);
+                          setSelectedSubmission(null);
+                          setReplyText("");
+                        }}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          fontSize: '28px',
+                          cursor: 'pointer',
+                          color: '#000000'
+                        }}
+                      >
+                        ✕
+                      </button>
+                    </div>
+
+                    <div style={{
+                      marginBottom: '24px',
+                      padding: '20px',
+                      backgroundColor: '#f5f5f5',
+                      borderRadius: '0'
+                    }}>
+                      <div style={{
+                        fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                        fontSize: '14px',
+                        color: '#666666',
+                        marginBottom: '8px'
+                      }}>
+                        FROM: {selectedSubmission.fullName} ({selectedSubmission.email})
+                      </div>
+                      <div style={{
+                        fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                        fontSize: '14px',
+                        color: '#666666',
+                        marginBottom: '8px'
+                      }}>
+                        DATE: {selectedSubmission.selectedDateFormatted} - {selectedSubmission.selectedTime} WIB
+                      </div>
+                      <div style={{
+                        fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                        fontSize: '14px',
+                        color: '#000000',
+                        marginTop: '12px',
+                        paddingTop: '12px',
+                        borderTop: '1px solid #cccccc'
+                      }}>
+                        "{selectedSubmission.trustReason}"
                       </div>
                     </div>
-                  </button>
-                </Link>
 
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '30px',
-                  flexWrap: 'wrap',
-                  width: '100%'
-                }}>
-                  <div ref={callTextRef} className="call-farid-text">
-                    <div>Ready to surpass your</div>
-                    <div>wildest dreams?</div>
-                    <div>Call Farid.</div>
+                    <div style={{ marginBottom: '24px' }}>
+                      <label style={{
+                        fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                        fontSize: '14px',
+                        fontWeight: '400',
+                        color: '#000000',
+                        display: 'block',
+                        marginBottom: '8px'
+                      }}>
+                        MEETING STATUS
+                      </label>
+                      <select
+                        value={replyStatus}
+                        onChange={(e) => setReplyStatus(e.target.value as any)}
+                        style={{
+                          width: '100%',
+                          padding: '12px 16px',
+                          borderRadius: '0',
+                          border: '1px solid #cccccc',
+                          fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                          fontSize: '14px',
+                          backgroundColor: '#ffffff'
+                        }}
+                      >
+                        <option value="pending">PENDING</option>
+                        <option value="confirmed">CONFIRMED</option>
+                        <option value="completed">COMPLETED</option>
+                        <option value="rejected">REJECTED</option>
+                      </select>
+                    </div>
+
+                    <div style={{ marginBottom: '28px' }}>
+                      <label style={{
+                        fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                        fontSize: '14px',
+                        fontWeight: '400',
+                        color: '#000000',
+                        display: 'block',
+                        marginBottom: '8px'
+                      }}>
+                        REPLY MESSAGE
+                      </label>
+                      <textarea
+                        value={replyText}
+                        onChange={(e) => setReplyText(e.target.value)}
+                        placeholder="Write your reply here..."
+                        rows={5}
+                        style={{
+                          width: '100%',
+                          padding: '12px 16px',
+                          borderRadius: '0',
+                          border: '1px solid #cccccc',
+                          fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                          fontSize: '14px',
+                          resize: 'vertical',
+                          backgroundColor: '#ffffff'
+                        }}
+                      />
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '16px' }}>
+                      <button
+                        onClick={() => {
+                          setShowReplyModal(false);
+                          setSelectedSubmission(null);
+                          setReplyText("");
+                        }}
+                        style={{
+                          flex: 1,
+                          padding: '14px',
+                          borderRadius: '0',
+                          border: '1px solid #000000',
+                          backgroundColor: 'transparent',
+                          color: '#000000',
+                          fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                          fontSize: '16px',
+                          fontWeight: '400',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        CANCEL
+                      </button>
+                      <button
+                        onClick={handleAdminReply}
+                        style={{
+                          flex: 1,
+                          padding: '14px',
+                          borderRadius: '0',
+                          border: '1px solid #000000',
+                          backgroundColor: '#000000',
+                          color: '#ffffff',
+                          fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                          fontSize: '16px',
+                          fontWeight: '400',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        SEND REPLY
+                      </button>
+                    </div>
                   </div>
-
-                  <button ref={calendarBtnRef} onClick={handleCalendarCall} className="calendar-btn">
-                    <ArrowIcon size={24} />
-                    Calendar call
-                  </button>
                 </div>
+              )}
 
+              {/* Bagian footer */}
+              <div style={{
+                width: '100%',
+                position: 'relative',
+                backgroundColor: 'white',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'flex-end',
+                alignItems: 'center',
+                minHeight: '60vh'
+              }}>
                 <div
-                  ref={profileRef}
+                  ref={bottomContentRef}
                   style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'flex-start',
-                    gap: '24px',
                     width: '100%',
-                    marginTop: '10px'
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'flex-start',
+                    gap: '40px',
+                    marginBottom: '80px',
+                    paddingLeft: '80px',
+                    opacity: 0
                   }}
                 >
                   <div style={{
-                    width: '80px',
-                    height: '100px',
-                    borderRadius: '12px',
-                    overflow: 'hidden',
-                    position: 'relative',
-                    border: '2px solid #e0e0e0'
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
                   }}>
-                    <Image
-                      src="/images/5.jpg"
-                      alt="Farid Ardiansyah"
-                      fill
-                      style={{ objectFit: 'cover', objectPosition: 'center' }}
-                    />
+                    <div
+                      ref={mencatatTextRef}
+                      style={{
+                        fontSize: '64px',
+                        fontFamily: 'Questrial, sans-serif',
+                        color: 'black',
+                        textAlign: 'left',
+                        fontWeight: '400',
+                        letterSpacing: '-0.02em',
+                        lineHeight: '1.2',
+                        whiteSpace: 'nowrap'
+                      }}>
+                      Mencatat apa yang kamu inginkan
+                    </div>
+                    <span style={{
+                      fontSize: '80px',
+                      color: 'black',
+                      fontWeight: '400',
+                      lineHeight: '1'
+                    }}>.</span>
+                  </div>
+
+                  <Link href="/contact">
+                    <button
+                      ref={contactBtnRef}
+                      onClick={handleContact}
+                      className="contact-btn-effect"
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '16px',
+                        padding: '14px 36px',
+                        borderRadius: '60px',
+                        cursor: 'pointer',
+                        fontSize: '20px',
+                        fontWeight: '600',
+                        letterSpacing: '-0.01em',
+                        fontFamily: 'Questrial, sans-serif',
+                        transition: 'all 0.3s ease',
+                        position: 'relative',
+                        overflow: 'hidden',
+                        zIndex: 1,
+                        border: '1.5px solid #cccccc',
+                        backgroundColor: '#ffffff',
+                        color: '#000000'
+                      }}
+                    >
+                      <span ref={contactTextRef}>Contact</span>
+
+                      <div style={{
+                        position: 'relative',
+                        width: '40px',
+                        height: '40px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}>
+                        <div className="dot-small" style={{
+                          width: '8px',
+                          height: '8px',
+                          borderRadius: '50%',
+                          backgroundColor: '#000000',
+                          opacity: 1,
+                          transform: 'scale(1)',
+                          transition: 'opacity 0.3s ease, transform 0.3s ease',
+                          position: 'absolute'
+                        }}></div>
+
+                        <div className="circle-large-white" style={{
+                          position: 'absolute',
+                          width: '40px',
+                          height: '40px',
+                          borderRadius: '50%',
+                          backgroundColor: '#000000',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          opacity: 0,
+                          transform: 'scale(0.8)',
+                          transition: 'opacity 0.3s ease, transform 0.3s ease, background-color 0.3s ease'
+                        }}>
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </div>
+                      </div>
+                    </button>
+                  </Link>
+
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '30px',
+                    flexWrap: 'wrap',
+                    width: '100%'
+                  }}>
+                    <div ref={callTextRef} className="call-farid-text">
+                      <div>Ready to surpass your</div>
+                      <div>wildest dreams?</div>
+                      <div>Call Farid.</div>
+                    </div>
+
+                    <button ref={calendarBtnRef} onClick={handleCalendarCall} className="calendar-btn">
+                      <ArrowIcon size={24} />
+                      Calendar call
+                    </button>
+                  </div>
+
+                  <div
+                    ref={profileRef}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'flex-start',
+                      gap: '24px',
+                      width: '100%',
+                      marginTop: '10px'
+                    }}
+                  >
+                    <div style={{
+                      width: '80px',
+                      height: '100px',
+                      borderRadius: '12px',
+                      overflow: 'hidden',
+                      position: 'relative',
+                      border: '2px solid #e0e0e0'
+                    }}>
+                      <Image
+                        src="/images/5.jpg"
+                        alt="Farid Ardiansyah"
+                        fill
+                        style={{ objectFit: 'cover', objectPosition: 'center' }}
+                      />
+                    </div>
+
+                    <div style={{
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '40px',
+                      fontWeight: '400',
+                      color: 'rgb(16, 16, 16)',
+                      letterSpacing: '-0.02em'
+                    }}>
+                      Farid Ardiansyah
+                    </div>
+
+                    <div className="badge-founder">
+                      Founder & Programmer
+                    </div>
+                  </div>
+                </div>
+
+                {/* Email dan Social Media Section */}
+                <div style={{
+                  position: 'relative',
+                  width: '100%',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'flex-end',
+                  padding: '0 80px',
+                  marginBottom: '30px',
+                  boxSizing: 'border-box'
+                }}>
+                  <div
+                    ref={emailRef}
+                    onClick={handleEmailClick}
+                    className="email-wrapper"
+                    style={{ marginBottom: '20px' }}
+                  >
+                    <ArrowIcon size={24} />
+                    <span className="email-text">contact.menuru@gmail.com</span>
                   </div>
 
                   <div style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '40px',
-                    fontWeight: '400',
-                    color: 'rgb(16, 16, 16)',
-                    letterSpacing: '-0.02em'
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '8px',
+                    position: 'absolute',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    marginBottom: '20px'
                   }}>
-                    Farid Ardiansyah
-                  </div>
+                    <div
+                      className="social-item"
+                      style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
+                      onMouseEnter={(e) => {
+                        const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
+                        if (textElement) handleSocialHover(textElement, originalTexts.ig);
+                      }}
+                      onMouseLeave={(e) => {
+                        const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
+                        if (textElement) handleSocialLeave(textElement, originalTexts.ig);
+                      }}
+                      onClick={() => handleSocialClick('Instagram')}
+                    >
+                      <span ref={igRef} className="social-text" style={{
+                        fontFamily: "'Questrial', sans-serif",
+                        fontSize: '28px',
+                        color: '#000000',
+                        fontWeight: '400',
+                        letterSpacing: '0.02em'
+                      }}>Instagram</span>
+                    </div>
 
-                  <div className="badge-founder">
-                    Founder & Programmer
+                    <div
+                      className="social-item"
+                      style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
+                      onMouseEnter={(e) => {
+                        const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
+                        if (textElement) handleSocialHover(textElement, originalTexts.x);
+                      }}
+                      onMouseLeave={(e) => {
+                        const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
+                        if (textElement) handleSocialLeave(textElement, originalTexts.x);
+                      }}
+                      onClick={() => handleSocialClick('X')}
+                    >
+                      <span ref={xRef} className="social-text" style={{
+                        fontFamily: "'Questrial', sans-serif",
+                        fontSize: '28px',
+                        color: '#000000',
+                        fontWeight: '400',
+                        letterSpacing: '0.02em'
+                      }}>X</span>
+                    </div>
+
+                    <div
+                      className="social-item"
+                      style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
+                      onMouseEnter={(e) => {
+                        const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
+                        if (textElement) handleSocialHover(textElement, originalTexts.linkedin);
+                      }}
+                      onMouseLeave={(e) => {
+                        const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
+                        if (textElement) handleSocialLeave(textElement, originalTexts.linkedin);
+                      }}
+                      onClick={() => handleSocialClick('LinkedIn')}
+                    >
+                      <span ref={linkedinRef} className="social-text" style={{
+                        fontFamily: "'Questrial', sans-serif",
+                        fontSize: '28px',
+                        color: '#000000',
+                        fontWeight: '400',
+                        letterSpacing: '0.02em'
+                      }}>LinkedIn</span>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Email dan Social Media Section */}
-              <div style={{
-                position: 'relative',
-                width: '100%',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'flex-end',
-                padding: '0 80px',
-                marginBottom: '30px',
-                boxSizing: 'border-box'
-              }}>
-                <div
-                  ref={emailRef}
-                  onClick={handleEmailClick}
-                  className="email-wrapper"
-                  style={{ marginBottom: '20px' }}
-                >
-                  <ArrowIcon size={24} />
-                  <span className="email-text">contact.menuru@gmail.com</span>
-                </div>
-
-                <div style={{
+                <footer style={{
+                  position: 'relative',
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  width: '100%',
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '8px',
-                  position: 'absolute',
-                  left: '50%',
-                  transform: 'translateX(-50%)',
-                  marginBottom: '20px'
+                  alignItems: 'flex-end',
+                  padding: '0 80px 0 0',
+                  margin: 0,
+                  pointerEvents: 'none',
+                  zIndex: 1,
+                  marginTop: '40px'
                 }}>
-                  <div
-                    className="social-item"
-                    style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
-                    onMouseEnter={(e) => {
-                      const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                      if (textElement) handleSocialHover(textElement, originalTexts.ig);
-                    }}
-                    onMouseLeave={(e) => {
-                      const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                      if (textElement) handleSocialLeave(textElement, originalTexts.ig);
-                    }}
-                    onClick={() => handleSocialClick('Instagram')}
-                  >
-                    <span ref={igRef} className="social-text" style={{
-                      fontFamily: "'Questrial', sans-serif",
-                      fontSize: '28px',
+                  <span
+                    ref={menuruTextRef}
+                    style={{
+                      fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
+                      fontWeight: 'normal',
+                      fontSize: '600px',
                       color: '#000000',
-                      fontWeight: '400',
-                      letterSpacing: '0.02em'
-                    }}>Instagram</span>
-                  </div>
-
-                  <div
-                    className="social-item"
-                    style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
-                    onMouseEnter={(e) => {
-                      const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                      if (textElement) handleSocialHover(textElement, originalTexts.x);
-                    }}
-                    onMouseLeave={(e) => {
-                      const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                      if (textElement) handleSocialLeave(textElement, originalTexts.x);
-                    }}
-                    onClick={() => handleSocialClick('X')}
-                  >
-                    <span ref={xRef} className="social-text" style={{
-                      fontFamily: "'Questrial', sans-serif",
-                      fontSize: '28px',
-                      color: '#000000',
-                      fontWeight: '400',
-                      letterSpacing: '0.02em'
-                    }}>X</span>
-                  </div>
-
-                  <div
-                    className="social-item"
-                    style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
-                    onMouseEnter={(e) => {
-                      const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                      if (textElement) handleSocialHover(textElement, originalTexts.linkedin);
-                    }}
-                    onMouseLeave={(e) => {
-                      const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                      if (textElement) handleSocialLeave(textElement, originalTexts.linkedin);
-                    }}
-                    onClick={() => handleSocialClick('LinkedIn')}
-                  >
-                    <span ref={linkedinRef} className="social-text" style={{
-                      fontFamily: "'Questrial', sans-serif",
-                      fontSize: '28px',
-                      color: '#000000',
-                      fontWeight: '400',
-                      letterSpacing: '0.02em'
-                    }}>LinkedIn</span>
-                  </div>
-                </div>
+                      textAlign: 'right',
+                      letterSpacing: '-0.02em',
+                      opacity: 1,
+                      textTransform: 'uppercase',
+                      lineHeight: '0.7',
+                      whiteSpace: 'nowrap',
+                      WebkitFontSmoothing: 'antialiased',
+                      MozOsxFontSmoothing: 'grayscale',
+                      fontKerning: 'normal',
+                      margin: 0,
+                      padding: 0,
+                      marginRight: '0',
+                      backgroundColor: 'transparent'
+                    }}>
+                    MENURU
+                  </span>
+                </footer>
               </div>
-
-              <footer style={{
-                position: 'relative',
-                bottom: 0,
-                left: 0,
-                right: 0,
-                width: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'flex-end',
-                padding: '0 80px 0 0',
-                margin: 0,
-                pointerEvents: 'none',
-                zIndex: 1,
-                marginTop: '40px'
-              }}>
-                <span
-                  ref={menuruTextRef}
-                  style={{
-                    fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
-                    fontWeight: 'normal',
-                    fontSize: '600px',
-                    color: '#000000',
-                    textAlign: 'right',
-                    letterSpacing: '-0.02em',
-                    opacity: 1,
-                    textTransform: 'uppercase',
-                    lineHeight: '0.7',
-                    whiteSpace: 'nowrap',
-                    WebkitFontSmoothing: 'antialiased',
-                    MozOsxFontSmoothing: 'grayscale',
-                    fontKerning: 'normal',
-                    margin: 0,
-                    padding: 0,
-                    marginRight: '0',
-                    backgroundColor: 'transparent'
-                  }}>
-                  MENURU
-                </span>
-              </footer>
             </div>
           </div>
         </div>
       </div>
-        </div>  {/* TUTUP WRAPPER */}
-
-
-
-
-
-
-
-
-
-      
 
       {/* SHADOW PAGE */}
       <div
