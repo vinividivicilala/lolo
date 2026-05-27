@@ -272,8 +272,9 @@ const StatusIcon = ({ status }: { status: string }) => (
   </svg>
 );
 
-const VerifiedBadge = ({ size = 20, showTooltip = true }: { size?: number; showTooltip?: boolean }) => {
-  const [showTooltipState, setShowTooltipState] = useState(false);
+// Verified Badge dengan teks "AKUN RESMI" besar dan warna hitam
+const VerifiedBadge = ({ size = 20, showLabel = true }: { size?: number; showLabel?: boolean }) => {
+  const [showTooltip, setShowTooltip] = useState(false);
   
   return (
     <div 
@@ -282,9 +283,10 @@ const VerifiedBadge = ({ size = 20, showTooltip = true }: { size?: number; showT
         display: 'inline-flex',
         alignItems: 'center',
         cursor: 'help',
+        gap: showLabel ? '8px' : '0',
       }}
-      onMouseEnter={() => showTooltip && setShowTooltipState(true)}
-      onMouseLeave={() => showTooltip && setShowTooltipState(false)}
+      onMouseEnter={() => setShowTooltip(true)}
+      onMouseLeave={() => setShowTooltip(false)}
     >
       <svg 
         width={size} 
@@ -303,17 +305,29 @@ const VerifiedBadge = ({ size = 20, showTooltip = true }: { size?: number; showT
         />
       </svg>
       
-      {showTooltip && showTooltipState && (
+      {showLabel && (
+        <span style={{
+          fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+          fontSize: size === 20 ? '14px' : size === 30 ? '20px' : '12px',
+          fontWeight: '500',
+          color: '#000000',
+          letterSpacing: '0.5px',
+        }}>
+          AKUN RESMI
+        </span>
+      )}
+      
+      {showTooltip && (
         <div style={{
           position: 'absolute',
           bottom: '100%',
           left: '50%',
           transform: 'translateX(-50%) translateY(-8px)',
-          backgroundColor: '#1D9BF0',
+          backgroundColor: '#000000',
           color: '#ffffff',
-          padding: '6px 14px',
+          padding: '8px 16px',
           borderRadius: '8px',
-          fontSize: '12px',
+          fontSize: '14px',
           fontFamily: "'Questrial', sans-serif",
           fontWeight: '500',
           whiteSpace: 'nowrap',
@@ -328,9 +342,9 @@ const VerifiedBadge = ({ size = 20, showTooltip = true }: { size?: number; showT
             transform: 'translateX(-50%)',
             width: 0,
             height: 0,
-            borderLeft: '5px solid transparent',
-            borderRight: '5px solid transparent',
-            borderTop: '5px solid #1D9BF0',
+            borderLeft: '6px solid transparent',
+            borderRight: '6px solid transparent',
+            borderTop: '6px solid #000000',
           }} />
         </div>
       )}
@@ -338,10 +352,11 @@ const VerifiedBadge = ({ size = 20, showTooltip = true }: { size?: number; showT
   );
 };
 
-// Download PDF component for donation receipt
+// Download PDF button component
 const DownloadPDFButton = ({ donation, onClose }: { donation: Donation; onClose?: () => void }) => {
+  const [isHovered, setIsHovered] = useState(false);
+  
   const handleDownload = () => {
-    // Create HTML content for PDF
     const donationDate = donation.createdAt?.toDate ? donation.createdAt.toDate() : new Date();
     const content = `
       <!DOCTYPE html>
@@ -442,15 +457,15 @@ const DownloadPDFButton = ({ donation, onClose }: { donation: Donation; onClose?
           <h3>Informasi Donatur</h3>
           <div class="info-row">
             <span class="label">Nama Donatur:</span>
-            <span>${donation.donorName}</span>
+            <span>Farid Ardiansyah</span>
           </div>
           <div class="info-row">
             <span class="label">Email:</span>
-            <span>${donation.donorEmail || '-'}</span>
+            <span>faridardiansyah061@gmail.com</span>
           </div>
           <div class="info-row">
             <span class="label">Tanggal Donasi:</span>
-            <span>${donationDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+            <span>30 Mei 2026</span>
           </div>
           <div class="info-row">
             <span class="label">Status:</span>
@@ -482,7 +497,6 @@ const DownloadPDFButton = ({ donation, onClose }: { donation: Donation; onClose?
         <div class="footer">
           <p>Menuru Studio - Jakarta, Indonesia</p>
           <p>© 2026 Menuru. All rights reserved.</p>
-          <p>Dokumen ini adalah bukti sah donasi dari Menuru Studio.</p>
         </div>
       </body>
       </html>
@@ -492,7 +506,7 @@ const DownloadPDFButton = ({ donation, onClose }: { donation: Donation; onClose?
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `Donation_Receipt_${donationDate.toISOString().split('T')[0]}.html`;
+    a.download = `Donation_Receipt_30_Mei_2026.html`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -504,69 +518,131 @@ const DownloadPDFButton = ({ donation, onClose }: { donation: Donation; onClose?
   return (
     <button
       onClick={handleDownload}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       style={{
         display: 'inline-flex',
         alignItems: 'center',
-        gap: '10px',
-        padding: '12px 24px',
-        backgroundColor: '#1D9BF0',
+        gap: '12px',
+        padding: '14px 28px',
+        backgroundColor: isHovered ? '#1a1a1a' : '#000000',
         color: '#ffffff',
         border: 'none',
         borderRadius: '60px',
         cursor: 'pointer',
-        fontFamily: "'Questrial', sans-serif",
-        fontSize: '16px',
+        fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+        fontSize: '18px',
         fontWeight: '500',
         transition: 'all 0.2s ease',
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.backgroundColor = '#0c85d0';
-        e.currentTarget.style.transform = 'scale(1.02)';
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.backgroundColor = '#1D9BF0';
-        e.currentTarget.style.transform = 'scale(1)';
+        boxShadow: isHovered ? '0 8px 20px rgba(0,0,0,0.2)' : 'none',
+        transform: isHovered ? 'scale(1.02)' : 'scale(1)',
       }}
     >
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M12 3v12m0 0l-3-3m3 3l3-3M5 17v2a2 2 0 002 2h10a2 2 0 002-2v-2" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
       </svg>
-      Download PDF Donasi
+      <span>Download PDF Donasi</span>
     </button>
   );
 };
 
-// Schedule item component for 30 May 2026
-const ScheduleItem = ({ time, activity, isLast }: { time: string; activity: string; isLast?: boolean }) => (
-  <div style={{
-    display: 'flex',
-    alignItems: 'center',
-    gap: '20px',
-    padding: '16px 0',
-    borderBottom: isLast ? 'none' : '1px solid rgba(0,0,0,0.1)',
-  }}>
+// Schedule dropdown component untuk 30 Mei 2026
+const ScheduleDropdown = ({ isOpen, onToggle }: { isOpen: boolean; onToggle: () => void }) => {
+  const scheduleData = [
+    { time: "08:00 - 09:00", activity: "Persiapan dan Pembukaan Acara" },
+    { time: "09:00 - 10:30", activity: "Penyerahan Sembako Batch 1" },
+    { time: "10:30 - 12:00", activity: "Penyerahan Sembako Batch 2" },
+    { time: "12:00 - 13:00", activity: "Istirahat & Makan Siang" },
+    { time: "13:00 - 14:30", activity: "Penyerahan Sembako Batch 3" },
+    { time: "14:30 - 16:00", activity: "Penyerahan Sembako Batch 4" },
+    { time: "16:00 - 17:00", activity: "Doa Bersama & Penutupan" },
+  ];
+
+  return (
     <div style={{
-      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-      fontSize: '24px',
-      fontWeight: '500',
-      color: '#1D9BF0',
-      minWidth: '100px',
+      marginTop: '20px',
+      marginBottom: '30px',
+      borderRadius: '20px',
+      overflow: 'hidden',
+      backgroundColor: '#f8f8f8',
+      border: isOpen ? '1px solid #e0e0e0' : 'none',
     }}>
-      {time}
+      <button
+        onClick={onToggle}
+        style={{
+          width: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '16px 24px',
+          backgroundColor: isOpen ? '#1a1a1a' : '#f0f0f0',
+          border: 'none',
+          cursor: 'pointer',
+          fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+          fontSize: '18px',
+          fontWeight: '500',
+          color: isOpen ? '#ffffff' : '#000000',
+          transition: 'all 0.2s ease',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke="currentColor" strokeWidth="1.5"/>
+            <line x1="8" y1="2" x2="8" y2="6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+            <line x1="16" y1="2" x2="16" y2="6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+            <line x1="3" y1="10" x2="21" y2="10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+          </svg>
+          <span>Rundown Kegiatan - 30 Mei 2026</span>
+        </div>
+        <svg 
+          width="24" 
+          height="24" 
+          viewBox="0 0 24 24" 
+          fill="none" 
+          xmlns="http://www.w3.org/2000/svg"
+          style={{ transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s ease' }}
+        >
+          <path d="M6 9L12 15L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </button>
+      
+      {isOpen && (
+        <div style={{ padding: '20px 24px', animation: 'modalFadeIn 0.2s ease' }}>
+          {scheduleData.map((item, idx) => (
+            <div key={idx} style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '24px',
+              padding: '14px 0',
+              borderBottom: idx < scheduleData.length - 1 ? '1px solid #e0e0e0' : 'none',
+            }}>
+              <div style={{
+                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                fontSize: '16px',
+                fontWeight: '600',
+                color: '#1D9BF0',
+                minWidth: '140px',
+              }}>
+                {item.time}
+              </div>
+              <div style={{
+                fontFamily: "'Questrial', sans-serif",
+                fontSize: '16px',
+                color: '#333333',
+                flex: 1,
+              }}>
+                {item.activity}
+              </div>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#999999" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
-    <div style={{
-      fontFamily: "'Questrial', sans-serif",
-      fontSize: '20px',
-      color: '#000000',
-      flex: 1,
-    }}>
-      {activity}
-    </div>
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
-  </div>
-);
+  );
+};
 
 // Reply modal for photo comments
 const ReplyCommentModal = ({ 
@@ -639,7 +715,7 @@ const ReplyCommentModal = ({
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
             <span style={{ fontFamily: "'Aeonik-Regular'", fontWeight: '600', fontSize: '14px' }}>{comment.userName}</span>
-            <VerifiedBadge size={14} showTooltip={false} />
+            <VerifiedBadge size={14} showLabel={false} />
           </div>
           <div style={{ fontFamily: "'Questrial'", fontSize: '14px', color: '#333' }}>{comment.text}</div>
         </div>
@@ -684,7 +760,7 @@ const ReplyCommentModal = ({
               padding: '10px 24px',
               borderRadius: '60px',
               border: 'none',
-              backgroundColor: replyText.trim() ? '#1D9BF0' : '#cccccc',
+              backgroundColor: replyText.trim() ? '#000000' : '#cccccc',
               color: '#ffffff',
               cursor: replyText.trim() ? 'pointer' : 'not-allowed',
               fontFamily: "'Questrial', sans-serif",
@@ -761,8 +837,6 @@ export default function HomePage(): React.JSX.Element {
   const [commentText, setCommentText] = useState("");
   const [donationCommentTarget, setDonationCommentTarget] = useState<string | null>(null);
   const [replyToComment, setReplyToComment] = useState<DonationComment | null>(null);
-  const [showPDFDownload, setShowPDFDownload] = useState(false);
-  const [selectedDonationForPDF, setSelectedDonationForPDF] = useState<Donation | null>(null);
 
   // State untuk Community
   const [communities, setCommunities] = useState<Community[]>([]);
@@ -879,16 +953,6 @@ export default function HomePage(): React.JSX.Element {
   const [nowPlaying, setNowPlaying] = useState<string | null>(null);
   const [nowPlayingUser, setNowPlayingUser] = useState<string | null>(null);
   const [playHistory, setPlayHistory] = useState<PlayHistoryItem[]>([]);
-
-  const scheduleData = [
-    { time: "08:00 - 09:00", activity: "Persiapan dan Pembukaan" },
-    { time: "09:00 - 10:30", activity: "Penyerahan Sembako Batch 1" },
-    { time: "10:30 - 12:00", activity: "Penyerahan Sembako Batch 2" },
-    { time: "12:00 - 13:00", activity: "Istirahat & Makan Siang" },
-    { time: "13:00 - 14:30", activity: "Penyerahan Sembako Batch 3" },
-    { time: "14:30 - 16:00", activity: "Penyerahan Sembako Batch 4" },
-    { time: "16:00 - 17:00", activity: "Doa Bersama & Penutup" },
-  ];
 
   const carouselItems = [
     {
@@ -1050,7 +1114,6 @@ export default function HomePage(): React.JSX.Element {
       if (db) {
         const calendarRef = collection(db, "calendar_submissions");
         await addDoc(calendarRef, submissionData);
-
         alert(`JADWAL MEETING BERHASIL DISIMPAN!\n\nTanggal: ${submissionData.selectedDateFormatted}\nWaktu: ${selectedTime} WIB\n\nAdmin akan menghubungi Anda maksimal 1x24 jam.`);
       } else {
         alert("Database tidak tersedia. Silakan coba lagi.");
@@ -1092,7 +1155,6 @@ export default function HomePage(): React.JSX.Element {
           repliedBy: user?.displayName || "ADMIN"
         }
       });
-
       setShowReplyModal(false);
       setSelectedSubmission(null);
       setReplyText("");
@@ -1141,7 +1203,6 @@ export default function HomePage(): React.JSX.Element {
       const updatedComments = [...currentComments, newComment];
       
       await updateDoc(donationRef, { comments: updatedComments });
-      
       setReplyToComment(null);
     } catch (error) {
       console.error("Error adding reply:", error);
@@ -1167,7 +1228,6 @@ export default function HomePage(): React.JSX.Element {
         songArtist: songArtist,
         timestamp: serverTimestamp(),
       });
-      
       setNowPlaying(songTitle);
       setNowPlayingUser(user.displayName || user.email?.split('@')[0] || "User");
     } catch (error) {
@@ -1260,7 +1320,6 @@ export default function HomePage(): React.JSX.Element {
         createdAt: serverTimestamp(),
         comments: []
       });
-
       alert("Terima kasih atas donasi Anda!");
       setShowDonationModal(false);
       setDonationAmount("");
@@ -1304,7 +1363,6 @@ export default function HomePage(): React.JSX.Element {
       const updatedComments = [...currentComments, newComment];
       
       await updateDoc(donationRef, { comments: updatedComments });
-      
       setCommentText("");
       setDonationCommentTarget(null);
     } catch (error) {
@@ -3318,15 +3376,9 @@ export default function HomePage(): React.JSX.Element {
   const displayCommunities = communities.length > 0 ? communities : defaultCommunities.map((c, idx) => ({ ...c, id: idx.toString(), members: [], memberCount: 0 }));
   const totalDonations = donations.reduce((sum, d) => sum + (d.amount || 0), 0);
 
-  // REPLACE the DONATION SECTION with the updated one that includes PDF download and schedule detail
-
-  // For brevity, I'll show the key changes for the donation section:
-  // The donation section now includes a Download PDF button in the modal and a clickable schedule on 30 May 2026
-
   return (
     <>
       <style jsx global>{`
-        /* ... same styles as before ... */
         @import url('https://fonts.googleapis.com/css2?family=Questrial&display=swap');
 
         @font-face {
@@ -4934,7 +4986,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             )}
 
-            {/* DONATION SECTION - UPDATED WITH PDF DOWNLOAD AND CLICKABLE SCHEDULE */}
+            {/* DONATION SECTION - UPDATED WITH PDF DOWNLOAD AND SCHEDULE DROPDOWN */}
             {!isLoading && (
               <div
                 ref={donationSectionRef}
@@ -5034,31 +5086,17 @@ export default function HomePage(): React.JSX.Element {
                             }}>
                               {String(idx + 1).padStart(2, '0')}
                             </div>
-                            {/* Clickable date that opens schedule detail */}
-                            <div 
-                              style={{
-                                display: 'inline-block',
-                                padding: '12px 24px',
-                                backgroundColor: '#2563EB',
-                                borderRadius: '40px',
-                                marginTop: '10px',
-                                cursor: 'pointer',
-                                transition: 'transform 0.2s, box-shadow 0.2s',
-                              }}
-                              onClick={() => setShowScheduleDetail(!showScheduleDetail)}
-                              onMouseEnter={(e) => {
-                                e.currentTarget.style.transform = 'scale(1.05)';
-                                e.currentTarget.style.boxShadow = '0 8px 20px rgba(37,99,235,0.3)';
-                              }}
-                              onMouseLeave={(e) => {
-                                e.currentTarget.style.transform = 'scale(1)';
-                                e.currentTarget.style.boxShadow = 'none';
-                              }}
-                            >
+                            <div style={{
+                              display: 'inline-block',
+                              padding: '12px 24px',
+                              backgroundColor: '#2563EB',
+                              borderRadius: '40px',
+                              marginTop: '10px',
+                            }}>
                               <div style={{
                                 display: 'flex',
                                 alignItems: 'center',
-                                gap: '12px',
+                                gap: '8px',
                               }}>
                                 <div style={{
                                   fontFamily: "'Questrial', sans-serif",
@@ -5069,9 +5107,6 @@ export default function HomePage(): React.JSX.Element {
                                 }}>
                                   30 Mei 2026
                                 </div>
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                  <path d="M9 18L15 12L9 6" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                </svg>
                               </div>
                             </div>
                           </div>
@@ -5162,7 +5197,7 @@ export default function HomePage(): React.JSX.Element {
                                 }}>
                                   {donorName}
                                 </div>
-                                <VerifiedBadge size={30} showTooltip={true} />
+                                <VerifiedBadge size={30} showLabel={true} />
                               </div>
                             </div>
 
@@ -5193,7 +5228,7 @@ export default function HomePage(): React.JSX.Element {
                             </div>
 
                             <div style={{
-                              marginBottom: '50px',
+                              marginBottom: '30px',
                               padding: '30px',
                               backgroundColor: '#f8f8f8',
                               borderRadius: '20px',
@@ -5251,54 +5286,11 @@ export default function HomePage(): React.JSX.Element {
                               </div>
                             </div>
 
-                            {/* Schedule Detail that appears when date is clicked */}
-                            {showScheduleDetail && (
-                              <div style={{
-                                marginBottom: '40px',
-                                padding: '30px',
-                                backgroundColor: '#1a1a1a',
-                                borderRadius: '20px',
-                                animation: 'modalFadeIn 0.3s ease',
-                              }}>
-                                <div style={{
-                                  display: 'flex',
-                                  justifyContent: 'space-between',
-                                  alignItems: 'center',
-                                  marginBottom: '24px',
-                                }}>
-                                  <div style={{
-                                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                                    fontSize: '28px',
-                                    fontWeight: '500',
-                                    color: '#ffffff',
-                                  }}>
-                                    📋 Rundown Kegiatan - 30 Mei 2026
-                                  </div>
-                                  <button
-                                    onClick={() => setShowScheduleDetail(false)}
-                                    style={{
-                                      background: 'none',
-                                      border: 'none',
-                                      color: '#ffffff',
-                                      fontSize: '24px',
-                                      cursor: 'pointer',
-                                    }}
-                                  >
-                                    ✕
-                                  </button>
-                                </div>
-                                <div>
-                                  {scheduleData.map((item, idx) => (
-                                    <ScheduleItem
-                                      key={idx}
-                                      time={item.time}
-                                      activity={item.activity}
-                                      isLast={idx === scheduleData.length - 1}
-                                    />
-                                  ))}
-                                </div>
-                              </div>
-                            )}
+                            {/* Schedule Dropdown for 30 May 2026 */}
+                            <ScheduleDropdown 
+                              isOpen={showScheduleDetail} 
+                              onToggle={() => setShowScheduleDetail(!showScheduleDetail)} 
+                            />
 
                             {/* 4 FOTO */}
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px' }}>
@@ -5391,7 +5383,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             )}
 
-            {/* MODAL UNTUK FOTO - dengan judul Galeri Donasi dan Reply Komentar yang sudah diperbaiki */}
+            {/* MODAL UNTUK FOTO - dengan Verified Badge yang sudah diperbaiki dan Reply Komentar */}
             {selectedDonation && (
               <div style={{
                 position: 'fixed',
@@ -5454,7 +5446,7 @@ export default function HomePage(): React.JSX.Element {
                           }}>
                             Farid Ardiansyah
                           </span>
-                          <VerifiedBadge size={20} showTooltip={true} />
+                          <VerifiedBadge size={20} showLabel={true} />
                           <span style={{
                             fontFamily: "'Questrial', sans-serif",
                             fontSize: '16px',
@@ -5578,14 +5570,13 @@ export default function HomePage(): React.JSX.Element {
                                 }}>
                                   {comment.userName || 'User'}
                                 </span>
-                                <VerifiedBadge size={14} showTooltip={true} />
+                                <VerifiedBadge size={14} showLabel={false} />
                                 <span style={{
                                   fontSize: '11px',
                                   color: '#999999',
                                 }}>
                                   {comment.createdAt ? (typeof comment.createdAt.toDate === 'function' ? formatTime(comment.createdAt) : '') : ''}
                                 </span>
-                                {/* Reply button on comment */}
                                 <button
                                   onClick={() => {
                                     if (user) {
@@ -5613,7 +5604,6 @@ export default function HomePage(): React.JSX.Element {
                                 </button>
                               </div>
                               
-                              {/* Show if this comment is a reply to another comment */}
                               {comment.replyTo && (
                                 <div style={{
                                   marginBottom: '8px',
@@ -5641,7 +5631,6 @@ export default function HomePage(): React.JSX.Element {
                       </div>
                     )}
 
-                    {/* Reply Modal */}
                     {replyToComment && (
                       <ReplyCommentModal
                         comment={replyToComment}
@@ -6345,7 +6334,7 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               )}
 
-              {/* Bagian footer */}
+              {/* Bagian footer - same as before */}
               <div style={{
                 width: '100%',
                 position: 'relative',
@@ -6668,7 +6657,7 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </div>
 
-      {/* SHADOW PAGE */}
+      {/* SHADOW PAGE - same as before */}
       <div
         ref={shadowPageRef}
         style={{
@@ -7341,7 +7330,7 @@ export default function HomePage(): React.JSX.Element {
         </div>
       )}
 
-      {/* CALENDAR CALL MODAL */}
+      {/* CALENDAR CALL MODAL - same as before */}
       {showCalendarModal && (
         <div className="calendar-modal-overlay">
           <div ref={modalRef} className="calendar-modal" style={{ maxWidth: '1300px', maxHeight: '85vh', overflow: 'auto' }}>
@@ -7352,6 +7341,7 @@ export default function HomePage(): React.JSX.Element {
                 height: 'auto',
                 minHeight: '620px'
               }}>
+                {/* Calendar modal content - same as original */}
                 <div style={{
                   flex: 1.1,
                   padding: '36px',
