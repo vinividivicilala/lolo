@@ -4228,6 +4228,8 @@ export default function HomePage(): React.JSX.Element {
                 MN'RU© - 26'
               </div>
 
+
+
 {/* ABOUT SECTION - Sejajar dalam satu baris */}
 <div
   style={{
@@ -4254,7 +4256,7 @@ export default function HomePage(): React.JSX.Element {
         color: '#000000',
         letterSpacing: '0.08em',
         textTransform: 'uppercase',
-        fontFamily: "'Questrial', sans-serif",
+        fontFamily: 'Questrial, sans-serif',
         whiteSpace: 'nowrap',
       }}
     >
@@ -4269,7 +4271,7 @@ export default function HomePage(): React.JSX.Element {
         fontWeight: 400,
         color: '#000000',
         letterSpacing: '-0.02em',
-        fontFamily: "'Questrial', sans-serif',
+        fontFamily: 'Questrial, sans-serif',
         flex: 1,
       }}
     >
@@ -4280,6 +4282,14 @@ export default function HomePage(): React.JSX.Element {
     </div>
   </div>
 
+
+
+
+
+
+
+
+              
               
          
               <div className="studio-hover-images">
