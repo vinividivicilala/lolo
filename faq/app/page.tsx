@@ -4251,7 +4251,7 @@ export default function HomePage(): React.JSX.Element {
     {/* TEXT ABOUT - 15px */}
     <div
       style={{
-        fontSize: '15px',
+        fontSize: '10px',
         fontWeight: 500,
         color: '#000000',
         letterSpacing: '0.08em',
@@ -4266,7 +4266,7 @@ export default function HomePage(): React.JSX.Element {
     {/* TEXT I AM - 20px */}
     <div
       style={{
-        fontSize: '20px',
+        fontSize: '30px',
         lineHeight: '1.4',
         fontWeight: 400,
         color: '#000000',
@@ -4275,10 +4275,8 @@ export default function HomePage(): React.JSX.Element {
         flex: 1,
       }}
     >
-      I am a developer based in Manchester, UK focused on creating
-      interactive digital experiences on the web, working with brands
-      and industry leaders such as Google Fonts, Paystack, Heva
-      Health, Disney, Jelly, and Null amongst others to achieve this.
+      I am a developer based in jakarta, jakarta focused on creating
+      interactive digital experiences on the web, working with brand personal others to achieve this.
     </div>
   </div>
     </div>
