@@ -4227,38 +4227,48 @@ export default function HomePage(): React.JSX.Element {
                 <br />
                 MN'RU© - 26'
               </div>
-               
-  {/* ABOUT di sisi kanan, sejajar dengan MN'RU© - 26' */}
-  <div style={{
-    position: 'absolute',
-    bottom: '5%',
-    right: '80px',
-    textAlign: 'right',
-    maxWidth: '500px',
-  }}>
-    <div style={{
-      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-      fontSize: '16px',
-      fontWeight: '400',
-      color: '#000000',
-      letterSpacing: '0.1em',
-      marginBottom: '16px',
-      textTransform: 'uppercase',
-    }}>
-      ABOUT
-    </div>
-    <div style={{
-      fontFamily: "'Questrial', sans-serif",
-      fontSize: '22px',
-      fontWeight: '400',
-      color: '#000000',
-      lineHeight: '1.4',
-      letterSpacing: '-0.01em',
-    }}>
-      I am a developer based in Manchester, UK focused on creating interactive digital experiences on the web, working with brands and industry leaders such as Google Fonts, Paystack, Heva Health, Disney, Jelly, and Null amongst others to achieve this.
-    </div>
-  </div>
 
+{/* SECTION ABOUT - Sejajar dengan MN'RU© - 26' */}
+<div style={{
+  position: 'absolute',
+  bottom: '5%',
+  right: '80px',
+  textAlign: 'right',
+}}>
+  <div style={{
+    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+    fontSize: '13px',
+    fontWeight: '400',
+    color: '#000000',
+    letterSpacing: '0.15em',
+    marginBottom: '20px',
+    textTransform: 'uppercase',
+  }}>
+    ABOUT
+  </div>
+  <div style={{
+    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+    fontSize: '18px',
+    fontWeight: '400',
+    color: '#000000',
+    lineHeight: '1.5',
+    letterSpacing: '0.02em',
+    maxWidth: '480px',
+  }}>
+    I am a developer based in<br />
+    Manchester, UK focused on creating<br />
+    interactive digital experiences on the<br />
+    web, working with brands and industry<br />
+    leaders such as <span style={{ fontWeight: '600' }}>GOOGLE FONTS</span>,<br />
+    <span style={{ fontWeight: '600' }}>PAYSTACK, HEVA HEALTH, DISNEY, JELLY,</span><br />
+    and <span style={{ fontWeight: '600' }}>NULL</span> amongst others to achieve this.
+  </div>
+</div>
+
+
+
+              
+         
               <div className="studio-hover-images">
                 <div
                   ref={img1Ref}
