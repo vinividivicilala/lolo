@@ -272,8 +272,8 @@ const StatusIcon = ({ status }: { status: string }) => (
   </svg>
 );
 
-// Verified Badge dengan teks "AKUN RESMI" besar dan warna hitam
-const VerifiedBadge = ({ size = 20, showLabel = true }: { size?: number; showLabel?: boolean }) => {
+// Verified Badge dengan tooltip teks besar 40px, tanpa label samping
+const VerifiedBadge = ({ size = 20 }: { size?: number }) => {
   const [showTooltip, setShowTooltip] = useState(false);
   
   return (
@@ -283,7 +283,6 @@ const VerifiedBadge = ({ size = 20, showLabel = true }: { size?: number; showLab
         display: 'inline-flex',
         alignItems: 'center',
         cursor: 'help',
-        gap: showLabel ? '8px' : '0',
       }}
       onMouseEnter={() => setShowTooltip(true)}
       onMouseLeave={() => setShowTooltip(false)}
@@ -305,18 +304,6 @@ const VerifiedBadge = ({ size = 20, showLabel = true }: { size?: number; showLab
         />
       </svg>
       
-      {showLabel && (
-        <span style={{
-          fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-          fontSize: size === 20 ? '14px' : size === 30 ? '20px' : '12px',
-          fontWeight: '500',
-          color: '#000000',
-          letterSpacing: '0.5px',
-        }}>
-          AKUN RESMI
-        </span>
-      )}
-      
       {showTooltip && (
         <div style={{
           position: 'absolute',
@@ -325,14 +312,15 @@ const VerifiedBadge = ({ size = 20, showLabel = true }: { size?: number; showLab
           transform: 'translateX(-50%) translateY(-8px)',
           backgroundColor: '#000000',
           color: '#ffffff',
-          padding: '8px 16px',
-          borderRadius: '8px',
-          fontSize: '14px',
-          fontFamily: "'Questrial', sans-serif",
+          padding: '12px 24px',
+          borderRadius: '12px',
+          fontSize: '40px',
+          fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
           fontWeight: '500',
           whiteSpace: 'nowrap',
           zIndex: 100,
           boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+          letterSpacing: '0.5px',
         }}>
           akun resmi
           <div style={{
@@ -342,9 +330,9 @@ const VerifiedBadge = ({ size = 20, showLabel = true }: { size?: number; showLab
             transform: 'translateX(-50%)',
             width: 0,
             height: 0,
-            borderLeft: '6px solid transparent',
-            borderRight: '6px solid transparent',
-            borderTop: '6px solid #000000',
+            borderLeft: '10px solid transparent',
+            borderRight: '10px solid transparent',
+            borderTop: '10px solid #000000',
           }} />
         </div>
       )}
