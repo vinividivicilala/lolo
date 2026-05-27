@@ -4228,47 +4228,56 @@ export default function HomePage(): React.JSX.Element {
                 MN'RU© - 26'
               </div>
 
-
-              {/* ABOUT SECTION - Teks kecil di atas, teks besar di bawah, posisi kanan bawah */}
+{/* ABOUT SECTION - Sejajar dalam satu baris */}
 <div
   style={{
     position: 'absolute',
     bottom: '5%',
     right: '80px',
     textAlign: 'left',
-    maxWidth: '550px',
+    maxWidth: '700px',
   }}
 >
-  {/* TEXT KECIL DI ATAS */}
   <div
     style={{
-      fontSize: '13px',
-      color: '#000000',
-      fontWeight: 500,
-      letterSpacing: '0.08em',
-      textTransform: 'uppercase',
-      marginBottom: '16px',
-      fontFamily: "'Questrial', sans-serif",
+      display: 'flex',
+      alignItems: 'baseline',
+      gap: '24px',
+      flexWrap: 'wrap',
     }}
   >
-    ABOUT
-  </div>
+    {/* TEXT ABOUT - 15px */}
+    <div
+      style={{
+        fontSize: '15px',
+        fontWeight: 500,
+        color: '#000000',
+        letterSpacing: '0.08em',
+        textTransform: 'uppercase',
+        fontFamily: "'Questrial', sans-serif",
+        whiteSpace: 'nowrap',
+      }}
+    >
+      ABOUT
+    </div>
 
-  {/* TEXT UTAMA DI BAWAH */}
-  <div
-    style={{
-      fontSize: '20px',
-      lineHeight: '1.5',
-      fontWeight: 400,
-      color: '#000000',
-      letterSpacing: '-0.02em',
-      fontFamily: "'Questrial', sans-serif",
-    }}
-  >
-    I am a developer based in Manchester, UK focused on creating
-    interactive digital experiences on the web, working with brands
-    and industry leaders such as Google Fonts, Paystack, Heva
-    Health, Disney, Jelly, and Null amongst others to achieve this.
+    {/* TEXT I AM - 20px */}
+    <div
+      style={{
+        fontSize: '20px',
+        lineHeight: '1.4',
+        fontWeight: 400,
+        color: '#000000',
+        letterSpacing: '-0.02em',
+        fontFamily: "'Questrial', sans-serif',
+        flex: 1,
+      }}
+    >
+      I am a developer based in Manchester, UK focused on creating
+      interactive digital experiences on the web, working with brands
+      and industry leaders such as Google Fonts, Paystack, Heva
+      Health, Disney, Jelly, and Null amongst others to achieve this.
+    </div>
   </div>
 </div>
 
