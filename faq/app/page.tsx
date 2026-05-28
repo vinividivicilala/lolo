@@ -703,7 +703,7 @@ const ReplyCommentModal = ({
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
             <span style={{ fontFamily: "'Aeonik-Regular'", fontWeight: '600', fontSize: '14px' }}>{comment.userName}</span>
-            <VerifiedBadge size={14} showLabel={false} />
+            <VerifiedBadge size={14} />
           </div>
           <div style={{ fontFamily: "'Questrial'", fontSize: '14px', color: '#333' }}>{comment.text}</div>
         </div>
@@ -3630,7 +3630,7 @@ export default function HomePage(): React.JSX.Element {
           z-index: 10000;
           display: flex;
           align-items: center;
-          justify-content: center;
+          justifyContent: 'center';
           animation: modalFadeIn 0.3s ease;
         }
 
@@ -4228,116 +4228,107 @@ export default function HomePage(): React.JSX.Element {
                 MN'RU© - 26'
               </div>
 
+              {/* ABOUT SECTION - Sejajar dalam satu baris */}
+              <div
+                style={{
+                  position: 'absolute',
+                  bottom: '5%',
+                  right: '80px',
+                  textAlign: 'left',
+                  maxWidth: '800px',
+                }}
+              >
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'baseline',
+                    gap: '24px',
+                    flexWrap: 'wrap',
+                  }}
+                >
+                  {/* TEXT ABOUT - 15px, hitam full */}
+                  <div
+                    style={{
+                      fontSize: '15px',
+                      fontWeight: 600,
+                      color: '#000000',
+                      letterSpacing: '0.08em',
+                      textTransform: 'uppercase',
+                      fontFamily: 'Questrial, sans-serif',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    ABOUT
+                  </div>
 
-{/* ABOUT SECTION - Sejajar dalam satu baris */}
-<div
-  style={{
-    position: 'absolute',
-    bottom: '5%',
-    right: '80px',
-    textAlign: 'left',
-    maxWidth: '800px',
-  }}
->
-  <div
-    style={{
-      display: 'flex',
-      alignItems: 'baseline',
-      gap: '24px',
-      flexWrap: 'wrap',
-    }}
-  >
-    {/* TEXT ABOUT - 15px, hitam full */}
-    <div
-      style={{
-        fontSize: '15px',
-        fontWeight: 600,
-        color: '#000000',
-        letterSpacing: '0.08em',
-        textTransform: 'uppercase',
-        fontFamily: 'Questrial, sans-serif',
-        whiteSpace: 'nowrap',
-      }}
-    >
-      ABOUT
-    </div>
+                  {/* TEXT I AM - 20px, hitam full */}
+                  <div
+                    style={{
+                      fontSize: '20px',
+                      lineHeight: '1.4',
+                      fontWeight: 400,
+                      color: '#000000',
+                      letterSpacing: '-0.02em',
+                      fontFamily: 'Questrial, sans-serif',
+                      flex: 1,
+                      display: 'flex',
+                      alignItems: 'baseline',
+                      flexWrap: 'wrap',
+                      gap: '12px',
+                    }}
+                  >
+                    <span>
+                      I am a developer based in Jakarta focused on creating
+                      interactive digital experiences on the web, working with brands
+                      and industry leaders such personal others to achieve this.
+                    </span>
+                    
+                    {/* PROFILE + ARROW - font 50px dengan Link */}
+                    <Link href="/profile">
+                      <div
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '12px',
+                          cursor: 'pointer',
+                          transition: 'opacity 0.2s ease',
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.opacity = '0.7'}
+                        onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+                      >
+                        <span
+                          style={{
+                            fontSize: '50px',
+                            fontWeight: 500,
+                            color: '#000000',
+                            fontFamily: 'Questrial, sans-serif',
+                            letterSpacing: '-0.02em',
+                          }}
+                        >
+                          Profile
+                        </span>
+                        <svg
+                          width="50"
+                          height="50"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                          style={{ stroke: '#000000', strokeWidth: '1.5' }}
+                        >
+                          <path
+                            d="M7 17L17 7M17 7H7M17 7V17"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      </div>
+                    </Link>
+                  </div>
+                </div>
+              </div>
 
-    {/* TEXT I AM - 20px, hitam full */}
-    <div
-      style={{
-        fontSize: '20px',
-        lineHeight: '1.4',
-        fontWeight: 400,
-        color: '#000000',
-        letterSpacing: '-0.02em',
-        fontFamily: 'Questrial, sans-serif',
-        flex: 1,
-        display: 'flex',
-        alignItems: 'baseline',
-        flexWrap: 'wrap',
-        gap: '12px',
-      }}
-    >
-      <span>
-        I am a developer based in Jakarta, Jakarta focused on creating
-        interactive digital experiences on the web, working with brands
-        and industry leaders such personal others to achieve this.
-      </span>
-      
-      {/* PROFILE + ARROW - font 50px dengan Link */}
-      <Link href="/profile">
-        <div
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '12px',
-            cursor: 'pointer',
-            transition: 'opacity 0.2s ease',
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.opacity = '0.7'}
-          onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
-        >
-          <span
-            style={{
-              fontSize: '50px',
-              fontWeight: 500,
-              color: '#000000',
-              fontFamily: 'Questrial, sans-serif',
-              letterSpacing: '-0.02em',
-            }}
-          >
-            Profile
-          </span>
-          <svg
-            width="50"
-            height="50"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            style={{ stroke: '#000000', strokeWidth: '1.5' }}
-          >
-            <path
-              d="M7 17L17 7M17 7H7M17 7V17"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </div>
-      </Link>
-    </div>
-  </div>
-</div>
-
-
-
-
-
-
-              
-              
-         
               <div className="studio-hover-images">
                 <div
                   ref={img1Ref}
@@ -5295,7 +5286,7 @@ export default function HomePage(): React.JSX.Element {
                                 }}>
                                   {donorName}
                                 </div>
-                                <VerifiedBadge size={30} showLabel={true} />
+                                <VerifiedBadge size={30} />
                               </div>
                             </div>
 
@@ -5544,7 +5535,7 @@ export default function HomePage(): React.JSX.Element {
                           }}>
                             Farid Ardiansyah
                           </span>
-                          <VerifiedBadge size={20} showLabel={true} />
+                          <VerifiedBadge size={20} />
                           <span style={{
                             fontFamily: "'Questrial', sans-serif",
                             fontSize: '16px',
@@ -5668,7 +5659,7 @@ export default function HomePage(): React.JSX.Element {
                                 }}>
                                   {comment.userName || 'User'}
                                 </span>
-                                <VerifiedBadge size={14} showLabel={false} />
+                                <VerifiedBadge size={14} />
                                 <span style={{
                                   fontSize: '11px',
                                   color: '#999999',
@@ -6432,8 +6423,7 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               )}
 
-              
-              {/* Bagian footer - same as before */}
+              {/* Bagian footer */}
               <div style={{
                 width: '100%',
                 position: 'relative',
@@ -6750,88 +6740,89 @@ export default function HomePage(): React.JSX.Element {
                     MENURU
                   </span>
                 </footer>
-                      {/* FLOATING BUTTON - Tengah Bawah (fixed position) */}
-      <div
-        style={{
-          position: 'fixed',
-          bottom: '30px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          zIndex: 9999,
-        }}
-      >
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0',
-            backgroundColor: '#000000',
-            border: '1px solid rgba(255,255,255,0.2)',
-            borderRadius: '60px',
-            padding: '6px',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
-          }}
-        >
-          {/* FEED Button */}
-          <button
-            onClick={() => {
-              console.log('Feed clicked');
-            }}
-            style={{
-              padding: '12px 28px',
-              borderRadius: '40px',
-              backgroundColor: 'transparent',
-              color: '#ffffff',
-              border: 'none',
-              cursor: 'pointer',
-              fontFamily: 'Questrial, sans-serif',
-              fontSize: '15px',
-              fontWeight: 500,
-              transition: 'all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)',
-              letterSpacing: '0.03em',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#ffffff';
-              e.currentTarget.style.color = '#000000';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'transparent';
-              e.currentTarget.style.color = '#ffffff';
-            }}
-          >
-            Feed
-          </button>
 
-          {/* PROFILE Button */}
-          <Link href="/profile">
-            <button
-              style={{
-                padding: '12px 28px',
-                borderRadius: '40px',
-                backgroundColor: 'transparent',
-                color: '#ffffff',
-                border: 'none',
-                cursor: 'pointer',
-                fontFamily: 'Questrial, sans-serif',
-                fontSize: '15px',
-                fontWeight: 500,
-                transition: 'all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)',
-                letterSpacing: '0.03em',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#ffffff';
-                e.currentTarget.style.color = '#000000';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'transparent';
-                e.currentTarget.style.color = '#ffffff';
-              }}
-            >
-              Profile
-            </button>
-          </Link>
-        </div>
-      </div>
+                {/* FLOATING BUTTON - Tengah Bawah (fixed position) */}
+                <div
+                  style={{
+                    position: 'fixed',
+                    bottom: '30px',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    zIndex: 9999,
+                  }}
+                >
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0',
+                      backgroundColor: '#000000',
+                      border: '1px solid rgba(255,255,255,0.2)',
+                      borderRadius: '60px',
+                      padding: '6px',
+                      boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+                    }}
+                  >
+                    {/* FEED Button */}
+                    <button
+                      onClick={() => {
+                        console.log('Feed clicked');
+                      }}
+                      style={{
+                        padding: '12px 28px',
+                        borderRadius: '40px',
+                        backgroundColor: 'transparent',
+                        color: '#ffffff',
+                        border: 'none',
+                        cursor: 'pointer',
+                        fontFamily: 'Questrial, sans-serif',
+                        fontSize: '15px',
+                        fontWeight: 500,
+                        transition: 'all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)',
+                        letterSpacing: '0.03em',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = '#ffffff';
+                        e.currentTarget.style.color = '#000000';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = 'transparent';
+                        e.currentTarget.style.color = '#ffffff';
+                      }}
+                    >
+                      Feed
+                    </button>
+
+                    {/* PROFILE Button */}
+                    <Link href="/profile">
+                      <button
+                        style={{
+                          padding: '12px 28px',
+                          borderRadius: '40px',
+                          backgroundColor: 'transparent',
+                          color: '#ffffff',
+                          border: 'none',
+                          cursor: 'pointer',
+                          fontFamily: 'Questrial, sans-serif',
+                          fontSize: '15px',
+                          fontWeight: 500,
+                          transition: 'all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)',
+                          letterSpacing: '0.03em',
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = '#ffffff';
+                          e.currentTarget.style.color = '#000000';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = 'transparent';
+                          e.currentTarget.style.color = '#ffffff';
+                        }}
+                      >
+                        Profile
+                      </button>
+                    </Link>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -7511,7 +7502,7 @@ export default function HomePage(): React.JSX.Element {
         </div>
       )}
 
-      {/* CALENDAR CALL MODAL - same as before */}
+      {/* CALENDAR CALL MODAL */}
       {showCalendarModal && (
         <div className="calendar-modal-overlay">
           <div ref={modalRef} className="calendar-modal" style={{ maxWidth: '1300px', maxHeight: '85vh', overflow: 'auto' }}>
@@ -7522,7 +7513,6 @@ export default function HomePage(): React.JSX.Element {
                 height: 'auto',
                 minHeight: '620px'
               }}>
-                {/* Calendar modal content - same as original */}
                 <div style={{
                   flex: 1.1,
                   padding: '36px',
