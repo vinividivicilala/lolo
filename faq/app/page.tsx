@@ -6746,7 +6746,8 @@ export default function HomePage(): React.JSX.Element {
       </div>
 
 
-        {/* FLOATING BUTTON - Tengah Bawah dengan Dropdown Menu */}
+
+{/* FLOATING BUTTON - Tengah Bawah dengan Dropdown Menu */}
 <div
   style={{
     position: 'fixed',
@@ -6757,18 +6758,18 @@ export default function HomePage(): React.JSX.Element {
     pointerEvents: 'auto',
   }}
 >
-  {/* Dropdown Menu - muncul ke atas */}
+  {/* Dropdown Menu - muncul ke ATAS dari tombol Menu */}
   <div
     style={{
       position: 'absolute',
       bottom: '100%',
-      left: '50%',
-      transform: 'translateX(-50%) translateY(-10px)',
+      left: '0%',
+      transform: 'translateY(-10px)',
       marginBottom: '12px',
       backgroundColor: '#000000',
       borderRadius: '20px',
       padding: '8px',
-      minWidth: '180px',
+      minWidth: '160px',
       opacity: 0,
       visibility: 'hidden',
       transition: 'all 0.25s cubic-bezier(0.2, 0.9, 0.4, 1.1)',
@@ -6793,7 +6794,6 @@ export default function HomePage(): React.JSX.Element {
           fontSize: '14px',
           fontWeight: 500,
           color: '#ffffff',
-          marginBottom: '4px',
         }}
         onMouseEnter={(e) => {
           e.currentTarget.style.backgroundColor = '#10b981';
@@ -6805,7 +6805,7 @@ export default function HomePage(): React.JSX.Element {
         }}
       >
         <span>Donation</span>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M7 17L17 7M17 7H7M17 7V17" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
       </div>
@@ -6826,7 +6826,6 @@ export default function HomePage(): React.JSX.Element {
           fontSize: '14px',
           fontWeight: 500,
           color: '#ffffff',
-          marginBottom: '4px',
         }}
         onMouseEnter={(e) => {
           e.currentTarget.style.backgroundColor = '#3b82f6';
@@ -6838,7 +6837,7 @@ export default function HomePage(): React.JSX.Element {
         }}
       >
         <span>Calendar</span>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M7 17L17 7M17 7H7M17 7V17" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
       </div>
@@ -6859,7 +6858,6 @@ export default function HomePage(): React.JSX.Element {
           fontSize: '14px',
           fontWeight: 500,
           color: '#ffffff',
-          marginBottom: '4px',
         }}
         onMouseEnter={(e) => {
           e.currentTarget.style.backgroundColor = '#f59e0b';
@@ -6871,7 +6869,7 @@ export default function HomePage(): React.JSX.Element {
         }}
       >
         <span>Note</span>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M7 17L17 7M17 7H7M17 7V17" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
       </div>
@@ -6892,7 +6890,6 @@ export default function HomePage(): React.JSX.Element {
           fontSize: '14px',
           fontWeight: 500,
           color: '#ffffff',
-          marginBottom: '4px',
         }}
         onMouseEnter={(e) => {
           e.currentTarget.style.backgroundColor = '#ec489a';
@@ -6904,7 +6901,7 @@ export default function HomePage(): React.JSX.Element {
         }}
       >
         <span>Blog</span>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M7 17L17 7M17 7H7M17 7V17" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
       </div>
@@ -6925,7 +6922,6 @@ export default function HomePage(): React.JSX.Element {
           fontSize: '14px',
           fontWeight: 500,
           color: '#ffffff',
-          marginBottom: '4px',
         }}
         onMouseEnter={(e) => {
           e.currentTarget.style.backgroundColor = '#ef4444';
@@ -6937,7 +6933,7 @@ export default function HomePage(): React.JSX.Element {
         }}
       >
         <span>Contact</span>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M7 17L17 7M17 7H7M17 7V17" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
       </div>
@@ -6969,7 +6965,7 @@ export default function HomePage(): React.JSX.Element {
         }}
       >
         <span>Community</span>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M7 17L17 7M17 7H7M17 7V17" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
       </div>
@@ -6999,8 +6995,8 @@ export default function HomePage(): React.JSX.Element {
           dropdown.style.opacity = isVisible ? '0' : '1';
           dropdown.style.visibility = isVisible ? 'hidden' : 'visible';
           dropdown.style.transform = isVisible 
-            ? 'translateX(-50%) translateY(-10px)' 
-            : 'translateX(-50%) translateY(0)';
+            ? 'translateY(-10px)' 
+            : 'translateY(0)';
         }
       }}
       style={{
@@ -7030,12 +7026,16 @@ export default function HomePage(): React.JSX.Element {
     >
       <span>Menu</span>
       <svg 
-        width="16" 
-        height="16" 
+        width="14" 
+        height="14" 
         viewBox="0 0 24 24" 
         fill="none" 
         xmlns="http://www.w3.org/2000/svg"
-        style={{ transition: 'transform 0.2s ease' }}
+        style={{ 
+          transition: 'transform 0.2s ease',
+          transform: 'rotate(0deg)'
+        }}
+        id="menuArrow"
       >
         <path d="M6 9L12 15L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
       </svg>
@@ -7121,7 +7121,13 @@ export default function HomePage(): React.JSX.Element {
     </Link>
   </div>
 </div>
-</div>
+        </div>
+
+
+
+
+
+        
 
       {/* SHADOW PAGE - same as before */}
       <div
