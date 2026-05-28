@@ -6432,6 +6432,106 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               )}
 
+{/* FLOATING BUTTON - Tengah Bawah, tetap posisi saat scroll */}
+<div
+  style={{
+    position: 'fixed',
+    bottom: '30px',
+    left: '50%',
+    transform: 'translateX(-50%)',
+    zIndex: 1000,
+  }}
+>
+  <div
+    style={{
+      display: 'flex',
+      alignItems: 'center',
+      gap: '0',
+      backgroundColor: '#000000',
+      border: '1px solid #333333',
+      borderRadius: '60px',
+      padding: '8px',
+      boxShadow: '0 4px 15px rgba(0,0,0,0.2)',
+      transition: 'all 0.3s ease',
+    }}
+  >
+    {/* FEED Button */}
+    <button
+      onClick={() => {
+        // Aksi untuk Feed
+        console.log('Feed clicked');
+        // Tambahkan scroll ke section Feed atau aksi lainnya
+      }}
+      style={{
+        padding: '12px 28px',
+        borderRadius: '60px',
+        backgroundColor: 'transparent',
+        color: '#ffffff',
+        border: 'none',
+        cursor: 'pointer',
+        fontFamily: 'Questrial, sans-serif',
+        fontSize: '16px',
+        fontWeight: 500,
+        transition: 'all 0.3s ease',
+        letterSpacing: '0.02em',
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.backgroundColor = '#ffffff';
+        e.currentTarget.style.color = '#000000';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.backgroundColor = 'transparent';
+        e.currentTarget.style.color = '#ffffff';
+      }}
+    >
+      Feed
+    </button>
+
+    {/* Separator Line */}
+    <div
+      style={{
+        width: '1px',
+        height: '24px',
+        backgroundColor: '#444444',
+        margin: '0 4px',
+      }}
+    />
+
+    {/* PROFILE Button */}
+    <Link href="/profile">
+      <button
+        style={{
+          padding: '12px 28px',
+          borderRadius: '60px',
+          backgroundColor: 'transparent',
+          color: '#ffffff',
+          border: 'none',
+          cursor: 'pointer',
+          fontFamily: 'Questrial, sans-serif',
+          fontSize: '16px',
+          fontWeight: 500,
+          transition: 'all 0.3s ease',
+          letterSpacing: '0.02em',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = '#ffffff';
+          e.currentTarget.style.color = '#000000';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = 'transparent';
+          e.currentTarget.style.color = '#ffffff';
+        }}
+      >
+        Profile
+      </button>
+    </Link>
+  </div>
+</div>
+
+
+
+              
+
               {/* Bagian footer - same as before */}
               <div style={{
                 width: '100%',
