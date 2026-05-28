@@ -4279,10 +4279,9 @@ export default function HomePage(): React.JSX.Element {
       }}
     >
       <span>
-        I am a developer based in Manchester, UK focused on creating
+        I am a developer based in Jakarta, Jakarta focused on creating
         interactive digital experiences on the web, working with brands
-        and industry leaders such as Google Fonts, Paystack, Heva
-        Health, Disney, Jelly, and Null amongst others to achieve this.
+        and industry leaders such personal others to achieve this.
       </span>
       
       {/* PROFILE + ARROW - font 50px dengan Link */}
