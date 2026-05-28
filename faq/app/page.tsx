@@ -4229,7 +4229,6 @@ export default function HomePage(): React.JSX.Element {
               </div>
 
 
-
 {/* ABOUT SECTION - Sejajar dalam satu baris */}
 <div
   style={{
@@ -4237,7 +4236,7 @@ export default function HomePage(): React.JSX.Element {
     bottom: '5%',
     right: '80px',
     textAlign: 'left',
-    maxWidth: '700px',
+    maxWidth: '800px',
   }}
 >
   <div
@@ -4248,10 +4247,10 @@ export default function HomePage(): React.JSX.Element {
       flexWrap: 'wrap',
     }}
   >
-    {/* TEXT ABOUT - 15px */}
+    {/* TEXT ABOUT - 15px, hitam full */}
     <div
       style={{
-        fontSize: '18px',
+        fontSize: '15px',
         fontWeight: 600,
         color: '#000000',
         letterSpacing: '0.08em',
@@ -4263,26 +4262,74 @@ export default function HomePage(): React.JSX.Element {
       ABOUT
     </div>
 
-    {/* TEXT I AM - 20px */}
+    {/* TEXT I AM - 20px, hitam full */}
     <div
       style={{
-        fontSize: '30px',
+        fontSize: '20px',
         lineHeight: '1.4',
-        fontWeight: 500,
+        fontWeight: 400,
         color: '#000000',
         letterSpacing: '-0.02em',
         fontFamily: 'Questrial, sans-serif',
         flex: 1,
+        display: 'flex',
+        alignItems: 'baseline',
+        flexWrap: 'wrap',
+        gap: '12px',
       }}
     >
-      I am a developer based in jakarta, jakarta focused on creating
-      interactive digital experiences on the web, working with brand personal others to achieve this.
+      <span>
+        I am a developer based in Manchester, UK focused on creating
+        interactive digital experiences on the web, working with brands
+        and industry leaders such as Google Fonts, Paystack, Heva
+        Health, Disney, Jelly, and Null amongst others to achieve this.
+      </span>
+      
+      {/* PROFILE + ARROW - font 50px dengan Link */}
+      <Link href="/profile">
+        <div
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '12px',
+            cursor: 'pointer',
+            transition: 'opacity 0.2s ease',
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.opacity = '0.7'}
+          onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+        >
+          <span
+            style={{
+              fontSize: '50px',
+              fontWeight: 500,
+              color: '#000000',
+              fontFamily: 'Questrial, sans-serif',
+              letterSpacing: '-0.02em',
+            }}
+          >
+            Profile
+          </span>
+          <svg
+            width="50"
+            height="50"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            style={{ stroke: '#000000', strokeWidth: '1.5' }}
+          >
+            <path
+              d="M7 17L17 7M17 7H7M17 7V17"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </div>
+      </Link>
     </div>
   </div>
-    </div>
-
-
-
+</div>
 
 
 
