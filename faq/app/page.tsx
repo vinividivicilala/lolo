@@ -6740,8 +6740,13 @@ export default function HomePage(): React.JSX.Element {
                     MENURU
                   </span>
                 </footer>
+            </div>
+          </div>
+        </div>
+      </div>
 
-               {/* FLOATING BUTTON - Tengah Bawah, selalu terlihat saat scroll */}
+
+         {/* FLOATING BUTTON - Tengah Bawah, selalu terlihat saat scroll */}
 <div
   style={{
     position: 'fixed',
@@ -6834,13 +6839,8 @@ export default function HomePage(): React.JSX.Element {
       </button>
     </Link>
   </div>
+</div>              
 </div>
-                  
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
 
       {/* SHADOW PAGE - same as before */}
       <div
