@@ -6741,88 +6741,101 @@ export default function HomePage(): React.JSX.Element {
                   </span>
                 </footer>
 
-                {/* FLOATING BUTTON - Tengah Bawah (fixed position) */}
-                <div
-                  style={{
-                    position: 'fixed',
-                    bottom: '30px',
-                    left: '50%',
-                    transform: 'translateX(-50%)',
-                    zIndex: 9999,
-                  }}
-                >
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0',
-                      backgroundColor: '#000000',
-                      border: '1px solid rgba(255,255,255,0.2)',
-                      borderRadius: '60px',
-                      padding: '6px',
-                      boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
-                    }}
-                  >
-                    {/* FEED Button */}
-                    <button
-                      onClick={() => {
-                        console.log('Feed clicked');
-                      }}
-                      style={{
-                        padding: '12px 28px',
-                        borderRadius: '40px',
-                        backgroundColor: 'transparent',
-                        color: '#ffffff',
-                        border: 'none',
-                        cursor: 'pointer',
-                        fontFamily: 'Questrial, sans-serif',
-                        fontSize: '15px',
-                        fontWeight: 500,
-                        transition: 'all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)',
-                        letterSpacing: '0.03em',
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = '#ffffff';
-                        e.currentTarget.style.color = '#000000';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = 'transparent';
-                        e.currentTarget.style.color = '#ffffff';
-                      }}
-                    >
-                      Feed
-                    </button>
+               {/* FLOATING BUTTON - Tengah Bawah, selalu terlihat saat scroll */}
+<div
+  style={{
+    position: 'fixed',
+    bottom: '24px',
+    left: '50%',
+    transform: 'translateX(-50%)',
+    zIndex: 999999,
+  }}
+>
+  <div
+    style={{
+      display: 'flex',
+      alignItems: 'center',
+      gap: '0',
+      backgroundColor: '#000000',
+      border: '1px solid rgba(255,255,255,0.15)',
+      borderRadius: '60px',
+      padding: '6px',
+      boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
+      backdropFilter: 'blur(0px)',
+    }}
+  >
+    {/* FEED Button */}
+    <button
+      onClick={() => {
+        console.log('Feed clicked');
+        // Tambahkan aksi scroll ke feed jika diperlukan
+      }}
+      style={{
+        padding: '12px 32px',
+        borderRadius: '40px',
+        backgroundColor: 'transparent',
+        color: '#ffffff',
+        border: 'none',
+        cursor: 'pointer',
+        fontFamily: 'Questrial, sans-serif',
+        fontSize: '15px',
+        fontWeight: 500,
+        transition: 'all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)',
+        letterSpacing: '0.03em',
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.backgroundColor = '#ffffff';
+        e.currentTarget.style.color = '#000000';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.backgroundColor = 'transparent';
+        e.currentTarget.style.color = '#ffffff';
+      }}
+    >
+      Feed
+    </button>
 
-                    {/* PROFILE Button */}
-                    <Link href="/profile">
-                      <button
-                        style={{
-                          padding: '12px 28px',
-                          borderRadius: '40px',
-                          backgroundColor: 'transparent',
-                          color: '#ffffff',
-                          border: 'none',
-                          cursor: 'pointer',
-                          fontFamily: 'Questrial, sans-serif',
-                          fontSize: '15px',
-                          fontWeight: 500,
-                          transition: 'all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)',
-                          letterSpacing: '0.03em',
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.backgroundColor = '#ffffff';
-                          e.currentTarget.style.color = '#000000';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.backgroundColor = 'transparent';
-                          e.currentTarget.style.color = '#ffffff';
-                        }}
-                      >
-                        Profile
-                      </button>
-                    </Link>
-                  </div>
-                </div>
+    {/* Separator */}
+    <div
+      style={{
+        width: '1px',
+        height: '28px',
+        backgroundColor: 'rgba(255,255,255,0.2)',
+        margin: '0 4px',
+      }}
+    />
+
+    {/* PROFILE Button */}
+    <Link href="/profile">
+      <button
+        style={{
+          padding: '12px 32px',
+          borderRadius: '40px',
+          backgroundColor: 'transparent',
+          color: '#ffffff',
+          border: 'none',
+          cursor: 'pointer',
+          fontFamily: 'Questrial, sans-serif',
+          fontSize: '15px',
+          fontWeight: 500,
+          transition: 'all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)',
+          letterSpacing: '0.03em',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = '#ffffff';
+          e.currentTarget.style.color = '#000000';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = 'transparent';
+          e.currentTarget.style.color = '#ffffff';
+        }}
+      >
+        Profile
+      </button>
+    </Link>
+  </div>
+</div>
+                  
               </div>
             </div>
           </div>
