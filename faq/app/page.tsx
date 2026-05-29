@@ -6245,24 +6245,33 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               )}
 
-{/* REAL-TIME DATE - Sebelah kiri tombol Schedule Call */}
+       
+{/* REAL-TIME DATE + SCHEDULE CALL - Biru Stabilo */}
 <div style={{
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
-  gap: '16px',
+  gap: '12px',
   width: '100%',
+  backgroundColor: '#f8f8f8',
+  borderRadius: '60px',
+  padding: '6px 6px 6px 20px',
+  border: '1px solid #e0e0e0',
 }}>
-  {/* SISI KIRI - Tanggal dan Hari Real-time */}
+  {/* SISI KIRI - Simbol | + Tanggal dan Hari Real-time */}
   <div style={{
     display: 'flex',
     alignItems: 'center',
     gap: '12px',
-    backgroundColor: '#f0f0f0',
-    padding: '12px 20px',
-    borderRadius: '60px',
-    flex: 1,
   }}>
+    <span style={{
+      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+      fontSize: '24px',
+      fontWeight: '300',
+      color: '#cccccc',
+    }}>
+      |
+    </span>
     {(() => {
       const today = new Date();
       const weekDays = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
@@ -6274,25 +6283,25 @@ export default function HomePage(): React.JSX.Element {
         <>
           <span style={{
             fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-            fontSize: '16px',
-            fontWeight: '600',
-            color: '#000000',
+            fontSize: '14px',
+            fontWeight: '500',
+            color: '#666666',
           }}>
             {dayName}
           </span>
           <span style={{
             fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-            fontSize: '24px',
-            fontWeight: '700',
+            fontSize: '20px',
+            fontWeight: '600',
             color: '#000000',
           }}>
             {dateNum}
           </span>
           <span style={{
             fontFamily: "'Questrial', sans-serif",
-            fontSize: '14px',
-            fontWeight: '500',
-            color: '#666666',
+            fontSize: '12px',
+            fontWeight: '400',
+            color: '#999999',
           }}>
             {month}
           </span>
@@ -6301,7 +6310,7 @@ export default function HomePage(): React.JSX.Element {
     })()}
   </div>
 
-  {/* SISI KANAN - Schedule Call Button (Background Biru) */}
+  {/* SISI KANAN - Schedule Call Button (Biru Stabilo #c5e800) */}
   <button
     onClick={() => {
       console.log('Schedule call clicked');
@@ -6311,43 +6320,36 @@ export default function HomePage(): React.JSX.Element {
       alignItems: 'center',
       justifyContent: 'center',
       gap: '10px',
-      backgroundColor: '#3b82f6',
+      backgroundColor: '#c5e800',
       border: 'none',
       borderRadius: '60px',
       cursor: 'pointer',
       fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-      fontSize: '16px',
+      fontSize: '14px',
       fontWeight: '500',
-      color: '#ffffff',
-      padding: '12px 24px',
+      color: '#000000',
+      padding: '10px 20px',
       transition: 'all 0.3s ease',
       whiteSpace: 'nowrap',
     }}
     onMouseEnter={(e) => {
-      e.currentTarget.style.backgroundColor = '#2563eb';
+      e.currentTarget.style.backgroundColor = '#b0d100';
       e.currentTarget.style.transform = 'scale(1.02)';
     }}
     onMouseLeave={(e) => {
-      e.currentTarget.style.backgroundColor = '#3b82f6';
+      e.currentTarget.style.backgroundColor = '#c5e800';
       e.currentTarget.style.transform = 'scale(1)';
     }}
   >
     <span>SCHEDULE CALL</span>
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   </button>
 </div>
 
 
-              
-
-       
-
-
-
-              
-
+  
               {/* REPLY MODAL FOR ADMIN */}
               {showReplyModal && selectedSubmission && (
                 <div className="reply-modal-overlay">
