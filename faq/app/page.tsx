@@ -6746,7 +6746,8 @@ export default function HomePage(): React.JSX.Element {
       </div>
 
 
-{/* FLOATING BUTTON - Warna Hitam dengan Desain Minimalis */}
+
+{/* FLOATING BUTTON - Desain Minimalis */}
 <div
   style={{
     position: 'fixed',
@@ -6764,45 +6765,47 @@ export default function HomePage(): React.JSX.Element {
       justifyContent: 'space-between',
       gap: '0',
       backgroundColor: '#000000',
-      border: '1px solid rgba(255,255,255,0.15)',
-      borderRadius: '60px',
-      padding: '8px 16px',
+      border: '1px solid rgba(255,255,255,0.2)',
+      borderRadius: '80px',
+      padding: '6px 12px',
       boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
-      minWidth: '500px',
+      width: 'auto',
+      minWidth: 'auto',
     }}
   >
-    {/* SISI KIRI - Teks "Sure, click away, idc" - Rata Kiri */}
+    {/* SISI KIRI - Teks "Sure, click away, idc" - 60px putih */}
     <div
       style={{
-        padding: '16px 24px',
+        padding: '8px 24px',
         fontFamily: 'Questrial, sans-serif',
-        fontSize: '14px',
+        fontSize: '60px',
         fontWeight: 400,
         color: '#ffffff',
-        letterSpacing: '0.02em',
+        letterSpacing: '-0.02em',
         textAlign: 'left',
+        lineHeight: '1.2',
+        whiteSpace: 'nowrap',
       }}
     >
       Sure, click away, idc
     </div>
 
-    {/* SISI KANAN - HOMEPAGE dengan border putih - Rata Kanan */}
+    {/* SISI KANAN - Tanda + dan Homepage */}
     <Link href="/">
       <div
         style={{
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center',
-          gap: '16px',
+          gap: '20px',
           backgroundColor: '#ffffff',
-          border: '1px solid #ffffff',
-          borderRadius: '60px',
-          padding: '12px 28px',
+          borderRadius: '80px',
+          padding: '12px 32px',
           cursor: 'pointer',
           transition: 'all 0.2s ease',
+          marginLeft: '20px',
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = '#f0f0f0';
+          e.currentTarget.style.backgroundColor = '#f5f5f5';
           e.currentTarget.style.transform = 'scale(1.02)';
         }}
         onMouseLeave={(e) => {
@@ -6810,24 +6813,27 @@ export default function HomePage(): React.JSX.Element {
           e.currentTarget.style.transform = 'scale(1)';
         }}
       >
+        {/* Tanda + besar 60px minimalis */}
         <span
           style={{
             fontFamily: 'Questrial, sans-serif',
-            fontSize: '50px',
-            fontWeight: 400,
+            fontSize: '60px',
+            fontWeight: 300,
             color: '#000000',
             lineHeight: '1',
           }}
         >
           +
         </span>
+        {/* Teks Homepage 60px hitam */}
         <span
           style={{
             fontFamily: 'Questrial, sans-serif',
-            fontSize: '16px',
+            fontSize: '60px',
             fontWeight: 500,
             color: '#000000',
-            letterSpacing: '0.03em',
+            letterSpacing: '-0.02em',
+            lineHeight: '1',
           }}
         >
           Homepage
@@ -6835,8 +6841,8 @@ export default function HomePage(): React.JSX.Element {
       </div>
     </Link>
   </div>
-</div>
-        </div>
+</div>       
+  </div>
 
 
         
