@@ -6245,6 +6245,107 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               )}
 
+              {/* CALENDAR REAL-TIME - 7 Hari + Tanggal */}
+<div style={{
+  marginTop: '30px',
+  width: '100%',
+}}>
+  <div style={{
+    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+    fontSize: '14px',
+    fontWeight: '400',
+    color: '#999999',
+    marginBottom: '16px',
+    letterSpacing: '0.05em'
+  }}>
+    AVAILABLE DATES
+  </div>
+  <div style={{
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '12px',
+  }}>
+    {(() => {
+      const weekDays = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+      const today = new Date();
+      const next7Days = Array.from({ length: 7 }, (_, i) => {
+        const date = new Date(today);
+        date.setDate(today.getDate() + i);
+        return date;
+      });
+      
+      return next7Days.map((date, idx) => {
+        const dayName = weekDays[date.getDay()];
+        const dateNum = date.getDate();
+        const month = date.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
+        const isToday = idx === 0;
+        
+        return (
+          <div
+            key={idx}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '12px 16px',
+              backgroundColor: isToday ? '#c5e800' : '#f5f5f5',
+              borderRadius: '12px',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#c5e800';
+              e.currentTarget.style.transform = 'translateX(4px)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = isToday ? '#c5e800' : '#f5f5f5';
+              e.currentTarget.style.transform = 'translateX(0)';
+            }}
+          >
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '16px',
+            }}>
+              <span style={{
+                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                fontSize: '16px',
+                fontWeight: '600',
+                color: isToday ? '#000000' : '#333333',
+                minWidth: '45px',
+              }}>
+                {dayName}
+              </span>
+              <span style={{
+                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                fontSize: '24px',
+                fontWeight: '500',
+                color: isToday ? '#000000' : '#333333',
+              }}>
+                {dateNum}
+              </span>
+              <span style={{
+                fontFamily: "'Questrial', sans-serif",
+                fontSize: '12px',
+                color: isToday ? '#000000' : '#999999',
+              }}>
+                {month}
+              </span>
+            </div>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M7 17L17 7M17 7H7M17 7V17" stroke={isToday ? '#000000' : '#999999'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </div>
+        );
+      });
+    })()}
+  </div>
+</div>
+
+
+
+              
+
               {/* REPLY MODAL FOR ADMIN */}
               {showReplyModal && selectedSubmission && (
                 <div className="reply-modal-overlay">
