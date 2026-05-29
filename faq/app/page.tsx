@@ -6745,7 +6745,9 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </div>
 
-{/* FLOATING BUTTON - Desain Minimalis */}
+
+
+        {/* FLOATING BUTTON - Desain Minimalis */}
 <div
   style={{
     position: 'fixed',
@@ -6765,9 +6767,9 @@ export default function HomePage(): React.JSX.Element {
       backgroundColor: '#000000',
       border: '1px solid rgba(255,255,255,0.2)',
       borderRadius: '80px',
-      padding: '8px 16px',
+      padding: '8px 24px',
       boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
-      width: '400px',
+      width: '1000px',
     }}
   >
     {/* SISI KIRI - Teks "Sure, click away, idc" - 20px putih */}
@@ -6792,11 +6794,11 @@ export default function HomePage(): React.JSX.Element {
       style={{
         display: 'flex',
         alignItems: 'center',
-        gap: '12px',
+        gap: '16px',
       }}
     >
-      {/* Background putih hanya untuk teks Homepage */}
-      <Link href="/">
+      {/* Background putih hanya untuk teks Homepage - tanpa underline */}
+      <Link href="/" style={{ textDecoration: 'none' }}>
         <div
           style={{
             display: 'flex',
@@ -6804,9 +6806,10 @@ export default function HomePage(): React.JSX.Element {
             justifyContent: 'center',
             backgroundColor: '#ffffff',
             borderRadius: '60px',
-            padding: '10px 28px',
+            padding: '10px 32px',
             cursor: 'pointer',
             transition: 'all 0.2s ease',
+            textDecoration: 'none',
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.backgroundColor = '#f0f0f0';
@@ -6824,6 +6827,7 @@ export default function HomePage(): React.JSX.Element {
               fontWeight: 500,
               color: '#000000',
               letterSpacing: '-0.01em',
+              textDecoration: 'none',
             }}
           >
             Homepage
