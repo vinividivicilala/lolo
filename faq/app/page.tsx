@@ -3290,6 +3290,109 @@ export default function HomePage(): React.JSX.Element {
     }
   }, [showCalendarModal, showFormView]);
 
+
+
+// Teks berubah-ubah saat scroll dan diam
+useEffect(() => {
+  const texts = [
+    "Menuru brand ✨",
+    "Open this 🚀",
+    "Hey! 👋",
+    "Welcome back 🎉",
+    "Good to see you! 🌟",
+    "Click me! 💫",
+    "Let's go! 🔥",
+    "Explore now 🎯",
+    "Hello there! 💙",
+    "Stay curious 🧠",
+    "Something new? ✨",
+    "Don't miss out! ⚡",
+    "Join the journey 🌈",
+    "Your vibe matters 💎",
+    "Level up! 🚀",
+    "Let's create 🎨",
+    "Think different 💡",
+    "Be inspired 🌊",
+    "Keep scrolling 📜",
+    "You're awesome! 🌟",
+    "Open this ✨",
+    "Scroll more! 📱",
+    "Nice to see you! 👋",
+    "Welcome! 🎈",
+    "Let's explore 🔍"
+  ];
+  
+  const textElement = document.getElementById('floatingText');
+  let intervalId = null;
+  let timeoutId = null;
+  let lastScrollY = window.scrollY;
+  let isChanging = false;
+  
+  const changeText = () => {
+    if (!textElement || isChanging) return;
+    isChanging = true;
+    const newText = texts[Math.floor(Math.random() * texts.length)];
+    textElement.style.opacity = '0';
+    setTimeout(() => {
+      if (textElement) {
+        textElement.textContent = newText;
+        textElement.style.opacity = '1';
+      }
+      isChanging = false;
+    }, 200);
+  };
+  
+  const startIdleTimer = () => {
+    if (timeoutId) clearTimeout(timeoutId);
+    if (intervalId) clearInterval(intervalId);
+    
+    timeoutId = setTimeout(() => {
+      intervalId = setInterval(() => {
+        changeText();
+      }, 3500);
+    }, 8000);
+  };
+  
+  const stopIdleTimer = () => {
+    if (timeoutId) clearTimeout(timeoutId);
+    if (intervalId) {
+      clearInterval(intervalId);
+      intervalId = null;
+    }
+  };
+  
+  const handleScroll = () => {
+    const currentScrollY = window.scrollY;
+    if (Math.abs(currentScrollY - lastScrollY) > 5) {
+      stopIdleTimer();
+      changeText();
+      startIdleTimer();
+      lastScrollY = currentScrollY;
+    }
+  };
+  
+  // Set initial random text
+  if (textElement) {
+    textElement.textContent = texts[Math.floor(Math.random() * texts.length)];
+  }
+  
+  startIdleTimer();
+  window.addEventListener('scroll', handleScroll);
+  
+  return () => {
+    window.removeEventListener('scroll', handleScroll);
+    stopIdleTimer();
+  };
+}, []);
+
+
+
+
+
+
+
+  
+
   const handleAccept = () => {
     localStorage.setItem('cookieConsent', 'accepted');
     setShowPopup(false);
@@ -6853,8 +6956,7 @@ export default function HomePage(): React.JSX.Element {
       </div>
 
 
-
-        {/* FLOATING BUTTON - Desain Minimalis */}
+        {/* FLOATING BUTTON - Teks Berubah-ubah dengan Emoticon */}
 <div
   style={{
     position: 'fixed',
@@ -6879,8 +6981,9 @@ export default function HomePage(): React.JSX.Element {
       width: '1000px',
     }}
   >
-    {/* SISI KIRI - Teks "Sure, click away, idc" - 20px putih */}
+    {/* SISI KIRI - Teks Berubah-ubah */}
     <div
+      id="floatingText"
       style={{
         padding: '8px 16px',
         fontFamily: 'Questrial, sans-serif',
@@ -6891,12 +6994,13 @@ export default function HomePage(): React.JSX.Element {
         textAlign: 'left',
         lineHeight: '1.2',
         whiteSpace: 'nowrap',
+        transition: 'opacity 0.3s ease',
       }}
     >
-      Sure, click away, idc
+      Menuru brand ✨
     </div>
 
-    {/* SISI KANAN - Homepage (bg putih) + Tanda plus di samping kanan */}
+    {/* SISI KANAN - Homepage (bg putih) + Tanda plus */}
     <div
       style={{
         display: 'flex',
@@ -6904,7 +7008,6 @@ export default function HomePage(): React.JSX.Element {
         gap: '16px',
       }}
     >
-      {/* Background putih hanya untuk teks Homepage - tanpa underline */}
       <Link href="/" style={{ textDecoration: 'none' }}>
         <div
           style={{
@@ -6942,7 +7045,7 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </Link>
 
-      {/* Tanda plus (+) di samping kanan dari teks homepage */}
+      {/* Tanda plus (+) */}
       <div
         style={{
           display: 'flex',
@@ -6976,7 +7079,7 @@ export default function HomePage(): React.JSX.Element {
     </div>
   </div>
 </div>
-  </div>
+</div>
 
 
         
