@@ -6745,8 +6745,6 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </div>
 
-
-
 {/* FLOATING BUTTON - Desain Minimalis */}
 <div
   style={{
@@ -6767,21 +6765,20 @@ export default function HomePage(): React.JSX.Element {
       backgroundColor: '#000000',
       border: '1px solid rgba(255,255,255,0.2)',
       borderRadius: '80px',
-      padding: '6px 12px',
+      padding: '8px 16px',
       boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
-      width: 'auto',
-      minWidth: 'auto',
+      width: '400px',
     }}
   >
-    {/* SISI KIRI - Teks "Sure, click away, idc" - 60px putih */}
+    {/* SISI KIRI - Teks "Sure, click away, idc" - 20px putih */}
     <div
       style={{
-        padding: '8px 24px',
+        padding: '8px 16px',
         fontFamily: 'Questrial, sans-serif',
-        fontSize: '60px',
+        fontSize: '20px',
         fontWeight: 400,
         color: '#ffffff',
-        letterSpacing: '-0.02em',
+        letterSpacing: '-0.01em',
         textAlign: 'left',
         lineHeight: '1.2',
         whiteSpace: 'nowrap',
@@ -6790,58 +6787,84 @@ export default function HomePage(): React.JSX.Element {
       Sure, click away, idc
     </div>
 
-    {/* SISI KANAN - Tanda + dan Homepage */}
-    <Link href="/">
+    {/* SISI KANAN - Homepage (bg putih) + Tanda plus di samping kanan */}
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '12px',
+      }}
+    >
+      {/* Background putih hanya untuk teks Homepage */}
+      <Link href="/">
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: '#ffffff',
+            borderRadius: '60px',
+            padding: '10px 28px',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = '#f0f0f0';
+            e.currentTarget.style.transform = 'scale(1.02)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = '#ffffff';
+            e.currentTarget.style.transform = 'scale(1)';
+          }}
+        >
+          <span
+            style={{
+              fontFamily: 'Questrial, sans-serif',
+              fontSize: '20px',
+              fontWeight: 500,
+              color: '#000000',
+              letterSpacing: '-0.01em',
+            }}
+          >
+            Homepage
+          </span>
+        </div>
+      </Link>
+
+      {/* Tanda plus (+) di samping kanan dari teks homepage */}
       <div
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '20px',
-          backgroundColor: '#ffffff',
-          borderRadius: '80px',
-          padding: '12px 32px',
+          justifyContent: 'center',
           cursor: 'pointer',
-          transition: 'all 0.2s ease',
-          marginLeft: '20px',
+          transition: 'opacity 0.2s ease',
+        }}
+        onClick={() => {
+          console.log('Plus clicked');
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = '#f5f5f5';
-          e.currentTarget.style.transform = 'scale(1.02)';
+          e.currentTarget.style.opacity = '0.7';
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.backgroundColor = '#ffffff';
-          e.currentTarget.style.transform = 'scale(1)';
+          e.currentTarget.style.opacity = '1';
         }}
       >
-        {/* Tanda + besar 60px minimalis */}
         <span
           style={{
             fontFamily: 'Questrial, sans-serif',
-            fontSize: '60px',
+            fontSize: '32px',
             fontWeight: 300,
-            color: '#000000',
+            color: '#ffffff',
             lineHeight: '1',
           }}
         >
           +
         </span>
-        {/* Teks Homepage 60px hitam */}
-        <span
-          style={{
-            fontFamily: 'Questrial, sans-serif',
-            fontSize: '60px',
-            fontWeight: 500,
-            color: '#000000',
-            letterSpacing: '-0.02em',
-            lineHeight: '1',
-          }}
-        >
-          Homepage
-        </span>
       </div>
-    </Link>
+    </div>
   </div>
-</div>       
+</div>
   </div>
 
 
