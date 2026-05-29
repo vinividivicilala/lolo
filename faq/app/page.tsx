@@ -6245,102 +6245,104 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               )}
 
-              {/* CALENDAR REAL-TIME - 7 Hari + Tanggal */}
+{/* REAL-TIME DATE - Sebelah kiri tombol Schedule Call */}
 <div style={{
-  marginTop: '30px',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  gap: '16px',
   width: '100%',
 }}>
-  <div style={{
-    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-    fontSize: '14px',
-    fontWeight: '400',
-    color: '#999999',
-    marginBottom: '16px',
-    letterSpacing: '0.05em'
-  }}>
-    AVAILABLE DATES
-  </div>
+  {/* SISI KIRI - Tanggal dan Hari Real-time */}
   <div style={{
     display: 'flex',
-    flexDirection: 'column',
+    alignItems: 'center',
     gap: '12px',
+    backgroundColor: '#f0f0f0',
+    padding: '12px 20px',
+    borderRadius: '60px',
+    flex: 1,
   }}>
     {(() => {
-      const weekDays = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
       const today = new Date();
-      const next7Days = Array.from({ length: 7 }, (_, i) => {
-        const date = new Date(today);
-        date.setDate(today.getDate() + i);
-        return date;
-      });
+      const weekDays = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+      const dayName = weekDays[today.getDay()];
+      const dateNum = today.getDate();
+      const month = today.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
       
-      return next7Days.map((date, idx) => {
-        const dayName = weekDays[date.getDay()];
-        const dateNum = date.getDate();
-        const month = date.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
-        const isToday = idx === 0;
-        
-        return (
-          <div
-            key={idx}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '12px 16px',
-              backgroundColor: isToday ? '#c5e800' : '#f5f5f5',
-              borderRadius: '12px',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#c5e800';
-              e.currentTarget.style.transform = 'translateX(4px)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = isToday ? '#c5e800' : '#f5f5f5';
-              e.currentTarget.style.transform = 'translateX(0)';
-            }}
-          >
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '16px',
-            }}>
-              <span style={{
-                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                fontSize: '16px',
-                fontWeight: '600',
-                color: isToday ? '#000000' : '#333333',
-                minWidth: '45px',
-              }}>
-                {dayName}
-              </span>
-              <span style={{
-                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                fontSize: '24px',
-                fontWeight: '500',
-                color: isToday ? '#000000' : '#333333',
-              }}>
-                {dateNum}
-              </span>
-              <span style={{
-                fontFamily: "'Questrial', sans-serif",
-                fontSize: '12px',
-                color: isToday ? '#000000' : '#999999',
-              }}>
-                {month}
-              </span>
-            </div>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M7 17L17 7M17 7H7M17 7V17" stroke={isToday ? '#000000' : '#999999'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </div>
-        );
-      });
+      return (
+        <>
+          <span style={{
+            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+            fontSize: '16px',
+            fontWeight: '600',
+            color: '#000000',
+          }}>
+            {dayName}
+          </span>
+          <span style={{
+            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+            fontSize: '24px',
+            fontWeight: '700',
+            color: '#000000',
+          }}>
+            {dateNum}
+          </span>
+          <span style={{
+            fontFamily: "'Questrial', sans-serif",
+            fontSize: '14px',
+            fontWeight: '500',
+            color: '#666666',
+          }}>
+            {month}
+          </span>
+        </>
+      );
     })()}
   </div>
+
+  {/* SISI KANAN - Schedule Call Button (Background Biru) */}
+  <button
+    onClick={() => {
+      console.log('Schedule call clicked');
+    }}
+    style={{
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: '10px',
+      backgroundColor: '#3b82f6',
+      border: 'none',
+      borderRadius: '60px',
+      cursor: 'pointer',
+      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+      fontSize: '16px',
+      fontWeight: '500',
+      color: '#ffffff',
+      padding: '12px 24px',
+      transition: 'all 0.3s ease',
+      whiteSpace: 'nowrap',
+    }}
+    onMouseEnter={(e) => {
+      e.currentTarget.style.backgroundColor = '#2563eb';
+      e.currentTarget.style.transform = 'scale(1.02)';
+    }}
+    onMouseLeave={(e) => {
+      e.currentTarget.style.backgroundColor = '#3b82f6';
+      e.currentTarget.style.transform = 'scale(1)';
+    }}
+  >
+    <span>SCHEDULE CALL</span>
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  </button>
 </div>
+
+
+              
+
+       
 
 
 
