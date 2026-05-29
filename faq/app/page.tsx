@@ -6962,24 +6962,18 @@ useEffect(() => {
 
 
 
-
-
-
-
-
-
-{/* FLOATING BUTTON - Background Tombol Naik ke Atas Membentuk Kotak */}
+{/* FLOATING BUTTON - Tombol bergulir ke atas berubah bentuk */}
 <div
   style={{
     position: 'fixed',
-    bottom: '30px',
+    bottom: isMenuOpen ? 'calc(100% - 200px)' : '30px',
     left: '50%',
     transform: 'translateX(-50%)',
     zIndex: 99999,
     pointerEvents: 'auto',
+    transition: 'bottom 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1)',
   }}
 >
-  {/* Container Background Hitam - BERTRANSFORMASI dari panjang ke kotak */}
   <div
     style={{
       backgroundColor: '#000000',
@@ -6991,7 +6985,7 @@ useEffect(() => {
       overflow: 'hidden',
     }}
   >
-    {/* KONTEN MENU YANG MUNCUL DI ATAS (saat expanded) */}
+    {/* KONTEN MENU (muncul saat tombol naik) */}
     <div
       style={{
         padding: isMenuOpen ? '24px 20px 16px 20px' : '0px 20px',
@@ -7137,7 +7131,7 @@ useEffect(() => {
       </div>
     </div>
 
-    {/* BAGIAN BAWAH (Tombol Utama) - TETAP ADA */}
+    {/* BAGIAN BAWAH (Tombol Utama) */}
     <div
       style={{
         display: 'flex',
