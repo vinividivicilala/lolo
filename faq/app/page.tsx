@@ -6746,8 +6746,7 @@ export default function HomePage(): React.JSX.Element {
       </div>
 
 
-
-{/* FLOATING BUTTON - Desain seperti di foto dengan tanda + */}
+{/* FLOATING BUTTON - Warna Hitam dengan Desain Minimalis */}
 <div
   style={{
     position: 'fixed',
@@ -6764,83 +6763,80 @@ export default function HomePage(): React.JSX.Element {
       alignItems: 'center',
       justifyContent: 'space-between',
       gap: '0',
-      backgroundColor: '#ffffff',
-      border: '1px solid #e0e0e0',
+      backgroundColor: '#000000',
+      border: '1px solid rgba(255,255,255,0.15)',
       borderRadius: '60px',
-      padding: '4px 6px 4px 24px',
-      boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+      padding: '8px 16px',
+      boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
+      minWidth: '500px',
     }}
   >
-    {/* SISI KIRI - Teks "Sure, click away, idc" */}
+    {/* SISI KIRI - Teks "Sure, click away, idc" - Rata Kiri */}
     <div
       style={{
-        padding: '10px 16px',
+        padding: '16px 24px',
         fontFamily: 'Questrial, sans-serif',
         fontSize: '14px',
         fontWeight: 400,
-        color: '#888888',
+        color: '#ffffff',
         letterSpacing: '0.02em',
+        textAlign: 'left',
       }}
     >
       Sure, click away, idc
     </div>
 
-    {/* SISI KANAN - HOMEPAGE dengan border dan tanda + */}
+    {/* SISI KANAN - HOMEPAGE dengan border putih - Rata Kanan */}
     <Link href="/">
       <div
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '10px',
+          justifyContent: 'center',
+          gap: '16px',
           backgroundColor: '#ffffff',
-          border: '1px solid #e0e0e0',
+          border: '1px solid #ffffff',
           borderRadius: '60px',
-          padding: '10px 24px',
+          padding: '12px 28px',
           cursor: 'pointer',
           transition: 'all 0.2s ease',
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = '#f5f5f5';
-          e.currentTarget.style.borderColor = '#cccccc';
+          e.currentTarget.style.backgroundColor = '#f0f0f0';
+          e.currentTarget.style.transform = 'scale(1.02)';
         }}
         onMouseLeave={(e) => {
           e.currentTarget.style.backgroundColor = '#ffffff';
-          e.currentTarget.style.borderColor = '#e0e0e0';
+          e.currentTarget.style.transform = 'scale(1)';
         }}
       >
         <span
           style={{
             fontFamily: 'Questrial, sans-serif',
-            fontSize: '14px',
+            fontSize: '50px',
+            fontWeight: 400,
+            color: '#000000',
+            lineHeight: '1',
+          }}
+        >
+          +
+        </span>
+        <span
+          style={{
+            fontFamily: 'Questrial, sans-serif',
+            fontSize: '16px',
             fontWeight: 500,
             color: '#000000',
+            letterSpacing: '0.03em',
           }}
         >
           Homepage
         </span>
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          style={{ stroke: '#000000', strokeWidth: '2' }}
-        >
-          <path
-            d="M12 5V19M5 12H19"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
       </div>
     </Link>
   </div>
 </div>
         </div>
-        
-
 
 
         
