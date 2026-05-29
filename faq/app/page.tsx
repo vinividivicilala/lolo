@@ -6746,8 +6746,7 @@ export default function HomePage(): React.JSX.Element {
       </div>
 
 
-
-{/* FLOATING BUTTON - Tengah Bawah dengan Dropdown Menu */}
+{/* FLOATING BUTTON - Tengah Bawah (Minimalist Design) */}
 <div
   style={{
     position: 'fixed',
@@ -6758,259 +6757,58 @@ export default function HomePage(): React.JSX.Element {
     pointerEvents: 'auto',
   }}
 >
-  {/* Dropdown Menu - muncul ke ATAS dari tombol Menu */}
-  <div
-    style={{
-      position: 'absolute',
-      bottom: '100%',
-      left: '0%',
-      transform: 'translateY(-10px)',
-      marginBottom: '12px',
-      backgroundColor: '#000000',
-      borderRadius: '20px',
-      padding: '8px',
-      minWidth: '160px',
-      opacity: 0,
-      visibility: 'hidden',
-      transition: 'all 0.25s cubic-bezier(0.2, 0.9, 0.4, 1.1)',
-      boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
-      border: '1px solid rgba(255,255,255,0.1)',
-      zIndex: 99998,
-    }}
-    id="menuDropdown"
-  >
-    {/* Donation */}
-    <Link href="/donatur">
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '12px 20px',
-          borderRadius: '14px',
-          cursor: 'pointer',
-          transition: 'all 0.2s ease',
-          fontFamily: 'Questrial, sans-serif',
-          fontSize: '14px',
-          fontWeight: 500,
-          color: '#ffffff',
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = '#10b981';
-          e.currentTarget.style.transform = 'translateX(4px)';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.backgroundColor = 'transparent';
-          e.currentTarget.style.transform = 'translateX(0)';
-        }}
-      >
-        <span>Donation</span>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M7 17L17 7M17 7H7M17 7V17" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-      </div>
-    </Link>
-
-    {/* Calendar */}
-    <Link href="/calendar">
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '12px 20px',
-          borderRadius: '14px',
-          cursor: 'pointer',
-          transition: 'all 0.2s ease',
-          fontFamily: 'Questrial, sans-serif',
-          fontSize: '14px',
-          fontWeight: 500,
-          color: '#ffffff',
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = '#3b82f6';
-          e.currentTarget.style.transform = 'translateX(4px)';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.backgroundColor = 'transparent';
-          e.currentTarget.style.transform = 'translateX(0)';
-        }}
-      >
-        <span>Calendar</span>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M7 17L17 7M17 7H7M17 7V17" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-      </div>
-    </Link>
-
-    {/* Note */}
-    <Link href="/note">
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '12px 20px',
-          borderRadius: '14px',
-          cursor: 'pointer',
-          transition: 'all 0.2s ease',
-          fontFamily: 'Questrial, sans-serif',
-          fontSize: '14px',
-          fontWeight: 500,
-          color: '#ffffff',
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = '#f59e0b';
-          e.currentTarget.style.transform = 'translateX(4px)';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.backgroundColor = 'transparent';
-          e.currentTarget.style.transform = 'translateX(0)';
-        }}
-      >
-        <span>Note</span>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M7 17L17 7M17 7H7M17 7V17" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-      </div>
-    </Link>
-
-    {/* Blog */}
-    <Link href="/blog">
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '12px 20px',
-          borderRadius: '14px',
-          cursor: 'pointer',
-          transition: 'all 0.2s ease',
-          fontFamily: 'Questrial, sans-serif',
-          fontSize: '14px',
-          fontWeight: 500,
-          color: '#ffffff',
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = '#ec489a';
-          e.currentTarget.style.transform = 'translateX(4px)';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.backgroundColor = 'transparent';
-          e.currentTarget.style.transform = 'translateX(0)';
-        }}
-      >
-        <span>Blog</span>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M7 17L17 7M17 7H7M17 7V17" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-      </div>
-    </Link>
-
-    {/* Contact */}
-    <Link href="/contact">
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '12px 20px',
-          borderRadius: '14px',
-          cursor: 'pointer',
-          transition: 'all 0.2s ease',
-          fontFamily: 'Questrial, sans-serif',
-          fontSize: '14px',
-          fontWeight: 500,
-          color: '#ffffff',
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = '#ef4444';
-          e.currentTarget.style.transform = 'translateX(4px)';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.backgroundColor = 'transparent';
-          e.currentTarget.style.transform = 'translateX(0)';
-        }}
-      >
-        <span>Contact</span>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M7 17L17 7M17 7H7M17 7V17" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-      </div>
-    </Link>
-
-    {/* Community */}
-    <Link href="/community">
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '12px 20px',
-          borderRadius: '14px',
-          cursor: 'pointer',
-          transition: 'all 0.2s ease',
-          fontFamily: 'Questrial, sans-serif',
-          fontSize: '14px',
-          fontWeight: 500,
-          color: '#ffffff',
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = '#8b5cf6';
-          e.currentTarget.style.transform = 'translateX(4px)';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.backgroundColor = 'transparent';
-          e.currentTarget.style.transform = 'translateX(0)';
-        }}
-      >
-        <span>Community</span>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M7 17L17 7M17 7H7M17 7V17" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-      </div>
-    </Link>
-  </div>
-
-  {/* Main Button Group */}
   <div
     style={{
       display: 'flex',
       alignItems: 'center',
       gap: '0',
       backgroundColor: '#000000',
-      border: '1px solid rgba(255,255,255,0.2)',
+      border: '1px solid rgba(255,255,255,0.15)',
       borderRadius: '60px',
-      padding: '6px',
+      padding: '8px 12px',
       boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
     }}
   >
-    {/* MENU Button - Trigger Dropdown */}
+    {/* SISI KIRI - MENURU BRAND */}
+    <div
+      style={{
+        padding: '10px 28px',
+        fontFamily: 'Questrial, sans-serif',
+        fontSize: '15px',
+        fontWeight: 500,
+        color: '#ffffff',
+        letterSpacing: '0.05em',
+      }}
+    >
+      MENURU BRAND
+    </div>
+
+    {/* Separator Kiri */}
+    <div
+      style={{
+        width: '1px',
+        height: '32px',
+        backgroundColor: 'rgba(255,255,255,0.15)',
+        margin: '0 8px',
+      }}
+    />
+
+    {/* PLUS (+) Button - Minimalis */}
     <button
-      id="menuButton"
       onClick={() => {
-        const dropdown = document.getElementById('menuDropdown');
-        if (dropdown) {
-          const isVisible = dropdown.style.opacity === '1';
-          dropdown.style.opacity = isVisible ? '0' : '1';
-          dropdown.style.visibility = isVisible ? 'hidden' : 'visible';
-          dropdown.style.transform = isVisible 
-            ? 'translateY(-10px)' 
-            : 'translateY(0)';
-        }
+        console.log('Plus clicked');
       }}
       style={{
-        padding: '12px 28px',
+        padding: '10px 24px',
         borderRadius: '40px',
         backgroundColor: 'transparent',
         color: '#ffffff',
         border: 'none',
         cursor: 'pointer',
         fontFamily: 'Questrial, sans-serif',
-        fontSize: '15px',
-        fontWeight: 500,
-        transition: 'all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)',
-        letterSpacing: '0.03em',
+        fontSize: '24px',
+        fontWeight: 300,
+        transition: 'all 0.3s ease',
         display: 'flex',
         alignItems: 'center',
         gap: '8px',
@@ -7024,107 +6822,60 @@ export default function HomePage(): React.JSX.Element {
         e.currentTarget.style.color = '#ffffff';
       }}
     >
-      <span>Menu</span>
-      <svg 
-        width="14" 
-        height="14" 
-        viewBox="0 0 24 24" 
-        fill="none" 
-        xmlns="http://www.w3.org/2000/svg"
-        style={{ 
-          transition: 'transform 0.2s ease',
-          transform: 'rotate(0deg)'
-        }}
-        id="menuArrow"
-      >
-        <path d="M6 9L12 15L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-      </svg>
+      <span>+</span>
     </button>
 
-    {/* Separator */}
+    {/* Separator Kanan */}
     <div
       style={{
         width: '1px',
-        height: '28px',
-        backgroundColor: '#444444',
-        margin: '0 4px',
+        height: '32px',
+        backgroundColor: 'rgba(255,255,255,0.15)',
+        margin: '0 8px',
       }}
     />
 
-    {/* FEED Button */}
-    <button
-      onClick={() => {
-        console.log('Feed clicked');
-      }}
+    {/* Arrow Button - Border Radius, BG Putih, Tanpa Hover, Tanpa Tautan */}
+    <div
       style={{
-        padding: '12px 28px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#ffffff',
         borderRadius: '40px',
-        backgroundColor: 'transparent',
-        color: '#ffffff',
-        border: 'none',
-        cursor: 'pointer',
-        fontFamily: 'Questrial, sans-serif',
-        fontSize: '15px',
-        fontWeight: 500,
-        transition: 'all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)',
-        letterSpacing: '0.03em',
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.backgroundColor = '#ffffff';
-        e.currentTarget.style.color = '#000000';
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.backgroundColor = 'transparent';
-        e.currentTarget.style.color = '#ffffff';
+        padding: '10px 20px',
+        marginLeft: '4px',
+        cursor: 'default',
       }}
     >
-      Feed
-    </button>
-
-    {/* Separator */}
-    <div
-      style={{
-        width: '1px',
-        height: '28px',
-        backgroundColor: '#444444',
-        margin: '0 4px',
-      }}
-    />
-
-    {/* PROFILE Button */}
-    <Link href="/profile">
-      <button
-        style={{
-          padding: '12px 28px',
-          borderRadius: '40px',
-          backgroundColor: 'transparent',
-          color: '#ffffff',
-          border: 'none',
-          cursor: 'pointer',
-          fontFamily: 'Questrial, sans-serif',
-          fontSize: '15px',
-          fontWeight: 500,
-          transition: 'all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)',
-          letterSpacing: '0.03em',
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = '#ffffff';
-          e.currentTarget.style.color = '#000000';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.backgroundColor = 'transparent';
-          e.currentTarget.style.color = '#ffffff';
-        }}
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        style={{ stroke: '#000000', strokeWidth: '1.5' }}
       >
-        Profile
-      </button>
-    </Link>
+        <path
+          d="M7 17L17 7M17 7H7M17 7V17"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </div>
   </div>
 </div>
-        </div>
 
 
 
+
+
+
+
+
+        
 
 
         
