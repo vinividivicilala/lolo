@@ -6964,10 +6964,7 @@ useEffect(() => {
 
 
 
-
-
-
-{/* FLOATING BUTTON - Tengah Bawah dengan Expand */}
+{/* FLOATING BUTTON - Expandable (Background naik ke atas) */}
 <div
   style={{
     position: 'fixed',
@@ -6978,247 +6975,233 @@ useEffect(() => {
     pointerEvents: 'auto',
   }}
 >
-  {/* Expandable Container - Muncul ke ATAS saat expanded */}
+  {/* Container utama yang expand ke ATAS */}
   <div
     style={{
-      position: 'absolute',
-      bottom: '100%',
-      left: '50%',
-      transform: `translateX(-50%) translateY(${isExpanded ? '0' : '-20px'})`,
-      marginBottom: '16px',
-      width: isExpanded ? '320px' : '0px',
-      opacity: isExpanded ? 1 : 0,
-      visibility: isExpanded ? 'visible' : 'hidden',
-      transition: 'all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)',
-      backgroundColor: '#1a1a1a',
-      borderRadius: '24px',
-      padding: isExpanded ? '20px' : '0px',
-      boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
-      border: isExpanded ? '1px solid rgba(255,255,255,0.1)' : 'none',
+      backgroundColor: '#000000',
+      border: '1px solid rgba(255,255,255,0.2)',
+      borderRadius: isExpanded ? '32px' : '80px',
+      boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
+      width: isExpanded ? '400px' : '1000px',
+      transition: 'all 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1)',
       overflow: 'hidden',
     }}
   >
-    <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '12px',
-    }}>
-      <div style={{
-        fontFamily: 'Questrial, sans-serif',
-        fontSize: '14px',
-        fontWeight: 500,
-        color: '#ffffff',
-        marginBottom: '8px',
-        letterSpacing: '0.05em',
-      }}>
-        MENU
-      </div>
-      <Link href="/donatur">
-        <div style={{
-          padding: '12px 16px',
-          borderRadius: '12px',
-          cursor: 'pointer',
-          transition: 'all 0.2s ease',
-          fontFamily: 'Questrial, sans-serif',
-          fontSize: '14px',
-          color: '#ffffff',
-          backgroundColor: 'transparent',
-        }}
-        onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#10b981'; e.currentTarget.style.transform = 'translateX(4px)'; }}
-        onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.transform = 'translateX(0)'; }}>
-          Donation
-        </div>
-      </Link>
-      <Link href="/calendar">
-        <div style={{
-          padding: '12px 16px',
-          borderRadius: '12px',
-          cursor: 'pointer',
-          transition: 'all 0.2s ease',
-          fontFamily: 'Questrial, sans-serif',
-          fontSize: '14px',
-          color: '#ffffff',
-          backgroundColor: 'transparent',
-        }}
-        onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#3b82f6'; e.currentTarget.style.transform = 'translateX(4px)'; }}
-        onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.transform = 'translateX(0)'; }}>
-          Calendar
-        </div>
-      </Link>
-      <Link href="/note">
-        <div style={{
-          padding: '12px 16px',
-          borderRadius: '12px',
-          cursor: 'pointer',
-          transition: 'all 0.2s ease',
-          fontFamily: 'Questrial, sans-serif',
-          fontSize: '14px',
-          color: '#ffffff',
-          backgroundColor: 'transparent',
-        }}
-        onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#f59e0b'; e.currentTarget.style.transform = 'translateX(4px)'; }}
-        onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.transform = 'translateX(0)'; }}>
-          Note
-        </div>
-      </Link>
-      <Link href="/blog">
-        <div style={{
-          padding: '12px 16px',
-          borderRadius: '12px',
-          cursor: 'pointer',
-          transition: 'all 0.2s ease',
-          fontFamily: 'Questrial, sans-serif',
-          fontSize: '14px',
-          color: '#ffffff',
-          backgroundColor: 'transparent',
-        }}
-        onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#ec489a'; e.currentTarget.style.transform = 'translateX(4px)'; }}
-        onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.transform = 'translateX(0)'; }}>
-          Blog
-        </div>
-      </Link>
-      <Link href="/contact">
-        <div style={{
-          padding: '12px 16px',
-          borderRadius: '12px',
-          cursor: 'pointer',
-          transition: 'all 0.2s ease',
-          fontFamily: 'Questrial, sans-serif',
-          fontSize: '14px',
-          color: '#ffffff',
-          backgroundColor: 'transparent',
-        }}
-        onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#ef4444'; e.currentTarget.style.transform = 'translateX(4px)'; }}
-        onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.transform = 'translateX(0)'; }}>
-          Contact
-        </div>
-      </Link>
-      <Link href="/community">
-        <div style={{
-          padding: '12px 16px',
-          borderRadius: '12px',
-          cursor: 'pointer',
-          transition: 'all 0.2s ease',
-          fontFamily: 'Questrial, sans-serif',
-          fontSize: '14px',
-          color: '#ffffff',
-          backgroundColor: 'transparent',
-        }}
-        onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#8b5cf6'; e.currentTarget.style.transform = 'translateX(4px)'; }}
-        onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.transform = 'translateX(0)'; }}>
-          Community
-        </div>
-      </Link>
-    </div>
-  </div>
-
-  {/* Main Button */}
-  <div
-    style={{
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      gap: '0',
-      backgroundColor: '#000000',
-      border: '1px solid rgba(255,255,255,0.2)',
-      borderRadius: '80px',
-      padding: '8px 24px',
-      boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
-      width: '1000px',
-      cursor: 'pointer',
-      transition: 'all 0.2s ease',
-    }}
-    onClick={() => setIsExpanded(!isExpanded)}
-  >
-    {/* SISI KIRI - Teks Berubah-ubah */}
+    {/* KONTEN YANG MUNCUL SAAT EXPAND (di atas) */}
     <div
-      id="floatingText"
       style={{
-        padding: '8px 16px',
-        fontFamily: 'Questrial, sans-serif',
-        fontSize: '20px',
-        fontWeight: 400,
-        color: '#ffffff',
-        letterSpacing: '-0.01em',
-        textAlign: 'left',
-        lineHeight: '1.2',
-        whiteSpace: 'nowrap',
-        transition: 'opacity 0.3s ease',
+        padding: isExpanded ? '24px 24px 16px 24px' : '0px 24px',
+        height: isExpanded ? 'auto' : '0px',
+        opacity: isExpanded ? 1 : 0,
+        visibility: isExpanded ? 'visible' : 'hidden',
+        transition: 'all 0.3s ease',
+        borderBottom: isExpanded ? '1px solid rgba(255,255,255,0.1)' : 'none',
       }}
     >
-      Menuru brand ✨
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '12px',
+      }}>
+        <div style={{
+          fontFamily: 'Questrial, sans-serif',
+          fontSize: '12px',
+          fontWeight: 500,
+          color: '#888888',
+          letterSpacing: '0.08em',
+          marginBottom: '8px',
+        }}>
+          QUICK MENU
+        </div>
+        <Link href="/donatur">
+          <div style={{
+            padding: '10px 16px',
+            borderRadius: '12px',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            fontFamily: 'Questrial, sans-serif',
+            fontSize: '14px',
+            color: '#ffffff',
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#10b981'; e.currentTarget.style.transform = 'translateX(4px)'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.transform = 'translateX(0)'; }}>
+            Donation
+          </div>
+        </Link>
+        <Link href="/calendar">
+          <div style={{
+            padding: '10px 16px',
+            borderRadius: '12px',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            fontFamily: 'Questrial, sans-serif',
+            fontSize: '14px',
+            color: '#ffffff',
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#3b82f6'; e.currentTarget.style.transform = 'translateX(4px)'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.transform = 'translateX(0)'; }}>
+            Calendar
+          </div>
+        </Link>
+        <Link href="/note">
+          <div style={{
+            padding: '10px 16px',
+            borderRadius: '12px',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            fontFamily: 'Questrial, sans-serif',
+            fontSize: '14px',
+            color: '#ffffff',
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#f59e0b'; e.currentTarget.style.transform = 'translateX(4px)'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.transform = 'translateX(0)'; }}>
+            Note
+          </div>
+        </Link>
+        <Link href="/blog">
+          <div style={{
+            padding: '10px 16px',
+            borderRadius: '12px',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            fontFamily: 'Questrial, sans-serif',
+            fontSize: '14px',
+            color: '#ffffff',
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#ec489a'; e.currentTarget.style.transform = 'translateX(4px)'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.transform = 'translateX(0)'; }}>
+            Blog
+          </div>
+        </Link>
+        <Link href="/contact">
+          <div style={{
+            padding: '10px 16px',
+            borderRadius: '12px',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            fontFamily: 'Questrial, sans-serif',
+            fontSize: '14px',
+            color: '#ffffff',
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#ef4444'; e.currentTarget.style.transform = 'translateX(4px)'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.transform = 'translateX(0)'; }}>
+            Contact
+          </div>
+        </Link>
+        <Link href="/community">
+          <div style={{
+            padding: '10px 16px',
+            borderRadius: '12px',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            fontFamily: 'Questrial, sans-serif',
+            fontSize: '14px',
+            color: '#ffffff',
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#8b5cf6'; e.currentTarget.style.transform = 'translateX(4px)'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.transform = 'translateX(0)'; }}>
+            Community
+          </div>
+        </Link>
+      </div>
     </div>
 
-    {/* SISI KANAN - Tanda + atau - */}
+    {/* BAGIAN BAWAH (Tombol utama yang selalu terlihat) */}
     <div
       style={{
         display: 'flex',
         alignItems: 'center',
-        gap: '16px',
+        justifyContent: 'space-between',
+        gap: '0',
+        padding: '8px 24px',
+        cursor: 'pointer',
       }}
+      onClick={() => setIsExpanded(!isExpanded)}
     >
+      {/* SISI KIRI - Teks Berubah-ubah */}
       <div
+        id="floatingText"
         style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          backgroundColor: '#ffffff',
-          borderRadius: '60px',
-          padding: '10px 32px',
-          transition: 'all 0.2s ease',
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = '#f0f0f0';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.backgroundColor = '#ffffff';
+          padding: '8px 16px',
+          fontFamily: 'Questrial, sans-serif',
+          fontSize: '20px',
+          fontWeight: 400,
+          color: '#ffffff',
+          letterSpacing: '-0.01em',
+          textAlign: 'left',
+          lineHeight: '1.2',
+          whiteSpace: 'nowrap',
+          transition: 'opacity 0.3s ease',
         }}
       >
-        <span
-          style={{
-            fontFamily: 'Questrial, sans-serif',
-            fontSize: '20px',
-            fontWeight: 500,
-            color: '#000000',
-            letterSpacing: '-0.01em',
-            textDecoration: 'none',
-          }}
-        >
-          Homepage
-        </span>
+        Menuru brand ✨
       </div>
 
-      {/* Tanda + / - untuk expand/collapse */}
+      {/* SISI KANAN */}
       <div
         style={{
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center',
-          cursor: 'pointer',
-          transition: 'opacity 0.2s ease',
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.opacity = '0.7';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.opacity = '1';
+          gap: '16px',
         }}
       >
-        <span
+        <div
           style={{
-            fontFamily: 'Questrial, sans-serif',
-            fontSize: '32px',
-            fontWeight: 300,
-            color: '#ffffff',
-            lineHeight: '1',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: '#ffffff',
+            borderRadius: '60px',
+            padding: '10px 32px',
+            transition: 'all 0.2s ease',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = '#f0f0f0';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = '#ffffff';
           }}
         >
-          {isExpanded ? '−' : '+'}
-        </span>
+          <span
+            style={{
+              fontFamily: 'Questrial, sans-serif',
+              fontSize: '20px',
+              fontWeight: 500,
+              color: '#000000',
+              letterSpacing: '-0.01em',
+              textDecoration: 'none',
+            }}
+          >
+            Homepage
+          </span>
+        </div>
+
+        {/* Tanda + / - */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            transition: 'opacity 0.2s ease',
+          }}
+        >
+          <span
+            style={{
+              fontFamily: 'Questrial, sans-serif',
+              fontSize: '32px',
+              fontWeight: 300,
+              color: '#ffffff',
+              lineHeight: '1',
+            }}
+          >
+            {isExpanded ? '−' : '+'}
+          </span>
+        </div>
       </div>
     </div>
   </div>
-</div>        
+</div>
 </div>
 
 
