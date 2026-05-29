@@ -6245,81 +6245,65 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               )}
 
-       {/* REAL-TIME DATE + SCHEDULE CALL - Background Biru Stabilo Sedang */}
+
+{/* REAL-TIME DATE + SCHEDULE CALL - Terpisah */}
 <div style={{
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
-  gap: '8px',
+  gap: '12px',
   width: '100%',
-  backgroundColor: '#3b82f6',
-  borderRadius: '60px',
-  padding: '6px 8px 6px 16px',
 }}>
-  {/* SISI KIRI - Simbol | + Tanggal Real-time dengan BG Putih */}
+  {/* SISI KIRI - Tanggal Real-time dengan BG Putih */}
   <div style={{
     display: 'flex',
     alignItems: 'center',
-    gap: '10px',
+    gap: '8px',
+    backgroundColor: '#ffffff',
+    borderRadius: '60px',
+    padding: '8px 20px',
+    border: '1px solid #e0e0e0',
+    flex: 1,
   }}>
-    <span style={{
-      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-      fontSize: '24px',
-      fontWeight: '300',
-      color: '#ffffff',
-    }}>
-      |
-    </span>
-    
-    {/* BG PUTIH untuk tanggal realtime */}
-    <div style={{
-      display: 'flex',
-      alignItems: 'center',
-      gap: '8px',
-      backgroundColor: '#ffffff',
-      borderRadius: '40px',
-      padding: '6px 16px',
-    }}>
-      {(() => {
-        const today = new Date();
-        const weekDays = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
-        const dayName = weekDays[today.getDay()];
-        const dateNum = today.getDate();
-        const month = today.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
-        
-        return (
-          <>
-            <span style={{
-              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-              fontSize: '13px',
-              fontWeight: '600',
-              color: '#000000',
-            }}>
-              {dayName}
-            </span>
-            <span style={{
-              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-              fontSize: '18px',
-              fontWeight: '700',
-              color: '#000000',
-            }}>
-              {dateNum}
-            </span>
-            <span style={{
-              fontFamily: "'Questrial', sans-serif",
-              fontSize: '11px',
-              fontWeight: '500',
-              color: '#666666',
-            }}>
-              {month}
-            </span>
-          </>
-        );
-      })()}
-    </div>
+    {(() => {
+      const today = new Date();
+      const weekDays = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+      const dayName = weekDays[today.getDay()];
+      const dateNum = today.getDate();
+      const month = today.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
+      
+      return (
+        <>
+          <span style={{
+            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+            fontSize: '13px',
+            fontWeight: '600',
+            color: '#666666',
+          }}>
+            {dayName}
+          </span>
+          <span style={{
+            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+            fontSize: '20px',
+            fontWeight: '700',
+            color: '#000000',
+          }}>
+            {dateNum}
+          </span>
+          <span style={{
+            fontFamily: "'Questrial', sans-serif",
+            fontSize: '12px',
+            fontWeight: '500',
+            color: '#999999',
+          }}>
+            {month}
+          </span>
+        </>
+      );
+    })()}
   </div>
 
-  {/* SISI KANAN - Schedule Call Button */}
+  {/* SISI KANAN - Schedule Call Button (Biru Stabilo, Besar, Kotak, Border Radius) */}
   <button
     onClick={() => {
       console.log('Schedule call clicked');
@@ -6328,18 +6312,19 @@ export default function HomePage(): React.JSX.Element {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      gap: '8px',
+      gap: '10px',
       backgroundColor: '#3b82f6',
       border: 'none',
-      borderRadius: '60px',
+      borderRadius: '16px',
       cursor: 'pointer',
       fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-      fontSize: '13px',
-      fontWeight: '500',
+      fontSize: '14px',
+      fontWeight: '600',
       color: '#ffffff',
-      padding: '8px 18px',
+      padding: '14px 24px',
       transition: 'all 0.3s ease',
       whiteSpace: 'nowrap',
+      minWidth: '160px',
     }}
     onMouseEnter={(e) => {
       e.currentTarget.style.backgroundColor = '#2563eb';
@@ -6351,13 +6336,22 @@ export default function HomePage(): React.JSX.Element {
     }}
   >
     <span>SCHEDULE CALL</span>
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   </button>
 </div>
 
-  
+
+
+
+
+
+
+
+
+
+              
               {/* REPLY MODAL FOR ADMIN */}
               {showReplyModal && selectedSubmission && (
                 <div className="reply-modal-overlay">
