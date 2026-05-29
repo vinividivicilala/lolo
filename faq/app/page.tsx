@@ -6745,7 +6745,9 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </div>
 
-{/* FLOATING BUTTON - Tengah Bawah (Minimalist Design) */}
+
+
+{/* FLOATING BUTTON - Desain seperti di foto dengan tanda + */}
 <div
   style={{
     position: 'fixed',
@@ -6760,113 +6762,74 @@ export default function HomePage(): React.JSX.Element {
     style={{
       display: 'flex',
       alignItems: 'center',
+      justifyContent: 'space-between',
       gap: '0',
-      backgroundColor: '#000000',
-      border: '1px solid rgba(255,255,255,0.15)',
+      backgroundColor: '#ffffff',
+      border: '1px solid #e0e0e0',
       borderRadius: '60px',
-      padding: '8px 12px',
-      boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
+      padding: '4px 6px 4px 24px',
+      boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
     }}
   >
-    {/* SISI KIRI - MENURU BRAND */}
+    {/* SISI KIRI - Teks "Sure, click away, idc" */}
     <div
       style={{
-        padding: '10px 28px',
+        padding: '10px 16px',
         fontFamily: 'Questrial, sans-serif',
-        fontSize: '15px',
-        fontWeight: 500,
-        color: '#ffffff',
-        letterSpacing: '0.05em',
+        fontSize: '14px',
+        fontWeight: 400,
+        color: '#888888',
+        letterSpacing: '0.02em',
       }}
     >
-      MENURU BRAND
+      Sure, click away, idc
     </div>
 
-    {/* Separator 1 */}
-    <div
-      style={{
-        width: '1px',
-        height: '32px',
-        backgroundColor: 'rgba(255,255,255,0.15)',
-        margin: '0 8px',
-      }}
-    />
-
-    {/* SISI KANAN - PLUS (+) Button */}
-    <button
-      onClick={() => {
-        console.log('Plus clicked');
-      }}
-      style={{
-        padding: '10px 24px',
-        borderRadius: '40px',
-        backgroundColor: 'transparent',
-        color: '#ffffff',
-        border: 'none',
-        cursor: 'pointer',
-        fontFamily: 'Questrial, sans-serif',
-        fontSize: '24px',
-        fontWeight: 300,
-        transition: 'all 0.3s ease',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '8px',
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.backgroundColor = '#ffffff';
-        e.currentTarget.style.color = '#000000';
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.backgroundColor = 'transparent';
-        e.currentTarget.style.color = '#ffffff';
-      }}
-    >
-      <span>+</span>
-    </button>
-
-    {/* Separator 2 */}
-    <div
-      style={{
-        width: '1px',
-        height: '32px',
-        backgroundColor: 'rgba(255,255,255,0.15)',
-        margin: '0 8px',
-      }}
-    />
-
-    {/* Arrow Button - Border Radius, BG Putih, Tanpa Hover, Tanpa Tautan (Homepage) */}
+    {/* SISI KANAN - HOMEPAGE dengan border dan tanda + */}
     <Link href="/">
       <div
         style={{
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center',
+          gap: '10px',
           backgroundColor: '#ffffff',
-          borderRadius: '40px',
-          padding: '10px 20px',
-          marginLeft: '4px',
+          border: '1px solid #e0e0e0',
+          borderRadius: '60px',
+          padding: '10px 24px',
           cursor: 'pointer',
-          transition: 'opacity 0.2s ease',
+          transition: 'all 0.2s ease',
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.opacity = '0.8';
+          e.currentTarget.style.backgroundColor = '#f5f5f5';
+          e.currentTarget.style.borderColor = '#cccccc';
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.opacity = '1';
+          e.currentTarget.style.backgroundColor = '#ffffff';
+          e.currentTarget.style.borderColor = '#e0e0e0';
         }}
       >
+        <span
+          style={{
+            fontFamily: 'Questrial, sans-serif',
+            fontSize: '14px',
+            fontWeight: 500,
+            color: '#000000',
+          }}
+        >
+          Homepage
+        </span>
         <svg
-          width="18"
-          height="18"
+          width="16"
+          height="16"
           viewBox="0 0 24 24"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
-          style={{ stroke: '#000000', strokeWidth: '1.5' }}
+          style={{ stroke: '#000000', strokeWidth: '2' }}
         >
           <path
-            d="M7 17L17 7M17 7H7M17 7V17"
+            d="M12 5V19M5 12H19"
             stroke="currentColor"
-            strokeWidth="2"
+            strokeWidth="1.8"
             strokeLinecap="round"
             strokeLinejoin="round"
           />
@@ -6875,12 +6838,7 @@ export default function HomePage(): React.JSX.Element {
     </Link>
   </div>
 </div>
-        </div>
-
-      
-
-
-
+        
 
 
 
