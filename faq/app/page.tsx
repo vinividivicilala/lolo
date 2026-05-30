@@ -6968,27 +6968,22 @@ const handleTextHover = () => {
       boxShadow: '0 20px 60px rgba(0,0,0,0.45)',
       width: '1000px',
       maxWidth: '92vw',
-      height: isMenuOpen ? '500px' : '68px',
       overflow: 'hidden',
       transformOrigin: 'bottom center',
-      transition:
-        'height .7s cubic-bezier(.16,1,.3,1), border-radius .7s cubic-bezier(.16,1,.3,1)',
+      transition: 'border-radius .7s cubic-bezier(.16,1,.3,1)',
     }}
   >
 
-    {/* PANEL MENU - Tinggi disesuaikan dengan container */}
+    {/* PANEL MENU - Muncul di ATAS tombol */}
     <div
       style={{
-        height: isMenuOpen ? '432px' : '0px',
+        display: isMenuOpen ? 'block' : 'none',
         opacity: isMenuOpen ? 1 : 0,
-        overflow: 'auto',
-        transition:
-          'opacity .45s ease .15s, height .7s cubic-bezier(.16,1,.3,1)',
-        scrollbarWidth: 'thin',
+        transition: 'opacity .45s ease',
       }}
     >
-      {/* MENU LIST - Design tetap sama seperti tombol */}
-      <div style={{ padding: '20px 0' }}>
+      {/* MENU LIST */}
+      <div style={{ padding: '24px 0 8px 0' }}>
         {[
           { name: 'Homepage', link: '/' },
           { name: 'Studios', link: '/studios' },
@@ -7005,7 +7000,7 @@ const handleTextHover = () => {
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                padding: '16px 30px',
+                padding: '14px 30px',
                 cursor: 'pointer',
                 transition: 'all .2s ease',
               }}
@@ -7019,7 +7014,7 @@ const handleTextHover = () => {
               <span
                 style={{
                   color: '#fff',
-                  fontSize: '22px',
+                  fontSize: '20px',
                   fontWeight: 400,
                   fontFamily: 'Questrial, sans-serif',
                 }}
@@ -7041,24 +7036,19 @@ const handleTextHover = () => {
       </div>
     </div>
 
-    {/* TOMBOL BAWAH - TETAP SAMA */}
+    {/* TOMBOL BAWAH - BORDER RADIUS SAMA DENGAN CONTAINER */}
     <div
       onClick={() => setIsMenuOpen(!isMenuOpen)}
       style={{
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        height: '68px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
+        height: '68px',
         padding: '0 24px',
         cursor: 'pointer',
-        borderTop: isMenuOpen
-          ? '1px solid rgba(255,255,255,0.08)'
-          : 'none',
+        borderTop: isMenuOpen ? '1px solid rgba(255,255,255,0.06)' : 'none',
         background: '#050505',
+        borderRadius: isMenuOpen ? '0 0 28px 28px' : '999px',
       }}
     >
       {/* FOTO + MENURU BRAND di sisi kiri */}
