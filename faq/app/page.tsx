@@ -6964,17 +6964,16 @@ const handleTextHover = () => {
     style={{
       background: '#050505',
       border: '1px solid rgba(255,255,255,0.08)',
-      borderRadius: isMenuOpen ? '28px' : '999px',
+      borderRadius: '999px',
       boxShadow: '0 20px 60px rgba(0,0,0,0.45)',
       width: '1000px',
       maxWidth: '92vw',
       overflow: 'hidden',
-      transformOrigin: 'bottom center',
       transition: 'border-radius .7s cubic-bezier(.16,1,.3,1)',
     }}
   >
 
-    {/* PANEL MENU - Muncul di ATAS tombol */}
+    {/* PANEL MENU */}
     <div
       style={{
         display: isMenuOpen ? 'block' : 'none',
@@ -6982,7 +6981,6 @@ const handleTextHover = () => {
         transition: 'opacity .45s ease',
       }}
     >
-      {/* MENU LIST */}
       <div style={{ padding: '24px 0 8px 0' }}>
         {[
           { name: 'Homepage', link: '/' },
@@ -7036,7 +7034,7 @@ const handleTextHover = () => {
       </div>
     </div>
 
-    {/* TOMBOL BAWAH - BORDER RADIUS SAMA DENGAN CONTAINER */}
+    {/* TOMBOL BAWAH - HANYA BORDER RADIUS YANG DIUBAH */}
     <div
       onClick={() => setIsMenuOpen(!isMenuOpen)}
       style={{
@@ -7048,10 +7046,10 @@ const handleTextHover = () => {
         cursor: 'pointer',
         borderTop: isMenuOpen ? '1px solid rgba(255,255,255,0.06)' : 'none',
         background: '#050505',
-        borderRadius: isMenuOpen ? '0 0 28px 28px' : '999px',
+        borderRadius: isMenuOpen ? '0 0 999px 999px' : '999px',
       }}
     >
-      {/* FOTO + MENURU BRAND di sisi kiri */}
+      {/* FOTO + MENURU BRAND */}
       <div
         style={{
           display: 'flex',
@@ -7081,7 +7079,7 @@ const handleTextHover = () => {
         </span>
       </div>
 
-      {/* TEKS YANG BERUBAH DENGAN GSAP */}
+      {/* TEKS BERUBAH */}
       <div
         ref={textRef}
         onMouseEnter={handleTextHover}
