@@ -6964,29 +6964,23 @@ const handleTextHover = () => {
   <div
     style={{
       background: '#050505',
-      border: '1px solid rgba(255,255,255,0.08)', // SATU BORDER untuk semuanya
+      border: '1px solid rgba(255,255,255,0.08)',
       borderRadius: isMenuOpen ? '28px' : '999px',
       boxShadow: '0 20px 60px rgba(0,0,0,0.45)',
       width: '1000px',
       maxWidth: '92vw',
-      height: isMenuOpen ? 'auto' : '68px',
-      minHeight: isMenuOpen ? '700px' : '68px',
+      transition: 'all .7s cubic-bezier(.16,1,.3,1)',
       overflow: 'hidden',
-      transition:
-        'min-height .7s cubic-bezier(.16,1,.3,1), border-radius .7s cubic-bezier(.16,1,.3,1), height .7s cubic-bezier(.16,1,.3,1)',
-      display: 'flex',
-      flexDirection: 'column',
     }}
   >
-
     {/* KONTEN MENU - Bagian Atas (muncul saat expand) */}
     <div
       style={{
-        flex: 1,
+        maxHeight: isMenuOpen ? '800px' : '0',
         opacity: isMenuOpen ? 1 : 0,
         visibility: isMenuOpen ? 'visible' : 'hidden',
-        transform: isMenuOpen ? 'translateY(0)' : 'translateY(-20px)',
-        transition: 'opacity .45s ease .15s, transform .45s ease .15s, visibility .45s ease .15s',
+        transition: 'max-height .7s cubic-bezier(.16,1,.3,1), opacity .45s ease .15s, visibility .45s ease .15s',
+        overflow: 'hidden',
       }}
     >
       {/* HEADER DENGAN FOTO DAN NAMA WEBSITE BESAR */}
@@ -7067,10 +7061,7 @@ const handleTextHover = () => {
               justifyContent: 'space-between',
               alignItems: 'center',
               padding: '22px 30px',
-              borderBottom:
-                index !== 5
-                  ? '1px solid rgba(255,255,255,0.06)'
-                  : 'none',
+              borderBottom: index !== 5 ? '1px solid rgba(255,255,255,0.06)' : 'none',
               cursor: 'pointer',
               transition: 'all .3s ease',
             }}
@@ -7105,7 +7096,7 @@ const handleTextHover = () => {
       ))}
     </div>
 
-    {/* TOMBOL BAWAH - Bagian Bawah dari Container yang SAMA, BORDER NYATA */}
+    {/* TOMBOL BAWAH - Bagian Bawah yang SELALU TERLIHAT */}
     <div
       onClick={() => setIsMenuOpen(!isMenuOpen)}
       style={{
@@ -7116,10 +7107,10 @@ const handleTextHover = () => {
         height: '68px',
         cursor: 'pointer',
         borderTop: isMenuOpen ? '1px solid rgba(255,255,255,0.08)' : 'none',
-        flexShrink: 0,
         background: '#050505',
       }}
     >
+      {/* TEKS KIRI - BERUBAH DENGAN GSAP */}
       <div
         ref={textRef}
         onMouseEnter={handleTextHover}
@@ -7135,6 +7126,7 @@ const handleTextHover = () => {
         {rotatingTexts[currentTextIndex]}
       </div>
 
+      {/* BAGIAN KANAN - HOMEPAGE + TANDA + */}
       <div
         style={{
           display: 'flex',
