@@ -6937,9 +6937,7 @@ useEffect(() => {
 
 
 
-
-
- {/* FLOATING BUTTON */}
+{/* FLOATING BUTTON */}
 <div
   style={{
     position: 'fixed',
@@ -6955,9 +6953,9 @@ useEffect(() => {
       border: '1px solid rgba(255,255,255,0.08)',
       borderRadius: isMenuOpen ? '28px' : '999px',
       boxShadow: '0 20px 60px rgba(0,0,0,0.45)',
-      width: '400px',
+      width: '800px',
       maxWidth: '92vw',
-      height: isMenuOpen ? '520px' : '72px',
+      height: isMenuOpen ? '480px' : '72px',
       overflow: 'hidden',
       transformOrigin: 'bottom center',
       transition:
@@ -6968,7 +6966,7 @@ useEffect(() => {
     {/* PANEL MENU */}
     <div
       style={{
-        maxHeight: isMenuOpen ? '448px' : '0px',
+        maxHeight: isMenuOpen ? '408px' : '0px',
         opacity: isMenuOpen ? 1 : 0,
         overflow: 'hidden',
         transform: isMenuOpen
@@ -7141,7 +7139,7 @@ useEffect(() => {
             hoverTimeoutRef.current = setTimeout(() => {
               const randomIndex = Math.floor(Math.random() * textList.length);
               setFloatingText(textList[randomIndex]);
-            }, 500); // jeda 500ms saat hover
+            }, 500);
           }}
         >
           {floatingText}
@@ -7188,7 +7186,7 @@ useEffect(() => {
       </div>
     </div>
   </div>
-</div>       
+</div>
 </div>
 
 
