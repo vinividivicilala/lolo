@@ -795,6 +795,10 @@ export default function HomePage(): React.JSX.Element {
 
 
 const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [floatingText, setFloatingText] = useState("Menuru brand");
+const textChangeTimeoutRef = useRef(null);
+const hoverTimeoutRef = useRef(null);
+
 
 
   
@@ -3299,100 +3303,67 @@ const [isMenuOpen, setIsMenuOpen] = useState(false);
 
 
 
-// Teks berubah-ubah saat scroll dan diam
+
+// Daftar teks yang akan berubah
+const textList = [
+  "Menuru brand",
+  "Open this",
+  "Hey!",
+  "Welcome back",
+  "Good to see you",
+  "Click me",
+  "Let's go",
+  "Explore now",
+  "Hello there",
+  "Stay curious",
+  "Something new",
+  "Don't miss out",
+  "Join the journey",
+  "Your vibe matters",
+  "Level up",
+  "Let's create",
+  "Think different",
+  "Be inspired",
+  "Keep scrolling",
+  "You're awesome"
+];
+
+// Fungsi untuk mengubah teks dengan jeda lambat
+const changeTextSlowly = () => {
+  if (textChangeTimeoutRef.current) clearTimeout(textChangeTimeoutRef.current);
+  
+  textChangeTimeoutRef.current = setTimeout(() => {
+    const randomIndex = Math.floor(Math.random() * textList.length);
+    setFloatingText(textList[randomIndex]);
+  }, 800); // jeda 800ms sebelum berubah
+};
+
+// Efek scroll dengan jeda lambat
 useEffect(() => {
-  const texts = [
-    "Menuru brand ✨",
-    "Open this 🚀",
-    "Hey! 👋",
-    "Welcome back 🎉",
-    "Good to see you! 🌟",
-    "Click me! 💫",
-    "Let's go! 🔥",
-    "Explore now 🎯",
-    "Hello there! 💙",
-    "Stay curious 🧠",
-    "Something new? ✨",
-    "Don't miss out! ⚡",
-    "Join the journey 🌈",
-    "Your vibe matters 💎",
-    "Level up! 🚀",
-    "Let's create 🎨",
-    "Think different 💡",
-    "Be inspired 🌊",
-    "Keep scrolling 📜",
-    "You're awesome! 🌟",
-    "Open this ✨",
-    "Scroll more! 📱",
-    "Nice to see you! 👋",
-    "Welcome! 🎈",
-    "Let's explore 🔍"
-  ];
-  
-  const textElement = document.getElementById('floatingText');
-  let intervalId = null;
-  let timeoutId = null;
   let lastScrollY = window.scrollY;
-  let isChanging = false;
-  
-  const changeText = () => {
-    if (!textElement || isChanging) return;
-    isChanging = true;
-    const newText = texts[Math.floor(Math.random() * texts.length)];
-    textElement.style.opacity = '0';
-    setTimeout(() => {
-      if (textElement) {
-        textElement.textContent = newText;
-        textElement.style.opacity = '1';
-      }
-      isChanging = false;
-    }, 200);
-  };
-  
-  const startIdleTimer = () => {
-    if (timeoutId) clearTimeout(timeoutId);
-    if (intervalId) clearInterval(intervalId);
-    
-    timeoutId = setTimeout(() => {
-      intervalId = setInterval(() => {
-        changeText();
-      }, 3500);
-    }, 8000);
-  };
-  
-  const stopIdleTimer = () => {
-    if (timeoutId) clearTimeout(timeoutId);
-    if (intervalId) {
-      clearInterval(intervalId);
-      intervalId = null;
-    }
-  };
+  let scrollTimeout = null;
   
   const handleScroll = () => {
-    const currentScrollY = window.scrollY;
-    if (Math.abs(currentScrollY - lastScrollY) > 5) {
-      stopIdleTimer();
-      changeText();
-      startIdleTimer();
-      lastScrollY = currentScrollY;
-    }
+    if (scrollTimeout) clearTimeout(scrollTimeout);
+    
+    scrollTimeout = setTimeout(() => {
+      const currentScrollY = window.scrollY;
+      if (Math.abs(currentScrollY - lastScrollY) > 10) {
+        changeTextSlowly();
+        lastScrollY = currentScrollY;
+      }
+    }, 300); // jeda 300ms setelah scroll berhenti
   };
   
-  // Set initial random text
-  if (textElement) {
-    textElement.textContent = texts[Math.floor(Math.random() * texts.length)];
-  }
-  
-  startIdleTimer();
   window.addEventListener('scroll', handleScroll);
   
   return () => {
     window.removeEventListener('scroll', handleScroll);
-    stopIdleTimer();
+    if (scrollTimeout) clearTimeout(scrollTimeout);
+    if (textChangeTimeoutRef.current) clearTimeout(textChangeTimeoutRef.current);
+    if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
   };
 }, []);
-
-
 
 
 
@@ -6966,6 +6937,9 @@ useEffect(() => {
 
 
 
+
+
+ {/* FLOATING BUTTON */}
 <div
   style={{
     position: 'fixed',
@@ -6981,9 +6955,9 @@ useEffect(() => {
       border: '1px solid rgba(255,255,255,0.08)',
       borderRadius: isMenuOpen ? '28px' : '999px',
       boxShadow: '0 20px 60px rgba(0,0,0,0.45)',
-      width: '760px',
+      width: '400px',
       maxWidth: '92vw',
-      height: isMenuOpen ? '720px' : '72px',
+      height: isMenuOpen ? '520px' : '72px',
       overflow: 'hidden',
       transformOrigin: 'bottom center',
       transition:
@@ -6994,7 +6968,7 @@ useEffect(() => {
     {/* PANEL MENU */}
     <div
       style={{
-        maxHeight: isMenuOpen ? '648px' : '0px',
+        maxHeight: isMenuOpen ? '448px' : '0px',
         opacity: isMenuOpen ? 1 : 0,
         overflow: 'hidden',
         transform: isMenuOpen
@@ -7010,7 +6984,7 @@ useEffect(() => {
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          padding: '30px',
+          padding: '24px 24px',
           borderBottom: '1px solid rgba(255,255,255,0.08)',
         }}
       >
@@ -7018,7 +6992,7 @@ useEffect(() => {
           <div
             style={{
               color: '#fff',
-              fontSize: '42px',
+              fontSize: '32px',
               lineHeight: '0.9',
               fontWeight: 500,
               fontFamily: 'Questrial, sans-serif',
@@ -7030,8 +7004,8 @@ useEffect(() => {
           <div
             style={{
               color: '#8a8a8a',
-              marginTop: '8px',
-              fontSize: '13px',
+              marginTop: '6px',
+              fontSize: '12px',
               fontFamily: 'Questrial, sans-serif',
             }}
           >
@@ -7043,11 +7017,12 @@ useEffect(() => {
           style={{
             background: '#fff',
             color: '#000',
-            padding: '12px 24px',
+            padding: '10px 20px',
             borderRadius: '999px',
-            fontSize: '14px',
+            fontSize: '13px',
             fontWeight: 500,
             cursor: 'pointer',
+            fontFamily: 'Questrial, sans-serif',
           }}
         >
           Let's Talk
@@ -7056,56 +7031,57 @@ useEffect(() => {
 
       {/* MENU */}
       {[
-        'Homepage',
-        'Studios',
-        'Recognition',
-        'Work',
-        'Blog',
-        'Contact',
+        { name: 'Homepage', link: '/' },
+        { name: 'Studios', link: '/studios' },
+        { name: 'Recognition', link: '/recognition' },
+        { name: 'Work', link: '/work' },
+        { name: 'Blog', link: '/blog' },
+        { name: 'Contact', link: '/contact' },
       ].map((item, index) => (
-        <div
-          key={index}
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            padding: '26px 30px',
-            borderBottom:
-              index !== 5
-                ? '1px solid rgba(255,255,255,0.06)'
-                : 'none',
-            cursor: 'pointer',
-            transition: 'all .3s ease',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background =
-              'rgba(255,255,255,0.03)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = 'transparent';
-          }}
-        >
-          <span
+        <Link href={item.link} key={index}>
+          <div
             style={{
-              color: '#fff',
-              fontSize: '30px',
-              fontWeight: 400,
-              fontFamily: 'Questrial, sans-serif',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              padding: '20px 24px',
+              borderBottom:
+                index !== 5
+                  ? '1px solid rgba(255,255,255,0.06)'
+                  : 'none',
+              cursor: 'pointer',
+              transition: 'all .3s ease',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background =
+                'rgba(255,255,255,0.03)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'transparent';
             }}
           >
-            {item}
-          </span>
+            <span
+              style={{
+                color: '#fff',
+                fontSize: '24px',
+                fontWeight: 400,
+                fontFamily: 'Questrial, sans-serif',
+              }}
+            >
+              {item.name}
+            </span>
 
-          <span
-            style={{
-              color: '#777',
-              fontSize: '14px',
-              fontFamily: 'Questrial, sans-serif',
-            }}
-          >
-            View
-          </span>
-        </div>
+            <span
+              style={{
+                color: '#777',
+                fontSize: '13px',
+                fontFamily: 'Questrial, sans-serif',
+              }}
+            >
+              View
+            </span>
+          </div>
+        </Link>
       ))}
     </div>
 
@@ -7121,49 +7097,90 @@ useEffect(() => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: '0 24px',
+        padding: '0 20px',
         cursor: 'pointer',
         borderTop: isMenuOpen
           ? '1px solid rgba(255,255,255,0.08)'
           : 'none',
       }}
     >
+      {/* GAMBAR + TEKS YANG BERUBAH */}
       <div
         style={{
-          color: '#fff',
-          fontSize: '20px',
-          fontFamily: 'Questrial, sans-serif',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
         }}
       >
-        Menuru brand ✨
+        <div
+          style={{
+            width: '36px',
+            height: '36px',
+            borderRadius: '50%',
+            overflow: 'hidden',
+            backgroundColor: '#1a1a1a',
+          }}
+        >
+          <Image
+            src="/images/menuru-logo.jpg"
+            alt="Menuru Logo"
+            width={36}
+            height={36}
+            style={{ objectFit: 'cover' }}
+          />
+        </div>
+        <div
+          style={{
+            color: '#fff',
+            fontSize: '16px',
+            fontFamily: 'Questrial, sans-serif',
+            transition: 'opacity 0.3s ease',
+          }}
+          onMouseEnter={() => {
+            if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+            hoverTimeoutRef.current = setTimeout(() => {
+              const randomIndex = Math.floor(Math.random() * textList.length);
+              setFloatingText(textList[randomIndex]);
+            }, 500); // jeda 500ms saat hover
+          }}
+        >
+          {floatingText}
+        </div>
       </div>
 
       <div
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '16px',
+          gap: '12px',
         }}
       >
-        <div
-          style={{
-            background: '#fff',
-            color: '#000',
-            borderRadius: '999px',
-            padding: '10px 28px',
-            fontSize: '18px',
-            fontWeight: 500,
-            fontFamily: 'Questrial, sans-serif',
-          }}
-        >
-          Homepage
-        </div>
+        <Link href="/">
+          <div
+            style={{
+              background: '#fff',
+              color: '#000',
+              borderRadius: '999px',
+              padding: '8px 20px',
+              fontSize: '14px',
+              fontWeight: 500,
+              fontFamily: 'Questrial, sans-serif',
+              cursor: 'pointer',
+              transition: 'opacity 0.2s ease',
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.opacity = '0.8'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.opacity = '1'; }}
+          >
+            Homepage
+          </div>
+        </Link>
 
         <span
           style={{
             color: '#fff',
-            fontSize: '32px',
+            fontSize: '28px',
             fontWeight: 300,
+            transition: 'transform 0.2s ease',
           }}
         >
           {isMenuOpen ? '−' : '+'}
@@ -7171,7 +7188,7 @@ useEffect(() => {
       </div>
     </div>
   </div>
-</div>
+</div>       
 </div>
 
 
