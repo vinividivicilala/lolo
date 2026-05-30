@@ -6964,122 +6964,169 @@ const handleTextHover = () => {
     style={{
       background: '#050505',
       border: '1px solid rgba(255,255,255,0.08)',
-      borderRadius: '999px',
+      borderRadius: isMenuOpen ? '28px' : '999px',
       boxShadow: '0 20px 60px rgba(0,0,0,0.45)',
       width: '1000px',
       maxWidth: '92vw',
+      height: isMenuOpen ? '900px' : '68px',
       overflow: 'hidden',
-      transition: 'border-radius .7s cubic-bezier(.16,1,.3,1)',
+      transformOrigin: 'bottom center',
+      transition:
+        'height .7s cubic-bezier(.16,1,.3,1), border-radius .7s cubic-bezier(.16,1,.3,1)',
     }}
   >
 
-    {/* PANEL MENU */}
+    {/* PANEL MENU / KONTEN - NYATU DENGAN TOMBOL */}
     <div
       style={{
-        display: isMenuOpen ? 'block' : 'none',
+        maxHeight: isMenuOpen ? '832px' : '0px',
         opacity: isMenuOpen ? 1 : 0,
-        transition: 'opacity .45s ease',
+        overflow: 'hidden',
+        transform: isMenuOpen ? 'translateY(0)' : 'translateY(40px)',
+        transition:
+          'opacity .45s ease .15s, transform .45s ease .15s, max-height .7s cubic-bezier(.16,1,.3,1)',
       }}
     >
-      <div style={{ padding: '24px 0 8px 0' }}>
-        {[
-          { name: 'Homepage', link: '/' },
-          { name: 'Studios', link: '/studios' },
-          { name: 'Recognition', link: '/recognition' },
-          { name: 'Work', link: '/work' },
-          { name: 'Blog', link: '/blog' },
-          { name: 'Contact', link: '/contact' },
-          { name: 'Donation', link: '/donatur' },
-          { name: 'Community', link: '/community' },
-        ].map((item, index) => (
-          <Link href={item.link} key={index} style={{ textDecoration: 'none' }}>
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                padding: '14px 30px',
-                cursor: 'pointer',
-                transition: 'all .2s ease',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'transparent';
-              }}
-            >
-              <span
-                style={{
-                  color: '#fff',
-                  fontSize: '20px',
-                  fontWeight: 400,
-                  fontFamily: 'Questrial, sans-serif',
-                }}
-              >
-                {item.name}
-              </span>
-              <span
-                style={{
-                  color: '#555',
-                  fontSize: '14px',
-                  fontFamily: 'Questrial, sans-serif',
-                }}
-              >
-                →
-              </span>
-            </div>
-          </Link>
-        ))}
-      </div>
-    </div>
-
-    {/* TOMBOL BAWAH - HANYA BORDER RADIUS YANG DIUBAH */}
-    <div
-      onClick={() => setIsMenuOpen(!isMenuOpen)}
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        height: '68px',
-        padding: '0 24px',
-        cursor: 'pointer',
-        borderTop: isMenuOpen ? '1px solid rgba(255,255,255,0.06)' : 'none',
-        background: '#050505',
-        borderRadius: isMenuOpen ? '0 0 999px 999px' : '999px',
-      }}
-    >
-      {/* FOTO + MENURU BRAND */}
+      {/* HEADER DENGAN FOTO DAN NAMA WEBSITE BESAR */}
       <div
         style={{
           display: 'flex',
+          justifyContent: 'space-between',
           alignItems: 'center',
-          gap: '12px',
+          padding: '30px',
+          borderBottom: '1px solid rgba(255,255,255,0.08)',
         }}
       >
-        <img
-          src="/images/lkhh.jpg"
-          alt="Menuru Brand"
+        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+          {/* FOTO SISI KIRI - /images/lkhh.jpg */}
+          <img
+            src="/images/lkhh.jpg"
+            alt="Menuru Brand"
+            style={{
+              width: '60px',
+              height: '60px',
+              borderRadius: '16px',
+              objectFit: 'cover',
+            }}
+          />
+          <div>
+            {/* NAMA WEBSITE BESAR */}
+            <div
+              style={{
+                color: '#fff',
+                fontSize: '48px',
+                lineHeight: '1',
+                fontWeight: 600,
+                fontFamily: 'Questrial, sans-serif',
+                letterSpacing: '-0.02em',
+              }}
+            >
+              MENURU
+            </div>
+            <div
+              style={{
+                color: '#8a8a8a',
+                marginTop: '8px',
+                fontSize: '14px',
+                fontFamily: 'Questrial, sans-serif',
+              }}
+            >
+              Creative Digital Studio
+            </div>
+          </div>
+        </div>
+
+        <div
           style={{
-            width: '40px',
-            height: '40px',
-            borderRadius: '12px',
-            objectFit: 'cover',
-          }}
-        />
-        <span
-          style={{
-            color: '#fff',
-            fontSize: '18px',
-            fontFamily: 'Questrial, sans-serif',
+            background: '#fff',
+            color: '#000',
+            padding: '10px 24px',
+            borderRadius: '999px',
+            fontSize: '14px',
             fontWeight: 500,
+            cursor: 'pointer',
           }}
         >
-          Menuru Brand
-        </span>
+          Let's Talk
+        </div>
       </div>
 
-      {/* TEKS BERUBAH */}
+      {/* MENU LIST - Tanpa underline */}
+      {[
+        { name: 'Homepage', link: '/' },
+        { name: 'Studios', link: '/studios' },
+        { name: 'Recognition', link: '/recognition' },
+        { name: 'Work', link: '/work' },
+        { name: 'Blog', link: '/blog' },
+        { name: 'Contact', link: '/contact' },
+      ].map((item, index) => (
+        <Link href={item.link} key={index} style={{ textDecoration: 'none' }}>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              padding: '22px 30px',
+              borderBottom:
+                index !== 5
+                  ? '1px solid rgba(255,255,255,0.06)'
+                  : 'none',
+              cursor: 'pointer',
+              transition: 'all .3s ease',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'transparent';
+            }}
+          >
+            <span
+              style={{
+                color: '#fff',
+                fontSize: '28px',
+                fontWeight: 400,
+                fontFamily: 'Questrial, sans-serif',
+              }}
+            >
+              {item.name}
+            </span>
+
+            <span
+              style={{
+                color: '#777',
+                fontSize: '14px',
+                fontFamily: 'Questrial, sans-serif',
+              }}
+            >
+              View
+            </span>
+          </div>
+        </Link>
+      ))}
+    </div>
+
+    {/* TOMBOL BAWAH - TETAP ADA, BORDER NYATA */}
+    <div
+      onClick={() => setIsMenuOpen(!isMenuOpen)}
+      style={{
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: '68px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '0 24px',
+        cursor: 'pointer',
+        borderTop: isMenuOpen
+          ? '1px solid rgba(255,255,255,0.08)'
+          : 'none',
+        background: '#050505',
+      }}
+    >
+      {/* TEKS YANG BERUBAH DENGAN GSAP */}
       <div
         ref={textRef}
         onMouseEnter={handleTextHover}
@@ -7102,25 +7149,28 @@ const handleTextHover = () => {
           gap: '16px',
         }}
       >
-        <div
-          style={{
-            background: '#fff',
-            color: '#000',
-            borderRadius: '999px',
-            padding: '8px 24px',
-            fontSize: '15px',
-            fontWeight: 500,
-            fontFamily: 'Questrial, sans-serif',
-          }}
-        >
-          Homepage
-        </div>
+        <Link href="/" style={{ textDecoration: 'none' }}>
+          <div
+            style={{
+              background: '#fff',
+              color: '#000',
+              borderRadius: '999px',
+              padding: '8px 24px',
+              fontSize: '16px',
+              fontWeight: 500,
+              fontFamily: 'Questrial, sans-serif',
+            }}
+          >
+            Homepage
+          </div>
+        </Link>
 
         <span
           style={{
             color: '#fff',
-            fontSize: '24px',
+            fontSize: '28px',
             fontWeight: 300,
+            cursor: 'pointer',
           }}
         >
           {isMenuOpen ? '−' : '+'}
