@@ -793,8 +793,7 @@ export default function HomePage(): React.JSX.Element {
   const shadowPageRef = useRef<HTMLDivElement>(null);
 
 
-
-  const [isExpanded, setIsExpanded] = useState(false);
+const [isMenuOpen, setIsMenuOpen] = useState(false);
 
 
   
@@ -6966,11 +6965,7 @@ useEffect(() => {
 
 
 
-
-
-
-
-{/* FLOATING BUTTON - Efek bg tombol 'naik' (expand) tapi posisi tombol diam */}
+{/* FLOATING BUTTON - Border tombol bergulir ke atas membentuk border menu */}
 <div
   style={{
     position: 'fixed',
@@ -6981,27 +6976,27 @@ useEffect(() => {
     pointerEvents: 'auto',
   }}
 >
-  {/* Container utama yang akan 'mengembang' ke atas */}
+  {/* Container utama dengan BORDER yang akan 'naik' */}
   <div
     style={{
       backgroundColor: '#000000',
-      border: '1px solid rgba(255,255,255,0.2)',
-      borderRadius: '80px', // Border radius tetap
+      border: '1px solid rgba(255,255,255,0.2)', // BORDER SAMA untuk tombol dan menu
+      borderRadius: isMenuOpen ? '28px' : '80px',
       boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
-      width: '1000px',
-      transition: 'height 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1)', // Hanya tinggi yang berubah
+      width: isMenuOpen ? '380px' : '1000px',
+      transition: 'all 0.45s cubic-bezier(0.2, 0.9, 0.4, 1.1)',
       overflow: 'hidden',
-      height: isExpanded ? '320px' : '74px', // Tinggi bertambah saat expand
+      position: 'relative',
     }}
   >
-    {/* KONTEN MENU YANG MUNCUL (bergulir dari dalam) */}
+    {/* KONTEN MENU (border-nya menyatu dengan border container) */}
     <div
       style={{
-        padding: isExpanded ? '24px 24px 16px 24px' : '0px 24px',
-        opacity: isExpanded ? 1 : 0,
-        visibility: isExpanded ? 'visible' : 'hidden',
-        transition: 'all 0.3s ease 0.05s',
-        borderBottom: isExpanded ? '1px solid rgba(255,255,255,0.1)' : 'none',
+        padding: isMenuOpen ? '24px 20px 20px 20px' : '0px 20px',
+        height: isMenuOpen ? 'auto' : '0px',
+        opacity: isMenuOpen ? 1 : 0,
+        visibility: isMenuOpen ? 'visible' : 'hidden',
+        transition: 'all 0.35s ease 0.05s',
       }}
     >
       <div style={{
@@ -7139,7 +7134,7 @@ useEffect(() => {
       </div>
     </div>
 
-    {/* BAGIAN BAWAH (Tombol Utama - TETAP DI SISI BAWAH CONTAINER) */}
+    {/* BAGIAN BAWAH (Tombol Utama) - BORDER NYA MENYATU */}
     <div
       style={{
         display: 'flex',
@@ -7147,14 +7142,9 @@ useEffect(() => {
         justifyContent: 'space-between',
         padding: '8px 24px',
         cursor: 'pointer',
-        position: 'absolute',
-        bottom: '0',
-        left: '0',
-        right: '0',
-        backgroundColor: '#000000', // Agar tidak transparan saat scroll
-        borderTop: isExpanded ? '1px solid rgba(255,255,255,0.1)' : 'none',
+        backgroundColor: '#000000',
       }}
-      onClick={() => setIsExpanded(!isExpanded)}
+      onClick={() => setIsMenuOpen(!isMenuOpen)}
     >
       <div
         id="floatingText"
@@ -7178,11 +7168,11 @@ useEffect(() => {
         }}>
           <span style={{ fontFamily: 'Questrial, sans-serif', fontSize: '20px', fontWeight: 500, color: '#000000' }}>Homepage</span>
         </div>
-        <span style={{ fontSize: '32px', fontWeight: 300, color: '#ffffff' }}>{isExpanded ? '−' : '+'}</span>
+        <span style={{ fontSize: '32px', fontWeight: 300, color: '#ffffff' }}>{isMenuOpen ? '−' : '+'}</span>
       </div>
     </div>
   </div>
-</div>      
+</div>
 </div>
 
 
