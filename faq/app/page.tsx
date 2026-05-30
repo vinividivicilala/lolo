@@ -6968,7 +6968,7 @@ const handleTextHover = () => {
       boxShadow: '0 20px 60px rgba(0,0,0,0.45)',
       width: '1000px',
       maxWidth: '92vw',
-      height: isMenuOpen ? '900px' : '68px',
+      height: isMenuOpen ? '500px' : '68px',
       overflow: 'hidden',
       transformOrigin: 'bottom center',
       transition:
@@ -6976,118 +6976,18 @@ const handleTextHover = () => {
     }}
   >
 
-    {/* PANEL MENU */}
+    {/* PANEL MENU - Tinggi disesuaikan dengan container */}
     <div
       style={{
-        maxHeight: isMenuOpen ? '832px' : '0px',
+        height: isMenuOpen ? '432px' : '0px',
         opacity: isMenuOpen ? 1 : 0,
         overflow: 'auto',
-        transform: isMenuOpen ? 'translateY(0)' : 'translateY(40px)',
         transition:
-          'opacity .45s ease .15s, transform .45s ease .15s, max-height .7s cubic-bezier(.16,1,.3,1)',
-        scrollbarWidth: 'none',
-        msOverflowStyle: 'none',
+          'opacity .45s ease .15s, height .7s cubic-bezier(.16,1,.3,1)',
+        scrollbarWidth: 'thin',
       }}
     >
-      {/* HEADER dengan FOTO dan TEKS */}
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          padding: '30px 30px 20px 30px',
-          borderBottom: '1px solid rgba(255,255,255,0.08)',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-          {/* FOTO "/images/lkhh.jpg" di sisi kiri */}
-          <img
-            src="/images/lkhh.jpg"
-            alt="Menuru Brand"
-            style={{
-              width: '70px',
-              height: '70px',
-              borderRadius: '20px',
-              objectFit: 'cover',
-            }}
-          />
-          <div>
-            <div
-              style={{
-                color: '#fff',
-                fontSize: '48px',
-                lineHeight: '1',
-                fontWeight: 600,
-                fontFamily: 'Questrial, sans-serif',
-                letterSpacing: '-0.02em',
-              }}
-            >
-              Menuru Brand
-            </div>
-            <div
-              style={{
-                color: '#8a8a8a',
-                marginTop: '8px',
-                fontSize: '14px',
-                fontFamily: 'Questrial, sans-serif',
-              }}
-            >
-              Creative Digital Studio
-            </div>
-          </div>
-        </div>
-
-        <div
-          style={{
-            background: '#fff',
-            color: '#000',
-            padding: '10px 24px',
-            borderRadius: '999px',
-            fontSize: '14px',
-            fontWeight: 500,
-            cursor: 'pointer',
-            transition: 'all 0.2s ease',
-          }}
-          onMouseEnter={(e) => { e.currentTarget.style.background = '#e0e0e0'; }}
-          onMouseLeave={(e) => { e.currentTarget.style.background = '#fff'; }}
-        >
-          Let's Talk
-        </div>
-      </div>
-
-      {/* NAMA WEBSITE BESAR */}
-      <div
-        style={{
-          padding: '40px 30px 20px 30px',
-          borderBottom: '1px solid rgba(255,255,255,0.06)',
-        }}
-      >
-        <div
-          style={{
-            color: '#fff',
-            fontSize: '72px',
-            fontWeight: 600,
-            fontFamily: 'Questrial, sans-serif',
-            letterSpacing: '-0.03em',
-            lineHeight: '1.1',
-          }}
-        >
-          MENURU STUDIO
-        </div>
-        <div
-          style={{
-            color: '#8a8a8a',
-            fontSize: '18px',
-            marginTop: '16px',
-            fontFamily: 'Questrial, sans-serif',
-            maxWidth: '80%',
-          }}
-        >
-          Jakarta UX/UI Design · Personal for Note, Donation & Calendar
-        </div>
-      </div>
-
-      {/* MENU LIST */}
+      {/* MENU LIST - Design tetap sama seperti tombol */}
       <div style={{ padding: '20px 0' }}>
         {[
           { name: 'Homepage', link: '/' },
@@ -7105,38 +7005,33 @@ const handleTextHover = () => {
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                padding: '18px 30px',
+                padding: '16px 30px',
                 cursor: 'pointer',
-                transition: 'all .3s ease',
+                transition: 'all .2s ease',
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
-                e.currentTarget.style.transform = 'translateX(8px)';
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.background = 'transparent';
-                e.currentTarget.style.transform = 'translateX(0)';
               }}
             >
               <span
                 style={{
                   color: '#fff',
-                  fontSize: '28px',
+                  fontSize: '22px',
                   fontWeight: 400,
                   fontFamily: 'Questrial, sans-serif',
-                  letterSpacing: '-0.01em',
                 }}
               >
                 {item.name}
               </span>
               <span
                 style={{
-                  color: '#777',
+                  color: '#555',
                   fontSize: '14px',
                   fontFamily: 'Questrial, sans-serif',
-                  transition: 'transform 0.2s ease',
                 }}
-                className="menu-arrow"
               >
                 →
               </span>
@@ -7146,7 +7041,7 @@ const handleTextHover = () => {
       </div>
     </div>
 
-    {/* TOMBOL BAWAH */}
+    {/* TOMBOL BAWAH - TETAP SAMA */}
     <div
       onClick={() => setIsMenuOpen(!isMenuOpen)}
       style={{
@@ -7166,13 +7061,43 @@ const handleTextHover = () => {
         background: '#050505',
       }}
     >
+      {/* FOTO + MENURU BRAND di sisi kiri */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+        }}
+      >
+        <img
+          src="/images/lkhh.jpg"
+          alt="Menuru Brand"
+          style={{
+            width: '40px',
+            height: '40px',
+            borderRadius: '12px',
+            objectFit: 'cover',
+          }}
+        />
+        <span
+          style={{
+            color: '#fff',
+            fontSize: '18px',
+            fontFamily: 'Questrial, sans-serif',
+            fontWeight: 500,
+          }}
+        >
+          Menuru Brand
+        </span>
+      </div>
+
       {/* TEKS YANG BERUBAH DENGAN GSAP */}
       <div
         ref={textRef}
         onMouseEnter={handleTextHover}
         style={{
           color: '#fff',
-          fontSize: '20px',
+          fontSize: '18px',
           fontFamily: 'Questrial, sans-serif',
           cursor: 'pointer',
           display: 'inline-block',
@@ -7194,14 +7119,11 @@ const handleTextHover = () => {
             background: '#fff',
             color: '#000',
             borderRadius: '999px',
-            padding: '8px 28px',
-            fontSize: '16px',
+            padding: '8px 24px',
+            fontSize: '15px',
             fontWeight: 500,
             fontFamily: 'Questrial, sans-serif',
-            transition: 'all 0.2s ease',
           }}
-          onMouseEnter={(e) => { e.currentTarget.style.background = '#e0e0e0'; }}
-          onMouseLeave={(e) => { e.currentTarget.style.background = '#fff'; }}
         >
           Homepage
         </div>
@@ -7209,9 +7131,8 @@ const handleTextHover = () => {
         <span
           style={{
             color: '#fff',
-            fontSize: '28px',
+            fontSize: '24px',
             fontWeight: 300,
-            transition: 'transform 0.2s ease',
           }}
         >
           {isMenuOpen ? '−' : '+'}
