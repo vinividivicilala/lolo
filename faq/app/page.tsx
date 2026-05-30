@@ -792,8 +792,7 @@ export default function HomePage(): React.JSX.Element {
   const [isShadowTransitioning, setIsShadowTransitioning] = useState(false);
   const shadowPageRef = useRef<HTMLDivElement>(null);
 
-
-const [isMenuOpen, setIsMenuOpen] = useState(false);
+const [isExpanded, setIsExpanded] = useState(false);
 
 
   
@@ -6964,9 +6963,7 @@ useEffect(() => {
 
 
 
-
-
-{/* FLOATING BUTTON - Border bawah bergulir ke atas membentuk border menu */}
+{/* FLOATING BUTTON - Efek bg tombol 'naik' (expand) tapi posisi tombol diam */}
 <div
   style={{
     position: 'fixed',
@@ -6977,67 +6974,50 @@ useEffect(() => {
     pointerEvents: 'auto',
   }}
 >
+  {/* Container utama yang akan 'mengembang' ke atas - DESAIN BORDER KOTAK DIPERBAIKI */}
   <div
     style={{
-      position: 'relative',
       backgroundColor: '#000000',
-      borderRadius: '80px',
-      boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
-      width: '1000px',
-      transition: 'border-radius 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1), width 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1)',
+      border: '1px solid rgba(255,255,255,0.15)', // Border lebih tipis dan soft
+      borderRadius: isExpanded ? '24px' : '100px', // Border radius berubah saat expand
+      boxShadow: '0 4px 20px rgba(0,0,0,0.2)', // Shadow lebih soft
+      width: isExpanded ? '400px' : 'auto', // Lebar berubah jadi kotak saat expand
+      minWidth: isExpanded ? '400px' : '1000px',
+      transition: 'all 0.5s cubic-bezier(0.2, 0.9, 0.4, 1.1)',
       overflow: 'hidden',
-      borderRadius: isMenuOpen ? '28px' : '80px',
-      width: isMenuOpen ? '380px' : '1000px',
+      height: isExpanded ? '380px' : '74px',
     }}
   >
-    {/* BORDER YANG BERGERAK/NAIK DARI BAWAH */}
+    {/* KONTEN MENU YANG MUNCUL (bergulir dari dalam) */}
     <div
       style={{
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        height: isMenuOpen ? '100%' : '2px',
-        backgroundColor: 'transparent',
-        border: isMenuOpen ? '1px solid rgba(255,255,255,0.2)' : 'none',
-        borderTop: isMenuOpen ? 'none' : '1px solid rgba(255,255,255,0.2)',
-        borderRadius: isMenuOpen ? '28px' : '0px',
-        transition: 'all 0.5s cubic-bezier(0.2, 0.9, 0.4, 1.1)',
-        pointerEvents: 'none',
-      }}
-    />
-
-    {/* KONTEN MENU */}
-    <div
-      style={{
-        padding: isMenuOpen ? '24px 20px 20px 20px' : '0px 20px',
-        height: isMenuOpen ? 'auto' : '0px',
-        opacity: isMenuOpen ? 1 : 0,
-        visibility: isMenuOpen ? 'visible' : 'hidden',
+        padding: isExpanded ? '28px 24px 20px 24px' : '0px 24px',
+        opacity: isExpanded ? 1 : 0,
+        visibility: isExpanded ? 'visible' : 'hidden',
         transition: 'all 0.35s ease 0.05s',
       }}
     >
       <div style={{
         fontFamily: 'Questrial, sans-serif',
-        fontSize: '11px',
+        fontSize: '12px',
         fontWeight: 500,
-        color: '#888888',
-        letterSpacing: '0.1em',
-        marginBottom: '16px',
+        color: '#666666',
+        letterSpacing: '0.12em',
+        marginBottom: '20px',
         textTransform: 'uppercase',
       }}>
-        MENU
+        EXPLORE
       </div>
       
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
         <Link href="/donatur">
           <div style={{
-            padding: '12px 16px',
-            borderRadius: '14px',
+            padding: '12px 18px',
+            borderRadius: '12px',
             cursor: 'pointer',
             transition: 'all 0.2s ease',
             fontFamily: 'Questrial, sans-serif',
-            fontSize: '15px',
+            fontSize: '16px',
             color: '#ffffff',
             display: 'flex',
             alignItems: 'center',
@@ -7052,12 +7032,12 @@ useEffect(() => {
         
         <Link href="/calendar">
           <div style={{
-            padding: '12px 16px',
-            borderRadius: '14px',
+            padding: '12px 18px',
+            borderRadius: '12px',
             cursor: 'pointer',
             transition: 'all 0.2s ease',
             fontFamily: 'Questrial, sans-serif',
-            fontSize: '15px',
+            fontSize: '16px',
             color: '#ffffff',
             display: 'flex',
             alignItems: 'center',
@@ -7072,12 +7052,12 @@ useEffect(() => {
         
         <Link href="/note">
           <div style={{
-            padding: '12px 16px',
-            borderRadius: '14px',
+            padding: '12px 18px',
+            borderRadius: '12px',
             cursor: 'pointer',
             transition: 'all 0.2s ease',
             fontFamily: 'Questrial, sans-serif',
-            fontSize: '15px',
+            fontSize: '16px',
             color: '#ffffff',
             display: 'flex',
             alignItems: 'center',
@@ -7092,12 +7072,12 @@ useEffect(() => {
         
         <Link href="/blog">
           <div style={{
-            padding: '12px 16px',
-            borderRadius: '14px',
+            padding: '12px 18px',
+            borderRadius: '12px',
             cursor: 'pointer',
             transition: 'all 0.2s ease',
             fontFamily: 'Questrial, sans-serif',
-            fontSize: '15px',
+            fontSize: '16px',
             color: '#ffffff',
             display: 'flex',
             alignItems: 'center',
@@ -7112,12 +7092,12 @@ useEffect(() => {
         
         <Link href="/contact">
           <div style={{
-            padding: '12px 16px',
-            borderRadius: '14px',
+            padding: '12px 18px',
+            borderRadius: '12px',
             cursor: 'pointer',
             transition: 'all 0.2s ease',
             fontFamily: 'Questrial, sans-serif',
-            fontSize: '15px',
+            fontSize: '16px',
             color: '#ffffff',
             display: 'flex',
             alignItems: 'center',
@@ -7132,12 +7112,12 @@ useEffect(() => {
         
         <Link href="/community">
           <div style={{
-            padding: '12px 16px',
-            borderRadius: '14px',
+            padding: '12px 18px',
+            borderRadius: '12px',
             cursor: 'pointer',
             transition: 'all 0.2s ease',
             fontFamily: 'Questrial, sans-serif',
-            fontSize: '15px',
+            fontSize: '16px',
             color: '#ffffff',
             display: 'flex',
             alignItems: 'center',
@@ -7152,7 +7132,7 @@ useEffect(() => {
       </div>
     </div>
 
-    {/* BAGIAN BAWAH (Tombol Utama) */}
+    {/* BAGIAN BAWAH (Tombol Utama - TETAP DI SISI BAWAH CONTAINER) */}
     <div
       style={{
         display: 'flex',
@@ -7160,21 +7140,25 @@ useEffect(() => {
         justifyContent: 'space-between',
         padding: '8px 24px',
         cursor: 'pointer',
+        position: 'absolute',
+        bottom: '0',
+        left: '0',
+        right: '0',
         backgroundColor: '#000000',
-        position: 'relative',
-        zIndex: 2,
+        borderTop: isExpanded ? '1px solid rgba(255,255,255,0.08)' : 'none',
       }}
-      onClick={() => setIsMenuOpen(!isMenuOpen)}
+      onClick={() => setIsExpanded(!isExpanded)}
     >
       <div
         id="floatingText"
         style={{
           padding: '8px 16px',
           fontFamily: 'Questrial, sans-serif',
-          fontSize: '20px',
+          fontSize: '18px',
           fontWeight: 400,
           color: '#ffffff',
           whiteSpace: 'nowrap',
+          letterSpacing: '-0.01em',
         }}
       >
         Menuru brand ✨
@@ -7183,16 +7167,21 @@ useEffect(() => {
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
         <div style={{
           backgroundColor: '#ffffff',
-          borderRadius: '60px',
-          padding: '10px 32px',
-        }}>
-          <span style={{ fontFamily: 'Questrial, sans-serif', fontSize: '20px', fontWeight: 500, color: '#000000' }}>Homepage</span>
+          borderRadius: '100px',
+          padding: '8px 28px',
+          transition: 'all 0.2s ease',
+        }}
+        onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#f0f0f0'; }}
+        onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#ffffff'; }}>
+          <span style={{ fontFamily: 'Questrial, sans-serif', fontSize: '18px', fontWeight: 500, color: '#000000' }}>Homepage</span>
         </div>
-        <span style={{ fontSize: '32px', fontWeight: 300, color: '#ffffff' }}>{isMenuOpen ? '−' : '+'}</span>
+        <span style={{ fontSize: '28px', fontWeight: 300, color: '#ffffff', transition: 'transform 0.2s ease', transform: isExpanded ? 'rotate(45deg)' : 'rotate(0deg)' }}>
+          +
+        </span>
       </div>
     </div>
   </div>
-</div>        
+</div>       
 </div>
 
 
