@@ -792,7 +792,9 @@ export default function HomePage(): React.JSX.Element {
   const [isShadowTransitioning, setIsShadowTransitioning] = useState(false);
   const shadowPageRef = useRef<HTMLDivElement>(null);
 
-const [isExpanded, setIsExpanded] = useState(false);
+
+
+const [isMenuOpen, setIsMenuOpen] = useState(false);
 
 
   
@@ -6963,7 +6965,7 @@ useEffect(() => {
 
 
 
-{/* FLOATING BUTTON - Efek bg tombol 'naik' (expand) tapi posisi tombol diam */}
+
 <div
   style={{
     position: 'fixed',
@@ -6971,217 +6973,205 @@ useEffect(() => {
     left: '50%',
     transform: 'translateX(-50%)',
     zIndex: 99999,
-    pointerEvents: 'auto',
   }}
 >
-  {/* Container utama yang akan 'mengembang' ke atas - DESAIN BORDER KOTAK DIPERBAIKI */}
   <div
     style={{
-      backgroundColor: '#000000',
-      border: '1px solid rgba(255,255,255,0.15)', // Border lebih tipis dan soft
-      borderRadius: isExpanded ? '24px' : '100px', // Border radius berubah saat expand
-      boxShadow: '0 4px 20px rgba(0,0,0,0.2)', // Shadow lebih soft
-      width: isExpanded ? '400px' : 'auto', // Lebar berubah jadi kotak saat expand
-      minWidth: isExpanded ? '400px' : '1000px',
-      transition: 'all 0.5s cubic-bezier(0.2, 0.9, 0.4, 1.1)',
+      background: '#050505',
+      border: '1px solid rgba(255,255,255,0.08)',
+      borderRadius: isMenuOpen ? '28px' : '999px',
+      boxShadow: '0 20px 60px rgba(0,0,0,0.45)',
+      width: '760px',
+      maxWidth: '92vw',
+      height: isMenuOpen ? '720px' : '72px',
       overflow: 'hidden',
-      height: isExpanded ? '380px' : '74px',
+      transformOrigin: 'bottom center',
+      transition:
+        'height .7s cubic-bezier(.16,1,.3,1), border-radius .7s cubic-bezier(.16,1,.3,1)',
     }}
   >
-    {/* KONTEN MENU YANG MUNCUL (bergulir dari dalam) */}
+
+    {/* PANEL MENU */}
     <div
       style={{
-        padding: isExpanded ? '28px 24px 20px 24px' : '0px 24px',
-        opacity: isExpanded ? 1 : 0,
-        visibility: isExpanded ? 'visible' : 'hidden',
-        transition: 'all 0.35s ease 0.05s',
+        maxHeight: isMenuOpen ? '648px' : '0px',
+        opacity: isMenuOpen ? 1 : 0,
+        overflow: 'hidden',
+        transform: isMenuOpen
+          ? 'translateY(0)'
+          : 'translateY(40px)',
+        transition:
+          'opacity .45s ease .15s, transform .45s ease .15s, max-height .7s cubic-bezier(.16,1,.3,1)',
       }}
     >
-      <div style={{
-        fontFamily: 'Questrial, sans-serif',
-        fontSize: '12px',
-        fontWeight: 500,
-        color: '#666666',
-        letterSpacing: '0.12em',
-        marginBottom: '20px',
-        textTransform: 'uppercase',
-      }}>
-        EXPLORE
+      {/* HEADER */}
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          padding: '30px',
+          borderBottom: '1px solid rgba(255,255,255,0.08)',
+        }}
+      >
+        <div>
+          <div
+            style={{
+              color: '#fff',
+              fontSize: '42px',
+              lineHeight: '0.9',
+              fontWeight: 500,
+              fontFamily: 'Questrial, sans-serif',
+            }}
+          >
+            Menuru
+          </div>
+
+          <div
+            style={{
+              color: '#8a8a8a',
+              marginTop: '8px',
+              fontSize: '13px',
+              fontFamily: 'Questrial, sans-serif',
+            }}
+          >
+            Creative Studio
+          </div>
+        </div>
+
+        <div
+          style={{
+            background: '#fff',
+            color: '#000',
+            padding: '12px 24px',
+            borderRadius: '999px',
+            fontSize: '14px',
+            fontWeight: 500,
+            cursor: 'pointer',
+          }}
+        >
+          Let's Talk
+        </div>
       </div>
-      
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-        <Link href="/donatur">
-          <div style={{
-            padding: '12px 18px',
-            borderRadius: '12px',
-            cursor: 'pointer',
-            transition: 'all 0.2s ease',
-            fontFamily: 'Questrial, sans-serif',
-            fontSize: '16px',
-            color: '#ffffff',
+
+      {/* MENU */}
+      {[
+        'Homepage',
+        'Studios',
+        'Recognition',
+        'Work',
+        'Blog',
+        'Contact',
+      ].map((item, index) => (
+        <div
+          key={index}
+          style={{
             display: 'flex',
-            alignItems: 'center',
             justifyContent: 'space-between',
-          }}
-          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#10b981'; e.currentTarget.style.transform = 'translateX(4px)'; }}
-          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.transform = 'translateX(0)'; }}>
-            <span>Donation</span>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
-          </div>
-        </Link>
-        
-        <Link href="/calendar">
-          <div style={{
-            padding: '12px 18px',
-            borderRadius: '12px',
+            alignItems: 'center',
+            padding: '26px 30px',
+            borderBottom:
+              index !== 5
+                ? '1px solid rgba(255,255,255,0.06)'
+                : 'none',
             cursor: 'pointer',
-            transition: 'all 0.2s ease',
-            fontFamily: 'Questrial, sans-serif',
-            fontSize: '16px',
-            color: '#ffffff',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
+            transition: 'all .3s ease',
           }}
-          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#3b82f6'; e.currentTarget.style.transform = 'translateX(4px)'; }}
-          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.transform = 'translateX(0)'; }}>
-            <span>Calendar</span>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
-          </div>
-        </Link>
-        
-        <Link href="/note">
-          <div style={{
-            padding: '12px 18px',
-            borderRadius: '12px',
-            cursor: 'pointer',
-            transition: 'all 0.2s ease',
-            fontFamily: 'Questrial, sans-serif',
-            fontSize: '16px',
-            color: '#ffffff',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background =
+              'rgba(255,255,255,0.03)';
           }}
-          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#f59e0b'; e.currentTarget.style.transform = 'translateX(4px)'; }}
-          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.transform = 'translateX(0)'; }}>
-            <span>Note</span>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
-          </div>
-        </Link>
-        
-        <Link href="/blog">
-          <div style={{
-            padding: '12px 18px',
-            borderRadius: '12px',
-            cursor: 'pointer',
-            transition: 'all 0.2s ease',
-            fontFamily: 'Questrial, sans-serif',
-            fontSize: '16px',
-            color: '#ffffff',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = 'transparent';
           }}
-          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#ec489a'; e.currentTarget.style.transform = 'translateX(4px)'; }}
-          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.transform = 'translateX(0)'; }}>
-            <span>Blog</span>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
-          </div>
-        </Link>
-        
-        <Link href="/contact">
-          <div style={{
-            padding: '12px 18px',
-            borderRadius: '12px',
-            cursor: 'pointer',
-            transition: 'all 0.2s ease',
-            fontFamily: 'Questrial, sans-serif',
-            fontSize: '16px',
-            color: '#ffffff',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-          }}
-          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#ef4444'; e.currentTarget.style.transform = 'translateX(4px)'; }}
-          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.transform = 'translateX(0)'; }}>
-            <span>Contact</span>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
-          </div>
-        </Link>
-        
-        <Link href="/community">
-          <div style={{
-            padding: '12px 18px',
-            borderRadius: '12px',
-            cursor: 'pointer',
-            transition: 'all 0.2s ease',
-            fontFamily: 'Questrial, sans-serif',
-            fontSize: '16px',
-            color: '#ffffff',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-          }}
-          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#8b5cf6'; e.currentTarget.style.transform = 'translateX(4px)'; }}
-          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.transform = 'translateX(0)'; }}>
-            <span>Community</span>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
-          </div>
-        </Link>
-      </div>
+        >
+          <span
+            style={{
+              color: '#fff',
+              fontSize: '30px',
+              fontWeight: 400,
+              fontFamily: 'Questrial, sans-serif',
+            }}
+          >
+            {item}
+          </span>
+
+          <span
+            style={{
+              color: '#777',
+              fontSize: '14px',
+              fontFamily: 'Questrial, sans-serif',
+            }}
+          >
+            View
+          </span>
+        </div>
+      ))}
     </div>
 
-    {/* BAGIAN BAWAH (Tombol Utama - TETAP DI SISI BAWAH CONTAINER) */}
+    {/* TOMBOL BAWAH */}
     <div
+      onClick={() => setIsMenuOpen(!isMenuOpen)}
       style={{
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: '72px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: '8px 24px',
+        padding: '0 24px',
         cursor: 'pointer',
-        position: 'absolute',
-        bottom: '0',
-        left: '0',
-        right: '0',
-        backgroundColor: '#000000',
-        borderTop: isExpanded ? '1px solid rgba(255,255,255,0.08)' : 'none',
+        borderTop: isMenuOpen
+          ? '1px solid rgba(255,255,255,0.08)'
+          : 'none',
       }}
-      onClick={() => setIsExpanded(!isExpanded)}
     >
       <div
-        id="floatingText"
         style={{
-          padding: '8px 16px',
+          color: '#fff',
+          fontSize: '20px',
           fontFamily: 'Questrial, sans-serif',
-          fontSize: '18px',
-          fontWeight: 400,
-          color: '#ffffff',
-          whiteSpace: 'nowrap',
-          letterSpacing: '-0.01em',
         }}
       >
         Menuru brand ✨
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-        <div style={{
-          backgroundColor: '#ffffff',
-          borderRadius: '100px',
-          padding: '8px 28px',
-          transition: 'all 0.2s ease',
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '16px',
         }}
-        onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#f0f0f0'; }}
-        onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#ffffff'; }}>
-          <span style={{ fontFamily: 'Questrial, sans-serif', fontSize: '18px', fontWeight: 500, color: '#000000' }}>Homepage</span>
+      >
+        <div
+          style={{
+            background: '#fff',
+            color: '#000',
+            borderRadius: '999px',
+            padding: '10px 28px',
+            fontSize: '18px',
+            fontWeight: 500,
+            fontFamily: 'Questrial, sans-serif',
+          }}
+        >
+          Homepage
         </div>
-        <span style={{ fontSize: '28px', fontWeight: 300, color: '#ffffff', transition: 'transform 0.2s ease', transform: isExpanded ? 'rotate(45deg)' : 'rotate(0deg)' }}>
-          +
+
+        <span
+          style={{
+            color: '#fff',
+            fontSize: '32px',
+            fontWeight: 300,
+          }}
+        >
+          {isMenuOpen ? '−' : '+'}
         </span>
       </div>
     </div>
   </div>
-</div>       
+</div>
 </div>
 
 
