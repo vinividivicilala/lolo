@@ -6960,31 +6960,33 @@ const handleTextHover = () => {
     zIndex: 99999,
   }}
 >
+  {/* SATU CONTAINER UTUH: border melingkupi tombol bawah DAN konten menu */}
   <div
     style={{
       background: '#050505',
-      border: '1px solid rgba(255,255,255,0.08)',
+      border: '1px solid rgba(255,255,255,0.08)', // SATU BORDER untuk semuanya
       borderRadius: isMenuOpen ? '28px' : '999px',
       boxShadow: '0 20px 60px rgba(0,0,0,0.45)',
       width: '1000px',
       maxWidth: '92vw',
-      height: isMenuOpen ? '900px' : '68px',
+      height: isMenuOpen ? 'auto' : '68px',
+      minHeight: isMenuOpen ? '700px' : '68px',
       overflow: 'hidden',
-      transformOrigin: 'bottom center',
       transition:
-        'height .7s cubic-bezier(.16,1,.3,1), border-radius .7s cubic-bezier(.16,1,.3,1)',
+        'min-height .7s cubic-bezier(.16,1,.3,1), border-radius .7s cubic-bezier(.16,1,.3,1), height .7s cubic-bezier(.16,1,.3,1)',
+      display: 'flex',
+      flexDirection: 'column',
     }}
   >
 
-    {/* PANEL MENU / KONTEN - NYATU DENGAN TOMBOL */}
+    {/* KONTEN MENU - Bagian Atas (muncul saat expand) */}
     <div
       style={{
-        maxHeight: isMenuOpen ? '832px' : '0px',
+        flex: 1,
         opacity: isMenuOpen ? 1 : 0,
-        overflow: 'hidden',
-        transform: isMenuOpen ? 'translateY(0)' : 'translateY(40px)',
-        transition:
-          'opacity .45s ease .15s, transform .45s ease .15s, max-height .7s cubic-bezier(.16,1,.3,1)',
+        visibility: isMenuOpen ? 'visible' : 'hidden',
+        transform: isMenuOpen ? 'translateY(0)' : 'translateY(-20px)',
+        transition: 'opacity .45s ease .15s, transform .45s ease .15s, visibility .45s ease .15s',
       }}
     >
       {/* HEADER DENGAN FOTO DAN NAMA WEBSITE BESAR */}
@@ -6998,7 +7000,6 @@ const handleTextHover = () => {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-          {/* FOTO SISI KIRI - /images/lkhh.jpg */}
           <img
             src="/images/lkhh.jpg"
             alt="Menuru Brand"
@@ -7010,7 +7011,6 @@ const handleTextHover = () => {
             }}
           />
           <div>
-            {/* NAMA WEBSITE BESAR */}
             <div
               style={{
                 color: '#fff',
@@ -7051,7 +7051,7 @@ const handleTextHover = () => {
         </div>
       </div>
 
-      {/* MENU LIST - Tanpa underline */}
+      {/* MENU LIST */}
       {[
         { name: 'Homepage', link: '/' },
         { name: 'Studios', link: '/studios' },
@@ -7091,7 +7091,6 @@ const handleTextHover = () => {
             >
               {item.name}
             </span>
-
             <span
               style={{
                 color: '#777',
@@ -7106,27 +7105,21 @@ const handleTextHover = () => {
       ))}
     </div>
 
-    {/* TOMBOL BAWAH - TETAP ADA, BORDER NYATA */}
+    {/* TOMBOL BAWAH - Bagian Bawah dari Container yang SAMA, BORDER NYATA */}
     <div
       onClick={() => setIsMenuOpen(!isMenuOpen)}
       style={{
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        height: '68px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: '0 24px',
+        height: '68px',
         cursor: 'pointer',
-        borderTop: isMenuOpen
-          ? '1px solid rgba(255,255,255,0.08)'
-          : 'none',
+        borderTop: isMenuOpen ? '1px solid rgba(255,255,255,0.08)' : 'none',
+        flexShrink: 0,
         background: '#050505',
       }}
     >
-      {/* TEKS YANG BERUBAH DENGAN GSAP */}
       <div
         ref={textRef}
         onMouseEnter={handleTextHover}
@@ -7164,7 +7157,6 @@ const handleTextHover = () => {
             Homepage
           </div>
         </Link>
-
         <span
           style={{
             color: '#fff',
