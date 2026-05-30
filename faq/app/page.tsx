@@ -795,9 +795,9 @@ export default function HomePage(): React.JSX.Element {
 
 
 const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [floatingText, setFloatingText] = useState("Menuru brand");
-const textChangeTimeoutRef = useRef(null);
-const hoverTimeoutRef = useRef(null);
+const [currentTextIndex, setCurrentTextIndex] = useState(0);
+const textRef = useRef(null);
+const [isHovering, setIsHovering] = useState(false);
 
 
 
@@ -3303,67 +3303,80 @@ const hoverTimeoutRef = useRef(null);
 
 
 
-
-// Daftar teks yang akan berubah
-const textList = [
-  "Menuru brand",
+// Daftar teks yang akan berganti
+const rotatingTexts = [
   "Open this",
-  "Hey!",
+  "Hey there",
   "Welcome back",
   "Good to see you",
-  "Click me",
-  "Let's go",
   "Explore now",
-  "Hello there",
-  "Stay curious",
-  "Something new",
-  "Don't miss out",
   "Join the journey",
-  "Your vibe matters",
-  "Level up",
-  "Let's create",
-  "Think different",
-  "Be inspired",
-  "Keep scrolling",
-  "You're awesome"
+  "Stay inspired",
+  "Click to begin"
 ];
 
-// Fungsi untuk mengubah teks dengan jeda lambat
-const changeTextSlowly = () => {
-  if (textChangeTimeoutRef.current) clearTimeout(textChangeTimeoutRef.current);
-  
-  textChangeTimeoutRef.current = setTimeout(() => {
-    const randomIndex = Math.floor(Math.random() * textList.length);
-    setFloatingText(textList[randomIndex]);
-  }, 800); // jeda 800ms sebelum berubah
-};
-
-// Efek scroll dengan jeda lambat
+// Efek GSAP untuk pergantian teks
 useEffect(() => {
-  let lastScrollY = window.scrollY;
-  let scrollTimeout = null;
+  let intervalId;
   
-  const handleScroll = () => {
-    if (scrollTimeout) clearTimeout(scrollTimeout);
+  const changeText = () => {
+    if (!textRef.current) return;
     
-    scrollTimeout = setTimeout(() => {
-      const currentScrollY = window.scrollY;
-      if (Math.abs(currentScrollY - lastScrollY) > 10) {
-        changeTextSlowly();
-        lastScrollY = currentScrollY;
+    // Animasi keluar
+    gsap.to(textRef.current, {
+      y: 20,
+      opacity: 0,
+      duration: 0.4,
+      ease: "power2.in",
+      onComplete: () => {
+        // Ganti teks
+        setCurrentTextIndex((prev) => (prev + 1) % rotatingTexts.length);
+        // Animasi masuk
+        gsap.fromTo(textRef.current, 
+          { y: -20, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.4, ease: "power2.out" }
+        );
       }
-    }, 300); // jeda 300ms setelah scroll berhenti
+    });
   };
   
-  window.addEventListener('scroll', handleScroll);
+  if (!isHovering) {
+    // Jeda sangat lambat: 8 detik
+    intervalId = setInterval(changeText, 8000);
+  }
   
   return () => {
-    window.removeEventListener('scroll', handleScroll);
-    if (scrollTimeout) clearTimeout(scrollTimeout);
-    if (textChangeTimeoutRef.current) clearTimeout(textChangeTimeoutRef.current);
-    if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+    if (intervalId) clearInterval(intervalId);
   };
-}, []);
+}, [isHovering, rotatingTexts.length]);
+
+// Hover handler untuk percepatan/perlambatan
+const handleTextHover = () => {
+  setIsHovering(true);
+  if (!textRef.current) return;
+  
+  // Hover: langsung ganti teks baru
+  gsap.to(textRef.current, {
+    y: 20,
+    opacity: 0,
+    duration: 0.3,
+    ease: "power2.in",
+    onComplete: () => {
+      const randomIndex = Math.floor(Math.random() * rotatingTexts.length);
+      setCurrentTextIndex(randomIndex);
+      gsap.fromTo(textRef.current,
+        { y: -20, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.3, ease: "power2.out" }
+      );
+    }
+  });
+  
+  // Reset hover state setelah 3 detik
+  setTimeout(() => {
+    setIsHovering(false);
+  }, 3000);
+};
+
 
 
 
@@ -6953,9 +6966,9 @@ useEffect(() => {
       border: '1px solid rgba(255,255,255,0.08)',
       borderRadius: isMenuOpen ? '28px' : '999px',
       boxShadow: '0 20px 60px rgba(0,0,0,0.45)',
-      width: '800px',
+      width: '1000px', // panjang tombol jadi 1000px
       maxWidth: '92vw',
-      height: isMenuOpen ? '480px' : '72px',
+      height: isMenuOpen ? '420px' : '68px', // tinggi border lebih pendek
       overflow: 'hidden',
       transformOrigin: 'bottom center',
       transition:
@@ -6966,12 +6979,10 @@ useEffect(() => {
     {/* PANEL MENU */}
     <div
       style={{
-        maxHeight: isMenuOpen ? '408px' : '0px',
+        maxHeight: isMenuOpen ? '360px' : '0px',
         opacity: isMenuOpen ? 1 : 0,
         overflow: 'hidden',
-        transform: isMenuOpen
-          ? 'translateY(0)'
-          : 'translateY(40px)',
+        transform: isMenuOpen ? 'translateY(0)' : 'translateY(40px)',
         transition:
           'opacity .45s ease .15s, transform .45s ease .15s, max-height .7s cubic-bezier(.16,1,.3,1)',
       }}
@@ -6982,15 +6993,30 @@ useEffect(() => {
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          padding: '24px 24px',
+          padding: '24px 30px',
           borderBottom: '1px solid rgba(255,255,255,0.08)',
         }}
       >
         <div>
+          {/* GAMBAR MENURU BRAND - Ganti dengan gambar */}
+          <img
+            src="/images/menuru-brand.jpg"
+            alt="Menuru Brand"
+            style={{
+              height: '40px',
+              width: 'auto',
+              objectFit: 'contain',
+            }}
+            onError={(e) => {
+              e.target.style.display = 'none';
+              e.target.nextSibling.style.display = 'block';
+            }}
+          />
           <div
             style={{
+              display: 'none',
               color: '#fff',
-              fontSize: '32px',
+              fontSize: '42px',
               lineHeight: '0.9',
               fontWeight: 500,
               fontFamily: 'Questrial, sans-serif',
@@ -7002,8 +7028,8 @@ useEffect(() => {
           <div
             style={{
               color: '#8a8a8a',
-              marginTop: '6px',
-              fontSize: '12px',
+              marginTop: '8px',
+              fontSize: '13px',
               fontFamily: 'Questrial, sans-serif',
             }}
           >
@@ -7015,34 +7041,33 @@ useEffect(() => {
           style={{
             background: '#fff',
             color: '#000',
-            padding: '10px 20px',
+            padding: '10px 22px',
             borderRadius: '999px',
-            fontSize: '13px',
+            fontSize: '14px',
             fontWeight: 500,
             cursor: 'pointer',
-            fontFamily: 'Questrial, sans-serif',
           }}
         >
           Let's Talk
         </div>
       </div>
 
-      {/* MENU */}
+      {/* MENU LIST */}
       {[
-        { name: 'Homepage', link: '/' },
-        { name: 'Studios', link: '/studios' },
-        { name: 'Recognition', link: '/recognition' },
-        { name: 'Work', link: '/work' },
-        { name: 'Blog', link: '/blog' },
-        { name: 'Contact', link: '/contact' },
+        'Homepage',
+        'Studios',
+        'Recognition',
+        'Work',
+        'Blog',
+        'Contact',
       ].map((item, index) => (
-        <Link href={item.link} key={index}>
+        <Link href={item === 'Homepage' ? '/' : `/${item.toLowerCase()}`} key={index}>
           <div
             style={{
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              padding: '20px 24px',
+              padding: '20px 30px',
               borderBottom:
                 index !== 5
                   ? '1px solid rgba(255,255,255,0.06)'
@@ -7051,8 +7076,7 @@ useEffect(() => {
               transition: 'all .3s ease',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.background =
-                'rgba(255,255,255,0.03)';
+              e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.background = 'transparent';
@@ -7061,18 +7085,18 @@ useEffect(() => {
             <span
               style={{
                 color: '#fff',
-                fontSize: '24px',
+                fontSize: '26px',
                 fontWeight: 400,
                 fontFamily: 'Questrial, sans-serif',
               }}
             >
-              {item.name}
+              {item}
             </span>
 
             <span
               style={{
                 color: '#777',
-                fontSize: '13px',
+                fontSize: '14px',
                 fontFamily: 'Questrial, sans-serif',
               }}
             >
@@ -7091,94 +7115,59 @@ useEffect(() => {
         bottom: 0,
         left: 0,
         right: 0,
-        height: '72px',
+        height: '68px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: '0 20px',
+        padding: '0 24px',
         cursor: 'pointer',
         borderTop: isMenuOpen
           ? '1px solid rgba(255,255,255,0.08)'
           : 'none',
       }}
     >
-      {/* GAMBAR + TEKS YANG BERUBAH */}
+      {/* TEKS YANG BERUBAH DENGAN GSAP */}
       <div
+        ref={textRef}
+        onMouseEnter={handleTextHover}
         style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '12px',
+          color: '#fff',
+          fontSize: '20px',
+          fontFamily: 'Questrial, sans-serif',
+          cursor: 'pointer',
+          display: 'inline-block',
+          whiteSpace: 'nowrap',
         }}
       >
-        <div
-          style={{
-            width: '36px',
-            height: '36px',
-            borderRadius: '50%',
-            overflow: 'hidden',
-            backgroundColor: '#1a1a1a',
-          }}
-        >
-          <Image
-            src="/images/menuru-logo.jpg"
-            alt="Menuru Logo"
-            width={36}
-            height={36}
-            style={{ objectFit: 'cover' }}
-          />
-        </div>
-        <div
-          style={{
-            color: '#fff',
-            fontSize: '16px',
-            fontFamily: 'Questrial, sans-serif',
-            transition: 'opacity 0.3s ease',
-          }}
-          onMouseEnter={() => {
-            if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
-            hoverTimeoutRef.current = setTimeout(() => {
-              const randomIndex = Math.floor(Math.random() * textList.length);
-              setFloatingText(textList[randomIndex]);
-            }, 500);
-          }}
-        >
-          {floatingText}
-        </div>
+        {rotatingTexts[currentTextIndex]}
       </div>
 
       <div
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '12px',
+          gap: '16px',
         }}
       >
-        <Link href="/">
-          <div
-            style={{
-              background: '#fff',
-              color: '#000',
-              borderRadius: '999px',
-              padding: '8px 20px',
-              fontSize: '14px',
-              fontWeight: 500,
-              fontFamily: 'Questrial, sans-serif',
-              cursor: 'pointer',
-              transition: 'opacity 0.2s ease',
-            }}
-            onMouseEnter={(e) => { e.currentTarget.style.opacity = '0.8'; }}
-            onMouseLeave={(e) => { e.currentTarget.style.opacity = '1'; }}
-          >
-            Homepage
-          </div>
-        </Link>
+        <div
+          style={{
+            background: '#fff',
+            color: '#000',
+            borderRadius: '999px',
+            padding: '8px 24px',
+            fontSize: '16px',
+            fontWeight: 500,
+            fontFamily: 'Questrial, sans-serif',
+          }}
+        >
+          Homepage
+        </div>
 
         <span
           style={{
             color: '#fff',
             fontSize: '28px',
             fontWeight: 300,
-            transition: 'transform 0.2s ease',
           }}
         >
           {isMenuOpen ? '−' : '+'}
