@@ -6965,7 +6965,8 @@ useEffect(() => {
 
 
 
-{/* FLOATING BUTTON - Border tombol bergulir ke atas membentuk border menu */}
+
+{/* FLOATING BUTTON - Border bawah bergulir ke atas membentuk border menu */}
 <div
   style={{
     position: 'fixed',
@@ -6976,20 +6977,37 @@ useEffect(() => {
     pointerEvents: 'auto',
   }}
 >
-  {/* Container utama dengan BORDER yang akan 'naik' */}
   <div
     style={{
-      backgroundColor: '#000000',
-      border: '1px solid rgba(255,255,255,0.2)', // BORDER SAMA untuk tombol dan menu
-      borderRadius: isMenuOpen ? '28px' : '80px',
-      boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
-      width: isMenuOpen ? '380px' : '1000px',
-      transition: 'all 0.45s cubic-bezier(0.2, 0.9, 0.4, 1.1)',
-      overflow: 'hidden',
       position: 'relative',
+      backgroundColor: '#000000',
+      borderRadius: '80px',
+      boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
+      width: '1000px',
+      transition: 'border-radius 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1), width 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1)',
+      overflow: 'hidden',
+      borderRadius: isMenuOpen ? '28px' : '80px',
+      width: isMenuOpen ? '380px' : '1000px',
     }}
   >
-    {/* KONTEN MENU (border-nya menyatu dengan border container) */}
+    {/* BORDER YANG BERGERAK/NAIK DARI BAWAH */}
+    <div
+      style={{
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: isMenuOpen ? '100%' : '2px',
+        backgroundColor: 'transparent',
+        border: isMenuOpen ? '1px solid rgba(255,255,255,0.2)' : 'none',
+        borderTop: isMenuOpen ? 'none' : '1px solid rgba(255,255,255,0.2)',
+        borderRadius: isMenuOpen ? '28px' : '0px',
+        transition: 'all 0.5s cubic-bezier(0.2, 0.9, 0.4, 1.1)',
+        pointerEvents: 'none',
+      }}
+    />
+
+    {/* KONTEN MENU */}
     <div
       style={{
         padding: isMenuOpen ? '24px 20px 20px 20px' : '0px 20px',
@@ -7134,7 +7152,7 @@ useEffect(() => {
       </div>
     </div>
 
-    {/* BAGIAN BAWAH (Tombol Utama) - BORDER NYA MENYATU */}
+    {/* BAGIAN BAWAH (Tombol Utama) */}
     <div
       style={{
         display: 'flex',
@@ -7143,6 +7161,8 @@ useEffect(() => {
         padding: '8px 24px',
         cursor: 'pointer',
         backgroundColor: '#000000',
+        position: 'relative',
+        zIndex: 2,
       }}
       onClick={() => setIsMenuOpen(!isMenuOpen)}
     >
@@ -7172,7 +7192,7 @@ useEffect(() => {
       </div>
     </div>
   </div>
-</div>
+</div>        
 </div>
 
 
