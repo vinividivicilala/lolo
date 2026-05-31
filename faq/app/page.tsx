@@ -949,17 +949,15 @@ const [isHovering, setIsHovering] = useState(false);
   const circleImg1_5Ref = useRef<HTMLDivElement>(null);
   const circleImg2_5Ref = useRef<HTMLDivElement>(null);
 
-  
-
-// State untuk kontrol scroll header
+  // State untuk kontrol scroll header
 const [headerScrollProgress, setHeaderScrollProgress] = useState(0);
-const [isHeaderScrolled, setIsHeaderScrolled] = useState(false);
 const headerRef = useRef<HTMLDivElement>(null);
 const headerTextRef = useRef<HTMLDivElement>(null);
 
 
 
   
+
 
   const carouselItems = [
     {
@@ -1217,56 +1215,48 @@ const headerTextRef = useRef<HTMLDivElement>(null);
     }
   };
 
-
 // Efek untuk animasi scroll header MENURU
 useEffect(() => {
   if (isLoading) return;
   
   const handleHeaderScroll = () => {
     const scrollY = window.scrollY;
-    const maxScroll = 400; // Scroll maksimum untuk transisi
+    const maxScroll = 200;
     
     // Hitung progress scroll (0 - 1)
     let progress = Math.min(1, scrollY / maxScroll);
     setHeaderScrollProgress(progress);
     
-    // Tentukan apakah sudah discroll
-    if (scrollY > 50) {
-      setIsHeaderScrolled(true);
-    } else {
-      setIsHeaderScrolled(false);
-    }
-    
-    // Update style header text via GSAP
     if (headerTextRef.current) {
       // Ukuran font: dari 300px ke 24px
       const fontSize = 300 - (progress * 276);
-      // Opacity: dari 1 ke 0.3
-      const opacity = 1 - (progress * 0.7);
-      // Transform Y: dari 0 ke -20
-      const translateY = progress * -20;
+      // Posisi X: dari 0 ke (layar/2 - lebar teks/2) agar ke tengah navbar
+      const translateX = progress * (window.innerWidth / 2 - 80);
+      // Posisi Y: dari 0 ke -40 (naik ke navbar)
+      const translateY = progress * -40;
       
       gsap.to(headerTextRef.current, {
         fontSize: `${Math.max(24, fontSize)}px`,
-        opacity: Math.max(0.3, opacity),
+        x: translateX,
         y: translateY,
         duration: 0.05,
-        overwrite: true
+        overwrite: true,
+        ease: "none"
       });
     }
     
-    // Update header container background dan padding
+    // Update header container background
     if (headerRef.current) {
       const bgOpacity = progress * 0.95;
-      const paddingTop = 40 - (progress * 20);
-      const paddingLeft = 40 - (progress * 20);
+      const paddingTop = 40 - (progress * 24);
+      const paddingLeft = 40 - (progress * 24);
       
       gsap.to(headerRef.current, {
         backgroundColor: `rgba(255, 255, 255, ${bgOpacity})`,
         backdropFilter: `blur(${progress * 12}px)`,
         paddingTop: `${Math.max(16, paddingTop)}px`,
         paddingLeft: `${Math.max(16, paddingLeft)}px`,
-        boxShadow: progress > 0.3 ? '0 4px 20px rgba(0,0,0,0.05)' : 'none',
+        boxShadow: progress > 0.2 ? '0 2px 20px rgba(0,0,0,0.08)' : 'none',
         duration: 0.05,
         overwrite: true
       });
@@ -1286,27 +1276,7 @@ useEffect(() => {
 
 
 
-
-
   
-
-  // Load calendar submissions from Firebase
-  useEffect(() => {
-    if (!db) return;
-
-    const submissionsRef = collection(db, "calendar_submissions");
-    const q = query(submissionsRef, orderBy("createdAt", "desc"));
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const submissions: CalendarSubmission[] = [];
-      snapshot.forEach((doc) => {
-        submissions.push({ id: doc.id, ...doc.data() } as CalendarSubmission);
-      });
-      setCalendarSubmissions(submissions);
-    });
-
-    return () => unsubscribe();
-  }, []);
 
   // Load donations from Firebase
   useEffect(() => {
@@ -3501,17 +3471,6 @@ const handleTextHover = () => {
       <style jsx global>{`
         @import url('https://fonts.googleapis.com/css2?family=Questrial&display=swap');
 
-         @keyframes fadeInRight {
-    from {
-      opacity: 0;
-      transform: translateX(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateX(0);
-    }
-  }
-
         @font-face {
           font-family: 'Aeonik-Regular';
           src: url('/fonts/Aeonik-Regular.woff2') format('woff2'),
@@ -4300,7 +4259,7 @@ const handleTextHover = () => {
             }}
           >
 
-            {/* HEADER SECTION - MENURU dengan efek scroll */}
+            {/* HEADER SECTION - MENURU */}
 <div
   ref={headerRef}
   style={{
@@ -4310,21 +4269,22 @@ const handleTextHover = () => {
     right: 0,
     zIndex: 100,
     pointerEvents: 'none',
-    padding: '40px 0 0 40px',
-    transition: 'all 0.05s linear'
+    padding: '40px 0 0 40px'
   }}
 >
   <div
     ref={headerTextRef}
     style={{
       fontFamily: 'Inter, "Helvetica Neue", sans-serif',
-      fontWeight: '700',
+      fontWeight: '400',
       fontSize: '300px',
-      lineHeight: '1',
+      lineHeight: '213px',
       color: '#000000',
       letterSpacing: '-0.02em',
       textTransform: 'uppercase',
       whiteSpace: 'nowrap',
+      opacity: 1,
+      transform: 'translateX(0)',
       display: 'inline-block'
     }}
   >
@@ -4332,32 +4292,37 @@ const handleTextHover = () => {
   </div>
 </div>
 
-// Tambahkan juga navbar menu items yang muncul setelah discroll
-{isHeaderScrolled && (
-  <div
-    style={{
-      position: 'fixed',
-      top: '16px',
-      right: '40px',
-      zIndex: 101,
-      display: 'flex',
-      alignItems: 'center',
-      gap: '32px',
-      pointerEvents: 'auto',
-      animation: 'fadeInRight 0.3s ease'
-    }}
-  >
+{/* NAVBAR - Tetap di atas saat scroll */}
+<div
+  style={{
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 99,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    padding: '16px 40px',
+    backgroundColor: 'transparent',
+    pointerEvents: 'auto'
+  }}
+>
+  <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
     <Link href="/" style={{ textDecoration: 'none' }}>
-      <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '16px', color: '#000000', cursor: 'pointer', transition: 'opacity 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>Home</span>
+      <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', fontWeight: '500', color: '#000000', cursor: 'pointer', transition: 'opacity 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>Home</span>
     </Link>
     <Link href="#features" style={{ textDecoration: 'none' }}>
-      <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '16px', color: '#000000', cursor: 'pointer', transition: 'opacity 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>Features</span>
+      <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', fontWeight: '500', color: '#000000', cursor: 'pointer', transition: 'opacity 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>Features</span>
     </Link>
     <Link href="#community" style={{ textDecoration: 'none' }}>
-      <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '16px', color: '#000000', cursor: 'pointer', transition: 'opacity 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>Community</span>
+      <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', fontWeight: '500', color: '#000000', cursor: 'pointer', transition: 'opacity 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>Community</span>
     </Link>
     <Link href="#donation" style={{ textDecoration: 'none' }}>
-      <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '16px', color: '#000000', cursor: 'pointer', transition: 'opacity 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>Donation</span>
+      <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', fontWeight: '500', color: '#000000', cursor: 'pointer', transition: 'opacity 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>Donation</span>
+    </Link>
+    <Link href="#blog" style={{ textDecoration: 'none' }}>
+      <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', fontWeight: '500', color: '#000000', cursor: 'pointer', transition: 'opacity 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>Blog</span>
     </Link>
     <button
       onClick={() => setShowCalendarModal(true)}
@@ -4366,8 +4331,8 @@ const handleTextHover = () => {
         color: '#ffffff',
         border: 'none',
         borderRadius: '60px',
-        padding: '8px 20px',
-        fontSize: '14px',
+        padding: '8px 24px',
+        fontSize: '13px',
         fontFamily: "'Questrial', sans-serif",
         fontWeight: '500',
         cursor: 'pointer',
@@ -4379,10 +4344,20 @@ const handleTextHover = () => {
       Book Call
     </button>
   </div>
-)}
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
             
-
             {/* SECTION 1 - MENURU.STUDIO */}
             <div
               ref={studioContainerRef}
