@@ -950,7 +950,6 @@ const [isHovering, setIsHovering] = useState(false);
   const circleImg2_5Ref = useRef<HTMLDivElement>(null);
 
 
-
 const [headerScrollProgress, setHeaderScrollProgress] = useState(0);
 const [showNavbar, setShowNavbar] = useState(false);
 const [showScrollDown, setShowScrollDown] = useState(true);
@@ -958,8 +957,6 @@ const headerTextRef = useRef<HTMLDivElement>(null);
 const headerSectionRef = useRef<HTMLDivElement>(null);
 const navbarRef = useRef<HTMLDivElement>(null);
 const scrollDownRef = useRef<HTMLDivElement>(null);
-
-
 
 
 
@@ -1235,7 +1232,11 @@ const scrollDownRef = useRef<HTMLDivElement>(null);
 
 
 
-// Efek untuk membuat teks scroll down mengikuti cursor (mouse)
+
+
+
+
+  // Efek untuk membuat teks scroll down mengikuti cursor (mouse)
 useEffect(() => {
   if (isLoading || !showScrollDown) return;
   
@@ -1283,15 +1284,29 @@ useEffect(() => {
         
         if (headerTextRef.current) {
           const fontSize = 300 - (progress * 276);
-          headerTextRef.current.style.fontSize = `${Math.max(24, fontSize)}px`;
+          const newFontSize = Math.max(24, fontSize);
+          headerTextRef.current.style.fontSize = `${newFontSize}px`;
           
-          // Debug: console log ukuran font
-          console.log('Font size:', Math.max(24, fontSize), 'Progress:', progress);
-          
-          // Navbar muncul saat font size <= 40px (sudah cukup kecil)
-          if (Math.max(24, fontSize) <= 40) {
+          // NAVBAR MUNCUL saat font size <= 40px ATAU progress > 0.7
+          if (newFontSize <= 40 || progress > 0.7) {
             setShowNavbar(true);
           } else {
+            setShowNavbar(false);
+          }
+        }
+      }
+    });
+    
+    // TAMBAHKAN: ScrollTrigger untuk navbar sebagai backup
+    ScrollTrigger.create({
+      trigger: document.body,
+      start: "top 250px",
+      onEnter: () => setShowNavbar(true),
+      onLeaveBack: () => {
+        // Cek font size sebelum hide
+        if (headerTextRef.current) {
+          const currentFontSize = parseInt(headerTextRef.current.style.fontSize);
+          if (currentFontSize > 40) {
             setShowNavbar(false);
           }
         }
@@ -1302,7 +1317,7 @@ useEffect(() => {
   return () => ctx.revert();
 }, [isLoading]);
 
-// Scroll handler untuk scroll down
+// Scroll handler untuk scroll down (TETAP PERTAHANKAN)
 useEffect(() => {
   if (isLoading) return;
   
@@ -1322,8 +1337,20 @@ useEffect(() => {
   return () => window.removeEventListener('scroll', handleScroll);
 }, [isLoading, showScrollDown]);
 
-
-
+// TAMBAHKAN: Backup handler untuk memastikan navbar muncul
+useEffect(() => {
+  if (isLoading) return;
+  
+  const backupHandler = () => {
+    const scrollY = window.scrollY;
+    if (scrollY > 300) {
+      setShowNavbar(true);
+    }
+  };
+  
+  window.addEventListener('scroll', backupHandler);
+  return () => window.removeEventListener('scroll', backupHandler);
+}, [isLoading]);
 
 
 
@@ -3563,7 +3590,7 @@ const handleTextHover = () => {
     }
   }
 
- @keyframes bounce {
+@keyframes bounce {
     0%, 100% {
       transform: translateY(0);
     }
@@ -3571,7 +3598,6 @@ const handleTextHover = () => {
       transform: translateY(5px);
     }
   }
-
 
 
 
@@ -4370,7 +4396,6 @@ const handleTextHover = () => {
           >
 
 
-
 {/* HEADER SECTION - MENURU dengan efek PINNED */}
 <div
   ref={headerSectionRef}
@@ -4411,7 +4436,7 @@ const handleTextHover = () => {
   </div>
 </div>
 
-{/* NAVBAR - Fixed Position di sisi KANAN, muncul saat teks MENURU sudah kecil */}
+{/* NAVBAR - Fixed Position di sisi KANAN */}
 <div
   style={{
     position: 'fixed',
