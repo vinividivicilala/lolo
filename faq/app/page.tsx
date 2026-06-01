@@ -3509,7 +3509,6 @@ const handleTextHover = () => {
       <style jsx global>{`
         @import url('https://fonts.googleapis.com/css2?family=Questrial&display=swap');
 
-        <style jsx global>{`
   @keyframes fadeInDown {
     from {
       opacity: 0;
