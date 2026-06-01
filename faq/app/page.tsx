@@ -951,7 +951,9 @@ const [isHovering, setIsHovering] = useState(false);
 
 
 
-  const [headerScrollProgress, setHeaderScrollProgress] = useState(0);
+
+
+const [headerScrollProgress, setHeaderScrollProgress] = useState(0);
 const [showNavbar, setShowNavbar] = useState(false);
 const [showScrollDown, setShowScrollDown] = useState(true);
 const headerTextRef = useRef<HTMLDivElement>(null);
@@ -961,6 +963,11 @@ const scrollDownRef = useRef<HTMLDivElement>(null);
 
 
 
+
+
+
+
+  
   
 
   const carouselItems = [
@@ -1222,10 +1229,6 @@ const scrollDownRef = useRef<HTMLDivElement>(null);
 
 
 
-
-
-
-  // Efek untuk drag teks scroll down
 useEffect(() => {
   if (isLoading || !showScrollDown || !scrollDownRef.current) return;
   
@@ -1234,6 +1237,8 @@ useEffect(() => {
   let startY = 0;
   let currentX = 0;
   let currentY = 0;
+  let translateX = 0;
+  let translateY = 0;
   
   const element = scrollDownRef.current;
   
@@ -1272,9 +1277,6 @@ useEffect(() => {
 useEffect(() => {
   if (isLoading) return;
   
-  let scrollTriggerNavbar: ScrollTrigger | null = null;
-  let scrollTriggerScrollDown: ScrollTrigger | null = null;
-  
   const ctx = gsap.context(() => {
     // PINNING: Buat section header tetap di tempat saat scroll
     ScrollTrigger.create({
@@ -1295,34 +1297,55 @@ useEffect(() => {
       }
     });
     
-    // Navbar muncul setelah scroll melewati 100px (bukan saat loading)
-    scrollTriggerNavbar = ScrollTrigger.create({
+    // Navbar muncul setelah scroll melewati 100px
+    ScrollTrigger.create({
       trigger: document.body,
       start: "top 100px",
       onEnter: () => setShowNavbar(true),
-      onLeaveBack: () => setShowNavbar(false)
+      onLeaveBack: () => setShowNavbar(false),
+      immediateRender: false
     });
     
-    // Teks "scroll down" hilang saat scroll ke bawah, muncul saat scroll ke atas
-    scrollTriggerScrollDown = ScrollTrigger.create({
+    // Teks "scroll down" hilang saat scroll ke bawah
+    ScrollTrigger.create({
       trigger: document.body,
-      start: "top 50px",
+      start: "top 30px",
       onEnter: () => setShowScrollDown(false),
-      onLeaveBack: () => setShowScrollDown(true)
+      onLeaveBack: () => setShowScrollDown(true),
+      immediateRender: false
     });
   });
   
-  return () => {
-    ctx.revert();
-    if (scrollTriggerNavbar) scrollTriggerNavbar.kill();
-    if (scrollTriggerScrollDown) scrollTriggerScrollDown.kill();
-  };
+  return () => ctx.revert();
 }, [isLoading]);
 
-
-
-
-
+// Scroll handler manual sebagai fallback
+useEffect(() => {
+  if (isLoading) return;
+  
+  const handleScroll = () => {
+    const scrollY = window.scrollY;
+    
+    // Navbar muncul setelah scroll > 100px
+    if (scrollY > 100) {
+      setShowNavbar(true);
+    } else if (scrollY < 50) {
+      setShowNavbar(false);
+    }
+    
+    // Scroll down hilang setelah scroll > 30px
+    if (scrollY > 30) {
+      setShowScrollDown(false);
+    } else if (scrollY < 10) {
+      setShowScrollDown(true);
+    }
+  };
+  
+  window.addEventListener('scroll', handleScroll);
+  handleScroll();
+  
+  return () => window.removeEventListener('scroll', handleScroll);
+}, [isLoading]);
 
 
 
@@ -3556,16 +3579,14 @@ const handleTextHover = () => {
     }
   }
 
-
-   @keyframes bounce {
+@keyframes bounce {
     0%, 100% {
-      transform: translateX(-50%) translateY(0);
+      transform: translateY(0);
     }
     50% {
-      transform: translateX(-50%) translateY(8px);
+      transform: translateY(6px);
     }
   }
-
 
         @font-face {
           font-family: 'Aeonik-Regular';
@@ -4356,6 +4377,7 @@ const handleTextHover = () => {
           >
 
 
+
 {/* HEADER SECTION - MENURU dengan efek PINNED */}
 <div
   ref={headerSectionRef}
@@ -4396,7 +4418,7 @@ const handleTextHover = () => {
   </div>
 </div>
 
-{/* NAVBAR - Fixed Position, muncul hanya saat scroll ke bawah (bukan loading) */}
+{/* NAVBAR - Fixed Position, muncul hanya saat scroll ke bawah (BUKAN SAAT LOADING) */}
 <div
   ref={navbarRef}
   style={{
@@ -4408,13 +4430,14 @@ const handleTextHover = () => {
     display: 'flex',
     alignItems: 'center',
     gap: '32px',
-    backgroundColor: showNavbar ? 'rgba(255, 255, 255, 0.95)' : 'transparent',
-    backdropFilter: showNavbar ? 'blur(12px)' : 'none',
-    padding: showNavbar ? '10px 28px' : '0px',
-    borderRadius: showNavbar ? '60px' : '0px',
-    boxShadow: showNavbar ? '0 2px 15px rgba(0,0,0,0.08)' : 'none',
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    backdropFilter: 'blur(12px)',
+    padding: '10px 28px',
+    borderRadius: '60px',
+    boxShadow: '0 2px 15px rgba(0,0,0,0.08)',
     pointerEvents: showNavbar ? 'auto' : 'none',
     opacity: showNavbar ? 1 : 0,
+    visibility: showNavbar ? 'visible' : 'hidden',
     transform: showNavbar ? 'translateY(0)' : 'translateY(-20px)',
     transition: 'all 0.3s ease'
   }}
@@ -4455,8 +4478,8 @@ const handleTextHover = () => {
   </button>
 </div>
 
-{/* SCROLL DOWN - Teks dengan panah SVG yang bisa di-drag, hilang saat scroll ke bawah */}
-{showScrollDown && !showNavbar && (
+{/* SCROLL DOWN - Teks dengan panah SVG yang bisa di-drag */}
+{showScrollDown && !isLoading && (
   <div
     ref={scrollDownRef}
     style={{
@@ -4469,38 +4492,46 @@ const handleTextHover = () => {
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
-      gap: '12px',
+      gap: '10px',
       fontFamily: 'Questrial, sans-serif',
       color: '#000000',
       userSelect: 'none',
-      backgroundColor: 'rgba(255, 255, 255, 0.9)',
-      padding: '14px 28px',
+      backgroundColor: 'rgba(0, 0, 0, 0.8)',
+      padding: '12px 24px',
       borderRadius: '60px',
       backdropFilter: 'blur(8px)',
-      boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-      transition: 'opacity 0.3s ease',
-      animation: 'bounce 1.5s ease infinite'
+      boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
+      transition: 'opacity 0.3s ease'
     }}
   >
-    <span style={{ fontSize: '14px', fontWeight: '600', letterSpacing: '0.08em' }}>
+    <span style={{ fontSize: '13px', fontWeight: '600', letterSpacing: '0.1em', color: '#ffffff' }}>
       SCROLL DOWN
     </span>
     <svg 
-      width="28" 
-      height="28" 
+      width="24" 
+      height="24" 
       viewBox="0 0 24 24" 
       fill="none" 
       xmlns="http://www.w3.org/2000/svg"
+      style={{ animation: 'bounce 1.5s ease infinite' }}
     >
-      <path d="M12 5V19M12 19L5 12M12 19L19 12" stroke="#000000" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M12 5V19M12 19L5 12M12 19L19 12" stroke="#ffffff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
-    <div style={{ fontSize: '10px', color: '#999999', marginTop: '4px', letterSpacing: '0.05em' }}>
+    <div style={{ fontSize: '9px', color: 'rgba(255,255,255,0.6)', marginTop: '2px', letterSpacing: '0.05em' }}>
       drag to move
     </div>
   </div>
 )}
 
 
+
+
+
+
+
+
+
+            
             
             
 
