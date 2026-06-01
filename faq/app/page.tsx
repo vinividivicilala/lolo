@@ -1240,8 +1240,6 @@ const scrollDownRef = useRef<HTMLDivElement>(null);
   };
 
 
-
-
 // Efek untuk membuat teks scroll down mengikuti cursor (mouse)
 useEffect(() => {
   if (isLoading || !showScrollDown) return;
@@ -1277,32 +1275,34 @@ useEffect(() => {
   
   const ctx = gsap.context(() => {
     // PINNING: Buat section header tetap di tempat saat scroll
-   ScrollTrigger.create({
-  trigger: headerSectionRef.current,
-  start: "top top",
-  end: "+=1000",
-  pin: true,
-  pinSpacing: true,
-  scrub: 1,
-
-  onUpdate: (self) => {
-    const progress = self.progress;
-    setHeaderScrollProgress(progress);
-
-    if (headerTextRef.current) {
-      const fontSize = 300 - (progress * 276);
-      const newFontSize = Math.max(24, fontSize);
-
-      headerTextRef.current.style.fontSize = `${newFontSize}px`;
-
-      if (newFontSize <= 24.5) {
-        setShowNavbar(true);
-      } else {
-        setShowNavbar(false);
+    ScrollTrigger.create({
+      trigger: headerSectionRef.current,
+      start: "top top",
+      end: "+=500",
+      pin: true,
+      pinSpacing: true,
+      scrub: 1,
+      onUpdate: (self) => {
+        const progress = self.progress;
+        setHeaderScrollProgress(progress);
+        
+        if (headerTextRef.current) {
+          const fontSize = 300 - (progress * 276);
+          const newFontSize = Math.max(24, fontSize);
+          headerTextRef.current.style.fontSize = `${newFontSize}px`;
+          
+          console.log('Font size:', newFontSize, 'Progress:', progress);
+          
+          // NAVBAR MUNCUL saat font size sudah 24px (progress >= 0.95)
+          if (progress >= 0.95 || newFontSize <= 25) {
+            console.log('NAVBAR HARUS MUNCUL!');
+            setShowNavbar(true);
+          } else {
+            setShowNavbar(false);
+          }
+        }
       }
-    }
-  }
-});
+    });
   });
   
   return () => ctx.revert();
@@ -1327,7 +1327,6 @@ useEffect(() => {
   
   return () => window.removeEventListener('scroll', handleScroll);
 }, [isLoading, showScrollDown]);
-
 
 
 
@@ -3572,7 +3571,20 @@ const handleTextHover = () => {
     }
   }
 
-
+/* Force fix untuk navbar yang terhalang ScrollSmoother */
+  .navbar-force-fix {
+    position: fixed !important;
+    transform: none !important;
+    top: 20px !important;
+    right: 40px !important;
+    z-index: 99999 !important;
+  }
+  
+  /* Reset transform pada container smooth */
+  #smooth-wrapper,
+  #smooth-content {
+    transform: none !important;
+  }
 
 
 
