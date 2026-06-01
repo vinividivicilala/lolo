@@ -951,13 +951,13 @@ const [isHovering, setIsHovering] = useState(false);
 
 
 
-// State untuk kontrol scroll header
-const [headerScrollProgress, setHeaderScrollProgress] = useState(0);
+  const [headerScrollProgress, setHeaderScrollProgress] = useState(0);
 const [showNavbar, setShowNavbar] = useState(false);
+const [showScrollDown, setShowScrollDown] = useState(true);
 const headerTextRef = useRef<HTMLDivElement>(null);
 const headerSectionRef = useRef<HTMLDivElement>(null);
 const navbarRef = useRef<HTMLDivElement>(null);
-
+const scrollDownRef = useRef<HTMLDivElement>(null);
 
 
 
@@ -1221,25 +1221,73 @@ const navbarRef = useRef<HTMLDivElement>(null);
 
 
 
+
+
+
+
+  // Efek untuk drag teks scroll down
+useEffect(() => {
+  if (isLoading || !showScrollDown || !scrollDownRef.current) return;
+  
+  let isDragging = false;
+  let startX = 0;
+  let startY = 0;
+  let currentX = 0;
+  let currentY = 0;
+  
+  const element = scrollDownRef.current;
+  
+  const onMouseDown = (e: MouseEvent) => {
+    isDragging = true;
+    startX = e.clientX - currentX;
+    startY = e.clientY - currentY;
+    element.style.cursor = 'grabbing';
+    e.preventDefault();
+  };
+  
+  const onMouseMove = (e: MouseEvent) => {
+    if (!isDragging) return;
+    currentX = e.clientX - startX;
+    currentY = e.clientY - startY;
+    element.style.transform = `translate(${currentX}px, ${currentY}px)`;
+  };
+  
+  const onMouseUp = () => {
+    isDragging = false;
+    element.style.cursor = 'grab';
+  };
+  
+  element.addEventListener('mousedown', onMouseDown);
+  window.addEventListener('mousemove', onMouseMove);
+  window.addEventListener('mouseup', onMouseUp);
+  
+  return () => {
+    element.removeEventListener('mousedown', onMouseDown);
+    window.removeEventListener('mousemove', onMouseMove);
+    window.removeEventListener('mouseup', onMouseUp);
+  };
+}, [isLoading, showScrollDown]);
+
 // Efek untuk animasi scroll header MENURU dengan ScrollTrigger
 useEffect(() => {
   if (isLoading) return;
   
+  let scrollTriggerNavbar: ScrollTrigger | null = null;
+  let scrollTriggerScrollDown: ScrollTrigger | null = null;
+  
   const ctx = gsap.context(() => {
     // PINNING: Buat section header tetap di tempat saat scroll
-    // Gunakan pinSpacing: false agar tidak menambah jarak kosong
     ScrollTrigger.create({
       trigger: headerSectionRef.current,
       start: "top top",
-      end: "+=300", // Durasi pinning 300px scroll (lebih pendek)
+      end: "+=300",
       pin: true,
-      pinSpacing: false, // Tidak menambah jarak kosong
+      pinSpacing: false,
       scrub: 1,
       onUpdate: (self) => {
         const progress = self.progress;
         setHeaderScrollProgress(progress);
         
-        // Ubah ukuran font MENURU saat scroll
         if (headerTextRef.current) {
           const fontSize = 300 - (progress * 276);
           headerTextRef.current.style.fontSize = `${Math.max(24, fontSize)}px`;
@@ -1247,18 +1295,29 @@ useEffect(() => {
       }
     });
     
-    // Navbar muncul setelah scroll melewati 150px
-    ScrollTrigger.create({
+    // Navbar muncul setelah scroll melewati 100px (bukan saat loading)
+    scrollTriggerNavbar = ScrollTrigger.create({
       trigger: document.body,
-      start: "top 150px",
+      start: "top 100px",
       onEnter: () => setShowNavbar(true),
       onLeaveBack: () => setShowNavbar(false)
     });
+    
+    // Teks "scroll down" hilang saat scroll ke bawah, muncul saat scroll ke atas
+    scrollTriggerScrollDown = ScrollTrigger.create({
+      trigger: document.body,
+      start: "top 50px",
+      onEnter: () => setShowScrollDown(false),
+      onLeaveBack: () => setShowScrollDown(true)
+    });
   });
   
-  return () => ctx.revert();
+  return () => {
+    ctx.revert();
+    if (scrollTriggerNavbar) scrollTriggerNavbar.kill();
+    if (scrollTriggerScrollDown) scrollTriggerScrollDown.kill();
+  };
 }, [isLoading]);
-
 
 
 
@@ -3498,6 +3557,16 @@ const handleTextHover = () => {
   }
 
 
+   @keyframes bounce {
+    0%, 100% {
+      transform: translateX(-50%) translateY(0);
+    }
+    50% {
+      transform: translateX(-50%) translateY(8px);
+    }
+  }
+
+
         @font-face {
           font-family: 'Aeonik-Regular';
           src: url('/fonts/Aeonik-Regular.woff2') format('woff2'),
@@ -4287,14 +4356,13 @@ const handleTextHover = () => {
           >
 
 
-
 {/* HEADER SECTION - MENURU dengan efek PINNED */}
 <div
   ref={headerSectionRef}
   style={{
     position: 'relative',
     width: '100%',
-    height: 'auto', // Tidak pakai height penuh agar tidak ada jarak kosong
+    height: 'auto',
     backgroundColor: 'transparent',
     zIndex: 10,
     paddingBottom: '0px'
@@ -4328,7 +4396,7 @@ const handleTextHover = () => {
   </div>
 </div>
 
-{/* NAVBAR - Fixed Position, muncul hanya saat scroll ke bawah */}
+{/* NAVBAR - Fixed Position, muncul hanya saat scroll ke bawah (bukan loading) */}
 <div
   ref={navbarRef}
   style={{
@@ -4387,6 +4455,50 @@ const handleTextHover = () => {
   </button>
 </div>
 
+{/* SCROLL DOWN - Teks dengan panah SVG yang bisa di-drag, hilang saat scroll ke bawah */}
+{showScrollDown && !showNavbar && (
+  <div
+    ref={scrollDownRef}
+    style={{
+      position: 'fixed',
+      bottom: '80px',
+      left: '50%',
+      transform: 'translateX(-50%)',
+      zIndex: 1001,
+      cursor: 'grab',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      gap: '12px',
+      fontFamily: 'Questrial, sans-serif',
+      color: '#000000',
+      userSelect: 'none',
+      backgroundColor: 'rgba(255, 255, 255, 0.9)',
+      padding: '14px 28px',
+      borderRadius: '60px',
+      backdropFilter: 'blur(8px)',
+      boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+      transition: 'opacity 0.3s ease',
+      animation: 'bounce 1.5s ease infinite'
+    }}
+  >
+    <span style={{ fontSize: '14px', fontWeight: '600', letterSpacing: '0.08em' }}>
+      SCROLL DOWN
+    </span>
+    <svg 
+      width="28" 
+      height="28" 
+      viewBox="0 0 24 24" 
+      fill="none" 
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path d="M12 5V19M12 19L5 12M12 19L19 12" stroke="#000000" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+    <div style={{ fontSize: '10px', color: '#999999', marginTop: '4px', letterSpacing: '0.05em' }}>
+      drag to move
+    </div>
+  </div>
+)}
 
 
             
