@@ -1273,42 +1273,40 @@ useEffect(() => {
   };
 }, [isLoading, showScrollDown]);
 
-// Efek untuk animasi scroll header MENURU dengan ScrollTrigger
 useEffect(() => {
   if (isLoading) return;
-  
+
   const ctx = gsap.context(() => {
-    // PINNING: Buat section header tetap di tempat saat scroll
     ScrollTrigger.create({
       trigger: headerSectionRef.current,
       start: "top top",
-      end: "+=500",
+      end: "+=1000",
       pin: true,
       pinSpacing: true,
       scrub: 1,
+
       onUpdate: (self) => {
         const progress = self.progress;
-        setHeaderScrollProgress(progress);
-        
+
+        const fontSize = 300 - (progress * 276);
+        const newFontSize = Math.max(24, fontSize);
+
         if (headerTextRef.current) {
-          const fontSize = 300 - (progress * 276);
-          const newFontSize = Math.max(24, fontSize);
           headerTextRef.current.style.fontSize = `${newFontSize}px`;
-          
-          console.log('Font size:', newFontSize, 'Progress:', progress);
-          
-          // NAVBAR MUNCUL saat font size sudah 24px (progress >= 0.95)
-          if (progress >= 0.95 || newFontSize <= 25) {
-            console.log('NAVBAR HARUS MUNCUL!');
-            setShowNavbar(true);
-          } else {
-            setShowNavbar(false);
-          }
         }
+
+        // NAVBAR MUNCUL TEPAT SAAT MENURU SUDAH 24PX
+        if (newFontSize <= 24) {
+          setShowNavbar(true);
+        } else {
+          setShowNavbar(false);
+        }
+
+        setHeaderScrollProgress(progress);
       }
     });
   });
-  
+
   return () => ctx.revert();
 }, [isLoading]);
 
@@ -4415,62 +4413,118 @@ const handleTextHover = () => {
     </div>
   </div>
 </div>
-{/* NAVBAR - Alternatif dengan posisi top center */}
 <div
   style={{
     position: 'fixed',
     top: '20px',
-    left: '50%',
-    transform: showNavbar ? 'translateX(-50%) translateY(0)' : 'translateX(-50%) translateY(-30px)',
-    zIndex: 99999,
+    right: '40px',
+    zIndex: 9999,
+
     display: 'flex',
     alignItems: 'center',
     gap: '32px',
-    backgroundColor: showNavbar ? '#000000' : 'transparent',
-    borderRadius: showNavbar ? '60px' : '0px',
-    padding: showNavbar ? '12px 32px' : '0px',
-    boxShadow: showNavbar ? '0 4px 20px rgba(0,0,0,0.3)' : 'none',
-    pointerEvents: showNavbar ? 'auto' : 'none',
+
+    background: '#111111',
+    borderRadius: '100px',
+    padding: '12px 30px',
+
     opacity: showNavbar ? 1 : 0,
     visibility: showNavbar ? 'visible' : 'hidden',
-    transition: 'all 0.4s ease',
-    border: showNavbar ? '1px solid rgba(255,215,0,0.3)' : 'none',
-    whiteSpace: 'nowrap'
+
+    transform: showNavbar
+      ? 'translateY(0px)'
+      : 'translateY(-40px)',
+
+    transition:
+      'opacity .6s cubic-bezier(.22,1,.36,1), transform .6s cubic-bezier(.22,1,.36,1)',
+
+    boxShadow: '0 10px 30px rgba(0,0,0,.15)',
+    border: '1px solid rgba(255,255,255,.1)',
+
+    pointerEvents: showNavbar ? 'auto' : 'none'
   }}
 >
   <Link href="/" style={{ textDecoration: 'none' }}>
-    <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', fontWeight: '500', color: '#ffffff', cursor: 'pointer' }}>Home</span>
+    <span
+      style={{
+        color: '#fff',
+        fontSize: '14px',
+        fontFamily: 'Questrial,sans-serif',
+        cursor: 'pointer'
+      }}
+    >
+      Home
+    </span>
   </Link>
+
   <Link href="#features" style={{ textDecoration: 'none' }}>
-    <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', fontWeight: '500', color: '#ffffff', cursor: 'pointer' }}>Features</span>
+    <span
+      style={{
+        color: '#fff',
+        fontSize: '14px',
+        fontFamily: 'Questrial,sans-serif',
+        cursor: 'pointer'
+      }}
+    >
+      Features
+    </span>
   </Link>
+
   <Link href="#community" style={{ textDecoration: 'none' }}>
-    <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', fontWeight: '500', color: '#ffffff', cursor: 'pointer' }}>Community</span>
+    <span
+      style={{
+        color: '#fff',
+        fontSize: '14px',
+        fontFamily: 'Questrial,sans-serif',
+        cursor: 'pointer'
+      }}
+    >
+      Community
+    </span>
   </Link>
+
   <Link href="#donation" style={{ textDecoration: 'none' }}>
-    <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', fontWeight: '500', color: '#ffffff', cursor: 'pointer' }}>Donation</span>
+    <span
+      style={{
+        color: '#fff',
+        fontSize: '14px',
+        fontFamily: 'Questrial,sans-serif',
+        cursor: 'pointer'
+      }}
+    >
+      Donation
+    </span>
   </Link>
+
   <Link href="#blog" style={{ textDecoration: 'none' }}>
-    <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', fontWeight: '500', color: '#ffffff', cursor: 'pointer' }}>Blog</span>
+    <span
+      style={{
+        color: '#fff',
+        fontSize: '14px',
+        fontFamily: 'Questrial,sans-serif',
+        cursor: 'pointer'
+      }}
+    >
+      Blog
+    </span>
   </Link>
+
   <button
     onClick={() => setShowCalendarModal(true)}
     style={{
-      background: '#c5e800',
-      color: '#000000',
+      background: '#C5E800',
+      color: '#000',
       border: 'none',
-      borderRadius: '60px',
-      padding: '8px 24px',
-      fontSize: '13px',
-      fontFamily: "'Questrial', sans-serif",
-      fontWeight: '600',
-      cursor: 'pointer'
+      borderRadius: '999px',
+      padding: '10px 22px',
+      cursor: 'pointer',
+      fontFamily: 'Questrial,sans-serif',
+      fontWeight: 600
     }}
   >
     Book Call
   </button>
 </div>
-
 {/* SCROLL DOWN - Teks yang mengikuti cursor */}
 {showScrollDown && !isLoading && (
   <div
