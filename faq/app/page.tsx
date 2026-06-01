@@ -950,6 +950,7 @@ const [isHovering, setIsHovering] = useState(false);
   const circleImg2_5Ref = useRef<HTMLDivElement>(null);
 
 
+
 const [headerScrollProgress, setHeaderScrollProgress] = useState(0);
 const [showNavbar, setShowNavbar] = useState(false);
 const [showScrollDown, setShowScrollDown] = useState(true);
@@ -959,6 +960,18 @@ const navbarRef = useRef<HTMLDivElement>(null);
 const scrollDownRef = useRef<HTMLDivElement>(null);
 
 
+
+
+
+
+
+
+
+
+
+
+
+  
 
 
   
@@ -1228,15 +1241,11 @@ useEffect(() => {
   
   let mouseX = 0;
   let mouseY = 0;
-  let targetX = 0;
-  let targetY = 0;
   let rafId: number | null = null;
   
   const updatePosition = () => {
     if (scrollDownRef.current) {
-      targetX = mouseX + 20;
-      targetY = mouseY + 20;
-      scrollDownRef.current.style.transform = `translate(${targetX}px, ${targetY}px)`;
+      scrollDownRef.current.style.transform = `translate(${mouseX + 20}px, ${mouseY + 20}px)`;
     }
     rafId = requestAnimationFrame(updatePosition);
   };
@@ -1264,7 +1273,7 @@ useEffect(() => {
     ScrollTrigger.create({
       trigger: headerSectionRef.current,
       start: "top top",
-      end: "+=300",
+      end: "+=400",
       pin: true,
       pinSpacing: false,
       scrub: 1,
@@ -1275,13 +1284,16 @@ useEffect(() => {
         if (headerTextRef.current) {
           const fontSize = 300 - (progress * 276);
           headerTextRef.current.style.fontSize = `${Math.max(24, fontSize)}px`;
-        }
-        
-        // Navbar muncul saat teks MENURU sudah mencapai ukuran 24px (progress >= 0.95)
-        if (progress >= 0.95) {
-          setShowNavbar(true);
-        } else if (progress < 0.8) {
-          setShowNavbar(false);
+          
+          // Debug: console log ukuran font
+          console.log('Font size:', Math.max(24, fontSize), 'Progress:', progress);
+          
+          // Navbar muncul saat font size <= 40px (sudah cukup kecil)
+          if (Math.max(24, fontSize) <= 40) {
+            setShowNavbar(true);
+          } else {
+            setShowNavbar(false);
+          }
         }
       }
     });
@@ -1290,7 +1302,7 @@ useEffect(() => {
   return () => ctx.revert();
 }, [isLoading]);
 
-// Scroll handler untuk scroll down (hilang saat scroll, muncul saat kembali ke atas)
+// Scroll handler untuk scroll down
 useEffect(() => {
   if (isLoading) return;
   
@@ -1314,6 +1326,8 @@ useEffect(() => {
 
 
 
+
+  
 
 
 
@@ -3549,7 +3563,7 @@ const handleTextHover = () => {
     }
   }
 
-@keyframes bounce {
+ @keyframes bounce {
     0%, 100% {
       transform: translateY(0);
     }
@@ -3557,6 +3571,15 @@ const handleTextHover = () => {
       transform: translateY(5px);
     }
   }
+
+
+
+
+
+
+
+  
+
 
         @font-face {
           font-family: 'Aeonik-Regular';
@@ -4347,7 +4370,7 @@ const handleTextHover = () => {
           >
 
 
-            
+
 {/* HEADER SECTION - MENURU dengan efek PINNED */}
 <div
   ref={headerSectionRef}
@@ -4388,9 +4411,8 @@ const handleTextHover = () => {
   </div>
 </div>
 
-{/* NAVBAR - Fixed Position, muncul saat teks MENURU sudah 24px */}
+{/* NAVBAR - Fixed Position di sisi KANAN, muncul saat teks MENURU sudah kecil */}
 <div
-  ref={navbarRef}
   style={{
     position: 'fixed',
     top: '20px',
@@ -4448,7 +4470,7 @@ const handleTextHover = () => {
   </button>
 </div>
 
-{/* SCROLL DOWN - Teks yang mengikuti cursor, hilang saat scroll */}
+{/* SCROLL DOWN - Teks yang mengikuti cursor */}
 {showScrollDown && !isLoading && (
   <div
     ref={scrollDownRef}
@@ -4490,6 +4512,10 @@ const handleTextHover = () => {
 
 
 
+
+
+
+            
 
 
 
