@@ -951,15 +951,12 @@ const [isHovering, setIsHovering] = useState(false);
 
 
 
-
-
-  // State untuk kontrol scroll header
+// State untuk kontrol scroll header
 const [headerScrollProgress, setHeaderScrollProgress] = useState(0);
 const [showNavbar, setShowNavbar] = useState(false);
 const headerTextRef = useRef<HTMLDivElement>(null);
 const headerSectionRef = useRef<HTMLDivElement>(null);
 const navbarRef = useRef<HTMLDivElement>(null);
-
 
 
 
@@ -1224,19 +1221,19 @@ const navbarRef = useRef<HTMLDivElement>(null);
 
 
 
-
- // Efek untuk animasi scroll header MENURU dengan ScrollTrigger
+// Efek untuk animasi scroll header MENURU dengan ScrollTrigger
 useEffect(() => {
   if (isLoading) return;
   
   const ctx = gsap.context(() => {
     // PINNING: Buat section header tetap di tempat saat scroll
+    // Gunakan pinSpacing: false agar tidak menambah jarak kosong
     ScrollTrigger.create({
       trigger: headerSectionRef.current,
       start: "top top",
-      end: "+=500", // Durasi pinning 500px scroll
+      end: "+=300", // Durasi pinning 300px scroll (lebih pendek)
       pin: true,
-      pinSpacing: true,
+      pinSpacing: false, // Tidak menambah jarak kosong
       scrub: 1,
       onUpdate: (self) => {
         const progress = self.progress;
@@ -1250,10 +1247,10 @@ useEffect(() => {
       }
     });
     
-    // Navbar muncul setelah scroll melewati 100px
+    // Navbar muncul setelah scroll melewati 150px
     ScrollTrigger.create({
       trigger: document.body,
-      start: "top 100px",
+      start: "top 150px",
       onEnter: () => setShowNavbar(true),
       onLeaveBack: () => setShowNavbar(false)
     });
@@ -1261,9 +1258,16 @@ useEffect(() => {
   
   return () => ctx.revert();
 }, [isLoading]);
+
+
+
+
+
+
+
+
+
   
-
-
 
 
 
@@ -4283,20 +4287,22 @@ const handleTextHover = () => {
           >
 
 
+
 {/* HEADER SECTION - MENURU dengan efek PINNED */}
 <div
   ref={headerSectionRef}
   style={{
     position: 'relative',
     width: '100%',
-    height: '100vh',
+    height: 'auto', // Tidak pakai height penuh agar tidak ada jarak kosong
     backgroundColor: 'transparent',
-    zIndex: 10
+    zIndex: 10,
+    paddingBottom: '0px'
   }}
 >
   <div
     style={{
-      position: 'absolute',
+      position: 'relative',
       top: 0,
       left: 0,
       right: 0,
@@ -4322,7 +4328,7 @@ const handleTextHover = () => {
   </div>
 </div>
 
-{/* NAVBAR - Fixed Position, muncul hanya saat scroll */}
+{/* NAVBAR - Fixed Position, muncul hanya saat scroll ke bawah */}
 <div
   ref={navbarRef}
   style={{
@@ -4380,8 +4386,6 @@ const handleTextHover = () => {
     Book Call
   </button>
 </div>
-
-
 
 
 
