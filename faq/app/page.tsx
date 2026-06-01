@@ -3571,21 +3571,32 @@ const handleTextHover = () => {
     }
   }
 
-/* Force fix untuk navbar yang terhalang ScrollSmoother */
-  .navbar-force-fix {
+/* PERBAIKAN UNTUK NAVBAR - Mengatasi ScrollSmoother */
+  .navbar-fixed {
     position: fixed !important;
-    transform: none !important;
     top: 20px !important;
     right: 40px !important;
+    transform: none !important;
     z-index: 99999 !important;
   }
   
-  /* Reset transform pada container smooth */
+  /* Reset transform pada smooth wrapper agar fixed element bekerja */
   #smooth-wrapper,
   #smooth-content {
     transform: none !important;
+    will-change: auto !important;
   }
-
+  
+  /* Atau alternatif: buat wrapper baru untuk fixed elements */
+  .fixed-outside-smooth {
+    position: fixed;
+    z-index: 99999;
+    pointer-events: none;
+  }
+  
+  .fixed-outside-smooth > * {
+    pointer-events: auto;
+  }
 
 
 
