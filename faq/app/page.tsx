@@ -950,15 +950,15 @@ const [isHovering, setIsHovering] = useState(false);
   const circleImg2_5Ref = useRef<HTMLDivElement>(null);
 
 
-// State untuk kontrol scroll header
+
+
+
+  // State untuk kontrol scroll header
 const [headerScrollProgress, setHeaderScrollProgress] = useState(0);
-const [showNavbar, setShowNavbar] = useState(true); // Ubah default menjadi true
+const [showNavbar, setShowNavbar] = useState(false);
 const headerTextRef = useRef<HTMLDivElement>(null);
-const headerContainerRef = useRef<HTMLDivElement>(null);
+const headerSectionRef = useRef<HTMLDivElement>(null);
 const navbarRef = useRef<HTMLDivElement>(null);
-
-
-
 
 
 
@@ -1225,33 +1225,42 @@ const navbarRef = useRef<HTMLDivElement>(null);
 
 
 
-  // Efek untuk animasi scroll header MENURU
+ // Efek untuk animasi scroll header MENURU dengan ScrollTrigger
 useEffect(() => {
   if (isLoading) return;
   
-  const handleScroll = () => {
-    const scrollY = window.scrollY;
-    const maxScroll = 300;
-    const progress = Math.min(1, scrollY / maxScroll);
+  const ctx = gsap.context(() => {
+    // PINNING: Buat section header tetap di tempat saat scroll
+    ScrollTrigger.create({
+      trigger: headerSectionRef.current,
+      start: "top top",
+      end: "+=500", // Durasi pinning 500px scroll
+      pin: true,
+      pinSpacing: true,
+      scrub: 1,
+      onUpdate: (self) => {
+        const progress = self.progress;
+        setHeaderScrollProgress(progress);
+        
+        // Ubah ukuran font MENURU saat scroll
+        if (headerTextRef.current) {
+          const fontSize = 300 - (progress * 276);
+          headerTextRef.current.style.fontSize = `${Math.max(24, fontSize)}px`;
+        }
+      }
+    });
     
-    // Ubah ukuran font (mengecil)
-    if (headerTextRef.current) {
-      const fontSize = 300 - (progress * 276);
-      headerTextRef.current.style.fontSize = `${Math.max(24, fontSize)}px`;
-    }
-    
-    // Navbar selalu muncul (tetap terlihat)
-    setShowNavbar(true);
-  };
+    // Navbar muncul setelah scroll melewati 100px
+    ScrollTrigger.create({
+      trigger: document.body,
+      start: "top 100px",
+      onEnter: () => setShowNavbar(true),
+      onLeaveBack: () => setShowNavbar(false)
+    });
+  });
   
-  window.addEventListener('scroll', handleScroll);
-  handleScroll();
-  
-  return () => window.removeEventListener('scroll', handleScroll);
+  return () => ctx.revert();
 }, [isLoading]);
-
-
-
   
 
 
@@ -4273,39 +4282,47 @@ const handleTextHover = () => {
             }}
           >
 
-            {/* HEADER SECTION - MENURU - Fixed Position, selalu terlihat */}
+
+{/* HEADER SECTION - MENURU dengan efek PINNED */}
 <div
-  ref={headerContainerRef}
+  ref={headerSectionRef}
   style={{
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 100,
-    pointerEvents: 'none',
-    padding: '40px 0 0 40px'
+    position: 'relative',
+    width: '100%',
+    height: '100vh',
+    backgroundColor: 'transparent',
+    zIndex: 10
   }}
 >
   <div
-    ref={headerTextRef}
     style={{
-      fontFamily: 'Inter, "Helvetica Neue", sans-serif',
-      fontWeight: '400',
-      fontSize: '300px',
-      lineHeight: '1',
-      color: '#000000',
-      letterSpacing: '-0.02em',
-      textTransform: 'uppercase',
-      whiteSpace: 'nowrap',
-      display: 'inline-block',
-      transition: 'font-size 0.05s linear'
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      padding: '40px 0 0 40px'
     }}
   >
-    MENURU
+    <div
+      ref={headerTextRef}
+      style={{
+        fontFamily: 'Inter, "Helvetica Neue", sans-serif',
+        fontWeight: '400',
+        fontSize: '300px',
+        lineHeight: '1',
+        color: '#000000',
+        letterSpacing: '-0.02em',
+        textTransform: 'uppercase',
+        whiteSpace: 'nowrap',
+        display: 'inline-block'
+      }}
+    >
+      MENURU
+    </div>
   </div>
 </div>
 
-{/* NAVBAR - Fixed Position, selalu terlihat */}
+{/* NAVBAR - Fixed Position, muncul hanya saat scroll */}
 <div
   ref={navbarRef}
   style={{
@@ -4313,18 +4330,18 @@ const handleTextHover = () => {
     top: '20px',
     right: '40px',
     left: 'auto',
-    zIndex: 101,
+    zIndex: 1000,
     display: 'flex',
     alignItems: 'center',
     gap: '32px',
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    backdropFilter: 'blur(12px)',
-    padding: '10px 28px',
-    borderRadius: '60px',
-    boxShadow: '0 2px 15px rgba(0,0,0,0.08)',
-    pointerEvents: 'auto',
-    opacity: 1,
-    transform: 'translateY(0)',
+    backgroundColor: showNavbar ? 'rgba(255, 255, 255, 0.95)' : 'transparent',
+    backdropFilter: showNavbar ? 'blur(12px)' : 'none',
+    padding: showNavbar ? '10px 28px' : '0px',
+    borderRadius: showNavbar ? '60px' : '0px',
+    boxShadow: showNavbar ? '0 2px 15px rgba(0,0,0,0.08)' : 'none',
+    pointerEvents: showNavbar ? 'auto' : 'none',
+    opacity: showNavbar ? 1 : 0,
+    transform: showNavbar ? 'translateY(0)' : 'translateY(-20px)',
     transition: 'all 0.3s ease'
   }}
 >
@@ -4364,6 +4381,11 @@ const handleTextHover = () => {
   </button>
 </div>
 
+
+
+
+
+            
             
 
 
