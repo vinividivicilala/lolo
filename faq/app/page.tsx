@@ -950,14 +950,11 @@ const [isHovering, setIsHovering] = useState(false);
   const circleImg2_5Ref = useRef<HTMLDivElement>(null);
 
 
-
 // State untuk kontrol scroll header
 const [headerScrollProgress, setHeaderScrollProgress] = useState(0);
 const [showNavbar, setShowNavbar] = useState(false);
-const headerRef = useRef<HTMLDivElement>(null);
 const headerTextRef = useRef<HTMLDivElement>(null);
 const navbarRef = useRef<HTMLDivElement>(null);
-
 
 
   
@@ -1222,7 +1219,9 @@ const navbarRef = useRef<HTMLDivElement>(null);
 
 
 
-// Efek untuk animasi scroll header MENURU
+
+
+  // Efek untuk animasi scroll header MENURU
 useEffect(() => {
   if (isLoading) return;
   
@@ -1242,36 +1241,15 @@ useEffect(() => {
     }
     
     if (headerTextRef.current) {
-      // Ukuran font: dari 300px ke 24px (tetap ada, tidak hilang)
+      // Hanya ubah ukuran font: dari 300px ke 24px
+      // Posisi TETAP (tidak bergerak ke mana-mana)
       const fontSize = 300 - (progress * 276);
-      // Posisi tetap di kiri atas
-      const translateX = 0;
-      // Geser sedikit ke atas
-      const translateY = progress * -30;
       
       gsap.to(headerTextRef.current, {
         fontSize: `${Math.max(24, fontSize)}px`,
-        x: translateX,
-        y: translateY,
         duration: 0.05,
         overwrite: true,
         ease: "none"
-      });
-    }
-    
-    // Update header container background
-    if (headerRef.current) {
-      const bgOpacity = progress * 0.9;
-      const paddingTop = 40 - (progress * 20);
-      const paddingLeft = 40 - (progress * 20);
-      
-      gsap.to(headerRef.current, {
-        backgroundColor: `rgba(255, 255, 255, ${bgOpacity})`,
-        backdropFilter: `blur(${progress * 10}px)`,
-        paddingTop: `${Math.max(20, paddingTop)}px`,
-        paddingLeft: `${Math.max(20, paddingLeft)}px`,
-        duration: 0.05,
-        overwrite: true
       });
     }
   };
@@ -1281,7 +1259,6 @@ useEffect(() => {
   
   return () => window.removeEventListener('scroll', handleHeaderScroll);
 }, [isLoading]);
-
 
 
 
@@ -4310,9 +4287,8 @@ const handleTextHover = () => {
           >
 
 
-            {/* HEADER SECTION - MENURU */}
+{/* HEADER SECTION - MENURU - FIXED POSITION */}
 <div
-  ref={headerRef}
   style={{
     position: 'fixed',
     top: 0,
@@ -4329,7 +4305,7 @@ const handleTextHover = () => {
       fontFamily: 'Inter, "Helvetica Neue", sans-serif',
       fontWeight: '400',
       fontSize: '300px',
-      lineHeight: '213px',
+      lineHeight: '1',
       color: '#000000',
       letterSpacing: '-0.02em',
       textTransform: 'uppercase',
@@ -4341,67 +4317,64 @@ const handleTextHover = () => {
   </div>
 </div>
 
-{/* NAVBAR - Muncul hanya saat sudah scroll ke bawah */}
-{showNavbar && (
-  <div
-    ref={navbarRef}
+{/* NAVBAR - FIXED POSITION, Muncul hanya saat sudah scroll ke bawah */}
+<div
+  ref={navbarRef}
+  style={{
+    position: 'fixed',
+    top: '20px',
+    right: '40px',
+    left: 'auto',
+    zIndex: 101,
+    display: 'flex',
+    alignItems: 'center',
+    gap: '32px',
+    backgroundColor: showNavbar ? 'rgba(255, 255, 255, 0.95)' : 'transparent',
+    backdropFilter: showNavbar ? 'blur(12px)' : 'none',
+    padding: showNavbar ? '10px 28px' : '0px',
+    borderRadius: showNavbar ? '60px' : '0px',
+    boxShadow: showNavbar ? '0 2px 15px rgba(0,0,0,0.08)' : 'none',
+    pointerEvents: showNavbar ? 'auto' : 'none',
+    opacity: showNavbar ? 1 : 0,
+    transform: showNavbar ? 'translateY(0)' : 'translateY(-20px)',
+    transition: 'all 0.3s ease'
+  }}
+>
+  <Link href="/" style={{ textDecoration: 'none' }}>
+    <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', fontWeight: '500', color: '#000000', cursor: 'pointer', transition: 'opacity 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>Home</span>
+  </Link>
+  <Link href="#features" style={{ textDecoration: 'none' }}>
+    <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', fontWeight: '500', color: '#000000', cursor: 'pointer', transition: 'opacity 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>Features</span>
+  </Link>
+  <Link href="#community" style={{ textDecoration: 'none' }}>
+    <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', fontWeight: '500', color: '#000000', cursor: 'pointer', transition: 'opacity 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>Community</span>
+  </Link>
+  <Link href="#donation" style={{ textDecoration: 'none' }}>
+    <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', fontWeight: '500', color: '#000000', cursor: 'pointer', transition: 'opacity 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>Donation</span>
+  </Link>
+  <Link href="#blog" style={{ textDecoration: 'none' }}>
+    <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', fontWeight: '500', color: '#000000', cursor: 'pointer', transition: 'opacity 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>Blog</span>
+  </Link>
+  <button
+    onClick={() => setShowCalendarModal(true)}
     style={{
-      position: 'fixed',
-      top: '16px',
-      right: '40px',
-      left: 'auto',
-      zIndex: 101,
-      display: 'flex',
-      alignItems: 'center',
-      gap: '32px',
-      backgroundColor: 'rgba(255, 255, 255, 0.95)',
-      backdropFilter: 'blur(12px)',
-      padding: '10px 28px',
+      background: '#000000',
+      color: '#ffffff',
+      border: 'none',
       borderRadius: '60px',
-      boxShadow: '0 2px 15px rgba(0,0,0,0.08)',
-      pointerEvents: 'auto',
-      animation: 'fadeInDown 0.3s ease'
+      padding: '8px 24px',
+      fontSize: '13px',
+      fontFamily: "'Questrial', sans-serif",
+      fontWeight: '500',
+      cursor: 'pointer',
+      transition: 'all 0.2s ease'
     }}
+    onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.backgroundColor = '#333333'; }}
+    onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.backgroundColor = '#000000'; }}
   >
-    <Link href="/" style={{ textDecoration: 'none' }}>
-      <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', fontWeight: '500', color: '#000000', cursor: 'pointer', transition: 'opacity 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>Home</span>
-    </Link>
-    <Link href="#features" style={{ textDecoration: 'none' }}>
-      <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', fontWeight: '500', color: '#000000', cursor: 'pointer', transition: 'opacity 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>Features</span>
-    </Link>
-    <Link href="#community" style={{ textDecoration: 'none' }}>
-      <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', fontWeight: '500', color: '#000000', cursor: 'pointer', transition: 'opacity 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>Community</span>
-    </Link>
-    <Link href="#donation" style={{ textDecoration: 'none' }}>
-      <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', fontWeight: '500', color: '#000000', cursor: 'pointer', transition: 'opacity 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>Donation</span>
-    </Link>
-    <Link href="#blog" style={{ textDecoration: 'none' }}>
-      <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', fontWeight: '500', color: '#000000', cursor: 'pointer', transition: 'opacity 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>Blog</span>
-    </Link>
-    <button
-      onClick={() => setShowCalendarModal(true)}
-      style={{
-        background: '#000000',
-        color: '#ffffff',
-        border: 'none',
-        borderRadius: '60px',
-        padding: '8px 24px',
-        fontSize: '13px',
-        fontFamily: "'Questrial', sans-serif",
-        fontWeight: '500',
-        cursor: 'pointer',
-        transition: 'all 0.2s ease'
-      }}
-      onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.backgroundColor = '#333333'; }}
-      onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.backgroundColor = '#000000'; }}
-    >
-      Book Call
-    </button>
-  </div>
-)}
-
-
-
+    Book Call
+  </button>
+</div>
 
 
 
