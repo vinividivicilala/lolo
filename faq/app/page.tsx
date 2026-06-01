@@ -949,15 +949,20 @@ const [isHovering, setIsHovering] = useState(false);
   const circleImg1_5Ref = useRef<HTMLDivElement>(null);
   const circleImg2_5Ref = useRef<HTMLDivElement>(null);
 
-  // State untuk kontrol scroll header
+
+
+// State untuk kontrol scroll header
 const [headerScrollProgress, setHeaderScrollProgress] = useState(0);
+const [showNavbar, setShowNavbar] = useState(false);
 const headerRef = useRef<HTMLDivElement>(null);
 const headerTextRef = useRef<HTMLDivElement>(null);
+const navbarRef = useRef<HTMLDivElement>(null);
 
 
 
   
 
+  
 
   const carouselItems = [
     {
@@ -1215,25 +1220,34 @@ const headerTextRef = useRef<HTMLDivElement>(null);
     }
   };
 
+
+
 // Efek untuk animasi scroll header MENURU
 useEffect(() => {
   if (isLoading) return;
   
   const handleHeaderScroll = () => {
     const scrollY = window.scrollY;
-    const maxScroll = 200;
+    const maxScroll = 400;
     
     // Hitung progress scroll (0 - 1)
     let progress = Math.min(1, scrollY / maxScroll);
     setHeaderScrollProgress(progress);
     
+    // Tampilkan navbar hanya setelah scroll melewati 100px
+    if (scrollY > 100) {
+      setShowNavbar(true);
+    } else {
+      setShowNavbar(false);
+    }
+    
     if (headerTextRef.current) {
-      // Ukuran font: dari 300px ke 24px
+      // Ukuran font: dari 300px ke 24px (tetap ada, tidak hilang)
       const fontSize = 300 - (progress * 276);
-      // Posisi X: dari 0 ke (layar/2 - lebar teks/2) agar ke tengah navbar
-      const translateX = progress * (window.innerWidth / 2 - 80);
-      // Posisi Y: dari 0 ke -40 (naik ke navbar)
-      const translateY = progress * -40;
+      // Posisi tetap di kiri atas
+      const translateX = 0;
+      // Geser sedikit ke atas
+      const translateY = progress * -30;
       
       gsap.to(headerTextRef.current, {
         fontSize: `${Math.max(24, fontSize)}px`,
@@ -1247,16 +1261,15 @@ useEffect(() => {
     
     // Update header container background
     if (headerRef.current) {
-      const bgOpacity = progress * 0.95;
-      const paddingTop = 40 - (progress * 24);
-      const paddingLeft = 40 - (progress * 24);
+      const bgOpacity = progress * 0.9;
+      const paddingTop = 40 - (progress * 20);
+      const paddingLeft = 40 - (progress * 20);
       
       gsap.to(headerRef.current, {
         backgroundColor: `rgba(255, 255, 255, ${bgOpacity})`,
-        backdropFilter: `blur(${progress * 12}px)`,
-        paddingTop: `${Math.max(16, paddingTop)}px`,
-        paddingLeft: `${Math.max(16, paddingLeft)}px`,
-        boxShadow: progress > 0.2 ? '0 2px 20px rgba(0,0,0,0.08)' : 'none',
+        backdropFilter: `blur(${progress * 10}px)`,
+        paddingTop: `${Math.max(20, paddingTop)}px`,
+        paddingLeft: `${Math.max(20, paddingLeft)}px`,
         duration: 0.05,
         overwrite: true
       });
@@ -1276,7 +1289,32 @@ useEffect(() => {
 
 
 
+
   
+
+
+
+
+
+  
+
+  // Load calendar submissions from Firebase
+  useEffect(() => {
+    if (!db) return;
+
+    const submissionsRef = collection(db, "calendar_submissions");
+    const q = query(submissionsRef, orderBy("createdAt", "desc"));
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const submissions: CalendarSubmission[] = [];
+      snapshot.forEach((doc) => {
+        submissions.push({ id: doc.id, ...doc.data() } as CalendarSubmission);
+      });
+      setCalendarSubmissions(submissions);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   // Load donations from Firebase
   useEffect(() => {
@@ -3471,6 +3509,19 @@ const handleTextHover = () => {
       <style jsx global>{`
         @import url('https://fonts.googleapis.com/css2?family=Questrial&display=swap');
 
+        <style jsx global>{`
+  @keyframes fadeInDown {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+
         @font-face {
           font-family: 'Aeonik-Regular';
           src: url('/fonts/Aeonik-Regular.woff2') format('woff2'),
@@ -4259,6 +4310,7 @@ const handleTextHover = () => {
             }}
           >
 
+
             {/* HEADER SECTION - MENURU */}
 <div
   ref={headerRef}
@@ -4283,8 +4335,6 @@ const handleTextHover = () => {
       letterSpacing: '-0.02em',
       textTransform: 'uppercase',
       whiteSpace: 'nowrap',
-      opacity: 1,
-      transform: 'translateX(0)',
       display: 'inline-block'
     }}
   >
@@ -4292,23 +4342,28 @@ const handleTextHover = () => {
   </div>
 </div>
 
-{/* NAVBAR - Tetap di atas saat scroll */}
-<div
-  style={{
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 99,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    padding: '16px 40px',
-    backgroundColor: 'transparent',
-    pointerEvents: 'auto'
-  }}
->
-  <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
+{/* NAVBAR - Muncul hanya saat sudah scroll ke bawah */}
+{showNavbar && (
+  <div
+    ref={navbarRef}
+    style={{
+      position: 'fixed',
+      top: '16px',
+      right: '40px',
+      left: 'auto',
+      zIndex: 101,
+      display: 'flex',
+      alignItems: 'center',
+      gap: '32px',
+      backgroundColor: 'rgba(255, 255, 255, 0.95)',
+      backdropFilter: 'blur(12px)',
+      padding: '10px 28px',
+      borderRadius: '60px',
+      boxShadow: '0 2px 15px rgba(0,0,0,0.08)',
+      pointerEvents: 'auto',
+      animation: 'fadeInDown 0.3s ease'
+    }}
+  >
     <Link href="/" style={{ textDecoration: 'none' }}>
       <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', fontWeight: '500', color: '#000000', cursor: 'pointer', transition: 'opacity 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>Home</span>
     </Link>
@@ -4344,8 +4399,7 @@ const handleTextHover = () => {
       Book Call
     </button>
   </div>
-</div>
-
+)}
 
 
 
@@ -4358,6 +4412,7 @@ const handleTextHover = () => {
 
 
             
+
             {/* SECTION 1 - MENURU.STUDIO */}
             <div
               ref={studioContainerRef}
