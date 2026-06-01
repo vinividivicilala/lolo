@@ -950,9 +950,6 @@ const [isHovering, setIsHovering] = useState(false);
   const circleImg2_5Ref = useRef<HTMLDivElement>(null);
 
 
-
-
-
 const [headerScrollProgress, setHeaderScrollProgress] = useState(0);
 const [showNavbar, setShowNavbar] = useState(false);
 const [showScrollDown, setShowScrollDown] = useState(true);
@@ -960,8 +957,6 @@ const headerTextRef = useRef<HTMLDivElement>(null);
 const headerSectionRef = useRef<HTMLDivElement>(null);
 const navbarRef = useRef<HTMLDivElement>(null);
 const scrollDownRef = useRef<HTMLDivElement>(null);
-
-
 
 
 
@@ -1240,7 +1235,10 @@ const scrollDownRef = useRef<HTMLDivElement>(null);
   };
 
 
-// Efek untuk membuat teks scroll down mengikuti cursor (mouse)
+
+
+
+  // Efek untuk membuat teks scroll down mengikuti cursor (mouse)
 useEffect(() => {
   if (isLoading || !showScrollDown) return;
   
@@ -1290,22 +1288,23 @@ useEffect(() => {
           const fontSize = 300 - (progress * 276);
           const newFontSize = Math.max(24, fontSize);
           headerTextRef.current.style.fontSize = `${newFontSize}px`;
-          
-          console.log('Font size:', newFontSize, 'Progress:', progress);
-          
-          // NAVBAR MUNCUL saat font size sudah 24px (progress >= 0.95)
-          if (progress >= 0.95 || newFontSize <= 25) {
-            console.log('NAVBAR HARUS MUNCUL!');
-            setShowNavbar(true);
-          } else {
-            setShowNavbar(false);
-          }
         }
       }
     });
   });
   
   return () => ctx.revert();
+}, [isLoading]);
+
+// EFEK UNTUK MUNCULKAN NAVBAR SETELAH LOADING SELESAI
+useEffect(() => {
+  if (!isLoading) {
+    // Navbar muncul setelah loading selesai (delay 500ms agar smooth)
+    const timer = setTimeout(() => {
+      setShowNavbar(true);
+    }, 500);
+    return () => clearTimeout(timer);
+  }
 }, [isLoading]);
 
 // Scroll handler untuk scroll down
@@ -1327,8 +1326,6 @@ useEffect(() => {
   
   return () => window.removeEventListener('scroll', handleScroll);
 }, [isLoading, showScrollDown]);
-
-
 
 
 
@@ -4367,9 +4364,7 @@ const handleTextHover = () => {
 
 
 
-
-
-            {/* HEADER SECTION - MENURU dengan efek PINNED */}
+{/* HEADER SECTION - MENURU dengan efek PINNED */}
 <div
   ref={headerSectionRef}
   style={{
@@ -4409,27 +4404,27 @@ const handleTextHover = () => {
   </div>
 </div>
 
-{/* NAVBAR - WARNA MENC mencolok, muncul saat teks MENURU 24px */}
+{/* NAVBAR - Muncul SETELAH LOADING SELESAI */}
 <div
   style={{
     position: 'fixed',
     top: '20px',
-    left: '40px',  // Ganti dari right ke left
-    right: 'auto',
-    zIndex: 999999,
+    right: '40px',
+    left: 'auto',
+    zIndex: 1000,
     display: 'flex',
     alignItems: 'center',
     gap: '32px',
-    backgroundColor: showNavbar ? '#ff0000' : 'transparent',
+    backgroundColor: showNavbar ? '#1a1a1a' : 'transparent',
     borderRadius: showNavbar ? '60px' : '0px',
     padding: showNavbar ? '12px 32px' : '0px',
-    boxShadow: showNavbar ? '0 4px 20px rgba(0,0,0,0.3)' : 'none',
+    boxShadow: showNavbar ? '0 4px 20px rgba(0,0,0,0.15)' : 'none',
     pointerEvents: showNavbar ? 'auto' : 'none',
     opacity: showNavbar ? 1 : 0,
     visibility: showNavbar ? 'visible' : 'hidden',
-    transform: showNavbar ? 'translateY(0)' : 'translateY(-50px)',
+    transform: showNavbar ? 'translateY(0)' : 'translateY(-20px)',
     transition: 'all 0.4s ease',
-    border: showNavbar ? '2px solid yellow' : 'none'
+    border: showNavbar ? '1px solid rgba(255,255,255,0.15)' : 'none'
   }}
 >
   <Link href="/" style={{ textDecoration: 'none' }}>
@@ -4506,8 +4501,6 @@ const handleTextHover = () => {
     </svg>
   </div>
 )}
-
-
 
 
 
