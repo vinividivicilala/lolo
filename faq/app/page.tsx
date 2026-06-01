@@ -950,6 +950,9 @@ const [isHovering, setIsHovering] = useState(false);
   const circleImg2_5Ref = useRef<HTMLDivElement>(null);
 
 
+
+
+
 const [headerScrollProgress, setHeaderScrollProgress] = useState(0);
 const [showNavbar, setShowNavbar] = useState(false);
 const [showScrollDown, setShowScrollDown] = useState(true);
@@ -957,6 +960,12 @@ const headerTextRef = useRef<HTMLDivElement>(null);
 const headerSectionRef = useRef<HTMLDivElement>(null);
 const navbarRef = useRef<HTMLDivElement>(null);
 const scrollDownRef = useRef<HTMLDivElement>(null);
+
+
+
+
+
+  
 
 
 
@@ -1235,7 +1244,6 @@ const scrollDownRef = useRef<HTMLDivElement>(null);
 
 
 
-
   // Efek untuk membuat teks scroll down mengikuti cursor (mouse)
 useEffect(() => {
   if (isLoading || !showScrollDown) return;
@@ -1274,9 +1282,9 @@ useEffect(() => {
     ScrollTrigger.create({
       trigger: headerSectionRef.current,
       start: "top top",
-      end: "+=400",
+      end: "+=500",
       pin: true,
-      pinSpacing: false,
+      pinSpacing: true,
       scrub: 1,
       onUpdate: (self) => {
         const progress = self.progress;
@@ -1287,26 +1295,13 @@ useEffect(() => {
           const newFontSize = Math.max(24, fontSize);
           headerTextRef.current.style.fontSize = `${newFontSize}px`;
           
-          // NAVBAR MUNCUL saat font size <= 40px ATAU progress > 0.7
-          if (newFontSize <= 40 || progress > 0.7) {
+          console.log('Font size:', newFontSize, 'Progress:', progress);
+          
+          // NAVBAR MUNCUL saat font size sudah 24px (progress >= 0.95)
+          if (progress >= 0.95 || newFontSize <= 25) {
+            console.log('NAVBAR HARUS MUNCUL!');
             setShowNavbar(true);
           } else {
-            setShowNavbar(false);
-          }
-        }
-      }
-    });
-    
-    // TAMBAHKAN: ScrollTrigger untuk navbar sebagai backup
-    ScrollTrigger.create({
-      trigger: document.body,
-      start: "top 250px",
-      onEnter: () => setShowNavbar(true),
-      onLeaveBack: () => {
-        // Cek font size sebelum hide
-        if (headerTextRef.current) {
-          const currentFontSize = parseInt(headerTextRef.current.style.fontSize);
-          if (currentFontSize > 40) {
             setShowNavbar(false);
           }
         }
@@ -1317,7 +1312,7 @@ useEffect(() => {
   return () => ctx.revert();
 }, [isLoading]);
 
-// Scroll handler untuk scroll down (TETAP PERTAHANKAN)
+// Scroll handler untuk scroll down
 useEffect(() => {
   if (isLoading) return;
   
@@ -1336,22 +1331,6 @@ useEffect(() => {
   
   return () => window.removeEventListener('scroll', handleScroll);
 }, [isLoading, showScrollDown]);
-
-// TAMBAHKAN: Backup handler untuk memastikan navbar muncul
-useEffect(() => {
-  if (isLoading) return;
-  
-  const backupHandler = () => {
-    const scrollY = window.scrollY;
-    if (scrollY > 300) {
-      setShowNavbar(true);
-    }
-  };
-  
-  window.addEventListener('scroll', backupHandler);
-  return () => window.removeEventListener('scroll', backupHandler);
-}, [isLoading]);
-
 
 
   
@@ -3590,7 +3569,7 @@ const handleTextHover = () => {
     }
   }
 
-@keyframes bounce {
+ @keyframes bounce {
     0%, 100% {
       transform: translateY(0);
     }
@@ -4396,16 +4375,17 @@ const handleTextHover = () => {
           >
 
 
+
 {/* HEADER SECTION - MENURU dengan efek PINNED */}
 <div
   ref={headerSectionRef}
   style={{
     position: 'relative',
     width: '100%',
-    height: 'auto',
+    height: '100vh',
     backgroundColor: 'transparent',
     zIndex: 10,
-    paddingBottom: '0px'
+    paddingBottom: '100px'
   }}
 >
   <div
@@ -4436,7 +4416,7 @@ const handleTextHover = () => {
   </div>
 </div>
 
-{/* NAVBAR - Fixed Position di sisi KANAN */}
+{/* NAVBAR - WARNA MENC mencolok, muncul saat teks MENURU 24px */}
 <div
   style={{
     position: 'fixed',
@@ -4447,49 +4427,50 @@ const handleTextHover = () => {
     display: 'flex',
     alignItems: 'center',
     gap: '32px',
-    backgroundColor: showNavbar ? '#ffffff' : 'transparent',
+    // WARNA MENC mencolok AGAR TERLIHAT
+    backgroundColor: showNavbar ? '#1a1a1a' : 'transparent',
     borderRadius: showNavbar ? '60px' : '0px',
-    padding: showNavbar ? '10px 28px' : '0px',
-    boxShadow: showNavbar ? '0 2px 15px rgba(0,0,0,0.1)' : 'none',
+    padding: showNavbar ? '12px 32px' : '0px',
+    boxShadow: showNavbar ? '0 4px 20px rgba(0,0,0,0.15)' : 'none',
     pointerEvents: showNavbar ? 'auto' : 'none',
     opacity: showNavbar ? 1 : 0,
     visibility: showNavbar ? 'visible' : 'hidden',
     transform: showNavbar ? 'translateY(0)' : 'translateY(-20px)',
-    transition: 'all 0.3s ease',
-    border: showNavbar ? '1px solid rgba(0,0,0,0.08)' : 'none'
+    transition: 'all 0.4s ease',
+    border: showNavbar ? '1px solid rgba(255,255,255,0.15)' : 'none'
   }}
 >
   <Link href="/" style={{ textDecoration: 'none' }}>
-    <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', fontWeight: '500', color: '#1a1a1a', cursor: 'pointer', transition: 'opacity 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>Home</span>
+    <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', fontWeight: '500', color: '#ffffff', cursor: 'pointer', transition: 'opacity 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.7'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>Home</span>
   </Link>
   <Link href="#features" style={{ textDecoration: 'none' }}>
-    <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', fontWeight: '500', color: '#1a1a1a', cursor: 'pointer', transition: 'opacity 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>Features</span>
+    <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', fontWeight: '500', color: '#ffffff', cursor: 'pointer', transition: 'opacity 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.7'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>Features</span>
   </Link>
   <Link href="#community" style={{ textDecoration: 'none' }}>
-    <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', fontWeight: '500', color: '#1a1a1a', cursor: 'pointer', transition: 'opacity 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>Community</span>
+    <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', fontWeight: '500', color: '#ffffff', cursor: 'pointer', transition: 'opacity 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.7'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>Community</span>
   </Link>
   <Link href="#donation" style={{ textDecoration: 'none' }}>
-    <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', fontWeight: '500', color: '#1a1a1a', cursor: 'pointer', transition: 'opacity 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>Donation</span>
+    <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', fontWeight: '500', color: '#ffffff', cursor: 'pointer', transition: 'opacity 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.7'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>Donation</span>
   </Link>
   <Link href="#blog" style={{ textDecoration: 'none' }}>
-    <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', fontWeight: '500', color: '#1a1a1a', cursor: 'pointer', transition: 'opacity 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>Blog</span>
+    <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', fontWeight: '500', color: '#ffffff', cursor: 'pointer', transition: 'opacity 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.7'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>Blog</span>
   </Link>
   <button
     onClick={() => setShowCalendarModal(true)}
     style={{
-      background: '#000000',
-      color: '#ffffff',
+      background: '#c5e800',
+      color: '#000000',
       border: 'none',
       borderRadius: '60px',
       padding: '8px 24px',
       fontSize: '13px',
       fontFamily: "'Questrial', sans-serif",
-      fontWeight: '500',
+      fontWeight: '600',
       cursor: 'pointer',
       transition: 'all 0.2s ease'
     }}
-    onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.backgroundColor = '#333333'; }}
-    onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.backgroundColor = '#000000'; }}
+    onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.backgroundColor = '#b0d100'; }}
+    onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.backgroundColor = '#c5e800'; }}
   >
     Book Call
   </button>
@@ -4535,6 +4516,16 @@ const handleTextHover = () => {
 )}
 
 
+
+
+
+
+
+
+
+
+
+            
 
 
 
