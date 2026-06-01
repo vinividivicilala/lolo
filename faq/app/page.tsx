@@ -952,10 +952,18 @@ const [isHovering, setIsHovering] = useState(false);
 
 // State untuk kontrol scroll header
 const [headerScrollProgress, setHeaderScrollProgress] = useState(0);
-const [showNavbar, setShowNavbar] = useState(false);
+const [showNavbar, setShowNavbar] = useState(true); // Ubah default menjadi true
 const headerTextRef = useRef<HTMLDivElement>(null);
 const headerContainerRef = useRef<HTMLDivElement>(null);
 const navbarRef = useRef<HTMLDivElement>(null);
+
+
+
+
+
+
+
+
   
 
   const carouselItems = [
@@ -1217,10 +1225,6 @@ const navbarRef = useRef<HTMLDivElement>(null);
 
 
 
-
-
-
-
   // Efek untuk animasi scroll header MENURU
 useEffect(() => {
   if (isLoading) return;
@@ -1230,18 +1234,14 @@ useEffect(() => {
     const maxScroll = 300;
     const progress = Math.min(1, scrollY / maxScroll);
     
-    // Ubah ukuran font
+    // Ubah ukuran font (mengecil)
     if (headerTextRef.current) {
       const fontSize = 300 - (progress * 276);
       headerTextRef.current.style.fontSize = `${Math.max(24, fontSize)}px`;
     }
     
-    // Tampilkan navbar setelah scroll > 50px
-    if (scrollY > 50) {
-      setShowNavbar(true);
-    } else {
-      setShowNavbar(false);
-    }
+    // Navbar selalu muncul (tetap terlihat)
+    setShowNavbar(true);
   };
   
   window.addEventListener('scroll', handleScroll);
@@ -1249,8 +1249,6 @@ useEffect(() => {
   
   return () => window.removeEventListener('scroll', handleScroll);
 }, [isLoading]);
-
-
 
 
 
@@ -4275,8 +4273,7 @@ const handleTextHover = () => {
             }}
           >
 
-
-{/* HEADER SECTION - MENURU - Fixed Position */}
+            {/* HEADER SECTION - MENURU - Fixed Position, selalu terlihat */}
 <div
   ref={headerContainerRef}
   style={{
@@ -4308,7 +4305,7 @@ const handleTextHover = () => {
   </div>
 </div>
 
-{/* NAVBAR - Fixed Position, muncul saat scroll */}
+{/* NAVBAR - Fixed Position, selalu terlihat */}
 <div
   ref={navbarRef}
   style={{
@@ -4320,14 +4317,14 @@ const handleTextHover = () => {
     display: 'flex',
     alignItems: 'center',
     gap: '32px',
-    backgroundColor: showNavbar ? 'rgba(255, 255, 255, 0.95)' : 'rgba(255, 255, 255, 0)',
-    backdropFilter: showNavbar ? 'blur(12px)' : 'none',
-    padding: showNavbar ? '10px 28px' : '0px',
-    borderRadius: showNavbar ? '60px' : '0px',
-    boxShadow: showNavbar ? '0 2px 15px rgba(0,0,0,0.08)' : 'none',
-    pointerEvents: showNavbar ? 'auto' : 'none',
-    opacity: showNavbar ? 1 : 0,
-    transform: showNavbar ? 'translateY(0)' : 'translateY(-20px)',
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    backdropFilter: 'blur(12px)',
+    padding: '10px 28px',
+    borderRadius: '60px',
+    boxShadow: '0 2px 15px rgba(0,0,0,0.08)',
+    pointerEvents: 'auto',
+    opacity: 1,
+    transform: 'translateY(0)',
     transition: 'all 0.3s ease'
   }}
 >
