@@ -3571,34 +3571,6 @@ const handleTextHover = () => {
     }
   }
 
-/* PERBAIKAN UNTUK NAVBAR - Mengatasi ScrollSmoother */
-  .navbar-fixed {
-    position: fixed !important;
-    top: 20px !important;
-    right: 40px !important;
-    transform: none !important;
-    z-index: 99999 !important;
-  }
-  
-  /* Reset transform pada smooth wrapper agar fixed element bekerja */
-  #smooth-wrapper,
-  #smooth-content {
-    transform: none !important;
-    will-change: auto !important;
-  }
-  
-  /* Atau alternatif: buat wrapper baru untuk fixed elements */
-  .fixed-outside-smooth {
-    position: fixed;
-    z-index: 99999;
-    pointer-events: none;
-  }
-  
-  .fixed-outside-smooth > * {
-    pointer-events: auto;
-  }
-
-
 
   
 
@@ -4442,23 +4414,22 @@ const handleTextHover = () => {
   style={{
     position: 'fixed',
     top: '20px',
-    right: '40px',
-    left: 'auto',
-    zIndex: 1000,
+    left: '40px',  // Ganti dari right ke left
+    right: 'auto',
+    zIndex: 999999,
     display: 'flex',
     alignItems: 'center',
     gap: '32px',
-    // WARNA MENC mencolok AGAR TERLIHAT
-    backgroundColor: showNavbar ? '#1a1a1a' : 'transparent',
+    backgroundColor: showNavbar ? '#ff0000' : 'transparent',
     borderRadius: showNavbar ? '60px' : '0px',
     padding: showNavbar ? '12px 32px' : '0px',
-    boxShadow: showNavbar ? '0 4px 20px rgba(0,0,0,0.15)' : 'none',
+    boxShadow: showNavbar ? '0 4px 20px rgba(0,0,0,0.3)' : 'none',
     pointerEvents: showNavbar ? 'auto' : 'none',
     opacity: showNavbar ? 1 : 0,
     visibility: showNavbar ? 'visible' : 'hidden',
-    transform: showNavbar ? 'translateY(0)' : 'translateY(-20px)',
+    transform: showNavbar ? 'translateY(0)' : 'translateY(-50px)',
     transition: 'all 0.4s ease',
-    border: showNavbar ? '1px solid rgba(255,255,255,0.15)' : 'none'
+    border: showNavbar ? '2px solid yellow' : 'none'
   }}
 >
   <Link href="/" style={{ textDecoration: 'none' }}>
