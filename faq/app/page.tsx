@@ -951,15 +951,12 @@ const [isHovering, setIsHovering] = useState(false);
 
 
 
-
-  // State untuk kontrol scroll header
+// State untuk kontrol scroll header
 const [headerScrollProgress, setHeaderScrollProgress] = useState(0);
 const [showNavbar, setShowNavbar] = useState(false);
 const headerTextRef = useRef<HTMLDivElement>(null);
 const headerContainerRef = useRef<HTMLDivElement>(null);
 const navbarRef = useRef<HTMLDivElement>(null);
-
-  
 
   
 
@@ -1220,45 +1217,50 @@ const navbarRef = useRef<HTMLDivElement>(null);
   };
 
 
-// Efek untuk animasi scroll header MENURU
+// Efek untuk animasi scroll header MENURU dengan GSAP ScrollTrigger
 useEffect(() => {
   if (isLoading) return;
   
-  const handleHeaderScroll = () => {
-    const scrollY = window.scrollY;
-    const maxScroll = 400;
+  // Setup ScrollTrigger untuk pinning dan animasi
+  const ctx = gsap.context(() => {
+    // Pin header container - gunakan pinSpacing: true
+    ScrollTrigger.create({
+      trigger: headerContainerRef.current,
+      start: "top top",
+      end: "+=400",
+      pin: true,
+      pinSpacing: true, // Ubah ke true
+      scrub: 1,
+    });
     
-    // Hitung progress scroll (0 - 1)
-    let progress = Math.min(1, scrollY / maxScroll);
-    setHeaderScrollProgress(progress);
-    
-    // Tampilkan navbar hanya setelah scroll melewati 100px
-    if (scrollY > 100) {
-      setShowNavbar(true);
-    } else {
-      setShowNavbar(false);
-    }
-    
-    if (headerTextRef.current) {
-      // Hanya ubah ukuran font: dari 300px ke 24px
-      // Posisi TETAP (tidak bergerak ke mana-mana)
-      const fontSize = 300 - (progress * 276);
-      
-      gsap.to(headerTextRef.current, {
-        fontSize: `${Math.max(24, fontSize)}px`,
-        duration: 0.05,
-        overwrite: true,
-        ease: "none"
-      });
-    }
-  };
+    // Animasi ukuran font MENURU saat scroll
+    ScrollTrigger.create({
+      trigger: document.body,
+      start: "top top",
+      end: "+=400",
+      scrub: 1,
+      onUpdate: (self) => {
+        const progress = self.progress;
+        setHeaderScrollProgress(progress);
+        
+        if (headerTextRef.current) {
+          const fontSize = 300 - (progress * 276);
+          // Gunakan gsap.quickTo atau langsung set style
+          headerTextRef.current.style.fontSize = `${Math.max(24, fontSize)}px`;
+        }
+        
+        // Tampilkan navbar setelah progress tertentu
+        if (progress > 0.25) {
+          setShowNavbar(true);
+        } else {
+          setShowNavbar(false);
+        }
+      }
+    });
+  });
   
-  window.addEventListener('scroll', handleHeaderScroll);
-  handleHeaderScroll();
-  
-  return () => window.removeEventListener('scroll', handleHeaderScroll);
+  return () => ctx.revert();
 }, [isLoading]);
-
 
 
 
@@ -4287,37 +4289,50 @@ const handleTextHover = () => {
             }}
           >
 
-{/* HEADER SECTION - MENURU - FIXED POSITION */}
+
+
+            
+{/* HEADER SECTION - MENURU dengan efek pinned */}
 <div
+  ref={headerContainerRef}
   style={{
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    right: 0,
+    position: 'relative',
+    width: '100%',
+    minHeight: '100vh', // Ubah dari height ke minHeight
     zIndex: 100,
-    pointerEvents: 'none',
-    padding: '40px 0 0 40px'
+    pointerEvents: 'none'
   }}
 >
   <div
-    ref={headerTextRef}
     style={{
-      fontFamily: 'Inter, "Helvetica Neue", sans-serif',
-      fontWeight: '400',
-      fontSize: '300px',
-      lineHeight: '1',
-      color: '#000000',
-      letterSpacing: '-0.02em',
-      textTransform: 'uppercase',
-      whiteSpace: 'nowrap',
-      display: 'inline-block'
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      padding: '40px 0 0 40px'
     }}
   >
-    MENURU
+    <div
+      ref={headerTextRef}
+      style={{
+        fontFamily: 'Inter, "Helvetica Neue", sans-serif',
+        fontWeight: '400',
+        fontSize: '300px',
+        lineHeight: '1',
+        color: '#000000',
+        letterSpacing: '-0.02em',
+        textTransform: 'uppercase',
+        whiteSpace: 'nowrap',
+        display: 'inline-block',
+        transition: 'font-size 0.1s linear' // Tambahkan transition
+      }}
+    >
+      MENURU
+    </div>
   </div>
 </div>
 
-{/* NAVBAR - FIXED POSITION, Muncul hanya saat sudah scroll ke bawah */}
+{/* NAVBAR - Tetap di atas, gunakan fixed dengan zIndex tinggi */}
 <div
   ref={navbarRef}
   style={{
@@ -4325,11 +4340,11 @@ const handleTextHover = () => {
     top: '20px',
     right: '40px',
     left: 'auto',
-    zIndex: 101,
+    zIndex: 9999, // ZIndex lebih tinggi
     display: 'flex',
     alignItems: 'center',
     gap: '32px',
-    backgroundColor: showNavbar ? 'rgba(255, 255, 255, 0.95)' : 'transparent',
+    backgroundColor: showNavbar ? 'rgba(255, 255, 255, 0.95)' : 'rgba(255, 255, 255, 0)',
     backdropFilter: showNavbar ? 'blur(12px)' : 'none',
     padding: showNavbar ? '10px 28px' : '0px',
     borderRadius: showNavbar ? '60px' : '0px',
@@ -4376,8 +4391,7 @@ const handleTextHover = () => {
   </button>
 </div>
 
-
-
+            
 
 
             
