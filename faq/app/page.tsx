@@ -950,12 +950,14 @@ const [isHovering, setIsHovering] = useState(false);
   const circleImg2_5Ref = useRef<HTMLDivElement>(null);
 
 
-// State untuk kontrol scroll header
+
+
+  // State untuk kontrol scroll header
 const [headerScrollProgress, setHeaderScrollProgress] = useState(0);
 const [showNavbar, setShowNavbar] = useState(false);
 const headerTextRef = useRef<HTMLDivElement>(null);
+const headerContainerRef = useRef<HTMLDivElement>(null);
 const navbarRef = useRef<HTMLDivElement>(null);
-
 
   
 
@@ -1218,10 +1220,7 @@ const navbarRef = useRef<HTMLDivElement>(null);
   };
 
 
-
-
-
-  // Efek untuk animasi scroll header MENURU
+// Efek untuk animasi scroll header MENURU
 useEffect(() => {
   if (isLoading) return;
   
@@ -2707,6 +2706,8 @@ useEffect(() => {
       window.removeEventListener('scroll', handleScrollColorChange);
     };
   }, [isLoading]);
+
+  
 
   useEffect(() => {
     if (isLoading) return;
@@ -4286,7 +4287,6 @@ const handleTextHover = () => {
             }}
           >
 
-
 {/* HEADER SECTION - MENURU - FIXED POSITION */}
 <div
   style={{
@@ -4375,9 +4375,6 @@ const handleTextHover = () => {
     Book Call
   </button>
 </div>
-
-
-
 
 
 
