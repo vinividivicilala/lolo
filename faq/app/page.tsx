@@ -950,14 +950,12 @@ const [isHovering, setIsHovering] = useState(false);
   const circleImg2_5Ref = useRef<HTMLDivElement>(null);
 
 
-
 // State untuk kontrol scroll header
 const [headerScrollProgress, setHeaderScrollProgress] = useState(0);
 const [showNavbar, setShowNavbar] = useState(false);
 const headerTextRef = useRef<HTMLDivElement>(null);
 const headerContainerRef = useRef<HTMLDivElement>(null);
 const navbarRef = useRef<HTMLDivElement>(null);
-
   
 
   const carouselItems = [
@@ -1217,52 +1215,40 @@ const navbarRef = useRef<HTMLDivElement>(null);
   };
 
 
-// Efek untuk animasi scroll header MENURU dengan GSAP ScrollTrigger
+
+
+
+
+
+
+  // Efek untuk animasi scroll header MENURU
 useEffect(() => {
   if (isLoading) return;
   
-  // Setup ScrollTrigger untuk pinning dan animasi
-  const ctx = gsap.context(() => {
-    // Pin header container - gunakan pinSpacing: true
-    ScrollTrigger.create({
-      trigger: headerContainerRef.current,
-      start: "top top",
-      end: "+=400",
-      pin: true,
-      pinSpacing: true, // Ubah ke true
-      scrub: 1,
-    });
+  const handleScroll = () => {
+    const scrollY = window.scrollY;
+    const maxScroll = 300;
+    const progress = Math.min(1, scrollY / maxScroll);
     
-    // Animasi ukuran font MENURU saat scroll
-    ScrollTrigger.create({
-      trigger: document.body,
-      start: "top top",
-      end: "+=400",
-      scrub: 1,
-      onUpdate: (self) => {
-        const progress = self.progress;
-        setHeaderScrollProgress(progress);
-        
-        if (headerTextRef.current) {
-          const fontSize = 300 - (progress * 276);
-          // Gunakan gsap.quickTo atau langsung set style
-          headerTextRef.current.style.fontSize = `${Math.max(24, fontSize)}px`;
-        }
-        
-        // Tampilkan navbar setelah progress tertentu
-        if (progress > 0.25) {
-          setShowNavbar(true);
-        } else {
-          setShowNavbar(false);
-        }
-      }
-    });
-  });
+    // Ubah ukuran font
+    if (headerTextRef.current) {
+      const fontSize = 300 - (progress * 276);
+      headerTextRef.current.style.fontSize = `${Math.max(24, fontSize)}px`;
+    }
+    
+    // Tampilkan navbar setelah scroll > 50px
+    if (scrollY > 50) {
+      setShowNavbar(true);
+    } else {
+      setShowNavbar(false);
+    }
+  };
   
-  return () => ctx.revert();
+  window.addEventListener('scroll', handleScroll);
+  handleScroll();
+  
+  return () => window.removeEventListener('scroll', handleScroll);
 }, [isLoading]);
-
-
 
 
 
@@ -4290,49 +4276,39 @@ const handleTextHover = () => {
           >
 
 
-
-            
-{/* HEADER SECTION - MENURU dengan efek pinned */}
+{/* HEADER SECTION - MENURU - Fixed Position */}
 <div
   ref={headerContainerRef}
   style={{
-    position: 'relative',
-    width: '100%',
-    minHeight: '100vh', // Ubah dari height ke minHeight
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
     zIndex: 100,
-    pointerEvents: 'none'
+    pointerEvents: 'none',
+    padding: '40px 0 0 40px'
   }}
 >
   <div
+    ref={headerTextRef}
     style={{
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      padding: '40px 0 0 40px'
+      fontFamily: 'Inter, "Helvetica Neue", sans-serif',
+      fontWeight: '400',
+      fontSize: '300px',
+      lineHeight: '1',
+      color: '#000000',
+      letterSpacing: '-0.02em',
+      textTransform: 'uppercase',
+      whiteSpace: 'nowrap',
+      display: 'inline-block',
+      transition: 'font-size 0.05s linear'
     }}
   >
-    <div
-      ref={headerTextRef}
-      style={{
-        fontFamily: 'Inter, "Helvetica Neue", sans-serif',
-        fontWeight: '400',
-        fontSize: '300px',
-        lineHeight: '1',
-        color: '#000000',
-        letterSpacing: '-0.02em',
-        textTransform: 'uppercase',
-        whiteSpace: 'nowrap',
-        display: 'inline-block',
-        transition: 'font-size 0.1s linear' // Tambahkan transition
-      }}
-    >
-      MENURU
-    </div>
+    MENURU
   </div>
 </div>
 
-{/* NAVBAR - Tetap di atas, gunakan fixed dengan zIndex tinggi */}
+{/* NAVBAR - Fixed Position, muncul saat scroll */}
 <div
   ref={navbarRef}
   style={{
@@ -4340,7 +4316,7 @@ const handleTextHover = () => {
     top: '20px',
     right: '40px',
     left: 'auto',
-    zIndex: 9999, // ZIndex lebih tinggi
+    zIndex: 101,
     display: 'flex',
     alignItems: 'center',
     gap: '32px',
