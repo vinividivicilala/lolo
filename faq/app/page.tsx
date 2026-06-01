@@ -4415,45 +4415,43 @@ const handleTextHover = () => {
     </div>
   </div>
 </div>
-
-{/* NAVBAR - WARNA MENC mencolok, muncul saat teks MENURU 24px */}
+{/* NAVBAR - Alternatif dengan posisi top center */}
 <div
   style={{
     position: 'fixed',
     top: '20px',
-    right: '40px',
-    left: 'auto',
-    zIndex: 1000,
+    left: '50%',
+    transform: showNavbar ? 'translateX(-50%) translateY(0)' : 'translateX(-50%) translateY(-30px)',
+    zIndex: 99999,
     display: 'flex',
     alignItems: 'center',
     gap: '32px',
-    // WARNA MENC mencolok AGAR TERLIHAT
-    backgroundColor: showNavbar ? '#1a1a1a' : 'transparent',
+    backgroundColor: showNavbar ? '#000000' : 'transparent',
     borderRadius: showNavbar ? '60px' : '0px',
     padding: showNavbar ? '12px 32px' : '0px',
-    boxShadow: showNavbar ? '0 4px 20px rgba(0,0,0,0.15)' : 'none',
+    boxShadow: showNavbar ? '0 4px 20px rgba(0,0,0,0.3)' : 'none',
     pointerEvents: showNavbar ? 'auto' : 'none',
     opacity: showNavbar ? 1 : 0,
     visibility: showNavbar ? 'visible' : 'hidden',
-    transform: showNavbar ? 'translateY(0)' : 'translateY(-20px)',
     transition: 'all 0.4s ease',
-    border: showNavbar ? '1px solid rgba(255,255,255,0.15)' : 'none'
+    border: showNavbar ? '1px solid rgba(255,215,0,0.3)' : 'none',
+    whiteSpace: 'nowrap'
   }}
 >
   <Link href="/" style={{ textDecoration: 'none' }}>
-    <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', fontWeight: '500', color: '#ffffff', cursor: 'pointer', transition: 'opacity 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.7'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>Home</span>
+    <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', fontWeight: '500', color: '#ffffff', cursor: 'pointer' }}>Home</span>
   </Link>
   <Link href="#features" style={{ textDecoration: 'none' }}>
-    <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', fontWeight: '500', color: '#ffffff', cursor: 'pointer', transition: 'opacity 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.7'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>Features</span>
+    <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', fontWeight: '500', color: '#ffffff', cursor: 'pointer' }}>Features</span>
   </Link>
   <Link href="#community" style={{ textDecoration: 'none' }}>
-    <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', fontWeight: '500', color: '#ffffff', cursor: 'pointer', transition: 'opacity 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.7'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>Community</span>
+    <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', fontWeight: '500', color: '#ffffff', cursor: 'pointer' }}>Community</span>
   </Link>
   <Link href="#donation" style={{ textDecoration: 'none' }}>
-    <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', fontWeight: '500', color: '#ffffff', cursor: 'pointer', transition: 'opacity 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.7'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>Donation</span>
+    <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', fontWeight: '500', color: '#ffffff', cursor: 'pointer' }}>Donation</span>
   </Link>
   <Link href="#blog" style={{ textDecoration: 'none' }}>
-    <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', fontWeight: '500', color: '#ffffff', cursor: 'pointer', transition: 'opacity 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.7'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>Blog</span>
+    <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', fontWeight: '500', color: '#ffffff', cursor: 'pointer' }}>Blog</span>
   </Link>
   <button
     onClick={() => setShowCalendarModal(true)}
@@ -4466,11 +4464,8 @@ const handleTextHover = () => {
       fontSize: '13px',
       fontFamily: "'Questrial', sans-serif",
       fontWeight: '600',
-      cursor: 'pointer',
-      transition: 'all 0.2s ease'
+      cursor: 'pointer'
     }}
-    onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.backgroundColor = '#b0d100'; }}
-    onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.backgroundColor = '#c5e800'; }}
   >
     Book Call
   </button>
