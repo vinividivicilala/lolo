@@ -950,14 +950,15 @@ const [isHovering, setIsHovering] = useState(false);
   const circleImg2_5Ref = useRef<HTMLDivElement>(null);
 
 
+// State untuk kontrol scroll header dan waktu
 const [headerScrollProgress, setHeaderScrollProgress] = useState(0);
 const [showNavbar, setShowNavbar] = useState(false);
 const [showScrollDown, setShowScrollDown] = useState(true);
+const [greeting, setGreeting] = useState("Good Morning");
 const headerTextRef = useRef<HTMLDivElement>(null);
 const headerSectionRef = useRef<HTMLDivElement>(null);
 const navbarRef = useRef<HTMLDivElement>(null);
 const scrollDownRef = useRef<HTMLDivElement>(null);
-
 
 
   
@@ -1238,7 +1239,22 @@ const scrollDownRef = useRef<HTMLDivElement>(null);
 
 
 
-  // Efek untuk membuat teks scroll down mengikuti cursor (mouse)
+// Efek untuk menentukan ucapan berdasarkan waktu
+useEffect(() => {
+  const currentHour = new Date().getHours();
+  
+  if (currentHour >= 5 && currentHour < 12) {
+    setGreeting("Good Morning ☀️");
+  } else if (currentHour >= 12 && currentHour < 18) {
+    setGreeting("Good Afternoon 🌤️");
+  } else if (currentHour >= 18 && currentHour < 22) {
+    setGreeting("Good Evening 🌙");
+  } else {
+    setGreeting("Good Night 🌟");
+  }
+}, []);
+
+// Efek untuk membuat teks scroll down mengikuti cursor (mouse)
 useEffect(() => {
   if (isLoading || !showScrollDown) return;
   
@@ -1288,23 +1304,19 @@ useEffect(() => {
           const fontSize = 300 - (progress * 276);
           const newFontSize = Math.max(24, fontSize);
           headerTextRef.current.style.fontSize = `${newFontSize}px`;
+          
+          // Navbar muncul saat font size sudah 24px
+          if (progress >= 0.95 || newFontSize <= 25) {
+            setShowNavbar(true);
+          } else {
+            setShowNavbar(false);
+          }
         }
       }
     });
   });
   
   return () => ctx.revert();
-}, [isLoading]);
-
-// EFEK UNTUK MUNCULKAN NAVBAR SETELAH LOADING SELESAI
-useEffect(() => {
-  if (!isLoading) {
-    // Navbar muncul setelah loading selesai (delay 500ms agar smooth)
-    const timer = setTimeout(() => {
-      setShowNavbar(true);
-    }, 500);
-    return () => clearTimeout(timer);
-  }
 }, [isLoading]);
 
 // Scroll handler untuk scroll down
@@ -1326,8 +1338,6 @@ useEffect(() => {
   
   return () => window.removeEventListener('scroll', handleScroll);
 }, [isLoading, showScrollDown]);
-
-
 
 
   
@@ -4361,9 +4371,6 @@ const handleTextHover = () => {
           >
 
 
-
-
-
 {/* HEADER SECTION - MENURU dengan efek PINNED */}
 <div
   ref={headerSectionRef}
@@ -4404,63 +4411,113 @@ const handleTextHover = () => {
   </div>
 </div>
 
-{/* NAVBAR - Muncul SETELAH LOADING SELESAI */}
+{/* NAVBAR - Hanya teks besar, ucapan otomatis, ukuran tetap tidak mengecil */}
 <div
   style={{
     position: 'fixed',
-    top: '20px',
-    right: '40px',
+    top: '30px',
+    right: '50px',
     left: 'auto',
     zIndex: 1000,
     display: 'flex',
     alignItems: 'center',
-    gap: '32px',
-    backgroundColor: showNavbar ? '#1a1a1a' : 'transparent',
-    borderRadius: showNavbar ? '60px' : '0px',
-    padding: showNavbar ? '12px 32px' : '0px',
-    boxShadow: showNavbar ? '0 4px 20px rgba(0,0,0,0.15)' : 'none',
+    gap: '50px',
+    backgroundColor: 'transparent',
     pointerEvents: showNavbar ? 'auto' : 'none',
     opacity: showNavbar ? 1 : 0,
     visibility: showNavbar ? 'visible' : 'hidden',
-    transform: showNavbar ? 'translateY(0)' : 'translateY(-20px)',
-    transition: 'all 0.4s ease',
-    border: showNavbar ? '1px solid rgba(255,255,255,0.15)' : 'none'
+    transform: showNavbar ? 'translateY(0)' : 'translateY(-30px)',
+    transition: 'all 0.5s ease'
   }}
 >
+  {/* Menu Home */}
   <Link href="/" style={{ textDecoration: 'none' }}>
-    <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', fontWeight: '500', color: '#ffffff', cursor: 'pointer', transition: 'opacity 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.7'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>Home</span>
+    <span style={{ 
+      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", 
+      fontSize: '28px', 
+      fontWeight: '400', 
+      color: '#000000', 
+      cursor: 'pointer', 
+      transition: 'opacity 0.2s',
+      letterSpacing: '-0.01em'
+    }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.5'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>
+      Home
+    </span>
   </Link>
+  
+  {/* Menu Features */}
   <Link href="#features" style={{ textDecoration: 'none' }}>
-    <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', fontWeight: '500', color: '#ffffff', cursor: 'pointer', transition: 'opacity 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.7'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>Features</span>
+    <span style={{ 
+      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", 
+      fontSize: '28px', 
+      fontWeight: '400', 
+      color: '#000000', 
+      cursor: 'pointer', 
+      transition: 'opacity 0.2s',
+      letterSpacing: '-0.01em'
+    }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.5'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>
+      Features
+    </span>
   </Link>
+  
+  {/* Menu Community */}
   <Link href="#community" style={{ textDecoration: 'none' }}>
-    <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', fontWeight: '500', color: '#ffffff', cursor: 'pointer', transition: 'opacity 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.7'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>Community</span>
+    <span style={{ 
+      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", 
+      fontSize: '28px', 
+      fontWeight: '400', 
+      color: '#000000', 
+      cursor: 'pointer', 
+      transition: 'opacity 0.2s',
+      letterSpacing: '-0.01em'
+    }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.5'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>
+      Community
+    </span>
   </Link>
+  
+  {/* Menu Donation */}
   <Link href="#donation" style={{ textDecoration: 'none' }}>
-    <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', fontWeight: '500', color: '#ffffff', cursor: 'pointer', transition: 'opacity 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.7'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>Donation</span>
+    <span style={{ 
+      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", 
+      fontSize: '28px', 
+      fontWeight: '400', 
+      color: '#000000', 
+      cursor: 'pointer', 
+      transition: 'opacity 0.2s',
+      letterSpacing: '-0.01em'
+    }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.5'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>
+      Donation
+    </span>
   </Link>
+  
+  {/* Menu Blog */}
   <Link href="#blog" style={{ textDecoration: 'none' }}>
-    <span style={{ fontFamily: "'Questrial', sans-serif", fontSize: '14px', fontWeight: '500', color: '#ffffff', cursor: 'pointer', transition: 'opacity 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.7'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>Blog</span>
+    <span style={{ 
+      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", 
+      fontSize: '28px', 
+      fontWeight: '400', 
+      color: '#000000', 
+      cursor: 'pointer', 
+      transition: 'opacity 0.2s',
+      letterSpacing: '-0.01em'
+    }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.5'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>
+      Blog
+    </span>
   </Link>
-  <button
-    onClick={() => setShowCalendarModal(true)}
-    style={{
-      background: '#c5e800',
-      color: '#000000',
-      border: 'none',
-      borderRadius: '60px',
-      padding: '8px 24px',
-      fontSize: '13px',
-      fontFamily: "'Questrial', sans-serif",
-      fontWeight: '600',
-      cursor: 'pointer',
-      transition: 'all 0.2s ease'
-    }}
-    onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.backgroundColor = '#b0d100'; }}
-    onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.backgroundColor = '#c5e800'; }}
-  >
-    Book Call
-  </button>
+  
+  {/* Greeting - ucapan otomatis (Good Morning/Afternoon/Evening/Night) */}
+  <span style={{ 
+    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", 
+    fontSize: '28px', 
+    fontWeight: '500', 
+    color: '#1a1a1a',
+    letterSpacing: '-0.01em',
+    marginLeft: '20px',
+    paddingLeft: '20px',
+    borderLeft: '2px solid #e0e0e0'
+  }}>
+    {greeting}
+  </span>
 </div>
 
 {/* SCROLL DOWN - Teks yang mengikuti cursor */}
@@ -4506,6 +4563,8 @@ const handleTextHover = () => {
 
 
 
+
+            
 
             
 
