@@ -950,7 +950,12 @@ const [isHovering, setIsHovering] = useState(false);
   const circleImg2_5Ref = useRef<HTMLDivElement>(null);
 
 
-// State untuk kontrol scroll header dan waktu
+
+
+
+
+
+  // State untuk kontrol scroll header
 const [headerScrollProgress, setHeaderScrollProgress] = useState(0);
 const [showNavbar, setShowNavbar] = useState(false);
 const [showScrollDown, setShowScrollDown] = useState(true);
@@ -959,8 +964,6 @@ const headerTextRef = useRef<HTMLDivElement>(null);
 const headerSectionRef = useRef<HTMLDivElement>(null);
 const navbarRef = useRef<HTMLDivElement>(null);
 const scrollDownRef = useRef<HTMLDivElement>(null);
-
-
   
 
 
@@ -1238,19 +1241,18 @@ const scrollDownRef = useRef<HTMLDivElement>(null);
 
 
 
-
 // Efek untuk menentukan ucapan berdasarkan waktu
 useEffect(() => {
   const currentHour = new Date().getHours();
   
   if (currentHour >= 5 && currentHour < 12) {
-    setGreeting("Good Morning ☀️");
+    setGreeting("Good Morning");
   } else if (currentHour >= 12 && currentHour < 18) {
-    setGreeting("Good Afternoon 🌤️");
+    setGreeting("Good Afternoon");
   } else if (currentHour >= 18 && currentHour < 22) {
-    setGreeting("Good Evening 🌙");
+    setGreeting("Good Evening");
   } else {
-    setGreeting("Good Night 🌟");
+    setGreeting("Good Night");
   }
 }, []);
 
@@ -1304,19 +1306,27 @@ useEffect(() => {
           const fontSize = 300 - (progress * 276);
           const newFontSize = Math.max(24, fontSize);
           headerTextRef.current.style.fontSize = `${newFontSize}px`;
-          
-          // Navbar muncul saat font size sudah 24px
-          if (progress >= 0.95 || newFontSize <= 25) {
-            setShowNavbar(true);
-          } else {
-            setShowNavbar(false);
-          }
         }
       }
     });
   });
   
   return () => ctx.revert();
+}, [isLoading]);
+
+// EFEK NAVBAR MUNCUL SETELAH LOADING SELESAI (PASTI MUNCUL)
+useEffect(() => {
+  // Setelah loading selesai, navbar langsung muncul
+  if (!isLoading) {
+    // Delay kecil agar transisi smooth
+    const timer = setTimeout(() => {
+      setShowNavbar(true);
+    }, 100);
+    return () => clearTimeout(timer);
+  } else {
+    // Saat loading, navbar tidak muncul
+    setShowNavbar(false);
+  }
 }, [isLoading]);
 
 // Scroll handler untuk scroll down
@@ -1338,6 +1348,12 @@ useEffect(() => {
   
   return () => window.removeEventListener('scroll', handleScroll);
 }, [isLoading, showScrollDown]);
+
+
+
+
+  
+
 
 
   
@@ -4371,6 +4387,8 @@ const handleTextHover = () => {
           >
 
 
+
+
 {/* HEADER SECTION - MENURU dengan efek PINNED */}
 <div
   ref={headerSectionRef}
@@ -4411,7 +4429,7 @@ const handleTextHover = () => {
   </div>
 </div>
 
-{/* NAVBAR - Hanya teks besar, ucapan otomatis, ukuran tetap tidak mengecil */}
+{/* NAVBAR - Muncul SETELAH LOADING SELESAI, teks besar tanpa background */}
 <div
   style={{
     position: 'fixed',
@@ -4421,100 +4439,83 @@ const handleTextHover = () => {
     zIndex: 1000,
     display: 'flex',
     alignItems: 'center',
-    gap: '50px',
+    gap: '40px',
     backgroundColor: 'transparent',
     pointerEvents: showNavbar ? 'auto' : 'none',
     opacity: showNavbar ? 1 : 0,
     visibility: showNavbar ? 'visible' : 'hidden',
-    transform: showNavbar ? 'translateY(0)' : 'translateY(-30px)',
-    transition: 'all 0.5s ease'
+    transition: 'opacity 0.5s ease, visibility 0.5s ease'
   }}
 >
-  {/* Menu Home */}
   <Link href="/" style={{ textDecoration: 'none' }}>
     <span style={{ 
       fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", 
       fontSize: '28px', 
       fontWeight: '400', 
       color: '#000000', 
-      cursor: 'pointer', 
-      transition: 'opacity 0.2s',
-      letterSpacing: '-0.01em'
-    }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.5'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>
+      cursor: 'pointer'
+    }}>
       Home
     </span>
   </Link>
   
-  {/* Menu Features */}
   <Link href="#features" style={{ textDecoration: 'none' }}>
     <span style={{ 
       fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", 
       fontSize: '28px', 
       fontWeight: '400', 
       color: '#000000', 
-      cursor: 'pointer', 
-      transition: 'opacity 0.2s',
-      letterSpacing: '-0.01em'
-    }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.5'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>
+      cursor: 'pointer'
+    }}>
       Features
     </span>
   </Link>
   
-  {/* Menu Community */}
   <Link href="#community" style={{ textDecoration: 'none' }}>
     <span style={{ 
       fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", 
       fontSize: '28px', 
       fontWeight: '400', 
       color: '#000000', 
-      cursor: 'pointer', 
-      transition: 'opacity 0.2s',
-      letterSpacing: '-0.01em'
-    }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.5'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>
+      cursor: 'pointer'
+    }}>
       Community
     </span>
   </Link>
   
-  {/* Menu Donation */}
   <Link href="#donation" style={{ textDecoration: 'none' }}>
     <span style={{ 
       fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", 
       fontSize: '28px', 
       fontWeight: '400', 
       color: '#000000', 
-      cursor: 'pointer', 
-      transition: 'opacity 0.2s',
-      letterSpacing: '-0.01em'
-    }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.5'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>
+      cursor: 'pointer'
+    }}>
       Donation
     </span>
   </Link>
   
-  {/* Menu Blog */}
   <Link href="#blog" style={{ textDecoration: 'none' }}>
     <span style={{ 
       fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", 
       fontSize: '28px', 
       fontWeight: '400', 
       color: '#000000', 
-      cursor: 'pointer', 
-      transition: 'opacity 0.2s',
-      letterSpacing: '-0.01em'
-    }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.5'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>
+      cursor: 'pointer'
+    }}>
       Blog
     </span>
   </Link>
   
-  {/* Greeting - ucapan otomatis (Good Morning/Afternoon/Evening/Night) */}
+  {/* Ucapan berdasarkan waktu */}
   <span style={{ 
     fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", 
     fontSize: '28px', 
-    fontWeight: '500', 
-    color: '#1a1a1a',
-    letterSpacing: '-0.01em',
+    fontWeight: '400', 
+    color: '#666666',
     marginLeft: '20px',
     paddingLeft: '20px',
-    borderLeft: '2px solid #e0e0e0'
+    borderLeft: '1px solid #cccccc'
   }}>
     {greeting}
   </span>
@@ -4558,12 +4559,6 @@ const handleTextHover = () => {
     </svg>
   </div>
 )}
-
-
-
-
-
-
             
 
             
