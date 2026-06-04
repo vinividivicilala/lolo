@@ -953,9 +953,6 @@ const [isHovering, setIsHovering] = useState(false);
 
 
 
-
-
-  // State untuk kontrol scroll header
 const [headerScrollProgress, setHeaderScrollProgress] = useState(0);
 const [showNavbar, setShowNavbar] = useState(false);
 const [showScrollDown, setShowScrollDown] = useState(true);
@@ -964,7 +961,9 @@ const headerTextRef = useRef<HTMLDivElement>(null);
 const headerSectionRef = useRef<HTMLDivElement>(null);
 const navbarRef = useRef<HTMLDivElement>(null);
 const scrollDownRef = useRef<HTMLDivElement>(null);
-  
+const greetingRef = useRef<HTMLDivElement>(null);
+
+
 
 
 
@@ -1285,7 +1284,7 @@ useEffect(() => {
   };
 }, [isLoading, showScrollDown]);
 
-// Efek untuk animasi scroll header MENURU dengan ScrollTrigger
+// Efek untuk animasi scroll header MENURU dan ucapan
 useEffect(() => {
   if (isLoading) return;
   
@@ -1302,31 +1301,36 @@ useEffect(() => {
         const progress = self.progress;
         setHeaderScrollProgress(progress);
         
+        // Animasi teks MENURU
         if (headerTextRef.current) {
           const fontSize = 300 - (progress * 276);
           const newFontSize = Math.max(24, fontSize);
           headerTextRef.current.style.fontSize = `${newFontSize}px`;
+          
+          // Navbar (ucapan) muncul saat teks MENURU sudah kecil
+          if (progress >= 0.85 || newFontSize <= 40) {
+            setShowNavbar(true);
+          } else {
+            setShowNavbar(false);
+          }
+        }
+        
+        // Animasi ucapan: dari kecil (0px) ke besar (98px) saat scroll
+        if (greetingRef.current) {
+          // Ucapan mulai muncul saat progress 0.7, membesar hingga progress 1
+          const greetingProgress = Math.max(0, Math.min(1, (progress - 0.7) / 0.3));
+          const greetingFontSize = 98 * greetingProgress;
+          const greetingOpacity = greetingProgress;
+          
+          greetingRef.current.style.fontSize = `${greetingFontSize}px`;
+          greetingRef.current.style.opacity = `${greetingOpacity}`;
+          greetingRef.current.style.transform = `translateY(${20 - (20 * greetingProgress)}px)`;
         }
       }
     });
   });
   
   return () => ctx.revert();
-}, [isLoading]);
-
-// EFEK NAVBAR MUNCUL SETELAH LOADING SELESAI (PASTI MUNCUL)
-useEffect(() => {
-  // Setelah loading selesai, navbar langsung muncul
-  if (!isLoading) {
-    // Delay kecil agar transisi smooth
-    const timer = setTimeout(() => {
-      setShowNavbar(true);
-    }, 100);
-    return () => clearTimeout(timer);
-  } else {
-    // Saat loading, navbar tidak muncul
-    setShowNavbar(false);
-  }
 }, [isLoading]);
 
 // Scroll handler untuk scroll down
@@ -1348,10 +1352,6 @@ useEffect(() => {
   
   return () => window.removeEventListener('scroll', handleScroll);
 }, [isLoading, showScrollDown]);
-
-
-
-
   
 
 
@@ -4388,6 +4388,7 @@ const handleTextHover = () => {
 
 
 
+            
 
 {/* HEADER SECTION - MENURU dengan efek PINNED */}
 <div
@@ -4429,96 +4430,58 @@ const handleTextHover = () => {
   </div>
 </div>
 
-{/* NAVBAR - Muncul SETELAH LOADING SELESAI, teks besar tanpa background */}
+{/* UCAPAN OTOMATIS - Hanya ini yang ada di navbar, muncul saat scroll */}
 <div
+  ref={greetingRef}
   style={{
     position: 'fixed',
-    top: '30px',
-    right: '50px',
-    left: 'auto',
+    bottom: '80px',
+    left: '50%',
+    transform: 'translateX(-50%)',
     zIndex: 1000,
     display: 'flex',
     alignItems: 'center',
-    gap: '40px',
-    backgroundColor: 'transparent',
+    justifyContent: 'center',
+    gap: '16px',
+    backgroundColor: '#ED1B3C',
+    padding: '20px 40px',
+    borderRadius: '80px',
+    boxShadow: '0 8px 30px rgba(237, 27, 60, 0.3)',
     pointerEvents: showNavbar ? 'auto' : 'none',
-    opacity: showNavbar ? 1 : 0,
-    visibility: showNavbar ? 'visible' : 'hidden',
-    transition: 'opacity 0.5s ease, visibility 0.5s ease'
+    opacity: 0,
+    fontSize: '0px',
+    whiteSpace: 'nowrap',
+    transition: 'box-shadow 0.3s ease'
+  }}
+  onMouseEnter={(e) => {
+    e.currentTarget.style.boxShadow = '0 12px 40px rgba(237, 27, 60, 0.4)';
+  }}
+  onMouseLeave={(e) => {
+    e.currentTarget.style.boxShadow = '0 8px 30px rgba(237, 27, 60, 0.3)';
   }}
 >
-  <Link href="/" style={{ textDecoration: 'none' }}>
-    <span style={{ 
-      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", 
-      fontSize: '28px', 
-      fontWeight: '400', 
-      color: '#000000', 
-      cursor: 'pointer'
-    }}>
-      Home
-    </span>
-  </Link>
-  
-  <Link href="#features" style={{ textDecoration: 'none' }}>
-    <span style={{ 
-      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", 
-      fontSize: '28px', 
-      fontWeight: '400', 
-      color: '#000000', 
-      cursor: 'pointer'
-    }}>
-      Features
-    </span>
-  </Link>
-  
-  <Link href="#community" style={{ textDecoration: 'none' }}>
-    <span style={{ 
-      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", 
-      fontSize: '28px', 
-      fontWeight: '400', 
-      color: '#000000', 
-      cursor: 'pointer'
-    }}>
-      Community
-    </span>
-  </Link>
-  
-  <Link href="#donation" style={{ textDecoration: 'none' }}>
-    <span style={{ 
-      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", 
-      fontSize: '28px', 
-      fontWeight: '400', 
-      color: '#000000', 
-      cursor: 'pointer'
-    }}>
-      Donation
-    </span>
-  </Link>
-  
-  <Link href="#blog" style={{ textDecoration: 'none' }}>
-    <span style={{ 
-      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", 
-      fontSize: '28px', 
-      fontWeight: '400', 
-      color: '#000000', 
-      cursor: 'pointer'
-    }}>
-      Blog
-    </span>
-  </Link>
-  
-  {/* Ucapan berdasarkan waktu */}
-  <span style={{ 
-    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", 
-    fontSize: '28px', 
-    fontWeight: '400', 
-    color: '#666666',
-    marginLeft: '20px',
-    paddingLeft: '20px',
-    borderLeft: '1px solid #cccccc'
+  <span style={{
+    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+    fontWeight: '600',
+    color: '#000000',
+    letterSpacing: '-0.01em'
   }}>
     {greeting}
   </span>
+  <svg 
+    width="0" 
+    height="0" 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    xmlns="http://www.w3.org/2000/svg"
+    style={{ 
+      transition: 'width 0.1s ease, height 0.1s ease',
+      stroke: '#000000',
+      strokeWidth: '2.5'
+    }}
+  >
+    <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
 </div>
 
 {/* SCROLL DOWN - Teks yang mengikuti cursor */}
@@ -4559,10 +4522,6 @@ const handleTextHover = () => {
     </svg>
   </div>
 )}
-            
-
-            
-
 
 
 
