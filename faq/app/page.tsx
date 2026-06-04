@@ -953,22 +953,15 @@ const [isHovering, setIsHovering] = useState(false);
 
 
 
+
 const [headerScrollProgress, setHeaderScrollProgress] = useState(0);
-const [showNavbar, setShowNavbar] = useState(false);
+const [showGreeting, setShowGreeting] = useState(false);
 const [showScrollDown, setShowScrollDown] = useState(true);
 const [greeting, setGreeting] = useState("Good Morning");
 const headerTextRef = useRef<HTMLDivElement>(null);
 const headerSectionRef = useRef<HTMLDivElement>(null);
-const navbarRef = useRef<HTMLDivElement>(null);
-const scrollDownRef = useRef<HTMLDivElement>(null);
 const greetingRef = useRef<HTMLDivElement>(null);
-
-
-
-
-
-
-
+const scrollDownRef = useRef<HTMLDivElement>(null);
 
 
 
@@ -1239,7 +1232,6 @@ const greetingRef = useRef<HTMLDivElement>(null);
 
 
 
-
 // Efek untuk menentukan ucapan berdasarkan waktu
 useEffect(() => {
   const currentHour = new Date().getHours();
@@ -1306,31 +1298,49 @@ useEffect(() => {
           const fontSize = 300 - (progress * 276);
           const newFontSize = Math.max(24, fontSize);
           headerTextRef.current.style.fontSize = `${newFontSize}px`;
-          
-          // Navbar (ucapan) muncul saat teks MENURU sudah kecil
-          if (progress >= 0.85 || newFontSize <= 40) {
-            setShowNavbar(true);
-          } else {
-            setShowNavbar(false);
-          }
         }
         
-        // Animasi ucapan: dari kecil (0px) ke besar (98px) saat scroll
+        // Animasi ucapan: dari progress 0.5 mulai muncul, membesar hingga progress 1
         if (greetingRef.current) {
-          // Ucapan mulai muncul saat progress 0.7, membesar hingga progress 1
-          const greetingProgress = Math.max(0, Math.min(1, (progress - 0.7) / 0.3));
-          const greetingFontSize = 98 * greetingProgress;
-          const greetingOpacity = greetingProgress;
+          // Ucapan mulai muncul saat progress 0.5, membesar hingga progress 1
+          let greetingProgress = 0;
+          if (progress >= 0.5) {
+            greetingProgress = Math.min(1, (progress - 0.5) / 0.5);
+          }
+          
+          const greetingFontSize = 24 + (74 * greetingProgress); // dari 24px ke 98px
+          const greetingOpacity = 0.3 + (0.7 * greetingProgress);
+          const translateY = 30 - (30 * greetingProgress);
           
           greetingRef.current.style.fontSize = `${greetingFontSize}px`;
           greetingRef.current.style.opacity = `${greetingOpacity}`;
-          greetingRef.current.style.transform = `translateY(${20 - (20 * greetingProgress)}px)`;
+          greetingRef.current.style.transform = `translateX(-50%) translateY(${translateY}px)`;
+          
+          // Ukuran panah mengikuti font size
+          const svg = greetingRef.current.querySelector('svg');
+          if (svg) {
+            const svgSize = greetingFontSize * 0.8;
+            svg.style.width = `${svgSize}px`;
+            svg.style.height = `${svgSize}px`;
+          }
         }
       }
     });
   });
   
   return () => ctx.revert();
+}, [isLoading]);
+
+// Efek untuk menampilkan ucapan SETELAH LOADING SELESAI
+useEffect(() => {
+  if (!isLoading) {
+    // Setelah loading selesai, ucapan akan muncul melalui ScrollTrigger
+    // Tapi kita set initial style
+    if (greetingRef.current) {
+      greetingRef.current.style.opacity = '0';
+      greetingRef.current.style.fontSize = '24px';
+    }
+  }
 }, [isLoading]);
 
 // Scroll handler untuk scroll down
@@ -1352,8 +1362,6 @@ useEffect(() => {
   
   return () => window.removeEventListener('scroll', handleScroll);
 }, [isLoading, showScrollDown]);
-  
-
 
 
   
@@ -4388,7 +4396,6 @@ const handleTextHover = () => {
 
 
 
-            
 
 {/* HEADER SECTION - MENURU dengan efek PINNED */}
 <div
@@ -4430,12 +4437,12 @@ const handleTextHover = () => {
   </div>
 </div>
 
-{/* UCAPAN OTOMATIS - Hanya ini yang ada di navbar, muncul saat scroll */}
+{/* UCAPAN OTOMATIS - Hanya ini yang ada, muncul saat scroll */}
 <div
   ref={greetingRef}
   style={{
     position: 'fixed',
-    bottom: '80px',
+    bottom: '100px',
     left: '50%',
     transform: 'translateX(-50%)',
     zIndex: 1000,
@@ -4444,20 +4451,26 @@ const handleTextHover = () => {
     justifyContent: 'center',
     gap: '16px',
     backgroundColor: '#ED1B3C',
-    padding: '20px 40px',
+    padding: '16px 32px',
     borderRadius: '80px',
     boxShadow: '0 8px 30px rgba(237, 27, 60, 0.3)',
-    pointerEvents: showNavbar ? 'auto' : 'none',
-    opacity: 0,
-    fontSize: '0px',
     whiteSpace: 'nowrap',
-    transition: 'box-shadow 0.3s ease'
+    transition: 'box-shadow 0.3s ease, padding 0.2s ease',
+    opacity: 0,
+    fontSize: '24px',
+    cursor: 'pointer'
   }}
   onMouseEnter={(e) => {
     e.currentTarget.style.boxShadow = '0 12px 40px rgba(237, 27, 60, 0.4)';
+    e.currentTarget.style.transform = 'translateX(-50%) scale(1.02)';
   }}
   onMouseLeave={(e) => {
     e.currentTarget.style.boxShadow = '0 8px 30px rgba(237, 27, 60, 0.3)';
+    e.currentTarget.style.transform = 'translateX(-50%) scale(1)';
+  }}
+  onClick={() => {
+    // Optional: action saat diklik
+    console.log('Greeting clicked:', greeting);
   }}
 >
   <span style={{
@@ -4469,15 +4482,15 @@ const handleTextHover = () => {
     {greeting}
   </span>
   <svg 
-    width="0" 
-    height="0" 
+    width="24" 
+    height="24" 
     viewBox="0 0 24 24" 
     fill="none" 
     xmlns="http://www.w3.org/2000/svg"
     style={{ 
-      transition: 'width 0.1s ease, height 0.1s ease',
       stroke: '#000000',
-      strokeWidth: '2.5'
+      strokeWidth: '2.5',
+      transition: 'width 0.2s ease, height 0.2s ease'
     }}
   >
     <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"/>
@@ -4525,6 +4538,13 @@ const handleTextHover = () => {
 
 
 
+
+
+
+
+
+
+            
 
             
 
