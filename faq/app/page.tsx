@@ -982,8 +982,15 @@ const greetingRef = useRef<HTMLDivElement>(null);
 const scrollDownRef = useRef<HTMLDivElement>(null);
 const [tooltipText, setTooltipText] = useState("");
 const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
-const [showTooltip, setShowTooltip] = useState(false);
 
+
+
+const [tooltipData, setTooltipData] = useState<{ text: string; x: number; y: number; visible: boolean }>({
+  text: "",
+  x: 0,
+  y: 0,
+  visible: false
+});
 
 
 
@@ -4598,9 +4605,6 @@ const handleTextHover = () => {
 </div>
 
 
-
-
-
 {showMaintenanceModal && (
   <div
     style={{
@@ -4647,12 +4651,11 @@ const handleTextHover = () => {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-          {/* Icon Waktu dengan Tooltip */}
+          {/* Icon Waktu */}
           <div
-            style={{ position: 'relative', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
-            onMouseEnter={(e) => showTooltipHandler("Current maintenance schedule time - Server time UTC+7", e)}
+            style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+            onMouseEnter={(e) => showTooltipHandler("⏰ Current maintenance schedule time - Server time UTC+7", e)}
             onMouseLeave={hideTooltipHandler}
-            onMouseMove={updateTooltipPosition}
           >
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <circle cx="12" cy="12" r="10" stroke="#ffffff" strokeWidth="1.8"/>
@@ -4660,12 +4663,11 @@ const handleTextHover = () => {
             </svg>
           </div>
           
-          {/* Icon Tanda Seru dengan Tooltip */}
+          {/* Icon Tanda Seru */}
           <div
-            style={{ position: 'relative', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
-            onMouseEnter={(e) => showTooltipHandler("Important: Website is under maintenance, please check back regularly", e)}
+            style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+            onMouseEnter={(e) => showTooltipHandler("⚠️ Important: Website is under maintenance, please check back regularly", e)}
             onMouseLeave={hideTooltipHandler}
-            onMouseMove={updateTooltipPosition}
           >
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <circle cx="12" cy="12" r="10" stroke="#ffffff" strokeWidth="1.8"/>
@@ -4695,8 +4697,6 @@ const handleTextHover = () => {
             borderRadius: '50%',
             transition: 'background 0.2s'
           }}
-          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.2)'}
-          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
         >
           ✕
         </button>
@@ -4765,6 +4765,11 @@ const handleTextHover = () => {
             const isActive = item.status === 'in-progress';
             const dotColor = item.color;
             
+            let statusTooltipText = "";
+            if (item.status === 'completed') statusTooltipText = "✓ COMPLETED - Task finished successfully";
+            if (item.status === 'in-progress') statusTooltipText = "⟳ IN PROGRESS - Task is currently being worked on";
+            if (item.status === 'pending') statusTooltipText = "○ PENDING - Task waiting to be started";
+            
             return (
               <div
                 key={item.id}
@@ -4795,7 +4800,7 @@ const handleTextHover = () => {
                     }}
                   />
                   
-                  {/* Titik bulat dengan tooltip */}
+                  {/* Titik bulat */}
                   <div
                     style={{
                       position: 'absolute',
@@ -4811,15 +4816,8 @@ const handleTextHover = () => {
                       zIndex: 3,
                       cursor: 'pointer'
                     }}
-                    onMouseEnter={(e) => {
-                      let statusText = "";
-                      if (item.status === 'completed') statusText = `✅ ${item.title} - Completed on ${item.date}`;
-                      if (item.status === 'in-progress') statusText = `🔄 ${item.title} - Currently in progress (Estimated: ${item.date})`;
-                      if (item.status === 'pending') statusText = `⏳ ${item.title} - Pending, waiting to be started`;
-                      showTooltipHandler(statusText, e);
-                    }}
+                    onMouseEnter={(e) => showTooltipHandler(`${item.title} - ${item.description} (${item.date})`, e)}
                     onMouseLeave={hideTooltipHandler}
-                    onMouseMove={updateTooltipPosition}
                   />
                 </div>
 
@@ -4834,16 +4832,15 @@ const handleTextHover = () => {
                     borderRadius: '12px'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#f8f8f8';
+                    e.currentTarget.style.backgroundColor = '#f0f0f0';
                     e.currentTarget.style.transform = 'translateX(4px)';
-                    showTooltipHandler(`📋 ${item.title}: ${item.description}`, e);
+                    showTooltipHandler(`📌 ${item.title}: ${item.description}`, e);
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.backgroundColor = 'transparent';
                     e.currentTarget.style.transform = 'translateX(0)';
                     hideTooltipHandler();
                   }}
-                  onMouseMove={updateTooltipPosition}
                 >
                   <div style={{
                     display: 'flex',
@@ -4868,7 +4865,7 @@ const handleTextHover = () => {
                       {item.date}
                     </span>
                     
-                    {/* Status badge dengan tooltip */}
+                    {/* Status badge */}
                     <span 
                       style={{
                         fontFamily: "'Questrial', sans-serif",
@@ -4878,22 +4875,17 @@ const handleTextHover = () => {
                         padding: '3px 10px',
                         borderRadius: '60px',
                         fontWeight: '600',
-                        transition: 'transform 0.2s ease, opacity 0.2s ease',
+                        transition: 'transform 0.2s ease',
                         cursor: 'pointer'
                       }}
                       onMouseEnter={(e) => {
                         e.currentTarget.style.transform = 'scale(1.05)';
-                        let statusTooltip = "";
-                        if (item.status === 'completed') statusTooltip = "✓ COMPLETED - Task finished successfully";
-                        if (item.status === 'in-progress') statusTooltip = "⟳ IN PROGRESS - Task is currently being worked on";
-                        if (item.status === 'pending') statusTooltip = "○ PENDING - Task waiting to be started";
-                        showTooltipHandler(statusTooltip, e);
+                        showTooltipHandler(statusTooltipText, e);
                       }}
                       onMouseLeave={(e) => {
                         e.currentTarget.style.transform = 'scale(1)';
                         hideTooltipHandler();
                       }}
-                      onMouseMove={updateTooltipPosition}
                     >
                       {item.status.toUpperCase()}
                     </span>
@@ -4949,7 +4941,7 @@ const handleTextHover = () => {
                 }}
               />
               
-              {/* Titik pemancar dengan tooltip */}
+              {/* Titik pemancar */}
               <div
                 style={{
                   position: 'absolute',
@@ -4966,7 +4958,6 @@ const handleTextHover = () => {
                 }}
                 onMouseEnter={(e) => showTooltipHandler("🚀 LAUNCH DAY - Website will be back online with amazing new features! Stay tuned!", e)}
                 onMouseLeave={hideTooltipHandler}
-                onMouseMove={updateTooltipPosition}
               />
               <div
                 style={{
@@ -4994,16 +4985,15 @@ const handleTextHover = () => {
                 borderRadius: '12px'
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#f8f8f8';
+                e.currentTarget.style.backgroundColor = '#f0f0f0';
                 e.currentTarget.style.transform = 'translateX(4px)';
-                showTooltipHandler("🎯 FINAL MILESTONE - Launch Day: Website will be back online!", e);
+                showTooltipHandler("🎯 FINAL MILESTONE - Launch Day: Website returns with new features!", e);
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.backgroundColor = 'transparent';
                 e.currentTarget.style.transform = 'translateX(0)';
                 hideTooltipHandler();
               }}
-              onMouseMove={updateTooltipPosition}
             >
               <div style={{
                 fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
@@ -5030,46 +5020,44 @@ const handleTextHover = () => {
   </div>
 )}
 
-{/* Tooltip Component */}
-{showTooltip && (
+{/* TOOLTIP - Dengan warna kontras yang PASTI TERLIHAT */}
+{tooltipData.visible && (
   <div
     style={{
       position: 'fixed',
-      top: tooltipPosition.y,
-      left: tooltipPosition.x,
-      backgroundColor: '#1a1a1a',
-      color: '#ffffff',
-      padding: '10px 18px',
+      top: tooltipData.y,
+      left: tooltipData.x,
+      backgroundColor: '#FFD700',
+      color: '#000000',
+      padding: '12px 20px',
       borderRadius: '12px',
-      fontSize: '13px',
-      fontFamily: "'Questrial', sans-serif",
+      fontSize: '14px',
+      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+      fontWeight: '500',
       zIndex: 100000,
       pointerEvents: 'none',
-      whiteSpace: 'nowrap',
-      boxShadow: '0 6px 20px rgba(0,0,0,0.25)',
-      border: '1px solid rgba(255,255,255,0.1)',
-      maxWidth: '300px',
+      maxWidth: '320px',
       whiteSpace: 'normal',
-      wordWrap: 'break-word'
+      wordWrap: 'break-word',
+      boxShadow: '0 8px 25px rgba(0,0,0,0.2)',
+      border: '1px solid rgba(0,0,0,0.1)'
     }}
   >
-    {tooltipText}
+    {tooltipData.text}
     <div
       style={{
         position: 'absolute',
         bottom: '-8px',
-        left: '15px',
+        left: '20px',
         width: 0,
         height: 0,
         borderLeft: '8px solid transparent',
         borderRight: '8px solid transparent',
-        borderTop: '8px solid #1a1a1a'
+        borderTop: '8px solid #FFD700'
       }}
     />
   </div>
 )}
-            
-
 
             
 
