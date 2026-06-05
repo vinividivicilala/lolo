@@ -980,12 +980,9 @@ const headerTextRef = useRef<HTMLDivElement>(null);
 const headerSectionRef = useRef<HTMLDivElement>(null);
 const greetingRef = useRef<HTMLDivElement>(null);
 const scrollDownRef = useRef<HTMLDivElement>(null);
-// State untuk tooltip
 const [tooltipText, setTooltipText] = useState("");
 const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
 const [showTooltip, setShowTooltip] = useState(false);
-
-
 
 
 
@@ -1043,16 +1040,7 @@ const [showTooltip, setShowTooltip] = useState(false);
   };
 
 
-// Fungsi untuk menampilkan tooltip
-const handleTooltip = (text: string, e: React.MouseEvent) => {
-  setTooltipText(text);
-  setTooltipPosition({ x: e.clientX + 15, y: e.clientY - 30 });
-  setShowTooltip(true);
-};
 
-const hideTooltip = () => {
-  setShowTooltip(false);
-};
 
 
 
@@ -1774,6 +1762,30 @@ useEffect(() => {
       console.error("Error logging out:", error);
     }
   };
+
+   // Fungsi untuk menampilkan tooltip
+const showTooltipHandler = (text: string, event: React.MouseEvent) => {
+  setTooltipText(text);
+  setTooltipPosition({
+    x: event.clientX + 15,
+    y: event.clientY - 35
+  });
+  setShowTooltip(true);
+};
+
+const hideTooltipHandler = () => {
+  setShowTooltip(false);
+};
+
+const updateTooltipPosition = (event: React.MouseEvent) => {
+  if (showTooltip) {
+    setTooltipPosition({
+      x: event.clientX + 15,
+      y: event.clientY - 35
+    });
+  }
+};
+
 
   const getRandomChar = () => {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
@@ -4588,6 +4600,7 @@ const handleTextHover = () => {
 
 
 
+
 {showMaintenanceModal && (
   <div
     style={{
@@ -4619,7 +4632,7 @@ const handleTextHover = () => {
         margin: 'auto'
       }}
     >
-      {/* Header Modal dengan icon waktu dan tanda seru - dengan hover tooltip */}
+      {/* Header Modal */}
       <div
         style={{
           padding: '24px 32px',
@@ -4636,10 +4649,10 @@ const handleTextHover = () => {
         <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
           {/* Icon Waktu dengan Tooltip */}
           <div
-            style={{ position: 'relative', cursor: 'pointer' }}
-            onMouseEnter={(e) => handleTooltip("Current maintenance schedule time", e)}
-            onMouseLeave={hideTooltip}
-            onMouseMove={(e) => setTooltipPosition({ x: e.clientX + 15, y: e.clientY - 30 })}
+            style={{ position: 'relative', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+            onMouseEnter={(e) => showTooltipHandler("Current maintenance schedule time - Server time UTC+7", e)}
+            onMouseLeave={hideTooltipHandler}
+            onMouseMove={updateTooltipPosition}
           >
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <circle cx="12" cy="12" r="10" stroke="#ffffff" strokeWidth="1.8"/>
@@ -4649,10 +4662,10 @@ const handleTextHover = () => {
           
           {/* Icon Tanda Seru dengan Tooltip */}
           <div
-            style={{ position: 'relative', cursor: 'pointer' }}
-            onMouseEnter={(e) => handleTooltip("Important maintenance information", e)}
-            onMouseLeave={hideTooltip}
-            onMouseMove={(e) => setTooltipPosition({ x: e.clientX + 15, y: e.clientY - 30 })}
+            style={{ position: 'relative', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+            onMouseEnter={(e) => showTooltipHandler("Important: Website is under maintenance, please check back regularly", e)}
+            onMouseLeave={hideTooltipHandler}
+            onMouseMove={updateTooltipPosition}
           >
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <circle cx="12" cy="12" r="10" stroke="#ffffff" strokeWidth="1.8"/>
@@ -4689,7 +4702,7 @@ const handleTextHover = () => {
         </button>
       </div>
 
-      {/* Pesan Maintenance - tanpa icon ⚠️ */}
+      {/* Pesan Maintenance */}
       <div
         style={{
           padding: '32px',
@@ -4736,7 +4749,7 @@ const handleTextHover = () => {
         </div>
 
         <div style={{ position: 'relative', paddingLeft: '20px' }}>
-          {/* Garis vertikal DASHED hitam - nyambung dari awal sampai akhir */}
+          {/* Garis vertikal DASHED hitam */}
           <div
             style={{
               position: 'absolute',
@@ -4750,7 +4763,6 @@ const handleTextHover = () => {
 
           {timelineData.map((item, index) => {
             const isActive = item.status === 'in-progress';
-            const isCompleted = item.status === 'completed';
             const dotColor = item.color;
             
             return (
@@ -4763,7 +4775,6 @@ const handleTextHover = () => {
                   marginBottom: '36px'
                 }}
               >
-                {/* Kolom kiri untuk titik - titik berada DI DALAM garis */}
                 <div
                   style={{
                     position: 'relative',
@@ -4773,7 +4784,6 @@ const handleTextHover = () => {
                     justifyContent: 'center'
                   }}
                 >
-                  {/* Garis horizontal DASHED hitam dari titik ke kanan */}
                   <div
                     style={{
                       position: 'absolute',
@@ -4785,7 +4795,7 @@ const handleTextHover = () => {
                     }}
                   />
                   
-                  {/* Titik bulat di TENGAH garis vertikal */}
+                  {/* Titik bulat dengan tooltip */}
                   <div
                     style={{
                       position: 'absolute',
@@ -4798,12 +4808,22 @@ const handleTextHover = () => {
                       border: isActive ? `2px solid ${dotColor}` : 'none',
                       boxShadow: isActive ? `0 0 0 0 ${dotColor}` : 'none',
                       animation: isActive ? 'pulse 1.5s infinite' : 'none',
-                      zIndex: 3
+                      zIndex: 3,
+                      cursor: 'pointer'
                     }}
+                    onMouseEnter={(e) => {
+                      let statusText = "";
+                      if (item.status === 'completed') statusText = `✅ ${item.title} - Completed on ${item.date}`;
+                      if (item.status === 'in-progress') statusText = `🔄 ${item.title} - Currently in progress (Estimated: ${item.date})`;
+                      if (item.status === 'pending') statusText = `⏳ ${item.title} - Pending, waiting to be started`;
+                      showTooltipHandler(statusText, e);
+                    }}
+                    onMouseLeave={hideTooltipHandler}
+                    onMouseMove={updateTooltipPosition}
                   />
                 </div>
 
-                {/* Konten timeline - HOVER effect */}
+                {/* Konten timeline */}
                 <div 
                   style={{ 
                     flex: 1, 
@@ -4816,11 +4836,14 @@ const handleTextHover = () => {
                   onMouseEnter={(e) => {
                     e.currentTarget.style.backgroundColor = '#f8f8f8';
                     e.currentTarget.style.transform = 'translateX(4px)';
+                    showTooltipHandler(`📋 ${item.title}: ${item.description}`, e);
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.backgroundColor = 'transparent';
                     e.currentTarget.style.transform = 'translateX(0)';
+                    hideTooltipHandler();
                   }}
+                  onMouseMove={updateTooltipPosition}
                 >
                   <div style={{
                     display: 'flex',
@@ -4844,7 +4867,8 @@ const handleTextHover = () => {
                     }}>
                       {item.date}
                     </span>
-                    {/* Status badge dengan hover tooltip */}
+                    
+                    {/* Status badge dengan tooltip */}
                     <span 
                       style={{
                         fontFamily: "'Questrial', sans-serif",
@@ -4859,20 +4883,17 @@ const handleTextHover = () => {
                       }}
                       onMouseEnter={(e) => {
                         e.currentTarget.style.transform = 'scale(1.05)';
-                        e.currentTarget.style.opacity = '0.85';
-                        // Tooltip untuk status
-                        let statusText = "";
-                        if (item.status === 'completed') statusText = "This task has been completed successfully";
-                        if (item.status === 'in-progress') statusText = "This task is currently in progress";
-                        if (item.status === 'pending') statusText = "This task is waiting to be started";
-                        handleTooltip(statusText, e);
+                        let statusTooltip = "";
+                        if (item.status === 'completed') statusTooltip = "✓ COMPLETED - Task finished successfully";
+                        if (item.status === 'in-progress') statusTooltip = "⟳ IN PROGRESS - Task is currently being worked on";
+                        if (item.status === 'pending') statusTooltip = "○ PENDING - Task waiting to be started";
+                        showTooltipHandler(statusTooltip, e);
                       }}
                       onMouseLeave={(e) => {
                         e.currentTarget.style.transform = 'scale(1)';
-                        e.currentTarget.style.opacity = '1';
-                        hideTooltip();
+                        hideTooltipHandler();
                       }}
-                      onMouseMove={(e) => setTooltipPosition({ x: e.clientX + 15, y: e.clientY - 30 })}
+                      onMouseMove={updateTooltipPosition}
                     >
                       {item.status.toUpperCase()}
                     </span>
@@ -4900,7 +4921,7 @@ const handleTextHover = () => {
             );
           })}
 
-          {/* Titik AKHIR - dengan animasi kedap kedip pemancar */}
+          {/* Titik AKHIR */}
           <div
             style={{
               position: 'relative',
@@ -4917,7 +4938,6 @@ const handleTextHover = () => {
                 justifyContent: 'center'
               }}
             >
-              {/* Garis horizontal DASHED hitam ke kanan */}
               <div
                 style={{
                   position: 'absolute',
@@ -4929,7 +4949,7 @@ const handleTextHover = () => {
                 }}
               />
               
-              {/* Titik pemancar (kedap kedip) */}
+              {/* Titik pemancar dengan tooltip */}
               <div
                 style={{
                   position: 'absolute',
@@ -4941,8 +4961,12 @@ const handleTextHover = () => {
                   backgroundColor: '#0052FF',
                   boxShadow: '0 0 0 0 rgba(0, 82, 255, 0.8)',
                   animation: 'radarPulse 1.5s infinite',
-                  zIndex: 3
+                  zIndex: 3,
+                  cursor: 'pointer'
                 }}
+                onMouseEnter={(e) => showTooltipHandler("🚀 LAUNCH DAY - Website will be back online with amazing new features! Stay tuned!", e)}
+                onMouseLeave={hideTooltipHandler}
+                onMouseMove={updateTooltipPosition}
               />
               <div
                 style={{
@@ -4972,11 +4996,14 @@ const handleTextHover = () => {
               onMouseEnter={(e) => {
                 e.currentTarget.style.backgroundColor = '#f8f8f8';
                 e.currentTarget.style.transform = 'translateX(4px)';
+                showTooltipHandler("🎯 FINAL MILESTONE - Launch Day: Website will be back online!", e);
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.backgroundColor = 'transparent';
                 e.currentTarget.style.transform = 'translateX(0)';
+                hideTooltipHandler();
               }}
+              onMouseMove={updateTooltipPosition}
             >
               <div style={{
                 fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
@@ -5010,37 +5037,37 @@ const handleTextHover = () => {
       position: 'fixed',
       top: tooltipPosition.y,
       left: tooltipPosition.x,
-      backgroundColor: '#000000',
+      backgroundColor: '#1a1a1a',
       color: '#ffffff',
-      padding: '8px 16px',
-      borderRadius: '8px',
+      padding: '10px 18px',
+      borderRadius: '12px',
       fontSize: '13px',
       fontFamily: "'Questrial', sans-serif",
       zIndex: 100000,
       pointerEvents: 'none',
       whiteSpace: 'nowrap',
-      boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+      boxShadow: '0 6px 20px rgba(0,0,0,0.25)',
+      border: '1px solid rgba(255,255,255,0.1)',
+      maxWidth: '300px',
+      whiteSpace: 'normal',
+      wordWrap: 'break-word'
     }}
   >
     {tooltipText}
     <div
       style={{
         position: 'absolute',
-        bottom: '-6px',
-        left: '10px',
+        bottom: '-8px',
+        left: '15px',
         width: 0,
         height: 0,
-        borderLeft: '6px solid transparent',
-        borderRight: '6px solid transparent',
-        borderTop: '6px solid #000000'
+        borderLeft: '8px solid transparent',
+        borderRight: '8px solid transparent',
+        borderTop: '8px solid #1a1a1a'
       }}
     />
   </div>
 )}
-
-
-
-
             
 
 
