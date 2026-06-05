@@ -951,6 +951,8 @@ const [isHovering, setIsHovering] = useState(false);
 
 
 
+
+
 const [headerScrollProgress, setHeaderScrollProgress] = useState(0);
 const [showGreeting, setShowGreeting] = useState(false);
 const [showScrollDown, setShowScrollDown] = useState(true);
@@ -963,6 +965,12 @@ const greetingRef = useRef<HTMLDivElement>(null);
 const scrollDownRef = useRef<HTMLDivElement>(null);
 
 
+
+
+
+
+
+  
 
   // Data timeline maintenance
 const maintenanceTimeline = [
@@ -1266,7 +1274,7 @@ const maintenanceTimeline = [
 
 
 
-  // Efek untuk menentukan ucapan berdasarkan waktu
+// Efek untuk menentukan ucapan berdasarkan waktu
 useEffect(() => {
   const currentHour = new Date().getHours();
   
@@ -1396,19 +1404,16 @@ useEffect(() => {
 
 // Fungsi untuk membuka modal
 const openGreetingModal = () => {
+  console.log("Modal opened"); // Debugging
   setShowGreetingModal(true);
 };
 
 // Fungsi untuk menutup modal
 const closeGreetingModal = () => {
+  console.log("Modal closed"); // Debugging
   setShowGreetingModal(false);
   setCurrentTimelineIndex(0);
 };
-
-
-
-
-
 
 
 
@@ -3643,7 +3648,9 @@ const handleTextHover = () => {
     }
   }
 
-  @keyframes bounce {
+
+
+@keyframes bounce {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(5px); }
   }
@@ -3683,6 +3690,15 @@ const handleTextHover = () => {
       transform: translateY(0);
     }
   }
+
+
+
+
+
+
+
+  
+
 
   
 
@@ -4481,7 +4497,298 @@ const handleTextHover = () => {
 
 
 
+Menuru Text Scroll Animation Fix
+Donation PDF and Verified Badge Features
+Community section redesign with numbers and arrows
+Community Section Overflow Fixed
+Add 6 Cards to Community Section
+Stacked Cards Community Section
+Stacked Card Scroll Animation GSAP Lenis
+Stacked Cards Animation with GSAP ScrollTrigger
+Stack Card Scroll Effect Code
+Calendar Submissions Code Fix
+Admin Reply Chat Calendar Submission Fix
+Fix Calendar Call Form Design
+Shadow page scroll effect
+Page Transition Scroll Effect
+Add GSAP Stacked Panels Animation Section
+Fix Features Section Hover Scroll
+Fix Features Section Scroll Behavior
+perbaiki codingan scroll footer
+Website Code Fix Request
+Fix Features Section Code
+Fix Features Section Hover Effects
+GSAP Pinned Scroll Feature Addition
+Cookie Popup Code Fix Request
+Donatur Page Firebase Donation Integration
+Contact to Donatur Page Fix
+Add MENURU text with GSAP split animation
+Add MENURU text with Amiamie font and GSAP split animation
+Cookie popup with Questrial font
+Modern Menu Page with GSAP Animations
+Cookie Consent Popup Implementation
+Empty Homepage
+Perbaiki tampilan link notifikasi
+Framed Layout Addition for Webpage
+Fix JSX syntax error in Next.js build
+Framed Layout Addition
+Framed Layout Implementation
+Privacy Policy Page Modification
+Terms of Service Page with Fixed Home Button
+Terms of Service Page with Section Title
+Add section title to terms page
+Enhanced Terms of Service Page
+Horizontal Scroll Terms of Service
+Fix title text to span two lines right side
+Remove table data improve GSAP overlay animation
+Profile Page Scroll Text Addition
+Firebase Real Time Chat Fix
+Fix text bold and hover movement
+Add Profile Page After Loading
+Fix MENURU overlay scroll transition
+Fix MENURU page scroll to main page
+Fix Netlify build error undefined variable
+Fix Loading to MENURU Overlay Scroll
+Add Best Solutions Component with Arrow
+Add MENURU overlay after loading
+Improved Categories Page Layout and Animation
+Code Fix for User Interface
+Perbaikan Halaman Kategori dengan Animasi
+Mobile App Carousel with Notes Card
+Add scroll transition to donation page
+Scroll to Reveal Donatur Page
+Donation page scroll transition GSAP
+Donation Page Code Fix
+Add Pantau Donasi Button with Real-time Data
+Perbaikan Kode NotesPage dengan Fitur Kolaborasi
+Perbaiki Kode Visual Designer
+Perbaikan Kode React dengan Overlay Community
+Perbaiki Notifikasi Halaman Utama
+Rotating Words GSAP Animation
+Perbaiki animasi loading dengan rotating words
+Perbaiki Overlay Community News Stories
+Perbaiki Codingan Website
+Perbaikan Kode Website
+Perbaiki Tampilan Website MENURU
+Chatbot page code review and fix
+Perbaiki tampilan link notifikasi
+Perbaiki Halaman Notifikasi dengan Arrow dan Komentar Blog
+Perbaikan Kode Notifikasi Minimalis
+Perbaiki tampilan menu overlay
+Perbaikan Tampilan Teks dan SVG
+Perbaiki title website NextJS
+Perbaikan Menu Overlay dengan Teks Berjalan
+Tambahkan Note dengan panah di menu
+Perbaikan Menu Overlay GSAP Modern
+Perbaikan kode halaman MENU
+Perbaikan Kode Halaman Utama
+Tambahkan teks berjalan dan rekomendasi blog
+Tambahkan fitur dari file lain ke halaman blog
+Perbaiki scrollbar horizontal blog
+Perbaikan Tampilan Blog Gunadarma
+Perbaiki teks berjalan dengan panah
+Fix scrollbar issues in React code
+Blog Page Share Button Addition
+Tutorial Google Search Console Next.js
+Perbaikan Layout Blog Minimalis
+Tambahkan tag dan halaman blog baru
+Blog Development Banner Addition
+Perbaiki Tampilan SignInPage Minimalist
+Perbaiki Tampilan SignInPage
+Perbaiki SignInPage Hapus Modal Login dan Animasi
+Tambah Fitur Password dan Teks
+Menuru Text Scroll Animation Fix
+Masalahnya modal tidak muncul karena mungkin ada error atau konflik. Berikut perbaikan dengan memastikan modal muncul saat ucapan diklik:
 
+tsx
+// State untuk kontrol scroll header
+const [headerScrollProgress, setHeaderScrollProgress] = useState(0);
+const [showGreeting, setShowGreeting] = useState(false);
+const [showScrollDown, setShowScrollDown] = useState(true);
+const [showGreetingModal, setShowGreetingModal] = useState(false);
+const [currentTimelineIndex, setCurrentTimelineIndex] = useState(0);
+const [greeting, setGreeting] = useState("Good Morning");
+const headerTextRef = useRef<HTMLDivElement>(null);
+const headerSectionRef = useRef<HTMLDivElement>(null);
+const greetingRef = useRef<HTMLDivElement>(null);
+const scrollDownRef = useRef<HTMLDivElement>(null);
+
+// Data timeline maintenance
+const maintenanceTimeline = [
+  { 
+    title: "MAINTENANCE START", 
+    description: "Mulai pemeliharaan sistem Menuru", 
+    time: "02 Juni 2026, 08:00 WIB",
+    status: "completed"
+  },
+  { 
+    title: "DATABASE MIGRATION", 
+    description: "Migrasi database ke server baru", 
+    time: "03 Juni 2026, 10:30 WIB",
+    status: "in-progress"
+  },
+  { 
+    title: "UI/UX ENHANCEMENT", 
+    description: "Peningkatan antarmuka pengguna", 
+    time: "04 Juni 2026, 09:00 WIB",
+    status: "pending"
+  },
+  { 
+    title: "SECURITY UPDATE", 
+    description: "Update sistem keamanan terbaru", 
+    time: "05 Juni 2026, 14:00 WIB",
+    status: "pending"
+  },
+  { 
+    title: "LAUNCH NEW FEATURES", 
+    description: "Peluncuran fitur-fitur baru", 
+    time: "06 Juni 2026, 20:00 WIB",
+    status: "pending"
+  }
+];
+
+// Efek untuk menentukan ucapan berdasarkan waktu
+useEffect(() => {
+  const currentHour = new Date().getHours();
+  
+  if (currentHour >= 5 && currentHour < 12) {
+    setGreeting("Good Morning");
+  } else if (currentHour >= 12 && currentHour < 18) {
+    setGreeting("Good Afternoon");
+  } else if (currentHour >= 18 && currentHour < 22) {
+    setGreeting("Good Evening");
+  } else {
+    setGreeting("Good Night");
+  }
+}, []);
+
+// Efek untuk membuat teks scroll down mengikuti cursor (mouse)
+useEffect(() => {
+  if (isLoading || !showScrollDown) return;
+  
+  let mouseX = 0;
+  let mouseY = 0;
+  let rafId: number | null = null;
+  
+  const updatePosition = () => {
+    if (scrollDownRef.current) {
+      scrollDownRef.current.style.transform = `translate(${mouseX + 20}px, ${mouseY + 20}px)`;
+    }
+    rafId = requestAnimationFrame(updatePosition);
+  };
+  
+  const onMouseMove = (e: MouseEvent) => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+  };
+  
+  document.addEventListener('mousemove', onMouseMove);
+  rafId = requestAnimationFrame(updatePosition);
+  
+  return () => {
+    document.removeEventListener('mousemove', onMouseMove);
+    if (rafId) cancelAnimationFrame(rafId);
+  };
+}, [isLoading, showScrollDown]);
+
+// Efek untuk menampilkan ucapan SETELAH LOADING SELESAI
+useEffect(() => {
+  if (!isLoading) {
+    setShowGreeting(true);
+  }
+}, [isLoading]);
+
+// Efek animasi timeline (kedap-kedip)
+useEffect(() => {
+  if (showGreetingModal) {
+    const interval = setInterval(() => {
+      setCurrentTimelineIndex((prev) => (prev + 1) % maintenanceTimeline.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }
+}, [showGreetingModal]);
+
+// Efek untuk animasi scroll header MENURU dan ucapan (MEMBESAR saat scroll)
+useEffect(() => {
+  if (isLoading) return;
+  
+  const ctx = gsap.context(() => {
+    // PINNING: Buat section header tetap di tempat saat scroll
+    ScrollTrigger.create({
+      trigger: headerSectionRef.current,
+      start: "top top",
+      end: "+=500",
+      pin: true,
+      pinSpacing: true,
+      scrub: 1,
+      onUpdate: (self) => {
+        const progress = self.progress;
+        setHeaderScrollProgress(progress);
+        
+        // Animasi teks MENURU (mengecil)
+        if (headerTextRef.current) {
+          const fontSize = 300 - (progress * 276);
+          const newFontSize = Math.max(24, fontSize);
+          headerTextRef.current.style.fontSize = `${newFontSize}px`;
+        }
+        
+        // Animasi ucapan MEMBESAR saat scroll (dari 24px ke 98px)
+        if (greetingRef.current && showGreeting) {
+          const greetingFontSize = 24 + (74 * progress);
+          const svgSize = greetingFontSize * 0.7;
+          
+          greetingRef.current.style.fontSize = `${greetingFontSize}px`;
+          
+          const svg = greetingRef.current.querySelector('svg');
+          if (svg) {
+            svg.style.width = `${svgSize}px`;
+            svg.style.height = `${svgSize}px`;
+          }
+          
+          const padding = 12 + (12 * progress);
+          greetingRef.current.style.padding = `${padding}px ${padding * 2}px`;
+        }
+      }
+    });
+  });
+  
+  return () => ctx.revert();
+}, [isLoading, showGreeting]);
+
+// Scroll handler untuk scroll down
+useEffect(() => {
+  if (isLoading) return;
+  
+  const handleScroll = () => {
+    const scrollY = window.scrollY;
+    
+    if (scrollY > 50 && showScrollDown) {
+      setShowScrollDown(false);
+    } else if (scrollY <= 10 && !showScrollDown) {
+      setShowScrollDown(true);
+    }
+  };
+  
+  window.addEventListener('scroll', handleScroll);
+  handleScroll();
+  
+  return () => window.removeEventListener('scroll', handleScroll);
+}, [isLoading, showScrollDown]);
+
+// Fungsi untuk membuka modal
+const openGreetingModal = () => {
+  console.log("Modal opened"); // Debugging
+  setShowGreetingModal(true);
+};
+
+// Fungsi untuk menutup modal
+const closeGreetingModal = () => {
+  console.log("Modal closed"); // Debugging
+  setShowGreetingModal(false);
+  setCurrentTimelineIndex(0);
+};
+
+// Ganti bagian HEADER SECTION - MENURU dengan kode berikut:
 
 {/* HEADER SECTION - MENURU dengan efek PINNED */}
 <div
@@ -4544,7 +4851,8 @@ const handleTextHover = () => {
           transition: 'box-shadow 0.3s ease, padding 0.05s linear',
           fontSize: '24px',
           cursor: 'pointer',
-          opacity: 1
+          opacity: 1,
+          zIndex: 1001
         }}
         onMouseEnter={(e) => {
           e.currentTarget.style.boxShadow = '0 12px 40px rgba(237, 27, 60, 0.4)';
@@ -4598,8 +4906,7 @@ const handleTextHover = () => {
       alignItems: 'center',
       justifyContent: 'center',
       padding: '40px',
-      boxSizing: 'border-box',
-      animation: 'fadeIn 0.3s ease'
+      boxSizing: 'border-box'
     }}
     onClick={closeGreetingModal}
   >
@@ -4612,8 +4919,7 @@ const handleTextHover = () => {
         padding: '60px',
         position: 'relative',
         maxHeight: '85vh',
-        overflowY: 'auto',
-        animation: 'slideUp 0.4s ease'
+        overflowY: 'auto'
       }}
       onClick={(e) => e.stopPropagation()}
     >
@@ -4645,10 +4951,12 @@ const handleTextHover = () => {
           gap: '16px',
           marginBottom: '20px'
         }}>
+          {/* Icon Jam */}
           <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <circle cx="12" cy="12" r="10" stroke="#000000" strokeWidth="1.5"/>
             <polyline points="12 6 12 12 16 14" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
+          {/* Icon Panah */}
           <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ED1B3C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
@@ -4876,8 +5184,6 @@ const handleTextHover = () => {
     </svg>
   </div>
 )}
-
-            
 
 
 
