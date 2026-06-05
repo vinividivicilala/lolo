@@ -3611,12 +3611,13 @@ const handleTextHover = () => {
 
 
 
+
 @keyframes bounce {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(5px); }
   }
-
-@keyframes pulse {
+  
+  @keyframes pulse {
     0% {
       box-shadow: 0 0 0 0 rgba(237, 27, 60, 0.7);
     }
@@ -3642,8 +3643,8 @@ const handleTextHover = () => {
   
   @keyframes radarWave {
     0% {
-      width: 24px;
-      height: 24px;
+      width: 20px;
+      height: 20px;
       opacity: 0.6;
     }
     100% {
@@ -3663,9 +3664,6 @@ const handleTextHover = () => {
       transform: translateY(0);
     }
   }
-  
-  
-
 
 
 
@@ -4569,7 +4567,7 @@ const handleTextHover = () => {
   </div>
 </div>
 
-{/* MODAL MAINTENANCE - Popup di sisi ucapan */}
+// MODAL MAINTENANCE - Popup di TENGAH LAYAR (paling atas)
 {showMaintenanceModal && (
   <div
     style={{
@@ -4578,9 +4576,9 @@ const handleTextHover = () => {
       left: 0,
       right: 0,
       bottom: 0,
-      backgroundColor: 'rgba(0, 0, 0, 0.6)',
-      backdropFilter: 'blur(4px)',
-      zIndex: 10000,
+      backgroundColor: 'rgba(0, 0, 0, 0.8)',
+      backdropFilter: 'blur(8px)',
+      zIndex: 99999,
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center'
@@ -4590,15 +4588,15 @@ const handleTextHover = () => {
       ref={modalRef}
       style={{
         position: 'relative',
-        maxWidth: '600px',
+        maxWidth: '650px',
         width: '90%',
         maxHeight: '85vh',
         backgroundColor: '#ffffff',
         borderRadius: '32px',
-        padding: '0px',
-        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.3)',
-        overflow: 'hidden',
-        animation: 'modalSlideUp 0.3s ease'
+        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+        overflow: 'auto',
+        animation: 'modalSlideUp 0.3s ease',
+        margin: 'auto'
       }}
     >
       {/* Header Modal */}
@@ -4609,16 +4607,17 @@ const handleTextHover = () => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          borderBottom: '1px solid rgba(0,0,0,0.1)'
+          borderBottom: '1px solid rgba(0,0,0,0.1)',
+          position: 'sticky',
+          top: 0,
+          zIndex: 10
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          {/* Jam Icon */}
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <circle cx="12" cy="12" r="10" stroke="#000000" strokeWidth="1.8"/>
             <polyline points="12 6 12 12 16 14" stroke="#000000" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
-          {/* Info Icon */}
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <circle cx="12" cy="12" r="10" stroke="#000000" strokeWidth="1.8"/>
             <line x1="12" y1="8" x2="12" y2="12" stroke="#000000" strokeWidth="1.8" strokeLinecap="round"/>
@@ -4633,8 +4632,12 @@ const handleTextHover = () => {
             fontSize: '28px',
             cursor: 'pointer',
             color: '#000000',
-            padding: '4px 8px'
+            padding: '4px 8px',
+            borderRadius: '50%',
+            transition: 'background 0.2s'
           }}
+          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.1)'}
+          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
         >
           ✕
         </button>
@@ -4693,13 +4696,13 @@ const handleTextHover = () => {
           MAINTENANCE TIMELINE
         </div>
 
-        {/* Timeline Items */}
+        {/* Timeline Items - Perbaikan posisi titik bulat di tengah garis */}
         <div style={{ position: 'relative', paddingLeft: '30px' }}>
-          {/* Garis vertikal putus-putus */}
+          {/* Garis vertikal putus-putus - posisi di tengah titik */}
           <div
             style={{
               position: 'absolute',
-              left: '8px',
+              left: '19px',
               top: '12px',
               bottom: '40px',
               width: '2px',
@@ -4717,37 +4720,55 @@ const handleTextHover = () => {
                 key={item.id}
                 style={{
                   position: 'relative',
-                  marginBottom: '32px',
+                  marginBottom: '40px',
                   display: 'flex',
                   alignItems: 'flex-start',
                   gap: '20px'
                 }}
               >
-                {/* Titik bulat dengan animasi kedap kedip untuk item aktif */}
+                {/* Titik bulat di TENGAH garis */}
                 <div
                   style={{
                     position: 'relative',
-                    width: '20px',
-                    height: '20px',
+                    width: '38px',
+                    height: '38px',
                     flexShrink: 0,
-                    marginTop: '4px'
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginTop: '0px'
                   }}
                 >
+                  {/* Garis horizontal penghubung dari titik ke judul */}
                   <div
                     style={{
-                      width: '100%',
-                      height: '100%',
+                      position: 'absolute',
+                      left: '38px',
+                      top: '50%',
+                      width: '20px',
+                      height: '2px',
+                      backgroundColor: isCompleted ? '#ED1B3C' : (isActive ? '#ED1B3C' : '#cccccc'),
+                      transform: 'translateY(-50%)'
+                    }}
+                  />
+                  
+                  {/* Titik bulat utama */}
+                  <div
+                    style={{
+                      width: '16px',
+                      height: '16px',
                       borderRadius: '50%',
                       backgroundColor: isCompleted ? '#ED1B3C' : (isActive ? '#ED1B3C' : '#cccccc'),
                       border: isActive ? '2px solid rgba(237, 27, 60, 0.4)' : 'none',
                       boxShadow: isActive ? '0 0 0 0 rgba(237, 27, 60, 0.7)' : 'none',
-                      animation: isActive ? 'pulse 1.5s infinite' : 'none'
+                      animation: isActive ? 'pulse 1.5s infinite' : 'none',
+                      zIndex: 2
                     }}
                   />
                 </div>
 
-                {/* Konten timeline */}
-                <div style={{ flex: 1 }}>
+                {/* Konten timeline - dengan garis penghubung dari titik */}
+                <div style={{ flex: 1, paddingLeft: '10px' }}>
                   <div style={{
                     display: 'flex',
                     alignItems: 'baseline',
@@ -4819,7 +4840,7 @@ const handleTextHover = () => {
             );
           })}
 
-          {/* Titik akhir dengan animasi kedap kedip pemancar */}
+          {/* Titik akhir dengan animasi kedap kedip pemancar - juga terhubung garis */}
           <div
             style={{
               position: 'relative',
@@ -4832,15 +4853,32 @@ const handleTextHover = () => {
             <div
               style={{
                 position: 'relative',
-                width: '24px',
-                height: '24px',
-                flexShrink: 0
+                width: '38px',
+                height: '38px',
+                flexShrink: 0,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
               }}
             >
+              {/* Garis horizontal penghubung ke titik akhir */}
               <div
                 style={{
-                  width: '100%',
-                  height: '100%',
+                  position: 'absolute',
+                  left: '38px',
+                  top: '50%',
+                  width: '20px',
+                  height: '2px',
+                  backgroundColor: '#ED1B3C',
+                  transform: 'translateY(-50%)'
+                }}
+              />
+              
+              {/* Titik pemancar */}
+              <div
+                style={{
+                  width: '20px',
+                  height: '20px',
                   borderRadius: '50%',
                   backgroundColor: '#ED1B3C',
                   boxShadow: '0 0 0 0 rgba(237, 27, 60, 0.8)',
@@ -4859,11 +4897,13 @@ const handleTextHover = () => {
                   height: '40px',
                   borderRadius: '50%',
                   backgroundColor: 'rgba(237, 27, 60, 0.2)',
-                  animation: 'radarWave 1.5s infinite'
+                  animation: 'radarWave 1.5s infinite',
+                  pointerEvents: 'none'
                 }}
               />
             </div>
-            <div style={{ flex: 1 }}>
+            
+            <div style={{ flex: 1, paddingLeft: '10px' }}>
               <div style={{
                 fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
                 fontSize: '22px',
@@ -4888,6 +4928,9 @@ const handleTextHover = () => {
     </div>
   </div>
 )}
+
+        
+
 
 {/* SCROLL DOWN - Teks yang mengikuti cursor */}
 {showScrollDown && !isLoading && (
