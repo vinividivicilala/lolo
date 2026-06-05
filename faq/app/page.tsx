@@ -967,40 +967,34 @@ const scrollDownRef = useRef<HTMLDivElement>(null);
 
 
 
-
-
-
-  
-
-  // Data timeline maintenance
 const maintenanceTimeline = [
-  { 
-    title: "MAINTENANCE START", 
-    description: "Mulai pemeliharaan sistem Menuru", 
+  {
+    title: "MAINTENANCE START",
+    description: "Mulai pemeliharaan sistem Menuru",
     time: "02 Juni 2026, 08:00 WIB",
     status: "completed"
   },
-  { 
-    title: "DATABASE MIGRATION", 
-    description: "Migrasi database ke server baru", 
+  {
+    title: "DATABASE MIGRATION",
+    description: "Migrasi database ke server baru",
     time: "03 Juni 2026, 10:30 WIB",
     status: "in-progress"
   },
-  { 
-    title: "UI/UX ENHANCEMENT", 
-    description: "Peningkatan antarmuka pengguna", 
+  {
+    title: "UI/UX ENHANCEMENT",
+    description: "Peningkatan antarmuka pengguna",
     time: "04 Juni 2026, 09:00 WIB",
     status: "pending"
   },
-  { 
-    title: "SECURITY UPDATE", 
-    description: "Update sistem keamanan terbaru", 
+  {
+    title: "SECURITY UPDATE",
+    description: "Update sistem keamanan terbaru",
     time: "05 Juni 2026, 14:00 WIB",
     status: "pending"
   },
-  { 
-    title: "LAUNCH NEW FEATURES", 
-    description: "Peluncuran fitur-fitur baru", 
+  {
+    title: "LAUNCH NEW FEATURES",
+    description: "Peluncuran fitur-fitur baru",
     time: "06 Juni 2026, 20:00 WIB",
     status: "pending"
   }
@@ -1008,7 +1002,10 @@ const maintenanceTimeline = [
 
 
 
-  
+
+
+
+
 
 
   
