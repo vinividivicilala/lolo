@@ -977,7 +977,7 @@ const headerTextRef = useRef<HTMLDivElement>(null);
 const headerSectionRef = useRef<HTMLDivElement>(null);
 const greetingRef = useRef<HTMLDivElement>(null);
 const scrollDownRef = useRef<HTMLDivElement>(null);
-const modalRef = useRef<HTMLDivElement>(null);
+
 
 
 
