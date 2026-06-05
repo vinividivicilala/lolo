@@ -191,7 +191,8 @@ const defaultCommunities = [
 ];
 
 
-// Data timeline maintenance
+
+
 const timelineData = [
   { id: 1, day: "Day 1", date: "June 5, 2026", title: "Initial Setup", description: "Server configuration and domain setup", status: "completed" },
   { id: 2, day: "Day 2", date: "June 6, 2026", title: "Database Migration", description: "Migrating data to new database system", status: "completed" },
@@ -199,6 +200,7 @@ const timelineData = [
   { id: 4, day: "Day 4", date: "June 8, 2026", title: "Feature Testing", description: "Testing all new features", status: "pending" },
   { id: 5, day: "Day 5", date: "June 9, 2026", title: "Launch Preparation", description: "Final checks and deployment", status: "pending" }
 ];
+
 
 
 
@@ -3611,8 +3613,7 @@ const handleTextHover = () => {
 
 
 
-
-@keyframes bounce {
+  @keyframes bounce {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(5px); }
   }
@@ -3634,7 +3635,7 @@ const handleTextHover = () => {
       box-shadow: 0 0 0 0 rgba(237, 27, 60, 0.8);
     }
     70% {
-      box-shadow: 0 0 0 15px rgba(237, 27, 60, 0);
+      box-shadow: 0 0 0 12px rgba(237, 27, 60, 0);
     }
     100% {
       box-shadow: 0 0 0 0 rgba(237, 27, 60, 0);
@@ -3643,13 +3644,13 @@ const handleTextHover = () => {
   
   @keyframes radarWave {
     0% {
-      width: 20px;
-      height: 20px;
-      opacity: 0.6;
+      width: 14px;
+      height: 14px;
+      opacity: 0.5;
     }
     100% {
-      width: 60px;
-      height: 60px;
+      width: 40px;
+      height: 40px;
       opacity: 0;
     }
   }
@@ -3664,9 +3665,6 @@ const handleTextHover = () => {
       transform: translateY(0);
     }
   }
-
-
-
 
 
 
@@ -4567,7 +4565,7 @@ const handleTextHover = () => {
   </div>
 </div>
 
-// MODAL MAINTENANCE - Popup di TENGAH LAYAR (paling atas)
+
 {showMaintenanceModal && (
   <div
     style={{
@@ -4643,7 +4641,7 @@ const handleTextHover = () => {
         </button>
       </div>
 
-      {/* Pesan Maintenance */}
+      {/* Pesan Maintenance - tanpa emoticon */}
       <div
         style={{
           padding: '32px',
@@ -4661,8 +4659,7 @@ const handleTextHover = () => {
           alignItems: 'center',
           gap: '12px'
         }}>
-          <span>🔧</span>
-          <span>Under Maintenance</span>
+          <span>UNDER MAINTENANCE</span>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
@@ -4696,22 +4693,21 @@ const handleTextHover = () => {
           MAINTENANCE TIMELINE
         </div>
 
-        {/* Timeline Items - Perbaikan posisi titik bulat di tengah garis */}
-        <div style={{ position: 'relative', paddingLeft: '30px' }}>
-          {/* Garis vertikal putus-putus - posisi di tengah titik */}
+        {/* Timeline Items */}
+        <div style={{ position: 'relative', paddingLeft: '20px' }}>
+          {/* Garis vertikal lurus (bukan putus-putus) sebagai jalur utama */}
           <div
             style={{
               position: 'absolute',
-              left: '19px',
-              top: '12px',
-              bottom: '40px',
+              left: '16px',
+              top: '20px',
+              bottom: '50px',
               width: '2px',
-              background: 'repeating-linear-gradient(0deg, #cccccc 0px, #cccccc 8px, transparent 8px, transparent 16px)'
+              backgroundColor: '#e0e0e0'
             }}
           />
 
           {timelineData.map((item, index) => {
-            const isLast = index === timelineData.length - 1;
             const isActive = item.status === 'in-progress';
             const isCompleted = item.status === 'completed';
             
@@ -4723,42 +4719,40 @@ const handleTextHover = () => {
                   marginBottom: '40px',
                   display: 'flex',
                   alignItems: 'flex-start',
-                  gap: '20px'
+                  gap: '0px'
                 }}
               >
-                {/* Titik bulat di TENGAH garis */}
+                {/* Titik bulat yang menyatu dengan garis vertikal */}
                 <div
                   style={{
                     position: 'relative',
-                    width: '38px',
-                    height: '38px',
+                    width: '32px',
                     flexShrink: 0,
                     display: 'flex',
-                    alignItems: 'center',
                     justifyContent: 'center',
-                    marginTop: '0px'
+                    marginTop: '4px'
                   }}
                 >
-                  {/* Garis horizontal penghubung dari titik ke judul */}
+                  {/* Garis horizontal PUTUS-PUTUS (dashed) dari titik ke judul */}
                   <div
                     style={{
                       position: 'absolute',
-                      left: '38px',
+                      left: '16px',
                       top: '50%',
-                      width: '20px',
-                      height: '2px',
-                      backgroundColor: isCompleted ? '#ED1B3C' : (isActive ? '#ED1B3C' : '#cccccc'),
+                      width: '24px',
+                      height: '1px',
+                      background: `repeating-linear-gradient(90deg, ${isCompleted ? '#ED1B3C' : (isActive ? '#ED1B3C' : '#cccccc')} 0px, ${isCompleted ? '#ED1B3C' : (isActive ? '#ED1B3C' : '#cccccc')} 6px, transparent 6px, transparent 12px)`,
                       transform: 'translateY(-50%)'
                     }}
                   />
                   
-                  {/* Titik bulat utama */}
+                  {/* Titik bulat di atas garis vertikal */}
                   <div
                     style={{
-                      width: '16px',
-                      height: '16px',
+                      width: '12px',
+                      height: '12px',
                       borderRadius: '50%',
-                      backgroundColor: isCompleted ? '#ED1B3C' : (isActive ? '#ED1B3C' : '#cccccc'),
+                      backgroundColor: isCompleted ? '#ED1B3C' : (isActive ? '#ED1B3C' : '#d0d0d0'),
                       border: isActive ? '2px solid rgba(237, 27, 60, 0.4)' : 'none',
                       boxShadow: isActive ? '0 0 0 0 rgba(237, 27, 60, 0.7)' : 'none',
                       animation: isActive ? 'pulse 1.5s infinite' : 'none',
@@ -4767,8 +4761,8 @@ const handleTextHover = () => {
                   />
                 </div>
 
-                {/* Konten timeline - dengan garis penghubung dari titik */}
-                <div style={{ flex: 1, paddingLeft: '10px' }}>
+                {/* Konten timeline */}
+                <div style={{ flex: 1, paddingLeft: '16px' }}>
                   <div style={{
                     display: 'flex',
                     alignItems: 'baseline',
@@ -4778,7 +4772,7 @@ const handleTextHover = () => {
                   }}>
                     <span style={{
                       fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                      fontSize: '20px',
+                      fontSize: '18px',
                       fontWeight: '600',
                       color: '#ED1B3C'
                     }}>
@@ -4786,7 +4780,7 @@ const handleTextHover = () => {
                     </span>
                     <span style={{
                       fontFamily: "'Questrial', sans-serif",
-                      fontSize: '14px',
+                      fontSize: '13px',
                       color: '#999999'
                     }}>
                       {item.date}
@@ -4794,10 +4788,10 @@ const handleTextHover = () => {
                     {isActive && (
                       <span style={{
                         fontFamily: "'Questrial', sans-serif",
-                        fontSize: '12px',
+                        fontSize: '11px',
                         backgroundColor: '#ED1B3C',
                         color: '#000000',
-                        padding: '4px 12px',
+                        padding: '3px 10px',
                         borderRadius: '60px',
                         fontWeight: '600'
                       }}>
@@ -4807,19 +4801,19 @@ const handleTextHover = () => {
                     {isCompleted && (
                       <span style={{
                         fontFamily: "'Questrial', sans-serif",
-                        fontSize: '12px',
+                        fontSize: '11px',
                         backgroundColor: '#e0e0e0',
                         color: '#666666',
-                        padding: '4px 12px',
+                        padding: '3px 10px',
                         borderRadius: '60px'
                       }}>
-                        ✓ COMPLETED
+                        COMPLETED
                       </span>
                     )}
                   </div>
                   <div style={{
                     fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                    fontSize: '22px',
+                    fontSize: '20px',
                     fontWeight: '500',
                     color: '#000000',
                     marginBottom: '6px',
@@ -4829,7 +4823,7 @@ const handleTextHover = () => {
                   </div>
                   <div style={{
                     fontFamily: "'Questrial', sans-serif",
-                    fontSize: '15px',
+                    fontSize: '14px',
                     color: '#666666',
                     lineHeight: '1.4'
                   }}>
@@ -4840,45 +4834,43 @@ const handleTextHover = () => {
             );
           })}
 
-          {/* Titik akhir dengan animasi kedap kedip pemancar - juga terhubung garis */}
+          {/* Titik akhir dengan animasi kedap kedip pemancar */}
           <div
             style={{
               position: 'relative',
               display: 'flex',
               alignItems: 'flex-start',
-              gap: '20px',
+              gap: '0px',
               marginTop: '8px'
             }}
           >
             <div
               style={{
                 position: 'relative',
-                width: '38px',
-                height: '38px',
+                width: '32px',
                 flexShrink: 0,
                 display: 'flex',
-                alignItems: 'center',
                 justifyContent: 'center'
               }}
             >
-              {/* Garis horizontal penghubung ke titik akhir */}
+              {/* Garis horizontal PUTUS-PUTUS ke titik akhir */}
               <div
                 style={{
                   position: 'absolute',
-                  left: '38px',
+                  left: '16px',
                   top: '50%',
-                  width: '20px',
-                  height: '2px',
-                  backgroundColor: '#ED1B3C',
+                  width: '24px',
+                  height: '1px',
+                  background: `repeating-linear-gradient(90deg, #ED1B3C 0px, #ED1B3C 6px, transparent 6px, transparent 12px)`,
                   transform: 'translateY(-50%)'
                 }}
               />
               
-              {/* Titik pemancar */}
+              {/* Titik pemancar (kedap kedip) */}
               <div
                 style={{
-                  width: '20px',
-                  height: '20px',
+                  width: '14px',
+                  height: '14px',
                   borderRadius: '50%',
                   backgroundColor: '#ED1B3C',
                   boxShadow: '0 0 0 0 rgba(237, 27, 60, 0.8)',
@@ -4891,22 +4883,22 @@ const handleTextHover = () => {
                 style={{
                   position: 'absolute',
                   top: '50%',
-                  left: '50%',
+                  left: '16px',
                   transform: 'translate(-50%, -50%)',
-                  width: '40px',
-                  height: '40px',
+                  width: '30px',
+                  height: '30px',
                   borderRadius: '50%',
-                  backgroundColor: 'rgba(237, 27, 60, 0.2)',
+                  backgroundColor: 'rgba(237, 27, 60, 0.15)',
                   animation: 'radarWave 1.5s infinite',
                   pointerEvents: 'none'
                 }}
               />
             </div>
             
-            <div style={{ flex: 1, paddingLeft: '10px' }}>
+            <div style={{ flex: 1, paddingLeft: '16px' }}>
               <div style={{
                 fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                fontSize: '22px',
+                fontSize: '20px',
                 fontWeight: '600',
                 color: '#ED1B3C',
                 marginBottom: '6px',
@@ -4916,10 +4908,10 @@ const handleTextHover = () => {
               </div>
               <div style={{
                 fontFamily: "'Questrial', sans-serif",
-                fontSize: '15px',
+                fontSize: '14px',
                 color: '#666666'
               }}>
-                Website will be back online with amazing new features! 🚀
+                Website will be back online with amazing new features!
               </div>
             </div>
           </div>
@@ -4928,7 +4920,7 @@ const handleTextHover = () => {
     </div>
   </div>
 )}
-
+            
         
 
 
