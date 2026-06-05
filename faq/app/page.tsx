@@ -192,7 +192,6 @@ const defaultCommunities = [
 
 
 
-
 const timelineData = [
   { id: 1, day: "Day 1", date: "June 5, 2026", title: "Initial Setup", description: "Server configuration and domain setup", status: "completed" },
   { id: 2, day: "Day 2", date: "June 6, 2026", title: "Database Migration", description: "Migrating data to new database system", status: "completed" },
@@ -200,7 +199,6 @@ const timelineData = [
   { id: 4, day: "Day 4", date: "June 8, 2026", title: "Feature Testing", description: "Testing all new features", status: "pending" },
   { id: 5, day: "Day 5", date: "June 9, 2026", title: "Launch Preparation", description: "Final checks and deployment", status: "pending" }
 ];
-
 
 
 
@@ -3617,8 +3615,9 @@ const handleTextHover = () => {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(5px); }
   }
-  
-  @keyframes pulse {
+
+
+   @keyframes pulse {
     0% {
       box-shadow: 0 0 0 0 rgba(237, 27, 60, 0.7);
     }
@@ -3635,7 +3634,7 @@ const handleTextHover = () => {
       box-shadow: 0 0 0 0 rgba(237, 27, 60, 0.8);
     }
     70% {
-      box-shadow: 0 0 0 12px rgba(237, 27, 60, 0);
+      box-shadow: 0 0 0 14px rgba(237, 27, 60, 0);
     }
     100% {
       box-shadow: 0 0 0 0 rgba(237, 27, 60, 0);
@@ -3644,13 +3643,13 @@ const handleTextHover = () => {
   
   @keyframes radarWave {
     0% {
-      width: 14px;
-      height: 14px;
+      width: 16px;
+      height: 16px;
       opacity: 0.5;
     }
     100% {
-      width: 40px;
-      height: 40px;
+      width: 48px;
+      height: 48px;
       opacity: 0;
     }
   }
@@ -3665,7 +3664,8 @@ const handleTextHover = () => {
       transform: translateY(0);
     }
   }
-
+  
+ 
 
 
 
@@ -4565,7 +4565,6 @@ const handleTextHover = () => {
   </div>
 </div>
 
-
 {showMaintenanceModal && (
   <div
     style={{
@@ -4641,7 +4640,7 @@ const handleTextHover = () => {
         </button>
       </div>
 
-      {/* Pesan Maintenance - tanpa emoticon */}
+      {/* Pesan Maintenance */}
       <div
         style={{
           padding: '32px',
@@ -4666,7 +4665,7 @@ const handleTextHover = () => {
         </div>
         <div style={{
           fontFamily: "'Questrial', sans-serif",
-          fontSize: '18px',
+          fontSize: '18px",
           color: '#333333',
           lineHeight: '1.5'
         }}>
@@ -4675,7 +4674,7 @@ const handleTextHover = () => {
         </div>
       </div>
 
-      {/* Timeline Section */}
+      {/* Timeline Section - SEMUA GARIS DASHED */}
       <div
         style={{
           padding: '32px',
@@ -4693,62 +4692,62 @@ const handleTextHover = () => {
           MAINTENANCE TIMELINE
         </div>
 
-        {/* Timeline Items */}
-        <div style={{ position: 'relative', paddingLeft: '20px' }}>
-          {/* Garis vertikal lurus (bukan putus-putus) sebagai jalur utama */}
-          <div
-            style={{
-              position: 'absolute',
-              left: '16px',
-              top: '20px',
-              bottom: '50px',
-              width: '2px',
-              backgroundColor: '#e0e0e0'
-            }}
-          />
-
+        <div style={{ position: 'relative' }}>
           {timelineData.map((item, index) => {
             const isActive = item.status === 'in-progress';
             const isCompleted = item.status === 'completed';
+            const isLast = index === timelineData.length - 1;
+            const lineColor = isCompleted ? '#ED1B3C' : (isActive ? '#ED1B3C' : '#cccccc');
             
             return (
               <div
                 key={item.id}
                 style={{
                   position: 'relative',
-                  marginBottom: '40px',
                   display: 'flex',
                   alignItems: 'flex-start',
-                  gap: '0px'
+                  marginBottom: '0px'
                 }}
               >
-                {/* Titik bulat yang menyatu dengan garis vertikal */}
+                {/* Kolom kiri untuk garis dan titik */}
                 <div
                   style={{
                     position: 'relative',
-                    width: '32px',
+                    width: '60px',
                     flexShrink: 0,
-                    display: 'flex',
-                    justifyContent: 'center',
-                    marginTop: '4px'
+                    minHeight: '100px'
                   }}
                 >
-                  {/* Garis horizontal PUTUS-PUTUS (dashed) dari titik ke judul */}
+                  {/* Garis vertikal DASHED (putus-putus) */}
                   <div
                     style={{
                       position: 'absolute',
-                      left: '16px',
-                      top: '50%',
-                      width: '24px',
-                      height: '1px',
-                      background: `repeating-linear-gradient(90deg, ${isCompleted ? '#ED1B3C' : (isActive ? '#ED1B3C' : '#cccccc')} 0px, ${isCompleted ? '#ED1B3C' : (isActive ? '#ED1B3C' : '#cccccc')} 6px, transparent 6px, transparent 12px)`,
-                      transform: 'translateY(-50%)'
+                      left: '28px',
+                      top: '0px',
+                      bottom: isLast ? '50px' : '-20px',
+                      width: '2px',
+                      background: `repeating-linear-gradient(to bottom, ${lineColor} 0px, ${lineColor} 6px, transparent 6px, transparent 12px)`
                     }}
                   />
                   
-                  {/* Titik bulat di atas garis vertikal */}
+                  {/* Garis horizontal DASHED dari titik ke kanan (menuju judul) */}
                   <div
                     style={{
+                      position: 'absolute',
+                      left: '32px',
+                      top: '16px',
+                      right: '0px',
+                      height: '2px',
+                      background: `repeating-linear-gradient(to right, ${lineColor} 0px, ${lineColor} 6px, transparent 6px, transparent 12px)`
+                    }}
+                  />
+                  
+                  {/* Titik bulat di TENGAH garis (di persimpangan) */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      left: '26px',
+                      top: '14px',
                       width: '12px',
                       height: '12px',
                       borderRadius: '50%',
@@ -4756,13 +4755,13 @@ const handleTextHover = () => {
                       border: isActive ? '2px solid rgba(237, 27, 60, 0.4)' : 'none',
                       boxShadow: isActive ? '0 0 0 0 rgba(237, 27, 60, 0.7)' : 'none',
                       animation: isActive ? 'pulse 1.5s infinite' : 'none',
-                      zIndex: 2
+                      zIndex: 3
                     }}
                   />
                 </div>
 
                 {/* Konten timeline */}
-                <div style={{ flex: 1, paddingLeft: '16px' }}>
+                <div style={{ flex: 1, paddingBottom: '32px', paddingLeft: '8px' }}>
                   <div style={{
                     display: 'flex',
                     alignItems: 'baseline',
@@ -4834,68 +4833,78 @@ const handleTextHover = () => {
             );
           })}
 
-          {/* Titik akhir dengan animasi kedap kedip pemancar */}
+          {/* Titik AKHIR - dengan animasi kedap kedip pemancar */}
           <div
             style={{
               position: 'relative',
               display: 'flex',
-              alignItems: 'flex-start',
-              gap: '0px',
-              marginTop: '8px'
+              alignItems: 'flex-start'
             }}
           >
             <div
               style={{
                 position: 'relative',
-                width: '32px',
+                width: '60px',
                 flexShrink: 0,
-                display: 'flex',
-                justifyContent: 'center'
+                minHeight: '50px'
               }}
             >
-              {/* Garis horizontal PUTUS-PUTUS ke titik akhir */}
+              {/* Garis vertikal DASHED terakhir menuju titik akhir */}
               <div
                 style={{
                   position: 'absolute',
-                  left: '16px',
-                  top: '50%',
-                  width: '24px',
-                  height: '1px',
-                  background: `repeating-linear-gradient(90deg, #ED1B3C 0px, #ED1B3C 6px, transparent 6px, transparent 12px)`,
-                  transform: 'translateY(-50%)'
+                  left: '28px',
+                  top: '0px',
+                  bottom: '30px',
+                  width: '2px',
+                  background: `repeating-linear-gradient(to bottom, #ED1B3C 0px, #ED1B3C 6px, transparent 6px, transparent 12px)`
+                }}
+              />
+              
+              {/* Garis horizontal DASHED ke kanan */}
+              <div
+                style={{
+                  position: 'absolute',
+                  left: '32px',
+                  top: '16px',
+                  right: '0px',
+                  height: '2px',
+                  background: `repeating-linear-gradient(to right, #ED1B3C 0px, #ED1B3C 6px, transparent 6px, transparent 12px)`
                 }}
               />
               
               {/* Titik pemancar (kedap kedip) */}
               <div
                 style={{
-                  width: '14px',
-                  height: '14px',
+                  position: 'absolute',
+                  left: '24px',
+                  top: '12px',
+                  width: '16px',
+                  height: '16px',
                   borderRadius: '50%',
                   backgroundColor: '#ED1B3C',
                   boxShadow: '0 0 0 0 rgba(237, 27, 60, 0.8)',
                   animation: 'radarPulse 1.5s infinite',
-                  position: 'relative',
-                  zIndex: 2
+                  zIndex: 3
                 }}
               />
               <div
                 style={{
                   position: 'absolute',
-                  top: '50%',
-                  left: '16px',
-                  transform: 'translate(-50%, -50%)',
-                  width: '30px',
-                  height: '30px',
+                  left: '32px',
+                  top: '20px',
+                  width: '32px',
+                  height: '32px',
                   borderRadius: '50%',
                   backgroundColor: 'rgba(237, 27, 60, 0.15)',
                   animation: 'radarWave 1.5s infinite',
+                  transform: 'translate(-50%, -50%)',
                   pointerEvents: 'none'
                 }}
               />
             </div>
             
-            <div style={{ flex: 1, paddingLeft: '16px' }}>
+            <div style={{ flex: 1, paddingLeft: '8px', paddingBottom: '20px' }}>
               <div style={{
                 fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
                 fontSize: '20px',
@@ -4920,10 +4929,16 @@ const handleTextHover = () => {
     </div>
   </div>
 )}
+
+
+
+
+
+
+
+
+
             
-        
-
-
 {/* SCROLL DOWN - Teks yang mengikuti cursor */}
 {showScrollDown && !isLoading && (
   <div
