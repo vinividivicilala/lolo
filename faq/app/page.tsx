@@ -193,13 +193,12 @@ const defaultCommunities = [
 
 
 const timelineData = [
-  { id: 1, day: "Day 1", date: "June 5, 2026", title: "Initial Setup", description: "Server configuration and domain setup", status: "completed" },
-  { id: 2, day: "Day 2", date: "June 6, 2026", title: "Database Migration", description: "Migrating data to new database system", status: "completed" },
-  { id: 3, day: "Day 3", date: "June 7, 2026", title: "UI/UX Enhancement", description: "Improving user interface and experience", status: "in-progress" },
-  { id: 4, day: "Day 4", date: "June 8, 2026", title: "Feature Testing", description: "Testing all new features", status: "pending" },
-  { id: 5, day: "Day 5", date: "June 9, 2026", title: "Launch Preparation", description: "Final checks and deployment", status: "pending" }
+  { id: 1, day: "Day 1", date: "June 5, 2026", title: "Initial Setup", description: "Server configuration and domain setup", status: "completed", color: "#A2EA13" },
+  { id: 2, day: "Day 2", date: "June 6, 2026", title: "Database Migration", description: "Migrating data to new database system", status: "completed", color: "#A2EA13" },
+  { id: 3, day: "Day 3", date: "June 7, 2026", title: "UI/UX Enhancement", description: "Improving user interface and experience", status: "in-progress", color: "#0052FF" },
+  { id: 4, day: "Day 4", date: "June 8, 2026", title: "Feature Testing", description: "Testing all new features", status: "pending", color: "#90E9FF" },
+  { id: 5, day: "Day 5", date: "June 9, 2026", title: "Launch Preparation", description: "Final checks and deployment", status: "pending", color: "#90E9FF" }
 ];
-
 
 
 
@@ -3617,39 +3616,39 @@ const handleTextHover = () => {
   }
 
 
-   @keyframes pulse {
+  @keyframes pulse {
     0% {
-      box-shadow: 0 0 0 0 rgba(237, 27, 60, 0.7);
+      box-shadow: 0 0 0 0 rgba(0, 82, 255, 0.7);
     }
     70% {
-      box-shadow: 0 0 0 10px rgba(237, 27, 60, 0);
+      box-shadow: 0 0 0 10px rgba(0, 82, 255, 0);
     }
     100% {
-      box-shadow: 0 0 0 0 rgba(237, 27, 60, 0);
+      box-shadow: 0 0 0 0 rgba(0, 82, 255, 0);
     }
   }
   
   @keyframes radarPulse {
     0% {
-      box-shadow: 0 0 0 0 rgba(237, 27, 60, 0.8);
+      box-shadow: 0 0 0 0 rgba(0, 82, 255, 0.8);
     }
     70% {
-      box-shadow: 0 0 0 14px rgba(237, 27, 60, 0);
+      box-shadow: 0 0 0 14px rgba(0, 82, 255, 0);
     }
     100% {
-      box-shadow: 0 0 0 0 rgba(237, 27, 60, 0);
+      box-shadow: 0 0 0 0 rgba(0, 82, 255, 0);
     }
   }
   
   @keyframes radarWave {
     0% {
-      width: 16px;
-      height: 16px;
+      width: 18px;
+      height: 18px;
       opacity: 0.5;
     }
     100% {
-      width: 48px;
-      height: 48px;
+      width: 50px;
+      height: 50px;
       opacity: 0;
     }
   }
@@ -3664,7 +3663,6 @@ const handleTextHover = () => {
       transform: translateY(0);
     }
   }
-  
  
 
 
@@ -4565,6 +4563,8 @@ const handleTextHover = () => {
   </div>
 </div>
 
+
+
 {showMaintenanceModal && (
   <div
     style={{
@@ -4585,7 +4585,7 @@ const handleTextHover = () => {
       ref={modalRef}
       style={{
         position: 'relative',
-        maxWidth: '650px',
+        maxWidth: '700px',
         width: '90%',
         maxHeight: '85vh',
         backgroundColor: '#ffffff',
@@ -4596,30 +4596,40 @@ const handleTextHover = () => {
         margin: 'auto'
       }}
     >
-      {/* Header Modal */}
+      {/* Header Modal dengan icon waktu dan tanda seru */}
       <div
         style={{
-          padding: '28px 32px',
-          backgroundColor: '#ED1B3C',
+          padding: '24px 32px',
+          backgroundColor: '#000000',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          borderBottom: '1px solid rgba(0,0,0,0.1)',
+          borderBottom: '1px solid rgba(255,255,255,0.1)',
           position: 'sticky',
           top: 0,
           zIndex: 10
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="12" cy="12" r="10" stroke="#000000" strokeWidth="1.8"/>
-            <polyline points="12 6 12 12 16 14" stroke="#000000" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+          {/* Icon Waktu */}
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="10" stroke="#ffffff" strokeWidth="1.8"/>
+            <polyline points="12 6 12 12 16 14" stroke="#ffffff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="12" cy="12" r="10" stroke="#000000" strokeWidth="1.8"/>
-            <line x1="12" y1="8" x2="12" y2="12" stroke="#000000" strokeWidth="1.8" strokeLinecap="round"/>
-            <circle cx="12" cy="16" r="1" fill="#000000"/>
+          {/* Icon Tanda Seru */}
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="10" stroke="#ffffff" strokeWidth="1.8"/>
+            <line x1="12" y1="8" x2="12" y2="12" stroke="#ffffff" strokeWidth="1.8" strokeLinecap="round"/>
+            <circle cx="12" cy="16" r="1.5" fill="#ffffff"/>
           </svg>
+          <span style={{
+            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+            fontSize: '20px',
+            fontWeight: '500',
+            color: '#ffffff'
+          }}>
+            MAINTENANCE STATUS
+          </span>
         </div>
         <button
           onClick={() => setShowMaintenanceModal(false)}
@@ -4628,12 +4638,12 @@ const handleTextHover = () => {
             border: 'none',
             fontSize: '28px',
             cursor: 'pointer',
-            color: '#000000',
+            color: '#ffffff',
             padding: '4px 8px',
             borderRadius: '50%',
             transition: 'background 0.2s'
           }}
-          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.1)'}
+          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.2)'}
           onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
         >
           ✕
@@ -4650,7 +4660,7 @@ const handleTextHover = () => {
       >
         <div style={{
           fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-          fontSize: '24px',
+          fontSize: '22px',
           fontWeight: '500',
           color: '#000000',
           marginBottom: '12px',
@@ -4658,14 +4668,11 @@ const handleTextHover = () => {
           alignItems: 'center',
           gap: '12px'
         }}>
-          <span>UNDER MAINTENANCE</span>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
+          <span>⚠️ UNDER MAINTENANCE</span>
         </div>
         <div style={{
           fontFamily: "'Questrial', sans-serif",
-          fontSize: '18px',
+          fontSize: '16px',
           color: '#333333',
           lineHeight: '1.5'
         }}>
@@ -4674,7 +4681,7 @@ const handleTextHover = () => {
         </div>
       </div>
 
-      {/* Timeline Section - SEMUA GARIS DASHED */}
+      {/* Timeline Section */}
       <div
         style={{
           padding: '32px',
@@ -4683,7 +4690,7 @@ const handleTextHover = () => {
       >
         <div style={{
           fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-          fontSize: '28px',
+          fontSize: '24px',
           fontWeight: '600',
           color: '#000000',
           marginBottom: '32px',
@@ -4692,12 +4699,24 @@ const handleTextHover = () => {
           MAINTENANCE TIMELINE
         </div>
 
-        <div style={{ position: 'relative' }}>
+        <div style={{ position: 'relative', paddingLeft: '20px' }}>
+          {/* Garis vertikal DASHED hitam - nyambung dari awal sampai akhir */}
+          <div
+            style={{
+              position: 'absolute',
+              left: '18px',
+              top: '10px',
+              bottom: '30px',
+              width: '2px',
+              background: `repeating-linear-gradient(to bottom, #000000 0px, #000000 6px, transparent 6px, transparent 12px)`
+            }}
+          />
+
           {timelineData.map((item, index) => {
             const isActive = item.status === 'in-progress';
             const isCompleted = item.status === 'completed';
             const isLast = index === timelineData.length - 1;
-            const lineColor = isCompleted ? '#ED1B3C' : (isActive ? '#ED1B3C' : '#cccccc');
+            const dotColor = item.color;
             
             return (
               <div
@@ -4706,62 +4725,66 @@ const handleTextHover = () => {
                   position: 'relative',
                   display: 'flex',
                   alignItems: 'flex-start',
-                  marginBottom: '0px'
+                  marginBottom: '36px'
                 }}
               >
-                {/* Kolom kiri untuk garis dan titik */}
+                {/* Kolom kiri untuk titik */}
                 <div
                   style={{
                     position: 'relative',
-                    width: '60px',
+                    width: '40px',
                     flexShrink: 0,
-                    minHeight: '100px'
+                    display: 'flex',
+                    justifyContent: 'center'
                   }}
                 >
-                  {/* Garis vertikal DASHED (putus-putus) */}
+                  {/* Garis horizontal DASHED hitam dari titik ke kanan */}
                   <div
                     style={{
                       position: 'absolute',
-                      left: '28px',
-                      top: '0px',
-                      bottom: isLast ? '50px' : '-20px',
-                      width: '2px',
-                      background: `repeating-linear-gradient(to bottom, ${lineColor} 0px, ${lineColor} 6px, transparent 6px, transparent 12px)`
-                    }}
-                  />
-                  
-                  {/* Garis horizontal DASHED dari titik ke kanan (menuju judul) */}
-                  <div
-                    style={{
-                      position: 'absolute',
-                      left: '32px',
-                      top: '16px',
-                      right: '0px',
-                      height: '2px',
-                      background: `repeating-linear-gradient(to right, ${lineColor} 0px, ${lineColor} 6px, transparent 6px, transparent 12px)`
-                    }}
-                  />
-                  
-                  {/* Titik bulat di TENGAH garis (di persimpangan) */}
-                  <div
-                    style={{
-                      position: 'absolute',
-                      left: '26px',
+                      left: '18px',
                       top: '14px',
-                      width: '12px',
-                      height: '12px',
+                      width: '25px',
+                      height: '2px',
+                      background: `repeating-linear-gradient(to right, #000000 0px, #000000 6px, transparent 6px, transparent 12px)`
+                    }}
+                  />
+                  
+                  {/* Titik bulat dengan warna sesuai status */}
+                  <div
+                    style={{
+                      width: '16px',
+                      height: '16px',
                       borderRadius: '50%',
-                      backgroundColor: isCompleted ? '#ED1B3C' : (isActive ? '#ED1B3C' : '#d0d0d0'),
-                      border: isActive ? '2px solid rgba(237, 27, 60, 0.4)' : 'none',
-                      boxShadow: isActive ? '0 0 0 0 rgba(237, 27, 60, 0.7)' : 'none',
+                      backgroundColor: dotColor,
+                      border: isActive ? `2px solid ${dotColor}` : 'none',
+                      boxShadow: isActive ? `0 0 0 0 ${dotColor}` : 'none',
                       animation: isActive ? 'pulse 1.5s infinite' : 'none',
-                      zIndex: 3
+                      zIndex: 3,
+                      marginTop: '5px'
                     }}
                   />
                 </div>
 
-                {/* Konten timeline */}
-                <div style={{ flex: 1, paddingBottom: '32px', paddingLeft: '8px' }}>
+                {/* Konten timeline - HOVER effect */}
+                <div 
+                  style={{ 
+                    flex: 1, 
+                    paddingLeft: '12px',
+                    cursor: 'pointer',
+                    transition: 'transform 0.2s ease, background 0.2s ease',
+                    padding: '8px 12px',
+                    borderRadius: '12px'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#f8f8f8';
+                    e.currentTarget.style.transform = 'translateX(4px)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                    e.currentTarget.style.transform = 'translateX(0)';
+                  }}
+                >
                   <div style={{
                     display: 'flex',
                     alignItems: 'baseline',
@@ -4773,7 +4796,7 @@ const handleTextHover = () => {
                       fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
                       fontSize: '18px',
                       fontWeight: '600',
-                      color: '#ED1B3C'
+                      color: '#000000'
                     }}>
                       {item.day}
                     </span>
@@ -4784,31 +4807,30 @@ const handleTextHover = () => {
                     }}>
                       {item.date}
                     </span>
-                    {isActive && (
-                      <span style={{
+                    {/* Status badge dengan hover effect */}
+                    <span 
+                      style={{
                         fontFamily: "'Questrial', sans-serif",
                         fontSize: '11px',
-                        backgroundColor: '#ED1B3C',
-                        color: '#000000',
+                        backgroundColor: item.color,
+                        color: item.status === 'pending' ? '#000000' : '#ffffff',
                         padding: '3px 10px',
                         borderRadius: '60px',
-                        fontWeight: '600'
-                      }}>
-                        IN PROGRESS
-                      </span>
-                    )}
-                    {isCompleted && (
-                      <span style={{
-                        fontFamily: "'Questrial', sans-serif",
-                        fontSize: '11px',
-                        backgroundColor: '#e0e0e0',
-                        color: '#666666',
-                        padding: '3px 10px',
-                        borderRadius: '60px'
-                      }}>
-                        COMPLETED
-                      </span>
-                    )}
+                        fontWeight: '600',
+                        transition: 'transform 0.2s ease, opacity 0.2s ease',
+                        cursor: 'pointer'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = 'scale(1.05)';
+                        e.currentTarget.style.opacity = '0.85';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = 'scale(1)';
+                        e.currentTarget.style.opacity = '1';
+                      }}
+                    >
+                      {item.status.toUpperCase()}
+                    </span>
                   </div>
                   <div style={{
                     fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
@@ -4844,59 +4866,46 @@ const handleTextHover = () => {
             <div
               style={{
                 position: 'relative',
-                width: '60px',
+                width: '40px',
                 flexShrink: 0,
-                minHeight: '50px'
+                display: 'flex',
+                justifyContent: 'center'
               }}
             >
-              {/* Garis vertikal DASHED terakhir menuju titik akhir */}
+              {/* Garis horizontal DASHED hitam ke kanan */}
               <div
                 style={{
                   position: 'absolute',
-                  left: '28px',
-                  top: '0px',
-                  bottom: '30px',
-                  width: '2px',
-                  background: `repeating-linear-gradient(to bottom, #ED1B3C 0px, #ED1B3C 6px, transparent 6px, transparent 12px)`
-                }}
-              />
-              
-              {/* Garis horizontal DASHED ke kanan */}
-              <div
-                style={{
-                  position: 'absolute',
-                  left: '32px',
-                  top: '16px',
-                  right: '0px',
+                  left: '18px',
+                  top: '14px',
+                  width: '25px',
                   height: '2px',
-                  background: `repeating-linear-gradient(to right, #ED1B3C 0px, #ED1B3C 6px, transparent 6px, transparent 12px)`
+                  background: `repeating-linear-gradient(to right, #000000 0px, #000000 6px, transparent 6px, transparent 12px)`
                 }}
               />
               
               {/* Titik pemancar (kedap kedip) */}
               <div
                 style={{
-                  position: 'absolute',
-                  left: '24px',
-                  top: '12px',
-                  width: '16px',
-                  height: '16px',
+                  width: '18px',
+                  height: '18px',
                   borderRadius: '50%',
-                  backgroundColor: '#ED1B3C',
-                  boxShadow: '0 0 0 0 rgba(237, 27, 60, 0.8)',
+                  backgroundColor: '#0052FF',
+                  boxShadow: '0 0 0 0 rgba(0, 82, 255, 0.8)',
                   animation: 'radarPulse 1.5s infinite',
-                  zIndex: 3
+                  zIndex: 3,
+                  marginTop: '4px'
                 }}
               />
               <div
                 style={{
                   position: 'absolute',
-                  left: '32px',
-                  top: '20px',
+                  left: '29px',
+                  top: '12px',
                   width: '32px',
                   height: '32px',
                   borderRadius: '50%',
-                  backgroundColor: 'rgba(237, 27, 60, 0.15)',
+                  backgroundColor: 'rgba(0, 82, 255, 0.15)',
                   animation: 'radarWave 1.5s infinite',
                   transform: 'translate(-50%, -50%)',
                   pointerEvents: 'none'
@@ -4904,12 +4913,29 @@ const handleTextHover = () => {
               />
             </div>
             
-            <div style={{ flex: 1, paddingLeft: '8px', paddingBottom: '20px' }}>
+            <div 
+              style={{ 
+                flex: 1, 
+                paddingLeft: '12px',
+                cursor: 'pointer',
+                transition: 'transform 0.2s ease, background 0.2s ease',
+                padding: '8px 12px',
+                borderRadius: '12px'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#f8f8f8';
+                e.currentTarget.style.transform = 'translateX(4px)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+                e.currentTarget.style.transform = 'translateX(0)';
+              }}
+            >
               <div style={{
                 fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
                 fontSize: '20px',
                 fontWeight: '600',
-                color: '#ED1B3C',
+                color: '#000000',
                 marginBottom: '6px',
                 letterSpacing: '-0.01em'
               }}>
@@ -4931,6 +4957,8 @@ const handleTextHover = () => {
 )}
 
 
+
+            
 
 
 
