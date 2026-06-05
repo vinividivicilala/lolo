@@ -191,14 +191,15 @@ const defaultCommunities = [
 ];
 
 
-
-const maintenanceTimeline = [
-  { title: "MAINTENANCE START", description: "Mulai pemeliharaan sistem Menuru", time: "02 Juni 2026, 08:00 WIB", status: "completed" },
-  { title: "DATABASE MIGRATION", description: "Migrasi database ke server baru", time: "03 Juni 2026, 10:30 WIB", status: "in-progress" },
-  { title: "UI/UX ENHANCEMENT", description: "Peningkatan antarmuka pengguna", time: "04 Juni 2026, 09:00 WIB", status: "pending" },
-  { title: "SECURITY UPDATE", description: "Update sistem keamanan terbaru", time: "05 Juni 2026, 14:00 WIB", status: "pending" },
-  { title: "LAUNCH NEW FEATURES", description: "Peluncuran fitur-fitur baru", time: "06 Juni 2026, 20:00 WIB", status: "pending" }
+// Data timeline maintenance
+const timelineData = [
+  { id: 1, day: "Day 1", date: "June 5, 2026", title: "Initial Setup", description: "Server configuration and domain setup", status: "completed" },
+  { id: 2, day: "Day 2", date: "June 6, 2026", title: "Database Migration", description: "Migrating data to new database system", status: "completed" },
+  { id: 3, day: "Day 3", date: "June 7, 2026", title: "UI/UX Enhancement", description: "Improving user interface and experience", status: "in-progress" },
+  { id: 4, day: "Day 4", date: "June 8, 2026", title: "Feature Testing", description: "Testing all new features", status: "pending" },
+  { id: 5, day: "Day 5", date: "June 9, 2026", title: "Launch Preparation", description: "Final checks and deployment", status: "pending" }
 ];
+
 
 
 
@@ -967,18 +968,16 @@ const [isHovering, setIsHovering] = useState(false);
 
 
 
-
 const [headerScrollProgress, setHeaderScrollProgress] = useState(0);
 const [showGreeting, setShowGreeting] = useState(false);
 const [showScrollDown, setShowScrollDown] = useState(true);
-const [showGreetingModal, setShowGreetingModal] = useState(false);
-const [currentTimelineIndex, setCurrentTimelineIndex] = useState(0);
+const [showMaintenanceModal, setShowMaintenanceModal] = useState(false);
 const [greeting, setGreeting] = useState("Good Morning");
 const headerTextRef = useRef<HTMLDivElement>(null);
 const headerSectionRef = useRef<HTMLDivElement>(null);
 const greetingRef = useRef<HTMLDivElement>(null);
 const scrollDownRef = useRef<HTMLDivElement>(null);
-
+const modalRef = useRef<HTMLDivElement>(null);
 
 
 
@@ -1248,10 +1247,6 @@ const scrollDownRef = useRef<HTMLDivElement>(null);
     }
   };
 
-
-
-
-
 // Efek untuk menentukan ucapan berdasarkan waktu
 useEffect(() => {
   const currentHour = new Date().getHours();
@@ -1267,7 +1262,7 @@ useEffect(() => {
   }
 }, []);
 
-// Efek untuk membuat teks scroll down mengikuti cursor (mouse)
+// Efek untuk membuat teks scroll down mengikuti cursor
 useEffect(() => {
   if (isLoading || !showScrollDown) return;
   
@@ -1303,22 +1298,11 @@ useEffect(() => {
   }
 }, [isLoading]);
 
-// Efek animasi timeline (kedap-kedip)
-useEffect(() => {
-  if (showGreetingModal) {
-    const interval = setInterval(() => {
-      setCurrentTimelineIndex((prev) => (prev + 1) % maintenanceTimeline.length);
-    }, 3000);
-    return () => clearInterval(interval);
-  }
-}, [showGreetingModal]);
-
-// Efek untuk animasi scroll header MENURU dan ucapan (MEMBESAR saat scroll)
+// Efek untuk animasi scroll header MENURU dan ucapan
 useEffect(() => {
   if (isLoading) return;
   
   const ctx = gsap.context(() => {
-    // PINNING: Buat section header tetap di tempat saat scroll
     ScrollTrigger.create({
       trigger: headerSectionRef.current,
       start: "top top",
@@ -1330,14 +1314,12 @@ useEffect(() => {
         const progress = self.progress;
         setHeaderScrollProgress(progress);
         
-        // Animasi teks MENURU (mengecil)
         if (headerTextRef.current) {
           const fontSize = 300 - (progress * 276);
           const newFontSize = Math.max(24, fontSize);
           headerTextRef.current.style.fontSize = `${newFontSize}px`;
         }
         
-        // Animasi ucapan MEMBESAR saat scroll (dari 24px ke 98px)
         if (greetingRef.current && showGreeting) {
           const greetingFontSize = 24 + (74 * progress);
           const svgSize = greetingFontSize * 0.7;
@@ -1380,21 +1362,22 @@ useEffect(() => {
   return () => window.removeEventListener('scroll', handleScroll);
 }, [isLoading, showScrollDown]);
 
-// Fungsi untuk membuka modal
-const openGreetingModal = () => {
-  console.log("Modal opened"); // Debugging
-  setShowGreetingModal(true);
-};
-
-// Fungsi untuk menutup modal
-const closeGreetingModal = () => {
-  console.log("Modal closed"); // Debugging
-  setShowGreetingModal(false);
-  setCurrentTimelineIndex(0);
-};
-
-
-
+// Tutup modal klik di luar
+useEffect(() => {
+  const handleClickOutside = (event: MouseEvent) => {
+    if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+      setShowMaintenanceModal(false);
+    }
+  };
+  
+  if (showMaintenanceModal) {
+    document.addEventListener('mousedown', handleClickOutside);
+  }
+  
+  return () => {
+    document.removeEventListener('mousedown', handleClickOutside);
+  };
+}, [showMaintenanceModal]);
   
 
   
@@ -3633,7 +3616,53 @@ const handleTextHover = () => {
     50% { transform: translateY(5px); }
   }
 
-
+@keyframes pulse {
+    0% {
+      box-shadow: 0 0 0 0 rgba(237, 27, 60, 0.7);
+    }
+    70% {
+      box-shadow: 0 0 0 10px rgba(237, 27, 60, 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(237, 27, 60, 0);
+    }
+  }
+  
+  @keyframes radarPulse {
+    0% {
+      box-shadow: 0 0 0 0 rgba(237, 27, 60, 0.8);
+    }
+    70% {
+      box-shadow: 0 0 0 15px rgba(237, 27, 60, 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(237, 27, 60, 0);
+    }
+  }
+  
+  @keyframes radarWave {
+    0% {
+      width: 24px;
+      height: 24px;
+      opacity: 0.6;
+    }
+    100% {
+      width: 60px;
+      height: 60px;
+      opacity: 0;
+    }
+  }
+  
+  @keyframes modalSlideUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
   
   
 
@@ -4439,6 +4468,7 @@ const handleTextHover = () => {
           >
 
 
+            
 
 {/* HEADER SECTION - MENURU dengan efek PINNED */}
 <div
@@ -4487,7 +4517,6 @@ const handleTextHover = () => {
     {showGreeting && (
       <div
         ref={greetingRef}
-        onClick={openGreetingModal}
         style={{
           display: 'inline-flex',
           alignItems: 'center',
@@ -4501,8 +4530,7 @@ const handleTextHover = () => {
           transition: 'box-shadow 0.3s ease, padding 0.05s linear',
           fontSize: '24px',
           cursor: 'pointer',
-          opacity: 1,
-          zIndex: 1001
+          opacity: 1
         }}
         onMouseEnter={(e) => {
           e.currentTarget.style.boxShadow = '0 12px 40px rgba(237, 27, 60, 0.4)';
@@ -4512,6 +4540,7 @@ const handleTextHover = () => {
           e.currentTarget.style.boxShadow = '0 8px 30px rgba(237, 27, 60, 0.3)';
           e.currentTarget.style.transform = 'scale(1)';
         }}
+        onClick={() => setShowMaintenanceModal(true)}
       >
         <span style={{
           fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
@@ -4540,164 +4569,325 @@ const handleTextHover = () => {
   </div>
 </div>
 
-{/* MODAL UCAPAN - SEDERHANA, PASTI TERLIHAT */}
-{showGreetingModal && (
+{/* MODAL MAINTENANCE - Popup di sisi ucapan */}
+{showMaintenanceModal && (
   <div
     style={{
       position: 'fixed',
       top: 0,
       left: 0,
-      width: '100%',
-      height: '100%',
-      backgroundColor: 'rgba(0, 0, 0, 0.8)',
-      zIndex: 99999,
+      right: 0,
+      bottom: 0,
+      backgroundColor: 'rgba(0, 0, 0, 0.6)',
+      backdropFilter: 'blur(4px)',
+      zIndex: 10000,
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center'
     }}
-    onClick={closeGreetingModal}
   >
     <div
+      ref={modalRef}
       style={{
-        maxWidth: '500px',
-        width: '90%',
-        backgroundColor: '#ffffff',
-        borderRadius: '20px',
-        padding: '30px',
         position: 'relative',
-        boxShadow: '0 20px 40px rgba(0,0,0,0.2)'
+        maxWidth: '600px',
+        width: '90%',
+        maxHeight: '85vh',
+        backgroundColor: '#ffffff',
+        borderRadius: '32px',
+        padding: '0px',
+        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.3)',
+        overflow: 'hidden',
+        animation: 'modalSlideUp 0.3s ease'
       }}
-      onClick={(e) => e.stopPropagation()}
     >
-      {/* Tombol close */}
-      <button
-        onClick={closeGreetingModal}
+      {/* Header Modal */}
+      <div
         style={{
-          position: 'absolute',
-          top: '15px',
-          right: '15px',
-          background: 'none',
-          border: 'none',
-          fontSize: '20px',
-          cursor: 'pointer',
-          color: '#999'
+          padding: '28px 32px',
+          backgroundColor: '#ED1B3C',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          borderBottom: '1px solid rgba(0,0,0,0.1)'
         }}
       >
-        ✕
-      </button>
-
-      {/* Icon */}
-      <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-        <span style={{ fontSize: '50px' }}>🚧</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          {/* Jam Icon */}
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="10" stroke="#000000" strokeWidth="1.8"/>
+            <polyline points="12 6 12 12 16 14" stroke="#000000" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+          {/* Info Icon */}
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="10" stroke="#000000" strokeWidth="1.8"/>
+            <line x1="12" y1="8" x2="12" y2="12" stroke="#000000" strokeWidth="1.8" strokeLinecap="round"/>
+            <circle cx="12" cy="16" r="1" fill="#000000"/>
+          </svg>
+        </div>
+        <button
+          onClick={() => setShowMaintenanceModal(false)}
+          style={{
+            background: 'none',
+            border: 'none',
+            fontSize: '28px',
+            cursor: 'pointer',
+            color: '#000000',
+            padding: '4px 8px'
+          }}
+        >
+          ✕
+        </button>
       </div>
 
-      {/* Title */}
-      <h2 style={{
-        fontSize: '24px',
-        fontWeight: 'bold',
-        color: '#000',
-        textAlign: 'center',
-        marginBottom: '15px'
-      }}>
-        Hello Everybody! 👋
-      </h2>
-
-      {/* Message */}
-      <p style={{
-        fontSize: '16px',
-        color: '#333',
-        textAlign: 'center',
-        lineHeight: '1.5',
-        marginBottom: '20px'
-      }}>
-        This is web Menuru on <span style={{ color: '#ED1B3C', fontWeight: 'bold' }}>Under Maintenance</span>
-        <br />
-        Cek berkala ya! 🚀
-      </p>
-
-      {/* Timeline sederhana */}
-      <div style={{
-        borderTop: '1px solid #eee',
-        paddingTop: '20px',
-        marginTop: '10px'
-      }}>
-        <h3 style={{
-          fontSize: '16px',
-          fontWeight: 'bold',
-          color: '#000',
-          marginBottom: '15px'
+      {/* Pesan Maintenance */}
+      <div
+        style={{
+          padding: '32px',
+          backgroundColor: '#ffffff',
+          borderBottom: '1px solid #f0f0f0'
+        }}
+      >
+        <div style={{
+          fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+          fontSize: '24px',
+          fontWeight: '500',
+          color: '#000000',
+          marginBottom: '12px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px'
         }}>
-          📋 MAINTENANCE TIMELINE
-        </h3>
-        
-        {maintenanceTimeline.map((item, idx) => (
-          <div key={idx} style={{
-            padding: '10px 0',
-            borderBottom: idx < maintenanceTimeline.length - 1 ? '1px solid #eee' : 'none'
-          }}>
-            <div style={{
+          <span>🔧</span>
+          <span>Under Maintenance</span>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000000" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </div>
+        <div style={{
+          fontFamily: "'Questrial', sans-serif",
+          fontSize: '18px',
+          color: '#333333',
+          lineHeight: '1.5'
+        }}>
+          Hello everybody, this is web Menuru on under maintenance. 
+          Please check back regularly for updates!
+        </div>
+      </div>
+
+      {/* Timeline Section */}
+      <div
+        style={{
+          padding: '32px',
+          backgroundColor: '#ffffff'
+        }}
+      >
+        <div style={{
+          fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+          fontSize: '28px',
+          fontWeight: '600',
+          color: '#000000',
+          marginBottom: '32px',
+          letterSpacing: '-0.02em'
+        }}>
+          MAINTENANCE TIMELINE
+        </div>
+
+        {/* Timeline Items */}
+        <div style={{ position: 'relative', paddingLeft: '30px' }}>
+          {/* Garis vertikal putus-putus */}
+          <div
+            style={{
+              position: 'absolute',
+              left: '8px',
+              top: '12px',
+              bottom: '40px',
+              width: '2px',
+              background: 'repeating-linear-gradient(0deg, #cccccc 0px, #cccccc 8px, transparent 8px, transparent 16px)'
+            }}
+          />
+
+          {timelineData.map((item, index) => {
+            const isLast = index === timelineData.length - 1;
+            const isActive = item.status === 'in-progress';
+            const isCompleted = item.status === 'completed';
+            
+            return (
+              <div
+                key={item.id}
+                style={{
+                  position: 'relative',
+                  marginBottom: '32px',
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: '20px'
+                }}
+              >
+                {/* Titik bulat dengan animasi kedap kedip untuk item aktif */}
+                <div
+                  style={{
+                    position: 'relative',
+                    width: '20px',
+                    height: '20px',
+                    flexShrink: 0,
+                    marginTop: '4px'
+                  }}
+                >
+                  <div
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      borderRadius: '50%',
+                      backgroundColor: isCompleted ? '#ED1B3C' : (isActive ? '#ED1B3C' : '#cccccc'),
+                      border: isActive ? '2px solid rgba(237, 27, 60, 0.4)' : 'none',
+                      boxShadow: isActive ? '0 0 0 0 rgba(237, 27, 60, 0.7)' : 'none',
+                      animation: isActive ? 'pulse 1.5s infinite' : 'none'
+                    }}
+                  />
+                </div>
+
+                {/* Konten timeline */}
+                <div style={{ flex: 1 }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'baseline',
+                    gap: '16px',
+                    flexWrap: 'wrap',
+                    marginBottom: '8px'
+                  }}>
+                    <span style={{
+                      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                      fontSize: '20px',
+                      fontWeight: '600',
+                      color: '#ED1B3C'
+                    }}>
+                      {item.day}
+                    </span>
+                    <span style={{
+                      fontFamily: "'Questrial', sans-serif",
+                      fontSize: '14px',
+                      color: '#999999'
+                    }}>
+                      {item.date}
+                    </span>
+                    {isActive && (
+                      <span style={{
+                        fontFamily: "'Questrial', sans-serif",
+                        fontSize: '12px',
+                        backgroundColor: '#ED1B3C',
+                        color: '#000000',
+                        padding: '4px 12px',
+                        borderRadius: '60px',
+                        fontWeight: '600'
+                      }}>
+                        IN PROGRESS
+                      </span>
+                    )}
+                    {isCompleted && (
+                      <span style={{
+                        fontFamily: "'Questrial', sans-serif",
+                        fontSize: '12px',
+                        backgroundColor: '#e0e0e0',
+                        color: '#666666',
+                        padding: '4px 12px',
+                        borderRadius: '60px'
+                      }}>
+                        ✓ COMPLETED
+                      </span>
+                    )}
+                  </div>
+                  <div style={{
+                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                    fontSize: '22px',
+                    fontWeight: '500',
+                    color: '#000000',
+                    marginBottom: '6px',
+                    letterSpacing: '-0.01em'
+                  }}>
+                    {item.title}
+                  </div>
+                  <div style={{
+                    fontFamily: "'Questrial', sans-serif",
+                    fontSize: '15px',
+                    color: '#666666',
+                    lineHeight: '1.4'
+                  }}>
+                    {item.description}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+
+          {/* Titik akhir dengan animasi kedap kedip pemancar */}
+          <div
+            style={{
+              position: 'relative',
               display: 'flex',
-              alignItems: 'center',
-              gap: '10px',
-              flexWrap: 'wrap'
-            }}>
-              <span style={{
-                fontSize: '14px',
-                fontWeight: 'bold',
-                color: idx === 1 ? '#ED1B3C' : '#000'
-              }}>
-                {item.title}
-              </span>
-              {idx === 1 && (
-                <span style={{
-                  fontSize: '10px',
-                  padding: '2px 8px',
+              alignItems: 'flex-start',
+              gap: '20px',
+              marginTop: '8px'
+            }}
+          >
+            <div
+              style={{
+                position: 'relative',
+                width: '24px',
+                height: '24px',
+                flexShrink: 0
+              }}
+            >
+              <div
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  borderRadius: '50%',
                   backgroundColor: '#ED1B3C',
-                  color: '#fff',
-                  borderRadius: '20px'
-                }}>
-                  IN PROGRESS
-                </span>
-              )}
+                  boxShadow: '0 0 0 0 rgba(237, 27, 60, 0.8)',
+                  animation: 'radarPulse 1.5s infinite',
+                  position: 'relative',
+                  zIndex: 2
+                }}
+              />
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  width: '40px',
+                  height: '40px',
+                  borderRadius: '50%',
+                  backgroundColor: 'rgba(237, 27, 60, 0.2)',
+                  animation: 'radarWave 1.5s infinite'
+                }}
+              />
             </div>
-            <p style={{
-              fontSize: '12px',
-              color: '#666',
-              marginTop: '5px'
-            }}>
-              {item.description}
-            </p>
-            <p style={{
-              fontSize: '11px',
-              color: '#999',
-              marginTop: '3px'
-            }}>
-              🕐 {item.time}
-            </p>
+            <div style={{ flex: 1 }}>
+              <div style={{
+                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                fontSize: '22px',
+                fontWeight: '600',
+                color: '#ED1B3C',
+                marginBottom: '6px',
+                letterSpacing: '-0.01em'
+              }}>
+                LAUNCH DAY
+              </div>
+              <div style={{
+                fontFamily: "'Questrial', sans-serif",
+                fontSize: '15px',
+                color: '#666666'
+              }}>
+                Website will be back online with amazing new features! 🚀
+              </div>
+            </div>
           </div>
-        ))}
-      </div>
-
-      {/* Footer */}
-      <div style={{
-        marginTop: '20px',
-        paddingTop: '15px',
-        borderTop: '1px solid #eee',
-        textAlign: 'center'
-      }}>
-        <p style={{
-          fontSize: '13px',
-          color: '#666'
-        }}>
-          🚧 Menuru sedang dalam proses pengembangan 🚧
-          <br />
-          Terima kasih atas kesabarannya! 🙏
-        </p>
+        </div>
       </div>
     </div>
   </div>
-)}            
-
+)}
 
 {/* SCROLL DOWN - Teks yang mengikuti cursor */}
 {showScrollDown && !isLoading && (
@@ -4737,13 +4927,6 @@ const handleTextHover = () => {
     </svg>
   </div>
 )}
-
-
-
-
-
-            
-
 
 
 
