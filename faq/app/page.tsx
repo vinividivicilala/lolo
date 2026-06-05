@@ -190,6 +190,43 @@ const defaultCommunities = [
   { id: "general", name: "GENERAL", description: "Komunitas umum untuk diskusi ringan, hiburan, dan berbagi cerita sehari-hari.", link: "/community/general" }
 ];
 
+
+
+
+const maintenanceTimeline = [
+  {
+    title: "MAINTENANCE START",
+    description: "Mulai pemeliharaan sistem Menuru",
+    time: "02 Juni 2026, 08:00 WIB",
+    status: "completed"
+  },
+  {
+    title: "DATABASE MIGRATION",
+    description: "Migrasi database ke server baru",
+    time: "03 Juni 2026, 10:30 WIB",
+    status: "in-progress"
+  },
+  {
+    title: "UI/UX ENHANCEMENT",
+    description: "Peningkatan antarmuka pengguna",
+    time: "04 Juni 2026, 09:00 WIB",
+    status: "pending"
+  },
+  {
+    title: "SECURITY UPDATE",
+    description: "Update sistem keamanan terbaru",
+    time: "05 Juni 2026, 14:00 WIB",
+    status: "pending"
+  },
+  {
+    title: "LAUNCH NEW FEATURES",
+    description: "Peluncuran fitur-fitur baru",
+    time: "06 Juni 2026, 20:00 WIB",
+    status: "pending"
+  }
+];
+
+
 // Sample donation photos
 const samplePhotos = [
   "/images/donation1.jpg",
@@ -965,40 +1002,6 @@ const greetingRef = useRef<HTMLDivElement>(null);
 const scrollDownRef = useRef<HTMLDivElement>(null);
 
 
-
-
-const maintenanceTimeline = [
-  {
-    title: "MAINTENANCE START",
-    description: "Mulai pemeliharaan sistem Menuru",
-    time: "02 Juni 2026, 08:00 WIB",
-    status: "completed"
-  },
-  {
-    title: "DATABASE MIGRATION",
-    description: "Migrasi database ke server baru",
-    time: "03 Juni 2026, 10:30 WIB",
-    status: "in-progress"
-  },
-  {
-    title: "UI/UX ENHANCEMENT",
-    description: "Peningkatan antarmuka pengguna",
-    time: "04 Juni 2026, 09:00 WIB",
-    status: "pending"
-  },
-  {
-    title: "SECURITY UPDATE",
-    description: "Update sistem keamanan terbaru",
-    time: "05 Juni 2026, 14:00 WIB",
-    status: "pending"
-  },
-  {
-    title: "LAUNCH NEW FEATURES",
-    description: "Peluncuran fitur-fitur baru",
-    time: "06 Juni 2026, 20:00 WIB",
-    status: "pending"
-  }
-];
 
 
 
