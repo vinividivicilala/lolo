@@ -191,6 +191,7 @@ const defaultCommunities = [
 ];
 
 
+
 const maintenanceTimeline = [
   { title: "MAINTENANCE START", description: "Mulai pemeliharaan sistem Menuru", time: "02 Juni 2026, 08:00 WIB", status: "completed" },
   { title: "DATABASE MIGRATION", description: "Migrasi database ke server baru", time: "03 Juni 2026, 10:30 WIB", status: "in-progress" },
@@ -198,7 +199,6 @@ const maintenanceTimeline = [
   { title: "SECURITY UPDATE", description: "Update sistem keamanan terbaru", time: "05 Juni 2026, 14:00 WIB", status: "pending" },
   { title: "LAUNCH NEW FEATURES", description: "Peluncuran fitur-fitur baru", time: "06 Juni 2026, 20:00 WIB", status: "pending" }
 ];
-
 
 
 
@@ -4539,7 +4539,8 @@ const handleTextHover = () => {
     )}
   </div>
 </div>
-{/* MODAL UCAPAN - SEDERHANA, TANPA ANIMASI */}
+
+{/* MODAL UCAPAN - SEDERHANA, PASTI TERLIHAT */}
 {showGreetingModal && (
   <div
     style={{
@@ -4558,12 +4559,13 @@ const handleTextHover = () => {
   >
     <div
       style={{
-        maxWidth: '600px',
+        maxWidth: '500px',
         width: '90%',
         backgroundColor: '#ffffff',
-        borderRadius: '24px',
-        padding: '40px',
-        position: 'relative'
+        borderRadius: '20px',
+        padding: '30px',
+        position: 'relative',
+        boxShadow: '0 20px 40px rgba(0,0,0,0.2)'
       }}
       onClick={(e) => e.stopPropagation()}
     >
@@ -4572,11 +4574,11 @@ const handleTextHover = () => {
         onClick={closeGreetingModal}
         style={{
           position: 'absolute',
-          top: '20px',
-          right: '20px',
+          top: '15px',
+          right: '15px',
           background: 'none',
           border: 'none',
-          fontSize: '24px',
+          fontSize: '20px',
           cursor: 'pointer',
           color: '#999'
         }}
@@ -4584,107 +4586,118 @@ const handleTextHover = () => {
         ✕
       </button>
 
-      {/* Konten Modal */}
-      <div>
-        <div style={{
-          fontSize: '32px',
+      {/* Icon */}
+      <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+        <span style={{ fontSize: '50px' }}>🚧</span>
+      </div>
+
+      {/* Title */}
+      <h2 style={{
+        fontSize: '24px',
+        fontWeight: 'bold',
+        color: '#000',
+        textAlign: 'center',
+        marginBottom: '15px'
+      }}>
+        Hello Everybody! 👋
+      </h2>
+
+      {/* Message */}
+      <p style={{
+        fontSize: '16px',
+        color: '#333',
+        textAlign: 'center',
+        lineHeight: '1.5',
+        marginBottom: '20px'
+      }}>
+        This is web Menuru on <span style={{ color: '#ED1B3C', fontWeight: 'bold' }}>Under Maintenance</span>
+        <br />
+        Cek berkala ya! 🚀
+      </p>
+
+      {/* Timeline sederhana */}
+      <div style={{
+        borderTop: '1px solid #eee',
+        paddingTop: '20px',
+        marginTop: '10px'
+      }}>
+        <h3 style={{
+          fontSize: '16px',
           fontWeight: 'bold',
           color: '#000',
-          marginBottom: '20px'
+          marginBottom: '15px'
         }}>
-          Hello Everybody! 👋
-        </div>
+          📋 MAINTENANCE TIMELINE
+        </h3>
         
-        <div style={{
-          fontSize: '18px',
-          color: '#333',
-          marginBottom: '30px',
-          lineHeight: '1.5'
-        }}>
-          This is web Menuru on <span style={{ color: '#ED1B3C', fontWeight: 'bold' }}>Under Maintenance</span>
-          <br />
-          Cek berkala ya! 🚀
-        </div>
-
-        {/* Simple Timeline */}
-        <div style={{
-          borderTop: '1px solid #eee',
-          paddingTop: '20px'
-        }}>
-          <div style={{
-            fontSize: '20px',
-            fontWeight: 'bold',
-            color: '#000',
-            marginBottom: '20px'
+        {maintenanceTimeline.map((item, idx) => (
+          <div key={idx} style={{
+            padding: '10px 0',
+            borderBottom: idx < maintenanceTimeline.length - 1 ? '1px solid #eee' : 'none'
           }}>
-            📋 MAINTENANCE TIMELINE
-          </div>
-          
-          {maintenanceTimeline.map((item, idx) => (
-            <div key={idx} style={{
-              padding: '12px 0',
-              borderBottom: idx < maintenanceTimeline.length - 1 ? '1px solid #eee' : 'none'
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              flexWrap: 'wrap'
             }}>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                flexWrap: 'wrap'
-              }}>
-                <span style={{
-                  fontSize: '16px',
-                  fontWeight: 'bold',
-                  color: idx === 1 ? '#ED1B3C' : '#000'
-                }}>
-                  {item.title}
-                </span>
-                {idx === 1 && (
-                  <span style={{
-                    fontSize: '11px',
-                    padding: '2px 10px',
-                    backgroundColor: '#ED1B3C',
-                    color: '#fff',
-                    borderRadius: '20px'
-                  }}>
-                    IN PROGRESS
-                  </span>
-                )}
-              </div>
-              <div style={{
+              <span style={{
                 fontSize: '14px',
-                color: '#666',
-                marginTop: '4px'
+                fontWeight: 'bold',
+                color: idx === 1 ? '#ED1B3C' : '#000'
               }}>
-                {item.description}
-              </div>
-              <div style={{
-                fontSize: '12px',
-                color: '#999',
-                marginTop: '4px'
-              }}>
-                🕐 {item.time}
-              </div>
+                {item.title}
+              </span>
+              {idx === 1 && (
+                <span style={{
+                  fontSize: '10px',
+                  padding: '2px 8px',
+                  backgroundColor: '#ED1B3C',
+                  color: '#fff',
+                  borderRadius: '20px'
+                }}>
+                  IN PROGRESS
+                </span>
+              )}
             </div>
-          ))}
-        </div>
+            <p style={{
+              fontSize: '12px',
+              color: '#666',
+              marginTop: '5px'
+            }}>
+              {item.description}
+            </p>
+            <p style={{
+              fontSize: '11px',
+              color: '#999',
+              marginTop: '3px'
+            }}>
+              🕐 {item.time}
+            </p>
+          </div>
+        ))}
+      </div>
 
-        {/* Footer */}
-        <div style={{
-          marginTop: '30px',
-          paddingTop: '20px',
-          borderTop: '1px solid #eee',
-          textAlign: 'center',
-          color: '#666',
-          fontSize: '14px'
+      {/* Footer */}
+      <div style={{
+        marginTop: '20px',
+        paddingTop: '15px',
+        borderTop: '1px solid #eee',
+        textAlign: 'center'
+      }}>
+        <p style={{
+          fontSize: '13px',
+          color: '#666'
         }}>
           🚧 Menuru sedang dalam proses pengembangan 🚧
           <br />
           Terima kasih atas kesabarannya! 🙏
-        </div>
+        </p>
       </div>
     </div>
   </div>
-)}
+)}            
+
 
 {/* SCROLL DOWN - Teks yang mengikuti cursor */}
 {showScrollDown && !isLoading && (
