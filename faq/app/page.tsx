@@ -4665,7 +4665,7 @@ const handleTextHover = () => {
         </div>
         <div style={{
           fontFamily: "'Questrial', sans-serif",
-          fontSize: '18px",
+          fontSize: '18px',
           color: '#333333',
           lineHeight: '1.5'
         }}>
