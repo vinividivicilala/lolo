@@ -990,6 +990,11 @@ const rollingWords = ["Note", "Donation", "Community", "Blog", "Calendar"];
 
 
 
+  const marqueeRef = useRef<HTMLDivElement>(null);
+
+
+
+
 
 const [tooltipData, setTooltipData] = useState<{ text: string; x: number; y: number; visible: boolean }>({
   text: "",
@@ -2867,6 +2872,47 @@ const updateTooltipPosition = (event: React.MouseEvent) => {
     };
   }, [isLoading]);
 
+
+
+  // Efek untuk animasi marquee (teks berjalan) dengan GSAP
+useEffect(() => {
+  if (isLoading) return;
+  
+  const marqueeElement = marqueeRef.current;
+  if (!marqueeElement) return;
+  
+  // Duplikat konten untuk efek infinite seamless
+  const originalContent = marqueeElement.innerHTML;
+  marqueeElement.innerHTML = originalContent + originalContent;
+  
+  // Animasi marquee dari kanan ke kiri
+  const marqueeAnimation = gsap.to(marqueeElement, {
+    x: "-50%",
+    duration: 30,
+    ease: "none",
+    repeat: -1,
+    repeatDelay: 0,
+    modifiers: {
+      x: (x) => {
+        const parseX = parseFloat(x);
+        return (parseX % (marqueeElement.scrollWidth / 2)) + "px";
+      }
+    }
+  });
+  
+  // Pause animation saat hover
+  marqueeElement.addEventListener("mouseenter", () => marqueeAnimation.pause());
+  marqueeElement.addEventListener("mouseleave", () => marqueeAnimation.resume());
+  
+  return () => {
+    marqueeAnimation.kill();
+    if (marqueeElement) {
+      marqueeElement.removeEventListener("mouseenter", () => marqueeAnimation.pause());
+      marqueeElement.removeEventListener("mouseleave", () => marqueeAnimation.resume());
+    }
+  };
+}, [isLoading]);
+
   
 
   useEffect(() => {
@@ -4695,6 +4741,88 @@ useEffect(() => {
     )}
   </div>
 </div>
+
+<div
+  ref={marqueeContainerRef}
+  style={{
+    position: 'relative',
+    width: '100%',
+    marginTop: '80px',
+    overflow: 'hidden',
+    backgroundColor: 'transparent',
+    padding: '20px 0'
+  }}
+>
+  <div
+    ref={marqueeContentRef}
+    style={{
+      display: 'flex',
+      whiteSpace: 'nowrap',
+      willChange: 'transform'
+    }}
+  >
+    {[...Array(3)].map((_, idx) => (
+      <div
+        key={idx}
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '40px',
+          marginRight: '50px'
+        }}
+      >
+        <span
+          style={{
+            fontFamily: 'Inter, "Helvetica Neue", sans-serif',
+            fontWeight: '700',
+            fontSize: '300px',
+            color: '#000000',
+            letterSpacing: '-0.03em',
+            textTransform: 'uppercase',
+            lineHeight: '1'
+          }}
+        >
+          SUBSCRIBE
+        </span>
+        
+        {/* Foto vertikal */}
+        <div
+          style={{
+            width: '220px',
+            height: '300px',
+            backgroundColor: '#e0e0e0',
+            borderRadius: '24px',
+            overflow: 'hidden',
+            position: 'relative',
+            flexShrink: 0,
+            boxShadow: '0 15px 35px rgba(0,0,0,0.15)'
+          }}
+        >
+          <Image
+            src="/images/5.jpg"
+            alt="Subscribe"
+            fill
+            style={{ objectFit: 'cover' }}
+          />
+        </div>
+        
+        {/* Panah dekorasi */}
+        <svg 
+          width="70" 
+          height="70" 
+          viewBox="0 0 24 24" 
+          fill="none" 
+          xmlns="http://www.w3.org/2000/svg"
+          style={{ stroke: '#000000', strokeWidth: '1.5', flexShrink: 0 }}
+        >
+          <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </div>
+    ))}
+  </div>
+</div>
+
+            
 
 
 {showMaintenanceModal && (
