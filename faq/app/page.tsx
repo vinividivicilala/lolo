@@ -4727,70 +4727,70 @@ useEffect(() => {
     </div>
 
 
-
-{/* UCAPAN OTOMATIS - Posisi di samping kanan teks MENURU */}
-{showGreeting && (
-  <div
-    ref={greetingRef}
-    style={{
-      display: 'inline-flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: '16px',
-      backgroundColor: '#ED1B3C',
-      padding: '12px 24px',
-      borderRadius: '80px',
-      boxShadow: '0 8px 30px rgba(237, 27, 60, 0.3)',
-      whiteSpace: 'nowrap',
-      transition: 'box-shadow 0.3s ease, padding 0.05s linear',
-      fontSize: '24px',
-      cursor: 'pointer',
-      opacity: 1,
-      marginTop: '20px'
-    }}
-    onMouseEnter={(e) => {
-      e.currentTarget.style.boxShadow = '0 12px 40px rgba(237, 27, 60, 0.4)';
-      e.currentTarget.style.transform = 'scale(1.02)';
-    }}
-    onMouseLeave={(e) => {
-      e.currentTarget.style.boxShadow = '0 8px 30px rgba(237, 27, 60, 0.3)';
-      e.currentTarget.style.transform = 'scale(1)';
-    }}
-    onClick={() => setShowMaintenanceModal(true)}
-  >
-    <span style={{
-      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-      fontWeight: '600',
-      color: '#000000',
-      letterSpacing: '-0.01em'
-    }}>
-      {greeting}
-    </span>
-    <svg 
-      width="28" 
-      height="28" 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      xmlns="http://www.w3.org/2000/svg"
-      style={{ 
-        stroke: '#000000',
-        strokeWidth: '2.5',
-        transition: 'width 0.05s linear, height 0.05s linear'
-      }}
-    >
-      <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
+    {/* UCAPAN OTOMATIS - Posisi di samping kanan teks MENURU */}
+    {showGreeting && (
+      <div
+        ref={greetingRef}
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '16px',
+          backgroundColor: '#ED1B3C',
+          padding: '12px 24px',
+          borderRadius: '80px',
+          boxShadow: '0 8px 30px rgba(237, 27, 60, 0.3)',
+          whiteSpace: 'nowrap',
+          transition: 'box-shadow 0.3s ease, padding 0.05s linear',
+          fontSize: '24px',
+          cursor: 'pointer',
+          opacity: 1,
+          marginTop: '20px'
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.boxShadow = '0 12px 40px rgba(237, 27, 60, 0.4)';
+          e.currentTarget.style.transform = 'scale(1.02)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.boxShadow = '0 8px 30px rgba(237, 27, 60, 0.3)';
+          e.currentTarget.style.transform = 'scale(1)';
+        }}
+        onClick={() => setShowMaintenanceModal(true)}
+      >
+        <span style={{
+          fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+          fontWeight: '600',
+          color: '#000000',
+          letterSpacing: '-0.01em'
+        }}>
+          {greeting}
+        </span>
+        <svg 
+          width="28" 
+          height="28" 
+          viewBox="0 0 24 24" 
+          fill="none" 
+          xmlns="http://www.w3.org/2000/svg"
+          style={{ 
+            stroke: '#000000',
+            strokeWidth: '2.5',
+            transition: 'width 0.05s linear, height 0.05s linear'
+          }}
+        >
+          <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </div>
+    )}
   </div>
- )}
+</div>
 
-
-{/* MARQUEE SECTION - Teks berjalan dari kanan ke kiri (DI BAWAH TOMBOL UCAPAN) */}
+{/* MARQUEE SECTION - Teks berjalan dari kanan ke kiri */}
 <div
   style={{
     position: 'relative',
     width: '100%',
-    marginTop: '100px',
-    marginBottom: '0px',
+    marginTop: '30px',
+    marginBottom: '50px',
     overflow: 'hidden',
     backgroundColor: 'transparent',
     padding: '40px 0'
@@ -4871,10 +4871,7 @@ useEffect(() => {
       </div>
     ))}
   </div>
-</div>
-  
-
-    
+</div> 
 
             
 
