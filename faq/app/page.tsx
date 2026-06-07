@@ -4789,11 +4789,11 @@ useEffect(() => {
   style={{
     position: 'relative',
     width: '100%',
-    marginTop: '30px',
-    marginBottom: '50px',
+    marginTop: '0px',
+    marginBottom: '0px',
     overflow: 'hidden',
     backgroundColor: 'transparent',
-    padding: '40px 0'
+    padding: '0px'
   }}
 >
   <div
@@ -4829,7 +4829,7 @@ useEffect(() => {
             color: '#000000',
             letterSpacing: '-0.03em',
             textTransform: 'uppercase',
-            lineHeight: '1',
+            lineHeight: '0.8',
             whiteSpace: 'nowrap'
           }}
         >
