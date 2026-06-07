@@ -3784,6 +3784,15 @@ useEffect(() => {
     }
   }
 
+   @keyframes marqueeScroll {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+
 
 
   @keyframes bounce {
@@ -4772,33 +4781,41 @@ useEffect(() => {
   </div>
 </div>
 
+{/* MARQUEE SECTION - Teks berjalan dari kanan ke kiri */}
 <div
-  ref={marqueeContainerRef}
   style={{
     position: 'relative',
     width: '100%',
-    marginTop: '80px',
+    marginTop: '150px',
+    marginBottom: '50px',
     overflow: 'hidden',
     backgroundColor: 'transparent',
-    padding: '20px 0'
+    padding: '40px 0'
   }}
 >
   <div
-    ref={marqueeContentRef}
     style={{
       display: 'flex',
       whiteSpace: 'nowrap',
-      willChange: 'transform'
+      animation: 'marqueeScroll 30s linear infinite',
+      width: 'fit-content'
+    }}
+    onMouseEnter={(e) => {
+      e.currentTarget.style.animationPlayState = 'paused';
+    }}
+    onMouseLeave={(e) => {
+      e.currentTarget.style.animationPlayState = 'running';
     }}
   >
-    {[...Array(2)].map((_, idx) => (
+    {/* Ulang 3 kali untuk efek seamless */}
+    {[...Array(3)].map((_, idx) => (
       <div
         key={idx}
         style={{
           display: 'inline-flex',
           alignItems: 'center',
-          gap: '40px',
-          marginRight: '50px'
+          gap: '50px',
+          marginRight: '80px'
         }}
       >
         <span
@@ -4816,6 +4833,7 @@ useEffect(() => {
           SUBSCRIBE
         </span>
         
+        {/* Foto vertikal */}
         <div
           style={{
             width: '220px',
@@ -4836,6 +4854,7 @@ useEffect(() => {
           />
         </div>
         
+        {/* Panah dekorasi */}
         <svg 
           width="70" 
           height="70" 
@@ -4850,7 +4869,6 @@ useEffect(() => {
     ))}
   </div>
 </div>
-
             
 
 
