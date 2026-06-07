@@ -4668,8 +4668,6 @@ useEffect(() => {
         )
       </span>
     </div>
-  </div>
-</div>
 
     {/* UCAPAN OTOMATIS - Posisi di samping kanan teks MENURU */}
     {showGreeting && (
