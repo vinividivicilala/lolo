@@ -4783,7 +4783,8 @@ useEffect(() => {
   </div>
 )}
 
-{/* MARQUEE SECTION - Teks berjalan dari kanan ke kiri */}
+
+{/* MARQUEE SECTION - Teks berjalan dari kanan ke kiri (DI BAWAH TOMBOL UCAPAN) */}
 <div
   style={{
     position: 'relative',
@@ -4792,14 +4793,14 @@ useEffect(() => {
     marginBottom: '0px',
     overflow: 'hidden',
     backgroundColor: 'transparent',
-    padding: '30px 0'
+    padding: '40px 0'
   }}
 >
   <div
     style={{
       display: 'flex',
       whiteSpace: 'nowrap',
-      animation: 'marqueeScroll 25s linear infinite',
+      animation: 'marqueeScroll 30s linear infinite',
       width: 'fit-content'
     }}
     onMouseEnter={(e) => {
@@ -4809,21 +4810,22 @@ useEffect(() => {
       e.currentTarget.style.animationPlayState = 'running';
     }}
   >
-    {[...Array(4)].map((_, idx) => (
+    {/* Ulang 3 kali untuk efek seamless */}
+    {[...Array(3)].map((_, idx) => (
       <div
         key={idx}
         style={{
           display: 'inline-flex',
           alignItems: 'center',
-          gap: '40px',
-          marginRight: '60px'
+          gap: '50px',
+          marginRight: '80px'
         }}
       >
         <span
           style={{
             fontFamily: 'Inter, "Helvetica Neue", sans-serif',
             fontWeight: '700',
-            fontSize: '200px',
+            fontSize: '300px',
             color: '#000000',
             letterSpacing: '-0.03em',
             textTransform: 'uppercase',
@@ -4834,16 +4836,17 @@ useEffect(() => {
           SUBSCRIBE
         </span>
         
+        {/* Foto vertikal */}
         <div
           style={{
-            width: '180px',
-            height: '250px',
+            width: '220px',
+            height: '300px',
             backgroundColor: '#e0e0e0',
-            borderRadius: '20px',
+            borderRadius: '24px',
             overflow: 'hidden',
             position: 'relative',
             flexShrink: 0,
-            boxShadow: '0 10px 25px rgba(0,0,0,0.1)'
+            boxShadow: '0 15px 35px rgba(0,0,0,0.15)'
           }}
         >
           <Image
@@ -4854,9 +4857,10 @@ useEffect(() => {
           />
         </div>
         
+        {/* Panah dekorasi */}
         <svg 
-          width="50" 
-          height="50" 
+          width="70" 
+          height="70" 
           viewBox="0 0 24 24" 
           fill="none" 
           xmlns="http://www.w3.org/2000/svg"
@@ -4868,13 +4872,8 @@ useEffect(() => {
     ))}
   </div>
 </div>
-
-
-
-
-
-
-
+    </div>
+)}
 
 
     
