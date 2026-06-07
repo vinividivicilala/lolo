@@ -984,6 +984,12 @@ const [tooltipText, setTooltipText] = useState("");
 const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
 
 
+  const [rollingIndex, setRollingIndex] = useState(0);
+const rollingTextRef = useRef<HTMLSpanElement>(null);
+const rollingWords = ["Note", "Donation", "Community", "Blog", "Calendar"];
+
+
+
 
 const [tooltipData, setTooltipData] = useState<{ text: string; x: number; y: number; visible: boolean }>({
   text: "",
@@ -3556,6 +3562,56 @@ const handleTextHover = () => {
 };
 
 
+// Efek untuk animasi rolling teks dengan GSAP
+useEffect(() => {
+  if (isLoading) return;
+  
+  let intervalId: NodeJS.Timeout;
+  let isAnimating = false;
+  
+  const animateRollingText = () => {
+    if (isAnimating) return;
+    isAnimating = true;
+    
+    if (rollingTextRef.current) {
+      // Animasi keluar (slide up + fade out)
+      gsap.to(rollingTextRef.current, {
+        y: -30,
+        opacity: 0,
+        duration: 0.4,
+        ease: "power2.in",
+        onComplete: () => {
+          // Ganti teks
+          setRollingIndex((prev) => (prev + 1) % rollingWords.length);
+          
+          // Reset posisi untuk animasi masuk
+          gsap.set(rollingTextRef.current, { y: 30, opacity: 0 });
+          
+          // Animasi masuk (slide down + fade in)
+          gsap.to(rollingTextRef.current, {
+            y: 0,
+            opacity: 1,
+            duration: 0.5,
+            ease: "back.out(0.7)",
+            onComplete: () => {
+              isAnimating = false;
+            }
+          });
+        }
+      });
+    }
+  };
+  
+  // Interval setiap 3 detik
+  intervalId = setInterval(animateRollingText, 3000);
+  
+  return () => {
+    if (intervalId) clearInterval(intervalId);
+    if (rollingTextRef.current) {
+      gsap.killTweensOf(rollingTextRef.current);
+    }
+  };
+}, [isLoading, rollingWords.length]);
 
 
 
@@ -4547,6 +4603,73 @@ const handleTextHover = () => {
     >
       MENURU
     </div>
+
+     {/* Subtitle dengan rolling teks - Menuru Brand + rolling text */}
+    <div
+      style={{
+        marginTop: '20px',
+        marginLeft: '8px',
+        display: 'flex',
+        alignItems: 'center',
+        flexWrap: 'wrap',
+        gap: '8px'
+      }}
+    >
+      <span
+        style={{
+          fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+          fontSize: '32px',
+          fontWeight: '400',
+          color: '#000000',
+          letterSpacing: '-0.01em'
+        }}
+      >
+        Menuru Brand
+      </span>
+      
+      <span
+        style={{
+          fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+          fontSize: '32px',
+          fontWeight: '400',
+          color: '#000000',
+          letterSpacing: '-0.01em'
+        }}
+      >
+        (
+      </span>
+      
+      {/* Rolling teks yang berubah-ubah */}
+      <span
+        ref={rollingTextRef}
+        style={{
+          fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+          fontSize: '32px',
+          fontWeight: '500',
+          color: '#ED1B3C',
+          letterSpacing: '-0.01em',
+          display: 'inline-block',
+          minWidth: '160px',
+          textAlign: 'center'
+        }}
+      >
+        {rollingWords[rollingIndex]}
+      </span>
+      
+      <span
+        style={{
+          fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+          fontSize: '32px',
+          fontWeight: '400',
+          color: '#000000',
+          letterSpacing: '-0.01em'
+        }}
+      >
+        )
+      </span>
+    </div>
+  </div>
+</div>
 
     {/* UCAPAN OTOMATIS - Posisi di samping kanan teks MENURU */}
     {showGreeting && (
