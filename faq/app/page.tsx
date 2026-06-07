@@ -4560,7 +4560,6 @@ useEffect(() => {
 
 
             
-
 {/* HEADER SECTION - MENURU dengan efek PINNED */}
 <div
   ref={headerSectionRef}
@@ -4579,14 +4578,10 @@ useEffect(() => {
       top: 0,
       left: 0,
       right: 0,
-      padding: '40px 0 0 40px',
-      display: 'flex',
-      alignItems: 'center',
-      gap: '30px',
-      flexWrap: 'wrap'
+      padding: '40px 0 0 40px'
     }}
   >
-    {/* Teks MENURU */}
+    {/* Teks MENURU besar */}
     <div
       ref={headerTextRef}
       style={{
@@ -4604,21 +4599,20 @@ useEffect(() => {
       MENURU
     </div>
 
-     {/* Subtitle dengan rolling teks - Menuru Brand + rolling text */}
+    {/* Subtitle dengan rolling teks - Menuru Brand + rolling text (DI BAWAH MENURU) */}
     <div
       style={{
-        marginTop: '20px',
-        marginLeft: '8px',
+        marginTop: '30px',
         display: 'flex',
         alignItems: 'center',
         flexWrap: 'wrap',
-        gap: '8px'
+        gap: '12px'
       }}
     >
       <span
         style={{
           fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-          fontSize: '32px',
+          fontSize: '50px',
           fontWeight: '400',
           color: '#000000',
           letterSpacing: '-0.01em'
@@ -4627,45 +4621,21 @@ useEffect(() => {
         Menuru Brand
       </span>
       
-      <span
-        style={{
-          fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-          fontSize: '32px',
-          fontWeight: '400',
-          color: '#000000',
-          letterSpacing: '-0.01em'
-        }}
-      >
-        (
-      </span>
-      
-      {/* Rolling teks yang berubah-ubah */}
+      {/* Rolling teks yang berubah-ubah - tanpa tanda kurung */}
       <span
         ref={rollingTextRef}
         style={{
           fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-          fontSize: '32px',
+          fontSize: '50px',
           fontWeight: '500',
-          color: '#ED1B3C',
+          color: '#000000',
           letterSpacing: '-0.01em',
           display: 'inline-block',
-          minWidth: '160px',
+          minWidth: '200px',
           textAlign: 'center'
         }}
       >
         {rollingWords[rollingIndex]}
-      </span>
-      
-      <span
-        style={{
-          fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-          fontSize: '32px',
-          fontWeight: '400',
-          color: '#000000',
-          letterSpacing: '-0.01em'
-        }}
-      >
-        )
       </span>
     </div>
 
@@ -4686,7 +4656,8 @@ useEffect(() => {
           transition: 'box-shadow 0.3s ease, padding 0.05s linear',
           fontSize: '24px',
           cursor: 'pointer',
-          opacity: 1
+          opacity: 1,
+          marginTop: '20px'
         }}
         onMouseEnter={(e) => {
           e.currentTarget.style.boxShadow = '0 12px 40px rgba(237, 27, 60, 0.4)';
