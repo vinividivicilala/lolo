@@ -4781,7 +4781,7 @@ useEffect(() => {
       <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   </div>
-)}
+}
 
 
 {/* MARQUEE SECTION - Teks berjalan dari kanan ke kiri (DI BAWAH TOMBOL UCAPAN) */}
@@ -4872,9 +4872,7 @@ useEffect(() => {
     ))}
   </div>
 </div>
-    </div>
-)}
-
+  
 
     
 
