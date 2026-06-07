@@ -4724,80 +4724,80 @@ useEffect(() => {
       </span>
     </div>
 
-    {/* UCAPAN OTOMATIS - Posisi di samping kanan teks MENURU */}
-    {showGreeting && (
-      <div
-        ref={greetingRef}
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '16px',
-          backgroundColor: '#ED1B3C',
-          padding: '12px 24px',
-          borderRadius: '80px',
-          boxShadow: '0 8px 30px rgba(237, 27, 60, 0.3)',
-          whiteSpace: 'nowrap',
-          transition: 'box-shadow 0.3s ease, padding 0.05s linear',
-          fontSize: '24px',
-          cursor: 'pointer',
-          opacity: 1,
-          marginTop: '20px'
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.boxShadow = '0 12px 40px rgba(237, 27, 60, 0.4)';
-          e.currentTarget.style.transform = 'scale(1.02)';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.boxShadow = '0 8px 30px rgba(237, 27, 60, 0.3)';
-          e.currentTarget.style.transform = 'scale(1)';
-        }}
-        onClick={() => setShowMaintenanceModal(true)}
-      >
-        <span style={{
-          fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-          fontWeight: '600',
-          color: '#000000',
-          letterSpacing: '-0.01em'
-        }}>
-          {greeting}
-        </span>
-        <svg 
-          width="28" 
-          height="28" 
-          viewBox="0 0 24 24" 
-          fill="none" 
-          xmlns="http://www.w3.org/2000/svg"
-          style={{ 
-            stroke: '#000000',
-            strokeWidth: '2.5',
-            transition: 'width 0.05s linear, height 0.05s linear'
-          }}
-        >
-          <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-      </div>
-    )}
-  </div>
-</div>
 
-{/* MARQUEE SECTION - Teks berjalan dari kanan ke kiri */}
+
+{/* UCAPAN OTOMATIS - Posisi di samping kanan teks MENURU */}
+{showGreeting && (
+  <div
+    ref={greetingRef}
+    style={{
+      display: 'inline-flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: '16px',
+      backgroundColor: '#ED1B3C',
+      padding: '12px 24px',
+      borderRadius: '80px',
+      boxShadow: '0 8px 30px rgba(237, 27, 60, 0.3)',
+      whiteSpace: 'nowrap',
+      transition: 'box-shadow 0.3s ease, padding 0.05s linear',
+      fontSize: '24px',
+      cursor: 'pointer',
+      opacity: 1,
+      marginTop: '20px'
+    }}
+    onMouseEnter={(e) => {
+      e.currentTarget.style.boxShadow = '0 12px 40px rgba(237, 27, 60, 0.4)';
+      e.currentTarget.style.transform = 'scale(1.02)';
+    }}
+    onMouseLeave={(e) => {
+      e.currentTarget.style.boxShadow = '0 8px 30px rgba(237, 27, 60, 0.3)';
+      e.currentTarget.style.transform = 'scale(1)';
+    }}
+    onClick={() => setShowMaintenanceModal(true)}
+  >
+    <span style={{
+      fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+      fontWeight: '600',
+      color: '#000000',
+      letterSpacing: '-0.01em'
+    }}>
+      {greeting}
+    </span>
+    <svg 
+      width="28" 
+      height="28" 
+      viewBox="0 0 24 24" 
+      fill="none" 
+      xmlns="http://www.w3.org/2000/svg"
+      style={{ 
+        stroke: '#000000',
+        strokeWidth: '2.5',
+        transition: 'width 0.05s linear, height 0.05s linear'
+      }}
+    >
+      <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  </div>
+)}
+
+{/* MARQUEE SECTION - Teks berjalan dari kanan ke kiri (DI BAWAH TOMBOL UCAPAN) */}
 <div
   style={{
     position: 'relative',
     width: '100%',
-    marginTop: '150px',
-    marginBottom: '50px',
+    marginTop: '100px',
+    marginBottom: '0px',
     overflow: 'hidden',
     backgroundColor: 'transparent',
-    padding: '40px 0'
+    padding: '30px 0'
   }}
 >
   <div
     style={{
       display: 'flex',
       whiteSpace: 'nowrap',
-      animation: 'marqueeScroll 30s linear infinite',
+      animation: 'marqueeScroll 25s linear infinite',
       width: 'fit-content'
     }}
     onMouseEnter={(e) => {
@@ -4807,22 +4807,22 @@ useEffect(() => {
       e.currentTarget.style.animationPlayState = 'running';
     }}
   >
-    {/* Ulang 3 kali untuk efek seamless */}
-    {[...Array(3)].map((_, idx) => (
+    {/* Ulang 4 kali untuk efek seamless */}
+    {[...Array(4)].map((_, idx) => (
       <div
         key={idx}
         style={{
           display: 'inline-flex',
           alignItems: 'center',
-          gap: '50px',
-          marginRight: '80px'
+          gap: '40px',
+          marginRight: '60px'
         }}
       >
         <span
           style={{
             fontFamily: 'Inter, "Helvetica Neue", sans-serif',
             fontWeight: '700',
-            fontSize: '300px',
+            fontSize: '500px',
             color: '#000000',
             letterSpacing: '-0.03em',
             textTransform: 'uppercase',
@@ -4836,14 +4836,14 @@ useEffect(() => {
         {/* Foto vertikal */}
         <div
           style={{
-            width: '220px',
-            height: '300px',
+            width: '180px',
+            height: '250px',
             backgroundColor: '#e0e0e0',
-            borderRadius: '24px',
+            borderRadius: '20px',
             overflow: 'hidden',
             position: 'relative',
             flexShrink: 0,
-            boxShadow: '0 15px 35px rgba(0,0,0,0.15)'
+            boxShadow: '0 10px 25px rgba(0,0,0,0.1)'
           }}
         >
           <Image
@@ -4856,8 +4856,8 @@ useEffect(() => {
         
         {/* Panah dekorasi */}
         <svg 
-          width="70" 
-          height="70" 
+          width="50" 
+          height="50" 
           viewBox="0 0 24 24" 
           fill="none" 
           xmlns="http://www.w3.org/2000/svg"
@@ -4869,6 +4869,17 @@ useEffect(() => {
     ))}
   </div>
 </div>
+
+
+
+
+
+
+
+
+
+    
+
             
 
 
