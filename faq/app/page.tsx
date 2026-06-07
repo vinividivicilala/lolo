@@ -988,9 +988,9 @@ const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
 const rollingTextRef = useRef<HTMLSpanElement>(null);
 const rollingWords = ["Note", "Donation", "Community", "Blog", "Calendar"];
 
-
-
-  const marqueeRef = useRef<HTMLDivElement>(null);
+// State untuk kontrol marquee
+const marqueeContainerRef = useRef<HTMLDivElement>(null);
+const marqueeContentRef = useRef<HTMLDivElement>(null);
 
 
 
@@ -1410,7 +1410,41 @@ useEffect(() => {
 }, [showMaintenanceModal]);
   
 
+ // Efek untuk animasi marquee dengan GSAP
+useEffect(() => {
+  if (isLoading) return;
   
+  const container = marqueeContainerRef.current;
+  const content = marqueeContentRef.current;
+  
+  if (!container || !content) return;
+  
+  // Lebar konten
+  const contentWidth = content.scrollWidth;
+  
+  // Duplikat konten untuk seamless loop
+  content.innerHTML = content.innerHTML + content.innerHTML;
+  
+  // Animasi marquee dari kanan ke kiri
+  const animation = gsap.to(content, {
+    x: -contentWidth / 2,
+    duration: 30,
+    ease: "none",
+    repeat: -1,
+    repeatDelay: 0
+  });
+  
+  // Pause on hover
+  container.addEventListener("mouseenter", () => animation.pause());
+  container.addEventListener("mouseleave", () => animation.resume());
+  
+  return () => {
+    animation.kill();
+    container.removeEventListener("mouseenter", () => animation.pause());
+    container.removeEventListener("mouseleave", () => animation.resume());
+  };
+}, [isLoading]);
+ 
 
 
   
@@ -2874,44 +2908,6 @@ const updateTooltipPosition = (event: React.MouseEvent) => {
 
 
 
-  // Efek untuk animasi marquee (teks berjalan) dengan GSAP
-useEffect(() => {
-  if (isLoading) return;
-  
-  const marqueeElement = marqueeRef.current;
-  if (!marqueeElement) return;
-  
-  // Duplikat konten untuk efek infinite seamless
-  const originalContent = marqueeElement.innerHTML;
-  marqueeElement.innerHTML = originalContent + originalContent;
-  
-  // Animasi marquee dari kanan ke kiri
-  const marqueeAnimation = gsap.to(marqueeElement, {
-    x: "-50%",
-    duration: 30,
-    ease: "none",
-    repeat: -1,
-    repeatDelay: 0,
-    modifiers: {
-      x: (x) => {
-        const parseX = parseFloat(x);
-        return (parseX % (marqueeElement.scrollWidth / 2)) + "px";
-      }
-    }
-  });
-  
-  // Pause animation saat hover
-  marqueeElement.addEventListener("mouseenter", () => marqueeAnimation.pause());
-  marqueeElement.addEventListener("mouseleave", () => marqueeAnimation.resume());
-  
-  return () => {
-    marqueeAnimation.kill();
-    if (marqueeElement) {
-      marqueeElement.removeEventListener("mouseenter", () => marqueeAnimation.pause());
-      marqueeElement.removeEventListener("mouseleave", () => marqueeAnimation.resume());
-    }
-  };
-}, [isLoading]);
 
   
 
@@ -4821,6 +4817,9 @@ useEffect(() => {
     ))}
   </div>
 </div>
+
+            
+
 
             
 
