@@ -3784,6 +3784,7 @@ useEffect(() => {
     }
   }
 
+
    @keyframes marqueeScroll {
     0% {
       transform: translateX(0);
@@ -3792,6 +3793,7 @@ useEffect(() => {
       transform: translateX(-50%);
     }
   }
+
 
 
 
@@ -4781,7 +4783,7 @@ useEffect(() => {
   </div>
 )}
 
-{/* MARQUEE SECTION - Teks berjalan dari kanan ke kiri (DI BAWAH TOMBOL UCAPAN) */}
+{/* MARQUEE SECTION - Teks berjalan dari kanan ke kiri */}
 <div
   style={{
     position: 'relative',
@@ -4807,7 +4809,6 @@ useEffect(() => {
       e.currentTarget.style.animationPlayState = 'running';
     }}
   >
-    {/* Ulang 4 kali untuk efek seamless */}
     {[...Array(4)].map((_, idx) => (
       <div
         key={idx}
@@ -4822,7 +4823,7 @@ useEffect(() => {
           style={{
             fontFamily: 'Inter, "Helvetica Neue", sans-serif',
             fontWeight: '700',
-            fontSize: '500px',
+            fontSize: '200px',
             color: '#000000',
             letterSpacing: '-0.03em',
             textTransform: 'uppercase',
@@ -4833,7 +4834,6 @@ useEffect(() => {
           SUBSCRIBE
         </span>
         
-        {/* Foto vertikal */}
         <div
           style={{
             width: '180px',
@@ -4854,7 +4854,6 @@ useEffect(() => {
           />
         </div>
         
-        {/* Panah dekorasi */}
         <svg 
           width="50" 
           height="50" 
