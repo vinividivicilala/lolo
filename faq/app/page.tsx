@@ -988,10 +988,9 @@ const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
 const rollingTextRef = useRef<HTMLSpanElement>(null);
 const rollingWords = ["Note", "Donation", "Community", "Blog", "Calendar"];
 
-// State untuk kontrol marquee
+  
 const marqueeContainerRef = useRef<HTMLDivElement>(null);
 const marqueeContentRef = useRef<HTMLDivElement>(null);
-
 
 
 
@@ -1408,43 +1407,78 @@ useEffect(() => {
     document.removeEventListener('mousedown', handleClickOutside);
   };
 }, [showMaintenanceModal]);
-  
 
- // Efek untuk animasi marquee dengan GSAP
+
+
+
+// Efek untuk animasi marquee dengan GSAP
 useEffect(() => {
   if (isLoading) return;
   
-  const container = marqueeContainerRef.current;
-  const content = marqueeContentRef.current;
+  // Gunakan setTimeout untuk memastikan DOM sudah ready
+  const timer = setTimeout(() => {
+    const container = marqueeContainerRef.current;
+    const content = marqueeContentRef.current;
+    
+    if (!container || !content) return;
+    
+    // Bersihkan konten duplikat sebelumnya
+    if (content.getAttribute('data-cloned') === 'true') return;
+    
+    // Duplikat konten untuk seamless loop
+    const originalWidth = content.scrollWidth;
+    const clone = content.cloneNode(true) as HTMLDivElement;
+    content.parentNode?.appendChild(clone);
+    
+    content.setAttribute('data-cloned', 'true');
+    
+    // Set posisi awal
+    gsap.set(content, { x: 0 });
+    gsap.set(clone, { x: originalWidth });
+    
+    // Animasi marquee
+    const animation = gsap.to([content, clone], {
+      x: `-=${originalWidth}`,
+      duration: 25,
+      ease: "none",
+      repeat: -1,
+      modifiers: {
+        x: (x) => {
+          const parseX = parseFloat(x);
+          return (parseX % originalWidth) + "px";
+        }
+      }
+    });
+    
+    // Pause on hover
+    const handleMouseEnter = () => animation.pause();
+    const handleMouseLeave = () => animation.resume();
+    
+    container.addEventListener("mouseenter", handleMouseEnter);
+    container.addEventListener("mouseleave", handleMouseLeave);
+    
+    return () => {
+      animation.kill();
+      container.removeEventListener("mouseenter", handleMouseEnter);
+      container.removeEventListener("mouseleave", handleMouseLeave);
+      // Hapus clone
+      if (clone && clone.parentNode) {
+        clone.parentNode.removeChild(clone);
+      }
+    };
+  }, 100);
   
-  if (!container || !content) return;
-  
-  // Lebar konten
-  const contentWidth = content.scrollWidth;
-  
-  // Duplikat konten untuk seamless loop
-  content.innerHTML = content.innerHTML + content.innerHTML;
-  
-  // Animasi marquee dari kanan ke kiri
-  const animation = gsap.to(content, {
-    x: -contentWidth / 2,
-    duration: 30,
-    ease: "none",
-    repeat: -1,
-    repeatDelay: 0
-  });
-  
-  // Pause on hover
-  container.addEventListener("mouseenter", () => animation.pause());
-  container.addEventListener("mouseleave", () => animation.resume());
-  
-  return () => {
-    animation.kill();
-    container.removeEventListener("mouseenter", () => animation.pause());
-    container.removeEventListener("mouseleave", () => animation.resume());
-  };
+  return () => clearTimeout(timer);
 }, [isLoading]);
- 
+
+
+
+
+
+
+  
+  
+
 
 
   
@@ -4757,7 +4791,7 @@ useEffect(() => {
       willChange: 'transform'
     }}
   >
-    {[...Array(3)].map((_, idx) => (
+    {[...Array(2)].map((_, idx) => (
       <div
         key={idx}
         style={{
@@ -4775,13 +4809,13 @@ useEffect(() => {
             color: '#000000',
             letterSpacing: '-0.03em',
             textTransform: 'uppercase',
-            lineHeight: '1'
+            lineHeight: '1',
+            whiteSpace: 'nowrap'
           }}
         >
           SUBSCRIBE
         </span>
         
-        {/* Foto vertikal */}
         <div
           style={{
             width: '220px',
@@ -4802,7 +4836,6 @@ useEffect(() => {
           />
         </div>
         
-        {/* Panah dekorasi */}
         <svg 
           width="70" 
           height="70" 
@@ -4817,9 +4850,6 @@ useEffect(() => {
     ))}
   </div>
 </div>
-
-            
-
 
             
 
