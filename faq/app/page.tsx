@@ -27,6 +27,10 @@ export default function HomePage(): React.JSX.Element {
   const [showPanel, setShowPanel] = useState(false);
   const noteRef = useRef<HTMLDivElement>(null);
   const panelTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // State untuk scroll navbar
+  const [isScrolled, setIsScrolled] = useState(false);
+  const navbarRef = useRef<HTMLDivElement>(null);
 
   // Refs
   const headerTextRef = useRef<HTMLDivElement>(null);
@@ -47,7 +51,7 @@ export default function HomePage(): React.JSX.Element {
   const marqueeContainerRef = useRef<HTMLDivElement>(null);
   const marqueeContentRef = useRef<HTMLDivElement>(null);
 
-  // Data untuk Hover Panel (konten berbeda sesuai navbar)
+  // Data untuk Hover Panel
   const navPanelData = {
     Note: {
       title: "Note Features",
@@ -91,7 +95,6 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Rotating texts untuk floating button
   const rotatingTexts = [
     "Open this",
     "Hey there",
@@ -132,7 +135,7 @@ export default function HomePage(): React.JSX.Element {
     };
   }, [isLoading, showScrollDown]);
 
-  // Efek untuk animasi marquee - hanya 1 baris tanpa duplikat, seamless
+  // Efek untuk animasi marquee - 1 baris, seamless, kecepatan normal
   useEffect(() => {
     if (isLoading) return;
     
@@ -155,7 +158,7 @@ export default function HomePage(): React.JSX.Element {
       
       const animation = gsap.to([content, clone], {
         x: `-=${originalWidth}`,
-        duration: 30,
+        duration: 20,
         ease: "none",
         repeat: -1,
         modifiers: {
@@ -213,13 +216,21 @@ export default function HomePage(): React.JSX.Element {
     return () => ctx.revert();
   }, [isLoading]);
 
-  // Scroll handler untuk scroll down hilang saat scroll
+  // Scroll handler untuk navbar - pindah ke kiri saat scroll
   useEffect(() => {
     if (isLoading) return;
     
     const handleScroll = () => {
       const scrollY = window.scrollY;
       
+      // Navbar pindah ke kiri setelah scroll > 100px
+      if (scrollY > 100) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
+      }
+      
+      // Scroll down hilang setelah scroll > 50px
       if (scrollY > 50 && showScrollDown) {
         setShowScrollDown(false);
       } else if (scrollY <= 10 && !showScrollDown) {
@@ -481,7 +492,7 @@ export default function HomePage(): React.JSX.Element {
     }, 3000);
   };
 
-  // Handler untuk hover panel - hanya 1 tempat di Note
+  // Handler untuk hover panel
   const handleNavHover = (navName: string) => {
     if (panelTimeoutRef.current) {
       clearTimeout(panelTimeoutRef.current);
@@ -500,7 +511,6 @@ export default function HomePage(): React.JSX.Element {
     setShowPanel(false);
   };
 
-  // Get panel position based on Note element
   const getPanelPosition = () => {
     if (noteRef.current) {
       const rect = noteRef.current.getBoundingClientRect();
@@ -752,106 +762,100 @@ export default function HomePage(): React.JSX.Element {
                   MENURU
                 </div>
 
-                {/* NAVBAR SEJAJAR DI SEBELAH KANAN */}
+                {/* NAVBAR - Awal di kanan, saat scroll pindah ke kiri */}
                 <div
+                  ref={navbarRef}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '48px'
+                    gap: '48px',
+                    transition: 'all 0.3s ease',
+                    position: 'relative'
                   }}
                 >
-                  {/* Note - dengan ref untuk posisi panel */}
-                  <div
-                    ref={noteRef}
-                    style={{ position: 'relative', cursor: 'pointer' }}
-                    onMouseEnter={() => handleNavHover("Note")}
-                    onMouseLeave={handleNavLeave}
-                  >
-                    <span
-                      style={{
-                        fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                        fontSize: '32px',
-                        fontWeight: '400',
-                        color: '#000000',
-                        letterSpacing: '-0.01em',
-                        transition: 'opacity 0.2s ease'
-                      }}
-                      onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'}
-                      onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+                  {["Note", "Community", "Donation", "Blog"].map((item) => (
+                    <div
+                      key={item}
+                      ref={item === "Note" ? noteRef : null}
+                      style={{ position: 'relative', cursor: 'pointer' }}
+                      onMouseEnter={() => handleNavHover(item)}
+                      onMouseLeave={handleNavLeave}
                     >
-                      Note
-                    </span>
-                  </div>
-
-                  {/* Community - hover mengubah konten panel */}
-                  <div
-                    style={{ position: 'relative', cursor: 'pointer' }}
-                    onMouseEnter={() => handleNavHover("Community")}
-                    onMouseLeave={handleNavLeave}
-                  >
-                    <span
-                      style={{
-                        fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                        fontSize: '32px',
-                        fontWeight: '400',
-                        color: '#000000',
-                        letterSpacing: '-0.01em',
-                        transition: 'opacity 0.2s ease'
-                      }}
-                      onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'}
-                      onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
-                    >
-                      Community
-                    </span>
-                  </div>
-
-                  {/* Donation - hover mengubah konten panel */}
-                  <div
-                    style={{ position: 'relative', cursor: 'pointer' }}
-                    onMouseEnter={() => handleNavHover("Donation")}
-                    onMouseLeave={handleNavLeave}
-                  >
-                    <span
-                      style={{
-                        fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                        fontSize: '32px',
-                        fontWeight: '400',
-                        color: '#000000',
-                        letterSpacing: '-0.01em',
-                        transition: 'opacity 0.2s ease'
-                      }}
-                      onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'}
-                      onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
-                    >
-                      Donation
-                    </span>
-                  </div>
-
-                  {/* Blog - hover mengubah konten panel */}
-                  <div
-                    style={{ position: 'relative', cursor: 'pointer' }}
-                    onMouseEnter={() => handleNavHover("Blog")}
-                    onMouseLeave={handleNavLeave}
-                  >
-                    <span
-                      style={{
-                        fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                        fontSize: '32px',
-                        fontWeight: '400',
-                        color: '#000000',
-                        letterSpacing: '-0.01em',
-                        transition: 'opacity 0.2s ease'
-                      }}
-                      onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'}
-                      onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
-                    >
-                      Blog
-                    </span>
-                  </div>
+                      <span
+                        style={{
+                          fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                          fontSize: '32px',
+                          fontWeight: '400',
+                          color: '#000000',
+                          letterSpacing: '-0.01em',
+                          transition: 'opacity 0.2s ease'
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'}
+                        onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+                      >
+                        {item}
+                      </span>
+                    </div>
+                  ))}
                 </div>
               </div>
 
-              {/* MARQUEE SECTION - Teks berjalan 1 baris tanpa terputus */}
+              {/* Teks MENURU kecil yang muncul saat scroll di samping navbar */}
+              {isScrolled && (
+                <div
+                  style={{
+                    position: 'fixed',
+                    top: '20px',
+                    left: '40px',
+                    zIndex: 100,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '30px',
+                    animation: 'fadeInUp 0.3s ease'
+                  }}
+                >
+                  <span
+                    style={{
+                      fontFamily: 'Inter, "Helvetica Neue", sans-serif',
+                      fontWeight: '400',
+                      fontSize: '32px',
+                      color: '#000000',
+                      letterSpacing: '-0.02em',
+                      textTransform: 'uppercase'
+                    }}
+                  >
+                    MENURU
+                  </span>
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '32px'
+                    }}
+                  >
+                    {["Note", "Community", "Donation", "Blog"].map((item) => (
+                      <span
+                        key={item}
+                        style={{
+                          fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                          fontSize: '18px',
+                          fontWeight: '400',
+                          color: '#000000',
+                          letterSpacing: '-0.01em',
+                          cursor: 'pointer',
+                          transition: 'opacity 0.2s ease'
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'}
+                        onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+                      >
+                        {item}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* MARQUEE SECTION - 1 BARIS, FULL WIDTH, TANPA PUTUS */}
               <div
                 ref={marqueeContainerRef}
                 style={{
@@ -873,13 +877,13 @@ export default function HomePage(): React.JSX.Element {
                     willChange: 'transform'
                   }}
                 >
-                  {/* Hanya 1 baris teks berjalan, tanpa duplikat visual */}
+                  {/* Hanya 1 baris teks berjalan */}
                   <div
                     style={{
                       display: 'inline-flex',
                       alignItems: 'center',
-                      gap: '50px',
-                      marginRight: '60px',
+                      gap: '60px',
+                      marginRight: '80px',
                       flexShrink: 0
                     }}
                   >
@@ -887,11 +891,11 @@ export default function HomePage(): React.JSX.Element {
                       style={{
                         fontFamily: 'Inter, "Helvetica Neue", sans-serif',
                         fontWeight: '700',
-                        fontSize: '180px',
+                        fontSize: '140px',
                         color: '#000000',
                         letterSpacing: '-0.03em',
                         textTransform: 'uppercase',
-                        lineHeight: '1',
+                        lineHeight: '1.2',
                         whiteSpace: 'nowrap'
                       }}
                     >
@@ -900,10 +904,10 @@ export default function HomePage(): React.JSX.Element {
                     
                     <div
                       style={{
-                        width: '140px',
-                        height: '200px',
+                        width: '100px',
+                        height: '140px',
                         backgroundColor: '#e0e0e0',
-                        borderRadius: '16px',
+                        borderRadius: '12px',
                         overflow: 'hidden',
                         position: 'relative',
                         flexShrink: 0,
@@ -919,8 +923,8 @@ export default function HomePage(): React.JSX.Element {
                     </div>
                     
                     <svg 
-                      width="45" 
-                      height="45" 
+                      width="35" 
+                      height="35" 
                       viewBox="0 0 24 24" 
                       fill="none" 
                       xmlns="http://www.w3.org/2000/svg"
@@ -1192,7 +1196,7 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </div>
 
-      {/* HOVER PANEL - Hanya 1 tempat di bawah Note, konten berubah sesuai hover */}
+      {/* HOVER PANEL */}
       {showPanel && (
         <div
           className="hover-panel"
