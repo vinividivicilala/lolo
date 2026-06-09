@@ -36,6 +36,35 @@ export default function HomePage(): React.JSX.Element {
   const marqueeContainerRef = useRef<HTMLDivElement>(null);
   const marqueeContentRef = useRef<HTMLDivElement>(null);
 
+  // Efek untuk scroll down mengikuti cursor
+  useEffect(() => {
+    if (isLoading || !showScrollDown) return;
+    
+    let mouseX = 0;
+    let mouseY = 0;
+    let rafId: number | null = null;
+    
+    const updatePosition = () => {
+      if (scrollDownRef.current) {
+        scrollDownRef.current.style.transform = `translate(${mouseX + 20}px, ${mouseY + 20}px)`;
+      }
+      rafId = requestAnimationFrame(updatePosition);
+    };
+    
+    const onMouseMove = (e: MouseEvent) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+    };
+    
+    document.addEventListener('mousemove', onMouseMove);
+    rafId = requestAnimationFrame(updatePosition);
+    
+    return () => {
+      document.removeEventListener('mousemove', onMouseMove);
+      if (rafId) cancelAnimationFrame(rafId);
+    };
+  }, [isLoading, showScrollDown]);
+
   // Efek untuk animasi marquee dengan GSAP
   useEffect(() => {
     if (isLoading) return;
@@ -59,7 +88,7 @@ export default function HomePage(): React.JSX.Element {
       
       const animation = gsap.to([content, clone], {
         x: `-=${originalWidth}`,
-        duration: 25,
+        duration: 30,
         ease: "none",
         repeat: -1,
         modifiers: {
@@ -117,7 +146,7 @@ export default function HomePage(): React.JSX.Element {
     return () => ctx.revert();
   }, [isLoading]);
 
-  // Scroll handler untuk scroll down
+  // Scroll handler untuk scroll down hilang saat scroll
   useEffect(() => {
     if (isLoading) return;
     
@@ -536,7 +565,7 @@ export default function HomePage(): React.JSX.Element {
                   MENURU
                 </div>
 
-                {/* MARQUEE SECTION - Teks berjalan dari kanan ke kiri (jarak 80px dari judul) */}
+                {/* MARQUEE SECTION - Teks berjalan dari kanan ke kiri (font 300px) */}
                 <div
                   ref={marqueeContainerRef}
                   style={{
@@ -570,11 +599,11 @@ export default function HomePage(): React.JSX.Element {
                           style={{
                             fontFamily: 'Inter, "Helvetica Neue", sans-serif',
                             fontWeight: '700',
-                            fontSize: '80px',
+                            fontSize: '300px',
                             color: '#000000',
                             letterSpacing: '-0.03em',
                             textTransform: 'uppercase',
-                            lineHeight: '1.2',
+                            lineHeight: '1',
                             whiteSpace: 'nowrap'
                           }}
                         >
@@ -584,14 +613,14 @@ export default function HomePage(): React.JSX.Element {
                         {/* Foto vertikal */}
                         <div
                           style={{
-                            width: '60px',
-                            height: '80px',
+                            width: '220px',
+                            height: '300px',
                             backgroundColor: '#e0e0e0',
-                            borderRadius: '12px',
+                            borderRadius: '24px',
                             overflow: 'hidden',
                             position: 'relative',
                             flexShrink: 0,
-                            boxShadow: '0 5px 15px rgba(0,0,0,0.1)'
+                            boxShadow: '0 15px 35px rgba(0,0,0,0.15)'
                           }}
                         >
                           <Image
@@ -604,8 +633,8 @@ export default function HomePage(): React.JSX.Element {
                         
                         {/* Panah dekorasi */}
                         <svg 
-                          width="30" 
-                          height="30" 
+                          width="70" 
+                          height="70" 
                           viewBox="0 0 24 24" 
                           fill="none" 
                           xmlns="http://www.w3.org/2000/svg"
@@ -617,6 +646,67 @@ export default function HomePage(): React.JSX.Element {
                     ))}
                   </div>
                 </div>
+              </div>
+            </div>
+
+            {/* NAVBAR TENGAH - Home, Features, Community, Donation, Blog, Book Call */}
+            <div
+              style={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                zIndex: 100,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '30px',
+                textAlign: 'center'
+              }}
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '60px',
+                  flexWrap: 'wrap',
+                  justifyContent: 'center'
+                }}
+              >
+                <Link href="/" style={{ textDecoration: 'none' }}>
+                  <span style={{ fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", fontSize: '24px', fontWeight: '400', color: '#000000', cursor: 'pointer', transition: 'opacity 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>Home</span>
+                </Link>
+                <Link href="#features" style={{ textDecoration: 'none' }}>
+                  <span style={{ fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", fontSize: '24px', fontWeight: '400', color: '#000000', cursor: 'pointer', transition: 'opacity 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>Features</span>
+                </Link>
+                <Link href="#community" style={{ textDecoration: 'none' }}>
+                  <span style={{ fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", fontSize: '24px', fontWeight: '400', color: '#000000', cursor: 'pointer', transition: 'opacity 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>Community</span>
+                </Link>
+                <Link href="#donation" style={{ textDecoration: 'none' }}>
+                  <span style={{ fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", fontSize: '24px', fontWeight: '400', color: '#000000', cursor: 'pointer', transition: 'opacity 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>Donation</span>
+                </Link>
+                <Link href="#blog" style={{ textDecoration: 'none' }}>
+                  <span style={{ fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", fontSize: '24px', fontWeight: '400', color: '#000000', cursor: 'pointer', transition: 'opacity 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>Blog</span>
+                </Link>
+                <button
+                  onClick={() => console.log('Book Call clicked')}
+                  style={{
+                    background: '#000000',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '60px',
+                    padding: '12px 32px',
+                    fontSize: '18px',
+                    fontFamily: "'Questrial', sans-serif",
+                    fontWeight: '500',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.backgroundColor = '#333333'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.backgroundColor = '#000000'; }}
+                >
+                  Book Call
+                </button>
               </div>
             </div>
 
@@ -714,7 +804,6 @@ export default function HomePage(): React.JSX.Element {
                       and industry leaders such personal others to achieve this.
                     </span>
                     
-                    {/* TOMBOL PROFILE DI TENGAH - TIDAK DIHILANGKAN */}
                     <Link href="/profile">
                       <div
                         style={{
@@ -761,7 +850,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* SCROLL DOWN - Teks yang mengikuti cursor (TIDAK DIHILANGKAN) */}
+            {/* SCROLL DOWN - Teks yang mengikuti cursor (bisa digerakkan) */}
             {showScrollDown && !isLoading && (
               <div
                 ref={scrollDownRef}
