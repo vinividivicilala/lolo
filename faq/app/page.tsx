@@ -643,19 +643,21 @@ export default function HomePage(): React.JSX.Element {
                   MENURU
                 </div>
 
-              {/* MARQUEE SECTION - Teks berjalan FULL WIDTH mentok kiri dan kanan */}
+
+
+
+
+                {/* MARQUEE SECTION - Teks berjalan FULL WIDTH mentok kiri dan kanan */}
 <div
   style={{
     position: 'relative',
-    width: '100vw',
-    left: '50%',
-    right: '50%',
-    marginLeft: '-50vw',
-    marginRight: '-50vw',
+    width: '100%',
     marginTop: '80px',
     marginBottom: '0px',
     overflow: 'hidden',
-    backgroundColor: 'transparent'
+    backgroundColor: 'transparent',
+    marginLeft: '-40px', // Menyesuaikan dengan padding parent (40px)
+    width: 'calc(100% + 80px)' // Lebar total + padding kiri kanan
   }}
 >
   <div
@@ -672,7 +674,6 @@ export default function HomePage(): React.JSX.Element {
       e.currentTarget.style.animationPlayState = 'running';
     }}
   >
-    {/* Ulang 6 kali untuk efek seamless */}
     {[...Array(6)].map((_, idx) => (
       <div
         key={idx}
@@ -733,6 +734,7 @@ export default function HomePage(): React.JSX.Element {
     ))}
   </div>
 </div>
+
               </div>
             </div>
 
