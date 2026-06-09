@@ -22,7 +22,7 @@ export default function HomePage(): React.JSX.Element {
   const textRef = useRef(null);
   const [isHovering, setIsHovering] = useState(false);
   
-  // State untuk Hover Preview Panel
+  // State untuk Hover Preview Panel (seperti Vercel)
   const [hoveredNav, setHoveredNav] = useState<string | null>(null);
   const [previewPosition, setPreviewPosition] = useState({ x: 0, y: 0 });
 
@@ -45,27 +45,31 @@ export default function HomePage(): React.JSX.Element {
   const marqueeContainerRef = useRef<HTMLDivElement>(null);
   const marqueeContentRef = useRef<HTMLDivElement>(null);
 
-  // Data untuk Hover Preview Panel
+  // Data untuk Hover Preview Panel (seperti Vercel)
   const navPreviewData = {
     Note: {
       title: "Note",
-      description: "Catat semua aktivitas harianmu",
-      features: ["📝 Catatan Harian", "🍽️ Catatan Makanan", "💧 Catatan Minum", "🏃 Catatan Olahraga", "😴 Catatan Tidur"]
+      description: "Catat semua aktivitas harianmu dengan mudah",
+      features: ["📝 Catatan Harian", "🍽️ Catatan Makanan", "💧 Catatan Minum", "🏃 Catatan Olahraga", "😴 Catatan Tidur"],
+      cta: "Explore Note →"
     },
     Community: {
       title: "Community",
-      description: "Bergabung dengan komunitas",
-      features: ["💬 Diskusi Umum", "👥 Grup Belajar", "🤝 Kolaborasi", "📢 Event & Meetup", "⭐ Feedback & Saran"]
+      description: "Bergabung dan terhubung dengan komunitas",
+      features: ["💬 Diskusi Umum", "👥 Grup Belajar", "🤝 Kolaborasi Proyek", "📢 Event & Meetup", "⭐ Feedback & Saran"],
+      cta: "Join Community →"
     },
     Donation: {
       title: "Donation",
-      description: "Donasi untuk sesama",
-      features: ["💰 Donasi Uang", "🍚 Donasi Makanan", "📚 Donasi Buku", "👕 Donasi Pakaian", "🏥 Donasi Kesehatan"]
+      description: "Donasi untuk membantu sesama",
+      features: ["💰 Donasi Uang", "🍚 Donasi Makanan", "📚 Donasi Buku", "👕 Donasi Pakaian", "🏥 Donasi Kesehatan"],
+      cta: "Donate Now →"
     },
     Blog: {
       title: "Blog",
-      description: "Artikel dan tutorial terbaru",
-      features: ["✍️ Artikel Terbaru", "📖 Tutorial", "🎯 Tips & Trik", "📰 Berita", "🎬 Video Content"]
+      description: "Artikel dan tutorial terbaru setiap hari",
+      features: ["✍️ Artikel Terbaru", "📖 Tutorial Lengkap", "🎯 Tips & Trik", "📰 Berita Terkini", "🎬 Video Content"],
+      cta: "Read Blog →"
     }
   };
 
@@ -459,15 +463,15 @@ export default function HomePage(): React.JSX.Element {
     }, 3000);
   };
 
-  // Handler untuk hover preview panel
+  // Handler untuk hover preview panel (seperti Vercel)
   const handleNavMouseEnter = (navName: string, event: React.MouseEvent) => {
     setHoveredNav(navName);
-    setPreviewPosition({ x: event.clientX + 20, y: event.clientY - 100 });
+    setPreviewPosition({ x: event.clientX + 20, y: event.clientY - 120 });
   };
 
   const handleNavMouseMove = (event: React.MouseEvent) => {
     if (hoveredNav) {
-      setPreviewPosition({ x: event.clientX + 20, y: event.clientY - 100 });
+      setPreviewPosition({ x: event.clientX + 20, y: event.clientY - 120 });
     }
   };
 
@@ -570,15 +574,15 @@ export default function HomePage(): React.JSX.Element {
 
         .preview-panel {
           position: fixed;
-          background: rgba(0, 0, 0, 0.9);
-          backdropFilter: blur(12px);
-          borderRadius: 20px;
-          padding: 24px 32px;
-          zIndex: 10000;
-          minWidth: 280px;
-          boxShadow: 0 20px 40px rgba(0,0,0,0.3);
+          background: rgba(10, 10, 10, 0.98);
+          backdropFilter: blur(16px);
+          border-radius: 24px;
+          padding: 28px 32px;
+          z-index: 100000;
+          min-width: 320px;
+          box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
           border: 1px solid rgba(255,255,255,0.1);
-          animation: fadeInUp 0.2s ease;
+          animation: fadeInUp 0.2s cubic-bezier(0.16, 1, 0.3, 1);
         }
       `}</style>
 
@@ -670,13 +674,13 @@ export default function HomePage(): React.JSX.Element {
               transition: 'all 0.01s ease'
             }}
           >
-            {/* HEADER SECTION - MENURU dengan efek PINNED */}
+            {/* HEADER SECTION */}
             <div
               ref={headerSectionRef}
               style={{
                 position: 'relative',
                 width: '100%',
-                height: '100vh',
+                minHeight: '100vh',
                 backgroundColor: 'transparent',
                 zIndex: 10,
                 paddingBottom: '150px'
@@ -688,49 +692,13 @@ export default function HomePage(): React.JSX.Element {
                   top: 0,
                   left: 0,
                   right: 0,
-                  padding: '40px 0 0 40px'
+                  padding: '40px 40px 0 40px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  flexWrap: 'wrap'
                 }}
               >
-                {/* NAVBAR SAMPING KANAN TEKS MENURU - Note, Community, Donation, Blog */}
-                <div
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '40px',
-                    marginLeft: '40px',
-                    marginBottom: '40px',
-                    flexWrap: 'wrap'
-                  }}
-                >
-                  {["Note", "Community", "Donation", "Blog"].map((item) => (
-                    <div
-                      key={item}
-                      style={{
-                        position: 'relative',
-                        cursor: 'pointer'
-                      }}
-                      onMouseEnter={(e) => handleNavMouseEnter(item, e)}
-                      onMouseMove={handleNavMouseMove}
-                      onMouseLeave={handleNavMouseLeave}
-                    >
-                      <span
-                        style={{
-                          fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                          fontSize: '40px',
-                          fontWeight: '400',
-                          color: '#000000',
-                          letterSpacing: '-0.01em',
-                          transition: 'opacity 0.2s ease'
-                        }}
-                        onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'}
-                        onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
-                      >
-                        {item}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-
                 {/* Teks MENURU besar - 300px */}
                 <div
                   ref={headerTextRef}
@@ -749,87 +717,124 @@ export default function HomePage(): React.JSX.Element {
                   MENURU
                 </div>
 
-                {/* MARQUEE SECTION - FULL WIDTH mentok kiri kanan */}
+                {/* NAVBAR SEJAJAR DI SEBELAH KANAN - Note, Community, Donation, Blog */}
                 <div
-                  ref={marqueeContainerRef}
                   style={{
-                    position: 'relative',
-                    width: '100vw',
-                    left: '50%',
-                    transform: 'translateX(-50%)',
-                    marginTop: '80px',
-                    marginBottom: '0px',
-                    overflow: 'hidden',
-                    backgroundColor: 'transparent'
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '32px'
                   }}
                 >
-                  <div
-                    ref={marqueeContentRef}
-                    style={{
-                      display: 'flex',
-                      whiteSpace: 'nowrap',
-                      willChange: 'transform'
-                    }}
-                  >
-                    {[...Array(6)].map((_, idx) => (
-                      <div
-                        key={idx}
+                  {["Note", "Community", "Donation", "Blog"].map((item) => (
+                    <div
+                      key={item}
+                      style={{
+                        position: 'relative',
+                        cursor: 'pointer'
+                      }}
+                      onMouseEnter={(e) => handleNavMouseEnter(item, e)}
+                      onMouseMove={handleNavMouseMove}
+                      onMouseLeave={handleNavMouseLeave}
+                    >
+                      <span
                         style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '50px',
-                          marginRight: '60px',
-                          flexShrink: 0
+                          fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                          fontSize: '32px',
+                          fontWeight: '400',
+                          color: '#000000',
+                          letterSpacing: '-0.01em',
+                          transition: 'opacity 0.2s ease'
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'}
+                        onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+                      >
+                        {item}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* MARQUEE SECTION - FULL WIDTH */}
+              <div
+                ref={marqueeContainerRef}
+                style={{
+                  position: 'relative',
+                  width: '100vw',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  marginTop: '60px',
+                  marginBottom: '0px',
+                  overflow: 'hidden',
+                  backgroundColor: 'transparent'
+                }}
+              >
+                <div
+                  ref={marqueeContentRef}
+                  style={{
+                    display: 'flex',
+                    whiteSpace: 'nowrap',
+                    willChange: 'transform'
+                  }}
+                >
+                  {[...Array(6)].map((_, idx) => (
+                    <div
+                      key={idx}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '50px',
+                        marginRight: '60px',
+                        flexShrink: 0
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontFamily: 'Inter, "Helvetica Neue", sans-serif',
+                          fontWeight: '700',
+                          fontSize: '180px',
+                          color: '#000000',
+                          letterSpacing: '-0.03em',
+                          textTransform: 'uppercase',
+                          lineHeight: '1',
+                          whiteSpace: 'nowrap'
                         }}
                       >
-                        <span
-                          style={{
-                            fontFamily: 'Inter, "Helvetica Neue", sans-serif',
-                            fontWeight: '700',
-                            fontSize: '180px',
-                            color: '#000000',
-                            letterSpacing: '-0.03em',
-                            textTransform: 'uppercase',
-                            lineHeight: '1',
-                            whiteSpace: 'nowrap'
-                          }}
-                        >
-                          SUBSCRIBE
-                        </span>
-                        
-                        <div
-                          style={{
-                            width: '140px',
-                            height: '200px',
-                            backgroundColor: '#e0e0e0',
-                            borderRadius: '16px',
-                            overflow: 'hidden',
-                            position: 'relative',
-                            flexShrink: 0,
-                            boxShadow: '0 10px 25px rgba(0,0,0,0.1)'
-                          }}
-                        >
-                          <Image
-                            src="/images/5.jpg"
-                            alt="Subscribe"
-                            fill
-                            style={{ objectFit: 'cover' }}
-                          />
-                        </div>
-                        
-                        <svg 
-                          width="45" 
-                          height="45" 
-                          viewBox="0 0 24 24" 
-                          fill="none" 
-                          xmlns="http://www.w3.org/2000/svg"
-                          style={{ stroke: '#000000', strokeWidth: '1.5', flexShrink: 0 }}
-                        >
-                          <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
+                        SUBSCRIBE
+                      </span>
+                      
+                      <div
+                        style={{
+                          width: '140px',
+                          height: '200px',
+                          backgroundColor: '#e0e0e0',
+                          borderRadius: '16px',
+                          overflow: 'hidden',
+                          position: 'relative',
+                          flexShrink: 0,
+                          boxShadow: '0 10px 25px rgba(0,0,0,0.1)'
+                        }}
+                      >
+                        <Image
+                          src="/images/5.jpg"
+                          alt="Subscribe"
+                          fill
+                          style={{ objectFit: 'cover' }}
+                        />
                       </div>
-                    ))}
-                  </div>
+                      
+                      <svg 
+                        width="45" 
+                        height="45" 
+                        viewBox="0 0 24 24" 
+                        fill="none" 
+                        xmlns="http://www.w3.org/2000/svg"
+                        style={{ stroke: '#000000', strokeWidth: '1.5', flexShrink: 0 }}
+                      >
+                        <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
@@ -876,7 +881,7 @@ export default function HomePage(): React.JSX.Element {
                 MN'RU© - 26'
               </div>
 
-              {/* ABOUT SECTION dengan tombol profile */}
+              {/* ABOUT SECTION */}
               <div
                 style={{
                   position: 'absolute',
@@ -930,7 +935,6 @@ export default function HomePage(): React.JSX.Element {
                       and industry leaders such personal others to achieve this.
                     </span>
                     
-                    {/* TOMBOL PROFILE */}
                     <Link href="/profile">
                       <div
                         style={{
@@ -977,7 +981,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* SCROLL DOWN - Teks yang mengikuti cursor */}
+            {/* SCROLL DOWN */}
             {showScrollDown && !isLoading && (
               <div
                 ref={scrollDownRef}
@@ -1038,7 +1042,6 @@ export default function HomePage(): React.JSX.Element {
                   overflow: 'hidden',
                 }}
               >
-                {/* KONTEN MENU - Bagian Atas (muncul saat expand) */}
                 <div
                   style={{
                     maxHeight: isMenuOpen ? '800px' : '0',
@@ -1048,7 +1051,6 @@ export default function HomePage(): React.JSX.Element {
                     overflow: 'hidden',
                   }}
                 >
-                  {/* HEADER DENGAN FOTO DAN NAMA WEBSITE BESAR */}
                   <div
                     style={{
                       display: 'flex',
@@ -1070,47 +1072,12 @@ export default function HomePage(): React.JSX.Element {
                         }}
                       />
                       <div>
-                        <div
-                          style={{
-                            color: '#fff',
-                            fontSize: '48px',
-                            lineHeight: '1',
-                            fontWeight: 600,
-                            fontFamily: 'Questrial, sans-serif',
-                            letterSpacing: '-0.02em',
-                          }}
-                        >
-                          MENURU
-                        </div>
-                        <div
-                          style={{
-                            color: '#8a8a8a',
-                            marginTop: '8px',
-                            fontSize: '14px',
-                            fontFamily: 'Questrial, sans-serif',
-                          }}
-                        >
-                          Creative Digital Studio
-                        </div>
+                        <div style={{ color: '#fff', fontSize: '48px', lineHeight: '1', fontWeight: 600, fontFamily: 'Questrial, sans-serif', letterSpacing: '-0.02em' }}>MENURU</div>
+                        <div style={{ color: '#8a8a8a', marginTop: '8px', fontSize: '14px', fontFamily: 'Questrial, sans-serif' }}>Creative Digital Studio</div>
                       </div>
                     </div>
-
-                    <div
-                      style={{
-                        background: '#fff',
-                        color: '#000',
-                        padding: '10px 24px',
-                        borderRadius: '999px',
-                        fontSize: '14px',
-                        fontWeight: 500,
-                        cursor: 'pointer',
-                      }}
-                    >
-                      Let's Talk
-                    </div>
+                    <div style={{ background: '#fff', color: '#000', padding: '10px 24px', borderRadius: '999px', fontSize: '14px', fontWeight: 500, cursor: 'pointer' }}>Let's Talk</div>
                   </div>
-
-                  {/* MENU LIST */}
                   {[
                     { name: 'Homepage', link: '/' },
                     { name: 'Studios', link: '/studios' },
@@ -1120,108 +1087,18 @@ export default function HomePage(): React.JSX.Element {
                     { name: 'Contact', link: '/contact' },
                   ].map((item, index) => (
                     <Link href={item.link} key={index} style={{ textDecoration: 'none' }}>
-                      <div
-                        style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                          padding: '22px 30px',
-                          borderBottom: index !== 5 ? '1px solid rgba(255,255,255,0.06)' : 'none',
-                          cursor: 'pointer',
-                          transition: 'all .3s ease',
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.background = 'transparent';
-                        }}
-                      >
-                        <span
-                          style={{
-                            color: '#fff',
-                            fontSize: '28px',
-                            fontWeight: 400,
-                            fontFamily: 'Questrial, sans-serif',
-                          }}
-                        >
-                          {item.name}
-                        </span>
-                        <span
-                          style={{
-                            color: '#777',
-                            fontSize: '14px',
-                            fontFamily: 'Questrial, sans-serif',
-                          }}
-                        >
-                          View
-                        </span>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '22px 30px', borderBottom: index !== 5 ? '1px solid rgba(255,255,255,0.06)' : 'none', cursor: 'pointer', transition: 'all .3s ease' }} onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; }} onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}>
+                        <span style={{ color: '#fff', fontSize: '28px', fontWeight: 400, fontFamily: 'Questrial, sans-serif' }}>{item.name}</span>
+                        <span style={{ color: '#777', fontSize: '14px', fontFamily: 'Questrial, sans-serif' }}>View</span>
                       </div>
                     </Link>
                   ))}
                 </div>
-
-                {/* TOMBOL BAWAH - Bagian Bawah yang SELALU TERLIHAT */}
-                <div
-                  onClick={() => setIsMenuOpen(!isMenuOpen)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '0 24px',
-                    height: '68px',
-                    cursor: 'pointer',
-                    borderTop: isMenuOpen ? '1px solid rgba(255,255,255,0.08)' : 'none',
-                    background: '#050505',
-                  }}
-                >
-                  <div
-                    ref={textRef}
-                    onMouseEnter={handleTextHover}
-                    style={{
-                      color: '#fff',
-                      fontSize: '18px',
-                      fontFamily: 'Questrial, sans-serif',
-                      cursor: 'pointer',
-                      display: 'inline-block',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    {rotatingTexts[currentTextIndex]}
-                  </div>
-
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '16px',
-                    }}
-                  >
-                    <Link href="/" style={{ textDecoration: 'none' }}>
-                      <div
-                        style={{
-                          background: '#fff',
-                          color: '#000',
-                          borderRadius: '999px',
-                          padding: '8px 24px',
-                          fontSize: '16px',
-                          fontWeight: 500,
-                          fontFamily: 'Questrial, sans-serif',
-                        }}
-                      >
-                        Homepage
-                      </div>
-                    </Link>
-                    <span
-                      style={{
-                        color: '#fff',
-                        fontSize: '28px',
-                        fontWeight: 300,
-                        cursor: 'pointer',
-                      }}
-                    >
-                      {isMenuOpen ? '−' : '+'}
-                    </span>
+                <div onClick={() => setIsMenuOpen(!isMenuOpen)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 24px', height: '68px', cursor: 'pointer', borderTop: isMenuOpen ? '1px solid rgba(255,255,255,0.08)' : 'none', background: '#050505' }}>
+                  <div ref={textRef} onMouseEnter={handleTextHover} style={{ color: '#fff', fontSize: '18px', fontFamily: 'Questrial, sans-serif', cursor: 'pointer', display: 'inline-block', whiteSpace: 'nowrap' }}>{rotatingTexts[currentTextIndex]}</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                    <Link href="/" style={{ textDecoration: 'none' }}><div style={{ background: '#fff', color: '#000', borderRadius: '999px', padding: '8px 24px', fontSize: '16px', fontWeight: 500, fontFamily: 'Questrial, sans-serif' }}>Homepage</div></Link>
+                    <span style={{ color: '#fff', fontSize: '28px', fontWeight: 300, cursor: 'pointer' }}>{isMenuOpen ? '−' : '+'}</span>
                   </div>
                 </div>
               </div>
@@ -1230,7 +1107,7 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </div>
 
-      {/* HOVER PREVIEW PANEL - Seperti Vercel/OpenAI */}
+      {/* HOVER PREVIEW PANEL - Seperti Vercel */}
       {hoveredNav && (
         <div
           className="preview-panel"
@@ -1239,52 +1116,21 @@ export default function HomePage(): React.JSX.Element {
             top: previewPosition.y,
           }}
         >
-          <div
-            style={{
-              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-              fontSize: '28px',
-              fontWeight: '600',
-              color: '#ffffff',
-              marginBottom: '12px'
-            }}
-          >
+          <div style={{ fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", fontSize: '26px', fontWeight: '600', color: '#ffffff', marginBottom: '8px' }}>
             {navPreviewData[hoveredNav as keyof typeof navPreviewData].title}
           </div>
-          <div
-            style={{
-              fontFamily: "'Questrial', sans-serif",
-              fontSize: '14px',
-              color: '#aaaaaa',
-              marginBottom: '20px',
-              lineHeight: '1.4'
-            }}
-          >
+          <div style={{ fontFamily: "'Questrial', sans-serif", fontSize: '13px', color: '#888888', marginBottom: '20px', lineHeight: '1.4' }}>
             {navPreviewData[hoveredNav as keyof typeof navPreviewData].description}
           </div>
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '10px'
-            }}
-          >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '20px' }}>
             {navPreviewData[hoveredNav as keyof typeof navPreviewData].features.map((feature, idx) => (
-              <div
-                key={idx}
-                style={{
-                  fontFamily: "'Questrial', sans-serif",
-                  fontSize: '14px',
-                  color: '#cccccc',
-                  padding: '6px 0',
-                  borderBottom: '1px solid rgba(255,255,255,0.05)',
-                  transition: 'color 0.2s ease'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.color = '#ffffff'}
-                onMouseLeave={(e) => e.currentTarget.style.color = '#cccccc'}
-              >
+              <div key={idx} style={{ fontFamily: "'Questrial', sans-serif", fontSize: '13px', color: '#cccccc', padding: '6px 0', borderBottom: '1px solid rgba(255,255,255,0.05)', transition: 'color 0.2s ease', cursor: 'pointer' }} onMouseEnter={(e) => e.currentTarget.style.color = '#ffffff'} onMouseLeave={(e) => e.currentTarget.style.color = '#cccccc'}>
                 {feature}
               </div>
             ))}
+          </div>
+          <div style={{ fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", fontSize: '14px', fontWeight: '500', color: '#ffffff', marginTop: '8px', paddingTop: '12px', borderTop: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer', transition: 'opacity 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.7'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>
+            {navPreviewData[hoveredNav as keyof typeof navPreviewData].cta}
           </div>
         </div>
       )}
