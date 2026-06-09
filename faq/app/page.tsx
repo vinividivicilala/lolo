@@ -105,7 +105,7 @@ export default function HomePage(): React.JSX.Element {
       
       const animation = gsap.to([content, clone], {
         x: `-=${originalWidth}`,
-        duration: 30,
+        duration: 25,
         ease: "none",
         repeat: -1,
         modifiers: {
@@ -436,13 +436,10 @@ export default function HomePage(): React.JSX.Element {
       <style jsx global>{`
         @import url('https://fonts.googleapis.com/css2?family=Questrial&display=swap');
 
-
-         @keyframes marqueeScroll {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(-50%); }
-  }
-
-      
+        @keyframes marqueeScroll {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
 
         @keyframes bounce {
           0%, 100% { transform: translateY(0); }
@@ -644,93 +641,88 @@ export default function HomePage(): React.JSX.Element {
                   MENURU
                 </div>
 
-            {/* MARQUEE SECTION - Teks berjalan FULL WIDTH mentok kiri dan kanan */}
-<div
-  style={{
-    position: 'relative',
-    width: '100vw',
-    marginLeft: 'calc(-50vw + 50%)',
-    marginTop: '80px',
-    marginBottom: '0px',
-    overflow: 'hidden',
-    backgroundColor: 'transparent'
-  }}
->
-  <div
-    style={{
-      display: 'flex',
-      whiteSpace: 'nowrap',
-      animation: 'marqueeScroll 25s linear infinite',
-      width: 'fit-content'
-    }}
-    onMouseEnter={(e) => {
-      e.currentTarget.style.animationPlayState = 'paused';
-    }}
-    onMouseLeave={(e) => {
-      e.currentTarget.style.animationPlayState = 'running';
-    }}
-  >
-    {/* Ulang 5 kali untuk efek seamless */}
-    {[...Array(5)].map((_, idx) => (
-      <div
-        key={idx}
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '60px',
-          marginRight: '80px',
-          flexShrink: 0
-        }}
-      >
-        <span
-          style={{
-            fontFamily: 'Inter, "Helvetica Neue", sans-serif',
-            fontWeight: '700',
-            fontSize: '200px',
-            color: '#000000',
-            letterSpacing: '-0.03em',
-            textTransform: 'uppercase',
-            lineHeight: '1',
-            whiteSpace: 'nowrap'
-          }}
-        >
-          SUBSCRIBE
-        </span>
-        
-        <div
-          style={{
-            width: '160px',
-            height: '220px',
-            backgroundColor: '#e0e0e0',
-            borderRadius: '20px',
-            overflow: 'hidden',
-            position: 'relative',
-            flexShrink: 0,
-            boxShadow: '0 10px 25px rgba(0,0,0,0.1)'
-          }}
-        >
-          <Image
-            src="/images/5.jpg"
-            alt="Subscribe"
-            fill
-            style={{ objectFit: 'cover' }}
-          />
-        </div>
-        
-        <svg 
-          width="50" 
-          height="50" 
-          viewBox="0 0 24 24" 
-          fill="none" 
-          xmlns="http://www.w3.org/2000/svg"
-          style={{ stroke: '#000000', strokeWidth: '1.5', flexShrink: 0 }}
-        >
-          <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-      </div>
-    ))}
-  </div>
-</div>
+                {/* MARQUEE SECTION - Teks berjalan FULL WIDTH mentok kiri dan kanan */}
+                <div
+                  ref={marqueeContainerRef}
+                  style={{
+                    position: 'relative',
+                    width: '100%',
+                    marginTop: '80px',
+                    marginBottom: '0px',
+                    overflow: 'hidden',
+                    backgroundColor: 'transparent'
+                  }}
+                >
+                  <div
+                    ref={marqueeContentRef}
+                    style={{
+                      display: 'flex',
+                      whiteSpace: 'nowrap',
+                      willChange: 'transform'
+                    }}
+                  >
+                    {[...Array(5)].map((_, idx) => (
+                      <div
+                        key={idx}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '50px',
+                          marginRight: '60px',
+                          flexShrink: 0
+                        }}
+                      >
+                        <span
+                          style={{
+                            fontFamily: 'Inter, "Helvetica Neue", sans-serif',
+                            fontWeight: '700',
+                            fontSize: '180px',
+                            color: '#000000',
+                            letterSpacing: '-0.03em',
+                            textTransform: 'uppercase',
+                            lineHeight: '1',
+                            whiteSpace: 'nowrap'
+                          }}
+                        >
+                          SUBSCRIBE
+                        </span>
+                        
+                        <div
+                          style={{
+                            width: '140px',
+                            height: '200px',
+                            backgroundColor: '#e0e0e0',
+                            borderRadius: '16px',
+                            overflow: 'hidden',
+                            position: 'relative',
+                            flexShrink: 0,
+                            boxShadow: '0 10px 25px rgba(0,0,0,0.1)'
+                          }}
+                        >
+                          <Image
+                            src="/images/5.jpg"
+                            alt="Subscribe"
+                            fill
+                            style={{ objectFit: 'cover' }}
+                          />
+                        </div>
+                        
+                        <svg 
+                          width="45" 
+                          height="45" 
+                          viewBox="0 0 24 24" 
+                          fill="none" 
+                          xmlns="http://www.w3.org/2000/svg"
+                          style={{ stroke: '#000000', strokeWidth: '1.5', flexShrink: 0 }}
+                        >
+                          <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
 
             {/* SECTION 1 - MENURU.STUDIO */}
             <div
@@ -1073,7 +1065,6 @@ export default function HomePage(): React.JSX.Element {
                     background: '#050505',
                   }}
                 >
-                  {/* TEKS KIRI - BERUBAH DENGAN GSAP */}
                   <div
                     ref={textRef}
                     onMouseEnter={handleTextHover}
@@ -1089,7 +1080,6 @@ export default function HomePage(): React.JSX.Element {
                     {rotatingTexts[currentTextIndex]}
                   </div>
 
-                  {/* BAGIAN KANAN - HOMEPAGE + TANDA + */}
                   <div
                     style={{
                       display: 'flex',
