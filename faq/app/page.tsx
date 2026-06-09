@@ -21,6 +21,10 @@ export default function HomePage(): React.JSX.Element {
   const [currentTextIndex, setCurrentTextIndex] = useState(0);
   const textRef = useRef(null);
   const [isHovering, setIsHovering] = useState(false);
+  
+  // State untuk overlay navbar
+  const [activeNav, setActiveNav] = useState<string | null>(null);
+  const [overlayContent, setOverlayContent] = useState({ title: "", items: [] as string[] });
 
   // Refs
   const headerTextRef = useRef<HTMLDivElement>(null);
@@ -40,6 +44,26 @@ export default function HomePage(): React.JSX.Element {
   
   const marqueeContainerRef = useRef<HTMLDivElement>(null);
   const marqueeContentRef = useRef<HTMLDivElement>(null);
+
+  // Data untuk overlay navbar
+  const navData = {
+    Note: {
+      title: "NOTE FEATURES",
+      items: ["📝 Catatan Harian", "🍽️ Catatan Makanan", "💧 Catatan Minum", "🏃 Catatan Olahraga", "😴 Catatan Tidur", "📅 Catatan Kegiatan"]
+    },
+    Community: {
+      title: "COMMUNITY",
+      items: ["💬 Diskusi Umum", "👥 Grup Belajar", "🤝 Kolaborasi", "📢 Event & Meetup", "⭐ Feedback & Saran"]
+    },
+    Donation: {
+      title: "DONATION",
+      items: ["💰 Donasi Uang", "🍚 Donasi Makanan", "📚 Donasi Buku", "👕 Donasi Pakaian", "🏥 Donasi Kesehatan"]
+    },
+    Blog: {
+      title: "BLOG",
+      items: ["✍️ Artikel Terbaru", "📖 Tutorial", "🎯 Tips & Trik", "📰 Berita", "🎬 Video Content"]
+    }
+  };
 
   // Rotating texts untuk floating button
   const rotatingTexts = [
@@ -431,21 +455,43 @@ export default function HomePage(): React.JSX.Element {
     }, 3000);
   };
 
+  // Handler untuk navbar hover
+  const handleNavHover = (navName: string) => {
+    setActiveNav(navName);
+    setOverlayContent({
+      title: navData[navName as keyof typeof navData].title,
+      items: navData[navName as keyof typeof navData].items
+    });
+  };
+
+  const handleNavLeave = () => {
+    setActiveNav(null);
+  };
+
   return (
     <>
       <style jsx global>{`
         @import url('https://fonts.googleapis.com/css2?family=Questrial&display=swap');
 
-
-         @keyframes marqueeScroll {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(-50%); }
-  }
-
+        @keyframes marqueeScroll {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
 
         @keyframes bounce {
           0%, 100% { transform: translateY(0); }
           50% { transform: translateY(5px); }
+        }
+
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
         }
 
         @font-face {
@@ -513,6 +559,31 @@ export default function HomePage(): React.JSX.Element {
           color: rgb(16, 16, 16);
           letter-spacing: -0.02em;
           line-height: 1.3;
+        }
+
+        .nav-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background-color: #000000;
+          z-index: 200;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          opacity: 0;
+          visibility: hidden;
+          transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .nav-overlay.active {
+          opacity: 1;
+          visibility: visible;
+        }
+
+        .nav-overlay-content {
+          animation: fadeInUp 0.3s ease;
         }
       `}</style>
 
@@ -625,6 +696,44 @@ export default function HomePage(): React.JSX.Element {
                   padding: '40px 0 0 40px'
                 }}
               >
+                {/* NAVBAR SAMPING JUDUL WEB - Note, Community, Donation, Blog */}
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '40px',
+                    marginBottom: '40px',
+                    flexWrap: 'wrap'
+                  }}
+                >
+                  {["Note", "Community", "Donation", "Blog"].map((item) => (
+                    <div
+                      key={item}
+                      style={{
+                        position: 'relative',
+                        cursor: 'pointer'
+                      }}
+                      onMouseEnter={() => handleNavHover(item)}
+                      onMouseLeave={handleNavLeave}
+                    >
+                      <span
+                        style={{
+                          fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                          fontSize: '40px',
+                          fontWeight: '400',
+                          color: '#000000',
+                          letterSpacing: '-0.01em',
+                          transition: 'opacity 0.2s ease'
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'}
+                        onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+                      >
+                        {item}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
                 {/* Teks MENURU besar - 300px */}
                 <div
                   ref={headerTextRef}
@@ -643,98 +752,88 @@ export default function HomePage(): React.JSX.Element {
                   MENURU
                 </div>
 
-
-
-
-
-                {/* MARQUEE SECTION - Teks berjalan FULL WIDTH mentok kiri dan kanan */}
-<div
-  style={{
-    position: 'relative',
-    width: '100%',
-    marginTop: '80px',
-    marginBottom: '0px',
-    overflow: 'hidden',
-    backgroundColor: 'transparent',
-    marginLeft: '-40px', // Menyesuaikan dengan padding parent (40px)
-    width: 'calc(100% + 80px)' // Lebar total + padding kiri kanan
-  }}
->
-  <div
-    style={{
-      display: 'flex',
-      whiteSpace: 'nowrap',
-      animation: 'marqueeScroll 25s linear infinite',
-      width: 'fit-content'
-    }}
-    onMouseEnter={(e) => {
-      e.currentTarget.style.animationPlayState = 'paused';
-    }}
-    onMouseLeave={(e) => {
-      e.currentTarget.style.animationPlayState = 'running';
-    }}
-  >
-    {[...Array(6)].map((_, idx) => (
-      <div
-        key={idx}
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '50px',
-          marginRight: '60px',
-          flexShrink: 0
-        }}
-      >
-        <span
-          style={{
-            fontFamily: 'Inter, "Helvetica Neue", sans-serif',
-            fontWeight: '700',
-            fontSize: '180px',
-            color: '#000000',
-            letterSpacing: '-0.03em',
-            textTransform: 'uppercase',
-            lineHeight: '1',
-            whiteSpace: 'nowrap'
-          }}
-        >
-          SUBSCRIBE
-        </span>
-        
-        <div
-          style={{
-            width: '140px',
-            height: '200px',
-            backgroundColor: '#e0e0e0',
-            borderRadius: '16px',
-            overflow: 'hidden',
-            position: 'relative',
-            flexShrink: 0,
-            boxShadow: '0 10px 25px rgba(0,0,0,0.1)'
-          }}
-        >
-          <Image
-            src="/images/5.jpg"
-            alt="Subscribe"
-            fill
-            style={{ objectFit: 'cover' }}
-          />
-        </div>
-        
-        <svg 
-          width="45" 
-          height="45" 
-          viewBox="0 0 24 24" 
-          fill="none" 
-          xmlns="http://www.w3.org/2000/svg"
-          style={{ stroke: '#000000', strokeWidth: '1.5', flexShrink: 0 }}
-        >
-          <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-      </div>
-    ))}
-  </div>
-</div>
-
+                {/* MARQUEE SECTION - FULL WIDTH mentok kiri kanan */}
+                <div
+                  ref={marqueeContainerRef}
+                  style={{
+                    position: 'relative',
+                    width: '100vw',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    marginTop: '80px',
+                    marginBottom: '0px',
+                    overflow: 'hidden',
+                    backgroundColor: 'transparent'
+                  }}
+                >
+                  <div
+                    ref={marqueeContentRef}
+                    style={{
+                      display: 'flex',
+                      whiteSpace: 'nowrap',
+                      willChange: 'transform'
+                    }}
+                  >
+                    {[...Array(6)].map((_, idx) => (
+                      <div
+                        key={idx}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '50px',
+                          marginRight: '60px',
+                          flexShrink: 0
+                        }}
+                      >
+                        <span
+                          style={{
+                            fontFamily: 'Inter, "Helvetica Neue", sans-serif',
+                            fontWeight: '700',
+                            fontSize: '180px',
+                            color: '#000000',
+                            letterSpacing: '-0.03em',
+                            textTransform: 'uppercase',
+                            lineHeight: '1',
+                            whiteSpace: 'nowrap'
+                          }}
+                        >
+                          SUBSCRIBE
+                        </span>
+                        
+                        <div
+                          style={{
+                            width: '140px',
+                            height: '200px',
+                            backgroundColor: '#e0e0e0',
+                            borderRadius: '16px',
+                            overflow: 'hidden',
+                            position: 'relative',
+                            flexShrink: 0,
+                            boxShadow: '0 10px 25px rgba(0,0,0,0.1)'
+                          }}
+                        >
+                          <Image
+                            src="/images/5.jpg"
+                            alt="Subscribe"
+                            fill
+                            style={{ objectFit: 'cover' }}
+                          />
+                        </div>
+                        
+                        <svg 
+                          width="45" 
+                          height="45" 
+                          viewBox="0 0 24 24" 
+                          fill="none" 
+                          xmlns="http://www.w3.org/2000/svg"
+                          style={{ stroke: '#000000', strokeWidth: '1.5', flexShrink: 0 }}
+                        >
+                          <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -1129,6 +1228,64 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* OVERLAY NAVBAR - Muncul saat hover Note, Community, Donation, Blog */}
+      <div className={`nav-overlay ${activeNav ? 'active' : ''}`}>
+        <div className="nav-overlay-content">
+          <div
+            style={{
+              textAlign: 'center',
+              maxWidth: '600px',
+              padding: '40px'
+            }}
+          >
+            <div
+              style={{
+                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                fontSize: '80px',
+                fontWeight: '600',
+                color: '#ffffff',
+                letterSpacing: '-0.02em',
+                marginBottom: '40px'
+              }}
+            >
+              {overlayContent.title}
+            </div>
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '20px'
+              }}
+            >
+              {overlayContent.items.map((item, idx) => (
+                <div
+                  key={idx}
+                  style={{
+                    fontFamily: "'Questrial', sans-serif",
+                    fontSize: '24px',
+                    color: '#cccccc',
+                    padding: '12px 24px',
+                    borderBottom: '1px solid rgba(255,255,255,0.1)',
+                    transition: 'all 0.2s ease',
+                    cursor: 'pointer'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.color = '#ffffff';
+                    e.currentTarget.style.transform = 'translateX(10px)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.color = '#cccccc';
+                    e.currentTarget.style.transform = 'translateX(0)';
+                  }}
+                >
+                  {item}
+                </div>
+              ))}
             </div>
           </div>
         </div>
