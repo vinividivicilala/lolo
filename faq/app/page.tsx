@@ -30,7 +30,7 @@ export default function HomePage(): React.JSX.Element {
   
   // State untuk scroll navbar
   const [isScrolled, setIsScrolled] = useState(false);
-  const navbarRef = useRef<HTMLDivElement>(null);
+  const [navbarOpacity, setNavbarOpacity] = useState(1);
 
   // Refs
   const headerTextRef = useRef<HTMLDivElement>(null);
@@ -135,7 +135,7 @@ export default function HomePage(): React.JSX.Element {
     };
   }, [isLoading, showScrollDown]);
 
-  // Efek untuk animasi marquee - 1 baris, seamless, kecepatan normal
+  // Efek untuk animasi marquee - 1 BARIS
   useEffect(() => {
     if (isLoading) return;
     
@@ -145,28 +145,25 @@ export default function HomePage(): React.JSX.Element {
       
       if (!container || !content) return;
       
-      if (content.getAttribute('data-cloned') === 'true') return;
+      // Hapus semua child kecuali satu baris
+      const items = content.children;
+      if (items.length > 1) {
+        for (let i = 1; i < items.length; i++) {
+          content.removeChild(items[i]);
+        }
+      }
       
-      const originalWidth = content.scrollWidth;
-      const clone = content.cloneNode(true) as HTMLDivElement;
-      content.parentNode?.appendChild(clone);
-      
-      content.setAttribute('data-cloned', 'true');
+      // Clone untuk seamless loop
+      const originalContent = content.innerHTML;
+      content.innerHTML = originalContent + originalContent;
       
       gsap.set(content, { x: 0 });
-      gsap.set(clone, { x: originalWidth });
       
-      const animation = gsap.to([content, clone], {
-        x: `-=${originalWidth}`,
+      const animation = gsap.to(content, {
+        x: -content.scrollWidth / 2,
         duration: 20,
         ease: "none",
-        repeat: -1,
-        modifiers: {
-          x: (x) => {
-            const parseX = parseFloat(x);
-            return (parseX % originalWidth) + "px";
-          }
-        }
+        repeat: -1
       });
       
       const handleMouseEnter = () => animation.pause();
@@ -179,9 +176,6 @@ export default function HomePage(): React.JSX.Element {
         animation.kill();
         container.removeEventListener("mouseenter", handleMouseEnter);
         container.removeEventListener("mouseleave", handleMouseLeave);
-        if (clone && clone.parentNode) {
-          clone.parentNode.removeChild(clone);
-        }
       };
     }, 100);
     
@@ -216,18 +210,20 @@ export default function HomePage(): React.JSX.Element {
     return () => ctx.revert();
   }, [isLoading]);
 
-  // Scroll handler untuk navbar - pindah ke kiri saat scroll
+  // Scroll handler untuk navbar dan scroll down
   useEffect(() => {
     if (isLoading) return;
     
     const handleScroll = () => {
       const scrollY = window.scrollY;
       
-      // Navbar pindah ke kiri setelah scroll > 100px
-      if (scrollY > 100) {
+      // Navbar transisi saat scroll
+      if (scrollY > 50) {
         setIsScrolled(true);
+        setNavbarOpacity(Math.min(1, scrollY / 100));
       } else {
         setIsScrolled(false);
+        setNavbarOpacity(1);
       }
       
       // Scroll down hilang setelah scroll > 50px
@@ -762,15 +758,15 @@ export default function HomePage(): React.JSX.Element {
                   MENURU
                 </div>
 
-                {/* NAVBAR - Awal di kanan, saat scroll pindah ke kiri */}
+                {/* NAVBAR KANAN - Awal */}
                 <div
-                  ref={navbarRef}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
                     gap: '48px',
-                    transition: 'all 0.3s ease',
-                    position: 'relative'
+                    opacity: isScrolled ? 0 : 1,
+                    visibility: isScrolled ? 'hidden' : 'visible',
+                    transition: 'all 0.3s ease'
                   }}
                 >
                   {["Note", "Community", "Donation", "Blog"].map((item) => (
@@ -800,68 +796,69 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </div>
 
-              {/* Teks MENURU kecil yang muncul saat scroll di samping navbar */}
-              {isScrolled && (
-                <div
+              {/* NAVBAR KIRI - Saat scroll muncul di samping judul */}
+              <div
+                style={{
+                  position: 'fixed',
+                  top: '30px',
+                  left: '40px',
+                  zIndex: 100,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '30px',
+                  opacity: isScrolled ? 1 : 0,
+                  visibility: isScrolled ? 'visible' : 'hidden',
+                  transform: isScrolled ? 'translateY(0)' : 'translateY(-20px)',
+                  transition: 'all 0.3s ease'
+                }}
+              >
+                <span
                   style={{
-                    position: 'fixed',
-                    top: '20px',
-                    left: '40px',
-                    zIndex: 100,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '30px',
-                    animation: 'fadeInUp 0.3s ease'
+                    fontFamily: 'Inter, "Helvetica Neue", sans-serif',
+                    fontWeight: '400',
+                    fontSize: '28px',
+                    color: '#000000',
+                    letterSpacing: '-0.02em',
+                    textTransform: 'uppercase'
                   }}
                 >
-                  <span
-                    style={{
-                      fontFamily: 'Inter, "Helvetica Neue", sans-serif',
-                      fontWeight: '400',
-                      fontSize: '32px',
-                      color: '#000000',
-                      letterSpacing: '-0.02em',
-                      textTransform: 'uppercase'
-                    }}
-                  >
-                    MENURU
-                  </span>
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '32px'
-                    }}
-                  >
-                    {["Note", "Community", "Donation", "Blog"].map((item) => (
-                      <span
-                        key={item}
-                        style={{
-                          fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                          fontSize: '18px',
-                          fontWeight: '400',
-                          color: '#000000',
-                          letterSpacing: '-0.01em',
-                          cursor: 'pointer',
-                          transition: 'opacity 0.2s ease'
-                        }}
-                        onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'}
-                        onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
-                      >
-                        {item}
-                      </span>
-                    ))}
-                  </div>
+                  MENURU
+                </span>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '32px'
+                  }}
+                >
+                  {["Note", "Community", "Donation", "Blog"].map((item) => (
+                    <span
+                      key={item}
+                      style={{
+                        fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                        fontSize: '18px',
+                        fontWeight: '400',
+                        color: '#000000',
+                        letterSpacing: '-0.01em',
+                        cursor: 'pointer',
+                        transition: 'opacity 0.2s ease'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'}
+                      onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+                    >
+                      {item}
+                    </span>
+                  ))}
                 </div>
-              )}
+              </div>
 
-              {/* MARQUEE SECTION - 1 BARIS, FULL WIDTH, TANPA PUTUS */}
+              {/* MARQUEE SECTION - 1 BARIS */}
               <div
                 ref={marqueeContainerRef}
                 style={{
                   position: 'relative',
                   width: '100%',
-                  marginTop: '80px',
+                  marginTop: '100px',
                   marginBottom: '0px',
                   overflow: 'hidden',
                   backgroundColor: 'transparent',
@@ -874,10 +871,11 @@ export default function HomePage(): React.JSX.Element {
                   style={{
                     display: 'flex',
                     whiteSpace: 'nowrap',
-                    willChange: 'transform'
+                    willChange: 'transform',
+                    width: 'fit-content'
                   }}
                 >
-                  {/* Hanya 1 baris teks berjalan */}
+                  {/* Hanya 1 baris konten marquee */}
                   <div
                     style={{
                       display: 'inline-flex',
@@ -895,7 +893,7 @@ export default function HomePage(): React.JSX.Element {
                         color: '#000000',
                         letterSpacing: '-0.03em',
                         textTransform: 'uppercase',
-                        lineHeight: '1.2',
+                        lineHeight: '1',
                         whiteSpace: 'nowrap'
                       }}
                     >
