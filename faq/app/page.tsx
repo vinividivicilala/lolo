@@ -22,9 +22,9 @@ export default function HomePage(): React.JSX.Element {
   const textRef = useRef(null);
   const [isHovering, setIsHovering] = useState(false);
   
-  // State untuk overlay navbar
-  const [activeNav, setActiveNav] = useState<string | null>(null);
-  const [overlayContent, setOverlayContent] = useState({ title: "", items: [] as string[] });
+  // State untuk Hover Preview Panel
+  const [hoveredNav, setHoveredNav] = useState<string | null>(null);
+  const [previewPosition, setPreviewPosition] = useState({ x: 0, y: 0 });
 
   // Refs
   const headerTextRef = useRef<HTMLDivElement>(null);
@@ -45,23 +45,27 @@ export default function HomePage(): React.JSX.Element {
   const marqueeContainerRef = useRef<HTMLDivElement>(null);
   const marqueeContentRef = useRef<HTMLDivElement>(null);
 
-  // Data untuk overlay navbar
-  const navData = {
+  // Data untuk Hover Preview Panel
+  const navPreviewData = {
     Note: {
-      title: "NOTE FEATURES",
-      items: ["📝 Catatan Harian", "🍽️ Catatan Makanan", "💧 Catatan Minum", "🏃 Catatan Olahraga", "😴 Catatan Tidur", "📅 Catatan Kegiatan"]
+      title: "Note",
+      description: "Catat semua aktivitas harianmu",
+      features: ["📝 Catatan Harian", "🍽️ Catatan Makanan", "💧 Catatan Minum", "🏃 Catatan Olahraga", "😴 Catatan Tidur"]
     },
     Community: {
-      title: "COMMUNITY",
-      items: ["💬 Diskusi Umum", "👥 Grup Belajar", "🤝 Kolaborasi", "📢 Event & Meetup", "⭐ Feedback & Saran"]
+      title: "Community",
+      description: "Bergabung dengan komunitas",
+      features: ["💬 Diskusi Umum", "👥 Grup Belajar", "🤝 Kolaborasi", "📢 Event & Meetup", "⭐ Feedback & Saran"]
     },
     Donation: {
-      title: "DONATION",
-      items: ["💰 Donasi Uang", "🍚 Donasi Makanan", "📚 Donasi Buku", "👕 Donasi Pakaian", "🏥 Donasi Kesehatan"]
+      title: "Donation",
+      description: "Donasi untuk sesama",
+      features: ["💰 Donasi Uang", "🍚 Donasi Makanan", "📚 Donasi Buku", "👕 Donasi Pakaian", "🏥 Donasi Kesehatan"]
     },
     Blog: {
-      title: "BLOG",
-      items: ["✍️ Artikel Terbaru", "📖 Tutorial", "🎯 Tips & Trik", "📰 Berita", "🎬 Video Content"]
+      title: "Blog",
+      description: "Artikel dan tutorial terbaru",
+      features: ["✍️ Artikel Terbaru", "📖 Tutorial", "🎯 Tips & Trik", "📰 Berita", "🎬 Video Content"]
     }
   };
 
@@ -455,17 +459,20 @@ export default function HomePage(): React.JSX.Element {
     }, 3000);
   };
 
-  // Handler untuk navbar hover
-  const handleNavHover = (navName: string) => {
-    setActiveNav(navName);
-    setOverlayContent({
-      title: navData[navName as keyof typeof navData].title,
-      items: navData[navName as keyof typeof navData].items
-    });
+  // Handler untuk hover preview panel
+  const handleNavMouseEnter = (navName: string, event: React.MouseEvent) => {
+    setHoveredNav(navName);
+    setPreviewPosition({ x: event.clientX + 20, y: event.clientY - 100 });
   };
 
-  const handleNavLeave = () => {
-    setActiveNav(null);
+  const handleNavMouseMove = (event: React.MouseEvent) => {
+    if (hoveredNav) {
+      setPreviewPosition({ x: event.clientX + 20, y: event.clientY - 100 });
+    }
+  };
+
+  const handleNavMouseLeave = () => {
+    setHoveredNav(null);
   };
 
   return (
@@ -486,7 +493,7 @@ export default function HomePage(): React.JSX.Element {
         @keyframes fadeInUp {
           from {
             opacity: 0;
-            transform: translateY(20px);
+            transform: translateY(10px);
           }
           to {
             opacity: 1;
@@ -561,29 +568,17 @@ export default function HomePage(): React.JSX.Element {
           line-height: 1.3;
         }
 
-        .nav-overlay {
+        .preview-panel {
           position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background-color: #000000;
-          z-index: 200;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          opacity: 0;
-          visibility: hidden;
-          transition: opacity 0.3s ease, visibility 0.3s ease;
-        }
-
-        .nav-overlay.active {
-          opacity: 1;
-          visibility: visible;
-        }
-
-        .nav-overlay-content {
-          animation: fadeInUp 0.3s ease;
+          background: rgba(0, 0, 0, 0.9);
+          backdropFilter: blur(12px);
+          borderRadius: 20px;
+          padding: 24px 32px;
+          zIndex: 10000;
+          minWidth: 280px;
+          boxShadow: 0 20px 40px rgba(0,0,0,0.3);
+          border: 1px solid rgba(255,255,255,0.1);
+          animation: fadeInUp 0.2s ease;
         }
       `}</style>
 
@@ -696,12 +691,13 @@ export default function HomePage(): React.JSX.Element {
                   padding: '40px 0 0 40px'
                 }}
               >
-                {/* NAVBAR SAMPING JUDUL WEB - Note, Community, Donation, Blog */}
+                {/* NAVBAR SAMPING KANAN TEKS MENURU - Note, Community, Donation, Blog */}
                 <div
                   style={{
-                    display: 'flex',
+                    display: 'inline-flex',
                     alignItems: 'center',
                     gap: '40px',
+                    marginLeft: '40px',
                     marginBottom: '40px',
                     flexWrap: 'wrap'
                   }}
@@ -713,8 +709,9 @@ export default function HomePage(): React.JSX.Element {
                         position: 'relative',
                         cursor: 'pointer'
                       }}
-                      onMouseEnter={() => handleNavHover(item)}
-                      onMouseLeave={handleNavLeave}
+                      onMouseEnter={(e) => handleNavMouseEnter(item, e)}
+                      onMouseMove={handleNavMouseMove}
+                      onMouseLeave={handleNavMouseLeave}
                     >
                       <span
                         style={{
@@ -1233,63 +1230,64 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </div>
 
-      {/* OVERLAY NAVBAR - Muncul saat hover Note, Community, Donation, Blog */}
-      <div className={`nav-overlay ${activeNav ? 'active' : ''}`}>
-        <div className="nav-overlay-content">
+      {/* HOVER PREVIEW PANEL - Seperti Vercel/OpenAI */}
+      {hoveredNav && (
+        <div
+          className="preview-panel"
+          style={{
+            left: previewPosition.x,
+            top: previewPosition.y,
+          }}
+        >
           <div
             style={{
-              textAlign: 'center',
-              maxWidth: '600px',
-              padding: '40px'
+              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+              fontSize: '28px',
+              fontWeight: '600',
+              color: '#ffffff',
+              marginBottom: '12px'
             }}
           >
-            <div
-              style={{
-                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                fontSize: '80px',
-                fontWeight: '600',
-                color: '#ffffff',
-                letterSpacing: '-0.02em',
-                marginBottom: '40px'
-              }}
-            >
-              {overlayContent.title}
-            </div>
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '20px'
-              }}
-            >
-              {overlayContent.items.map((item, idx) => (
-                <div
-                  key={idx}
-                  style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '24px',
-                    color: '#cccccc',
-                    padding: '12px 24px',
-                    borderBottom: '1px solid rgba(255,255,255,0.1)',
-                    transition: 'all 0.2s ease',
-                    cursor: 'pointer'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.color = '#ffffff';
-                    e.currentTarget.style.transform = 'translateX(10px)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.color = '#cccccc';
-                    e.currentTarget.style.transform = 'translateX(0)';
-                  }}
-                >
-                  {item}
-                </div>
-              ))}
-            </div>
+            {navPreviewData[hoveredNav as keyof typeof navPreviewData].title}
+          </div>
+          <div
+            style={{
+              fontFamily: "'Questrial', sans-serif",
+              fontSize: '14px',
+              color: '#aaaaaa',
+              marginBottom: '20px',
+              lineHeight: '1.4'
+            }}
+          >
+            {navPreviewData[hoveredNav as keyof typeof navPreviewData].description}
+          </div>
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '10px'
+            }}
+          >
+            {navPreviewData[hoveredNav as keyof typeof navPreviewData].features.map((feature, idx) => (
+              <div
+                key={idx}
+                style={{
+                  fontFamily: "'Questrial', sans-serif",
+                  fontSize: '14px',
+                  color: '#cccccc',
+                  padding: '6px 0',
+                  borderBottom: '1px solid rgba(255,255,255,0.05)',
+                  transition: 'color 0.2s ease'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.color = '#ffffff'}
+                onMouseLeave={(e) => e.currentTarget.style.color = '#cccccc'}
+              >
+                {feature}
+              </div>
+            ))}
           </div>
         </div>
-      </div>
+      )}
     </>
   );
 }
